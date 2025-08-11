@@ -2,6 +2,7 @@ package types
 
 import (
 	"context"
+
 	"cosmossdk.io/math"
 
 	credentialschematypes "github.com/verana-labs/verana-blockchain/x/credentialschema/types"

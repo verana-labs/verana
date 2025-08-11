@@ -6,7 +6,6 @@ import "gogoproto/gogo.proto";
 import "verana/perm/v1/params.proto";
 import "verana/perm/v1/types.proto";
 
-
 option go_package = "github.com/verana-labs/verana-blockchain/x/permission/types";
 
 // GenesisState defines the permission module's genesis state.

@@ -2,9 +2,11 @@ package app
 
 import (
 	"fmt"
+	"io"
+
+	dummymodulekeeper "github.com/verana-labs/verana-blockchain/x/dummy/keeper"
 	trustdepositmodulev1 "github.com/verana-labs/verana-blockchain/x/trustdeposit/module"
 	trustdeposittypes "github.com/verana-labs/verana-blockchain/x/trustdeposit/types"
-	"io"
 
 	upgradetypes "cosmossdk.io/x/upgrade/types"
 	"github.com/verana-labs/verana-blockchain/app/upgrades"
@@ -202,6 +204,7 @@ type App struct {
 	CredentialschemaKeeper credentialschemamodulekeeper.Keeper
 	PermissionKeeper       permissionmodulekeeper.Keeper
 	TrustdepositKeeper     trustdepositmodulekeeper.Keeper
+	DummyKeeper            dummymodulekeeper.Keeper
 	// this line is used by starport scaffolding # stargate/app/keeperDeclaration
 
 	// simulation manager
@@ -339,6 +342,8 @@ func New(
 		&app.CredentialschemaKeeper,
 		&app.PermissionKeeper,
 		&app.TrustdepositKeeper,
+		&app.DummyKeeper,
+
 		// this line is used by starport scaffolding # stargate/app/keeperDefinition
 	); err != nil {
 		panic(err)

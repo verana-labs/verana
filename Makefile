@@ -95,10 +95,21 @@ endif
 #$(info $$BUILD_FLAGS is [$(BUILD_FLAGS)])
 
 check_version:
-ifneq ($(GO_MINIMUM_MINOR_VERSION),22)
-	@echo "ERROR: Please upgrade Go version to 1.22+"
-	exit 1
-endif
+	@echo "Checking Go version compatibility..."
+	@INSTALLED_GO_VERSION=$$(go version | cut -c 14- | cut -d' ' -f1); \
+	REQUIRED_GO_VERSION=$$(cat go.mod | grep -E 'go [0-9].[0-9]+' | cut -d ' ' -f2); \
+	INSTALLED_MAJOR=$$(echo $$INSTALLED_GO_VERSION | cut -d'.' -f1); \
+	INSTALLED_MINOR=$$(echo $$INSTALLED_GO_VERSION | cut -d'.' -f2); \
+	REQUIRED_MAJOR=$$(echo $$REQUIRED_GO_VERSION | cut -d'.' -f1); \
+	REQUIRED_MINOR=$$(echo $$REQUIRED_GO_VERSION | cut -d'.' -f2); \
+	echo "Installed Go version: $$INSTALLED_GO_VERSION"; \
+	echo "Required Go version: $$REQUIRED_GO_VERSION"; \
+	if [ $$INSTALLED_MAJOR -lt $$REQUIRED_MAJOR ] || \
+	   ([ $$INSTALLED_MAJOR -eq $$REQUIRED_MAJOR ] && [ $$INSTALLED_MINOR -lt $$REQUIRED_MINOR ]); then \
+		echo "ERROR: Please upgrade Go version to $$REQUIRED_GO_VERSION+"; \
+		exit 1; \
+	fi; \
+	echo "✓ Go version check passed"
 
 all: install
 	@echo "--> project root: go mod tidy"

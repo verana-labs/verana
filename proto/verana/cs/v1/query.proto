@@ -2,12 +2,12 @@ syntax = "proto3";
 package verana.cs.v1;
 
 import "amino/amino.proto";
+import "cosmos/base/query/v1beta1/pagination.proto";
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
-import "cosmos/base/query/v1beta1/pagination.proto";
+import "google/protobuf/timestamp.proto";
 import "verana/cs/v1/params.proto";
 import "verana/cs/v1/types.proto";
-import "google/protobuf/timestamp.proto";
 
 option go_package = "github.com/verana-labs/verana-blockchain/x/credentialschema/types";
 
@@ -45,7 +45,10 @@ message QueryParamsResponse {
 
 message QueryListCredentialSchemasRequest {
   uint64 tr_id = 1; // optional
-  google.protobuf.Timestamp modified_after = 2 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  google.protobuf.Timestamp modified_after = 2 [
+    (gogoproto.stdtime) = true,
+    (gogoproto.nullable) = true
+  ];
   uint32 response_max_size = 3;
 }
 

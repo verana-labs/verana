@@ -1,0 +1,75 @@
+syntax = "proto3";
+package veranablockchain.dummy.v1;
+
+import "amino/amino.proto";
+import "cosmos/msg/v1/msg.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "veranablockchain/dummy/v1/params.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/verana-labs/verana-blockchain/x/dummy/types";
+
+// Msg defines the Msg service.
+service Msg {
+  option (cosmos.msg.v1.service) = true;
+
+  // UpdateParams defines a (governance) operation for updating the module
+  // parameters. The authority defaults to the x/gov module account.
+  rpc UpdateParams(MsgUpdateParams) returns (MsgUpdateParamsResponse);
+  rpc StartPermissionVP(MsgStartPermissionVP) returns (MsgStartPermissionVPResponse);
+}
+
+// MsgUpdateParams is the Msg/UpdateParams request type.
+message MsgUpdateParams {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "verana/x/permission/MsgUpdateParams";
+
+  // authority is the address that controls the module (defaults to x/gov unless overwritten).
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // params defines the module parameters to update.
+  //
+  // NOTE: All parameters must be supplied.
+  Params params = 2 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+}
+
+// MsgUpdateParamsResponse defines the response structure for executing a
+// MsgUpdateParams message.
+message MsgUpdateParamsResponse {}
+
+// MsgStartPermissionVP represents a message to start a permission validation process
+message MsgStartPermissionVP {
+  option (cosmos.msg.v1.signer) = "creator";
+
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  uint32 type = 2;
+  uint64 validator_perm_id = 3;
+  string country = 4;
+  string did = 5 [(gogoproto.nullable) = true]; // optional
+}
+
+// MsgStartPermissionVPResponse defines the Msg/StartPermissionVP response type
+message MsgStartPermissionVPResponse {
+  uint64 permission_id = 1;
+}
+
+message MsgCreatePermission {
+  option (cosmos.msg.v1.signer) = "creator";
+
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  uint64 schema_id = 2;
+  PermissionType type = 3;
+  string did = 4;
+  string country = 5;
+  google.protobuf.Timestamp effective_from = 6 [(gogoproto.stdtime) = true];
+  google.protobuf.Timestamp effective_until = 7 [(gogoproto.stdtime) = true];
+  uint64 verification_fees = 8;
+}
+
+message MsgCreatePermissionResponse {
+  uint64 id = 1;
+}

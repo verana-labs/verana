@@ -1,13 +1,14 @@
 package keeper_test
 
 import (
+	"testing"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 	keepertest "github.com/verana-labs/verana-blockchain/testutil/keeper"
 	"github.com/verana-labs/verana-blockchain/x/trustdeposit/types"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"testing"
 )
 
 func TestGetTrustDeposit(t *testing.T) {

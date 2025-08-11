@@ -1,0 +1,17 @@
+syntax = "proto3";
+package veranablockchain.dummy.v1;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+import "veranablockchain/dummy/v1/params.proto";
+
+option go_package = "github.com/verana-labs/verana-blockchain/x/dummy/types";
+
+// GenesisState defines the dummy module's genesis state.
+message GenesisState {
+  // params defines all the parameters of the module.
+  Params params = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+}

@@ -2,9 +2,9 @@ syntax = "proto3";
 package verana.cs.v1;
 
 import "amino/amino.proto";
+import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
 import "google/protobuf/timestamp.proto";
-import "cosmos_proto/cosmos.proto";
 
 option go_package = "github.com/verana-labs/verana-blockchain/x/credentialschema/types";
 
@@ -24,9 +24,18 @@ enum CredentialSchemaPermManagementMode {
 message CredentialSchema {
   uint64 id = 1;
   uint64 tr_id = 2;
-  google.protobuf.Timestamp created = 3 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
-  google.protobuf.Timestamp modified = 4 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
-  google.protobuf.Timestamp archived = 5 [(gogoproto.nullable) = true, (gogoproto.stdtime) = true];
+  google.protobuf.Timestamp created = 3 [
+    (gogoproto.nullable) = false,
+    (gogoproto.stdtime) = true
+  ];
+  google.protobuf.Timestamp modified = 4 [
+    (gogoproto.nullable) = false,
+    (gogoproto.stdtime) = true
+  ];
+  google.protobuf.Timestamp archived = 5 [
+    (gogoproto.nullable) = true,
+    (gogoproto.stdtime) = true
+  ];
   uint64 deposit = 6;
   string json_schema = 7;
   uint32 issuer_grantor_validation_validity_period = 8;
