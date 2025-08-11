@@ -46,7 +46,7 @@ message MsgStartPermissionVP {
   option (cosmos.msg.v1.signer) = "creator";
 
   string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  uint32 type = 2;
+  PermissionType type = 2;
   uint64 validator_perm_id = 3;
   string country = 4;
   string did = 5 [(gogoproto.nullable) = true]; // optional
