@@ -39,13 +39,28 @@ func (ms msgServer) validateAddGovernanceFrameworkDocumentParams(ctx sdk.Context
 		return fmt.Errorf("error checking versions: %w", err)
 	}
 
-	// Validate version according to spec
-	if !hasVersion && msg.Version != maxVersion+1 {
-		return fmt.Errorf("invalid version: must be %d or %d", maxVersion, maxVersion+1)
+	// Validate version according to spec:
+	// 1. Version must EITHER exist OR be exactly maxVersion+1
+	// 2. AND version must be greater than active_version
+
+	nextVersion := maxVersion + 1
+
+	// Combined validation: check both constraints together
+	if !hasVersion && msg.Version != nextVersion {
+		// Version doesn't exist and is not the next sequential version
+		return fmt.Errorf("invalid version: must be %d", nextVersion)
 	}
 
 	if msg.Version <= tr.ActiveVersion {
-		return fmt.Errorf("version must be greater than the active version %d", tr.ActiveVersion)
+		// Version is not greater than activeVersion
+		// Only suggest valid options that satisfy both constraints
+		if nextVersion > tr.ActiveVersion {
+			return fmt.Errorf("invalid version: must be %d", nextVersion)
+		} else {
+			// Edge case: even nextVersion doesn't satisfy activeVersion constraint
+			minValidVersion := tr.ActiveVersion + 1
+			return fmt.Errorf("invalid version: must be %d", minValidVersion)
+		}
 	}
 
 	// Validate language tag
