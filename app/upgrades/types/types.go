@@ -8,11 +8,11 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/module"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
-	credentialschemakeeper "github.com/verana-labs/verana-blockchain/x/credentialschema/keeper"
-	diddirectorykeeper "github.com/verana-labs/verana-blockchain/x/diddirectory/keeper"
-	permission "github.com/verana-labs/verana-blockchain/x/permission/keeper"
-	trustdeposit "github.com/verana-labs/verana-blockchain/x/trustdeposit/keeper"
-	trustregistry "github.com/verana-labs/verana-blockchain/x/trustregistry/keeper"
+	credentialschemakeeper "github.com/verana-labs/verana/x/credentialschema/keeper"
+	diddirectorykeeper "github.com/verana-labs/verana/x/diddirectory/keeper"
+	permission "github.com/verana-labs/verana/x/permission/keeper"
+	trustdeposit "github.com/verana-labs/verana/x/trustdeposit/keeper"
+	trustregistry "github.com/verana-labs/verana/x/trustregistry/keeper"
 )
 
 type BaseAppParamManager interface {

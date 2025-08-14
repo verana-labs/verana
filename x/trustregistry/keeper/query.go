@@ -6,7 +6,7 @@ import (
 	"sort"
 
 	"cosmossdk.io/collections"
-	"github.com/verana-labs/verana-blockchain/x/trustregistry/types"
+	"github.com/verana-labs/verana/x/trustregistry/types"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )

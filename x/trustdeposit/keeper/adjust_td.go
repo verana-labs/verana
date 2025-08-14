@@ -3,7 +3,7 @@ package keeper
 import (
 	"fmt"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/verana-labs/verana-blockchain/x/trustdeposit/types"
+	"github.com/verana-labs/verana/x/trustdeposit/types"
 )
 
 // AdjustTrustDeposit modifies the trust deposit for an account by the specified amount.

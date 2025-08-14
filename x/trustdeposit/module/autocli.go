@@ -12,9 +12,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/gov/client/cli"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	"github.com/spf13/cobra"
-	"github.com/verana-labs/verana-blockchain/x/trustdeposit/types"
+	"github.com/verana-labs/verana/x/trustdeposit/types"
 
-	modulev1 "github.com/verana-labs/verana-blockchain/api/verana/td/v1"
+	modulev1 "github.com/verana-labs/verana/api/verana/td/v1"
 )
 
 // AutoCLIOptions implements the autocli.HasAutoCLIConfig interface.

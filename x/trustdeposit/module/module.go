@@ -21,9 +21,9 @@ import (
 
 	// this line is used by starport scaffolding # 1
 
-	modulev1 "github.com/verana-labs/verana-blockchain/api/verana/td/module"
-	"github.com/verana-labs/verana-blockchain/x/trustdeposit/keeper"
-	"github.com/verana-labs/verana-blockchain/x/trustdeposit/types"
+	modulev1 "github.com/verana-labs/verana/api/verana/td/module"
+	"github.com/verana-labs/verana/x/trustdeposit/keeper"
+	"github.com/verana-labs/verana/x/trustdeposit/types"
 )
 
 var (

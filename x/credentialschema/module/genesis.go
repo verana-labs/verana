@@ -6,8 +6,8 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/verana-labs/verana-blockchain/x/credentialschema/keeper"
-	"github.com/verana-labs/verana-blockchain/x/credentialschema/types"
+	"github.com/verana-labs/verana/x/credentialschema/keeper"
+	"github.com/verana-labs/verana/x/credentialschema/types"
 )
 
 // InitGenesis initializes the module's state from a provided genesis state.

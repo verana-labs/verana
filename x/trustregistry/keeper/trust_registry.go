@@ -6,7 +6,7 @@ import (
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/verana-labs/verana-blockchain/x/trustregistry/types"
+	"github.com/verana-labs/verana/x/trustregistry/types"
 )
 
 func isValidLanguageTag(lang string) bool {

@@ -6,8 +6,8 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/verana-labs/verana-blockchain/x/diddirectory/keeper"
-	"github.com/verana-labs/verana-blockchain/x/diddirectory/types"
+	"github.com/verana-labs/verana/x/diddirectory/keeper"
+	"github.com/verana-labs/verana/x/diddirectory/types"
 )
 
 // InitGenesis initializes the module's state from a provided genesis state.

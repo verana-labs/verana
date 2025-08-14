@@ -1,11 +1,11 @@
 # Verana Blockchain
 
 [![Project Status: Active -- The project has reached a stable, usable state and is being actively developed.](https://img.shields.io/badge/repo%20status-Active-green.svg?style=flat-square)](https://www.repostatus.org/#active)
-[![GoDoc](https://img.shields.io/badge/godoc-reference-blue?style=flat-square&logo=go)](https://pkg.go.dev/github.com/verana-labs/verana-blockchain)
-[![Go Report Card](https://goreportcard.com/badge/github.com/verana-labs/verana-blockchain?style=flat-square)](https://goreportcard.com/report/github.com/verana-labs/verana-blockchain)
-[![Version](https://img.shields.io/github/tag/verana-labs/verana-blockchain.svg?style=flat-square)](https://github.com/verana-labs/verana-blockchain/releases/latest)
-[![License: Apache-2.0](https://img.shields.io/github/license/verana-labs/verana-blockchain.svg?style=flat-square)](https://github.com/verana-labs/verana-blockchain/blob/main/LICENSE)
-[![Lines Of Code](https://img.shields.io/tokei/lines/github/verana-labs/verana-blockchain?style=flat-square)](https://github.com/verana-labs/verana-blockchain)
+[![GoDoc](https://img.shields.io/badge/godoc-reference-blue?style=flat-square&logo=go)](https://pkg.go.dev/github.com/verana-labs/verana)
+[![Go Report Card](https://goreportcard.com/badge/github.com/verana-labs/verana?style=flat-square)](https://goreportcard.com/report/github.com/verana-labs/verana)
+[![Version](https://img.shields.io/github/tag/verana-labs/verana.svg?style=flat-square)](https://github.com/verana-labs/verana/releases/latest)
+[![License: Apache-2.0](https://img.shields.io/github/license/verana-labs/verana.svg?style=flat-square)](https://github.com/verana-labs/verana/blob/main/LICENSE)
+[![Lines Of Code](https://img.shields.io/tokei/lines/github/verana-labs/verana?style=flat-square)](https://github.com/verana-labs/verana)
 [![Discord](https://badgen.net/badge/icon/discord?icon=discord&label)](https://discord.gg/verana)
 
 Verana Blockchain is a Verifiable Public Registry (VPR) providing foundational infrastructure for decentralized trust ecosystems. As a sovereign Layer 1 appchain built on the Cosmos SDK, Verana enables trustless verification of credentials and services across ecosystems through a standardized trust registry framework.

@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
-	"github.com/verana-labs/verana-blockchain/x/diddirectory/types"
+	"github.com/verana-labs/verana/x/diddirectory/types"
 )
 
 func TestGenesisState_Validate(t *testing.T) {

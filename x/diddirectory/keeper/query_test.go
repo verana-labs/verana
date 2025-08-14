@@ -7,8 +7,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/stretchr/testify/require"
-	keepertest "github.com/verana-labs/verana-blockchain/testutil/keeper"
-	"github.com/verana-labs/verana-blockchain/x/diddirectory/types"
+	keepertest "github.com/verana-labs/verana/testutil/keeper"
+	"github.com/verana-labs/verana/x/diddirectory/types"
 )
 
 func TestListDIDs(t *testing.T) {

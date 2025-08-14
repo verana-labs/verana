@@ -4,7 +4,7 @@ package verana.td.v1;
 import "amino/amino.proto";
 import "gogoproto/gogo.proto";
 
-option go_package = "github.com/verana-labs/verana-blockchain/x/trustdeposit/types";
+option go_package = "github.com/verana-labs/verana/x/trustdeposit/types";
 
 // Params defines the parameters for the module.
 message Params {

@@ -5,10 +5,10 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
-	keepertest "github.com/verana-labs/verana-blockchain/testutil/keeper"
-	"github.com/verana-labs/verana-blockchain/testutil/nullify"
-	credentialschema "github.com/verana-labs/verana-blockchain/x/credentialschema/module"
-	"github.com/verana-labs/verana-blockchain/x/credentialschema/types"
+	keepertest "github.com/verana-labs/verana/testutil/keeper"
+	"github.com/verana-labs/verana/testutil/nullify"
+	credentialschema "github.com/verana-labs/verana/x/credentialschema/module"
+	"github.com/verana-labs/verana/x/credentialschema/types"
 )
 
 func TestGenesisImportExport(t *testing.T) {

@@ -10,7 +10,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/verana-labs/verana-blockchain/x/diddirectory/types"
+	"github.com/verana-labs/verana/x/diddirectory/types"
 )
 
 type (

@@ -6,7 +6,7 @@ import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
 import "google/protobuf/timestamp.proto";
 
-option go_package = "github.com/verana-labs/verana-blockchain/x/permission/types";
+option go_package = "github.com/verana-labs/verana/x/permission/types";
 
 // Permission types
 enum PermissionType {

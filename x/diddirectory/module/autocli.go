@@ -3,7 +3,7 @@ package diddirectory
 import (
 	autocliv1 "cosmossdk.io/api/cosmos/autocli/v1"
 
-	modulev1 "github.com/verana-labs/verana-blockchain/api/verana/dd/v1"
+	modulev1 "github.com/verana-labs/verana/api/verana/dd/v1"
 )
 
 // AutoCLIOptions implements the autocli.HasAutoCLIConfig interface.

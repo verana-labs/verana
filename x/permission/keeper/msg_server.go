@@ -8,11 +8,11 @@ import (
 
 	"cosmossdk.io/math"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	credentialschematypes "github.com/verana-labs/verana-blockchain/x/credentialschema/types"
-	trustdeposittypes "github.com/verana-labs/verana-blockchain/x/trustdeposit/types"
+	credentialschematypes "github.com/verana-labs/verana/x/credentialschema/types"
+	trustdeposittypes "github.com/verana-labs/verana/x/trustdeposit/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/verana-labs/verana-blockchain/x/permission/types"
+	"github.com/verana-labs/verana/x/permission/types"
 )
 
 type msgServer struct {

@@ -3,7 +3,7 @@ package permission
 import (
 	autocliv1 "cosmossdk.io/api/cosmos/autocli/v1"
 
-	modulev1 "github.com/verana-labs/verana-blockchain/api/verana/perm/v1"
+	modulev1 "github.com/verana-labs/verana/api/verana/perm/v1"
 )
 
 // AutoCLIOptions implements the autocli.HasAutoCLIConfig interface.

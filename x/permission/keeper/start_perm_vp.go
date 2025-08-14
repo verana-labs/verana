@@ -4,8 +4,8 @@ import (
 	"cosmossdk.io/math"
 	"fmt"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	credentialschematypes "github.com/verana-labs/verana-blockchain/x/credentialschema/types"
-	"github.com/verana-labs/verana-blockchain/x/permission/types"
+	credentialschematypes "github.com/verana-labs/verana/x/credentialschema/types"
+	"github.com/verana-labs/verana/x/permission/types"
 )
 
 func (ms msgServer) validatePermissionChecks(ctx sdk.Context, msg *types.MsgStartPermissionVP) (types.Permission, error) {

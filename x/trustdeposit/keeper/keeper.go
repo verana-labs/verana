@@ -10,7 +10,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/verana-labs/verana-blockchain/x/trustdeposit/types"
+	"github.com/verana-labs/verana/x/trustdeposit/types"
 )
 
 type (

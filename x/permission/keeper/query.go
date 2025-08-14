@@ -10,8 +10,8 @@ import (
 
 	"cosmossdk.io/collections"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	credentialschematypes "github.com/verana-labs/verana-blockchain/x/credentialschema/types"
-	"github.com/verana-labs/verana-blockchain/x/permission/types"
+	credentialschematypes "github.com/verana-labs/verana/x/credentialschema/types"
+	"github.com/verana-labs/verana/x/permission/types"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )

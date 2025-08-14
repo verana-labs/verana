@@ -6,7 +6,7 @@ import (
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/verana-labs/verana-blockchain/x/diddirectory/types"
+	"github.com/verana-labs/verana/x/diddirectory/types"
 )
 
 func (ms msgServer) validateRemoveDIDParams(ctx sdk.Context, msg *types.MsgRemoveDID) error {

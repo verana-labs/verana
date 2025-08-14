@@ -53,21 +53,21 @@ import (
 	ibcexported "github.com/cosmos/ibc-go/v8/modules/core/exported"
 	"google.golang.org/protobuf/types/known/durationpb"
 
-	credentialschemamodulev1 "github.com/verana-labs/verana-blockchain/api/verana/cs/module"
-	diddirectorymodulev1 "github.com/verana-labs/verana-blockchain/api/verana/dd/module"
-	permissionmodulev1 "github.com/verana-labs/verana-blockchain/api/verana/perm/module"
-	trustdepositmodulev1 "github.com/verana-labs/verana-blockchain/api/verana/td/module"
-	trustregistrymodulev1 "github.com/verana-labs/verana-blockchain/api/verana/tr/module"
-	_ "github.com/verana-labs/verana-blockchain/x/credentialschema/module" // import for side-effects
-	credentialschemamoduletypes "github.com/verana-labs/verana-blockchain/x/credentialschema/types"
-	_ "github.com/verana-labs/verana-blockchain/x/diddirectory/module" // import for side-effects
-	diddirectorymoduletypes "github.com/verana-labs/verana-blockchain/x/diddirectory/types"
-	_ "github.com/verana-labs/verana-blockchain/x/permission/module" // import for side-effects
-	permissionmoduletypes "github.com/verana-labs/verana-blockchain/x/permission/types"
-	_ "github.com/verana-labs/verana-blockchain/x/trustdeposit/module" // import for side-effects
-	trustdepositmoduletypes "github.com/verana-labs/verana-blockchain/x/trustdeposit/types"
-	_ "github.com/verana-labs/verana-blockchain/x/trustregistry/module" // import for side-effects
-	trustregistrymoduletypes "github.com/verana-labs/verana-blockchain/x/trustregistry/types"
+	credentialschemamodulev1 "github.com/verana-labs/verana/api/verana/cs/module"
+	diddirectorymodulev1 "github.com/verana-labs/verana/api/verana/dd/module"
+	permissionmodulev1 "github.com/verana-labs/verana/api/verana/perm/module"
+	trustdepositmodulev1 "github.com/verana-labs/verana/api/verana/td/module"
+	trustregistrymodulev1 "github.com/verana-labs/verana/api/verana/tr/module"
+	_ "github.com/verana-labs/verana/x/credentialschema/module" // import for side-effects
+	credentialschemamoduletypes "github.com/verana-labs/verana/x/credentialschema/types"
+	_ "github.com/verana-labs/verana/x/diddirectory/module" // import for side-effects
+	diddirectorymoduletypes "github.com/verana-labs/verana/x/diddirectory/types"
+	_ "github.com/verana-labs/verana/x/permission/module" // import for side-effects
+	permissionmoduletypes "github.com/verana-labs/verana/x/permission/types"
+	_ "github.com/verana-labs/verana/x/trustdeposit/module" // import for side-effects
+	trustdepositmoduletypes "github.com/verana-labs/verana/x/trustdeposit/types"
+	_ "github.com/verana-labs/verana/x/trustregistry/module" // import for side-effects
+	trustregistrymoduletypes "github.com/verana-labs/verana/x/trustregistry/types"
 	// this line is used by starport scaffolding # stargate/app/moduleImport
 )
 

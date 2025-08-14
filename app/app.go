@@ -2,12 +2,12 @@ package app
 
 import (
 	"fmt"
-	trustdepositmodulev1 "github.com/verana-labs/verana-blockchain/x/trustdeposit/module"
-	trustdeposittypes "github.com/verana-labs/verana-blockchain/x/trustdeposit/types"
+	trustdepositmodulev1 "github.com/verana-labs/verana/x/trustdeposit/module"
+	trustdeposittypes "github.com/verana-labs/verana/x/trustdeposit/types"
 	"io"
 
 	upgradetypes "cosmossdk.io/x/upgrade/types"
-	"github.com/verana-labs/verana-blockchain/app/upgrades"
+	"github.com/verana-labs/verana/app/upgrades"
 
 	"cosmossdk.io/x/evidence"
 	"cosmossdk.io/x/upgrade"
@@ -99,18 +99,18 @@ import (
 	ibctransferkeeper "github.com/cosmos/ibc-go/v8/modules/apps/transfer/keeper"
 	ibckeeper "github.com/cosmos/ibc-go/v8/modules/core/keeper"
 
-	diddirectorymodulekeeper "github.com/verana-labs/verana-blockchain/x/diddirectory/keeper"
-	trustregistrymodulekeeper "github.com/verana-labs/verana-blockchain/x/trustregistry/keeper"
+	diddirectorymodulekeeper "github.com/verana-labs/verana/x/diddirectory/keeper"
+	trustregistrymodulekeeper "github.com/verana-labs/verana/x/trustregistry/keeper"
 
-	credentialschemamodulekeeper "github.com/verana-labs/verana-blockchain/x/credentialschema/keeper"
+	credentialschemamodulekeeper "github.com/verana-labs/verana/x/credentialschema/keeper"
 
-	permissionmodulekeeper "github.com/verana-labs/verana-blockchain/x/permission/keeper"
-	trustdepositmodulekeeper "github.com/verana-labs/verana-blockchain/x/trustdeposit/keeper"
+	permissionmodulekeeper "github.com/verana-labs/verana/x/permission/keeper"
+	trustdepositmodulekeeper "github.com/verana-labs/verana/x/trustdeposit/keeper"
 
 	// this line is used by starport scaffolding # stargate/app/moduleImport
 	authzmodule "github.com/cosmos/cosmos-sdk/x/authz/module"
 
-	"github.com/verana-labs/verana-blockchain/docs"
+	"github.com/verana-labs/verana/docs"
 )
 
 const (

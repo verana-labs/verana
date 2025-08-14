@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"cosmossdk.io/math"
-	credentialschematypes "github.com/verana-labs/verana-blockchain/x/credentialschema/types"
+	credentialschematypes "github.com/verana-labs/verana/x/credentialschema/types"
 
 	"cosmossdk.io/collections"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -13,7 +13,7 @@ import (
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/verana-labs/verana-blockchain/x/permission/types"
+	"github.com/verana-labs/verana/x/permission/types"
 )
 
 func (ms msgServer) validateSessionAccess(ctx sdk.Context, msg *types.MsgCreateOrUpdatePermissionSession) error {

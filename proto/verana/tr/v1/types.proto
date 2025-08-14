@@ -6,7 +6,7 @@ import "gogoproto/gogo.proto";
 import "cosmos_proto/cosmos.proto";
 import "google/protobuf/timestamp.proto";
 
-option go_package = "github.com/verana-labs/verana-blockchain/x/trustregistry/types";
+option go_package = "github.com/verana-labs/verana/x/trustregistry/types";
 
 message TrustRegistry {
   uint64 id = 1;  // Added id field

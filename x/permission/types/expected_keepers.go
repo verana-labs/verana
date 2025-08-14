@@ -4,8 +4,8 @@ import (
 	"context"
 	"cosmossdk.io/math"
 
-	credentialschematypes "github.com/verana-labs/verana-blockchain/x/credentialschema/types"
-	trustregistrytypes "github.com/verana-labs/verana-blockchain/x/trustregistry/types"
+	credentialschematypes "github.com/verana-labs/verana/x/credentialschema/types"
+	trustregistrytypes "github.com/verana-labs/verana/x/trustregistry/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )

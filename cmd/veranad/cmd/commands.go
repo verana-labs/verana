@@ -28,7 +28,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/verana-labs/verana-blockchain/app"
+	"github.com/verana-labs/verana/app"
 )
 
 func initRootCmd(

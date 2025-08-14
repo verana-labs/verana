@@ -18,7 +18,7 @@ jobs:
   test-harness:
     runs-on: ubuntu-latest
     env:
-      VERANA_BLOCKCHAIN_PATH: ./verana-blockchain
+      VERANA_BLOCKCHAIN_PATH: ./verana
       TEST_HARNESS_PATH: ./verana-test-harness
 
     steps:

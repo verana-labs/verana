@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/verana-labs/verana-blockchain/x/trustdeposit/types"
+	"github.com/verana-labs/verana/x/trustdeposit/types"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )

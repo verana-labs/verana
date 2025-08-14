@@ -4,7 +4,7 @@ package verana.perm.v1;
 import "amino/amino.proto";
 import "gogoproto/gogo.proto";
 
-option go_package = "github.com/verana-labs/verana-blockchain/x/permission/types";
+option go_package = "github.com/verana-labs/verana/x/permission/types";
 
 // Params defines the parameters for the module.
 message Params {

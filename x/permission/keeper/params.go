@@ -5,7 +5,7 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/runtime"
 
-	"github.com/verana-labs/verana-blockchain/x/permission/types"
+	"github.com/verana-labs/verana/x/permission/types"
 )
 
 // GetParams get all parameters as types.Params

@@ -8,8 +8,8 @@ import (
 	"cosmossdk.io/collections"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/verana-labs/verana-blockchain/x/permission/keeper"
-	"github.com/verana-labs/verana-blockchain/x/permission/types"
+	"github.com/verana-labs/verana/x/permission/keeper"
+	"github.com/verana-labs/verana/x/permission/types"
 )
 
 // DefaultGenesis returns the default genesis state
