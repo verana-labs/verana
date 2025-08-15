@@ -9,6 +9,11 @@ import (
 
 	upgradetypes "cosmossdk.io/x/upgrade/types"
 	"github.com/verana-labs/verana/app/upgrades"
+	csmodulekeeper "github.com/verana-labs/verana/x/cs/keeper"
+	ddmodulekeeper "github.com/verana-labs/verana/x/dd/keeper"
+	permmodulekeeper "github.com/verana-labs/verana/x/perm/keeper"
+	tdmodulekeeper "github.com/verana-labs/verana/x/td/keeper"
+	trmodulekeeper "github.com/verana-labs/verana/x/tr/keeper"
 
 	"cosmossdk.io/x/evidence"
 	"cosmossdk.io/x/upgrade"
@@ -16,6 +21,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/consensus"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
+
 	//govtypesv1beta1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	"github.com/cosmos/cosmos-sdk/x/mint"
 	"github.com/cosmos/cosmos-sdk/x/params"
@@ -203,6 +209,11 @@ type App struct {
 	//CredentialschemaKeeper credentialschemamodulekeeper.Keeper
 	//PermissionKeeper       permissionmodulekeeper.Keeper
 	//TrustdepositKeeper     trustdepositmodulekeeper.Keeper
+	CsKeeper   csmodulekeeper.Keeper
+	DdKeeper   ddmodulekeeper.Keeper
+	PermKeeper permmodulekeeper.Keeper
+	TdKeeper   tdmodulekeeper.Keeper
+	TrKeeper   trmodulekeeper.Keeper
 	// this line is used by starport scaffolding # stargate/app/keeperDeclaration
 
 	// simulation manager
@@ -335,6 +346,12 @@ func New(
 		&app.NFTKeeper,
 		&app.GroupKeeper,
 		&app.CircuitBreakerKeeper,
+		&app.CsKeeper,
+		&app.DdKeeper,
+		&app.PermKeeper,
+		&app.TdKeeper,
+		&app.TrKeeper,
+
 		//&app.TrustregistryKeeper,
 		//&app.DiddirectoryKeeper,
 		//&app.CredentialschemaKeeper,

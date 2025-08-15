@@ -1,0 +1,17 @@
+syntax = "proto3";
+package verana.tr.v1;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+import "verana/tr/v1/params.proto";
+
+option go_package = "github.com/verana-labs/verana/x/tr/types";
+
+// GenesisState defines the tr module's genesis state.
+message GenesisState {
+  // params defines all the parameters of the module.
+  Params params = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+}

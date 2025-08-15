@@ -1,0 +1,13 @@
+syntax = "proto3";
+package verana.td.v1;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/verana-labs/verana/x/td/types";
+
+// Params defines the parameters for the module.
+message Params {
+  option (amino.name) = "verana/x/td/Params";
+  option (gogoproto.equal) = true;
+}

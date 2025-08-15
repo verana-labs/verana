@@ -51,6 +51,16 @@ import (
 	ibcfeetypes "github.com/cosmos/ibc-go/v8/modules/apps/29-fee/types"
 	ibctransfertypes "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
 	ibcexported "github.com/cosmos/ibc-go/v8/modules/core/exported"
+	_ "github.com/verana-labs/verana/x/cs/module"
+	csmoduletypes "github.com/verana-labs/verana/x/cs/types"
+	_ "github.com/verana-labs/verana/x/dd/module"
+	ddmoduletypes "github.com/verana-labs/verana/x/dd/types"
+	_ "github.com/verana-labs/verana/x/perm/module"
+	permmoduletypes "github.com/verana-labs/verana/x/perm/types"
+	_ "github.com/verana-labs/verana/x/td/module"
+	tdmoduletypes "github.com/verana-labs/verana/x/td/types"
+	_ "github.com/verana-labs/verana/x/tr/module"
+	trmoduletypes "github.com/verana-labs/verana/x/tr/types"
 	"google.golang.org/protobuf/types/known/durationpb"
 	//_ "github.com/verana-labs/verana/x/credentialschema/module" // import for side-effects
 	//credentialschemamoduletypes "github.com/verana-labs/verana/x/credentialschema/types"
@@ -104,6 +114,11 @@ var (
 		//credentialschemamoduletypes.ModuleName,
 		//permissionmoduletypes.ModuleName,
 		//trustdepositmoduletypes.ModuleName,
+		csmoduletypes.ModuleName,
+		ddmoduletypes.ModuleName,
+		permmoduletypes.ModuleName,
+		tdmoduletypes.ModuleName,
+		trmoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/initGenesis
 	}
 
@@ -133,6 +148,11 @@ var (
 		//credentialschemamoduletypes.ModuleName,
 		//permissionmoduletypes.ModuleName,
 		//trustdepositmoduletypes.ModuleName,
+		csmoduletypes.ModuleName,
+		ddmoduletypes.ModuleName,
+		permmoduletypes.ModuleName,
+		tdmoduletypes.ModuleName,
+		trmoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/beginBlockers
 	}
 
@@ -156,6 +176,11 @@ var (
 		//credentialschemamoduletypes.ModuleName,
 		//permissionmoduletypes.ModuleName,
 		//trustdepositmoduletypes.ModuleName,
+		csmoduletypes.ModuleName,
+		ddmoduletypes.ModuleName,
+		permmoduletypes.ModuleName,
+		tdmoduletypes.ModuleName,
+		trmoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/endBlockers
 	}
 
@@ -200,8 +225,11 @@ var (
 			{
 				Name: runtime.ModuleName,
 				Config: appconfig.WrapAny(&runtimev1alpha1.Module{
-					AppName:       Name,
-					PreBlockers:   preBlockers,
+					AppName: Name,
+					PreBlockers: []string{
+						upgradetypes.ModuleName,
+						authtypes.ModuleName,
+					},
 					BeginBlockers: beginBlockers,
 					EndBlockers:   endBlockers,
 					InitGenesis:   genesisModuleOrder,
@@ -334,6 +362,26 @@ var (
 			//	Name:   trustdepositmoduletypes.ModuleName,
 			//	Config: appconfig.WrapAny(&trustdepositmodulev1.Module{}),
 			//},
+			{
+				Name:   csmoduletypes.ModuleName,
+				Config: appconfig.WrapAny(&csmoduletypes.Module{}),
+			},
+			{
+				Name:   ddmoduletypes.ModuleName,
+				Config: appconfig.WrapAny(&ddmoduletypes.Module{}),
+			},
+			{
+				Name:   permmoduletypes.ModuleName,
+				Config: appconfig.WrapAny(&permmoduletypes.Module{}),
+			},
+			{
+				Name:   tdmoduletypes.ModuleName,
+				Config: appconfig.WrapAny(&tdmoduletypes.Module{}),
+			},
+			{
+				Name:   trmoduletypes.ModuleName,
+				Config: appconfig.WrapAny(&trmoduletypes.Module{}),
+			},
 			// this line is used by starport scaffolding # stargate/app/moduleConfig
 		},
 	})
