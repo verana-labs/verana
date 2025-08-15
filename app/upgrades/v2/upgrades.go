@@ -7,8 +7,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/verana-labs/verana/app/upgrades/types"
-	diddirectory "github.com/verana-labs/verana/x/diddirectory/module"
-	didtypes "github.com/verana-labs/verana/x/diddirectory/types"
+	//diddirectory "github.com/verana-labs/verana/x/diddirectory/module"
+	//didtypes "github.com/verana-labs/verana/x/diddirectory/types"
 )
 
 func CreateUpgradeHandler(
@@ -24,7 +24,7 @@ func CreateUpgradeHandler(
 			return nil, err
 		}
 
-		diddirectory.InitGenesis(ctx, keepers.GetDidDirectoryKeeper(), *didtypes.DefaultGenesis())
+		//diddirectory.InitGenesis(ctx, keepers.GetDidDirectoryKeeper(), *didtypes.DefaultGenesis())
 		return migrations, nil
 	}
 }

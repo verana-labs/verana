@@ -7,8 +7,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/verana-labs/verana/app/upgrades/types"
-	credentialschema "github.com/verana-labs/verana/x/credentialschema/module"
-	credentialschematypes "github.com/verana-labs/verana/x/credentialschema/types"
+	//credentialschema "github.com/verana-labs/verana/x/credentialschema/module"
+	//credentialschematypes "github.com/verana-labs/verana/x/credentialschema/types"
 )
 
 func CreateUpgradeHandler(
@@ -24,7 +24,7 @@ func CreateUpgradeHandler(
 			return nil, err
 		}
 
-		credentialschema.InitGenesis(ctx, keepers.GetCredentialSchemaKeeper(), *credentialschematypes.DefaultGenesis())
+		//credentialschema.InitGenesis(ctx, keepers.GetCredentialSchemaKeeper(), *credentialschematypes.DefaultGenesis())
 		return migrations, nil
 	}
 }
