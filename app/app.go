@@ -2,8 +2,9 @@ package app
 
 import (
 	"fmt"
-	trustdepositmodulev1 "github.com/verana-labs/verana/x/trustdeposit/module"
-	trustdeposittypes "github.com/verana-labs/verana/x/trustdeposit/types"
+
+	//trustdepositmodulev1 "github.com/verana-labs/verana/x/trustdeposit/module"
+	//trustdeposittypes "github.com/verana-labs/verana/x/trustdeposit/types"
 	"io"
 
 	upgradetypes "cosmossdk.io/x/upgrade/types"
@@ -15,7 +16,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/consensus"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
-	govtypesv1beta1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
+	//govtypesv1beta1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	"github.com/cosmos/cosmos-sdk/x/mint"
 	"github.com/cosmos/cosmos-sdk/x/params"
 	"github.com/cosmos/cosmos-sdk/x/slashing"
@@ -99,13 +100,13 @@ import (
 	ibctransferkeeper "github.com/cosmos/ibc-go/v8/modules/apps/transfer/keeper"
 	ibckeeper "github.com/cosmos/ibc-go/v8/modules/core/keeper"
 
-	diddirectorymodulekeeper "github.com/verana-labs/verana/x/diddirectory/keeper"
-	trustregistrymodulekeeper "github.com/verana-labs/verana/x/trustregistry/keeper"
-
-	credentialschemamodulekeeper "github.com/verana-labs/verana/x/credentialschema/keeper"
-
-	permissionmodulekeeper "github.com/verana-labs/verana/x/permission/keeper"
-	trustdepositmodulekeeper "github.com/verana-labs/verana/x/trustdeposit/keeper"
+	//diddirectorymodulekeeper "github.com/verana-labs/verana/x/diddirectory/keeper"
+	//trustregistrymodulekeeper "github.com/verana-labs/verana/x/trustregistry/keeper"
+	//
+	//credentialschemamodulekeeper "github.com/verana-labs/verana/x/credentialschema/keeper"
+	//
+	//permissionmodulekeeper "github.com/verana-labs/verana/x/permission/keeper"
+	//trustdepositmodulekeeper "github.com/verana-labs/verana/x/trustdeposit/keeper"
 
 	// this line is used by starport scaffolding # stargate/app/moduleImport
 	authzmodule "github.com/cosmos/cosmos-sdk/x/authz/module"
@@ -197,11 +198,11 @@ type App struct {
 	ScopedICAHostKeeper       capabilitykeeper.ScopedKeeper
 	ScopedKeepers             map[string]capabilitykeeper.ScopedKeeper
 
-	TrustregistryKeeper    trustregistrymodulekeeper.Keeper
-	DiddirectoryKeeper     diddirectorymodulekeeper.Keeper
-	CredentialschemaKeeper credentialschemamodulekeeper.Keeper
-	PermissionKeeper       permissionmodulekeeper.Keeper
-	TrustdepositKeeper     trustdepositmodulekeeper.Keeper
+	//TrustregistryKeeper    trustregistrymodulekeeper.Keeper
+	//DiddirectoryKeeper     diddirectorymodulekeeper.Keeper
+	//CredentialschemaKeeper credentialschemamodulekeeper.Keeper
+	//PermissionKeeper       permissionmodulekeeper.Keeper
+	//TrustdepositKeeper     trustdepositmodulekeeper.Keeper
 	// this line is used by starport scaffolding # stargate/app/keeperDeclaration
 
 	// simulation manager
@@ -224,7 +225,7 @@ func getGovProposalHandlers() []govclient.ProposalHandler {
 
 	govProposalHandlers = append(govProposalHandlers,
 		paramsclient.ProposalHandler,
-		trustdepositmodulev1.SlashTrustDepositHandler,
+		//trustdepositmodulev1.SlashTrustDepositHandler,
 		// this line is used by starport scaffolding # stargate/app/govProposalHandler
 	)
 
@@ -248,25 +249,25 @@ func AppConfig() depinject.Config {
 	)
 }
 
-func (app *App) GetDidDirectoryKeeper() diddirectorymodulekeeper.Keeper {
-	return app.DiddirectoryKeeper
-}
-
-func (app *App) GetCredentialSchemaKeeper() credentialschemamodulekeeper.Keeper {
-	return app.CredentialschemaKeeper
-}
-
-func (app *App) GetTrustRegistryKeeper() trustregistrymodulekeeper.Keeper {
-	return app.TrustregistryKeeper
-}
-
-func (app *App) GetPermissionKeeper() permissionmodulekeeper.Keeper {
-	return app.PermissionKeeper
-}
-
-func (app *App) GetTrustDepositKeeper() trustdepositmodulekeeper.Keeper {
-	return app.TrustdepositKeeper
-}
+//func (app *App) GetDidDirectoryKeeper() diddirectorymodulekeeper.Keeper {
+//	return app.DiddirectoryKeeper
+//}
+//
+//func (app *App) GetCredentialSchemaKeeper() credentialschemamodulekeeper.Keeper {
+//	return app.CredentialschemaKeeper
+//}
+//
+//func (app *App) GetTrustRegistryKeeper() trustregistrymodulekeeper.Keeper {
+//	return app.TrustregistryKeeper
+//}
+//
+//func (app *App) GetPermissionKeeper() permissionmodulekeeper.Keeper {
+//	return app.PermissionKeeper
+//}
+//
+//func (app *App) GetTrustDepositKeeper() trustdepositmodulekeeper.Keeper {
+//	return app.TrustdepositKeeper
+//}
 
 func (app *App) GetBankKeeper() bankkeeper.Keeper {
 	return app.BankKeeper
@@ -334,11 +335,11 @@ func New(
 		&app.NFTKeeper,
 		&app.GroupKeeper,
 		&app.CircuitBreakerKeeper,
-		&app.TrustregistryKeeper,
-		&app.DiddirectoryKeeper,
-		&app.CredentialschemaKeeper,
-		&app.PermissionKeeper,
-		&app.TrustdepositKeeper,
+		//&app.TrustregistryKeeper,
+		//&app.DiddirectoryKeeper,
+		//&app.CredentialschemaKeeper,
+		//&app.PermissionKeeper,
+		//&app.TrustdepositKeeper,
 		// this line is used by starport scaffolding # stargate/app/keeperDefinition
 	); err != nil {
 		panic(err)
@@ -383,8 +384,8 @@ func New(
 		return app.App.InitChainer(ctx, req)
 	})
 
-	govRouter := govtypesv1beta1.NewRouter()
-	govRouter.AddRoute(trustdeposittypes.RouterKey, trustdepositmodulekeeper.NewTrustDepositHandler(app.TrustdepositKeeper))
+	//govRouter := govtypesv1beta1.NewRouter()
+	//govRouter.AddRoute(trustdeposittypes.RouterKey, trustdepositmodulekeeper.NewTrustDepositHandler(app.TrustdepositKeeper))
 
 	app.configurator = module.NewConfigurator(app.appCodec, app.MsgServiceRouter(), app.GRPCQueryRouter())
 

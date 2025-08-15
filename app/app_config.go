@@ -52,22 +52,16 @@ import (
 	ibctransfertypes "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
 	ibcexported "github.com/cosmos/ibc-go/v8/modules/core/exported"
 	"google.golang.org/protobuf/types/known/durationpb"
-
-	credentialschemamodulev1 "github.com/verana-labs/verana/api/verana/cs/module"
-	diddirectorymodulev1 "github.com/verana-labs/verana/api/verana/dd/module"
-	permissionmodulev1 "github.com/verana-labs/verana/api/verana/perm/module"
-	trustdepositmodulev1 "github.com/verana-labs/verana/api/verana/td/module"
-	trustregistrymodulev1 "github.com/verana-labs/verana/api/verana/tr/module"
-	_ "github.com/verana-labs/verana/x/credentialschema/module" // import for side-effects
-	credentialschemamoduletypes "github.com/verana-labs/verana/x/credentialschema/types"
-	_ "github.com/verana-labs/verana/x/diddirectory/module" // import for side-effects
-	diddirectorymoduletypes "github.com/verana-labs/verana/x/diddirectory/types"
-	_ "github.com/verana-labs/verana/x/permission/module" // import for side-effects
-	permissionmoduletypes "github.com/verana-labs/verana/x/permission/types"
-	_ "github.com/verana-labs/verana/x/trustdeposit/module" // import for side-effects
-	trustdepositmoduletypes "github.com/verana-labs/verana/x/trustdeposit/types"
-	_ "github.com/verana-labs/verana/x/trustregistry/module" // import for side-effects
-	trustregistrymoduletypes "github.com/verana-labs/verana/x/trustregistry/types"
+	//_ "github.com/verana-labs/verana/x/credentialschema/module" // import for side-effects
+	//credentialschemamoduletypes "github.com/verana-labs/verana/x/credentialschema/types"
+	//_ "github.com/verana-labs/verana/x/diddirectory/module" // import for side-effects
+	//diddirectorymoduletypes "github.com/verana-labs/verana/x/diddirectory/types"
+	//_ "github.com/verana-labs/verana/x/permission/module" // import for side-effects
+	//permissionmoduletypes "github.com/verana-labs/verana/x/permission/types"
+	//_ "github.com/verana-labs/verana/x/trustdeposit/module" // import for side-effects
+	//trustdepositmoduletypes "github.com/verana-labs/verana/x/trustdeposit/types"
+	//_ "github.com/verana-labs/verana/x/trustregistry/module" // import for side-effects
+	//trustregistrymoduletypes "github.com/verana-labs/verana/x/trustregistry/types"
 	// this line is used by starport scaffolding # stargate/app/moduleImport
 )
 
@@ -105,11 +99,11 @@ var (
 		consensustypes.ModuleName,
 		circuittypes.ModuleName,
 		// chain modules
-		trustregistrymoduletypes.ModuleName,
-		diddirectorymoduletypes.ModuleName,
-		credentialschemamoduletypes.ModuleName,
-		permissionmoduletypes.ModuleName,
-		trustdepositmoduletypes.ModuleName,
+		//trustregistrymoduletypes.ModuleName,
+		//diddirectorymoduletypes.ModuleName,
+		//credentialschemamoduletypes.ModuleName,
+		//permissionmoduletypes.ModuleName,
+		//trustdepositmoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/initGenesis
 	}
 
@@ -134,11 +128,11 @@ var (
 		icatypes.ModuleName,
 		ibcfeetypes.ModuleName,
 		// chain modules
-		trustregistrymoduletypes.ModuleName,
-		diddirectorymoduletypes.ModuleName,
-		credentialschemamoduletypes.ModuleName,
-		permissionmoduletypes.ModuleName,
-		trustdepositmoduletypes.ModuleName,
+		//trustregistrymoduletypes.ModuleName,
+		//diddirectorymoduletypes.ModuleName,
+		//credentialschemamoduletypes.ModuleName,
+		//permissionmoduletypes.ModuleName,
+		//trustdepositmoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/beginBlockers
 	}
 
@@ -157,11 +151,11 @@ var (
 		icatypes.ModuleName,
 		ibcfeetypes.ModuleName,
 		// chain modules
-		trustregistrymoduletypes.ModuleName,
-		diddirectorymoduletypes.ModuleName,
-		credentialschemamoduletypes.ModuleName,
-		permissionmoduletypes.ModuleName,
-		trustdepositmoduletypes.ModuleName,
+		//trustregistrymoduletypes.ModuleName,
+		//diddirectorymoduletypes.ModuleName,
+		//credentialschemamoduletypes.ModuleName,
+		//permissionmoduletypes.ModuleName,
+		//trustdepositmoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/endBlockers
 	}
 
@@ -182,9 +176,9 @@ var (
 		{Account: ibctransfertypes.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner}},
 		{Account: ibcfeetypes.ModuleName},
 		{Account: icatypes.ModuleName},
-		{Account: trustregistrymoduletypes.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner}},
-		{Account: trustdepositmoduletypes.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner}},
-		{Account: permissionmoduletypes.ModuleName},
+		//{Account: trustregistrymoduletypes.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner}},
+		//{Account: trustdepositmoduletypes.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner}},
+		//{Account: permissionmoduletypes.ModuleName},
 		// this line is used by starport scaffolding # stargate/app/maccPerms
 	}
 
@@ -320,26 +314,26 @@ var (
 				Name:   circuittypes.ModuleName,
 				Config: appconfig.WrapAny(&circuitmodulev1.Module{}),
 			},
-			{
-				Name:   trustregistrymoduletypes.ModuleName,
-				Config: appconfig.WrapAny(&trustregistrymodulev1.Module{}),
-			},
-			{
-				Name:   diddirectorymoduletypes.ModuleName,
-				Config: appconfig.WrapAny(&diddirectorymodulev1.Module{}),
-			},
-			{
-				Name:   credentialschemamoduletypes.ModuleName,
-				Config: appconfig.WrapAny(&credentialschemamodulev1.Module{}),
-			},
-			{
-				Name:   permissionmoduletypes.ModuleName,
-				Config: appconfig.WrapAny(&permissionmodulev1.Module{}),
-			},
-			{
-				Name:   trustdepositmoduletypes.ModuleName,
-				Config: appconfig.WrapAny(&trustdepositmodulev1.Module{}),
-			},
+			//{
+			//	Name:   trustregistrymoduletypes.ModuleName,
+			//	Config: appconfig.WrapAny(&trustregistrymodulev1.Module{}),
+			//},
+			//{
+			//	Name:   diddirectorymoduletypes.ModuleName,
+			//	Config: appconfig.WrapAny(&diddirectorymodulev1.Module{}),
+			//},
+			//{
+			//	Name:   credentialschemamoduletypes.ModuleName,
+			//	Config: appconfig.WrapAny(&credentialschemamodulev1.Module{}),
+			//},
+			//{
+			//	Name:   permissionmoduletypes.ModuleName,
+			//	Config: appconfig.WrapAny(&permissionmodulev1.Module{}),
+			//},
+			//{
+			//	Name:   trustdepositmoduletypes.ModuleName,
+			//	Config: appconfig.WrapAny(&trustdepositmodulev1.Module{}),
+			//},
 			// this line is used by starport scaffolding # stargate/app/moduleConfig
 		},
 	})
