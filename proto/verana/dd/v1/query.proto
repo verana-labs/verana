@@ -3,9 +3,12 @@ package verana.dd.v1;
 
 import "amino/amino.proto";
 import "cosmos/base/query/v1beta1/pagination.proto";
+import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
 import "verana/dd/v1/params.proto";
+import "verana/dd/v1/types.proto";
 
 option go_package = "github.com/verana-labs/verana/x/dd/types";
 
@@ -13,7 +16,13 @@ option go_package = "github.com/verana-labs/verana/x/dd/types";
 service Query {
   // Parameters queries the parameters of the module.
   rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
-    option (google.api.http).get = "/verana-labs/verana/dd/v1/params";
+    option (google.api.http).get = "/verana/dd/v1/params";
+  }
+  rpc ListDIDs(QueryListDIDsRequest) returns (QueryListDIDsResponse) {
+    option (google.api.http).get = "/verana/dd/v1/list";
+  }
+  rpc GetDID(QueryGetDIDRequest) returns (QueryGetDIDResponse) {
+    option (google.api.http).get = "/verana/dd/v1/get/{did}";
   }
 }
 
@@ -27,4 +36,24 @@ message QueryParamsResponse {
     (gogoproto.nullable) = false,
     (amino.dont_omitempty) = true
   ];
+}
+
+message QueryListDIDsRequest {
+  string account = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  google.protobuf.Timestamp changed = 2 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  bool expired = 3;
+  bool over_grace = 4;
+  uint32 response_max_size = 5;
+}
+
+message QueryListDIDsResponse {
+  repeated DIDDirectory dids = 1 [(gogoproto.nullable) = false];
+}
+
+message QueryGetDIDRequest {
+  string did = 1;
+}
+
+message QueryGetDIDResponse {
+  DIDDirectory did_entry = 1 [(gogoproto.nullable) = false];
 }

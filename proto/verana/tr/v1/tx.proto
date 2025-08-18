@@ -16,6 +16,12 @@ service Msg {
   // UpdateParams defines a (governance) operation for updating the module
   // parameters. The authority defaults to the x/gov module account.
   rpc UpdateParams(MsgUpdateParams) returns (MsgUpdateParamsResponse);
+  // CreateTrustRegistry creates a new trust registry.
+  rpc CreateTrustRegistry(MsgCreateTrustRegistry) returns (MsgCreateTrustRegistryResponse);
+  rpc AddGovernanceFrameworkDocument(MsgAddGovernanceFrameworkDocument) returns (MsgAddGovernanceFrameworkDocumentResponse);
+  rpc IncreaseActiveGovernanceFrameworkVersion(MsgIncreaseActiveGovernanceFrameworkVersion) returns (MsgIncreaseActiveGovernanceFrameworkVersionResponse);
+  rpc UpdateTrustRegistry(MsgUpdateTrustRegistry) returns (MsgUpdateTrustRegistryResponse);
+  rpc ArchiveTrustRegistry(MsgArchiveTrustRegistry) returns (MsgArchiveTrustRegistryResponse);
 }
 
 // MsgUpdateParams is the Msg/UpdateParams request type.
@@ -38,3 +44,69 @@ message MsgUpdateParams {
 // MsgUpdateParamsResponse defines the response structure for executing a
 // MsgUpdateParams message.
 message MsgUpdateParamsResponse {}
+
+// MsgCreateTrustRegistry defines the Msg/CreateTrustRegistry request type.
+message MsgCreateTrustRegistry {
+  option (cosmos.msg.v1.signer) = "creator";
+
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string did = 2;
+  string aka = 3 [(gogoproto.nullable) = true];
+  string language = 4;
+  string doc_url = 5;
+  string doc_digest_sri = 6;
+}
+
+// MsgCreateTrustRegistryResponse defines the Msg/CreateTrustRegistry response type.
+message MsgCreateTrustRegistryResponse {}
+
+// MsgAddGovernanceFrameworkDocument defines the Msg/AddGovernanceFrameworkDocument request type.
+message MsgAddGovernanceFrameworkDocument {
+  option (cosmos.msg.v1.signer) = "creator";
+
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  uint64 id = 2;
+  string doc_language = 3;
+  string doc_url = 4;
+  string doc_digest_sri = 5;
+  int32 version = 6;
+}
+
+// MsgAddGovernanceFrameworkDocumentResponse defines the Msg/AddGovernanceFrameworkDocument response type.
+message MsgAddGovernanceFrameworkDocumentResponse {}
+
+// MsgIncreaseActiveGovernanceFrameworkVersion defines the Msg/IncreaseActiveGovernanceFrameworkVersion request type.
+message MsgIncreaseActiveGovernanceFrameworkVersion {
+  option (cosmos.msg.v1.signer) = "creator";
+
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  uint64 id = 2; // Changed from tr_id to id
+}
+
+// MsgIncreaseActiveGovernanceFrameworkVersion defines the Msg/IncreaseActiveGovernanceFrameworkVersion response type.
+message MsgIncreaseActiveGovernanceFrameworkVersionResponse {}
+
+// MsgUpdateTrustRegistry defines the Msg/UpdateTrustRegistry request type.
+message MsgUpdateTrustRegistry {
+  option (cosmos.msg.v1.signer) = "creator";
+
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  uint64 id = 2;
+  string did = 3;
+  string aka = 4 [(gogoproto.nullable) = true];
+}
+
+// MsgUpdateTrustRegistryResponse defines the Msg/UpdateTrustRegistry response type.
+message MsgUpdateTrustRegistryResponse {}
+
+// MsgArchiveTrustRegistry defines the Msg/ArchiveTrustRegistry request type.
+message MsgArchiveTrustRegistry {
+  option (cosmos.msg.v1.signer) = "creator";
+
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  uint64 id = 2;
+  bool archive = 3;
+}
+
+// MsgArchiveTrustRegistryResponse defines the Msg/ArchiveTrustRegistry response type.
+message MsgArchiveTrustRegistryResponse {}

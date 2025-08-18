@@ -5,18 +5,16 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/verana-labs/verana/x/cs/keeper"
+	keepertest "github.com/verana-labs/verana/testutil/keeper"
 	"github.com/verana-labs/verana/x/cs/types"
 )
 
 func TestParamsQuery(t *testing.T) {
-	f := initFixture(t)
-
-	qs := keeper.NewQueryServerImpl(f.keeper)
+	keeper, _, ctx := keepertest.CredentialschemaKeeper(t)
 	params := types.DefaultParams()
-	require.NoError(t, f.keeper.Params.Set(f.ctx, params))
+	require.NoError(t, keeper.SetParams(ctx, params))
 
-	response, err := qs.Params(f.ctx, &types.QueryParamsRequest{})
+	response, err := keeper.Params(ctx, &types.QueryParamsRequest{})
 	require.NoError(t, err)
 	require.Equal(t, &types.QueryParamsResponse{Params: params}, response)
 }

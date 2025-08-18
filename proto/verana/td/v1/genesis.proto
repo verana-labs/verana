@@ -14,4 +14,14 @@ message GenesisState {
     (gogoproto.nullable) = false,
     (amino.dont_omitempty) = true
   ];
+
+  repeated TrustDepositRecord trust_deposits = 2 [(gogoproto.nullable) = false];
+}
+
+// TrustDepositRecord defines a trust deposit entry for genesis state
+message TrustDepositRecord {
+  string account = 1;
+  uint64 share = 2;
+  uint64 amount = 3;
+  uint64 claimable = 4;
 }

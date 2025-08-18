@@ -1,0 +1,39 @@
+syntax = "proto3";
+package verana.cs.v1;
+
+import "amino/amino.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/verana-labs/verana/x/cs/types";
+
+// CredentialSchemaPermManagementMode defines how permissions are managed
+enum CredentialSchemaPermManagementMode {
+  // Default to prevent accidental omission
+  MODE_UNSPECIFIED = 0;
+  // Anyone can create their own permission
+  OPEN = 1;
+  // Requires validation from a grantor
+  GRANTOR_VALIDATION = 2;
+  // Requires validation from ecosystem (was TRUST_REGISTRY_VALIDATION)
+  ECOSYSTEM = 3;
+}
+
+// CredentialSchema defines the structure for a credential schema
+message CredentialSchema {
+  uint64 id = 1;
+  uint64 tr_id = 2;
+  google.protobuf.Timestamp created = 3 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+  google.protobuf.Timestamp modified = 4 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+  google.protobuf.Timestamp archived = 5 [(gogoproto.nullable) = true, (gogoproto.stdtime) = true];
+  uint64 deposit = 6;
+  string json_schema = 7;
+  uint32 issuer_grantor_validation_validity_period = 8;
+  uint32 verifier_grantor_validation_validity_period = 9;
+  uint32 issuer_validation_validity_period = 10;
+  uint32 verifier_validation_validity_period = 11;
+  uint32 holder_validation_validity_period = 12;
+  CredentialSchemaPermManagementMode issuer_perm_management_mode = 13;
+  CredentialSchemaPermManagementMode verifier_perm_management_mode = 14;
+}

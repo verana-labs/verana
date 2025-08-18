@@ -13,7 +13,12 @@ const (
 	// It should be synced with the gov module's name if it is ever changed.
 	// See: https://github.com/cosmos/cosmos-sdk/blob/v0.52.0-beta.2/x/gov/types/keys.go#L9
 	GovModuleName = "gov"
+	BondDenom     = "uvna"
 )
 
-// ParamsKey is the prefix to retrieve all Params
-var ParamsKey = collections.NewPrefix("p_perm")
+var (
+	ParamsKey            = collections.NewPrefix("p_perm")
+	PermissionKey        = collections.NewPrefix(0)
+	PermissionCounterKey = collections.NewPrefix(1)
+	PermissionSessionKey = collections.NewPrefix(2)
+)

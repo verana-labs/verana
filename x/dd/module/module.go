@@ -59,7 +59,9 @@ func (AppModule) Name() string {
 }
 
 // RegisterLegacyAminoCodec registers the amino codec
-func (AppModule) RegisterLegacyAminoCodec(*codec.LegacyAmino) {}
+func (AppModule) RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
+	types.RegisterLegacyAminoCodec(cdc)
+}
 
 // RegisterGRPCGatewayRoutes registers the gRPC Gateway routes for the module.
 func (AppModule) RegisterGRPCGatewayRoutes(clientCtx client.Context, mux *runtime.ServeMux) {
@@ -76,8 +78,7 @@ func (AppModule) RegisterInterfaces(registrar codectypes.InterfaceRegistry) {
 // RegisterServices registers a gRPC query service to respond to the module-specific gRPC queries
 func (am AppModule) RegisterServices(registrar grpc.ServiceRegistrar) error {
 	types.RegisterMsgServer(registrar, keeper.NewMsgServerImpl(am.keeper))
-	types.RegisterQueryServer(registrar, keeper.NewQueryServerImpl(am.keeper))
-
+	types.RegisterQueryServer(registrar, am.keeper)
 	return nil
 }
 

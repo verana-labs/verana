@@ -10,4 +10,7 @@ option go_package = "github.com/verana-labs/verana/x/tr/types";
 message Params {
   option (amino.name) = "verana/x/tr/Params";
   option (gogoproto.equal) = true;
+
+  uint64 trust_registry_trust_deposit = 1;
+  uint64 trust_unit_price = 2;
 }

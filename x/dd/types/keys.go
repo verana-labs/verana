@@ -16,4 +16,11 @@ const (
 )
 
 // ParamsKey is the prefix to retrieve all Params
-var ParamsKey = collections.NewPrefix("p_dd")
+var (
+	ParamsKey       = collections.NewPrefix("p_dd")
+	DIDDirectoryKey = collections.NewPrefix(1)
+)
+
+func KeyPrefix(p string) []byte {
+	return []byte(p)
+}

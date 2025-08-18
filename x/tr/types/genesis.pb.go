@@ -5,13 +5,12 @@ package types
 
 import (
 	fmt "fmt"
-	io "io"
-	math "math"
-	math_bits "math/bits"
-
 	_ "github.com/cosmos/cosmos-sdk/types/tx/amino"
 	_ "github.com/cosmos/gogoproto/gogoproto"
 	proto "github.com/cosmos/gogoproto/proto"
+	io "io"
+	math "math"
+	math_bits "math/bits"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -25,17 +24,78 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
-// GenesisState defines the tr module's genesis state.
+// Counter defines an entity type and its current counter value
+type Counter struct {
+	EntityType string `protobuf:"bytes,1,opt,name=entity_type,json=entityType,proto3" json:"entity_type,omitempty"`
+	Value      uint64 `protobuf:"varint,2,opt,name=value,proto3" json:"value,omitempty"`
+}
+
+func (m *Counter) Reset()         { *m = Counter{} }
+func (m *Counter) String() string { return proto.CompactTextString(m) }
+func (*Counter) ProtoMessage()    {}
+func (*Counter) Descriptor() ([]byte, []int) {
+	return fileDescriptor_adf26977d00c7756, []int{0}
+}
+func (m *Counter) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *Counter) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_Counter.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *Counter) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Counter.Merge(m, src)
+}
+func (m *Counter) XXX_Size() int {
+	return m.Size()
+}
+func (m *Counter) XXX_DiscardUnknown() {
+	xxx_messageInfo_Counter.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Counter proto.InternalMessageInfo
+
+func (m *Counter) GetEntityType() string {
+	if m != nil {
+		return m.EntityType
+	}
+	return ""
+}
+
+func (m *Counter) GetValue() uint64 {
+	if m != nil {
+		return m.Value
+	}
+	return 0
+}
+
+// GenesisState defines the trustregistry module's genesis state.
 type GenesisState struct {
 	// params defines all the parameters of the module.
 	Params Params `protobuf:"bytes,1,opt,name=params,proto3" json:"params"`
+	// Collection of all trust registries
+	TrustRegistries []TrustRegistry `protobuf:"bytes,2,rep,name=trust_registries,json=trustRegistries,proto3" json:"trust_registries"`
+	// Collection of all governance framework versions
+	GovernanceFrameworkVersions []GovernanceFrameworkVersion `protobuf:"bytes,3,rep,name=governance_framework_versions,json=governanceFrameworkVersions,proto3" json:"governance_framework_versions"`
+	// Collection of all governance framework documents
+	GovernanceFrameworkDocuments []GovernanceFrameworkDocument `protobuf:"bytes,4,rep,name=governance_framework_documents,json=governanceFrameworkDocuments,proto3" json:"governance_framework_documents"`
+	// List of counters by entity type (tr, gfv, gfd)
+	Counters []Counter `protobuf:"bytes,5,rep,name=counters,proto3" json:"counters"`
 }
 
 func (m *GenesisState) Reset()         { *m = GenesisState{} }
 func (m *GenesisState) String() string { return proto.CompactTextString(m) }
 func (*GenesisState) ProtoMessage()    {}
 func (*GenesisState) Descriptor() ([]byte, []int) {
-	return fileDescriptor_adf26977d00c7756, []int{0}
+	return fileDescriptor_adf26977d00c7756, []int{1}
 }
 func (m *GenesisState) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -71,27 +131,105 @@ func (m *GenesisState) GetParams() Params {
 	return Params{}
 }
 
+func (m *GenesisState) GetTrustRegistries() []TrustRegistry {
+	if m != nil {
+		return m.TrustRegistries
+	}
+	return nil
+}
+
+func (m *GenesisState) GetGovernanceFrameworkVersions() []GovernanceFrameworkVersion {
+	if m != nil {
+		return m.GovernanceFrameworkVersions
+	}
+	return nil
+}
+
+func (m *GenesisState) GetGovernanceFrameworkDocuments() []GovernanceFrameworkDocument {
+	if m != nil {
+		return m.GovernanceFrameworkDocuments
+	}
+	return nil
+}
+
+func (m *GenesisState) GetCounters() []Counter {
+	if m != nil {
+		return m.Counters
+	}
+	return nil
+}
+
 func init() {
+	proto.RegisterType((*Counter)(nil), "verana.tr.v1.Counter")
 	proto.RegisterType((*GenesisState)(nil), "verana.tr.v1.GenesisState")
 }
 
 func init() { proto.RegisterFile("verana/tr/v1/genesis.proto", fileDescriptor_adf26977d00c7756) }
 
 var fileDescriptor_adf26977d00c7756 = []byte{
-	// 208 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x92, 0x2a, 0x4b, 0x2d, 0x4a,
-	0xcc, 0x4b, 0xd4, 0x2f, 0x29, 0xd2, 0x2f, 0x33, 0xd4, 0x4f, 0x4f, 0xcd, 0x4b, 0x2d, 0xce, 0x2c,
-	0xd6, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0xe2, 0x81, 0xc8, 0xe9, 0x95, 0x14, 0xe9, 0x95, 0x19,
-	0x4a, 0x09, 0x26, 0xe6, 0x66, 0xe6, 0xe5, 0xeb, 0x83, 0x49, 0x88, 0x02, 0x29, 0x91, 0xf4, 0xfc,
-	0xf4, 0x7c, 0x30, 0x53, 0x1f, 0xc4, 0x82, 0x8a, 0x4a, 0xa2, 0x18, 0x59, 0x90, 0x58, 0x94, 0x98,
-	0x0b, 0x35, 0x51, 0xc9, 0x9d, 0x8b, 0xc7, 0x1d, 0x62, 0x45, 0x70, 0x49, 0x62, 0x49, 0xaa, 0x90,
-	0x39, 0x17, 0x1b, 0x44, 0x5e, 0x82, 0x51, 0x81, 0x51, 0x83, 0xdb, 0x48, 0x44, 0x0f, 0xd9, 0x4a,
-	0xbd, 0x00, 0xb0, 0x9c, 0x13, 0xe7, 0x89, 0x7b, 0xf2, 0x0c, 0x2b, 0x9e, 0x6f, 0xd0, 0x62, 0x0c,
-	0x82, 0x2a, 0x77, 0x72, 0x3a, 0xf1, 0x48, 0x8e, 0xf1, 0xc2, 0x23, 0x39, 0xc6, 0x07, 0x8f, 0xe4,
-	0x18, 0x27, 0x3c, 0x96, 0x63, 0xb8, 0xf0, 0x58, 0x8e, 0xe1, 0xc6, 0x63, 0x39, 0x86, 0x28, 0x8d,
-	0xf4, 0xcc, 0x92, 0x8c, 0xd2, 0x24, 0xbd, 0xe4, 0xfc, 0x5c, 0x7d, 0x88, 0x61, 0xba, 0x39, 0x89,
-	0x49, 0xc5, 0x50, 0xb6, 0x7e, 0x05, 0xc8, 0x59, 0x25, 0x95, 0x05, 0xa9, 0xc5, 0x49, 0x6c, 0x60,
-	0x37, 0x19, 0x03, 0x02, 0x00, 0x00, 0xff, 0xff, 0x54, 0xd5, 0x4d, 0xfd, 0x03, 0x01, 0x00, 0x00,
+	// 419 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x84, 0x92, 0xb1, 0x6e, 0xd4, 0x40,
+	0x10, 0x86, 0xed, 0xdc, 0x25, 0x90, 0xbd, 0x48, 0xc0, 0xea, 0x90, 0x8c, 0x03, 0xce, 0x29, 0x95,
+	0x41, 0xc2, 0x56, 0x42, 0x91, 0x16, 0x19, 0x44, 0x1a, 0x0a, 0x64, 0x22, 0x0a, 0x1a, 0x6b, 0xcf,
+	0x0c, 0xcb, 0x8a, 0x78, 0xd7, 0xda, 0x5d, 0x1b, 0xfc, 0x16, 0x3c, 0x06, 0x25, 0x2d, 0x6f, 0x70,
+	0xe5, 0x95, 0x54, 0x08, 0xdd, 0x15, 0xbc, 0x06, 0xf2, 0xee, 0x72, 0x3a, 0x4b, 0x9c, 0x68, 0xac,
+	0xf1, 0xcc, 0xff, 0x7f, 0xbf, 0xad, 0x19, 0x14, 0xb6, 0x20, 0x09, 0x27, 0xa9, 0x96, 0x69, 0x7b,
+	0x96, 0x52, 0xe0, 0xa0, 0x98, 0x4a, 0x6a, 0x29, 0xb4, 0xc0, 0x47, 0x76, 0x96, 0x68, 0x99, 0xb4,
+	0x67, 0xe1, 0x1d, 0x52, 0x31, 0x2e, 0x52, 0xf3, 0xb4, 0x82, 0x70, 0x4a, 0x05, 0x15, 0xa6, 0x4c,
+	0xfb, 0xca, 0x75, 0xef, 0x0d, 0x90, 0x35, 0x91, 0xa4, 0x72, 0xc4, 0x30, 0x18, 0x8c, 0x74, 0x57,
+	0x83, 0x9b, 0x9c, 0x3e, 0x45, 0x37, 0x9e, 0x89, 0x86, 0x6b, 0x90, 0xf8, 0x04, 0x4d, 0x80, 0x6b,
+	0xa6, 0xbb, 0xa2, 0x17, 0x04, 0xfe, 0xcc, 0x8f, 0x0f, 0x73, 0x64, 0x5b, 0x57, 0x5d, 0x0d, 0x78,
+	0x8a, 0xf6, 0x5b, 0x72, 0xdd, 0x40, 0xb0, 0x37, 0xf3, 0xe3, 0x71, 0x6e, 0x5f, 0x4e, 0xbf, 0x8f,
+	0xd0, 0xd1, 0xa5, 0xfd, 0xfe, 0xd7, 0x9a, 0x68, 0xc0, 0x17, 0xe8, 0xc0, 0x86, 0x1b, 0xc4, 0xe4,
+	0x7c, 0x9a, 0x6c, 0xff, 0x4f, 0xf2, 0xca, 0xcc, 0xb2, 0xc3, 0xc5, 0xcf, 0x13, 0xef, 0xeb, 0xef,
+	0x6f, 0x8f, 0xfc, 0xdc, 0xc9, 0xf1, 0x4b, 0x74, 0x5b, 0xcb, 0x46, 0xe9, 0x42, 0x02, 0x65, 0x4a,
+	0x4b, 0x06, 0x2a, 0xd8, 0x9b, 0x8d, 0xe2, 0xc9, 0xf9, 0xf1, 0x10, 0x71, 0xd5, 0xab, 0x72, 0x2b,
+	0xea, 0xb2, 0x71, 0x4f, 0xca, 0x6f, 0xe9, 0xad, 0x26, 0x03, 0x85, 0x25, 0x7a, 0x40, 0x45, 0x0b,
+	0x92, 0x13, 0x5e, 0x42, 0xf1, 0x5e, 0x92, 0x0a, 0x3e, 0x09, 0xf9, 0xb1, 0x68, 0x41, 0x2a, 0x26,
+	0xb8, 0x0a, 0x46, 0x06, 0x1d, 0x0f, 0xd1, 0x97, 0x1b, 0xcb, 0x8b, 0xbf, 0x8e, 0x37, 0xd6, 0xe0,
+	0x72, 0x8e, 0xe9, 0x4e, 0x85, 0xc2, 0x0d, 0x8a, 0xfe, 0x99, 0xf9, 0x4e, 0x94, 0x4d, 0x05, 0x5c,
+	0xab, 0x60, 0x6c, 0x42, 0x1f, 0xfe, 0x37, 0xf4, 0xb9, 0x73, 0xb8, 0xd4, 0xfb, 0x74, 0xb7, 0x44,
+	0xe1, 0x0b, 0x74, 0xb3, 0xb4, 0x4b, 0x54, 0xc1, 0xbe, 0x09, 0xb8, 0x3b, 0x0c, 0x70, 0x2b, 0x76,
+	0xb0, 0x8d, 0x38, 0xcb, 0x16, 0xab, 0xc8, 0x5f, 0xae, 0x22, 0xff, 0xd7, 0x2a, 0xf2, 0xbf, 0xac,
+	0x23, 0x6f, 0xb9, 0x8e, 0xbc, 0x1f, 0xeb, 0xc8, 0x7b, 0x1b, 0x53, 0xa6, 0x3f, 0x34, 0xf3, 0xa4,
+	0x14, 0x55, 0x6a, 0x51, 0x8f, 0xaf, 0xc9, 0x5c, 0xb9, 0x3a, 0xfd, 0xdc, 0x9f, 0x92, 0xb9, 0xa3,
+	0xf9, 0x81, 0x39, 0xa4, 0x27, 0x7f, 0x02, 0x00, 0x00, 0xff, 0xff, 0x32, 0xd3, 0x7e, 0xd2, 0xd2,
+	0x02, 0x00, 0x00,
+}
+
+func (m *Counter) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *Counter) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *Counter) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Value != 0 {
+		i = encodeVarintGenesis(dAtA, i, uint64(m.Value))
+		i--
+		dAtA[i] = 0x10
+	}
+	if len(m.EntityType) > 0 {
+		i -= len(m.EntityType)
+		copy(dAtA[i:], m.EntityType)
+		i = encodeVarintGenesis(dAtA, i, uint64(len(m.EntityType)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
 }
 
 func (m *GenesisState) Marshal() (dAtA []byte, err error) {
@@ -114,6 +252,62 @@ func (m *GenesisState) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if len(m.Counters) > 0 {
+		for iNdEx := len(m.Counters) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Counters[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintGenesis(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x2a
+		}
+	}
+	if len(m.GovernanceFrameworkDocuments) > 0 {
+		for iNdEx := len(m.GovernanceFrameworkDocuments) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.GovernanceFrameworkDocuments[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintGenesis(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x22
+		}
+	}
+	if len(m.GovernanceFrameworkVersions) > 0 {
+		for iNdEx := len(m.GovernanceFrameworkVersions) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.GovernanceFrameworkVersions[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintGenesis(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x1a
+		}
+	}
+	if len(m.TrustRegistries) > 0 {
+		for iNdEx := len(m.TrustRegistries) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.TrustRegistries[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintGenesis(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x12
+		}
+	}
 	{
 		size, err := m.Params.MarshalToSizedBuffer(dAtA[:i])
 		if err != nil {
@@ -138,6 +332,22 @@ func encodeVarintGenesis(dAtA []byte, offset int, v uint64) int {
 	dAtA[offset] = uint8(v)
 	return base
 }
+func (m *Counter) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.EntityType)
+	if l > 0 {
+		n += 1 + l + sovGenesis(uint64(l))
+	}
+	if m.Value != 0 {
+		n += 1 + sovGenesis(uint64(m.Value))
+	}
+	return n
+}
+
 func (m *GenesisState) Size() (n int) {
 	if m == nil {
 		return 0
@@ -146,6 +356,30 @@ func (m *GenesisState) Size() (n int) {
 	_ = l
 	l = m.Params.Size()
 	n += 1 + l + sovGenesis(uint64(l))
+	if len(m.TrustRegistries) > 0 {
+		for _, e := range m.TrustRegistries {
+			l = e.Size()
+			n += 1 + l + sovGenesis(uint64(l))
+		}
+	}
+	if len(m.GovernanceFrameworkVersions) > 0 {
+		for _, e := range m.GovernanceFrameworkVersions {
+			l = e.Size()
+			n += 1 + l + sovGenesis(uint64(l))
+		}
+	}
+	if len(m.GovernanceFrameworkDocuments) > 0 {
+		for _, e := range m.GovernanceFrameworkDocuments {
+			l = e.Size()
+			n += 1 + l + sovGenesis(uint64(l))
+		}
+	}
+	if len(m.Counters) > 0 {
+		for _, e := range m.Counters {
+			l = e.Size()
+			n += 1 + l + sovGenesis(uint64(l))
+		}
+	}
 	return n
 }
 
@@ -154,6 +388,107 @@ func sovGenesis(x uint64) (n int) {
 }
 func sozGenesis(x uint64) (n int) {
 	return sovGenesis(uint64((x << 1) ^ uint64((int64(x) >> 63))))
+}
+func (m *Counter) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowGenesis
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: Counter: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: Counter: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field EntityType", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowGenesis
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthGenesis
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthGenesis
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.EntityType = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Value", wireType)
+			}
+			m.Value = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowGenesis
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Value |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipGenesis(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthGenesis
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
 }
 func (m *GenesisState) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
@@ -214,6 +549,142 @@ func (m *GenesisState) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			if err := m.Params.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field TrustRegistries", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowGenesis
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthGenesis
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthGenesis
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.TrustRegistries = append(m.TrustRegistries, TrustRegistry{})
+			if err := m.TrustRegistries[len(m.TrustRegistries)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field GovernanceFrameworkVersions", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowGenesis
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthGenesis
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthGenesis
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.GovernanceFrameworkVersions = append(m.GovernanceFrameworkVersions, GovernanceFrameworkVersion{})
+			if err := m.GovernanceFrameworkVersions[len(m.GovernanceFrameworkVersions)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field GovernanceFrameworkDocuments", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowGenesis
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthGenesis
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthGenesis
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.GovernanceFrameworkDocuments = append(m.GovernanceFrameworkDocuments, GovernanceFrameworkDocument{})
+			if err := m.GovernanceFrameworkDocuments[len(m.GovernanceFrameworkDocuments)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Counters", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowGenesis
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthGenesis
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthGenesis
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Counters = append(m.Counters, Counter{})
+			if err := m.Counters[len(m.Counters)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex

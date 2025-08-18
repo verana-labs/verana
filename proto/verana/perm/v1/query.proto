@@ -5,7 +5,9 @@ import "amino/amino.proto";
 import "cosmos/base/query/v1beta1/pagination.proto";
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
 import "verana/perm/v1/params.proto";
+import "verana/perm/v1/types.proto";
 
 option go_package = "github.com/verana-labs/verana/x/perm/types";
 
@@ -13,7 +15,25 @@ option go_package = "github.com/verana-labs/verana/x/perm/types";
 service Query {
   // Parameters queries the parameters of the module.
   rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
-    option (google.api.http).get = "/verana-labs/verana/perm/v1/params";
+    option (google.api.http).get = "/verana/perm/v1/params";
+  }
+  rpc ListPermissions(QueryListPermissionsRequest) returns (QueryListPermissionsResponse) {
+    option (google.api.http).get = "/verana/perm/v1/list";
+  }
+  rpc GetPermission(QueryGetPermissionRequest) returns (QueryGetPermissionResponse) {
+    option (google.api.http).get = "/verana/perm/v1/get/{id}";
+  }
+  rpc GetPermissionSession(QueryGetPermissionSessionRequest) returns (QueryGetPermissionSessionResponse) {
+    option (google.api.http).get = "/verana/perm/v1/get_session/{id}";
+  }
+  rpc ListPermissionSessions(QueryListPermissionSessionsRequest) returns (QueryListPermissionSessionsResponse) {
+    option (google.api.http).get = "/verana/perm/v1/list_session";
+  }
+  rpc FindPermissionsWithDID(QueryFindPermissionsWithDIDRequest) returns (QueryFindPermissionsWithDIDResponse) {
+    option (google.api.http).get = "/verana/perm/v1/find_with_did";
+  }
+  rpc FindBeneficiaries(QueryFindBeneficiariesRequest) returns (QueryFindBeneficiariesResponse) {
+    option (google.api.http).get = "/verana/perm/v1/beneficiaries";
   }
 }
 
@@ -27,4 +47,59 @@ message QueryParamsResponse {
     (gogoproto.nullable) = false,
     (amino.dont_omitempty) = true
   ];
+}
+
+message QueryListPermissionsRequest {
+  google.protobuf.Timestamp modified_after = 1 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  uint32 response_max_size = 2;  // Default 64, min 1, max 1024
+}
+
+message QueryListPermissionsResponse {
+  repeated Permission permissions = 1 [(gogoproto.nullable) = false];
+}
+
+message QueryGetPermissionRequest {
+  uint64 id = 1;
+}
+
+message QueryGetPermissionResponse {
+  Permission permission = 1 [(gogoproto.nullable) = false];
+}
+
+message QueryGetPermissionSessionRequest {
+  string id = 1;  // UUID
+}
+
+message QueryGetPermissionSessionResponse {
+  PermissionSession session = 1;
+}
+
+message QueryListPermissionSessionsRequest {
+  google.protobuf.Timestamp modified_after = 1 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  uint32 response_max_size = 2;
+}
+
+message QueryListPermissionSessionsResponse {
+  repeated PermissionSession sessions = 1 [(gogoproto.nullable) = false];
+}
+
+message QueryFindPermissionsWithDIDRequest {
+  string did = 1;
+  uint32 type = 2;
+  uint64 schema_id = 3;
+  string country = 4 [(gogoproto.nullable) = true];
+  google.protobuf.Timestamp when = 5 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+}
+
+message QueryFindPermissionsWithDIDResponse {
+  repeated Permission permissions = 1 [(gogoproto.nullable) = false];
+}
+
+message QueryFindBeneficiariesRequest {
+  uint64 issuer_perm_id = 1;
+  uint64 verifier_perm_id = 2;
+}
+
+message QueryFindBeneficiariesResponse {
+  repeated Permission permissions = 1 [(gogoproto.nullable) = false];
 }

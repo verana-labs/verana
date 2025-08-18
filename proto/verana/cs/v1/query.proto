@@ -5,7 +5,9 @@ import "amino/amino.proto";
 import "cosmos/base/query/v1beta1/pagination.proto";
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
 import "verana/cs/v1/params.proto";
+import "verana/cs/v1/types.proto";
 
 option go_package = "github.com/verana-labs/verana/x/cs/types";
 
@@ -13,7 +15,19 @@ option go_package = "github.com/verana-labs/verana/x/cs/types";
 service Query {
   // Parameters queries the parameters of the module.
   rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
-    option (google.api.http).get = "/verana-labs/verana/cs/v1/params";
+    option (google.api.http).get = "/verana/cs/v1/params";
+  }
+  // ListCredentialSchemas queries a list of CredentialSchema items.
+  rpc ListCredentialSchemas(QueryListCredentialSchemasRequest) returns (QueryListCredentialSchemasResponse) {
+    option (google.api.http).get = "/verana/cs/v1/list";
+  }
+  // GetCredentialSchema returns a credential schema by ID
+  rpc GetCredentialSchema(QueryGetCredentialSchemaRequest) returns (QueryGetCredentialSchemaResponse) {
+    option (google.api.http).get = "/verana/cs/v1/get/{id}";
+  }
+  // RenderJsonSchema returns the JSON schema definition
+  rpc RenderJsonSchema(QueryRenderJsonSchemaRequest) returns (QueryRenderJsonSchemaResponse) {
+    option (google.api.http).get = "/verana/cs/v1/js/{id}";
   }
 }
 
@@ -27,4 +41,30 @@ message QueryParamsResponse {
     (gogoproto.nullable) = false,
     (amino.dont_omitempty) = true
   ];
+}
+
+message QueryListCredentialSchemasRequest {
+  uint64 tr_id = 1; // optional
+  google.protobuf.Timestamp modified_after = 2 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  uint32 response_max_size = 3;
+}
+
+message QueryListCredentialSchemasResponse {
+  repeated CredentialSchema schemas = 1 [(gogoproto.nullable) = false];
+}
+
+message QueryGetCredentialSchemaRequest {
+  uint64 id = 1;
+}
+
+message QueryGetCredentialSchemaResponse {
+  CredentialSchema schema = 1 [(gogoproto.nullable) = false];
+}
+
+message QueryRenderJsonSchemaRequest {
+  uint64 id = 1;
+}
+
+message QueryRenderJsonSchemaResponse {
+  string schema = 1;
 }

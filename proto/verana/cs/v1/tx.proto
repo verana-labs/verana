@@ -16,6 +16,12 @@ service Msg {
   // UpdateParams defines a (governance) operation for updating the module
   // parameters. The authority defaults to the x/gov module account.
   rpc UpdateParams(MsgUpdateParams) returns (MsgUpdateParamsResponse);
+  // CreateCredentialSchema defines a method for creating a new credential schema.
+  rpc CreateCredentialSchema(MsgCreateCredentialSchema) returns (MsgCreateCredentialSchemaResponse);
+  // UpdateCredentialSchema defines a method for updating a credential schema.
+  rpc UpdateCredentialSchema(MsgUpdateCredentialSchema) returns (MsgUpdateCredentialSchemaResponse);
+  // ArchiveCredentialSchema defines a method for archiving a credential schema.
+  rpc ArchiveCredentialSchema(MsgArchiveCredentialSchema) returns (MsgArchiveCredentialSchemaResponse);
 }
 
 // MsgUpdateParams is the Msg/UpdateParams request type.
@@ -38,3 +44,46 @@ message MsgUpdateParams {
 // MsgUpdateParamsResponse defines the response structure for executing a
 // MsgUpdateParams message.
 message MsgUpdateParamsResponse {}
+
+message MsgCreateCredentialSchema {
+  option (cosmos.msg.v1.signer) = "creator";
+
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  uint64 tr_id = 2;
+  string json_schema = 3;
+  uint32 issuer_grantor_validation_validity_period = 4;
+  uint32 verifier_grantor_validation_validity_period = 5;
+  uint32 issuer_validation_validity_period = 6;
+  uint32 verifier_validation_validity_period = 7;
+  uint32 holder_validation_validity_period = 8;
+  uint32 issuer_perm_management_mode = 9;
+  uint32 verifier_perm_management_mode = 10;
+}
+
+message MsgCreateCredentialSchemaResponse {
+  uint64 id = 1; // ID of the created credential schema for confirmation
+}
+
+message MsgUpdateCredentialSchema {
+  option (cosmos.msg.v1.signer) = "creator";
+
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  uint64 id = 2;
+  uint32 issuer_grantor_validation_validity_period = 3;
+  uint32 verifier_grantor_validation_validity_period = 4;
+  uint32 issuer_validation_validity_period = 5;
+  uint32 verifier_validation_validity_period = 6;
+  uint32 holder_validation_validity_period = 7;
+}
+
+message MsgUpdateCredentialSchemaResponse {}
+
+message MsgArchiveCredentialSchema {
+  option (cosmos.msg.v1.signer) = "creator";
+
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  uint64 id = 2;
+  bool archive = 3;
+}
+
+message MsgArchiveCredentialSchemaResponse {}

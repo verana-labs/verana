@@ -5,13 +5,12 @@ package types
 
 import (
 	fmt "fmt"
-	io "io"
-	math "math"
-	math_bits "math/bits"
-
 	_ "github.com/cosmos/cosmos-sdk/types/tx/amino"
 	_ "github.com/cosmos/gogoproto/gogoproto"
 	proto "github.com/cosmos/gogoproto/proto"
+	io "io"
+	math "math"
+	math_bits "math/bits"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -27,6 +26,13 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 // Params defines the parameters for the module.
 type Params struct {
+	CredentialSchemaTrustDeposit                                   uint64 `protobuf:"varint,1,opt,name=credential_schema_trust_deposit,json=credentialSchemaTrustDeposit,proto3" json:"credential_schema_trust_deposit,omitempty"`
+	CredentialSchemaSchemaMaxSize                                  uint64 `protobuf:"varint,2,opt,name=credential_schema_schema_max_size,json=credentialSchemaSchemaMaxSize,proto3" json:"credential_schema_schema_max_size,omitempty"`
+	CredentialSchemaIssuerGrantorValidationValidityPeriodMaxDays   uint32 `protobuf:"varint,3,opt,name=credential_schema_issuer_grantor_validation_validity_period_max_days,json=credentialSchemaIssuerGrantorValidationValidityPeriodMaxDays,proto3" json:"credential_schema_issuer_grantor_validation_validity_period_max_days,omitempty"`
+	CredentialSchemaVerifierGrantorValidationValidityPeriodMaxDays uint32 `protobuf:"varint,4,opt,name=credential_schema_verifier_grantor_validation_validity_period_max_days,json=credentialSchemaVerifierGrantorValidationValidityPeriodMaxDays,proto3" json:"credential_schema_verifier_grantor_validation_validity_period_max_days,omitempty"`
+	CredentialSchemaIssuerValidationValidityPeriodMaxDays          uint32 `protobuf:"varint,5,opt,name=credential_schema_issuer_validation_validity_period_max_days,json=credentialSchemaIssuerValidationValidityPeriodMaxDays,proto3" json:"credential_schema_issuer_validation_validity_period_max_days,omitempty"`
+	CredentialSchemaVerifierValidationValidityPeriodMaxDays        uint32 `protobuf:"varint,6,opt,name=credential_schema_verifier_validation_validity_period_max_days,json=credentialSchemaVerifierValidationValidityPeriodMaxDays,proto3" json:"credential_schema_verifier_validation_validity_period_max_days,omitempty"`
+	CredentialSchemaHolderValidationValidityPeriodMaxDays          uint32 `protobuf:"varint,7,opt,name=credential_schema_holder_validation_validity_period_max_days,json=credentialSchemaHolderValidationValidityPeriodMaxDays,proto3" json:"credential_schema_holder_validation_validity_period_max_days,omitempty"`
 }
 
 func (m *Params) Reset()         { *m = Params{} }
@@ -62,6 +68,55 @@ func (m *Params) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_Params proto.InternalMessageInfo
 
+func (m *Params) GetCredentialSchemaTrustDeposit() uint64 {
+	if m != nil {
+		return m.CredentialSchemaTrustDeposit
+	}
+	return 0
+}
+
+func (m *Params) GetCredentialSchemaSchemaMaxSize() uint64 {
+	if m != nil {
+		return m.CredentialSchemaSchemaMaxSize
+	}
+	return 0
+}
+
+func (m *Params) GetCredentialSchemaIssuerGrantorValidationValidityPeriodMaxDays() uint32 {
+	if m != nil {
+		return m.CredentialSchemaIssuerGrantorValidationValidityPeriodMaxDays
+	}
+	return 0
+}
+
+func (m *Params) GetCredentialSchemaVerifierGrantorValidationValidityPeriodMaxDays() uint32 {
+	if m != nil {
+		return m.CredentialSchemaVerifierGrantorValidationValidityPeriodMaxDays
+	}
+	return 0
+}
+
+func (m *Params) GetCredentialSchemaIssuerValidationValidityPeriodMaxDays() uint32 {
+	if m != nil {
+		return m.CredentialSchemaIssuerValidationValidityPeriodMaxDays
+	}
+	return 0
+}
+
+func (m *Params) GetCredentialSchemaVerifierValidationValidityPeriodMaxDays() uint32 {
+	if m != nil {
+		return m.CredentialSchemaVerifierValidationValidityPeriodMaxDays
+	}
+	return 0
+}
+
+func (m *Params) GetCredentialSchemaHolderValidationValidityPeriodMaxDays() uint32 {
+	if m != nil {
+		return m.CredentialSchemaHolderValidationValidityPeriodMaxDays
+	}
+	return 0
+}
+
 func init() {
 	proto.RegisterType((*Params)(nil), "verana.cs.v1.Params")
 }
@@ -69,18 +124,34 @@ func init() {
 func init() { proto.RegisterFile("verana/cs/v1/params.proto", fileDescriptor_00b75c8faa1f4dcc) }
 
 var fileDescriptor_00b75c8faa1f4dcc = []byte{
-	// 172 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x92, 0x2c, 0x4b, 0x2d, 0x4a,
-	0xcc, 0x4b, 0xd4, 0x4f, 0x2e, 0xd6, 0x2f, 0x33, 0xd4, 0x2f, 0x48, 0x2c, 0x4a, 0xcc, 0x2d, 0xd6,
-	0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0xe2, 0x81, 0x48, 0xe9, 0x25, 0x17, 0xeb, 0x95, 0x19, 0x4a,
-	0x09, 0x26, 0xe6, 0x66, 0xe6, 0xe5, 0xeb, 0x83, 0x49, 0x88, 0x02, 0x29, 0x91, 0xf4, 0xfc, 0xf4,
-	0x7c, 0x30, 0x53, 0x1f, 0xc4, 0x82, 0x88, 0x2a, 0xa9, 0x72, 0xb1, 0x05, 0x80, 0x8d, 0xb1, 0x92,
-	0x7e, 0xb1, 0x40, 0x9e, 0xb1, 0xeb, 0xf9, 0x06, 0x2d, 0x21, 0xa8, 0x25, 0x15, 0x20, 0x6b, 0x20,
-	0x92, 0x4e, 0x4e, 0x27, 0x1e, 0xc9, 0x31, 0x5e, 0x78, 0x24, 0xc7, 0xf8, 0xe0, 0x91, 0x1c, 0xe3,
-	0x84, 0xc7, 0x72, 0x0c, 0x17, 0x1e, 0xcb, 0x31, 0xdc, 0x78, 0x2c, 0xc7, 0x10, 0xa5, 0x91, 0x9e,
-	0x59, 0x92, 0x51, 0x9a, 0xa4, 0x97, 0x9c, 0x9f, 0xab, 0x0f, 0xd1, 0xa8, 0x9b, 0x93, 0x98, 0x54,
-	0xac, 0x8f, 0x6c, 0x48, 0x49, 0x65, 0x41, 0x6a, 0x71, 0x12, 0x1b, 0xd8, 0x46, 0x63, 0x40, 0x00,
-	0x00, 0x00, 0xff, 0xff, 0xe2, 0x14, 0x92, 0x71, 0xc5, 0x00, 0x00, 0x00,
+	// 420 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x93, 0xcf, 0xca, 0xd3, 0x40,
+	0x14, 0xc5, 0x3b, 0x5a, 0x23, 0x0c, 0xba, 0x30, 0xb8, 0xa8, 0x55, 0xd3, 0xea, 0xaa, 0x08, 0x26,
+	0x14, 0x11, 0x41, 0x4a, 0x17, 0xa5, 0x6a, 0x5d, 0x14, 0x4a, 0x2b, 0x5d, 0xb8, 0x09, 0xb7, 0xc9,
+	0x98, 0x0e, 0x24, 0x99, 0x30, 0x33, 0x0d, 0x49, 0x5d, 0xb8, 0xef, 0x42, 0x7c, 0x04, 0x1f, 0xc1,
+	0xc7, 0x70, 0x67, 0x97, 0x2e, 0xa5, 0x5d, 0xe8, 0x63, 0x48, 0x67, 0x82, 0x4a, 0xff, 0xd8, 0x7c,
+	0xdf, 0x66, 0x72, 0x49, 0x4e, 0x7e, 0xe7, 0xcc, 0x85, 0x83, 0xef, 0xa4, 0x84, 0x43, 0x0c, 0x8e,
+	0x27, 0x9c, 0xb4, 0xed, 0x24, 0xc0, 0x21, 0x12, 0x76, 0xc2, 0x99, 0x64, 0xe6, 0x0d, 0xfd, 0xc9,
+	0xf6, 0x84, 0x9d, 0xb6, 0xeb, 0xb7, 0x20, 0xa2, 0x31, 0x73, 0xd4, 0xa9, 0x05, 0xf5, 0xdb, 0x01,
+	0x0b, 0x98, 0x1a, 0x9d, 0xdd, 0xa4, 0xdf, 0x3e, 0xfc, 0x66, 0x60, 0x63, 0xa4, 0x38, 0xe6, 0x0b,
+	0xdc, 0xf0, 0x38, 0xf1, 0x49, 0x2c, 0x29, 0x84, 0xae, 0xf0, 0xe6, 0x24, 0x02, 0x57, 0xf2, 0x85,
+	0x90, 0xae, 0x4f, 0x12, 0x26, 0xa8, 0xac, 0xa1, 0x26, 0x6a, 0x55, 0xc7, 0xf7, 0xfe, 0xca, 0x26,
+	0x4a, 0xf5, 0x66, 0x27, 0xea, 0x6b, 0x8d, 0x39, 0xc0, 0x0f, 0x0e, 0x31, 0xc5, 0x23, 0x82, 0xcc,
+	0x15, 0x74, 0x49, 0x6a, 0x57, 0x14, 0xe8, 0xfe, 0x3e, 0x48, 0x9f, 0x43, 0xc8, 0x26, 0x74, 0x49,
+	0xcc, 0x15, 0xc2, 0xfd, 0x43, 0x14, 0x15, 0x62, 0x41, 0xb8, 0x1b, 0x70, 0x88, 0x25, 0xe3, 0x6e,
+	0x0a, 0x21, 0xf5, 0x41, 0x52, 0x16, 0xeb, 0x91, 0xca, 0xdc, 0x4d, 0x08, 0xa7, 0xcc, 0x57, 0x6e,
+	0x3e, 0xe4, 0xa2, 0x76, 0xb5, 0x89, 0x5a, 0x37, 0xc7, 0x9d, 0x7d, 0xb7, 0xd7, 0x8a, 0xf4, 0x4a,
+	0x83, 0xa6, 0x7f, 0x38, 0xd3, 0x02, 0x33, 0x52, 0x94, 0x21, 0x64, 0x7d, 0xc8, 0x85, 0xf9, 0x11,
+	0xe1, 0x97, 0x87, 0x61, 0x52, 0xc2, 0xe9, 0x3b, 0x7a, 0xc1, 0x38, 0x55, 0x15, 0xa7, 0xbb, 0x1f,
+	0x67, 0x5a, 0xb0, 0x4a, 0x06, 0x7a, 0x8f, 0x3b, 0x27, 0x97, 0x53, 0x26, 0xc5, 0x35, 0x95, 0xe2,
+	0xe9, 0xf1, 0xa5, 0x9c, 0x33, 0xff, 0x80, 0xbb, 0xff, 0x59, 0x46, 0x19, 0x7b, 0x43, 0xd9, 0x3f,
+	0x3b, 0xb5, 0x84, 0x4b, 0xdd, 0x7e, 0xce, 0x42, 0xbf, 0xa4, 0xfd, 0xf5, 0xe3, 0xb7, 0x1f, 0x28,
+	0xc2, 0x19, 0xf3, 0xe7, 0x77, 0x7f, 0x7d, 0x6e, 0xa0, 0xd5, 0xcf, 0x2f, 0x8f, 0xcc, 0xa2, 0x8f,
+	0xd9, 0xae, 0x91, 0xba, 0x46, 0xbd, 0xde, 0xd7, 0x8d, 0x85, 0xd6, 0x1b, 0x0b, 0xfd, 0xd8, 0x58,
+	0xe8, 0xd3, 0xd6, 0xaa, 0xac, 0xb7, 0x56, 0xe5, 0xfb, 0xd6, 0xaa, 0xbc, 0x6d, 0x05, 0x54, 0xce,
+	0x17, 0x33, 0xdb, 0x63, 0x91, 0xa3, 0x7f, 0x7c, 0x1c, 0xc2, 0x4c, 0x38, 0xff, 0x42, 0x64, 0x9e,
+	0x10, 0x31, 0x33, 0x54, 0x39, 0x9f, 0xfc, 0x0e, 0x00, 0x00, 0xff, 0xff, 0x40, 0xfe, 0x10, 0x27,
+	0xf0, 0x03, 0x00, 0x00,
 }
 
 func (this *Params) Equal(that interface{}) bool {
@@ -100,6 +171,27 @@ func (this *Params) Equal(that interface{}) bool {
 	if that1 == nil {
 		return this == nil
 	} else if this == nil {
+		return false
+	}
+	if this.CredentialSchemaTrustDeposit != that1.CredentialSchemaTrustDeposit {
+		return false
+	}
+	if this.CredentialSchemaSchemaMaxSize != that1.CredentialSchemaSchemaMaxSize {
+		return false
+	}
+	if this.CredentialSchemaIssuerGrantorValidationValidityPeriodMaxDays != that1.CredentialSchemaIssuerGrantorValidationValidityPeriodMaxDays {
+		return false
+	}
+	if this.CredentialSchemaVerifierGrantorValidationValidityPeriodMaxDays != that1.CredentialSchemaVerifierGrantorValidationValidityPeriodMaxDays {
+		return false
+	}
+	if this.CredentialSchemaIssuerValidationValidityPeriodMaxDays != that1.CredentialSchemaIssuerValidationValidityPeriodMaxDays {
+		return false
+	}
+	if this.CredentialSchemaVerifierValidationValidityPeriodMaxDays != that1.CredentialSchemaVerifierValidationValidityPeriodMaxDays {
+		return false
+	}
+	if this.CredentialSchemaHolderValidationValidityPeriodMaxDays != that1.CredentialSchemaHolderValidationValidityPeriodMaxDays {
 		return false
 	}
 	return true
@@ -124,6 +216,41 @@ func (m *Params) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.CredentialSchemaHolderValidationValidityPeriodMaxDays != 0 {
+		i = encodeVarintParams(dAtA, i, uint64(m.CredentialSchemaHolderValidationValidityPeriodMaxDays))
+		i--
+		dAtA[i] = 0x38
+	}
+	if m.CredentialSchemaVerifierValidationValidityPeriodMaxDays != 0 {
+		i = encodeVarintParams(dAtA, i, uint64(m.CredentialSchemaVerifierValidationValidityPeriodMaxDays))
+		i--
+		dAtA[i] = 0x30
+	}
+	if m.CredentialSchemaIssuerValidationValidityPeriodMaxDays != 0 {
+		i = encodeVarintParams(dAtA, i, uint64(m.CredentialSchemaIssuerValidationValidityPeriodMaxDays))
+		i--
+		dAtA[i] = 0x28
+	}
+	if m.CredentialSchemaVerifierGrantorValidationValidityPeriodMaxDays != 0 {
+		i = encodeVarintParams(dAtA, i, uint64(m.CredentialSchemaVerifierGrantorValidationValidityPeriodMaxDays))
+		i--
+		dAtA[i] = 0x20
+	}
+	if m.CredentialSchemaIssuerGrantorValidationValidityPeriodMaxDays != 0 {
+		i = encodeVarintParams(dAtA, i, uint64(m.CredentialSchemaIssuerGrantorValidationValidityPeriodMaxDays))
+		i--
+		dAtA[i] = 0x18
+	}
+	if m.CredentialSchemaSchemaMaxSize != 0 {
+		i = encodeVarintParams(dAtA, i, uint64(m.CredentialSchemaSchemaMaxSize))
+		i--
+		dAtA[i] = 0x10
+	}
+	if m.CredentialSchemaTrustDeposit != 0 {
+		i = encodeVarintParams(dAtA, i, uint64(m.CredentialSchemaTrustDeposit))
+		i--
+		dAtA[i] = 0x8
+	}
 	return len(dAtA) - i, nil
 }
 
@@ -144,6 +271,27 @@ func (m *Params) Size() (n int) {
 	}
 	var l int
 	_ = l
+	if m.CredentialSchemaTrustDeposit != 0 {
+		n += 1 + sovParams(uint64(m.CredentialSchemaTrustDeposit))
+	}
+	if m.CredentialSchemaSchemaMaxSize != 0 {
+		n += 1 + sovParams(uint64(m.CredentialSchemaSchemaMaxSize))
+	}
+	if m.CredentialSchemaIssuerGrantorValidationValidityPeriodMaxDays != 0 {
+		n += 1 + sovParams(uint64(m.CredentialSchemaIssuerGrantorValidationValidityPeriodMaxDays))
+	}
+	if m.CredentialSchemaVerifierGrantorValidationValidityPeriodMaxDays != 0 {
+		n += 1 + sovParams(uint64(m.CredentialSchemaVerifierGrantorValidationValidityPeriodMaxDays))
+	}
+	if m.CredentialSchemaIssuerValidationValidityPeriodMaxDays != 0 {
+		n += 1 + sovParams(uint64(m.CredentialSchemaIssuerValidationValidityPeriodMaxDays))
+	}
+	if m.CredentialSchemaVerifierValidationValidityPeriodMaxDays != 0 {
+		n += 1 + sovParams(uint64(m.CredentialSchemaVerifierValidationValidityPeriodMaxDays))
+	}
+	if m.CredentialSchemaHolderValidationValidityPeriodMaxDays != 0 {
+		n += 1 + sovParams(uint64(m.CredentialSchemaHolderValidationValidityPeriodMaxDays))
+	}
 	return n
 }
 
@@ -182,6 +330,139 @@ func (m *Params) Unmarshal(dAtA []byte) error {
 			return fmt.Errorf("proto: Params: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CredentialSchemaTrustDeposit", wireType)
+			}
+			m.CredentialSchemaTrustDeposit = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowParams
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.CredentialSchemaTrustDeposit |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CredentialSchemaSchemaMaxSize", wireType)
+			}
+			m.CredentialSchemaSchemaMaxSize = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowParams
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.CredentialSchemaSchemaMaxSize |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CredentialSchemaIssuerGrantorValidationValidityPeriodMaxDays", wireType)
+			}
+			m.CredentialSchemaIssuerGrantorValidationValidityPeriodMaxDays = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowParams
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.CredentialSchemaIssuerGrantorValidationValidityPeriodMaxDays |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CredentialSchemaVerifierGrantorValidationValidityPeriodMaxDays", wireType)
+			}
+			m.CredentialSchemaVerifierGrantorValidationValidityPeriodMaxDays = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowParams
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.CredentialSchemaVerifierGrantorValidationValidityPeriodMaxDays |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 5:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CredentialSchemaIssuerValidationValidityPeriodMaxDays", wireType)
+			}
+			m.CredentialSchemaIssuerValidationValidityPeriodMaxDays = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowParams
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.CredentialSchemaIssuerValidationValidityPeriodMaxDays |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 6:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CredentialSchemaVerifierValidationValidityPeriodMaxDays", wireType)
+			}
+			m.CredentialSchemaVerifierValidationValidityPeriodMaxDays = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowParams
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.CredentialSchemaVerifierValidationValidityPeriodMaxDays |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 7:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CredentialSchemaHolderValidationValidityPeriodMaxDays", wireType)
+			}
+			m.CredentialSchemaHolderValidationValidityPeriodMaxDays = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowParams
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.CredentialSchemaHolderValidationValidityPeriodMaxDays |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
 		default:
 			iNdEx = preIndex
 			skippy, err := skipParams(dAtA[iNdEx:])

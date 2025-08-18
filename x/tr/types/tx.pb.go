@@ -6,10 +6,6 @@ package types
 import (
 	context "context"
 	fmt "fmt"
-	io "io"
-	math "math"
-	math_bits "math/bits"
-
 	_ "github.com/cosmos/cosmos-proto"
 	_ "github.com/cosmos/cosmos-sdk/types/msgservice"
 	_ "github.com/cosmos/cosmos-sdk/types/tx/amino"
@@ -19,6 +15,9 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	io "io"
+	math "math"
+	math_bits "math/bits"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -127,37 +126,623 @@ func (m *MsgUpdateParamsResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgUpdateParamsResponse proto.InternalMessageInfo
 
+// MsgCreateTrustRegistry defines the Msg/CreateTrustRegistry request type.
+type MsgCreateTrustRegistry struct {
+	Creator      string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
+	Did          string `protobuf:"bytes,2,opt,name=did,proto3" json:"did,omitempty"`
+	Aka          string `protobuf:"bytes,3,opt,name=aka,proto3" json:"aka,omitempty"`
+	Language     string `protobuf:"bytes,4,opt,name=language,proto3" json:"language,omitempty"`
+	DocUrl       string `protobuf:"bytes,5,opt,name=doc_url,json=docUrl,proto3" json:"doc_url,omitempty"`
+	DocDigestSri string `protobuf:"bytes,6,opt,name=doc_digest_sri,json=docDigestSri,proto3" json:"doc_digest_sri,omitempty"`
+}
+
+func (m *MsgCreateTrustRegistry) Reset()         { *m = MsgCreateTrustRegistry{} }
+func (m *MsgCreateTrustRegistry) String() string { return proto.CompactTextString(m) }
+func (*MsgCreateTrustRegistry) ProtoMessage()    {}
+func (*MsgCreateTrustRegistry) Descriptor() ([]byte, []int) {
+	return fileDescriptor_7e1b7399a439fd58, []int{2}
+}
+func (m *MsgCreateTrustRegistry) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgCreateTrustRegistry) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgCreateTrustRegistry.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgCreateTrustRegistry) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgCreateTrustRegistry.Merge(m, src)
+}
+func (m *MsgCreateTrustRegistry) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgCreateTrustRegistry) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgCreateTrustRegistry.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgCreateTrustRegistry proto.InternalMessageInfo
+
+func (m *MsgCreateTrustRegistry) GetCreator() string {
+	if m != nil {
+		return m.Creator
+	}
+	return ""
+}
+
+func (m *MsgCreateTrustRegistry) GetDid() string {
+	if m != nil {
+		return m.Did
+	}
+	return ""
+}
+
+func (m *MsgCreateTrustRegistry) GetAka() string {
+	if m != nil {
+		return m.Aka
+	}
+	return ""
+}
+
+func (m *MsgCreateTrustRegistry) GetLanguage() string {
+	if m != nil {
+		return m.Language
+	}
+	return ""
+}
+
+func (m *MsgCreateTrustRegistry) GetDocUrl() string {
+	if m != nil {
+		return m.DocUrl
+	}
+	return ""
+}
+
+func (m *MsgCreateTrustRegistry) GetDocDigestSri() string {
+	if m != nil {
+		return m.DocDigestSri
+	}
+	return ""
+}
+
+// MsgCreateTrustRegistryResponse defines the Msg/CreateTrustRegistry response type.
+type MsgCreateTrustRegistryResponse struct {
+}
+
+func (m *MsgCreateTrustRegistryResponse) Reset()         { *m = MsgCreateTrustRegistryResponse{} }
+func (m *MsgCreateTrustRegistryResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgCreateTrustRegistryResponse) ProtoMessage()    {}
+func (*MsgCreateTrustRegistryResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_7e1b7399a439fd58, []int{3}
+}
+func (m *MsgCreateTrustRegistryResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgCreateTrustRegistryResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgCreateTrustRegistryResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgCreateTrustRegistryResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgCreateTrustRegistryResponse.Merge(m, src)
+}
+func (m *MsgCreateTrustRegistryResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgCreateTrustRegistryResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgCreateTrustRegistryResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgCreateTrustRegistryResponse proto.InternalMessageInfo
+
+// MsgAddGovernanceFrameworkDocument defines the Msg/AddGovernanceFrameworkDocument request type.
+type MsgAddGovernanceFrameworkDocument struct {
+	Creator      string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
+	Id           uint64 `protobuf:"varint,2,opt,name=id,proto3" json:"id,omitempty"`
+	DocLanguage  string `protobuf:"bytes,3,opt,name=doc_language,json=docLanguage,proto3" json:"doc_language,omitempty"`
+	DocUrl       string `protobuf:"bytes,4,opt,name=doc_url,json=docUrl,proto3" json:"doc_url,omitempty"`
+	DocDigestSri string `protobuf:"bytes,5,opt,name=doc_digest_sri,json=docDigestSri,proto3" json:"doc_digest_sri,omitempty"`
+	Version      int32  `protobuf:"varint,6,opt,name=version,proto3" json:"version,omitempty"`
+}
+
+func (m *MsgAddGovernanceFrameworkDocument) Reset()         { *m = MsgAddGovernanceFrameworkDocument{} }
+func (m *MsgAddGovernanceFrameworkDocument) String() string { return proto.CompactTextString(m) }
+func (*MsgAddGovernanceFrameworkDocument) ProtoMessage()    {}
+func (*MsgAddGovernanceFrameworkDocument) Descriptor() ([]byte, []int) {
+	return fileDescriptor_7e1b7399a439fd58, []int{4}
+}
+func (m *MsgAddGovernanceFrameworkDocument) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgAddGovernanceFrameworkDocument) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgAddGovernanceFrameworkDocument.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgAddGovernanceFrameworkDocument) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgAddGovernanceFrameworkDocument.Merge(m, src)
+}
+func (m *MsgAddGovernanceFrameworkDocument) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgAddGovernanceFrameworkDocument) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgAddGovernanceFrameworkDocument.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgAddGovernanceFrameworkDocument proto.InternalMessageInfo
+
+func (m *MsgAddGovernanceFrameworkDocument) GetCreator() string {
+	if m != nil {
+		return m.Creator
+	}
+	return ""
+}
+
+func (m *MsgAddGovernanceFrameworkDocument) GetId() uint64 {
+	if m != nil {
+		return m.Id
+	}
+	return 0
+}
+
+func (m *MsgAddGovernanceFrameworkDocument) GetDocLanguage() string {
+	if m != nil {
+		return m.DocLanguage
+	}
+	return ""
+}
+
+func (m *MsgAddGovernanceFrameworkDocument) GetDocUrl() string {
+	if m != nil {
+		return m.DocUrl
+	}
+	return ""
+}
+
+func (m *MsgAddGovernanceFrameworkDocument) GetDocDigestSri() string {
+	if m != nil {
+		return m.DocDigestSri
+	}
+	return ""
+}
+
+func (m *MsgAddGovernanceFrameworkDocument) GetVersion() int32 {
+	if m != nil {
+		return m.Version
+	}
+	return 0
+}
+
+// MsgAddGovernanceFrameworkDocumentResponse defines the Msg/AddGovernanceFrameworkDocument response type.
+type MsgAddGovernanceFrameworkDocumentResponse struct {
+}
+
+func (m *MsgAddGovernanceFrameworkDocumentResponse) Reset() {
+	*m = MsgAddGovernanceFrameworkDocumentResponse{}
+}
+func (m *MsgAddGovernanceFrameworkDocumentResponse) String() string {
+	return proto.CompactTextString(m)
+}
+func (*MsgAddGovernanceFrameworkDocumentResponse) ProtoMessage() {}
+func (*MsgAddGovernanceFrameworkDocumentResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_7e1b7399a439fd58, []int{5}
+}
+func (m *MsgAddGovernanceFrameworkDocumentResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgAddGovernanceFrameworkDocumentResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgAddGovernanceFrameworkDocumentResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgAddGovernanceFrameworkDocumentResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgAddGovernanceFrameworkDocumentResponse.Merge(m, src)
+}
+func (m *MsgAddGovernanceFrameworkDocumentResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgAddGovernanceFrameworkDocumentResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgAddGovernanceFrameworkDocumentResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgAddGovernanceFrameworkDocumentResponse proto.InternalMessageInfo
+
+// MsgIncreaseActiveGovernanceFrameworkVersion defines the Msg/IncreaseActiveGovernanceFrameworkVersion request type.
+type MsgIncreaseActiveGovernanceFrameworkVersion struct {
+	Creator string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
+	Id      uint64 `protobuf:"varint,2,opt,name=id,proto3" json:"id,omitempty"`
+}
+
+func (m *MsgIncreaseActiveGovernanceFrameworkVersion) Reset() {
+	*m = MsgIncreaseActiveGovernanceFrameworkVersion{}
+}
+func (m *MsgIncreaseActiveGovernanceFrameworkVersion) String() string {
+	return proto.CompactTextString(m)
+}
+func (*MsgIncreaseActiveGovernanceFrameworkVersion) ProtoMessage() {}
+func (*MsgIncreaseActiveGovernanceFrameworkVersion) Descriptor() ([]byte, []int) {
+	return fileDescriptor_7e1b7399a439fd58, []int{6}
+}
+func (m *MsgIncreaseActiveGovernanceFrameworkVersion) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgIncreaseActiveGovernanceFrameworkVersion) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgIncreaseActiveGovernanceFrameworkVersion.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgIncreaseActiveGovernanceFrameworkVersion) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgIncreaseActiveGovernanceFrameworkVersion.Merge(m, src)
+}
+func (m *MsgIncreaseActiveGovernanceFrameworkVersion) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgIncreaseActiveGovernanceFrameworkVersion) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgIncreaseActiveGovernanceFrameworkVersion.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgIncreaseActiveGovernanceFrameworkVersion proto.InternalMessageInfo
+
+func (m *MsgIncreaseActiveGovernanceFrameworkVersion) GetCreator() string {
+	if m != nil {
+		return m.Creator
+	}
+	return ""
+}
+
+func (m *MsgIncreaseActiveGovernanceFrameworkVersion) GetId() uint64 {
+	if m != nil {
+		return m.Id
+	}
+	return 0
+}
+
+// MsgIncreaseActiveGovernanceFrameworkVersion defines the Msg/IncreaseActiveGovernanceFrameworkVersion response type.
+type MsgIncreaseActiveGovernanceFrameworkVersionResponse struct {
+}
+
+func (m *MsgIncreaseActiveGovernanceFrameworkVersionResponse) Reset() {
+	*m = MsgIncreaseActiveGovernanceFrameworkVersionResponse{}
+}
+func (m *MsgIncreaseActiveGovernanceFrameworkVersionResponse) String() string {
+	return proto.CompactTextString(m)
+}
+func (*MsgIncreaseActiveGovernanceFrameworkVersionResponse) ProtoMessage() {}
+func (*MsgIncreaseActiveGovernanceFrameworkVersionResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_7e1b7399a439fd58, []int{7}
+}
+func (m *MsgIncreaseActiveGovernanceFrameworkVersionResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgIncreaseActiveGovernanceFrameworkVersionResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgIncreaseActiveGovernanceFrameworkVersionResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgIncreaseActiveGovernanceFrameworkVersionResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgIncreaseActiveGovernanceFrameworkVersionResponse.Merge(m, src)
+}
+func (m *MsgIncreaseActiveGovernanceFrameworkVersionResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgIncreaseActiveGovernanceFrameworkVersionResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgIncreaseActiveGovernanceFrameworkVersionResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgIncreaseActiveGovernanceFrameworkVersionResponse proto.InternalMessageInfo
+
+// MsgUpdateTrustRegistry defines the Msg/UpdateTrustRegistry request type.
+type MsgUpdateTrustRegistry struct {
+	Creator string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
+	Id      uint64 `protobuf:"varint,2,opt,name=id,proto3" json:"id,omitempty"`
+	Did     string `protobuf:"bytes,3,opt,name=did,proto3" json:"did,omitempty"`
+	Aka     string `protobuf:"bytes,4,opt,name=aka,proto3" json:"aka,omitempty"`
+}
+
+func (m *MsgUpdateTrustRegistry) Reset()         { *m = MsgUpdateTrustRegistry{} }
+func (m *MsgUpdateTrustRegistry) String() string { return proto.CompactTextString(m) }
+func (*MsgUpdateTrustRegistry) ProtoMessage()    {}
+func (*MsgUpdateTrustRegistry) Descriptor() ([]byte, []int) {
+	return fileDescriptor_7e1b7399a439fd58, []int{8}
+}
+func (m *MsgUpdateTrustRegistry) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgUpdateTrustRegistry) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgUpdateTrustRegistry.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgUpdateTrustRegistry) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgUpdateTrustRegistry.Merge(m, src)
+}
+func (m *MsgUpdateTrustRegistry) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgUpdateTrustRegistry) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgUpdateTrustRegistry.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgUpdateTrustRegistry proto.InternalMessageInfo
+
+func (m *MsgUpdateTrustRegistry) GetCreator() string {
+	if m != nil {
+		return m.Creator
+	}
+	return ""
+}
+
+func (m *MsgUpdateTrustRegistry) GetId() uint64 {
+	if m != nil {
+		return m.Id
+	}
+	return 0
+}
+
+func (m *MsgUpdateTrustRegistry) GetDid() string {
+	if m != nil {
+		return m.Did
+	}
+	return ""
+}
+
+func (m *MsgUpdateTrustRegistry) GetAka() string {
+	if m != nil {
+		return m.Aka
+	}
+	return ""
+}
+
+// MsgUpdateTrustRegistryResponse defines the Msg/UpdateTrustRegistry response type.
+type MsgUpdateTrustRegistryResponse struct {
+}
+
+func (m *MsgUpdateTrustRegistryResponse) Reset()         { *m = MsgUpdateTrustRegistryResponse{} }
+func (m *MsgUpdateTrustRegistryResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgUpdateTrustRegistryResponse) ProtoMessage()    {}
+func (*MsgUpdateTrustRegistryResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_7e1b7399a439fd58, []int{9}
+}
+func (m *MsgUpdateTrustRegistryResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgUpdateTrustRegistryResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgUpdateTrustRegistryResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgUpdateTrustRegistryResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgUpdateTrustRegistryResponse.Merge(m, src)
+}
+func (m *MsgUpdateTrustRegistryResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgUpdateTrustRegistryResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgUpdateTrustRegistryResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgUpdateTrustRegistryResponse proto.InternalMessageInfo
+
+// MsgArchiveTrustRegistry defines the Msg/ArchiveTrustRegistry request type.
+type MsgArchiveTrustRegistry struct {
+	Creator string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
+	Id      uint64 `protobuf:"varint,2,opt,name=id,proto3" json:"id,omitempty"`
+	Archive bool   `protobuf:"varint,3,opt,name=archive,proto3" json:"archive,omitempty"`
+}
+
+func (m *MsgArchiveTrustRegistry) Reset()         { *m = MsgArchiveTrustRegistry{} }
+func (m *MsgArchiveTrustRegistry) String() string { return proto.CompactTextString(m) }
+func (*MsgArchiveTrustRegistry) ProtoMessage()    {}
+func (*MsgArchiveTrustRegistry) Descriptor() ([]byte, []int) {
+	return fileDescriptor_7e1b7399a439fd58, []int{10}
+}
+func (m *MsgArchiveTrustRegistry) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgArchiveTrustRegistry) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgArchiveTrustRegistry.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgArchiveTrustRegistry) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgArchiveTrustRegistry.Merge(m, src)
+}
+func (m *MsgArchiveTrustRegistry) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgArchiveTrustRegistry) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgArchiveTrustRegistry.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgArchiveTrustRegistry proto.InternalMessageInfo
+
+func (m *MsgArchiveTrustRegistry) GetCreator() string {
+	if m != nil {
+		return m.Creator
+	}
+	return ""
+}
+
+func (m *MsgArchiveTrustRegistry) GetId() uint64 {
+	if m != nil {
+		return m.Id
+	}
+	return 0
+}
+
+func (m *MsgArchiveTrustRegistry) GetArchive() bool {
+	if m != nil {
+		return m.Archive
+	}
+	return false
+}
+
+// MsgArchiveTrustRegistryResponse defines the Msg/ArchiveTrustRegistry response type.
+type MsgArchiveTrustRegistryResponse struct {
+}
+
+func (m *MsgArchiveTrustRegistryResponse) Reset()         { *m = MsgArchiveTrustRegistryResponse{} }
+func (m *MsgArchiveTrustRegistryResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgArchiveTrustRegistryResponse) ProtoMessage()    {}
+func (*MsgArchiveTrustRegistryResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_7e1b7399a439fd58, []int{11}
+}
+func (m *MsgArchiveTrustRegistryResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgArchiveTrustRegistryResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgArchiveTrustRegistryResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgArchiveTrustRegistryResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgArchiveTrustRegistryResponse.Merge(m, src)
+}
+func (m *MsgArchiveTrustRegistryResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgArchiveTrustRegistryResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgArchiveTrustRegistryResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgArchiveTrustRegistryResponse proto.InternalMessageInfo
+
 func init() {
 	proto.RegisterType((*MsgUpdateParams)(nil), "verana.tr.v1.MsgUpdateParams")
 	proto.RegisterType((*MsgUpdateParamsResponse)(nil), "verana.tr.v1.MsgUpdateParamsResponse")
+	proto.RegisterType((*MsgCreateTrustRegistry)(nil), "verana.tr.v1.MsgCreateTrustRegistry")
+	proto.RegisterType((*MsgCreateTrustRegistryResponse)(nil), "verana.tr.v1.MsgCreateTrustRegistryResponse")
+	proto.RegisterType((*MsgAddGovernanceFrameworkDocument)(nil), "verana.tr.v1.MsgAddGovernanceFrameworkDocument")
+	proto.RegisterType((*MsgAddGovernanceFrameworkDocumentResponse)(nil), "verana.tr.v1.MsgAddGovernanceFrameworkDocumentResponse")
+	proto.RegisterType((*MsgIncreaseActiveGovernanceFrameworkVersion)(nil), "verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion")
+	proto.RegisterType((*MsgIncreaseActiveGovernanceFrameworkVersionResponse)(nil), "verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersionResponse")
+	proto.RegisterType((*MsgUpdateTrustRegistry)(nil), "verana.tr.v1.MsgUpdateTrustRegistry")
+	proto.RegisterType((*MsgUpdateTrustRegistryResponse)(nil), "verana.tr.v1.MsgUpdateTrustRegistryResponse")
+	proto.RegisterType((*MsgArchiveTrustRegistry)(nil), "verana.tr.v1.MsgArchiveTrustRegistry")
+	proto.RegisterType((*MsgArchiveTrustRegistryResponse)(nil), "verana.tr.v1.MsgArchiveTrustRegistryResponse")
 }
 
 func init() { proto.RegisterFile("verana/tr/v1/tx.proto", fileDescriptor_7e1b7399a439fd58) }
 
 var fileDescriptor_7e1b7399a439fd58 = []byte{
-	// 341 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x12, 0x2d, 0x4b, 0x2d, 0x4a,
-	0xcc, 0x4b, 0xd4, 0x2f, 0x29, 0xd2, 0x2f, 0x33, 0xd4, 0x2f, 0xa9, 0xd0, 0x2b, 0x28, 0xca, 0x2f,
-	0xc9, 0x17, 0xe2, 0x81, 0x08, 0xeb, 0x95, 0x14, 0xe9, 0x95, 0x19, 0x4a, 0x09, 0x26, 0xe6, 0x66,
-	0xe6, 0xe5, 0xeb, 0x83, 0x49, 0x88, 0x02, 0x29, 0xf1, 0xe4, 0xfc, 0xe2, 0xdc, 0xfc, 0x62, 0xfd,
-	0xdc, 0xe2, 0x74, 0x90, 0xc6, 0xdc, 0xe2, 0x74, 0xa8, 0x84, 0x24, 0x44, 0x22, 0x1e, 0xcc, 0xd3,
-	0x87, 0x70, 0xa0, 0x52, 0x22, 0xe9, 0xf9, 0xe9, 0xf9, 0x10, 0x71, 0x10, 0x0b, 0xa6, 0x01, 0xc5,
-	0x05, 0x05, 0x89, 0x45, 0x89, 0xb9, 0x50, 0x0d, 0x4a, 0x9b, 0x18, 0xb9, 0xf8, 0x7d, 0x8b, 0xd3,
-	0x43, 0x0b, 0x52, 0x12, 0x4b, 0x52, 0x03, 0xc0, 0x32, 0x42, 0x66, 0x5c, 0x9c, 0x89, 0xa5, 0x25,
-	0x19, 0xf9, 0x45, 0x99, 0x25, 0x95, 0x12, 0x8c, 0x0a, 0x8c, 0x1a, 0x9c, 0x4e, 0x12, 0x97, 0xb6,
-	0xe8, 0x8a, 0x40, 0x6d, 0x72, 0x4c, 0x49, 0x29, 0x4a, 0x2d, 0x2e, 0x0e, 0x2e, 0x29, 0xca, 0xcc,
-	0x4b, 0x0f, 0x42, 0x28, 0x15, 0x32, 0xe7, 0x62, 0x83, 0x98, 0x2d, 0xc1, 0xa4, 0xc0, 0xa8, 0xc1,
-	0x6d, 0x24, 0xa2, 0x87, 0xec, 0x45, 0x3d, 0x88, 0xe9, 0x4e, 0x9c, 0x27, 0xee, 0xc9, 0x33, 0xac,
-	0x78, 0xbe, 0x41, 0x8b, 0x31, 0x08, 0xaa, 0xdc, 0x4a, 0xaf, 0xe9, 0xf9, 0x06, 0x2d, 0x84, 0x41,
-	0x5d, 0xcf, 0x37, 0x68, 0x49, 0x43, 0x9d, 0x5c, 0x01, 0x72, 0x34, 0x9a, 0x03, 0x95, 0x24, 0xb9,
-	0xc4, 0xd1, 0x84, 0x82, 0x52, 0x8b, 0x0b, 0xf2, 0xf3, 0x8a, 0x53, 0x8d, 0x92, 0xb8, 0x98, 0x7d,
-	0x8b, 0xd3, 0x85, 0x42, 0xb8, 0x78, 0x50, 0xbc, 0x24, 0x8b, 0xea, 0x14, 0x34, 0xdd, 0x52, 0xaa,
-	0x78, 0xa5, 0x61, 0x86, 0x4b, 0xb1, 0x36, 0x80, 0x9c, 0xed, 0xe4, 0x74, 0xe2, 0x91, 0x1c, 0xe3,
-	0x85, 0x47, 0x72, 0x8c, 0x0f, 0x1e, 0xc9, 0x31, 0x4e, 0x78, 0x2c, 0xc7, 0x70, 0xe1, 0xb1, 0x1c,
-	0xc3, 0x8d, 0xc7, 0x72, 0x0c, 0x51, 0x1a, 0xe9, 0x99, 0x25, 0x19, 0xa5, 0x49, 0x7a, 0xc9, 0xf9,
-	0xb9, 0xfa, 0x10, 0x13, 0x75, 0x73, 0x12, 0x93, 0x8a, 0xf5, 0x91, 0x3d, 0x53, 0x52, 0x59, 0x90,
-	0x5a, 0x9c, 0xc4, 0x06, 0x0e, 0x7e, 0x63, 0x40, 0x00, 0x00, 0x00, 0xff, 0xff, 0xf5, 0x32, 0xea,
-	0x68, 0x1d, 0x02, 0x00, 0x00,
+	// 760 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x56, 0x4f, 0x4f, 0xdb, 0x4a,
+	0x10, 0x8f, 0xc9, 0x3f, 0xb2, 0x44, 0xbc, 0xf7, 0xfc, 0xf2, 0xc0, 0xf8, 0xa9, 0x06, 0x22, 0x2a,
+	0xa5, 0x50, 0x62, 0x01, 0x6a, 0x51, 0xb9, 0x25, 0x45, 0xad, 0x2a, 0x35, 0x52, 0x65, 0xa0, 0x87,
+	0x5e, 0xa2, 0xc5, 0x5e, 0x2d, 0x16, 0xb1, 0x37, 0xda, 0xdd, 0xa4, 0x70, 0x6a, 0x55, 0xa9, 0x17,
+	0x4e, 0x3d, 0xf4, 0x43, 0x70, 0x44, 0x55, 0x3f, 0x04, 0x47, 0xd4, 0x53, 0x4f, 0xb4, 0x82, 0x03,
+	0xe7, 0x7e, 0x83, 0xca, 0xeb, 0x3f, 0x80, 0x63, 0x48, 0xa0, 0xed, 0x25, 0xf2, 0xce, 0xcc, 0x6f,
+	0xe6, 0x37, 0xb3, 0x33, 0xb3, 0x01, 0xff, 0x75, 0x11, 0x85, 0x2e, 0xd4, 0x39, 0xd5, 0xbb, 0x0b,
+	0x3a, 0xdf, 0xa9, 0xb6, 0x29, 0xe1, 0x44, 0x2e, 0xfa, 0xe2, 0x2a, 0xa7, 0xd5, 0xee, 0x82, 0xfa,
+	0x0f, 0x74, 0x6c, 0x97, 0xe8, 0xe2, 0xd7, 0x37, 0x50, 0xc7, 0x4d, 0xc2, 0x1c, 0xc2, 0x74, 0x87,
+	0x61, 0x0f, 0xe8, 0x30, 0x1c, 0x28, 0x26, 0x7c, 0x45, 0x53, 0x9c, 0x74, 0xff, 0x10, 0xa8, 0x4a,
+	0x98, 0x60, 0xe2, 0xcb, 0xbd, 0xaf, 0x10, 0x70, 0x89, 0x41, 0x1b, 0x52, 0xe8, 0x04, 0x80, 0xf2,
+	0x27, 0x09, 0xfc, 0xd5, 0x60, 0x78, 0xa3, 0x6d, 0x41, 0x8e, 0x5e, 0x08, 0x8d, 0xfc, 0x10, 0x14,
+	0x60, 0x87, 0x6f, 0x11, 0x6a, 0xf3, 0x5d, 0x45, 0x9a, 0x92, 0x2a, 0x85, 0xba, 0xf2, 0xe5, 0xf3,
+	0x7c, 0x29, 0x88, 0x54, 0xb3, 0x2c, 0x8a, 0x18, 0x5b, 0xe3, 0xd4, 0x76, 0xb1, 0x71, 0x6e, 0x2a,
+	0x2f, 0x83, 0x9c, 0xef, 0x5b, 0x19, 0x9a, 0x92, 0x2a, 0x23, 0x8b, 0xa5, 0xea, 0xc5, 0x14, 0xab,
+	0xbe, 0xf7, 0x7a, 0xe1, 0xf0, 0x78, 0x32, 0xb5, 0x7f, 0x76, 0x30, 0x2b, 0x19, 0x81, 0xf9, 0x4a,
+	0xf5, 0xdd, 0xd9, 0xc1, 0xec, 0xb9, 0xa3, 0xbd, 0xb3, 0x83, 0xd9, 0xff, 0x03, 0xca, 0x3b, 0x1e,
+	0xe9, 0x18, 0xc1, 0xf2, 0x04, 0x18, 0x8f, 0x89, 0x0c, 0xc4, 0xda, 0xc4, 0x65, 0xa8, 0xfc, 0x4d,
+	0x02, 0x63, 0x0d, 0x86, 0x1f, 0x53, 0x04, 0x39, 0x5a, 0xa7, 0x1d, 0xc6, 0x0d, 0x84, 0x6d, 0xc6,
+	0xe9, 0xae, 0xbc, 0x08, 0xf2, 0xa6, 0x27, 0x26, 0xb4, 0x6f, 0x52, 0xa1, 0xa1, 0xfc, 0x37, 0x48,
+	0x5b, 0xb6, 0x25, 0xf2, 0x29, 0x18, 0xde, 0xa7, 0x3c, 0x06, 0xd2, 0x70, 0x1b, 0x2a, 0x69, 0xe1,
+	0x21, 0x73, 0x78, 0x3c, 0x29, 0x19, 0x9e, 0x40, 0x56, 0xc1, 0x70, 0x0b, 0xba, 0xb8, 0x03, 0x31,
+	0x52, 0x32, 0xc2, 0x3c, 0x3a, 0xcb, 0xe3, 0x20, 0x6f, 0x11, 0xb3, 0xd9, 0xa1, 0x2d, 0x25, 0x2b,
+	0x54, 0x39, 0x8b, 0x98, 0x1b, 0xb4, 0x25, 0xcf, 0x80, 0x51, 0x4f, 0x61, 0xd9, 0x18, 0x31, 0xde,
+	0x64, 0xd4, 0x56, 0x72, 0x42, 0x5f, 0xb4, 0x88, 0xb9, 0x2a, 0x84, 0x6b, 0xd4, 0x5e, 0x29, 0x7a,
+	0xe5, 0x09, 0x29, 0x95, 0xa7, 0x80, 0x96, 0x9c, 0x60, 0x54, 0x83, 0x1f, 0x12, 0x98, 0x6e, 0x30,
+	0x5c, 0xb3, 0xac, 0xa7, 0xa4, 0x8b, 0xa8, 0x0b, 0x5d, 0x13, 0x3d, 0xa1, 0xd0, 0x41, 0xaf, 0x09,
+	0xdd, 0x5e, 0x25, 0x66, 0xc7, 0x41, 0x2e, 0xbf, 0x55, 0x39, 0x46, 0xc1, 0x50, 0x50, 0x8d, 0x8c,
+	0x31, 0x64, 0x5b, 0xf2, 0x34, 0xf0, 0x98, 0x36, 0xa3, 0xc4, 0x45, 0x55, 0x8c, 0x11, 0x8b, 0x98,
+	0xcf, 0x13, 0x72, 0xcf, 0xf4, 0xc9, 0x3d, 0xdb, 0x9b, 0xbb, 0xac, 0x80, 0x7c, 0x17, 0x51, 0x66,
+	0x13, 0x57, 0x94, 0x26, 0x6b, 0x84, 0xc7, 0x58, 0x55, 0xe6, 0xc0, 0xbd, 0xbe, 0x29, 0x47, 0x05,
+	0x7a, 0x03, 0xe6, 0x1a, 0x0c, 0x3f, 0x73, 0x3d, 0x30, 0x43, 0x35, 0x93, 0xdb, 0x5d, 0x94, 0x80,
+	0x7b, 0xe9, 0x47, 0xfa, 0x1d, 0x95, 0x8a, 0xb1, 0x7d, 0x00, 0x96, 0x6e, 0x40, 0x20, 0xe2, 0xfd,
+	0xd1, 0x6f, 0x6e, 0xbf, 0xf1, 0x7f, 0xbd, 0xb9, 0xe3, 0xb7, 0x19, 0x34, 0x7b, 0xba, 0xa7, 0xd9,
+	0x33, 0xb1, 0x66, 0x4f, 0xec, 0xc8, 0x04, 0x56, 0x11, 0xf1, 0xf7, 0x92, 0x98, 0xd8, 0x1a, 0x35,
+	0xb7, 0xec, 0xee, 0x1f, 0x60, 0xae, 0x80, 0x3c, 0xf4, 0x7d, 0x0b, 0xf6, 0xc3, 0x46, 0x78, 0x8c,
+	0x31, 0x9d, 0x06, 0x93, 0x57, 0xd0, 0x08, 0xa9, 0x2e, 0x1e, 0x67, 0x41, 0xba, 0xc1, 0xb0, 0xbc,
+	0x0e, 0x8a, 0x97, 0x96, 0xe2, 0x9d, 0xcb, 0xcb, 0x2c, 0xb6, 0x7f, 0xd4, 0xbb, 0xd7, 0xaa, 0x43,
+	0xef, 0xb2, 0x0d, 0xfe, 0x4d, 0x5a, 0x4d, 0x33, 0x3d, 0xe8, 0x04, 0x2b, 0xf5, 0xfe, 0x20, 0x56,
+	0x51, 0xa8, 0x3d, 0x09, 0x68, 0x7d, 0x56, 0x80, 0xde, 0xe3, 0xf0, 0x7a, 0x80, 0xba, 0x7c, 0x43,
+	0x40, 0x44, 0x66, 0x5f, 0x02, 0x95, 0x81, 0xe7, 0xed, 0x51, 0x4f, 0x94, 0x41, 0xa1, 0x6a, 0xed,
+	0xd6, 0xd0, 0x8b, 0x57, 0x94, 0x34, 0x60, 0x33, 0x57, 0x5c, 0x70, 0xbf, 0x2b, 0xba, 0x66, 0x2c,
+	0xe4, 0x16, 0x28, 0x25, 0x8e, 0x44, 0x6f, 0x33, 0x25, 0x99, 0xa9, 0xf3, 0x03, 0x99, 0x85, 0xd1,
+	0xd4, 0xec, 0x5b, 0xef, 0xd1, 0xad, 0xd7, 0x0f, 0x4f, 0x34, 0xe9, 0xe8, 0x44, 0x93, 0xbe, 0x9f,
+	0x68, 0xd2, 0x87, 0x53, 0x2d, 0x75, 0x74, 0xaa, 0xa5, 0xbe, 0x9e, 0x6a, 0xa9, 0x57, 0x15, 0x6c,
+	0xf3, 0xad, 0xce, 0x66, 0xd5, 0x24, 0x8e, 0xee, 0x7b, 0x9e, 0x6f, 0xc1, 0x4d, 0xa6, 0x5f, 0x7c,
+	0x8a, 0xf9, 0x6e, 0x1b, 0xb1, 0xcd, 0x9c, 0xf8, 0xf3, 0xb0, 0xf4, 0x33, 0x00, 0x00, 0xff, 0xff,
+	0x59, 0x72, 0x89, 0xaa, 0xdb, 0x08, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -175,6 +760,12 @@ type MsgClient interface {
 	// UpdateParams defines a (governance) operation for updating the module
 	// parameters. The authority defaults to the x/gov module account.
 	UpdateParams(ctx context.Context, in *MsgUpdateParams, opts ...grpc.CallOption) (*MsgUpdateParamsResponse, error)
+	// CreateTrustRegistry creates a new trust registry.
+	CreateTrustRegistry(ctx context.Context, in *MsgCreateTrustRegistry, opts ...grpc.CallOption) (*MsgCreateTrustRegistryResponse, error)
+	AddGovernanceFrameworkDocument(ctx context.Context, in *MsgAddGovernanceFrameworkDocument, opts ...grpc.CallOption) (*MsgAddGovernanceFrameworkDocumentResponse, error)
+	IncreaseActiveGovernanceFrameworkVersion(ctx context.Context, in *MsgIncreaseActiveGovernanceFrameworkVersion, opts ...grpc.CallOption) (*MsgIncreaseActiveGovernanceFrameworkVersionResponse, error)
+	UpdateTrustRegistry(ctx context.Context, in *MsgUpdateTrustRegistry, opts ...grpc.CallOption) (*MsgUpdateTrustRegistryResponse, error)
+	ArchiveTrustRegistry(ctx context.Context, in *MsgArchiveTrustRegistry, opts ...grpc.CallOption) (*MsgArchiveTrustRegistryResponse, error)
 }
 
 type msgClient struct {
@@ -194,11 +785,62 @@ func (c *msgClient) UpdateParams(ctx context.Context, in *MsgUpdateParams, opts 
 	return out, nil
 }
 
+func (c *msgClient) CreateTrustRegistry(ctx context.Context, in *MsgCreateTrustRegistry, opts ...grpc.CallOption) (*MsgCreateTrustRegistryResponse, error) {
+	out := new(MsgCreateTrustRegistryResponse)
+	err := c.cc.Invoke(ctx, "/verana.tr.v1.Msg/CreateTrustRegistry", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *msgClient) AddGovernanceFrameworkDocument(ctx context.Context, in *MsgAddGovernanceFrameworkDocument, opts ...grpc.CallOption) (*MsgAddGovernanceFrameworkDocumentResponse, error) {
+	out := new(MsgAddGovernanceFrameworkDocumentResponse)
+	err := c.cc.Invoke(ctx, "/verana.tr.v1.Msg/AddGovernanceFrameworkDocument", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *msgClient) IncreaseActiveGovernanceFrameworkVersion(ctx context.Context, in *MsgIncreaseActiveGovernanceFrameworkVersion, opts ...grpc.CallOption) (*MsgIncreaseActiveGovernanceFrameworkVersionResponse, error) {
+	out := new(MsgIncreaseActiveGovernanceFrameworkVersionResponse)
+	err := c.cc.Invoke(ctx, "/verana.tr.v1.Msg/IncreaseActiveGovernanceFrameworkVersion", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *msgClient) UpdateTrustRegistry(ctx context.Context, in *MsgUpdateTrustRegistry, opts ...grpc.CallOption) (*MsgUpdateTrustRegistryResponse, error) {
+	out := new(MsgUpdateTrustRegistryResponse)
+	err := c.cc.Invoke(ctx, "/verana.tr.v1.Msg/UpdateTrustRegistry", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *msgClient) ArchiveTrustRegistry(ctx context.Context, in *MsgArchiveTrustRegistry, opts ...grpc.CallOption) (*MsgArchiveTrustRegistryResponse, error) {
+	out := new(MsgArchiveTrustRegistryResponse)
+	err := c.cc.Invoke(ctx, "/verana.tr.v1.Msg/ArchiveTrustRegistry", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MsgServer is the server API for Msg service.
 type MsgServer interface {
 	// UpdateParams defines a (governance) operation for updating the module
 	// parameters. The authority defaults to the x/gov module account.
 	UpdateParams(context.Context, *MsgUpdateParams) (*MsgUpdateParamsResponse, error)
+	// CreateTrustRegistry creates a new trust registry.
+	CreateTrustRegistry(context.Context, *MsgCreateTrustRegistry) (*MsgCreateTrustRegistryResponse, error)
+	AddGovernanceFrameworkDocument(context.Context, *MsgAddGovernanceFrameworkDocument) (*MsgAddGovernanceFrameworkDocumentResponse, error)
+	IncreaseActiveGovernanceFrameworkVersion(context.Context, *MsgIncreaseActiveGovernanceFrameworkVersion) (*MsgIncreaseActiveGovernanceFrameworkVersionResponse, error)
+	UpdateTrustRegistry(context.Context, *MsgUpdateTrustRegistry) (*MsgUpdateTrustRegistryResponse, error)
+	ArchiveTrustRegistry(context.Context, *MsgArchiveTrustRegistry) (*MsgArchiveTrustRegistryResponse, error)
 }
 
 // UnimplementedMsgServer can be embedded to have forward compatible implementations.
@@ -207,6 +849,21 @@ type UnimplementedMsgServer struct {
 
 func (*UnimplementedMsgServer) UpdateParams(ctx context.Context, req *MsgUpdateParams) (*MsgUpdateParamsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateParams not implemented")
+}
+func (*UnimplementedMsgServer) CreateTrustRegistry(ctx context.Context, req *MsgCreateTrustRegistry) (*MsgCreateTrustRegistryResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateTrustRegistry not implemented")
+}
+func (*UnimplementedMsgServer) AddGovernanceFrameworkDocument(ctx context.Context, req *MsgAddGovernanceFrameworkDocument) (*MsgAddGovernanceFrameworkDocumentResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddGovernanceFrameworkDocument not implemented")
+}
+func (*UnimplementedMsgServer) IncreaseActiveGovernanceFrameworkVersion(ctx context.Context, req *MsgIncreaseActiveGovernanceFrameworkVersion) (*MsgIncreaseActiveGovernanceFrameworkVersionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method IncreaseActiveGovernanceFrameworkVersion not implemented")
+}
+func (*UnimplementedMsgServer) UpdateTrustRegistry(ctx context.Context, req *MsgUpdateTrustRegistry) (*MsgUpdateTrustRegistryResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateTrustRegistry not implemented")
+}
+func (*UnimplementedMsgServer) ArchiveTrustRegistry(ctx context.Context, req *MsgArchiveTrustRegistry) (*MsgArchiveTrustRegistryResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ArchiveTrustRegistry not implemented")
 }
 
 func RegisterMsgServer(s grpc1.Server, srv MsgServer) {
@@ -231,6 +888,96 @@ func _Msg_UpdateParams_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Msg_CreateTrustRegistry_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgCreateTrustRegistry)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).CreateTrustRegistry(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/verana.tr.v1.Msg/CreateTrustRegistry",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).CreateTrustRegistry(ctx, req.(*MsgCreateTrustRegistry))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Msg_AddGovernanceFrameworkDocument_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgAddGovernanceFrameworkDocument)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).AddGovernanceFrameworkDocument(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/verana.tr.v1.Msg/AddGovernanceFrameworkDocument",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).AddGovernanceFrameworkDocument(ctx, req.(*MsgAddGovernanceFrameworkDocument))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Msg_IncreaseActiveGovernanceFrameworkVersion_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgIncreaseActiveGovernanceFrameworkVersion)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).IncreaseActiveGovernanceFrameworkVersion(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/verana.tr.v1.Msg/IncreaseActiveGovernanceFrameworkVersion",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).IncreaseActiveGovernanceFrameworkVersion(ctx, req.(*MsgIncreaseActiveGovernanceFrameworkVersion))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Msg_UpdateTrustRegistry_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgUpdateTrustRegistry)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).UpdateTrustRegistry(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/verana.tr.v1.Msg/UpdateTrustRegistry",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).UpdateTrustRegistry(ctx, req.(*MsgUpdateTrustRegistry))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Msg_ArchiveTrustRegistry_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgArchiveTrustRegistry)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).ArchiveTrustRegistry(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/verana.tr.v1.Msg/ArchiveTrustRegistry",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).ArchiveTrustRegistry(ctx, req.(*MsgArchiveTrustRegistry))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var Msg_serviceDesc = _Msg_serviceDesc
 var _Msg_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "verana.tr.v1.Msg",
@@ -239,6 +986,26 @@ var _Msg_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateParams",
 			Handler:    _Msg_UpdateParams_Handler,
+		},
+		{
+			MethodName: "CreateTrustRegistry",
+			Handler:    _Msg_CreateTrustRegistry_Handler,
+		},
+		{
+			MethodName: "AddGovernanceFrameworkDocument",
+			Handler:    _Msg_AddGovernanceFrameworkDocument_Handler,
+		},
+		{
+			MethodName: "IncreaseActiveGovernanceFrameworkVersion",
+			Handler:    _Msg_IncreaseActiveGovernanceFrameworkVersion_Handler,
+		},
+		{
+			MethodName: "UpdateTrustRegistry",
+			Handler:    _Msg_UpdateTrustRegistry_Handler,
+		},
+		{
+			MethodName: "ArchiveTrustRegistry",
+			Handler:    _Msg_ArchiveTrustRegistry_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -308,6 +1075,376 @@ func (m *MsgUpdateParamsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error)
 	return len(dAtA) - i, nil
 }
 
+func (m *MsgCreateTrustRegistry) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgCreateTrustRegistry) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgCreateTrustRegistry) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.DocDigestSri) > 0 {
+		i -= len(m.DocDigestSri)
+		copy(dAtA[i:], m.DocDigestSri)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.DocDigestSri)))
+		i--
+		dAtA[i] = 0x32
+	}
+	if len(m.DocUrl) > 0 {
+		i -= len(m.DocUrl)
+		copy(dAtA[i:], m.DocUrl)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.DocUrl)))
+		i--
+		dAtA[i] = 0x2a
+	}
+	if len(m.Language) > 0 {
+		i -= len(m.Language)
+		copy(dAtA[i:], m.Language)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Language)))
+		i--
+		dAtA[i] = 0x22
+	}
+	if len(m.Aka) > 0 {
+		i -= len(m.Aka)
+		copy(dAtA[i:], m.Aka)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Aka)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.Did) > 0 {
+		i -= len(m.Did)
+		copy(dAtA[i:], m.Did)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Did)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Creator) > 0 {
+		i -= len(m.Creator)
+		copy(dAtA[i:], m.Creator)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Creator)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgCreateTrustRegistryResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgCreateTrustRegistryResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgCreateTrustRegistryResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgAddGovernanceFrameworkDocument) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgAddGovernanceFrameworkDocument) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgAddGovernanceFrameworkDocument) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Version != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.Version))
+		i--
+		dAtA[i] = 0x30
+	}
+	if len(m.DocDigestSri) > 0 {
+		i -= len(m.DocDigestSri)
+		copy(dAtA[i:], m.DocDigestSri)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.DocDigestSri)))
+		i--
+		dAtA[i] = 0x2a
+	}
+	if len(m.DocUrl) > 0 {
+		i -= len(m.DocUrl)
+		copy(dAtA[i:], m.DocUrl)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.DocUrl)))
+		i--
+		dAtA[i] = 0x22
+	}
+	if len(m.DocLanguage) > 0 {
+		i -= len(m.DocLanguage)
+		copy(dAtA[i:], m.DocLanguage)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.DocLanguage)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if m.Id != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.Id))
+		i--
+		dAtA[i] = 0x10
+	}
+	if len(m.Creator) > 0 {
+		i -= len(m.Creator)
+		copy(dAtA[i:], m.Creator)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Creator)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgAddGovernanceFrameworkDocumentResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgAddGovernanceFrameworkDocumentResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgAddGovernanceFrameworkDocumentResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgIncreaseActiveGovernanceFrameworkVersion) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgIncreaseActiveGovernanceFrameworkVersion) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgIncreaseActiveGovernanceFrameworkVersion) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Id != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.Id))
+		i--
+		dAtA[i] = 0x10
+	}
+	if len(m.Creator) > 0 {
+		i -= len(m.Creator)
+		copy(dAtA[i:], m.Creator)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Creator)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgIncreaseActiveGovernanceFrameworkVersionResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgIncreaseActiveGovernanceFrameworkVersionResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgIncreaseActiveGovernanceFrameworkVersionResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgUpdateTrustRegistry) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgUpdateTrustRegistry) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgUpdateTrustRegistry) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Aka) > 0 {
+		i -= len(m.Aka)
+		copy(dAtA[i:], m.Aka)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Aka)))
+		i--
+		dAtA[i] = 0x22
+	}
+	if len(m.Did) > 0 {
+		i -= len(m.Did)
+		copy(dAtA[i:], m.Did)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Did)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if m.Id != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.Id))
+		i--
+		dAtA[i] = 0x10
+	}
+	if len(m.Creator) > 0 {
+		i -= len(m.Creator)
+		copy(dAtA[i:], m.Creator)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Creator)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgUpdateTrustRegistryResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgUpdateTrustRegistryResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgUpdateTrustRegistryResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgArchiveTrustRegistry) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgArchiveTrustRegistry) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgArchiveTrustRegistry) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Archive {
+		i--
+		if m.Archive {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x18
+	}
+	if m.Id != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.Id))
+		i--
+		dAtA[i] = 0x10
+	}
+	if len(m.Creator) > 0 {
+		i -= len(m.Creator)
+		copy(dAtA[i:], m.Creator)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Creator)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgArchiveTrustRegistryResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgArchiveTrustRegistryResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgArchiveTrustRegistryResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintTx(dAtA []byte, offset int, v uint64) int {
 	offset -= sovTx(v)
 	base := offset
@@ -335,6 +1472,174 @@ func (m *MsgUpdateParams) Size() (n int) {
 }
 
 func (m *MsgUpdateParamsResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
+func (m *MsgCreateTrustRegistry) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Creator)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.Did)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.Aka)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.Language)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.DocUrl)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.DocDigestSri)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	return n
+}
+
+func (m *MsgCreateTrustRegistryResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
+func (m *MsgAddGovernanceFrameworkDocument) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Creator)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	if m.Id != 0 {
+		n += 1 + sovTx(uint64(m.Id))
+	}
+	l = len(m.DocLanguage)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.DocUrl)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.DocDigestSri)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	if m.Version != 0 {
+		n += 1 + sovTx(uint64(m.Version))
+	}
+	return n
+}
+
+func (m *MsgAddGovernanceFrameworkDocumentResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
+func (m *MsgIncreaseActiveGovernanceFrameworkVersion) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Creator)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	if m.Id != 0 {
+		n += 1 + sovTx(uint64(m.Id))
+	}
+	return n
+}
+
+func (m *MsgIncreaseActiveGovernanceFrameworkVersionResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
+func (m *MsgUpdateTrustRegistry) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Creator)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	if m.Id != 0 {
+		n += 1 + sovTx(uint64(m.Id))
+	}
+	l = len(m.Did)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.Aka)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	return n
+}
+
+func (m *MsgUpdateTrustRegistryResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
+func (m *MsgArchiveTrustRegistry) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Creator)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	if m.Id != 0 {
+		n += 1 + sovTx(uint64(m.Id))
+	}
+	if m.Archive {
+		n += 2
+	}
+	return n
+}
+
+func (m *MsgArchiveTrustRegistryResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -491,6 +1796,1101 @@ func (m *MsgUpdateParamsResponse) Unmarshal(dAtA []byte) error {
 		}
 		if fieldNum <= 0 {
 			return fmt.Errorf("proto: MsgUpdateParamsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgCreateTrustRegistry) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgCreateTrustRegistry: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgCreateTrustRegistry: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Creator", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Creator = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Did", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Did = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Aka", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Aka = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Language", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Language = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field DocUrl", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.DocUrl = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 6:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field DocDigestSri", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.DocDigestSri = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgCreateTrustRegistryResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgCreateTrustRegistryResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgCreateTrustRegistryResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgAddGovernanceFrameworkDocument) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgAddGovernanceFrameworkDocument: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgAddGovernanceFrameworkDocument: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Creator", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Creator = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Id", wireType)
+			}
+			m.Id = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Id |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field DocLanguage", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.DocLanguage = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field DocUrl", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.DocUrl = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field DocDigestSri", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.DocDigestSri = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 6:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Version", wireType)
+			}
+			m.Version = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Version |= int32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgAddGovernanceFrameworkDocumentResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgAddGovernanceFrameworkDocumentResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgAddGovernanceFrameworkDocumentResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgIncreaseActiveGovernanceFrameworkVersion) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgIncreaseActiveGovernanceFrameworkVersion: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgIncreaseActiveGovernanceFrameworkVersion: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Creator", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Creator = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Id", wireType)
+			}
+			m.Id = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Id |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgIncreaseActiveGovernanceFrameworkVersionResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgIncreaseActiveGovernanceFrameworkVersionResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgIncreaseActiveGovernanceFrameworkVersionResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgUpdateTrustRegistry) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgUpdateTrustRegistry: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgUpdateTrustRegistry: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Creator", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Creator = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Id", wireType)
+			}
+			m.Id = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Id |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Did", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Did = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Aka", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Aka = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgUpdateTrustRegistryResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgUpdateTrustRegistryResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgUpdateTrustRegistryResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgArchiveTrustRegistry) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgArchiveTrustRegistry: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgArchiveTrustRegistry: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Creator", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Creator = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Id", wireType)
+			}
+			m.Id = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Id |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Archive", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.Archive = bool(v != 0)
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgArchiveTrustRegistryResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgArchiveTrustRegistryResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgArchiveTrustRegistryResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		default:

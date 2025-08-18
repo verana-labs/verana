@@ -10,4 +10,13 @@ option go_package = "github.com/verana-labs/verana/x/dd/types";
 message Params {
   option (amino.name) = "verana/x/dd/Params";
   option (gogoproto.equal) = true;
+
+  uint64 did_directory_trust_deposit = 1 [
+    (gogoproto.moretags) = "yaml:\"did_directory_trust_deposit\"",
+    (amino.dont_omitempty) = true
+  ];
+  uint64 did_directory_grace_period = 2 [
+    (gogoproto.moretags) = "yaml:\"did_directory_grace_period\"",
+    (amino.dont_omitempty) = true
+  ];
 }

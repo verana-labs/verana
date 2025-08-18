@@ -6,6 +6,7 @@ import "cosmos/base/query/v1beta1/pagination.proto";
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
 import "verana/td/v1/params.proto";
+import "verana/td/v1/types.proto";
 
 option go_package = "github.com/verana-labs/verana/x/td/types";
 
@@ -13,7 +14,10 @@ option go_package = "github.com/verana-labs/verana/x/td/types";
 service Query {
   // Parameters queries the parameters of the module.
   rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
-    option (google.api.http).get = "/verana-labs/verana/td/v1/params";
+    option (google.api.http).get = "/verana/td/v1/params";
+  }
+  rpc GetTrustDeposit(QueryGetTrustDepositRequest) returns (QueryGetTrustDepositResponse) {
+    option (google.api.http).get = "/verana/td/v1/get/{account}";
   }
 }
 
@@ -27,4 +31,14 @@ message QueryParamsResponse {
     (gogoproto.nullable) = false,
     (amino.dont_omitempty) = true
   ];
+}
+
+// QueryGetTrustDepositRequest is request type for the GetTrustDeposit RPC method
+message QueryGetTrustDepositRequest {
+  string account = 1;
+}
+
+// QueryGetTrustDepositResponse is response type for the GetTrustDeposit RPC method
+message QueryGetTrustDepositResponse {
+  TrustDeposit trust_deposit = 1 [(gogoproto.nullable) = false];
 }

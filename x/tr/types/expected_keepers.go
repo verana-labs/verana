@@ -25,3 +25,8 @@ type ParamSubspace interface {
 	Get(context.Context, []byte, interface{})
 	Set(context.Context, []byte, interface{})
 }
+
+// TrustDepositKeeper defines the expected interface for the Trust Deposit module.
+type TrustDepositKeeper interface {
+	AdjustTrustDeposit(ctx sdk.Context, account string, augend int64) error
+}
