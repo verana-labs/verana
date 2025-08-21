@@ -46,7 +46,7 @@ func TestDeterministicGenesis(t *testing.T) {
 	// Create test permissions in random order
 	perm2 := types.Permission{
 		Id:              2,
-		Type:            types.PermissionType_PERMISSION_TYPE_ISSUER,
+		Type:            types.PermissionType_ISSUER,
 		Did:             "did:example:67890",
 		Grantee:         creatorAddr,
 		Created:         &nowTime,
@@ -61,7 +61,7 @@ func TestDeterministicGenesis(t *testing.T) {
 
 	perm1 := types.Permission{
 		Id:             1,
-		Type:           types.PermissionType_PERMISSION_TYPE_ECOSYSTEM,
+		Type:           types.PermissionType_ECOSYSTEM,
 		Did:            "did:example:12345",
 		Grantee:        creatorAddr,
 		Created:        &nowTime,
@@ -170,7 +170,7 @@ func TestGenesisImportExport(t *testing.T) {
 	// Create test permissions
 	perm1 := types.Permission{
 		Id:             1,
-		Type:           types.PermissionType_PERMISSION_TYPE_ECOSYSTEM,
+		Type:           types.PermissionType_ECOSYSTEM,
 		Did:            "did:example:12345",
 		Grantee:        creatorAddr,
 		Created:        &nowTime,
@@ -184,7 +184,7 @@ func TestGenesisImportExport(t *testing.T) {
 
 	perm2 := types.Permission{
 		Id:              2,
-		Type:            types.PermissionType_PERMISSION_TYPE_ISSUER,
+		Type:            types.PermissionType_ISSUER,
 		Did:             "did:example:67890",
 		Grantee:         creatorAddr,
 		Created:         &nowTime,
@@ -199,7 +199,7 @@ func TestGenesisImportExport(t *testing.T) {
 
 	perm3 := types.Permission{
 		Id:              3,
-		Type:            types.PermissionType_PERMISSION_TYPE_VERIFIER,
+		Type:            types.PermissionType_VERIFIER,
 		Did:             "did:example:verifier",
 		Grantee:         creatorAddr,
 		Created:         &nowTime,
@@ -320,14 +320,14 @@ func TestGenesisValidation(t *testing.T) {
 				Permissions: []types.Permission{
 					{
 						Id:       1,
-						Type:     types.PermissionType_PERMISSION_TYPE_ISSUER,
+						Type:     types.PermissionType_ISSUER,
 						Grantee:  creatorAddr,
 						Created:  &nowTime,
 						Modified: &nowTime,
 					},
 					{
 						Id:       1, // Duplicate ID
-						Type:     types.PermissionType_PERMISSION_TYPE_VERIFIER,
+						Type:     types.PermissionType_VERIFIER,
 						Grantee:  creatorAddr,
 						Created:  &nowTime,
 						Modified: &nowTime,
@@ -344,7 +344,7 @@ func TestGenesisValidation(t *testing.T) {
 				Permissions: []types.Permission{
 					{
 						Id:       5,
-						Type:     types.PermissionType_PERMISSION_TYPE_ISSUER,
+						Type:     types.PermissionType_ISSUER,
 						Grantee:  creatorAddr,
 						Created:  &nowTime,
 						Modified: &nowTime,
@@ -361,7 +361,7 @@ func TestGenesisValidation(t *testing.T) {
 				Permissions: []types.Permission{
 					{
 						Id:   1,
-						Type: types.PermissionType_PERMISSION_TYPE_ISSUER,
+						Type: types.PermissionType_ISSUER,
 						// Missing Grantee field
 						Created:  &nowTime,
 						Modified: &nowTime,
@@ -378,7 +378,7 @@ func TestGenesisValidation(t *testing.T) {
 				Permissions: []types.Permission{
 					{
 						Id:              2,
-						Type:            types.PermissionType_PERMISSION_TYPE_ISSUER,
+						Type:            types.PermissionType_ISSUER,
 						Grantee:         creatorAddr,
 						Created:         &nowTime,
 						Modified:        &nowTime,

@@ -16,7 +16,7 @@ func TestGenesisState_Validate(t *testing.T) {
 
 	validPerm1 := types.Permission{
 		Id:             1,
-		Type:           types.PermissionType_PERMISSION_TYPE_ECOSYSTEM,
+		Type:           types.PermissionType_ECOSYSTEM,
 		Did:            "did:example:12345",
 		Grantee:        creatorAddr,
 		Created:        &nowTime,
@@ -30,7 +30,7 @@ func TestGenesisState_Validate(t *testing.T) {
 
 	validPerm2 := types.Permission{
 		Id:              2,
-		Type:            types.PermissionType_PERMISSION_TYPE_ISSUER,
+		Type:            types.PermissionType_ISSUER,
 		Did:             "did:example:67890",
 		Grantee:         creatorAddr,
 		Created:         &nowTime,
@@ -109,7 +109,7 @@ func TestGenesisState_Validate(t *testing.T) {
 				Permissions: []types.Permission{
 					{
 						Id:       0, // Invalid ID
-						Type:     types.PermissionType_PERMISSION_TYPE_ISSUER,
+						Type:     types.PermissionType_ISSUER,
 						Grantee:  creatorAddr,
 						Created:  &nowTime,
 						Modified: &nowTime,
@@ -128,7 +128,7 @@ func TestGenesisState_Validate(t *testing.T) {
 				Permissions: []types.Permission{
 					{
 						Id:              1,
-						Type:            types.PermissionType_PERMISSION_TYPE_ISSUER,
+						Type:            types.PermissionType_ISSUER,
 						Grantee:         creatorAddr,
 						Created:         &nowTime,
 						Modified:        &nowTime,

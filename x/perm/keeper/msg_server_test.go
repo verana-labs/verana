@@ -145,7 +145,7 @@ func TestStartPermissionVP(t *testing.T) {
 				// Verify created perm
 				perm, err := k.GetPermissionByID(sdkCtx, resp.PermissionId)
 				require.NoError(t, err)
-				require.Equal(t, tc.msg.Type, uint32(perm.Type))
+				require.Equal(t, tc.msg.Type, perm.Type)
 				require.Equal(t, tc.msg.Creator, perm.Grantee)
 				require.Equal(t, tc.msg.Country, perm.Country)
 				require.Equal(t, tc.msg.ValidatorPermId, perm.ValidatorPermId)
