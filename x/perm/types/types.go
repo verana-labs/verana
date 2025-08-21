@@ -300,9 +300,9 @@ func (msg *MsgCreatePermission) ValidateBasic() error {
 	if _, err := sdk.AccAddressFromBech32(msg.Creator); err != nil {
 		return sdkerrors.ErrInvalidAddress.Wrapf("invalid creator address: %s", err)
 	}
-	// [MOD-PERM-MSG-13-2-1] Repay Permission Slashed Trust Deposit basic checks
+	// [MOD-PERM-MSG-14-2-1] Create Permission basic checks
 	if msg.SchemaId == 0 {
-		return sdkerrors.ErrInvalidRequest.Wrap("id must be a valid uint64")
+		return sdkerrors.ErrInvalidRequest.Wrap("schema_id must be a valid uint64")
 	}
 	// type MUST be ISSUER or VERIFIER
 	if msg.Type != PermissionType_ISSUER &&

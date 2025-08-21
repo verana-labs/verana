@@ -1237,7 +1237,7 @@ func (ms msgServer) executeCreatePermission(ctx sdk.Context, msg *types.MsgCreat
 		return 0, fmt.Errorf("failed to find ecosystem perm: %w", err)
 	}
 
-	// Create new Permission entry
+	// Create new Permission entry as per specs [MOD-PERM-MSG-14-3]
 	perm := types.Permission{
 		SchemaId:         msg.SchemaId,
 		Type:             msg.Type,
@@ -1249,9 +1249,11 @@ func (ms msgServer) executeCreatePermission(ctx sdk.Context, msg *types.MsgCreat
 		EffectiveFrom:    msg.EffectiveFrom,
 		EffectiveUntil:   msg.EffectiveUntil,
 		Country:          msg.Country,
+		ValidationFees:   0, // perm.validation_fees: 0
+		IssuanceFees:     0,
 		VerificationFees: msg.VerificationFees,
-		VpState:          types.ValidationState_VALIDATED,
-		ValidatorPermId:  ecosystemPerm.Id, // Set the ecosystem perm as the validator
+		Deposit:          0,
+		ValidatorPermId:  ecosystemPerm.Id,
 	}
 
 	// Store the perm
