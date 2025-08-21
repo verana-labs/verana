@@ -183,7 +183,7 @@ func (m *MsgStartPermissionVP) GetType() PermissionType {
 	if m != nil {
 		return m.Type
 	}
-	return PermissionType_PERMISSION_TYPE_UNSPECIFIED
+	return PermissionType_UNSPECIFIED
 }
 
 func (m *MsgStartPermissionVP) GetValidatorPermId() uint64 {
@@ -1476,7 +1476,7 @@ func (m *MsgCreatePermission) GetType() PermissionType {
 	if m != nil {
 		return m.Type
 	}
-	return PermissionType_PERMISSION_TYPE_UNSPECIFIED
+	return PermissionType_UNSPECIFIED
 }
 
 func (m *MsgCreatePermission) GetDid() string {

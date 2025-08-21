@@ -50,7 +50,7 @@ func TestStartPermissionVP(t *testing.T) {
 	// This should be VALIDATED as it's a prerequisite
 	validatorPerm := types.Permission{
 		SchemaId:   1,
-		Type:       types.PermissionType_PERMISSION_TYPE_ISSUER_GRANTOR,
+		Type:       types.PermissionType_ISSUER_GRANTOR,
 		Grantee:    creator,
 		Created:    &now,
 		CreatedBy:  creator,
@@ -58,7 +58,7 @@ func TestStartPermissionVP(t *testing.T) {
 		ExtendedBy: creator,
 		Modified:   &now,
 		Country:    "US",
-		VpState:    types.ValidationState_VALIDATION_STATE_VALIDATED, // validator must be validated
+		VpState:    types.ValidationState_VALIDATED, // validator must be validated
 	}
 	validatorPermID, err := k.CreatePermission(sdkCtx, validatorPerm)
 	require.NoError(t, err)
@@ -66,7 +66,7 @@ func TestStartPermissionVP(t *testing.T) {
 	// Create another validator perm (VERIFIER_GRANTOR with different country)
 	verifierGrantorPerm := types.Permission{
 		SchemaId:   1,
-		Type:       types.PermissionType_PERMISSION_TYPE_VERIFIER_GRANTOR,
+		Type:       types.PermissionType_VERIFIER_GRANTOR,
 		Grantee:    creator,
 		Created:    &now,
 		CreatedBy:  creator,
@@ -74,7 +74,7 @@ func TestStartPermissionVP(t *testing.T) {
 		ExtendedBy: creator,
 		Modified:   &now,
 		Country:    "FR", // Different country
-		VpState:    types.ValidationState_VALIDATION_STATE_VALIDATED,
+		VpState:    types.ValidationState_VALIDATED,
 	}
 	verifierGrantorPermID, err := k.CreatePermission(sdkCtx, verifierGrantorPerm)
 	require.NoError(t, err)
@@ -88,7 +88,7 @@ func TestStartPermissionVP(t *testing.T) {
 			name: "Valid ISSUER Permission Request",
 			msg: &types.MsgStartPermissionVP{
 				Creator:         creator,
-				Type:            uint32(types.PermissionType_PERMISSION_TYPE_ISSUER),
+				Type:            types.PermissionType_ISSUER,
 				ValidatorPermId: validatorPermID,
 				Country:         "US",
 				Did:             validDid,
@@ -99,7 +99,7 @@ func TestStartPermissionVP(t *testing.T) {
 			name: "Non-existent Validator Permission",
 			msg: &types.MsgStartPermissionVP{
 				Creator:         creator,
-				Type:            uint32(types.PermissionType_PERMISSION_TYPE_ISSUER),
+				Type:            types.PermissionType_ISSUER,
 				ValidatorPermId: 999,
 				Country:         "US",
 				Did:             validDid,
@@ -121,7 +121,7 @@ func TestStartPermissionVP(t *testing.T) {
 			name: "Invalid Permission Type Combination - ISSUER with wrong validator",
 			msg: &types.MsgStartPermissionVP{
 				Creator:         creator,
-				Type:            uint32(types.PermissionType_PERMISSION_TYPE_ISSUER),
+				Type:            types.PermissionType_ISSUER,
 				ValidatorPermId: verifierGrantorPermID, // Wrong validator type
 				Country:         "FR",
 				Did:             validDid,
@@ -149,7 +149,7 @@ func TestStartPermissionVP(t *testing.T) {
 				require.Equal(t, tc.msg.Creator, perm.Grantee)
 				require.Equal(t, tc.msg.Country, perm.Country)
 				require.Equal(t, tc.msg.ValidatorPermId, perm.ValidatorPermId)
-				require.Equal(t, types.ValidationState_VALIDATION_STATE_PENDING, perm.VpState)
+				require.Equal(t, types.ValidationState_PENDING, perm.VpState)
 				require.NotNil(t, perm.Created)
 				require.NotNil(t, perm.Modified)
 				require.NotNil(t, perm.VpLastStateChange)
@@ -179,7 +179,7 @@ func TestRenewPermissionVP(t *testing.T) {
 		ExtendedBy: creator,
 		Modified:   &now,
 		Country:    "US",
-		VpState:    types.ValidationState_VALIDATION_STATE_VALIDATED,
+		VpState:    types.ValidationState_VALIDATED,
 	}
 	validatorPermID, err := k.CreatePermission(sdk.UnwrapSDKContext(ctx), validatorPerm)
 	require.NoError(t, err)
@@ -196,7 +196,7 @@ func TestRenewPermissionVP(t *testing.T) {
 		Modified:        &now,
 		Country:         "US",
 		ValidatorPermId: validatorPermID,
-		VpState:         types.ValidationState_VALIDATION_STATE_VALIDATED,
+		VpState:         types.ValidationState_VALIDATED,
 	}
 	applicantPermID, err := k.CreatePermission(sdk.UnwrapSDKContext(ctx), applicantPerm)
 	require.NoError(t, err)
@@ -238,7 +238,7 @@ func TestRenewPermissionVP(t *testing.T) {
 				// Verify updated perm
 				perm, err := k.GetPermissionByID(sdk.UnwrapSDKContext(ctx), tc.msg.Id)
 				require.NoError(t, err)
-				require.Equal(t, types.ValidationState_VALIDATION_STATE_PENDING, perm.VpState)
+				require.Equal(t, types.ValidationState_PENDING, perm.VpState)
 				require.NotNil(t, perm.VpLastStateChange)
 			}
 		})
@@ -264,7 +264,7 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 	// Create validator perm
 	validatorPerm := types.Permission{
 		SchemaId:   1,
-		Type:       types.PermissionType_PERMISSION_TYPE_ISSUER_GRANTOR,
+		Type:       types.PermissionType_ISSUER_GRANTOR,
 		Grantee:    validatorAddr,
 		Created:    &now,
 		CreatedBy:  validatorAddr,
@@ -272,7 +272,7 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 		ExtendedBy: validatorAddr,
 		Modified:   &now,
 		Country:    "US",
-		VpState:    types.ValidationState_VALIDATION_STATE_VALIDATED,
+		VpState:    types.ValidationState_VALIDATED,
 	}
 	validatorPermID, err := k.CreatePermission(sdkCtx, validatorPerm)
 	require.NoError(t, err)
@@ -282,7 +282,7 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 		// Create a new perm in PENDING state
 		newPerm := types.Permission{
 			SchemaId:        1,
-			Type:            types.PermissionType_PERMISSION_TYPE_ISSUER,
+			Type:            types.PermissionType_ISSUER,
 			Grantee:         creator,
 			Created:         &now,
 			CreatedBy:       creator,
@@ -291,7 +291,7 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 			Modified:        &now,
 			Country:         "US",
 			ValidatorPermId: validatorPermID,
-			VpState:         types.ValidationState_VALIDATION_STATE_PENDING,
+			VpState:         types.ValidationState_PENDING,
 		}
 		newPermID, err := k.CreatePermission(sdkCtx, newPerm)
 		require.NoError(t, err)
@@ -315,7 +315,7 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 		// Verify perm was updated correctly
 		updatedPerm, err := k.GetPermissionByID(sdkCtx, newPermID)
 		require.NoError(t, err)
-		require.Equal(t, types.ValidationState_VALIDATION_STATE_VALIDATED, updatedPerm.VpState)
+		require.Equal(t, types.ValidationState_VALIDATED, updatedPerm.VpState)
 		require.Equal(t, msg.ValidationFees, updatedPerm.ValidationFees)
 		require.Equal(t, msg.IssuanceFees, updatedPerm.IssuanceFees)
 		require.Equal(t, msg.VerificationFees, updatedPerm.VerificationFees)
@@ -395,7 +395,7 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 		// Create a perm that's not in PENDING state
 		notPendingPerm := types.Permission{
 			SchemaId:        1,
-			Type:            types.PermissionType_PERMISSION_TYPE_ISSUER,
+			Type:            types.PermissionType_ISSUER,
 			Grantee:         creator,
 			Created:         &now,
 			CreatedBy:       creator,
@@ -404,7 +404,7 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 			Modified:        &now,
 			Country:         "US",
 			ValidatorPermId: validatorPermID,
-			VpState:         types.ValidationState_VALIDATION_STATE_VALIDATED, // Not PENDING
+			VpState:         types.ValidationState_VALIDATED, // Not PENDING
 		}
 		notPendingPermID, err := k.CreatePermission(sdkCtx, notPendingPerm)
 		require.NoError(t, err)
@@ -425,7 +425,7 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 		// Create a new perm in PENDING state
 		pendingPerm := types.Permission{
 			SchemaId:        1,
-			Type:            types.PermissionType_PERMISSION_TYPE_ISSUER,
+			Type:            types.PermissionType_ISSUER,
 			Grantee:         creator,
 			Created:         &now,
 			CreatedBy:       creator,
@@ -434,7 +434,7 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 			Modified:        &now,
 			Country:         "US",
 			ValidatorPermId: validatorPermID,
-			VpState:         types.ValidationState_VALIDATION_STATE_PENDING,
+			VpState:         types.ValidationState_PENDING,
 		}
 		pendingPermID, err := k.CreatePermission(sdkCtx, pendingPerm)
 		require.NoError(t, err)
@@ -455,7 +455,7 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 		// Create a HOLDER perm in PENDING state
 		holderPerm := types.Permission{
 			SchemaId:        1,
-			Type:            types.PermissionType_PERMISSION_TYPE_HOLDER,
+			Type:            types.PermissionType_HOLDER,
 			Grantee:         creator,
 			Created:         &now,
 			CreatedBy:       creator,
@@ -464,7 +464,7 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 			Modified:        &now,
 			Country:         "US",
 			ValidatorPermId: validatorPermID,
-			VpState:         types.ValidationState_VALIDATION_STATE_PENDING,
+			VpState:         types.ValidationState_PENDING,
 		}
 		holderPermID, err := k.CreatePermission(sdkCtx, holderPerm)
 		require.NoError(t, err)
@@ -571,7 +571,7 @@ func TestMsgServerCreateRootPermission(t *testing.T) {
 				require.Equal(t, tc.msg.SchemaId, perm.SchemaId)
 				require.Equal(t, tc.msg.Did, perm.Did)
 				require.Equal(t, tc.msg.Creator, perm.Grantee)
-				require.Equal(t, types.PermissionType_PERMISSION_TYPE_ECOSYSTEM, perm.Type)
+				require.Equal(t, types.PermissionType_ECOSYSTEM, perm.Type)
 				require.Equal(t, tc.msg.ValidationFees, perm.ValidationFees)
 				require.Equal(t, tc.msg.IssuanceFees, perm.IssuanceFees)
 				require.Equal(t, tc.msg.VerificationFees, perm.VerificationFees)
@@ -622,7 +622,7 @@ func TestRequestPermissionVPTermination(t *testing.T) {
 	// Create validator perm
 	validatorPerm := types.Permission{
 		SchemaId:   1,
-		Type:       types.PermissionType_PERMISSION_TYPE_ISSUER_GRANTOR,
+		Type:       types.PermissionType_ISSUER_GRANTOR,
 		Grantee:    validatorAddr,
 		Created:    &now,
 		CreatedBy:  validatorAddr,
@@ -630,7 +630,7 @@ func TestRequestPermissionVPTermination(t *testing.T) {
 		ExtendedBy: validatorAddr,
 		Modified:   &now,
 		Country:    "US",
-		VpState:    types.ValidationState_VALIDATION_STATE_VALIDATED,
+		VpState:    types.ValidationState_VALIDATED,
 	}
 	validatorPermID, err := k.CreatePermission(sdkCtx, validatorPerm)
 	require.NoError(t, err)
@@ -639,7 +639,7 @@ func TestRequestPermissionVPTermination(t *testing.T) {
 	// For testing termination of non-HOLDER type
 	applicantPerm := types.Permission{
 		SchemaId:        1,
-		Type:            types.PermissionType_PERMISSION_TYPE_ISSUER,
+		Type:            types.PermissionType_ISSUER,
 		Grantee:         creator,
 		Created:         &now,
 		CreatedBy:       creator,
@@ -648,7 +648,7 @@ func TestRequestPermissionVPTermination(t *testing.T) {
 		Modified:        &now,
 		Country:         "US",
 		ValidatorPermId: validatorPermID,
-		VpState:         types.ValidationState_VALIDATION_STATE_VALIDATED,
+		VpState:         types.ValidationState_VALIDATED,
 	}
 	applicantPermID, err := k.CreatePermission(sdkCtx, applicantPerm)
 	require.NoError(t, err)
@@ -657,7 +657,7 @@ func TestRequestPermissionVPTermination(t *testing.T) {
 	pastTime := now.Add(-30 * 24 * time.Hour) // 30 days in the past
 	expiredVpPerm := types.Permission{
 		SchemaId:        1,
-		Type:            types.PermissionType_PERMISSION_TYPE_ISSUER, // Not HOLDER to avoid that rule
+		Type:            types.PermissionType_ISSUER, // Not HOLDER to avoid that rule
 		Grantee:         creator,
 		Created:         &now,
 		CreatedBy:       creator,
@@ -666,7 +666,7 @@ func TestRequestPermissionVPTermination(t *testing.T) {
 		Modified:        &now,
 		Country:         "US",
 		ValidatorPermId: validatorPermID,
-		VpState:         types.ValidationState_VALIDATION_STATE_VALIDATED,
+		VpState:         types.ValidationState_VALIDATED,
 		VpExp:           &pastTime, // Clearly expired VP
 	}
 	expiredVpPermID, err := k.CreatePermission(sdkCtx, expiredVpPerm)
@@ -676,7 +676,7 @@ func TestRequestPermissionVPTermination(t *testing.T) {
 	futureTime := now.Add(24 * time.Hour)
 	holderPerm := types.Permission{
 		SchemaId:        1,
-		Type:            types.PermissionType_PERMISSION_TYPE_HOLDER,
+		Type:            types.PermissionType_HOLDER,
 		Grantee:         creator,
 		Created:         &now,
 		CreatedBy:       creator,
@@ -685,7 +685,7 @@ func TestRequestPermissionVPTermination(t *testing.T) {
 		Modified:        &now,
 		Country:         "US",
 		ValidatorPermId: validatorPermID,
-		VpState:         types.ValidationState_VALIDATION_STATE_VALIDATED,
+		VpState:         types.ValidationState_VALIDATED,
 		VpExp:           &futureTime, // Not expired
 	}
 	holderPermID, err := k.CreatePermission(sdkCtx, holderPerm)
@@ -697,7 +697,7 @@ func TestRequestPermissionVPTermination(t *testing.T) {
 	// Create a perm in PENDING state for testing validation error
 	pendingPerm := types.Permission{
 		SchemaId:        1,
-		Type:            types.PermissionType_PERMISSION_TYPE_ISSUER,
+		Type:            types.PermissionType_ISSUER,
 		Grantee:         creator,
 		Created:         &now,
 		CreatedBy:       creator,
@@ -706,7 +706,7 @@ func TestRequestPermissionVPTermination(t *testing.T) {
 		Modified:        &now,
 		Country:         "US",
 		ValidatorPermId: validatorPermID,
-		VpState:         types.ValidationState_VALIDATION_STATE_PENDING,
+		VpState:         types.ValidationState_PENDING,
 	}
 	pendingPermID, err := k.CreatePermission(sdkCtx, pendingPerm)
 	require.NoError(t, err)
@@ -727,7 +727,7 @@ func TestRequestPermissionVPTermination(t *testing.T) {
 			},
 			expectErr:  false,
 			checkState: true,
-			expState:   types.ValidationState_VALIDATION_STATE_TERMINATED, // Non-HOLDER -> directly TERMINATED
+			expState:   types.ValidationState_TERMINATED, // Non-HOLDER -> directly TERMINATED
 		},
 		{
 			name: "Valid termination of expired VP by validator",
@@ -737,7 +737,7 @@ func TestRequestPermissionVPTermination(t *testing.T) {
 			},
 			expectErr:  false,
 			checkState: true,
-			expState:   types.ValidationState_VALIDATION_STATE_TERMINATED, // Expired -> directly TERMINATED
+			expState:   types.ValidationState_TERMINATED, // Expired -> directly TERMINATED
 		},
 		{
 			name: "Valid termination of active HOLDER type - goes to requested state",
@@ -747,7 +747,7 @@ func TestRequestPermissionVPTermination(t *testing.T) {
 			},
 			expectErr:  false,
 			checkState: true,
-			expState:   types.ValidationState_VALIDATION_STATE_TERMINATION_REQUESTED, // HOLDER + not expired -> TERMINATION_REQUESTED
+			expState:   types.ValidationState_TERMINATION_REQUESTED, // HOLDER + not expired -> TERMINATION_REQUESTED
 		},
 		{
 			name: "Invalid - perm not found",
@@ -797,10 +797,10 @@ func TestRequestPermissionVPTermination(t *testing.T) {
 					require.Equal(t, tc.expState, perm.VpState)
 
 					// For terminated permissions, check additional fields
-					if tc.expState == types.ValidationState_VALIDATION_STATE_TERMINATED {
+					if tc.expState == types.ValidationState_TERMINATED {
 						require.NotNil(t, perm.Terminated)
 						require.Equal(t, tc.msg.Creator, perm.TerminatedBy)
-					} else if tc.expState == types.ValidationState_VALIDATION_STATE_TERMINATION_REQUESTED {
+					} else if tc.expState == types.ValidationState_TERMINATION_REQUESTED {
 						require.NotNil(t, perm.VpTermRequested)
 					}
 				}
@@ -842,7 +842,7 @@ func TestConfirmPermissionVPTermination(t *testing.T) {
 	// Create validator perm
 	validatorPerm := types.Permission{
 		SchemaId:   1,
-		Type:       types.PermissionType_PERMISSION_TYPE_ISSUER_GRANTOR,
+		Type:       types.PermissionType_ISSUER_GRANTOR,
 		Grantee:    validatorAddr,
 		Created:    &now,
 		CreatedBy:  validatorAddr,
@@ -850,7 +850,7 @@ func TestConfirmPermissionVPTermination(t *testing.T) {
 		ExtendedBy: validatorAddr,
 		Modified:   &now,
 		Country:    "US",
-		VpState:    types.ValidationState_VALIDATION_STATE_VALIDATED,
+		VpState:    types.ValidationState_VALIDATED,
 	}
 	validatorPermID, err := k.CreatePermission(sdkCtx, validatorPerm)
 	require.NoError(t, err)
@@ -860,7 +860,7 @@ func TestConfirmPermissionVPTermination(t *testing.T) {
 	termRequested := now.Add(-1 * time.Hour)
 	applicantPerm := types.Permission{
 		SchemaId:           1,
-		Type:               types.PermissionType_PERMISSION_TYPE_ISSUER,
+		Type:               types.PermissionType_ISSUER,
 		Grantee:            creator,
 		Created:            &now,
 		CreatedBy:          creator,
@@ -869,7 +869,7 @@ func TestConfirmPermissionVPTermination(t *testing.T) {
 		Modified:           &now,
 		Country:            "US",
 		ValidatorPermId:    validatorPermID,
-		VpState:            types.ValidationState_VALIDATION_STATE_TERMINATION_REQUESTED,
+		VpState:            types.ValidationState_TERMINATION_REQUESTED,
 		VpTermRequested:    &termRequested,
 		Deposit:            100, // Add some deposit to test it gets processed
 		VpValidatorDeposit: 50,  // Validator deposit
@@ -886,7 +886,7 @@ func TestConfirmPermissionVPTermination(t *testing.T) {
 	termRequestedTimeout := now.Add(-8 * 24 * time.Hour)
 	applicantPermTimeoutExpired := types.Permission{
 		SchemaId:           1,
-		Type:               types.PermissionType_PERMISSION_TYPE_ISSUER,
+		Type:               types.PermissionType_ISSUER,
 		Grantee:            creator,
 		Created:            &now,
 		CreatedBy:          creator,
@@ -895,7 +895,7 @@ func TestConfirmPermissionVPTermination(t *testing.T) {
 		Modified:           &now,
 		Country:            "US",
 		ValidatorPermId:    validatorPermID,
-		VpState:            types.ValidationState_VALIDATION_STATE_TERMINATION_REQUESTED,
+		VpState:            types.ValidationState_TERMINATION_REQUESTED,
 		VpTermRequested:    &termRequestedTimeout,
 		Deposit:            100,
 		VpValidatorDeposit: 50,
@@ -979,7 +979,7 @@ func TestConfirmPermissionVPTermination(t *testing.T) {
 				// Verify perm state was updated correctly
 				perm, err := k.GetPermissionByID(sdkCtx, tc.msg.Id)
 				require.NoError(t, err)
-				require.Equal(t, types.ValidationState_VALIDATION_STATE_TERMINATED, perm.VpState)
+				require.Equal(t, types.ValidationState_TERMINATED, perm.VpState)
 				require.NotNil(t, perm.Terminated)
 				require.Equal(t, tc.msg.Creator, perm.TerminatedBy)
 
@@ -1018,7 +1018,7 @@ func TestCancelPermissionVPLastRequest(t *testing.T) {
 	// Create validator perm
 	validatorPerm := types.Permission{
 		SchemaId:   1,
-		Type:       types.PermissionType_PERMISSION_TYPE_ISSUER_GRANTOR,
+		Type:       types.PermissionType_ISSUER_GRANTOR,
 		Grantee:    validatorAddr,
 		Created:    &now,
 		CreatedBy:  validatorAddr,
@@ -1026,7 +1026,7 @@ func TestCancelPermissionVPLastRequest(t *testing.T) {
 		ExtendedBy: validatorAddr,
 		Modified:   &now,
 		Country:    "US",
-		VpState:    types.ValidationState_VALIDATION_STATE_VALIDATED,
+		VpState:    types.ValidationState_VALIDATED,
 	}
 	validatorPermID, err := k.CreatePermission(sdkCtx, validatorPerm)
 	require.NoError(t, err)
@@ -1035,7 +1035,7 @@ func TestCancelPermissionVPLastRequest(t *testing.T) {
 	// This should transition to TERMINATED when cancelled
 	neverValidatedPerm := types.Permission{
 		SchemaId:         1,
-		Type:             types.PermissionType_PERMISSION_TYPE_ISSUER,
+		Type:             types.PermissionType_ISSUER,
 		Grantee:          creator,
 		Created:          &now,
 		CreatedBy:        creator,
@@ -1044,7 +1044,7 @@ func TestCancelPermissionVPLastRequest(t *testing.T) {
 		Modified:         &now,
 		Country:          "US",
 		ValidatorPermId:  validatorPermID,
-		VpState:          types.ValidationState_VALIDATION_STATE_PENDING,
+		VpState:          types.ValidationState_PENDING,
 		VpCurrentFees:    100,
 		VpCurrentDeposit: 50,
 		// VpExp is nil, indicating it has never been validated
@@ -1057,7 +1057,7 @@ func TestCancelPermissionVPLastRequest(t *testing.T) {
 	futureTime := now.Add(24 * time.Hour)
 	previouslyValidatedPerm := types.Permission{
 		SchemaId:         1,
-		Type:             types.PermissionType_PERMISSION_TYPE_ISSUER,
+		Type:             types.PermissionType_ISSUER,
 		Grantee:          creator,
 		Created:          &now,
 		CreatedBy:        creator,
@@ -1066,7 +1066,7 @@ func TestCancelPermissionVPLastRequest(t *testing.T) {
 		Modified:         &now,
 		Country:          "US",
 		ValidatorPermId:  validatorPermID,
-		VpState:          types.ValidationState_VALIDATION_STATE_PENDING,
+		VpState:          types.ValidationState_PENDING,
 		VpExp:            &futureTime, // Has a previous validation
 		VpCurrentFees:    100,
 		VpCurrentDeposit: 50,
@@ -1077,7 +1077,7 @@ func TestCancelPermissionVPLastRequest(t *testing.T) {
 	// Create a perm not in PENDING state for testing validation error
 	notPendingPerm := types.Permission{
 		SchemaId:        1,
-		Type:            types.PermissionType_PERMISSION_TYPE_ISSUER,
+		Type:            types.PermissionType_ISSUER,
 		Grantee:         creator,
 		Created:         &now,
 		CreatedBy:       creator,
@@ -1086,7 +1086,7 @@ func TestCancelPermissionVPLastRequest(t *testing.T) {
 		Modified:        &now,
 		Country:         "US",
 		ValidatorPermId: validatorPermID,
-		VpState:         types.ValidationState_VALIDATION_STATE_VALIDATED, // Not in PENDING state
+		VpState:         types.ValidationState_VALIDATED, // Not in PENDING state
 	}
 	notPendingPermID, err := k.CreatePermission(sdkCtx, notPendingPerm)
 	require.NoError(t, err)
@@ -1107,7 +1107,7 @@ func TestCancelPermissionVPLastRequest(t *testing.T) {
 			},
 			expectErr:  false,
 			checkState: true,
-			expState:   types.ValidationState_VALIDATION_STATE_TERMINATED,
+			expState:   types.ValidationState_TERMINATED,
 		},
 		{
 			name: "Valid cancellation - previously validated",
@@ -1117,7 +1117,7 @@ func TestCancelPermissionVPLastRequest(t *testing.T) {
 			},
 			expectErr:  false,
 			checkState: true,
-			expState:   types.ValidationState_VALIDATION_STATE_VALIDATED,
+			expState:   types.ValidationState_VALIDATED,
 		},
 		{
 			name: "Invalid - perm not found",
@@ -1201,7 +1201,7 @@ func TestExtendPermission(t *testing.T) {
 	// Create validator perm
 	validatorPerm := types.Permission{
 		SchemaId:   1,
-		Type:       types.PermissionType_PERMISSION_TYPE_ISSUER_GRANTOR,
+		Type:       types.PermissionType_ISSUER_GRANTOR,
 		Grantee:    validatorAddr,
 		Created:    &now,
 		CreatedBy:  validatorAddr,
@@ -1209,7 +1209,7 @@ func TestExtendPermission(t *testing.T) {
 		ExtendedBy: validatorAddr,
 		Modified:   &now,
 		Country:    "US",
-		VpState:    types.ValidationState_VALIDATION_STATE_VALIDATED,
+		VpState:    types.ValidationState_VALIDATED,
 	}
 	validatorPermID, err := k.CreatePermission(sdkCtx, validatorPerm)
 	require.NoError(t, err)
@@ -1217,7 +1217,7 @@ func TestExtendPermission(t *testing.T) {
 	// Create a perm to extend
 	applicantPerm := types.Permission{
 		SchemaId:        1,
-		Type:            types.PermissionType_PERMISSION_TYPE_ISSUER,
+		Type:            types.PermissionType_ISSUER,
 		Grantee:         creator,
 		Created:         &now,
 		CreatedBy:       creator,
@@ -1227,7 +1227,7 @@ func TestExtendPermission(t *testing.T) {
 		EffectiveUntil:  &currentEffectiveUntil,
 		Country:         "US",
 		ValidatorPermId: validatorPermID,
-		VpState:         types.ValidationState_VALIDATION_STATE_VALIDATED,
+		VpState:         types.ValidationState_VALIDATED,
 		VpExp:           &futureVpExp,
 	}
 	applicantPermID, err := k.CreatePermission(sdkCtx, applicantPerm)
@@ -1236,7 +1236,7 @@ func TestExtendPermission(t *testing.T) {
 	// Create a trust registry perm to test direct extension
 	trustRegistryPerm := types.Permission{
 		SchemaId:       1,
-		Type:           types.PermissionType_PERMISSION_TYPE_ECOSYSTEM,
+		Type:           types.PermissionType_ECOSYSTEM,
 		Grantee:        trustRegistryAddr,
 		Created:        &now,
 		CreatedBy:      trustRegistryAddr,
@@ -1245,7 +1245,7 @@ func TestExtendPermission(t *testing.T) {
 		Modified:       &now,
 		EffectiveUntil: &currentEffectiveUntil,
 		Country:        "US",
-		VpState:        types.ValidationState_VALIDATION_STATE_VALIDATED,
+		VpState:        types.ValidationState_VALIDATED,
 	}
 	trustRegistryPermID, err := k.CreatePermission(sdkCtx, trustRegistryPerm)
 	require.NoError(t, err)
@@ -1254,7 +1254,7 @@ func TestExtendPermission(t *testing.T) {
 	// Use same validator but has a different effective_until date
 	wrongCreatorTestPerm := types.Permission{
 		SchemaId:        1,
-		Type:            types.PermissionType_PERMISSION_TYPE_ISSUER,
+		Type:            types.PermissionType_ISSUER,
 		Grantee:         creator,
 		Created:         &now,
 		CreatedBy:       creator,
@@ -1264,7 +1264,7 @@ func TestExtendPermission(t *testing.T) {
 		EffectiveUntil:  &currentEffectiveUntil, // Same as the regular test
 		Country:         "US",
 		ValidatorPermId: validatorPermID,
-		VpState:         types.ValidationState_VALIDATION_STATE_VALIDATED,
+		VpState:         types.ValidationState_VALIDATED,
 		VpExp:           &futureVpExp,
 	}
 	wrongCreatorTestPermID, err := k.CreatePermission(sdkCtx, wrongCreatorTestPerm)
@@ -1391,7 +1391,7 @@ func TestRevokePermission(t *testing.T) {
 	// Create validator perm
 	validatorPerm := types.Permission{
 		SchemaId:   1,
-		Type:       types.PermissionType_PERMISSION_TYPE_ISSUER_GRANTOR,
+		Type:       types.PermissionType_ISSUER_GRANTOR,
 		Grantee:    validatorAddr,
 		Created:    &now,
 		CreatedBy:  validatorAddr,
@@ -1399,7 +1399,7 @@ func TestRevokePermission(t *testing.T) {
 		ExtendedBy: validatorAddr,
 		Modified:   &now,
 		Country:    "US",
-		VpState:    types.ValidationState_VALIDATION_STATE_VALIDATED,
+		VpState:    types.ValidationState_VALIDATED,
 	}
 	validatorPermID, err := k.CreatePermission(sdkCtx, validatorPerm)
 	require.NoError(t, err)
@@ -1407,7 +1407,7 @@ func TestRevokePermission(t *testing.T) {
 	// Create a perm to revoke
 	applicantPerm := types.Permission{
 		SchemaId:        1,
-		Type:            types.PermissionType_PERMISSION_TYPE_ISSUER,
+		Type:            types.PermissionType_ISSUER,
 		Grantee:         creator,
 		Created:         &now,
 		CreatedBy:       creator,
@@ -1416,7 +1416,7 @@ func TestRevokePermission(t *testing.T) {
 		Modified:        &now,
 		Country:         "US",
 		ValidatorPermId: validatorPermID,
-		VpState:         types.ValidationState_VALIDATION_STATE_VALIDATED,
+		VpState:         types.ValidationState_VALIDATED,
 	}
 	applicantPermID, err := k.CreatePermission(sdkCtx, applicantPerm)
 	require.NoError(t, err)
@@ -1512,7 +1512,7 @@ func TestCreateOrUpdatePermissionSession(t *testing.T) {
 	// Create trust registry / validator perm
 	trustPerm := types.Permission{
 		SchemaId:         1,
-		Type:             types.PermissionType_PERMISSION_TYPE_ECOSYSTEM,
+		Type:             types.PermissionType_ECOSYSTEM,
 		Grantee:          creator,
 		Created:          &now,
 		CreatedBy:        creator,
@@ -1520,7 +1520,7 @@ func TestCreateOrUpdatePermissionSession(t *testing.T) {
 		ExtendedBy:       creator,
 		Modified:         &now,
 		Country:          "US",
-		VpState:          types.ValidationState_VALIDATION_STATE_VALIDATED,
+		VpState:          types.ValidationState_VALIDATED,
 		ValidationFees:   10,
 		IssuanceFees:     5,
 		VerificationFees: 3,
@@ -1531,7 +1531,7 @@ func TestCreateOrUpdatePermissionSession(t *testing.T) {
 	// Create issuer perm
 	issuerPerm := types.Permission{
 		SchemaId:        1,
-		Type:            types.PermissionType_PERMISSION_TYPE_ISSUER,
+		Type:            types.PermissionType_ISSUER,
 		Grantee:         creator,
 		Created:         &now,
 		CreatedBy:       creator,
@@ -1540,7 +1540,7 @@ func TestCreateOrUpdatePermissionSession(t *testing.T) {
 		Modified:        &now,
 		Country:         "US",
 		ValidatorPermId: trustPermID,
-		VpState:         types.ValidationState_VALIDATION_STATE_VALIDATED,
+		VpState:         types.ValidationState_VALIDATED,
 	}
 	issuerPermID, err := k.CreatePermission(sdkCtx, issuerPerm)
 	require.NoError(t, err)
@@ -1565,7 +1565,7 @@ func TestCreateOrUpdatePermissionSession(t *testing.T) {
 	// Create agent perm (HOLDER type)
 	agentPerm := types.Permission{
 		SchemaId:        1,
-		Type:            types.PermissionType_PERMISSION_TYPE_HOLDER,
+		Type:            types.PermissionType_HOLDER,
 		Grantee:         creator,
 		Created:         &now,
 		CreatedBy:       creator,
@@ -1574,7 +1574,7 @@ func TestCreateOrUpdatePermissionSession(t *testing.T) {
 		Modified:        &now,
 		Country:         "US",
 		ValidatorPermId: issuerPermID, // Issued by the issuer
-		VpState:         types.ValidationState_VALIDATION_STATE_VALIDATED,
+		VpState:         types.ValidationState_VALIDATED,
 	}
 	agentPermID, err := k.CreatePermission(sdkCtx, agentPerm)
 	require.NoError(t, err)
@@ -1582,7 +1582,7 @@ func TestCreateOrUpdatePermissionSession(t *testing.T) {
 	// Create wallet agent perm (HOLDER type)
 	walletAgentPerm := types.Permission{
 		SchemaId:        1,
-		Type:            types.PermissionType_PERMISSION_TYPE_HOLDER,
+		Type:            types.PermissionType_HOLDER,
 		Grantee:         creator,
 		Created:         &now,
 		CreatedBy:       creator,
@@ -1591,7 +1591,7 @@ func TestCreateOrUpdatePermissionSession(t *testing.T) {
 		Modified:        &now,
 		Country:         "US",
 		ValidatorPermId: issuerPermID, // Issued by the issuer
-		VpState:         types.ValidationState_VALIDATION_STATE_VALIDATED,
+		VpState:         types.ValidationState_VALIDATED,
 	}
 	walletAgentPermID, err := k.CreatePermission(sdkCtx, walletAgentPerm)
 	require.NoError(t, err)
@@ -1782,7 +1782,7 @@ func TestGetPermissionByID(t *testing.T) {
 	// Create a test perm
 	testPerm := types.Permission{
 		SchemaId:   1,
-		Type:       types.PermissionType_PERMISSION_TYPE_ISSUER,
+		Type:       types.PermissionType_ISSUER,
 		Grantee:    creator,
 		Created:    &now,
 		CreatedBy:  creator,
@@ -1790,7 +1790,7 @@ func TestGetPermissionByID(t *testing.T) {
 		ExtendedBy: creator,
 		Modified:   &now,
 		Country:    "US",
-		VpState:    types.ValidationState_VALIDATION_STATE_VALIDATED,
+		VpState:    types.ValidationState_VALIDATED,
 	}
 	permID, err := k.CreatePermission(sdkCtx, testPerm)
 	require.NoError(t, err)
@@ -1820,7 +1820,7 @@ func TestCreateAndUpdatePermission(t *testing.T) {
 	// Test CreatePermission
 	testPerm := types.Permission{
 		SchemaId:   1,
-		Type:       types.PermissionType_PERMISSION_TYPE_ISSUER,
+		Type:       types.PermissionType_ISSUER,
 		Grantee:    creator,
 		Created:    &now,
 		CreatedBy:  creator,
@@ -1828,7 +1828,7 @@ func TestCreateAndUpdatePermission(t *testing.T) {
 		ExtendedBy: creator,
 		Modified:   &now,
 		Country:    "US",
-		VpState:    types.ValidationState_VALIDATION_STATE_VALIDATED,
+		VpState:    types.ValidationState_VALIDATED,
 	}
 
 	permID, err := k.CreatePermission(sdkCtx, testPerm)
@@ -1879,7 +1879,7 @@ func TestQueryPermissions(t *testing.T) {
 	// Trust Registry perm
 	trustPerm := types.Permission{
 		SchemaId:   1,
-		Type:       types.PermissionType_PERMISSION_TYPE_ECOSYSTEM,
+		Type:       types.PermissionType_ECOSYSTEM,
 		Did:        validDid,
 		Grantee:    creator,
 		Created:    &now,
@@ -1888,7 +1888,7 @@ func TestQueryPermissions(t *testing.T) {
 		ExtendedBy: creator,
 		Modified:   &now,
 		Country:    "US",
-		VpState:    types.ValidationState_VALIDATION_STATE_VALIDATED,
+		VpState:    types.ValidationState_VALIDATED,
 	}
 	trustPermID, err := k.CreatePermission(sdkCtx, trustPerm)
 	require.NoError(t, err)
@@ -1896,7 +1896,7 @@ func TestQueryPermissions(t *testing.T) {
 	// Issuer perm
 	issuerPerm := types.Permission{
 		SchemaId:        1,
-		Type:            types.PermissionType_PERMISSION_TYPE_ISSUER,
+		Type:            types.PermissionType_ISSUER,
 		Did:             validDid,
 		Grantee:         creator,
 		Created:         &now,
@@ -1906,7 +1906,7 @@ func TestQueryPermissions(t *testing.T) {
 		Modified:        &now,
 		Country:         "US",
 		ValidatorPermId: trustPermID,
-		VpState:         types.ValidationState_VALIDATION_STATE_VALIDATED,
+		VpState:         types.ValidationState_VALIDATED,
 	}
 	issuerPermID, err := k.CreatePermission(sdkCtx, issuerPerm)
 	require.NoError(t, err)
@@ -1914,7 +1914,7 @@ func TestQueryPermissions(t *testing.T) {
 	// Verifier perm
 	verifierPerm := types.Permission{
 		SchemaId:        1,
-		Type:            types.PermissionType_PERMISSION_TYPE_VERIFIER,
+		Type:            types.PermissionType_VERIFIER,
 		Did:             validDid,
 		Grantee:         creator,
 		Created:         &now,
@@ -1924,7 +1924,7 @@ func TestQueryPermissions(t *testing.T) {
 		Modified:        &now,
 		Country:         "FR", // Different country
 		ValidatorPermId: trustPermID,
-		VpState:         types.ValidationState_VALIDATION_STATE_VALIDATED,
+		VpState:         types.ValidationState_VALIDATED,
 	}
 	verifierPermID, err := k.CreatePermission(sdkCtx, verifierPerm)
 	require.NoError(t, err)
@@ -1988,7 +1988,7 @@ func TestQueryPermissions(t *testing.T) {
 	// Test FindPermissionsWithDID query
 	findPermDIDReq := &types.QueryFindPermissionsWithDIDRequest{
 		Did:      validDid,
-		Type:     uint32(types.PermissionType_PERMISSION_TYPE_ISSUER),
+		Type:     uint32(types.PermissionType_ISSUER),
 		SchemaId: 1,
 		Country:  "US",
 	}
@@ -2037,7 +2037,7 @@ func TestSlashPermissionTrustDeposit(t *testing.T) {
 	// Create ecosystem perm
 	ecosystemPerm := types.Permission{
 		SchemaId:   1,
-		Type:       types.PermissionType_PERMISSION_TYPE_ECOSYSTEM,
+		Type:       types.PermissionType_ECOSYSTEM,
 		Grantee:    ecosystemAddr,
 		Created:    &now,
 		CreatedBy:  ecosystemAddr,
@@ -2045,7 +2045,7 @@ func TestSlashPermissionTrustDeposit(t *testing.T) {
 		ExtendedBy: ecosystemAddr,
 		Modified:   &now,
 		Country:    "US",
-		VpState:    types.ValidationState_VALIDATION_STATE_VALIDATED,
+		VpState:    types.ValidationState_VALIDATED,
 	}
 	_, err := k.CreatePermission(sdkCtx, ecosystemPerm)
 	require.NoError(t, err)
@@ -2053,7 +2053,7 @@ func TestSlashPermissionTrustDeposit(t *testing.T) {
 	// Create validator perm
 	validatorPerm := types.Permission{
 		SchemaId:   1,
-		Type:       types.PermissionType_PERMISSION_TYPE_ISSUER_GRANTOR,
+		Type:       types.PermissionType_ISSUER_GRANTOR,
 		Grantee:    validatorAddr,
 		Created:    &now,
 		CreatedBy:  validatorAddr,
@@ -2061,7 +2061,7 @@ func TestSlashPermissionTrustDeposit(t *testing.T) {
 		ExtendedBy: validatorAddr,
 		Modified:   &now,
 		Country:    "US",
-		VpState:    types.ValidationState_VALIDATION_STATE_VALIDATED,
+		VpState:    types.ValidationState_VALIDATED,
 	}
 	validatorPermID, err := k.CreatePermission(sdkCtx, validatorPerm)
 	require.NoError(t, err)
@@ -2069,7 +2069,7 @@ func TestSlashPermissionTrustDeposit(t *testing.T) {
 	// Create applicant perm with deposit
 	applicantPerm := types.Permission{
 		SchemaId:        1,
-		Type:            types.PermissionType_PERMISSION_TYPE_ISSUER,
+		Type:            types.PermissionType_ISSUER,
 		Grantee:         creator,
 		Created:         &now,
 		CreatedBy:       creator,
@@ -2078,7 +2078,7 @@ func TestSlashPermissionTrustDeposit(t *testing.T) {
 		Modified:        &now,
 		Country:         "US",
 		ValidatorPermId: validatorPermID,
-		VpState:         types.ValidationState_VALIDATION_STATE_VALIDATED,
+		VpState:         types.ValidationState_VALIDATED,
 		Deposit:         1000, // Set initial deposit
 	}
 	applicantPermID, err := k.CreatePermission(sdkCtx, applicantPerm)
@@ -2182,7 +2182,7 @@ func TestRepayPermissionSlashedTrustDeposit(t *testing.T) {
 	// Create ecosystem perm
 	ecosystemPerm := types.Permission{
 		SchemaId:   1,
-		Type:       types.PermissionType_PERMISSION_TYPE_ECOSYSTEM,
+		Type:       types.PermissionType_ECOSYSTEM,
 		Grantee:    ecosystemAddr,
 		Created:    &now,
 		CreatedBy:  ecosystemAddr,
@@ -2190,7 +2190,7 @@ func TestRepayPermissionSlashedTrustDeposit(t *testing.T) {
 		ExtendedBy: ecosystemAddr,
 		Modified:   &now,
 		Country:    "US",
-		VpState:    types.ValidationState_VALIDATION_STATE_VALIDATED,
+		VpState:    types.ValidationState_VALIDATED,
 	}
 	_, err := k.CreatePermission(sdkCtx, ecosystemPerm)
 	require.NoError(t, err)
@@ -2198,7 +2198,7 @@ func TestRepayPermissionSlashedTrustDeposit(t *testing.T) {
 	// Create validator perm
 	validatorPerm := types.Permission{
 		SchemaId:   1,
-		Type:       types.PermissionType_PERMISSION_TYPE_ISSUER_GRANTOR,
+		Type:       types.PermissionType_ISSUER_GRANTOR,
 		Grantee:    validatorAddr,
 		Created:    &now,
 		CreatedBy:  validatorAddr,
@@ -2206,7 +2206,7 @@ func TestRepayPermissionSlashedTrustDeposit(t *testing.T) {
 		ExtendedBy: validatorAddr,
 		Modified:   &now,
 		Country:    "US",
-		VpState:    types.ValidationState_VALIDATION_STATE_VALIDATED,
+		VpState:    types.ValidationState_VALIDATED,
 	}
 	validatorPermID, err := k.CreatePermission(sdkCtx, validatorPerm)
 	require.NoError(t, err)
@@ -2214,7 +2214,7 @@ func TestRepayPermissionSlashedTrustDeposit(t *testing.T) {
 	// Create applicant perm with initial deposit
 	applicantPerm := types.Permission{
 		SchemaId:        1,
-		Type:            types.PermissionType_PERMISSION_TYPE_ISSUER,
+		Type:            types.PermissionType_ISSUER,
 		Grantee:         creator,
 		Created:         &now,
 		CreatedBy:       creator,
@@ -2223,7 +2223,7 @@ func TestRepayPermissionSlashedTrustDeposit(t *testing.T) {
 		Modified:        &now,
 		Country:         "US",
 		ValidatorPermId: validatorPermID,
-		VpState:         types.ValidationState_VALIDATION_STATE_VALIDATED,
+		VpState:         types.ValidationState_VALIDATED,
 		Deposit:         1000, // Initial deposit
 	}
 	applicantPermID, err := k.CreatePermission(sdkCtx, applicantPerm)
@@ -2325,14 +2325,14 @@ func TestCreatePermission(t *testing.T) {
 	// Create an ecosystem perm first (required for validation)
 	ecosystemPerm := types.Permission{
 		SchemaId:  1,
-		Type:      types.PermissionType_PERMISSION_TYPE_ECOSYSTEM,
+		Type:      types.PermissionType_ECOSYSTEM,
 		Did:       validDid,
 		Grantee:   creator,
 		Created:   &now,
 		CreatedBy: creator,
 		Modified:  &now,
 		Country:   "US",
-		VpState:   types.ValidationState_VALIDATION_STATE_VALIDATED,
+		VpState:   types.ValidationState_VALIDATED,
 	}
 	ecosystemPermID, err := k.CreatePermission(sdkCtx, ecosystemPerm)
 	require.NoError(t, err)
@@ -2348,7 +2348,7 @@ func TestCreatePermission(t *testing.T) {
 			msg: &types.MsgCreatePermission{
 				Creator:          creator,
 				SchemaId:         1,
-				Type:             types.PermissionType_PERMISSION_TYPE_ISSUER,
+				Type:             types.PermissionType_ISSUER,
 				Did:              validDid,
 				Country:          "US",
 				EffectiveFrom:    &now,
@@ -2362,7 +2362,7 @@ func TestCreatePermission(t *testing.T) {
 			msg: &types.MsgCreatePermission{
 				Creator:          creator,
 				SchemaId:         1,
-				Type:             types.PermissionType_PERMISSION_TYPE_VERIFIER,
+				Type:             types.PermissionType_VERIFIER,
 				Did:              validDid,
 				Country:          "US",
 				EffectiveFrom:    &now,
@@ -2376,7 +2376,7 @@ func TestCreatePermission(t *testing.T) {
 			msg: &types.MsgCreatePermission{
 				Creator:          creator,
 				SchemaId:         999, // Non-existent schema
-				Type:             types.PermissionType_PERMISSION_TYPE_ISSUER,
+				Type:             types.PermissionType_ISSUER,
 				Did:              validDid,
 				Country:          "US",
 				VerificationFees: 100,
@@ -2389,7 +2389,7 @@ func TestCreatePermission(t *testing.T) {
 			msg: &types.MsgCreatePermission{
 				Creator:          creator,
 				SchemaId:         1,
-				Type:             types.PermissionType_PERMISSION_TYPE_UNSPECIFIED,
+				Type:             types.PermissionType_UNSPECIFIED,
 				Did:              validDid,
 				Country:          "US",
 				VerificationFees: 100,
@@ -2402,7 +2402,7 @@ func TestCreatePermission(t *testing.T) {
 			msg: &types.MsgCreatePermission{
 				Creator:          creator,
 				SchemaId:         1,
-				Type:             types.PermissionType_PERMISSION_TYPE_ISSUER,
+				Type:             types.PermissionType_ISSUER,
 				Did:              validDid,
 				Country:          "INVALID",
 				VerificationFees: 100,
@@ -2415,7 +2415,7 @@ func TestCreatePermission(t *testing.T) {
 			msg: &types.MsgCreatePermission{
 				Creator:          creator,
 				SchemaId:         1,
-				Type:             types.PermissionType_PERMISSION_TYPE_ISSUER,
+				Type:             types.PermissionType_ISSUER,
 				Did:              validDid,
 				Country:          "US",
 				EffectiveFrom:    &futureTime,
@@ -2451,7 +2451,7 @@ func TestCreatePermission(t *testing.T) {
 				require.Equal(t, tc.msg.Country, perm.Country)
 				require.Equal(t, tc.msg.VerificationFees, perm.VerificationFees)
 				require.Equal(t, ecosystemPermID, perm.ValidatorPermId)
-				require.Equal(t, types.ValidationState_VALIDATION_STATE_VALIDATED, perm.VpState)
+				require.Equal(t, types.ValidationState_VALIDATED, perm.VpState)
 
 				// Verify time fields if set
 				if tc.msg.EffectiveFrom != nil {

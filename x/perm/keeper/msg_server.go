@@ -136,7 +136,7 @@ func (ms msgServer) executeRenewPermissionVP(ctx sdk.Context, perm types.Permiss
 	now := ctx.BlockTime()
 
 	// Update perm
-	perm.VpState = types.ValidationState_VALIDATION_STATE_PENDING
+	perm.VpState = types.ValidationState_PENDING
 	perm.VpLastStateChange = &now
 	perm.Deposit += deposit
 	perm.VpCurrentFees = fees
@@ -159,7 +159,7 @@ func (ms msgServer) SetPermissionVPToValidated(goCtx context.Context, msg *types
 	}
 
 	// applicant_perm.vp_state MUST be equal to PENDING, else abort.
-	if applicantPerm.VpState != types.ValidationState_VALIDATION_STATE_PENDING {
+	if applicantPerm.VpState != types.ValidationState_PENDING {
 		return nil, fmt.Errorf("perm must be in PENDING state to be validated")
 	}
 
@@ -184,7 +184,7 @@ func (ms msgServer) SetPermissionVPToValidated(goCtx context.Context, msg *types
 	}
 
 	// vp_summary_digest_sri: MUST be null if validation.type is set to HOLDER
-	if applicantPerm.Type == types.PermissionType_PERMISSION_TYPE_HOLDER && msg.VpSummaryDigestSri != "" {
+	if applicantPerm.Type == types.PermissionType_HOLDER && msg.VpSummaryDigestSri != "" {
 		return nil, fmt.Errorf("vp_summary_digest_sri must be null for HOLDER type")
 	}
 
@@ -257,7 +257,7 @@ func (ms msgServer) RequestPermissionVPTermination(goCtx context.Context, msg *t
 		return nil, fmt.Errorf("perm not found: %w", err)
 	}
 
-	if applicantPerm.VpState != types.ValidationState_VALIDATION_STATE_VALIDATED {
+	if applicantPerm.VpState != types.ValidationState_VALIDATED {
 		return nil, fmt.Errorf("perm must be in VALIDATED state")
 	}
 
@@ -279,7 +279,7 @@ func (ms msgServer) RequestPermissionVPTermination(goCtx context.Context, msg *t
 	}
 
 	// Handle trust deposits
-	if applicantPerm.VpState == types.ValidationState_VALIDATION_STATE_TERMINATED {
+	if applicantPerm.VpState == types.ValidationState_TERMINATED {
 		if applicantPerm.Deposit > 0 {
 			err = ms.trustDeposit.AdjustTrustDeposit(ctx, applicantPerm.Grantee, -int64(applicantPerm.Deposit))
 			if err != nil {
@@ -317,10 +317,10 @@ func (ms msgServer) executeRequestPermissionVPTermination(ctx sdk.Context, perm 
 	perm.VpLastStateChange = &now
 
 	// Set state based on conditions
-	if perm.Type != types.PermissionType_PERMISSION_TYPE_HOLDER || // not HOLDER
+	if perm.Type != types.PermissionType_HOLDER || // not HOLDER
 		(perm.VpExp != nil && now.After(*perm.VpExp)) { // expired
 		// Immediate termination
-		perm.VpState = types.ValidationState_VALIDATION_STATE_TERMINATED
+		perm.VpState = types.ValidationState_TERMINATED
 		perm.Terminated = &now
 		perm.TerminatedBy = terminator
 
@@ -330,7 +330,7 @@ func (ms msgServer) executeRequestPermissionVPTermination(ctx sdk.Context, perm 
 		}
 	} else {
 		// Request termination
-		perm.VpState = types.ValidationState_VALIDATION_STATE_TERMINATION_REQUESTED
+		perm.VpState = types.ValidationState_TERMINATION_REQUESTED
 	}
 
 	return ms.Keeper.UpdatePermission(ctx, perm)
@@ -383,7 +383,7 @@ func (ms msgServer) ConfirmPermissionVPTermination(goCtx context.Context, msg *t
 	}
 
 	// Check perm state
-	if applicantPerm.VpState != types.ValidationState_VALIDATION_STATE_TERMINATION_REQUESTED {
+	if applicantPerm.VpState != types.ValidationState_TERMINATION_REQUESTED {
 		return nil, fmt.Errorf("perm must be in TERMINATION_REQUESTED state")
 	}
 
@@ -439,7 +439,7 @@ func (ms msgServer) ConfirmPermissionVPTermination(goCtx context.Context, msg *t
 func (ms msgServer) executeConfirmPermissionVPTermination(ctx sdk.Context, applicantPerm, validatorPerm types.Permission, confirmer string, now time.Time) error {
 	// Update basic fields
 	applicantPerm.Modified = &now
-	applicantPerm.VpState = types.ValidationState_VALIDATION_STATE_TERMINATED
+	applicantPerm.VpState = types.ValidationState_TERMINATED
 	applicantPerm.VpLastStateChange = &now
 	applicantPerm.Terminated = &now
 	applicantPerm.TerminatedBy = confirmer
@@ -493,7 +493,7 @@ func (ms msgServer) CancelPermissionVPLastRequest(goCtx context.Context, msg *ty
 	}
 
 	// Check perm state
-	if applicantPerm.VpState != types.ValidationState_VALIDATION_STATE_PENDING {
+	if applicantPerm.VpState != types.ValidationState_PENDING {
 		return nil, fmt.Errorf("perm must be in PENDING state")
 	}
 
@@ -514,9 +514,9 @@ func (ms msgServer) executeCancelPermissionVPLastRequest(ctx sdk.Context, perm t
 
 	// Set state based on vp_exp
 	if perm.VpExp == nil {
-		perm.VpState = types.ValidationState_VALIDATION_STATE_TERMINATED
+		perm.VpState = types.ValidationState_TERMINATED
 	} else {
-		perm.VpState = types.ValidationState_VALIDATION_STATE_VALIDATED
+		perm.VpState = types.ValidationState_VALIDATED
 	}
 
 	// Handle current fees if any
@@ -625,7 +625,7 @@ func (ms msgServer) executeCreateRootPermission(ctx sdk.Context, msg *types.MsgC
 	// Create new perm
 	perm := types.Permission{
 		SchemaId:         msg.SchemaId,
-		Type:             types.PermissionType_PERMISSION_TYPE_ECOSYSTEM,
+		Type:             types.PermissionType_ECOSYSTEM,
 		Did:              msg.Did,
 		Grantee:          msg.Creator,
 		Created:          &now,
@@ -685,7 +685,7 @@ func (ms msgServer) ExtendPermission(goCtx context.Context, msg *types.MsgExtend
 func (ms msgServer) validateExtendPermissionAuthority(ctx sdk.Context, creator string, perm types.Permission) error {
 	if perm.ValidatorPermId == 0 {
 		// For TRUST_REGISTRY type, creator must be the grantee
-		if perm.Type == types.PermissionType_PERMISSION_TYPE_ECOSYSTEM {
+		if perm.Type == types.PermissionType_ECOSYSTEM {
 			if perm.Grantee != creator {
 				return fmt.Errorf("creator is not the perm grantee")
 			}
@@ -812,7 +812,7 @@ func (ms msgServer) CreateOrUpdatePermissionSession(goCtx context.Context, msg *
 			return nil, sdkerrors.ErrNotFound.Wrapf("issuer perm not found: %v", err)
 		}
 
-		if perm.Type != types.PermissionType_PERMISSION_TYPE_ISSUER {
+		if perm.Type != types.PermissionType_ISSUER {
 			return nil, sdkerrors.ErrInvalidRequest.Wrap("issuer perm must be ISSUER type")
 		}
 
@@ -828,7 +828,7 @@ func (ms msgServer) CreateOrUpdatePermissionSession(goCtx context.Context, msg *
 			return nil, sdkerrors.ErrNotFound.Wrapf("verifier perm not found: %v", err)
 		}
 
-		if perm.Type != types.PermissionType_PERMISSION_TYPE_VERIFIER {
+		if perm.Type != types.PermissionType_VERIFIER {
 			return nil, sdkerrors.ErrInvalidRequest.Wrap("verifier perm must be VERIFIER type")
 		}
 
@@ -845,7 +845,7 @@ func (ms msgServer) CreateOrUpdatePermissionSession(goCtx context.Context, msg *
 		return nil, sdkerrors.ErrNotFound.Wrap("agent perm not found")
 	}
 
-	if agentPerm.Type != types.PermissionType_PERMISSION_TYPE_HOLDER {
+	if agentPerm.Type != types.PermissionType_HOLDER {
 		return nil, sdkerrors.ErrInvalidRequest.Wrap("agent perm must be HOLDER type")
 	}
 
@@ -860,7 +860,7 @@ func (ms msgServer) CreateOrUpdatePermissionSession(goCtx context.Context, msg *
 			return nil, sdkerrors.ErrNotFound.Wrap("wallet agent perm not found")
 		}
 
-		if perm.Type != types.PermissionType_PERMISSION_TYPE_HOLDER {
+		if perm.Type != types.PermissionType_HOLDER {
 			return nil, sdkerrors.ErrInvalidRequest.Wrap("wallet agent perm must be HOLDER type")
 		}
 
@@ -1038,7 +1038,7 @@ func (ms msgServer) findEcosystemPermissionForSchema(ctx sdk.Context, schemaId u
 	var found bool
 
 	err := ms.Permission.Walk(ctx, nil, func(key uint64, perm types.Permission) (bool, error) {
-		if perm.Type == types.PermissionType_PERMISSION_TYPE_ECOSYSTEM &&
+		if perm.Type == types.PermissionType_ECOSYSTEM &&
 			perm.SchemaId == schemaId &&
 			perm.Revoked == nil &&
 			perm.Terminated == nil {
@@ -1159,8 +1159,8 @@ func (ms msgServer) CreatePermission(goCtx context.Context, msg *types.MsgCreate
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	// type MUST be ISSUER or VERIFIER
-	if msg.Type != types.PermissionType_PERMISSION_TYPE_ISSUER &&
-		msg.Type != types.PermissionType_PERMISSION_TYPE_VERIFIER {
+	if msg.Type != types.PermissionType_ISSUER &&
+		msg.Type != types.PermissionType_VERIFIER {
 		return nil, fmt.Errorf("type must be ISSUER or VERIFIER")
 	}
 
@@ -1191,11 +1191,11 @@ func (ms msgServer) CreatePermission(goCtx context.Context, msg *types.MsgCreate
 	}
 
 	// [MOD-PERM-MSG-14-2-2] Create Permission perm checks
-	if msg.Type == types.PermissionType_PERMISSION_TYPE_ISSUER {
+	if msg.Type == types.PermissionType_ISSUER {
 		if cs.IssuerPermManagementMode != credentialschematypes.CredentialSchemaPermManagementMode_OPEN {
 			return nil, fmt.Errorf("issuer perm management mode is not OPEN")
 		}
-	} else if msg.Type == types.PermissionType_PERMISSION_TYPE_VERIFIER {
+	} else if msg.Type == types.PermissionType_VERIFIER {
 		if cs.VerifierPermManagementMode != credentialschematypes.CredentialSchemaPermManagementMode_OPEN {
 			return nil, fmt.Errorf("verifier perm management mode is not OPEN")
 		}
@@ -1250,7 +1250,7 @@ func (ms msgServer) executeCreatePermission(ctx sdk.Context, msg *types.MsgCreat
 		EffectiveUntil:   msg.EffectiveUntil,
 		Country:          msg.Country,
 		VerificationFees: msg.VerificationFees,
-		VpState:          types.ValidationState_VALIDATION_STATE_VALIDATED,
+		VpState:          types.ValidationState_VALIDATED,
 		ValidatorPermId:  ecosystemPerm.Id, // Set the ecosystem perm as the validator
 	}
 
@@ -1270,7 +1270,7 @@ func (ms msgServer) findEcosystemPermission(ctx sdk.Context, cs credentialschema
 
 	// Iterate through all permissions to find the ecosystem perm for this schema
 	err := ms.Permission.Walk(ctx, nil, func(id uint64, perm types.Permission) (stop bool, err error) {
-		if perm.SchemaId == cs.Id && perm.Type == types.PermissionType_PERMISSION_TYPE_ECOSYSTEM {
+		if perm.SchemaId == cs.Id && perm.Type == types.PermissionType_ECOSYSTEM {
 			foundPerm = perm
 			found = true
 			return true, nil

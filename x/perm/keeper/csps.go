@@ -237,7 +237,7 @@ func (ms msgServer) findBeneficiaries(ctx sdk.Context, issuerPermId, verifierPer
 		// Find ECOSYSTEM perm for this schema
 		err = ms.Permission.Walk(ctx, nil, func(id uint64, perm types.Permission) (bool, error) {
 			if perm.SchemaId == schemaID &&
-				perm.Type == types.PermissionType_PERMISSION_TYPE_ECOSYSTEM &&
+				perm.Type == types.PermissionType_ECOSYSTEM &&
 				perm.Revoked == nil && perm.Terminated == nil && perm.SlashedDeposit == 0 {
 				foundPerms = append(foundPerms, perm)
 				return true, nil // Stop iteration once found

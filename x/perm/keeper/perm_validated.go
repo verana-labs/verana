@@ -59,7 +59,7 @@ func (ms msgServer) executeSetPermissionVPToValidated(
 
 	// Update Permission applicant_perm:
 	applicantPerm.Modified = &now
-	applicantPerm.VpState = types.ValidationState_VALIDATION_STATE_VALIDATED
+	applicantPerm.VpState = types.ValidationState_VALIDATED
 	applicantPerm.VpLastStateChange = &now
 	applicantPerm.VpSummaryDigestSri = msg.VpSummaryDigestSri
 	applicantPerm.VpExp = vpExp

@@ -305,8 +305,8 @@ func (msg *MsgCreatePermission) ValidateBasic() error {
 		return sdkerrors.ErrInvalidRequest.Wrap("id must be a valid uint64")
 	}
 	// type MUST be ISSUER or VERIFIER
-	if msg.Type != PermissionType_PERMISSION_TYPE_ISSUER &&
-		msg.Type != PermissionType_PERMISSION_TYPE_VERIFIER {
+	if msg.Type != PermissionType_ISSUER &&
+		msg.Type != PermissionType_VERIFIER {
 		return sdkerrors.ErrInvalidRequest.Wrap("type must be ISSUER or VERIFIER")
 	}
 

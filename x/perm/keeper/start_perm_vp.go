@@ -102,14 +102,14 @@ func (ms msgServer) executeStartPermissionVP(ctx sdk.Context, msg *types.MsgStar
 		IssuanceFees:       0,                             // applicant_perm.issuance_fees: 0
 		VerificationFees:   0,                             // applicant_perm.verification_fees: 0
 		Country:            msg.Country,
-		ValidatorPermId:    msg.ValidatorPermId,                            // applicant_perm.validator_perm_id: validator_perm_id
-		VpLastStateChange:  &now,                                           // applicant_perm.vp_last_state_change: now
-		VpState:            types.ValidationState_VALIDATION_STATE_PENDING, // applicant_perm.vp_state: PENDING
-		VpCurrentFees:      validationFeesInDenom,                          // applicant_perm.vp_current_fees: validation_fees_in_denom
-		VpCurrentDeposit:   validationTrustDepositInDenom,                  // applicant_perm.vp_current_deposit: validation_trust_deposit_in_denom
-		VpSummaryDigestSri: "",                                             // applicant_perm.vp_summary_digest_sri: null
-		VpTermRequested:    nil,                                            // applicant_perm.vp_term_requested: null
-		VpValidatorDeposit: 0,                                              // applicant_perm.vp_validator_deposit: 0
+		ValidatorPermId:    msg.ValidatorPermId,           // applicant_perm.validator_perm_id: validator_perm_id
+		VpLastStateChange:  &now,                          // applicant_perm.vp_last_state_change: now
+		VpState:            types.ValidationState_PENDING, // applicant_perm.vp_state: PENDING
+		VpCurrentFees:      validationFeesInDenom,         // applicant_perm.vp_current_fees: validation_fees_in_denom
+		VpCurrentDeposit:   validationTrustDepositInDenom, // applicant_perm.vp_current_deposit: validation_trust_deposit_in_denom
+		VpSummaryDigestSri: "",                            // applicant_perm.vp_summary_digest_sri: null
+		VpTermRequested:    nil,                           // applicant_perm.vp_term_requested: null
+		VpValidatorDeposit: 0,                             // applicant_perm.vp_validator_deposit: 0
 	}
 
 	// Store the perm
@@ -123,42 +123,42 @@ func (ms msgServer) executeStartPermissionVP(ctx sdk.Context, msg *types.MsgStar
 
 func validatePermissionTypeCombination(requestedType, validatorType types.PermissionType, cs credentialschematypes.CredentialSchema) error {
 	switch requestedType {
-	case types.PermissionType_PERMISSION_TYPE_ISSUER:
+	case types.PermissionType_ISSUER:
 		if cs.IssuerPermManagementMode == credentialschematypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION {
-			if validatorType != types.PermissionType_PERMISSION_TYPE_ISSUER_GRANTOR {
+			if validatorType != types.PermissionType_ISSUER_GRANTOR {
 				return fmt.Errorf("issuer perm requires ISSUER_GRANTOR validator")
 			}
 		} else if cs.IssuerPermManagementMode == credentialschematypes.CredentialSchemaPermManagementMode_ECOSYSTEM {
-			if validatorType != types.PermissionType_PERMISSION_TYPE_ECOSYSTEM {
+			if validatorType != types.PermissionType_ECOSYSTEM {
 				return fmt.Errorf("issuer perm requires ECOSYSTEM validator")
 			}
 		} else if cs.IssuerPermManagementMode == credentialschematypes.CredentialSchemaPermManagementMode_OPEN {
 			// Mode is OPEN which means anyone can issue credential of this schema
 			// But formal perm creation is still needed when payment is required
 			// Check if validator has the correct type for fee collection
-			if validatorType != types.PermissionType_PERMISSION_TYPE_ECOSYSTEM {
+			if validatorType != types.PermissionType_ECOSYSTEM {
 				return fmt.Errorf("open issuance still requires ECOSYSTEM validator for fee collection")
 			}
 		} else {
 			return fmt.Errorf("issuer perm not supported with current schema settings")
 		}
 
-	case types.PermissionType_PERMISSION_TYPE_ISSUER_GRANTOR:
+	case types.PermissionType_ISSUER_GRANTOR:
 		if cs.IssuerPermManagementMode == credentialschematypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION {
-			if validatorType != types.PermissionType_PERMISSION_TYPE_ECOSYSTEM {
+			if validatorType != types.PermissionType_ECOSYSTEM {
 				return fmt.Errorf("issuer grantor perm requires ECOSYSTEM validator")
 			}
 		} else {
 			return fmt.Errorf("issuer grantor perm not supported with current schema settings")
 		}
 
-	case types.PermissionType_PERMISSION_TYPE_VERIFIER:
+	case types.PermissionType_VERIFIER:
 		if cs.VerifierPermManagementMode == credentialschematypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION {
-			if validatorType != types.PermissionType_PERMISSION_TYPE_VERIFIER_GRANTOR {
+			if validatorType != types.PermissionType_VERIFIER_GRANTOR {
 				return fmt.Errorf("verifier perm requires VERIFIER_GRANTOR validator")
 			}
 		} else if cs.VerifierPermManagementMode == credentialschematypes.CredentialSchemaPermManagementMode_ECOSYSTEM {
-			if validatorType != types.PermissionType_PERMISSION_TYPE_ECOSYSTEM {
+			if validatorType != types.PermissionType_ECOSYSTEM {
 				return fmt.Errorf("verifier perm requires ECOSYSTEM validator")
 			}
 		} else if cs.VerifierPermManagementMode == credentialschematypes.CredentialSchemaPermManagementMode_OPEN {
@@ -166,31 +166,31 @@ func validatePermissionTypeCombination(requestedType, validatorType types.Permis
 			// This doesn't imply no payment is necessary - formal perm might be
 			// required when payment is needed
 			// Check if validator has the correct type for fee collection
-			if validatorType != types.PermissionType_PERMISSION_TYPE_ECOSYSTEM {
+			if validatorType != types.PermissionType_ECOSYSTEM {
 				return fmt.Errorf("open verification still requires ECOSYSTEM validator for fee collection")
 			}
 		} else {
 			return fmt.Errorf("verifier perm not supported with current schema settings")
 		}
 
-	case types.PermissionType_PERMISSION_TYPE_VERIFIER_GRANTOR:
+	case types.PermissionType_VERIFIER_GRANTOR:
 		if cs.VerifierPermManagementMode == credentialschematypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION {
-			if validatorType != types.PermissionType_PERMISSION_TYPE_ECOSYSTEM {
+			if validatorType != types.PermissionType_ECOSYSTEM {
 				return fmt.Errorf("verifier grantor perm requires ECOSYSTEM validator")
 			}
 		} else {
 			return fmt.Errorf("verifier grantor perm not supported with current schema settings")
 		}
 
-	case types.PermissionType_PERMISSION_TYPE_HOLDER:
+	case types.PermissionType_HOLDER:
 		if cs.VerifierPermManagementMode == credentialschematypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION ||
 			cs.VerifierPermManagementMode == credentialschematypes.CredentialSchemaPermManagementMode_ECOSYSTEM {
-			if validatorType != types.PermissionType_PERMISSION_TYPE_ISSUER {
+			if validatorType != types.PermissionType_ISSUER {
 				return fmt.Errorf("holder perm requires ISSUER validator")
 			}
 		} else if cs.VerifierPermManagementMode == credentialschematypes.CredentialSchemaPermManagementMode_OPEN {
 			// Even in OPEN mode, holder permissions might require validation from an ISSUER
-			if validatorType != types.PermissionType_PERMISSION_TYPE_ISSUER {
+			if validatorType != types.PermissionType_ISSUER {
 				return fmt.Errorf("holder perm requires ISSUER validator even in OPEN verification mode")
 			}
 		} else {
