@@ -132,7 +132,7 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					Use:       "start-perm-vp [type] [validator-perm-id] [country]",
 					Short:     "Start a new perm validation process",
 					Long: `Start a new perm validation process with the specified parameters:
-- type: Permission type (0=Unspecified, 1=Issuer, 2=Verifier, 3=IssuerGrantor, 4=VerifierGrantor, 5=TrustRegistry, 6=Holder)
+- type: Permission type (issuer, verifier, issuer-grantor, verifier-grantor, ecosystem, holder)
 - validator-perm-id: ID of the validator perm
 - country: ISO 3166-1 alpha-2 country code`,
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
@@ -403,7 +403,7 @@ This allows self-creation of permissions without validation process.
 
 Parameters:
 - schema-id: ID of the credential schema
-- type: Permission type (1=ISSUER, 2=VERIFIER)
+- type: Permission type (issuer, verifier)
 - did: DID of the grantee service
 
 Optional flags:
