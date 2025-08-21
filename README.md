@@ -42,10 +42,55 @@ Documentation is currently under development and will be available soon.
 
 Instructions for joining the Verana Mainnet will be provided prior to the network launch.
 
-## Contributing
+## Development
 
-Contributing guidelines will be available in the repository once the project reaches its public development phase.
+### Protobuf Generation
+
+After making changes to any `.proto` files, you need to regenerate the protobuf files and related code. Verana uses Cosmos SDK v0.50.13 and requires Ignite CLI v28.x for compatibility.
+
+#### Prerequisites
+
+First, install Ignite CLI v28.10.0 and rename it to `ignite_eden`:
+
+1. **Download Ignite v28.10.0:**
+   ```bash
+   curl https://get.ignite.com/cli@v28.10.0 | bash
+   ```
+
+2. **Rename the binary:**
+   ```bash
+   mv /usr/local/bin/ignite /usr/local/bin/ignite_eden
+   ```
+   *Note: Adjust the path as needed for your environment (sometimes `~/.local/bin/ignite`).*
+
+3. **Verify installation:**
+   ```bash
+   ignite_eden version
+   ```
+   You should see Ignite CLI version `v28.x.y` and Cosmos SDK v0.50.x.
+
+#### Generating Protobuf Files
+
+To regenerate protobuf files after making changes:
+
+```bash
+ignite_eden chain build
+```
+
+#### Generating OpenAPI Documentation
+
+To generate OpenAPI documentation:
+
+```bash
+ignite_eden generate openapi --clear-cache --enable-proto-vendor
+```
+
+**Important:** Always run these commands after modifying any `.proto` files to ensure your changes are properly compiled and integrated into the codebase.
 
 ## Local Development Environment
 
 A local development environment for Verana is planned and will be made available in the future.
+
+## Contributing
+
+Contributing guidelines will be available in the repository once the project reaches its public development phase.
