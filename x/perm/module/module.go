@@ -20,9 +20,9 @@ import (
 
 	// this line is used by starport scaffolding # 1
 
-	modulev1 "github.com/verana-labs/verana-blockchain/api/verana/perm/module"
-	"github.com/verana-labs/verana-blockchain/x/perm/keeper"
-	"github.com/verana-labs/verana-blockchain/x/perm/types"
+	modulev1 "github.com/verana-labs/verana/api/verana/perm/module"
+	"github.com/verana-labs/verana/x/perm/keeper"
+	"github.com/verana-labs/verana/x/perm/types"
 )
 
 var (

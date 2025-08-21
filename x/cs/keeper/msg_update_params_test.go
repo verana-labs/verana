@@ -6,7 +6,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 
-	"github.com/verana-labs/verana-blockchain/x/cs/types"
+	"github.com/verana-labs/verana/x/cs/types"
 )
 
 func TestMsgUpdateParams(t *testing.T) {

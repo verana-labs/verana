@@ -1,14 +1,14 @@
 package types_test
 
 import (
-	keepertest "github.com/verana-labs/verana-blockchain/testutil/keeper"
-	"github.com/verana-labs/verana-blockchain/testutil/nullify"
-	trustregistry "github.com/verana-labs/verana-blockchain/x/tr/module"
+	keepertest "github.com/verana-labs/verana/testutil/keeper"
+	"github.com/verana-labs/verana/testutil/nullify"
+	trustregistry "github.com/verana-labs/verana/x/tr/module"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/require"
-	"github.com/verana-labs/verana-blockchain/x/tr/types"
+	"github.com/verana-labs/verana/x/tr/types"
 )
 
 func TestGenesis(t *testing.T) {

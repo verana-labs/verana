@@ -8,13 +8,13 @@ import (
 	"github.com/google/uuid"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	cstypes "github.com/verana-labs/verana-blockchain/x/cs/types"
+	cstypes "github.com/verana-labs/verana/x/cs/types"
 
 	"github.com/stretchr/testify/require"
 
-	keepertest "github.com/verana-labs/verana-blockchain/testutil/keeper"
-	"github.com/verana-labs/verana-blockchain/x/perm/keeper"
-	"github.com/verana-labs/verana-blockchain/x/perm/types"
+	keepertest "github.com/verana-labs/verana/testutil/keeper"
+	"github.com/verana-labs/verana/x/perm/keeper"
+	"github.com/verana-labs/verana/x/perm/types"
 )
 
 func setupMsgServer(t testing.TB) (keeper.Keeper, types.MsgServer, *keepertest.MockCredentialSchemaKeeper, *keepertest.MockTrustRegistryKeeper, context.Context) {

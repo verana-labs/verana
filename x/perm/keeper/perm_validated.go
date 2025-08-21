@@ -6,8 +6,8 @@ import (
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	cstypes "github.com/verana-labs/verana-blockchain/x/cs/types"
-	"github.com/verana-labs/verana-blockchain/x/perm/types"
+	cstypes "github.com/verana-labs/verana/x/cs/types"
+	"github.com/verana-labs/verana/x/perm/types"
 )
 
 func getValidityPeriod(permType uint32, cs cstypes.CredentialSchema) uint32 {

@@ -4,7 +4,7 @@ import (
 	"context"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	trustregistrytypes "github.com/verana-labs/verana-blockchain/x/tr/types"
+	trustregistrytypes "github.com/verana-labs/verana/x/tr/types"
 )
 
 // AccountKeeper defines the expected interface for the Account module.

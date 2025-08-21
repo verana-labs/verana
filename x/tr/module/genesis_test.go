@@ -4,10 +4,10 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	keepertest "github.com/verana-labs/verana-blockchain/testutil/keeper"
-	"github.com/verana-labs/verana-blockchain/testutil/nullify"
-	trustregistry "github.com/verana-labs/verana-blockchain/x/tr/module"
-	"github.com/verana-labs/verana-blockchain/x/tr/types"
+	keepertest "github.com/verana-labs/verana/testutil/keeper"
+	"github.com/verana-labs/verana/testutil/nullify"
+	trustregistry "github.com/verana-labs/verana/x/tr/module"
+	"github.com/verana-labs/verana/x/tr/types"
 )
 
 func TestGenesis(t *testing.T) {

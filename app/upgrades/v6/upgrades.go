@@ -7,12 +7,12 @@ import (
 	"fmt"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
-	"github.com/verana-labs/verana-blockchain/app/upgrades/types"
-	credentialschematypes "github.com/verana-labs/verana-blockchain/x/cs/types"
-	diddirectorytypes "github.com/verana-labs/verana-blockchain/x/dd/types"
-	permissiontypes "github.com/verana-labs/verana-blockchain/x/perm/types"
-	trustdeposittypes "github.com/verana-labs/verana-blockchain/x/td/types"
-	trustregistrytypes "github.com/verana-labs/verana-blockchain/x/tr/types"
+	"github.com/verana-labs/verana/app/upgrades/types"
+	credentialschematypes "github.com/verana-labs/verana/x/cs/types"
+	diddirectorytypes "github.com/verana-labs/verana/x/dd/types"
+	permissiontypes "github.com/verana-labs/verana/x/perm/types"
+	trustdeposittypes "github.com/verana-labs/verana/x/td/types"
+	trustregistrytypes "github.com/verana-labs/verana/x/tr/types"
 	"strconv"
 )
 

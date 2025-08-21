@@ -6,9 +6,9 @@ import (
 	upgradetypes "cosmossdk.io/x/upgrade/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
-	"github.com/verana-labs/verana-blockchain/app/upgrades/types"
-	credentialschema "github.com/verana-labs/verana-blockchain/x/cs/module"
-	credentialschematypes "github.com/verana-labs/verana-blockchain/x/cs/types"
+	"github.com/verana-labs/verana/app/upgrades/types"
+	credentialschema "github.com/verana-labs/verana/x/cs/module"
+	credentialschematypes "github.com/verana-labs/verana/x/cs/types"
 )
 
 func CreateUpgradeHandler(

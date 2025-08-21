@@ -7,10 +7,10 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 
-	keepertest "github.com/verana-labs/verana-blockchain/testutil/keeper"
-	"github.com/verana-labs/verana-blockchain/testutil/nullify"
-	permission "github.com/verana-labs/verana-blockchain/x/perm/module"
-	"github.com/verana-labs/verana-blockchain/x/perm/types"
+	keepertest "github.com/verana-labs/verana/testutil/keeper"
+	"github.com/verana-labs/verana/testutil/nullify"
+	permission "github.com/verana-labs/verana/x/perm/module"
+	"github.com/verana-labs/verana/x/perm/types"
 )
 
 func TestGenesis(t *testing.T) {

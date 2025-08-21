@@ -8,9 +8,9 @@ import (
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	"github.com/cosmos/cosmos-sdk/x/simulation"
 
-	"github.com/verana-labs/verana-blockchain/testutil/sample"
-	trustdepositsimulation "github.com/verana-labs/verana-blockchain/x/td/simulation"
-	"github.com/verana-labs/verana-blockchain/x/td/types"
+	"github.com/verana-labs/verana/testutil/sample"
+	trustdepositsimulation "github.com/verana-labs/verana/x/td/simulation"
+	"github.com/verana-labs/verana/x/td/types"
 )
 
 // avoid unused import issue

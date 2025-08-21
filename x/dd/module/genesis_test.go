@@ -6,10 +6,10 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
-	keepertest "github.com/verana-labs/verana-blockchain/testutil/keeper"
-	"github.com/verana-labs/verana-blockchain/testutil/nullify"
-	diddirectory "github.com/verana-labs/verana-blockchain/x/dd/module"
-	"github.com/verana-labs/verana-blockchain/x/dd/types"
+	keepertest "github.com/verana-labs/verana/testutil/keeper"
+	"github.com/verana-labs/verana/testutil/nullify"
+	diddirectory "github.com/verana-labs/verana/x/dd/module"
+	"github.com/verana-labs/verana/x/dd/types"
 )
 
 func TestGenesis(t *testing.T) {

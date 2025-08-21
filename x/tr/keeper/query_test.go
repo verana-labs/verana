@@ -6,9 +6,9 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
-	keepertest "github.com/verana-labs/verana-blockchain/testutil/keeper"
-	"github.com/verana-labs/verana-blockchain/x/tr/keeper"
-	"github.com/verana-labs/verana-blockchain/x/tr/types"
+	keepertest "github.com/verana-labs/verana/testutil/keeper"
+	"github.com/verana-labs/verana/x/tr/keeper"
+	"github.com/verana-labs/verana/x/tr/types"
 )
 
 func setupTestData(t *testing.T) (keeper.Keeper, types.QueryServer, context.Context, uint64) {

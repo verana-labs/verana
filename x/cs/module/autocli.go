@@ -3,7 +3,7 @@ package credentialschema
 import (
 	autocliv1 "cosmossdk.io/api/cosmos/autocli/v1"
 
-	modulev1 "github.com/verana-labs/verana-blockchain/api/verana/cs/v1"
+	modulev1 "github.com/verana-labs/verana/api/verana/cs/v1"
 )
 
 // AutoCLIOptions implements the autocli.HasAutoCLIConfig interface.

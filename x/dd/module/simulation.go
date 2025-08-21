@@ -8,9 +8,9 @@ import (
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	"github.com/cosmos/cosmos-sdk/x/simulation"
 
-	"github.com/verana-labs/verana-blockchain/testutil/sample"
-	diddirectorysimulation "github.com/verana-labs/verana-blockchain/x/dd/simulation"
-	"github.com/verana-labs/verana-blockchain/x/dd/types"
+	"github.com/verana-labs/verana/testutil/sample"
+	diddirectorysimulation "github.com/verana-labs/verana/x/dd/simulation"
+	"github.com/verana-labs/verana/x/dd/types"
 )
 
 // avoid unused import issue

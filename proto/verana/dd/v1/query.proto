@@ -10,7 +10,7 @@ import "google/protobuf/timestamp.proto";
 import "cosmos_proto/cosmos.proto";
 import "verana/dd/v1/types.proto";
 
-option go_package = "github.com/verana-labs/verana-blockchain/x/dd/types";
+option go_package = "github.com/verana-labs/verana/x/dd/types";
 
 // Query defines the gRPC querier service.
 service Query {

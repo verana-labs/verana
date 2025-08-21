@@ -5,7 +5,7 @@ import (
 	"cosmossdk.io/math"
 	"fmt"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/verana-labs/verana-blockchain/x/td/types"
+	"github.com/verana-labs/verana/x/td/types"
 )
 
 type msgServer struct {

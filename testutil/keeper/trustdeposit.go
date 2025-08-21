@@ -17,8 +17,8 @@ import (
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/stretchr/testify/require"
 
-	"github.com/verana-labs/verana-blockchain/x/td/keeper"
-	"github.com/verana-labs/verana-blockchain/x/td/types"
+	"github.com/verana-labs/verana/x/td/keeper"
+	"github.com/verana-labs/verana/x/td/types"
 )
 
 func TrustdepositKeeper(t testing.TB) (keeper.Keeper, sdk.Context) {

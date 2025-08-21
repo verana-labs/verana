@@ -4,8 +4,8 @@ import (
 	"fmt"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/verana-labs/verana-blockchain/x/td/keeper"
-	"github.com/verana-labs/verana-blockchain/x/td/types"
+	"github.com/verana-labs/verana/x/td/keeper"
+	"github.com/verana-labs/verana/x/td/types"
 )
 
 // InitGenesis initializes the module's state from a provided genesis state.

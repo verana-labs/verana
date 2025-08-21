@@ -2,7 +2,7 @@ package trustregistry
 
 import (
 	autocliv1 "cosmossdk.io/api/cosmos/autocli/v1"
-	modulev1 "github.com/verana-labs/verana-blockchain/api/verana/tr/v1"
+	modulev1 "github.com/verana-labs/verana/api/verana/tr/v1"
 )
 
 // AutoCLIOptions implements the autocli.HasAutoCLIConfig interface.
