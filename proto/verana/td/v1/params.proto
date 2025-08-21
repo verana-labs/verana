@@ -4,11 +4,11 @@ package verana.td.v1;
 import "amino/amino.proto";
 import "gogoproto/gogo.proto";
 
-option go_package = "github.com/verana-labs/verana-blockchain/x/trustdeposit/types";
+option go_package = "github.com/verana-labs/verana-blockchain/x/td/types";
 
 // Params defines the parameters for the module.
 message Params {
-  option (amino.name) = "verana/x/trustdeposit/Params";
+  option (amino.name) = "verana/x/td/Params";
   option (gogoproto.equal) = true;
 
   string trust_deposit_reclaim_burn_rate = 1[

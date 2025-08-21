@@ -4,11 +4,11 @@ package verana.tr.v1;
 import "amino/amino.proto";
 import "gogoproto/gogo.proto";
 
-option go_package = "github.com/verana-labs/verana-blockchain/x/trustregistry/types";
+option go_package = "github.com/verana-labs/verana-blockchain/x/tr/types";
 
 // Params defines the parameters for the module.
 message Params {
-  option (amino.name) = "verana/x/trustregistry/Params";
+  option (amino.name) = "verana/x/tr/Params";
   option (gogoproto.equal) = true;
 
   uint64 trust_registry_trust_deposit = 1;

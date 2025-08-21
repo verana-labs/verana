@@ -18,9 +18,9 @@ import (
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/stretchr/testify/require"
 
-	"github.com/verana-labs/verana-blockchain/x/credentialschema/keeper"
-	"github.com/verana-labs/verana-blockchain/x/credentialschema/types"
-	trtypes "github.com/verana-labs/verana-blockchain/x/trustregistry/types"
+	"github.com/verana-labs/verana-blockchain/x/cs/keeper"
+	"github.com/verana-labs/verana-blockchain/x/cs/types"
+	trtypes "github.com/verana-labs/verana-blockchain/x/tr/types"
 )
 
 // MockBankKeeper is a mock implementation of types.BankKeeper

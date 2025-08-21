@@ -5,7 +5,7 @@ import "amino/amino.proto";
 import "gogoproto/gogo.proto";
 import "verana/td/v1/params.proto";
 
-option go_package = "github.com/verana-labs/verana-blockchain/x/trustdeposit/types";
+option go_package = "github.com/verana-labs/verana-blockchain/x/td/types";
 
 // GenesisState defines the trustdeposit module's genesis state.
 message GenesisState {

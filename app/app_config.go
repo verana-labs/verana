@@ -58,16 +58,16 @@ import (
 	permissionmodulev1 "github.com/verana-labs/verana-blockchain/api/verana/perm/module"
 	trustdepositmodulev1 "github.com/verana-labs/verana-blockchain/api/verana/td/module"
 	trustregistrymodulev1 "github.com/verana-labs/verana-blockchain/api/verana/tr/module"
-	_ "github.com/verana-labs/verana-blockchain/x/credentialschema/module" // import for side-effects
-	credentialschemamoduletypes "github.com/verana-labs/verana-blockchain/x/credentialschema/types"
-	_ "github.com/verana-labs/verana-blockchain/x/diddirectory/module" // import for side-effects
-	diddirectorymoduletypes "github.com/verana-labs/verana-blockchain/x/diddirectory/types"
-	_ "github.com/verana-labs/verana-blockchain/x/permission/module" // import for side-effects
-	permissionmoduletypes "github.com/verana-labs/verana-blockchain/x/permission/types"
-	_ "github.com/verana-labs/verana-blockchain/x/trustdeposit/module" // import for side-effects
-	trustdepositmoduletypes "github.com/verana-labs/verana-blockchain/x/trustdeposit/types"
-	_ "github.com/verana-labs/verana-blockchain/x/trustregistry/module" // import for side-effects
-	trustregistrymoduletypes "github.com/verana-labs/verana-blockchain/x/trustregistry/types"
+	_ "github.com/verana-labs/verana-blockchain/x/cs/module" // import for side-effects
+	credentialschemamoduletypes "github.com/verana-labs/verana-blockchain/x/cs/types"
+	_ "github.com/verana-labs/verana-blockchain/x/dd/module" // import for side-effects
+	diddirectorymoduletypes "github.com/verana-labs/verana-blockchain/x/dd/types"
+	_ "github.com/verana-labs/verana-blockchain/x/perm/module" // import for side-effects
+	permissionmoduletypes "github.com/verana-labs/verana-blockchain/x/perm/types"
+	_ "github.com/verana-labs/verana-blockchain/x/td/module" // import for side-effects
+	trustdepositmoduletypes "github.com/verana-labs/verana-blockchain/x/td/types"
+	_ "github.com/verana-labs/verana-blockchain/x/tr/module" // import for side-effects
+	trustregistrymoduletypes "github.com/verana-labs/verana-blockchain/x/tr/types"
 	// this line is used by starport scaffolding # stargate/app/moduleImport
 )
 

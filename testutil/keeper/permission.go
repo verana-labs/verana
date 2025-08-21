@@ -17,9 +17,9 @@ import (
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/stretchr/testify/require"
 
-	cstypes "github.com/verana-labs/verana-blockchain/x/credentialschema/types"
-	"github.com/verana-labs/verana-blockchain/x/permission/keeper"
-	"github.com/verana-labs/verana-blockchain/x/permission/types"
+	cstypes "github.com/verana-labs/verana-blockchain/x/cs/types"
+	"github.com/verana-labs/verana-blockchain/x/perm/keeper"
+	"github.com/verana-labs/verana-blockchain/x/perm/types"
 )
 
 func PermissionKeeper(t testing.TB) (keeper.Keeper, *MockCredentialSchemaKeeper, *MockTrustRegistryKeeper, sdk.Context) {

@@ -6,7 +6,7 @@ import "gogoproto/gogo.proto";
 import "google/protobuf/timestamp.proto";
 import "cosmos_proto/cosmos.proto";
 
-option go_package = "github.com/verana-labs/verana-blockchain/x/credentialschema/types";
+option go_package = "github.com/verana-labs/verana-blockchain/x/cs/types";
 
 // CredentialSchemaPermManagementMode defines how permissions are managed
 enum CredentialSchemaPermManagementMode {

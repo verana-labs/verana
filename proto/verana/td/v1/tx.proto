@@ -7,7 +7,7 @@ import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
 import "verana/td/v1/params.proto";
 
-option go_package = "github.com/verana-labs/verana-blockchain/x/trustdeposit/types";
+option go_package = "github.com/verana-labs/verana-blockchain/x/td/types";
 
 // Msg defines the Msg service.
 service Msg {
@@ -27,7 +27,7 @@ service Msg {
 // MsgUpdateParams is the Msg/UpdateParams request type.
 message MsgUpdateParams {
   option (cosmos.msg.v1.signer) = "authority";
-  option (amino.name) = "verana/x/trustdeposit/MsgUpdateParams";
+  option (amino.name) = "verana/x/td/MsgUpdateParams";
 
   // authority is the address that controls the module (defaults to x/gov unless overwritten).
   string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
