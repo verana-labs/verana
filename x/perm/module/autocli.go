@@ -216,32 +216,7 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 						},
 					},
 				},
-				{
-					RpcMethod: "RequestPermissionVPTermination",
-					Use:       "request-vp-termination [id]",
-					Short:     "Request termination of a perm validation process",
-					Long: `Request termination of a perm validation process:
-- id: ID of the perm validation process to terminate
-Note: For expired VPs, either the grantee or validator can request termination.
-For active VPs, only the grantee can request termination unless it's a HOLDER type.`,
-					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
-						{
-							ProtoField: "id",
-						},
-					},
-				},
-				// Add to the RpcCommandOptions array in the Tx ServiceCommandDescriptor:
-				{
-					RpcMethod: "ConfirmPermissionVPTermination",
-					Use:       "confirm-vp-termination [id]",
-					Short:     "Confirm the termination of a perm VP",
-					Long:      "Confirm the termination of a perm VP. Can be called by the validator, or by the grantee after the timeout period has elapsed.",
-					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
-						{
-							ProtoField: "id",
-						},
-					},
-				},
+
 				{
 					RpcMethod: "CancelPermissionVPLastRequest",
 					Use:       "cancel-perm-vp-request [id]",

@@ -114,36 +114,6 @@ func isValidDigestSRI(digestSRI string) bool {
 	return matched
 }
 
-// ValidateBasic for MsgRequestPermissionVPTermination
-func (msg *MsgRequestPermissionVPTermination) ValidateBasic() error {
-	// Validate creator address
-	if _, err := sdk.AccAddressFromBech32(msg.Creator); err != nil {
-		return fmt.Errorf("invalid creator address: %w", err)
-	}
-
-	// Validate perm ID
-	if msg.Id == 0 {
-		return fmt.Errorf("perm ID cannot be 0")
-	}
-
-	return nil
-}
-
-// ValidateBasic for MsgConfirmPermissionVPTermination
-func (msg *MsgConfirmPermissionVPTermination) ValidateBasic() error {
-	// Validate creator address
-	if _, err := sdk.AccAddressFromBech32(msg.Creator); err != nil {
-		return fmt.Errorf("invalid creator address: %w", err)
-	}
-
-	// Validate perm ID
-	if msg.Id == 0 {
-		return fmt.Errorf("perm ID cannot be 0")
-	}
-
-	return nil
-}
-
 // ValidateBasic for MsgConfirmPermissionVPTermination
 func (msg *MsgCancelPermissionVPLastRequest) ValidateBasic() error {
 	// Validate creator address
