@@ -310,8 +310,8 @@ For active VPs, only the grantee can request termination unless it's a HOLDER ty
 				{
 					RpcMethod: "RevokePermission",
 					Use:       "revoke-perm [id]",
-					Short:     "Revoke a perm",
-					Long:      "Revoke a perm. Can only be executed by the validator of the perm.",
+					Short:     "Revoke a permission",
+					Long:      "Revoke a permission. Can be executed by the permission grantee, a validator ancestor, or the trust registry controller.",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{
 							ProtoField: "id",

@@ -792,73 +792,133 @@ func (ms msgServer) RevokePermission(goCtx context.Context, msg *types.MsgRevoke
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	now := ctx.BlockTime()
 
-	// [MOD-PERM-MSG-9-2-1] Basic checks
-	applicantPerm, err := ms.Keeper.GetPermissionByID(ctx, msg.Id)
+	// [MOD-PERM-MSG-9-2-1] Revoke Permission basic checks
+	applicantPerm, err := ms.validateRevokePermissionBasicChecks(ctx, msg, now)
 	if err != nil {
-		return nil, fmt.Errorf("perm not found: %w", err)
+		return nil, err
 	}
 
-	// [MOD-PERM-MSG-9-2-2] Validator perm checks
-	validatorPerm, err := ms.Keeper.GetPermissionByID(ctx, applicantPerm.ValidatorPermId)
-	if err != nil {
-		return nil, fmt.Errorf("validator perm not found: %w", err)
+	// [MOD-PERM-MSG-9-2-2] Revoke Permission advanced checks
+	if err := ms.validateRevokePermissionAdvancedChecks(ctx, msg, applicantPerm, now); err != nil {
+		return nil, err
 	}
 
-	if err := IsValidPermission(validatorPerm, applicantPerm.Country, ctx.BlockTime()); err != nil {
-		return nil, fmt.Errorf("validator perm is not valid: %w", err)
-	}
+	// [MOD-PERM-MSG-9-2-3] Revoke Permission fee checks
+	// Account MUST have the required estimated transaction fees available
+	// (This is handled by the SDK automatically during transaction processing)
 
-	if validatorPerm.Grantee != msg.Creator {
-		return nil, fmt.Errorf("creator is not the validator")
-	}
-
-	// Handle applicant's trust deposit
-	if applicantPerm.Deposit > 0 {
-		err = ms.trustDeposit.AdjustTrustDeposit(ctx, applicantPerm.Grantee, -int64(applicantPerm.Deposit))
-		if err != nil {
-			return nil, fmt.Errorf("failed to reduce applicant trust deposit: %w", err)
-		}
-		applicantPerm.Deposit = 0
-	}
-
-	// Handle validator's trust deposit
-	if applicantPerm.VpValidatorDeposit > 0 {
-		validatorPerm, err := ms.Keeper.GetPermissionByID(ctx, applicantPerm.ValidatorPermId)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get validator perm: %w", err)
-		}
-		err = ms.trustDeposit.AdjustTrustDeposit(ctx, validatorPerm.Grantee, -int64(applicantPerm.VpValidatorDeposit))
-		if err != nil {
-			return nil, fmt.Errorf("failed to reduce validator trust deposit: %w", err)
-		}
-		applicantPerm.VpValidatorDeposit = 0
-	}
-
-	// [MOD-PERM-MSG-9-3] Execution
+	// [MOD-PERM-MSG-9-3] Revoke Permission execution
 	if err := ms.executeRevokePermission(ctx, applicantPerm, msg.Creator, now); err != nil {
-		return nil, fmt.Errorf("failed to revoke perm: %w", err)
+		return nil, fmt.Errorf("failed to revoke permission: %w", err)
 	}
 
 	return &types.MsgRevokePermissionResponse{}, nil
 }
 
+// [MOD-PERM-MSG-9-2-1] Revoke Permission basic checks
+func (ms msgServer) validateRevokePermissionBasicChecks(ctx sdk.Context, msg *types.MsgRevokePermission, now time.Time) (types.Permission, error) {
+	var applicantPerm types.Permission
+
+	// id MUST be a valid uint64 (already validated in ValidateBasic)
+
+	// Load Permission entry applicant_perm from id. If no entry found, abort
+	perm, err := ms.Keeper.GetPermissionByID(ctx, msg.Id)
+	if err != nil {
+		return applicantPerm, fmt.Errorf("permission not found: %w", err)
+	}
+	applicantPerm = perm
+
+	// applicant_perm MUST be a valid permission
+	if err := IsValidPermission(applicantPerm, applicantPerm.Country, now); err != nil {
+		return applicantPerm, fmt.Errorf("applicant permission is not valid: %w", err)
+	}
+
+	return applicantPerm, nil
+}
+
+// [MOD-PERM-MSG-9-2-2] Revoke Permission advanced checks
+func (ms msgServer) validateRevokePermissionAdvancedChecks(ctx sdk.Context, msg *types.MsgRevokePermission, applicantPerm types.Permission, now time.Time) error {
+	// Either Option #1, #2 or #3 MUST return true, else abort
+
+	// Option #1: executed by a validator ancestor
+	if ms.checkValidatorAncestorOption(ctx, msg.Creator, applicantPerm, now) {
+		return nil
+	}
+
+	// Option #2: executed by TrustRegistry controller
+	if ms.checkTrustRegistryControllerOption(ctx, msg.Creator, applicantPerm) {
+		return nil
+	}
+
+	// Option #3: executed by applicant_perm.grantee
+	if applicantPerm.Grantee == msg.Creator {
+		return nil
+	}
+
+	return fmt.Errorf("creator is not authorized to revoke this permission")
+}
+
+// Option #1: executed by a validator ancestor
+func (ms msgServer) checkValidatorAncestorOption(ctx sdk.Context, creator string, applicantPerm types.Permission, now time.Time) bool {
+	// if applicant_perm.validator_perm_id is defined
+	if applicantPerm.ValidatorPermId == 0 {
+		return false
+	}
+
+	// set validator_perm = applicant_perm
+	// while validator_perm.validator_perm_id is defined
+	currentValidatorPermId := applicantPerm.ValidatorPermId
+
+	for currentValidatorPermId != 0 {
+		// load validator_perm from validator_perm.validator_perm_id
+		validatorPerm, err := ms.Keeper.GetPermissionByID(ctx, currentValidatorPermId)
+		if err != nil {
+			return false
+		}
+
+		// if validator_perm is a valid permission and validator_perm.grantee is who is running the method
+		if IsValidPermission(validatorPerm, validatorPerm.Country, now) == nil &&
+			validatorPerm.Grantee == creator {
+			return true
+		}
+
+		// Move up to the next ancestor
+		currentValidatorPermId = validatorPerm.ValidatorPermId
+	}
+
+	return false
+}
+
+// Option #2: executed by TrustRegistry controller
+func (ms msgServer) checkTrustRegistryControllerOption(ctx sdk.Context, creator string, applicantPerm types.Permission) bool {
+	// load CredentialSchema cs from applicant_perm.schema_id
+	cs, err := ms.credentialSchemaKeeper.GetCredentialSchemaById(ctx, applicantPerm.SchemaId)
+	if err != nil {
+		return false
+	}
+
+	// load TrustRegistry tr from cs.tr_id
+	tr, err := ms.trustRegistryKeeper.GetTrustRegistry(ctx, cs.TrId)
+	if err != nil {
+		return false
+	}
+
+	// if account running the method is tr.controller, return true
+	return tr.Controller == creator
+}
+
+// [MOD-PERM-MSG-9-3] Revoke Permission execution
 func (ms msgServer) executeRevokePermission(ctx sdk.Context, perm types.Permission, creator string, now time.Time) error {
+	// set applicant_perm.revoked to now
 	perm.Revoked = &now
+
+	// set applicant_perm.modified to now
 	perm.Modified = &now
+
+	// set applicant_perm.revoked_by to account executing the method
 	perm.RevokedBy = creator
 
 	return ms.Keeper.UpdatePermission(ctx, perm)
-}
-
-type PermissionSet []types.Permission
-
-func (ps PermissionSet) contains(id uint64) bool {
-	for _, perm := range ps {
-		if perm.Id == id {
-			return true
-		}
-	}
-	return false
 }
 
 func (ms msgServer) CreateOrUpdatePermissionSession(goCtx context.Context, msg *types.MsgCreateOrUpdatePermissionSession) (*types.MsgCreateOrUpdatePermissionSessionResponse, error) {
