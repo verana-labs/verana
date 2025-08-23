@@ -564,15 +564,9 @@ func (ms msgServer) CreateRootPermission(goCtx context.Context, msg *types.MsgCr
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	now := ctx.BlockTime()
 
-	// Add this check inside CreateRootPermission after the schema check
-	if msg.EffectiveFrom != nil && !msg.EffectiveFrom.After(now) {
-		return nil, fmt.Errorf("effective_from must be in the future")
-	}
-
-	// Check credential schema exists
-	_, err := ms.credentialSchemaKeeper.GetCredentialSchemaById(ctx, msg.SchemaId)
-	if err != nil {
-		return nil, fmt.Errorf("credential schema not found: %w", err)
+	// [MOD-PERM-MSG-7-2-1] Create Root Permission basic checks
+	if err := ms.validateCreateRootPermissionBasicChecks(ctx, msg, now); err != nil {
+		return nil, err
 	}
 
 	// [MOD-PERM-MSG-7-2-2] Permission checks
@@ -600,6 +594,30 @@ func (ms msgServer) CreateRootPermission(goCtx context.Context, msg *types.MsgCr
 	}, nil
 }
 
+// [MOD-PERM-MSG-7-2-1] Create Root Permission basic checks
+func (ms msgServer) validateCreateRootPermissionBasicChecks(ctx sdk.Context, msg *types.MsgCreateRootPermission, now time.Time) error {
+	// schema_id MUST be a valid uint64 and a credential schema entry with this id MUST exist
+	_, err := ms.credentialSchemaKeeper.GetCredentialSchemaById(ctx, msg.SchemaId)
+	if err != nil {
+		return fmt.Errorf("credential schema not found: %w", err)
+	}
+
+	// effective_from must be in the future
+	if msg.EffectiveFrom != nil && !msg.EffectiveFrom.After(now) {
+		return fmt.Errorf("effective_from must be in the future")
+	}
+
+	// effective_until, if not null, must be greater than effective_from
+	if msg.EffectiveUntil != nil && msg.EffectiveFrom != nil {
+		if !msg.EffectiveUntil.After(*msg.EffectiveFrom) {
+			return fmt.Errorf("effective_until must be greater than effective_from")
+		}
+	}
+
+	return nil
+}
+
+// [MOD-PERM-MSG-7-2-2] Create Root Perm permission checks
 func (ms msgServer) validateCreateRootPermissionAuthority(ctx sdk.Context, msg *types.MsgCreateRootPermission) error {
 	// Get credential schema
 	cs, err := ms.credentialSchemaKeeper.GetCredentialSchemaById(ctx, msg.SchemaId)
@@ -613,7 +631,7 @@ func (ms msgServer) validateCreateRootPermissionAuthority(ctx sdk.Context, msg *
 		return fmt.Errorf("trust registry not found: %w", err)
 	}
 
-	// Check if creator is the controller
+	// account executing the method MUST be the controller of tr
 	if tr.Controller != msg.Creator {
 		return fmt.Errorf("creator is not the trust registry controller")
 	}
@@ -621,16 +639,18 @@ func (ms msgServer) validateCreateRootPermissionAuthority(ctx sdk.Context, msg *
 	return nil
 }
 
+// [MOD-PERM-MSG-7-3] Create Root Permission execution
 func (ms msgServer) executeCreateRootPermission(ctx sdk.Context, msg *types.MsgCreateRootPermission, now time.Time) (uint64, error) {
 	// Create new perm
 	perm := types.Permission{
+		// perm.id: auto-incremented uint64 (handled by CreatePermission)
 		SchemaId:         msg.SchemaId,
+		Modified:         &now,
 		Type:             types.PermissionType_ECOSYSTEM,
 		Did:              msg.Did,
 		Grantee:          msg.Creator,
 		Created:          &now,
 		CreatedBy:        msg.Creator,
-		Modified:         &now,
 		EffectiveFrom:    msg.EffectiveFrom,
 		EffectiveUntil:   msg.EffectiveUntil,
 		Country:          msg.Country,

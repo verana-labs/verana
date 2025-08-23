@@ -167,48 +167,42 @@ func (msg *MsgCreateRootPermission) ValidateBasic() error {
 		return fmt.Errorf("invalid creator address: %w", err)
 	}
 
-	// Validate schema ID
+	// if a mandatory parameter is not present, transaction MUST abort
 	if msg.SchemaId == 0 {
 		return fmt.Errorf("schema ID cannot be 0")
 	}
 
-	// Validate DID
 	if msg.Did == "" {
 		return fmt.Errorf("DID is required")
 	}
+
+	// did, if specified, MUST conform to the DID Syntax
 	if !isValidDID(msg.Did) {
 		return fmt.Errorf("invalid DID format")
 	}
 
-	// Validate fees are non-negative
+	// validation_fees MUST be >= 0
 	if msg.ValidationFees < 0 {
 		return fmt.Errorf("validation fees cannot be negative")
 	}
+
+	// issuance_fees MUST be >= 0
 	if msg.IssuanceFees < 0 {
 		return fmt.Errorf("issuance fees cannot be negative")
 	}
+
+	// verification_fees MUST be >= 0
 	if msg.VerificationFees < 0 {
 		return fmt.Errorf("verification fees cannot be negative")
 	}
 
-	// Validate country code if present
+	// country if not null, MUST be a valid alpha-2 code (ISO 3166)
 	if msg.Country != "" && !isValidCountryCode(msg.Country) {
 		return fmt.Errorf("invalid country code format")
 	}
 
-	// Validate effective dates if present
-	now := time.Now()
-	if msg.EffectiveFrom != nil {
-		if !msg.EffectiveFrom.After(now) {
-			return fmt.Errorf("effective_from must be in the future")
-		}
-
-		if msg.EffectiveUntil != nil {
-			if !msg.EffectiveUntil.After(*msg.EffectiveFrom) {
-				return fmt.Errorf("effective_until must be after effective_from")
-			}
-		}
-	}
+	// Note: Time-based validations are moved to the main function
+	// to use blockchain time instead of system time
 
 	return nil
 }
