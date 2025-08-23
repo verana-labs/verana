@@ -673,28 +673,18 @@ func (ms msgServer) ExtendPermission(goCtx context.Context, msg *types.MsgExtend
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	now := ctx.BlockTime()
 
-	// [MOD-PERM-MSG-8-2-1] Basic checks
-	applicantPerm, err := ms.Keeper.GetPermissionByID(ctx, msg.Id)
+	// [MOD-PERM-MSG-8-2-1] Extend Permission basic checks
+	applicantPerm, err := ms.validateExtendPermissionBasicChecks(ctx, msg, now)
 	if err != nil {
-		return nil, fmt.Errorf("perm not found: %w", err)
-	}
-
-	// Check effective_until is after current effective_until
-	if applicantPerm.EffectiveUntil != nil && !msg.EffectiveUntil.After(*applicantPerm.EffectiveUntil) {
-		return nil, fmt.Errorf("effective_until must be after current effective_until")
-	}
-
-	// Check effective_until is before or equal to vp_exp
-	if applicantPerm.VpExp != nil && msg.EffectiveUntil.After(*applicantPerm.VpExp) {
-		return nil, fmt.Errorf("effective_until cannot be after validation expiration")
-	}
-
-	// [MOD-PERM-MSG-8-2-2] Validator perm checks
-	if err := ms.validateExtendPermissionAuthority(ctx, msg.Creator, applicantPerm); err != nil {
 		return nil, err
 	}
 
-	// [MOD-PERM-MSG-8-3] Execution
+	// [MOD-PERM-MSG-8-2-2] Extend Permission advanced checks
+	if err := ms.validateExtendPermissionAdvancedChecks(ctx, msg, applicantPerm, now); err != nil {
+		return nil, err
+	}
+
+	// [MOD-PERM-MSG-8-3] Extend Permission execution
 	if err := ms.executeExtendPermission(ctx, applicantPerm, msg.Creator, msg.EffectiveUntil, now); err != nil {
 		return nil, fmt.Errorf("failed to extend perm: %w", err)
 	}
@@ -702,38 +692,96 @@ func (ms msgServer) ExtendPermission(goCtx context.Context, msg *types.MsgExtend
 	return &types.MsgExtendPermissionResponse{}, nil
 }
 
-func (ms msgServer) validateExtendPermissionAuthority(ctx sdk.Context, creator string, perm types.Permission) error {
-	if perm.ValidatorPermId == 0 {
-		// For TRUST_REGISTRY type, creator must be the grantee
-		if perm.Type == types.PermissionType_ECOSYSTEM {
-			if perm.Grantee != creator {
-				return fmt.Errorf("creator is not the perm grantee")
-			}
-		} else {
-			return fmt.Errorf("invalid perm type for extension")
-		}
-	} else {
-		// For other types, creator must be the validator
-		validatorPerm, err := ms.Keeper.GetPermissionByID(ctx, perm.ValidatorPermId)
-		if err != nil {
-			return fmt.Errorf("validator perm not found: %w", err)
-		}
+// [MOD-PERM-MSG-8-2-1] Extend Permission basic checks
+func (ms msgServer) validateExtendPermissionBasicChecks(ctx sdk.Context, msg *types.MsgExtendPermission, now time.Time) (types.Permission, error) {
+	var applicantPerm types.Permission
 
-		if err = IsValidPermission(validatorPerm, perm.Country, ctx.BlockTime()); err != nil {
-			return fmt.Errorf("validator perm is not valid: %w", err)
-		}
+	// id MUST be a valid uint64 (already validated in ValidateBasic)
 
-		if validatorPerm.Grantee != creator {
-			return fmt.Errorf("creator is not the validator")
-		}
+	// Load Permission entry applicant_perm from id. If no entry found, abort
+	perm, err := ms.Keeper.GetPermissionByID(ctx, msg.Id)
+	if err != nil {
+		return applicantPerm, fmt.Errorf("permission not found: %w", err)
 	}
-	return nil
+	applicantPerm = perm
+
+	// applicant_perm MUST be a valid permission
+	if err := IsValidPermission(applicantPerm, applicantPerm.Country, now); err != nil {
+		return applicantPerm, fmt.Errorf("applicant permission is not valid: %w", err)
+	}
+
+	// effective_until MUST be greater than applicant_perm.effective_until else MUST abort
+	if applicantPerm.EffectiveUntil == nil {
+		return applicantPerm, fmt.Errorf("cannot extend permission with no current effective_until")
+	}
+	if !msg.EffectiveUntil.After(*applicantPerm.EffectiveUntil) {
+		return applicantPerm, fmt.Errorf("effective_until must be greater than current effective_until")
+	}
+
+	return applicantPerm, nil
 }
 
+// [MOD-PERM-MSG-8-2-2] Extend Permission advanced checks
+func (ms msgServer) validateExtendPermissionAdvancedChecks(ctx sdk.Context, msg *types.MsgExtendPermission, applicantPerm types.Permission, now time.Time) error {
+	// 1. ECOSYSTEM permissions
+	if applicantPerm.ValidatorPermId == 0 && applicantPerm.Type == types.PermissionType_ECOSYSTEM {
+		// account running the method MUST be applicant_perm.grantee
+		if applicantPerm.Grantee != msg.Creator {
+			return fmt.Errorf("creator is not the permission grantee")
+		}
+		return nil
+	}
+
+	// For permissions with validator_perm_id, we need to distinguish between cases 2 and 3
+	if applicantPerm.ValidatorPermId != 0 {
+		// Load validator_perm from applicant_perm.validator_perm_id
+		validatorPerm, err := ms.Keeper.GetPermissionByID(ctx, applicantPerm.ValidatorPermId)
+		if err != nil {
+			return fmt.Errorf("validator permission not found: %w", err)
+		}
+
+		// validator_perm MUST be a valid permission
+		if err := IsValidPermission(validatorPerm, validatorPerm.Country, now); err != nil {
+			return fmt.Errorf("validator permission is not valid: %w", err)
+		}
+
+		// 2. Self-created permissions
+		if validatorPerm.Type == types.PermissionType_ECOSYSTEM {
+			// account running the method MUST be applicant_perm.grantee
+			if applicantPerm.Grantee != msg.Creator {
+				return fmt.Errorf("creator is not the permission grantee")
+			}
+			return nil
+		}
+
+		// 3. VP managed permissions
+		// effective_until MUST be lower or equal to applicant_perm.vp_exp else MUST abort
+		if applicantPerm.VpExp != nil && msg.EffectiveUntil.After(*applicantPerm.VpExp) {
+			return fmt.Errorf("effective_until cannot be after validation expiration")
+		}
+
+		// account running the method MUST be validator_perm.grantee
+		if validatorPerm.Grantee != msg.Creator {
+			return fmt.Errorf("creator is not the validator permission grantee")
+		}
+		return nil
+	}
+
+	return fmt.Errorf("invalid permission configuration for extension")
+}
+
+// [MOD-PERM-MSG-8-3] Extend Permission execution
 func (ms msgServer) executeExtendPermission(ctx sdk.Context, perm types.Permission, creator string, effectiveUntil *time.Time, now time.Time) error {
+	// set applicant_perm.effective_until to effective_until
 	perm.EffectiveUntil = effectiveUntil
+
+	// set applicant_perm.extended to now
 	perm.Extended = &now
+
+	// set applicant_perm.modified to now
 	perm.Modified = &now
+
+	// set applicant_perm.extended_by to account executing the method
 	perm.ExtendedBy = creator
 
 	return ms.Keeper.UpdatePermission(ctx, perm)

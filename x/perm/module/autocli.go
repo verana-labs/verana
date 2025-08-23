@@ -296,8 +296,8 @@ For active VPs, only the grantee can request termination unless it's a HOLDER ty
 				{
 					RpcMethod: "ExtendPermission",
 					Use:       "extend-perm [id] [effective-until]",
-					Short:     "Extend a perm's effective duration",
-					Long:      "Extend a perm's effective duration. Can only be executed by the validator of the perm.",
+					Short:     "Extend a permission's effective duration",
+					Long:      "Extend a permission's effective duration. Can be executed by the grantee (for ECOSYSTEM or self-created permissions) or by the validator (for VP managed permissions).",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{
 							ProtoField: "id",

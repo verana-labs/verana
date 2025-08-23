@@ -2,12 +2,10 @@ package types
 
 import (
 	"fmt"
-	"regexp"
-	"time"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/google/uuid"
+	"regexp"
 )
 
 func (msg *MsgStartPermissionVP) ValidateBasic() error {
@@ -213,15 +211,19 @@ func (msg *MsgExtendPermission) ValidateBasic() error {
 		return fmt.Errorf("invalid creator address: %w", err)
 	}
 
-	// Validate perm ID
+	// if a mandatory parameter is not present, transaction MUST abort
+	// id MUST be a valid uint64
 	if msg.Id == 0 {
-		return fmt.Errorf("perm ID cannot be 0")
+		return fmt.Errorf("permission ID cannot be 0")
 	}
 
-	// Validate effective_until is in the future
-	if msg.EffectiveUntil != nil && !msg.EffectiveUntil.After(time.Now()) {
-		return fmt.Errorf("effective_until must be in the future")
+	// effective_until is mandatory according to spec
+	if msg.EffectiveUntil == nil {
+		return fmt.Errorf("effective_until is required")
 	}
+
+	// Note: Time-based validations are moved to the main function
+	// to use blockchain time instead of system time
 
 	return nil
 }
