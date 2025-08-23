@@ -390,20 +390,8 @@ Parameters:
 				{
 					RpcMethod: "CreatePermission",
 					Use:       "create-perm [schema-id] [type] [did]",
-					Short:     "Create a new perm for open schemas",
-					Long: `Create a new ISSUER or VERIFIER perm for schemas with OPEN management mode.
-This allows self-creation of permissions without validation process.
-
-Parameters:
-- schema-id: ID of the credential schema
-- type: Permission type (issuer, verifier)
-- did: DID of the grantee service
-
-Optional flags:
-- country: ISO 3166-1 alpha-2 country code
-- effective-from: Timestamp when perm becomes effective (RFC3339)
-- effective-until: Timestamp when perm expires (RFC3339)
-- verification-fees: Fees for credential verification (default: 0)`,
+					Short:     "Create a new permission for open schemas",
+					Long:      "Create a new ISSUER or VERIFIER permission for schemas with OPEN management mode. This allows self-creation of permissions without validation process.",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{
 							ProtoField: "schema_id",
@@ -424,17 +412,22 @@ Optional flags:
 						"effective_from": {
 							Name:         "effective-from",
 							DefaultValue: "",
-							Usage:        "Optional timestamp (RFC3339) from when the perm is effective",
+							Usage:        "Optional timestamp (RFC3339) from when the permission is effective",
 						},
 						"effective_until": {
 							Name:         "effective-until",
 							DefaultValue: "",
-							Usage:        "Optional timestamp (RFC3339) until when the perm is effective",
+							Usage:        "Optional timestamp (RFC3339) until when the permission is effective",
 						},
 						"verification_fees": {
 							Name:         "verification-fees",
 							DefaultValue: "0",
-							Usage:        "Verification fees in trust units",
+							Usage:        "Verification fees in trust units (ISSUER permissions only)",
+						},
+						"validation_fees": {
+							Name:         "validation-fees",
+							DefaultValue: "0",
+							Usage:        "Validation fees in trust units (ISSUER permissions only)",
 						},
 					},
 				},

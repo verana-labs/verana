@@ -207,9 +207,10 @@ message MsgCreatePermission {
   PermissionType type = 3;
   string did = 4;
   string country = 5;
-  google.protobuf.Timestamp effective_from = 6 [(gogoproto.stdtime) = true];
-  google.protobuf.Timestamp effective_until = 7 [(gogoproto.stdtime) = true];
+  google.protobuf.Timestamp effective_from = 6 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  google.protobuf.Timestamp effective_until = 7 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
   uint64 verification_fees = 8;
+  uint64 validation_fees = 9;
 }
 
 message MsgCreatePermissionResponse {

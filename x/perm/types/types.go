@@ -297,13 +297,15 @@ func (msg *MsgCreatePermission) ValidateBasic() error {
 	if _, err := sdk.AccAddressFromBech32(msg.Creator); err != nil {
 		return sdkerrors.ErrInvalidAddress.Wrapf("invalid creator address: %s", err)
 	}
-	// [MOD-PERM-MSG-14-2-1] Create Permission basic checks
+
+	// if a mandatory parameter is not present, transaction MUST abort
+	// schema_id MUST be a valid uint64
 	if msg.SchemaId == 0 {
 		return sdkerrors.ErrInvalidRequest.Wrap("schema_id must be a valid uint64")
 	}
-	// type MUST be ISSUER or VERIFIER
-	if msg.Type != PermissionType_ISSUER &&
-		msg.Type != PermissionType_VERIFIER {
+
+	// type (PermissionType) (mandatory): MUST be ISSUER or VERIFIER, else abort
+	if msg.Type != PermissionType_ISSUER && msg.Type != PermissionType_VERIFIER {
 		return sdkerrors.ErrInvalidRequest.Wrap("type must be ISSUER or VERIFIER")
 	}
 
@@ -314,5 +316,9 @@ func (msg *MsgCreatePermission) ValidateBasic() error {
 	if !isValidDID(msg.Did) {
 		return sdkerrors.ErrInvalidRequest.Wrap("invalid DID syntax")
 	}
+
+	// Note: Time-based validations are moved to the main function
+	// to use blockchain time instead of system time
+
 	return nil
 }
