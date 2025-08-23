@@ -1070,57 +1070,26 @@ func (ms msgServer) CreateOrUpdatePermissionSession(goCtx context.Context, msg *
 // SlashPermissionTrustDeposit handles the MsgSlashPermissionTrustDeposit message
 func (ms msgServer) SlashPermissionTrustDeposit(goCtx context.Context, msg *types.MsgSlashPermissionTrustDeposit) (*types.MsgSlashPermissionTrustDepositResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
+	now := ctx.BlockTime()
 
-	// Load Permission entry applicant_perm from id
-	applicantPerm, err := ms.Keeper.GetPermissionByID(ctx, msg.Id)
+	// [MOD-PERM-MSG-12-2-1] Slash Permission Trust Deposit basic checks
+	applicantPerm, err := ms.validateSlashPermissionBasicChecks(ctx, msg)
 	if err != nil {
-		return nil, fmt.Errorf("perm not found: %w", err)
-	}
-
-	// applicant_perm MUST be a valid perm
-	//if applicantPerm.Revoked != nil || applicantPerm.Terminated != nil {
-	//	return nil, fmt.Errorf("perm is not valid (revoked or terminated)")
-	//}
-
-	// amount MUST be lower or equal to applicant_perm.deposit
-	if msg.Amount > applicantPerm.Deposit {
-		return nil, fmt.Errorf("amount exceeds available deposit: %d > %d", msg.Amount, applicantPerm.Deposit)
+		return nil, err
 	}
 
 	// [MOD-PERM-MSG-12-2-2] Slash Permission Trust Deposit validator perms
-	hasSlashingAuthority := false
-
-	// Option #1: executed by validator
-	if applicantPerm.ValidatorPermId != 0 {
-		validatorPerm, err := ms.Keeper.GetPermissionByID(ctx, applicantPerm.ValidatorPermId)
-		if err == nil && validatorPerm.Revoked == nil && validatorPerm.Terminated == nil {
-			if validatorPerm.Grantee == msg.Creator {
-				hasSlashingAuthority = true
-			}
-		}
-	}
-
-	// Option #2: executed by ecosystem controller
-	if !hasSlashingAuthority {
-		ecosystemPerm, err := ms.findEcosystemPermissionForSchema(ctx, applicantPerm.SchemaId)
-		if err == nil {
-			if ecosystemPerm.Grantee == msg.Creator {
-				hasSlashingAuthority = true
-			}
-		}
-	}
-
-	if !hasSlashingAuthority {
-		return nil, fmt.Errorf("creator does not have authority to slash this perm")
+	if err := ms.validateSlashPermissionValidatorPerms(ctx, msg, applicantPerm, now); err != nil {
+		return nil, err
 	}
 
 	// [MOD-PERM-MSG-12-2-3] Slash Permission Trust Deposit fee checks
-	// Account executing the method MUST have the required estimated transaction fees
-	// This is handled by the SDK automatically
+	// Account MUST have the required estimated transaction fees available
+	// (This is handled by the SDK automatically during transaction processing)
 
 	// [MOD-PERM-MSG-12-3] Slash Permission Trust Deposit execution
-	if err := ms.executeSlashPermissionTrustDeposit(ctx, applicantPerm, msg.Amount, msg.Creator); err != nil {
-		return nil, fmt.Errorf("failed to slash perm trust deposit: %w", err)
+	if err := ms.executeSlashPermissionTrustDeposit(ctx, applicantPerm, msg.Amount, msg.Creator, now); err != nil {
+		return nil, fmt.Errorf("failed to slash permission trust deposit: %w", err)
 	}
 
 	// Emit event
@@ -1130,62 +1099,87 @@ func (ms msgServer) SlashPermissionTrustDeposit(goCtx context.Context, msg *type
 			sdk.NewAttribute(types.AttributeKeyPermissionID, strconv.FormatUint(msg.Id, 10)),
 			sdk.NewAttribute(types.AttributeKeySlashedAmount, strconv.FormatUint(msg.Amount, 10)),
 			sdk.NewAttribute(types.AttributeKeySlashedBy, msg.Creator),
-			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
+			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
 		),
 	})
 
 	return &types.MsgSlashPermissionTrustDepositResponse{}, nil
 }
 
-// executeSlashPermissionTrustDeposit performs the actual slashing execution
-func (ms msgServer) executeSlashPermissionTrustDeposit(ctx sdk.Context, applicantPerm types.Permission, amount uint64, slashedBy string) error {
-	now := ctx.BlockTime()
+// [MOD-PERM-MSG-12-2-1] Slash Permission Trust Deposit basic checks
+func (ms msgServer) validateSlashPermissionBasicChecks(ctx sdk.Context, msg *types.MsgSlashPermissionTrustDeposit) (types.Permission, error) {
+	var applicantPerm types.Permission
 
-	// Update Permission entry applicant_perm
+	// id MUST be a valid uint64 (already validated in ValidateBasic)
+
+	// Load Permission entry applicant_perm from id. If no entry found, abort
+	perm, err := ms.Keeper.GetPermissionByID(ctx, msg.Id)
+	if err != nil {
+		return applicantPerm, fmt.Errorf("permission not found: %w", err)
+	}
+	applicantPerm = perm
+
+	// amount MUST be lower or equal to applicant_perm.deposit else MUST abort
+	if msg.Amount > applicantPerm.Deposit {
+		return applicantPerm, fmt.Errorf("amount exceeds available deposit: %d > %d", msg.Amount, applicantPerm.Deposit)
+	}
+
+	return applicantPerm, nil
+}
+
+// [MOD-PERM-MSG-12-2-2] Slash Permission Trust Deposit validator perms
+func (ms msgServer) validateSlashPermissionValidatorPerms(ctx sdk.Context, msg *types.MsgSlashPermissionTrustDeposit, applicantPerm types.Permission, now time.Time) error {
+	// Either Option #1, or #2 MUST return true, else abort
+
+	// Option #1: executed by a validator ancestor
+	if ms.checkValidatorAncestorOption(ctx, msg.Creator, applicantPerm, now) {
+		return nil
+	}
+
+	// Option #2: executed by TrustRegistry controller
+	if ms.checkTrustRegistryControllerOption(ctx, msg.Creator, applicantPerm) {
+		return nil
+	}
+
+	return fmt.Errorf("creator does not have authority to slash this permission")
+}
+
+// [MOD-PERM-MSG-12-3] Slash Permission Trust Deposit execution
+func (ms msgServer) executeSlashPermissionTrustDeposit(ctx sdk.Context, applicantPerm types.Permission, amount uint64, creator string, now time.Time) error {
+	// Load Permission entry applicant_perm from id (already loaded)
+
+	// Load Permission entry validator_perm from applicant_perm.validator_perm_id
+	if applicantPerm.ValidatorPermId != 0 {
+		_, err := ms.Keeper.GetPermissionByID(ctx, applicantPerm.ValidatorPermId)
+		if err != nil {
+			return fmt.Errorf("validator permission not found: %w", err)
+		}
+		// Note: validator_perm is loaded but not used per spec
+	}
+
+	// set applicant_perm.slashed to now
 	applicantPerm.Slashed = &now
-	applicantPerm.Modified = &now
-	applicantPerm.SlashedDeposit = applicantPerm.SlashedDeposit + amount
-	applicantPerm.SlashedBy = slashedBy
 
-	// This functionality doesn't exist yet, so commenting out for now
+	// set applicant_perm.modified to now
+	applicantPerm.Modified = &now
+
+	// set applicant_perm.slashed_deposit to applicant_perm.slashed_deposit + amount
+	applicantPerm.SlashedDeposit = applicantPerm.SlashedDeposit + amount
+
+	// set applicant_perm.slashed_by to account executing the method
+	applicantPerm.SlashedBy = creator
+
+	// use MOD-TD-MSG-7 to burn the slashed amount from the trust deposit of applicant_perm.grantee
 	if err := ms.trustDeposit.BurnEcosystemSlashedTrustDeposit(ctx, applicantPerm.Grantee, amount); err != nil {
 		return fmt.Errorf("failed to burn trust deposit: %w", err)
 	}
 
-	// Update perm
+	// Update permission
 	if err := ms.Keeper.UpdatePermission(ctx, applicantPerm); err != nil {
-		return fmt.Errorf("failed to update perm: %w", err)
+		return fmt.Errorf("failed to update permission: %w", err)
 	}
 
 	return nil
-}
-
-// findEcosystemPermissionForSchema finds the ECOSYSTEM perm for a given schema
-func (ms msgServer) findEcosystemPermissionForSchema(ctx sdk.Context, schemaId uint64) (types.Permission, error) {
-	var ecosystemPerm types.Permission
-	var found bool
-
-	err := ms.Permission.Walk(ctx, nil, func(key uint64, perm types.Permission) (bool, error) {
-		if perm.Type == types.PermissionType_ECOSYSTEM &&
-			perm.SchemaId == schemaId &&
-			perm.Revoked == nil &&
-			perm.Terminated == nil {
-			ecosystemPerm = perm
-			found = true
-			return true, nil // Stop iteration
-		}
-		return false, nil
-	})
-
-	if err != nil {
-		return types.Permission{}, err
-	}
-
-	if !found {
-		return types.Permission{}, fmt.Errorf("ecosystem perm not found for schema %d", schemaId)
-	}
-
-	return ecosystemPerm, nil
 }
 
 // RepayPermissionSlashedTrustDeposit handles the MsgRepayPermissionSlashedTrustDeposit message

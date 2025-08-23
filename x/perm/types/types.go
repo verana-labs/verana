@@ -270,7 +270,8 @@ func (msg *MsgSlashPermissionTrustDeposit) ValidateBasic() error {
 		return sdkerrors.ErrInvalidAddress.Wrapf("invalid creator address: %s", err)
 	}
 
-	// [MOD-PERM-MSG-12-2-1] Slash Permission Trust Deposit basic checks
+	// if a mandatory parameter is not present, transaction MUST abort
+	// id MUST be a valid uint64
 	if msg.Id == 0 {
 		return sdkerrors.ErrInvalidRequest.Wrap("id must be a valid uint64")
 	}

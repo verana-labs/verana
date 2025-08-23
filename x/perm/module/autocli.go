@@ -360,15 +360,8 @@ At least one of issuer-perm-id or verifier-perm-id must be provided.`,
 				{
 					RpcMethod: "SlashPermissionTrustDeposit",
 					Use:       "slash-perm-td [id] [amount]",
-					Short:     "Slash a perm's trust deposit",
-					Long: `Slash a perm's trust deposit. Can only be executed by:
-- The validator that created the perm
-- The grantee of the ECOSYSTEM perm (trust registry controller) for the corresponding credential schema
-- The network governance authority (via proposal)
-
-Parameters:
-- id: ID of the perm to slash
-- amount: Amount to slash from the trust deposit`,
+					Short:     "Slash a permission's trust deposit",
+					Long:      "Slash a permission's trust deposit. Can only be executed by a validator ancestor or the trust registry controller.",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{
 							ProtoField: "id",
