@@ -2,12 +2,10 @@ package types
 
 import (
 	"fmt"
-	"regexp"
-	"time"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/google/uuid"
+	"regexp"
 )
 
 func (msg *MsgStartPermissionVP) ValidateBasic() error {
@@ -116,36 +114,6 @@ func isValidDigestSRI(digestSRI string) bool {
 	return matched
 }
 
-// ValidateBasic for MsgRequestPermissionVPTermination
-func (msg *MsgRequestPermissionVPTermination) ValidateBasic() error {
-	// Validate creator address
-	if _, err := sdk.AccAddressFromBech32(msg.Creator); err != nil {
-		return fmt.Errorf("invalid creator address: %w", err)
-	}
-
-	// Validate perm ID
-	if msg.Id == 0 {
-		return fmt.Errorf("perm ID cannot be 0")
-	}
-
-	return nil
-}
-
-// ValidateBasic for MsgConfirmPermissionVPTermination
-func (msg *MsgConfirmPermissionVPTermination) ValidateBasic() error {
-	// Validate creator address
-	if _, err := sdk.AccAddressFromBech32(msg.Creator); err != nil {
-		return fmt.Errorf("invalid creator address: %w", err)
-	}
-
-	// Validate perm ID
-	if msg.Id == 0 {
-		return fmt.Errorf("perm ID cannot be 0")
-	}
-
-	return nil
-}
-
 // ValidateBasic for MsgConfirmPermissionVPTermination
 func (msg *MsgCancelPermissionVPLastRequest) ValidateBasic() error {
 	// Validate creator address
@@ -167,48 +135,42 @@ func (msg *MsgCreateRootPermission) ValidateBasic() error {
 		return fmt.Errorf("invalid creator address: %w", err)
 	}
 
-	// Validate schema ID
+	// if a mandatory parameter is not present, transaction MUST abort
 	if msg.SchemaId == 0 {
 		return fmt.Errorf("schema ID cannot be 0")
 	}
 
-	// Validate DID
 	if msg.Did == "" {
 		return fmt.Errorf("DID is required")
 	}
+
+	// did, if specified, MUST conform to the DID Syntax
 	if !isValidDID(msg.Did) {
 		return fmt.Errorf("invalid DID format")
 	}
 
-	// Validate fees are non-negative
+	// validation_fees MUST be >= 0
 	if msg.ValidationFees < 0 {
 		return fmt.Errorf("validation fees cannot be negative")
 	}
+
+	// issuance_fees MUST be >= 0
 	if msg.IssuanceFees < 0 {
 		return fmt.Errorf("issuance fees cannot be negative")
 	}
+
+	// verification_fees MUST be >= 0
 	if msg.VerificationFees < 0 {
 		return fmt.Errorf("verification fees cannot be negative")
 	}
 
-	// Validate country code if present
+	// country if not null, MUST be a valid alpha-2 code (ISO 3166)
 	if msg.Country != "" && !isValidCountryCode(msg.Country) {
 		return fmt.Errorf("invalid country code format")
 	}
 
-	// Validate effective dates if present
-	now := time.Now()
-	if msg.EffectiveFrom != nil {
-		if !msg.EffectiveFrom.After(now) {
-			return fmt.Errorf("effective_from must be in the future")
-		}
-
-		if msg.EffectiveUntil != nil {
-			if !msg.EffectiveUntil.After(*msg.EffectiveFrom) {
-				return fmt.Errorf("effective_until must be after effective_from")
-			}
-		}
-	}
+	// Note: Time-based validations are moved to the main function
+	// to use blockchain time instead of system time
 
 	return nil
 }
@@ -219,15 +181,19 @@ func (msg *MsgExtendPermission) ValidateBasic() error {
 		return fmt.Errorf("invalid creator address: %w", err)
 	}
 
-	// Validate perm ID
+	// if a mandatory parameter is not present, transaction MUST abort
+	// id MUST be a valid uint64
 	if msg.Id == 0 {
-		return fmt.Errorf("perm ID cannot be 0")
+		return fmt.Errorf("permission ID cannot be 0")
 	}
 
-	// Validate effective_until is in the future
-	if msg.EffectiveUntil != nil && !msg.EffectiveUntil.After(time.Now()) {
-		return fmt.Errorf("effective_until must be in the future")
+	// effective_until is mandatory according to spec
+	if msg.EffectiveUntil == nil {
+		return fmt.Errorf("effective_until is required")
 	}
+
+	// Note: Time-based validations are moved to the main function
+	// to use blockchain time instead of system time
 
 	return nil
 }
@@ -274,7 +240,8 @@ func (msg *MsgSlashPermissionTrustDeposit) ValidateBasic() error {
 		return sdkerrors.ErrInvalidAddress.Wrapf("invalid creator address: %s", err)
 	}
 
-	// [MOD-PERM-MSG-12-2-1] Slash Permission Trust Deposit basic checks
+	// if a mandatory parameter is not present, transaction MUST abort
+	// id MUST be a valid uint64
 	if msg.Id == 0 {
 		return sdkerrors.ErrInvalidRequest.Wrap("id must be a valid uint64")
 	}
@@ -300,13 +267,15 @@ func (msg *MsgCreatePermission) ValidateBasic() error {
 	if _, err := sdk.AccAddressFromBech32(msg.Creator); err != nil {
 		return sdkerrors.ErrInvalidAddress.Wrapf("invalid creator address: %s", err)
 	}
-	// [MOD-PERM-MSG-14-2-1] Create Permission basic checks
+
+	// if a mandatory parameter is not present, transaction MUST abort
+	// schema_id MUST be a valid uint64
 	if msg.SchemaId == 0 {
 		return sdkerrors.ErrInvalidRequest.Wrap("schema_id must be a valid uint64")
 	}
-	// type MUST be ISSUER or VERIFIER
-	if msg.Type != PermissionType_ISSUER &&
-		msg.Type != PermissionType_VERIFIER {
+
+	// type (PermissionType) (mandatory): MUST be ISSUER or VERIFIER, else abort
+	if msg.Type != PermissionType_ISSUER && msg.Type != PermissionType_VERIFIER {
 		return sdkerrors.ErrInvalidRequest.Wrap("type must be ISSUER or VERIFIER")
 	}
 
@@ -317,5 +286,9 @@ func (msg *MsgCreatePermission) ValidateBasic() error {
 	if !isValidDID(msg.Did) {
 		return sdkerrors.ErrInvalidRequest.Wrap("invalid DID syntax")
 	}
+
+	// Note: Time-based validations are moved to the main function
+	// to use blockchain time instead of system time
+
 	return nil
 }

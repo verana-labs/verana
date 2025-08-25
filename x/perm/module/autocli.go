@@ -216,32 +216,7 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 						},
 					},
 				},
-				{
-					RpcMethod: "RequestPermissionVPTermination",
-					Use:       "request-vp-termination [id]",
-					Short:     "Request termination of a perm validation process",
-					Long: `Request termination of a perm validation process:
-- id: ID of the perm validation process to terminate
-Note: For expired VPs, either the grantee or validator can request termination.
-For active VPs, only the grantee can request termination unless it's a HOLDER type.`,
-					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
-						{
-							ProtoField: "id",
-						},
-					},
-				},
-				// Add to the RpcCommandOptions array in the Tx ServiceCommandDescriptor:
-				{
-					RpcMethod: "ConfirmPermissionVPTermination",
-					Use:       "confirm-vp-termination [id]",
-					Short:     "Confirm the termination of a perm VP",
-					Long:      "Confirm the termination of a perm VP. Can be called by the validator, or by the grantee after the timeout period has elapsed.",
-					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
-						{
-							ProtoField: "id",
-						},
-					},
-				},
+
 				{
 					RpcMethod: "CancelPermissionVPLastRequest",
 					Use:       "cancel-perm-vp-request [id]",
@@ -296,8 +271,8 @@ For active VPs, only the grantee can request termination unless it's a HOLDER ty
 				{
 					RpcMethod: "ExtendPermission",
 					Use:       "extend-perm [id] [effective-until]",
-					Short:     "Extend a perm's effective duration",
-					Long:      "Extend a perm's effective duration. Can only be executed by the validator of the perm.",
+					Short:     "Extend a permission's effective duration",
+					Long:      "Extend a permission's effective duration. Can be executed by the grantee (for ECOSYSTEM or self-created permissions) or by the validator (for VP managed permissions).",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{
 							ProtoField: "id",
@@ -310,8 +285,8 @@ For active VPs, only the grantee can request termination unless it's a HOLDER ty
 				{
 					RpcMethod: "RevokePermission",
 					Use:       "revoke-perm [id]",
-					Short:     "Revoke a perm",
-					Long:      "Revoke a perm. Can only be executed by the validator of the perm.",
+					Short:     "Revoke a permission",
+					Long:      "Revoke a permission. Can be executed by the permission grantee, a validator ancestor, or the trust registry controller.",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{
 							ProtoField: "id",
@@ -360,15 +335,8 @@ At least one of issuer-perm-id or verifier-perm-id must be provided.`,
 				{
 					RpcMethod: "SlashPermissionTrustDeposit",
 					Use:       "slash-perm-td [id] [amount]",
-					Short:     "Slash a perm's trust deposit",
-					Long: `Slash a perm's trust deposit. Can only be executed by:
-- The validator that created the perm
-- The grantee of the ECOSYSTEM perm (trust registry controller) for the corresponding credential schema
-- The network governance authority (via proposal)
-
-Parameters:
-- id: ID of the perm to slash
-- amount: Amount to slash from the trust deposit`,
+					Short:     "Slash a permission's trust deposit",
+					Long:      "Slash a permission's trust deposit. Can only be executed by a validator ancestor or the trust registry controller.",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{
 							ProtoField: "id",
@@ -397,20 +365,8 @@ Parameters:
 				{
 					RpcMethod: "CreatePermission",
 					Use:       "create-perm [schema-id] [type] [did]",
-					Short:     "Create a new perm for open schemas",
-					Long: `Create a new ISSUER or VERIFIER perm for schemas with OPEN management mode.
-This allows self-creation of permissions without validation process.
-
-Parameters:
-- schema-id: ID of the credential schema
-- type: Permission type (issuer, verifier)
-- did: DID of the grantee service
-
-Optional flags:
-- country: ISO 3166-1 alpha-2 country code
-- effective-from: Timestamp when perm becomes effective (RFC3339)
-- effective-until: Timestamp when perm expires (RFC3339)
-- verification-fees: Fees for credential verification (default: 0)`,
+					Short:     "Create a new permission for open schemas",
+					Long:      "Create a new ISSUER or VERIFIER permission for schemas with OPEN management mode. This allows self-creation of permissions without validation process.",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{
 							ProtoField: "schema_id",
@@ -431,17 +387,22 @@ Optional flags:
 						"effective_from": {
 							Name:         "effective-from",
 							DefaultValue: "",
-							Usage:        "Optional timestamp (RFC3339) from when the perm is effective",
+							Usage:        "Optional timestamp (RFC3339) from when the permission is effective",
 						},
 						"effective_until": {
 							Name:         "effective-until",
 							DefaultValue: "",
-							Usage:        "Optional timestamp (RFC3339) until when the perm is effective",
+							Usage:        "Optional timestamp (RFC3339) until when the permission is effective",
 						},
 						"verification_fees": {
 							Name:         "verification-fees",
 							DefaultValue: "0",
-							Usage:        "Verification fees in trust units",
+							Usage:        "Verification fees in trust units (ISSUER permissions only)",
+						},
+						"validation_fees": {
+							Name:         "validation-fees",
+							DefaultValue: "0",
+							Usage:        "Validation fees in trust units (ISSUER permissions only)",
 						},
 					},
 				},

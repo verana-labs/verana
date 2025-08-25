@@ -23,8 +23,6 @@ const (
 	Msg_StartPermissionVP_FullMethodName                  = "/verana.perm.v1.Msg/StartPermissionVP"
 	Msg_RenewPermissionVP_FullMethodName                  = "/verana.perm.v1.Msg/RenewPermissionVP"
 	Msg_SetPermissionVPToValidated_FullMethodName         = "/verana.perm.v1.Msg/SetPermissionVPToValidated"
-	Msg_RequestPermissionVPTermination_FullMethodName     = "/verana.perm.v1.Msg/RequestPermissionVPTermination"
-	Msg_ConfirmPermissionVPTermination_FullMethodName     = "/verana.perm.v1.Msg/ConfirmPermissionVPTermination"
 	Msg_CancelPermissionVPLastRequest_FullMethodName      = "/verana.perm.v1.Msg/CancelPermissionVPLastRequest"
 	Msg_CreateRootPermission_FullMethodName               = "/verana.perm.v1.Msg/CreateRootPermission"
 	Msg_ExtendPermission_FullMethodName                   = "/verana.perm.v1.Msg/ExtendPermission"
@@ -45,8 +43,8 @@ type MsgClient interface {
 	StartPermissionVP(ctx context.Context, in *MsgStartPermissionVP, opts ...grpc.CallOption) (*MsgStartPermissionVPResponse, error)
 	RenewPermissionVP(ctx context.Context, in *MsgRenewPermissionVP, opts ...grpc.CallOption) (*MsgRenewPermissionVPResponse, error)
 	SetPermissionVPToValidated(ctx context.Context, in *MsgSetPermissionVPToValidated, opts ...grpc.CallOption) (*MsgSetPermissionVPToValidatedResponse, error)
-	RequestPermissionVPTermination(ctx context.Context, in *MsgRequestPermissionVPTermination, opts ...grpc.CallOption) (*MsgRequestPermissionVPTerminationResponse, error)
-	ConfirmPermissionVPTermination(ctx context.Context, in *MsgConfirmPermissionVPTermination, opts ...grpc.CallOption) (*MsgConfirmPermissionVPTerminationResponse, error)
+	// rpc RequestPermissionVPTermination(MsgRequestPermissionVPTermination) returns (MsgRequestPermissionVPTerminationResponse);
+	// rpc ConfirmPermissionVPTermination(MsgConfirmPermissionVPTermination) returns (MsgConfirmPermissionVPTerminationResponse);
 	CancelPermissionVPLastRequest(ctx context.Context, in *MsgCancelPermissionVPLastRequest, opts ...grpc.CallOption) (*MsgCancelPermissionVPLastRequestResponse, error)
 	CreateRootPermission(ctx context.Context, in *MsgCreateRootPermission, opts ...grpc.CallOption) (*MsgCreateRootPermissionResponse, error)
 	ExtendPermission(ctx context.Context, in *MsgExtendPermission, opts ...grpc.CallOption) (*MsgExtendPermissionResponse, error)
@@ -95,24 +93,6 @@ func (c *msgClient) RenewPermissionVP(ctx context.Context, in *MsgRenewPermissio
 func (c *msgClient) SetPermissionVPToValidated(ctx context.Context, in *MsgSetPermissionVPToValidated, opts ...grpc.CallOption) (*MsgSetPermissionVPToValidatedResponse, error) {
 	out := new(MsgSetPermissionVPToValidatedResponse)
 	err := c.cc.Invoke(ctx, Msg_SetPermissionVPToValidated_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *msgClient) RequestPermissionVPTermination(ctx context.Context, in *MsgRequestPermissionVPTermination, opts ...grpc.CallOption) (*MsgRequestPermissionVPTerminationResponse, error) {
-	out := new(MsgRequestPermissionVPTerminationResponse)
-	err := c.cc.Invoke(ctx, Msg_RequestPermissionVPTermination_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *msgClient) ConfirmPermissionVPTermination(ctx context.Context, in *MsgConfirmPermissionVPTermination, opts ...grpc.CallOption) (*MsgConfirmPermissionVPTerminationResponse, error) {
-	out := new(MsgConfirmPermissionVPTerminationResponse)
-	err := c.cc.Invoke(ctx, Msg_ConfirmPermissionVPTermination_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -201,8 +181,8 @@ type MsgServer interface {
 	StartPermissionVP(context.Context, *MsgStartPermissionVP) (*MsgStartPermissionVPResponse, error)
 	RenewPermissionVP(context.Context, *MsgRenewPermissionVP) (*MsgRenewPermissionVPResponse, error)
 	SetPermissionVPToValidated(context.Context, *MsgSetPermissionVPToValidated) (*MsgSetPermissionVPToValidatedResponse, error)
-	RequestPermissionVPTermination(context.Context, *MsgRequestPermissionVPTermination) (*MsgRequestPermissionVPTerminationResponse, error)
-	ConfirmPermissionVPTermination(context.Context, *MsgConfirmPermissionVPTermination) (*MsgConfirmPermissionVPTerminationResponse, error)
+	// rpc RequestPermissionVPTermination(MsgRequestPermissionVPTermination) returns (MsgRequestPermissionVPTerminationResponse);
+	// rpc ConfirmPermissionVPTermination(MsgConfirmPermissionVPTermination) returns (MsgConfirmPermissionVPTerminationResponse);
 	CancelPermissionVPLastRequest(context.Context, *MsgCancelPermissionVPLastRequest) (*MsgCancelPermissionVPLastRequestResponse, error)
 	CreateRootPermission(context.Context, *MsgCreateRootPermission) (*MsgCreateRootPermissionResponse, error)
 	ExtendPermission(context.Context, *MsgExtendPermission) (*MsgExtendPermissionResponse, error)
@@ -229,12 +209,6 @@ func (UnimplementedMsgServer) RenewPermissionVP(context.Context, *MsgRenewPermis
 }
 func (UnimplementedMsgServer) SetPermissionVPToValidated(context.Context, *MsgSetPermissionVPToValidated) (*MsgSetPermissionVPToValidatedResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SetPermissionVPToValidated not implemented")
-}
-func (UnimplementedMsgServer) RequestPermissionVPTermination(context.Context, *MsgRequestPermissionVPTermination) (*MsgRequestPermissionVPTerminationResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RequestPermissionVPTermination not implemented")
-}
-func (UnimplementedMsgServer) ConfirmPermissionVPTermination(context.Context, *MsgConfirmPermissionVPTermination) (*MsgConfirmPermissionVPTerminationResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ConfirmPermissionVPTermination not implemented")
 }
 func (UnimplementedMsgServer) CancelPermissionVPLastRequest(context.Context, *MsgCancelPermissionVPLastRequest) (*MsgCancelPermissionVPLastRequestResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CancelPermissionVPLastRequest not implemented")
@@ -341,42 +315,6 @@ func _Msg_SetPermissionVPToValidated_Handler(srv interface{}, ctx context.Contex
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MsgServer).SetPermissionVPToValidated(ctx, req.(*MsgSetPermissionVPToValidated))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Msg_RequestPermissionVPTermination_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(MsgRequestPermissionVPTermination)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(MsgServer).RequestPermissionVPTermination(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Msg_RequestPermissionVPTermination_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MsgServer).RequestPermissionVPTermination(ctx, req.(*MsgRequestPermissionVPTermination))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Msg_ConfirmPermissionVPTermination_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(MsgConfirmPermissionVPTermination)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(MsgServer).ConfirmPermissionVPTermination(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Msg_ConfirmPermissionVPTermination_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MsgServer).ConfirmPermissionVPTermination(ctx, req.(*MsgConfirmPermissionVPTermination))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -547,14 +485,6 @@ var Msg_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SetPermissionVPToValidated",
 			Handler:    _Msg_SetPermissionVPToValidated_Handler,
-		},
-		{
-			MethodName: "RequestPermissionVPTermination",
-			Handler:    _Msg_RequestPermissionVPTermination_Handler,
-		},
-		{
-			MethodName: "ConfirmPermissionVPTermination",
-			Handler:    _Msg_ConfirmPermissionVPTermination_Handler,
 		},
 		{
 			MethodName: "CancelPermissionVPLastRequest",
