@@ -101,18 +101,18 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 				{
 					RpcMethod: "FindBeneficiaries",
 					Use:       "find-beneficiaries",
-					Short:     "Find beneficiary permissions in the perm tree",
-					Long:      "Find beneficiary permissions by traversing the perm tree for issuer and/or verifier permissions",
+					Short:     "Find beneficiary permissions in the permission tree",
+					Long:      "Find beneficiary permissions by traversing the permission tree for issuer and/or verifier permissions. At least one of issuer-perm-id or verifier-perm-id must be provided.",
 					FlagOptions: map[string]*autocliv1.FlagOptions{
 						"issuer_perm_id": {
 							Name:         "issuer-perm-id",
 							DefaultValue: "0",
-							Usage:        "ID of the issuer perm",
+							Usage:        "ID of the issuer permission",
 						},
 						"verifier_perm_id": {
 							Name:         "verifier-perm-id",
 							DefaultValue: "0",
-							Usage:        "ID of the verifier perm",
+							Usage:        "ID of the verifier permission",
 						},
 					},
 				},
@@ -295,17 +295,9 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 				},
 				{
 					RpcMethod: "CreateOrUpdatePermissionSession",
-					Use:       "create-or-update-perm-session [id] [agent-perm-id]",
-					Short:     "Create or update a perm session",
-					Long: `Create or update a perm session with the specified parameters:
-- id: UUID of the session
-- agent-perm-id: ID of the agent perm (HOLDER)
-Optional parameters:
-- issuer-perm-id: ID of the issuer perm
-- verifier-perm-id: ID of the verifier perm
-- wallet-agent-perm-id: ID of the wallet agent perm if different from agent
-
-At least one of issuer-perm-id or verifier-perm-id must be provided.`,
+					Use:       "create-or-update-perm-session [id] [agent-perm-id] [wallet-agent-perm-id]",
+					Short:     "Create or update a permission session",
+					Long:      "Create or update a permission session for credential exchange operations. At least one of issuer-perm-id or verifier-perm-id must be provided.",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{
 							ProtoField: "id",
@@ -313,21 +305,19 @@ At least one of issuer-perm-id or verifier-perm-id must be provided.`,
 						{
 							ProtoField: "agent_perm_id",
 						},
+						{
+							ProtoField: "wallet_agent_perm_id",
+						},
 					},
 					FlagOptions: map[string]*autocliv1.FlagOptions{
 						"issuer_perm_id": {
 							Name:         "issuer-perm-id",
-							Usage:        "ID of the issuer perm",
+							Usage:        "ID of the issuer permission",
 							DefaultValue: "0",
 						},
 						"verifier_perm_id": {
 							Name:         "verifier-perm-id",
-							Usage:        "ID of the verifier perm",
-							DefaultValue: "0",
-						},
-						"wallet_agent_perm_id": {
-							Name:         "wallet-agent-perm-id",
-							Usage:        "ID of the wallet agent perm if different from agent",
+							Usage:        "ID of the verifier permission",
 							DefaultValue: "0",
 						},
 					},

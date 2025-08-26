@@ -119,7 +119,7 @@ func (k Keeper) UpdatePermission(ctx sdk.Context, perm types.Permission) error {
 // A valid perm:
 // - Has a matching country (perm country is null or matches the provided country)
 // - Is currently effective (effective_from ≤ now < effective_until)
-// - Is not revoked or terminated
+// - Is not revoked
 // - Is not slashed
 func IsValidPermission(perm types.Permission, country string, checkTime time.Time) error {
 	// Check country compatibility
@@ -140,11 +140,6 @@ func IsValidPermission(perm types.Permission, country string, checkTime time.Tim
 	// Check if perm is revoked
 	if perm.Revoked != nil {
 		return fmt.Errorf("perm is revoked since %v", perm.Revoked)
-	}
-
-	// Check if perm is terminated
-	if perm.Terminated != nil {
-		return fmt.Errorf("perm is terminated since %v", perm.Terminated)
 	}
 
 	// Check if perm is slashed

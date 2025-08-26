@@ -222,14 +222,19 @@ func (msg *MsgCreateOrUpdatePermissionSession) ValidateBasic() error {
 		return sdkerrors.ErrInvalidRequest.Wrap("invalid session ID: must be valid UUID")
 	}
 
-	// At least one of issuer or verifier must be provided
+	// if issuer_perm_id is null AND verifier_perm_id is null, MUST abort
 	if msg.IssuerPermId == 0 && msg.VerifierPermId == 0 {
 		return sdkerrors.ErrInvalidRequest.Wrap("at least one of issuer_perm_id or verifier_perm_id must be provided")
 	}
 
-	// Agent perm ID is required
+	// agent_perm_id is mandatory
 	if msg.AgentPermId == 0 {
-		return sdkerrors.ErrInvalidRequest.Wrap("agent perm ID required")
+		return sdkerrors.ErrInvalidRequest.Wrap("agent_perm_id is mandatory")
+	}
+
+	// wallet_agent_perm_id is mandatory
+	if msg.WalletAgentPermId == 0 {
+		return sdkerrors.ErrInvalidRequest.Wrap("wallet_agent_perm_id is mandatory")
 	}
 
 	return nil
