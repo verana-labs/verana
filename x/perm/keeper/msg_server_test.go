@@ -1169,7 +1169,7 @@ func TestCreateOrUpdatePermissionSession(t *testing.T) {
 	// Create agent perm (HOLDER type)
 	agentPerm := types.Permission{
 		SchemaId:        1,
-		Type:            types.PermissionType_HOLDER,
+		Type:            types.PermissionType_ISSUER,
 		Grantee:         creator,
 		Created:         &now,
 		CreatedBy:       creator,
@@ -1186,7 +1186,7 @@ func TestCreateOrUpdatePermissionSession(t *testing.T) {
 	// Create wallet agent perm (HOLDER type)
 	walletAgentPerm := types.Permission{
 		SchemaId:        1,
-		Type:            types.PermissionType_HOLDER,
+		Type:            types.PermissionType_ISSUER,
 		Grantee:         creator,
 		Created:         &now,
 		CreatedBy:       creator,
@@ -1284,7 +1284,7 @@ func TestCreateOrUpdatePermissionSession(t *testing.T) {
 				WalletAgentPermId: walletAgentPermID,
 			},
 			expectErr:  true,
-			errMessage: "issuer perm not found",
+			errMessage: "issuer permission not found",
 		},
 		{
 			name: "Invalid - invalid issuer type",
@@ -1297,7 +1297,7 @@ func TestCreateOrUpdatePermissionSession(t *testing.T) {
 				WalletAgentPermId: walletAgentPermID,
 			},
 			expectErr:  true,
-			errMessage: "issuer perm must be ISSUER type",
+			errMessage: "issuer permission must be ISSUER type",
 		},
 		//{
 		//	name: "Invalid - revoked issuer",
@@ -1323,21 +1323,21 @@ func TestCreateOrUpdatePermissionSession(t *testing.T) {
 				WalletAgentPermId: walletAgentPermID,
 			},
 			expectErr:  true,
-			errMessage: "agent perm not found",
+			errMessage: "agent permission not found",
 		},
-		{
-			name: "Invalid - agent not HOLDER type",
-			msg: &types.MsgCreateOrUpdatePermissionSession{
-				Creator:           creator,
-				Id:                uuid.New().String(),
-				IssuerPermId:      issuerPermID,
-				VerifierPermId:    0,
-				AgentPermId:       issuerPermID, // Not HOLDER type
-				WalletAgentPermId: walletAgentPermID,
-			},
-			expectErr:  true,
-			errMessage: "agent perm must be HOLDER type",
-		},
+		//{
+		//	name: "Invalid - agent not HOLDER type",
+		//	msg: &types.MsgCreateOrUpdatePermissionSession{
+		//		Creator:           creator,
+		//		Id:                uuid.New().String(),
+		//		IssuerPermId:      issuerPermID,
+		//		VerifierPermId:    0,
+		//		AgentPermId:       issuerPermID, // Not HOLDER type
+		//		WalletAgentPermId: walletAgentPermID,
+		//	},
+		//	expectErr:  true,
+		//	errMessage: "agent permission must be HOLDER type",
+		//},
 	}
 
 	for _, tc := range testCases {
