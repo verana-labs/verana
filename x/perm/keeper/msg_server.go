@@ -6,8 +6,6 @@ import (
 	"strconv"
 	"time"
 
-	"cosmossdk.io/math"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	credentialschematypes "github.com/verana-labs/verana/x/cs/types"
 	trustdeposittypes "github.com/verana-labs/verana/x/td/types"
 
@@ -694,128 +692,20 @@ func (ms msgServer) CreateOrUpdatePermissionSession(goCtx context.Context, msg *
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	now := ctx.BlockTime()
 
-	// Validate session access
-	if err := ms.validateSessionAccess(ctx, msg); err != nil {
+	// [MOD-PERM-MSG-10-2] Create or Update Permission Session precondition checks
+	if err := ms.validateCreateOrUpdatePermissionSessionPreconditions(ctx, msg, now); err != nil {
 		return nil, err
 	}
 
-	// Define variables for issuerPerm and verifierPerm
-	var verifierPerm *types.Permission
-
-	// Load and validate issuer perm if specified
-	if msg.IssuerPermId != 0 {
-		perm, err := ms.Permission.Get(ctx, msg.IssuerPermId)
-		if err != nil {
-			return nil, sdkerrors.ErrNotFound.Wrapf("issuer perm not found: %v", err)
-		}
-
-		if perm.Type != types.PermissionType_ISSUER {
-			return nil, sdkerrors.ErrInvalidRequest.Wrap("issuer perm must be ISSUER type")
-		}
-
-		if perm.Revoked != nil || perm.Terminated != nil || perm.SlashedDeposit > 0 {
-			return nil, sdkerrors.ErrInvalidRequest.Wrap("issuer perm is revoked, terminated, or slashed")
-		}
-	}
-
-	// Load and validate verifier perm if specified
-	if msg.VerifierPermId != 0 {
-		perm, err := ms.Permission.Get(ctx, msg.VerifierPermId)
-		if err != nil {
-			return nil, sdkerrors.ErrNotFound.Wrapf("verifier perm not found: %v", err)
-		}
-
-		if perm.Type != types.PermissionType_VERIFIER {
-			return nil, sdkerrors.ErrInvalidRequest.Wrap("verifier perm must be VERIFIER type")
-		}
-
-		if perm.Revoked != nil || perm.Terminated != nil || perm.SlashedDeposit > 0 {
-			return nil, sdkerrors.ErrInvalidRequest.Wrap("verifier perm is revoked, terminated, or slashed")
-		}
-
-		verifierPerm = &perm
-	}
-
-	// Validate agent perm
-	agentPerm, err := ms.Permission.Get(ctx, msg.AgentPermId)
+	// [MOD-PERM-MSG-10-3] Create or Update Permission Session fee checks
+	foundPermSet, beneficiaryFees, trustFees, err := ms.validateCreateOrUpdatePermissionSessionFees(ctx, msg)
 	if err != nil {
-		return nil, sdkerrors.ErrNotFound.Wrap("agent perm not found")
+		return nil, err
 	}
 
-	if agentPerm.Type != types.PermissionType_HOLDER {
-		return nil, sdkerrors.ErrInvalidRequest.Wrap("agent perm must be HOLDER type")
-	}
-
-	if agentPerm.Revoked != nil || agentPerm.Terminated != nil || agentPerm.SlashedDeposit > 0 {
-		return nil, sdkerrors.ErrInvalidRequest.Wrap("agent perm is revoked, terminated, or slashed")
-	}
-
-	// Validate wallet agent perm if provided
-	if msg.WalletAgentPermId != 0 {
-		perm, err := ms.Permission.Get(ctx, msg.WalletAgentPermId)
-		if err != nil {
-			return nil, sdkerrors.ErrNotFound.Wrap("wallet agent perm not found")
-		}
-
-		if perm.Type != types.PermissionType_HOLDER {
-			return nil, sdkerrors.ErrInvalidRequest.Wrap("wallet agent perm must be HOLDER type")
-		}
-
-		if perm.Revoked != nil || perm.Terminated != nil || perm.SlashedDeposit > 0 {
-			return nil, sdkerrors.ErrInvalidRequest.Wrap("wallet agent perm is revoked, terminated, or slashed")
-		}
-
-	}
-
-	// Get beneficiary permissions set
-	foundPermSet, err := ms.findBeneficiaries(ctx, msg.IssuerPermId, msg.VerifierPermId)
-	if err != nil {
-		return nil, fmt.Errorf("failed to find beneficiaries: %w", err)
-	}
-
-	// Calculate fees
-	trustUnitPrice := ms.trustRegistryKeeper.GetTrustUnitPrice(ctx)
-	trustDepositRate := ms.trustDeposit.GetTrustDepositRate(ctx)
-	userAgentRewardRate := ms.trustDeposit.GetUserAgentRewardRate(ctx)
-	walletUserAgentRewardRate := ms.trustDeposit.GetWalletUserAgentRewardRate(ctx)
-
-	// Calculate beneficiary fees
-	beneficiaryFees := uint64(0)
-	for _, perm := range foundPermSet {
-		if verifierPerm != nil {
-			beneficiaryFees += perm.VerificationFees
-		} else {
-			beneficiaryFees += perm.IssuanceFees
-		}
-	}
-
-	// Calculate total required funds
-	totalFees := beneficiaryFees * trustUnitPrice
-	trustFees := uint64(math.LegacyNewDec(int64(totalFees)).Mul(trustDepositRate).TruncateInt64())
-	rewardRate := userAgentRewardRate.Add(walletUserAgentRewardRate)
-	rewards := uint64(math.LegacyNewDec(int64(totalFees)).Mul(rewardRate).TruncateInt64())
-
-	// Calculate required balance
-	requiredAmount := sdk.NewInt64Coin(types.BondDenom, int64(totalFees+trustFees+rewards))
-
-	// Validate sender has sufficient balance
-	creatorAddr, err := sdk.AccAddressFromBech32(msg.Creator)
-	if err != nil {
-		return nil, fmt.Errorf("invalid creator address: %w", err)
-	}
-
-	if !ms.bankKeeper.HasBalance(ctx, creatorAddr, requiredAmount) {
-		return nil, sdkerrors.ErrInsufficientFunds.Wrapf("insufficient funds: required %s", requiredAmount)
-	}
-
-	// Process fees
-	if err := ms.processFees(ctx, msg.Creator, foundPermSet, verifierPerm != nil, trustUnitPrice, trustDepositRate); err != nil {
-		return nil, fmt.Errorf("failed to process fees: %w", err)
-	}
-
-	// Create or update session
-	if err := ms.createOrUpdateSession(ctx, msg, now); err != nil {
-		return nil, fmt.Errorf("failed to create/update session: %w", err)
+	// [MOD-PERM-MSG-10-4] Create or Update Permission Session execution
+	if err := ms.executeCreateOrUpdatePermissionSession(ctx, msg, foundPermSet, beneficiaryFees, trustFees, now); err != nil {
+		return nil, fmt.Errorf("failed to create/update permission session: %w", err)
 	}
 
 	// Emit events

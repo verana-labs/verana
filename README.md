@@ -57,15 +57,15 @@ First, install Ignite CLI v28.10.0 and rename it to `ignite_eden`:
    curl https://get.ignite.com/cli@v28.10.0 | bash
    ```
 
-2. **Rename the binary:**
+2. **Move the binary:**
    ```bash
-   mv /usr/local/bin/ignite /usr/local/bin/ignite_eden
+   sudo mv ignite /usr/local/bin/ignite
    ```
    *Note: Adjust the path as needed for your environment (sometimes `~/.local/bin/ignite`).*
 
 3. **Verify installation:**
    ```bash
-   ignite_eden version
+   ignite version
    ```
    You should see Ignite CLI version `v28.x.y` and Cosmos SDK v0.50.x.
 
@@ -74,7 +74,7 @@ First, install Ignite CLI v28.10.0 and rename it to `ignite_eden`:
 To regenerate protobuf files after making changes:
 
 ```bash
-ignite_eden chain build
+ignite chain build
 ```
 
 #### Generating OpenAPI Documentation
@@ -82,7 +82,19 @@ ignite_eden chain build
 To generate OpenAPI documentation:
 
 ```bash
-ignite_eden generate openapi --clear-cache --enable-proto-vendor
+ignite generate openapi --clear-cache --enable-proto-vendor
+```
+
+Set the version to the correct one.
+
+```
+VER=$(veranad version)
+FILE="./docs/static/openapi.yml"
+
+sed -i '' -E \
+  -e "s/(\"version\"[[:space:]]*:[[:space:]]*)\"version not set\"/\\1\"$VER\"/" \
+  -e "s/^([[:space:]]*version[[:space:]]*:[[:space:]]*)\"?version not set\"?/\\1\"$VER\"/" \
+  "$FILE"
 ```
 
 **Important:** Always run these commands after modifying any `.proto` files to ensure your changes are properly compiled and integrated into the codebase.

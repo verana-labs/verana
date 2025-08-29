@@ -299,11 +299,6 @@ func isPermissionValidAtTime(perm types.Permission, when time.Time) bool {
 		return false
 	}
 
-	// Check terminated
-	if perm.Terminated != nil && !when.Before(*perm.Terminated) {
-		return false
-	}
-
 	// Check slashed
 	if perm.SlashedDeposit > 0 {
 		return false
@@ -332,140 +327,94 @@ func (k Keeper) FindBeneficiaries(goCtx context.Context, req *types.QueryFindBen
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	// [MOD-PERM-QRY-4-2] Checks
-	// At least one of issuer_perm_id or verifier_perm_id must be provided
+	// [MOD-PERM-QRY-4-2] Find Beneficiaries checks
+	// if issuer_perm_id and verifier_perm_id are unset then MUST abort
 	if req.IssuerPermId == 0 && req.VerifierPermId == 0 {
 		return nil, status.Error(codes.InvalidArgument, "at least one of issuer_perm_id or verifier_perm_id must be provided")
 	}
 
 	var issuerPerm, verifierPerm *types.Permission
-	var schemaID uint64
 
-	// Load issuer perm if specified
+	// if issuer_perm_id is specified, load issuer_perm from issuer_perm_id, Permission MUST exist and MUST be a valid permission
 	if req.IssuerPermId != 0 {
 		perm, err := k.Permission.Get(ctx, req.IssuerPermId)
 		if err != nil {
-			return nil, status.Error(codes.NotFound, fmt.Sprintf("issuer perm not found: %v", err))
+			return nil, status.Error(codes.NotFound, fmt.Sprintf("issuer permission not found: %v", err))
 		}
+
+		// MUST be a valid permission
+		if err := IsValidPermission(perm, perm.Country, ctx.BlockTime()); err != nil {
+			return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("issuer permission is not valid: %v", err))
+		}
+
 		issuerPerm = &perm
-		schemaID = perm.SchemaId
 	}
 
-	// Load verifier perm if specified
+	// if verifier_perm_id is specified, load verifier_perm from verifier_perm_id, Permission MUST exist and MUST be a valid permission
 	if req.VerifierPermId != 0 {
 		perm, err := k.Permission.Get(ctx, req.VerifierPermId)
 		if err != nil {
-			return nil, status.Error(codes.NotFound, fmt.Sprintf("verifier perm not found: %v", err))
+			return nil, status.Error(codes.NotFound, fmt.Sprintf("verifier permission not found: %v", err))
 		}
+
+		// MUST be a valid permission
+		if err := IsValidPermission(perm, perm.Country, ctx.BlockTime()); err != nil {
+			return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("verifier permission is not valid: %v", err))
+		}
+
 		verifierPerm = &perm
-		if schemaID == 0 {
-			schemaID = perm.SchemaId
-		}
 	}
 
-	// Get schema to check perm management mode
-	cs, err := k.credentialSchemaKeeper.GetCredentialSchemaById(ctx, schemaID)
-	if err != nil {
-		return nil, status.Error(codes.NotFound, fmt.Sprintf("credential schema not found: %v", err))
-	}
-
-	// Check if schema is configured with OPEN perm management mode
-	isIssuerOpenMode := false
-	isVerifierOpenMode := false
-
-	if cs.IssuerPermManagementMode == credentialschematypes.CredentialSchemaPermManagementMode_OPEN {
-		isIssuerOpenMode = true
-	}
-
-	if cs.VerifierPermManagementMode == credentialschematypes.CredentialSchemaPermManagementMode_OPEN {
-		isVerifierOpenMode = true
-	}
-
-	// Handle OPEN mode case
-	// If in OPEN mode, we need to find the ECOSYSTEM perm for this schema
-	if (req.IssuerPermId != 0 && isIssuerOpenMode) || (req.VerifierPermId != 0 && isVerifierOpenMode) {
-		// Find ECOSYSTEM perm for this schema
-		var ecosystemPerm types.Permission
-		ecosystemPermFound := false
-
-		err = k.Permission.Walk(ctx, nil, func(id uint64, perm types.Permission) (bool, error) {
-			if perm.SchemaId == schemaID &&
-				perm.Type == types.PermissionType_ECOSYSTEM &&
-				perm.Revoked == nil && perm.Terminated == nil {
-				ecosystemPerm = perm
-				ecosystemPermFound = true
-				return true, nil // Stop iteration once found
-			}
-			return false, nil
-		})
-
-		if err != nil {
-			return nil, status.Error(codes.Internal, fmt.Sprintf("failed to query ECOSYSTEM perm: %v", err))
-		}
-
-		if ecosystemPermFound {
-			// For OPEN mode, the only beneficiary is the ECOSYSTEM perm
-			permissions := []types.Permission{ecosystemPerm}
-			return &types.QueryFindBeneficiariesResponse{
-				Permissions: permissions,
-			}, nil
-		}
-	}
-
-	// If not in OPEN mode or ECOSYSTEM perm not found, proceed with normal hierarchy traversal
-	// [MOD-PERM-QRY-4-3] Execution
-	// Use a map to implement the set functionality
+	// [MOD-PERM-QRY-4-3] Find Beneficiaries execution
+	// create Set found_perm_set
 	foundPermMap := make(map[uint64]types.Permission)
 
-	// Process issuer perm hierarchy
+	// if issuer_perm is not null
 	if issuerPerm != nil {
-		// Start with the validator of issuer_perm
-		if issuerPerm.ValidatorPermId != 0 {
-			currentPermID := issuerPerm.ValidatorPermId
+		// set current_perm = issuer_perm
+		currentPerm := issuerPerm
 
-			// Traverse up the validator chain
-			for currentPermID != 0 {
-				currentPerm, err := k.Permission.Get(ctx, currentPermID)
-				if err != nil {
-					return nil, status.Error(codes.Internal, fmt.Sprintf("failed to get perm: %v", err))
-				}
+		// while current_perm.validator_perm_id is not null
+		for currentPerm.ValidatorPermId != 0 {
+			// set current_perm to loaded permission from current_perm.validator_perm_id
+			perm, err := k.Permission.Get(ctx, currentPerm.ValidatorPermId)
+			if err != nil {
+				return nil, status.Error(codes.Internal, fmt.Sprintf("failed to get permission: %v", err))
+			}
+			currentPerm = &perm
 
-				// Add to set if not revoked or terminated
-				if currentPerm.Revoked == nil && currentPerm.Terminated == nil && currentPerm.SlashedDeposit == 0 {
-					foundPermMap[currentPermID] = currentPerm
-				}
-
-				// Move up to the next validator
-				currentPermID = currentPerm.ValidatorPermId
+			// if current_perm.revoked IS NULL AND current_perm.slashed IS NULL, Add current_perm to found_perm_set
+			// Note: SlashedDeposit > 0 indicates the permission has been slashed
+			if currentPerm.Revoked == nil && currentPerm.SlashedDeposit == 0 {
+				foundPermMap[currentPerm.Id] = *currentPerm
 			}
 		}
 	}
 
-	// Process verifier perm hierarchy
+	// Additionally, if verifier_perm is not null
 	if verifierPerm != nil {
-		// First add issuer_perm to the set if it exists
-		if issuerPerm != nil && issuerPerm.Revoked == nil && issuerPerm.Terminated == nil && issuerPerm.SlashedDeposit == 0 {
-			foundPermMap[req.IssuerPermId] = *issuerPerm
+		// if issuer_perm is not null, add issuer_perm to found_perm_set
+		if issuerPerm != nil {
+			if issuerPerm.Revoked == nil && issuerPerm.SlashedDeposit == 0 {
+				foundPermMap[issuerPerm.Id] = *issuerPerm
+			}
 		}
 
-		// Start with the validator of verifier_perm
-		if verifierPerm.ValidatorPermId != 0 {
-			currentPermID := verifierPerm.ValidatorPermId
+		// set current_perm = verifier_perm
+		currentPerm := verifierPerm
 
-			// Traverse up the validator chain
-			for currentPermID != 0 {
-				currentPerm, err := k.Permission.Get(ctx, currentPermID)
-				if err != nil {
-					return nil, status.Error(codes.Internal, fmt.Sprintf("failed to get perm: %v", err))
-				}
+		// while verifier_perm.validator_perm_id is not null
+		for currentPerm.ValidatorPermId != 0 {
+			// set current_perm to loaded permission from current_perm.validator_perm_id
+			perm, err := k.Permission.Get(ctx, currentPerm.ValidatorPermId)
+			if err != nil {
+				return nil, status.Error(codes.Internal, fmt.Sprintf("failed to get permission: %v", err))
+			}
+			currentPerm = &perm
 
-				// Add to set if not revoked or terminated
-				if currentPerm.Revoked == nil && currentPerm.Terminated == nil && currentPerm.SlashedDeposit == 0 {
-					foundPermMap[currentPermID] = currentPerm
-				}
-
-				// Move up to the next validator
-				currentPermID = currentPerm.ValidatorPermId
+			// if current_perm.revoked IS NULL AND current_perm.slashed IS NULL, Add current_perm to found_perm_set
+			if currentPerm.Revoked == nil && currentPerm.SlashedDeposit == 0 {
+				foundPermMap[currentPerm.Id] = *currentPerm
 			}
 		}
 	}
