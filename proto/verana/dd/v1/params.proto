@@ -4,11 +4,11 @@ package verana.dd.v1;
 import "amino/amino.proto";
 import "gogoproto/gogo.proto";
 
-option go_package = "github.com/verana-labs/verana-blockchain/x/diddirectory/types";
+option go_package = "github.com/verana-labs/verana/x/dd/types";
 
 // Params defines the parameters for the module.
 message Params {
-  option (amino.name) = "verana/x/diddirectory/Params";
+  option (amino.name) = "verana/x/dd/Params";
   option (gogoproto.equal) = true;
 
   uint64 did_directory_trust_deposit = 1 [

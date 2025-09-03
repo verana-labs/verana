@@ -4,11 +4,11 @@ package verana.cs.v1;
 import "amino/amino.proto";
 import "gogoproto/gogo.proto";
 
-option go_package = "github.com/verana-labs/verana-blockchain/x/credentialschema/types";
+option go_package = "github.com/verana-labs/verana/x/cs/types";
 
 // Params defines the parameters for the module.
 message Params {
-  option (amino.name) = "verana/x/credentialschema/Params";
+  option (amino.name) = "verana/x/cs/Params";
   option (gogoproto.equal) = true;
 
   uint64 credential_schema_trust_deposit = 1;

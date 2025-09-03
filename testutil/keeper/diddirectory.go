@@ -17,8 +17,8 @@ import (
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/stretchr/testify/require"
 
-	"github.com/verana-labs/verana-blockchain/x/diddirectory/keeper"
-	"github.com/verana-labs/verana-blockchain/x/diddirectory/types"
+	"github.com/verana-labs/verana/x/dd/keeper"
+	"github.com/verana-labs/verana/x/dd/types"
 )
 
 func DiddirectoryKeeper(t testing.TB) (keeper.Keeper, sdk.Context) {

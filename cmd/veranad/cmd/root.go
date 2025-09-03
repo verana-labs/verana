@@ -20,7 +20,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
-	"github.com/verana-labs/verana-blockchain/app"
+	"github.com/verana-labs/verana/app"
 )
 
 // NewRootCmd creates a new root command for veranad. It is called once in the main function.

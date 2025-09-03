@@ -18,7 +18,7 @@ jobs:
   test-harness:
     runs-on: ubuntu-latest
     env:
-      VERANA_BLOCKCHAIN_PATH: ./verana-blockchain
+      VERANA_BLOCKCHAIN_PATH: ./verana
       TEST_HARNESS_PATH: ./verana-test-harness
 
     steps:
@@ -34,7 +34,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: verana-labs/verana-test-harness
-          ref: ${{ github.event.inputs.TEST_HARNESS_BRANCH || 'v0.6-dev.4' }}
+          ref: ${{ github.event.inputs.TEST_HARNESS_BRANCH || 'feat/remove-void-messages' }}
           ssh-key: ${{ secrets.VERANA_TEST_HARNESS_DEPLOY_KEY }}
           path: ${{ env.TEST_HARNESS_PATH }}
 

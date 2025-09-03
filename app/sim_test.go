@@ -32,11 +32,11 @@ import (
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/require"
 
-	"github.com/verana-labs/verana-blockchain/app"
+	"github.com/verana-labs/verana/app"
 )
 
 const (
-	SimAppChainID = "verana-blockchain-simapp"
+	SimAppChainID = "verana-simapp"
 )
 
 var FlagEnableStreamingValue bool

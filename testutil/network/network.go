@@ -7,7 +7,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/testutil/network"
 	"github.com/stretchr/testify/require"
 
-	"github.com/verana-labs/verana-blockchain/app"
+	"github.com/verana-labs/verana/app"
 )
 
 type (

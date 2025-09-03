@@ -1,11 +1,11 @@
 # Verana Blockchain
 
 [![Project Status: Active -- The project has reached a stable, usable state and is being actively developed.](https://img.shields.io/badge/repo%20status-Active-green.svg?style=flat-square)](https://www.repostatus.org/#active)
-[![GoDoc](https://img.shields.io/badge/godoc-reference-blue?style=flat-square&logo=go)](https://pkg.go.dev/github.com/verana-labs/verana-blockchain)
-[![Go Report Card](https://goreportcard.com/badge/github.com/verana-labs/verana-blockchain?style=flat-square)](https://goreportcard.com/report/github.com/verana-labs/verana-blockchain)
-[![Version](https://img.shields.io/github/tag/verana-labs/verana-blockchain.svg?style=flat-square)](https://github.com/verana-labs/verana-blockchain/releases/latest)
-[![License: Apache-2.0](https://img.shields.io/github/license/verana-labs/verana-blockchain.svg?style=flat-square)](https://github.com/verana-labs/verana-blockchain/blob/main/LICENSE)
-[![Lines Of Code](https://img.shields.io/tokei/lines/github/verana-labs/verana-blockchain?style=flat-square)](https://github.com/verana-labs/verana-blockchain)
+[![GoDoc](https://img.shields.io/badge/godoc-reference-blue?style=flat-square&logo=go)](https://pkg.go.dev/github.com/verana-labs/verana)
+[![Go Report Card](https://goreportcard.com/badge/github.com/verana-labs/verana?style=flat-square)](https://goreportcard.com/report/github.com/verana-labs/verana)
+[![Version](https://img.shields.io/github/tag/verana-labs/verana.svg?style=flat-square)](https://github.com/verana-labs/verana/releases/latest)
+[![License: Apache-2.0](https://img.shields.io/github/license/verana-labs/verana.svg?style=flat-square)](https://github.com/verana-labs/verana/blob/main/LICENSE)
+[![Lines Of Code](https://img.shields.io/tokei/lines/github/verana-labs/verana?style=flat-square)](https://github.com/verana-labs/verana)
 [![Discord](https://badgen.net/badge/icon/discord?icon=discord&label)](https://discord.gg/verana)
 
 Verana Blockchain is a Verifiable Public Registry (VPR) providing foundational infrastructure for decentralized trust ecosystems. As a sovereign Layer 1 appchain built on the Cosmos SDK, Verana enables trustless verification of credentials and services across ecosystems through a standardized trust registry framework.
@@ -42,10 +42,67 @@ Documentation is currently under development and will be available soon.
 
 Instructions for joining the Verana Mainnet will be provided prior to the network launch.
 
-## Contributing
+## Development
 
-Contributing guidelines will be available in the repository once the project reaches its public development phase.
+### Protobuf Generation
+
+After making changes to any `.proto` files, you need to regenerate the protobuf files and related code. Verana uses Cosmos SDK v0.50.13 and requires Ignite CLI v28.x for compatibility.
+
+#### Prerequisites
+
+First, install Ignite CLI v28.10.0 and rename it to `ignite_eden`:
+
+1. **Download Ignite v28.10.0:**
+   ```bash
+   curl https://get.ignite.com/cli@v28.10.0 | bash
+   ```
+
+2. **Move the binary:**
+   ```bash
+   sudo mv ignite /usr/local/bin/ignite
+   ```
+   *Note: Adjust the path as needed for your environment (sometimes `~/.local/bin/ignite`).*
+
+3. **Verify installation:**
+   ```bash
+   ignite version
+   ```
+   You should see Ignite CLI version `v28.x.y` and Cosmos SDK v0.50.x.
+
+#### Generating Protobuf Files
+
+To regenerate protobuf files after making changes:
+
+```bash
+ignite chain build
+```
+
+#### Generating OpenAPI Documentation
+
+To generate OpenAPI documentation:
+
+```bash
+ignite generate openapi --clear-cache --enable-proto-vendor
+```
+
+Set the version to the correct one.
+
+```
+VER=$(veranad version)
+FILE="./docs/static/openapi.yml"
+
+sed -i '' -E \
+  -e "s/(\"version\"[[:space:]]*:[[:space:]]*)\"version not set\"/\\1\"$VER\"/" \
+  -e "s/^([[:space:]]*version[[:space:]]*:[[:space:]]*)\"?version not set\"?/\\1\"$VER\"/" \
+  "$FILE"
+```
+
+**Important:** Always run these commands after modifying any `.proto` files to ensure your changes are properly compiled and integrated into the codebase.
 
 ## Local Development Environment
 
 A local development environment for Verana is planned and will be made available in the future.
+
+## Contributing
+
+Contributing guidelines will be available in the repository once the project reaches its public development phase.

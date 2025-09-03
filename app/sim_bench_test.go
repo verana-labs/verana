@@ -14,7 +14,7 @@ import (
 	simcli "github.com/cosmos/cosmos-sdk/x/simulation/client/cli"
 	"github.com/stretchr/testify/require"
 
-	"github.com/verana-labs/verana-blockchain/app"
+	"github.com/verana-labs/verana/app"
 )
 
 // Profile with:

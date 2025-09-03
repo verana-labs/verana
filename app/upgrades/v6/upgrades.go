@@ -7,12 +7,12 @@ import (
 	"fmt"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
-	"github.com/verana-labs/verana-blockchain/app/upgrades/types"
-	credentialschematypes "github.com/verana-labs/verana-blockchain/x/credentialschema/types"
-	diddirectorytypes "github.com/verana-labs/verana-blockchain/x/diddirectory/types"
-	permissiontypes "github.com/verana-labs/verana-blockchain/x/permission/types"
-	trustdeposittypes "github.com/verana-labs/verana-blockchain/x/trustdeposit/types"
-	trustregistrytypes "github.com/verana-labs/verana-blockchain/x/trustregistry/types"
+	"github.com/verana-labs/verana/app/upgrades/types"
+	credentialschematypes "github.com/verana-labs/verana/x/cs/types"
+	diddirectorytypes "github.com/verana-labs/verana/x/dd/types"
+	permissiontypes "github.com/verana-labs/verana/x/perm/types"
+	trustdeposittypes "github.com/verana-labs/verana/x/td/types"
+	trustregistrytypes "github.com/verana-labs/verana/x/tr/types"
 	"strconv"
 )
 
@@ -50,7 +50,7 @@ func CreateUpgradeHandler(
 
 		// Restore Permission data
 		if err := restorePermissionData(ctx, keepers, permissionData); err != nil {
-			return nil, fmt.Errorf("failed to restore permission data: %w", err)
+			return nil, fmt.Errorf("failed to restore perm data: %w", err)
 		}
 
 		// Restore DID Directory data
@@ -65,28 +65,28 @@ func CreateUpgradeHandler(
 
 func transferModuleBalances(ctx sdk.Context, keepers types.AppKeepers) error {
 	// Transfer DID Directory module balance
-	if err := transferSingleModuleBalance(ctx, keepers, "diddirectory", diddirectorytypes.ModuleName); err != nil {
-		return fmt.Errorf("failed to transfer diddirectory balance: %w", err)
+	if err := transferSingleModuleBalance(ctx, keepers, "dd", diddirectorytypes.ModuleName); err != nil {
+		return fmt.Errorf("failed to transfer dd balance: %w", err)
 	}
 
 	// Transfer Trust Registry module balance
-	if err := transferSingleModuleBalance(ctx, keepers, "trustregistry", trustregistrytypes.ModuleName); err != nil {
-		return fmt.Errorf("failed to transfer trustregistry balance: %w", err)
+	if err := transferSingleModuleBalance(ctx, keepers, "tr", trustregistrytypes.ModuleName); err != nil {
+		return fmt.Errorf("failed to transfer tr balance: %w", err)
 	}
 
 	// Transfer Trust Deposit module balance
-	if err := transferSingleModuleBalance(ctx, keepers, "trustdeposit", trustdeposittypes.ModuleName); err != nil {
-		return fmt.Errorf("failed to transfer trustdeposit balance: %w", err)
+	if err := transferSingleModuleBalance(ctx, keepers, "td", trustdeposittypes.ModuleName); err != nil {
+		return fmt.Errorf("failed to transfer td balance: %w", err)
 	}
 
 	// Transfer Credential Schema module balance
-	if err := transferSingleModuleBalance(ctx, keepers, "credentialschema", credentialschematypes.ModuleName); err != nil {
-		return fmt.Errorf("failed to transfer credentialschema balance: %w", err)
+	if err := transferSingleModuleBalance(ctx, keepers, "cs", credentialschematypes.ModuleName); err != nil {
+		return fmt.Errorf("failed to transfer cs balance: %w", err)
 	}
 
 	// Transfer Permission module balance
-	if err := transferSingleModuleBalance(ctx, keepers, "permission", permissiontypes.ModuleName); err != nil {
-		return fmt.Errorf("failed to transfer permission balance: %w", err)
+	if err := transferSingleModuleBalance(ctx, keepers, "perm", permissiontypes.ModuleName); err != nil {
+		return fmt.Errorf("failed to transfer perm balance: %w", err)
 	}
 
 	return nil
@@ -290,32 +290,32 @@ func restorePermissionData(ctx sdk.Context, keepers types.AppKeepers, data Permi
 		vpState, _ := strconv.ParseUint(perm.VPState, 10, 64)
 
 		permUpdated := permissiontypes.Permission{
-			Id:                 id,
-			SchemaId:           schemaID,
-			Type:               permissiontypes.PermissionType(permType),
-			Did:                perm.DID,
-			Grantee:            perm.Grantee,
-			Created:            &perm.Created,
-			CreatedBy:          perm.CreatedBy,
-			Extended:           nil,
-			ExtendedBy:         "",
-			Slashed:            nil,
-			SlashedBy:          "",
-			Repaid:             nil,
-			RepaidBy:           "",
-			EffectiveFrom:      &perm.EffectiveFrom,
-			EffectiveUntil:     &perm.EffectiveUntil,
-			Modified:           &perm.Modified,
-			ValidationFees:     validationFees,
-			IssuanceFees:       issuanceFees,
-			VerificationFees:   verificationFees,
-			Deposit:            deposit,
-			SlashedDeposit:     0,
-			RepaidDeposit:      0,
-			Revoked:            nil,
-			RevokedBy:          "",
-			Terminated:         nil,
-			TerminatedBy:       "",
+			Id:               id,
+			SchemaId:         schemaID,
+			Type:             permissiontypes.PermissionType(permType),
+			Did:              perm.DID,
+			Grantee:          perm.Grantee,
+			Created:          &perm.Created,
+			CreatedBy:        perm.CreatedBy,
+			Extended:         nil,
+			ExtendedBy:       "",
+			Slashed:          nil,
+			SlashedBy:        "",
+			Repaid:           nil,
+			RepaidBy:         "",
+			EffectiveFrom:    &perm.EffectiveFrom,
+			EffectiveUntil:   &perm.EffectiveUntil,
+			Modified:         &perm.Modified,
+			ValidationFees:   validationFees,
+			IssuanceFees:     issuanceFees,
+			VerificationFees: verificationFees,
+			Deposit:          deposit,
+			SlashedDeposit:   0,
+			RepaidDeposit:    0,
+			Revoked:          nil,
+			RevokedBy:        "",
+			//Terminated:         nil,
+			//TerminatedBy:       "",
 			Country:            perm.Country,
 			ValidatorPermId:    validatorPermID,
 			VpState:            permissiontypes.ValidationState(vpState),
@@ -332,10 +332,10 @@ func restorePermissionData(ctx sdk.Context, keepers types.AppKeepers, data Permi
 			return err
 		}
 
-		fmt.Printf("Restoring permission ID: %s, schema ID: %s, grantee: %s\n", perm.ID, perm.SchemaID, perm.Grantee)
+		fmt.Printf("Restoring perm ID: %s, schema ID: %s, grantee: %s\n", perm.ID, perm.SchemaID, perm.Grantee)
 	}
 
-	// Set next permission ID
+	// Set next perm ID
 	nextID, _ := strconv.ParseUint(data.NextPermissionID, 10, 64)
 
 	err := keepers.GetPermissionKeeper().PermissionCounter.Set(ctx, nextID)
@@ -343,7 +343,7 @@ func restorePermissionData(ctx sdk.Context, keepers types.AppKeepers, data Permi
 		return err
 	}
 
-	fmt.Printf("Restoring next permission ID: %s\n", data.NextPermissionID)
+	fmt.Printf("Restoring next perm ID: %s\n", data.NextPermissionID)
 
 	return nil
 }

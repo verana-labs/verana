@@ -6,26 +6,26 @@ import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
 import "google/protobuf/timestamp.proto";
 
-option go_package = "github.com/verana-labs/verana-blockchain/x/permission/types";
+option go_package = "github.com/verana-labs/verana/x/perm/types";
 
 // Permission types
 enum PermissionType {
-  PERMISSION_TYPE_UNSPECIFIED = 0;
-  PERMISSION_TYPE_ISSUER = 1;
-  PERMISSION_TYPE_VERIFIER = 2;
-  PERMISSION_TYPE_ISSUER_GRANTOR = 3;
-  PERMISSION_TYPE_VERIFIER_GRANTOR = 4;
-  PERMISSION_TYPE_ECOSYSTEM = 5;  // Changed from PERMISSION_TYPE_TRUST_REGISTRY
-  PERMISSION_TYPE_HOLDER = 6;
+  UNSPECIFIED = 0;
+  ISSUER = 1;
+  VERIFIER = 2;
+  ISSUER_GRANTOR = 3;
+  VERIFIER_GRANTOR = 4;
+  ECOSYSTEM = 5;  // Changed from PERMISSION_TYPE_TRUST_REGISTRY
+  HOLDER = 6;
 }
 
 // Validation process states
 enum ValidationState {
   VALIDATION_STATE_UNSPECIFIED = 0;
-  VALIDATION_STATE_PENDING = 1;
-  VALIDATION_STATE_VALIDATED = 2;
-  VALIDATION_STATE_TERMINATED = 3;
-  VALIDATION_STATE_TERMINATION_REQUESTED = 4;
+  PENDING = 1;
+  VALIDATED = 2;
+  TERMINATED = 3;
+  TERMINATION_REQUESTED = 4;
 }
 
 message Permission {
@@ -57,18 +57,16 @@ message Permission {
   // END NEW
   google.protobuf.Timestamp revoked = 23 [(gogoproto.stdtime) = true];
   string revoked_by = 24 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  google.protobuf.Timestamp terminated = 25 [(gogoproto.stdtime) = true];
-  string terminated_by = 26 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  string country = 27;
-  uint64 validator_perm_id = 28;
-  ValidationState vp_state = 29;
-  google.protobuf.Timestamp vp_exp = 30 [(gogoproto.stdtime) = true];
-  google.protobuf.Timestamp vp_last_state_change = 31 [(gogoproto.stdtime) = true];
-  uint64 vp_validator_deposit = 32;
-  uint64 vp_current_fees = 33;
-  uint64 vp_current_deposit = 34;
-  string vp_summary_digest_sri = 35;
-  google.protobuf.Timestamp vp_term_requested = 36 [(gogoproto.stdtime) = true];
+  string country = 25;
+  uint64 validator_perm_id = 26;
+  ValidationState vp_state = 27;
+  google.protobuf.Timestamp vp_exp = 28 [(gogoproto.stdtime) = true];
+  google.protobuf.Timestamp vp_last_state_change = 29 [(gogoproto.stdtime) = true];
+  uint64 vp_validator_deposit = 30;
+  uint64 vp_current_fees = 31;
+  uint64 vp_current_deposit = 32;
+  string vp_summary_digest_sri = 33;
+  google.protobuf.Timestamp vp_term_requested = 34 [(gogoproto.stdtime) = true];
 }
 
 message PermissionSession {

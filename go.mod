@@ -1,4 +1,4 @@
-module github.com/verana-labs/verana-blockchain
+module github.com/verana-labs/verana
 
 go 1.22.11
 
