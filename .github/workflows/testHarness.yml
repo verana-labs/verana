@@ -20,6 +20,13 @@ jobs:
     env:
       VERANA_BLOCKCHAIN_PATH: ./verana
       TEST_HARNESS_PATH: ./verana-test-harness
+      VERANA_CHAIN_ID: vna-local-1
+      VERANA_DOCKER_IMAGE: verana:dev
+      VALIDATOR1_NAME: validator1
+      RPC_INTERNAL_PORT: "26657"
+      REST_INTERNAL_PORT: "1317"
+      GRPC_INTERNAL_PORT: "9090"
+      WAIT_RPC_TIMEOUT: "180"
 
     steps:
       - name: Checkout this repository
@@ -38,23 +45,87 @@ jobs:
           ssh-key: ${{ secrets.VERANA_TEST_HARNESS_DEPLOY_KEY }}
           path: ${{ env.TEST_HARNESS_PATH }}
 
-      - name: Install dependencies and run setup script asynchronously
+      - name: Install CLI and prepare env
         run: |
           cd ${{ env.VERANA_BLOCKCHAIN_PATH }}
-          env
+          sudo apt-get update -y
+          sudo apt-get install -y jq
           export PATH=$PATH:$HOME/go/bin
           export BINARYPATH=$HOME/go/bin
           make install
           echo "BINARYPATH=$BINARYPATH" >> $GITHUB_ENV
           type veranad
-          echo ./scripts/setup_primary_validator.sh....
-          ./scripts/setup_primary_validator.sh &
-          echo $! > /tmp/setup_primary_validator_pid
-          echo "Asynchronous setup process started with PID: $(cat /tmp/setup_primary_validator_pid)"
-          echo "Waiting for setup process to complete..."
+
+      - name: Build Docker images for local testnet
+        run: |
+          cd ${{ env.VERANA_BLOCKCHAIN_PATH }}
+          chmod +x ./local-test/build.sh ./local-test/setup-validators.sh || true
+          ./local-test/build.sh
+
+      - name: Start Docker-based validators
+        run: |
+          cd ${{ env.VERANA_BLOCKCHAIN_PATH }}
+          ./local-test/setup-validators.sh --clean
+          docker ps
+
+      - name: Discover exposed ports and export endpoints
+        run: |
+          # Determine host-mapped ports for validator1
+          RPC_PORT=$(docker port "${{ env.VALIDATOR1_NAME }}" "${{ env.RPC_INTERNAL_PORT }}"/tcp | head -n1 | awk -F: '{print $NF}')
+          API_PORT=$(docker port "${{ env.VALIDATOR1_NAME }}" "${{ env.REST_INTERNAL_PORT }}"/tcp | head -n1 | awk -F: '{print $NF}')
+          GRPC_PORT=$(docker port "${{ env.VALIDATOR1_NAME }}" "${{ env.GRPC_INTERNAL_PORT }}"/tcp | head -n1 | awk -F: '{print $NF}')
+
+          echo "VERANA_RPC_ENDPOINT=http://localhost:${RPC_PORT}" >> $GITHUB_ENV
+          echo "VERANA_REST_ENDPOINT=http://localhost:${API_PORT}" >> $GITHUB_ENV
+          echo "VERANA_GRPC_ENDPOINT=localhost:${GRPC_PORT}" >> $GITHUB_ENV
+          echo "VERANA_NODE=tcp://localhost:${RPC_PORT}" >> $GITHUB_ENV
+          echo "RPC_PORT=${RPC_PORT}" >> $GITHUB_ENV
+          echo "API_PORT=${API_PORT}" >> $GITHUB_ENV
+          echo "GRPC_PORT=${GRPC_PORT}" >> $GITHUB_ENV
+          echo "Discovered ports -> RPC:${RPC_PORT} REST:${API_PORT} GRPC:${GRPC_PORT}"
+
+      - name: Wait for RPC and first block
+        run: |
+          echo "Waiting for RPC at ${{ env.VERANA_RPC_ENDPOINT }} ..."
+          # Wait up to WAIT_RPC_TIMEOUT seconds for /status to respond and height > 0
+          SECS=0
+          until curl -sf "${{ env.VERANA_RPC_ENDPOINT }}/status" >/dev/null; do
+            if [ "$SECS" -ge "${{ env.WAIT_RPC_TIMEOUT }}" ]; then
+              echo "RPC never came up" >&2
+              exit 1
+            fi
+            sleep 2; SECS=$((SECS+2))
+          done
+
+          echo "RPC responding, now waiting for first block..."
+          SECS=0
+          while true; do
+            HEIGHT=$(curl -sf "${{ env.VERANA_RPC_ENDPOINT }}/status" | jq -r '.result.sync_info.latest_block_height // 0')
+            if [ "$HEIGHT" -ge 1 ] 2>/dev/null; then
+              echo "Block height is $HEIGHT"
+              break
+            fi
+            if [ "$SECS" -ge "${{ env.WAIT_RPC_TIMEOUT }}" ]; then
+              echo "Timeout waiting for first block" >&2
+              exit 1
+            fi
+            sleep 2; SECS=$((SECS+2))
+          done
+
+      - name: Configure veranad client
+        run: |
+          veranad config chain-id "${{ env.VERANA_CHAIN_ID }}"
+          veranad config node "${{ env.VERANA_NODE }}"
+          veranad config keyring-backend test
+          veranad status | jq '.result.node_info | {id, moniker, network}'
 
       - name: Run test harness
         run: |
+          # Export discovered endpoints for harness scripts that support env config
+          export NODE_RPC="${VERANA_NODE}"
+          export RPC_ENDPOINT="${VERANA_RPC_ENDPOINT}"
+          export REST_ENDPOINT="${VERANA_REST_ENDPOINT}"
+          export VERANA_CHAIN_ID="${{ env.VERANA_CHAIN_ID }}"
           cd ${{ env.TEST_HARNESS_PATH }}
           pwd
           find .
@@ -63,12 +134,19 @@ jobs:
           ./scripts/setup_accounts.sh
           ./scripts/run_all.sh
 
-      - name: Kill asynchronous setup process
+
+      - name: Dump validator logs (on failure)
+        if: failure()
         run: |
-          if [ -f /tmp/setup_primary_validator_pid ]; then
-            kill -9 $(cat /tmp/setup_primary_validator_pid) || true
-            rm /tmp/setup_primary_validator_pid
-          fi
+          echo "Collecting last 200 lines of logs from running containers..."
+          docker ps --format '{{.Names}}' | xargs -I{} sh -c 'echo "=== {} ==="; docker logs --tail=200 {} || true'
+
+      - name: Cleanup Docker (best effort)
+        if: always()
+        run: |
+          # Stop and remove known validator containers, ignore errors if they don't exist
+          docker stop validator1 validator2 validator3 validator4 validator5 2>/dev/null || true
+          docker rm validator1 validator2 validator3 validator4 validator5 2>/dev/null || true
 
       - name: Finalize without error
         run: echo "Test harness execution completed successfully."
