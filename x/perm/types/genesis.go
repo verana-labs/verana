@@ -10,7 +10,7 @@ func DefaultGenesis() *GenesisState {
 		Params:             DefaultParams(),
 		Permissions:        []Permission{},
 		PermissionSessions: []PermissionSession{},
-		NextPermissionId:   1,
+		NextPermissionId:   0,
 	}
 }
 
