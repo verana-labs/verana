@@ -75,7 +75,7 @@ func (gs GenesisState) Validate() error {
 	}
 
 	// Validate next perm ID is greater than max perm ID
-	if gs.NextPermissionId <= maxPermId {
+	if len(gs.Permissions) > 0 && gs.NextPermissionId <= maxPermId {
 		return fmt.Errorf("next_permission_id (%d) must be greater than the maximum perm ID (%d)",
 			gs.NextPermissionId, maxPermId)
 	}
