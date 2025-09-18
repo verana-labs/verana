@@ -69,6 +69,9 @@ import (
 	_ "github.com/verana-labs/verana/x/tr/module" // import for side-effects
 	trustregistrymoduletypes "github.com/verana-labs/verana/x/tr/types"
 	// this line is used by starport scaffolding # stargate/app/moduleImport
+	protocolpoolmodulev1 "cosmossdk.io/api/cosmos/protocolpool/module/v1" // import for side-effects
+	_ "github.com/cosmos/cosmos-sdk/x/protocolpool"
+	protocolpooltypes "github.com/cosmos/cosmos-sdk/x/protocolpool/types"
 )
 
 var (
@@ -104,6 +107,7 @@ var (
 		group.ModuleName,
 		consensustypes.ModuleName,
 		circuittypes.ModuleName,
+		protocolpooltypes.ModuleName,
 		// chain modules
 		trustregistrymoduletypes.ModuleName,
 		diddirectorymoduletypes.ModuleName,
@@ -127,6 +131,7 @@ var (
 		stakingtypes.ModuleName,
 		authz.ModuleName,
 		genutiltypes.ModuleName,
+		protocolpooltypes.ModuleName,
 		// ibc modules
 		capabilitytypes.ModuleName,
 		ibcexported.ModuleName,
@@ -150,6 +155,7 @@ var (
 		feegrant.ModuleName,
 		group.ModuleName,
 		genutiltypes.ModuleName,
+		protocolpooltypes.ModuleName,
 		// ibc modules
 		ibcexported.ModuleName,
 		ibctransfertypes.ModuleName,
@@ -186,6 +192,8 @@ var (
 		{Account: trustregistrymoduletypes.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner}},
 		{Account: trustdepositmoduletypes.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner}},
 		{Account: permissionmoduletypes.ModuleName},
+		{Account: protocolpooltypes.ModuleName},
+		{Account: protocolpooltypes.ProtocolPoolEscrowAccount},
 		// this line is used by starport scaffolding # stargate/app/maccPerms
 	}
 
@@ -320,6 +328,10 @@ var (
 			{
 				Name:   circuittypes.ModuleName,
 				Config: appconfig.WrapAny(&circuitmodulev1.Module{}),
+			},
+			{
+				Name:   protocolpooltypes.ModuleName,
+				Config: appconfig.WrapAny(&protocolpoolmodulev1.Module{}),
 			},
 			{
 				Name:   trustregistrymoduletypes.ModuleName,

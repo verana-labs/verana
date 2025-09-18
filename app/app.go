@@ -110,6 +110,7 @@ import (
 	// this line is used by starport scaffolding # stargate/app/moduleImport
 	authzmodule "github.com/cosmos/cosmos-sdk/x/authz/module"
 
+	protocolpoolkeeper "github.com/cosmos/cosmos-sdk/x/protocolpool/keeper"
 	"github.com/verana-labs/verana/docs"
 )
 
@@ -181,6 +182,7 @@ type App struct {
 	GroupKeeper          groupkeeper.Keeper
 	NFTKeeper            nftkeeper.Keeper
 	CircuitBreakerKeeper circuitkeeper.Keeper
+	ProtocolPoolKeeper   protocolpoolkeeper.Keeper
 
 	// IBC
 	IBCKeeper           *ibckeeper.Keeper // IBC Keeper must be a pointer in the app, so we can SetRouter on it correctly
@@ -334,6 +336,7 @@ func New(
 		&app.NFTKeeper,
 		&app.GroupKeeper,
 		&app.CircuitBreakerKeeper,
+		&app.ProtocolPoolKeeper,
 		&app.TrustregistryKeeper,
 		&app.DiddirectoryKeeper,
 		&app.CredentialschemaKeeper,
