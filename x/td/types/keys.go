@@ -12,7 +12,8 @@ const (
 	// MemStoreKey defines the in-memory store key
 	MemStoreKey = "mem_trustdeposit"
 
-	RouterKey = ModuleName
+	RouterKey             = ModuleName
+	YieldIntermediatePool = "yield_intermediate_pool"
 )
 
 var (
