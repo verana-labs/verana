@@ -194,6 +194,7 @@ var (
 		{Account: permissionmoduletypes.ModuleName},
 		{Account: protocolpooltypes.ModuleName},
 		{Account: protocolpooltypes.ProtocolPoolEscrowAccount},
+		{Account: trustdepositmoduletypes.YieldIntermediatePool},
 		// this line is used by starport scaffolding # stargate/app/maccPerms
 	}
 
