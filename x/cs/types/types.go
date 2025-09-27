@@ -11,8 +11,8 @@ import (
 	"github.com/xeipuuv/gojsonschema"
 )
 
-// Official meta-schema for Draft 2020-12
-const jsonSchemaMetaSchema = `{
+// JsonSchemaMetaSchema Official meta-schema for Draft 2020-12
+const JsonSchemaMetaSchema = `{
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://example.com/meta-schema/credential-schema",
   "title": "Credential Schema Meta-Schema",
@@ -22,7 +22,7 @@ const jsonSchemaMetaSchema = `{
     "$id": {
       "type": "string",
       "format": "uri-reference",
-      "pattern": "^vpr:verana:mainnet/cs/v1/js/(VPR_CREDENTIAL_SCHEMA_ID|\\d+)$",
+      "pattern": "^vpr:verana:VPR_CHAIN_ID/cs/v1/js/VPR_CREDENTIAL_SCHEMA_ID$",
       "description": "$id must be a URI matching the rendering URL format"
     },
     "$schema": {
@@ -206,11 +206,11 @@ func validateJSONSchema(schemaJSON string) error {
 
 	// Only validate that $id follows the basic pattern, actual ID will be set later
 	if !isValidSchemaIdPattern(schemaId) {
-		return fmt.Errorf("$id must match the pattern 'vpr:verana:mainnet/cs/v1/js/VPR_CREDENTIAL_SCHEMA_ID' or 'vpr:verana:mainnet/cs/v1/js/{number}'")
+		return fmt.Errorf("$id must match the pattern 'vpr:verana:VPR_CHAIN_ID/cs/v1/js/VPR_CREDENTIAL_SCHEMA_ID'")
 	}
 
 	// Load the meta-schema and validate
-	metaSchemaLoader := gojsonschema.NewStringLoader(jsonSchemaMetaSchema)
+	metaSchemaLoader := gojsonschema.NewStringLoader(JsonSchemaMetaSchema)
 	schemaLoader := gojsonschema.NewStringLoader(schemaJSON)
 	result, err := gojsonschema.Validate(metaSchemaLoader, schemaLoader)
 	if err != nil {
@@ -257,11 +257,10 @@ func validateJSONSchema(schemaJSON string) error {
 }
 
 func isValidSchemaIdPattern(schemaId string) bool {
-	// Accept either the placeholder or an actual number
-	placeholderPattern := regexp.MustCompile(`^vpr:verana:mainnet/cs/v1/js/VPR_CREDENTIAL_SCHEMA_ID$`)
-	numberPattern := regexp.MustCompile(`^vpr:verana:mainnet/cs/v1/js/\d+$`)
+	// ONLY accept the placeholder format - users must use placeholders
+	placeholderPattern := regexp.MustCompile(`^vpr:verana:VPR_CHAIN_ID/cs/v1/js/VPR_CREDENTIAL_SCHEMA_ID$`)
 
-	return placeholderPattern.MatchString(schemaId) || numberPattern.MatchString(schemaId)
+	return placeholderPattern.MatchString(schemaId)
 }
 
 func validateValidityPeriods(msg *MsgCreateCredentialSchema) error {

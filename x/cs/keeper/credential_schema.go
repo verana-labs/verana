@@ -75,7 +75,9 @@ func (ms msgServer) executeCreateCredentialSchema(ctx sdk.Context, schemaID uint
 	}
 
 	// Replace VPR_CREDENTIAL_SCHEMA_ID placeholder with actual generated ID
+	// Replace VPR_CHAIN_ID with actual chain ID
 	processedJsonSchema := strings.ReplaceAll(msg.JsonSchema, "VPR_CREDENTIAL_SCHEMA_ID", fmt.Sprintf("%d", schemaID))
+	processedJsonSchema = strings.ReplaceAll(processedJsonSchema, "VPR_CHAIN_ID", ctx.ChainID())
 
 	// Create the credential schema
 	credentialSchema := types.CredentialSchema{
@@ -84,7 +86,7 @@ func (ms msgServer) executeCreateCredentialSchema(ctx sdk.Context, schemaID uint
 		Created:                                 ctx.BlockTime(),
 		Modified:                                ctx.BlockTime(),
 		Deposit:                                 trustDepositAmount,
-		JsonSchema:                              processedJsonSchema, // Use processed schema with replaced ID
+		JsonSchema:                              processedJsonSchema, // Now includes chain ID replacement
 		IssuerGrantorValidationValidityPeriod:   msg.IssuerGrantorValidationValidityPeriod,
 		VerifierGrantorValidationValidityPeriod: msg.VerifierGrantorValidationValidityPeriod,
 		IssuerValidationValidityPeriod:          msg.IssuerValidationValidityPeriod,
