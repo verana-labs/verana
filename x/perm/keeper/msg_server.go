@@ -57,6 +57,7 @@ func (ms msgServer) StartPermissionVP(goCtx context.Context, msg *types.MsgStart
 			sdk.NewAttribute(types.AttributeKeyCountry, msg.Country),
 			sdk.NewAttribute(types.AttributeKeyFees, strconv.FormatUint(fees, 10)),
 			sdk.NewAttribute(types.AttributeKeyDeposit, strconv.FormatUint(deposit, 10)),
+			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
 		),
 	})
 
@@ -99,6 +100,18 @@ func (ms msgServer) RenewPermissionVP(goCtx context.Context, msg *types.MsgRenew
 	if err := ms.executeRenewPermissionVP(ctx, applicantPerm, validationFees, validationDeposit); err != nil {
 		return nil, fmt.Errorf("failed to execute perm VP renewal: %w", err)
 	}
+
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			types.EventTypeRenewPermissionVP,
+			sdk.NewAttribute(types.AttributeKeyPermissionID, strconv.FormatUint(msg.Id, 10)),
+			sdk.NewAttribute(types.AttributeKeyCreator, msg.Creator),
+			sdk.NewAttribute(types.AttributeKeyValidatorPermID, strconv.FormatUint(applicantPerm.ValidatorPermId, 10)),
+			sdk.NewAttribute(types.AttributeKeyValidationFees, strconv.FormatUint(validationFees, 10)),
+			sdk.NewAttribute(types.AttributeKeyValidationDeposit, strconv.FormatUint(validationDeposit, 10)),
+			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
+		),
+	})
 
 	return &types.MsgRenewPermissionVPResponse{}, nil
 }
@@ -269,6 +282,15 @@ func (ms msgServer) CancelPermissionVPLastRequest(goCtx context.Context, msg *ty
 		return nil, fmt.Errorf("failed to execute VP cancellation: %w", err)
 	}
 
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			types.EventTypeCancelPermissionVPLastRequest,
+			sdk.NewAttribute(types.AttributeKeyPermissionID, strconv.FormatUint(msg.Id, 10)),
+			sdk.NewAttribute(types.AttributeKeyCreator, msg.Creator),
+			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
+		),
+	})
+
 	return &types.MsgCancelPermissionVPLastRequestResponse{}, nil
 }
 
@@ -352,6 +374,13 @@ func (ms msgServer) CreateRootPermission(goCtx context.Context, msg *types.MsgCr
 			types.EventTypeCreateRootPermission,
 			sdk.NewAttribute(types.AttributeKeyRootPermissionID, strconv.FormatUint(id, 10)),
 			sdk.NewAttribute(types.AttributeKeySchemaID, strconv.FormatUint(msg.SchemaId, 10)),
+			sdk.NewAttribute(types.AttributeKeyCreator, msg.Creator),
+			sdk.NewAttribute(types.AttributeKeyCountry, msg.Country),
+			sdk.NewAttribute(types.AttributeKeyEffectiveFrom, formatTimePtr(msg.EffectiveFrom)),
+			sdk.NewAttribute(types.AttributeKeyEffectiveUntil, formatTimePtr(msg.EffectiveUntil)),
+			sdk.NewAttribute(types.AttributeKeyValidationFees, strconv.FormatUint(msg.ValidationFees, 10)),
+			sdk.NewAttribute(types.AttributeKeyIssuanceFees, strconv.FormatUint(msg.IssuanceFees, 10)),
+			sdk.NewAttribute(types.AttributeKeyVerificationFees, strconv.FormatUint(msg.VerificationFees, 10)),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
 		),
 	})
@@ -455,6 +484,16 @@ func (ms msgServer) ExtendPermission(goCtx context.Context, msg *types.MsgExtend
 	if err := ms.executeExtendPermission(ctx, applicantPerm, msg.Creator, msg.EffectiveUntil, now); err != nil {
 		return nil, fmt.Errorf("failed to extend perm: %w", err)
 	}
+
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			types.EventTypeExtendPermission,
+			sdk.NewAttribute(types.AttributeKeyPermissionID, strconv.FormatUint(msg.Id, 10)),
+			sdk.NewAttribute(types.AttributeKeyExtendedBy, msg.Creator),
+			sdk.NewAttribute(types.AttributeKeyNewEffectiveUntil, msg.EffectiveUntil.String()),
+			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
+		),
+	})
 
 	return &types.MsgExtendPermissionResponse{}, nil
 }
@@ -578,6 +617,16 @@ func (ms msgServer) RevokePermission(goCtx context.Context, msg *types.MsgRevoke
 	if err := ms.executeRevokePermission(ctx, applicantPerm, msg.Creator, now); err != nil {
 		return nil, fmt.Errorf("failed to revoke permission: %w", err)
 	}
+
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			types.EventTypeRevokePermission,
+			sdk.NewAttribute(types.AttributeKeyPermissionID, strconv.FormatUint(msg.Id, 10)),
+			sdk.NewAttribute(types.AttributeKeyRevokedBy, msg.Creator),
+			sdk.NewAttribute(types.AttributeKeyRevokedAt, now.String()),
+			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
+		),
+	})
 
 	return &types.MsgRevokePermissionResponse{}, nil
 }
@@ -967,6 +1016,12 @@ func (ms msgServer) CreatePermission(goCtx context.Context, msg *types.MsgCreate
 			sdk.NewAttribute(types.AttributeKeyPermissionID, strconv.FormatUint(permissionId, 10)),
 			sdk.NewAttribute(types.AttributeKeySchemaID, strconv.FormatUint(msg.SchemaId, 10)),
 			sdk.NewAttribute(types.AttributeKeyCreator, msg.Creator),
+			sdk.NewAttribute(types.AttributeKeyType, msg.Type.String()),
+			sdk.NewAttribute(types.AttributeKeyCountry, msg.Country),
+			sdk.NewAttribute(types.AttributeKeyEffectiveFrom, formatTimePtr(msg.EffectiveFrom)),
+			sdk.NewAttribute(types.AttributeKeyEffectiveUntil, formatTimePtr(msg.EffectiveUntil)),
+			sdk.NewAttribute(types.AttributeKeyValidationFees, strconv.FormatUint(msg.ValidationFees, 10)),
+			sdk.NewAttribute(types.AttributeKeyVerificationFees, strconv.FormatUint(msg.VerificationFees, 10)),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
 		),
 	})
