@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/verana-labs/verana/x/cs/types"
@@ -39,6 +40,16 @@ func (ms msgServer) CreateCredentialSchema(goCtx context.Context, msg *types.Msg
 	if err := ms.executeCreateCredentialSchema(ctx, nextID, msg); err != nil {
 		return nil, err
 	}
+
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			types.EventTypeCreateCredentialSchema,
+			sdk.NewAttribute(types.AttributeKeyId, strconv.FormatUint(nextID, 10)),
+			sdk.NewAttribute(types.AttributeKeyTrId, strconv.FormatUint(msg.TrId, 10)),
+			sdk.NewAttribute(types.AttributeKeyCreator, msg.Creator),
+			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
+		),
+	})
 
 	return &types.MsgCreateCredentialSchemaResponse{
 		Id: nextID,
@@ -80,6 +91,21 @@ func (ms msgServer) UpdateCredentialSchema(goCtx context.Context, msg *types.Msg
 	if err := ms.CredentialSchema.Set(ctx, cs.Id, cs); err != nil {
 		return nil, fmt.Errorf("failed to update credential schema: %w", err)
 	}
+
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			types.EventTypeUpdateCredentialSchema,
+			sdk.NewAttribute(types.AttributeKeyId, strconv.FormatUint(msg.Id, 10)),
+			sdk.NewAttribute(types.AttributeKeyTrId, strconv.FormatUint(cs.TrId, 10)),
+			sdk.NewAttribute(types.AttributeKeyCreator, msg.Creator),
+			sdk.NewAttribute(types.AttributeKeyIssuerGrantorValidationValidityPeriod, strconv.FormatUint(uint64(msg.IssuerGrantorValidationValidityPeriod), 10)),
+			sdk.NewAttribute(types.AttributeKeyVerifierGrantorValidationValidityPeriod, strconv.FormatUint(uint64(msg.VerifierGrantorValidationValidityPeriod), 10)),
+			sdk.NewAttribute(types.AttributeKeyIssuerValidationValidityPeriod, strconv.FormatUint(uint64(msg.IssuerValidationValidityPeriod), 10)),
+			sdk.NewAttribute(types.AttributeKeyVerifierValidationValidityPeriod, strconv.FormatUint(uint64(msg.VerifierValidationValidityPeriod), 10)),
+			sdk.NewAttribute(types.AttributeKeyHolderValidationValidityPeriod, strconv.FormatUint(uint64(msg.HolderValidationValidityPeriod), 10)),
+			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
+		),
+	})
 
 	return &types.MsgUpdateCredentialSchemaResponse{}, nil
 }
@@ -149,6 +175,23 @@ func (ms msgServer) ArchiveCredentialSchema(goCtx context.Context, msg *types.Ms
 	if err := ms.CredentialSchema.Set(ctx, cs.Id, cs); err != nil {
 		return nil, fmt.Errorf("failed to update credential schema: %w", err)
 	}
+
+	// Determine archive status string
+	archiveStatus := "archived"
+	if !msg.Archive {
+		archiveStatus = "unarchived"
+	}
+
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			types.EventTypeArchiveCredentialSchema,
+			sdk.NewAttribute(types.AttributeKeyId, strconv.FormatUint(msg.Id, 10)),
+			sdk.NewAttribute(types.AttributeKeyTrId, strconv.FormatUint(cs.TrId, 10)),
+			sdk.NewAttribute(types.AttributeKeyCreator, msg.Creator),
+			sdk.NewAttribute(types.AttributeKeyArchiveStatus, archiveStatus),
+			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
+		),
+	})
 
 	return &types.MsgArchiveCredentialSchemaResponse{}, nil
 }
