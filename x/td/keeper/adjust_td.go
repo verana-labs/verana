@@ -4,6 +4,7 @@ import (
 	"fmt"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/verana-labs/verana/x/td/types"
+	"strconv"
 )
 
 // AdjustTrustDeposit modifies the trust deposit for an account by the specified amount.
@@ -73,6 +74,19 @@ func (k Keeper) AdjustTrustDeposit(ctx sdk.Context, account string, augend int64
 		if err != nil {
 			return fmt.Errorf("failed to save trust deposit: %w", err)
 		}
+
+		// Emit event for new entry
+		ctx.EventManager().EmitEvents(sdk.Events{
+			sdk.NewEvent(
+				types.EventTypeAdjustTrustDeposit,
+				sdk.NewAttribute(types.AttributeKeyAccount, account),
+				sdk.NewAttribute(types.AttributeKeyAugend, strconv.FormatInt(augend, 10)),
+				sdk.NewAttribute(types.AttributeKeyAdjustmentType, "increase"),
+				sdk.NewAttribute(types.AttributeKeyNewAmount, strconv.FormatUint(td.Amount, 10)),
+				sdk.NewAttribute(types.AttributeKeyNewShare, strconv.FormatUint(td.Share, 10)),
+				sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
+			),
+		})
 
 		return nil
 	}
@@ -167,6 +181,25 @@ func (k Keeper) AdjustTrustDeposit(ctx sdk.Context, account string, augend int64
 	if err != nil {
 		return fmt.Errorf("failed to save trust deposit: %w", err)
 	}
+
+	// Emit event for adjustment
+	adjustmentType := "increase"
+	if augend < 0 {
+		adjustmentType = "decrease"
+	}
+
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			types.EventTypeAdjustTrustDeposit,
+			sdk.NewAttribute(types.AttributeKeyAccount, account),
+			sdk.NewAttribute(types.AttributeKeyAugend, strconv.FormatInt(augend, 10)),
+			sdk.NewAttribute(types.AttributeKeyAdjustmentType, adjustmentType),
+			sdk.NewAttribute(types.AttributeKeyNewAmount, strconv.FormatUint(td.Amount, 10)),
+			sdk.NewAttribute(types.AttributeKeyNewShare, strconv.FormatUint(td.Share, 10)),
+			sdk.NewAttribute(types.AttributeKeyNewClaimable, strconv.FormatUint(td.Claimable, 10)),
+			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
+		),
+	})
 
 	return nil
 }
