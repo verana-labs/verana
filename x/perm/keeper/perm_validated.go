@@ -3,6 +3,7 @@ package keeper
 import (
 	"cosmossdk.io/math"
 	"fmt"
+	"strconv"
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -121,6 +122,23 @@ func (ms msgServer) executeSetPermissionVPToValidated(
 	if err := ms.Keeper.UpdatePermission(ctx, applicantPerm); err != nil {
 		return nil, fmt.Errorf("failed to update perm: %w", err)
 	}
+
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			types.EventTypeSetPermissionVPToValidated,
+			sdk.NewAttribute(types.AttributeKeyPermissionID, strconv.FormatUint(msg.Id, 10)),
+			sdk.NewAttribute(types.AttributeKeyCreator, msg.Creator),
+			sdk.NewAttribute(types.AttributeKeyValidatorPermID, strconv.FormatUint(applicantPerm.ValidatorPermId, 10)),
+			sdk.NewAttribute(types.AttributeKeyVpSummaryDigestSri, msg.VpSummaryDigestSri),
+			sdk.NewAttribute(types.AttributeKeyEffectiveUntil, formatTimePtr(msg.EffectiveUntil)),
+			sdk.NewAttribute(types.AttributeKeyValidationFees, strconv.FormatUint(msg.ValidationFees, 10)),
+			sdk.NewAttribute(types.AttributeKeyIssuanceFees, strconv.FormatUint(msg.IssuanceFees, 10)),
+			sdk.NewAttribute(types.AttributeKeyVerificationFees, strconv.FormatUint(msg.VerificationFees, 10)),
+			sdk.NewAttribute(types.AttributeKeyVpExp, formatTimePtr(vpExp)),
+			sdk.NewAttribute(types.AttributeKeyCountry, msg.Country),
+			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
+		),
+	})
 
 	return &types.MsgSetPermissionVPToValidatedResponse{}, nil
 }

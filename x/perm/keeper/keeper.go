@@ -149,3 +149,10 @@ func IsValidPermission(perm types.Permission, country string, checkTime time.Tim
 
 	return nil
 }
+
+func formatTimePtr(t *time.Time) string {
+	if t == nil {
+		return ""
+	}
+	return t.String()
+}

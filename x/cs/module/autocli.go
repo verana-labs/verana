@@ -85,16 +85,20 @@ $ veranad query cs schema 1`,
 					RpcMethod: "CreateCredentialSchema",
 					Use:       "create-credential-schema [tr-id] [json-schema] [issuer-grantor-period] [verifier-grantor-period] [issuer-period] [verifier-period] [holder-period] [issuer-mode] [verifier-mode]",
 					Short:     "Create a new credential schema",
-					Long: `Create a new credential schema with the specified parameters:
-- tr-id: trust registry ID
-- json-schema: path to JSON schema file or JSON string
-- issuer-grantor-period: validation period for issuer grantors (days)
-- verifier-grantor-period: validation period for verifier grantors (days)
-- issuer-period: validation period for issuers (days)
-- verifier-period: validation period for verifiers (days)
-- holder-period: validation period for holders (days)
-- issuer-mode: perm management mode for issuers (1=OPEN, 2=GRANTOR_VALIDATION, 3=TRUST_REGISTRY_VALIDATION)
-- verifier-mode: perm management mode for verifiers (1=OPEN, 2=GRANTOR_VALIDATION, 3=TRUST_REGISTRY_VALIDATION)
+					Long: `Create a new credential schema with the specified parameters. The JSON schema supports placeholder replacement:
+- VPR_CREDENTIAL_SCHEMA_ID: Replaced with the generated schema ID  
+- VPR_CHAIN_ID: Replaced with the current chain ID
+
+Parameters:
+- tr-id: Trust registry ID (must be controlled by creator)
+- json-schema: Path to JSON schema file or inline JSON string
+- issuer-grantor-period: Validation period for issuer grantors (days)
+- verifier-grantor-period: Validation period for verifier grantors (days)
+- issuer-period: Validation period for issuers (days)
+- verifier-period: Validation period for verifiers (days)
+- holder-period: Validation period for holders (days)
+- issuer-mode: Permission management mode (1=OPEN, 2=GRANTOR_VALIDATION, 3=TRUST_REGISTRY_VALIDATION)
+- verifier-mode: Permission management mode (same options as issuer-mode)
 
 Example:
 $ veranad tx cs create-credential-schema 1 schema.json 365 365 180 180 180 2 2`,

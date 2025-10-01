@@ -6,6 +6,7 @@ import (
 	"fmt"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/verana-labs/verana/x/td/types"
+	"strconv"
 )
 
 type msgServer struct {
@@ -69,6 +70,16 @@ func (ms msgServer) ReclaimTrustDepositYield(goCtx context.Context, msg *types.M
 	if err := ms.Keeper.TrustDeposit.Set(ctx, account, td); err != nil {
 		return nil, fmt.Errorf("failed to update trust deposit: %w", err)
 	}
+
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			types.EventTypeReclaimTrustDepositYield,
+			sdk.NewAttribute(types.AttributeKeyAccount, account),
+			sdk.NewAttribute(types.AttributeKeyClaimedYield, strconv.FormatUint(claimableYield, 10)),
+			sdk.NewAttribute(types.AttributeKeySharesReduced, strconv.FormatUint(sharesToReduce, 10)),
+			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
+		),
+	})
 
 	return &types.MsgReclaimTrustDepositYieldResponse{
 		ClaimedAmount: claimableYield, // Or rename to ClaimedYield
@@ -171,6 +182,18 @@ func (ms msgServer) ReclaimTrustDeposit(goCtx context.Context, msg *types.MsgRec
 		return nil, fmt.Errorf("failed to update trust deposit: %w", err)
 	}
 
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			types.EventTypeReclaimTrustDeposit,
+			sdk.NewAttribute(types.AttributeKeyAccount, account),
+			sdk.NewAttribute(types.AttributeKeyClaimedAmount, strconv.FormatUint(msg.Claimed, 10)),
+			sdk.NewAttribute(types.AttributeKeyBurnedAmount, strconv.FormatUint(toBurn, 10)),
+			sdk.NewAttribute(types.AttributeKeyTransferAmount, strconv.FormatUint(toTransfer, 10)),
+			sdk.NewAttribute(types.AttributeKeySharesReduced, strconv.FormatUint(shareReduction, 10)),
+			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
+		),
+	})
+
 	return &types.MsgReclaimTrustDepositResponse{
 		BurnedAmount:  toBurn,
 		ClaimedAmount: toTransfer,
@@ -238,14 +261,15 @@ func (ms msgServer) RepaySlashedTrustDeposit(goCtx context.Context, msg *types.M
 	}
 
 	// Emit event
-	ctx.EventManager().EmitEvent(
+	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeRepaySlashedTrustDeposit,
 			sdk.NewAttribute(types.AttributeKeyAccount, msg.Account),
-			sdk.NewAttribute(types.AttributeKeyAmount, fmt.Sprintf("%d", msg.Amount)),
+			sdk.NewAttribute(types.AttributeKeyAmount, strconv.FormatUint(msg.Amount, 10)),
 			sdk.NewAttribute(types.AttributeKeyRepaidBy, msg.Creator),
+			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
 		),
-	)
+	})
 
 	return &types.MsgRepaySlashedTrustDepositResponse{}, nil
 }

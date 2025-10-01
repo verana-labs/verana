@@ -26,4 +26,26 @@ const (
 	AttributeKeyValidatorPermID                 = "validator_perm_id"
 	AttributeKeyType                            = "type"
 	AttributeKeyCountry                         = "country"
+
+	EventTypeRenewPermissionVP    = "renew_permission_vp"
+	AttributeKeyValidationFees    = "validation_fees"
+	AttributeKeyValidationDeposit = "validation_deposit"
+
+	EventTypeSetPermissionVPToValidated = "set_permission_vp_to_validated"
+	AttributeKeyVpSummaryDigestSri      = "vp_summary_digest_sri"
+	AttributeKeyEffectiveFrom           = "effective_from"
+	AttributeKeyEffectiveUntil          = "effective_until"
+	AttributeKeyIssuanceFees            = "issuance_fees"
+	AttributeKeyVerificationFees        = "verification_fees"
+	AttributeKeyVpExp                   = "vp_exp"
+
+	EventTypeCancelPermissionVPLastRequest = "cancel_permission_vp_last_request"
+
+	EventTypeExtendPermission     = "extend_permission"
+	AttributeKeyExtendedBy        = "extended_by"
+	AttributeKeyNewEffectiveUntil = "new_effective_until"
+
+	EventTypeRevokePermission = "revoke_permission"
+	AttributeKeyRevokedBy     = "revoked_by"
+	AttributeKeyRevokedAt     = "revoked_at"
 )

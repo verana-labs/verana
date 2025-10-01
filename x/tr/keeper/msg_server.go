@@ -88,6 +88,19 @@ func (ms msgServer) AddGovernanceFrameworkDocument(goCtx context.Context, msg *t
 		return nil, err
 	}
 
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			types.EventTypeAddGovernanceFrameworkDocument,
+			sdk.NewAttribute(types.AttributeKeyGFVersionID, strconv.FormatUint(msg.Id, 10)),
+			sdk.NewAttribute(types.AttributeKeyVersion, strconv.FormatInt(int64(msg.Version), 10)),
+			sdk.NewAttribute(types.AttributeKeyLanguage, msg.DocLanguage),
+			sdk.NewAttribute(types.AttributeKeyDocURL, msg.DocUrl),
+			sdk.NewAttribute(types.AttributeKeyDigestSri, msg.DocDigestSri),
+			sdk.NewAttribute(types.AttributeKeyController, msg.Creator),
+			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
+		),
+	})
+
 	return &types.MsgAddGovernanceFrameworkDocumentResponse{}, nil
 }
 
@@ -103,6 +116,15 @@ func (ms msgServer) IncreaseActiveGovernanceFrameworkVersion(goCtx context.Conte
 	if err := ms.executeIncreaseActiveGovernanceFrameworkVersion(ctx, msg); err != nil {
 		return nil, err
 	}
+
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			types.EventTypeIncreaseActiveGFVersion,
+			sdk.NewAttribute(types.AttributeKeyTrustRegistryID, strconv.FormatUint(msg.Id, 10)),
+			sdk.NewAttribute(types.AttributeKeyController, msg.Creator),
+			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
+		),
+	})
 
 	return &types.MsgIncreaseActiveGovernanceFrameworkVersionResponse{}, nil
 }
@@ -130,6 +152,17 @@ func (ms msgServer) UpdateTrustRegistry(goCtx context.Context, msg *types.MsgUpd
 	if err := ms.TrustRegistry.Set(ctx, tr.Id, tr); err != nil {
 		return nil, fmt.Errorf("failed to update trust registry: %w", err)
 	}
+
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			types.EventTypeUpdateTrustRegistry,
+			sdk.NewAttribute(types.AttributeKeyTrustRegistryID, strconv.FormatUint(msg.Id, 10)),
+			sdk.NewAttribute(types.AttributeKeyController, msg.Creator),
+			sdk.NewAttribute(types.AttributeKeyDID, msg.Did),
+			sdk.NewAttribute(types.AttributeKeyAka, msg.Aka),
+			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
+		),
+	})
 
 	return &types.MsgUpdateTrustRegistryResponse{}, nil
 }
@@ -172,6 +205,21 @@ func (ms msgServer) ArchiveTrustRegistry(goCtx context.Context, msg *types.MsgAr
 	if err := ms.TrustRegistry.Set(ctx, tr.Id, tr); err != nil {
 		return nil, fmt.Errorf("failed to update trust registry: %w", err)
 	}
+
+	archiveStatus := "archived"
+	if !msg.Archive {
+		archiveStatus = "unarchived"
+	}
+
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			types.EventTypeArchiveTrustRegistry,
+			sdk.NewAttribute(types.AttributeKeyTrustRegistryID, strconv.FormatUint(msg.Id, 10)),
+			sdk.NewAttribute(types.AttributeKeyController, msg.Creator),
+			sdk.NewAttribute(types.AttributeKeyArchiveStatus, archiveStatus),
+			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
+		),
+	})
 
 	return &types.MsgArchiveTrustRegistryResponse{}, nil
 }
