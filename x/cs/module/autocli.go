@@ -83,25 +83,28 @@ $ veranad query cs schema 1`,
 				},
 				{
 					RpcMethod: "CreateCredentialSchema",
-					Use:       "create-credential-schema [tr-id] [json-schema] [issuer-grantor-period] [verifier-grantor-period] [issuer-period] [verifier-period] [holder-period] [issuer-mode] [verifier-mode]",
+					Use:       "create-credential-schema [tr-id] [json-schema] [issuer-mode] [verifier-mode]",
 					Short:     "Create a new credential schema",
 					Long: `Create a new credential schema with the specified parameters. The JSON schema supports placeholder replacement:
 - VPR_CREDENTIAL_SCHEMA_ID: Replaced with the generated schema ID  
 - VPR_CHAIN_ID: Replaced with the current chain ID
 
-Parameters:
+Required Parameters:
 - tr-id: Trust registry ID (must be controlled by creator)
 - json-schema: Path to JSON schema file or inline JSON string
-- issuer-grantor-period: Validation period for issuer grantors (days)
-- verifier-grantor-period: Validation period for verifier grantors (days)
-- issuer-period: Validation period for issuers (days)
-- verifier-period: Validation period for verifiers (days)
-- holder-period: Validation period for holders (days)
 - issuer-mode: Permission management mode (1=OPEN, 2=GRANTOR_VALIDATION, 3=TRUST_REGISTRY_VALIDATION)
 - verifier-mode: Permission management mode (same options as issuer-mode)
 
+Optional Flags (default to 0 days):
+- --issuer-grantor-validation-validity-period: Validation period for issuer grantors (days, default: 0)
+- --verifier-grantor-validation-validity-period: Validation period for verifier grantors (days, default: 0)
+- --issuer-validation-validity-period: Validation period for issuers (days, default: 0)
+- --verifier-validation-validity-period: Validation period for verifiers (days, default: 0)
+- --holder-validation-validity-period: Validation period for holders (days, default: 0)
+
 Example:
-$ veranad tx cs create-credential-schema 1 schema.json 365 365 180 180 180 2 2`,
+$ veranad tx cs create-credential-schema 1 schema.json 2 2 --issuer-grantor-validation-validity-period 365 --verifier-grantor-validation-validity-period 365
+$ veranad tx cs create-credential-schema 1 schema.json 2 2`,
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{
 							ProtoField: "tr_id",
@@ -110,51 +113,85 @@ $ veranad tx cs create-credential-schema 1 schema.json 365 365 180 180 180 2 2`,
 							ProtoField: "json_schema",
 						},
 						{
-							ProtoField: "issuer_grantor_validation_validity_period",
-						},
-						{
-							ProtoField: "verifier_grantor_validation_validity_period",
-						},
-						{
-							ProtoField: "issuer_validation_validity_period",
-						},
-						{
-							ProtoField: "verifier_validation_validity_period",
-						},
-						{
-							ProtoField: "holder_validation_validity_period",
-						},
-						{
 							ProtoField: "issuer_perm_management_mode",
 						},
 						{
 							ProtoField: "verifier_perm_management_mode",
 						},
 					},
+					FlagOptions: map[string]*autocliv1.FlagOptions{
+						"issuer_grantor_validation_validity_period": {
+							Name:         "issuer-grantor-validation-validity-period",
+							Usage:        "Validation period for issuer grantors in days (default: 0)",
+							DefaultValue: "0",
+						},
+						"verifier_grantor_validation_validity_period": {
+							Name:         "verifier-grantor-validation-validity-period",
+							Usage:        "Validation period for verifier grantors in days (default: 0)",
+							DefaultValue: "0",
+						},
+						"issuer_validation_validity_period": {
+							Name:         "issuer-validation-validity-period",
+							Usage:        "Validation period for issuers in days (default: 0)",
+							DefaultValue: "0",
+						},
+						"verifier_validation_validity_period": {
+							Name:         "verifier-validation-validity-period",
+							Usage:        "Validation period for verifiers in days (default: 0)",
+							DefaultValue: "0",
+						},
+						"holder_validation_validity_period": {
+							Name:         "holder-validation-validity-period",
+							Usage:        "Validation period for holders in days (default: 0)",
+							DefaultValue: "0",
+						},
+					},
 				},
 				{
 					RpcMethod: "UpdateCredentialSchema",
-					Use:       "update [id] [issuer-grantor-period] [verifier-grantor-period] [issuer-period] [verifier-period] [holder-period]",
+					Use:       "update [id]",
 					Short:     "Update a credential schema's validity periods",
-					Long:      "Update the validity periods of an existing credential schema",
+					Long: `Update the validity periods of an existing credential schema.
+
+Optional Flags (default to 0 days):
+- --issuer-grantor-validation-validity-period: Validation period for issuer grantors (days, default: 0)
+- --verifier-grantor-validation-validity-period: Validation period for verifier grantors (days, default: 0)
+- --issuer-validation-validity-period: Validation period for issuers (days, default: 0)
+- --verifier-validation-validity-period: Validation period for verifiers (days, default: 0)
+- --holder-validation-validity-period: Validation period for holders (days, default: 0)
+
+Example:
+$ veranad tx cs update 1 --issuer-validation-validity-period 365 --verifier-validation-validity-period 180`,
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{
 							ProtoField: "id",
 						},
-						{
-							ProtoField: "issuer_grantor_validation_validity_period",
+					},
+					FlagOptions: map[string]*autocliv1.FlagOptions{
+						"issuer_grantor_validation_validity_period": {
+							Name:         "issuer-grantor-validation-validity-period",
+							Usage:        "Validation period for issuer grantors in days (default: 0)",
+							DefaultValue: "0",
 						},
-						{
-							ProtoField: "verifier_grantor_validation_validity_period",
+						"verifier_grantor_validation_validity_period": {
+							Name:         "verifier-grantor-validation-validity-period",
+							Usage:        "Validation period for verifier grantors in days (default: 0)",
+							DefaultValue: "0",
 						},
-						{
-							ProtoField: "issuer_validation_validity_period",
+						"issuer_validation_validity_period": {
+							Name:         "issuer-validation-validity-period",
+							Usage:        "Validation period for issuers in days (default: 0)",
+							DefaultValue: "0",
 						},
-						{
-							ProtoField: "verifier_validation_validity_period",
+						"verifier_validation_validity_period": {
+							Name:         "verifier-validation-validity-period",
+							Usage:        "Validation period for verifiers in days (default: 0)",
+							DefaultValue: "0",
 						},
-						{
-							ProtoField: "holder_validation_validity_period",
+						"holder_validation_validity_period": {
+							Name:         "holder-validation-validity-period",
+							Usage:        "Validation period for holders in days (default: 0)",
+							DefaultValue: "0",
 						},
 					},
 				},
