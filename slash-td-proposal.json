@@ -1,0 +1,16 @@
+{
+  "messages": [
+    {
+      "@type": "/verana.td.v1.MsgSlashTrustDeposit",
+      "authority": "verana10d07y265gmmuvt4z0w9aw880jnsr700j22m4w8",
+      "account": "verana12dyk649yce4dvdppehsyraxe6p6jemzg2qwutf",
+      "amount": "8000000"
+    }
+  ],
+  "metadata": "ipfs://CID",
+  "deposit": "10000000uvna",
+  "title": "Slash Trust Deposit for Account verana12dyk649yce4dvdppehsyraxe6p6jemzg2qwutf",
+  "summary": "Governance proposal to slash 8000000uvna from the trust deposit of account verana12dyk649yce4dvdppehsyraxe6p6jemzg2qwutf due to network governance decision to enforce protocol rules and maintain trust registry integrity.",
+  "expedited": false
+}
+
