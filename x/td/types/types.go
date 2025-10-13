@@ -1,8 +1,9 @@
 package types
 
 import (
-	errorsmod "cosmossdk.io/errors"
 	"fmt"
+
+	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
@@ -24,6 +25,27 @@ func (msg *MsgReclaimTrustDeposit) ValidateBasic() error {
 	if msg.Claimed == 0 {
 		return fmt.Errorf("claimed amount must be greater than 0")
 	}
+	return nil
+}
+
+func (msg *MsgSlashTrustDeposit) ValidateBasic() error {
+	// Validate authority address
+	_, err := sdk.AccAddressFromBech32(msg.Authority)
+	if err != nil {
+		return errorsmod.Wrapf(sdkerrors.ErrInvalidAddress, "invalid authority address (%s)", err)
+	}
+
+	// Validate account address
+	_, err = sdk.AccAddressFromBech32(msg.Account)
+	if err != nil {
+		return errorsmod.Wrapf(sdkerrors.ErrInvalidAddress, "invalid account address (%s)", err)
+	}
+
+	// Validate amount
+	if msg.Amount.IsZero() || msg.Amount.IsNegative() {
+		return errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "amount must be greater than 0")
+	}
+
 	return nil
 }
 

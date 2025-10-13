@@ -2,11 +2,12 @@ package keeper
 
 import (
 	"context"
-	"cosmossdk.io/math"
 	"fmt"
+	"strconv"
+
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/verana-labs/verana/x/td/types"
-	"strconv"
 )
 
 type msgServer struct {
@@ -205,6 +206,74 @@ func (k Keeper) CalculateBurnAmount(claimed uint64, burnRate math.LegacyDec) uin
 	claimedDec := math.LegacyNewDec(int64(claimed))
 	burnAmountDec := claimedDec.Mul(burnRate)
 	return burnAmountDec.TruncateInt().Uint64()
+}
+
+// SlashTrustDeposit handles governance slashing of trust deposits
+func (ms msgServer) SlashTrustDeposit(goCtx context.Context, msg *types.MsgSlashTrustDeposit) (*types.MsgSlashTrustDepositResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	// [CRITICAL] Authority check - only governance can call this
+	if ms.Keeper.authority != msg.Authority {
+		return nil, fmt.Errorf("invalid authority; expected %s, got %s", ms.Keeper.authority, msg.Authority)
+	}
+
+	// [MOD-TD-MSG-5-2-1] Basic checks
+	if msg.Amount.IsZero() || msg.Amount.IsNegative() {
+		return nil, fmt.Errorf("amount must be greater than 0")
+	}
+
+	// Check if TrustDeposit entry exists for the account
+	td, err := ms.Keeper.TrustDeposit.Get(ctx, msg.Account)
+	if err != nil {
+		return nil, fmt.Errorf("trust deposit not found for account: %s", msg.Account)
+	}
+
+	// Check if deposit is sufficient
+	if math.NewIntFromUint64(td.Amount).LT(msg.Amount) {
+		return nil, fmt.Errorf("insufficient trust deposit: deposit=%d, required=%s", td.Amount, msg.Amount.String())
+	}
+
+	// [MOD-TD-MSG-5-3] Execute the slash
+	now := ctx.BlockTime()
+
+	// Get global variables for share calculation
+	params := ms.Keeper.GetParams(ctx)
+	shareValue := params.TrustDepositShareValue
+
+	// Calculate share reduction
+	shareReduction := math.LegacyNewDecFromInt(msg.Amount).Quo(shareValue)
+
+	// Update TrustDeposit entry
+	td.Amount = td.Amount - msg.Amount.Uint64()
+	td.Share = td.Share - uint64(shareReduction.TruncateInt64())
+	td.SlashedDeposit = td.SlashedDeposit + msg.Amount.Uint64()
+	td.LastSlashed = &now
+	td.LastRepaidBy = ""
+	td.SlashCount++
+
+	// Burn the slashed amount
+	burnCoins := sdk.NewCoins(sdk.NewCoin(types.BondDenom, msg.Amount))
+	if err := ms.Keeper.bankKeeper.BurnCoins(ctx, types.ModuleName, burnCoins); err != nil {
+		return nil, fmt.Errorf("failed to burn coins: %w", err)
+	}
+
+	// Save the updated TrustDeposit entry
+	if err := ms.Keeper.TrustDeposit.Set(ctx, msg.Account, td); err != nil {
+		return nil, fmt.Errorf("failed to save trust deposit: %w", err)
+	}
+
+	// Emit event
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeSlashTrustDeposit,
+			sdk.NewAttribute(types.AttributeKeyAccount, msg.Account),
+			sdk.NewAttribute(types.AttributeKeyAmount, msg.Amount.String()),
+			sdk.NewAttribute(types.AttributeKeySlashCount, strconv.FormatUint(td.SlashCount, 10)),
+			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
+		),
+	)
+
+	return &types.MsgSlashTrustDepositResponse{}, nil
 }
 
 func (ms msgServer) RepaySlashedTrustDeposit(goCtx context.Context, msg *types.MsgRepaySlashedTrustDeposit) (*types.MsgRepaySlashedTrustDepositResponse, error) {

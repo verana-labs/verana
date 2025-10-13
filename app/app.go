@@ -2,9 +2,9 @@ package app
 
 import (
 	"fmt"
-	trustdepositmodulev1 "github.com/verana-labs/verana/x/td/module"
-	trustdeposittypes "github.com/verana-labs/verana/x/td/types"
 	"io"
+
+	trustdepositmodulev1 "github.com/verana-labs/verana/x/td/module"
 
 	upgradetypes "cosmossdk.io/x/upgrade/types"
 	"github.com/verana-labs/verana/app/upgrades"
@@ -15,7 +15,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/consensus"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
-	govtypesv1beta1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	"github.com/cosmos/cosmos-sdk/x/mint"
 	"github.com/cosmos/cosmos-sdk/x/params"
 	"github.com/cosmos/cosmos-sdk/x/slashing"
@@ -386,8 +385,8 @@ func New(
 		return app.App.InitChainer(ctx, req)
 	})
 
-	govRouter := govtypesv1beta1.NewRouter()
-	govRouter.AddRoute(trustdeposittypes.RouterKey, trustdepositmodulekeeper.NewTrustDepositHandler(app.TrustdepositKeeper))
+	// NOTE: Legacy governance router removed - trust deposit slashing now uses
+	// MsgSlashTrustDeposit with modern v1 governance pattern
 
 	app.configurator = module.NewConfigurator(app.appCodec, app.MsgServiceRouter(), app.GRPCQueryRouter())
 

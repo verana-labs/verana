@@ -222,29 +222,28 @@ proto-all: proto-clean proto-deps proto-gen proto-swagger proto-format
 	@echo "🎉 Protobuf generation completed successfully!"
 
 proto-gen:
-	@echo "🏗️  Generating protobuf files..."
-	@chmod +x ./generate-proto.sh
-	@./generate-proto.sh go
+	@./scripts/protocgen.sh
 
 proto-swagger:
-	@echo "📚 Generating Swagger documentation..."
-	@chmod +x ./generate-proto.sh
-	@./generate-proto.sh swagger
+	@echo "Generating Swagger documentation..."
+	@cd proto && buf generate --template buf.gen.swagger.yaml
 
 proto-deps:
-	@echo "📥 Downloading proto dependencies..."
-	@chmod +x ./generate-proto.sh
-	@./generate-proto.sh deps
+	@echo "Updating proto dependencies..."
+	@cd proto && buf dep update
 
 proto-clean:
-	@echo "🧹 Cleaning generated protobuf files..."
-	@chmod +x ./generate-proto.sh
-	@./generate-proto.sh clean
+	@echo "Cleaning generated protobuf files..."
+	@find x -name "*.pb.go" -delete 2>/dev/null || true
+	@find x -name "*.pb.gw.go" -delete 2>/dev/null || true
+	@find api -name "*.pulsar.go" -delete 2>/dev/null || true
+	@find api -name "*_grpc.pb.go" -delete 2>/dev/null || true
+	@rm -f docs/static/openapi.yml
 
 proto-format:
-	@echo "🎨 Formatting generated code..."
-	@chmod +x ./generate-proto.sh
-	@./generate-proto.sh format
+	@echo "Formatting generated code..."
+	@find x -name "*.pb.go" -exec gofmt -w {} + 2>/dev/null || true
+	@find api -name "*.pulsar.go" -exec gofmt -w {} + 2>/dev/null || true
 
 proto-lint:
 	@echo "🔍 Linting protobuf files..."
