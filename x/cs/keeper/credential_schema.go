@@ -34,27 +34,27 @@ func (ms msgServer) validateCreateCredentialSchemaParams(ctx sdk.Context, msg *t
 }
 
 func validateValidityPeriodsWithParams(msg *types.MsgCreateCredentialSchema, params types.Params) error {
-	if msg.IssuerGrantorValidationValidityPeriod > params.CredentialSchemaIssuerGrantorValidationValidityPeriodMaxDays {
+	if msg.GetIssuerGrantorValidationValidityPeriod() > params.CredentialSchemaIssuerGrantorValidationValidityPeriodMaxDays {
 		return fmt.Errorf("issuer grantor validation validity period exceeds maximum of %d days",
 			params.CredentialSchemaIssuerGrantorValidationValidityPeriodMaxDays)
 	}
 
-	if msg.VerifierGrantorValidationValidityPeriod > params.CredentialSchemaVerifierGrantorValidationValidityPeriodMaxDays {
+	if msg.GetVerifierGrantorValidationValidityPeriod() > params.CredentialSchemaVerifierGrantorValidationValidityPeriodMaxDays {
 		return fmt.Errorf("verifier grantor validation validity period exceeds maximum of %d days",
 			params.CredentialSchemaVerifierGrantorValidationValidityPeriodMaxDays)
 	}
 
-	if msg.IssuerValidationValidityPeriod > params.CredentialSchemaIssuerValidationValidityPeriodMaxDays {
+	if msg.GetIssuerValidationValidityPeriod() > params.CredentialSchemaIssuerValidationValidityPeriodMaxDays {
 		return fmt.Errorf("issuer validation validity period exceeds maximum of %d days",
 			params.CredentialSchemaIssuerValidationValidityPeriodMaxDays)
 	}
 
-	if msg.VerifierValidationValidityPeriod > params.CredentialSchemaVerifierValidationValidityPeriodMaxDays {
+	if msg.GetVerifierValidationValidityPeriod() > params.CredentialSchemaVerifierValidationValidityPeriodMaxDays {
 		return fmt.Errorf("verifier validation validity period exceeds maximum of %d days",
 			params.CredentialSchemaVerifierValidationValidityPeriodMaxDays)
 	}
 
-	if msg.HolderValidationValidityPeriod > params.CredentialSchemaHolderValidationValidityPeriodMaxDays {
+	if msg.GetHolderValidationValidityPeriod() > params.CredentialSchemaHolderValidationValidityPeriodMaxDays {
 		return fmt.Errorf("holder validation validity period exceeds maximum of %d days",
 			params.CredentialSchemaHolderValidationValidityPeriodMaxDays)
 	}
@@ -87,11 +87,11 @@ func (ms msgServer) executeCreateCredentialSchema(ctx sdk.Context, schemaID uint
 		Modified:                                ctx.BlockTime(),
 		Deposit:                                 trustDepositAmount,
 		JsonSchema:                              processedJsonSchema, // Now includes chain ID replacement
-		IssuerGrantorValidationValidityPeriod:   msg.IssuerGrantorValidationValidityPeriod,
-		VerifierGrantorValidationValidityPeriod: msg.VerifierGrantorValidationValidityPeriod,
-		IssuerValidationValidityPeriod:          msg.IssuerValidationValidityPeriod,
-		VerifierValidationValidityPeriod:        msg.VerifierValidationValidityPeriod,
-		HolderValidationValidityPeriod:          msg.HolderValidationValidityPeriod,
+		IssuerGrantorValidationValidityPeriod:   msg.GetIssuerGrantorValidationValidityPeriod(),
+		VerifierGrantorValidationValidityPeriod: msg.GetVerifierGrantorValidationValidityPeriod(),
+		IssuerValidationValidityPeriod:          msg.GetIssuerValidationValidityPeriod(),
+		VerifierValidationValidityPeriod:        msg.GetVerifierValidationValidityPeriod(),
+		HolderValidationValidityPeriod:          msg.GetHolderValidationValidityPeriod(),
 		IssuerPermManagementMode:                types.CredentialSchemaPermManagementMode(msg.IssuerPermManagementMode),
 		VerifierPermManagementMode:              types.CredentialSchemaPermManagementMode(msg.VerifierPermManagementMode),
 	}
