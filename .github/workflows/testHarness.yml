@@ -34,7 +34,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: verana-labs/verana-test-harness
-          ref: ${{ github.event.inputs.TEST_HARNESS_BRANCH || 'v0.8-dev.8' }}
+          ref: ${{ github.event.inputs.TEST_HARNESS_BRANCH || 'v0.8-dev.9' }}
           ssh-key: ${{ secrets.VERANA_TEST_HARNESS_DEPLOY_KEY }}
           path: ${{ env.TEST_HARNESS_PATH }}
 
