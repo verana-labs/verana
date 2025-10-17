@@ -96,11 +96,11 @@ Required Parameters:
 - verifier-mode: Permission management mode (same options as issuer-mode)
 
 Optional Flags (default to 0 days):
-- --issuer-grantor-validation-validity-period: Validation period for issuer grantors (days, default: 0)
-- --verifier-grantor-validation-validity-period: Validation period for verifier grantors (days, default: 0)
-- --issuer-validation-validity-period: Validation period for issuers (days, default: 0)
-- --verifier-validation-validity-period: Validation period for verifiers (days, default: 0)
-- --holder-validation-validity-period: Validation period for holders (days, default: 0)
+- --issuer-grantor-validity: Validation period for issuer grantors (days, default: 0)
+- --verifier-grantor-validity: Validation period for verifier grantors (days, default: 0)
+- --issuer-validity: Validation period for issuers (days, default: 0)
+- --verifier-validity: Validation period for verifiers (days, default: 0)
+- --holder-validity: Validation period for holders (days, default: 0)
 
 Example:
 $ veranad tx cs create-credential-schema 1 schema.json 2 2 --issuer-grantor-validation-validity-period 365 --verifier-grantor-validation-validity-period 365
@@ -120,28 +120,28 @@ $ veranad tx cs create-credential-schema 1 schema.json 2 2`,
 						},
 					},
 					FlagOptions: map[string]*autocliv1.FlagOptions{
-						"issuer_grantor_validation_validity_period": {
-							Name:         "issuer-grantor-validation-validity-period",
+						"issuer_grantor_validity": {
+							Name:         "issuer-grantor-validity",
 							Usage:        "Validation period for issuer grantors in days (default: 0)",
 							DefaultValue: "0",
 						},
-						"verifier_grantor_validation_validity_period": {
-							Name:         "verifier-grantor-validation-validity-period",
+						"verifier_grantor_validity": {
+							Name:         "verifier-grantor-validity",
 							Usage:        "Validation period for verifier grantors in days (default: 0)",
 							DefaultValue: "0",
 						},
-						"issuer_validation_validity_period": {
-							Name:         "issuer-validation-validity-period",
+						"issuer_validity": {
+							Name:         "issuer-validity",
 							Usage:        "Validation period for issuers in days (default: 0)",
 							DefaultValue: "0",
 						},
-						"verifier_validation_validity_period": {
-							Name:         "verifier-validation-validity-period",
+						"verifier_validity": {
+							Name:         "verifier-validity",
 							Usage:        "Validation period for verifiers in days (default: 0)",
 							DefaultValue: "0",
 						},
-						"holder_validation_validity_period": {
-							Name:         "holder-validation-validity-period",
+						"holder_validity": {
+							Name:         "holder-validity",
 							Usage:        "Validation period for holders in days (default: 0)",
 							DefaultValue: "0",
 						},
