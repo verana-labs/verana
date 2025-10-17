@@ -89,18 +89,18 @@ func TestMsgServerCreateCredentialSchema(t *testing.T) {
 		isValid bool
 	}{
 		{
-			name: "Valid Create Credential Schema",
-			msg: keeper.CreateMsgWithValidityPeriods(creator, trID, validJsonSchema, 365, 365, 180, 180, 180, 2, 2),
+			name:    "Valid Create Credential Schema",
+			msg:     keeper.CreateMsgWithValidityPeriods(creator, trID, validJsonSchema, 365, 365, 180, 180, 180, 2, 2),
 			isValid: true,
 		},
 		{
-			name: "Non-existent Trust Registry",
-			msg: keeper.CreateMsgWithValidityPeriods(creator, 999, validJsonSchema, 365, 365, 180, 180, 180, 2, 2),
+			name:    "Non-existent Trust Registry",
+			msg:     keeper.CreateMsgWithValidityPeriods(creator, 999, validJsonSchema, 365, 365, 180, 180, 180, 2, 2),
 			isValid: false,
 		},
 		{
-			name: "Wrong Trust Registry Controller",
-			msg: keeper.CreateMsgWithValidityPeriods(sdk.AccAddress([]byte("wrong_creator")).String(), trID, validJsonSchema, 365, 365, 180, 180, 180, 2, 2),
+			name:    "Wrong Trust Registry Controller",
+			msg:     keeper.CreateMsgWithValidityPeriods(sdk.AccAddress([]byte("wrong_creator")).String(), trID, validJsonSchema, 365, 365, 180, 180, 180, 2, 2),
 			isValid: false,
 		},
 	}
@@ -175,25 +175,25 @@ func TestUpdateCredentialSchema(t *testing.T) {
 		errorContains string
 	}{
 		{
-			name: "valid update",
-			msg: keeper.CreateUpdateMsgWithValidityPeriods(creator, schemaID.Id, 365, 365, 180, 180, 180),
+			name:    "valid update",
+			msg:     keeper.CreateUpdateMsgWithValidityPeriods(creator, schemaID.Id, 365, 365, 180, 180, 180),
 			expPass: true,
 		},
 		{
-			name: "non-existent schema",
-			msg: keeper.CreateUpdateMsgWithValidityPeriods(creator, 999, 365, 365, 180, 180, 180),
+			name:          "non-existent schema",
+			msg:           keeper.CreateUpdateMsgWithValidityPeriods(creator, 999, 365, 365, 180, 180, 180),
 			expPass:       false,
 			errorContains: "credential schema not found",
 		},
 		{
-			name: "unauthorized update - not controller",
-			msg: keeper.CreateUpdateMsgWithValidityPeriods("verana1unauthorized", schemaID.Id, 365, 365, 180, 180, 180),
+			name:          "unauthorized update - not controller",
+			msg:           keeper.CreateUpdateMsgWithValidityPeriods("verana1unauthorized", schemaID.Id, 365, 365, 180, 180, 180),
 			expPass:       false,
 			errorContains: "creator is not the controller",
 		},
 		{
-			name: "invalid validity period - exceeds maximum",
-			msg: keeper.CreateUpdateMsgWithValidityPeriods(creator, schemaID.Id, 99999, 365, 180, 180, 180),
+			name:          "invalid validity period - exceeds maximum",
+			msg:           keeper.CreateUpdateMsgWithValidityPeriods(creator, schemaID.Id, 99999, 365, 180, 180, 180),
 			expPass:       false,
 			errorContains: "exceeds maximum",
 		},
