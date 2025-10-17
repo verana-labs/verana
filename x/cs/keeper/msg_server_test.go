@@ -89,51 +89,18 @@ func TestMsgServerCreateCredentialSchema(t *testing.T) {
 		isValid bool
 	}{
 		{
-			name: "Valid Create Credential Schema",
-			msg: &types.MsgCreateCredentialSchema{
-				Creator:                                 creator,
-				TrId:                                    trID, // Use the ID from trust registry response
-				JsonSchema:                              validJsonSchema,
-				IssuerGrantorValidationValidityPeriod:   365,
-				VerifierGrantorValidationValidityPeriod: 365,
-				IssuerValidationValidityPeriod:          180,
-				VerifierValidationValidityPeriod:        180,
-				HolderValidationValidityPeriod:          180,
-				IssuerPermManagementMode:                2,
-				VerifierPermManagementMode:              2,
-			},
+			name:    "Valid Create Credential Schema",
+			msg:     keeper.CreateMsgWithValidityPeriods(creator, trID, validJsonSchema, 365, 365, 180, 180, 180, 2, 2),
 			isValid: true,
 		},
 		{
-			name: "Non-existent Trust Registry",
-			msg: &types.MsgCreateCredentialSchema{
-				Creator:                                 creator,
-				TrId:                                    999, // Non-existent trust registry
-				JsonSchema:                              validJsonSchema,
-				IssuerGrantorValidationValidityPeriod:   365,
-				VerifierGrantorValidationValidityPeriod: 365,
-				IssuerValidationValidityPeriod:          180,
-				VerifierValidationValidityPeriod:        180,
-				HolderValidationValidityPeriod:          180,
-				IssuerPermManagementMode:                2,
-				VerifierPermManagementMode:              2,
-			},
+			name:    "Non-existent Trust Registry",
+			msg:     keeper.CreateMsgWithValidityPeriods(creator, 999, validJsonSchema, 365, 365, 180, 180, 180, 2, 2),
 			isValid: false,
 		},
 		{
-			name: "Wrong Trust Registry Controller",
-			msg: &types.MsgCreateCredentialSchema{
-				Creator:                                 sdk.AccAddress([]byte("wrong_creator")).String(),
-				TrId:                                    trID,
-				JsonSchema:                              validJsonSchema,
-				IssuerGrantorValidationValidityPeriod:   365,
-				VerifierGrantorValidationValidityPeriod: 365,
-				IssuerValidationValidityPeriod:          180,
-				VerifierValidationValidityPeriod:        180,
-				HolderValidationValidityPeriod:          180,
-				IssuerPermManagementMode:                2,
-				VerifierPermManagementMode:              2,
-			},
+			name:    "Wrong Trust Registry Controller",
+			msg:     keeper.CreateMsgWithValidityPeriods(sdk.AccAddress([]byte("wrong_creator")).String(), trID, validJsonSchema, 365, 365, 180, 180, 180, 2, 2),
 			isValid: false,
 		},
 	}
@@ -208,57 +175,25 @@ func TestUpdateCredentialSchema(t *testing.T) {
 		errorContains string
 	}{
 		{
-			name: "valid update",
-			msg: &types.MsgUpdateCredentialSchema{
-				Creator:                                 creator,
-				Id:                                      schemaID.Id,
-				IssuerGrantorValidationValidityPeriod:   365,
-				VerifierGrantorValidationValidityPeriod: 365,
-				IssuerValidationValidityPeriod:          180,
-				VerifierValidationValidityPeriod:        180,
-				HolderValidationValidityPeriod:          180,
-			},
+			name:    "valid update",
+			msg:     keeper.CreateUpdateMsgWithValidityPeriods(creator, schemaID.Id, 365, 365, 180, 180, 180),
 			expPass: true,
 		},
 		{
-			name: "non-existent schema",
-			msg: &types.MsgUpdateCredentialSchema{
-				Creator:                                 creator,
-				Id:                                      999, // Non-existent schema ID
-				IssuerGrantorValidationValidityPeriod:   365,
-				VerifierGrantorValidationValidityPeriod: 365,
-				IssuerValidationValidityPeriod:          180,
-				VerifierValidationValidityPeriod:        180,
-				HolderValidationValidityPeriod:          180,
-			},
+			name:          "non-existent schema",
+			msg:           keeper.CreateUpdateMsgWithValidityPeriods(creator, 999, 365, 365, 180, 180, 180),
 			expPass:       false,
 			errorContains: "credential schema not found",
 		},
 		{
-			name: "unauthorized update - not controller",
-			msg: &types.MsgUpdateCredentialSchema{
-				Creator:                                 "verana1unauthorized",
-				Id:                                      schemaID.Id,
-				IssuerGrantorValidationValidityPeriod:   365,
-				VerifierGrantorValidationValidityPeriod: 365,
-				IssuerValidationValidityPeriod:          180,
-				VerifierValidationValidityPeriod:        180,
-				HolderValidationValidityPeriod:          180,
-			},
+			name:          "unauthorized update - not controller",
+			msg:           keeper.CreateUpdateMsgWithValidityPeriods("verana1unauthorized", schemaID.Id, 365, 365, 180, 180, 180),
 			expPass:       false,
 			errorContains: "creator is not the controller",
 		},
 		{
-			name: "invalid validity period - exceeds maximum",
-			msg: &types.MsgUpdateCredentialSchema{
-				Creator:                                 creator,
-				Id:                                      schemaID.Id,
-				IssuerGrantorValidationValidityPeriod:   99999, // Exceeds maximum
-				VerifierGrantorValidationValidityPeriod: 365,
-				IssuerValidationValidityPeriod:          180,
-				VerifierValidationValidityPeriod:        180,
-				HolderValidationValidityPeriod:          180,
-			},
+			name:          "invalid validity period - exceeds maximum",
+			msg:           keeper.CreateUpdateMsgWithValidityPeriods(creator, schemaID.Id, 99999, 365, 180, 180, 180),
 			expPass:       false,
 			errorContains: "exceeds maximum",
 		},
@@ -274,11 +209,11 @@ func TestUpdateCredentialSchema(t *testing.T) {
 				// Verify changes
 				schema, err := k.CredentialSchema.Get(ctx, tc.msg.Id)
 				require.NoError(t, err)
-				require.Equal(t, tc.msg.IssuerGrantorValidationValidityPeriod, schema.IssuerGrantorValidationValidityPeriod)
-				require.Equal(t, tc.msg.VerifierGrantorValidationValidityPeriod, schema.VerifierGrantorValidationValidityPeriod)
-				require.Equal(t, tc.msg.IssuerValidationValidityPeriod, schema.IssuerValidationValidityPeriod)
-				require.Equal(t, tc.msg.VerifierValidationValidityPeriod, schema.VerifierValidationValidityPeriod)
-				require.Equal(t, tc.msg.HolderValidationValidityPeriod, schema.HolderValidationValidityPeriod)
+				require.Equal(t, tc.msg.GetIssuerGrantorValidationValidityPeriod(), schema.IssuerGrantorValidationValidityPeriod)
+				require.Equal(t, tc.msg.GetVerifierGrantorValidationValidityPeriod(), schema.VerifierGrantorValidationValidityPeriod)
+				require.Equal(t, tc.msg.GetIssuerValidationValidityPeriod(), schema.IssuerValidationValidityPeriod)
+				require.Equal(t, tc.msg.GetVerifierValidationValidityPeriod(), schema.VerifierValidationValidityPeriod)
+				require.Equal(t, tc.msg.GetHolderValidationValidityPeriod(), schema.HolderValidationValidityPeriod)
 				require.NotEqual(t, schema.Created, schema.Modified)
 			} else {
 				require.Error(t, err)

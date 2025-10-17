@@ -1,0 +1,15 @@
+{
+    "messages": [
+      {
+        "@type": "/verana.td.v1.MsgSlashTrustDeposit",
+        "authority": "verana10d07y265gmmuvt4z0w9aw880jnsr700j22m4w8",
+        "account": "verana12dyk649yce4dvdppehsyraxe6p6jemzg2qwutf",
+        "amount": "1000000"
+      }
+    ],
+    "metadata": "ipfs://CID",
+    "deposit": "10000000uvna",
+    "title": "Slash Trust Deposit for Fraudulent Activity",
+    "summary": "This proposal requests to slash 1,000,000 uvna from the trust deposit of account verana12dyk649yce4dvdppehsyraxe6p6jemzg2qwutf due to verified fraudulent activity. The account will need to repay this slashed amount before being able to participate in the VPR again.",
+    "expedited": false
+  }
