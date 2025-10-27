@@ -3,12 +3,10 @@ package types
 import (
 	"encoding/json"
 	"fmt"
-	"regexp"
 
 	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	"github.com/xeipuuv/gojsonschema"
 )
 
 // JsonSchemaMetaSchema Official meta-schema for Draft 2020-12
@@ -222,35 +220,11 @@ func validateJSONSchema(schemaJSON string) error {
 		return fmt.Errorf("invalid JSON format: %w", err)
 	}
 
-	// Check for $id field
-	schemaId, ok := schemaDoc["$id"].(string)
-	if !ok {
-		return fmt.Errorf("$id must be a string")
-	}
+	// Ignore $id field - it will be set to canonical value on creation
+	// No validation of $id is needed
 
-	// Only validate that $id follows the basic pattern, actual ID will be set later
-	if !isValidSchemaIdPattern(schemaId) {
-		return fmt.Errorf("$id must match the pattern 'vpr:verana:VPR_CHAIN_ID/cs/v1/js/VPR_CREDENTIAL_SCHEMA_ID'")
-	}
-
-	// Load the meta-schema and validate
-	metaSchemaLoader := gojsonschema.NewStringLoader(JsonSchemaMetaSchema)
-	schemaLoader := gojsonschema.NewStringLoader(schemaJSON)
-	result, err := gojsonschema.Validate(metaSchemaLoader, schemaLoader)
-	if err != nil {
-		return fmt.Errorf("schema validation error: %w", err)
-	}
-
-	if !result.Valid() {
-		errMsgs := make([]string, 0, len(result.Errors()))
-		for _, err := range result.Errors() {
-			errMsgs = append(errMsgs, err.String())
-		}
-		return fmt.Errorf("invalid JSON schema: %v", errMsgs)
-	}
-
-	// Check required fields
-	requiredFields := []string{"$schema", "$id", "type", "title", "description"}
+	// Check required fields (excluding $id since it's optional and will be set)
+	requiredFields := []string{"$schema", "type", "title", "description"}
 	for _, field := range requiredFields {
 		if _, ok := schemaDoc[field]; !ok {
 			return fmt.Errorf("missing required field: %s", field)
@@ -280,11 +254,49 @@ func validateJSONSchema(schemaJSON string) error {
 	return nil
 }
 
-func isValidSchemaIdPattern(schemaId string) bool {
-	// ONLY accept the placeholder format - users must use placeholders
-	placeholderPattern := regexp.MustCompile(`^vpr:verana:VPR_CHAIN_ID/cs/v1/js/VPR_CREDENTIAL_SCHEMA_ID$`)
+// InjectCanonicalID parses the JSON schema, removes any existing $id, and injects the canonical $id
+func InjectCanonicalID(schemaJSON string, chainID string, schemaID uint64) (string, error) {
+	// Parse JSON
+	var schemaDoc map[string]interface{}
+	if err := json.Unmarshal([]byte(schemaJSON), &schemaDoc); err != nil {
+		return "", fmt.Errorf("failed to parse JSON schema: %w", err)
+	}
 
-	return placeholderPattern.MatchString(schemaId)
+	// Remove any existing $id
+	delete(schemaDoc, "$id")
+
+	// Inject canonical $id
+	canonicalID := fmt.Sprintf("vpr:verana:%s/cs/v1/js/%d", chainID, schemaID)
+	schemaDoc["$id"] = canonicalID
+
+	// Serialize back to JSON with indentation for readability
+	updatedSchema, err := json.MarshalIndent(schemaDoc, "", "  ")
+	if err != nil {
+		return "", fmt.Errorf("failed to serialize JSON schema: %w", err)
+	}
+
+	return string(updatedSchema), nil
+}
+
+// EnsureCanonicalID ensures the JSON schema has the canonical $id, updating it if needed
+func EnsureCanonicalID(schemaJSON string, chainID string, schemaID uint64) (string, error) {
+	// Parse JSON
+	var schemaDoc map[string]interface{}
+	if err := json.Unmarshal([]byte(schemaJSON), &schemaDoc); err != nil {
+		return "", fmt.Errorf("failed to parse JSON schema: %w", err)
+	}
+
+	// Inject/update canonical $id
+	canonicalID := fmt.Sprintf("vpr:verana:%s/cs/v1/js/%d", chainID, schemaID)
+	schemaDoc["$id"] = canonicalID
+
+	// Serialize back to JSON with indentation for readability
+	updatedSchema, err := json.MarshalIndent(schemaDoc, "", "  ")
+	if err != nil {
+		return "", fmt.Errorf("failed to serialize JSON schema: %w", err)
+	}
+
+	return string(updatedSchema), nil
 }
 
 func validateValidityPeriods(msg *MsgCreateCredentialSchema) error {

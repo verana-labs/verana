@@ -40,6 +40,15 @@ func (k Keeper) ListCredentialSchemas(goCtx context.Context, req *types.QueryLis
 			return false, nil
 		}
 
+		// Ensure canonical $id is present in the JSON schema
+		schemaWithCanonicalID, err := types.EnsureCanonicalID(schema.JsonSchema, ctx.ChainID(), schema.Id)
+		if err != nil {
+			// Log error but don't fail the entire query
+			k.Logger().Error("failed to ensure canonical ID", "schema_id", schema.Id, "error", err)
+		} else {
+			schema.JsonSchema = schemaWithCanonicalID
+		}
+
 		schemas = append(schemas, schema)
 		return len(schemas) >= int(req.ResponseMaxSize), nil
 	})
@@ -70,6 +79,13 @@ func (k Keeper) GetCredentialSchema(goCtx context.Context, req *types.QueryGetCr
 		return nil, status.Error(codes.NotFound, "credential schema not found")
 	}
 
+	// Ensure canonical $id is present in the JSON schema
+	schemaWithCanonicalID, err := types.EnsureCanonicalID(schema.JsonSchema, ctx.ChainID(), schema.Id)
+	if err != nil {
+		return nil, status.Error(codes.Internal, fmt.Sprintf("failed to ensure canonical ID: %v", err))
+	}
+	schema.JsonSchema = schemaWithCanonicalID
+
 	return &types.QueryGetCredentialSchemaResponse{
 		Schema: schema,
 	}, nil
@@ -87,7 +103,13 @@ func (k Keeper) RenderJsonSchema(goCtx context.Context, req *types.QueryRenderJs
 		return nil, status.Error(codes.NotFound, "credential schema not found")
 	}
 
+	// Ensure canonical $id is present in the JSON schema
+	schemaWithCanonicalID, err := types.EnsureCanonicalID(schema.JsonSchema, ctx.ChainID(), schema.Id)
+	if err != nil {
+		return nil, status.Error(codes.Internal, fmt.Sprintf("failed to ensure canonical ID: %v", err))
+	}
+
 	return &types.QueryRenderJsonSchemaResponse{
-		Schema: schema.JsonSchema,
+		Schema: schemaWithCanonicalID,
 	}, nil
 }
