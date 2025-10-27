@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"fmt"
-	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/verana-labs/verana/x/cs/types"
@@ -74,10 +73,11 @@ func (ms msgServer) executeCreateCredentialSchema(ctx sdk.Context, schemaID uint
 		return fmt.Errorf("failed to adjust trust deposit: %w", err)
 	}
 
-	// Replace VPR_CREDENTIAL_SCHEMA_ID placeholder with actual generated ID
-	// Replace VPR_CHAIN_ID with actual chain ID
-	processedJsonSchema := strings.ReplaceAll(msg.JsonSchema, "VPR_CREDENTIAL_SCHEMA_ID", fmt.Sprintf("%d", schemaID))
-	processedJsonSchema = strings.ReplaceAll(processedJsonSchema, "VPR_CHAIN_ID", ctx.ChainID())
+	// Inject canonical $id into the JSON schema
+	processedJsonSchema, err := types.InjectCanonicalID(msg.JsonSchema, ctx.ChainID(), schemaID)
+	if err != nil {
+		return fmt.Errorf("failed to process JSON schema: %w", err)
+	}
 
 	// Create the credential schema
 	credentialSchema := types.CredentialSchema{

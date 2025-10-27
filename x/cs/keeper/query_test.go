@@ -1,7 +1,8 @@
 package keeper_test
 
 import (
-	_ "context"
+	"encoding/json"
+	"fmt"
 	"testing"
 	"time"
 
@@ -187,7 +188,18 @@ func TestQueries(t *testing.T) {
 				}
 				require.NoError(t, err)
 				require.NotNil(t, resp)
-				require.Equal(t, validJsonSchema, resp.Schema)
+
+				// Verify the schema has canonical $id
+				// Parse the JSON to extract and verify $id
+				var schemaDoc map[string]interface{}
+				err = json.Unmarshal([]byte(resp.Schema), &schemaDoc)
+				require.NoError(t, err)
+
+				// Verify canonical $id is present
+				canonicalId, ok := schemaDoc["$id"].(string)
+				require.True(t, ok, "$id field should be present")
+				expectedId := fmt.Sprintf("vpr:verana:%s/cs/v1/js/%d", ctx.ChainID(), tc.request.Id)
+				require.Equal(t, expectedId, canonicalId, "Schema should have canonical $id")
 			})
 		}
 	})
