@@ -21,7 +21,11 @@ message GenesisState {
 // TrustDepositRecord defines a trust deposit entry for genesis state
 message TrustDepositRecord {
   string account = 1;
-  uint64 share = 2;
+  string share = 2 [
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.moretags) = "yaml:\"share\"",
+    (gogoproto.nullable) = false
+  ];
   uint64 amount = 3;
   uint64 claimable = 4;
 }
