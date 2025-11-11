@@ -2,9 +2,10 @@ package keeper
 
 import (
 	"fmt"
+	"strconv"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/verana-labs/verana/x/td/types"
-	"strconv"
 )
 
 // AdjustTrustDeposit modifies the trust deposit for an account by the specified amount.
@@ -64,7 +65,7 @@ func (k Keeper) AdjustTrustDeposit(ctx sdk.Context, account string, augend int64
 		td = types.TrustDeposit{
 			Account:   account,
 			Amount:    uint64(augend),
-			Share:     augendShare,
+			Share:     augendShare, // Now LegacyDec
 			Claimable: 0,
 			// v2 fields auto-initialize to zero values
 		}
@@ -83,7 +84,7 @@ func (k Keeper) AdjustTrustDeposit(ctx sdk.Context, account string, augend int64
 				sdk.NewAttribute(types.AttributeKeyAugend, strconv.FormatInt(augend, 10)),
 				sdk.NewAttribute(types.AttributeKeyAdjustmentType, "increase"),
 				sdk.NewAttribute(types.AttributeKeyNewAmount, strconv.FormatUint(td.Amount, 10)),
-				sdk.NewAttribute(types.AttributeKeyNewShare, strconv.FormatUint(td.Share, 10)),
+				sdk.NewAttribute(types.AttributeKeyNewShare, td.Share.String()),
 				sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
 			),
 		})
@@ -99,7 +100,7 @@ func (k Keeper) AdjustTrustDeposit(ctx sdk.Context, account string, augend int64
 	// Convert uint fields to int64 for calculations
 	amount := int64(td.Amount)
 	claimable := int64(td.Claimable)
-	share := int64(td.Share)
+	// share stays as td.Share (math.LegacyDec)
 
 	if augend > 0 {
 		// Handle positive adjustment (increase)
@@ -126,7 +127,7 @@ func (k Keeper) AdjustTrustDeposit(ctx sdk.Context, account string, augend int64
 				missingShare := k.AmountToShare(uint64(neededDeposit), shareValue)
 
 				amount += neededDeposit
-				share += int64(missingShare)
+				td.Share = td.Share.Add(missingShare) // Use Add method
 				claimable = 0
 			}
 		} else {
@@ -145,7 +146,7 @@ func (k Keeper) AdjustTrustDeposit(ctx sdk.Context, account string, augend int64
 			augendShare := k.AmountToShare(uint64(augend), shareValue)
 
 			amount += augend
-			share += int64(augendShare)
+			td.Share = td.Share.Add(augendShare) // Use Add method
 		}
 	} else { // augend < 0
 		// Handle negative adjustment (decrease)
@@ -168,13 +169,13 @@ func (k Keeper) AdjustTrustDeposit(ctx sdk.Context, account string, augend int64
 	if claimable < 0 {
 		return fmt.Errorf("claimable amount cannot be negative after adjustment: %d", claimable)
 	}
-	if share < 0 {
-		return fmt.Errorf("share cannot be negative after adjustment: %d", share)
+	if td.Share.IsNegative() {
+		return fmt.Errorf("share cannot be negative after adjustment: %s", td.Share.String())
 	}
 
 	td.Amount = uint64(amount)
 	td.Claimable = uint64(claimable)
-	td.Share = uint64(share)
+	// td.Share is already LegacyDec, no conversion needed
 
 	// Save updated trust deposit
 	err = k.TrustDeposit.Set(ctx, account, td)
@@ -195,7 +196,7 @@ func (k Keeper) AdjustTrustDeposit(ctx sdk.Context, account string, augend int64
 			sdk.NewAttribute(types.AttributeKeyAugend, strconv.FormatInt(augend, 10)),
 			sdk.NewAttribute(types.AttributeKeyAdjustmentType, adjustmentType),
 			sdk.NewAttribute(types.AttributeKeyNewAmount, strconv.FormatUint(td.Amount, 10)),
-			sdk.NewAttribute(types.AttributeKeyNewShare, strconv.FormatUint(td.Share, 10)),
+			sdk.NewAttribute(types.AttributeKeyNewShare, td.Share.String()),
 			sdk.NewAttribute(types.AttributeKeyNewClaimable, strconv.FormatUint(td.Claimable, 10)),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
 		),

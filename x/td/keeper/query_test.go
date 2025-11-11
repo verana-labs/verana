@@ -1,13 +1,15 @@
 package keeper_test
 
 import (
+	"testing"
+
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 	keepertest "github.com/verana-labs/verana/testutil/keeper"
 	"github.com/verana-labs/verana/x/td/types"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"testing"
 )
 
 func TestGetTrustDeposit(t *testing.T) {
@@ -28,7 +30,7 @@ func TestGetTrustDeposit(t *testing.T) {
 	// Create a trust deposit
 	trustDeposit := types.TrustDeposit{
 		Account:   testAddr,
-		Share:     100,
+		Share:     math.LegacyNewDec(100),
 		Amount:    1000,
 		Claimable: 50,
 	}

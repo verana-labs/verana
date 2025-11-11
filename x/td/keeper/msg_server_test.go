@@ -66,7 +66,7 @@ func TestMsgReclaimTrustDepositYield(t *testing.T) {
 				// Create a trust deposit with no yield
 				td := types.TrustDeposit{
 					Account:   testAccString,
-					Share:     1000,
+					Share:     math.LegacyNewDec(1000),
 					Amount:    1000,
 					Claimable: 0,
 				}
@@ -96,7 +96,7 @@ func TestMsgReclaimTrustDepositYield(t *testing.T) {
 				// Create a trust deposit with potential yield
 				td := types.TrustDeposit{
 					Account:   testAccString,
-					Share:     1000,
+					Share:     math.LegacyNewDec(1000),
 					Amount:    1000, // 1000 shares at 1.5 value = 1500 tokens total value
 					Claimable: 0,
 				}
@@ -114,8 +114,9 @@ func TestMsgReclaimTrustDepositYield(t *testing.T) {
 				// Verify trust deposit was updated correctly
 				td, err := k.TrustDeposit.Get(ctx, testAccString)
 				require.NoError(t, err)
-				// Shares reduced by 500/1.5 = 333.33 rounded to 333
-				require.Equal(t, uint64(667), td.Share)   // 1000 - 333 = 667
+				// Shares reduced by 500/1.5 = 333.33...
+				expectedShare := math.LegacyNewDec(1000).Sub(math.LegacyMustNewDecFromStr("333.333333333333333333"))
+				require.True(t, td.Share.Equal(expectedShare), "expected %s, got %s", expectedShare.String(), td.Share.String())
 				require.Equal(t, uint64(1000), td.Amount) // Original deposit unchanged
 			},
 		},
@@ -191,7 +192,7 @@ func TestMsgReclaimTrustDeposit(t *testing.T) {
 				// Create a trust deposit with limited claimable amount
 				td := types.TrustDeposit{
 					Account:   testAccString,
-					Share:     1000,
+					Share:     math.LegacyNewDec(1000),
 					Amount:    1000,
 					Claimable: 500,
 				}
@@ -222,7 +223,7 @@ func TestMsgReclaimTrustDeposit(t *testing.T) {
 				// Create a trust deposit
 				td := types.TrustDeposit{
 					Account:   testAccString,
-					Share:     1000,
+					Share:     math.LegacyNewDec(1000),
 					Amount:    1000,
 					Claimable: 500,
 				}
@@ -253,7 +254,7 @@ func TestMsgReclaimTrustDeposit(t *testing.T) {
 				// Create a trust deposit with claimable amount
 				td := types.TrustDeposit{
 					Account:   testAccString,
-					Share:     1000,
+					Share:     math.LegacyNewDec(1000),
 					Amount:    1000,
 					Claimable: 500,
 				}
@@ -273,9 +274,9 @@ func TestMsgReclaimTrustDeposit(t *testing.T) {
 				// Verify trust deposit was updated correctly
 				td, err := k.TrustDeposit.Get(ctx, testAccString)
 				require.NoError(t, err)
-				require.Equal(t, uint64(300), td.Claimable) // 500 - 200 = 300
-				require.Equal(t, uint64(800), td.Amount)    // 1000 - 200 = 800
-				require.Equal(t, uint64(800), td.Share)     // 1000 - 200 = 800 (1:1 ratio)
+				require.Equal(t, uint64(300), td.Claimable)                                                        // 500 - 200 = 300
+				require.Equal(t, uint64(800), td.Amount)                                                           // 1000 - 200 = 800
+				require.True(t, td.Share.Equal(math.LegacyNewDec(800)), "expected 800, got %s", td.Share.String()) // 1000 - 200 = 800 (1:1 ratio)
 			},
 		},
 	}
@@ -351,7 +352,7 @@ func TestAdjustTrustDeposit(t *testing.T) {
 				// Create a trust deposit
 				td := types.TrustDeposit{
 					Account:   testAccString,
-					Share:     1000,
+					Share:     math.LegacyNewDec(1000),
 					Amount:    1000,
 					Claimable: 200,
 				}
@@ -363,9 +364,9 @@ func TestAdjustTrustDeposit(t *testing.T) {
 				// Verify trust deposit was updated correctly
 				td, err := k.TrustDeposit.Get(ctx, testAccString)
 				require.NoError(t, err)
-				require.Equal(t, uint64(300), td.Claimable) // 200 + 100 = 300
-				require.Equal(t, uint64(1000), td.Amount)   // Unchanged
-				require.Equal(t, uint64(1000), td.Share)    // Unchanged
+				require.Equal(t, uint64(300), td.Claimable)                                                          // 200 + 100 = 300
+				require.Equal(t, uint64(1000), td.Amount)                                                            // Unchanged
+				require.True(t, td.Share.Equal(math.LegacyNewDec(1000)), "expected 1000, got %s", td.Share.String()) // Unchanged
 			},
 		},
 		{
@@ -376,7 +377,7 @@ func TestAdjustTrustDeposit(t *testing.T) {
 				// Create a trust deposit
 				td := types.TrustDeposit{
 					Account:   testAccString,
-					Share:     1000,
+					Share:     math.LegacyNewDec(1000),
 					Amount:    1000,
 					Claimable: 200,
 				}
@@ -394,7 +395,7 @@ func TestAdjustTrustDeposit(t *testing.T) {
 				// Create a trust deposit with claimable amount
 				td := types.TrustDeposit{
 					Account:   testAccString,
-					Share:     1000,
+					Share:     math.LegacyNewDec(1000),
 					Amount:    1000,
 					Claimable: 300,
 				}
@@ -406,9 +407,9 @@ func TestAdjustTrustDeposit(t *testing.T) {
 				// Verify trust deposit was updated correctly
 				td, err := k.TrustDeposit.Get(ctx, testAccString)
 				require.NoError(t, err)
-				require.Equal(t, uint64(250), td.Claimable) // 300 - 50 = 250
-				require.Equal(t, uint64(1000), td.Amount)   // Unchanged
-				require.Equal(t, uint64(1000), td.Share)    // Unchanged
+				require.Equal(t, uint64(250), td.Claimable)                                                          // 300 - 50 = 250
+				require.Equal(t, uint64(1000), td.Amount)                                                            // Unchanged
+				require.True(t, td.Share.Equal(math.LegacyNewDec(1000)), "expected 1000, got %s", td.Share.String()) // Unchanged
 			},
 		},
 	}
@@ -444,22 +445,22 @@ func TestUtilityFunctions(t *testing.T) {
 	// Test ShareToAmount
 	t.Run("ShareToAmount", func(t *testing.T) {
 		testCases := []struct {
-			share      uint64
+			share      math.LegacyDec
 			shareValue math.LegacyDec
 			expected   uint64
 		}{
 			{
-				share:      100,
+				share:      math.LegacyNewDec(100),
 				shareValue: math.LegacyNewDec(1),
 				expected:   100,
 			},
 			{
-				share:      100,
+				share:      math.LegacyNewDec(100),
 				shareValue: math.LegacyMustNewDecFromStr("1.5"),
 				expected:   150,
 			},
 			{
-				share:      0,
+				share:      math.LegacyNewDec(0),
 				shareValue: math.LegacyNewDec(1),
 				expected:   0,
 			},
@@ -476,33 +477,33 @@ func TestUtilityFunctions(t *testing.T) {
 		testCases := []struct {
 			amount     uint64
 			shareValue math.LegacyDec
-			expected   uint64
+			expected   math.LegacyDec
 		}{
 			{
 				amount:     100,
 				shareValue: math.LegacyNewDec(1),
-				expected:   100,
+				expected:   math.LegacyNewDec(100),
 			},
 			{
 				amount:     150,
 				shareValue: math.LegacyMustNewDecFromStr("1.5"),
-				expected:   100, // 150/1.5 = 100
+				expected:   math.LegacyNewDec(100), // 150/1.5 = 100
 			},
 			{
 				amount:     0,
 				shareValue: math.LegacyNewDec(1),
-				expected:   0,
+				expected:   math.LegacyNewDec(0),
 			},
 			{
 				amount:     100,
 				shareValue: math.LegacyNewDec(0),
-				expected:   0, // Division by zero prevention
+				expected:   math.LegacyZeroDec(), // Division by zero prevention
 			},
 		}
 
 		for _, tc := range testCases {
 			result := k.AmountToShare(tc.amount, tc.shareValue)
-			require.Equal(t, tc.expected, result)
+			require.True(t, result.Equal(tc.expected), "expected %s, got %s", tc.expected.String(), result.String())
 		}
 	})
 

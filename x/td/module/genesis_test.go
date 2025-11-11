@@ -3,6 +3,7 @@ package trustdeposit_test
 import (
 	"testing"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 	keepertest "github.com/verana-labs/verana/testutil/keeper"
@@ -21,13 +22,13 @@ func TestGenesis(t *testing.T) {
 		TrustDeposits: []types.TrustDepositRecord{
 			{
 				Account:   addr1,
-				Share:     100,
+				Share:     math.LegacyNewDec(100),
 				Amount:    1000,
 				Claimable: 50,
 			},
 			{
 				Account:   addr2,
-				Share:     200,
+				Share:     math.LegacyNewDec(200),
 				Amount:    2000,
 				Claimable: 100,
 			},
@@ -86,14 +87,14 @@ func TestImportExportGenesisWithTrustDeposits(t *testing.T) {
 
 	td1 := types.TrustDeposit{
 		Account:   addr1,
-		Share:     100,
+		Share:     math.LegacyNewDec(100),
 		Amount:    1000,
 		Claimable: 50,
 	}
 
 	td2 := types.TrustDeposit{
 		Account:   addr2,
-		Share:     200,
+		Share:     math.LegacyNewDec(200),
 		Amount:    2000,
 		Claimable: 100,
 	}

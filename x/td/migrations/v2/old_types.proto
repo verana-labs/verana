@@ -1,0 +1,25 @@
+syntax = "proto3";
+package verana.td.v1;
+
+// This file contains the OLD proto definition for TrustDeposit
+// with uint64 Share field, used for migration purposes only.
+
+option go_package = "github.com/verana-labs/verana/x/td/migrations/v2";
+
+import "google/protobuf/timestamp.proto";
+
+// TrustDepositV1 represents the OLD version of TrustDeposit with uint64 Share
+message TrustDepositV1 {
+  string account = 1;
+  uint64 share = 2;  // OLD: uint64, will be migrated to LegacyDec
+  uint64 amount = 3;
+  uint64 claimable = 4;
+  // v2 fields (these were added later, so they might not exist in old data)
+  uint64 slashed_deposit = 5;
+  uint64 repaid_deposit = 6;
+  google.protobuf.Timestamp last_slashed = 7;
+  google.protobuf.Timestamp last_repaid = 8;
+  uint64 slash_count = 9;
+  string last_repaid_by = 10;
+}
+
