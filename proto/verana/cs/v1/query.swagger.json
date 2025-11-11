@@ -1,0 +1,327 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "verana/cs/v1/query.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "Query"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/verana/cs/v1/get/{id}": {
+      "get": {
+        "summary": "GetCredentialSchema returns a credential schema by ID",
+        "operationId": "Query_GetCredentialSchema",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.cs.v1.QueryGetCredentialSchemaResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "uint64"
+          }
+        ],
+        "tags": [
+          "Query"
+        ]
+      }
+    },
+    "/verana/cs/v1/js/{id}": {
+      "get": {
+        "summary": "RenderJsonSchema returns the JSON schema definition",
+        "operationId": "Query_RenderJsonSchema",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.cs.v1.QueryRenderJsonSchemaResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "uint64"
+          }
+        ],
+        "tags": [
+          "Query"
+        ]
+      }
+    },
+    "/verana/cs/v1/list": {
+      "get": {
+        "summary": "ListCredentialSchemas queries a list of CredentialSchema items.",
+        "operationId": "Query_ListCredentialSchemas",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.cs.v1.QueryListCredentialSchemasResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "tr_id",
+            "description": "optional",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uint64"
+          },
+          {
+            "name": "modified_after",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "response_max_size",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "Query"
+        ]
+      }
+    },
+    "/verana/cs/v1/params": {
+      "get": {
+        "summary": "Parameters queries the parameters of the module.",
+        "operationId": "Query_Params",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.cs.v1.QueryParamsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "tags": [
+          "Query"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "google.protobuf.Any": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "google.rpc.Status": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/google.protobuf.Any"
+          }
+        }
+      }
+    },
+    "verana.cs.v1.CredentialSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "tr_id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "created": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "modified": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "archived": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "deposit": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "json_schema": {
+          "type": "string"
+        },
+        "issuer_grantor_validation_validity_period": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "verifier_grantor_validation_validity_period": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "issuer_validation_validity_period": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "verifier_validation_validity_period": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "holder_validation_validity_period": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "issuer_perm_management_mode": {
+          "$ref": "#/definitions/verana.cs.v1.CredentialSchemaPermManagementMode"
+        },
+        "verifier_perm_management_mode": {
+          "$ref": "#/definitions/verana.cs.v1.CredentialSchemaPermManagementMode"
+        }
+      },
+      "title": "CredentialSchema defines the structure for a credential schema"
+    },
+    "verana.cs.v1.CredentialSchemaPermManagementMode": {
+      "type": "string",
+      "enum": [
+        "MODE_UNSPECIFIED",
+        "OPEN",
+        "GRANTOR_VALIDATION",
+        "ECOSYSTEM"
+      ],
+      "default": "MODE_UNSPECIFIED",
+      "description": "- MODE_UNSPECIFIED: Default to prevent accidental omission\n - OPEN: Anyone can create their own permission\n - GRANTOR_VALIDATION: Requires validation from a grantor\n - ECOSYSTEM: Requires validation from ecosystem (was TRUST_REGISTRY_VALIDATION)",
+      "title": "CredentialSchemaPermManagementMode defines how permissions are managed"
+    },
+    "verana.cs.v1.Params": {
+      "type": "object",
+      "properties": {
+        "credential_schema_trust_deposit": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "credential_schema_schema_max_size": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "credential_schema_issuer_grantor_validation_validity_period_max_days": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "credential_schema_verifier_grantor_validation_validity_period_max_days": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "credential_schema_issuer_validation_validity_period_max_days": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "credential_schema_verifier_validation_validity_period_max_days": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "credential_schema_holder_validation_validity_period_max_days": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "description": "Params defines the parameters for the module."
+    },
+    "verana.cs.v1.QueryGetCredentialSchemaResponse": {
+      "type": "object",
+      "properties": {
+        "schema": {
+          "$ref": "#/definitions/verana.cs.v1.CredentialSchema"
+        }
+      }
+    },
+    "verana.cs.v1.QueryListCredentialSchemasResponse": {
+      "type": "object",
+      "properties": {
+        "schemas": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/verana.cs.v1.CredentialSchema"
+          }
+        }
+      }
+    },
+    "verana.cs.v1.QueryParamsResponse": {
+      "type": "object",
+      "properties": {
+        "params": {
+          "$ref": "#/definitions/verana.cs.v1.Params",
+          "description": "params holds all the parameters of this module."
+        }
+      },
+      "description": "QueryParamsResponse is response type for the Query/Params RPC method."
+    },
+    "verana.cs.v1.QueryRenderJsonSchemaResponse": {
+      "type": "object",
+      "properties": {
+        "schema": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

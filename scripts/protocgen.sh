@@ -2,24 +2,53 @@
 
 set -eo pipefail
 
-echo "Generating protobuf files..."
+echo "Formatting protobuf files"
+find ./ -name "*.proto" -exec clang-format -i {} \; 2>/dev/null || echo "clang-format not found, skipping formatting"
 
-# Change to project root
-cd "$(dirname "$0")/.."
+home=$PWD
 
-# Check if ignite is installed
-if ! command -v ignite &> /dev/null; then
-    echo "Error: ignite is not installed"
-    echo "Install from: https://github.com/ignite/cli"
-    exit 1
-fi
+echo "Generating proto code"
+proto_dirs=$(find ./ -name 'buf.yaml' -print0 | xargs -0 -n1 dirname | sort | uniq)
 
-# Generate proto files using Ignite
-echo "Using Ignite to generate proto files..."
-ignite generate proto-go --yes
+for dir in $proto_dirs; do
+  echo "Processing proto directory: $dir"
+  cd "$dir"
 
-echo "✅ Protobuf generation completed!"
-echo ""
-echo "Generated:"
-echo "  • Go files (.pb.go, .pb.gw.go) in x/*/types/"
-echo "  • Pulsar files (.pulsar.go, _grpc.pb.go) in api/verana/*/"
+  # Generate pulsar proto code (for api directory)
+  if [ -f "buf.gen.pulsar.yaml" ]; then
+    echo "  Generating pulsar proto code..."
+    buf generate --template buf.gen.pulsar.yaml
+
+    # Move generated files to the right places
+    if [ -d "../api" ]; then
+      echo "  Moving pulsar generated files to api directory..."
+      # The pulsar files should already be in the right place based on buf.gen.pulsar.yaml config
+    fi
+  fi
+
+  # Generate gogo proto code (for x/ modules - types.pb.go files)
+  if [ -f "buf.gen.gogo.yaml" ]; then
+    echo "  Generating gogo proto code..."
+
+    # Find all proto files and generate for each
+    for file in $(find . -maxdepth 5 -name '*.proto'); do
+      # Check if proto file has go_package set
+      # Only generate gogo for files NOT using cosmossdk.io/api (those use pulsar)
+      if grep -q "option go_package" "$file" && \
+         grep -H -o -c 'option go_package.*cosmossdk.io/api' "$file" | grep -q ':0$' || \
+         ! grep -q "option go_package.*cosmossdk.io/api" "$file"; then
+        buf generate --template buf.gen.gogo.yaml "$file"
+      fi
+    done
+  fi
+
+  # Generate swagger/OpenAPI documentation
+  if [ -f "buf.gen.swagger.yaml" ]; then
+    echo "  Generating swagger documentation..."
+    buf generate --template buf.gen.swagger.yaml
+  fi
+
+  cd "$home"
+done
+
+echo "✓ Proto generation complete!"

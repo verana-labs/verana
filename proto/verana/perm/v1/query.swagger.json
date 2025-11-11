@@ -1,0 +1,599 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "verana/perm/v1/query.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "Query"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/verana/perm/v1/beneficiaries": {
+      "get": {
+        "operationId": "Query_FindBeneficiaries",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.perm.v1.QueryFindBeneficiariesResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "issuer_perm_id",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uint64"
+          },
+          {
+            "name": "verifier_perm_id",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uint64"
+          }
+        ],
+        "tags": [
+          "Query"
+        ]
+      }
+    },
+    "/verana/perm/v1/find_with_did": {
+      "get": {
+        "operationId": "Query_FindPermissionsWithDID",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.perm.v1.QueryFindPermissionsWithDIDResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "did",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "schema_id",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uint64"
+          },
+          {
+            "name": "country",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "when",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          }
+        ],
+        "tags": [
+          "Query"
+        ]
+      }
+    },
+    "/verana/perm/v1/get/{id}": {
+      "get": {
+        "operationId": "Query_GetPermission",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.perm.v1.QueryGetPermissionResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "uint64"
+          }
+        ],
+        "tags": [
+          "Query"
+        ]
+      }
+    },
+    "/verana/perm/v1/get_session/{id}": {
+      "get": {
+        "operationId": "Query_GetPermissionSession",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.perm.v1.QueryGetPermissionSessionResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "description": "UUID",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Query"
+        ]
+      }
+    },
+    "/verana/perm/v1/list": {
+      "get": {
+        "operationId": "Query_ListPermissions",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.perm.v1.QueryListPermissionsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "modified_after",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "response_max_size",
+            "description": "Default 64, min 1, max 1024",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "Query"
+        ]
+      }
+    },
+    "/verana/perm/v1/list_session": {
+      "get": {
+        "operationId": "Query_ListPermissionSessions",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.perm.v1.QueryListPermissionSessionsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "modified_after",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "response_max_size",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "Query"
+        ]
+      }
+    },
+    "/verana/perm/v1/params": {
+      "get": {
+        "summary": "Parameters queries the parameters of the module.",
+        "operationId": "Query_Params",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.perm.v1.QueryParamsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "tags": [
+          "Query"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "google.protobuf.Any": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "google.rpc.Status": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/google.protobuf.Any"
+          }
+        }
+      }
+    },
+    "verana.perm.v1.Params": {
+      "type": "object",
+      "properties": {
+        "validation_term_requested_timeout_days": {
+          "type": "string",
+          "format": "uint64"
+        }
+      },
+      "description": "Params defines the parameters for the module."
+    },
+    "verana.perm.v1.Permission": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "schema_id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "type": {
+          "$ref": "#/definitions/verana.perm.v1.PermissionType"
+        },
+        "did": {
+          "type": "string"
+        },
+        "grantee": {
+          "type": "string"
+        },
+        "created": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "created_by": {
+          "type": "string"
+        },
+        "extended": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "extended_by": {
+          "type": "string"
+        },
+        "slashed": {
+          "type": "string",
+          "format": "date-time",
+          "title": "NEW: Slashing related fields"
+        },
+        "slashed_by": {
+          "type": "string"
+        },
+        "repaid": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "repaid_by": {
+          "type": "string"
+        },
+        "effective_from": {
+          "type": "string",
+          "format": "date-time",
+          "title": "END NEW"
+        },
+        "effective_until": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "modified": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "validation_fees": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "issuance_fees": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "verification_fees": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "deposit": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "slashed_deposit": {
+          "type": "string",
+          "format": "uint64",
+          "title": "NEW: Slashing deposit fields"
+        },
+        "repaid_deposit": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "revoked": {
+          "type": "string",
+          "format": "date-time",
+          "title": "END NEW"
+        },
+        "revoked_by": {
+          "type": "string"
+        },
+        "country": {
+          "type": "string"
+        },
+        "validator_perm_id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "vp_state": {
+          "$ref": "#/definitions/verana.perm.v1.ValidationState"
+        },
+        "vp_exp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "vp_last_state_change": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "vp_validator_deposit": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "vp_current_fees": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "vp_current_deposit": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "vp_summary_digest_sri": {
+          "type": "string"
+        },
+        "vp_term_requested": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "verana.perm.v1.PermissionSession": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "controller": {
+          "type": "string"
+        },
+        "agent_perm_id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "authz": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/verana.perm.v1.SessionAuthz"
+          }
+        },
+        "created": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "modified": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "verana.perm.v1.PermissionType": {
+      "type": "string",
+      "enum": [
+        "UNSPECIFIED",
+        "ISSUER",
+        "VERIFIER",
+        "ISSUER_GRANTOR",
+        "VERIFIER_GRANTOR",
+        "ECOSYSTEM",
+        "HOLDER"
+      ],
+      "default": "UNSPECIFIED",
+      "description": "- ECOSYSTEM: Changed from PERMISSION_TYPE_TRUST_REGISTRY",
+      "title": "Permission types"
+    },
+    "verana.perm.v1.QueryFindBeneficiariesResponse": {
+      "type": "object",
+      "properties": {
+        "permissions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/verana.perm.v1.Permission"
+          }
+        }
+      }
+    },
+    "verana.perm.v1.QueryFindPermissionsWithDIDResponse": {
+      "type": "object",
+      "properties": {
+        "permissions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/verana.perm.v1.Permission"
+          }
+        }
+      }
+    },
+    "verana.perm.v1.QueryGetPermissionResponse": {
+      "type": "object",
+      "properties": {
+        "permission": {
+          "$ref": "#/definitions/verana.perm.v1.Permission"
+        }
+      }
+    },
+    "verana.perm.v1.QueryGetPermissionSessionResponse": {
+      "type": "object",
+      "properties": {
+        "session": {
+          "$ref": "#/definitions/verana.perm.v1.PermissionSession"
+        }
+      }
+    },
+    "verana.perm.v1.QueryListPermissionSessionsResponse": {
+      "type": "object",
+      "properties": {
+        "sessions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/verana.perm.v1.PermissionSession"
+          }
+        }
+      }
+    },
+    "verana.perm.v1.QueryListPermissionsResponse": {
+      "type": "object",
+      "properties": {
+        "permissions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/verana.perm.v1.Permission"
+          }
+        }
+      }
+    },
+    "verana.perm.v1.QueryParamsResponse": {
+      "type": "object",
+      "properties": {
+        "params": {
+          "$ref": "#/definitions/verana.perm.v1.Params",
+          "description": "params holds all the parameters of this module."
+        }
+      },
+      "description": "QueryParamsResponse is response type for the Query/Params RPC method."
+    },
+    "verana.perm.v1.SessionAuthz": {
+      "type": "object",
+      "properties": {
+        "executor_perm_id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "beneficiary_perm_id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "wallet_agent_perm_id": {
+          "type": "string",
+          "format": "uint64"
+        }
+      }
+    },
+    "verana.perm.v1.ValidationState": {
+      "type": "string",
+      "enum": [
+        "VALIDATION_STATE_UNSPECIFIED",
+        "PENDING",
+        "VALIDATED",
+        "TERMINATED",
+        "TERMINATION_REQUESTED"
+      ],
+      "default": "VALIDATION_STATE_UNSPECIFIED",
+      "title": "Validation process states"
+    }
+  }
+}
