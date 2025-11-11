@@ -65,14 +65,26 @@ func MigrateStore(ctx sdk.Context, k Keeper) error {
 	defer iterator.Close()
 
 	migratedCount := 0
+	skippedCount := 0
 	for ; iterator.Valid(); iterator.Next() {
 		key := iterator.Key()
 		value := iterator.Value()
 
+		// First, try to unmarshal with the new proto definition (LegacyDec Share)
+		// This handles the case where the migration was partially run or data is already migrated
+		var newTD types.TrustDeposit
+		valueCodec := codec.CollValue[types.TrustDeposit](cdc)
+		newTD, err := valueCodec.Decode(value)
+		if err == nil {
+			// Data is already in the new format, skip it
+			skippedCount++
+			continue
+		}
+
 		// Try to unmarshal with old proto definition (uint64 Share)
 		oldTD, err := unmarshalOldTrustDeposit(value, cdc)
 		if err != nil {
-			logger.Info("Failed to unmarshal old trust deposit, skipping", "key", string(key), "error", err)
+			logger.Info("Failed to unmarshal trust deposit (neither old nor new format), skipping", "key", string(key), "error", err)
 			continue
 		}
 
@@ -92,7 +104,7 @@ func MigrateStore(ctx sdk.Context, k Keeper) error {
 		}
 
 		// Create new TrustDeposit with LegacyDec Share using the actual types
-		newTD := types.TrustDeposit{
+		newTD = types.TrustDeposit{
 			Account:        oldTD.Account,
 			Share:          newShare, // Now LegacyDec
 			Amount:         oldTD.Amount,
@@ -105,10 +117,12 @@ func MigrateStore(ctx sdk.Context, k Keeper) error {
 			LastRepaidBy:   oldTD.LastRepaidBy,
 		}
 
-		// Marshal the new structure using the codec
-		newBz, err := cdc.Marshal(&newTD)
+		// Marshal the new structure using the same encoder that collections.Map uses
+		// This ensures the LegacyDec custom type is properly encoded
+		// CollValue wraps the codec to handle custom types correctly
+		newBz, err := valueCodec.Encode(newTD)
 		if err != nil {
-			logger.Info("Failed to marshal new trust deposit", "key", string(key), "error", err)
+			logger.Info("Failed to encode new trust deposit", "key", string(key), "error", err)
 			continue
 		}
 
@@ -119,7 +133,7 @@ func MigrateStore(ctx sdk.Context, k Keeper) error {
 		logger.Info("Migrated trust deposit", "account", oldTD.Account, "old_share", oldTD.Share, "new_share", newShare.String())
 	}
 
-	logger.Info("Migration completed", "migrated_count", migratedCount)
+	logger.Info("Migration completed", "migrated_count", migratedCount, "skipped_count", skippedCount)
 	return nil
 }
 
