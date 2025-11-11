@@ -52,11 +52,11 @@ message MsgCreateCredentialSchema {
   string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   uint64 tr_id = 2;
   string json_schema = 3;
-  optional uint32 issuer_grantor_validation_validity_period = 4;
-  optional uint32 verifier_grantor_validation_validity_period = 5;
-  optional uint32 issuer_validation_validity_period = 6;
-  optional uint32 verifier_validation_validity_period = 7;
-  optional uint32 holder_validation_validity_period = 8;
+  uint32 issuer_grantor_validation_validity_period = 4;
+  uint32 verifier_grantor_validation_validity_period = 5;
+  uint32 issuer_validation_validity_period = 6;
+  uint32 verifier_validation_validity_period = 7;
+  uint32 holder_validation_validity_period = 8;
   uint32 issuer_perm_management_mode = 9;
   uint32 verifier_perm_management_mode = 10;
 }
@@ -70,11 +70,11 @@ message MsgUpdateCredentialSchema {
 
   string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   uint64 id = 2;
-  optional uint32 issuer_grantor_validation_validity_period = 3;
-  optional uint32 verifier_grantor_validation_validity_period = 4;
-  optional uint32 issuer_validation_validity_period = 5;
-  optional uint32 verifier_validation_validity_period = 6;
-  optional uint32 holder_validation_validity_period = 7;
+  uint32 issuer_grantor_validation_validity_period = 3;
+  uint32 verifier_grantor_validation_validity_period = 4;
+  uint32 issuer_validation_validity_period = 5;
+  uint32 verifier_validation_validity_period = 6;
+  uint32 holder_validation_validity_period = 7;
 }
 
 message MsgUpdateCredentialSchemaResponse {}
