@@ -4,7 +4,11 @@ import (
 	"fmt"
 	"io"
 
+	_ "github.com/verana-labs/verana/x/cs/module"   // import for side-effects
+	_ "github.com/verana-labs/verana/x/dd/module"   // import for side-effects
+	_ "github.com/verana-labs/verana/x/perm/module" // import for side-effects
 	trustdepositmodule "github.com/verana-labs/verana/x/td/module"
+	_ "github.com/verana-labs/verana/x/tr/module" // import for side-effects
 
 	upgradetypes "cosmossdk.io/x/upgrade/types"
 	"github.com/verana-labs/verana/app/upgrades"
