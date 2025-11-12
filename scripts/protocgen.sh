@@ -54,4 +54,10 @@ for dir in $proto_dirs; do
   cd "$home"
 done
 
+# Clean up any remaining github.com directory in project root (in case buf generated files there)
+if [ -d "$home/github.com" ]; then
+  echo "  Cleaning up github.com directory in project root..."
+  rm -rf "$home/github.com"
+fi
+
 echo "✓ Proto generation complete!"
