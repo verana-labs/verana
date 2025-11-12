@@ -118,38 +118,16 @@ func NewMsgCreateCredentialSchema(
 	verifierPermManagementMode uint32,
 ) *MsgCreateCredentialSchema {
 	msg := &MsgCreateCredentialSchema{
-		Creator:                    creator,
-		TrId:                       trId,
-		JsonSchema:                 jsonSchema,
-		IssuerPermManagementMode:   issuerPermManagementMode,
-		VerifierPermManagementMode: verifierPermManagementMode,
-	}
-
-	// Set optional fields using the wrapper types
-	if issuerGrantorValidationValidityPeriod > 0 {
-		msg.XIssuerGrantorValidationValidityPeriod = &MsgCreateCredentialSchema_IssuerGrantorValidationValidityPeriod{
-			IssuerGrantorValidationValidityPeriod: issuerGrantorValidationValidityPeriod,
-		}
-	}
-	if verifierGrantorValidationValidityPeriod > 0 {
-		msg.XVerifierGrantorValidationValidityPeriod = &MsgCreateCredentialSchema_VerifierGrantorValidationValidityPeriod{
-			VerifierGrantorValidationValidityPeriod: verifierGrantorValidationValidityPeriod,
-		}
-	}
-	if issuerValidationValidityPeriod > 0 {
-		msg.XIssuerValidationValidityPeriod = &MsgCreateCredentialSchema_IssuerValidationValidityPeriod{
-			IssuerValidationValidityPeriod: issuerValidationValidityPeriod,
-		}
-	}
-	if verifierValidationValidityPeriod > 0 {
-		msg.XVerifierValidationValidityPeriod = &MsgCreateCredentialSchema_VerifierValidationValidityPeriod{
-			VerifierValidationValidityPeriod: verifierValidationValidityPeriod,
-		}
-	}
-	if holderValidationValidityPeriod > 0 {
-		msg.XHolderValidationValidityPeriod = &MsgCreateCredentialSchema_HolderValidationValidityPeriod{
-			HolderValidationValidityPeriod: holderValidationValidityPeriod,
-		}
+		Creator:                                 creator,
+		TrId:                                    trId,
+		JsonSchema:                              jsonSchema,
+		IssuerGrantorValidationValidityPeriod:   issuerGrantorValidationValidityPeriod,
+		VerifierGrantorValidationValidityPeriod: verifierGrantorValidationValidityPeriod,
+		IssuerValidationValidityPeriod:          issuerValidationValidityPeriod,
+		VerifierValidationValidityPeriod:        verifierValidationValidityPeriod,
+		HolderValidationValidityPeriod:          holderValidationValidityPeriod,
+		IssuerPermManagementMode:                issuerPermManagementMode,
+		VerifierPermManagementMode:              verifierPermManagementMode,
 	}
 
 	return msg

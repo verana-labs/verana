@@ -30,16 +30,19 @@ for dir in $proto_dirs; do
   if [ -f "buf.gen.gogo.yaml" ]; then
     echo "  Generating gogo proto code..."
 
-    # Find all proto files and generate for each
     for file in $(find . -maxdepth 5 -name '*.proto'); do
-      # Check if proto file has go_package set
-      # Only generate gogo for files NOT using cosmossdk.io/api (those use pulsar)
       if grep -q "option go_package" "$file" && \
-         grep -H -o -c 'option go_package.*cosmossdk.io/api' "$file" | grep -q ':0$' || \
          ! grep -q "option go_package.*cosmossdk.io/api" "$file"; then
         buf generate --template buf.gen.gogo.yaml "$file"
       fi
     done
+
+    # Move generated files from nested structure to correct location
+    if [ -d "github.com/verana-labs/verana/x" ]; then
+      echo "  Moving gogo generated files to x/ directory..."
+      cp -r github.com/verana-labs/verana/x/* ../x/
+      rm -rf github.com
+    fi
   fi
 
   # Generate swagger/OpenAPI documentation

@@ -127,31 +127,16 @@ func (m *MsgUpdateParamsResponse) XXX_DiscardUnknown() {
 var xxx_messageInfo_MsgUpdateParamsResponse proto.InternalMessageInfo
 
 type MsgCreateCredentialSchema struct {
-	Creator    string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
-	TrId       uint64 `protobuf:"varint,2,opt,name=tr_id,json=trId,proto3" json:"tr_id,omitempty"`
-	JsonSchema string `protobuf:"bytes,3,opt,name=json_schema,json=jsonSchema,proto3" json:"json_schema,omitempty"`
-	// Types that are valid to be assigned to XIssuerGrantorValidationValidityPeriod:
-	//
-	//	*MsgCreateCredentialSchema_IssuerGrantorValidationValidityPeriod
-	XIssuerGrantorValidationValidityPeriod isMsgCreateCredentialSchema_XIssuerGrantorValidationValidityPeriod `protobuf_oneof:"_issuer_grantor_validation_validity_period"`
-	// Types that are valid to be assigned to XVerifierGrantorValidationValidityPeriod:
-	//
-	//	*MsgCreateCredentialSchema_VerifierGrantorValidationValidityPeriod
-	XVerifierGrantorValidationValidityPeriod isMsgCreateCredentialSchema_XVerifierGrantorValidationValidityPeriod `protobuf_oneof:"_verifier_grantor_validation_validity_period"`
-	// Types that are valid to be assigned to XIssuerValidationValidityPeriod:
-	//
-	//	*MsgCreateCredentialSchema_IssuerValidationValidityPeriod
-	XIssuerValidationValidityPeriod isMsgCreateCredentialSchema_XIssuerValidationValidityPeriod `protobuf_oneof:"_issuer_validation_validity_period"`
-	// Types that are valid to be assigned to XVerifierValidationValidityPeriod:
-	//
-	//	*MsgCreateCredentialSchema_VerifierValidationValidityPeriod
-	XVerifierValidationValidityPeriod isMsgCreateCredentialSchema_XVerifierValidationValidityPeriod `protobuf_oneof:"_verifier_validation_validity_period"`
-	// Types that are valid to be assigned to XHolderValidationValidityPeriod:
-	//
-	//	*MsgCreateCredentialSchema_HolderValidationValidityPeriod
-	XHolderValidationValidityPeriod isMsgCreateCredentialSchema_XHolderValidationValidityPeriod `protobuf_oneof:"_holder_validation_validity_period"`
-	IssuerPermManagementMode        uint32                                                      `protobuf:"varint,9,opt,name=issuer_perm_management_mode,json=issuerPermManagementMode,proto3" json:"issuer_perm_management_mode,omitempty"`
-	VerifierPermManagementMode      uint32                                                      `protobuf:"varint,10,opt,name=verifier_perm_management_mode,json=verifierPermManagementMode,proto3" json:"verifier_perm_management_mode,omitempty"`
+	Creator                                 string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
+	TrId                                    uint64 `protobuf:"varint,2,opt,name=tr_id,json=trId,proto3" json:"tr_id,omitempty"`
+	JsonSchema                              string `protobuf:"bytes,3,opt,name=json_schema,json=jsonSchema,proto3" json:"json_schema,omitempty"`
+	IssuerGrantorValidationValidityPeriod   uint32 `protobuf:"varint,4,opt,name=issuer_grantor_validation_validity_period,json=issuerGrantorValidationValidityPeriod,proto3" json:"issuer_grantor_validation_validity_period,omitempty"`
+	VerifierGrantorValidationValidityPeriod uint32 `protobuf:"varint,5,opt,name=verifier_grantor_validation_validity_period,json=verifierGrantorValidationValidityPeriod,proto3" json:"verifier_grantor_validation_validity_period,omitempty"`
+	IssuerValidationValidityPeriod          uint32 `protobuf:"varint,6,opt,name=issuer_validation_validity_period,json=issuerValidationValidityPeriod,proto3" json:"issuer_validation_validity_period,omitempty"`
+	VerifierValidationValidityPeriod        uint32 `protobuf:"varint,7,opt,name=verifier_validation_validity_period,json=verifierValidationValidityPeriod,proto3" json:"verifier_validation_validity_period,omitempty"`
+	HolderValidationValidityPeriod          uint32 `protobuf:"varint,8,opt,name=holder_validation_validity_period,json=holderValidationValidityPeriod,proto3" json:"holder_validation_validity_period,omitempty"`
+	IssuerPermManagementMode                uint32 `protobuf:"varint,9,opt,name=issuer_perm_management_mode,json=issuerPermManagementMode,proto3" json:"issuer_perm_management_mode,omitempty"`
+	VerifierPermManagementMode              uint32 `protobuf:"varint,10,opt,name=verifier_perm_management_mode,json=verifierPermManagementMode,proto3" json:"verifier_perm_management_mode,omitempty"`
 }
 
 func (m *MsgCreateCredentialSchema) Reset()         { *m = MsgCreateCredentialSchema{} }
@@ -187,90 +172,6 @@ func (m *MsgCreateCredentialSchema) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgCreateCredentialSchema proto.InternalMessageInfo
 
-type isMsgCreateCredentialSchema_XIssuerGrantorValidationValidityPeriod interface {
-	isMsgCreateCredentialSchema_XIssuerGrantorValidationValidityPeriod()
-	MarshalTo([]byte) (int, error)
-	Size() int
-}
-type isMsgCreateCredentialSchema_XVerifierGrantorValidationValidityPeriod interface {
-	isMsgCreateCredentialSchema_XVerifierGrantorValidationValidityPeriod()
-	MarshalTo([]byte) (int, error)
-	Size() int
-}
-type isMsgCreateCredentialSchema_XIssuerValidationValidityPeriod interface {
-	isMsgCreateCredentialSchema_XIssuerValidationValidityPeriod()
-	MarshalTo([]byte) (int, error)
-	Size() int
-}
-type isMsgCreateCredentialSchema_XVerifierValidationValidityPeriod interface {
-	isMsgCreateCredentialSchema_XVerifierValidationValidityPeriod()
-	MarshalTo([]byte) (int, error)
-	Size() int
-}
-type isMsgCreateCredentialSchema_XHolderValidationValidityPeriod interface {
-	isMsgCreateCredentialSchema_XHolderValidationValidityPeriod()
-	MarshalTo([]byte) (int, error)
-	Size() int
-}
-
-type MsgCreateCredentialSchema_IssuerGrantorValidationValidityPeriod struct {
-	IssuerGrantorValidationValidityPeriod uint32 `protobuf:"varint,4,opt,name=issuer_grantor_validation_validity_period,json=issuerGrantorValidationValidityPeriod,proto3,oneof" json:"issuer_grantor_validation_validity_period,omitempty"`
-}
-type MsgCreateCredentialSchema_VerifierGrantorValidationValidityPeriod struct {
-	VerifierGrantorValidationValidityPeriod uint32 `protobuf:"varint,5,opt,name=verifier_grantor_validation_validity_period,json=verifierGrantorValidationValidityPeriod,proto3,oneof" json:"verifier_grantor_validation_validity_period,omitempty"`
-}
-type MsgCreateCredentialSchema_IssuerValidationValidityPeriod struct {
-	IssuerValidationValidityPeriod uint32 `protobuf:"varint,6,opt,name=issuer_validation_validity_period,json=issuerValidationValidityPeriod,proto3,oneof" json:"issuer_validation_validity_period,omitempty"`
-}
-type MsgCreateCredentialSchema_VerifierValidationValidityPeriod struct {
-	VerifierValidationValidityPeriod uint32 `protobuf:"varint,7,opt,name=verifier_validation_validity_period,json=verifierValidationValidityPeriod,proto3,oneof" json:"verifier_validation_validity_period,omitempty"`
-}
-type MsgCreateCredentialSchema_HolderValidationValidityPeriod struct {
-	HolderValidationValidityPeriod uint32 `protobuf:"varint,8,opt,name=holder_validation_validity_period,json=holderValidationValidityPeriod,proto3,oneof" json:"holder_validation_validity_period,omitempty"`
-}
-
-func (*MsgCreateCredentialSchema_IssuerGrantorValidationValidityPeriod) isMsgCreateCredentialSchema_XIssuerGrantorValidationValidityPeriod() {
-}
-func (*MsgCreateCredentialSchema_VerifierGrantorValidationValidityPeriod) isMsgCreateCredentialSchema_XVerifierGrantorValidationValidityPeriod() {
-}
-func (*MsgCreateCredentialSchema_IssuerValidationValidityPeriod) isMsgCreateCredentialSchema_XIssuerValidationValidityPeriod() {
-}
-func (*MsgCreateCredentialSchema_VerifierValidationValidityPeriod) isMsgCreateCredentialSchema_XVerifierValidationValidityPeriod() {
-}
-func (*MsgCreateCredentialSchema_HolderValidationValidityPeriod) isMsgCreateCredentialSchema_XHolderValidationValidityPeriod() {
-}
-
-func (m *MsgCreateCredentialSchema) GetXIssuerGrantorValidationValidityPeriod() isMsgCreateCredentialSchema_XIssuerGrantorValidationValidityPeriod {
-	if m != nil {
-		return m.XIssuerGrantorValidationValidityPeriod
-	}
-	return nil
-}
-func (m *MsgCreateCredentialSchema) GetXVerifierGrantorValidationValidityPeriod() isMsgCreateCredentialSchema_XVerifierGrantorValidationValidityPeriod {
-	if m != nil {
-		return m.XVerifierGrantorValidationValidityPeriod
-	}
-	return nil
-}
-func (m *MsgCreateCredentialSchema) GetXIssuerValidationValidityPeriod() isMsgCreateCredentialSchema_XIssuerValidationValidityPeriod {
-	if m != nil {
-		return m.XIssuerValidationValidityPeriod
-	}
-	return nil
-}
-func (m *MsgCreateCredentialSchema) GetXVerifierValidationValidityPeriod() isMsgCreateCredentialSchema_XVerifierValidationValidityPeriod {
-	if m != nil {
-		return m.XVerifierValidationValidityPeriod
-	}
-	return nil
-}
-func (m *MsgCreateCredentialSchema) GetXHolderValidationValidityPeriod() isMsgCreateCredentialSchema_XHolderValidationValidityPeriod {
-	if m != nil {
-		return m.XHolderValidationValidityPeriod
-	}
-	return nil
-}
-
 func (m *MsgCreateCredentialSchema) GetCreator() string {
 	if m != nil {
 		return m.Creator
@@ -293,36 +194,36 @@ func (m *MsgCreateCredentialSchema) GetJsonSchema() string {
 }
 
 func (m *MsgCreateCredentialSchema) GetIssuerGrantorValidationValidityPeriod() uint32 {
-	if x, ok := m.GetXIssuerGrantorValidationValidityPeriod().(*MsgCreateCredentialSchema_IssuerGrantorValidationValidityPeriod); ok {
-		return x.IssuerGrantorValidationValidityPeriod
+	if m != nil {
+		return m.IssuerGrantorValidationValidityPeriod
 	}
 	return 0
 }
 
 func (m *MsgCreateCredentialSchema) GetVerifierGrantorValidationValidityPeriod() uint32 {
-	if x, ok := m.GetXVerifierGrantorValidationValidityPeriod().(*MsgCreateCredentialSchema_VerifierGrantorValidationValidityPeriod); ok {
-		return x.VerifierGrantorValidationValidityPeriod
+	if m != nil {
+		return m.VerifierGrantorValidationValidityPeriod
 	}
 	return 0
 }
 
 func (m *MsgCreateCredentialSchema) GetIssuerValidationValidityPeriod() uint32 {
-	if x, ok := m.GetXIssuerValidationValidityPeriod().(*MsgCreateCredentialSchema_IssuerValidationValidityPeriod); ok {
-		return x.IssuerValidationValidityPeriod
+	if m != nil {
+		return m.IssuerValidationValidityPeriod
 	}
 	return 0
 }
 
 func (m *MsgCreateCredentialSchema) GetVerifierValidationValidityPeriod() uint32 {
-	if x, ok := m.GetXVerifierValidationValidityPeriod().(*MsgCreateCredentialSchema_VerifierValidationValidityPeriod); ok {
-		return x.VerifierValidationValidityPeriod
+	if m != nil {
+		return m.VerifierValidationValidityPeriod
 	}
 	return 0
 }
 
 func (m *MsgCreateCredentialSchema) GetHolderValidationValidityPeriod() uint32 {
-	if x, ok := m.GetXHolderValidationValidityPeriod().(*MsgCreateCredentialSchema_HolderValidationValidityPeriod); ok {
-		return x.HolderValidationValidityPeriod
+	if m != nil {
+		return m.HolderValidationValidityPeriod
 	}
 	return 0
 }
@@ -339,17 +240,6 @@ func (m *MsgCreateCredentialSchema) GetVerifierPermManagementMode() uint32 {
 		return m.VerifierPermManagementMode
 	}
 	return 0
-}
-
-// XXX_OneofWrappers is for the internal use of the proto package.
-func (*MsgCreateCredentialSchema) XXX_OneofWrappers() []interface{} {
-	return []interface{}{
-		(*MsgCreateCredentialSchema_IssuerGrantorValidationValidityPeriod)(nil),
-		(*MsgCreateCredentialSchema_VerifierGrantorValidationValidityPeriod)(nil),
-		(*MsgCreateCredentialSchema_IssuerValidationValidityPeriod)(nil),
-		(*MsgCreateCredentialSchema_VerifierValidationValidityPeriod)(nil),
-		(*MsgCreateCredentialSchema_HolderValidationValidityPeriod)(nil),
-	}
 }
 
 type MsgCreateCredentialSchemaResponse struct {
@@ -397,28 +287,13 @@ func (m *MsgCreateCredentialSchemaResponse) GetId() uint64 {
 }
 
 type MsgUpdateCredentialSchema struct {
-	Creator string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
-	Id      uint64 `protobuf:"varint,2,opt,name=id,proto3" json:"id,omitempty"`
-	// Types that are valid to be assigned to XIssuerGrantorValidationValidityPeriod:
-	//
-	//	*MsgUpdateCredentialSchema_IssuerGrantorValidationValidityPeriod
-	XIssuerGrantorValidationValidityPeriod isMsgUpdateCredentialSchema_XIssuerGrantorValidationValidityPeriod `protobuf_oneof:"_issuer_grantor_validation_validity_period"`
-	// Types that are valid to be assigned to XVerifierGrantorValidationValidityPeriod:
-	//
-	//	*MsgUpdateCredentialSchema_VerifierGrantorValidationValidityPeriod
-	XVerifierGrantorValidationValidityPeriod isMsgUpdateCredentialSchema_XVerifierGrantorValidationValidityPeriod `protobuf_oneof:"_verifier_grantor_validation_validity_period"`
-	// Types that are valid to be assigned to XIssuerValidationValidityPeriod:
-	//
-	//	*MsgUpdateCredentialSchema_IssuerValidationValidityPeriod
-	XIssuerValidationValidityPeriod isMsgUpdateCredentialSchema_XIssuerValidationValidityPeriod `protobuf_oneof:"_issuer_validation_validity_period"`
-	// Types that are valid to be assigned to XVerifierValidationValidityPeriod:
-	//
-	//	*MsgUpdateCredentialSchema_VerifierValidationValidityPeriod
-	XVerifierValidationValidityPeriod isMsgUpdateCredentialSchema_XVerifierValidationValidityPeriod `protobuf_oneof:"_verifier_validation_validity_period"`
-	// Types that are valid to be assigned to XHolderValidationValidityPeriod:
-	//
-	//	*MsgUpdateCredentialSchema_HolderValidationValidityPeriod
-	XHolderValidationValidityPeriod isMsgUpdateCredentialSchema_XHolderValidationValidityPeriod `protobuf_oneof:"_holder_validation_validity_period"`
+	Creator                                 string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
+	Id                                      uint64 `protobuf:"varint,2,opt,name=id,proto3" json:"id,omitempty"`
+	IssuerGrantorValidationValidityPeriod   uint32 `protobuf:"varint,3,opt,name=issuer_grantor_validation_validity_period,json=issuerGrantorValidationValidityPeriod,proto3" json:"issuer_grantor_validation_validity_period,omitempty"`
+	VerifierGrantorValidationValidityPeriod uint32 `protobuf:"varint,4,opt,name=verifier_grantor_validation_validity_period,json=verifierGrantorValidationValidityPeriod,proto3" json:"verifier_grantor_validation_validity_period,omitempty"`
+	IssuerValidationValidityPeriod          uint32 `protobuf:"varint,5,opt,name=issuer_validation_validity_period,json=issuerValidationValidityPeriod,proto3" json:"issuer_validation_validity_period,omitempty"`
+	VerifierValidationValidityPeriod        uint32 `protobuf:"varint,6,opt,name=verifier_validation_validity_period,json=verifierValidationValidityPeriod,proto3" json:"verifier_validation_validity_period,omitempty"`
+	HolderValidationValidityPeriod          uint32 `protobuf:"varint,7,opt,name=holder_validation_validity_period,json=holderValidationValidityPeriod,proto3" json:"holder_validation_validity_period,omitempty"`
 }
 
 func (m *MsgUpdateCredentialSchema) Reset()         { *m = MsgUpdateCredentialSchema{} }
@@ -454,90 +329,6 @@ func (m *MsgUpdateCredentialSchema) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgUpdateCredentialSchema proto.InternalMessageInfo
 
-type isMsgUpdateCredentialSchema_XIssuerGrantorValidationValidityPeriod interface {
-	isMsgUpdateCredentialSchema_XIssuerGrantorValidationValidityPeriod()
-	MarshalTo([]byte) (int, error)
-	Size() int
-}
-type isMsgUpdateCredentialSchema_XVerifierGrantorValidationValidityPeriod interface {
-	isMsgUpdateCredentialSchema_XVerifierGrantorValidationValidityPeriod()
-	MarshalTo([]byte) (int, error)
-	Size() int
-}
-type isMsgUpdateCredentialSchema_XIssuerValidationValidityPeriod interface {
-	isMsgUpdateCredentialSchema_XIssuerValidationValidityPeriod()
-	MarshalTo([]byte) (int, error)
-	Size() int
-}
-type isMsgUpdateCredentialSchema_XVerifierValidationValidityPeriod interface {
-	isMsgUpdateCredentialSchema_XVerifierValidationValidityPeriod()
-	MarshalTo([]byte) (int, error)
-	Size() int
-}
-type isMsgUpdateCredentialSchema_XHolderValidationValidityPeriod interface {
-	isMsgUpdateCredentialSchema_XHolderValidationValidityPeriod()
-	MarshalTo([]byte) (int, error)
-	Size() int
-}
-
-type MsgUpdateCredentialSchema_IssuerGrantorValidationValidityPeriod struct {
-	IssuerGrantorValidationValidityPeriod uint32 `protobuf:"varint,3,opt,name=issuer_grantor_validation_validity_period,json=issuerGrantorValidationValidityPeriod,proto3,oneof" json:"issuer_grantor_validation_validity_period,omitempty"`
-}
-type MsgUpdateCredentialSchema_VerifierGrantorValidationValidityPeriod struct {
-	VerifierGrantorValidationValidityPeriod uint32 `protobuf:"varint,4,opt,name=verifier_grantor_validation_validity_period,json=verifierGrantorValidationValidityPeriod,proto3,oneof" json:"verifier_grantor_validation_validity_period,omitempty"`
-}
-type MsgUpdateCredentialSchema_IssuerValidationValidityPeriod struct {
-	IssuerValidationValidityPeriod uint32 `protobuf:"varint,5,opt,name=issuer_validation_validity_period,json=issuerValidationValidityPeriod,proto3,oneof" json:"issuer_validation_validity_period,omitempty"`
-}
-type MsgUpdateCredentialSchema_VerifierValidationValidityPeriod struct {
-	VerifierValidationValidityPeriod uint32 `protobuf:"varint,6,opt,name=verifier_validation_validity_period,json=verifierValidationValidityPeriod,proto3,oneof" json:"verifier_validation_validity_period,omitempty"`
-}
-type MsgUpdateCredentialSchema_HolderValidationValidityPeriod struct {
-	HolderValidationValidityPeriod uint32 `protobuf:"varint,7,opt,name=holder_validation_validity_period,json=holderValidationValidityPeriod,proto3,oneof" json:"holder_validation_validity_period,omitempty"`
-}
-
-func (*MsgUpdateCredentialSchema_IssuerGrantorValidationValidityPeriod) isMsgUpdateCredentialSchema_XIssuerGrantorValidationValidityPeriod() {
-}
-func (*MsgUpdateCredentialSchema_VerifierGrantorValidationValidityPeriod) isMsgUpdateCredentialSchema_XVerifierGrantorValidationValidityPeriod() {
-}
-func (*MsgUpdateCredentialSchema_IssuerValidationValidityPeriod) isMsgUpdateCredentialSchema_XIssuerValidationValidityPeriod() {
-}
-func (*MsgUpdateCredentialSchema_VerifierValidationValidityPeriod) isMsgUpdateCredentialSchema_XVerifierValidationValidityPeriod() {
-}
-func (*MsgUpdateCredentialSchema_HolderValidationValidityPeriod) isMsgUpdateCredentialSchema_XHolderValidationValidityPeriod() {
-}
-
-func (m *MsgUpdateCredentialSchema) GetXIssuerGrantorValidationValidityPeriod() isMsgUpdateCredentialSchema_XIssuerGrantorValidationValidityPeriod {
-	if m != nil {
-		return m.XIssuerGrantorValidationValidityPeriod
-	}
-	return nil
-}
-func (m *MsgUpdateCredentialSchema) GetXVerifierGrantorValidationValidityPeriod() isMsgUpdateCredentialSchema_XVerifierGrantorValidationValidityPeriod {
-	if m != nil {
-		return m.XVerifierGrantorValidationValidityPeriod
-	}
-	return nil
-}
-func (m *MsgUpdateCredentialSchema) GetXIssuerValidationValidityPeriod() isMsgUpdateCredentialSchema_XIssuerValidationValidityPeriod {
-	if m != nil {
-		return m.XIssuerValidationValidityPeriod
-	}
-	return nil
-}
-func (m *MsgUpdateCredentialSchema) GetXVerifierValidationValidityPeriod() isMsgUpdateCredentialSchema_XVerifierValidationValidityPeriod {
-	if m != nil {
-		return m.XVerifierValidationValidityPeriod
-	}
-	return nil
-}
-func (m *MsgUpdateCredentialSchema) GetXHolderValidationValidityPeriod() isMsgUpdateCredentialSchema_XHolderValidationValidityPeriod {
-	if m != nil {
-		return m.XHolderValidationValidityPeriod
-	}
-	return nil
-}
-
 func (m *MsgUpdateCredentialSchema) GetCreator() string {
 	if m != nil {
 		return m.Creator
@@ -553,49 +344,38 @@ func (m *MsgUpdateCredentialSchema) GetId() uint64 {
 }
 
 func (m *MsgUpdateCredentialSchema) GetIssuerGrantorValidationValidityPeriod() uint32 {
-	if x, ok := m.GetXIssuerGrantorValidationValidityPeriod().(*MsgUpdateCredentialSchema_IssuerGrantorValidationValidityPeriod); ok {
-		return x.IssuerGrantorValidationValidityPeriod
+	if m != nil {
+		return m.IssuerGrantorValidationValidityPeriod
 	}
 	return 0
 }
 
 func (m *MsgUpdateCredentialSchema) GetVerifierGrantorValidationValidityPeriod() uint32 {
-	if x, ok := m.GetXVerifierGrantorValidationValidityPeriod().(*MsgUpdateCredentialSchema_VerifierGrantorValidationValidityPeriod); ok {
-		return x.VerifierGrantorValidationValidityPeriod
+	if m != nil {
+		return m.VerifierGrantorValidationValidityPeriod
 	}
 	return 0
 }
 
 func (m *MsgUpdateCredentialSchema) GetIssuerValidationValidityPeriod() uint32 {
-	if x, ok := m.GetXIssuerValidationValidityPeriod().(*MsgUpdateCredentialSchema_IssuerValidationValidityPeriod); ok {
-		return x.IssuerValidationValidityPeriod
+	if m != nil {
+		return m.IssuerValidationValidityPeriod
 	}
 	return 0
 }
 
 func (m *MsgUpdateCredentialSchema) GetVerifierValidationValidityPeriod() uint32 {
-	if x, ok := m.GetXVerifierValidationValidityPeriod().(*MsgUpdateCredentialSchema_VerifierValidationValidityPeriod); ok {
-		return x.VerifierValidationValidityPeriod
+	if m != nil {
+		return m.VerifierValidationValidityPeriod
 	}
 	return 0
 }
 
 func (m *MsgUpdateCredentialSchema) GetHolderValidationValidityPeriod() uint32 {
-	if x, ok := m.GetXHolderValidationValidityPeriod().(*MsgUpdateCredentialSchema_HolderValidationValidityPeriod); ok {
-		return x.HolderValidationValidityPeriod
+	if m != nil {
+		return m.HolderValidationValidityPeriod
 	}
 	return 0
-}
-
-// XXX_OneofWrappers is for the internal use of the proto package.
-func (*MsgUpdateCredentialSchema) XXX_OneofWrappers() []interface{} {
-	return []interface{}{
-		(*MsgUpdateCredentialSchema_IssuerGrantorValidationValidityPeriod)(nil),
-		(*MsgUpdateCredentialSchema_VerifierGrantorValidationValidityPeriod)(nil),
-		(*MsgUpdateCredentialSchema_IssuerValidationValidityPeriod)(nil),
-		(*MsgUpdateCredentialSchema_VerifierValidationValidityPeriod)(nil),
-		(*MsgUpdateCredentialSchema_HolderValidationValidityPeriod)(nil),
-	}
 }
 
 type MsgUpdateCredentialSchemaResponse struct {
@@ -744,58 +524,54 @@ func init() {
 func init() { proto.RegisterFile("verana/cs/v1/tx.proto", fileDescriptor_28caaebe5b206ca2) }
 
 var fileDescriptor_28caaebe5b206ca2 = []byte{
-	// 807 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xdc, 0x56, 0xcf, 0x4f, 0xdc, 0x46,
-	0x14, 0x5e, 0xef, 0x4f, 0x76, 0xa0, 0xad, 0xea, 0xd2, 0x62, 0x8c, 0x30, 0x8b, 0x81, 0xb2, 0xdd,
-	0x82, 0x5d, 0x40, 0x6a, 0x25, 0xa4, 0x1e, 0x30, 0x87, 0xb6, 0x87, 0xad, 0x90, 0x69, 0x39, 0x44,
-	0x8a, 0xac, 0x61, 0x3d, 0xf1, 0x4e, 0xb4, 0xf6, 0xac, 0x66, 0xbc, 0x2b, 0xb8, 0x45, 0x39, 0xa1,
-	0x9c, 0xf2, 0x0f, 0xe4, 0x9e, 0x23, 0x8a, 0xf2, 0x0f, 0xe4, 0xc6, 0x11, 0xe5, 0x94, 0x53, 0x14,
-	0xc1, 0x81, 0xbf, 0x20, 0xf7, 0xc8, 0x33, 0xf6, 0xc2, 0x02, 0xbb, 0x6b, 0x24, 0xb8, 0xe4, 0xb2,
-	0x5a, 0xcf, 0xfb, 0xde, 0xf7, 0xbe, 0xa7, 0x37, 0x9f, 0xfd, 0xc0, 0x8f, 0x5d, 0x44, 0x61, 0x00,
-	0xcd, 0x06, 0x33, 0xbb, 0x6b, 0x66, 0x78, 0x60, 0xb4, 0x29, 0x09, 0x89, 0x3c, 0x21, 0x8e, 0x8d,
-	0x06, 0x33, 0xba, 0x6b, 0xea, 0xf7, 0xd0, 0xc7, 0x01, 0x31, 0xf9, 0xaf, 0x00, 0xa8, 0x53, 0x0d,
-	0xc2, 0x7c, 0xc2, 0x4c, 0x9f, 0x79, 0x51, 0xa2, 0xcf, 0xbc, 0x38, 0x30, 0x2d, 0x02, 0x0e, 0x7f,
-	0x32, 0xc5, 0x43, 0x1c, 0x9a, 0xf4, 0x88, 0x47, 0xc4, 0x79, 0xf4, 0x2f, 0x49, 0xe8, 0x53, 0xd0,
-	0x86, 0x14, 0xfa, 0x49, 0x82, 0xd2, 0x2f, 0xee, 0xb0, 0x8d, 0xe2, 0x88, 0xfe, 0x46, 0x02, 0xdf,
-	0xd5, 0x99, 0xf7, 0x7f, 0xdb, 0x85, 0x21, 0xda, 0xe1, 0x39, 0xf2, 0xef, 0xa0, 0x0c, 0x3b, 0x61,
-	0x93, 0x50, 0x1c, 0x1e, 0x2a, 0x52, 0x45, 0xaa, 0x96, 0x2d, 0xe5, 0xfd, 0xdb, 0xd5, 0xc9, 0x58,
-	0xc3, 0x96, 0xeb, 0x52, 0xc4, 0xd8, 0x6e, 0x48, 0x71, 0xe0, 0xd9, 0x97, 0x50, 0xf9, 0x0f, 0x50,
-	0x14, 0x55, 0x95, 0x6c, 0x45, 0xaa, 0x8e, 0xaf, 0x4f, 0x1a, 0x57, 0x9b, 0x37, 0x04, 0xbb, 0x55,
-	0x3e, 0xf9, 0x38, 0x97, 0x79, 0x7d, 0x71, 0x5c, 0x93, 0xec, 0x18, 0xbe, 0x69, 0x3c, 0xbf, 0x38,
-	0xae, 0x5d, 0x12, 0xbd, 0xb8, 0x38, 0xae, 0xcd, 0xc4, 0x8a, 0x0f, 0x22, 0xcd, 0xd7, 0x04, 0xea,
-	0xd3, 0x60, 0xea, 0xda, 0x91, 0x8d, 0x58, 0x9b, 0x04, 0x0c, 0xe9, 0xaf, 0x4a, 0x60, 0xba, 0xce,
-	0xbc, 0x6d, 0x8a, 0x60, 0x88, 0xb6, 0x29, 0x72, 0x51, 0x10, 0x62, 0xd8, 0xda, 0x6d, 0x34, 0x91,
-	0x0f, 0xe5, 0x75, 0x50, 0x6a, 0x44, 0x11, 0x42, 0x47, 0xf6, 0x95, 0x00, 0xe5, 0x1f, 0x40, 0x21,
-	0xa4, 0x0e, 0x76, 0x79, 0x53, 0x79, 0x3b, 0x1f, 0xd2, 0x7f, 0x5c, 0x79, 0x0e, 0x8c, 0x3f, 0x65,
-	0x24, 0x70, 0x18, 0xe7, 0x55, 0x72, 0x11, 0x99, 0x0d, 0xa2, 0xa3, 0xb8, 0xd2, 0x63, 0xf0, 0x0b,
-	0x66, 0xac, 0x83, 0xa8, 0xe3, 0x51, 0x18, 0x84, 0x84, 0x3a, 0x5d, 0xd8, 0xc2, 0x2e, 0x0c, 0x31,
-	0x09, 0xc4, 0x5f, 0x1c, 0x1e, 0x3a, 0x6d, 0x44, 0x31, 0x71, 0x95, 0x7c, 0x45, 0xaa, 0x7e, 0xf3,
-	0x77, 0xc6, 0x5e, 0x12, 0x29, 0x7f, 0x89, 0x8c, 0xbd, 0x5e, 0xc2, 0x5e, 0x8c, 0xdf, 0xe1, 0xf0,
-	0x23, 0x49, 0x92, 0x21, 0xf8, 0xb5, 0x8b, 0x28, 0x7e, 0x82, 0xd3, 0x15, 0x28, 0xf0, 0x02, 0x92,
-	0xbd, 0x9c, 0x24, 0xa5, 0x28, 0xf1, 0x2f, 0x98, 0x8f, 0x3b, 0x18, 0x42, 0x5c, 0xe4, 0xc4, 0x59,
-	0x5b, 0x13, 0xd0, 0x61, 0x7c, 0x36, 0x58, 0xe8, 0x49, 0x1e, 0xc2, 0x58, 0xe2, 0x8c, 0x39, 0xbb,
-	0x92, 0x80, 0x47, 0x68, 0x6c, 0x92, 0x96, 0x3b, 0x9c, 0x71, 0x8c, 0x33, 0xe6, 0x6d, 0x4d, 0x40,
-	0x87, 0xf1, 0xfd, 0x09, 0x66, 0xe2, 0x9e, 0xdb, 0x88, 0xfa, 0x8e, 0x0f, 0x03, 0xe8, 0x21, 0x1f,
-	0x05, 0xa1, 0xe3, 0x13, 0x17, 0x29, 0xe5, 0x88, 0xc9, 0x56, 0x04, 0x64, 0x07, 0x51, 0xbf, 0xde,
-	0x03, 0xd4, 0x89, 0x8b, 0xe4, 0x2d, 0x30, 0xdb, 0x6b, 0xf1, 0x56, 0x02, 0xc0, 0x09, 0xd4, 0x04,
-	0x74, 0x93, 0x62, 0x73, 0x22, 0xb2, 0x42, 0x72, 0xf7, 0xac, 0x15, 0x50, 0x73, 0x52, 0x5f, 0x23,
-	0xcb, 0x00, 0x2b, 0xce, 0x1d, 0x6e, 0x85, 0xb5, 0x08, 0x74, 0x67, 0xe4, 0x88, 0xad, 0x9f, 0xc1,
-	0xa2, 0x93, 0x62, 0x70, 0x9c, 0x6d, 0xe4, 0x30, 0xf4, 0x0d, 0x30, 0x3f, 0xd0, 0x9e, 0x89, 0x89,
-	0xe5, 0x6f, 0x41, 0x16, 0xbb, 0xdc, 0xa1, 0x79, 0x3b, 0x8b, 0x5d, 0xfd, 0x73, 0x81, 0x9b, 0x5a,
-	0x18, 0xfe, 0x5e, 0x4c, 0x2d, 0x2a, 0x64, 0x93, 0x0a, 0x77, 0xb3, 0x6b, 0xee, 0xa1, 0xed, 0x9a,
-	0x7f, 0x28, 0xbb, 0x16, 0xee, 0xdd, 0xae, 0xc5, 0x7b, 0xb7, 0x6b, 0x29, 0xb5, 0x5d, 0xbf, 0x7a,
-	0xb3, 0x2c, 0x70, 0xb3, 0xdc, 0x7e, 0xed, 0x7b, 0x5f, 0xbc, 0x23, 0x09, 0xa8, 0x75, 0xe6, 0x6d,
-	0xd1, 0x46, 0x13, 0x77, 0x1f, 0xc6, 0x1d, 0x0a, 0x28, 0x41, 0x41, 0xcf, 0xef, 0xfe, 0x98, 0x9d,
-	0x3c, 0xf6, 0x4f, 0x40, 0x5f, 0x04, 0xfa, 0x60, 0x25, 0x89, 0xe0, 0xf5, 0x77, 0x39, 0x90, 0xab,
-	0x33, 0x4f, 0xfe, 0x0f, 0x4c, 0xf4, 0xad, 0x1d, 0xb3, 0xfd, 0xeb, 0xc2, 0xb5, 0x2f, 0xbc, 0xba,
-	0x34, 0x34, 0xdc, 0x7b, 0x77, 0x50, 0xf0, 0xd3, 0x80, 0x8f, 0xff, 0xf2, 0x0d, 0x82, 0xdb, 0x81,
-	0xaa, 0x99, 0x12, 0x78, 0xb5, 0xe6, 0x80, 0x77, 0xd3, 0xf2, 0x00, 0xd1, 0x29, 0x6a, 0x0e, 0x1f,
-	0xbb, 0xdc, 0x01, 0x53, 0x83, 0x46, 0x5e, 0xbd, 0xc1, 0x35, 0x00, 0xa9, 0xfe, 0x96, 0x16, 0x99,
-	0x94, 0x55, 0x0b, 0xcf, 0xa2, 0xcd, 0xcd, 0xb2, 0x4e, 0xce, 0x34, 0xe9, 0xf4, 0x4c, 0x93, 0x3e,
-	0x9d, 0x69, 0xd2, 0xcb, 0x73, 0x2d, 0x73, 0x7a, 0xae, 0x65, 0x3e, 0x9c, 0x6b, 0x99, 0x47, 0x55,
-	0x0f, 0x87, 0xcd, 0xce, 0xbe, 0xd1, 0x20, 0xbe, 0x29, 0xc8, 0x57, 0x5b, 0x70, 0x9f, 0x99, 0x57,
-	0xf7, 0x39, 0xbe, 0x80, 0xee, 0x17, 0xf9, 0x06, 0xba, 0xf1, 0x25, 0x00, 0x00, 0xff, 0xff, 0x4d,
-	0xc8, 0x0e, 0x43, 0x3a, 0x0b, 0x00, 0x00,
+	// 751 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x96, 0x4f, 0x4b, 0xdc, 0x4e,
+	0x18, 0xc7, 0x37, 0xfb, 0xd7, 0x1d, 0xfd, 0xfd, 0x4a, 0x53, 0x5b, 0x63, 0xc4, 0x75, 0x5d, 0x2b,
+	0x6e, 0x2d, 0x6e, 0xaa, 0x42, 0x0b, 0x42, 0x0f, 0xae, 0x87, 0xe2, 0x61, 0x41, 0x62, 0x2b, 0xa5,
+	0x14, 0xc2, 0x98, 0x4c, 0xb3, 0x53, 0x36, 0x99, 0x30, 0x33, 0xbb, 0xe8, 0xad, 0xf4, 0x54, 0x3c,
+	0xf5, 0x65, 0xf4, 0x28, 0xd2, 0x37, 0xd0, 0x9b, 0x47, 0xe9, 0xa9, 0xa7, 0x52, 0xf4, 0xe0, 0xdb,
+	0x28, 0x99, 0x49, 0x56, 0x77, 0x35, 0xeb, 0x16, 0xf4, 0xb2, 0x24, 0x33, 0xdf, 0xe7, 0xf3, 0x7c,
+	0x87, 0x7c, 0xb3, 0x4f, 0xc0, 0xc3, 0x0e, 0xa2, 0xd0, 0x87, 0x86, 0xcd, 0x8c, 0xce, 0xb2, 0xc1,
+	0xf7, 0x6a, 0x01, 0x25, 0x9c, 0xa8, 0x63, 0x72, 0xb9, 0x66, 0xb3, 0x5a, 0x67, 0x59, 0xbf, 0x0f,
+	0x3d, 0xec, 0x13, 0x43, 0xfc, 0x4a, 0x81, 0x3e, 0x61, 0x13, 0xe6, 0x11, 0x66, 0x78, 0xcc, 0x0d,
+	0x0b, 0x3d, 0xe6, 0x46, 0x1b, 0x93, 0x72, 0xc3, 0x12, 0x77, 0x86, 0xbc, 0x89, 0xb6, 0xc6, 0x5d,
+	0xe2, 0x12, 0xb9, 0x1e, 0x5e, 0xc5, 0x05, 0x3d, 0x0e, 0x02, 0x48, 0xa1, 0x17, 0x17, 0x68, 0xbd,
+	0xe6, 0xf6, 0x03, 0x14, 0xed, 0x54, 0x8e, 0x14, 0x70, 0xaf, 0xc1, 0xdc, 0x37, 0x81, 0x03, 0x39,
+	0xda, 0x12, 0x35, 0xea, 0x73, 0x50, 0x84, 0x6d, 0xde, 0x24, 0x14, 0xf3, 0x7d, 0x4d, 0x29, 0x2b,
+	0xd5, 0x62, 0x5d, 0xfb, 0xf9, 0x7d, 0x69, 0x3c, 0xf2, 0xb0, 0xee, 0x38, 0x14, 0x31, 0xb6, 0xcd,
+	0x29, 0xf6, 0x5d, 0xf3, 0x42, 0xaa, 0xbe, 0x00, 0x79, 0xd9, 0x55, 0x4b, 0x97, 0x95, 0xea, 0xe8,
+	0xca, 0x78, 0xed, 0xf2, 0xe1, 0x6b, 0x92, 0x5e, 0x2f, 0x1e, 0xff, 0x9e, 0x49, 0x7d, 0x3b, 0x3f,
+	0x5c, 0x54, 0xcc, 0x48, 0xbe, 0x56, 0xfb, 0x7c, 0x7e, 0xb8, 0x78, 0x01, 0x3a, 0x38, 0x3f, 0x5c,
+	0x9c, 0x8a, 0x1c, 0xef, 0x85, 0x9e, 0xfb, 0x0c, 0x56, 0x26, 0xc1, 0x44, 0xdf, 0x92, 0x89, 0x58,
+	0x40, 0x7c, 0x86, 0x2a, 0x47, 0x39, 0x30, 0xd9, 0x60, 0xee, 0x06, 0x45, 0x90, 0xa3, 0x0d, 0x8a,
+	0x1c, 0xe4, 0x73, 0x0c, 0x5b, 0xdb, 0x76, 0x13, 0x79, 0x50, 0x5d, 0x01, 0x05, 0x3b, 0xdc, 0x21,
+	0xf4, 0xc6, 0x73, 0xc5, 0x42, 0xf5, 0x01, 0xc8, 0x71, 0x6a, 0x61, 0x47, 0x1c, 0x2a, 0x6b, 0x66,
+	0x39, 0xdd, 0x74, 0xd4, 0x19, 0x30, 0xfa, 0x91, 0x11, 0xdf, 0x62, 0x82, 0xab, 0x65, 0x42, 0x98,
+	0x09, 0xc2, 0xa5, 0xa8, 0xd3, 0x5b, 0xf0, 0x04, 0x33, 0xd6, 0x46, 0xd4, 0x72, 0x29, 0xf4, 0x39,
+	0xa1, 0x56, 0x07, 0xb6, 0xb0, 0x03, 0x39, 0x26, 0xbe, 0xbc, 0xc4, 0x7c, 0xdf, 0x0a, 0x10, 0xc5,
+	0xc4, 0xd1, 0xb2, 0x65, 0xa5, 0xfa, 0x9f, 0x39, 0x2f, 0x0b, 0x5e, 0x49, 0xfd, 0x4e, 0x57, 0xbe,
+	0x13, 0xa9, 0xb7, 0x84, 0x58, 0x7d, 0x0f, 0x9e, 0x76, 0x10, 0xc5, 0x1f, 0xf0, 0x70, 0xec, 0x9c,
+	0x60, 0x2f, 0xc4, 0x25, 0x37, 0xd1, 0x37, 0xc1, 0x6c, 0xe4, 0x7b, 0x00, 0x33, 0x2f, 0x98, 0x25,
+	0x29, 0x4c, 0x44, 0x35, 0xc0, 0x5c, 0xd7, 0xe8, 0x00, 0x58, 0x41, 0xc0, 0xca, 0xb1, 0x74, 0x90,
+	0xb3, 0x26, 0x69, 0x39, 0x83, 0x61, 0x23, 0xd2, 0x99, 0x14, 0x26, 0xa2, 0x5e, 0x82, 0xa9, 0xe8,
+	0x90, 0x01, 0xa2, 0x9e, 0xe5, 0x41, 0x1f, 0xba, 0xc8, 0x43, 0x3e, 0xb7, 0x3c, 0xe2, 0x20, 0xad,
+	0x28, 0x20, 0x9a, 0x94, 0x6c, 0x21, 0xea, 0x35, 0xba, 0x82, 0x06, 0x71, 0x90, 0xba, 0x0e, 0xa6,
+	0xbb, 0x07, 0xbb, 0x16, 0x00, 0x04, 0x40, 0x8f, 0x45, 0x57, 0x11, 0x6b, 0x63, 0x61, 0xe2, 0xe3,
+	0x88, 0x55, 0x56, 0xc1, 0x6c, 0x62, 0x66, 0xe3, 0x64, 0xab, 0xff, 0x83, 0x34, 0x76, 0x44, 0x6c,
+	0xb3, 0x66, 0x1a, 0x3b, 0x95, 0x83, 0xac, 0x48, 0xba, 0x7c, 0x0b, 0x6e, 0x25, 0xe9, 0xb2, 0x43,
+	0x3a, 0xee, 0xf0, 0x6f, 0x19, 0xce, 0xdc, 0x61, 0x86, 0xb3, 0x77, 0x90, 0xe1, 0xdc, 0x6d, 0x66,
+	0x38, 0x7f, 0x9b, 0x19, 0x2e, 0x0c, 0x93, 0xe1, 0xbe, 0x04, 0xcd, 0x89, 0x04, 0x5d, 0x9f, 0x85,
+	0xee, 0x7f, 0xe3, 0x17, 0x05, 0xe8, 0x0d, 0xe6, 0xae, 0x53, 0xbb, 0x89, 0x3b, 0x77, 0x13, 0x19,
+	0x0d, 0x14, 0xa0, 0xc4, 0x8b, 0x40, 0x8c, 0x98, 0xf1, 0x6d, 0x9f, 0xdf, 0xc7, 0xa0, 0x92, 0xec,
+	0x24, 0x36, 0xbc, 0xf2, 0x23, 0x03, 0x32, 0x0d, 0xe6, 0xaa, 0xaf, 0xc1, 0x58, 0xcf, 0x80, 0x9a,
+	0xee, 0x1d, 0x2c, 0x7d, 0xb3, 0x40, 0x9f, 0x1f, 0xb8, 0xdd, 0x7d, 0xa1, 0x28, 0x78, 0x94, 0x30,
+	0x26, 0x16, 0xae, 0x00, 0xae, 0x17, 0xea, 0xc6, 0x90, 0xc2, 0xcb, 0x3d, 0x13, 0x5e, 0xd8, 0x85,
+	0x04, 0xd3, 0x43, 0xf4, 0x1c, 0xfc, 0xd8, 0xd5, 0x36, 0x98, 0x48, 0x7a, 0xe4, 0xd5, 0x2b, 0xac,
+	0x04, 0xa5, 0xfe, 0x6c, 0x58, 0x65, 0xdc, 0x56, 0xcf, 0x7d, 0x0a, 0x67, 0x7c, 0xbd, 0x7e, 0x7c,
+	0x5a, 0x52, 0x4e, 0x4e, 0x4b, 0xca, 0x9f, 0xd3, 0x92, 0xf2, 0xf5, 0xac, 0x94, 0x3a, 0x39, 0x2b,
+	0xa5, 0x7e, 0x9d, 0x95, 0x52, 0xef, 0xaa, 0x2e, 0xe6, 0xcd, 0xf6, 0x6e, 0xcd, 0x26, 0x9e, 0x21,
+	0xe1, 0x4b, 0x2d, 0xb8, 0xcb, 0x8c, 0xcb, 0x93, 0x5f, 0x7c, 0xaa, 0xec, 0xe6, 0xc5, 0xb7, 0xca,
+	0xea, 0xdf, 0x00, 0x00, 0x00, 0xff, 0xff, 0x20, 0x02, 0xe7, 0x30, 0x64, 0x09, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -1090,50 +866,30 @@ func (m *MsgCreateCredentialSchema) MarshalToSizedBuffer(dAtA []byte) (int, erro
 		i--
 		dAtA[i] = 0x48
 	}
-	if m.XHolderValidationValidityPeriod != nil {
-		{
-			size := m.XHolderValidationValidityPeriod.Size()
-			i -= size
-			if _, err := m.XHolderValidationValidityPeriod.MarshalTo(dAtA[i:]); err != nil {
-				return 0, err
-			}
-		}
+	if m.HolderValidationValidityPeriod != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.HolderValidationValidityPeriod))
+		i--
+		dAtA[i] = 0x40
 	}
-	if m.XVerifierValidationValidityPeriod != nil {
-		{
-			size := m.XVerifierValidationValidityPeriod.Size()
-			i -= size
-			if _, err := m.XVerifierValidationValidityPeriod.MarshalTo(dAtA[i:]); err != nil {
-				return 0, err
-			}
-		}
+	if m.VerifierValidationValidityPeriod != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.VerifierValidationValidityPeriod))
+		i--
+		dAtA[i] = 0x38
 	}
-	if m.XIssuerValidationValidityPeriod != nil {
-		{
-			size := m.XIssuerValidationValidityPeriod.Size()
-			i -= size
-			if _, err := m.XIssuerValidationValidityPeriod.MarshalTo(dAtA[i:]); err != nil {
-				return 0, err
-			}
-		}
+	if m.IssuerValidationValidityPeriod != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.IssuerValidationValidityPeriod))
+		i--
+		dAtA[i] = 0x30
 	}
-	if m.XVerifierGrantorValidationValidityPeriod != nil {
-		{
-			size := m.XVerifierGrantorValidationValidityPeriod.Size()
-			i -= size
-			if _, err := m.XVerifierGrantorValidationValidityPeriod.MarshalTo(dAtA[i:]); err != nil {
-				return 0, err
-			}
-		}
+	if m.VerifierGrantorValidationValidityPeriod != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.VerifierGrantorValidationValidityPeriod))
+		i--
+		dAtA[i] = 0x28
 	}
-	if m.XIssuerGrantorValidationValidityPeriod != nil {
-		{
-			size := m.XIssuerGrantorValidationValidityPeriod.Size()
-			i -= size
-			if _, err := m.XIssuerGrantorValidationValidityPeriod.MarshalTo(dAtA[i:]); err != nil {
-				return 0, err
-			}
-		}
+	if m.IssuerGrantorValidationValidityPeriod != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.IssuerGrantorValidationValidityPeriod))
+		i--
+		dAtA[i] = 0x20
 	}
 	if len(m.JsonSchema) > 0 {
 		i -= len(m.JsonSchema)
@@ -1157,66 +913,6 @@ func (m *MsgCreateCredentialSchema) MarshalToSizedBuffer(dAtA []byte) (int, erro
 	return len(dAtA) - i, nil
 }
 
-func (m *MsgCreateCredentialSchema_IssuerGrantorValidationValidityPeriod) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *MsgCreateCredentialSchema_IssuerGrantorValidationValidityPeriod) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	i = encodeVarintTx(dAtA, i, uint64(m.IssuerGrantorValidationValidityPeriod))
-	i--
-	dAtA[i] = 0x20
-	return len(dAtA) - i, nil
-}
-func (m *MsgCreateCredentialSchema_VerifierGrantorValidationValidityPeriod) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *MsgCreateCredentialSchema_VerifierGrantorValidationValidityPeriod) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	i = encodeVarintTx(dAtA, i, uint64(m.VerifierGrantorValidationValidityPeriod))
-	i--
-	dAtA[i] = 0x28
-	return len(dAtA) - i, nil
-}
-func (m *MsgCreateCredentialSchema_IssuerValidationValidityPeriod) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *MsgCreateCredentialSchema_IssuerValidationValidityPeriod) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	i = encodeVarintTx(dAtA, i, uint64(m.IssuerValidationValidityPeriod))
-	i--
-	dAtA[i] = 0x30
-	return len(dAtA) - i, nil
-}
-func (m *MsgCreateCredentialSchema_VerifierValidationValidityPeriod) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *MsgCreateCredentialSchema_VerifierValidationValidityPeriod) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	i = encodeVarintTx(dAtA, i, uint64(m.VerifierValidationValidityPeriod))
-	i--
-	dAtA[i] = 0x38
-	return len(dAtA) - i, nil
-}
-func (m *MsgCreateCredentialSchema_HolderValidationValidityPeriod) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *MsgCreateCredentialSchema_HolderValidationValidityPeriod) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	i = encodeVarintTx(dAtA, i, uint64(m.HolderValidationValidityPeriod))
-	i--
-	dAtA[i] = 0x40
-	return len(dAtA) - i, nil
-}
 func (m *MsgCreateCredentialSchemaResponse) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -1265,50 +961,30 @@ func (m *MsgUpdateCredentialSchema) MarshalToSizedBuffer(dAtA []byte) (int, erro
 	_ = i
 	var l int
 	_ = l
-	if m.XHolderValidationValidityPeriod != nil {
-		{
-			size := m.XHolderValidationValidityPeriod.Size()
-			i -= size
-			if _, err := m.XHolderValidationValidityPeriod.MarshalTo(dAtA[i:]); err != nil {
-				return 0, err
-			}
-		}
+	if m.HolderValidationValidityPeriod != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.HolderValidationValidityPeriod))
+		i--
+		dAtA[i] = 0x38
 	}
-	if m.XVerifierValidationValidityPeriod != nil {
-		{
-			size := m.XVerifierValidationValidityPeriod.Size()
-			i -= size
-			if _, err := m.XVerifierValidationValidityPeriod.MarshalTo(dAtA[i:]); err != nil {
-				return 0, err
-			}
-		}
+	if m.VerifierValidationValidityPeriod != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.VerifierValidationValidityPeriod))
+		i--
+		dAtA[i] = 0x30
 	}
-	if m.XIssuerValidationValidityPeriod != nil {
-		{
-			size := m.XIssuerValidationValidityPeriod.Size()
-			i -= size
-			if _, err := m.XIssuerValidationValidityPeriod.MarshalTo(dAtA[i:]); err != nil {
-				return 0, err
-			}
-		}
+	if m.IssuerValidationValidityPeriod != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.IssuerValidationValidityPeriod))
+		i--
+		dAtA[i] = 0x28
 	}
-	if m.XVerifierGrantorValidationValidityPeriod != nil {
-		{
-			size := m.XVerifierGrantorValidationValidityPeriod.Size()
-			i -= size
-			if _, err := m.XVerifierGrantorValidationValidityPeriod.MarshalTo(dAtA[i:]); err != nil {
-				return 0, err
-			}
-		}
+	if m.VerifierGrantorValidationValidityPeriod != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.VerifierGrantorValidationValidityPeriod))
+		i--
+		dAtA[i] = 0x20
 	}
-	if m.XIssuerGrantorValidationValidityPeriod != nil {
-		{
-			size := m.XIssuerGrantorValidationValidityPeriod.Size()
-			i -= size
-			if _, err := m.XIssuerGrantorValidationValidityPeriod.MarshalTo(dAtA[i:]); err != nil {
-				return 0, err
-			}
-		}
+	if m.IssuerGrantorValidationValidityPeriod != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.IssuerGrantorValidationValidityPeriod))
+		i--
+		dAtA[i] = 0x18
 	}
 	if m.Id != 0 {
 		i = encodeVarintTx(dAtA, i, uint64(m.Id))
@@ -1325,66 +1001,6 @@ func (m *MsgUpdateCredentialSchema) MarshalToSizedBuffer(dAtA []byte) (int, erro
 	return len(dAtA) - i, nil
 }
 
-func (m *MsgUpdateCredentialSchema_IssuerGrantorValidationValidityPeriod) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *MsgUpdateCredentialSchema_IssuerGrantorValidationValidityPeriod) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	i = encodeVarintTx(dAtA, i, uint64(m.IssuerGrantorValidationValidityPeriod))
-	i--
-	dAtA[i] = 0x18
-	return len(dAtA) - i, nil
-}
-func (m *MsgUpdateCredentialSchema_VerifierGrantorValidationValidityPeriod) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *MsgUpdateCredentialSchema_VerifierGrantorValidationValidityPeriod) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	i = encodeVarintTx(dAtA, i, uint64(m.VerifierGrantorValidationValidityPeriod))
-	i--
-	dAtA[i] = 0x20
-	return len(dAtA) - i, nil
-}
-func (m *MsgUpdateCredentialSchema_IssuerValidationValidityPeriod) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *MsgUpdateCredentialSchema_IssuerValidationValidityPeriod) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	i = encodeVarintTx(dAtA, i, uint64(m.IssuerValidationValidityPeriod))
-	i--
-	dAtA[i] = 0x28
-	return len(dAtA) - i, nil
-}
-func (m *MsgUpdateCredentialSchema_VerifierValidationValidityPeriod) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *MsgUpdateCredentialSchema_VerifierValidationValidityPeriod) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	i = encodeVarintTx(dAtA, i, uint64(m.VerifierValidationValidityPeriod))
-	i--
-	dAtA[i] = 0x30
-	return len(dAtA) - i, nil
-}
-func (m *MsgUpdateCredentialSchema_HolderValidationValidityPeriod) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *MsgUpdateCredentialSchema_HolderValidationValidityPeriod) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	i = encodeVarintTx(dAtA, i, uint64(m.HolderValidationValidityPeriod))
-	i--
-	dAtA[i] = 0x38
-	return len(dAtA) - i, nil
-}
 func (m *MsgUpdateCredentialSchemaResponse) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -1528,20 +1144,20 @@ func (m *MsgCreateCredentialSchema) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
-	if m.XIssuerGrantorValidationValidityPeriod != nil {
-		n += m.XIssuerGrantorValidationValidityPeriod.Size()
+	if m.IssuerGrantorValidationValidityPeriod != 0 {
+		n += 1 + sovTx(uint64(m.IssuerGrantorValidationValidityPeriod))
 	}
-	if m.XVerifierGrantorValidationValidityPeriod != nil {
-		n += m.XVerifierGrantorValidationValidityPeriod.Size()
+	if m.VerifierGrantorValidationValidityPeriod != 0 {
+		n += 1 + sovTx(uint64(m.VerifierGrantorValidationValidityPeriod))
 	}
-	if m.XIssuerValidationValidityPeriod != nil {
-		n += m.XIssuerValidationValidityPeriod.Size()
+	if m.IssuerValidationValidityPeriod != 0 {
+		n += 1 + sovTx(uint64(m.IssuerValidationValidityPeriod))
 	}
-	if m.XVerifierValidationValidityPeriod != nil {
-		n += m.XVerifierValidationValidityPeriod.Size()
+	if m.VerifierValidationValidityPeriod != 0 {
+		n += 1 + sovTx(uint64(m.VerifierValidationValidityPeriod))
 	}
-	if m.XHolderValidationValidityPeriod != nil {
-		n += m.XHolderValidationValidityPeriod.Size()
+	if m.HolderValidationValidityPeriod != 0 {
+		n += 1 + sovTx(uint64(m.HolderValidationValidityPeriod))
 	}
 	if m.IssuerPermManagementMode != 0 {
 		n += 1 + sovTx(uint64(m.IssuerPermManagementMode))
@@ -1552,51 +1168,6 @@ func (m *MsgCreateCredentialSchema) Size() (n int) {
 	return n
 }
 
-func (m *MsgCreateCredentialSchema_IssuerGrantorValidationValidityPeriod) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	n += 1 + sovTx(uint64(m.IssuerGrantorValidationValidityPeriod))
-	return n
-}
-func (m *MsgCreateCredentialSchema_VerifierGrantorValidationValidityPeriod) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	n += 1 + sovTx(uint64(m.VerifierGrantorValidationValidityPeriod))
-	return n
-}
-func (m *MsgCreateCredentialSchema_IssuerValidationValidityPeriod) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	n += 1 + sovTx(uint64(m.IssuerValidationValidityPeriod))
-	return n
-}
-func (m *MsgCreateCredentialSchema_VerifierValidationValidityPeriod) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	n += 1 + sovTx(uint64(m.VerifierValidationValidityPeriod))
-	return n
-}
-func (m *MsgCreateCredentialSchema_HolderValidationValidityPeriod) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	n += 1 + sovTx(uint64(m.HolderValidationValidityPeriod))
-	return n
-}
 func (m *MsgCreateCredentialSchemaResponse) Size() (n int) {
 	if m == nil {
 		return 0
@@ -1622,69 +1193,24 @@ func (m *MsgUpdateCredentialSchema) Size() (n int) {
 	if m.Id != 0 {
 		n += 1 + sovTx(uint64(m.Id))
 	}
-	if m.XIssuerGrantorValidationValidityPeriod != nil {
-		n += m.XIssuerGrantorValidationValidityPeriod.Size()
+	if m.IssuerGrantorValidationValidityPeriod != 0 {
+		n += 1 + sovTx(uint64(m.IssuerGrantorValidationValidityPeriod))
 	}
-	if m.XVerifierGrantorValidationValidityPeriod != nil {
-		n += m.XVerifierGrantorValidationValidityPeriod.Size()
+	if m.VerifierGrantorValidationValidityPeriod != 0 {
+		n += 1 + sovTx(uint64(m.VerifierGrantorValidationValidityPeriod))
 	}
-	if m.XIssuerValidationValidityPeriod != nil {
-		n += m.XIssuerValidationValidityPeriod.Size()
+	if m.IssuerValidationValidityPeriod != 0 {
+		n += 1 + sovTx(uint64(m.IssuerValidationValidityPeriod))
 	}
-	if m.XVerifierValidationValidityPeriod != nil {
-		n += m.XVerifierValidationValidityPeriod.Size()
+	if m.VerifierValidationValidityPeriod != 0 {
+		n += 1 + sovTx(uint64(m.VerifierValidationValidityPeriod))
 	}
-	if m.XHolderValidationValidityPeriod != nil {
-		n += m.XHolderValidationValidityPeriod.Size()
+	if m.HolderValidationValidityPeriod != 0 {
+		n += 1 + sovTx(uint64(m.HolderValidationValidityPeriod))
 	}
 	return n
 }
 
-func (m *MsgUpdateCredentialSchema_IssuerGrantorValidationValidityPeriod) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	n += 1 + sovTx(uint64(m.IssuerGrantorValidationValidityPeriod))
-	return n
-}
-func (m *MsgUpdateCredentialSchema_VerifierGrantorValidationValidityPeriod) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	n += 1 + sovTx(uint64(m.VerifierGrantorValidationValidityPeriod))
-	return n
-}
-func (m *MsgUpdateCredentialSchema_IssuerValidationValidityPeriod) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	n += 1 + sovTx(uint64(m.IssuerValidationValidityPeriod))
-	return n
-}
-func (m *MsgUpdateCredentialSchema_VerifierValidationValidityPeriod) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	n += 1 + sovTx(uint64(m.VerifierValidationValidityPeriod))
-	return n
-}
-func (m *MsgUpdateCredentialSchema_HolderValidationValidityPeriod) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	n += 1 + sovTx(uint64(m.HolderValidationValidityPeriod))
-	return n
-}
 func (m *MsgUpdateCredentialSchemaResponse) Size() (n int) {
 	if m == nil {
 		return 0
@@ -2009,7 +1535,7 @@ func (m *MsgCreateCredentialSchema) Unmarshal(dAtA []byte) error {
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field IssuerGrantorValidationValidityPeriod", wireType)
 			}
-			var v uint32
+			m.IssuerGrantorValidationValidityPeriod = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowTx
@@ -2019,17 +1545,16 @@ func (m *MsgCreateCredentialSchema) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				v |= uint32(b&0x7F) << shift
+				m.IssuerGrantorValidationValidityPeriod |= uint32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			m.XIssuerGrantorValidationValidityPeriod = &MsgCreateCredentialSchema_IssuerGrantorValidationValidityPeriod{v}
 		case 5:
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field VerifierGrantorValidationValidityPeriod", wireType)
 			}
-			var v uint32
+			m.VerifierGrantorValidationValidityPeriod = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowTx
@@ -2039,17 +1564,16 @@ func (m *MsgCreateCredentialSchema) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				v |= uint32(b&0x7F) << shift
+				m.VerifierGrantorValidationValidityPeriod |= uint32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			m.XVerifierGrantorValidationValidityPeriod = &MsgCreateCredentialSchema_VerifierGrantorValidationValidityPeriod{v}
 		case 6:
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field IssuerValidationValidityPeriod", wireType)
 			}
-			var v uint32
+			m.IssuerValidationValidityPeriod = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowTx
@@ -2059,17 +1583,16 @@ func (m *MsgCreateCredentialSchema) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				v |= uint32(b&0x7F) << shift
+				m.IssuerValidationValidityPeriod |= uint32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			m.XIssuerValidationValidityPeriod = &MsgCreateCredentialSchema_IssuerValidationValidityPeriod{v}
 		case 7:
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field VerifierValidationValidityPeriod", wireType)
 			}
-			var v uint32
+			m.VerifierValidationValidityPeriod = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowTx
@@ -2079,17 +1602,16 @@ func (m *MsgCreateCredentialSchema) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				v |= uint32(b&0x7F) << shift
+				m.VerifierValidationValidityPeriod |= uint32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			m.XVerifierValidationValidityPeriod = &MsgCreateCredentialSchema_VerifierValidationValidityPeriod{v}
 		case 8:
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field HolderValidationValidityPeriod", wireType)
 			}
-			var v uint32
+			m.HolderValidationValidityPeriod = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowTx
@@ -2099,12 +1621,11 @@ func (m *MsgCreateCredentialSchema) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				v |= uint32(b&0x7F) << shift
+				m.HolderValidationValidityPeriod |= uint32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			m.XHolderValidationValidityPeriod = &MsgCreateCredentialSchema_HolderValidationValidityPeriod{v}
 		case 9:
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field IssuerPermManagementMode", wireType)
@@ -2317,7 +1838,7 @@ func (m *MsgUpdateCredentialSchema) Unmarshal(dAtA []byte) error {
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field IssuerGrantorValidationValidityPeriod", wireType)
 			}
-			var v uint32
+			m.IssuerGrantorValidationValidityPeriod = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowTx
@@ -2327,17 +1848,16 @@ func (m *MsgUpdateCredentialSchema) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				v |= uint32(b&0x7F) << shift
+				m.IssuerGrantorValidationValidityPeriod |= uint32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			m.XIssuerGrantorValidationValidityPeriod = &MsgUpdateCredentialSchema_IssuerGrantorValidationValidityPeriod{v}
 		case 4:
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field VerifierGrantorValidationValidityPeriod", wireType)
 			}
-			var v uint32
+			m.VerifierGrantorValidationValidityPeriod = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowTx
@@ -2347,17 +1867,16 @@ func (m *MsgUpdateCredentialSchema) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				v |= uint32(b&0x7F) << shift
+				m.VerifierGrantorValidationValidityPeriod |= uint32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			m.XVerifierGrantorValidationValidityPeriod = &MsgUpdateCredentialSchema_VerifierGrantorValidationValidityPeriod{v}
 		case 5:
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field IssuerValidationValidityPeriod", wireType)
 			}
-			var v uint32
+			m.IssuerValidationValidityPeriod = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowTx
@@ -2367,17 +1886,16 @@ func (m *MsgUpdateCredentialSchema) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				v |= uint32(b&0x7F) << shift
+				m.IssuerValidationValidityPeriod |= uint32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			m.XIssuerValidationValidityPeriod = &MsgUpdateCredentialSchema_IssuerValidationValidityPeriod{v}
 		case 6:
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field VerifierValidationValidityPeriod", wireType)
 			}
-			var v uint32
+			m.VerifierValidationValidityPeriod = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowTx
@@ -2387,17 +1905,16 @@ func (m *MsgUpdateCredentialSchema) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				v |= uint32(b&0x7F) << shift
+				m.VerifierValidationValidityPeriod |= uint32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			m.XVerifierValidationValidityPeriod = &MsgUpdateCredentialSchema_VerifierValidationValidityPeriod{v}
 		case 7:
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field HolderValidationValidityPeriod", wireType)
 			}
-			var v uint32
+			m.HolderValidationValidityPeriod = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowTx
@@ -2407,12 +1924,11 @@ func (m *MsgUpdateCredentialSchema) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				v |= uint32(b&0x7F) << shift
+				m.HolderValidationValidityPeriod |= uint32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			m.XHolderValidationValidityPeriod = &MsgUpdateCredentialSchema_HolderValidationValidityPeriod{v}
 		default:
 			iNdEx = preIndex
 			skippy, err := skipTx(dAtA[iNdEx:])

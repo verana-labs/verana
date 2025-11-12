@@ -131,58 +131,32 @@ func (k Keeper) GetNextID(ctx sdk.Context, entityType string) (uint64, error) {
 	return nextID, nil
 }
 
-// CreateMsgWithValidityPeriods Helper function to create MsgCreateCredentialSchema with optional fields
 func CreateMsgWithValidityPeriods(creator string, trID uint64, jsonSchema string, issuerGrantor, verifierGrantor, issuer, verifier, holder uint32, issuerMode, verifierMode uint32) *types.MsgCreateCredentialSchema {
 	msg := &types.MsgCreateCredentialSchema{
-		Creator:                    creator,
-		TrId:                       trID,
-		JsonSchema:                 jsonSchema,
-		IssuerPermManagementMode:   issuerMode,
-		VerifierPermManagementMode: verifierMode,
-	}
-
-	// Always set optional fields using the wrapper types (even for 0 values)
-	msg.XIssuerGrantorValidationValidityPeriod = &types.MsgCreateCredentialSchema_IssuerGrantorValidationValidityPeriod{
-		IssuerGrantorValidationValidityPeriod: issuerGrantor,
-	}
-	msg.XVerifierGrantorValidationValidityPeriod = &types.MsgCreateCredentialSchema_VerifierGrantorValidationValidityPeriod{
+		Creator:                                 creator,
+		TrId:                                    trID,
+		JsonSchema:                              jsonSchema,
+		IssuerGrantorValidationValidityPeriod:   issuerGrantor,
 		VerifierGrantorValidationValidityPeriod: verifierGrantor,
-	}
-	msg.XIssuerValidationValidityPeriod = &types.MsgCreateCredentialSchema_IssuerValidationValidityPeriod{
-		IssuerValidationValidityPeriod: issuer,
-	}
-	msg.XVerifierValidationValidityPeriod = &types.MsgCreateCredentialSchema_VerifierValidationValidityPeriod{
-		VerifierValidationValidityPeriod: verifier,
-	}
-	msg.XHolderValidationValidityPeriod = &types.MsgCreateCredentialSchema_HolderValidationValidityPeriod{
-		HolderValidationValidityPeriod: holder,
+		IssuerValidationValidityPeriod:          issuer,
+		VerifierValidationValidityPeriod:        verifier,
+		HolderValidationValidityPeriod:          holder,
+		IssuerPermManagementMode:                issuerMode,
+		VerifierPermManagementMode:              verifierMode,
 	}
 
 	return msg
 }
 
-// CreateUpdateMsgWithValidityPeriods Helper function to create MsgUpdateCredentialSchema with optional fields
 func CreateUpdateMsgWithValidityPeriods(creator string, id uint64, issuerGrantor, verifierGrantor, issuer, verifier, holder uint32) *types.MsgUpdateCredentialSchema {
 	msg := &types.MsgUpdateCredentialSchema{
-		Creator: creator,
-		Id:      id,
-	}
-
-	// Always set optional fields using the wrapper types (even for 0 values)
-	msg.XIssuerGrantorValidationValidityPeriod = &types.MsgUpdateCredentialSchema_IssuerGrantorValidationValidityPeriod{
-		IssuerGrantorValidationValidityPeriod: issuerGrantor,
-	}
-	msg.XVerifierGrantorValidationValidityPeriod = &types.MsgUpdateCredentialSchema_VerifierGrantorValidationValidityPeriod{
+		Creator:                                 creator,
+		Id:                                      id,
+		IssuerGrantorValidationValidityPeriod:   issuerGrantor,
 		VerifierGrantorValidationValidityPeriod: verifierGrantor,
-	}
-	msg.XIssuerValidationValidityPeriod = &types.MsgUpdateCredentialSchema_IssuerValidationValidityPeriod{
-		IssuerValidationValidityPeriod: issuer,
-	}
-	msg.XVerifierValidationValidityPeriod = &types.MsgUpdateCredentialSchema_VerifierValidationValidityPeriod{
-		VerifierValidationValidityPeriod: verifier,
-	}
-	msg.XHolderValidationValidityPeriod = &types.MsgUpdateCredentialSchema_HolderValidationValidityPeriod{
-		HolderValidationValidityPeriod: holder,
+		IssuerValidationValidityPeriod:          issuer,
+		VerifierValidationValidityPeriod:        verifier,
+		HolderValidationValidityPeriod:          holder,
 	}
 
 	return msg

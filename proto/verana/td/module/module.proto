@@ -3,7 +3,7 @@ package verana.td.module;
 
 import "cosmos/app/v1alpha1/module.proto";
 
-option go_package = "github.com/verana-labs/verana/x/td/module";
+option go_package = "github.com/verana-labs/verana/x/td/module;trustdeposit";
 
 
 // Module is the config object for the module.

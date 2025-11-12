@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	trustdepositmodulev1 "github.com/verana-labs/verana/x/td/module"
+	trustdepositmodule "github.com/verana-labs/verana/x/td/module"
 
 	upgradetypes "cosmossdk.io/x/upgrade/types"
 	"github.com/verana-labs/verana/app/upgrades"
@@ -225,7 +225,7 @@ func getGovProposalHandlers() []govclient.ProposalHandler {
 
 	govProposalHandlers = append(govProposalHandlers,
 		paramsclient.ProposalHandler,
-		trustdepositmodulev1.SlashTrustDepositHandler,
+		trustdepositmodule.SlashTrustDepositHandler,
 		// this line is used by starport scaffolding # stargate/app/govProposalHandler
 	)
 
