@@ -211,24 +211,19 @@
           "type": "string"
         },
         "issuer_grantor_validation_validity_period": {
-          "type": "integer",
-          "format": "int64"
+          "$ref": "#/definitions/verana.cs.v1.OptionalUInt32"
         },
         "verifier_grantor_validation_validity_period": {
-          "type": "integer",
-          "format": "int64"
+          "$ref": "#/definitions/verana.cs.v1.OptionalUInt32"
         },
         "issuer_validation_validity_period": {
-          "type": "integer",
-          "format": "int64"
+          "$ref": "#/definitions/verana.cs.v1.OptionalUInt32"
         },
         "verifier_validation_validity_period": {
-          "type": "integer",
-          "format": "int64"
+          "$ref": "#/definitions/verana.cs.v1.OptionalUInt32"
         },
         "holder_validation_validity_period": {
-          "type": "integer",
-          "format": "int64"
+          "$ref": "#/definitions/verana.cs.v1.OptionalUInt32"
         },
         "issuer_perm_management_mode": {
           "type": "integer",
@@ -261,24 +256,20 @@
           "format": "uint64"
         },
         "issuer_grantor_validation_validity_period": {
-          "type": "integer",
-          "format": "int64"
+          "$ref": "#/definitions/verana.cs.v1.OptionalUInt32",
+          "title": "Optional fields: nil/not set means don't update, 0 means never expires"
         },
         "verifier_grantor_validation_validity_period": {
-          "type": "integer",
-          "format": "int64"
+          "$ref": "#/definitions/verana.cs.v1.OptionalUInt32"
         },
         "issuer_validation_validity_period": {
-          "type": "integer",
-          "format": "int64"
+          "$ref": "#/definitions/verana.cs.v1.OptionalUInt32"
         },
         "verifier_validation_validity_period": {
-          "type": "integer",
-          "format": "int64"
+          "$ref": "#/definitions/verana.cs.v1.OptionalUInt32"
         },
         "holder_validation_validity_period": {
-          "type": "integer",
-          "format": "int64"
+          "$ref": "#/definitions/verana.cs.v1.OptionalUInt32"
         }
       }
     },
@@ -302,6 +293,16 @@
     "verana.cs.v1.MsgUpdateParamsResponse": {
       "type": "object",
       "description": "MsgUpdateParamsResponse defines the response structure for executing a\nMsgUpdateParams message."
+    },
+    "verana.cs.v1.OptionalUInt32": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "title": "OptionalUInt32 is a wrapper for optional uint32 values\nnil means don't update, 0 means never expires"
     },
     "verana.cs.v1.Params": {
       "type": "object",

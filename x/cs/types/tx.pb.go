@@ -127,16 +127,16 @@ func (m *MsgUpdateParamsResponse) XXX_DiscardUnknown() {
 var xxx_messageInfo_MsgUpdateParamsResponse proto.InternalMessageInfo
 
 type MsgCreateCredentialSchema struct {
-	Creator                                 string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
-	TrId                                    uint64 `protobuf:"varint,2,opt,name=tr_id,json=trId,proto3" json:"tr_id,omitempty"`
-	JsonSchema                              string `protobuf:"bytes,3,opt,name=json_schema,json=jsonSchema,proto3" json:"json_schema,omitempty"`
-	IssuerGrantorValidationValidityPeriod   uint32 `protobuf:"varint,4,opt,name=issuer_grantor_validation_validity_period,json=issuerGrantorValidationValidityPeriod,proto3" json:"issuer_grantor_validation_validity_period,omitempty"`
-	VerifierGrantorValidationValidityPeriod uint32 `protobuf:"varint,5,opt,name=verifier_grantor_validation_validity_period,json=verifierGrantorValidationValidityPeriod,proto3" json:"verifier_grantor_validation_validity_period,omitempty"`
-	IssuerValidationValidityPeriod          uint32 `protobuf:"varint,6,opt,name=issuer_validation_validity_period,json=issuerValidationValidityPeriod,proto3" json:"issuer_validation_validity_period,omitempty"`
-	VerifierValidationValidityPeriod        uint32 `protobuf:"varint,7,opt,name=verifier_validation_validity_period,json=verifierValidationValidityPeriod,proto3" json:"verifier_validation_validity_period,omitempty"`
-	HolderValidationValidityPeriod          uint32 `protobuf:"varint,8,opt,name=holder_validation_validity_period,json=holderValidationValidityPeriod,proto3" json:"holder_validation_validity_period,omitempty"`
-	IssuerPermManagementMode                uint32 `protobuf:"varint,9,opt,name=issuer_perm_management_mode,json=issuerPermManagementMode,proto3" json:"issuer_perm_management_mode,omitempty"`
-	VerifierPermManagementMode              uint32 `protobuf:"varint,10,opt,name=verifier_perm_management_mode,json=verifierPermManagementMode,proto3" json:"verifier_perm_management_mode,omitempty"`
+	Creator                                 string          `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
+	TrId                                    uint64          `protobuf:"varint,2,opt,name=tr_id,json=trId,proto3" json:"tr_id,omitempty"`
+	JsonSchema                              string          `protobuf:"bytes,3,opt,name=json_schema,json=jsonSchema,proto3" json:"json_schema,omitempty"`
+	IssuerGrantorValidationValidityPeriod   *OptionalUInt32 `protobuf:"bytes,4,opt,name=issuer_grantor_validation_validity_period,json=issuerGrantorValidationValidityPeriod,proto3" json:"issuer_grantor_validation_validity_period,omitempty"`
+	VerifierGrantorValidationValidityPeriod *OptionalUInt32 `protobuf:"bytes,5,opt,name=verifier_grantor_validation_validity_period,json=verifierGrantorValidationValidityPeriod,proto3" json:"verifier_grantor_validation_validity_period,omitempty"`
+	IssuerValidationValidityPeriod          *OptionalUInt32 `protobuf:"bytes,6,opt,name=issuer_validation_validity_period,json=issuerValidationValidityPeriod,proto3" json:"issuer_validation_validity_period,omitempty"`
+	VerifierValidationValidityPeriod        *OptionalUInt32 `protobuf:"bytes,7,opt,name=verifier_validation_validity_period,json=verifierValidationValidityPeriod,proto3" json:"verifier_validation_validity_period,omitempty"`
+	HolderValidationValidityPeriod          *OptionalUInt32 `protobuf:"bytes,8,opt,name=holder_validation_validity_period,json=holderValidationValidityPeriod,proto3" json:"holder_validation_validity_period,omitempty"`
+	IssuerPermManagementMode                uint32          `protobuf:"varint,9,opt,name=issuer_perm_management_mode,json=issuerPermManagementMode,proto3" json:"issuer_perm_management_mode,omitempty"`
+	VerifierPermManagementMode              uint32          `protobuf:"varint,10,opt,name=verifier_perm_management_mode,json=verifierPermManagementMode,proto3" json:"verifier_perm_management_mode,omitempty"`
 }
 
 func (m *MsgCreateCredentialSchema) Reset()         { *m = MsgCreateCredentialSchema{} }
@@ -193,39 +193,39 @@ func (m *MsgCreateCredentialSchema) GetJsonSchema() string {
 	return ""
 }
 
-func (m *MsgCreateCredentialSchema) GetIssuerGrantorValidationValidityPeriod() uint32 {
+func (m *MsgCreateCredentialSchema) GetIssuerGrantorValidationValidityPeriod() *OptionalUInt32 {
 	if m != nil {
 		return m.IssuerGrantorValidationValidityPeriod
 	}
-	return 0
+	return nil
 }
 
-func (m *MsgCreateCredentialSchema) GetVerifierGrantorValidationValidityPeriod() uint32 {
+func (m *MsgCreateCredentialSchema) GetVerifierGrantorValidationValidityPeriod() *OptionalUInt32 {
 	if m != nil {
 		return m.VerifierGrantorValidationValidityPeriod
 	}
-	return 0
+	return nil
 }
 
-func (m *MsgCreateCredentialSchema) GetIssuerValidationValidityPeriod() uint32 {
+func (m *MsgCreateCredentialSchema) GetIssuerValidationValidityPeriod() *OptionalUInt32 {
 	if m != nil {
 		return m.IssuerValidationValidityPeriod
 	}
-	return 0
+	return nil
 }
 
-func (m *MsgCreateCredentialSchema) GetVerifierValidationValidityPeriod() uint32 {
+func (m *MsgCreateCredentialSchema) GetVerifierValidationValidityPeriod() *OptionalUInt32 {
 	if m != nil {
 		return m.VerifierValidationValidityPeriod
 	}
-	return 0
+	return nil
 }
 
-func (m *MsgCreateCredentialSchema) GetHolderValidationValidityPeriod() uint32 {
+func (m *MsgCreateCredentialSchema) GetHolderValidationValidityPeriod() *OptionalUInt32 {
 	if m != nil {
 		return m.HolderValidationValidityPeriod
 	}
-	return 0
+	return nil
 }
 
 func (m *MsgCreateCredentialSchema) GetIssuerPermManagementMode() uint32 {
@@ -287,13 +287,14 @@ func (m *MsgCreateCredentialSchemaResponse) GetId() uint64 {
 }
 
 type MsgUpdateCredentialSchema struct {
-	Creator                                 string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
-	Id                                      uint64 `protobuf:"varint,2,opt,name=id,proto3" json:"id,omitempty"`
-	IssuerGrantorValidationValidityPeriod   uint32 `protobuf:"varint,3,opt,name=issuer_grantor_validation_validity_period,json=issuerGrantorValidationValidityPeriod,proto3" json:"issuer_grantor_validation_validity_period,omitempty"`
-	VerifierGrantorValidationValidityPeriod uint32 `protobuf:"varint,4,opt,name=verifier_grantor_validation_validity_period,json=verifierGrantorValidationValidityPeriod,proto3" json:"verifier_grantor_validation_validity_period,omitempty"`
-	IssuerValidationValidityPeriod          uint32 `protobuf:"varint,5,opt,name=issuer_validation_validity_period,json=issuerValidationValidityPeriod,proto3" json:"issuer_validation_validity_period,omitempty"`
-	VerifierValidationValidityPeriod        uint32 `protobuf:"varint,6,opt,name=verifier_validation_validity_period,json=verifierValidationValidityPeriod,proto3" json:"verifier_validation_validity_period,omitempty"`
-	HolderValidationValidityPeriod          uint32 `protobuf:"varint,7,opt,name=holder_validation_validity_period,json=holderValidationValidityPeriod,proto3" json:"holder_validation_validity_period,omitempty"`
+	Creator string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
+	Id      uint64 `protobuf:"varint,2,opt,name=id,proto3" json:"id,omitempty"`
+	// Optional fields: nil/not set means don't update, 0 means never expires
+	IssuerGrantorValidationValidityPeriod   *OptionalUInt32 `protobuf:"bytes,3,opt,name=issuer_grantor_validation_validity_period,json=issuerGrantorValidationValidityPeriod,proto3" json:"issuer_grantor_validation_validity_period,omitempty"`
+	VerifierGrantorValidationValidityPeriod *OptionalUInt32 `protobuf:"bytes,4,opt,name=verifier_grantor_validation_validity_period,json=verifierGrantorValidationValidityPeriod,proto3" json:"verifier_grantor_validation_validity_period,omitempty"`
+	IssuerValidationValidityPeriod          *OptionalUInt32 `protobuf:"bytes,5,opt,name=issuer_validation_validity_period,json=issuerValidationValidityPeriod,proto3" json:"issuer_validation_validity_period,omitempty"`
+	VerifierValidationValidityPeriod        *OptionalUInt32 `protobuf:"bytes,6,opt,name=verifier_validation_validity_period,json=verifierValidationValidityPeriod,proto3" json:"verifier_validation_validity_period,omitempty"`
+	HolderValidationValidityPeriod          *OptionalUInt32 `protobuf:"bytes,7,opt,name=holder_validation_validity_period,json=holderValidationValidityPeriod,proto3" json:"holder_validation_validity_period,omitempty"`
 }
 
 func (m *MsgUpdateCredentialSchema) Reset()         { *m = MsgUpdateCredentialSchema{} }
@@ -343,37 +344,83 @@ func (m *MsgUpdateCredentialSchema) GetId() uint64 {
 	return 0
 }
 
-func (m *MsgUpdateCredentialSchema) GetIssuerGrantorValidationValidityPeriod() uint32 {
+func (m *MsgUpdateCredentialSchema) GetIssuerGrantorValidationValidityPeriod() *OptionalUInt32 {
 	if m != nil {
 		return m.IssuerGrantorValidationValidityPeriod
 	}
-	return 0
+	return nil
 }
 
-func (m *MsgUpdateCredentialSchema) GetVerifierGrantorValidationValidityPeriod() uint32 {
+func (m *MsgUpdateCredentialSchema) GetVerifierGrantorValidationValidityPeriod() *OptionalUInt32 {
 	if m != nil {
 		return m.VerifierGrantorValidationValidityPeriod
 	}
-	return 0
+	return nil
 }
 
-func (m *MsgUpdateCredentialSchema) GetIssuerValidationValidityPeriod() uint32 {
+func (m *MsgUpdateCredentialSchema) GetIssuerValidationValidityPeriod() *OptionalUInt32 {
 	if m != nil {
 		return m.IssuerValidationValidityPeriod
 	}
-	return 0
+	return nil
 }
 
-func (m *MsgUpdateCredentialSchema) GetVerifierValidationValidityPeriod() uint32 {
+func (m *MsgUpdateCredentialSchema) GetVerifierValidationValidityPeriod() *OptionalUInt32 {
 	if m != nil {
 		return m.VerifierValidationValidityPeriod
 	}
-	return 0
+	return nil
 }
 
-func (m *MsgUpdateCredentialSchema) GetHolderValidationValidityPeriod() uint32 {
+func (m *MsgUpdateCredentialSchema) GetHolderValidationValidityPeriod() *OptionalUInt32 {
 	if m != nil {
 		return m.HolderValidationValidityPeriod
+	}
+	return nil
+}
+
+// OptionalUInt32 is a wrapper for optional uint32 values
+// nil means don't update, 0 means never expires
+type OptionalUInt32 struct {
+	Value uint32 `protobuf:"varint,1,opt,name=value,proto3" json:"value,omitempty"`
+}
+
+func (m *OptionalUInt32) Reset()         { *m = OptionalUInt32{} }
+func (m *OptionalUInt32) String() string { return proto.CompactTextString(m) }
+func (*OptionalUInt32) ProtoMessage()    {}
+func (*OptionalUInt32) Descriptor() ([]byte, []int) {
+	return fileDescriptor_28caaebe5b206ca2, []int{5}
+}
+func (m *OptionalUInt32) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *OptionalUInt32) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_OptionalUInt32.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *OptionalUInt32) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_OptionalUInt32.Merge(m, src)
+}
+func (m *OptionalUInt32) XXX_Size() int {
+	return m.Size()
+}
+func (m *OptionalUInt32) XXX_DiscardUnknown() {
+	xxx_messageInfo_OptionalUInt32.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_OptionalUInt32 proto.InternalMessageInfo
+
+func (m *OptionalUInt32) GetValue() uint32 {
+	if m != nil {
+		return m.Value
 	}
 	return 0
 }
@@ -385,7 +432,7 @@ func (m *MsgUpdateCredentialSchemaResponse) Reset()         { *m = MsgUpdateCred
 func (m *MsgUpdateCredentialSchemaResponse) String() string { return proto.CompactTextString(m) }
 func (*MsgUpdateCredentialSchemaResponse) ProtoMessage()    {}
 func (*MsgUpdateCredentialSchemaResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_28caaebe5b206ca2, []int{5}
+	return fileDescriptor_28caaebe5b206ca2, []int{6}
 }
 func (m *MsgUpdateCredentialSchemaResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -424,7 +471,7 @@ func (m *MsgArchiveCredentialSchema) Reset()         { *m = MsgArchiveCredential
 func (m *MsgArchiveCredentialSchema) String() string { return proto.CompactTextString(m) }
 func (*MsgArchiveCredentialSchema) ProtoMessage()    {}
 func (*MsgArchiveCredentialSchema) Descriptor() ([]byte, []int) {
-	return fileDescriptor_28caaebe5b206ca2, []int{6}
+	return fileDescriptor_28caaebe5b206ca2, []int{7}
 }
 func (m *MsgArchiveCredentialSchema) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -481,7 +528,7 @@ func (m *MsgArchiveCredentialSchemaResponse) Reset()         { *m = MsgArchiveCr
 func (m *MsgArchiveCredentialSchemaResponse) String() string { return proto.CompactTextString(m) }
 func (*MsgArchiveCredentialSchemaResponse) ProtoMessage()    {}
 func (*MsgArchiveCredentialSchemaResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_28caaebe5b206ca2, []int{7}
+	return fileDescriptor_28caaebe5b206ca2, []int{8}
 }
 func (m *MsgArchiveCredentialSchemaResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -516,6 +563,7 @@ func init() {
 	proto.RegisterType((*MsgCreateCredentialSchema)(nil), "verana.cs.v1.MsgCreateCredentialSchema")
 	proto.RegisterType((*MsgCreateCredentialSchemaResponse)(nil), "verana.cs.v1.MsgCreateCredentialSchemaResponse")
 	proto.RegisterType((*MsgUpdateCredentialSchema)(nil), "verana.cs.v1.MsgUpdateCredentialSchema")
+	proto.RegisterType((*OptionalUInt32)(nil), "verana.cs.v1.OptionalUInt32")
 	proto.RegisterType((*MsgUpdateCredentialSchemaResponse)(nil), "verana.cs.v1.MsgUpdateCredentialSchemaResponse")
 	proto.RegisterType((*MsgArchiveCredentialSchema)(nil), "verana.cs.v1.MsgArchiveCredentialSchema")
 	proto.RegisterType((*MsgArchiveCredentialSchemaResponse)(nil), "verana.cs.v1.MsgArchiveCredentialSchemaResponse")
@@ -524,54 +572,58 @@ func init() {
 func init() { proto.RegisterFile("verana/cs/v1/tx.proto", fileDescriptor_28caaebe5b206ca2) }
 
 var fileDescriptor_28caaebe5b206ca2 = []byte{
-	// 751 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x96, 0x4f, 0x4b, 0xdc, 0x4e,
-	0x18, 0xc7, 0x37, 0xfb, 0xd7, 0x1d, 0xfd, 0xfd, 0x4a, 0x53, 0x5b, 0x63, 0xc4, 0x75, 0x5d, 0x2b,
-	0x6e, 0x2d, 0x6e, 0xaa, 0x42, 0x0b, 0x42, 0x0f, 0xae, 0x87, 0xe2, 0x61, 0x41, 0x62, 0x2b, 0xa5,
-	0x14, 0xc2, 0x98, 0x4c, 0xb3, 0x53, 0x36, 0x99, 0x30, 0x33, 0xbb, 0xe8, 0xad, 0xf4, 0x54, 0x3c,
-	0xf5, 0x65, 0xf4, 0x28, 0xd2, 0x37, 0xd0, 0x9b, 0x47, 0xe9, 0xa9, 0xa7, 0x52, 0xf4, 0xe0, 0xdb,
-	0x28, 0x99, 0x49, 0x56, 0x77, 0x35, 0xeb, 0x16, 0xf4, 0xb2, 0x24, 0x33, 0xdf, 0xe7, 0xf3, 0x7c,
-	0x87, 0x7c, 0xb3, 0x4f, 0xc0, 0xc3, 0x0e, 0xa2, 0xd0, 0x87, 0x86, 0xcd, 0x8c, 0xce, 0xb2, 0xc1,
-	0xf7, 0x6a, 0x01, 0x25, 0x9c, 0xa8, 0x63, 0x72, 0xb9, 0x66, 0xb3, 0x5a, 0x67, 0x59, 0xbf, 0x0f,
-	0x3d, 0xec, 0x13, 0x43, 0xfc, 0x4a, 0x81, 0x3e, 0x61, 0x13, 0xe6, 0x11, 0x66, 0x78, 0xcc, 0x0d,
-	0x0b, 0x3d, 0xe6, 0x46, 0x1b, 0x93, 0x72, 0xc3, 0x12, 0x77, 0x86, 0xbc, 0x89, 0xb6, 0xc6, 0x5d,
-	0xe2, 0x12, 0xb9, 0x1e, 0x5e, 0xc5, 0x05, 0x3d, 0x0e, 0x02, 0x48, 0xa1, 0x17, 0x17, 0x68, 0xbd,
-	0xe6, 0xf6, 0x03, 0x14, 0xed, 0x54, 0x8e, 0x14, 0x70, 0xaf, 0xc1, 0xdc, 0x37, 0x81, 0x03, 0x39,
-	0xda, 0x12, 0x35, 0xea, 0x73, 0x50, 0x84, 0x6d, 0xde, 0x24, 0x14, 0xf3, 0x7d, 0x4d, 0x29, 0x2b,
-	0xd5, 0x62, 0x5d, 0xfb, 0xf9, 0x7d, 0x69, 0x3c, 0xf2, 0xb0, 0xee, 0x38, 0x14, 0x31, 0xb6, 0xcd,
-	0x29, 0xf6, 0x5d, 0xf3, 0x42, 0xaa, 0xbe, 0x00, 0x79, 0xd9, 0x55, 0x4b, 0x97, 0x95, 0xea, 0xe8,
-	0xca, 0x78, 0xed, 0xf2, 0xe1, 0x6b, 0x92, 0x5e, 0x2f, 0x1e, 0xff, 0x9e, 0x49, 0x7d, 0x3b, 0x3f,
-	0x5c, 0x54, 0xcc, 0x48, 0xbe, 0x56, 0xfb, 0x7c, 0x7e, 0xb8, 0x78, 0x01, 0x3a, 0x38, 0x3f, 0x5c,
-	0x9c, 0x8a, 0x1c, 0xef, 0x85, 0x9e, 0xfb, 0x0c, 0x56, 0x26, 0xc1, 0x44, 0xdf, 0x92, 0x89, 0x58,
-	0x40, 0x7c, 0x86, 0x2a, 0x47, 0x39, 0x30, 0xd9, 0x60, 0xee, 0x06, 0x45, 0x90, 0xa3, 0x0d, 0x8a,
-	0x1c, 0xe4, 0x73, 0x0c, 0x5b, 0xdb, 0x76, 0x13, 0x79, 0x50, 0x5d, 0x01, 0x05, 0x3b, 0xdc, 0x21,
-	0xf4, 0xc6, 0x73, 0xc5, 0x42, 0xf5, 0x01, 0xc8, 0x71, 0x6a, 0x61, 0x47, 0x1c, 0x2a, 0x6b, 0x66,
-	0x39, 0xdd, 0x74, 0xd4, 0x19, 0x30, 0xfa, 0x91, 0x11, 0xdf, 0x62, 0x82, 0xab, 0x65, 0x42, 0x98,
-	0x09, 0xc2, 0xa5, 0xa8, 0xd3, 0x5b, 0xf0, 0x04, 0x33, 0xd6, 0x46, 0xd4, 0x72, 0x29, 0xf4, 0x39,
-	0xa1, 0x56, 0x07, 0xb6, 0xb0, 0x03, 0x39, 0x26, 0xbe, 0xbc, 0xc4, 0x7c, 0xdf, 0x0a, 0x10, 0xc5,
-	0xc4, 0xd1, 0xb2, 0x65, 0xa5, 0xfa, 0x9f, 0x39, 0x2f, 0x0b, 0x5e, 0x49, 0xfd, 0x4e, 0x57, 0xbe,
-	0x13, 0xa9, 0xb7, 0x84, 0x58, 0x7d, 0x0f, 0x9e, 0x76, 0x10, 0xc5, 0x1f, 0xf0, 0x70, 0xec, 0x9c,
-	0x60, 0x2f, 0xc4, 0x25, 0x37, 0xd1, 0x37, 0xc1, 0x6c, 0xe4, 0x7b, 0x00, 0x33, 0x2f, 0x98, 0x25,
-	0x29, 0x4c, 0x44, 0x35, 0xc0, 0x5c, 0xd7, 0xe8, 0x00, 0x58, 0x41, 0xc0, 0xca, 0xb1, 0x74, 0x90,
-	0xb3, 0x26, 0x69, 0x39, 0x83, 0x61, 0x23, 0xd2, 0x99, 0x14, 0x26, 0xa2, 0x5e, 0x82, 0xa9, 0xe8,
-	0x90, 0x01, 0xa2, 0x9e, 0xe5, 0x41, 0x1f, 0xba, 0xc8, 0x43, 0x3e, 0xb7, 0x3c, 0xe2, 0x20, 0xad,
-	0x28, 0x20, 0x9a, 0x94, 0x6c, 0x21, 0xea, 0x35, 0xba, 0x82, 0x06, 0x71, 0x90, 0xba, 0x0e, 0xa6,
-	0xbb, 0x07, 0xbb, 0x16, 0x00, 0x04, 0x40, 0x8f, 0x45, 0x57, 0x11, 0x6b, 0x63, 0x61, 0xe2, 0xe3,
-	0x88, 0x55, 0x56, 0xc1, 0x6c, 0x62, 0x66, 0xe3, 0x64, 0xab, 0xff, 0x83, 0x34, 0x76, 0x44, 0x6c,
-	0xb3, 0x66, 0x1a, 0x3b, 0x95, 0x83, 0xac, 0x48, 0xba, 0x7c, 0x0b, 0x6e, 0x25, 0xe9, 0xb2, 0x43,
-	0x3a, 0xee, 0xf0, 0x6f, 0x19, 0xce, 0xdc, 0x61, 0x86, 0xb3, 0x77, 0x90, 0xe1, 0xdc, 0x6d, 0x66,
-	0x38, 0x7f, 0x9b, 0x19, 0x2e, 0x0c, 0x93, 0xe1, 0xbe, 0x04, 0xcd, 0x89, 0x04, 0x5d, 0x9f, 0x85,
-	0xee, 0x7f, 0xe3, 0x17, 0x05, 0xe8, 0x0d, 0xe6, 0xae, 0x53, 0xbb, 0x89, 0x3b, 0x77, 0x13, 0x19,
-	0x0d, 0x14, 0xa0, 0xc4, 0x8b, 0x40, 0x8c, 0x98, 0xf1, 0x6d, 0x9f, 0xdf, 0xc7, 0xa0, 0x92, 0xec,
-	0x24, 0x36, 0xbc, 0xf2, 0x23, 0x03, 0x32, 0x0d, 0xe6, 0xaa, 0xaf, 0xc1, 0x58, 0xcf, 0x80, 0x9a,
-	0xee, 0x1d, 0x2c, 0x7d, 0xb3, 0x40, 0x9f, 0x1f, 0xb8, 0xdd, 0x7d, 0xa1, 0x28, 0x78, 0x94, 0x30,
-	0x26, 0x16, 0xae, 0x00, 0xae, 0x17, 0xea, 0xc6, 0x90, 0xc2, 0xcb, 0x3d, 0x13, 0x5e, 0xd8, 0x85,
-	0x04, 0xd3, 0x43, 0xf4, 0x1c, 0xfc, 0xd8, 0xd5, 0x36, 0x98, 0x48, 0x7a, 0xe4, 0xd5, 0x2b, 0xac,
-	0x04, 0xa5, 0xfe, 0x6c, 0x58, 0x65, 0xdc, 0x56, 0xcf, 0x7d, 0x0a, 0x67, 0x7c, 0xbd, 0x7e, 0x7c,
-	0x5a, 0x52, 0x4e, 0x4e, 0x4b, 0xca, 0x9f, 0xd3, 0x92, 0xf2, 0xf5, 0xac, 0x94, 0x3a, 0x39, 0x2b,
-	0xa5, 0x7e, 0x9d, 0x95, 0x52, 0xef, 0xaa, 0x2e, 0xe6, 0xcd, 0xf6, 0x6e, 0xcd, 0x26, 0x9e, 0x21,
-	0xe1, 0x4b, 0x2d, 0xb8, 0xcb, 0x8c, 0xcb, 0x93, 0x5f, 0x7c, 0xaa, 0xec, 0xe6, 0xc5, 0xb7, 0xca,
-	0xea, 0xdf, 0x00, 0x00, 0x00, 0xff, 0xff, 0x20, 0x02, 0xe7, 0x30, 0x64, 0x09, 0x00, 0x00,
+	// 803 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xc4, 0x56, 0x4f, 0x4f, 0xdb, 0x48,
+	0x1c, 0x8d, 0xf3, 0x97, 0x0c, 0x7f, 0x56, 0xeb, 0xcd, 0x2e, 0xc6, 0x2c, 0x21, 0x84, 0x65, 0xc9,
+	0xb2, 0x22, 0x5e, 0x82, 0xb4, 0x2b, 0x21, 0xed, 0x81, 0x70, 0x58, 0x71, 0x88, 0x16, 0x99, 0x85,
+	0xc3, 0x5e, 0xac, 0x21, 0x9e, 0x3a, 0x53, 0xc5, 0x1e, 0x77, 0x66, 0x12, 0x81, 0xd4, 0x03, 0xea,
+	0xa9, 0xea, 0xa9, 0x1f, 0xa3, 0x47, 0x54, 0xf5, 0x5e, 0xf5, 0xc6, 0x11, 0xf5, 0xd4, 0x13, 0xaa,
+	0xe0, 0x90, 0xaf, 0x51, 0xd9, 0x63, 0x07, 0x12, 0x70, 0x70, 0x25, 0x0a, 0x97, 0x28, 0x33, 0xf3,
+	0xe6, 0xbd, 0xf7, 0xfb, 0x79, 0x9e, 0x3d, 0xe0, 0xc7, 0x2e, 0xa2, 0xd0, 0x81, 0x5a, 0x93, 0x69,
+	0xdd, 0x35, 0x8d, 0x1f, 0x56, 0x5d, 0x4a, 0x38, 0x91, 0x27, 0xc4, 0x74, 0xb5, 0xc9, 0xaa, 0xdd,
+	0x35, 0xf5, 0x7b, 0x68, 0x63, 0x87, 0x68, 0xfe, 0xaf, 0x00, 0xa8, 0xd3, 0x4d, 0xc2, 0x6c, 0xc2,
+	0x34, 0x9b, 0x59, 0xde, 0x46, 0x9b, 0x59, 0xc1, 0xc2, 0x8c, 0x58, 0x30, 0xfc, 0x91, 0x26, 0x06,
+	0xc1, 0x52, 0xc1, 0x22, 0x16, 0x11, 0xf3, 0xde, 0xbf, 0x70, 0xc3, 0x80, 0x03, 0x17, 0x52, 0x68,
+	0x87, 0x1b, 0x94, 0x41, 0x73, 0x47, 0x2e, 0x0a, 0x56, 0xca, 0x6f, 0x25, 0xf0, 0x5d, 0x83, 0x59,
+	0x7b, 0xae, 0x09, 0x39, 0xda, 0xf1, 0xf7, 0xc8, 0x7f, 0x82, 0x3c, 0xec, 0xf0, 0x16, 0xa1, 0x98,
+	0x1f, 0x29, 0x52, 0x49, 0xaa, 0xe4, 0xeb, 0xca, 0xc7, 0x77, 0xab, 0x85, 0xc0, 0xc3, 0xa6, 0x69,
+	0x52, 0xc4, 0xd8, 0x2e, 0xa7, 0xd8, 0xb1, 0xf4, 0x2b, 0xa8, 0xfc, 0x17, 0xc8, 0x0a, 0x55, 0x25,
+	0x59, 0x92, 0x2a, 0xe3, 0xb5, 0x42, 0xf5, 0x7a, 0xf1, 0x55, 0xc1, 0x5e, 0xcf, 0x9f, 0x9e, 0xcf,
+	0x27, 0xde, 0xf4, 0x4e, 0x56, 0x24, 0x3d, 0x80, 0x6f, 0x54, 0x5f, 0xf4, 0x4e, 0x56, 0xae, 0x88,
+	0x5e, 0xf5, 0x4e, 0x56, 0x66, 0x03, 0xc7, 0x87, 0x9e, 0xe7, 0x21, 0x83, 0xe5, 0x19, 0x30, 0x3d,
+	0x34, 0xa5, 0x23, 0xe6, 0x12, 0x87, 0xa1, 0x72, 0x2f, 0x0b, 0x66, 0x1a, 0xcc, 0xda, 0xa2, 0x08,
+	0x72, 0xb4, 0x45, 0x91, 0x89, 0x1c, 0x8e, 0x61, 0x7b, 0xb7, 0xd9, 0x42, 0x36, 0x94, 0x6b, 0x20,
+	0xd7, 0xf4, 0x56, 0x08, 0xbd, 0xb3, 0xae, 0x10, 0x28, 0xff, 0x00, 0x32, 0x9c, 0x1a, 0xd8, 0xf4,
+	0x8b, 0x4a, 0xeb, 0x69, 0x4e, 0xb7, 0x4d, 0x79, 0x1e, 0x8c, 0x3f, 0x65, 0xc4, 0x31, 0x98, 0xcf,
+	0xab, 0xa4, 0x3c, 0x32, 0x1d, 0x78, 0x53, 0x81, 0xd2, 0x73, 0xf0, 0x1b, 0x66, 0xac, 0x83, 0xa8,
+	0x61, 0x51, 0xe8, 0x70, 0x42, 0x8d, 0x2e, 0x6c, 0x63, 0x13, 0x72, 0x4c, 0x1c, 0xf1, 0x17, 0xf3,
+	0x23, 0xc3, 0x45, 0x14, 0x13, 0x53, 0x49, 0xfb, 0xed, 0xfa, 0x79, 0xb0, 0x5d, 0xff, 0xba, 0x1e,
+	0x16, 0xb6, 0xf7, 0xb6, 0x1d, 0xbe, 0x5e, 0xab, 0xa7, 0x4f, 0xcf, 0xe7, 0x25, 0x7d, 0x49, 0x90,
+	0xfe, 0x23, 0x38, 0xf7, 0xfb, 0x94, 0xfb, 0x01, 0xe3, 0x8e, 0x4f, 0x28, 0x1f, 0x4b, 0xe0, 0xf7,
+	0x2e, 0xa2, 0xf8, 0x09, 0x8e, 0x67, 0x20, 0x13, 0xdb, 0xc0, 0x72, 0x48, 0x7b, 0x97, 0x05, 0x1b,
+	0x2c, 0x04, 0x0d, 0x18, 0xa1, 0x9b, 0x8d, 0xad, 0x5b, 0x14, 0x64, 0x91, 0x72, 0xcf, 0xc0, 0x62,
+	0xbf, 0xe0, 0x11, 0x82, 0xb9, 0xd8, 0x82, 0xa5, 0x90, 0x6e, 0x54, 0x85, 0x2d, 0xd2, 0x36, 0x47,
+	0x0b, 0x8e, 0xc5, 0xaf, 0x50, 0x90, 0x45, 0xca, 0xfd, 0x0d, 0x66, 0x83, 0x86, 0xba, 0x88, 0xda,
+	0x86, 0x0d, 0x1d, 0x68, 0x21, 0x1b, 0x39, 0xdc, 0xb0, 0x89, 0x89, 0x94, 0x7c, 0x49, 0xaa, 0x4c,
+	0xea, 0x8a, 0x80, 0xec, 0x20, 0x6a, 0x37, 0xfa, 0x80, 0x06, 0x31, 0x91, 0xbc, 0x09, 0xe6, 0xfa,
+	0x0d, 0xba, 0x95, 0x00, 0xf8, 0x04, 0x6a, 0x08, 0xba, 0x49, 0xb1, 0x31, 0xe1, 0xc5, 0x34, 0xcc,
+	0x45, 0x79, 0x1d, 0x2c, 0x44, 0x06, 0x2d, 0x8c, 0xa3, 0x3c, 0x05, 0x92, 0xd8, 0xf4, 0xb3, 0x96,
+	0xd6, 0x93, 0xd8, 0x2c, 0xbf, 0xcf, 0xf8, 0xf1, 0x14, 0xd1, 0xbd, 0x97, 0x78, 0x0a, 0x85, 0x64,
+	0xa8, 0xf0, 0x75, 0xc1, 0x4b, 0x3d, 0x76, 0xf0, 0xd2, 0x8f, 0x14, 0xbc, 0xcc, 0x43, 0x07, 0x2f,
+	0xfb, 0xd0, 0xc1, 0xcb, 0xdd, 0x57, 0xf0, 0x86, 0x8e, 0xfd, 0xaf, 0x60, 0x6a, 0x90, 0x45, 0x2e,
+	0x80, 0x4c, 0x17, 0xb6, 0x3b, 0xc8, 0x3f, 0xb3, 0x93, 0xba, 0x18, 0x94, 0x17, 0xfd, 0x78, 0xdc,
+	0x7e, 0xd0, 0xfb, 0x5f, 0xab, 0x97, 0x12, 0x50, 0x1b, 0xcc, 0xda, 0xa4, 0xcd, 0x16, 0xee, 0x7e,
+	0x9b, 0x3c, 0x28, 0x20, 0x07, 0x05, 0xbd, 0x7f, 0xda, 0xc7, 0xf4, 0x70, 0x38, 0x54, 0xd7, 0x2f,
+	0xa0, 0x1c, 0xed, 0x24, 0x34, 0x5c, 0xfb, 0x90, 0x02, 0xa9, 0x06, 0xb3, 0xe4, 0xff, 0xc0, 0xc4,
+	0xc0, 0x95, 0x61, 0x6e, 0xb0, 0xcf, 0x43, 0x5f, 0x67, 0x75, 0x69, 0xe4, 0x72, 0xff, 0x6d, 0x41,
+	0xc1, 0x4f, 0x11, 0x1f, 0xee, 0xe5, 0x1b, 0x04, 0xb7, 0x03, 0x55, 0x2d, 0x26, 0xf0, 0xba, 0x66,
+	0xc4, 0xdb, 0x68, 0x39, 0xc2, 0x74, 0x0c, 0xcd, 0xd1, 0x8f, 0x5d, 0xee, 0x80, 0xe9, 0xa8, 0x47,
+	0x5e, 0xb9, 0xc1, 0x15, 0x81, 0x54, 0xff, 0x88, 0x8b, 0x0c, 0x65, 0xd5, 0xcc, 0xb1, 0x77, 0xeb,
+	0xaa, 0xd7, 0x4f, 0x2f, 0x8a, 0xd2, 0xd9, 0x45, 0x51, 0xfa, 0x7c, 0x51, 0x94, 0x5e, 0x5f, 0x16,
+	0x13, 0x67, 0x97, 0xc5, 0xc4, 0xa7, 0xcb, 0x62, 0xe2, 0xff, 0x8a, 0x85, 0x79, 0xab, 0x73, 0x50,
+	0x6d, 0x12, 0x5b, 0x13, 0xe4, 0xab, 0x6d, 0x78, 0xc0, 0xb4, 0xeb, 0x77, 0x31, 0xff, 0xf2, 0x78,
+	0x90, 0xf5, 0x6f, 0x8f, 0xeb, 0x5f, 0x02, 0x00, 0x00, 0xff, 0xff, 0xea, 0xcf, 0xa8, 0x4c, 0xf6,
+	0x0a, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -866,30 +918,65 @@ func (m *MsgCreateCredentialSchema) MarshalToSizedBuffer(dAtA []byte) (int, erro
 		i--
 		dAtA[i] = 0x48
 	}
-	if m.HolderValidationValidityPeriod != 0 {
-		i = encodeVarintTx(dAtA, i, uint64(m.HolderValidationValidityPeriod))
+	if m.HolderValidationValidityPeriod != nil {
+		{
+			size, err := m.HolderValidationValidityPeriod.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTx(dAtA, i, uint64(size))
+		}
 		i--
-		dAtA[i] = 0x40
+		dAtA[i] = 0x42
 	}
-	if m.VerifierValidationValidityPeriod != 0 {
-		i = encodeVarintTx(dAtA, i, uint64(m.VerifierValidationValidityPeriod))
+	if m.VerifierValidationValidityPeriod != nil {
+		{
+			size, err := m.VerifierValidationValidityPeriod.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTx(dAtA, i, uint64(size))
+		}
 		i--
-		dAtA[i] = 0x38
+		dAtA[i] = 0x3a
 	}
-	if m.IssuerValidationValidityPeriod != 0 {
-		i = encodeVarintTx(dAtA, i, uint64(m.IssuerValidationValidityPeriod))
+	if m.IssuerValidationValidityPeriod != nil {
+		{
+			size, err := m.IssuerValidationValidityPeriod.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTx(dAtA, i, uint64(size))
+		}
 		i--
-		dAtA[i] = 0x30
+		dAtA[i] = 0x32
 	}
-	if m.VerifierGrantorValidationValidityPeriod != 0 {
-		i = encodeVarintTx(dAtA, i, uint64(m.VerifierGrantorValidationValidityPeriod))
+	if m.VerifierGrantorValidationValidityPeriod != nil {
+		{
+			size, err := m.VerifierGrantorValidationValidityPeriod.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTx(dAtA, i, uint64(size))
+		}
 		i--
-		dAtA[i] = 0x28
+		dAtA[i] = 0x2a
 	}
-	if m.IssuerGrantorValidationValidityPeriod != 0 {
-		i = encodeVarintTx(dAtA, i, uint64(m.IssuerGrantorValidationValidityPeriod))
+	if m.IssuerGrantorValidationValidityPeriod != nil {
+		{
+			size, err := m.IssuerGrantorValidationValidityPeriod.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTx(dAtA, i, uint64(size))
+		}
 		i--
-		dAtA[i] = 0x20
+		dAtA[i] = 0x22
 	}
 	if len(m.JsonSchema) > 0 {
 		i -= len(m.JsonSchema)
@@ -961,30 +1048,65 @@ func (m *MsgUpdateCredentialSchema) MarshalToSizedBuffer(dAtA []byte) (int, erro
 	_ = i
 	var l int
 	_ = l
-	if m.HolderValidationValidityPeriod != 0 {
-		i = encodeVarintTx(dAtA, i, uint64(m.HolderValidationValidityPeriod))
+	if m.HolderValidationValidityPeriod != nil {
+		{
+			size, err := m.HolderValidationValidityPeriod.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTx(dAtA, i, uint64(size))
+		}
 		i--
-		dAtA[i] = 0x38
+		dAtA[i] = 0x3a
 	}
-	if m.VerifierValidationValidityPeriod != 0 {
-		i = encodeVarintTx(dAtA, i, uint64(m.VerifierValidationValidityPeriod))
+	if m.VerifierValidationValidityPeriod != nil {
+		{
+			size, err := m.VerifierValidationValidityPeriod.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTx(dAtA, i, uint64(size))
+		}
 		i--
-		dAtA[i] = 0x30
+		dAtA[i] = 0x32
 	}
-	if m.IssuerValidationValidityPeriod != 0 {
-		i = encodeVarintTx(dAtA, i, uint64(m.IssuerValidationValidityPeriod))
+	if m.IssuerValidationValidityPeriod != nil {
+		{
+			size, err := m.IssuerValidationValidityPeriod.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTx(dAtA, i, uint64(size))
+		}
 		i--
-		dAtA[i] = 0x28
+		dAtA[i] = 0x2a
 	}
-	if m.VerifierGrantorValidationValidityPeriod != 0 {
-		i = encodeVarintTx(dAtA, i, uint64(m.VerifierGrantorValidationValidityPeriod))
+	if m.VerifierGrantorValidationValidityPeriod != nil {
+		{
+			size, err := m.VerifierGrantorValidationValidityPeriod.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTx(dAtA, i, uint64(size))
+		}
 		i--
-		dAtA[i] = 0x20
+		dAtA[i] = 0x22
 	}
-	if m.IssuerGrantorValidationValidityPeriod != 0 {
-		i = encodeVarintTx(dAtA, i, uint64(m.IssuerGrantorValidationValidityPeriod))
+	if m.IssuerGrantorValidationValidityPeriod != nil {
+		{
+			size, err := m.IssuerGrantorValidationValidityPeriod.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTx(dAtA, i, uint64(size))
+		}
 		i--
-		dAtA[i] = 0x18
+		dAtA[i] = 0x1a
 	}
 	if m.Id != 0 {
 		i = encodeVarintTx(dAtA, i, uint64(m.Id))
@@ -997,6 +1119,34 @@ func (m *MsgUpdateCredentialSchema) MarshalToSizedBuffer(dAtA []byte) (int, erro
 		i = encodeVarintTx(dAtA, i, uint64(len(m.Creator)))
 		i--
 		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *OptionalUInt32) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *OptionalUInt32) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *OptionalUInt32) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Value != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.Value))
+		i--
+		dAtA[i] = 0x8
 	}
 	return len(dAtA) - i, nil
 }
@@ -1144,20 +1294,25 @@ func (m *MsgCreateCredentialSchema) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
-	if m.IssuerGrantorValidationValidityPeriod != 0 {
-		n += 1 + sovTx(uint64(m.IssuerGrantorValidationValidityPeriod))
+	if m.IssuerGrantorValidationValidityPeriod != nil {
+		l = m.IssuerGrantorValidationValidityPeriod.Size()
+		n += 1 + l + sovTx(uint64(l))
 	}
-	if m.VerifierGrantorValidationValidityPeriod != 0 {
-		n += 1 + sovTx(uint64(m.VerifierGrantorValidationValidityPeriod))
+	if m.VerifierGrantorValidationValidityPeriod != nil {
+		l = m.VerifierGrantorValidationValidityPeriod.Size()
+		n += 1 + l + sovTx(uint64(l))
 	}
-	if m.IssuerValidationValidityPeriod != 0 {
-		n += 1 + sovTx(uint64(m.IssuerValidationValidityPeriod))
+	if m.IssuerValidationValidityPeriod != nil {
+		l = m.IssuerValidationValidityPeriod.Size()
+		n += 1 + l + sovTx(uint64(l))
 	}
-	if m.VerifierValidationValidityPeriod != 0 {
-		n += 1 + sovTx(uint64(m.VerifierValidationValidityPeriod))
+	if m.VerifierValidationValidityPeriod != nil {
+		l = m.VerifierValidationValidityPeriod.Size()
+		n += 1 + l + sovTx(uint64(l))
 	}
-	if m.HolderValidationValidityPeriod != 0 {
-		n += 1 + sovTx(uint64(m.HolderValidationValidityPeriod))
+	if m.HolderValidationValidityPeriod != nil {
+		l = m.HolderValidationValidityPeriod.Size()
+		n += 1 + l + sovTx(uint64(l))
 	}
 	if m.IssuerPermManagementMode != 0 {
 		n += 1 + sovTx(uint64(m.IssuerPermManagementMode))
@@ -1193,20 +1348,37 @@ func (m *MsgUpdateCredentialSchema) Size() (n int) {
 	if m.Id != 0 {
 		n += 1 + sovTx(uint64(m.Id))
 	}
-	if m.IssuerGrantorValidationValidityPeriod != 0 {
-		n += 1 + sovTx(uint64(m.IssuerGrantorValidationValidityPeriod))
+	if m.IssuerGrantorValidationValidityPeriod != nil {
+		l = m.IssuerGrantorValidationValidityPeriod.Size()
+		n += 1 + l + sovTx(uint64(l))
 	}
-	if m.VerifierGrantorValidationValidityPeriod != 0 {
-		n += 1 + sovTx(uint64(m.VerifierGrantorValidationValidityPeriod))
+	if m.VerifierGrantorValidationValidityPeriod != nil {
+		l = m.VerifierGrantorValidationValidityPeriod.Size()
+		n += 1 + l + sovTx(uint64(l))
 	}
-	if m.IssuerValidationValidityPeriod != 0 {
-		n += 1 + sovTx(uint64(m.IssuerValidationValidityPeriod))
+	if m.IssuerValidationValidityPeriod != nil {
+		l = m.IssuerValidationValidityPeriod.Size()
+		n += 1 + l + sovTx(uint64(l))
 	}
-	if m.VerifierValidationValidityPeriod != 0 {
-		n += 1 + sovTx(uint64(m.VerifierValidationValidityPeriod))
+	if m.VerifierValidationValidityPeriod != nil {
+		l = m.VerifierValidationValidityPeriod.Size()
+		n += 1 + l + sovTx(uint64(l))
 	}
-	if m.HolderValidationValidityPeriod != 0 {
-		n += 1 + sovTx(uint64(m.HolderValidationValidityPeriod))
+	if m.HolderValidationValidityPeriod != nil {
+		l = m.HolderValidationValidityPeriod.Size()
+		n += 1 + l + sovTx(uint64(l))
+	}
+	return n
+}
+
+func (m *OptionalUInt32) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Value != 0 {
+		n += 1 + sovTx(uint64(m.Value))
 	}
 	return n
 }
@@ -1532,10 +1704,10 @@ func (m *MsgCreateCredentialSchema) Unmarshal(dAtA []byte) error {
 			m.JsonSchema = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 4:
-			if wireType != 0 {
+			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field IssuerGrantorValidationValidityPeriod", wireType)
 			}
-			m.IssuerGrantorValidationValidityPeriod = 0
+			var msglen int
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowTx
@@ -1545,16 +1717,33 @@ func (m *MsgCreateCredentialSchema) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.IssuerGrantorValidationValidityPeriod |= uint32(b&0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
+			if msglen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.IssuerGrantorValidationValidityPeriod == nil {
+				m.IssuerGrantorValidationValidityPeriod = &OptionalUInt32{}
+			}
+			if err := m.IssuerGrantorValidationValidityPeriod.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
 		case 5:
-			if wireType != 0 {
+			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field VerifierGrantorValidationValidityPeriod", wireType)
 			}
-			m.VerifierGrantorValidationValidityPeriod = 0
+			var msglen int
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowTx
@@ -1564,16 +1753,33 @@ func (m *MsgCreateCredentialSchema) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.VerifierGrantorValidationValidityPeriod |= uint32(b&0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
+			if msglen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.VerifierGrantorValidationValidityPeriod == nil {
+				m.VerifierGrantorValidationValidityPeriod = &OptionalUInt32{}
+			}
+			if err := m.VerifierGrantorValidationValidityPeriod.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
 		case 6:
-			if wireType != 0 {
+			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field IssuerValidationValidityPeriod", wireType)
 			}
-			m.IssuerValidationValidityPeriod = 0
+			var msglen int
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowTx
@@ -1583,16 +1789,33 @@ func (m *MsgCreateCredentialSchema) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.IssuerValidationValidityPeriod |= uint32(b&0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
+			if msglen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.IssuerValidationValidityPeriod == nil {
+				m.IssuerValidationValidityPeriod = &OptionalUInt32{}
+			}
+			if err := m.IssuerValidationValidityPeriod.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
 		case 7:
-			if wireType != 0 {
+			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field VerifierValidationValidityPeriod", wireType)
 			}
-			m.VerifierValidationValidityPeriod = 0
+			var msglen int
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowTx
@@ -1602,16 +1825,33 @@ func (m *MsgCreateCredentialSchema) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.VerifierValidationValidityPeriod |= uint32(b&0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
+			if msglen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.VerifierValidationValidityPeriod == nil {
+				m.VerifierValidationValidityPeriod = &OptionalUInt32{}
+			}
+			if err := m.VerifierValidationValidityPeriod.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
 		case 8:
-			if wireType != 0 {
+			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field HolderValidationValidityPeriod", wireType)
 			}
-			m.HolderValidationValidityPeriod = 0
+			var msglen int
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowTx
@@ -1621,11 +1861,28 @@ func (m *MsgCreateCredentialSchema) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.HolderValidationValidityPeriod |= uint32(b&0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
+			if msglen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.HolderValidationValidityPeriod == nil {
+				m.HolderValidationValidityPeriod = &OptionalUInt32{}
+			}
+			if err := m.HolderValidationValidityPeriod.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
 		case 9:
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field IssuerPermManagementMode", wireType)
@@ -1835,10 +2092,10 @@ func (m *MsgUpdateCredentialSchema) Unmarshal(dAtA []byte) error {
 				}
 			}
 		case 3:
-			if wireType != 0 {
+			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field IssuerGrantorValidationValidityPeriod", wireType)
 			}
-			m.IssuerGrantorValidationValidityPeriod = 0
+			var msglen int
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowTx
@@ -1848,16 +2105,33 @@ func (m *MsgUpdateCredentialSchema) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.IssuerGrantorValidationValidityPeriod |= uint32(b&0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
+			if msglen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.IssuerGrantorValidationValidityPeriod == nil {
+				m.IssuerGrantorValidationValidityPeriod = &OptionalUInt32{}
+			}
+			if err := m.IssuerGrantorValidationValidityPeriod.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
 		case 4:
-			if wireType != 0 {
+			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field VerifierGrantorValidationValidityPeriod", wireType)
 			}
-			m.VerifierGrantorValidationValidityPeriod = 0
+			var msglen int
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowTx
@@ -1867,16 +2141,33 @@ func (m *MsgUpdateCredentialSchema) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.VerifierGrantorValidationValidityPeriod |= uint32(b&0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
+			if msglen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.VerifierGrantorValidationValidityPeriod == nil {
+				m.VerifierGrantorValidationValidityPeriod = &OptionalUInt32{}
+			}
+			if err := m.VerifierGrantorValidationValidityPeriod.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
 		case 5:
-			if wireType != 0 {
+			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field IssuerValidationValidityPeriod", wireType)
 			}
-			m.IssuerValidationValidityPeriod = 0
+			var msglen int
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowTx
@@ -1886,16 +2177,33 @@ func (m *MsgUpdateCredentialSchema) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.IssuerValidationValidityPeriod |= uint32(b&0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
+			if msglen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.IssuerValidationValidityPeriod == nil {
+				m.IssuerValidationValidityPeriod = &OptionalUInt32{}
+			}
+			if err := m.IssuerValidationValidityPeriod.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
 		case 6:
-			if wireType != 0 {
+			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field VerifierValidationValidityPeriod", wireType)
 			}
-			m.VerifierValidationValidityPeriod = 0
+			var msglen int
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowTx
@@ -1905,16 +2213,33 @@ func (m *MsgUpdateCredentialSchema) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.VerifierValidationValidityPeriod |= uint32(b&0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
+			if msglen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.VerifierValidationValidityPeriod == nil {
+				m.VerifierValidationValidityPeriod = &OptionalUInt32{}
+			}
+			if err := m.VerifierValidationValidityPeriod.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
 		case 7:
-			if wireType != 0 {
+			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field HolderValidationValidityPeriod", wireType)
 			}
-			m.HolderValidationValidityPeriod = 0
+			var msglen int
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowTx
@@ -1924,7 +2249,93 @@ func (m *MsgUpdateCredentialSchema) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.HolderValidationValidityPeriod |= uint32(b&0x7F) << shift
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.HolderValidationValidityPeriod == nil {
+				m.HolderValidationValidityPeriod = &OptionalUInt32{}
+			}
+			if err := m.HolderValidationValidityPeriod.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *OptionalUInt32) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: OptionalUInt32: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: OptionalUInt32: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Value", wireType)
+			}
+			m.Value = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Value |= uint32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}

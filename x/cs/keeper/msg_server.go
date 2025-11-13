@@ -74,18 +74,29 @@ func (ms msgServer) UpdateCredentialSchema(goCtx context.Context, msg *types.Msg
 		return nil, fmt.Errorf("creator is not the controller of the trust registry")
 	}
 
-	// Validate validity periods against params
+	// Validate validity periods against params (only for fields that are set)
 	params := ms.GetParams(ctx)
 	if err := ValidateValidityPeriods(params, msg); err != nil {
 		return nil, fmt.Errorf("invalid validity period: %w", err)
 	}
 
-	// [MOD-CS-MSG-2-3] Update mutable fields only
-	cs.IssuerGrantorValidationValidityPeriod = msg.GetIssuerGrantorValidationValidityPeriod()
-	cs.VerifierGrantorValidationValidityPeriod = msg.GetVerifierGrantorValidationValidityPeriod()
-	cs.IssuerValidationValidityPeriod = msg.GetIssuerValidationValidityPeriod()
-	cs.VerifierValidationValidityPeriod = msg.GetVerifierValidationValidityPeriod()
-	cs.HolderValidationValidityPeriod = msg.GetHolderValidationValidityPeriod()
+	// [MOD-CS-MSG-2-3] Update mutable fields only (only if explicitly set)
+	// nil means don't update, 0 means never expires
+	if msg.GetIssuerGrantorValidationValidityPeriod() != nil {
+		cs.IssuerGrantorValidationValidityPeriod = msg.GetIssuerGrantorValidationValidityPeriod().GetValue()
+	}
+	if msg.GetVerifierGrantorValidationValidityPeriod() != nil {
+		cs.VerifierGrantorValidationValidityPeriod = msg.GetVerifierGrantorValidationValidityPeriod().GetValue()
+	}
+	if msg.GetIssuerValidationValidityPeriod() != nil {
+		cs.IssuerValidationValidityPeriod = msg.GetIssuerValidationValidityPeriod().GetValue()
+	}
+	if msg.GetVerifierValidationValidityPeriod() != nil {
+		cs.VerifierValidationValidityPeriod = msg.GetVerifierValidationValidityPeriod().GetValue()
+	}
+	if msg.GetHolderValidationValidityPeriod() != nil {
+		cs.HolderValidationValidityPeriod = msg.GetHolderValidationValidityPeriod().GetValue()
+	}
 	cs.Modified = ctx.BlockTime()
 
 	if err := ms.CredentialSchema.Set(ctx, cs.Id, cs); err != nil {
@@ -98,11 +109,36 @@ func (ms msgServer) UpdateCredentialSchema(goCtx context.Context, msg *types.Msg
 			sdk.NewAttribute(types.AttributeKeyId, strconv.FormatUint(msg.Id, 10)),
 			sdk.NewAttribute(types.AttributeKeyTrId, strconv.FormatUint(cs.TrId, 10)),
 			sdk.NewAttribute(types.AttributeKeyCreator, msg.Creator),
-			sdk.NewAttribute(types.AttributeKeyIssuerGrantorValidationValidityPeriod, strconv.FormatUint(uint64(msg.GetIssuerGrantorValidationValidityPeriod()), 10)),
-			sdk.NewAttribute(types.AttributeKeyVerifierGrantorValidationValidityPeriod, strconv.FormatUint(uint64(msg.GetVerifierGrantorValidationValidityPeriod()), 10)),
-			sdk.NewAttribute(types.AttributeKeyIssuerValidationValidityPeriod, strconv.FormatUint(uint64(msg.GetIssuerValidationValidityPeriod()), 10)),
-			sdk.NewAttribute(types.AttributeKeyVerifierValidationValidityPeriod, strconv.FormatUint(uint64(msg.GetVerifierValidationValidityPeriod()), 10)),
-			sdk.NewAttribute(types.AttributeKeyHolderValidationValidityPeriod, strconv.FormatUint(uint64(msg.GetHolderValidationValidityPeriod()), 10)),
+			sdk.NewAttribute(types.AttributeKeyIssuerGrantorValidationValidityPeriod, func() string {
+				if v := msg.GetIssuerGrantorValidationValidityPeriod(); v != nil {
+					return strconv.FormatUint(uint64(v.GetValue()), 10)
+				}
+				return "0"
+			}()),
+			sdk.NewAttribute(types.AttributeKeyVerifierGrantorValidationValidityPeriod, func() string {
+				if v := msg.GetVerifierGrantorValidationValidityPeriod(); v != nil {
+					return strconv.FormatUint(uint64(v.GetValue()), 10)
+				}
+				return "0"
+			}()),
+			sdk.NewAttribute(types.AttributeKeyIssuerValidationValidityPeriod, func() string {
+				if v := msg.GetIssuerValidationValidityPeriod(); v != nil {
+					return strconv.FormatUint(uint64(v.GetValue()), 10)
+				}
+				return "0"
+			}()),
+			sdk.NewAttribute(types.AttributeKeyVerifierValidationValidityPeriod, func() string {
+				if v := msg.GetVerifierValidationValidityPeriod(); v != nil {
+					return strconv.FormatUint(uint64(v.GetValue()), 10)
+				}
+				return "0"
+			}()),
+			sdk.NewAttribute(types.AttributeKeyHolderValidationValidityPeriod, func() string {
+				if v := msg.GetHolderValidationValidityPeriod(); v != nil {
+					return strconv.FormatUint(uint64(v.GetValue()), 10)
+				}
+				return "0"
+			}()),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
 		),
 	})
@@ -111,24 +147,42 @@ func (ms msgServer) UpdateCredentialSchema(goCtx context.Context, msg *types.Msg
 }
 
 // ValidateValidityPeriods checks if all validity periods are within allowed ranges
+// Only validates fields that are explicitly set. 0 is a valid value meaning "never expires"
 func ValidateValidityPeriods(
 	params types.Params,
 	msg *types.MsgUpdateCredentialSchema,
 ) error {
-	if msg.GetIssuerGrantorValidationValidityPeriod() > params.CredentialSchemaIssuerGrantorValidationValidityPeriodMaxDays {
-		return errors.New("issuer grantor validation validity period exceeds maximum allowed days")
+	// Only validate fields that are explicitly set (wrapper is not nil)
+	// 0 is valid (never expires), only check if > 0 and exceeds max
+	if msg.GetIssuerGrantorValidationValidityPeriod() != nil {
+		val := msg.GetIssuerGrantorValidationValidityPeriod().GetValue()
+		if val > 0 && val > params.CredentialSchemaIssuerGrantorValidationValidityPeriodMaxDays {
+			return errors.New("issuer grantor validation validity period exceeds maximum allowed days")
+		}
 	}
-	if msg.GetVerifierGrantorValidationValidityPeriod() > params.CredentialSchemaVerifierGrantorValidationValidityPeriodMaxDays {
-		return errors.New("verifier grantor validation validity period exceeds maximum allowed days")
+	if msg.GetVerifierGrantorValidationValidityPeriod() != nil {
+		val := msg.GetVerifierGrantorValidationValidityPeriod().GetValue()
+		if val > 0 && val > params.CredentialSchemaVerifierGrantorValidationValidityPeriodMaxDays {
+			return errors.New("verifier grantor validation validity period exceeds maximum allowed days")
+		}
 	}
-	if msg.GetIssuerValidationValidityPeriod() > params.CredentialSchemaIssuerValidationValidityPeriodMaxDays {
-		return errors.New("issuer validation validity period exceeds maximum allowed days")
+	if msg.GetIssuerValidationValidityPeriod() != nil {
+		val := msg.GetIssuerValidationValidityPeriod().GetValue()
+		if val > 0 && val > params.CredentialSchemaIssuerValidationValidityPeriodMaxDays {
+			return errors.New("issuer validation validity period exceeds maximum allowed days")
+		}
 	}
-	if msg.GetVerifierValidationValidityPeriod() > params.CredentialSchemaVerifierValidationValidityPeriodMaxDays {
-		return errors.New("verifier validation validity period exceeds maximum allowed days")
+	if msg.GetVerifierValidationValidityPeriod() != nil {
+		val := msg.GetVerifierValidationValidityPeriod().GetValue()
+		if val > 0 && val > params.CredentialSchemaVerifierValidationValidityPeriodMaxDays {
+			return errors.New("verifier validation validity period exceeds maximum allowed days")
+		}
 	}
-	if msg.GetHolderValidationValidityPeriod() > params.CredentialSchemaHolderValidationValidityPeriodMaxDays {
-		return errors.New("holder validation validity period exceeds maximum allowed days")
+	if msg.GetHolderValidationValidityPeriod() != nil {
+		val := msg.GetHolderValidationValidityPeriod().GetValue()
+		if val > 0 && val > params.CredentialSchemaHolderValidationValidityPeriodMaxDays {
+			return errors.New("holder validation validity period exceeds maximum allowed days")
+		}
 	}
 	return nil
 }

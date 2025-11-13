@@ -545,11 +545,21 @@ func TestUpdateCredentialSchema(t *testing.T) {
 				// Verify changes
 				schema, err := k.CredentialSchema.Get(ctx, tc.msg.Id)
 				require.NoError(t, err)
-				require.Equal(t, tc.msg.GetIssuerGrantorValidationValidityPeriod(), schema.IssuerGrantorValidationValidityPeriod)
-				require.Equal(t, tc.msg.GetVerifierGrantorValidationValidityPeriod(), schema.VerifierGrantorValidationValidityPeriod)
-				require.Equal(t, tc.msg.GetIssuerValidationValidityPeriod(), schema.IssuerValidationValidityPeriod)
-				require.Equal(t, tc.msg.GetVerifierValidationValidityPeriod(), schema.VerifierValidationValidityPeriod)
-				require.Equal(t, tc.msg.GetHolderValidationValidityPeriod(), schema.HolderValidationValidityPeriod)
+				if tc.msg.GetIssuerGrantorValidationValidityPeriod() != nil {
+					require.Equal(t, tc.msg.GetIssuerGrantorValidationValidityPeriod().GetValue(), schema.IssuerGrantorValidationValidityPeriod)
+				}
+				if tc.msg.GetVerifierGrantorValidationValidityPeriod() != nil {
+					require.Equal(t, tc.msg.GetVerifierGrantorValidationValidityPeriod().GetValue(), schema.VerifierGrantorValidationValidityPeriod)
+				}
+				if tc.msg.GetIssuerValidationValidityPeriod() != nil {
+					require.Equal(t, tc.msg.GetIssuerValidationValidityPeriod().GetValue(), schema.IssuerValidationValidityPeriod)
+				}
+				if tc.msg.GetVerifierValidationValidityPeriod() != nil {
+					require.Equal(t, tc.msg.GetVerifierValidationValidityPeriod().GetValue(), schema.VerifierValidationValidityPeriod)
+				}
+				if tc.msg.GetHolderValidationValidityPeriod() != nil {
+					require.Equal(t, tc.msg.GetHolderValidationValidityPeriod().GetValue(), schema.HolderValidationValidityPeriod)
+				}
 				require.NotEqual(t, schema.Created, schema.Modified)
 			} else {
 				require.Error(t, err)

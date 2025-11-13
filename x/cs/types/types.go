@@ -121,11 +121,11 @@ func NewMsgCreateCredentialSchema(
 		Creator:                                 creator,
 		TrId:                                    trId,
 		JsonSchema:                              jsonSchema,
-		IssuerGrantorValidationValidityPeriod:   issuerGrantorValidationValidityPeriod,
-		VerifierGrantorValidationValidityPeriod: verifierGrantorValidationValidityPeriod,
-		IssuerValidationValidityPeriod:          issuerValidationValidityPeriod,
-		VerifierValidationValidityPeriod:        verifierValidationValidityPeriod,
-		HolderValidationValidityPeriod:          holderValidationValidityPeriod,
+		IssuerGrantorValidationValidityPeriod:   &OptionalUInt32{Value: issuerGrantorValidationValidityPeriod},
+		VerifierGrantorValidationValidityPeriod: &OptionalUInt32{Value: verifierGrantorValidationValidityPeriod},
+		IssuerValidationValidityPeriod:          &OptionalUInt32{Value: issuerValidationValidityPeriod},
+		VerifierValidationValidityPeriod:        &OptionalUInt32{Value: verifierValidationValidityPeriod},
+		HolderValidationValidityPeriod:          &OptionalUInt32{Value: holderValidationValidityPeriod},
 		IssuerPermManagementMode:                issuerPermManagementMode,
 		VerifierPermManagementMode:              verifierPermManagementMode,
 	}
@@ -280,34 +280,48 @@ func EnsureCanonicalID(schemaJSON string, chainID string, schemaID uint64) (stri
 func validateValidityPeriods(msg *MsgCreateCredentialSchema) error {
 	// A value of 0 indicates no expiration (never expire)
 	// All other values must be within the allowed range
+	// For Create, fields are required (should not be nil), but we check anyway
 
-	if msg.GetIssuerGrantorValidationValidityPeriod() < 0 {
-		return fmt.Errorf("issuer grantor validation validity period cannot be negative")
-	}
-	if msg.GetVerifierGrantorValidationValidityPeriod() < 0 {
-		return fmt.Errorf("verifier grantor validation validity period cannot be negative")
-	}
-
-	// Add maximum value checks
-	if msg.GetIssuerGrantorValidationValidityPeriod() > 0 &&
-		msg.GetIssuerGrantorValidationValidityPeriod() > DefaultCredentialSchemaIssuerGrantorValidationValidityPeriodMaxDays {
-		return fmt.Errorf("issuer grantor validation validity period exceeds maximum allowed days")
+	if msg.GetIssuerGrantorValidationValidityPeriod() != nil {
+		val := msg.GetIssuerGrantorValidationValidityPeriod().GetValue()
+		// uint32 cannot be negative, so skip negative check
+		if val > 0 && val > DefaultCredentialSchemaIssuerGrantorValidationValidityPeriodMaxDays {
+			return fmt.Errorf("issuer grantor validation validity period exceeds maximum allowed days")
+		}
 	}
 
-	if msg.GetVerifierGrantorValidationValidityPeriod() > 0 &&
-		msg.GetVerifierGrantorValidationValidityPeriod() > DefaultCredentialSchemaVerifierGrantorValidationValidityPeriodMaxDays {
-		return fmt.Errorf("verifier grantor validation validity period exceeds maximum allowed days")
+	if msg.GetVerifierGrantorValidationValidityPeriod() != nil {
+		val := msg.GetVerifierGrantorValidationValidityPeriod().GetValue()
+		// uint32 cannot be negative, so skip negative check
+		if val > 0 && val > DefaultCredentialSchemaVerifierGrantorValidationValidityPeriodMaxDays {
+			return fmt.Errorf("verifier grantor validation validity period exceeds maximum allowed days")
+		}
 	}
 
-	if msg.GetIssuerValidationValidityPeriod() < 0 {
-		return fmt.Errorf("issuer validation validity period cannot be negative")
+	if msg.GetIssuerValidationValidityPeriod() != nil {
+		val := msg.GetIssuerValidationValidityPeriod().GetValue()
+		// uint32 cannot be negative, so skip negative check
+		if val > 0 && val > DefaultCredentialSchemaIssuerValidationValidityPeriodMaxDays {
+			return fmt.Errorf("issuer validation validity period exceeds maximum allowed days")
+		}
 	}
-	if msg.GetVerifierValidationValidityPeriod() < 0 {
-		return fmt.Errorf("verifier validation validity period cannot be negative")
+
+	if msg.GetVerifierValidationValidityPeriod() != nil {
+		val := msg.GetVerifierValidationValidityPeriod().GetValue()
+		// uint32 cannot be negative, so skip negative check
+		if val > 0 && val > DefaultCredentialSchemaVerifierValidationValidityPeriodMaxDays {
+			return fmt.Errorf("verifier validation validity period exceeds maximum allowed days")
+		}
 	}
-	if msg.GetHolderValidationValidityPeriod() < 0 {
-		return fmt.Errorf("holder validation validity period cannot be negative")
+
+	if msg.GetHolderValidationValidityPeriod() != nil {
+		val := msg.GetHolderValidationValidityPeriod().GetValue()
+		// uint32 cannot be negative, so skip negative check
+		if val > 0 && val > DefaultCredentialSchemaHolderValidationValidityPeriodMaxDays {
+			return fmt.Errorf("holder validation validity period exceeds maximum allowed days")
+		}
 	}
+
 	return nil
 }
 

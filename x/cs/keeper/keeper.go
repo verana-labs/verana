@@ -136,11 +136,11 @@ func CreateMsgWithValidityPeriods(creator string, trID uint64, jsonSchema string
 		Creator:                                 creator,
 		TrId:                                    trID,
 		JsonSchema:                              jsonSchema,
-		IssuerGrantorValidationValidityPeriod:   issuerGrantor,
-		VerifierGrantorValidationValidityPeriod: verifierGrantor,
-		IssuerValidationValidityPeriod:          issuer,
-		VerifierValidationValidityPeriod:        verifier,
-		HolderValidationValidityPeriod:          holder,
+		IssuerGrantorValidationValidityPeriod:   &types.OptionalUInt32{Value: issuerGrantor},
+		VerifierGrantorValidationValidityPeriod: &types.OptionalUInt32{Value: verifierGrantor},
+		IssuerValidationValidityPeriod:          &types.OptionalUInt32{Value: issuer},
+		VerifierValidationValidityPeriod:        &types.OptionalUInt32{Value: verifier},
+		HolderValidationValidityPeriod:          &types.OptionalUInt32{Value: holder},
 		IssuerPermManagementMode:                issuerMode,
 		VerifierPermManagementMode:              verifierMode,
 	}
@@ -150,14 +150,16 @@ func CreateMsgWithValidityPeriods(creator string, trID uint64, jsonSchema string
 
 func CreateUpdateMsgWithValidityPeriods(creator string, id uint64, issuerGrantor, verifierGrantor, issuer, verifier, holder uint32) *types.MsgUpdateCredentialSchema {
 	msg := &types.MsgUpdateCredentialSchema{
-		Creator:                                 creator,
-		Id:                                      id,
-		IssuerGrantorValidationValidityPeriod:   issuerGrantor,
-		VerifierGrantorValidationValidityPeriod: verifierGrantor,
-		IssuerValidationValidityPeriod:          issuer,
-		VerifierValidationValidityPeriod:        verifier,
-		HolderValidationValidityPeriod:          holder,
+		Creator: creator,
+		Id:      id,
 	}
+
+	// Set optional fields using wrapper messages (0 is valid - means never expires)
+	msg.IssuerGrantorValidationValidityPeriod = &types.OptionalUInt32{Value: issuerGrantor}
+	msg.VerifierGrantorValidationValidityPeriod = &types.OptionalUInt32{Value: verifierGrantor}
+	msg.IssuerValidationValidityPeriod = &types.OptionalUInt32{Value: issuer}
+	msg.VerifierValidationValidityPeriod = &types.OptionalUInt32{Value: verifier}
+	msg.HolderValidationValidityPeriod = &types.OptionalUInt32{Value: holder}
 
 	return msg
 }
