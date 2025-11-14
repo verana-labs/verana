@@ -1,0 +1,332 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "verana/tr/v1/query.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "Query"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/verana/tr/v1/get/{tr_id}": {
+      "get": {
+        "summary": "GetTrustRegistry returns the trust registry information.",
+        "operationId": "Query_GetTrustRegistry",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.tr.v1.QueryGetTrustRegistryResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "tr_id",
+            "description": "Changed from string did to uint64 tr_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "uint64"
+          },
+          {
+            "name": "active_gf_only",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "preferred_language",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Query"
+        ]
+      }
+    },
+    "/verana/tr/v1/list": {
+      "get": {
+        "summary": "ListTrustRegistries returns a list of Trust Registries",
+        "operationId": "Query_ListTrustRegistries",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.tr.v1.QueryListTrustRegistriesResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "controller",
+            "description": "Added controller field",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "modified_after",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "active_gf_only",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "preferred_language",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "response_max_size",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "Query"
+        ]
+      }
+    },
+    "/verana/tr/v1/params": {
+      "get": {
+        "summary": "Parameters queries the parameters of the module.",
+        "operationId": "Query_Params",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.tr.v1.QueryParamsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "tags": [
+          "Query"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "google.protobuf.Any": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "google.rpc.Status": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/google.protobuf.Any"
+          }
+        }
+      }
+    },
+    "verana.tr.v1.GovernanceFrameworkDocument": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uint64",
+          "title": "Changed from string to uint64"
+        },
+        "gfv_id": {
+          "type": "string",
+          "format": "uint64",
+          "title": "Changed from string to uint64"
+        },
+        "created": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "language": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "digest_sri": {
+          "type": "string"
+        }
+      }
+    },
+    "verana.tr.v1.GovernanceFrameworkVersionWithDocs": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "tr_id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "created": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "active_since": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "documents": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/verana.tr.v1.GovernanceFrameworkDocument"
+          }
+        }
+      },
+      "title": "GovernanceFrameworkVersionWithDocs extends GovernanceFrameworkVersion to include its documents"
+    },
+    "verana.tr.v1.Params": {
+      "type": "object",
+      "properties": {
+        "trust_registry_trust_deposit": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "trust_unit_price": {
+          "type": "string",
+          "format": "uint64"
+        }
+      },
+      "description": "Params defines the parameters for the module."
+    },
+    "verana.tr.v1.QueryGetTrustRegistryResponse": {
+      "type": "object",
+      "properties": {
+        "trust_registry": {
+          "$ref": "#/definitions/verana.tr.v1.TrustRegistryWithVersions"
+        }
+      },
+      "description": "QueryGetTrustRegistryResponse is the response type for the Query/GetTrustRegistry RPC method."
+    },
+    "verana.tr.v1.QueryListTrustRegistriesResponse": {
+      "type": "object",
+      "properties": {
+        "trust_registries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/verana.tr.v1.TrustRegistryWithVersions"
+          }
+        }
+      },
+      "description": "QueryListTrustRegistriesResponse is the response type for the Query/ListTrustRegistries RPC method."
+    },
+    "verana.tr.v1.QueryParamsResponse": {
+      "type": "object",
+      "properties": {
+        "params": {
+          "$ref": "#/definitions/verana.tr.v1.Params",
+          "description": "params holds all the parameters of this module."
+        }
+      },
+      "description": "QueryParamsResponse is response type for the Query/Params RPC method."
+    },
+    "verana.tr.v1.TrustRegistryWithVersions": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "did": {
+          "type": "string"
+        },
+        "controller": {
+          "type": "string"
+        },
+        "created": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "modified": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "archived": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "deposit": {
+          "type": "string",
+          "format": "int64"
+        },
+        "aka": {
+          "type": "string"
+        },
+        "active_version": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "language": {
+          "type": "string"
+        },
+        "versions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/verana.tr.v1.GovernanceFrameworkVersionWithDocs"
+          }
+        }
+      },
+      "title": "TrustRegistryWithVersions extends TrustRegistry to include its versions with nested documents"
+    }
+  }
+}

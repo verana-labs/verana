@@ -92,10 +92,10 @@ $ veranad query cs schema 1`,
 Required Parameters:
 - tr-id: Trust registry ID (must be controlled by creator)
 - json-schema: Path to JSON schema file or inline JSON string
-- issuer-mode: Permission management mode (1=OPEN, 2=GRANTOR_VALIDATION, 3=TRUST_REGISTRY_VALIDATION)
+- issuer-mode: Permission management mode (1=OPEN, 2=GRANTOR_VALIDATION, 3=ECOSYSTEM)
 - verifier-mode: Permission management mode (same options as issuer-mode)
 
-Optional Flags (default to 0 days):
+Required Flags (default to 0 days, 0 means never expires):
 - --issuer-grantor-validation-validity-period: Validation period for issuer grantors (days, default: 0)
 - --verifier-grantor-validation-validity-period: Validation period for verifier grantors (days, default: 0)
 - --issuer-validation-validity-period: Validation period for issuers (days, default: 0)
@@ -153,7 +153,7 @@ $ veranad tx cs create-credential-schema 1 schema.json 2 2`,
 					Short:     "Update a credential schema's validity periods",
 					Long: `Update the validity periods of an existing credential schema.
 
-Optional Flags (default to 0 days):
+Required Flags (default to 0 days, 0 means never expires):
 - --issuer-grantor-validation-validity-period: Validation period for issuer grantors (days, default: 0)
 - --verifier-grantor-validation-validity-period: Validation period for verifier grantors (days, default: 0)
 - --issuer-validation-validity-period: Validation period for issuers (days, default: 0)

@@ -1,0 +1,339 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "verana/td/v1/tx.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "Msg"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/verana.td.v1.Msg/ReclaimTrustDeposit": {
+      "post": {
+        "operationId": "Msg_ReclaimTrustDeposit",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.td.v1.MsgReclaimTrustDepositResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.td.v1.MsgReclaimTrustDeposit"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.td.v1.Msg/ReclaimTrustDepositYield": {
+      "post": {
+        "operationId": "Msg_ReclaimTrustDepositYield",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.td.v1.MsgReclaimTrustDepositYieldResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.td.v1.MsgReclaimTrustDepositYield"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.td.v1.Msg/RepaySlashedTrustDeposit": {
+      "post": {
+        "operationId": "Msg_RepaySlashedTrustDeposit",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.td.v1.MsgRepaySlashedTrustDepositResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.td.v1.MsgRepaySlashedTrustDeposit"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.td.v1.Msg/SlashTrustDeposit": {
+      "post": {
+        "summary": "SlashTrustDeposit defines a governance operation to slash an account's trust deposit",
+        "operationId": "Msg_SlashTrustDeposit",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.td.v1.MsgSlashTrustDepositResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.td.v1.MsgSlashTrustDeposit"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.td.v1.Msg/UpdateParams": {
+      "post": {
+        "summary": "UpdateParams defines a (governance) operation for updating the module\nparameters. The authority defaults to the x/gov module account.",
+        "operationId": "Msg_UpdateParams",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.td.v1.MsgUpdateParamsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "MsgUpdateParams is the Msg/UpdateParams request type.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.td.v1.MsgUpdateParams"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "google.protobuf.Any": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "google.rpc.Status": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/google.protobuf.Any"
+          }
+        }
+      }
+    },
+    "verana.td.v1.MsgReclaimTrustDeposit": {
+      "type": "object",
+      "properties": {
+        "creator": {
+          "type": "string"
+        },
+        "claimed": {
+          "type": "string",
+          "format": "uint64",
+          "title": "Amount to reclaim in denom"
+        }
+      }
+    },
+    "verana.td.v1.MsgReclaimTrustDepositResponse": {
+      "type": "object",
+      "properties": {
+        "burned_amount": {
+          "type": "string",
+          "format": "uint64",
+          "title": "Amount burned"
+        },
+        "claimed_amount": {
+          "type": "string",
+          "format": "uint64",
+          "title": "Amount transferred to account"
+        }
+      }
+    },
+    "verana.td.v1.MsgReclaimTrustDepositYield": {
+      "type": "object",
+      "properties": {
+        "creator": {
+          "type": "string"
+        }
+      },
+      "title": "MsgReclaimTrustDepositYield defines the request type"
+    },
+    "verana.td.v1.MsgReclaimTrustDepositYieldResponse": {
+      "type": "object",
+      "properties": {
+        "claimed_amount": {
+          "type": "string",
+          "format": "uint64"
+        }
+      },
+      "title": "MsgReclaimTrustDepositYieldResponse defines the response type"
+    },
+    "verana.td.v1.MsgRepaySlashedTrustDeposit": {
+      "type": "object",
+      "properties": {
+        "creator": {
+          "type": "string"
+        },
+        "account": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "string",
+          "format": "uint64"
+        }
+      }
+    },
+    "verana.td.v1.MsgRepaySlashedTrustDepositResponse": {
+      "type": "object"
+    },
+    "verana.td.v1.MsgSlashTrustDeposit": {
+      "type": "object",
+      "properties": {
+        "authority": {
+          "type": "string",
+          "description": "authority is the address that controls the module (defaults to x/gov unless overwritten)."
+        },
+        "account": {
+          "type": "string",
+          "title": "account is the address of the account whose trust deposit will be slashed"
+        },
+        "amount": {
+          "type": "string",
+          "title": "amount is the amount to slash (in base denom)"
+        }
+      },
+      "title": "MsgSlashTrustDeposit defines the message for slashing an account's trust deposit\nThis can only be executed by the governance module"
+    },
+    "verana.td.v1.MsgSlashTrustDepositResponse": {
+      "type": "object",
+      "title": "MsgSlashTrustDepositResponse defines the response for MsgSlashTrustDeposit"
+    },
+    "verana.td.v1.MsgUpdateParams": {
+      "type": "object",
+      "properties": {
+        "authority": {
+          "type": "string",
+          "description": "authority is the address that controls the module (defaults to x/gov unless overwritten)."
+        },
+        "params": {
+          "$ref": "#/definitions/verana.td.v1.Params",
+          "description": "params defines the module parameters to update.\n\nNOTE: All parameters must be supplied."
+        }
+      },
+      "description": "MsgUpdateParams is the Msg/UpdateParams request type."
+    },
+    "verana.td.v1.MsgUpdateParamsResponse": {
+      "type": "object",
+      "description": "MsgUpdateParamsResponse defines the response structure for executing a\nMsgUpdateParams message."
+    },
+    "verana.td.v1.Params": {
+      "type": "object",
+      "properties": {
+        "trust_deposit_reclaim_burn_rate": {
+          "type": "string"
+        },
+        "trust_deposit_share_value": {
+          "type": "string"
+        },
+        "trust_deposit_rate": {
+          "type": "string"
+        },
+        "wallet_user_agent_reward_rate": {
+          "type": "string"
+        },
+        "user_agent_reward_rate": {
+          "type": "string"
+        }
+      },
+      "description": "Params defines the parameters for the module."
+    }
+  }
+}

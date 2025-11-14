@@ -1,0 +1,342 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "verana/cs/v1/tx.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "Msg"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/verana.cs.v1.Msg/ArchiveCredentialSchema": {
+      "post": {
+        "summary": "ArchiveCredentialSchema defines a method for archiving a credential schema.",
+        "operationId": "Msg_ArchiveCredentialSchema",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.cs.v1.MsgArchiveCredentialSchemaResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.cs.v1.MsgArchiveCredentialSchema"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.cs.v1.Msg/CreateCredentialSchema": {
+      "post": {
+        "summary": "CreateCredentialSchema defines a method for creating a new credential schema.",
+        "operationId": "Msg_CreateCredentialSchema",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.cs.v1.MsgCreateCredentialSchemaResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.cs.v1.MsgCreateCredentialSchema"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.cs.v1.Msg/UpdateCredentialSchema": {
+      "post": {
+        "summary": "UpdateCredentialSchema defines a method for updating a credential schema.",
+        "operationId": "Msg_UpdateCredentialSchema",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.cs.v1.MsgUpdateCredentialSchemaResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.cs.v1.MsgUpdateCredentialSchema"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.cs.v1.Msg/UpdateParams": {
+      "post": {
+        "summary": "UpdateParams defines a (governance) operation for updating the module\nparameters. The authority defaults to the x/gov module account.",
+        "operationId": "Msg_UpdateParams",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.cs.v1.MsgUpdateParamsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "MsgUpdateParams is the Msg/UpdateParams request type.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.cs.v1.MsgUpdateParams"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "google.protobuf.Any": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "google.rpc.Status": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/google.protobuf.Any"
+          }
+        }
+      }
+    },
+    "verana.cs.v1.MsgArchiveCredentialSchema": {
+      "type": "object",
+      "properties": {
+        "creator": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "archive": {
+          "type": "boolean"
+        }
+      }
+    },
+    "verana.cs.v1.MsgArchiveCredentialSchemaResponse": {
+      "type": "object"
+    },
+    "verana.cs.v1.MsgCreateCredentialSchema": {
+      "type": "object",
+      "properties": {
+        "creator": {
+          "type": "string"
+        },
+        "tr_id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "json_schema": {
+          "type": "string"
+        },
+        "issuer_grantor_validation_validity_period": {
+          "$ref": "#/definitions/verana.cs.v1.OptionalUInt32"
+        },
+        "verifier_grantor_validation_validity_period": {
+          "$ref": "#/definitions/verana.cs.v1.OptionalUInt32"
+        },
+        "issuer_validation_validity_period": {
+          "$ref": "#/definitions/verana.cs.v1.OptionalUInt32"
+        },
+        "verifier_validation_validity_period": {
+          "$ref": "#/definitions/verana.cs.v1.OptionalUInt32"
+        },
+        "holder_validation_validity_period": {
+          "$ref": "#/definitions/verana.cs.v1.OptionalUInt32"
+        },
+        "issuer_perm_management_mode": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "verifier_perm_management_mode": {
+          "type": "integer",
+          "format": "int64"
+        }
+      }
+    },
+    "verana.cs.v1.MsgCreateCredentialSchemaResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uint64",
+          "title": "ID of the created credential schema for confirmation"
+        }
+      }
+    },
+    "verana.cs.v1.MsgUpdateCredentialSchema": {
+      "type": "object",
+      "properties": {
+        "creator": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "issuer_grantor_validation_validity_period": {
+          "$ref": "#/definitions/verana.cs.v1.OptionalUInt32",
+          "title": "Optional fields: nil/not set means don't update, 0 means never expires"
+        },
+        "verifier_grantor_validation_validity_period": {
+          "$ref": "#/definitions/verana.cs.v1.OptionalUInt32"
+        },
+        "issuer_validation_validity_period": {
+          "$ref": "#/definitions/verana.cs.v1.OptionalUInt32"
+        },
+        "verifier_validation_validity_period": {
+          "$ref": "#/definitions/verana.cs.v1.OptionalUInt32"
+        },
+        "holder_validation_validity_period": {
+          "$ref": "#/definitions/verana.cs.v1.OptionalUInt32"
+        }
+      }
+    },
+    "verana.cs.v1.MsgUpdateCredentialSchemaResponse": {
+      "type": "object"
+    },
+    "verana.cs.v1.MsgUpdateParams": {
+      "type": "object",
+      "properties": {
+        "authority": {
+          "type": "string",
+          "description": "authority is the address that controls the module (defaults to x/gov unless overwritten)."
+        },
+        "params": {
+          "$ref": "#/definitions/verana.cs.v1.Params",
+          "description": "params defines the module parameters to update.\n\nNOTE: All parameters must be supplied."
+        }
+      },
+      "description": "MsgUpdateParams is the Msg/UpdateParams request type."
+    },
+    "verana.cs.v1.MsgUpdateParamsResponse": {
+      "type": "object",
+      "description": "MsgUpdateParamsResponse defines the response structure for executing a\nMsgUpdateParams message."
+    },
+    "verana.cs.v1.OptionalUInt32": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "title": "OptionalUInt32 is a wrapper for optional uint32 values\nnil means don't update, 0 means never expires"
+    },
+    "verana.cs.v1.Params": {
+      "type": "object",
+      "properties": {
+        "credential_schema_trust_deposit": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "credential_schema_schema_max_size": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "credential_schema_issuer_grantor_validation_validity_period_max_days": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "credential_schema_verifier_grantor_validation_validity_period_max_days": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "credential_schema_issuer_validation_validity_period_max_days": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "credential_schema_verifier_validation_validity_period_max_days": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "credential_schema_holder_validation_validity_period_max_days": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "description": "Params defines the parameters for the module."
+    }
+  }
+}
