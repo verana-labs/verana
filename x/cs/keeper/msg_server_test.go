@@ -492,11 +492,7 @@ func TestUpdateCredentialSchema(t *testing.T) {
         "required": ["name"],
         "additionalProperties": false
     }`
-	createMsg := &types.MsgCreateCredentialSchema{
-		Creator:    creator,
-		TrId:       trID,
-		JsonSchema: validJsonSchema,
-	}
+	createMsg := keeper.CreateMsgWithValidityPeriods(creator, trID, validJsonSchema, 365, 365, 180, 180, 180, 2, 2)
 
 	schemaID, err := ms.CreateCredentialSchema(ctx, createMsg)
 	require.NoError(t, err)
@@ -594,11 +590,7 @@ func TestArchiveCredentialSchema(t *testing.T) {
         "required": ["name"],
         "additionalProperties": false
     }`
-	createMsg := &types.MsgCreateCredentialSchema{
-		Creator:    creator,
-		TrId:       trID,
-		JsonSchema: validJsonSchema,
-	}
+	createMsg := keeper.CreateMsgWithValidityPeriods(creator, trID, validJsonSchema, 365, 365, 180, 180, 180, 2, 2)
 
 	schemaID, err := ms.CreateCredentialSchema(ctx, createMsg)
 	require.NoError(t, err)

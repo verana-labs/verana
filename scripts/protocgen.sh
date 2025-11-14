@@ -24,7 +24,7 @@ for dir in $proto_dirs; do
       echo "  Moving pulsar generated files to api directory..."
       # The pulsar files should already be in the right place based on buf.gen.pulsar.yaml config
     fi
-  fi
+fi
 
   # Generate gogo proto code (for x/ modules - types.pb.go files)
   if [ -f "buf.gen.gogo.yaml" ]; then
