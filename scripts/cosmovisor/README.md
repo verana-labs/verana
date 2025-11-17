@@ -121,7 +121,7 @@ veranad tx gov vote <proposal-id> yes \
     --yes
 
 # Or get proposal ID and vote in one command
-PROPOSAL_ID=$(veranad query gov proposals --node tcp://localhost:26657 --limit 1 --reverse --output json | jq -r '.proposals[0].id')
+PROPOSAL_ID=$(veranad query gov proposals --node tcp://localhost:26657 --output json | jq -r '.proposals[0].id')
 veranad tx gov vote $PROPOSAL_ID yes \
     --from cooluser \
     --chain-id vna-testnet-1 \
