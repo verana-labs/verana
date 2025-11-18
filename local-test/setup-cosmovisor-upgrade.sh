@@ -11,7 +11,9 @@ UPGRADE_BINARY_PATH="${UPGRADE_BINARY_PATH:-}"
 if [ -z "$UPGRADE_BINARY_PATH" ]; then
     echo "Error: UPGRADE_BINARY_PATH must be set"
     echo "Usage: UPGRADE_BINARY_PATH=/path/to/veranad-binary ./setup-cosmovisor-upgrade.sh"
-    echo "Example: UPGRADE_BINARY_PATH=./veranad-darwin-arm64 ./setup-cosmovisor-upgrade.sh"
+    echo ""
+    echo "Note: Docker containers run Linux, so download linux-amd64 or linux-arm64 (not darwin!)"
+    echo "Example: UPGRADE_BINARY_PATH=./veranad-linux-amd64 ./setup-cosmovisor-upgrade.sh"
     exit 1
 fi
 
@@ -59,7 +61,14 @@ for i in {1..5}; do
 done
 echo ""
 echo "Next steps:"
-echo "1. Submit an upgrade proposal (use scripts/cosmovisor/submit_proposal.sh)"
-echo "2. Vote on the proposal"
+echo "1. Query current block height:"
+echo "   docker exec validator1 veranad status --node tcp://localhost:26657 | jq -r '.sync_info.latest_block_height'"
+echo ""
+echo "2. Submit upgrade proposal and vote (from all validators):"
+echo "   ./local-test/submit-upgrade-proposal-docker.sh <upgrade-height> <release-tag>"
+echo "   Example: ./local-test/submit-upgrade-proposal-docker.sh 400 v0.9-dev.3"
+echo ""
 echo "3. When the upgrade height is reached, cosmovisor will automatically switch binaries"
+echo ""
+echo "Note: The binary has been made executable automatically (chmod +x)"
 

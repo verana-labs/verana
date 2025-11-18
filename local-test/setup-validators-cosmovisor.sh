@@ -337,9 +337,10 @@ sed -i.bak 's/stake/uvna/g' validator1/config/genesis.json
 # Update unbonding time to 60 seconds for testing
 # sed -i.bak 's/172800s/60s/g' validator1/config/genesis.json
 
-# Update governance parameters for faster testing
-# sed -i.bak 's/"max_deposit_period": ".*"/"max_deposit_period": "100s"/' validator1/config/genesis.json
-# sed -i.bak 's/"voting_period": ".*"/"voting_period": "100s"/' validator1/config/genesis.json
+# Update governance parameters for faster testing (100 seconds voting period)
+sed -i.bak 's/"max_deposit_period": ".*"/"max_deposit_period": "100s"/' validator1/config/genesis.json
+sed -i.bak 's/"voting_period": ".*"/"voting_period": "100s"/' validator1/config/genesis.json
+sed -i.bak 's/"expedited_voting_period": ".*"/"expedited_voting_period": "90s"/' validator1/config/genesis.json
 
 # Set minimum gas prices
 sed -i.bak 's/minimum-gas-prices = ""/minimum-gas-prices = "0.25uvna"/g' validator1/config/app.toml
