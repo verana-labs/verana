@@ -9,18 +9,25 @@ Quick setup for testing Verana blockchain changes with 3 validators in Docker.
 
 ## Setup
 
-1. **Create the 4 files** (Dockerfile, build.sh, setup-validators.sh, cleanup.sh) in your Verana project root
+All required files are already in the `local-test/` directory:
+- `Dockerfile` - Docker image definition
+- `build.sh` - Build script for Docker image
+- `setup-validators.sh` - Setup script for 5 validators
+- `cleanup.sh` - Cleanup script
 
-2. **Make scripts executable:**
-   ```bash
-   chmod +x build.sh setup-validators.sh cleanup.sh
-   ```
+**First build:**
+```bash
+# From project root
+./local-test/build.sh
+./local-test/setup-validators.sh
+```
 
-3. **First build:**
-   ```bash
-   ./build.sh
-   ./setup-validators.sh
-   ```
+Or if you're in the `local-test/` directory:
+```bash
+cd local-test
+./build.sh
+./setup-validators.sh
+```
 
 ## Development Workflow
 
@@ -28,13 +35,13 @@ Every time you make code changes:
 
 ```bash
 # 1. Build new Docker image with your changes
-./build.sh
+./local-test/build.sh
 
 # 2. Clean old environment
-./cleanup.sh
+./local-test/cleanup.sh
 
 # 3. Start fresh 5-validator network
-./setup-validators.sh
+./local-test/setup-validators.sh
 
 # 4. Test your changes
 ```
@@ -72,8 +79,8 @@ docker exec val2 veranad query bank balances $VAL2_ADDR
 ## Quick Commands
 
 ```bash
-# Full rebuild cycle
-./build.sh && ./cleanup.sh && ./setup-validators.sh
+# Full rebuild cycle (from project root)
+./local-test/build.sh && ./local-test/cleanup.sh && ./local-test/setup-validators.sh
 
 # Check all validator heights
 for port in 26657 27657 28657; do
@@ -81,16 +88,49 @@ for port in 26657 27657 28657; do
 done
 
 # Reset everything if stuck
-./cleanup.sh
+./local-test/cleanup.sh
 docker rmi verana:dev
-./build.sh && ./setup-validators.sh
+./local-test/build.sh && ./local-test/setup-validators.sh
 ```
+
+## Testing Upgrades with Cosmovisor
+
+To test chain upgrades in the local-test environment:
+
+1. **Build cosmovisor-enabled image:**
+   ```bash
+   ./local-test/build-cosmovisor.sh
+   ```
+
+2. **Update `local-test/setup-validators.sh` to use cosmovisor image:**
+   ```bash
+   # Change line 11 from:
+   DOCKER_IMAGE="verana:dev"
+   # To:
+   DOCKER_IMAGE="verana:dev-cosmovisor"
+   ```
+
+3. **Setup validators (they will use cosmovisor):**
+   ```bash
+   ./local-test/setup-validators.sh
+   ```
+
+4. **Prepare upgrade binary:**
+   ```bash
+   # Download upgrade binary and prepare for all validators
+   UPGRADE_BINARY_PATH=/path/to/veranad-binary ./local-test/setup-cosmovisor-upgrade.sh
+   ```
+
+5. **Submit upgrade proposal and vote** (use scripts from `scripts/cosmovisor/`)
+
+6. **Monitor upgrade:** When the upgrade height is reached, cosmovisor will automatically switch binaries in all validators.
 
 ## Troubleshooting
 
 - **Build fails:** Run `go mod tidy` in your source code
 - **Ports busy:** Run `./cleanup.sh` first
 - **Validators not syncing:** Check `docker logs val1`
-- **Complete reset:** `./cleanup.sh && docker rmi verana:dev && ./build.sh`
+- **Complete reset:** `./local-test/cleanup.sh && docker rmi verana:dev && ./local-test/build.sh`
+- **Cosmovisor not switching:** Verify upgrade binary exists in each validator's `cosmovisor/upgrades/<name>/bin/` directory
 
 That's it! Build → Clean → Setup → Test → Repeat for fast development cycles.

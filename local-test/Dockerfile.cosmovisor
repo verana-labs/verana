@@ -1,0 +1,46 @@
+FROM golang:1.23-alpine AS builder
+
+RUN apk add --no-cache ca-certificates build-base git
+
+WORKDIR /app
+
+# Copy source code
+COPY . .
+
+# Temporarily remove tool block for build (tool block syntax not fully supported in all Go versions)
+# The tool block is only needed for local development tools, not for building the binary
+RUN sed -i '/^tool (/,/^)$/d' go.mod || true
+
+# Build the binary
+RUN CGO_ENABLED=0 go build -o veranad ./cmd/veranad
+
+# Install cosmovisor
+RUN go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@latest
+
+# Final image
+FROM alpine:latest
+RUN apk --no-cache add ca-certificates
+
+# Copy binaries
+COPY --from=builder /app/veranad /usr/local/bin/veranad
+COPY --from=builder /go/bin/cosmovisor /usr/local/bin/cosmovisor
+
+# Create cosmovisor directory structure
+RUN mkdir -p /root/.verana/cosmovisor/genesis/bin && \
+    mkdir -p /root/.verana/cosmovisor/upgrades
+
+# Copy current binary to genesis
+RUN cp /usr/local/bin/veranad /root/.verana/cosmovisor/genesis/bin/veranad && \
+    chmod +x /root/.verana/cosmovisor/genesis/bin/veranad
+
+# Set cosmovisor environment variables
+ENV DAEMON_NAME=veranad
+ENV DAEMON_HOME=/root/.verana
+ENV DAEMON_RESTART_AFTER_UPGRADE=true
+ENV DAEMON_ALLOW_DOWNLOAD_BINARIES=false
+
+EXPOSE 26656 26657 1317 9090
+
+# Use cosmovisor as entrypoint
+ENTRYPOINT ["cosmovisor", "run", "start"]
+
