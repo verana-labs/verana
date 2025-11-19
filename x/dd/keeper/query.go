@@ -95,6 +95,6 @@ func (k Keeper) GetDID(ctx context.Context, req *types.QueryGetDIDRequest) (*typ
 	}
 
 	return &types.QueryGetDIDResponse{
-		DidEntry: didEntry,
+		Did: didEntry,
 	}, nil
 }
