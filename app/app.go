@@ -281,6 +281,10 @@ func (app *App) GetAccountKeeper() authkeeper.AccountKeeper {
 	return app.AccountKeeper
 }
 
+func (app *App) GetGovKeeper() *govkeeper.Keeper {
+	return app.GovKeeper
+}
+
 // New returns a reference to an initialized App.
 func New(
 	logger log.Logger,
