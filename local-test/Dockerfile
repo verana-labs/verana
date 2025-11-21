@@ -1,4 +1,4 @@
-FROM golang:1.22-alpine AS builder
+FROM golang:1.23-alpine AS builder
 
 RUN apk add --no-cache ca-certificates build-base git
 
@@ -7,9 +7,11 @@ WORKDIR /app
 # Copy source code
 COPY . .
 
-# Initialize modules if needed and build
-RUN go mod init verana || true
-RUN go mod tidy
+# Temporarily remove tool block for build (tool block syntax not fully supported in all Go versions)
+# The tool block is only needed for local development tools, not for building the binary
+RUN sed -i '/^tool (/,/^)$/d' go.mod || true
+
+# Build the binary
 RUN CGO_ENABLED=0 go build -o veranad ./cmd/veranad
 
 # Final image
