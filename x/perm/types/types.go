@@ -2,10 +2,11 @@ package types
 
 import (
 	"fmt"
+	"regexp"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/google/uuid"
-	"regexp"
 )
 
 func (msg *MsgStartPermissionVP) ValidateBasic() error {
@@ -43,8 +44,10 @@ func isValidCountryCode(code string) bool {
 }
 
 func isValidDID(did string) bool {
-	// Basic DID validation regex
-	match, _ := regexp.MatchString(`^did:[a-zA-Z0-9]+:[a-zA-Z0-9._-]+$`, did)
+	// DID validation regex following W3C DID specification
+	// Format: did:<method-name>:<method-specific-id>
+	// Method-specific-id can contain alphanumeric, dots, underscores, hyphens, colons, and slashes
+	match, _ := regexp.MatchString(`^did:[a-zA-Z0-9]+:[a-zA-Z0-9._:/-]+$`, did)
 	return match
 }
 

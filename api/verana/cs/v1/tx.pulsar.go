@@ -5115,7 +5115,6 @@ func (x *MsgUpdateCredentialSchema) GetHolderValidationValidityPeriod() *Optiona
 }
 
 // OptionalUInt32 is a wrapper for optional uint32 values
-// nil means don't update, 0 means never expires
 type OptionalUInt32 struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache

@@ -200,7 +200,7 @@
     "verana.dd.v1.QueryGetDIDResponse": {
       "type": "object",
       "properties": {
-        "did_entry": {
+        "did": {
           "$ref": "#/definitions/verana.dd.v1.DIDDirectory"
         }
       }

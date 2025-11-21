@@ -38,9 +38,10 @@ func (ms msgServer) validateAddDIDParams(ctx sdk.Context, msg *types.MsgAddDID) 
 }
 
 func isValidDID(did string) bool {
-	// Basic DID validation regex
-	// This is a simplified version and may need to be expanded based on specific DID method requirements
-	didRegex := regexp.MustCompile(`^did:[a-zA-Z0-9]+:[a-zA-Z0-9._-]+$`)
+	// DID validation regex following W3C DID specification
+	// Format: did:<method-name>:<method-specific-id>
+	// Method-specific-id can contain alphanumeric, dots, underscores, hyphens, colons, and slashes
+	didRegex := regexp.MustCompile(`^did:[a-zA-Z0-9]+:[a-zA-Z0-9._:/-]+$`)
 	return didRegex.MatchString(did)
 }
 

@@ -380,7 +380,6 @@ func (m *MsgUpdateCredentialSchema) GetHolderValidationValidityPeriod() *Optiona
 }
 
 // OptionalUInt32 is a wrapper for optional uint32 values
-// nil means don't update, 0 means never expires
 type OptionalUInt32 struct {
 	Value uint32 `protobuf:"varint,1,opt,name=value,proto3" json:"value,omitempty"`
 }

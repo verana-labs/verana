@@ -554,6 +554,16 @@ func TestDIDValidation(t *testing.T) {
 			isValid: true,
 		},
 		{
+			name:    "Valid DID with colon in method-specific-id (webvh format)",
+			did:     "did:webvh:QmU1tBocQ6oZN3zaPFrx9hjB5BnzQr1Kb1GvKqY144Qjjp:dm.gov-id-issuer.demos.dev.2060.io",
+			isValid: true,
+		},
+		{
+			name:    "Valid DID with slash in method-specific-id",
+			did:     "did:example:path/to/resource",
+			isValid: true,
+		},
+		{
 			name:    "Invalid DID - no prefix",
 			did:     "example:123456789abcdefghi",
 			isValid: false,

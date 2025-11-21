@@ -55,5 +55,5 @@ message QueryGetDIDRequest {
 }
 
 message QueryGetDIDResponse {
-  DIDDirectory did_entry = 1 [(gogoproto.nullable) = false];
+  DIDDirectory did = 1 [(gogoproto.nullable) = false];
 }
