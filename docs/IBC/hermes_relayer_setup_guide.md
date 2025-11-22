@@ -806,3 +806,69 @@ curl http://127.0.0.1:3001/metrics             # Telemetry
 ---
 
 **Questions or issues?** Check the [Hermes documentation](https://hermes.informal.systems/) or join the Verana/Osmosis Discord communities for support.
+
+
+## How to test the bridge?
+
+```bash
+osmosisd q bank balances $OSMOS_ACC_LIT --node $OSMO_RPC
+
+osmosisd q bank balance $(osmosisd keys show $USER_ACC -a --keyring-backend test) "ibc/A29BAC98BBD293A8BEEB6413123CD3788035F27676DCD066FE0A869D5B39474C" --node $OSMO_RPC
+
+osmosisd q bank balance $OSMOS_ACC_LIT "ibc/A29BAC98BBD293A8BEEB6413123CD3788035F27676DCD066FE0A869D5B39474C" --node $OSMO_RPC
+
+veranad q bank balances $(veranad keys show cooluser -a --keyring-backend test) --node $NODE_RPC
+
+osmosisd q ibc-transfer denom-trace \
+  A29BAC98BBD293A8BEEB6413123CD3788035F27676DCD066FE0A869D5B39474C \
+  --node $OSMO_RPC
+
+```
+
+```bash
+NODE_RPC=https://rpc.devnet.verana.network
+CHAIN_ID=vna-devnet-1
+OSMOS_ACC=mat-test-acc
+OSMOS_ACC_LIT=osmo1sxau0xyttphpck7vhlvt8s82ez70nlzwjgvynf
+veranad tx ibc-transfer transfer transfer channel-1 $OSMOS_ACC_LIT 1000000uvna --chain-id $CHAIN_ID --keyring-backend test  --from cooluser --fees 800000uvna --gas 800000 -y --node $NODE_RPC
+
+
+VERANA_GRPC=http://node1.devnet.verana.network:9090  # or set an env var
+veranad tx ibc-transfer transfer transfer channel-1 \
+  "$OSMOS_ACC_LIT" 1000000uvna \
+  --chain-id "$CHAIN_ID" \
+  --keyring-backend test \
+  --from cooluser \
+  --fees 800000uvna \
+  --gas 800000 \
+  --node "$NODE_RPC" \
+  -y
+```
+
+
+
+```bash
+OSMO_RPC=https://osmosis.rpc.kjnodes.com
+OSMO_CHAIN_ID=osmosis-1
+USER_ACC_LIT=verana1sxau0xyttphpck7vhlvt8s82ez70nlzw2mhya0
+
+echo "$TEST_WALLET_MNEMO" | osmosisd keys add $USER_ACC --keyring-backend test --recover 
+
+
+
+osmosisd tx ibc-transfer transfer transfer channel-107808 $USER_ACC_LIT 1000000ibc/A29BAC98BBD293A8BEEB6413123CD3788035F27676DCD066FE0A869D5B39474C --chain-id $OSMO_CHAIN_ID --keyring-backend test  --from $USER_ACC --fees 80000uosmo --gas 800000 -y --node $OSMO_RPC
+```
+
+## troubleshooting tips
+
+```bash
+hermes update client --host-chain vna-devnet-1 --client 07-tendermint-7
+hermes update client --host-chain osmosis-1 --client 07-tendermint-3629
+
+```
+
+## How to remove a key
+
+```bash
+hermes keys delete --key-name osmosis-relayer  --chain osmosis-1
+```
