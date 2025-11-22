@@ -192,11 +192,11 @@ func TestQueryGetDID(t *testing.T) {
 			expectedError: false,
 			check: func(t *testing.T, response *types.QueryGetDIDResponse) {
 				require.NotNil(t, response)
-				require.Equal(t, validDID, response.DidEntry.Did)
-				require.Equal(t, creator, response.DidEntry.Controller)
-				require.False(t, response.DidEntry.Created.IsZero())
-				require.False(t, response.DidEntry.Modified.IsZero())
-				require.False(t, response.DidEntry.Exp.IsZero())
+				require.Equal(t, validDID, response.Did.Did)
+				require.Equal(t, creator, response.Did.Controller)
+				require.False(t, response.Did.Created.IsZero())
+				require.False(t, response.Did.Modified.IsZero())
+				require.False(t, response.Did.Exp.IsZero())
 			},
 		},
 		{
