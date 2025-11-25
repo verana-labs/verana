@@ -1,0 +1,786 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "verana/perm/v1/tx.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "Msg"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/verana.perm.v1.Msg/CancelPermissionVPLastRequest": {
+      "post": {
+        "summary": "rpc RequestPermissionVPTermination(MsgRequestPermissionVPTermination) returns (MsgRequestPermissionVPTerminationResponse);\n rpc ConfirmPermissionVPTermination(MsgConfirmPermissionVPTermination) returns (MsgConfirmPermissionVPTerminationResponse);",
+        "operationId": "Msg_CancelPermissionVPLastRequest",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.perm.v1.MsgCancelPermissionVPLastRequestResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.perm.v1.MsgCancelPermissionVPLastRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.perm.v1.Msg/CreateOrUpdatePermissionSession": {
+      "post": {
+        "operationId": "Msg_CreateOrUpdatePermissionSession",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.perm.v1.MsgCreateOrUpdatePermissionSessionResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.perm.v1.MsgCreateOrUpdatePermissionSession"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.perm.v1.Msg/CreatePermission": {
+      "post": {
+        "operationId": "Msg_CreatePermission",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.perm.v1.MsgCreatePermissionResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.perm.v1.MsgCreatePermission"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.perm.v1.Msg/CreateRootPermission": {
+      "post": {
+        "operationId": "Msg_CreateRootPermission",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.perm.v1.MsgCreateRootPermissionResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.perm.v1.MsgCreateRootPermission"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.perm.v1.Msg/ExtendPermission": {
+      "post": {
+        "operationId": "Msg_ExtendPermission",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.perm.v1.MsgExtendPermissionResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.perm.v1.MsgExtendPermission"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.perm.v1.Msg/RenewPermissionVP": {
+      "post": {
+        "operationId": "Msg_RenewPermissionVP",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.perm.v1.MsgRenewPermissionVPResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.perm.v1.MsgRenewPermissionVP"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.perm.v1.Msg/RepayPermissionSlashedTrustDeposit": {
+      "post": {
+        "operationId": "Msg_RepayPermissionSlashedTrustDeposit",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.perm.v1.MsgRepayPermissionSlashedTrustDepositResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.perm.v1.MsgRepayPermissionSlashedTrustDeposit"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.perm.v1.Msg/RevokePermission": {
+      "post": {
+        "operationId": "Msg_RevokePermission",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.perm.v1.MsgRevokePermissionResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.perm.v1.MsgRevokePermission"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.perm.v1.Msg/SetPermissionVPToValidated": {
+      "post": {
+        "operationId": "Msg_SetPermissionVPToValidated",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.perm.v1.MsgSetPermissionVPToValidatedResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.perm.v1.MsgSetPermissionVPToValidated"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.perm.v1.Msg/SlashPermissionTrustDeposit": {
+      "post": {
+        "operationId": "Msg_SlashPermissionTrustDeposit",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.perm.v1.MsgSlashPermissionTrustDepositResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.perm.v1.MsgSlashPermissionTrustDeposit"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.perm.v1.Msg/StartPermissionVP": {
+      "post": {
+        "operationId": "Msg_StartPermissionVP",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.perm.v1.MsgStartPermissionVPResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.perm.v1.MsgStartPermissionVP"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.perm.v1.Msg/UpdateParams": {
+      "post": {
+        "summary": "UpdateParams defines a (governance) operation for updating the module\nparameters. The authority defaults to the x/gov module account.",
+        "operationId": "Msg_UpdateParams",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.perm.v1.MsgUpdateParamsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "MsgUpdateParams is the Msg/UpdateParams request type.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.perm.v1.MsgUpdateParams"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "google.protobuf.Any": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "google.rpc.Status": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/google.protobuf.Any"
+          }
+        }
+      }
+    },
+    "verana.perm.v1.MsgCancelPermissionVPLastRequest": {
+      "type": "object",
+      "properties": {
+        "creator": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string",
+          "format": "uint64",
+          "title": "Permission ID"
+        }
+      }
+    },
+    "verana.perm.v1.MsgCancelPermissionVPLastRequestResponse": {
+      "type": "object"
+    },
+    "verana.perm.v1.MsgCreateOrUpdatePermissionSession": {
+      "type": "object",
+      "properties": {
+        "creator": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string",
+          "title": "UUID"
+        },
+        "issuer_perm_id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "verifier_perm_id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "agent_perm_id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "wallet_agent_perm_id": {
+          "type": "string",
+          "format": "uint64"
+        }
+      }
+    },
+    "verana.perm.v1.MsgCreateOrUpdatePermissionSessionResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      }
+    },
+    "verana.perm.v1.MsgCreatePermission": {
+      "type": "object",
+      "properties": {
+        "creator": {
+          "type": "string"
+        },
+        "schema_id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "type": {
+          "$ref": "#/definitions/verana.perm.v1.PermissionType"
+        },
+        "did": {
+          "type": "string"
+        },
+        "country": {
+          "type": "string"
+        },
+        "effective_from": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "effective_until": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "verification_fees": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "validation_fees": {
+          "type": "string",
+          "format": "uint64"
+        }
+      }
+    },
+    "verana.perm.v1.MsgCreatePermissionResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uint64"
+        }
+      }
+    },
+    "verana.perm.v1.MsgCreateRootPermission": {
+      "type": "object",
+      "properties": {
+        "creator": {
+          "type": "string"
+        },
+        "schema_id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "did": {
+          "type": "string"
+        },
+        "country": {
+          "type": "string"
+        },
+        "effective_from": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "effective_until": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "validation_fees": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "issuance_fees": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "verification_fees": {
+          "type": "string",
+          "format": "uint64"
+        }
+      }
+    },
+    "verana.perm.v1.MsgCreateRootPermissionResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uint64",
+          "title": "ID of the created permission"
+        }
+      }
+    },
+    "verana.perm.v1.MsgExtendPermission": {
+      "type": "object",
+      "properties": {
+        "creator": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string",
+          "format": "uint64",
+          "title": "Permission ID"
+        },
+        "effective_until": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "verana.perm.v1.MsgExtendPermissionResponse": {
+      "type": "object"
+    },
+    "verana.perm.v1.MsgRenewPermissionVP": {
+      "type": "object",
+      "properties": {
+        "creator": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string",
+          "format": "uint64",
+          "title": "ID of the permission to renew"
+        }
+      },
+      "title": "MsgRenewPermissionVP represents a message to renew a permission validation process"
+    },
+    "verana.perm.v1.MsgRenewPermissionVPResponse": {
+      "type": "object",
+      "title": "MsgRenewPermissionVPResponse defines the Msg/RenewPermissionVP response type"
+    },
+    "verana.perm.v1.MsgRepayPermissionSlashedTrustDeposit": {
+      "type": "object",
+      "properties": {
+        "creator": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string",
+          "format": "uint64"
+        }
+      }
+    },
+    "verana.perm.v1.MsgRepayPermissionSlashedTrustDepositResponse": {
+      "type": "object"
+    },
+    "verana.perm.v1.MsgRevokePermission": {
+      "type": "object",
+      "properties": {
+        "creator": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string",
+          "format": "uint64",
+          "title": "Permission ID"
+        }
+      }
+    },
+    "verana.perm.v1.MsgRevokePermissionResponse": {
+      "type": "object"
+    },
+    "verana.perm.v1.MsgSetPermissionVPToValidated": {
+      "type": "object",
+      "properties": {
+        "creator": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "effective_until": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "validation_fees": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "issuance_fees": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "verification_fees": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "country": {
+          "type": "string"
+        },
+        "vp_summary_digest_sri": {
+          "type": "string"
+        }
+      },
+      "title": "MsgSetPermissionVPToValidated represents a message to set a permission validation process to validated state"
+    },
+    "verana.perm.v1.MsgSetPermissionVPToValidatedResponse": {
+      "type": "object",
+      "title": "MsgSetPermissionVPToValidatedResponse defines the Msg/SetPermissionVPToValidated response type"
+    },
+    "verana.perm.v1.MsgSlashPermissionTrustDeposit": {
+      "type": "object",
+      "properties": {
+        "creator": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "amount": {
+          "type": "string",
+          "format": "uint64"
+        }
+      }
+    },
+    "verana.perm.v1.MsgSlashPermissionTrustDepositResponse": {
+      "type": "object"
+    },
+    "verana.perm.v1.MsgStartPermissionVP": {
+      "type": "object",
+      "properties": {
+        "creator": {
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/definitions/verana.perm.v1.PermissionType"
+        },
+        "validator_perm_id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "country": {
+          "type": "string"
+        },
+        "did": {
+          "type": "string",
+          "title": "optional"
+        }
+      },
+      "title": "MsgStartPermissionVP represents a message to start a permission validation process"
+    },
+    "verana.perm.v1.MsgStartPermissionVPResponse": {
+      "type": "object",
+      "properties": {
+        "permission_id": {
+          "type": "string",
+          "format": "uint64"
+        }
+      },
+      "title": "MsgStartPermissionVPResponse defines the Msg/StartPermissionVP response type"
+    },
+    "verana.perm.v1.MsgUpdateParams": {
+      "type": "object",
+      "properties": {
+        "authority": {
+          "type": "string",
+          "description": "authority is the address that controls the module (defaults to x/gov unless overwritten)."
+        },
+        "params": {
+          "$ref": "#/definitions/verana.perm.v1.Params",
+          "description": "params defines the module parameters to update.\n\nNOTE: All parameters must be supplied."
+        }
+      },
+      "description": "MsgUpdateParams is the Msg/UpdateParams request type."
+    },
+    "verana.perm.v1.MsgUpdateParamsResponse": {
+      "type": "object",
+      "description": "MsgUpdateParamsResponse defines the response structure for executing a\nMsgUpdateParams message."
+    },
+    "verana.perm.v1.Params": {
+      "type": "object",
+      "properties": {
+        "validation_term_requested_timeout_days": {
+          "type": "string",
+          "format": "uint64"
+        }
+      },
+      "description": "Params defines the parameters for the module."
+    },
+    "verana.perm.v1.PermissionType": {
+      "type": "string",
+      "enum": [
+        "UNSPECIFIED",
+        "ISSUER",
+        "VERIFIER",
+        "ISSUER_GRANTOR",
+        "VERIFIER_GRANTOR",
+        "ECOSYSTEM",
+        "HOLDER"
+      ],
+      "default": "UNSPECIFIED",
+      "description": "- ECOSYSTEM: Changed from PERMISSION_TYPE_TRUST_REGISTRY",
+      "title": "Permission types"
+    }
+  }
+}

@@ -1,0 +1,188 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "verana/td/v1/query.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "Query"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/verana/td/v1/get/{account}": {
+      "get": {
+        "operationId": "Query_GetTrustDeposit",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.td.v1.QueryGetTrustDepositResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "account",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Query"
+        ]
+      }
+    },
+    "/verana/td/v1/params": {
+      "get": {
+        "summary": "Parameters queries the parameters of the module.",
+        "operationId": "Query_Params",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.td.v1.QueryParamsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "tags": [
+          "Query"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "google.protobuf.Any": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "google.rpc.Status": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/google.protobuf.Any"
+          }
+        }
+      }
+    },
+    "verana.td.v1.Params": {
+      "type": "object",
+      "properties": {
+        "trust_deposit_reclaim_burn_rate": {
+          "type": "string"
+        },
+        "trust_deposit_share_value": {
+          "type": "string"
+        },
+        "trust_deposit_rate": {
+          "type": "string"
+        },
+        "wallet_user_agent_reward_rate": {
+          "type": "string"
+        },
+        "user_agent_reward_rate": {
+          "type": "string"
+        }
+      },
+      "description": "Params defines the parameters for the module."
+    },
+    "verana.td.v1.QueryGetTrustDepositResponse": {
+      "type": "object",
+      "properties": {
+        "trust_deposit": {
+          "$ref": "#/definitions/verana.td.v1.TrustDeposit"
+        }
+      },
+      "title": "QueryGetTrustDepositResponse is response type for the GetTrustDeposit RPC method"
+    },
+    "verana.td.v1.QueryParamsResponse": {
+      "type": "object",
+      "properties": {
+        "params": {
+          "$ref": "#/definitions/verana.td.v1.Params",
+          "description": "params holds all the parameters of this module."
+        }
+      },
+      "description": "QueryParamsResponse is response type for the Query/Params RPC method."
+    },
+    "verana.td.v1.TrustDeposit": {
+      "type": "object",
+      "properties": {
+        "account": {
+          "type": "string"
+        },
+        "share": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "amount": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "claimable": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "slashed_deposit": {
+          "type": "string",
+          "format": "uint64",
+          "title": "NEW v2 fields: Slashing related"
+        },
+        "repaid_deposit": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "last_slashed": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "last_repaid": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "slash_count": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "last_repaid_by": {
+          "type": "string"
+        }
+      },
+      "title": "TrustDeposit represents an account's trust deposit"
+    }
+  }
+}

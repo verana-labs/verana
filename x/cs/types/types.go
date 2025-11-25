@@ -118,38 +118,16 @@ func NewMsgCreateCredentialSchema(
 	verifierPermManagementMode uint32,
 ) *MsgCreateCredentialSchema {
 	msg := &MsgCreateCredentialSchema{
-		Creator:                    creator,
-		TrId:                       trId,
-		JsonSchema:                 jsonSchema,
-		IssuerPermManagementMode:   issuerPermManagementMode,
-		VerifierPermManagementMode: verifierPermManagementMode,
-	}
-
-	// Set optional fields using the wrapper types
-	if issuerGrantorValidationValidityPeriod > 0 {
-		msg.XIssuerGrantorValidationValidityPeriod = &MsgCreateCredentialSchema_IssuerGrantorValidationValidityPeriod{
-			IssuerGrantorValidationValidityPeriod: issuerGrantorValidationValidityPeriod,
-		}
-	}
-	if verifierGrantorValidationValidityPeriod > 0 {
-		msg.XVerifierGrantorValidationValidityPeriod = &MsgCreateCredentialSchema_VerifierGrantorValidationValidityPeriod{
-			VerifierGrantorValidationValidityPeriod: verifierGrantorValidationValidityPeriod,
-		}
-	}
-	if issuerValidationValidityPeriod > 0 {
-		msg.XIssuerValidationValidityPeriod = &MsgCreateCredentialSchema_IssuerValidationValidityPeriod{
-			IssuerValidationValidityPeriod: issuerValidationValidityPeriod,
-		}
-	}
-	if verifierValidationValidityPeriod > 0 {
-		msg.XVerifierValidationValidityPeriod = &MsgCreateCredentialSchema_VerifierValidationValidityPeriod{
-			VerifierValidationValidityPeriod: verifierValidationValidityPeriod,
-		}
-	}
-	if holderValidationValidityPeriod > 0 {
-		msg.XHolderValidationValidityPeriod = &MsgCreateCredentialSchema_HolderValidationValidityPeriod{
-			HolderValidationValidityPeriod: holderValidationValidityPeriod,
-		}
+		Creator:                                 creator,
+		TrId:                                    trId,
+		JsonSchema:                              jsonSchema,
+		IssuerGrantorValidationValidityPeriod:   &OptionalUInt32{Value: issuerGrantorValidationValidityPeriod},
+		VerifierGrantorValidationValidityPeriod: &OptionalUInt32{Value: verifierGrantorValidationValidityPeriod},
+		IssuerValidationValidityPeriod:          &OptionalUInt32{Value: issuerValidationValidityPeriod},
+		VerifierValidationValidityPeriod:        &OptionalUInt32{Value: verifierValidationValidityPeriod},
+		HolderValidationValidityPeriod:          &OptionalUInt32{Value: holderValidationValidityPeriod},
+		IssuerPermManagementMode:                issuerPermManagementMode,
+		VerifierPermManagementMode:              verifierPermManagementMode,
 	}
 
 	return msg
@@ -300,36 +278,52 @@ func EnsureCanonicalID(schemaJSON string, chainID string, schemaID uint64) (stri
 }
 
 func validateValidityPeriods(msg *MsgCreateCredentialSchema) error {
+	// [MOD-CS-MSG-1-2-1] All validity period fields are mandatory
 	// A value of 0 indicates no expiration (never expire)
-	// All other values must be within the allowed range
+	// All other values must be within the allowed range (between 0 and max_days)
 
-	if msg.GetIssuerGrantorValidationValidityPeriod() < 0 {
-		return fmt.Errorf("issuer grantor validation validity period cannot be negative")
+	if msg.GetIssuerGrantorValidationValidityPeriod() == nil {
+		return fmt.Errorf("issuer_grantor_validation_validity_period is mandatory")
 	}
-	if msg.GetVerifierGrantorValidationValidityPeriod() < 0 {
-		return fmt.Errorf("verifier grantor validation validity period cannot be negative")
+	if msg.GetVerifierGrantorValidationValidityPeriod() == nil {
+		return fmt.Errorf("verifier_grantor_validation_validity_period is mandatory")
+	}
+	if msg.GetIssuerValidationValidityPeriod() == nil {
+		return fmt.Errorf("issuer_validation_validity_period is mandatory")
+	}
+	if msg.GetVerifierValidationValidityPeriod() == nil {
+		return fmt.Errorf("verifier_validation_validity_period is mandatory")
+	}
+	if msg.GetHolderValidationValidityPeriod() == nil {
+		return fmt.Errorf("holder_validation_validity_period is mandatory")
 	}
 
-	// Add maximum value checks
-	if msg.GetIssuerGrantorValidationValidityPeriod() > 0 &&
-		msg.GetIssuerGrantorValidationValidityPeriod() > DefaultCredentialSchemaIssuerGrantorValidationValidityPeriodMaxDays {
+	// Validate ranges: must be between 0 (never expire) and max_days
+	val := msg.GetIssuerGrantorValidationValidityPeriod().GetValue()
+	if val > 0 && val > DefaultCredentialSchemaIssuerGrantorValidationValidityPeriodMaxDays {
 		return fmt.Errorf("issuer grantor validation validity period exceeds maximum allowed days")
 	}
 
-	if msg.GetVerifierGrantorValidationValidityPeriod() > 0 &&
-		msg.GetVerifierGrantorValidationValidityPeriod() > DefaultCredentialSchemaVerifierGrantorValidationValidityPeriodMaxDays {
+	val = msg.GetVerifierGrantorValidationValidityPeriod().GetValue()
+	if val > 0 && val > DefaultCredentialSchemaVerifierGrantorValidationValidityPeriodMaxDays {
 		return fmt.Errorf("verifier grantor validation validity period exceeds maximum allowed days")
 	}
 
-	if msg.GetIssuerValidationValidityPeriod() < 0 {
-		return fmt.Errorf("issuer validation validity period cannot be negative")
+	val = msg.GetIssuerValidationValidityPeriod().GetValue()
+	if val > 0 && val > DefaultCredentialSchemaIssuerValidationValidityPeriodMaxDays {
+		return fmt.Errorf("issuer validation validity period exceeds maximum allowed days")
 	}
-	if msg.GetVerifierValidationValidityPeriod() < 0 {
-		return fmt.Errorf("verifier validation validity period cannot be negative")
+
+	val = msg.GetVerifierValidationValidityPeriod().GetValue()
+	if val > 0 && val > DefaultCredentialSchemaVerifierValidationValidityPeriodMaxDays {
+		return fmt.Errorf("verifier validation validity period exceeds maximum allowed days")
 	}
-	if msg.GetHolderValidationValidityPeriod() < 0 {
-		return fmt.Errorf("holder validation validity period cannot be negative")
+
+	val = msg.GetHolderValidationValidityPeriod().GetValue()
+	if val > 0 && val > DefaultCredentialSchemaHolderValidationValidityPeriodMaxDays {
+		return fmt.Errorf("holder validation validity period exceeds maximum allowed days")
 	}
+
 	return nil
 }
 
@@ -360,13 +354,26 @@ func (msg *MsgUpdateCredentialSchema) ValidateBasic() error {
 		return errors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid creator address (%s)", err)
 	}
 
-	// Check mandatory parameters
+	// [MOD-CS-MSG-2-2-1] Check mandatory parameters
 	if msg.Id == 0 {
 		return errors.Wrap(sdkerrors.ErrInvalidRequest, "id cannot be 0")
 	}
 
-	if msg.Id == 0 {
-		return fmt.Errorf("credential schema id is required")
+	// [MOD-CS-MSG-2-2-1] All validity period fields are mandatory
+	if msg.GetIssuerGrantorValidationValidityPeriod() == nil {
+		return errors.Wrap(sdkerrors.ErrInvalidRequest, "issuer_grantor_validation_validity_period is mandatory")
+	}
+	if msg.GetVerifierGrantorValidationValidityPeriod() == nil {
+		return errors.Wrap(sdkerrors.ErrInvalidRequest, "verifier_grantor_validation_validity_period is mandatory")
+	}
+	if msg.GetIssuerValidationValidityPeriod() == nil {
+		return errors.Wrap(sdkerrors.ErrInvalidRequest, "issuer_validation_validity_period is mandatory")
+	}
+	if msg.GetVerifierValidationValidityPeriod() == nil {
+		return errors.Wrap(sdkerrors.ErrInvalidRequest, "verifier_validation_validity_period is mandatory")
+	}
+	if msg.GetHolderValidationValidityPeriod() == nil {
+		return errors.Wrap(sdkerrors.ErrInvalidRequest, "holder_validation_validity_period is mandatory")
 	}
 
 	return nil

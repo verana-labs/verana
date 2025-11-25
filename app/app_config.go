@@ -58,15 +58,10 @@ import (
 	permissionmodulev1 "github.com/verana-labs/verana/api/verana/perm/module"
 	trustdepositmodulev1 "github.com/verana-labs/verana/api/verana/td/module"
 	trustregistrymodulev1 "github.com/verana-labs/verana/api/verana/tr/module"
-	_ "github.com/verana-labs/verana/x/cs/module" // import for side-effects
 	credentialschemamoduletypes "github.com/verana-labs/verana/x/cs/types"
-	_ "github.com/verana-labs/verana/x/dd/module" // import for side-effects
 	diddirectorymoduletypes "github.com/verana-labs/verana/x/dd/types"
-	_ "github.com/verana-labs/verana/x/perm/module" // import for side-effects
 	permissionmoduletypes "github.com/verana-labs/verana/x/perm/types"
-	_ "github.com/verana-labs/verana/x/td/module" // import for side-effects
 	trustdepositmoduletypes "github.com/verana-labs/verana/x/td/types"
-	_ "github.com/verana-labs/verana/x/tr/module" // import for side-effects
 	trustregistrymoduletypes "github.com/verana-labs/verana/x/tr/types"
 	// this line is used by starport scaffolding # stargate/app/moduleImport
 	protocolpoolmodulev1 "cosmossdk.io/api/cosmos/protocolpool/module/v1" // import for side-effects

@@ -2,6 +2,7 @@ package v9
 
 import (
 	"context"
+	"time"
 
 	upgradetypes "cosmossdk.io/x/upgrade/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -9,25 +10,36 @@ import (
 	"github.com/verana-labs/verana/app/upgrades/types"
 )
 
-// CreateUpgradeHandler creates an upgrade handler for v9 upgrade.
-// This upgrade migrates the TrustDeposit module from version 1 to 2,
-// converting Share field from uint64 to math.LegacyDec.
 func CreateUpgradeHandler(
 	mm *module.Manager,
 	configurator module.Configurator,
 	_ types.BaseAppParamManager,
-	_ types.AppKeepers,
+	keepers types.AppKeepers,
 ) upgradetypes.UpgradeHandler {
 	return func(context context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 		ctx := sdk.UnwrapSDKContext(context)
 
-		// Run migrations - this will automatically trigger the TrustDeposit migration
-		// from version 1 to 2 (Migrate1to2) which converts Share from uint64 to LegacyDec
-		migrations, err := mm.RunMigrations(ctx, configurator, fromVM)
+		// Update governance parameters
+		govKeeper := keepers.GetGovKeeper()
+		params, err := govKeeper.Params.Get(ctx)
 		if err != nil {
 			return nil, err
 		}
 
-		return migrations, nil
+		// Set voting_period to 48 hours
+		votingPeriod := time.Hour * 48
+		params.VotingPeriod = &votingPeriod
+
+		// Set expedited_voting_period to 20 minutes
+		expeditedVotingPeriod := time.Minute * 20
+		params.ExpeditedVotingPeriod = &expeditedVotingPeriod
+
+		// Update params
+		if err := govKeeper.Params.Set(ctx, params); err != nil {
+			return nil, err
+		}
+
+		// Run standard migrations
+		return mm.RunMigrations(ctx, configurator, fromVM)
 	}
 }

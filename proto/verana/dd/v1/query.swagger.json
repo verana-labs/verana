@@ -1,0 +1,231 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "verana/dd/v1/query.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "Query"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/verana/dd/v1/get/{did}": {
+      "get": {
+        "operationId": "Query_GetDID",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.dd.v1.QueryGetDIDResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "did",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Query"
+        ]
+      }
+    },
+    "/verana/dd/v1/list": {
+      "get": {
+        "operationId": "Query_ListDIDs",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.dd.v1.QueryListDIDsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "account",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "changed",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "expired",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "over_grace",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "response_max_size",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "Query"
+        ]
+      }
+    },
+    "/verana/dd/v1/params": {
+      "get": {
+        "summary": "Parameters queries the parameters of the module.",
+        "operationId": "Query_Params",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.dd.v1.QueryParamsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "tags": [
+          "Query"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "google.protobuf.Any": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "google.rpc.Status": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/google.protobuf.Any"
+          }
+        }
+      }
+    },
+    "verana.dd.v1.DIDDirectory": {
+      "type": "object",
+      "properties": {
+        "did": {
+          "type": "string"
+        },
+        "controller": {
+          "type": "string"
+        },
+        "created": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "modified": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "exp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "deposit": {
+          "type": "string",
+          "format": "int64"
+        }
+      },
+      "title": "Core DIDDirectory type"
+    },
+    "verana.dd.v1.Params": {
+      "type": "object",
+      "properties": {
+        "did_directory_trust_deposit": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "did_directory_grace_period": {
+          "type": "string",
+          "format": "uint64"
+        }
+      },
+      "description": "Params defines the parameters for the module."
+    },
+    "verana.dd.v1.QueryGetDIDResponse": {
+      "type": "object",
+      "properties": {
+        "did": {
+          "$ref": "#/definitions/verana.dd.v1.DIDDirectory"
+        }
+      }
+    },
+    "verana.dd.v1.QueryListDIDsResponse": {
+      "type": "object",
+      "properties": {
+        "dids": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/verana.dd.v1.DIDDirectory"
+          }
+        }
+      }
+    },
+    "verana.dd.v1.QueryParamsResponse": {
+      "type": "object",
+      "properties": {
+        "params": {
+          "$ref": "#/definitions/verana.dd.v1.Params",
+          "description": "params holds all the parameters of this module."
+        }
+      },
+      "description": "QueryParamsResponse is response type for the Query/Params RPC method."
+    }
+  }
+}

@@ -33,27 +33,53 @@ func (ms msgServer) validateCreateCredentialSchemaParams(ctx sdk.Context, msg *t
 }
 
 func validateValidityPeriodsWithParams(msg *types.MsgCreateCredentialSchema, params types.Params) error {
-	if msg.GetIssuerGrantorValidationValidityPeriod() > params.CredentialSchemaIssuerGrantorValidationValidityPeriodMaxDays {
+	// [MOD-CS-MSG-1-2-1] All validity period fields are mandatory
+	// Must be between 0 (never expire) and max_days
+
+	// Check mandatory fields are present
+	if msg.GetIssuerGrantorValidationValidityPeriod() == nil {
+		return fmt.Errorf("issuer_grantor_validation_validity_period is mandatory")
+	}
+	if msg.GetVerifierGrantorValidationValidityPeriod() == nil {
+		return fmt.Errorf("verifier_grantor_validation_validity_period is mandatory")
+	}
+	if msg.GetIssuerValidationValidityPeriod() == nil {
+		return fmt.Errorf("issuer_validation_validity_period is mandatory")
+	}
+	if msg.GetVerifierValidationValidityPeriod() == nil {
+		return fmt.Errorf("verifier_validation_validity_period is mandatory")
+	}
+	if msg.GetHolderValidationValidityPeriod() == nil {
+		return fmt.Errorf("holder_validation_validity_period is mandatory")
+	}
+
+	// Validate ranges: must be between 0 (never expire) and max_days
+	val := msg.GetIssuerGrantorValidationValidityPeriod().GetValue()
+	if val > 0 && val > params.CredentialSchemaIssuerGrantorValidationValidityPeriodMaxDays {
 		return fmt.Errorf("issuer grantor validation validity period exceeds maximum of %d days",
 			params.CredentialSchemaIssuerGrantorValidationValidityPeriodMaxDays)
 	}
 
-	if msg.GetVerifierGrantorValidationValidityPeriod() > params.CredentialSchemaVerifierGrantorValidationValidityPeriodMaxDays {
+	val = msg.GetVerifierGrantorValidationValidityPeriod().GetValue()
+	if val > 0 && val > params.CredentialSchemaVerifierGrantorValidationValidityPeriodMaxDays {
 		return fmt.Errorf("verifier grantor validation validity period exceeds maximum of %d days",
 			params.CredentialSchemaVerifierGrantorValidationValidityPeriodMaxDays)
 	}
 
-	if msg.GetIssuerValidationValidityPeriod() > params.CredentialSchemaIssuerValidationValidityPeriodMaxDays {
+	val = msg.GetIssuerValidationValidityPeriod().GetValue()
+	if val > 0 && val > params.CredentialSchemaIssuerValidationValidityPeriodMaxDays {
 		return fmt.Errorf("issuer validation validity period exceeds maximum of %d days",
 			params.CredentialSchemaIssuerValidationValidityPeriodMaxDays)
 	}
 
-	if msg.GetVerifierValidationValidityPeriod() > params.CredentialSchemaVerifierValidationValidityPeriodMaxDays {
+	val = msg.GetVerifierValidationValidityPeriod().GetValue()
+	if val > 0 && val > params.CredentialSchemaVerifierValidationValidityPeriodMaxDays {
 		return fmt.Errorf("verifier validation validity period exceeds maximum of %d days",
 			params.CredentialSchemaVerifierValidationValidityPeriodMaxDays)
 	}
 
-	if msg.GetHolderValidationValidityPeriod() > params.CredentialSchemaHolderValidationValidityPeriodMaxDays {
+	val = msg.GetHolderValidationValidityPeriod().GetValue()
+	if val > 0 && val > params.CredentialSchemaHolderValidationValidityPeriodMaxDays {
 		return fmt.Errorf("holder validation validity period exceeds maximum of %d days",
 			params.CredentialSchemaHolderValidationValidityPeriodMaxDays)
 	}
@@ -79,7 +105,8 @@ func (ms msgServer) executeCreateCredentialSchema(ctx sdk.Context, schemaID uint
 		return fmt.Errorf("failed to process JSON schema: %w", err)
 	}
 
-	// Create the credential schema
+	// [MOD-CS-MSG-1-3] Create the credential schema
+	// All validity period fields are mandatory (already validated), 0 means never expires
 	credentialSchema := types.CredentialSchema{
 		Id:                                      schemaID, // Use the generated ID
 		TrId:                                    msg.TrId,
@@ -87,11 +114,11 @@ func (ms msgServer) executeCreateCredentialSchema(ctx sdk.Context, schemaID uint
 		Modified:                                ctx.BlockTime(),
 		Deposit:                                 trustDepositAmount,
 		JsonSchema:                              processedJsonSchema, // Now includes chain ID replacement
-		IssuerGrantorValidationValidityPeriod:   msg.GetIssuerGrantorValidationValidityPeriod(),
-		VerifierGrantorValidationValidityPeriod: msg.GetVerifierGrantorValidationValidityPeriod(),
-		IssuerValidationValidityPeriod:          msg.GetIssuerValidationValidityPeriod(),
-		VerifierValidationValidityPeriod:        msg.GetVerifierValidationValidityPeriod(),
-		HolderValidationValidityPeriod:          msg.GetHolderValidationValidityPeriod(),
+		IssuerGrantorValidationValidityPeriod:   msg.GetIssuerGrantorValidationValidityPeriod().GetValue(),
+		VerifierGrantorValidationValidityPeriod: msg.GetVerifierGrantorValidationValidityPeriod().GetValue(),
+		IssuerValidationValidityPeriod:          msg.GetIssuerValidationValidityPeriod().GetValue(),
+		VerifierValidationValidityPeriod:        msg.GetVerifierValidationValidityPeriod().GetValue(),
+		HolderValidationValidityPeriod:          msg.GetHolderValidationValidityPeriod().GetValue(),
 		IssuerPermManagementMode:                types.CredentialSchemaPermManagementMode(msg.IssuerPermManagementMode),
 		VerifierPermManagementMode:              types.CredentialSchemaPermManagementMode(msg.VerifierPermManagementMode),
 	}

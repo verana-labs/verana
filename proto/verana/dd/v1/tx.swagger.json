@@ -1,0 +1,316 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "verana/dd/v1/tx.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "Msg"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/verana.dd.v1.Msg/AddDID": {
+      "post": {
+        "operationId": "Msg_AddDID",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.dd.v1.MsgAddDIDResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.dd.v1.MsgAddDID"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.dd.v1.Msg/RemoveDID": {
+      "post": {
+        "operationId": "Msg_RemoveDID",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.dd.v1.MsgRemoveDIDResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.dd.v1.MsgRemoveDID"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.dd.v1.Msg/RenewDID": {
+      "post": {
+        "operationId": "Msg_RenewDID",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.dd.v1.MsgRenewDIDResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.dd.v1.MsgRenewDID"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.dd.v1.Msg/TouchDID": {
+      "post": {
+        "operationId": "Msg_TouchDID",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.dd.v1.MsgTouchDIDResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.dd.v1.MsgTouchDID"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.dd.v1.Msg/UpdateParams": {
+      "post": {
+        "summary": "UpdateParams defines a (governance) operation for updating the module\nparameters. The authority defaults to the x/gov module account.",
+        "operationId": "Msg_UpdateParams",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.dd.v1.MsgUpdateParamsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "MsgUpdateParams is the Msg/UpdateParams request type.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.dd.v1.MsgUpdateParams"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "google.protobuf.Any": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "google.rpc.Status": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/google.protobuf.Any"
+          }
+        }
+      }
+    },
+    "verana.dd.v1.MsgAddDID": {
+      "type": "object",
+      "properties": {
+        "creator": {
+          "type": "string"
+        },
+        "did": {
+          "type": "string"
+        },
+        "years": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "title": "MsgAddDID defines the Msg/AddDID request type"
+    },
+    "verana.dd.v1.MsgAddDIDResponse": {
+      "type": "object",
+      "title": "MsgAddDIDResponse defines the Msg/AddDID response type"
+    },
+    "verana.dd.v1.MsgRemoveDID": {
+      "type": "object",
+      "properties": {
+        "creator": {
+          "type": "string"
+        },
+        "did": {
+          "type": "string"
+        }
+      },
+      "title": "MsgRemoveDID defines the Msg/RemoveDID request type"
+    },
+    "verana.dd.v1.MsgRemoveDIDResponse": {
+      "type": "object",
+      "title": "MsgRemoveDIDResponse defines the Msg/RemoveDID response type"
+    },
+    "verana.dd.v1.MsgRenewDID": {
+      "type": "object",
+      "properties": {
+        "creator": {
+          "type": "string"
+        },
+        "did": {
+          "type": "string"
+        },
+        "years": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "title": "MsgRenewDID defines the Msg/RenewDID request type"
+    },
+    "verana.dd.v1.MsgRenewDIDResponse": {
+      "type": "object",
+      "title": "MsgRenewDIDResponse defines the Msg/RenewDID response type"
+    },
+    "verana.dd.v1.MsgTouchDID": {
+      "type": "object",
+      "properties": {
+        "creator": {
+          "type": "string"
+        },
+        "did": {
+          "type": "string"
+        }
+      },
+      "title": "MsgTouchDID defines the Msg/TouchDID request type"
+    },
+    "verana.dd.v1.MsgTouchDIDResponse": {
+      "type": "object",
+      "title": "MsgTouchDIDResponse defines the Msg/TouchDID response type"
+    },
+    "verana.dd.v1.MsgUpdateParams": {
+      "type": "object",
+      "properties": {
+        "authority": {
+          "type": "string",
+          "description": "authority is the address that controls the module (defaults to x/gov unless overwritten)."
+        },
+        "params": {
+          "$ref": "#/definitions/verana.dd.v1.Params",
+          "description": "params defines the module parameters to update.\n\nNOTE: All parameters must be supplied."
+        }
+      },
+      "description": "MsgUpdateParams is the Msg/UpdateParams request type."
+    },
+    "verana.dd.v1.MsgUpdateParamsResponse": {
+      "type": "object",
+      "description": "MsgUpdateParamsResponse defines the response structure for executing a\nMsgUpdateParams message."
+    },
+    "verana.dd.v1.Params": {
+      "type": "object",
+      "properties": {
+        "did_directory_trust_deposit": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "did_directory_grace_period": {
+          "type": "string",
+          "format": "uint64"
+        }
+      },
+      "description": "Params defines the parameters for the module."
+    }
+  }
+}

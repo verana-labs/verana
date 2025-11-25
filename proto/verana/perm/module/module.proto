@@ -3,6 +3,8 @@ package verana.perm.module;
 
 import "cosmos/app/v1alpha1/module.proto";
 
+option go_package = "github.com/verana-labs/verana/x/perm/module;permission";
+
 // Module is the config object for the module.
 message Module {
   option (cosmos.app.v1alpha1.module) = {

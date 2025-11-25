@@ -1,0 +1,401 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "verana/tr/v1/tx.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "Msg"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/verana.tr.v1.Msg/AddGovernanceFrameworkDocument": {
+      "post": {
+        "operationId": "Msg_AddGovernanceFrameworkDocument",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.tr.v1.MsgAddGovernanceFrameworkDocumentResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "MsgAddGovernanceFrameworkDocument defines the Msg/AddGovernanceFrameworkDocument request type.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.tr.v1.MsgAddGovernanceFrameworkDocument"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.tr.v1.Msg/ArchiveTrustRegistry": {
+      "post": {
+        "operationId": "Msg_ArchiveTrustRegistry",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.tr.v1.MsgArchiveTrustRegistryResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "MsgArchiveTrustRegistry defines the Msg/ArchiveTrustRegistry request type.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.tr.v1.MsgArchiveTrustRegistry"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.tr.v1.Msg/CreateTrustRegistry": {
+      "post": {
+        "summary": "CreateTrustRegistry creates a new trust registry.",
+        "operationId": "Msg_CreateTrustRegistry",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.tr.v1.MsgCreateTrustRegistryResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "MsgCreateTrustRegistry defines the Msg/CreateTrustRegistry request type.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.tr.v1.MsgCreateTrustRegistry"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.tr.v1.Msg/IncreaseActiveGovernanceFrameworkVersion": {
+      "post": {
+        "operationId": "Msg_IncreaseActiveGovernanceFrameworkVersion",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersionResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "MsgIncreaseActiveGovernanceFrameworkVersion defines the Msg/IncreaseActiveGovernanceFrameworkVersion request type.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.tr.v1.Msg/UpdateParams": {
+      "post": {
+        "summary": "UpdateParams defines a (governance) operation for updating the module\nparameters. The authority defaults to the x/gov module account.",
+        "operationId": "Msg_UpdateParams",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.tr.v1.MsgUpdateParamsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "MsgUpdateParams is the Msg/UpdateParams request type.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.tr.v1.MsgUpdateParams"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.tr.v1.Msg/UpdateTrustRegistry": {
+      "post": {
+        "operationId": "Msg_UpdateTrustRegistry",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.tr.v1.MsgUpdateTrustRegistryResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "MsgUpdateTrustRegistry defines the Msg/UpdateTrustRegistry request type.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.tr.v1.MsgUpdateTrustRegistry"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "google.protobuf.Any": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "google.rpc.Status": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/google.protobuf.Any"
+          }
+        }
+      }
+    },
+    "verana.tr.v1.MsgAddGovernanceFrameworkDocument": {
+      "type": "object",
+      "properties": {
+        "creator": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "doc_language": {
+          "type": "string"
+        },
+        "doc_url": {
+          "type": "string"
+        },
+        "doc_digest_sri": {
+          "type": "string"
+        },
+        "version": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "description": "MsgAddGovernanceFrameworkDocument defines the Msg/AddGovernanceFrameworkDocument request type."
+    },
+    "verana.tr.v1.MsgAddGovernanceFrameworkDocumentResponse": {
+      "type": "object",
+      "description": "MsgAddGovernanceFrameworkDocumentResponse defines the Msg/AddGovernanceFrameworkDocument response type."
+    },
+    "verana.tr.v1.MsgArchiveTrustRegistry": {
+      "type": "object",
+      "properties": {
+        "creator": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "archive": {
+          "type": "boolean"
+        }
+      },
+      "description": "MsgArchiveTrustRegistry defines the Msg/ArchiveTrustRegistry request type."
+    },
+    "verana.tr.v1.MsgArchiveTrustRegistryResponse": {
+      "type": "object",
+      "description": "MsgArchiveTrustRegistryResponse defines the Msg/ArchiveTrustRegistry response type."
+    },
+    "verana.tr.v1.MsgCreateTrustRegistry": {
+      "type": "object",
+      "properties": {
+        "creator": {
+          "type": "string"
+        },
+        "did": {
+          "type": "string"
+        },
+        "aka": {
+          "type": "string"
+        },
+        "language": {
+          "type": "string"
+        },
+        "doc_url": {
+          "type": "string"
+        },
+        "doc_digest_sri": {
+          "type": "string"
+        }
+      },
+      "description": "MsgCreateTrustRegistry defines the Msg/CreateTrustRegistry request type."
+    },
+    "verana.tr.v1.MsgCreateTrustRegistryResponse": {
+      "type": "object",
+      "description": "MsgCreateTrustRegistryResponse defines the Msg/CreateTrustRegistry response type."
+    },
+    "verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion": {
+      "type": "object",
+      "properties": {
+        "creator": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string",
+          "format": "uint64",
+          "title": "Changed from tr_id to id"
+        }
+      },
+      "description": "MsgIncreaseActiveGovernanceFrameworkVersion defines the Msg/IncreaseActiveGovernanceFrameworkVersion request type."
+    },
+    "verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersionResponse": {
+      "type": "object",
+      "description": "MsgIncreaseActiveGovernanceFrameworkVersion defines the Msg/IncreaseActiveGovernanceFrameworkVersion response type."
+    },
+    "verana.tr.v1.MsgUpdateParams": {
+      "type": "object",
+      "properties": {
+        "authority": {
+          "type": "string",
+          "description": "authority is the address that controls the module (defaults to x/gov unless overwritten)."
+        },
+        "params": {
+          "$ref": "#/definitions/verana.tr.v1.Params",
+          "description": "params defines the module parameters to update.\n\nNOTE: All parameters must be supplied."
+        }
+      },
+      "description": "MsgUpdateParams is the Msg/UpdateParams request type."
+    },
+    "verana.tr.v1.MsgUpdateParamsResponse": {
+      "type": "object",
+      "description": "MsgUpdateParamsResponse defines the response structure for executing a\nMsgUpdateParams message."
+    },
+    "verana.tr.v1.MsgUpdateTrustRegistry": {
+      "type": "object",
+      "properties": {
+        "creator": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "did": {
+          "type": "string"
+        },
+        "aka": {
+          "type": "string"
+        }
+      },
+      "description": "MsgUpdateTrustRegistry defines the Msg/UpdateTrustRegistry request type."
+    },
+    "verana.tr.v1.MsgUpdateTrustRegistryResponse": {
+      "type": "object",
+      "description": "MsgUpdateTrustRegistryResponse defines the Msg/UpdateTrustRegistry response type."
+    },
+    "verana.tr.v1.Params": {
+      "type": "object",
+      "properties": {
+        "trust_registry_trust_deposit": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "trust_unit_price": {
+          "type": "string",
+          "format": "uint64"
+        }
+      },
+      "description": "Params defines the parameters for the module."
+    }
+  }
+}
