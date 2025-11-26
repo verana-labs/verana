@@ -1,9 +1,10 @@
 package v2
 
 import (
+	"time"
+
 	"cosmossdk.io/math"
 	"github.com/cosmos/gogoproto/proto"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // TrustDepositV1 represents the old version of TrustDeposit with uint64 Share.
@@ -15,8 +16,8 @@ type TrustDepositV1 struct {
 	Claimable      uint64
 	SlashedDeposit uint64
 	RepaidDeposit  uint64
-	LastSlashed    *timestamppb.Timestamp
-	LastRepaid     *timestamppb.Timestamp
+	LastSlashed    *time.Time
+	LastRepaid     *time.Time
 	SlashCount     uint64
 	LastRepaidBy   string
 }
@@ -47,8 +48,8 @@ type TrustDepositV2 struct {
 	Claimable      uint64
 	SlashedDeposit uint64
 	RepaidDeposit  uint64
-	LastSlashed    *timestamppb.Timestamp
-	LastRepaid     *timestamppb.Timestamp
+	LastSlashed    *time.Time
+	LastRepaid     *time.Time
 	SlashCount     uint64
 	LastRepaidBy   string
 }

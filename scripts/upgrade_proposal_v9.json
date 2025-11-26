@@ -4,9 +4,9 @@
       "@type": "/cosmos.upgrade.v1beta1.MsgSoftwareUpgrade",
       "authority": "verana10d07y265gmmuvt4z0w9aw880jnsr700j22m4w8",
       "plan": {
-        "name": "v0.9",
+        "name": "v0.9.1",
         "time": "0001-01-01T00:00:00Z",
-        "height": "35",
+        "height": "265",
         "info": "{\"binaries\":{\"darwin/arm64\":\"https://github.com/verana-labs/verana/releases/download/v0.9-dev.3/veranad-v0.9-dev.3-darwin-arm64\",\"darwin/amd64\":\"https://github.com/verana-labs/verana/releases/download/v0.9-dev.3/veranad-v0.9-dev.3-darwin-amd64\",\"linux/arm64\":\"https://github.com/verana-labs/verana/releases/download/v0.9-dev.3/veranad-v0.9-dev.3-linux-arm64\",\"linux/amd64\":\"https://github.com/verana-labs/verana/releases/download/v0.9-dev.3/veranad-v0.9-dev.3-linux-amd64\"}}",
         "upgraded_client_state": null
       }
