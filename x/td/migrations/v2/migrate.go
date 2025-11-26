@@ -1,9 +1,9 @@
 package v2
 
 import (
-	"strings"
 	"time"
 
+	"cosmossdk.io/collections"
 	"cosmossdk.io/core/store"
 	"cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -25,29 +25,32 @@ type Keeper interface {
 	GetLogger() interface {
 		Info(msg string, keyvals ...interface{})
 	}
+	// GetTrustDepositMap returns the TrustDeposit collections.Map for migration
+	GetTrustDepositMap() collections.Map[string, types.TrustDeposit]
 }
 
 // MigrateStore performs in-place store migrations from v1 to v2.
 // The migration converts Share from uint64 to LegacyDec.
 //
 // Strategy:
-// 1. Access the raw store to read old data
-// 2. Iterate over all trust deposit keys
-// 3. For each entry, read raw bytes and unmarshal with old proto (uint64 Share)
+// 1. Use collections.Map to iterate over all trust deposits (ensures correct key encoding)
+// 2. For each entry, try to read with new format first (already migrated)
+// 3. If that fails, read raw bytes and unmarshal with old proto (uint64 Share)
 // 4. Convert Share from uint64 to LegacyDec
-// 5. Save using new proto definition
+// 5. Save using collections.Map.Set() (ensures correct encoding)
 func MigrateStore(ctx sdk.Context, k Keeper) error {
 	logger := k.GetLogger()
 	logger.Info("Starting migration: converting Share from uint64 to LegacyDec")
 
 	storeService := k.GetStoreService()
 	cdc := k.GetCodec()
+	trustDepositMap := k.GetTrustDepositMap()
 
-	// Get the raw KVStore
+	// Get the raw KVStore for reading old format data
 	kvStore := storeService.OpenKVStore(ctx)
 
 	// The trust_deposit map uses prefix 1 (from types.TrustDepositKey)
-	// We need to iterate over all keys with this prefix
+	// We need to iterate over all keys with this prefix to read old format
 	prefix := []byte{0x01} // collections.NewPrefix(1) = []byte{0x01}
 
 	// Calculate end prefix: increment the last byte
@@ -66,36 +69,37 @@ func MigrateStore(ctx sdk.Context, k Keeper) error {
 
 	migratedCount := 0
 	skippedCount := 0
+	valueCodec := codec.CollValue[types.TrustDeposit](cdc)
+
 	for ; iterator.Valid(); iterator.Next() {
 		key := iterator.Key()
 		value := iterator.Value()
 
-		// First, try to unmarshal with the new proto definition (LegacyDec Share)
-		// This handles the case where the migration was partially run or data is already migrated
+		// First, try to unmarshal with new proto definition (LegacyDec Share) using valueCodec
+		// If this succeeds, the data is already in the new format
 		var newTD types.TrustDeposit
-		valueCodec := codec.CollValue[types.TrustDeposit](cdc)
 		newTD, err := valueCodec.Decode(value)
 		if err == nil {
-			// Data is already in the new format, skip it
-			skippedCount++
-			continue
+			// Data is already in new format, verify it's readable via collections.Map
+			// and skip if it's already properly stored
+			_, getErr := trustDepositMap.Get(ctx, newTD.Account)
+			if getErr == nil {
+				// Already properly stored in collections, skip
+				skippedCount++
+				continue
+			}
+			// Data decodes correctly but might not be in collections yet
+			// Re-save it using collections.Map to ensure proper storage
+			if setErr := trustDepositMap.Set(ctx, newTD.Account, newTD); setErr == nil {
+				skippedCount++
+				continue
+			}
 		}
 
 		// Try to unmarshal with old proto definition (uint64 Share)
 		oldTD, err := unmarshalOldTrustDeposit(value, cdc)
 		if err != nil {
-			// Check if this is a wireType error - if so, the data is likely already in new format
-			// (bytes for LegacyDec) but we're trying to read it as old format (varint for uint64)
-			errStr := err.Error()
-			if strings.Contains(errStr, "wireType") || strings.Contains(errStr, "wire type") {
-				// Data appears to be in new format but first decode attempt failed
-				// This could mean the data is already migrated. Try one more time with new format
-				// using a different approach, or skip if it's clearly new format data
-				logger.Info("Trust deposit appears to be in new format (wireType error indicates bytes vs varint mismatch), skipping", "key", string(key))
-				skippedCount++
-				continue
-			}
-			logger.Info("Failed to unmarshal trust deposit (neither old nor new format), skipping", "key", string(key), "error", err)
+			logger.Info("Failed to unmarshal trust deposit (neither old nor new format), skipping", "key", key, "error", err)
 			continue
 		}
 
@@ -117,19 +121,14 @@ func MigrateStore(ctx sdk.Context, k Keeper) error {
 			LastRepaidBy:   oldTD.LastRepaidBy,
 		}
 
-		// Marshal the new structure using the same encoder that collections.Map uses
-		// This ensures the LegacyDec custom type is properly encoded
-		// CollValue wraps the codec to handle custom types correctly
-		newBz, err := valueCodec.Encode(newTD)
-		if err != nil {
-			logger.Info("Failed to encode new trust deposit", "key", string(key), "error", err)
+		// Save using collections.Map.Set() - this ensures correct encoding
+		// and uses the same codec as normal operations
+		if err := trustDepositMap.Set(ctx, oldTD.Account, newTD); err != nil {
+			logger.Info("Failed to save migrated trust deposit", "account", oldTD.Account, "error", err)
 			continue
 		}
 
-		// Save the migrated data
-		kvStore.Set(key, newBz)
 		migratedCount++
-
 		logger.Info("Migrated trust deposit", "account", oldTD.Account, "old_share", oldTD.Share, "new_share", newShare.String())
 	}
 

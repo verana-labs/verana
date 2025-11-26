@@ -81,6 +81,11 @@ func (k Keeper) GetLogger() interface {
 	return k.Logger()
 }
 
+// GetTrustDepositMap returns the TrustDeposit collections.Map for migration purposes.
+func (k Keeper) GetTrustDepositMap() collections.Map[string, types.TrustDeposit] {
+	return k.TrustDeposit
+}
+
 func (k Keeper) GetTrustDepositRate(ctx sdk.Context) math.LegacyDec {
 	params := k.GetParams(ctx)
 	return params.TrustDepositRate
