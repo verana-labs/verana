@@ -127,11 +127,7 @@ func MigrateStore(ctx sdk.Context, k Keeper) error {
 			logger.Info("Failed to save migrated trust deposit", "account", oldTD.Account, "error", err)
 			continue
 		}
-
-		// Delete the old key from raw store to avoid conflicts
-		// The new data is now stored via collections.Map with proper encoding
-		kvStore.Delete(key)
-
+		
 		migratedCount++
 		logger.Info("Migrated trust deposit", "account", oldTD.Account, "old_share", oldTD.Share, "new_share", newShare.String())
 	}

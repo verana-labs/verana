@@ -146,8 +146,7 @@
           "type": "string"
         },
         "share": {
-          "type": "string",
-          "format": "uint64"
+          "type": "string"
         },
         "amount": {
           "type": "string",
