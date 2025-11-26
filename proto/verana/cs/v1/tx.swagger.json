@@ -302,7 +302,7 @@
           "format": "int64"
         }
       },
-      "title": "OptionalUInt32 is a wrapper for optional uint32 values\nnil means don't update, 0 means never expires"
+      "title": "OptionalUInt32 is a wrapper for optional uint32 values"
     },
     "verana.cs.v1.Params": {
       "type": "object",

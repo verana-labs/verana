@@ -396,7 +396,9 @@ func New(
 	// NOTE: Legacy governance router removed - trust deposit slashing now uses
 	// MsgSlashTrustDeposit with modern v1 governance pattern
 
-	app.configurator = module.NewConfigurator(app.appCodec, app.MsgServiceRouter(), app.GRPCQueryRouter())
+	// Use the configurator from the runtime.App (which was used during Build)
+	// This ensures migrations registered in RegisterServices are available
+	app.configurator = app.App.Configurator()
 
 	// Set up upgrade handlers
 	app.setupUpgradeHandlers()

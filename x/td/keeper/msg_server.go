@@ -52,7 +52,7 @@ func (ms msgServer) ReclaimTrustDepositYield(goCtx context.Context, msg *types.M
 	// [MOD-TD-MSG-2-3] Calculate shares to reduce
 	// td.share = td.share - claimable_yield / GlobalVariables.trust_deposit_share_value
 	sharesToReduce := ms.Keeper.AmountToShare(claimableYield, params.TrustDepositShareValue)
-	td.Share -= sharesToReduce
+	td.Share = td.Share.Sub(sharesToReduce) // Use Sub method
 
 	addr, _ := sdk.AccAddressFromBech32(account)
 
@@ -77,7 +77,7 @@ func (ms msgServer) ReclaimTrustDepositYield(goCtx context.Context, msg *types.M
 			types.EventTypeReclaimTrustDepositYield,
 			sdk.NewAttribute(types.AttributeKeyAccount, account),
 			sdk.NewAttribute(types.AttributeKeyClaimedYield, strconv.FormatUint(claimableYield, 10)),
-			sdk.NewAttribute(types.AttributeKeySharesReduced, strconv.FormatUint(sharesToReduce, 10)),
+			sdk.NewAttribute(types.AttributeKeySharesReduced, sharesToReduce.String()),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
 		),
 	})
@@ -88,20 +88,18 @@ func (ms msgServer) ReclaimTrustDepositYield(goCtx context.Context, msg *types.M
 }
 
 // ShareToAmount converts share value to amount using decimal math
-func (k Keeper) ShareToAmount(share uint64, shareValue math.LegacyDec) uint64 {
-	shareDec := math.LegacyNewDec(int64(share))
-	amountDec := shareDec.Mul(shareValue)
+func (k Keeper) ShareToAmount(share math.LegacyDec, shareValue math.LegacyDec) uint64 {
+	amountDec := share.Mul(shareValue)
 	return amountDec.TruncateInt().Uint64()
 }
 
 // AmountToShare converts amount to share value using decimal math
-func (k Keeper) AmountToShare(amount uint64, shareValue math.LegacyDec) uint64 {
+func (k Keeper) AmountToShare(amount uint64, shareValue math.LegacyDec) math.LegacyDec {
 	amountDec := math.LegacyNewDec(int64(amount))
 	if shareValue.IsZero() {
-		return 0 // Prevent division by zero
+		return math.LegacyZeroDec() // Prevent division by zero
 	}
-	shareDec := amountDec.Quo(shareValue)
-	return shareDec.TruncateInt().Uint64()
+	return amountDec.Quo(shareValue)
 }
 
 func (ms msgServer) ReclaimTrustDeposit(goCtx context.Context, msg *types.MsgReclaimTrustDeposit) (*types.MsgReclaimTrustDepositResponse, error) {
@@ -150,7 +148,7 @@ func (ms msgServer) ReclaimTrustDeposit(goCtx context.Context, msg *types.MsgRec
 	// Update trust deposit
 	td.Claimable -= msg.Claimed
 	td.Amount -= msg.Claimed
-	td.Share -= shareReduction
+	td.Share = td.Share.Sub(shareReduction) // Use Sub method
 
 	addr, _ := sdk.AccAddressFromBech32(msg.Creator)
 	// Transfer claimable amount minus burn to the account
@@ -190,7 +188,7 @@ func (ms msgServer) ReclaimTrustDeposit(goCtx context.Context, msg *types.MsgRec
 			sdk.NewAttribute(types.AttributeKeyClaimedAmount, strconv.FormatUint(msg.Claimed, 10)),
 			sdk.NewAttribute(types.AttributeKeyBurnedAmount, strconv.FormatUint(toBurn, 10)),
 			sdk.NewAttribute(types.AttributeKeyTransferAmount, strconv.FormatUint(toTransfer, 10)),
-			sdk.NewAttribute(types.AttributeKeySharesReduced, strconv.FormatUint(shareReduction, 10)),
+			sdk.NewAttribute(types.AttributeKeySharesReduced, shareReduction.String()),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
 		),
 	})
@@ -245,7 +243,7 @@ func (ms msgServer) SlashTrustDeposit(goCtx context.Context, msg *types.MsgSlash
 
 	// Update TrustDeposit entry
 	td.Amount = td.Amount - msg.Amount.Uint64()
-	td.Share = td.Share - uint64(shareReduction.TruncateInt64())
+	td.Share = td.Share.Sub(shareReduction) // Use Sub method
 	td.SlashedDeposit = td.SlashedDeposit + msg.Amount.Uint64()
 	td.LastSlashed = &now
 	td.LastRepaidBy = ""
@@ -317,7 +315,7 @@ func (ms msgServer) RepaySlashedTrustDeposit(goCtx context.Context, msg *types.M
 
 	// Calculate share increase using decimal math
 	shareIncrease := ms.Keeper.AmountToShare(msg.Amount, params.TrustDepositShareValue)
-	td.Share += shareIncrease
+	td.Share = td.Share.Add(shareIncrease) // Use Add method
 
 	// Update repayment tracking
 	td.RepaidDeposit += msg.Amount

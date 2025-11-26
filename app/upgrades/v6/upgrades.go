@@ -210,7 +210,7 @@ func restoreTrustDepositData(ctx sdk.Context, keepers types.AppKeepers, data Tru
 
 		tdUpdated := trustdeposittypes.TrustDeposit{
 			Account:        td.Account,
-			Share:          share.Uint64(),
+			Share:          math.LegacyDec(share),
 			Amount:         amount.Uint64(),
 			Claimable:      claimable.Uint64(),
 			SlashedDeposit: 0,

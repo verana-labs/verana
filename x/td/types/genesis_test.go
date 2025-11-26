@@ -1,8 +1,9 @@
 package types_test
 
 import (
-	"cosmossdk.io/math"
 	"testing"
+
+	"cosmossdk.io/math"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
@@ -36,13 +37,13 @@ func TestGenesisState_Validate(t *testing.T) {
 				TrustDeposits: []types.TrustDepositRecord{
 					{
 						Account:   validAddr1,
-						Share:     100,
+						Share:     math.LegacyNewDec(100),
 						Amount:    1000,
 						Claimable: 500,
 					},
 					{
 						Account:   validAddr2,
-						Share:     200,
+						Share:     math.LegacyNewDec(200),
 						Amount:    2000,
 						Claimable: 1000,
 					},
@@ -65,7 +66,7 @@ func TestGenesisState_Validate(t *testing.T) {
 				TrustDeposits: []types.TrustDepositRecord{
 					{
 						Account:   "invalid_address", // Invalid: not a valid bech32 address
-						Share:     100,
+						Share:     math.LegacyNewDec(100),
 						Amount:    1000,
 						Claimable: 500,
 					},
@@ -80,13 +81,13 @@ func TestGenesisState_Validate(t *testing.T) {
 				TrustDeposits: []types.TrustDepositRecord{
 					{
 						Account:   validAddr1,
-						Share:     100,
+						Share:     math.LegacyNewDec(100),
 						Amount:    1000,
 						Claimable: 500,
 					},
 					{
 						Account:   validAddr1, // Duplicate account
-						Share:     200,
+						Share:     math.LegacyNewDec(200),
 						Amount:    2000,
 						Claimable: 1000,
 					},
@@ -101,7 +102,7 @@ func TestGenesisState_Validate(t *testing.T) {
 				TrustDeposits: []types.TrustDepositRecord{
 					{
 						Account:   validAddr1,
-						Share:     100,
+						Share:     math.LegacyNewDec(100),
 						Amount:    1000,
 						Claimable: 1500, // Invalid: claimable > amount
 					},

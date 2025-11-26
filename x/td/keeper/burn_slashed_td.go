@@ -1,8 +1,9 @@
 package keeper
 
 import (
-	"cosmossdk.io/math"
 	"fmt"
+
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/verana-labs/verana/x/td/types"
 )
@@ -54,13 +55,12 @@ func (k Keeper) executeBurnEcosystemSlashedTrustDeposit(ctx sdk.Context, account
 	// Calculate and reduce shares - convert types properly
 	amountInt := math.NewInt(int64(amount))
 	amountDec := math.LegacyNewDecFromInt(amountInt)
-	shareReductionDec := amountDec.Quo(trustDepositShareValue)
-	shareReduction := shareReductionDec.TruncateInt().Uint64()
+	shareReduction := amountDec.Quo(trustDepositShareValue)
 
-	if shareReduction > td.Share {
-		return fmt.Errorf("share reduction exceeds available shares: %d > %d", shareReduction, td.Share)
+	if shareReduction.GT(td.Share) {
+		return fmt.Errorf("share reduction exceeds available shares: %s > %s", shareReduction.String(), td.Share.String())
 	}
-	td.Share = td.Share - shareReduction
+	td.Share = td.Share.Sub(shareReduction) // Use Sub method
 
 	// Update v2 slashing fields
 	td.SlashedDeposit += amount

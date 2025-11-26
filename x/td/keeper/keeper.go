@@ -1,9 +1,10 @@
 package keeper
 
 import (
+	"fmt"
+
 	"cosmossdk.io/collections"
 	"cosmossdk.io/math"
-	"fmt"
 
 	"cosmossdk.io/core/store"
 	"cosmossdk.io/log"
@@ -61,6 +62,28 @@ func (k Keeper) GetAuthority() string {
 // Logger returns a module-specific logger.
 func (k Keeper) Logger() log.Logger {
 	return k.logger.With("module", fmt.Sprintf("x/%s", types.ModuleName))
+}
+
+// GetStoreService returns the store service for migration purposes.
+func (k Keeper) GetStoreService() store.KVStoreService {
+	return k.storeService
+}
+
+// GetCodec returns the codec for migration purposes.
+func (k Keeper) GetCodec() codec.BinaryCodec {
+	return k.cdc
+}
+
+// GetLogger returns the logger for migration purposes.
+func (k Keeper) GetLogger() interface {
+	Info(msg string, keyvals ...interface{})
+} {
+	return k.Logger()
+}
+
+// GetTrustDepositMap returns the TrustDeposit collections.Map for migration purposes.
+func (k Keeper) GetTrustDepositMap() collections.Map[string, types.TrustDeposit] {
+	return k.TrustDeposit
 }
 
 func (k Keeper) GetTrustDepositRate(ctx sdk.Context) math.LegacyDec {
