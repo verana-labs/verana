@@ -25,6 +25,7 @@ type (
 		authority string
 		// state
 		TrustDeposit collections.Map[string, types.TrustDeposit]
+		Dust         collections.Item[string] // Accumulated fractional yield (stored as string)
 		// external keeper
 		bankKeeper types.BankKeeper
 	}
@@ -50,6 +51,7 @@ func NewKeeper(
 		authority:    authority,
 		logger:       logger,
 		TrustDeposit: collections.NewMap(sb, types.TrustDepositKey, "trust_deposit", collections.StringKey, codec.CollValue[types.TrustDeposit](cdc)),
+		Dust:         collections.NewItem(sb, types.DustKey, "dust", collections.StringValue),
 		bankKeeper:   bankKeeper,
 	}
 }
