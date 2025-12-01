@@ -16,8 +16,15 @@ func (k Keeper) BeginBlocker(ctx context.Context) error {
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 	params := k.GetParams(sdkCtx)
 
+	// Get blocks_per_year from mint module (reuse existing chain parameter)
+	blocksPerYear, err := k.mintKeeper.GetBlocksPerYear(ctx)
+	if err != nil {
+		k.Logger().Error("failed to get blocks_per_year from mint module", "error", err)
+		return err
+	}
+
 	// Skip if yield distribution is not configured
-	if params.YieldIntermediatePool == "" || params.BlocksPerYear == 0 || params.TrustDepositMaxYieldRate.IsZero() {
+	if params.YieldIntermediatePool == "" || blocksPerYear == 0 || params.TrustDepositMaxYieldRate.IsZero() {
 		return nil
 	}
 
@@ -44,7 +51,7 @@ func (k Keeper) BeginBlocker(ctx context.Context) error {
 
 	// Compute yield allowance
 	// allowance = dust + trust_deposit * trust_deposit_max_yield_rate / blocks_per_year
-	blocksPerYearDec := math.LegacyNewDec(int64(params.BlocksPerYear))
+	blocksPerYearDec := math.LegacyNewDec(int64(blocksPerYear))
 	perBlockYieldRate := params.TrustDepositMaxYieldRate.Quo(blocksPerYearDec)
 	perBlockYield := trustDepositBalanceDec.Mul(perBlockYieldRate)
 	allowance := dust.Add(perBlockYield)

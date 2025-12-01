@@ -11,13 +11,12 @@ import (
 var _ paramtypes.ParamSet = (*Params)(nil)
 
 const (
-	DefaultTrustDepositReclaimBurnRate = "0.6"   // 60%
-	DefaultTrustDepositShareValue      = "1.0"   // Initial value: 1
-	DefaultTrustDepositRate            = "0.2"   // 20%
-	DefaultWalletUserAgentRewardRate   = "0.2"   // 20%
-	DefaultUserAgentRewardRate         = "0.2"   // 20%
-	DefaultTrustDepositMaxYieldRate    = "0.15"  // 15% annual yield
-	DefaultBlocksPerYear               = 6311520 // ~365.25 days * 24 hours * 60 minutes * 60 seconds / 5 seconds per block
+	DefaultTrustDepositReclaimBurnRate = "0.6"  // 60%
+	DefaultTrustDepositShareValue      = "1.0"  // Initial value: 1
+	DefaultTrustDepositRate            = "0.2"  // 20%
+	DefaultWalletUserAgentRewardRate   = "0.2"  // 20%
+	DefaultUserAgentRewardRate         = "0.2"  // 20%
+	DefaultTrustDepositMaxYieldRate    = "0.15" // 15% annual yield
 )
 
 // ParamKeyTable the param key table for launch module
@@ -33,7 +32,6 @@ func NewParams(
 	walletUserAgentRewardRate math.LegacyDec,
 	userAgentRewardRate math.LegacyDec,
 	trustDepositMaxYieldRate math.LegacyDec,
-	blocksPerYear uint64,
 	yieldIntermediatePool string,
 ) Params {
 	return Params{
@@ -43,7 +41,6 @@ func NewParams(
 		WalletUserAgentRewardRate:   walletUserAgentRewardRate,
 		UserAgentRewardRate:         userAgentRewardRate,
 		TrustDepositMaxYieldRate:    trustDepositMaxYieldRate,
-		BlocksPerYear:               blocksPerYear,
 		YieldIntermediatePool:       yieldIntermediatePool,
 	}
 }
@@ -68,7 +65,6 @@ func DefaultParams() Params {
 		WalletUserAgentRewardRate,
 		UserAgentRewardRate,
 		TrustDepositMaxYieldRate,
-		DefaultBlocksPerYear,
 		defaultYieldIntermediatePool,
 	)
 }
@@ -107,11 +103,6 @@ func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 			validateLegacyDec,
 		),
 		paramtypes.NewParamSetPair(
-			[]byte("BlocksPerYear"),
-			&p.BlocksPerYear,
-			validateUint64,
-		),
-		paramtypes.NewParamSetPair(
 			[]byte("YieldIntermediatePool"),
 			&p.YieldIntermediatePool,
 			validateString,
@@ -138,9 +129,6 @@ func (p Params) Validate() error {
 	}
 	if err := validateLegacyDec(p.TrustDepositMaxYieldRate); err != nil {
 		return err
-	}
-	if p.BlocksPerYear == 0 {
-		return fmt.Errorf("blocks_per_year must be positive")
 	}
 	if p.YieldIntermediatePool != "" {
 		if _, err := sdk.AccAddressFromBech32(p.YieldIntermediatePool); err != nil {

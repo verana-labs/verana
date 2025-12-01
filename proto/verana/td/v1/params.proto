@@ -47,12 +47,8 @@ message Params {
     (gogoproto.moretags) = "yaml:\"trust_deposit_max_yield_rate\"",
     (gogoproto.nullable) = false
   ];
-  // blocks_per_year is chain-specific estimate used when converting annual rate into per-block allowances
-  uint64 blocks_per_year = 7[
-    (gogoproto.moretags) = "yaml:\"blocks_per_year\""
-  ];
   // yield_intermediate_pool is the Bech32 string for the Yield Intermediate Pool module account
-  string yield_intermediate_pool = 8[
+  string yield_intermediate_pool = 7[
     (gogoproto.moretags) = "yaml:\"yield_intermediate_pool\""
   ];
 }
