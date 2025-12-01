@@ -5,6 +5,7 @@ import (
 
 	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 )
 
@@ -54,9 +55,8 @@ func DefaultParams() Params {
 	UserAgentRewardRate, _ := math.LegacyNewDecFromStr(DefaultUserAgentRewardRate)
 	TrustDepositMaxYieldRate, _ := math.LegacyNewDecFromStr(DefaultTrustDepositMaxYieldRate)
 
-	// Default yield intermediate pool is derived from module name
-	// This will be set properly when the module account is created
-	defaultYieldIntermediatePool := "" // Will be set to module address in app_config.go
+	// Default yield intermediate pool is the module account address derived from the module account name.
+	defaultYieldIntermediatePool := authtypes.NewModuleAddress(YieldIntermediatePool).String()
 
 	return NewParams(
 		TrustDepositReclaimBurnRate,
