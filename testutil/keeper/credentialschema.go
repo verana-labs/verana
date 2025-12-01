@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"cosmossdk.io/log"
+	"cosmossdk.io/math"
 	"cosmossdk.io/store"
 	"cosmossdk.io/store/metrics"
 	storetypes "cosmossdk.io/store/types"
@@ -48,19 +49,24 @@ func (k *MockBankKeeper) SendCoinsFromModuleToAccount(ctx context.Context, sende
 	return nil
 }
 
-func (k *MockBankKeeper) SendCoinsFromModuleToModule(ctx sdk.Context, senderModule, recipientModule string, amt sdk.Coins) error {
-	//TODO implement me
-	panic("implement me")
+func (k *MockBankKeeper) SendCoinsFromModuleToModule(ctx context.Context, senderModule, recipientModule string, amt sdk.Coins) error {
+	// For testing purposes, just return nil (success)
+	return nil
 }
 
 func (k *MockBankKeeper) SpendableCoins(ctx context.Context, address sdk.AccAddress) sdk.Coins {
-	//TODO implement me
-	panic("implement me")
+	// For testing purposes, return empty coins
+	return sdk.Coins{}
 }
 
-func (k *MockBankKeeper) GetBalance(ctx sdk.Context, addr sdk.AccAddress, denom string) sdk.Coin {
-	//TODO implement me
-	panic("implement me")
+func (k *MockBankKeeper) GetBalance(ctx context.Context, addr sdk.AccAddress, denom string) sdk.Coin {
+	// For testing purposes, return zero coin
+	return sdk.NewCoin(denom, math.ZeroInt())
+}
+
+func (k *MockBankKeeper) GetAllBalances(ctx context.Context, addr sdk.AccAddress) sdk.Coins {
+	// For testing purposes, return empty coins
+	return sdk.Coins{}
 }
 
 func NewMockBankKeeper() *MockBankKeeper {
