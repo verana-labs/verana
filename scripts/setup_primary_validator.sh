@@ -107,6 +107,77 @@ $SED_CMD 's/swagger = false/swagger = true/' "$APP_TOML_PATH"
 $SED_CMD 's/enabled-unsafe-cors = false/enabled-unsafe-cors = true/' "$APP_TOML_PATH"
 $SED_CMD 's/cors_allowed_origins = \[\]/cors_allowed_origins = \["*"\]/' "$CONFIG_TOML_PATH"
 
+# Initialize YieldIntermediatePool module account with 1 uvna to prevent invariant violations
+# This addresses the issue where empty module accounts break invariants when receiving funds
+# See: https://github.com/cosmos/cosmos-sdk/issues/25315
+log "Initializing YieldIntermediatePool module account with 1 uvna..."
+
+# Hardcoded YieldIntermediatePool module account address (derived from module name)
+YIELD_POOL_ADDR="verana1wjnrmvjlgxvs098cnu3jaczzjjm4csmqep067h"
+
+if command -v python3 &> /dev/null; then
+    python3 << PYEOF
+import json
+
+genesis_path = "$GENESIS_JSON_PATH"
+yield_addr = "verana1wjnrmvjlgxvs098cnu3jaczzjjm4csmqep067h"
+
+with open(genesis_path, "r") as f:
+    genesis = json.load(f)
+
+app_state = genesis.setdefault("app_state", {})
+bank = app_state.setdefault("bank", {})
+balances = bank.setdefault("balances", [])
+
+# Find existing balance entry for the yield pool address
+entry = next((b for b in balances if b.get("address") == yield_addr), None)
+
+balance_added = False
+if entry is None:
+    # Create a new balance entry with 1 uvna
+    balances.append({
+        "address": yield_addr,
+        "coins": [{"denom": "uvna", "amount": "1"}],
+    })
+    balance_added = True
+else:
+    # Update existing entry: increment or add uvna
+    coins = entry.setdefault("coins", [])
+    uvna = next((c for c in coins if c.get("denom") == "uvna"), None)
+    if uvna is None:
+        coins.append({"denom": "uvna", "amount": "1"})
+        balance_added = True
+    else:
+        old_amount = int(uvna.get("amount", "0"))
+        if old_amount == 0:
+            uvna["amount"] = "1"
+            balance_added = True
+        else:
+            uvna["amount"] = str(old_amount + 1)
+            balance_added = True
+
+# Update supply to match the added balance
+if balance_added:
+    supply = bank.setdefault("supply", [])
+    uvna_supply = next((s for s in supply if s.get("denom") == "uvna"), None)
+    if uvna_supply:
+        # Increment existing supply by 1
+        current_supply = int(uvna_supply.get("amount", "0"))
+        uvna_supply["amount"] = str(current_supply + 1)
+    else:
+        # Add new supply entry
+        supply.append({"denom": "uvna", "amount": "1"})
+
+with open(genesis_path, "w") as f:
+    json.dump(genesis, f, indent=2)
+
+print(f"Ensured 1 uvna exists for YieldIntermediatePool account: {yield_addr}")
+PYEOF
+else
+    log "Warning: python3 not found; cannot auto-initialize YieldIntermediatePool."
+    log "Please add 1uvna to $YIELD_POOL_ADDR in $GENESIS_JSON_PATH manually."
+fi
+
 # Collect genesis transactions
 log "Collecting genesis transactions..."
 $BINARY collect-gentxs
