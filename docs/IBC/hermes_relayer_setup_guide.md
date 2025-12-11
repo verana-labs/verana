@@ -817,6 +817,8 @@ osmosisd q bank balance $(osmosisd keys show $USER_ACC -a --keyring-backend test
 
 osmosisd q bank balance $OSMOS_ACC_LIT "ibc/A29BAC98BBD293A8BEEB6413123CD3788035F27676DCD066FE0A869D5B39474C" --node $OSMO_RPC
 
+veranad q bank balances $(veranad keys show $USER_ACC  -a --keyring-backend test) --node $NODE_RPC
+
 veranad q bank balances $(veranad keys show cooluser -a --keyring-backend test) --node $NODE_RPC
 
 osmosisd q ibc-transfer denom-trace \
@@ -856,7 +858,7 @@ echo "$TEST_WALLET_MNEMO" | osmosisd keys add $USER_ACC --keyring-backend test -
 
 
 
-osmosisd tx ibc-transfer transfer transfer channel-107808 $USER_ACC_LIT 1000000ibc/A29BAC98BBD293A8BEEB6413123CD3788035F27676DCD066FE0A869D5B39474C --chain-id $OSMO_CHAIN_ID --keyring-backend test  --from $USER_ACC --fees 80000uosmo --gas 800000 -y --node $OSMO_RPC
+osmosisd tx ibc-transfer transfer transfer channel-107808 $USER_ACC_LIT 100000ibc/A29BAC98BBD293A8BEEB6413123CD3788035F27676DCD066FE0A869D5B39474C --chain-id $OSMO_CHAIN_ID --keyring-backend test  --from $USER_ACC --fees 80000uosmo --gas 800000 -y --node $OSMO_RPC
 ```
 
 ## troubleshooting tips
@@ -864,6 +866,11 @@ osmosisd tx ibc-transfer transfer transfer channel-107808 $USER_ACC_LIT 1000000i
 ```bash
 hermes update client --host-chain vna-devnet-1 --client 07-tendermint-7
 hermes update client --host-chain osmosis-1 --client 07-tendermint-3629
+
+
+hermes query packet pending --chain $CHAIN_ID --port transfer --channel channel-1
+
+hermes clear packets --chain vna-devnet-1 --port transfer --channel channel-1
 
 ```
 

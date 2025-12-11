@@ -6,16 +6,16 @@
       "plan": {
         "name": "v0.9",
         "time": "0001-01-01T00:00:00Z",
-        "height": "35",
-        "info": "{\"binaries\":{\"darwin/arm64\":\"https://github.com/verana-labs/verana/releases/download/v0.9-dev.3/veranad-v0.9-dev.3-darwin-arm64\",\"darwin/amd64\":\"https://github.com/verana-labs/verana/releases/download/v0.9-dev.3/veranad-v0.9-dev.3-darwin-amd64\",\"linux/arm64\":\"https://github.com/verana-labs/verana/releases/download/v0.9-dev.3/veranad-v0.9-dev.3-linux-arm64\",\"linux/amd64\":\"https://github.com/verana-labs/verana/releases/download/v0.9-dev.3/veranad-v0.9-dev.3-linux-amd64\"}}",
+        "height": "648600",
+        "info": "{\"binaries\":{\"darwin/arm64\":\"https://github.com/verana-labs/verana/releases/download/v0.9-dev.7/veranad-v0.9-dev.7-darwin-arm64\",\"darwin/amd64\":\"https://github.com/verana-labs/verana/releases/download/v0.9-dev.7/veranad-v0.9-dev.7-darwin-amd64\",\"linux/arm64\":\"https://github.com/verana-labs/verana/releases/download/v0.9-dev.7/veranad-v0.9-dev.7-linux-arm64\",\"linux/amd64\":\"https://github.com/verana-labs/verana/releases/download/v0.9-dev.7/veranad-v0.9-dev.7-linux-amd64\"}}",
         "upgraded_client_state": null
       }
     }
   ],
   "metadata": "CmUKI1VwZ3JhZGUgdG8gVmVyYW5hIHYwLjktZGV2LjMKIlNvZnR3YXJlIHVwZ3JhZGUgdG8gVmVyYW5hIHYwLjktZGV2LjMgd2l0aCBnb3Zlcm5hbmNlIHBhcmFtZXRlciB1cGRhdGVzLg==",
   "deposit": "10000000uvna",
-  "title": "Upgrade to Verana v0.9-dev.4",
-  "summary": "Software upgrade to Verana v0.9-dev.4 with governance parameter updates (voting_period: 48h, expedited_voting_period: 20m)",
+  "title": "Upgrade to Verana v0.9-dev.7",
+  "summary": "Software upgrade to Verana v0.9-dev.7 with governance parameter updates (voting_period: 48h, expedited_voting_period: 20m)",
   "expedited": false
 }
 

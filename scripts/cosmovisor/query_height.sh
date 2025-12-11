@@ -10,6 +10,8 @@ BINARY="${BINARY:-veranad}"
 NODE="${NODE:-tcp://localhost:26657}"
 
 echo "Querying chain status..."
+echo "CHAIN_ID="${CHAIN_ID}"
+echo "NODE=${NODE}"
 STATUS_JSON=$($BINARY status --node $NODE 2>/dev/null)
 if [ $? -eq 0 ] && [ -n "$STATUS_JSON" ]; then
     HEIGHT=$(echo "$STATUS_JSON" | jq -r '.sync_info.latest_block_height // .latest_block_height // empty')
