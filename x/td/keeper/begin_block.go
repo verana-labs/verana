@@ -56,9 +56,21 @@ func (k Keeper) BeginBlocker(ctx context.Context) error {
 	perBlockYield := trustDepositBalanceDec.Mul(perBlockYieldRate)
 	allowance := dust.Add(perBlockYield)
 
-	// Get yield intermediate pool balance
+	// Get yield intermediate pool balance BEFORE any transfers in this block
+	// This captures the amount that came into YIP from the continuous funding proposal
 	yieldIntermediatePoolBalance := k.bankKeeper.GetBalance(ctx, yieldIntermediatePoolAddr, types.BondDenom)
 	yieldIntermediatePoolBalanceDec := math.LegacyNewDecFromInt(yieldIntermediatePoolBalance.Amount)
+
+	// Emit event to track YIP incoming amount (for simulation monitoring)
+	sdkCtx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeYieldDistribution,
+			sdk.NewAttribute(types.AttributeKeyYIPIncomingBalance, yieldIntermediatePoolBalance.Amount.String()),
+			sdk.NewAttribute(types.AttributeKeyYIPIncomingBalanceDec, yieldIntermediatePoolBalanceDec.String()),
+			sdk.NewAttribute(types.AttributeKeyAllowance, allowance.String()),
+			sdk.NewAttribute(types.AttributeKeyTrustDepositBalance, trustDepositBalanceBefore.Amount.String()),
+		),
+	)
 
 	// Determine transfer amount: min(allowance, yield_intermediate_pool_balance)
 	transferAmountDec := math.LegacyMinDec(allowance, yieldIntermediatePoolBalanceDec)
@@ -68,6 +80,17 @@ func (k Keeper) BeginBlocker(ctx context.Context) error {
 	if !transferAmount.IsPositive() {
 		return nil
 	}
+
+	// Emit event for transfer details
+	sdkCtx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeYieldTransfer,
+			sdk.NewAttribute(types.AttributeKeyTransferAmount, transferAmount.String()),
+			sdk.NewAttribute(types.AttributeKeyTransferAmountDec, transferAmountDec.String()),
+			sdk.NewAttribute(types.AttributeKeyAllowance, allowance.String()),
+			sdk.NewAttribute(types.AttributeKeyYIPBalanceBefore, yieldIntermediatePoolBalance.Amount.String()),
+		),
+	)
 
 	// Transfer yield from yield intermediate pool to trust deposit module
 	transferCoins := sdk.NewCoins(sdk.NewCoin(types.BondDenom, transferAmount))
