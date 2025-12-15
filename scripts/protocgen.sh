@@ -45,6 +45,15 @@ fi
     fi
   fi
 
+  # Generate ts-proto TypeScript codecs for frontend/clients
+  if [ -f "buf.gen.ts.yaml" ]; then
+    echo "  Generating ts-proto TypeScript codecs..."
+    TS_OUT="$home/ts-proto/src/codec"
+    rm -rf "$TS_OUT"
+    mkdir -p "$TS_OUT"
+    buf generate --template buf.gen.ts.yaml
+  fi
+
   # Generate swagger/OpenAPI documentation
   if [ -f "buf.gen.swagger.yaml" ]; then
     echo "  Generating swagger documentation..."
