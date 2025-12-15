@@ -90,7 +90,11 @@ jobs:
           cd proto
           buf generate --template buf.gen.ts.yaml
           cd ../ts-proto
-          npm ci
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
           if [ "${VERSION}" != "dev" ]; then
             npm version --no-git-tag-version "${VERSION#v}"
           fi
