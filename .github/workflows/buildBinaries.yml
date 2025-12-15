@@ -40,7 +40,7 @@ jobs:
           go-version: 1.25
 
       - name: Set up Buf
-        uses: bufbuild/buf-setup@v1
+        uses: bufbuild/buf-setup-action@v1
         with:
           github_token: ${{ github.token }}
 
@@ -187,4 +187,3 @@ jobs:
             ts-proto/${{ env.PKG_TGZ }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
