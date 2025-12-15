@@ -66,13 +66,17 @@ jobs:
           git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr - %an)%Creset' --abbrev-commit --date=relative --all
           echo executing: git describe --tags --exact-match
           git describe --tags --exact-match || true
-          if git describe --tags --exact-match > /dev/null 2>&1; then
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            VERSION="${GITHUB_REF_NAME}"
+            echo "VERSION from GITHUB_REF_NAME=${VERSION}"
+          elif git describe --tags --exact-match > /dev/null 2>&1; then
             VERSION=$(git describe --tags --exact-match)
-            echo "then VERSION=${VERSION}"
+            echo "VERSION from git describe=${VERSION}"
           else
             VERSION="dev"
-            echo "else VERSION=${VERSION}"
+            echo "VERSION default=${VERSION}"
           fi
+          NPM_VERSION="${VERSION}"
           COMMIT=$(git rev-parse --short HEAD)
           LDFLAGS="-X github.com/cosmos/cosmos-sdk/version.Name=verana \
           -X github.com/cosmos/cosmos-sdk/version.AppName=verana \
@@ -80,9 +84,11 @@ jobs:
           -X github.com/cosmos/cosmos-sdk/version.Commit=${COMMIT}"
           echo "LDFLAGS=${LDFLAGS}"
           echo "VERSION=${VERSION}"
+          echo "NPM_VERSION=${NPM_VERSION}"
           echo "COMMIT=${COMMIT}"
           echo "LDFLAGS=${LDFLAGS}" >> $GITHUB_ENV
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "NPM_VERSION=${NPM_VERSION}" >> $GITHUB_ENV
           echo "COMMIT=${COMMIT}" >> $GITHUB_ENV          
 
       - name: Generate ts-proto package and pack
@@ -95,8 +101,8 @@ jobs:
           else
             npm install
           fi
-          if [ "${VERSION}" != "dev" ]; then
-            npm version --no-git-tag-version "${VERSION#v}"
+          if [ -n "${NPM_VERSION}" ]; then
+            npm version --no-git-tag-version "${NPM_VERSION}"
           fi
           npm pack
           echo "PKG_TGZ=$(ls verana-proto-codecs-*.tgz | head -n 1)" >> $GITHUB_ENV
