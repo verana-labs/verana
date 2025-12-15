@@ -87,9 +87,9 @@ jobs:
 
       - name: Generate ts-proto package and pack
         run: |
-          cd proto
+          cd "$GITHUB_WORKSPACE/proto"
           buf generate --template buf.gen.ts.yaml
-          cd ../ts-proto
+          cd "$GITHUB_WORKSPACE/ts-proto"
           if [ -f package-lock.json ]; then
             npm ci
           else
