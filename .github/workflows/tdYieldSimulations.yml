@@ -78,6 +78,14 @@ jobs:
             exit 1
           fi
 
+      - name: Setup accounts for simulations
+        run: |
+          cd ${{ env.TEST_HARNESS_PATH }}
+          export PATH=$PATH:$BINARYPATH
+          export FEES=0uvna
+          type veranad
+          ./scripts/setup_accounts.sh
+
       - name: Run TD Yield Simulations
         run: |
           cd ${{ env.TEST_HARNESS_PATH }}
