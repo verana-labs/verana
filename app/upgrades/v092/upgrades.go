@@ -63,8 +63,13 @@ func CreateUpgradeHandler(
 		// see zero values for new fields after proto decode.
 		params := tdKeeper.GetParams(sdkCtx)
 
-		// Backfill TrustDepositMaxYieldRate if it is zero.
-		if params.TrustDepositMaxYieldRate.IsZero() {
+		// NOTE: On existing chains that were started before this field was added,
+		// the protobuf decode will leave TrustDepositMaxYieldRate as the Go
+		// zero-value for math.LegacyDec, which has a nil internal big.Int. Calling
+		// methods like IsZero() on that nil value will panic. To avoid that, we
+		// first check for the pure zero-value struct, and only call IsZero() when
+		// the value is non-nil.
+		if params.TrustDepositMaxYieldRate == (math.LegacyDec{}) || params.TrustDepositMaxYieldRate.IsZero() {
 			defaultMaxYield, err := math.LegacyNewDecFromStr(tdtypes.DefaultTrustDepositMaxYieldRate)
 			if err != nil {
 				return nil, err
