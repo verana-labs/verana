@@ -41,4 +41,14 @@ message Params {
     (gogoproto.moretags) = "yaml:\"user_agent_reward_rate\"",
     (gogoproto.nullable) = false
   ];
+  // trust_deposit_max_yield_rate is the maximum annualized yield rate (e.g. 0.15 for 15%)
+  string trust_deposit_max_yield_rate = 6[
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.moretags) = "yaml:\"trust_deposit_max_yield_rate\"",
+    (gogoproto.nullable) = false
+  ];
+  // yield_intermediate_pool is the Bech32 string for the Yield Intermediate Pool module account
+  string yield_intermediate_pool = 7[
+    (gogoproto.moretags) = "yaml:\"yield_intermediate_pool\""
+  ];
 }

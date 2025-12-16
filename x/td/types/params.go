@@ -1,19 +1,23 @@
 package types
 
 import (
-	"cosmossdk.io/math"
 	"fmt"
+
+	"cosmossdk.io/math"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 )
 
 var _ paramtypes.ParamSet = (*Params)(nil)
 
 const (
-	DefaultTrustDepositReclaimBurnRate = "0.6" // 60%
-	DefaultTrustDepositShareValue      = "1.0" // Initial value: 1
-	DefaultTrustDepositRate            = "0.2" // 20%
-	DefaultWalletUserAgentRewardRate   = "0.2" // 20%
-	DefaultUserAgentRewardRate         = "0.2" // 20%
+	DefaultTrustDepositReclaimBurnRate = "0.6"  // 60%
+	DefaultTrustDepositShareValue      = "1.0"  // Initial value: 1
+	DefaultTrustDepositRate            = "0.2"  // 20%
+	DefaultWalletUserAgentRewardRate   = "0.2"  // 20%
+	DefaultUserAgentRewardRate         = "0.2"  // 20%
+	DefaultTrustDepositMaxYieldRate    = "0.15" // 15% annual yield
 )
 
 // ParamKeyTable the param key table for launch module
@@ -28,6 +32,8 @@ func NewParams(
 	trustDepositRate math.LegacyDec,
 	walletUserAgentRewardRate math.LegacyDec,
 	userAgentRewardRate math.LegacyDec,
+	trustDepositMaxYieldRate math.LegacyDec,
+	yieldIntermediatePool string,
 ) Params {
 	return Params{
 		TrustDepositReclaimBurnRate: trustDepositReclaimBurnRate,
@@ -35,6 +41,8 @@ func NewParams(
 		TrustDepositRate:            trustDepositRate,
 		WalletUserAgentRewardRate:   walletUserAgentRewardRate,
 		UserAgentRewardRate:         userAgentRewardRate,
+		TrustDepositMaxYieldRate:    trustDepositMaxYieldRate,
+		YieldIntermediatePool:       yieldIntermediatePool,
 	}
 }
 
@@ -45,6 +53,10 @@ func DefaultParams() Params {
 	TrustDepositRate, _ := math.LegacyNewDecFromStr(DefaultTrustDepositRate)
 	WalletUserAgentRewardRate, _ := math.LegacyNewDecFromStr(DefaultWalletUserAgentRewardRate)
 	UserAgentRewardRate, _ := math.LegacyNewDecFromStr(DefaultUserAgentRewardRate)
+	TrustDepositMaxYieldRate, _ := math.LegacyNewDecFromStr(DefaultTrustDepositMaxYieldRate)
+
+	// Default yield intermediate pool is the module account address derived from the module account name.
+	defaultYieldIntermediatePool := authtypes.NewModuleAddress(YieldIntermediatePool).String()
 
 	return NewParams(
 		TrustDepositReclaimBurnRate,
@@ -52,6 +64,8 @@ func DefaultParams() Params {
 		TrustDepositRate,
 		WalletUserAgentRewardRate,
 		UserAgentRewardRate,
+		TrustDepositMaxYieldRate,
+		defaultYieldIntermediatePool,
 	)
 }
 
@@ -83,6 +97,16 @@ func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 			&p.UserAgentRewardRate,
 			validateLegacyDec,
 		),
+		paramtypes.NewParamSetPair(
+			[]byte("TrustDepositMaxYieldRate"),
+			&p.TrustDepositMaxYieldRate,
+			validateLegacyDec,
+		),
+		paramtypes.NewParamSetPair(
+			[]byte("YieldIntermediatePool"),
+			&p.YieldIntermediatePool,
+			validateString,
+		),
 	}
 }
 
@@ -102,6 +126,14 @@ func (p Params) Validate() error {
 	}
 	if err := validateLegacyDec(p.UserAgentRewardRate); err != nil {
 		return err
+	}
+	if err := validateLegacyDec(p.TrustDepositMaxYieldRate); err != nil {
+		return err
+	}
+	if p.YieldIntermediatePool != "" {
+		if _, err := sdk.AccAddressFromBech32(p.YieldIntermediatePool); err != nil {
+			return fmt.Errorf("invalid yield_intermediate_pool address: %w", err)
+		}
 	}
 	return nil
 }
@@ -135,5 +167,23 @@ func validatePositiveLegacyDec(i interface{}) error {
 		return fmt.Errorf("value must be positive: %s", v)
 	}
 
+	return nil
+}
+
+// validateUint64 validates that the parameter is a valid uint64
+func validateUint64(i interface{}) error {
+	_, ok := i.(uint64)
+	if !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
+	return nil
+}
+
+// validateString validates that the parameter is a valid string
+func validateString(i interface{}) error {
+	_, ok := i.(string)
+	if !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
 	return nil
 }

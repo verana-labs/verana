@@ -16,6 +16,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/module"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
+	mintkeeper "github.com/cosmos/cosmos-sdk/x/mint/keeper"
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 
@@ -154,8 +155,8 @@ func (AppModule) ConsensusVersion() uint64 { return 2 }
 
 // BeginBlock contains the logic that is automatically triggered at the beginning of each block.
 // The begin block implementation is optional.
-func (am AppModule) BeginBlock(_ context.Context) error {
-	return nil
+func (am AppModule) BeginBlock(ctx context.Context) error {
+	return am.keeper.BeginBlocker(ctx)
 }
 
 // EndBlock contains the logic that is automatically triggered at the end of each block.
@@ -191,6 +192,7 @@ type ModuleInputs struct {
 
 	AccountKeeper types.AccountKeeper
 	BankKeeper    types.BankKeeper
+	MintKeeper    mintkeeper.Keeper
 }
 
 type ModuleOutputs struct {
@@ -200,18 +202,36 @@ type ModuleOutputs struct {
 	Module             appmodule.AppModule
 }
 
+// mintKeeperAdapter adapts the Cosmos SDK mint keeper to our MintKeeper interface
+type mintKeeperAdapter struct {
+	mintKeeper mintkeeper.Keeper
+}
+
+func (a *mintKeeperAdapter) GetBlocksPerYear(ctx context.Context) (uint64, error) {
+	params, err := a.mintKeeper.Params.Get(ctx)
+	if err != nil {
+		return 0, err
+	}
+	return params.BlocksPerYear, nil
+}
+
 func ProvideModule(in ModuleInputs) ModuleOutputs {
 	// default to governance authority if not provided
 	authority := authtypes.NewModuleAddress(govtypes.ModuleName)
 	if in.Config.Authority != "" {
 		authority = authtypes.NewModuleAddressOrBech32Address(in.Config.Authority)
 	}
+
+	// Create adapter for mint keeper
+	mintAdapter := &mintKeeperAdapter{mintKeeper: in.MintKeeper}
+
 	k := keeper.NewKeeper(
 		in.Cdc,
 		in.StoreService,
 		in.Logger,
 		authority.String(),
 		in.BankKeeper,
+		mintAdapter,
 	)
 	m := NewAppModule(
 		in.Cdc,

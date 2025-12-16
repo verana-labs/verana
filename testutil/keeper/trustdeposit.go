@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"context"
 	"testing"
 
 	"cosmossdk.io/log"
@@ -21,6 +22,18 @@ import (
 	"github.com/verana-labs/verana/x/td/types"
 )
 
+// MockMintKeeper is a mock implementation of types.MintKeeper
+type MockMintKeeper struct{}
+
+func NewMockMintKeeper() types.MintKeeper {
+	return &MockMintKeeper{}
+}
+
+func (k *MockMintKeeper) GetBlocksPerYear(ctx context.Context) (uint64, error) {
+	// Return a default value for testing (6311520 blocks per year for 5 second blocks)
+	return 6311520, nil
+}
+
 func TrustdepositKeeper(t testing.TB) (keeper.Keeper, sdk.Context) {
 	storeKey := storetypes.NewKVStoreKey(types.StoreKey)
 
@@ -33,6 +46,7 @@ func TrustdepositKeeper(t testing.TB) (keeper.Keeper, sdk.Context) {
 	cdc := codec.NewProtoCodec(registry)
 	authority := authtypes.NewModuleAddress(govtypes.ModuleName)
 	bankKeeper := NewMockBankKeeper()
+	mintKeeper := NewMockMintKeeper()
 
 	k := keeper.NewKeeper(
 		cdc,
@@ -40,6 +54,7 @@ func TrustdepositKeeper(t testing.TB) (keeper.Keeper, sdk.Context) {
 		log.NewNopLogger(),
 		authority.String(),
 		bankKeeper,
+		mintKeeper,
 	)
 
 	ctx := sdk.NewContext(stateStore, cmtproto.Header{}, false, log.NewNopLogger())

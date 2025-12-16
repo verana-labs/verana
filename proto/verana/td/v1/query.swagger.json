@@ -116,6 +116,14 @@
         },
         "user_agent_reward_rate": {
           "type": "string"
+        },
+        "trust_deposit_max_yield_rate": {
+          "type": "string",
+          "title": "trust_deposit_max_yield_rate is the maximum annualized yield rate (e.g. 0.15 for 15%)"
+        },
+        "yield_intermediate_pool": {
+          "type": "string",
+          "title": "yield_intermediate_pool is the Bech32 string for the Yield Intermediate Pool module account"
         }
       },
       "description": "Params defines the parameters for the module."
