@@ -874,9 +874,84 @@ func TestExtendPermission(t *testing.T) {
 	wrongCreatorTestPermID, err := k.CreatePermission(sdkCtx, wrongCreatorTestPerm)
 	require.NoError(t, err)
 
+	// Create a perm with NULL effective_until for testing NULL case
+	nullEffectiveUntilPerm := types.Permission{
+		SchemaId:        1,
+		Type:            types.PermissionType_ISSUER,
+		Grantee:         creator,
+		Created:         &now,
+		CreatedBy:       creator,
+		Extended:        &now,
+		ExtendedBy:      creator,
+		Modified:        &now,
+		EffectiveUntil:  nil, // NULL effective_until
+		Country:         "US",
+		ValidatorPermId: validatorPermID,
+		VpState:         types.ValidationState_VALIDATED,
+		VpExp:           &futureVpExp,
+	}
+	nullEffectiveUntilPermID, err := k.CreatePermission(sdkCtx, nullEffectiveUntilPerm)
+	require.NoError(t, err)
+
+	// Create an ecosystem perm with NULL effective_until
+	nullEffectiveUntilEcosystemPerm := types.Permission{
+		SchemaId:       1,
+		Type:           types.PermissionType_ECOSYSTEM,
+		Grantee:        trustRegistryAddr,
+		Created:        &now,
+		CreatedBy:      trustRegistryAddr,
+		Extended:       &now,
+		ExtendedBy:     trustRegistryAddr,
+		Modified:       &now,
+		EffectiveUntil: nil, // NULL effective_until
+		Country:        "US",
+		VpState:        types.ValidationState_VALIDATED,
+	}
+	nullEffectiveUntilEcosystemPermID, err := k.CreatePermission(sdkCtx, nullEffectiveUntilEcosystemPerm)
+	require.NoError(t, err)
+
+	// Create additional perms with NULL effective_until for invalid test cases
+	// (each test case needs its own perm since extending modifies the state)
+	nullEffectiveUntilPermForPastTest := types.Permission{
+		SchemaId:        1,
+		Type:            types.PermissionType_ISSUER,
+		Grantee:         creator,
+		Created:         &now,
+		CreatedBy:       creator,
+		Extended:        &now,
+		ExtendedBy:      creator,
+		Modified:        &now,
+		EffectiveUntil:  nil, // NULL effective_until
+		Country:         "US",
+		ValidatorPermId: validatorPermID,
+		VpState:         types.ValidationState_VALIDATED,
+		VpExp:           &futureVpExp,
+	}
+	nullEffectiveUntilPermForPastTestID, err := k.CreatePermission(sdkCtx, nullEffectiveUntilPermForPastTest)
+	require.NoError(t, err)
+
+	nullEffectiveUntilPermForEqualTest := types.Permission{
+		SchemaId:        1,
+		Type:            types.PermissionType_ISSUER,
+		Grantee:         creator,
+		Created:         &now,
+		CreatedBy:       creator,
+		Extended:        &now,
+		ExtendedBy:      creator,
+		Modified:        &now,
+		EffectiveUntil:  nil, // NULL effective_until
+		Country:         "US",
+		ValidatorPermId: validatorPermID,
+		VpState:         types.ValidationState_VALIDATED,
+		VpExp:           &futureVpExp,
+	}
+	nullEffectiveUntilPermForEqualTestID, err := k.CreatePermission(sdkCtx, nullEffectiveUntilPermForEqualTest)
+	require.NoError(t, err)
+
 	newEffectiveUntil := now.Add(60 * 24 * time.Hour)     // 60 days in the future
 	pastEffectiveUntil := now.Add(-1 * 24 * time.Hour)    // 1 day in the past
 	tooFarEffectiveUntil := now.Add(500 * 24 * time.Hour) // Past VP expiration
+	equalToNowEffectiveUntil := now                       // Equal to now (should fail)
 
 	testCases := []struct {
 		name       string
@@ -951,6 +1026,44 @@ func TestExtendPermission(t *testing.T) {
 			},
 			expectErr:  true,
 			errMessage: "creator is not the validator",
+		},
+		{
+			name: "Valid - extend permission with NULL effective_until (validator-managed)",
+			msg: &types.MsgExtendPermission{
+				Creator:        validatorAddr,
+				Id:             nullEffectiveUntilPermID,
+				EffectiveUntil: &newEffectiveUntil,
+			},
+			expectErr: false,
+		},
+		{
+			name: "Valid - extend permission with NULL effective_until (ecosystem)",
+			msg: &types.MsgExtendPermission{
+				Creator:        trustRegistryAddr,
+				Id:             nullEffectiveUntilEcosystemPermID,
+				EffectiveUntil: &newEffectiveUntil,
+			},
+			expectErr: false,
+		},
+		{
+			name: "Invalid - extend permission with NULL effective_until but new effective_until not greater than now (past)",
+			msg: &types.MsgExtendPermission{
+				Creator:        validatorAddr,
+				Id:             nullEffectiveUntilPermForPastTestID,
+				EffectiveUntil: &pastEffectiveUntil,
+			},
+			expectErr:  true,
+			errMessage: "effective_until must be greater than current timestamp",
+		},
+		{
+			name: "Invalid - extend permission with NULL effective_until but new effective_until equals now",
+			msg: &types.MsgExtendPermission{
+				Creator:        validatorAddr,
+				Id:             nullEffectiveUntilPermForEqualTestID,
+				EffectiveUntil: &equalToNowEffectiveUntil,
+			},
+			expectErr:  true,
+			errMessage: "effective_until must be greater than current timestamp",
 		},
 	}
 

@@ -516,12 +516,17 @@ func (ms msgServer) validateExtendPermissionBasicChecks(ctx sdk.Context, msg *ty
 		return applicantPerm, fmt.Errorf("applicant permission is not valid: %w", err)
 	}
 
-	// effective_until MUST be greater than applicant_perm.effective_until else MUST abort
+	// if applicant_perm.effective_until is NULL: effective_until MUST be greater than now()
+	// else effective_until MUST be greater than applicant_perm.effective_until
+	// else MUST abort
 	if applicantPerm.EffectiveUntil == nil {
-		return applicantPerm, fmt.Errorf("cannot extend permission with no current effective_until")
-	}
-	if !msg.EffectiveUntil.After(*applicantPerm.EffectiveUntil) {
-		return applicantPerm, fmt.Errorf("effective_until must be greater than current effective_until")
+		if !msg.EffectiveUntil.After(now) {
+			return applicantPerm, fmt.Errorf("effective_until must be greater than current timestamp")
+		}
+	} else {
+		if !msg.EffectiveUntil.After(*applicantPerm.EffectiveUntil) {
+			return applicantPerm, fmt.Errorf("effective_until must be greater than current effective_until")
+		}
 	}
 
 	return applicantPerm, nil
