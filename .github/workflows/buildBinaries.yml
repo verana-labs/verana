@@ -106,7 +106,8 @@ jobs:
             npm pkg set version="${NPM_VERSION}"
           fi
           npm pack
-          echo "Package version now: $(node -e \"console.log(require('./package.json').version)\")"
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          echo "Package version now: ${PKG_VERSION}"
           PKG_TGZ=$(ls -t verana-labs-verana-types-*.tgz | head -n 1)
           echo "PKG_TGZ=${PKG_TGZ}" >> $GITHUB_ENV
 
