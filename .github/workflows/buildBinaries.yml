@@ -29,10 +29,20 @@ jobs:
         with:
             fetch-depth: 0  # Fetch all history
 
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
       - name: Set up Go environment
         uses: actions/setup-go@v3
         with:
           go-version: 1.25
+
+      - name: Set up Buf
+        uses: bufbuild/buf-setup-action@v1
+        with:
+          github_token: ${{ github.token }}
 
       - name: Determine Branch or Environment
         id: determine-branch
@@ -56,13 +66,17 @@ jobs:
           git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr - %an)%Creset' --abbrev-commit --date=relative --all
           echo executing: git describe --tags --exact-match
           git describe --tags --exact-match || true
-          if git describe --tags --exact-match > /dev/null 2>&1; then
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            VERSION="${GITHUB_REF_NAME}"
+            echo "VERSION from GITHUB_REF_NAME=${VERSION}"
+          elif git describe --tags --exact-match > /dev/null 2>&1; then
             VERSION=$(git describe --tags --exact-match)
-            echo "then VERSION=${VERSION}"
+            echo "VERSION from git describe=${VERSION}"
           else
             VERSION="dev"
-            echo "else VERSION=${VERSION}"
+            echo "VERSION default=${VERSION}"
           fi
+          NPM_VERSION="${VERSION#v}"
           COMMIT=$(git rev-parse --short HEAD)
           LDFLAGS="-X github.com/cosmos/cosmos-sdk/version.Name=verana \
           -X github.com/cosmos/cosmos-sdk/version.AppName=verana \
@@ -70,10 +84,32 @@ jobs:
           -X github.com/cosmos/cosmos-sdk/version.Commit=${COMMIT}"
           echo "LDFLAGS=${LDFLAGS}"
           echo "VERSION=${VERSION}"
+          echo "NPM_VERSION=${NPM_VERSION}"
           echo "COMMIT=${COMMIT}"
           echo "LDFLAGS=${LDFLAGS}" >> $GITHUB_ENV
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "NPM_VERSION=${NPM_VERSION}" >> $GITHUB_ENV
           echo "COMMIT=${COMMIT}" >> $GITHUB_ENV          
+
+      - name: Generate ts-proto package and pack
+        run: |
+          cd "$GITHUB_WORKSPACE/proto"
+          buf generate --template buf.gen.ts.yaml
+          cd "$GITHUB_WORKSPACE/ts-proto"
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+          rm -f verana-labs-verana-types-*.tgz
+          if [ -n "${NPM_VERSION}" ]; then
+            npm pkg set version="${NPM_VERSION}"
+          fi
+          npm pack
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          echo "Package version now: ${PKG_VERSION}"
+          PKG_TGZ=$(ls -t verana-labs-verana-types-*.tgz | head -n 1)
+          echo "PKG_TGZ=${PKG_TGZ}" >> $GITHUB_ENV
 
       - name: Build binary for Linux AMD64
         run: |
@@ -162,5 +198,6 @@ jobs:
             binaries/${{env.BINARY_NAME}}-darwin-amd64
             binaries/${{env.BINARY_NAME}}-darwin-arm64
             binaries/checksums/md5sums.txt
+            ts-proto/${{ env.PKG_TGZ }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}          
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

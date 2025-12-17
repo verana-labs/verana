@@ -228,6 +228,11 @@ proto-swagger:
 	@echo "Generating Swagger documentation..."
 	@cd proto && buf generate --template buf.gen.swagger.yaml
 
+proto-ts:
+	@echo "Generating TypeScript protobuf package..."
+	@cd proto && buf generate --template buf.gen.ts.yaml
+	@cd ts-proto && npm run build
+
 proto-deps:
 	@echo "Updating proto dependencies..."
 	@cd proto && buf dep update
@@ -268,7 +273,7 @@ proto-gen-docker:
 		--gocosmos_out=plugins=interfacetype+grpc,Mgoogle/protobuf/any.proto=github.com/cosmos/cosmos-sdk/codec/types:. \
 		{} \;
 
-.PHONY: proto-all proto-gen proto-swagger proto-deps proto-clean proto-format proto-lint proto-format-buf proto-breaking proto-gen-docker
+.PHONY: proto-all proto-gen proto-swagger proto-ts proto-deps proto-clean proto-format proto-lint proto-format-buf proto-breaking proto-gen-docker
 
 ###############################################################################
 ###                              Simulation                                 ###
@@ -395,6 +400,7 @@ help:
 	@echo "  proto-all         - Generate all protobuf files"
 	@echo "  proto-gen         - Generate Go protobuf files"
 	@echo "  proto-swagger     - Generate Swagger docs"
+	@echo "  proto-ts          - Generate TypeScript proto package (ts-proto)"
 	@echo "  proto-clean       - Clean generated files"
 	@echo "  proto-lint        - Lint protobuf files"
 	@echo ""
