@@ -101,13 +101,13 @@ jobs:
           else
             npm install
           fi
-          rm -f verana-proto-codecs-*.tgz
+          rm -f verana-labs-verana-types-*.tgz
           if [ -n "${NPM_VERSION}" ]; then
             npm pkg set version="${NPM_VERSION}"
           fi
           npm pack
           echo "Package version now: $(node -e \"console.log(require('./package.json').version)\")"
-          PKG_TGZ=$(ls -t verana-proto-codecs-*.tgz | head -n 1)
+          PKG_TGZ=$(ls -t verana-labs-verana-types-*.tgz | head -n 1)
           echo "PKG_TGZ=${PKG_TGZ}" >> $GITHUB_ENV
 
       - name: Build binary for Linux AMD64

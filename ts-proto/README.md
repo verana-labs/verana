@@ -1,4 +1,4 @@
-# @verana/proto-codecs
+# @verana-labs/verana-types
 
 TypeScript protobuf codecs generated from the Verana blockchain protobufs with `ts-proto`.
 
@@ -23,11 +23,11 @@ You can also use `make proto-ts` once dependencies are installed.
 ## Consume
 
 ```bash
-npm install @verana/proto-codecs
+npm install @verana-labs/verana-types
 ```
 
 Import directly from the codec paths:
 
 ```ts
-import { MsgAddDID } from "@verana/proto-codecs/codec/verana/dd/v1/tx";
+import { MsgAddDID } from "@verana-labs/verana-types/codec/verana/dd/v1/tx";
 ```
