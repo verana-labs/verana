@@ -106,6 +106,7 @@ require (
 	github.com/bgentry/speakeasy v0.2.0 // indirect
 	github.com/bits-and-blooms/bitset v1.22.0 // indirect
 	github.com/bkielbasa/cyclop v1.2.3 // indirect
+	github.com/blang/semver/v4 v4.0.0 // indirect
 	github.com/blizzy78/varnamelen v0.8.0 // indirect
 	github.com/bombsimon/wsl/v4 v4.5.0 // indirect
 	github.com/breml/bidichk v0.3.2 // indirect
@@ -121,6 +122,7 @@ require (
 	github.com/bytedance/sonic/loader v0.3.0 // indirect
 	github.com/catenacyber/perfsprint v0.8.2 // indirect
 	github.com/ccojocar/zxcvbn-go v1.0.2 // indirect
+	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/charithe/durationcheck v0.0.10 // indirect
