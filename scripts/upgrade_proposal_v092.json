@@ -1,0 +1,21 @@
+{
+  "messages": [
+    {
+      "@type": "/cosmos.upgrade.v1beta1.MsgSoftwareUpgrade",
+      "authority": "verana10d07y265gmmuvt4z0w9aw880jnsr700j22m4w8",
+      "plan": {
+        "name": "v0.9.2",
+        "time": "0001-01-01T00:00:00Z",
+        "height": "40",
+        "info": "{\"binaries\":{\"darwin/arm64\":\"https://github.com/verana-labs/verana/releases/download/v0.9.1-dev.6/veranad-v0.9.1-dev.6-darwin-arm64\",\"darwin/amd64\":\"https://github.com/verana-labs/verana/releases/download/v0.9.1-dev.6/veranad-v0.9.1-dev.6-darwin-amd64\",\"linux/arm64\":\"https://github.com/verana-labs/verana/releases/download/v0.9.1-dev.6/veranad-v0.9.1-dev.6-linux-arm64\",\"linux/amd64\":\"https://github.com/verana-labs/verana/releases/download/v0.9.1-dev.6/veranad-v0.9.1-dev.6-linux-amd64\"}}",
+        "upgraded_client_state": null
+      }
+    }
+  ],
+  "metadata": "Q3VzdG9tIHNvZnR3YXJlIHVwZ3JhZGUgdG8gVmVyYW5hIHYwLjkuMiAoY29udGFpbnMgdHJ1c3QgZGVwb3NpdCB5aWVsZCBkaXN0cmlidXRpb24pLg==",
+  "deposit": "10000000uvna",
+  "title": "Upgrade to Verana v0.9.1-dev.6 (v0.9.2 handler)",
+  "summary": "Software upgrade to Verana v0.9.2 (binary v0.9.1-dev.6) adding trust deposit yield distribution and related parameters.",
+  "expedited": false
+}
+

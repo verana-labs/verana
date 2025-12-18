@@ -2,11 +2,6 @@ name: 2.Test Harness Execution
 
 on:
   workflow_dispatch:
-    inputs:
-      TEST_HARNESS_BRANCH:
-        description: 'Branch to use for verana-test-harness checkout (default is main)'
-        required: false
-        default: 'main'
   pull_request:
     branches:
       - '*' # Trigger on pull requests to any branch
@@ -18,8 +13,7 @@ jobs:
   test-harness:
     runs-on: ubuntu-latest
     env:
-      VERANA_BLOCKCHAIN_PATH: ./verana
-      TEST_HARNESS_PATH: ./verana-test-harness
+      TEST_HARNESS_PATH: ./testharness
 
     steps:
       - name: Checkout this repository
@@ -27,20 +21,9 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ github.head_ref || github.ref_name }}
-          token: ${{ secrets.GITHUB_TOKEN }}
-          path: ${{ env.VERANA_BLOCKCHAIN_PATH }}
-
-      - name: Checkout verana-test-harness
-        uses: actions/checkout@v3
-        with:
-          repository: verana-labs/verana-test-harness
-          ref: ${{ github.event.inputs.TEST_HARNESS_BRANCH || 'v0.9.2-dev.1' }}
-          ssh-key: ${{ secrets.VERANA_TEST_HARNESS_DEPLOY_KEY }}
-          path: ${{ env.TEST_HARNESS_PATH }}
 
       - name: Install dependencies and run setup script asynchronously
         run: |
-          cd ${{ env.VERANA_BLOCKCHAIN_PATH }}
           env
           export PATH=$PATH:$HOME/go/bin
           export BINARYPATH=$HOME/go/bin

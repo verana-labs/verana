@@ -29,3 +29,6 @@ vendor/
 .s3cfg
 .secrets*
 .env
+
+# Test harness
+testharness/journey_results/*
