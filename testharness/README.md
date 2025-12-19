@@ -14,8 +14,19 @@ The test harness provides:
 
 - **Go 1.22+** installed
 - A running Verana blockchain node (local or remote)
-- Account with sufficient funds for testing
 - Environment variables configured (see Configuration section)
+- Necessary Account created
+
+
+## Account Creation
+
+
+This script will create the necessary account for the testharness execution
+
+```bash
+cd testharness
+./scripts/setup_accounts.sh
+```
 
 ## Installation
 

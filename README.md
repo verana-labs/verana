@@ -168,7 +168,7 @@ cd local-test
 ./cleanup.sh
 ```
 
-See `local-test/setup-guide.md` for detailed instructions.
+See [local-test/setup-guide.md](local-test/setup-guide.md) for detailed instructions.
 
 ### Option 3: Manual Setup
 
@@ -200,6 +200,11 @@ make install          # Install veranad binary
 make build            # Build binary to build/ directory
 make build-linux      # Build for Linux
 make clean            # Clean build artifacts
+
+Notes:
+- `make build` on macOS/Linux keeps Ledger enabled when your toolchain supports it.
+- `make build-linux` cross-compiles to Linux from macOS with `LEDGER_ENABLED=false` to avoid missing CGO/HID deps.
+- Release binaries are produced without Ledger; build from source on Linux with `LEDGER_ENABLED=true make build` if you need Ledger support.
 
 # Development
 make lint             # Run linter
@@ -252,15 +257,11 @@ For detailed information on running journeys, configuring the test environment, 
 ```bash
 # Run a specific journey
 cd testharness
+./scripts/setup_accounts.sh
 go run cmd/main.go 1
 
 # Run all journeys (1-19)
 ./scripts/run_all.sh
-
-# Run TD Yield simulations
-go run cmd/main.go 20  # Setup funding proposal
-go run cmd/main.go 21  # Sufficient funding simulation
-go run cmd/main.go 22  # Insufficient funding simulation
 ```
 
 ## Joining the Mainnet
