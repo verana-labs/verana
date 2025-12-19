@@ -1,0 +1,28 @@
+{
+  "name": "@verana-labs/ts-client-test",
+  "version": "0.1.0",
+  "description": "TypeScript client test harness for Verana blockchain",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "test:create-tr": "npx tsx src/journeys/createTrustRegistry.ts",
+    "test:query-tr": "npx tsx src/journeys/queryTrustRegistry.ts",
+    "test:all": "npx tsx src/journeys/runAll.ts"
+  },
+  "dependencies": {
+    "@cosmjs/amino": "^0.32.4",
+    "@cosmjs/crypto": "^0.32.4",
+    "@cosmjs/encoding": "^0.32.4",
+    "@cosmjs/proto-signing": "^0.32.4",
+    "@cosmjs/stargate": "^0.32.4",
+    "@cosmjs/tendermint-rpc": "^0.32.4",
+    "long": "5.3.2",
+    "protobufjs": "7.2.6"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.7.3"
+  }
+}
+
