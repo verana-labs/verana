@@ -5,8 +5,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/verana-labs/verana?style=flat-square)](https://goreportcard.com/report/github.com/verana-labs/verana)
 [![Version](https://img.shields.io/github/tag/verana-labs/verana.svg?style=flat-square)](https://github.com/verana-labs/verana/releases/latest)
 [![License: Apache-2.0](https://img.shields.io/github/license/verana-labs/verana.svg?style=flat-square)](https://github.com/verana-labs/verana/blob/main/LICENSE)
-[![Lines Of Code](https://img.shields.io/tokei/lines/github/verana-labs/verana?style=flat-square)](https://github.com/verana-labs/verana)
-[![Discord](https://badgen.net/badge/icon/discord?icon=discord&label)](https://discord.gg/verana)
+[![Discord](https://badgen.net/badge/icon/discord?icon=discord&label)](https://discord.com/invite/edjaFn252q)
 
 Verana Blockchain is a Verifiable Public Registry (VPR) providing foundational infrastructure for decentralized trust ecosystems. As a sovereign Layer 1 appchain built on the Cosmos SDK, Verana enables trustless verification of credentials and services across ecosystems through a standardized trust registry framework.
 
@@ -37,62 +36,19 @@ While Verana can run on lower-spec hardware, you may experience reduced performa
 ## Prerequisites
 
 - **Go 1.22+** ([Installation Guide](https://golang.org/doc/install))
-- **Node.js 18+** (for TypeScript client tests)
 - **Docker** (optional, for local multi-validator network)
 - **jq** (optional, for JSON parsing in scripts)
-- **buf** (for protobuf generation) - installed automatically with `make proto-deps`
 
-## First-Time Setup (Fresh Clone)
+## Installation
 
-**Important:** The repository does not include generated files (protobuf code, binaries, node_modules, etc.). You must generate them after cloning.
-
-### Quick Start
-
-For a fresh clone, run these commands in order:
-
-```bash
-git clone https://github.com/verana-labs/verana.git
-cd verana
-make proto-all          # Generate protobuf files (REQUIRED - see below)
-go mod download          # Download Go dependencies
-make install            # Build and install veranad
-veranad version         # Verify installation
-```
-
-### Step-by-Step Setup
-
-#### 1. Clone the Repository
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/verana-labs/verana.git
 cd verana
 ```
 
-#### 2. Generate Protobuf Files (REQUIRED)
-
-**This is the most important step!** Generated protobuf files are not committed to git. You must generate them first:
-
-```bash
-# Generate all protobuf files (Go, TypeScript, Swagger)
-make proto-all
-
-# This generates:
-# - Go protobuf files (*.pb.go) in x/ and api/ directories
-# - TypeScript protobuf files in ts-proto/src/codec/
-# - Swagger/OpenAPI docs in docs/static/openapi.yml
-```
-
-**What gets generated:**
-- **Go files**: `x/**/*.pb.go`, `api/**/*.pulsar.go` - Required for building `veranad`
-- **TypeScript files**: `ts-proto/src/codec/**/*.ts` - Required for TypeScript client tests
-- **Swagger docs**: `docs/static/openapi.yml` - API documentation
-
-**Note:** If you only need specific outputs:
-- `make proto-gen` - Generate Go protobuf files only
-- `make proto-ts` - Generate TypeScript protobuf files only  
-- `make proto-swagger` - Generate Swagger docs only
-
-#### 3. Install Go Dependencies
+### 2. Install Dependencies
 
 ```bash
 # Download Go modules
@@ -102,7 +58,7 @@ go mod download
 go mod verify
 ```
 
-#### 4. Build and Install
+### 3. Build and Install
 
 ```bash
 # Install the veranad binary to $GOPATH/bin
@@ -116,45 +72,6 @@ veranad version
 ```
 
 The `veranad` binary will be installed to `$GOPATH/bin`. Make sure `$GOPATH/bin` is in your `PATH`.
-
-#### 5. Setup TypeScript Client (Optional)
-
-If you want to run TypeScript client tests:
-
-```bash
-# Build TypeScript proto package
-cd ts-proto
-npm install
-npm run build
-
-# Setup test harness
-cd test
-npm install
-```
-
-#### 6. Initialize Local Chain (Optional)
-
-To start a local blockchain for testing:
-
-```bash
-# Initialize and start single validator chain
-./scripts/setup_primary_validator.sh
-
-# Or use multi-validator Docker setup
-cd local-test
-./build.sh
-./setup-validators.sh
-```
-
-## Documentation
-
-- [Test Harness & Simulations Guide](testharness/README.md) - Comprehensive guide for running test journeys and simulations
-- [TypeScript Client Tests](ts-proto/test/README.md) - Guide for testing TypeScript client integration
-- [TypeScript Proto Generation](ts-proto/README.md) - Guide for generating and using TypeScript protobuf types
-
-## Joining the Mainnet
-
-Instructions for joining the Verana Mainnet will be provided prior to the network launch.
 
 ## Development
 
@@ -250,7 +167,7 @@ cd local-test
 ./cleanup.sh
 ```
 
-See `local-test/setup-guide.md` for detailed instructions.
+See [local-test/setup-guide.md](local-test/setup-guide.md) for detailed instructions.
 
 ### Option 3: Manual Setup
 
@@ -282,6 +199,11 @@ make install          # Install veranad binary
 make build            # Build binary to build/ directory
 make build-linux      # Build for Linux
 make clean            # Clean build artifacts
+
+Notes:
+- `make build` on macOS/Linux keeps Ledger enabled when your toolchain supports it.
+- `make build-linux` cross-compiles to Linux from macOS with `LEDGER_ENABLED=false` to avoid missing CGO/HID deps.
+- Release binaries are produced without Ledger; build from source on Linux with `LEDGER_ENABLED=true make build` if you need Ledger support.
 
 # Development
 make lint             # Run linter
@@ -334,17 +256,21 @@ For detailed information on running journeys, configuring the test environment, 
 ```bash
 # Run a specific journey
 cd testharness
+./scripts/setup_accounts.sh
 go run cmd/main.go 1
 
 # Run all journeys (1-19)
 ./scripts/run_all.sh
-
-# Run TD Yield simulations
-go run cmd/main.go 20  # Setup funding proposal
-go run cmd/main.go 21  # Sufficient funding simulation
-go run cmd/main.go 22  # Insufficient funding simulation
 ```
+
+## Joining the Mainnet
+
+Instructions for joining the Verana Mainnet will be provided prior to the network launch.
 
 ## Contributing
 
 Contributing guidelines will be available in the repository once the project reaches its public development phase.
+
+## License
+
+This project is licensed under the Apache-2.0 License - see the LICENSE file for details.
