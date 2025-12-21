@@ -23,10 +23,20 @@ interface TestResult {
 }
 
 const tests = [
+  // Trust Registry (tr) module
   { name: "Create Trust Registry", script: "test:create-tr" },
+  { name: "Update Trust Registry", script: "test:update-tr" },
+  { name: "Archive Trust Registry", script: "test:archive-tr" },
+  { name: "Add Governance Framework Document", script: "test:add-gf-doc" },
+  { name: "Increase Active Governance Framework Version", script: "test:increase-gf-version" },
   // Add more tests here as they are created
-  // { name: "Create Credential Schema", script: "test:create-cs" },
+  // DID Directory (dd) module - next
   // { name: "Add DID", script: "test:add-did" },
+  // { name: "Renew DID", script: "test:renew-did" },
+  // { name: "Remove DID", script: "test:remove-did" },
+  // { name: "Touch DID", script: "test:touch-did" },
+  // Credential Schema (cs) module - after DID
+  // { name: "Create Credential Schema", script: "test:create-cs" },
   // etc.
   // Note: Query tests removed - focus on transaction signing validation
 ];
