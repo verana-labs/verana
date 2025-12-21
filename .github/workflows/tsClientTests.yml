@@ -62,16 +62,15 @@ jobs:
           echo "BINARYPATH=$BINARYPATH" >> $GITHUB_ENV
           type veranad
 
+      - name: Install ts-proto dependencies
+        run: |
+          cd ${{ env.VERANA_BLOCKCHAIN_PATH }}/ts-proto
+          npm install
+
       - name: Generate TypeScript protobuf types
         run: |
           cd ${{ env.VERANA_BLOCKCHAIN_PATH }}
           make proto-ts
-
-      - name: Build ts-proto package
-        run: |
-          cd ${{ env.VERANA_BLOCKCHAIN_PATH }}/ts-proto
-          npm install
-          npm run build
 
       - name: Install test dependencies
         run: |
