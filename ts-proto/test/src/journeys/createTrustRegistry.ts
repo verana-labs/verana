@@ -138,7 +138,15 @@ async function main() {
   console.log("=".repeat(60));
 }
 
-main().catch((error) => {
-  console.error("Fatal error:", error);
+main().catch((error: any) => {
+  console.error("\n❌ Fatal error:", error.message || error);
+  
+  // Check if it's a connection error
+  if (error.cause?.code === "ECONNREFUSED" || error.message?.includes("fetch failed")) {
+    console.error("\n⚠️  Connection Error: Cannot connect to the blockchain.");
+    console.error(`   Make sure the Verana blockchain is running at ${config.rpcEndpoint}`);
+    console.error("   Start it with: ./scripts/setup_primary_validator.sh");
+  }
+  
   process.exit(1);
 });

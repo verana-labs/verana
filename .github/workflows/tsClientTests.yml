@@ -1,0 +1,129 @@
+name: 3.TypeScript Client Tests
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - '*' # Trigger on pull requests to any branch
+    paths:
+      - 'proto/**'
+      - 'ts-proto/**'
+      - '.github/workflows/tsClientTests.yml'
+  push:
+    branches:
+      - '*' # Trigger on every commit to any branch
+    paths:
+      - 'proto/**'
+      - 'ts-proto/**'
+      - '.github/workflows/tsClientTests.yml'
+
+jobs:
+  ts-client-tests:
+    runs-on: ubuntu-latest
+    env:
+      VERANA_BLOCKCHAIN_PATH: ./verana
+      VERANA_RPC_ENDPOINT: http://localhost:26657
+      VERANA_LCD_ENDPOINT: http://localhost:1317
+      VERANA_CHAIN_ID: verana
+      VERANA_ADDRESS_PREFIX: verana
+      VERANA_DENOM: uvna
+      MNEMONIC: "pink glory help gown abstract eight nice crazy forward ketchup skill cheese"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: ${{ github.head_ref || github.ref_name }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          path: ${{ env.VERANA_BLOCKCHAIN_PATH }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: ts-proto/test/package-lock.json
+
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.25'
+
+      - name: Install Go dependencies and build binary
+        run: |
+          cd ${{ env.VERANA_BLOCKCHAIN_PATH }}
+          export PATH=$PATH:$HOME/go/bin
+          export BINARYPATH=$HOME/go/bin
+          make install
+          echo "BINARYPATH=$BINARYPATH" >> $GITHUB_ENV
+          type veranad
+
+      - name: Generate TypeScript protobuf types
+        run: |
+          cd ${{ env.VERANA_BLOCKCHAIN_PATH }}
+          make proto-ts
+
+      - name: Build ts-proto package
+        run: |
+          cd ${{ env.VERANA_BLOCKCHAIN_PATH }}/ts-proto
+          npm install
+          npm run build
+
+      - name: Install test dependencies
+        run: |
+          cd ${{ env.VERANA_BLOCKCHAIN_PATH }}/ts-proto/test
+          npm install
+
+      - name: Start blockchain node asynchronously
+        run: |
+          cd ${{ env.VERANA_BLOCKCHAIN_PATH }}
+          echo "Starting blockchain setup..."
+          ./scripts/setup_primary_validator.sh &
+          echo $! > /tmp/setup_primary_validator_pid
+          echo "Setup process started with PID: $(cat /tmp/setup_primary_validator_pid)"
+          
+          # Wait for chain to be ready (check RPC endpoint)
+          echo "Waiting for blockchain to be ready..."
+          for i in {1..60}; do
+            if curl -s http://localhost:26657/status > /dev/null 2>&1; then
+              echo "Blockchain is ready!"
+              break
+            fi
+            if [ $i -eq 60 ]; then
+              echo "Timeout waiting for blockchain to start"
+              exit 1
+            fi
+            sleep 2
+          done
+
+      - name: Run TypeScript client tests
+        run: |
+          cd ${{ env.VERANA_BLOCKCHAIN_PATH }}/ts-proto/test
+          export PATH=$PATH:$BINARYPATH
+          
+          echo "==================================================================="
+          echo "Running TypeScript Client Tests"
+          echo "==================================================================="
+          echo ""
+          
+          # Run all TypeScript client tests
+          npm run test:all || {
+            echo "TypeScript client tests failed!"
+            exit 1
+          }
+
+      - name: Kill blockchain setup process
+        if: always()
+        run: |
+          if [ -f /tmp/setup_primary_validator_pid ]; then
+            kill -9 $(cat /tmp/setup_primary_validator_pid) || true
+            rm /tmp/setup_primary_validator_pid
+          fi
+          # Also kill any veranad processes
+          pkill -9 veranad || true
+
+      - name: Finalize
+        if: always()
+        run: echo "TypeScript client tests execution completed."
+

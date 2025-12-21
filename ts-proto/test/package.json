@@ -6,7 +6,6 @@
   "scripts": {
     "build": "tsc",
     "test:create-tr": "npx tsx src/journeys/createTrustRegistry.ts",
-    "test:query-tr": "npx tsx src/journeys/queryTrustRegistry.ts",
     "test:all": "npx tsx src/journeys/runAll.ts"
   },
   "dependencies": {
