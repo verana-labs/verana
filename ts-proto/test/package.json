@@ -10,6 +10,13 @@
     "test:archive-tr": "npx tsx src/journeys/archiveTrustRegistry.ts",
     "test:add-gf-doc": "npx tsx src/journeys/addGovernanceFrameworkDocument.ts",
     "test:increase-gf-version": "npx tsx src/journeys/increaseActiveGovernanceFrameworkVersion.ts",
+    "test:add-did": "npx tsx src/journeys/addDID.ts",
+    "test:renew-did": "npx tsx src/journeys/renewDID.ts",
+    "test:remove-did": "npx tsx src/journeys/removeDID.ts",
+    "test:touch-did": "npx tsx src/journeys/touchDID.ts",
+    "test:create-cs": "npx tsx src/journeys/createCredentialSchema.ts",
+    "test:update-cs": "npx tsx src/journeys/updateCredentialSchema.ts",
+    "test:archive-cs": "npx tsx src/journeys/archiveCredentialSchema.ts",
     "test:all": "npx tsx src/journeys/runAll.ts"
   },
   "dependencies": {

@@ -29,15 +29,15 @@ const tests = [
   { name: "Archive Trust Registry", script: "test:archive-tr" },
   { name: "Add Governance Framework Document", script: "test:add-gf-doc" },
   { name: "Increase Active Governance Framework Version", script: "test:increase-gf-version" },
-  // Add more tests here as they are created
-  // DID Directory (dd) module - next
-  // { name: "Add DID", script: "test:add-did" },
-  // { name: "Renew DID", script: "test:renew-did" },
-  // { name: "Remove DID", script: "test:remove-did" },
-  // { name: "Touch DID", script: "test:touch-did" },
-  // Credential Schema (cs) module - after DID
-  // { name: "Create Credential Schema", script: "test:create-cs" },
-  // etc.
+  // DID Directory (dd) module
+  { name: "Add DID", script: "test:add-did" },
+  { name: "Renew DID", script: "test:renew-did" },
+  { name: "Remove DID", script: "test:remove-did" },
+  { name: "Touch DID", script: "test:touch-did" },
+  // Credential Schema (cs) module
+  { name: "Create Credential Schema", script: "test:create-cs" },
+  { name: "Update Credential Schema", script: "test:update-cs" },
+  { name: "Archive Credential Schema", script: "test:archive-cs" },
   // Note: Query tests removed - focus on transaction signing validation
 ];
 

@@ -13,18 +13,18 @@ This document lists all transaction types in Verana and tracks test implementati
 
 ## DID Directory (dd) Module
 
-### 📋 Planned
-- [ ] `MsgAddDID` - Add a new DID to the directory
-- [ ] `MsgRenewDID` - Renew an existing DID
-- [ ] `MsgRemoveDID` - Remove a DID from the directory
-- [ ] `MsgTouchDID` - Touch/update a DID's modified timestamp
+### ✅ Completed
+- [x] `MsgAddDID` - Add a new DID to the directory
+- [x] `MsgRenewDID` - Renew an existing DID
+- [x] `MsgRemoveDID` - Remove a DID from the directory
+- [x] `MsgTouchDID` - Touch/update a DID's modified timestamp
 
 ## Credential Schema (cs) Module
 
-### 📋 Planned
-- [ ] `MsgCreateCredentialSchema` - Create a new credential schema
-- [ ] `MsgUpdateCredentialSchema` - Update a credential schema
-- [ ] `MsgArchiveCredentialSchema` - Archive/unarchive a credential schema
+### ✅ Completed
+- [x] `MsgCreateCredentialSchema` - Create a new credential schema
+- [x] `MsgUpdateCredentialSchema` - Update a credential schema
+- [x] `MsgArchiveCredentialSchema` - Archive/unarchive a credential schema
 
 ## Permission (perm) Module
 
@@ -58,16 +58,16 @@ This document lists all transaction types in Verana and tracks test implementati
    - ✅ AddGovernanceFrameworkDocument
    - ✅ IncreaseActiveGovernanceFrameworkVersion
 
-2. **DID Directory (dd)** - Next
-   - AddDID
-   - RenewDID
-   - RemoveDID
-   - TouchDID
+2. ✅ **DID Directory (dd)** - COMPLETE
+   - ✅ AddDID
+   - ✅ RenewDID
+   - ✅ RemoveDID
+   - ✅ TouchDID
 
-3. **Credential Schema (cs)** - After DID
-   - CreateCredentialSchema
-   - UpdateCredentialSchema
-   - ArchiveCredentialSchema
+3. ✅ **Credential Schema (cs)** - COMPLETE
+   - ✅ CreateCredentialSchema
+   - ✅ UpdateCredentialSchema
+   - ✅ ArchiveCredentialSchema
 
 4. **Permission (perm)** - Later
    - All 11 permission messages
