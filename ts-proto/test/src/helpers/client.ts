@@ -87,15 +87,50 @@ export async function createSigningClient(
     const gasPriceObj = GasPrice.fromString(config.gasPrice);
     console.log(`  [DEBUG] GasPrice object created: ${JSON.stringify(gasPriceObj)}`);
     
-    const client = await SigningStargateClient.connectWithSigner(config.rpcEndpoint, wallet, {
-      registry,
-      gasPrice: gasPriceObj,
-    });
-    console.log("  [DEBUG] Client connected successfully");
-    return client;
+    // Retry connection up to 3 times with exponential backoff
+    // This handles cases where the blockchain is still initializing
+    const maxRetries = 3;
+    let lastError: Error | null = null;
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`  [DEBUG] Connection attempt ${attempt}/${maxRetries}...`);
+        const client = await SigningStargateClient.connectWithSigner(config.rpcEndpoint, wallet, {
+          registry,
+          gasPrice: gasPriceObj,
+        });
+        console.log("  [DEBUG] Client connected successfully");
+        return client;
+      } catch (error: any) {
+        lastError = error;
+        console.log(`  [DEBUG] Connection attempt ${attempt} failed: ${error.message}`);
+        
+        // If it's the "must provide a non-empty value" error, it might be a timing issue
+        // Wait before retrying (exponential backoff)
+        if (attempt < maxRetries && error.message?.includes("must provide a non-empty value")) {
+          const waitTime = Math.pow(2, attempt) * 1000; // 2s, 4s, 8s
+          console.log(`  [DEBUG] Waiting ${waitTime}ms before retry...`);
+          await new Promise(resolve => setTimeout(resolve, waitTime));
+          continue;
+        }
+        
+        // For other errors or last attempt, throw immediately
+        throw error;
+      }
+    }
+    
+    // Should never reach here, but just in case
+    throw lastError || new Error("Failed to connect after retries");
   } catch (error: any) {
-    console.error(`  [ERROR] Failed to create client: ${error.message}`);
+    console.error(`  [ERROR] Failed to create client after retries: ${error.message}`);
     console.error(`  [ERROR] Error stack: ${error.stack}`);
+    
+    // Provide helpful error message
+    if (error.message?.includes("must provide a non-empty value")) {
+      console.error(`  [ERROR] This error typically indicates the blockchain is still initializing`);
+      console.error(`  [ERROR] or the sync_info response has empty fields. Try waiting a few seconds.`);
+    }
+    
     throw error;
   }
 }
