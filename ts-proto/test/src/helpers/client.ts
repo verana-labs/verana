@@ -57,35 +57,18 @@ export async function createWallet(mnemonic: string): Promise<DirectSecp256k1HdW
 export async function createSigningClient(
   wallet: DirectSecp256k1HdWallet
 ): Promise<SigningStargateClient> {
-  // Debug logging
-  console.log("  [DEBUG] createSigningClient called");
-  console.log(`  [DEBUG] process.env.VERANA_RPC_ENDPOINT: "${process.env.VERANA_RPC_ENDPOINT}"`);
-  console.log(`  [DEBUG] process.env.VERANA_GAS_PRICE: "${process.env.VERANA_GAS_PRICE}"`);
-  console.log(`  [DEBUG] process.env.VERANA_CHAIN_ID: "${process.env.VERANA_CHAIN_ID}"`);
-  console.log(`  [DEBUG] config.rpcEndpoint: "${config.rpcEndpoint}"`);
-  console.log(`  [DEBUG] config.gasPrice: "${config.gasPrice}"`);
-  console.log(`  [DEBUG] config.chainId: "${config.chainId}"`);
-  console.log(`  [DEBUG] config.addressPrefix: "${config.addressPrefix}"`);
-  
   const registry = createVeranaRegistry();
-  console.log("  [DEBUG] Registry created");
 
   // Validate config values before connecting
   if (!config.rpcEndpoint || !config.rpcEndpoint.trim()) {
-    console.error(`  [ERROR] Invalid RPC endpoint: "${config.rpcEndpoint}"`);
     throw new Error(`Invalid RPC endpoint: "${config.rpcEndpoint}". Set VERANA_RPC_ENDPOINT environment variable.`);
   }
   if (!config.gasPrice || !config.gasPrice.trim()) {
-    console.error(`  [ERROR] Invalid gas price: "${config.gasPrice}"`);
     throw new Error(`Invalid gas price: "${config.gasPrice}". Set VERANA_GAS_PRICE environment variable.`);
   }
 
-  console.log(`  [DEBUG] Attempting to connect to: ${config.rpcEndpoint}`);
-  console.log(`  [DEBUG] Using gas price: ${config.gasPrice}`);
-  
   try {
     const gasPriceObj = GasPrice.fromString(config.gasPrice);
-    console.log(`  [DEBUG] GasPrice object created: ${JSON.stringify(gasPriceObj)}`);
     
     // Retry connection up to 3 times with exponential backoff
     // This handles cases where the blockchain is still initializing
@@ -94,22 +77,18 @@ export async function createSigningClient(
     
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        console.log(`  [DEBUG] Connection attempt ${attempt}/${maxRetries}...`);
         const client = await SigningStargateClient.connectWithSigner(config.rpcEndpoint, wallet, {
           registry,
           gasPrice: gasPriceObj,
         });
-        console.log("  [DEBUG] Client connected successfully");
         return client;
       } catch (error: any) {
         lastError = error;
-        console.log(`  [DEBUG] Connection attempt ${attempt} failed: ${error.message}`);
         
         // If it's the "must provide a non-empty value" error, it might be a timing issue
         // Wait before retrying (exponential backoff)
         if (attempt < maxRetries && error.message?.includes("must provide a non-empty value")) {
           const waitTime = Math.pow(2, attempt) * 1000; // 2s, 4s, 8s
-          console.log(`  [DEBUG] Waiting ${waitTime}ms before retry...`);
           await new Promise(resolve => setTimeout(resolve, waitTime));
           continue;
         }
@@ -122,15 +101,6 @@ export async function createSigningClient(
     // Should never reach here, but just in case
     throw lastError || new Error("Failed to connect after retries");
   } catch (error: any) {
-    console.error(`  [ERROR] Failed to create client after retries: ${error.message}`);
-    console.error(`  [ERROR] Error stack: ${error.stack}`);
-    
-    // Provide helpful error message
-    if (error.message?.includes("must provide a non-empty value")) {
-      console.error(`  [ERROR] This error typically indicates the blockchain is still initializing`);
-      console.error(`  [ERROR] or the sync_info response has empty fields. Try waiting a few seconds.`);
-    }
-    
     throw error;
   }
 }
