@@ -29,7 +29,7 @@ import { MsgCreateTrustRegistry, MsgUpdateTrustRegistry } from "../../../src/cod
 
 // Test mnemonic - Uses cooluser seed phrase (same as test harness)
 const TEST_MNEMONIC =
-  process.env.MNEMONIC ||
+  (process.env.MNEMONIC && process.env.MNEMONIC.trim()) ||
   "pink glory help gown abstract eight nice crazy forward ketchup skill cheese";
 
 async function main() {

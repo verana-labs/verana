@@ -27,7 +27,7 @@ import { MsgCreateTrustRegistry } from "../../../src/codec/verana/tr/v1/tx";
 // Test mnemonic - Uses cooluser seed phrase (same as test harness)
 // This account is pre-funded in local chains initialized with setup_primary_validator.sh
 const TEST_MNEMONIC =
-  process.env.MNEMONIC ||
+  (process.env.MNEMONIC && process.env.MNEMONIC.trim()) ||
   "pink glory help gown abstract eight nice crazy forward ketchup skill cheese";
 
 async function main() {

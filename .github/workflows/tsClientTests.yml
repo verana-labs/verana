@@ -110,6 +110,14 @@ jobs:
           done
 
       - name: Run TypeScript client tests
+        env:
+          VERANA_RPC_ENDPOINT: ${{ env.VERANA_RPC_ENDPOINT }}
+          VERANA_LCD_ENDPOINT: ${{ env.VERANA_LCD_ENDPOINT }}
+          VERANA_CHAIN_ID: ${{ env.VERANA_CHAIN_ID }}
+          VERANA_ADDRESS_PREFIX: ${{ env.VERANA_ADDRESS_PREFIX }}
+          VERANA_DENOM: ${{ env.VERANA_DENOM }}
+          MNEMONIC: ${{ env.MNEMONIC }}
+          FEES: ${{ env.FEES }}
         run: |
           cd ${{ env.VERANA_BLOCKCHAIN_PATH }}/ts-proto/test
           export PATH=$PATH:$BINARYPATH
@@ -117,6 +125,15 @@ jobs:
           echo "==================================================================="
           echo "Running TypeScript Client Tests"
           echo "==================================================================="
+          echo ""
+          echo "Environment variables:"
+          echo "  VERANA_RPC_ENDPOINT: $VERANA_RPC_ENDPOINT"
+          echo "  VERANA_LCD_ENDPOINT: $VERANA_LCD_ENDPOINT"
+          echo "  VERANA_CHAIN_ID: $VERANA_CHAIN_ID"
+          echo "  VERANA_ADDRESS_PREFIX: $VERANA_ADDRESS_PREFIX"
+          echo "  VERANA_DENOM: $VERANA_DENOM"
+          echo "  MNEMONIC: ${MNEMONIC:0:20}..." # Show first 20 chars only
+          echo "  FEES: $FEES"
           echo ""
           
           # Run all TypeScript client tests
