@@ -26,6 +26,8 @@
     "test:start-perm-vp": "npx tsx src/journeys/startPermissionVP.ts",
     "test:set-perm-vp-validated": "npx tsx src/journeys/setPermissionVPToValidated.ts",
     "test:create-perm-session": "npx tsx src/journeys/createOrUpdatePermissionSession.ts",
+    "test:reclaim-td-yield": "npx tsx src/journeys/reclaimTrustDepositYield.ts",
+    "test:reclaim-td": "npx tsx src/journeys/reclaimTrustDeposit.ts",
     "test:all": "npx tsx src/journeys/runAll.ts"
   },
   "dependencies": {

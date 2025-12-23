@@ -22,7 +22,13 @@ interface TestResult {
   error?: string;
 }
 
-const tests = [
+interface TestConfig {
+  name: string;
+  script: string;
+  isGoJourney?: boolean;
+}
+
+const tests: TestConfig[] = [
   // Trust Registry (tr) module
   { name: "Create Trust Registry", script: "test:create-tr" },
   { name: "Update Trust Registry", script: "test:update-tr" },
@@ -48,31 +54,52 @@ const tests = [
   { name: "Set Permission VP To Validated", script: "test:set-perm-vp-validated" },
   { name: "Cancel Permission VP Last Request", script: "test:cancel-perm-vp" },
   { name: "Create Or Update Permission Session", script: "test:create-perm-session" },
+  // Trust Deposit (td) module - Setup funding proposal first (Journey 20)
+  { name: "Setup TD Yield Funding Proposal (Journey 20)", script: "test:setup-td-proposal", isGoJourney: true },
+  { name: "Reclaim Trust Deposit Yield", script: "test:reclaim-td-yield" },
+  { name: "Reclaim Trust Deposit", script: "test:reclaim-td" },
   // Note: Query tests removed - focus on transaction signing validation
 ];
 
 /**
  * Run a single test script
  */
-async function runTest(testName: string, script: string): Promise<TestResult> {
+async function runTest(test: TestConfig): Promise<TestResult> {
   console.log("\n" + "=".repeat(60));
-  console.log(`Running: ${testName}`);
+  console.log(`Running: ${test.name}`);
   console.log("=".repeat(60));
 
   return new Promise((resolve) => {
-    const child = spawn("npm", ["run", script], {
-      stdio: "inherit",
-      env: { ...process.env },
-    });
+    let child;
+    
+    if (test.isGoJourney) {
+      // Run Go test harness journey (journey 20 for TD yield proposal setup)
+      // Assumes the Go binary is available in the testharness directory
+      const goCommand = process.env.GO_TEST_HARNESS_PATH || "go";
+      const journeyId = test.script === "test:setup-td-proposal" ? "20" : "";
+      // Path from ts-proto/test to testharness (go up 2 levels: test -> ts-proto -> verana)
+      const testharnessPath = process.env.TESTHARNESS_DIR || "../../testharness";
+      child = spawn(goCommand, ["run", "cmd/main.go", journeyId], {
+        stdio: "inherit",
+        env: { ...process.env },
+        cwd: testharnessPath,
+      });
+    } else {
+      // Run npm script (TypeScript journey)
+      child = spawn("npm", ["run", test.script], {
+        stdio: "inherit",
+        env: { ...process.env, RUNNING_ALL_TESTS: "true" },
+      });
+    }
 
     child.on("close", (code) => {
       if (code === 0) {
-        console.log(`✅ ${testName} passed\n`);
-        resolve({ name: testName, passed: true });
+        console.log(`✅ ${test.name} passed\n`);
+        resolve({ name: test.name, passed: true });
       } else {
-        console.log(`❌ ${testName} failed with exit code ${code}\n`);
+        console.log(`❌ ${test.name} failed with exit code ${code}\n`);
         resolve({
-          name: testName,
+          name: test.name,
           passed: false,
           error: `Exit code: ${code}`,
         });
@@ -80,9 +107,9 @@ async function runTest(testName: string, script: string): Promise<TestResult> {
     });
 
     child.on("error", (error) => {
-      console.log(`❌ ${testName} failed with error: ${error.message}\n`);
+      console.log(`❌ ${test.name} failed with error: ${error.message}\n`);
       resolve({
-        name: testName,
+        name: test.name,
         passed: false,
         error: error.message,
       });
@@ -103,7 +130,7 @@ async function main() {
 
   // Run tests sequentially
   for (const test of tests) {
-    const result = await runTest(test.name, test.script);
+    const result = await runTest(test);
     results.push(result);
 
     // If a test fails, you can choose to continue or stop

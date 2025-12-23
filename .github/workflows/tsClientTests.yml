@@ -24,10 +24,11 @@ jobs:
       VERANA_BLOCKCHAIN_PATH: ./verana
       VERANA_RPC_ENDPOINT: http://localhost:26657
       VERANA_LCD_ENDPOINT: http://localhost:1317
-      VERANA_CHAIN_ID: verana
+      VERANA_CHAIN_ID: vna-testnet-1
       VERANA_ADDRESS_PREFIX: verana
       VERANA_DENOM: uvna
       MNEMONIC: "pink glory help gown abstract eight nice crazy forward ketchup skill cheese"
+      FEES: "0uvna"
 
     steps:
       - name: Checkout repository
@@ -79,21 +80,30 @@ jobs:
 
       - name: Start blockchain node asynchronously
         run: |
-          cd ${{ env.VERANA_BLOCKCHAIN_PATH }}
-          echo "Starting blockchain setup..."
-          ./scripts/setup_primary_validator.sh &
-          echo $! > /tmp/setup_primary_validator_pid
-          echo "Setup process started with PID: $(cat /tmp/setup_primary_validator_pid)"
+          cd ${{ env.VERANA_BLOCKCHAIN_PATH }}/testharness
+          echo "Starting blockchain setup using simulation script..."
+          export PATH=$PATH:$BINARYPATH
+          export FEES="0uvna"
+          chmod +x scripts/init_chain_for_simulations.sh
+          # Run the script in background - it will initialize and start the chain
+          nohup ./scripts/init_chain_for_simulations.sh > /tmp/chain_setup.log 2>&1 &
+          echo $! > /tmp/setup_chain_pid
+          echo "Setup process started with PID: $(cat /tmp/setup_chain_pid)"
           
           # Wait for chain to be ready (check RPC endpoint)
           echo "Waiting for blockchain to be ready..."
-          for i in {1..60}; do
+          for i in {1..120}; do
             if curl -s http://localhost:26657/status > /dev/null 2>&1; then
               echo "Blockchain is ready!"
+              # Show last few lines of log for debugging
+              echo "--- Last 20 lines of chain setup log ---"
+              tail -20 /tmp/chain_setup.log || true
               break
             fi
-            if [ $i -eq 60 ]; then
+            if [ $i -eq 120 ]; then
               echo "Timeout waiting for blockchain to start"
+              echo "--- Full chain setup log ---"
+              cat /tmp/chain_setup.log || true
               exit 1
             fi
             sleep 2
@@ -118,9 +128,9 @@ jobs:
       - name: Kill blockchain setup process
         if: always()
         run: |
-          if [ -f /tmp/setup_primary_validator_pid ]; then
-            kill -9 $(cat /tmp/setup_primary_validator_pid) || true
-            rm /tmp/setup_primary_validator_pid
+          if [ -f /tmp/setup_chain_pid ]; then
+            kill -9 $(cat /tmp/setup_chain_pid) || true
+            rm /tmp/setup_chain_pid
           fi
           # Also kill any veranad processes
           pkill -9 veranad || true
