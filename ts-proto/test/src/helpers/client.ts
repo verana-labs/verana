@@ -57,20 +57,47 @@ export async function createWallet(mnemonic: string): Promise<DirectSecp256k1HdW
 export async function createSigningClient(
   wallet: DirectSecp256k1HdWallet
 ): Promise<SigningStargateClient> {
+  // Debug logging
+  console.log("  [DEBUG] createSigningClient called");
+  console.log(`  [DEBUG] process.env.VERANA_RPC_ENDPOINT: "${process.env.VERANA_RPC_ENDPOINT}"`);
+  console.log(`  [DEBUG] process.env.VERANA_GAS_PRICE: "${process.env.VERANA_GAS_PRICE}"`);
+  console.log(`  [DEBUG] process.env.VERANA_CHAIN_ID: "${process.env.VERANA_CHAIN_ID}"`);
+  console.log(`  [DEBUG] config.rpcEndpoint: "${config.rpcEndpoint}"`);
+  console.log(`  [DEBUG] config.gasPrice: "${config.gasPrice}"`);
+  console.log(`  [DEBUG] config.chainId: "${config.chainId}"`);
+  console.log(`  [DEBUG] config.addressPrefix: "${config.addressPrefix}"`);
+  
   const registry = createVeranaRegistry();
+  console.log("  [DEBUG] Registry created");
 
   // Validate config values before connecting
   if (!config.rpcEndpoint || !config.rpcEndpoint.trim()) {
+    console.error(`  [ERROR] Invalid RPC endpoint: "${config.rpcEndpoint}"`);
     throw new Error(`Invalid RPC endpoint: "${config.rpcEndpoint}". Set VERANA_RPC_ENDPOINT environment variable.`);
   }
   if (!config.gasPrice || !config.gasPrice.trim()) {
+    console.error(`  [ERROR] Invalid gas price: "${config.gasPrice}"`);
     throw new Error(`Invalid gas price: "${config.gasPrice}". Set VERANA_GAS_PRICE environment variable.`);
   }
 
-  return SigningStargateClient.connectWithSigner(config.rpcEndpoint, wallet, {
-    registry,
-    gasPrice: GasPrice.fromString(config.gasPrice),
-  });
+  console.log(`  [DEBUG] Attempting to connect to: ${config.rpcEndpoint}`);
+  console.log(`  [DEBUG] Using gas price: ${config.gasPrice}`);
+  
+  try {
+    const gasPriceObj = GasPrice.fromString(config.gasPrice);
+    console.log(`  [DEBUG] GasPrice object created: ${JSON.stringify(gasPriceObj)}`);
+    
+    const client = await SigningStargateClient.connectWithSigner(config.rpcEndpoint, wallet, {
+      registry,
+      gasPrice: gasPriceObj,
+    });
+    console.log("  [DEBUG] Client connected successfully");
+    return client;
+  } catch (error: any) {
+    console.error(`  [ERROR] Failed to create client: ${error.message}`);
+    console.error(`  [ERROR] Error stack: ${error.stack}`);
+    throw error;
+  }
 }
 
 /**

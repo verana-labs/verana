@@ -38,8 +38,21 @@ async function main() {
   console.log("=".repeat(60));
   console.log();
 
+  // Debug: Log environment variables
+  console.log("[DEBUG] Environment check:");
+  console.log(`  VERANA_RPC_ENDPOINT: "${process.env.VERANA_RPC_ENDPOINT}"`);
+  console.log(`  VERANA_GAS_PRICE: "${process.env.VERANA_GAS_PRICE}"`);
+  console.log(`  VERANA_CHAIN_ID: "${process.env.VERANA_CHAIN_ID}"`);
+  console.log(`  MNEMONIC: "${process.env.MNEMONIC ? process.env.MNEMONIC.substring(0, 20) + '...' : 'NOT SET'}"`);
+  console.log(`  Config values:`);
+  console.log(`    rpcEndpoint: "${config.rpcEndpoint}"`);
+  console.log(`    gasPrice: "${config.gasPrice}"`);
+  console.log(`    chainId: "${config.chainId}"`);
+  console.log();
+
   // Step 1: Setup wallet
   console.log("Step 1: Setting up wallet...");
+  console.log(`  [DEBUG] Using mnemonic: "${TEST_MNEMONIC.substring(0, 20)}..."`);
   const wallet = await createWallet(TEST_MNEMONIC);
   const account = await getAccountInfo(wallet);
   console.log(`  ✓ Wallet address: ${account.address}`);
@@ -48,6 +61,7 @@ async function main() {
   // Step 2: Connect to blockchain
   console.log("Step 2: Connecting to Verana blockchain...");
   console.log(`  RPC Endpoint: ${config.rpcEndpoint}`);
+  console.log(`  [DEBUG] About to call createSigningClient...`);
   const client = await createSigningClient(wallet);
   console.log("  ✓ Connected successfully");
   console.log();
