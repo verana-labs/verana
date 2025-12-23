@@ -125,3 +125,73 @@ export function generateUniqueDID(): string {
   const random = Math.random().toString(36).substring(2, 8);
   return `did:verana:test:${timestamp}:${random}`;
 }
+
+/**
+ * Gets the current block time from the blockchain.
+ * This is important because the blockchain uses block time, not local time.
+ */
+export async function getBlockTime(client: StargateClient): Promise<Date> {
+  const block = await client.getBlock();
+  // block.header.time might be a string or Date, convert to Date
+  const time = block.header.time as any;
+  if (time instanceof Date) {
+    return time;
+  }
+  return new Date(time);
+}
+
+/**
+ * Waits until the blockchain's block time has passed the given time.
+ * This ensures permissions are effective according to blockchain time, not local time.
+ */
+export async function waitUntilBlockTime(
+  client: StargateClient,
+  targetTime: Date,
+  maxWaitMs: number = 30000
+): Promise<void> {
+  const startTime = Date.now();
+  while (Date.now() - startTime < maxWaitMs) {
+    const blockTime = await getBlockTime(client);
+    if (blockTime >= targetTime) {
+      return;
+    }
+    // Wait a bit before checking again
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  }
+  throw new Error(`Block time did not reach ${targetTime.toISOString()} within ${maxWaitMs}ms`);
+}
+
+/**
+ * Waits for a permission to become effective by checking blockchain block time.
+ * This is needed because permissions are created with effective_from in the future,
+ * and operations like Extend/Revoke require the permission to be effective.
+ */
+export async function waitForPermissionToBecomeEffective(
+  client: StargateClient,
+  effectiveFrom: Date,
+  maxWaitMs: number = 30000
+): Promise<void> {
+  const startTime = Date.now();
+  let lastBlockTime: Date | null = null;
+  
+  while (Date.now() - startTime < maxWaitMs) {
+    const blockTime = await getBlockTime(client);
+    lastBlockTime = blockTime;
+    
+    // Check if block time has passed effective_from
+    if (blockTime >= effectiveFrom) {
+      return;
+    }
+    
+    // Wait a bit before checking again (check every second)
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  }
+  
+  // If we timeout, provide helpful error message
+  const timeRemaining = effectiveFrom.getTime() - (lastBlockTime?.getTime() || Date.now());
+  throw new Error(
+    `Permission not yet effective. Block time: ${lastBlockTime?.toISOString()}, ` +
+    `effective_from: ${effectiveFrom.toISOString()}, ` +
+    `time remaining: ${Math.ceil(timeRemaining / 1000)}s`
+  );
+}

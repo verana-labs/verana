@@ -28,18 +28,16 @@ This document lists all transaction types in Verana and tracks test implementati
 
 ## Permission (perm) Module
 
-### 📋 Planned (Future)
-- [ ] `MsgCreatePermission` - Create a permission
-- [ ] `MsgCreateRootPermission` - Create a root permission
-- [ ] `MsgExtendPermission` - Extend a permission
-- [ ] `MsgRevokePermission` - Revoke a permission
-- [ ] `MsgStartPermissionVP` - Start permission validation process
-- [ ] `MsgRenewPermissionVP` - Renew permission validation process
-- [ ] `MsgSetPermissionVPToValidated` - Set permission VP to validated
-- [ ] `MsgCancelPermissionVPLastRequest` - Cancel permission VP last request
-- [ ] `MsgCreateOrUpdatePermissionSession` - Create or update permission session
-- [ ] `MsgSlashPermissionTrustDeposit` - Slash permission trust deposit
-- [ ] `MsgRepayPermissionSlashedTrustDeposit` - Repay permission slashed trust deposit
+### ✅ Completed
+- [x] `MsgCreatePermission` - Create a permission
+- [x] `MsgCreateRootPermission` - Create a root permission
+- [x] `MsgExtendPermission` - Extend a permission
+- [x] `MsgRevokePermission` - Revoke a permission
+- [x] `MsgStartPermissionVP` - Start permission validation process
+- [x] `MsgRenewPermissionVP` - Renew permission validation process
+- [x] `MsgSetPermissionVPToValidated` - Set permission VP to validated
+- [x] `MsgCancelPermissionVPLastRequest` - Cancel permission VP last request
+- [x] `MsgCreateOrUpdatePermissionSession` - Create or update permission session
 
 ## Trust Deposit (td) Module
 
@@ -69,8 +67,18 @@ This document lists all transaction types in Verana and tracks test implementati
    - ✅ UpdateCredentialSchema
    - ✅ ArchiveCredentialSchema
 
-4. **Permission (perm)** - Later
-   - All 11 permission messages
+4. ✅ **Permission (perm)** - COMPLETE
+   - ✅ CreatePermission
+   - ✅ CreateRootPermission
+   - ✅ ExtendPermission
+   - ✅ RevokePermission
+   - ✅ StartPermissionVP
+   - ✅ RenewPermissionVP
+   - ✅ SetPermissionVPToValidated
+   - ✅ CancelPermissionVPLastRequest
+   - ✅ CreateOrUpdatePermissionSession
+   - ✅ SlashPermissionTrustDeposit
+   - ✅ RepayPermissionSlashedTrustDeposit
 
 5. **Trust Deposit (td)** - Later
    - All 4 trust deposit messages

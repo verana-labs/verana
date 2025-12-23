@@ -38,6 +38,16 @@ const tests = [
   { name: "Create Credential Schema", script: "test:create-cs" },
   { name: "Update Credential Schema", script: "test:update-cs" },
   { name: "Archive Credential Schema", script: "test:archive-cs" },
+  // Permission (perm) module
+  { name: "Create Root Permission", script: "test:create-root-perm" },
+  { name: "Create Permission", script: "test:create-perm" },
+  { name: "Extend Permission", script: "test:extend-perm" },
+  { name: "Revoke Permission", script: "test:revoke-perm" },
+  { name: "Start Permission VP", script: "test:start-perm-vp" },
+  { name: "Renew Permission VP", script: "test:renew-perm-vp" },
+  { name: "Set Permission VP To Validated", script: "test:set-perm-vp-validated" },
+  { name: "Cancel Permission VP Last Request", script: "test:cancel-perm-vp" },
+  { name: "Create Or Update Permission Session", script: "test:create-perm-session" },
   // Note: Query tests removed - focus on transaction signing validation
 ];
 
