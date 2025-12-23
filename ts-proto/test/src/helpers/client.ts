@@ -9,16 +9,37 @@ import { createVeranaRegistry } from "./registry";
 
 // Default configuration - can be overridden via environment variables
 // Matches frontend configuration from veranaChain.sign.client.ts
-export const config = {
-  rpcEndpoint: process.env.VERANA_RPC_ENDPOINT || "http://localhost:26657",
-  lcdEndpoint: process.env.VERANA_LCD_ENDPOINT || "http://localhost:1317",
-  chainId: process.env.VERANA_CHAIN_ID || "verana",
-  addressPrefix: process.env.VERANA_ADDRESS_PREFIX || "verana",
-  denom: process.env.VERANA_DENOM || "uvna",
-  gasPrice: process.env.VERANA_GAS_PRICE || "3uvna", // Matches frontend
-  gasLimit: process.env.VERANA_GAS_LIMIT || "300000", // Matches frontend
-  gasAdjustment: parseFloat(process.env.VERANA_GAS_ADJUSTMENT || "2"), // Matches frontend
-};
+// Helper function to safely get env var with fallback
+function getEnvOrDefault(key: string, defaultValue: string): string {
+  const value = process.env[key];
+  // Handle empty strings, null, undefined - treat as missing
+  if (!value || typeof value !== 'string' || !value.trim()) {
+    return defaultValue;
+  }
+  return value.trim();
+}
+
+// Create config as a getter function to ensure it reads env vars at access time
+// This prevents issues where env vars are set after module load
+function getConfig() {
+  return {
+    rpcEndpoint: getEnvOrDefault("VERANA_RPC_ENDPOINT", "http://localhost:26657"),
+    lcdEndpoint: getEnvOrDefault("VERANA_LCD_ENDPOINT", "http://localhost:1317"),
+    chainId: getEnvOrDefault("VERANA_CHAIN_ID", "verana"),
+    addressPrefix: getEnvOrDefault("VERANA_ADDRESS_PREFIX", "verana"),
+    denom: getEnvOrDefault("VERANA_DENOM", "uvna"),
+    gasPrice: getEnvOrDefault("VERANA_GAS_PRICE", "3uvna"), // Matches frontend
+    gasLimit: getEnvOrDefault("VERANA_GAS_LIMIT", "300000"), // Matches frontend
+    gasAdjustment: parseFloat(getEnvOrDefault("VERANA_GAS_ADJUSTMENT", "2")), // Matches frontend
+  };
+}
+
+// Export config as a getter to ensure fresh reads
+export const config = new Proxy({} as ReturnType<typeof getConfig>, {
+  get(_target, prop) {
+    return getConfig()[prop as keyof ReturnType<typeof getConfig>];
+  }
+});
 
 /**
  * Creates a wallet from a mnemonic phrase.
@@ -37,6 +58,14 @@ export async function createSigningClient(
   wallet: DirectSecp256k1HdWallet
 ): Promise<SigningStargateClient> {
   const registry = createVeranaRegistry();
+
+  // Validate config values before connecting
+  if (!config.rpcEndpoint || !config.rpcEndpoint.trim()) {
+    throw new Error(`Invalid RPC endpoint: "${config.rpcEndpoint}". Set VERANA_RPC_ENDPOINT environment variable.`);
+  }
+  if (!config.gasPrice || !config.gasPrice.trim()) {
+    throw new Error(`Invalid gas price: "${config.gasPrice}". Set VERANA_GAS_PRICE environment variable.`);
+  }
 
   return SigningStargateClient.connectWithSigner(config.rpcEndpoint, wallet, {
     registry,
