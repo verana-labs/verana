@@ -4,8 +4,10 @@
  */
 
 import { DirectSecp256k1HdWallet } from "@cosmjs/proto-signing";
-import { SigningStargateClient, StargateClient, GasPrice, calculateFee } from "@cosmjs/stargate";
+import { Secp256k1HdWallet } from "@cosmjs/amino";
+import { SigningStargateClient, StargateClient, GasPrice, calculateFee, AminoTypes } from "@cosmjs/stargate";
 import { createVeranaRegistry } from "./registry";
+import { MsgCreateTrustRegistryAminoConverter } from "./aminoConverters";
 
 // Default configuration - can be overridden via environment variables
 // Matches frontend configuration from veranaChain.sign.client.ts
@@ -42,20 +44,51 @@ export const config = new Proxy({} as ReturnType<typeof getConfig>, {
 });
 
 /**
- * Creates a wallet from a mnemonic phrase.
+ * Creates an Amino Sign wallet from a mnemonic phrase.
+ * This matches the frontend's Amino Sign approach.
  */
-export async function createWallet(mnemonic: string): Promise<DirectSecp256k1HdWallet> {
+export async function createAminoWallet(mnemonic: string): Promise<Secp256k1HdWallet> {
+  return Secp256k1HdWallet.fromMnemonic(mnemonic, {
+    prefix: config.addressPrefix,
+  });
+}
+
+/**
+ * Creates a Direct Sign wallet from a mnemonic phrase.
+ * Kept for backward compatibility.
+ */
+export async function createDirectWallet(mnemonic: string): Promise<DirectSecp256k1HdWallet> {
   return DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {
     prefix: config.addressPrefix,
   });
 }
 
 /**
- * Creates a signing client connected to the Verana blockchain.
+ * Creates a wallet from a mnemonic phrase.
+ * Defaults to Amino Sign to match frontend behavior.
+ */
+export async function createWallet(mnemonic: string): Promise<Secp256k1HdWallet> {
+  return createAminoWallet(mnemonic);
+}
+
+/**
+ * Creates Amino Types for Verana messages.
+ * Matches frontend implementation in veranaChain.sign.client.ts
+ */
+export function createVeranaAminoTypes(): AminoTypes {
+  return new AminoTypes({
+    '/verana.tr.v1.MsgCreateTrustRegistry': MsgCreateTrustRegistryAminoConverter,
+    // Add more converters as needed
+  });
+}
+
+/**
+ * Creates a signing client connected to the Verana blockchain using Amino Sign.
  * Matches frontend configuration from veranaChain.sign.client.ts
+ * This is the default and matches what the frontend uses.
  */
 export async function createSigningClient(
-  wallet: DirectSecp256k1HdWallet
+  wallet: Secp256k1HdWallet | DirectSecp256k1HdWallet
 ): Promise<SigningStargateClient> {
   const registry = createVeranaRegistry();
 
@@ -70,6 +103,9 @@ export async function createSigningClient(
   try {
     const gasPriceObj = GasPrice.fromString(config.gasPrice);
     
+    // Determine if this is an Amino wallet (Secp256k1HdWallet from @cosmjs/amino)
+    const isAminoWallet = wallet instanceof Secp256k1HdWallet;
+    
     // Retry connection up to 3 times with exponential backoff
     // This handles cases where the blockchain is still initializing
     const maxRetries = 3;
@@ -77,10 +113,22 @@ export async function createSigningClient(
     
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        const client = await SigningStargateClient.connectWithSigner(config.rpcEndpoint, wallet, {
+        // Use Amino Sign if wallet is Amino wallet, otherwise use Direct Sign
+        const clientOptions: any = {
           registry,
           gasPrice: gasPriceObj,
-        });
+        };
+        
+        if (isAminoWallet) {
+          // Add Amino types for Amino Sign (matches frontend)
+          clientOptions.aminoTypes = createVeranaAminoTypes();
+        }
+        
+        const client = await SigningStargateClient.connectWithSigner(
+          config.rpcEndpoint, 
+          wallet, 
+          clientOptions
+        );
         return client;
       } catch (error: any) {
         lastError = error;
@@ -114,8 +162,9 @@ export async function createQueryClient(): Promise<StargateClient> {
 
 /**
  * Helper to get account info from a wallet.
+ * Supports both Amino and Direct Sign wallets.
  */
-export async function getAccountInfo(wallet: DirectSecp256k1HdWallet) {
+export async function getAccountInfo(wallet: Secp256k1HdWallet | DirectSecp256k1HdWallet) {
   const [account] = await wallet.getAccounts();
   return account;
 }
