@@ -7,7 +7,36 @@ import { DirectSecp256k1HdWallet } from "@cosmjs/proto-signing";
 import { Secp256k1HdWallet } from "@cosmjs/amino";
 import { SigningStargateClient, StargateClient, GasPrice, calculateFee, AminoTypes } from "@cosmjs/stargate";
 import { createVeranaRegistry } from "./registry";
-import { MsgCreateTrustRegistryAminoConverter } from "./aminoConverters";
+import {
+  // TR module
+  MsgCreateTrustRegistryAminoConverter,
+  MsgUpdateTrustRegistryAminoConverter,
+  MsgArchiveTrustRegistryAminoConverter,
+  MsgAddGovernanceFrameworkDocumentAminoConverter,
+  MsgIncreaseActiveGovernanceFrameworkVersionAminoConverter,
+  // DD module
+  MsgAddDIDAminoConverter,
+  MsgRenewDIDAminoConverter,
+  MsgTouchDIDAminoConverter,
+  MsgRemoveDIDAminoConverter,
+  // CS module
+  MsgCreateCredentialSchemaAminoConverter,
+  MsgUpdateCredentialSchemaAminoConverter,
+  MsgArchiveCredentialSchemaAminoConverter,
+  // TD module
+  MsgReclaimTrustDepositAminoConverter,
+  MsgReclaimTrustDepositYieldAminoConverter,
+  // PERM module
+  MsgCreateRootPermissionAminoConverter,
+  MsgCreatePermissionAminoConverter,
+  MsgExtendPermissionAminoConverter,
+  MsgRevokePermissionAminoConverter,
+  MsgStartPermissionVPAminoConverter,
+  MsgRenewPermissionVPAminoConverter,
+  MsgSetPermissionVPToValidatedAminoConverter,
+  MsgCancelPermissionVPLastRequestAminoConverter,
+  MsgCreateOrUpdatePermissionSessionAminoConverter,
+} from "./aminoConverters";
 
 // Default configuration - can be overridden via environment variables
 // Matches frontend configuration from veranaChain.sign.client.ts
@@ -77,8 +106,34 @@ export async function createWallet(mnemonic: string): Promise<Secp256k1HdWallet>
  */
 export function createVeranaAminoTypes(): AminoTypes {
   return new AminoTypes({
+    // Trust Registry (tr) module
     '/verana.tr.v1.MsgCreateTrustRegistry': MsgCreateTrustRegistryAminoConverter,
-    // Add more converters as needed
+    '/verana.tr.v1.MsgUpdateTrustRegistry': MsgUpdateTrustRegistryAminoConverter,
+    '/verana.tr.v1.MsgArchiveTrustRegistry': MsgArchiveTrustRegistryAminoConverter,
+    '/verana.tr.v1.MsgAddGovernanceFrameworkDocument': MsgAddGovernanceFrameworkDocumentAminoConverter,
+    '/verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion': MsgIncreaseActiveGovernanceFrameworkVersionAminoConverter,
+    // DID Directory (dd) module
+    '/verana.dd.v1.MsgAddDID': MsgAddDIDAminoConverter,
+    '/verana.dd.v1.MsgRenewDID': MsgRenewDIDAminoConverter,
+    '/verana.dd.v1.MsgTouchDID': MsgTouchDIDAminoConverter,
+    '/verana.dd.v1.MsgRemoveDID': MsgRemoveDIDAminoConverter,
+    // Credential Schema (cs) module
+    '/verana.cs.v1.MsgCreateCredentialSchema': MsgCreateCredentialSchemaAminoConverter,
+    '/verana.cs.v1.MsgUpdateCredentialSchema': MsgUpdateCredentialSchemaAminoConverter,
+    '/verana.cs.v1.MsgArchiveCredentialSchema': MsgArchiveCredentialSchemaAminoConverter,
+    // Trust Deposit (td) module
+    '/verana.td.v1.MsgReclaimTrustDeposit': MsgReclaimTrustDepositAminoConverter,
+    '/verana.td.v1.MsgReclaimTrustDepositYield': MsgReclaimTrustDepositYieldAminoConverter,
+    // Permission (perm) module
+    '/verana.perm.v1.MsgCreateRootPermission': MsgCreateRootPermissionAminoConverter,
+    '/verana.perm.v1.MsgCreatePermission': MsgCreatePermissionAminoConverter,
+    '/verana.perm.v1.MsgExtendPermission': MsgExtendPermissionAminoConverter,
+    '/verana.perm.v1.MsgRevokePermission': MsgRevokePermissionAminoConverter,
+    '/verana.perm.v1.MsgStartPermissionVP': MsgStartPermissionVPAminoConverter,
+    '/verana.perm.v1.MsgRenewPermissionVP': MsgRenewPermissionVPAminoConverter,
+    '/verana.perm.v1.MsgSetPermissionVPToValidated': MsgSetPermissionVPToValidatedAminoConverter,
+    '/verana.perm.v1.MsgCancelPermissionVPLastRequest': MsgCancelPermissionVPLastRequestAminoConverter,
+    '/verana.perm.v1.MsgCreateOrUpdatePermissionSession': MsgCreateOrUpdatePermissionSessionAminoConverter,
   });
 }
 
@@ -187,6 +242,43 @@ export async function calculateFeeWithSimulation(
   
   // Use calculateFee from @cosmjs/stargate (same as frontend)
   return calculateFee(gasLimit, gasPrice);
+}
+
+/**
+ * Sign and broadcast with retry logic for unauthorized errors (matches frontend).
+ * The frontend's signAndBroadcastManualAmino retries once if it gets an unauthorized error,
+ * as this can happen due to account number/sequence timing issues.
+ */
+export async function signAndBroadcastWithRetry(
+  client: SigningStargateClient,
+  address: string,
+  messages: any[],
+  fee: any,
+  memo: string = ""
+) {
+  // Fetch account sequence & accountNumber (like frontend does)
+  // This ensures the client has the latest sequence cached
+  // Add a small delay before fetching to ensure any previous transaction is processed
+  await new Promise((resolve) => setTimeout(resolve, 300));
+  const sequenceBefore = await client.getSequence(address);
+  
+  let res = await client.signAndBroadcast(address, messages, fee, memo);
+  
+  // If unauthorized error, retry once (matches frontend signAndBroadcastManualAmino)
+  const unauthorized = res.code === 4 && typeof res.rawLog === 'string' && res.rawLog.includes('signature verification failed');
+  if (unauthorized) {
+    
+    // Add a longer delay to ensure previous transaction is fully processed and sequence is updated
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    // Refresh account sequence before retry - this forces a fresh fetch
+    // Call it twice to ensure cache is cleared
+    const seq1 = await client.getSequence(address);
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    const seq2 = await client.getSequence(address);
+    res = await client.signAndBroadcast(address, messages, fee, memo);
+  }
+  
+  return res;
 }
 
 /**

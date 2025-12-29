@@ -40,11 +40,12 @@ async function main() {
   console.log("=".repeat(60));
   console.log();
 
-  // Step 1: Setup wallet
-  console.log("Step 1: Setting up wallet...");
+  // Step 1: Setup wallet (using Amino Sign to match frontend)
+  console.log("Step 1: Setting up wallet (Amino Sign mode)...");
   const wallet = await createWallet(TEST_MNEMONIC);
   const account = await getAccountInfo(wallet);
   console.log(`  ✓ Wallet address: ${account.address}`);
+  console.log(`  ✓ Using Amino Sign (matches frontend)`);
   console.log();
 
   // Step 2: Connect to blockchain

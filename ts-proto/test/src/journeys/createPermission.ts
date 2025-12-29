@@ -26,6 +26,7 @@ import {
   createSigningClient,
   getAccountInfo,
   calculateFeeWithSimulation,
+  signAndBroadcastWithRetry,
   config,
 } from "../helpers/client";
 import { typeUrls } from "../helpers/registry";
@@ -44,11 +45,12 @@ async function main() {
   console.log("=".repeat(60));
   console.log();
 
-  // Step 1: Setup wallet
-  console.log("Step 1: Setting up wallet...");
+  // Step 1: Setup wallet (using Amino Sign to match frontend)
+  console.log("Step 1: Setting up wallet (Amino Sign mode)...");
   const wallet = await createWallet(TEST_MNEMONIC);
   const account = await getAccountInfo(wallet);
   console.log(`  ✓ Wallet address: ${account.address}`);
+  console.log(`  ✓ Using Amino Sign (matches frontend behavior)`);
   console.log();
 
   // Step 2: Connect to blockchain
@@ -86,6 +88,11 @@ async function main() {
     schemaId = schemaResult.schemaId;
     did = schemaResult.did;
     console.log(`  ✓ Created Credential Schema with ID: ${schemaId}`);
+    // Refresh sequence after schema creation to ensure cache is updated
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await client.getSequence(account.address);
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    await client.getSequence(account.address);
   }
 
   if (!schemaId || !did) {
@@ -101,6 +108,11 @@ async function main() {
   try {
     const rootPermId = await createRootPermissionForTest(client, account.address, schemaId, did);
     console.log(`  ✓ Root Permission (ecosystem permission) created with ID: ${rootPermId}`);
+    // Refresh sequence after root permission creation to ensure cache is updated
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await client.getSequence(account.address);
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    await client.getSequence(account.address);
   } catch (error: any) {
     console.log("  ❌ Failed to create Root Permission (prerequisite)");
     console.error(`  Error: ${error.message}`);
@@ -155,7 +167,9 @@ async function main() {
     );
     console.log(`  Calculated gas: ${fee.gas}, fee: ${fee.amount[0].amount}${fee.amount[0].denom}`);
     
-    const result = await client.signAndBroadcast(
+    // Use retry logic for consistency (matches frontend pattern)
+    const result = await signAndBroadcastWithRetry(
+      client,
       account.address,
       [msg],
       fee,

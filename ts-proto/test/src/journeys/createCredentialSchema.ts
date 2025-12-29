@@ -21,6 +21,7 @@ import {
   createSigningClient,
   getAccountInfo,
   calculateFeeWithSimulation,
+  signAndBroadcastWithRetry,
   generateUniqueDID,
   config,
 } from "../helpers/client";
@@ -28,6 +29,7 @@ import { typeUrls } from "../helpers/registry";
 import { MsgCreateCredentialSchema, OptionalUInt32 } from "../../../src/codec/verana/cs/v1/tx";
 import { MsgCreateTrustRegistry } from "../../../src/codec/verana/tr/v1/tx";
 import { CredentialSchemaPermManagementMode } from "../../../src/codec/verana/cs/v1/types";
+import Long from "long";
 
 // Test mnemonic - Uses cooluser seed phrase (same as test harness)
 const TEST_MNEMONIC =
@@ -82,11 +84,12 @@ async function main() {
   console.log("=".repeat(60));
   console.log();
 
-  // Step 1: Setup wallet
-  console.log("Step 1: Setting up wallet...");
+  // Step 1: Setup wallet (using Amino Sign to match frontend)
+  console.log("Step 1: Setting up wallet (Amino Sign mode)...");
   const wallet = await createWallet(TEST_MNEMONIC);
   const account = await getAccountInfo(wallet);
   console.log(`  ✓ Wallet address: ${account.address}`);
+  console.log(`  ✓ Using Amino Sign (matches frontend)`);
   console.log();
 
   // Step 2: Connect to blockchain
@@ -187,7 +190,7 @@ async function main() {
     typeUrl: typeUrls.MsgCreateCredentialSchema,
     value: MsgCreateCredentialSchema.fromPartial({
       creator: account.address,
-      trId: trId,
+      trId: Long.fromNumber(trId), // Use Long.fromNumber to match frontend (Long.fromValue)
       jsonSchema: jsonSchema,
       // Validity periods: 0 means never expire (matches test harness)
       issuerGrantorValidationValidityPeriod: { value: 0 } as OptionalUInt32,
@@ -218,7 +221,10 @@ async function main() {
     );
     console.log(`  Calculated gas: ${fee.gas}, fee: ${fee.amount[0].amount}${fee.amount[0].denom}`);
     
-    const result = await client.signAndBroadcast(
+    // Use retry logic for unauthorized errors (matches frontend signAndBroadcastManualAmino)
+    // This function already calls getSequence internally
+    const result = await signAndBroadcastWithRetry(
+      client,
       account.address,
       [msg],
       fee,

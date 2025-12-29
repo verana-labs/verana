@@ -15,6 +15,7 @@ import {
   createSigningClient,
   getAccountInfo,
   calculateFeeWithSimulation,
+  signAndBroadcastWithRetry,
   config,
   createQueryClient,
   getBlockTime,
@@ -35,13 +36,21 @@ async function main() {
   console.log("=".repeat(60));
   console.log();
 
+  // Using Amino Sign to match frontend
   const wallet = await createWallet(TEST_MNEMONIC);
   const account = await getAccountInfo(wallet);
   const client = await createSigningClient(wallet);
 
   console.log(`  ✓ Wallet address: ${account.address}`);
+  console.log(`  ✓ Using Amino Sign (matches frontend behavior)`);
   console.log(`  ✓ Connected to ${config.rpcEndpoint}`);
   console.log();
+
+  // Refresh sequence at the start to ensure we have the latest sequence from blockchain
+  // This is critical when running multiple tests in sequence
+  await client.getSequence(account.address);
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  await client.getSequence(account.address);
 
   const balance = await client.getBalance(account.address, config.denom);
   if (BigInt(balance.amount) < BigInt(1000000)) {
@@ -60,7 +69,18 @@ async function main() {
   } else {
     console.log("Step 4: Creating schema, validator permission, and starting VP first...");
     const { schemaId, did } = await createSchemaForTest(client, account.address);
+    // Refresh sequence after schema creation
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await client.getSequence(account.address);
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    await client.getSequence(account.address);
+    
     const validatorPermId = await createRootPermissionForTest(client, account.address, schemaId, did);
+    // Refresh sequence after root permission creation
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await client.getSequence(account.address);
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    await client.getSequence(account.address);
     
     // Wait for validator permission to become effective (permissions are created with effectiveFrom 10 seconds in future)
     console.log(`  ⏳ Waiting for validator permission to become effective (permissions require effective_from to be in the future)...`);
@@ -102,7 +122,9 @@ async function main() {
       [startVPMsg],
       "Starting VP for validation test"
     );
-    const startVPResult = await client.signAndBroadcast(
+    // Use retry logic for consistency (matches frontend pattern)
+    const startVPResult = await signAndBroadcastWithRetry(
+      client,
       account.address,
       [startVPMsg],
       startVPFee,
@@ -113,6 +135,12 @@ async function main() {
       console.log(`  Error: ${startVPResult.rawLog}`);
       process.exit(1);
     }
+    
+    // Refresh sequence after starting VP
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await client.getSequence(account.address);
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    await client.getSequence(account.address);
     
     // Extract permission ID from events
     const events = startVPResult.events || [];
@@ -143,6 +171,14 @@ async function main() {
   }
 
   console.log();
+
+  // Refresh sequence before set validated transaction to ensure cache is up to date
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+  await client.getSequence(account.address);
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  await client.getSequence(account.address);
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  await client.getSequence(account.address);
 
   console.log("Step 5: Setting Permission VP To Validated transaction...");
   const effectiveUntil = new Date(Date.now() + 360 * 24 * 60 * 60 * 1000); // 360 days from now
@@ -184,7 +220,9 @@ async function main() {
     );
     console.log(`  Calculated gas: ${fee.gas}, fee: ${fee.amount[0].amount}${fee.amount[0].denom}`);
 
-    const result = await client.signAndBroadcast(
+    // Use retry logic for consistency (matches frontend pattern)
+    const result = await signAndBroadcastWithRetry(
+      client,
       account.address,
       [msg],
       fee,

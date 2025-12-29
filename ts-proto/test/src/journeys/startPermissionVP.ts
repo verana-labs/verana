@@ -15,6 +15,7 @@ import {
   createSigningClient,
   getAccountInfo,
   calculateFeeWithSimulation,
+  signAndBroadcastWithRetry,
   config,
   createQueryClient,
   getBlockTime,
@@ -35,8 +36,10 @@ async function main() {
   console.log("=".repeat(60));
   console.log();
 
+  // Using Amino Sign to match frontend
   const wallet = await createWallet(TEST_MNEMONIC);
   const account = await getAccountInfo(wallet);
+  console.log(`  ✓ Using Amino Sign (matches frontend behavior)`);
   const client = await createSigningClient(wallet);
 
   console.log(`  ✓ Wallet address: ${account.address}`);
@@ -63,6 +66,10 @@ async function main() {
   } else {
     console.log("Step 4: Creating schema and validator permission first...");
     const { schemaId, did } = await createSchemaForTest(client, account.address);
+    // Refresh sequence after schema creation to ensure cache is updated
+    await client.getSequence(account.address);
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    await client.getSequence(account.address);
     // Create a root permission as validator (ECOSYSTEM type)
     validatorPermId = await createRootPermissionForTest(client, account.address, schemaId, did);
     console.log(`  ✓ Created Validator Permission (Root) with ID: ${validatorPermId}`);
@@ -99,6 +106,9 @@ async function main() {
     } finally {
       queryClient.disconnect();
     }
+    
+    // Refresh sequence after waiting to ensure it's up to date
+    await client.getSequence(account.address);
   }
 
   if (!validatorPermId) {
@@ -137,7 +147,14 @@ async function main() {
     );
     console.log(`  Calculated gas: ${fee.gas}, fee: ${fee.amount[0].amount}${fee.amount[0].denom}`);
 
-    const result = await client.signAndBroadcast(account.address, [msg], fee, "Starting Permission VP via TypeScript client");
+    // Use retry logic for consistency (matches frontend pattern)
+    const result = await signAndBroadcastWithRetry(
+      client,
+      account.address,
+      [msg],
+      fee,
+      "Starting Permission VP via TypeScript client"
+    );
 
     console.log();
     if (result.code === 0) {

@@ -15,6 +15,7 @@ import {
   createSigningClient,
   getAccountInfo,
   calculateFeeWithSimulation,
+  signAndBroadcastWithRetry,
   config,
   createQueryClient,
   getBlockTime,
@@ -33,11 +34,13 @@ async function main() {
   console.log("=".repeat(60));
   console.log();
 
+  // Using Amino Sign to match frontend
   const wallet = await createWallet(TEST_MNEMONIC);
   const account = await getAccountInfo(wallet);
   const client = await createSigningClient(wallet);
 
   console.log(`  ✓ Wallet address: ${account.address}`);
+  console.log(`  ✓ Using Amino Sign (matches frontend behavior)`);
   console.log(`  ✓ Connected to ${config.rpcEndpoint}`);
   console.log();
 
@@ -60,6 +63,12 @@ async function main() {
     const { schemaId, did } = await createSchemaForTest(client, account.address);
     permId = await createPermissionForTest(client, account.address, schemaId, did);
     console.log(`  ✓ Created Permission with ID: ${permId}`);
+    
+    // Refresh sequence after permission creation to ensure cache is updated
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await client.getSequence(account.address);
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    await client.getSequence(account.address);
     
     // Wait for permission to become effective (permissions are created with effectiveFrom 10 seconds in future)
     // We need to wait for blockchain block time to pass the effectiveFrom time
@@ -93,6 +102,9 @@ async function main() {
     } finally {
       queryClient.disconnect();
     }
+    
+    // Refresh sequence after waiting to ensure it's up to date
+    await client.getSequence(account.address);
   }
 
   if (!permId) {
@@ -101,6 +113,11 @@ async function main() {
   }
 
   console.log();
+
+  // Refresh sequence before revoke transaction to ensure cache is up to date
+  await client.getSequence(account.address);
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  await client.getSequence(account.address);
 
   console.log("Step 5: Revoking Permission transaction...");
   const msg = {
@@ -123,7 +140,14 @@ async function main() {
     );
     console.log(`  Calculated gas: ${fee.gas}, fee: ${fee.amount[0].amount}${fee.amount[0].denom}`);
 
-    const result = await client.signAndBroadcast(account.address, [msg], fee, "Revoking Permission via TypeScript client");
+    // Use retry logic for consistency (matches frontend pattern)
+    const result = await signAndBroadcastWithRetry(
+      client,
+      account.address,
+      [msg],
+      fee,
+      "Revoking Permission via TypeScript client"
+    );
 
     console.log();
     if (result.code === 0) {

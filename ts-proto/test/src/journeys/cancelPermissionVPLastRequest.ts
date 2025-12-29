@@ -15,6 +15,7 @@ import {
   createSigningClient,
   getAccountInfo,
   calculateFeeWithSimulation,
+  signAndBroadcastWithRetry,
   config,
   generateUniqueDID,
   createQueryClient,
@@ -35,11 +36,13 @@ async function main() {
   console.log("=".repeat(60));
   console.log();
 
+  // Using Amino Sign to match frontend
   const wallet = await createWallet(TEST_MNEMONIC);
   const account = await getAccountInfo(wallet);
   const client = await createSigningClient(wallet);
 
   console.log(`  ✓ Wallet address: ${account.address}`);
+  console.log(`  ✓ Using Amino Sign (matches frontend behavior)`);
   console.log(`  ✓ Connected to ${config.rpcEndpoint}`);
   console.log();
 
@@ -106,7 +109,9 @@ async function main() {
       [startVPMsg],
       "Starting Permission VP for cancel test"
     );
-    const startVPResult = await client.signAndBroadcast(
+    // Use retry logic for consistency (matches frontend pattern)
+    const startVPResult = await signAndBroadcastWithRetry(
+      client,
       account.address,
       [startVPMsg],
       startVPFee,
@@ -170,7 +175,9 @@ async function main() {
     );
     console.log(`  Calculated gas: ${fee.gas}, fee: ${fee.amount[0].amount}${fee.amount[0].denom}`);
 
-    const result = await client.signAndBroadcast(
+    // Use retry logic for consistency (matches frontend pattern)
+    const result = await signAndBroadcastWithRetry(
+      client,
       account.address,
       [msg],
       fee,

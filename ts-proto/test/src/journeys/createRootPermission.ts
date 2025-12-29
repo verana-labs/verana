@@ -22,6 +22,7 @@ import {
   createSigningClient,
   getAccountInfo,
   calculateFeeWithSimulation,
+  signAndBroadcastWithRetry,
   generateUniqueDID,
   config,
 } from "../helpers/client";
@@ -62,11 +63,12 @@ async function main() {
   console.log("=".repeat(60));
   console.log();
 
-  // Step 1: Setup wallet
-  console.log("Step 1: Setting up wallet...");
+  // Step 1: Setup wallet (using Amino Sign to match frontend)
+  console.log("Step 1: Setting up wallet (Amino Sign mode)...");
   const wallet = await createWallet(TEST_MNEMONIC);
   const account = await getAccountInfo(wallet);
   console.log(`  ✓ Wallet address: ${account.address}`);
+  console.log(`  ✓ Using Amino Sign (matches frontend behavior)`);
   console.log();
 
   // Step 2: Connect to blockchain
@@ -122,7 +124,9 @@ async function main() {
       "Creating Trust Registry for root permission test"
     );
 
-    const createTrResult = await client.signAndBroadcast(
+    // Use retry logic for consistency (matches frontend pattern)
+    const createTrResult = await signAndBroadcastWithRetry(
+      client,
       account.address,
       [createTrMsg],
       createTrFee,
@@ -179,7 +183,9 @@ async function main() {
       "Creating Credential Schema for root permission test"
     );
 
-    const createCsResult = await client.signAndBroadcast(
+    // Use retry logic for consistency (matches frontend pattern)
+    const createCsResult = await signAndBroadcastWithRetry(
+      client,
       account.address,
       [createCsMsg],
       createCsFee,
@@ -269,7 +275,9 @@ async function main() {
     );
     console.log(`  Calculated gas: ${fee.gas}, fee: ${fee.amount[0].amount}${fee.amount[0].denom}`);
     
-    const result = await client.signAndBroadcast(
+    // Use retry logic for consistency (matches frontend pattern)
+    const result = await signAndBroadcastWithRetry(
+      client,
       account.address,
       [msg],
       fee,

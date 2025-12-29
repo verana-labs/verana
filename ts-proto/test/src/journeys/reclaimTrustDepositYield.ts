@@ -41,11 +41,13 @@ async function main() {
   console.log("=".repeat(60));
   console.log();
 
+  // Using Amino Sign to match frontend (default behavior)
   const wallet = await createWallet(TEST_MNEMONIC);
   const account = await getAccountInfo(wallet);
   const client = await createSigningClient(wallet);
 
   console.log(`  ✓ Wallet address: ${account.address}`);
+  console.log(`  ✓ Using Amino Sign (matches frontend)`);
   console.log(`  ✓ Connected to ${config.rpcEndpoint}`);
   console.log();
 

@@ -15,6 +15,7 @@ import {
   createSigningClient,
   getAccountInfo,
   calculateFeeWithSimulation,
+  signAndBroadcastWithRetry,
   config,
   createQueryClient,
   getBlockTime,
@@ -33,11 +34,13 @@ async function main() {
   console.log("=".repeat(60));
   console.log();
 
+  // Using Amino Sign to match frontend
   const wallet = await createWallet(TEST_MNEMONIC);
   const account = await getAccountInfo(wallet);
   const client = await createSigningClient(wallet);
 
   console.log(`  ✓ Wallet address: ${account.address}`);
+  console.log(`  ✓ Using Amino Sign (matches frontend behavior)`);
   console.log(`  ✓ Connected to ${config.rpcEndpoint}`);
   console.log();
 
@@ -58,8 +61,20 @@ async function main() {
   } else {
     console.log("Step 4: Creating schema and permission first...");
     const { schemaId, did } = await createSchemaForTest(client, account.address);
+    // Refresh sequence after schema creation to ensure cache is updated
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await client.getSequence(account.address);
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    await client.getSequence(account.address);
+    
     permId = await createPermissionForTest(client, account.address, schemaId, did);
     console.log(`  ✓ Created Permission with ID: ${permId}`);
+    
+    // Refresh sequence after permission creation to ensure cache is updated
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await client.getSequence(account.address);
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    await client.getSequence(account.address);
     
     // Wait for permission to become effective (permissions are created with effectiveFrom 10 seconds in future)
     console.log(`  ⏳ Waiting for permission to become effective (permissions require effective_from to be in the future)...`);
@@ -92,6 +107,14 @@ async function main() {
 
   console.log();
 
+  // Refresh sequence before renew transaction to ensure cache is up to date
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+  await client.getSequence(account.address);
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  await client.getSequence(account.address);
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  await client.getSequence(account.address);
+
   console.log("Step 5: Renewing Permission VP transaction...");
   const msg = {
     typeUrl: typeUrls.MsgRenewPermissionVP,
@@ -113,7 +136,14 @@ async function main() {
     );
     console.log(`  Calculated gas: ${fee.gas}, fee: ${fee.amount[0].amount}${fee.amount[0].denom}`);
 
-    const result = await client.signAndBroadcast(account.address, [msg], fee, "Renewing Permission VP via TypeScript client");
+    // Use retry logic for consistency (matches frontend pattern)
+    const result = await signAndBroadcastWithRetry(
+      client,
+      account.address,
+      [msg],
+      fee,
+      "Renewing Permission VP via TypeScript client"
+    );
 
     console.log();
     if (result.code === 0) {
