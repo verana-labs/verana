@@ -46,6 +46,12 @@ import { PermissionType } from "../../../src/codec/verana/perm/v1/types";
 const u64ToStr = (v?: Long | string | number | null) =>
   v != null ? Long.fromValue(v).toString() : undefined;
 
+const u64ToStrIfNonZero = (v?: Long | string | number | null) => {
+  if (v == null) return undefined;
+  const value = Long.fromValue(v);
+  return value.isZero() ? undefined : value.toString();
+};
+
 const strToU64 = (s?: string | null) =>
   s != null ? Long.fromString(s) : undefined;
 
@@ -404,8 +410,8 @@ export const MsgCreatePermissionAminoConverter: AminoConverter = {
     country: m.country ?? '',
     effective_from: dateToAmino(m.effectiveFrom),
     effective_until: dateToAmino(m.effectiveUntil),
-    verification_fees: u64ToStr(m.verificationFees),
-    validation_fees: u64ToStr(m.validationFees),
+    verification_fees: u64ToStrIfNonZero(m.verificationFees),
+    validation_fees: u64ToStrIfNonZero(m.validationFees),
   }),
   fromAmino: (a: any): MsgCreatePermission =>
     MsgCreatePermission.fromPartial({
