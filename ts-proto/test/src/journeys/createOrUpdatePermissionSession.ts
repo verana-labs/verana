@@ -11,7 +11,7 @@
  */
 
 import {
-  createDirectWallet,
+  createAminoWallet,
   createSigningClient,
   getAccountInfo,
   calculateFeeWithSimulation,
@@ -44,11 +44,11 @@ async function main() {
   console.log("=".repeat(60));
   console.log();
 
-  // Using Direct Sign for Permission Session
-  const wallet = await createDirectWallet(TEST_MNEMONIC);
+  // Using Amino Sign for Permission Session
+  const wallet = await createAminoWallet(TEST_MNEMONIC);
   const account = await getAccountInfo(wallet);
   const client = await createSigningClient(wallet);
-  console.log(`  ✓ Using Direct Sign`);
+  console.log(`  ✓ Using Amino Sign`);
 
   console.log(`  ✓ Wallet address: ${account.address}`);
   console.log(`  ✓ Connected to ${config.rpcEndpoint}`);
@@ -219,4 +219,3 @@ main().catch((error: any) => {
   }
   process.exit(1);
 });
-
