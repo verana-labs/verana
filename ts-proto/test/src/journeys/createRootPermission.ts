@@ -159,6 +159,12 @@ async function main() {
       process.exit(1);
     }
 
+    // Refresh sequence after TR creation to ensure cache is updated
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await client.getSequence(account.address);
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    await client.getSequence(account.address);
+
     // Create Credential Schema
     const createCsMsg = {
       typeUrl: typeUrls.MsgCreateCredentialSchema,
@@ -219,6 +225,12 @@ async function main() {
       console.log("  ❌ Could not extract Schema ID from events");
       process.exit(1);
     }
+
+    // Refresh sequence after CS creation to ensure cache is updated
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await client.getSequence(account.address);
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    await client.getSequence(account.address);
   }
 
   if (!schemaId || !did) {
@@ -267,6 +279,12 @@ async function main() {
   // Step 6: Sign and broadcast
   console.log("Step 6: Signing and broadcasting transaction...");
   try {
+    // Refresh sequence one more time right before the transaction to ensure it's up to date
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await client.getSequence(account.address);
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    await client.getSequence(account.address);
+    
     const fee = await calculateFeeWithSimulation(
       client,
       account.address,

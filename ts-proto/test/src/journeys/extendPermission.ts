@@ -140,6 +140,12 @@ async function main() {
 
   console.log("Step 6: Signing and broadcasting transaction...");
   try {
+    // Refresh sequence one more time right before the transaction to ensure it's up to date
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await client.getSequence(account.address);
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    await client.getSequence(account.address);
+    
     const fee = await calculateFeeWithSimulation(
       client,
       account.address,

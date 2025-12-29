@@ -258,8 +258,10 @@ export async function signAndBroadcastWithRetry(
 ) {
   // Fetch account sequence & accountNumber (like frontend does)
   // This ensures the client has the latest sequence cached
-  // Add a small delay before fetching to ensure any previous transaction is processed
-  await new Promise((resolve) => setTimeout(resolve, 300));
+  // Add a delay and refresh multiple times to ensure we have the latest sequence
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  await client.getSequence(address);
+  await new Promise((resolve) => setTimeout(resolve, 500));
   const sequenceBefore = await client.getSequence(address);
   
   let res = await client.signAndBroadcast(address, messages, fee, memo);
@@ -269,12 +271,14 @@ export async function signAndBroadcastWithRetry(
   if (unauthorized) {
     
     // Add a longer delay to ensure previous transaction is fully processed and sequence is updated
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 3000));
     // Refresh account sequence before retry - this forces a fresh fetch
-    // Call it twice to ensure cache is cleared
-    const seq1 = await client.getSequence(address);
+    // Call it multiple times to ensure cache is cleared and we get the latest sequence
+    await client.getSequence(address);
     await new Promise((resolve) => setTimeout(resolve, 500));
-    const seq2 = await client.getSequence(address);
+    await client.getSequence(address);
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    const seq3 = await client.getSequence(address);
     res = await client.signAndBroadcast(address, messages, fee, memo);
   }
   

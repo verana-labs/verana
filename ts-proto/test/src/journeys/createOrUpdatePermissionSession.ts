@@ -11,7 +11,7 @@
  */
 
 import {
-  createWallet,
+  createDirectWallet,
   createSigningClient,
   getAccountInfo,
   calculateFeeWithSimulation,
@@ -44,11 +44,11 @@ async function main() {
   console.log("=".repeat(60));
   console.log();
 
-  // Using Amino Sign to match frontend
-  const wallet = await createWallet(TEST_MNEMONIC);
+  // Using Direct Sign for Permission Session
+  const wallet = await createDirectWallet(TEST_MNEMONIC);
   const account = await getAccountInfo(wallet);
   const client = await createSigningClient(wallet);
-  console.log(`  ✓ Using Amino Sign (matches frontend behavior)`);
+  console.log(`  ✓ Using Direct Sign`);
 
   console.log(`  ✓ Wallet address: ${account.address}`);
   console.log(`  ✓ Connected to ${config.rpcEndpoint}`);
