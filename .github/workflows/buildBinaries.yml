@@ -111,6 +111,10 @@ jobs:
           PKG_TGZ=$(ls -t verana-labs-verana-types-*.tgz | head -n 1)
           echo "PKG_TGZ=${PKG_TGZ}" >> $GITHUB_ENV
 
+      - name: Publish ts-proto package
+        if: env.VERSION != 'dev'
+        run: npm publish
+
       - name: Build binary for Linux AMD64
         run: |
           mkdir -p binaries/testnet_v1
