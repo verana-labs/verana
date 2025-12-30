@@ -34,7 +34,7 @@ func main() {
 		IssuerGrantorValidationValidityPeriod:   &cstypes.OptionalUInt32{Value: 0},
 		VerifierGrantorValidationValidityPeriod: &cstypes.OptionalUInt32{Value: 0},
 		IssuerValidationValidityPeriod:          &cstypes.OptionalUInt32{Value: 0},
-		VerifierValidationValidityPeriod:        &cstypes.OptionalUInt32{Value: 0},
+		VerifierValidationValidityPeriod:        &cstypes.OptionalUInt32{Value: 180},
 		HolderValidationValidityPeriod:          &cstypes.OptionalUInt32{Value: 0},
 		IssuerPermManagementMode:                2,
 		VerifierPermManagementMode:              1,

@@ -39,7 +39,7 @@ function buildCreateCredentialSchemaMsg(): AminoMsg {
       issuer_grantor_validation_validity_period: {},
       verifier_grantor_validation_validity_period: {},
       issuer_validation_validity_period: {},
-      verifier_validation_validity_period: {},
+      verifier_validation_validity_period: { value: 180 },
       holder_validation_validity_period: {},
       issuer_perm_management_mode: 2,
       verifier_perm_management_mode: 1,
