@@ -30,8 +30,8 @@ func main() {
 	permtypes.RegisterLegacyAminoCodec(amino)
 	legacytx.RegressionTestingAminoCodec = amino
 
-	effectiveFrom := time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC)
-	effectiveUntil := time.Date(2025, 12, 31, 0, 0, 0, 0, time.UTC)
+	effectiveFrom := time.Date(2025, 1, 1, 0, 0, 0, 123000000, time.UTC)
+	effectiveUntil := time.Date(2025, 12, 31, 0, 0, 0, 123000000, time.UTC)
 
 	address := "verana16mzeyu9l6kua2cdg9x0jk5g6e7h0kk8q6uadu4"
 	msg := &permtypes.MsgCreatePermission{
@@ -157,8 +157,8 @@ func buildClientSignBytes(address string, accountNumber, sequence uint64) []byte
 					"type":              2,
 					"did":               "did:verana:test:bench",
 					"country":           "US",
-					"effective_from":    "2025-01-01T00:00:00Z",
-					"effective_until":   "2025-12-31T00:00:00Z",
+					"effective_from":    "2025-01-01T00:00:00.123Z",
+					"effective_until":   "2025-12-31T00:00:00.123Z",
 					"verification_fees": "0",
 					"validation_fees":   "0",
 				},

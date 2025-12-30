@@ -29,8 +29,8 @@ const FEE = {
 const MEMO = "Amino bench demo";
 
 function buildCreatePermissionMsgs(): { clientMsg: AminoMsg; serverMsg: AminoMsg } {
-  const effectiveFrom = new Date("2025-01-01T00:00:00Z");
-  const effectiveUntil = new Date("2025-12-31T00:00:00Z");
+  const effectiveFrom = new Date("2025-01-01T00:00:00.123Z");
+  const effectiveUntil = new Date("2025-12-31T00:00:00.123Z");
   const protoMsg = MsgCreatePermission.fromPartial({
     creator: "verana16mzeyu9l6kua2cdg9x0jk5g6e7h0kk8q6uadu4",
     schemaId: 1,
