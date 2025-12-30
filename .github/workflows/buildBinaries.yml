@@ -91,7 +91,7 @@ jobs:
           echo "NPM_VERSION=${NPM_VERSION}" >> $GITHUB_ENV
           echo "COMMIT=${COMMIT}" >> $GITHUB_ENV          
 
-      - name: Generate ts-proto package, pack and publish to npmjs
+      - name: Generate ts-proto package and pack
         run: |
           cd "$GITHUB_WORKSPACE/proto"
           buf generate --template buf.gen.ts.yaml
@@ -110,7 +110,10 @@ jobs:
           echo "Package version now: ${PKG_VERSION}"
           PKG_TGZ=$(ls -t verana-labs-verana-types-*.tgz | head -n 1)
           echo "PKG_TGZ=${PKG_TGZ}" >> $GITHUB_ENV
-          npm publish
+
+      - name: Publish ts-proto package
+        if: env.VERSION != 'dev'
+        run: npm publish
 
       - name: Build binary for Linux AMD64
         run: |
