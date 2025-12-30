@@ -1,6 +1,6 @@
 // Go-side corollary: reproduce the server's legacy Amino sign bytes.
 // Run from repo root:
-//   go run ts-proto/test/scripts/amino-sign-bench-go.go
+//   go run ts-proto/test/scripts/benches/amino/perm/go.go
 //
 // This prints:
 // - server sign bytes (legacy amino JSON with omitempty semantics)
@@ -113,7 +113,7 @@ func main() {
 
 	fmt.Println("Equal?", string(serverBytes) == string(clientBytes))
 
-	outDir := filepath.Join("ts-proto", "test", "out")
+	outDir := filepath.Join("ts-proto", "test", "out", "amino", "perm")
 	_ = os.MkdirAll(outDir, 0o755)
 	_ = os.WriteFile(filepath.Join(outDir, "amino-sign-bench-go-server.json"), []byte(serverJSON+"\n"), 0o644)
 	_ = os.WriteFile(filepath.Join(outDir, "amino-sign-bench-go-client.json"), []byte(clientJSON+"\n"), 0o644)

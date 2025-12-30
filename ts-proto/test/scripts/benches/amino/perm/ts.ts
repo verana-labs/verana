@@ -5,9 +5,9 @@ import { StargateClient } from "@cosmjs/stargate";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { MsgCreatePermission } from "../../src/codec/verana/perm/v1/tx";
-import { PermissionType } from "../../src/codec/verana/perm/v1/types";
-import { MsgCreatePermissionAminoConverter } from "../src/helpers/aminoConverters";
+import { MsgCreatePermission } from "../../../../src/codec/verana/perm/v1/tx";
+import { PermissionType } from "../../../../src/codec/verana/perm/v1/types";
+import { MsgCreatePermissionAminoConverter } from "../../../../src/helpers/aminoConverters";
 
 type AminoMsg = {
   type: string;
@@ -146,7 +146,7 @@ async function main() {
   const bytesWithZeros = serializeSignDoc(signDocWithZeros);
   const bytesOmittingZeros = serializeSignDoc(signDocOmittingZeros);
   const scriptDir = dirname(fileURLToPath(import.meta.url));
-  const outDir = join(scriptDir, "..", "out");
+  const outDir = join(scriptDir, "..", "..", "..", "..", "out", "amino", "perm");
   mkdirSync(outDir, { recursive: true });
   writeFileSync(join(outDir, "amino-sign-bench-ts-server.json"), JSON.stringify(signDocOmittingZeros, null, 2));
   writeFileSync(join(outDir, "amino-sign-bench-ts-client.json"), JSON.stringify(signDocWithZeros, null, 2));

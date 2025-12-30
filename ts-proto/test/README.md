@@ -132,15 +132,15 @@ When the frontend struggles with invalid tx signatures, use the Amino sign bench
 
 ```bash
 # From ts-proto/test
-npx tsx scripts/amino-sign-bench.ts
+npx tsx scripts/benches/amino/perm/ts.ts
 ```
 
 Notes:
 - Uses `VERANA_RPC_ENDPOINT` to fetch on-chain `account_number` and `sequence`.
 - Falls back to `0, 0` if the node is unreachable (still useful for comparing sign bytes).
-- Edit the message payload in `ts-proto/test/scripts/amino-sign-bench.ts` to test new message types.
+- Edit the message payload in `ts-proto/test/scripts/benches/amino/perm/ts.ts` to test new message types.
 - Root cause example: the chain omits zero-value fields in legacy Amino JSON (Go `omitempty`), while the client originally included `"verification_fees": "0"` / `"validation_fees": "0"`. That changes the sign bytes and causes signature verification to fail. The bench shows “client-style” (zeros included) vs “server-style” (zeros omitted) bytes.
-- After running both benches, compare outputs with `node ts-proto/test/scripts/compare-amino-bench.js`. The script normalizes JSON by sorting keys, so raw JSON strings can differ even when the bytes match.
+- After running both benches, compare outputs with `node ts-proto/test/scripts/benches/amino/perm/compare.js`. The script normalizes JSON by sorting keys, so raw JSON strings can differ even when the bytes match.
 
 ### Go Corollary (Server-Style Sign Bytes)
 
@@ -148,10 +148,14 @@ If you want to reproduce the server's legacy Amino sign bytes in Go (and compare
 
 ```bash
 # From repo root
-go run ts-proto/test/scripts/amino-sign-bench-go.go
+go run ts-proto/test/scripts/benches/amino/perm/go.go
 ```
 
 This prints the server-style sign bytes (omitting zero fees) and a client-style variant that includes zeros, showing the exact byte mismatch.
+
+### Credential Schema Bench (CS)
+
+The Credential Schema bench follows the same structure under `ts-proto/test/scripts/benches/amino/cs/` with `ts.ts`, `go.go`, and `compare.js`.
 
 ### Recommended Run Sequence (TS → Go → Compare)
 
@@ -159,9 +163,9 @@ Run the three scripts in this order so the comparison uses fresh outputs:
 
 ```bash
 # From repo root
-npx tsx ts-proto/test/scripts/amino-sign-bench.ts
-go run ts-proto/test/scripts/amino-sign-bench-go.go
-node ts-proto/test/scripts/compare-amino-bench.js
+npx tsx ts-proto/test/scripts/benches/amino/perm/ts.ts
+go run ts-proto/test/scripts/benches/amino/perm/go.go
+node ts-proto/test/scripts/benches/amino/perm/compare.js
 ```
 
 ### Create a Trust Registry

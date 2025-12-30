@@ -49,9 +49,9 @@ If LCD is available, the REST endpoint `GET /cosmos/auth/v1beta1/accounts/<addre
 - Run a specific journey:
   - `npm run test:create-perm-session`
 - Run the Amino sign bench:
-  - `npx tsx ts-proto/test/scripts/amino-sign-bench.ts`
+  - `npx tsx ts-proto/test/scripts/benches/amino/perm/ts.ts`
 - Compare TS vs Go bench outputs:
-  - `node ts-proto/test/scripts/compare-amino-bench.js`
+  - `node ts-proto/test/scripts/benches/amino/perm/compare.js`
 
 When debugging signing, always log:
 - chain-id
@@ -63,7 +63,7 @@ When debugging signing, always log:
 ## Go Debugging
 
 - Run the Go Amino bench:
-  - `go run ts-proto/test/scripts/amino-sign-bench-go.go`
+  - `go run ts-proto/test/scripts/benches/amino/perm/go.go`
 
 Use the legacy Amino codec (`RegisterLegacyAminoCodec`) and `legacytx.StdSignBytes` to match the chain’s sign bytes. If needed, canonicalize JSON (`sdk.MustSortJSON`) to compare with client-side outputs.
 

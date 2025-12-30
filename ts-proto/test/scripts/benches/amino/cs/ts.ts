@@ -6,9 +6,9 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import Long from "long";
-import { MsgCreateCredentialSchema, OptionalUInt32 } from "../../src/codec/verana/cs/v1/tx";
-import { CredentialSchemaPermManagementMode } from "../../src/codec/verana/cs/v1/types";
-import { MsgCreateCredentialSchemaAminoConverter } from "../src/helpers/aminoConverters";
+import { MsgCreateCredentialSchema, OptionalUInt32 } from "../../../../src/codec/verana/cs/v1/tx";
+import { CredentialSchemaPermManagementMode } from "../../../../src/codec/verana/cs/v1/types";
+import { MsgCreateCredentialSchemaAminoConverter } from "../../../../src/helpers/aminoConverters";
 
 type AminoMsg = {
   type: string;
@@ -99,7 +99,7 @@ async function main() {
 
   const bytes = serializeSignDoc(signDoc);
   const scriptDir = dirname(fileURLToPath(import.meta.url));
-  const outDir = join(scriptDir, "..", "out");
+  const outDir = join(scriptDir, "..", "..", "..", "..", "out", "amino", "cs");
   mkdirSync(outDir, { recursive: true });
   writeFileSync(join(outDir, "amino-sign-bench-cs-ts.json"), JSON.stringify(signDoc, null, 2));
   writeFileSync(join(outDir, "amino-sign-bench-cs-ts.hex"), `${toHex(bytes)}\n`);

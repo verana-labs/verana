@@ -1,10 +1,10 @@
 // Compare TS vs Go credential schema Amino bench outputs.
-// Run: node ts-proto/test/scripts/compare-amino-bench-cs.js
+// Run: node ts-proto/test/scripts/benches/amino/cs/compare.js
 
 const { readFileSync } = require("node:fs");
 const { join } = require("node:path");
 
-const outDir = join(__dirname, "..", "out");
+const outDir = join(__dirname, "..", "..", "..", "..", "out", "amino", "cs");
 
 function read(path) {
   return readFileSync(join(outDir, path), "utf8").trim();

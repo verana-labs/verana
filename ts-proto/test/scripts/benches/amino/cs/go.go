@@ -1,6 +1,6 @@
 // Go-side corollary: reproduce legacy Amino sign bytes for MsgCreateCredentialSchema.
 // Run from repo root:
-//   go run ts-proto/test/scripts/amino-sign-bench-cs-go.go
+//   go run ts-proto/test/scripts/benches/amino/cs/go.go
 package main
 
 import (
@@ -88,7 +88,7 @@ func main() {
 	fmt.Println(hex.EncodeToString(serverBytes))
 	fmt.Println()
 
-	outDir := filepath.Join("ts-proto", "test", "out")
+	outDir := filepath.Join("ts-proto", "test", "out", "amino", "cs")
 	_ = os.MkdirAll(outDir, 0o755)
 	_ = os.WriteFile(filepath.Join(outDir, "amino-sign-bench-cs-go.json"), []byte(serverJSON+"\n"), 0o644)
 	_ = os.WriteFile(filepath.Join(outDir, "amino-sign-bench-cs-go.hex"), []byte(hex.EncodeToString(serverBytes)+"\n"), 0o644)
