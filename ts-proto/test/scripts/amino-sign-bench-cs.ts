@@ -5,6 +5,10 @@ import { StargateClient } from "@cosmjs/stargate";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import Long from "long";
+import { MsgCreateCredentialSchema, OptionalUInt32 } from "../../src/codec/verana/cs/v1/tx";
+import { CredentialSchemaPermManagementMode } from "../../src/codec/verana/cs/v1/types";
+import { MsgCreateCredentialSchemaAminoConverter } from "../src/helpers/aminoConverters";
 
 type AminoMsg = {
   type: string;
@@ -29,21 +33,23 @@ const JSON_SCHEMA =
   "{\"$id\":\"vpr:verana:VPR_CHAIN_ID/cs/v1/js/VPR_CREDENTIAL_SCHEMA_ID\",\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"title\":\"ExampleCredential\",\"description\":\"ExampleCredential using JsonSchema\",\"type\":\"object\",\"properties\":{\"credentialSubject\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\",\"format\":\"uri\"},\"firstName\":{\"type\":\"string\",\"minLength\":0,\"maxLength\":256},\"lastName\":{\"type\":\"string\",\"minLength\":1,\"maxLength\":256},\"expirationDate\":{\"type\":\"string\",\"format\":\"date\"},\"countryOfResidence\":{\"type\":\"string\",\"minLength\":2,\"maxLength\":2}},\"required\":[\"id\",\"lastName\",\"expirationDate\",\"countryOfResidence\"]}}}";
 
 function buildCreateCredentialSchemaMsg(): AminoMsg {
+  const protoMsg = MsgCreateCredentialSchema.fromPartial({
+    creator: "verana16mzeyu9l6kua2cdg9x0jk5g6e7h0kk8q6uadu4",
+    trId: Long.fromNumber(1),
+    jsonSchema: JSON_SCHEMA,
+    issuerGrantorValidationValidityPeriod: { value: 0 } as OptionalUInt32,
+    verifierGrantorValidationValidityPeriod: { value: 0 } as OptionalUInt32,
+    issuerValidationValidityPeriod: { value: 0 } as OptionalUInt32,
+    verifierValidationValidityPeriod: { value: 180 } as OptionalUInt32,
+    holderValidationValidityPeriod: { value: 0 } as OptionalUInt32,
+    issuerPermManagementMode: CredentialSchemaPermManagementMode.GRANTOR_VALIDATION,
+    verifierPermManagementMode: CredentialSchemaPermManagementMode.OPEN,
+  });
+
   return {
     // Legacy amino type string for CS.
     type: "/vpr/v1/cs/create-credential-schema",
-    value: {
-      creator: "verana16mzeyu9l6kua2cdg9x0jk5g6e7h0kk8q6uadu4",
-      tr_id: "1",
-      json_schema: JSON_SCHEMA,
-      issuer_grantor_validation_validity_period: {},
-      verifier_grantor_validation_validity_period: {},
-      issuer_validation_validity_period: {},
-      verifier_validation_validity_period: { value: 180 },
-      holder_validation_validity_period: {},
-      issuer_perm_management_mode: 2,
-      verifier_perm_management_mode: 1,
-    },
+    value: MsgCreateCredentialSchemaAminoConverter.toAmino(protoMsg),
   };
 }
 
