@@ -6,8 +6,8 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import Long from "long";
-import { MsgCreateCredentialSchema, OptionalUInt32 } from "../../../../src/codec/verana/cs/v1/tx";
-import { CredentialSchemaPermManagementMode } from "../../../../src/codec/verana/cs/v1/types";
+import { MsgCreateCredentialSchema, OptionalUInt32 } from "../../../../../src/codec/verana/cs/v1/tx";
+import { CredentialSchemaPermManagementMode } from "../../../../../src/codec/verana/cs/v1/types";
 import { MsgCreateCredentialSchemaAminoConverter } from "../../../../src/helpers/aminoConverters";
 
 type AminoMsg = {

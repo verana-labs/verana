@@ -5,8 +5,8 @@ import { StargateClient } from "@cosmjs/stargate";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { MsgCreatePermission } from "../../../../src/codec/verana/perm/v1/tx";
-import { PermissionType } from "../../../../src/codec/verana/perm/v1/types";
+import { MsgCreatePermission } from "../../../../../src/codec/verana/perm/v1/tx";
+import { PermissionType } from "../../../../../src/codec/verana/perm/v1/types";
 import { MsgCreatePermissionAminoConverter } from "../../../../src/helpers/aminoConverters";
 
 type AminoMsg = {
