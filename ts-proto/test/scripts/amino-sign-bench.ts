@@ -5,6 +5,9 @@ import { StargateClient } from "@cosmjs/stargate";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { MsgCreatePermission } from "../../src/codec/verana/perm/v1/tx";
+import { PermissionType } from "../../src/codec/verana/perm/v1/types";
+import { MsgCreatePermissionAminoConverter } from "../src/helpers/aminoConverters";
 
 type AminoMsg = {
   type: string;
@@ -25,26 +28,32 @@ const FEE = {
 
 const MEMO = "Amino bench demo";
 
-function buildCreatePermissionMsg(includeZeroFees: boolean): AminoMsg {
-  const value: Record<string, unknown> = {
+function buildCreatePermissionMsgs(): { clientMsg: AminoMsg; serverMsg: AminoMsg } {
+  const effectiveFrom = new Date("2025-01-01T00:00:00Z");
+  const effectiveUntil = new Date("2025-12-31T00:00:00Z");
+  const protoMsg = MsgCreatePermission.fromPartial({
     creator: "verana16mzeyu9l6kua2cdg9x0jk5g6e7h0kk8q6uadu4",
-    schema_id: "1",
-    type: 2, // VERIFIER
+    schemaId: 1,
+    type: PermissionType.VERIFIER,
     did: "did:verana:test:bench",
     country: "US",
-    effective_from: "2025-01-01T00:00:00Z",
-    effective_until: "2025-12-31T00:00:00Z",
-  };
+    effectiveFrom,
+    effectiveUntil,
+    verificationFees: 0,
+    validationFees: 0,
+  });
 
-  if (includeZeroFees) {
-    value.verification_fees = "0";
-    value.validation_fees = "0";
-  }
+  const serverValue = MsgCreatePermissionAminoConverter.toAmino(protoMsg);
+  const clientValue = {
+    ...serverValue,
+    verification_fees: "0",
+    validation_fees: "0",
+  };
 
   return {
     // Use legacy amino type string to match the Go bench output.
-    type: "/perm/v1/create-perm",
-    value,
+    serverMsg: { type: "/perm/v1/create-perm", value: serverValue },
+    clientMsg: { type: "/perm/v1/create-perm", value: clientValue },
   };
 }
 
@@ -68,15 +77,14 @@ async function main() {
     );
   }
 
-  const msgWithZeros = buildCreatePermissionMsg(true);
-  const msgOmittingZeros = buildCreatePermissionMsg(false);
+  const { clientMsg, serverMsg } = buildCreatePermissionMsgs();
 
   const accountNumberStr = String(accountNumber);
   const sequenceStr = String(sequence);
 
   // Client-style bytes (bad): includes zero fee fields.
   const signDocWithZeros = makeSignDoc(
-    [msgWithZeros],
+    [clientMsg],
     FEE,
     CHAIN_ID,
     MEMO,
@@ -85,7 +93,7 @@ async function main() {
   );
   // Server-style bytes (good): omits zero fee fields via Amino omitempty rules.
   const signDocOmittingZeros = makeSignDoc(
-    [msgOmittingZeros],
+    [serverMsg],
     FEE,
     CHAIN_ID,
     MEMO,
@@ -123,11 +131,11 @@ async function main() {
   );
 
   console.log("Message with zero fees:");
-  console.log(JSON.stringify(msgWithZeros, null, 2));
+  console.log(JSON.stringify(clientMsg, null, 2));
   console.log();
 
   console.log("Message omitting zero fees:");
-  console.log(JSON.stringify(msgOmittingZeros, null, 2));
+  console.log(JSON.stringify(serverMsg, null, 2));
   console.log();
 
   console.log("Signature verifies against its own sign bytes:");
