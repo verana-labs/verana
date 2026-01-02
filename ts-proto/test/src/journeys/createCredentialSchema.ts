@@ -29,6 +29,7 @@ import { typeUrls } from "../helpers/registry";
 import { MsgCreateCredentialSchema, OptionalUInt32 } from "../../../src/codec/verana/cs/v1/tx";
 import { MsgCreateTrustRegistry } from "../../../src/codec/verana/tr/v1/tx";
 import { CredentialSchemaPermManagementMode } from "../../../src/codec/verana/cs/v1/types";
+import { saveJourneyResult } from "../helpers/journeyResults";
 import Long from "long";
 
 // Test mnemonic - Uses cooluser seed phrase (same as test harness)
@@ -111,6 +112,7 @@ async function main() {
 
   // Step 4: Get or create Trust Registry ID
   let trId: number | undefined;
+  let did: string | undefined;
   if (process.env.TR_ID) {
     trId = parseInt(process.env.TR_ID, 10);
     if (isNaN(trId)) {
@@ -119,8 +121,19 @@ async function main() {
     }
     console.log(`Step 4: Using provided Trust Registry ID: ${trId}`);
   } else {
-    console.log("Step 4: Creating a Trust Registry first (no TR_ID provided)...");
-    const did = generateUniqueDID();
+    // Try to reuse active TR from journey results first (for sequential runs)
+    const { getActiveTR } = await import("../helpers/journeyResults");
+    const trResult = getActiveTR();
+    
+    if (trResult) {
+      trId = trResult.trustRegistryId;
+      did = trResult.did;
+      console.log(`Step 4: Reusing active Trust Registry from journey results: ${trId}`);
+    }
+    
+    if (!trId) {
+      console.log("Step 4: Creating a Trust Registry first (no TR_ID provided and no journey results found)...");
+      did = generateUniqueDID();
     const createMsg = {
       typeUrl: typeUrls.MsgCreateTrustRegistry,
       value: MsgCreateTrustRegistry.fromPartial({
@@ -170,9 +183,14 @@ async function main() {
       }
     }
 
-    if (!trId || isNaN(trId)) {
-      console.log("  ❌ Could not extract TR ID from events");
-      process.exit(1);
+      if (!trId || isNaN(trId)) {
+        console.log("  ❌ Could not extract TR ID from events");
+        process.exit(1);
+      }
+      
+      // Save new TR as active TR so subsequent tests can reuse it
+      const { saveActiveTR } = await import("../helpers/journeyResults");
+      saveActiveTR(trId, did);
     }
   }
 
@@ -185,12 +203,14 @@ async function main() {
 
   // Step 5: Create Credential Schema message
   console.log("Step 5: Creating Credential Schema transaction...");
-  const jsonSchema = generateSimpleSchema(trId.toString());
+  // At this point, trId is guaranteed to be a number (checked above)
+  const trIdNumber = trId as number;
+  const jsonSchema = generateSimpleSchema(trIdNumber.toString());
   const msg = {
     typeUrl: typeUrls.MsgCreateCredentialSchema,
     value: MsgCreateCredentialSchema.fromPartial({
       creator: account.address,
-      trId: Long.fromNumber(trId), // Use Long.fromNumber to match frontend (Long.fromValue)
+      trId: trIdNumber, // Message expects number, not Long
       jsonSchema: jsonSchema,
       // Validity periods: 0 means never expire (matches test harness)
       issuerGrantorValidationValidityPeriod: { value: 0 } as OptionalUInt32,
@@ -198,16 +218,16 @@ async function main() {
       issuerValidationValidityPeriod: { value: 0 } as OptionalUInt32,
       verifierValidationValidityPeriod: { value: 0 } as OptionalUInt32,
       holderValidationValidityPeriod: { value: 0 } as OptionalUInt32,
-      // Permission management modes: GRANTOR_VALIDATION = 2, OPEN = 1
-      issuerPermManagementMode: CredentialSchemaPermManagementMode.GRANTOR_VALIDATION,
+      // Permission management modes: OPEN = 1 (allows direct permission creation)
+      issuerPermManagementMode: CredentialSchemaPermManagementMode.OPEN,
       verifierPermManagementMode: CredentialSchemaPermManagementMode.OPEN,
     }),
   };
   console.log("  Message details:");
   console.log(`    - Creator: ${account.address}`);
   console.log(`    - Trust Registry ID: ${trId}`);
-  console.log(`    - Issuer Perm Management Mode: GRANTOR_VALIDATION (2)`);
-  console.log(`    - Verifier Perm Management Mode: OPEN (1)`);
+    console.log(`    - Issuer Perm Management Mode: OPEN (1)`);
+    console.log(`    - Verifier Perm Management Mode: OPEN (1)`);
   console.log();
 
   // Step 6: Sign and broadcast
@@ -241,14 +261,41 @@ async function main() {
       
       // Try to extract schema ID from events
       const events = result.events || [];
+      let schemaId: number | undefined;
+      let did: string | undefined;
+      
+      // DID is already available from Step 4 if we created TR
+      
       for (const event of events) {
         if (event.type === "create_credential_schema" || event.type === "verana.cs.v1.EventCreateCredentialSchema") {
           for (const attr of event.attributes) {
             if (attr.key === "credential_schema_id" || attr.key === "id" || attr.key === "cs_id") {
-              console.log(`  Credential Schema ID: ${attr.value}`);
+              schemaId = parseInt(attr.value, 10);
+              if (!isNaN(schemaId)) {
+                console.log(`  Credential Schema ID: ${schemaId}`);
+              }
             }
           }
         }
+      }
+      
+      // Save journey result for reuse (include TR ID and DID if we have them)
+      if (schemaId) {
+        const resultData: any = {
+          schemaId: schemaId.toString(),
+        };
+        
+        if (trId) {
+          resultData.trustRegistryId = trId.toString();
+        }
+        
+        if (did) {
+          resultData.did = did;
+        }
+        
+        // Save as active CS for reuse
+        const { saveActiveCS } = await import("../helpers/journeyResults");
+        saveActiveCS(schemaId, trId || 0, did || "");
       }
     } else {
       console.log("❌ FAILED! Transaction failed.");

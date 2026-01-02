@@ -12,23 +12,27 @@
 
 import {
   createWallet,
+  createAccountFromMnemonic,
   createSigningClient,
   getAccountInfo,
   calculateFeeWithSimulation,
   signAndBroadcastWithRetry,
+  fundAccount,
   config,
-  createQueryClient,
-  getBlockTime,
+  generateUniqueDID,
 } from "../helpers/client";
 import { typeUrls } from "../helpers/registry";
 import { MsgStartPermissionVP } from "../../../src/codec/verana/perm/v1/tx";
 import { PermissionType } from "../../../src/codec/verana/perm/v1/types";
-import { createSchemaForTest, createRootPermissionForTest } from "../helpers/permissionHelpers";
-import { generateUniqueDID } from "../helpers/client";
+import { getActiveTRAndSchema, getRootPermissionId, savePermissionId } from "../helpers/journeyResults";
 
-const TEST_MNEMONIC =
+// Master mnemonic - same for all accounts
+const MASTER_MNEMONIC =
   process.env.MNEMONIC ||
   "pink glory help gown abstract eight nice crazy forward ketchup skill cheese";
+
+// Account index for Journey 17 (Start Permission VP)
+const ACCOUNT_INDEX = 17;
 
 async function main() {
   console.log("=".repeat(60));
@@ -36,112 +40,131 @@ async function main() {
   console.log("=".repeat(60));
   console.log();
 
-  // Using Amino Sign to match frontend
-  const wallet = await createWallet(TEST_MNEMONIC);
-  const account = await getAccountInfo(wallet);
-  console.log(`  ✓ Using Amino Sign (matches frontend behavior)`);
-  const client = await createSigningClient(wallet);
-
-  console.log(`  ✓ Wallet address: ${account.address}`);
-  console.log(`  ✓ Connected to ${config.rpcEndpoint}`);
+  // Step 1: Setup cooluser account (for funding)
+  console.log("Step 1: Setting up cooluser account (for funding)...");
+  const cooluserWallet = await createWallet(MASTER_MNEMONIC);
+  const cooluserAccount = await getAccountInfo(cooluserWallet);
+  const cooluserClient = await createSigningClient(cooluserWallet);
+  console.log(`  ✓ Cooluser address: ${cooluserAccount.address}`);
   console.log();
 
-  const balance = await client.getBalance(account.address, config.denom);
-  if (BigInt(balance.amount) < BigInt(1000000)) {
-    console.log("  ⚠️  Warning: Low balance.");
+  // Step 2: Create account_17 from mnemonic with derivation path 17
+  console.log(`Step 2: Creating account_${ACCOUNT_INDEX} from mnemonic (derivation path ${ACCOUNT_INDEX})...`);
+  const account17Wallet = await createAccountFromMnemonic(MASTER_MNEMONIC, ACCOUNT_INDEX);
+  const account17 = await getAccountInfo(account17Wallet);
+  console.log(`  ✓ Account_${ACCOUNT_INDEX} address: ${account17.address}`);
+  console.log();
+
+  // Step 3: Fund account_17 from cooluser
+  console.log("Step 3: Funding account_17 from cooluser...");
+  const fundingAmount = "1000000000uvna"; // 1 VNA
+  try {
+    const fundResult = await fundAccount(
+      MASTER_MNEMONIC,
+      cooluserAccount.address,
+      account17.address,
+      fundingAmount
+    );
+    if (fundResult.code === 0) {
+      console.log(`  ✓ Funded account_17 with ${fundingAmount}`);
+      console.log(`  Transaction Hash: ${fundResult.transactionHash}`);
+    } else {
+      console.log(`  ❌ Funding failed: ${fundResult.rawLog}`);
+      process.exit(1);
+    }
+  } catch (error: any) {
+    console.log(`  ❌ Funding failed: ${error.message}`);
     process.exit(1);
   }
+  console.log();
 
-  let validatorPermId: number | undefined;
+  // Step 4: Wait for balance to be reflected (10 seconds)
+  console.log("Step 4: Waiting 10 seconds for balance to be reflected...");
+  await new Promise((resolve) => setTimeout(resolve, 10000));
+  console.log("  ✓ Wait complete");
+  console.log();
+
+  // Step 5: Connect account_17 to blockchain
+  console.log("Step 5: Connecting account_17 to Verana blockchain...");
+  console.log(`  RPC Endpoint: ${config.rpcEndpoint}`);
+  const client = await createSigningClient(account17Wallet);
+  console.log("  ✓ Connected successfully");
+  
+  // Verify balance
+  const balance = await client.getBalance(account17.address, config.denom);
+  console.log(`  Balance: ${balance.amount} ${balance.denom}`);
+  if (BigInt(balance.amount) < BigInt(1000000)) {
+    console.log("  ⚠️  Warning: Low balance. Funding may not have completed.");
+    process.exit(1);
+  }
+  console.log();
+
+  // Step 6: Load root permission ID from Journey 13
   const permissionType = process.env.TYPE === "VERIFIER" ? PermissionType.VERIFIER : PermissionType.ISSUER;
   const country = process.env.COUNTRY || "US";
-
+  
+  let validatorPermId: number | undefined;
   if (process.env.VALIDATOR_PERM_ID) {
     validatorPermId = parseInt(process.env.VALIDATOR_PERM_ID, 10);
     if (isNaN(validatorPermId)) {
       console.log("  ❌ Invalid VALIDATOR_PERM_ID provided");
       process.exit(1);
     }
-    console.log(`Step 4: Using provided Validator Permission ID: ${validatorPermId}`);
+    console.log(`Step 6: Using provided Validator Permission ID: ${validatorPermId}`);
   } else {
-    console.log("Step 4: Creating schema and validator permission first...");
-    const { schemaId, did } = await createSchemaForTest(client, account.address);
-    // Refresh sequence after schema creation to ensure cache is updated
-    await client.getSequence(account.address);
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    await client.getSequence(account.address);
-    // Create a root permission as validator (ECOSYSTEM type)
-    validatorPermId = await createRootPermissionForTest(client, account.address, schemaId, did);
-    console.log(`  ✓ Created Validator Permission (Root) with ID: ${validatorPermId}`);
-    
-    // Wait for validator permission to become effective (permissions are created with effectiveFrom 10 seconds in future)
-    // We need to wait for blockchain block time to pass the effectiveFrom time
-    // Since permissions are created with effectiveFrom = Date.now() + 10000, we wait 15 seconds to ensure
-    // blockchain block time has advanced past that point
-    console.log(`  ⏳ Waiting for validator permission to become effective (permissions require effective_from to be in the future)...`);
-    const queryClient = await createQueryClient();
-    try {
-      // Wait for blockchain block time to advance (check every second)
-      const startTime = Date.now();
-      let lastBlockTime: Date | null = null;
-      const maxWait = 20000; // 20 seconds max wait
-      
-      while (Date.now() - startTime < maxWait) {
-        const blockTime = await getBlockTime(queryClient);
-        lastBlockTime = blockTime;
-        
-        // Permissions are created with effectiveFrom = Date.now() + 10000 (10 seconds in future)
-        // We need block time to be at least 10 seconds after the creation time
-        // Since we don't know exact creation time, wait 15 seconds from now to be safe
-        const waitElapsed = Date.now() - startTime;
-        if (waitElapsed >= 15000) {
-          // Double-check block time has advanced sufficiently
-          const currentBlockTime = await getBlockTime(queryClient);
-          console.log(`  ✓ Waited ${Math.ceil(waitElapsed / 1000)} seconds, block time: ${currentBlockTime.toISOString()}`);
-          break;
-        }
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-      }
-      console.log(`  ✓ Validator permission should now be effective`);
-    } finally {
-      queryClient.disconnect();
+    // Load root permission ID from Journey 13
+    const loadedRootPermId = getRootPermissionId();
+    if (loadedRootPermId === null) {
+      console.log("  ❌ Root Permission not found. Journey 13 (Create Root Permission) must be run first.");
+      process.exit(1);
     }
-    
-    // Refresh sequence after waiting to ensure it's up to date
-    await client.getSequence(account.address);
+    validatorPermId = loadedRootPermId;
+    console.log(`Step 6: Loaded Root Permission ID from Journey 13: ${validatorPermId}`);
   }
+  console.log();
+
+  // Step 7: Verify TR/CS exist (for reference)
+  const trAndSchema = getActiveTRAndSchema();
+  if (trAndSchema) {
+    console.log(`Step 7: Active TR/CS:`);
+    console.log(`  - Trust Registry ID: ${trAndSchema.trustRegistryId}`);
+    console.log(`  - Schema ID: ${trAndSchema.schemaId}`);
+    console.log(`  - DID: ${trAndSchema.did}`);
+  }
+  console.log();
 
   if (!validatorPermId) {
     console.log("  ❌ Validator Permission ID is required");
     process.exit(1);
   }
 
-  console.log();
-
-  console.log("Step 5: Starting Permission VP transaction...");
+  // Step 8: Start Permission VP transaction
+  console.log("Step 8: Starting Permission VP transaction...");
   const did = process.env.DID || generateUniqueDID();
   const msg = {
     typeUrl: typeUrls.MsgStartPermissionVP,
     value: MsgStartPermissionVP.fromPartial({
-      creator: account.address,
+      creator: account17.address,
       type: permissionType,
       validatorPermId: validatorPermId,
       country: country,
       did: did,
     }),
   };
-  console.log(`    - Creator: ${account.address}`);
+  console.log("  Message details:");
+  console.log(`    - Creator: ${account17.address} (account_${ACCOUNT_INDEX})`);
   console.log(`    - Permission Type: ${PermissionType[permissionType]} (${permissionType})`);
   console.log(`    - Validator Permission ID: ${validatorPermId}`);
   console.log(`    - Country: ${country}`);
   console.log(`    - DID: ${did}`);
   console.log();
 
-  console.log("Step 6: Signing and broadcasting transaction...");
+  // Step 9: Sign and broadcast
+  console.log("Step 9: Signing and broadcasting transaction...");
   try {
     const fee = await calculateFeeWithSimulation(
       client,
-      account.address,
+      account17.address,
       [msg],
       "Starting Permission VP via TypeScript client"
     );
@@ -150,7 +173,7 @@ async function main() {
     // Use retry logic for consistency (matches frontend pattern)
     const result = await signAndBroadcastWithRetry(
       client,
-      account.address,
+      account17.address,
       [msg],
       fee,
       "Starting Permission VP via TypeScript client"
@@ -164,16 +187,26 @@ async function main() {
       console.log(`  Block Height: ${result.height}`);
       console.log(`  Gas Used: ${result.gasUsed}/${result.gasWanted}`);
       
-      // Try to extract permission ID from events
+      // Extract permission ID from events and save to journey results
+      let permissionId: number | null = null;
       const events = result.events || [];
       for (const event of events) {
         if (event.type === "start_permission_vp" || event.type === "verana.perm.v1.EventStartPermissionVP") {
           for (const attr of event.attributes) {
             if (attr.key === "permission_id" || attr.key === "id") {
-              console.log(`  Permission ID: ${attr.value}`);
+              permissionId = parseInt(attr.value, 10);
+              console.log(`  Permission ID: ${permissionId}`);
             }
           }
         }
+      }
+      
+      // Save permission ID for reuse in Journeys 18 and 20
+      if (permissionId !== null) {
+        savePermissionId(permissionId, "start-perm-vp");
+        console.log(`  💾 Saved permission ID to journey results for reuse`);
+      } else {
+        console.log(`  ⚠️  Warning: Could not extract permission ID from events`);
       }
     } else {
       console.log("❌ FAILED! Transaction failed.");

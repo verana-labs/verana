@@ -6,6 +6,7 @@
 import { DirectSecp256k1HdWallet } from "@cosmjs/proto-signing";
 import { Secp256k1HdWallet } from "@cosmjs/amino";
 import { SigningStargateClient, StargateClient, GasPrice, calculateFee, AminoTypes } from "@cosmjs/stargate";
+import { stringToPath } from "@cosmjs/crypto";
 import { createVeranaRegistry } from "./registry";
 import {
   // TR module
@@ -98,6 +99,25 @@ export async function createDirectWallet(mnemonic: string): Promise<DirectSecp25
  */
 export async function createWallet(mnemonic: string): Promise<Secp256k1HdWallet> {
   return createAminoWallet(mnemonic);
+}
+
+/**
+ * Creates a wallet from a mnemonic phrase with a custom derivation path.
+ * Used for creating multiple accounts from the same mnemonic.
+ * @param mnemonic - Master mnemonic phrase
+ * @param accountIndex - Account index for derivation path (e.g., 13, 14, 17, 21)
+ * @returns Promise<Secp256k1HdWallet> for Amino signing
+ */
+export async function createAccountFromMnemonic(
+  mnemonic: string,
+  accountIndex: number
+): Promise<Secp256k1HdWallet> {
+  // Derivation path: m/44'/118'/0'/0/{accountIndex}
+  const hdPath = stringToPath(`m/44'/118'/0'/0/${accountIndex}`);
+  return Secp256k1HdWallet.fromMnemonic(mnemonic, {
+    prefix: config.addressPrefix,
+    hdPaths: [hdPath],
+  });
 }
 
 /**
@@ -245,9 +265,16 @@ export async function calculateFeeWithSimulation(
 }
 
 /**
- * Sign and broadcast with retry logic for unauthorized errors (matches frontend).
- * The frontend's signAndBroadcastManualAmino retries once if it gets an unauthorized error,
- * as this can happen due to account number/sequence timing issues.
+ * Sign and broadcast with retry logic for unauthorized errors.
+ * CRITICAL FIX: Creates a NEW client instance for each transaction (matches frontend).
+ * 
+ * The key difference from previous attempts:
+ * 1. We wait for previous transaction to be FULLY confirmed (included in block AND sequence incremented)
+ * 2. THEN create a fresh client (fresh cache)
+ * 3. THEN getSequence() which will get the correct sequence
+ * 4. THEN sign and broadcast
+ * 
+ * This matches the frontend pattern where each transaction gets a fresh client.
  */
 export async function signAndBroadcastWithRetry(
   client: SigningStargateClient,
@@ -256,33 +283,108 @@ export async function signAndBroadcastWithRetry(
   fee: any,
   memo: string = ""
 ) {
-  // Fetch account sequence & accountNumber (like frontend does)
-  // This ensures the client has the latest sequence cached
-  // Add a delay and refresh multiple times to ensure we have the latest sequence
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  await client.getSequence(address);
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  const sequenceBefore = await client.getSequence(address);
-  
-  let res = await client.signAndBroadcast(address, messages, fee, memo);
-  
-  // If unauthorized error, retry once (matches frontend signAndBroadcastManualAmino)
-  const unauthorized = res.code === 4 && typeof res.rawLog === 'string' && res.rawLog.includes('signature verification failed');
-  if (unauthorized) {
-    
-    // Add a longer delay to ensure previous transaction is fully processed and sequence is updated
-    await new Promise((resolve) => setTimeout(resolve, 3000));
-    // Refresh account sequence before retry - this forces a fresh fetch
-    // Call it multiple times to ensure cache is cleared and we get the latest sequence
-    await client.getSequence(address);
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    await client.getSequence(address);
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    const seq3 = await client.getSequence(address);
-    res = await client.signAndBroadcast(address, messages, fee, memo);
+  // Extract wallet from client to create fresh client
+  const wallet = (client as any).signer;
+  if (!wallet) {
+    throw new Error("Cannot extract wallet from client. Client must have a signer.");
   }
   
-  return res;
+  // CRITICAL: Get current on-chain sequence BEFORE creating new client
+  // This ensures we know what sequence we should be using
+  const queryClientBefore = await createQueryClient();
+  let expectedSequence: number;
+  try {
+    const seqInfo = await queryClientBefore.getSequence(address);
+    expectedSequence = seqInfo.sequence;
+    console.log(`  🔄 Current on-chain sequence: ${expectedSequence}`);
+  } finally {
+    queryClientBefore.disconnect();
+  }
+  
+  // Create fresh client for this transaction (matches frontend signAndBroadcastManualAmino)
+  // This gives us a fresh cache, but we still need to ensure sequence is correct
+  const freshClient = await createSigningClient(wallet);
+  
+  try {
+    // Get sequence from fresh client - should match on-chain sequence
+    const cachedSeq = await freshClient.getSequence(address);
+    
+    // If there's a mismatch, wait a bit and try again
+    if (cachedSeq.sequence !== expectedSequence) {
+      console.log(`  ⚠️  Sequence mismatch: on-chain=${expectedSequence}, cached=${cachedSeq.sequence}, waiting...`);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await freshClient.getSequence(address); // Force refresh
+    }
+    
+    // Match frontend: getSequence() once before signing
+    await freshClient.getSequence(address);
+    
+    let res = await freshClient.signAndBroadcast(address, messages, fee, memo);
+    
+    // If unauthorized error, wait for previous transaction and retry
+    const unauthorized = res.code === 4 && typeof res.rawLog === 'string' && res.rawLog.includes('signature verification failed');
+    if (unauthorized) {
+      console.log(`  ⚠️  Unauthorized error detected. Waiting for previous transaction to confirm...`);
+      
+      // CRITICAL: Wait for previous transaction to be FULLY confirmed
+      // 1. Wait for it to be included in a block
+      // 2. Wait for sequence to increment on-chain
+      const queryClientWait = await createQueryClient();
+      try {
+        // Wait for transaction to be queryable (means it's in a block)
+        for (let i = 0; i < 20; i++) {
+          await new Promise((resolve) => setTimeout(resolve, 500));
+          // Check if sequence has incremented
+          const currentSeq = await queryClientWait.getSequence(address);
+          if (currentSeq.sequence > expectedSequence) {
+            console.log(`  ✓ Previous transaction confirmed, sequence now: ${currentSeq.sequence}`);
+            break;
+          }
+        }
+      } finally {
+        queryClientWait.disconnect();
+      }
+      
+      // Wait a bit more to ensure sequence is fully propagated
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      
+      // Create another fresh client for retry (fresh cache with updated sequence)
+      const retryClient = await createSigningClient(wallet);
+      try {
+        // Match frontend: getSequence() once before retry
+        await retryClient.getSequence(address);
+        res = await retryClient.signAndBroadcast(address, messages, fee, memo);
+      } finally {
+        retryClient.disconnect();
+      }
+    }
+    
+    // Wait for this transaction to be confirmed (helps with next transaction)
+    if (res.code === 0) {
+      const queryClient = await createQueryClient();
+      try {
+        // Wait for transaction to be queryable (means it's in a block)
+        for (let i = 0; i < 20; i++) {
+          try {
+            const tx = await queryClient.getTx(res.transactionHash);
+            if (tx) {
+              break;
+            }
+          } catch {
+            // Transaction not found yet, continue waiting
+          }
+          await new Promise((resolve) => setTimeout(resolve, 500));
+        }
+      } finally {
+        queryClient.disconnect();
+      }
+    }
+    
+    return res;
+  } finally {
+    // Always disconnect the fresh client
+    freshClient.disconnect();
+  }
 }
 
 /**
@@ -321,6 +423,69 @@ export async function waitForTx(
     await new Promise((resolve) => setTimeout(resolve, 1000));
   }
   throw new Error(`Transaction ${txHash} not found within ${timeoutMs}ms`);
+}
+
+/**
+ * Funds an account from another account using bank send.
+ * Uses Direct signing (not Amino) for bank send messages.
+ * @param mnemonic - Mnemonic phrase for the funding account
+ * @param fromAddress - Address of the account sending funds
+ * @param toAddress - Address of the account receiving funds
+ * @param amount - Amount to send (e.g., "1000000000uvna")
+ * @returns Promise<DeliverTxResponse>
+ */
+export async function fundAccount(
+  mnemonic: string,
+  fromAddress: string,
+  toAddress: string,
+  amount: string
+) {
+  // Parse amount string like "1000000000uvna" into amount and denom
+  // The format is: <number><denom> (e.g., "1000000000uvna")
+  let amountValue = "";
+  let denom = "";
+  
+  for (let i = 0; i < amount.length; i++) {
+    if (amount[i] >= '0' && amount[i] <= '9') {
+      amountValue += amount[i];
+    } else {
+      denom = amount.substring(i);
+      break;
+    }
+  }
+  
+  if (!amountValue || !denom) {
+    throw new Error(`Invalid amount format: ${amount}. Expected format: "1000000000uvna"`);
+  }
+  
+  // Create a DirectSigningClient for bank send (uses Direct signing, not Amino)
+  const { DirectSecp256k1HdWallet } = await import("@cosmjs/proto-signing");
+  const { createVeranaRegistry } = await import("./registry");
+  const registry = createVeranaRegistry();
+  
+  const directWallet = await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {
+    prefix: config.addressPrefix,
+  });
+  
+  // Create DirectSigningClient without Amino types (uses Direct signing)
+  const directClient = await SigningStargateClient.connectWithSigner(
+    config.rpcEndpoint,
+    directWallet,
+    {
+      registry,
+      gasPrice: GasPrice.fromString(config.gasPrice),
+      // No aminoTypes - use Direct signing for bank send
+    }
+  );
+  
+  // Use sendTokens which works with Direct signing
+  return await directClient.sendTokens(
+    fromAddress,
+    toAddress,
+    [{ denom: denom, amount: amountValue }],
+    "auto",
+    "Funding account"
+  );
 }
 
 /**

@@ -5,9 +5,15 @@
  * TypeScript client and the generated protobuf types.
  *
  * Usage:
- *   SCHEMA_ID=1 DID="did:verana:example" npm run test:create-root-perm
- *   # Or let it create a schema first, then create root permission
+ *   # Reuse existing TR/CS from journey results (recommended)
  *   npm run test:create-root-perm
+ *   
+ *   # Or provide specific Schema ID and DID
+ *   SCHEMA_ID=1 DID="did:verana:example" npm run test:create-root-perm
+ *   
+ *   # First create TR and CS if they don't exist:
+ *   npm run test:create-tr
+ *   npm run test:create-cs
  *
  * Or with environment variables:
  *   export MNEMONIC="your mnemonic here"
@@ -19,43 +25,27 @@
 
 import {
   createWallet,
+  createAccountFromMnemonic,
   createSigningClient,
   getAccountInfo,
   calculateFeeWithSimulation,
   signAndBroadcastWithRetry,
-  generateUniqueDID,
+  fundAccount,
   config,
 } from "../helpers/client";
 import { typeUrls } from "../helpers/registry";
 import { MsgCreateRootPermission } from "../../../src/codec/verana/perm/v1/tx";
-import { MsgCreateTrustRegistry } from "../../../src/codec/verana/tr/v1/tx";
-import { MsgCreateCredentialSchema, OptionalUInt32 } from "../../../src/codec/verana/cs/v1/tx";
-import { CredentialSchemaPermManagementMode } from "../../../src/codec/verana/cs/v1/types";
-// Test mnemonic - Uses cooluser seed phrase (same as test harness)
-const TEST_MNEMONIC =
+import { getActiveTRAndSchema, saveRootPermissionId } from "../helpers/journeyResults";
+import { createSchemaForTest } from "../helpers/permissionHelpers";
+
+// Master mnemonic - same for all accounts
+const MASTER_MNEMONIC =
   process.env.MNEMONIC ||
   "pink glory help gown abstract eight nice crazy forward ketchup skill cheese";
 
-// Generate a simple JSON schema
-function generateSimpleSchema(trustRegistryId: string): string {
-  return JSON.stringify({
-    $id: `vpr:verana:VPR_CHAIN_ID/cs/v1/js/VPR_CREDENTIAL_SCHEMA_ID`,
-    $schema: "https://json-schema.org/draft/2020-12/schema",
-    title: "ExampleCredential",
-    description: "ExampleCredential using JsonSchema",
-    type: "object",
-    properties: {
-      credentialSubject: {
-        type: "object",
-        properties: {
-          id: { type: "string", format: "uri" },
-          firstName: { type: "string", minLength: 0, maxLength: 256 },
-          lastName: { type: "string", minLength: 1, maxLength: 256 },
-        },
-      },
-    },
-  });
-}
+// Account index for Journey 13 (Create Root Permission)
+const ACCOUNT_INDEX = 13;
+
 
 async function main() {
   console.log("=".repeat(60));
@@ -63,174 +53,118 @@ async function main() {
   console.log("=".repeat(60));
   console.log();
 
-  // Step 1: Setup wallet (using Amino Sign to match frontend)
-  console.log("Step 1: Setting up wallet (Amino Sign mode)...");
-  const wallet = await createWallet(TEST_MNEMONIC);
-  const account = await getAccountInfo(wallet);
-  console.log(`  ✓ Wallet address: ${account.address}`);
-  console.log(`  ✓ Using Amino Sign (matches frontend behavior)`);
+  // Step 1: Setup cooluser account (for funding)
+  console.log("Step 1: Setting up cooluser account (for funding)...");
+  const cooluserWallet = await createWallet(MASTER_MNEMONIC);
+  const cooluserAccount = await getAccountInfo(cooluserWallet);
+  const cooluserClient = await createSigningClient(cooluserWallet);
+  console.log(`  ✓ Cooluser address: ${cooluserAccount.address}`);
   console.log();
 
-  // Step 2: Connect to blockchain
-  console.log("Step 2: Connecting to Verana blockchain...");
-  console.log(`  RPC Endpoint: ${config.rpcEndpoint}`);
-  const client = await createSigningClient(wallet);
-  console.log("  ✓ Connected successfully");
+  // Step 2: Create account_13 from mnemonic with derivation path 13
+  console.log(`Step 2: Creating account_${ACCOUNT_INDEX} from mnemonic (derivation path ${ACCOUNT_INDEX})...`);
+  const account13Wallet = await createAccountFromMnemonic(MASTER_MNEMONIC, ACCOUNT_INDEX);
+  const account13 = await getAccountInfo(account13Wallet);
+  console.log(`  ✓ Account_${ACCOUNT_INDEX} address: ${account13.address}`);
   console.log();
 
-  // Step 3: Check account balance
-  console.log("Step 3: Checking account balance...");
-  const balance = await client.getBalance(account.address, config.denom);
-  console.log(`  Balance: ${balance.amount} ${balance.denom}`);
-  if (BigInt(balance.amount) < BigInt(1000000)) {
-    console.log("  ⚠️  Warning: Low balance. You may need to fund this account.");
+  // Step 3: Fund account_13 from cooluser
+  console.log("Step 3: Funding account_13 from cooluser...");
+  const fundingAmount = "1000000000uvna"; // 1 VNA
+  try {
+    const fundResult = await fundAccount(
+      MASTER_MNEMONIC,
+      cooluserAccount.address,
+      account13.address,
+      fundingAmount
+    );
+    if (fundResult.code === 0) {
+      console.log(`  ✓ Funded account_13 with ${fundingAmount}`);
+      console.log(`  Transaction Hash: ${fundResult.transactionHash}`);
+    } else {
+      console.log(`  ❌ Funding failed: ${fundResult.rawLog}`);
+      process.exit(1);
+    }
+  } catch (error: any) {
+    console.log(`  ❌ Funding failed: ${error.message}`);
     process.exit(1);
   }
   console.log();
 
-  // Step 4: Get or create Schema ID and DID
+  // Step 4: Wait for balance to be reflected (10 seconds)
+  console.log("Step 4: Waiting 10 seconds for balance to be reflected...");
+  await new Promise((resolve) => setTimeout(resolve, 10000));
+  console.log("  ✓ Wait complete");
+  console.log();
+
+  // Step 5: Connect account_13 to blockchain
+  console.log("Step 5: Connecting account_13 to Verana blockchain...");
+  console.log(`  RPC Endpoint: ${config.rpcEndpoint}`);
+  const client = await createSigningClient(account13Wallet);
+  console.log("  ✓ Connected successfully");
+  
+  // Verify balance
+  const balance = await client.getBalance(account13.address, config.denom);
+  console.log(`  Balance: ${balance.amount} ${balance.denom}`);
+  if (BigInt(balance.amount) < BigInt(1000000)) {
+    console.log("  ⚠️  Warning: Low balance. Funding may not have completed.");
+    process.exit(1);
+  }
+  console.log();
+
+  // Step 6: Get Schema ID and DID from journey results or create new ones
   let schemaId: number | undefined;
   let did: string;
   
   if (process.env.SCHEMA_ID && process.env.DID) {
+    // Use provided values
     schemaId = parseInt(process.env.SCHEMA_ID, 10);
     did = process.env.DID;
     if (isNaN(schemaId)) {
       console.log("  ❌ Invalid SCHEMA_ID provided");
       process.exit(1);
     }
-    console.log(`Step 4: Using provided Schema ID: ${schemaId} and DID: ${did}`);
+    console.log(`Step 6: Using provided Schema ID: ${schemaId} and DID: ${did}`);
   } else {
-    console.log("Step 4: Creating Trust Registry and Schema first...");
+    // Try to load active TR/CS from journey results (reuse existing TR/CS from earlier journeys)
+    console.log("Step 6: Loading active Trust Registry and Schema from journey results...");
+    const trAndSchema = getActiveTRAndSchema();
     
-    // Create Trust Registry
-    did = generateUniqueDID();
-    const createTrMsg = {
-      typeUrl: typeUrls.MsgCreateTrustRegistry,
-      value: MsgCreateTrustRegistry.fromPartial({
-        creator: account.address,
-        did: did,
-        aka: "http://example-trust-registry.com",
-        language: "en",
-        docUrl: "https://example.com/governance-framework.pdf",
-        docDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
-      }),
-    };
-
-    const createTrFee = await calculateFeeWithSimulation(
-      client,
-      account.address,
-      [createTrMsg],
-      "Creating Trust Registry for root permission test"
-    );
-
-    // Use retry logic for consistency (matches frontend pattern)
-    const createTrResult = await signAndBroadcastWithRetry(
-      client,
-      account.address,
-      [createTrMsg],
-      createTrFee,
-      "Creating Trust Registry for root permission test"
-    );
-
-    if (createTrResult.code !== 0) {
-      console.log("  ❌ Failed to create Trust Registry");
-      console.log(`  Error: ${createTrResult.rawLog}`);
-      process.exit(1);
-    }
-
-    // Extract TR ID
-    let trId: number | undefined;
-    const trEvents = createTrResult.events || [];
-    for (const event of trEvents) {
-      if (event.type === "create_trust_registry" || event.type === "verana.tr.v1.EventCreateTrustRegistry") {
-        for (const attr of event.attributes) {
-          if (attr.key === "trust_registry_id" || attr.key === "id" || attr.key === "tr_id") {
-            trId = parseInt(attr.value, 10);
-            if (!isNaN(trId)) break;
-          }
+    if (trAndSchema) {
+      // Try to verify the schema exists on-chain by querying LCD endpoint
+      try {
+        const lcdEndpoint = process.env.VERANA_LCD_ENDPOINT || "http://localhost:1317";
+        const response = await fetch(`${lcdEndpoint}/verana/cs/v1/credential_schema/${trAndSchema.schemaId}`);
+        
+        if (response.ok) {
+          // Schema exists, reuse it
+          schemaId = trAndSchema.schemaId;
+          did = trAndSchema.did;
+          console.log(`  ✓ Reusing TR/CS from journey results:`);
+          console.log(`    - Trust Registry ID: ${trAndSchema.trustRegistryId}`);
+          console.log(`    - Schema ID: ${schemaId}`);
+          console.log(`    - DID: ${did}`);
+        } else {
+          throw new Error("Schema not found");
         }
-        if (trId) break;
+      } catch (error) {
+        // Schema doesn't exist on-chain, create a new one with account_13
+        // This ensures account_13 is the TR controller and can create root permission
+        console.log("  ⚠️  Schema from journey results doesn't exist on-chain, creating new Trust Registry and Schema with account_13...");
+        const newSchema = await createSchemaForTest(client, account13.address);
+        schemaId = newSchema.schemaId;
+        did = newSchema.did;
+        console.log(`  ✓ Created new Schema ID: ${schemaId}, DID: ${did}`);
       }
+    } else {
+      // No journey results found - create new TR/CS using account_13
+      // This ensures account_13 is the TR controller and can create root permission
+      console.log("  No journey results found, creating new Trust Registry and Schema with account_13...");
+      const newSchema = await createSchemaForTest(client, account13.address);
+      schemaId = newSchema.schemaId;
+      did = newSchema.did;
+      console.log(`  ✓ Created new Schema ID: ${schemaId}, DID: ${did}`);
     }
-
-    if (!trId) {
-      console.log("  ❌ Could not extract TR ID from events");
-      process.exit(1);
-    }
-
-    // Refresh sequence after TR creation to ensure cache is updated
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    await client.getSequence(account.address);
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    await client.getSequence(account.address);
-
-    // Create Credential Schema
-    const createCsMsg = {
-      typeUrl: typeUrls.MsgCreateCredentialSchema,
-      value: MsgCreateCredentialSchema.fromPartial({
-        creator: account.address,
-        trId: trId,
-        jsonSchema: generateSimpleSchema(trId.toString()),
-        issuerGrantorValidationValidityPeriod: { value: 0 } as OptionalUInt32,
-        verifierGrantorValidationValidityPeriod: { value: 0 } as OptionalUInt32,
-        issuerValidationValidityPeriod: { value: 0 } as OptionalUInt32,
-        verifierValidationValidityPeriod: { value: 0 } as OptionalUInt32,
-        holderValidationValidityPeriod: { value: 0 } as OptionalUInt32,
-        issuerPermManagementMode: CredentialSchemaPermManagementMode.GRANTOR_VALIDATION,
-        verifierPermManagementMode: CredentialSchemaPermManagementMode.OPEN,
-      }),
-    };
-
-    const createCsFee = await calculateFeeWithSimulation(
-      client,
-      account.address,
-      [createCsMsg],
-      "Creating Credential Schema for root permission test"
-    );
-
-    // Use retry logic for consistency (matches frontend pattern)
-    const createCsResult = await signAndBroadcastWithRetry(
-      client,
-      account.address,
-      [createCsMsg],
-      createCsFee,
-      "Creating Credential Schema for root permission test"
-    );
-
-    if (createCsResult.code !== 0) {
-      console.log("  ❌ Failed to create Credential Schema");
-      console.log(`  Error: ${createCsResult.rawLog}`);
-      process.exit(1);
-    }
-
-    // Extract Schema ID from events
-    const csEvents = createCsResult.events || [];
-    for (const event of csEvents) {
-      if (event.type === "create_credential_schema" || event.type === "verana.cs.v1.EventCreateCredentialSchema") {
-        for (const attr of event.attributes) {
-          if (attr.key === "credential_schema_id" || attr.key === "id" || attr.key === "cs_id") {
-            schemaId = parseInt(attr.value, 10);
-            if (!isNaN(schemaId)) {
-              console.log(`  ✓ Created Credential Schema with ID: ${schemaId}`);
-              break;
-            }
-          }
-        }
-        if (schemaId) break;
-      }
-    }
-
-    if (!schemaId || isNaN(schemaId)) {
-      console.log("  ❌ Could not extract Schema ID from events");
-      process.exit(1);
-    }
-
-    // Refresh sequence after CS creation to ensure cache is updated
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    await client.getSequence(account.address);
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    await client.getSequence(account.address);
   }
 
   if (!schemaId || !did) {
@@ -240,8 +174,8 @@ async function main() {
 
   console.log();
 
-  // Step 5: Create Root Permission message
-  console.log("Step 5: Creating Root Permission transaction...");
+  // Step 7: Create Root Permission message
+  console.log("Step 7: Creating Root Permission transaction...");
   // Set effectiveFrom to 10 seconds in the future as required by blockchain (matches test harness)
   const effectiveFrom = new Date(Date.now() + 10000);
   const effectiveUntil = new Date(effectiveFrom.getTime() + 360 * 24 * 60 * 60 * 1000); // 360 days from effectiveFrom
@@ -253,7 +187,7 @@ async function main() {
   const msg = {
     typeUrl: typeUrls.MsgCreateRootPermission,
     value: MsgCreateRootPermission.fromPartial({
-      creator: account.address,
+      creator: account13.address,
       schemaId: schemaId,
       did: did,
       country: country,
@@ -265,7 +199,7 @@ async function main() {
     }),
   };
   console.log("  Message details:");
-  console.log(`    - Creator: ${account.address}`);
+  console.log(`    - Creator: ${account13.address} (account_${ACCOUNT_INDEX})`);
   console.log(`    - Schema ID: ${schemaId}`);
   console.log(`    - DID: ${did}`);
   console.log(`    - Country: ${country}`);
@@ -276,18 +210,12 @@ async function main() {
   console.log(`    - Issuance Fees: ${issuanceFees}`);
   console.log();
 
-  // Step 6: Sign and broadcast
-  console.log("Step 6: Signing and broadcasting transaction...");
+  // Step 8: Sign and broadcast
+  console.log("Step 8: Signing and broadcasting transaction...");
   try {
-    // Refresh sequence one more time right before the transaction to ensure it's up to date
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    await client.getSequence(account.address);
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    await client.getSequence(account.address);
-    
     const fee = await calculateFeeWithSimulation(
       client,
-      account.address,
+      account13.address,
       [msg],
       "Creating Root Permission via TypeScript client"
     );
@@ -296,7 +224,7 @@ async function main() {
     // Use retry logic for consistency (matches frontend pattern)
     const result = await signAndBroadcastWithRetry(
       client,
-      account.address,
+      account13.address,
       [msg],
       fee,
       "Creating Root Permission via TypeScript client"
@@ -310,16 +238,26 @@ async function main() {
       console.log(`  Block Height: ${result.height}`);
       console.log(`  Gas Used: ${result.gasUsed}/${result.gasWanted}`);
       
-      // Try to extract permission ID from events
+      // Extract permission ID from events and save to journey results
+      let rootPermissionId: number | null = null;
       const events = result.events || [];
       for (const event of events) {
         if (event.type === "create_root_permission" || event.type === "verana.perm.v1.EventCreateRootPermission") {
           for (const attr of event.attributes) {
             if (attr.key === "root_permission_id" || attr.key === "permission_id" || attr.key === "id") {
-              console.log(`  Root Permission ID: ${attr.value}`);
+              rootPermissionId = parseInt(attr.value, 10);
+              console.log(`  Root Permission ID: ${rootPermissionId}`);
             }
           }
         }
+      }
+      
+      // Save root permission ID for reuse in other journeys
+      if (rootPermissionId !== null) {
+        saveRootPermissionId(rootPermissionId);
+        console.log(`  💾 Saved root permission ID to journey results for reuse`);
+      } else {
+        console.log(`  ⚠️  Warning: Could not extract root permission ID from events`);
       }
     } else {
       console.log("❌ FAILED! Transaction failed.");

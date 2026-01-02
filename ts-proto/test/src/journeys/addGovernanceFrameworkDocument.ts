@@ -73,8 +73,18 @@ async function main() {
     }
     console.log(`Step 4: Using provided Trust Registry ID: ${trId}`);
   } else {
-    console.log("Step 4: Creating a Trust Registry first (no TR_ID provided)...");
-    const did = generateUniqueDID();
+    // Try to reuse active TR from journey results first (for sequential runs)
+    const { getActiveTR } = await import("../helpers/journeyResults");
+    const trResult = getActiveTR();
+    
+    if (trResult) {
+      trId = trResult.trustRegistryId;
+      console.log(`Step 4: Reusing active Trust Registry from journey results: ${trId}`);
+    }
+    
+    if (!trId) {
+      console.log("Step 4: Creating a Trust Registry first (no TR_ID provided and no journey results found)...");
+      const did = generateUniqueDID();
     const createMsg = {
       typeUrl: typeUrls.MsgCreateTrustRegistry,
       value: MsgCreateTrustRegistry.fromPartial({
@@ -124,9 +134,14 @@ async function main() {
       }
     }
 
-    if (!trId || isNaN(trId)) {
-      console.log("  ❌ Could not extract TR ID from events");
-      process.exit(1);
+      if (!trId || isNaN(trId)) {
+        console.log("  ❌ Could not extract TR ID from events");
+        process.exit(1);
+      }
+      
+      // Save new TR as active TR so subsequent tests can reuse it
+      const { saveActiveTR } = await import("../helpers/journeyResults");
+      saveActiveTR(trId, did);
     }
   }
 

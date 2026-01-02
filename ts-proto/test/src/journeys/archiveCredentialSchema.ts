@@ -96,9 +96,17 @@ async function main() {
     }
     console.log(`Step 4: Using provided Credential Schema ID: ${csId}`);
   } else {
-    console.log("Step 4: Creating a Credential Schema first (no CS_ID provided)...");
+    // Try to reuse active CS from journey results first (for sequential runs)
+    const { getActiveCS } = await import("../helpers/journeyResults");
+    const csResult = getActiveCS();
     
-    // First create a Trust Registry
+    if (csResult) {
+      csId = csResult.schemaId;
+      console.log(`Step 4: Reusing active Credential Schema from journey results: ${csId}`);
+    } else {
+      console.log("Step 4: Creating a Credential Schema first (no CS_ID provided and no journey results found)...");
+      
+      // First create a Trust Registry
     const did = generateUniqueDID();
     const createTrMsg = {
       typeUrl: typeUrls.MsgCreateTrustRegistry,
@@ -206,9 +214,10 @@ async function main() {
       }
     }
 
-    if (!csId || isNaN(csId)) {
-      console.log("  ❌ Could not extract CS ID from events");
-      process.exit(1);
+      if (!csId || isNaN(csId)) {
+        console.log("  ❌ Could not extract CS ID from events");
+        process.exit(1);
+      }
     }
   }
 

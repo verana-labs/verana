@@ -452,6 +452,11 @@ export async function createSchemaForTest(
   // Force sequence refresh to ensure client cache is updated
   await client.getSequence(address);
 
+  // Save as active TR/CS so subsequent tests can reuse them
+  const { saveActiveTR, saveActiveCS } = await import("./journeyResults");
+  saveActiveTR(trId, did);
+  saveActiveCS(schemaId, trId, did);
+
   return { schemaId, did };
 }
 

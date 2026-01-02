@@ -23,6 +23,7 @@ import {
 } from "../helpers/client";
 import { typeUrls } from "../helpers/registry";
 import { MsgCreateTrustRegistry } from "../../../src/codec/verana/tr/v1/tx";
+import { saveJourneyResult } from "../helpers/journeyResults";
 
 // Test mnemonic - Uses cooluser seed phrase (same as test harness)
 // This account is pre-funded in local chains initialized with setup_primary_validator.sh
@@ -118,12 +119,25 @@ async function main() {
 
       // Try to extract the trust registry ID from events
       const events = result.events || [];
+      let trId: number | undefined;
       for (const event of events) {
-        if (event.type === "verana.tr.v1.EventCreateTrustRegistry") {
+        if (event.type === "create_trust_registry" || event.type === "verana.tr.v1.EventCreateTrustRegistry") {
           for (const attr of event.attributes) {
             console.log(`  Event ${attr.key}: ${attr.value}`);
+            if (attr.key === "trust_registry_id" || attr.key === "id" || attr.key === "tr_id") {
+              trId = parseInt(attr.value, 10);
+              if (!isNaN(trId)) {
+                console.log(`  ✓ Trust Registry ID: ${trId}`);
+              }
+            }
           }
         }
+      }
+      
+      // Save as active TR for reuse
+      if (trId) {
+        const { saveActiveTR } = await import("../helpers/journeyResults");
+        saveActiveTR(trId, did);
       }
     } else {
       console.log("❌ FAILED! Transaction failed.");
