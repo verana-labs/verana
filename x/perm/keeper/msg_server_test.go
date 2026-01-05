@@ -79,10 +79,30 @@ func TestStartPermissionVP(t *testing.T) {
 	verifierGrantorPermID, err := k.CreatePermission(sdkCtx, verifierGrantorPerm)
 	require.NoError(t, err)
 
+	// Create a validator perm without country (for testing optional country)
+	validatorPermNoCountry := types.Permission{
+		SchemaId:   1,
+		Type:       types.PermissionType_ISSUER_GRANTOR,
+		Grantee:    creator,
+		Created:    &now,
+		CreatedBy:  creator,
+		Extended:   &now,
+		ExtendedBy: creator,
+		Modified:   &now,
+		Country:    "", // No country restriction
+		VpState:    types.ValidationState_VALIDATED,
+	}
+	validatorPermNoCountryID, err := k.CreatePermission(sdkCtx, validatorPermNoCountry)
+	require.NoError(t, err)
+
 	testCases := []struct {
 		name string
 		msg  *types.MsgStartPermissionVP
 		err  string
+		checkFees bool
+		expectedValidationFees uint64
+		expectedIssuanceFees uint64
+		expectedVerificationFees uint64
 	}{
 		{
 			name: "Valid ISSUER Permission Request",
@@ -94,6 +114,71 @@ func TestStartPermissionVP(t *testing.T) {
 				Did:             validDid,
 			},
 			err: "",
+			checkFees: false,
+		},
+		{
+			name: "Valid ISSUER Permission Request with optional fees",
+			msg: &types.MsgStartPermissionVP{
+				Creator:         creator,
+				Type:            types.PermissionType_ISSUER,
+				ValidatorPermId: validatorPermID,
+				Country:         "US",
+				Did:             validDid,
+				ValidationFees: &types.OptionalUInt64{Value: 100},
+				IssuanceFees:   &types.OptionalUInt64{Value: 50},
+				VerificationFees: &types.OptionalUInt64{Value: 25},
+			},
+			err: "",
+			checkFees: true,
+			expectedValidationFees: 100,
+			expectedIssuanceFees: 50,
+			expectedVerificationFees: 25,
+		},
+		{
+			name: "Valid ISSUER Permission Request with partial fees",
+			msg: &types.MsgStartPermissionVP{
+				Creator:         creator,
+				Type:            types.PermissionType_ISSUER,
+				ValidatorPermId: validatorPermID,
+				Country:         "US",
+				Did:             validDid,
+				ValidationFees: &types.OptionalUInt64{Value: 75},
+			},
+			err: "",
+			checkFees: true,
+			expectedValidationFees: 75,
+			expectedIssuanceFees: 0,
+			expectedVerificationFees: 0,
+		},
+		{
+			name: "Valid ISSUER Permission Request with zero fees",
+			msg: &types.MsgStartPermissionVP{
+				Creator:         creator,
+				Type:            types.PermissionType_ISSUER,
+				ValidatorPermId: validatorPermID,
+				Country:         "US",
+				Did:             validDid,
+				ValidationFees: &types.OptionalUInt64{Value: 0},
+				IssuanceFees:   &types.OptionalUInt64{Value: 0},
+				VerificationFees: &types.OptionalUInt64{Value: 0},
+			},
+			err: "",
+			checkFees: true,
+			expectedValidationFees: 0,
+			expectedIssuanceFees: 0,
+			expectedVerificationFees: 0,
+		},
+		{
+			name: "Valid ISSUER Permission Request without country (optional)",
+			msg: &types.MsgStartPermissionVP{
+				Creator:         creator,
+				Type:            types.PermissionType_ISSUER,
+				ValidatorPermId: validatorPermNoCountryID, // Use validator without country
+				Country:         "", // Optional country
+				Did:             validDid,
+			},
+			err: "",
+			checkFees: false,
 		},
 		{
 			name: "Non-existent Validator Permission",
@@ -105,18 +190,8 @@ func TestStartPermissionVP(t *testing.T) {
 				Did:             validDid,
 			},
 			err: "validator perm not found",
+			checkFees: false,
 		},
-		//{
-		//	name: "Country Mismatch",
-		//	msg: &types.MsgStartPermissionVP{
-		//		Creator:         creator,
-		//		Type:            uint32(types.PermissionType_PERMISSION_TYPE_ISSUER),
-		//		ValidatorPermId: validatorPermID,
-		//		Country:         "FR", // Different from validator's country
-		//		Did:             validDid,
-		//	},
-		//	err: "perm validation failed: validator perm is not valid: perm country mismatch: perm has US, requested FR does not contain validator perm country mismatch",
-		//},
 		{
 			name: "Invalid Permission Type Combination - ISSUER with wrong validator",
 			msg: &types.MsgStartPermissionVP{
@@ -127,6 +202,7 @@ func TestStartPermissionVP(t *testing.T) {
 				Did:             validDid,
 			},
 			err: "issuer perm requires ISSUER_GRANTOR validator",
+			checkFees: false,
 		},
 	}
 
@@ -153,6 +229,18 @@ func TestStartPermissionVP(t *testing.T) {
 				require.NotNil(t, perm.Created)
 				require.NotNil(t, perm.Modified)
 				require.NotNil(t, perm.VpLastStateChange)
+
+				// Verify requested fees if provided
+				if tc.checkFees {
+					require.Equal(t, tc.expectedValidationFees, perm.ValidationFees, "Validation fees should match requested value")
+					require.Equal(t, tc.expectedIssuanceFees, perm.IssuanceFees, "Issuance fees should match requested value")
+					require.Equal(t, tc.expectedVerificationFees, perm.VerificationFees, "Verification fees should match requested value")
+				} else {
+					// If fees were not provided, they should be 0
+					require.Equal(t, uint64(0), perm.ValidationFees, "Validation fees should be 0 when not provided")
+					require.Equal(t, uint64(0), perm.IssuanceFees, "Issuance fees should be 0 when not provided")
+					require.Equal(t, uint64(0), perm.VerificationFees, "Verification fees should be 0 when not provided")
+				}
 			}
 		})
 	}

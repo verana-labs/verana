@@ -61,6 +61,9 @@ message MsgStartPermissionVP {
   string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   PermissionType type = 2;
   uint64 validator_perm_id = 3;
+  OptionalUInt64 validation_fees = 6 [(gogoproto.nullable) = true]; // optional: Requested validation_fees for this permission (can be modified by validator)
+  OptionalUInt64 issuance_fees = 7 [(gogoproto.nullable) = true]; // optional: Requested issuance_fees for this permission (can be modified by validator)
+  OptionalUInt64 verification_fees = 8 [(gogoproto.nullable) = true]; // optional: Requested verification_fees for this permission (can be modified by validator)
   string country = 4;
   string did = 5 [(gogoproto.nullable) = true]; // optional
 }

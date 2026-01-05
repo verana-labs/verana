@@ -184,6 +184,11 @@ export interface SessionAuthz {
   walletAgentPermId: number;
 }
 
+/** OptionalUInt64 is a wrapper for optional uint64 values */
+export interface OptionalUInt64 {
+  value: number;
+}
+
 function createBasePermission(): Permission {
   return {
     id: 0,
@@ -992,6 +997,63 @@ export const SessionAuthz = {
     message.executorPermId = object.executorPermId ?? 0;
     message.beneficiaryPermId = object.beneficiaryPermId ?? 0;
     message.walletAgentPermId = object.walletAgentPermId ?? 0;
+    return message;
+  },
+};
+
+function createBaseOptionalUInt64(): OptionalUInt64 {
+  return { value: 0 };
+}
+
+export const OptionalUInt64 = {
+  encode(message: OptionalUInt64, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.value !== 0) {
+      writer.uint32(8).uint64(message.value);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): OptionalUInt64 {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseOptionalUInt64();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 8) {
+            break;
+          }
+
+          message.value = longToNumber(reader.uint64() as Long);
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): OptionalUInt64 {
+    return { value: isSet(object.value) ? globalThis.Number(object.value) : 0 };
+  },
+
+  toJSON(message: OptionalUInt64): unknown {
+    const obj: any = {};
+    if (message.value !== 0) {
+      obj.value = Math.round(message.value);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<OptionalUInt64>, I>>(base?: I): OptionalUInt64 {
+    return OptionalUInt64.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<OptionalUInt64>, I>>(object: I): OptionalUInt64 {
+    const message = createBaseOptionalUInt64();
+    message.value = object.value ?? 0;
     return message;
   },
 };

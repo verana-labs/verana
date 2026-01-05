@@ -129,12 +129,11 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 				},
 				{
 					RpcMethod: "StartPermissionVP",
-					Use:       "start-perm-vp [type] [validator-perm-id] [country]",
+					Use:       "start-perm-vp [type] [validator-perm-id]",
 					Short:     "Start a new perm validation process",
 					Long: `Start a new perm validation process with the specified parameters:
 - type: Permission type (issuer, verifier, issuer-grantor, verifier-grantor, ecosystem, holder)
-- validator-perm-id: ID of the validator perm
-- country: ISO 3166-1 alpha-2 country code`,
+- validator-perm-id: ID of the validator perm`,
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{
 							ProtoField: "type",
@@ -142,15 +141,32 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 						{
 							ProtoField: "validator_perm_id",
 						},
-						{
-							ProtoField: "country",
-						},
 					},
 					FlagOptions: map[string]*autocliv1.FlagOptions{
+						"country": {
+							Name:         "country",
+							Usage:        "Optional ISO 3166-1 alpha-2 country code",
+							DefaultValue: "",
+						},
 						"did": {
 							Name:         "did",
 							Usage:        "Optional DID for this perm",
 							DefaultValue: "",
+						},
+						"validation_fees": {
+							Name:         "validation-fees",
+							Usage:        "Optional requested validation fees (can be modified by validator)",
+							DefaultValue: "0",
+						},
+						"issuance_fees": {
+							Name:         "issuance-fees",
+							Usage:        "Optional requested issuance fees (can be modified by validator)",
+							DefaultValue: "0",
+						},
+						"verification_fees": {
+							Name:         "verification-fees",
+							Usage:        "Optional requested verification fees (can be modified by validator)",
+							DefaultValue: "0",
 						},
 					},
 				},

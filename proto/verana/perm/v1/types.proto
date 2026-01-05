@@ -83,3 +83,8 @@ message SessionAuthz {
   uint64 beneficiary_perm_id = 2;
   uint64 wallet_agent_perm_id = 3;
 }
+
+// OptionalUInt64 is a wrapper for optional uint64 values
+message OptionalUInt64 {
+  uint64 value = 1;
+}

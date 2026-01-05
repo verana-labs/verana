@@ -719,6 +719,18 @@
           "type": "string",
           "format": "uint64"
         },
+        "validation_fees": {
+          "$ref": "#/definitions/verana.perm.v1.OptionalUInt64",
+          "title": "optional: Requested validation_fees for this permission (can be modified by validator)"
+        },
+        "issuance_fees": {
+          "$ref": "#/definitions/verana.perm.v1.OptionalUInt64",
+          "title": "optional: Requested issuance_fees for this permission (can be modified by validator)"
+        },
+        "verification_fees": {
+          "$ref": "#/definitions/verana.perm.v1.OptionalUInt64",
+          "title": "optional: Requested verification_fees for this permission (can be modified by validator)"
+        },
         "country": {
           "type": "string"
         },
@@ -756,6 +768,16 @@
     "verana.perm.v1.MsgUpdateParamsResponse": {
       "type": "object",
       "description": "MsgUpdateParamsResponse defines the response structure for executing a\nMsgUpdateParams message."
+    },
+    "verana.perm.v1.OptionalUInt64": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "string",
+          "format": "uint64"
+        }
+      },
+      "title": "OptionalUInt64 is a wrapper for optional uint64 values"
     },
     "verana.perm.v1.Params": {
       "type": "object",

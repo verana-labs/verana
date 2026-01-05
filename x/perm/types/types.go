@@ -22,11 +22,8 @@ func (msg *MsgStartPermissionVP) ValidateBasic() error {
 		return fmt.Errorf("perm type must be between 1 and 6")
 	}
 
-	if msg.Country == "" {
-		return fmt.Errorf("country must be specified")
-	}
-
-	if !isValidCountryCode(msg.Country) {
+	// country is optional, but if provided must be valid
+	if msg.Country != "" && !isValidCountryCode(msg.Country) {
 		return fmt.Errorf("invalid country code format")
 	}
 

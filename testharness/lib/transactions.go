@@ -353,11 +353,14 @@ func StartPermissionVP(client cosmosclient.Client, ctx context.Context, creator 
 
 	// Start with an empty struct and set only the defined attributes from override
 	msg := &permtypes.MsgStartPermissionVP{
-		Creator:         creatorAddr,
-		Type:            override.Type,
-		Did:             override.Did,
-		ValidatorPermId: override.ValidatorPermId,
-		Country:         override.Country,
+		Creator:          creatorAddr,
+		Type:             override.Type,
+		Did:              override.Did,
+		ValidatorPermId:  override.ValidatorPermId,
+		Country:          override.Country,
+		ValidationFees:   override.ValidationFees,
+		IssuanceFees:     override.IssuanceFees,
+		VerificationFees: override.VerificationFees,
 	}
 
 	if override.Did != "" {
@@ -366,6 +369,7 @@ func StartPermissionVP(client cosmosclient.Client, ctx context.Context, creator 
 	if override.Country != "" {
 		msg.Country = override.Country
 	}
+	// Optional fee fields are already set from override
 
 	txResp, err := client.BroadcastTx(ctx, creator, msg)
 	if err != nil {
