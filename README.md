@@ -22,6 +22,8 @@ Key features include:
 
 Verana is designed to bridge the gap between centralized trust models and the decentralized web, enabling trustworthy digital interactions across ecosystems while preserving privacy and sovereignty.
 
+For frontend transaction signing debugging, see the Amino sign bench notes in `ts-proto/test/README.md`.
+
 ## System Requirements
 
 These system specifications have been tested and are recommended for running a Verana node:

@@ -1,0 +1,158 @@
+name: 3.TypeScript Client Tests
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - '*' # Trigger on pull requests to any branch
+    paths:
+      - 'proto/**'
+      - 'ts-proto/**'
+      - '.github/workflows/tsClientTests.yml'
+  push:
+    branches:
+      - '*' # Trigger on every commit to any branch
+    paths:
+      - 'proto/**'
+      - 'ts-proto/**'
+      - '.github/workflows/tsClientTests.yml'
+
+jobs:
+  ts-client-tests:
+    runs-on: ubuntu-latest
+    env:
+      VERANA_BLOCKCHAIN_PATH: ./verana
+      VERANA_RPC_ENDPOINT: http://localhost:26657
+      VERANA_LCD_ENDPOINT: http://localhost:1317
+      VERANA_CHAIN_ID: vna-testnet-1
+      VERANA_ADDRESS_PREFIX: verana
+      VERANA_DENOM: uvna
+      MNEMONIC: "pink glory help gown abstract eight nice crazy forward ketchup skill cheese"
+      FEES: "0uvna"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: ${{ github.head_ref || github.ref_name }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          path: ${{ env.VERANA_BLOCKCHAIN_PATH }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.25'
+
+      - name: Set up Buf
+        uses: bufbuild/buf-setup-action@v1
+        with:
+          github_token: ${{ github.token }}
+
+      - name: Install Go dependencies and build binary
+        run: |
+          cd ${{ env.VERANA_BLOCKCHAIN_PATH }}
+          export PATH=$PATH:$HOME/go/bin
+          export BINARYPATH=$HOME/go/bin
+          make install
+          echo "BINARYPATH=$BINARYPATH" >> $GITHUB_ENV
+          type veranad
+
+      - name: Install ts-proto dependencies
+        run: |
+          cd ${{ env.VERANA_BLOCKCHAIN_PATH }}/ts-proto
+          npm install
+
+      - name: Generate TypeScript protobuf types
+        run: |
+          cd ${{ env.VERANA_BLOCKCHAIN_PATH }}
+          make proto-ts
+
+      - name: Install test dependencies
+        run: |
+          cd ${{ env.VERANA_BLOCKCHAIN_PATH }}/ts-proto/test
+          npm install
+
+      - name: Start blockchain node asynchronously
+        run: |
+          cd ${{ env.VERANA_BLOCKCHAIN_PATH }}/testharness
+          echo "Starting blockchain setup using simulation script..."
+          export PATH=$PATH:$BINARYPATH
+          export FEES="0uvna"
+          chmod +x scripts/init_chain_for_simulations.sh
+          # Run the script in background - it will initialize and start the chain
+          nohup ./scripts/init_chain_for_simulations.sh > /tmp/chain_setup.log 2>&1 &
+          echo $! > /tmp/setup_chain_pid
+          echo "Setup process started with PID: $(cat /tmp/setup_chain_pid)"
+          
+          # Wait for chain to be ready (check RPC endpoint)
+          echo "Waiting for blockchain to be ready..."
+          for i in {1..120}; do
+            if curl -s http://localhost:26657/status > /dev/null 2>&1; then
+              echo "Blockchain is ready!"
+              # Show last few lines of log for debugging
+              echo "--- Last 20 lines of chain setup log ---"
+              tail -20 /tmp/chain_setup.log || true
+              break
+            fi
+            if [ $i -eq 120 ]; then
+              echo "Timeout waiting for blockchain to start"
+              echo "--- Full chain setup log ---"
+              cat /tmp/chain_setup.log || true
+              exit 1
+            fi
+            sleep 2
+          done
+
+      - name: Run TypeScript client tests
+        env:
+          VERANA_RPC_ENDPOINT: ${{ env.VERANA_RPC_ENDPOINT }}
+          VERANA_LCD_ENDPOINT: ${{ env.VERANA_LCD_ENDPOINT }}
+          VERANA_CHAIN_ID: ${{ env.VERANA_CHAIN_ID }}
+          VERANA_ADDRESS_PREFIX: ${{ env.VERANA_ADDRESS_PREFIX }}
+          VERANA_DENOM: ${{ env.VERANA_DENOM }}
+          MNEMONIC: ${{ env.MNEMONIC }}
+          FEES: ${{ env.FEES }}
+        run: |
+          cd ${{ env.VERANA_BLOCKCHAIN_PATH }}/ts-proto/test
+          export PATH=$PATH:$BINARYPATH
+          
+          echo "==================================================================="
+          echo "Running TypeScript Client Tests"
+          echo "==================================================================="
+          echo ""
+          echo "Environment variables:"
+          echo "  VERANA_RPC_ENDPOINT: $VERANA_RPC_ENDPOINT"
+          echo "  VERANA_LCD_ENDPOINT: $VERANA_LCD_ENDPOINT"
+          echo "  VERANA_CHAIN_ID: $VERANA_CHAIN_ID"
+          echo "  VERANA_ADDRESS_PREFIX: $VERANA_ADDRESS_PREFIX"
+          echo "  VERANA_DENOM: $VERANA_DENOM"
+          echo "  MNEMONIC: ${MNEMONIC:0:20}..." # Show first 20 chars only
+          echo "  FEES: $FEES"
+          echo ""
+          
+          # Run all TypeScript client tests
+          npm run test:all || {
+            echo "TypeScript client tests failed!"
+            exit 1
+          }
+
+      - name: Kill blockchain setup process
+        if: always()
+        run: |
+          if [ -f /tmp/setup_chain_pid ]; then
+            kill -9 $(cat /tmp/setup_chain_pid) || true
+            rm /tmp/setup_chain_pid
+          fi
+          # Also kill any veranad processes
+          pkill -9 veranad || true
+
+      - name: Finalize
+        if: always()
+        run: echo "TypeScript client tests execution completed."
+
