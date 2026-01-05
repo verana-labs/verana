@@ -166,7 +166,13 @@ export interface Permission {
   vpCurrentFees: number;
   vpCurrentDeposit: number;
   vpSummaryDigestSri: string;
-  vpTermRequested: Date | undefined;
+  vpTermRequested:
+    | Date
+    | undefined;
+  /** Fee discount fields (scaled: 0 = 0.0, 10000 = 1.0, range 0-10000) */
+  issuanceFeeDiscount: number;
+  /** Verification fee discount (0-10000, where 10000 = 100% discount) */
+  verificationFeeDiscount: number;
 }
 
 export interface PermissionSession {
@@ -225,6 +231,8 @@ function createBasePermission(): Permission {
     vpCurrentDeposit: 0,
     vpSummaryDigestSri: "",
     vpTermRequested: undefined,
+    issuanceFeeDiscount: 0,
+    verificationFeeDiscount: 0,
   };
 }
 
@@ -331,6 +339,12 @@ export const Permission = {
     }
     if (message.vpTermRequested !== undefined) {
       Timestamp.encode(toTimestamp(message.vpTermRequested), writer.uint32(274).fork()).ldelim();
+    }
+    if (message.issuanceFeeDiscount !== 0) {
+      writer.uint32(280).uint64(message.issuanceFeeDiscount);
+    }
+    if (message.verificationFeeDiscount !== 0) {
+      writer.uint32(288).uint64(message.verificationFeeDiscount);
     }
     return writer;
   },
@@ -580,6 +594,20 @@ export const Permission = {
 
           message.vpTermRequested = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
           continue;
+        case 35:
+          if (tag !== 280) {
+            break;
+          }
+
+          message.issuanceFeeDiscount = longToNumber(reader.uint64() as Long);
+          continue;
+        case 36:
+          if (tag !== 288) {
+            break;
+          }
+
+          message.verificationFeeDiscount = longToNumber(reader.uint64() as Long);
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -625,6 +653,10 @@ export const Permission = {
       vpCurrentDeposit: isSet(object.vpCurrentDeposit) ? globalThis.Number(object.vpCurrentDeposit) : 0,
       vpSummaryDigestSri: isSet(object.vpSummaryDigestSri) ? globalThis.String(object.vpSummaryDigestSri) : "",
       vpTermRequested: isSet(object.vpTermRequested) ? fromJsonTimestamp(object.vpTermRequested) : undefined,
+      issuanceFeeDiscount: isSet(object.issuanceFeeDiscount) ? globalThis.Number(object.issuanceFeeDiscount) : 0,
+      verificationFeeDiscount: isSet(object.verificationFeeDiscount)
+        ? globalThis.Number(object.verificationFeeDiscount)
+        : 0,
     };
   },
 
@@ -732,6 +764,12 @@ export const Permission = {
     if (message.vpTermRequested !== undefined) {
       obj.vpTermRequested = message.vpTermRequested.toISOString();
     }
+    if (message.issuanceFeeDiscount !== 0) {
+      obj.issuanceFeeDiscount = Math.round(message.issuanceFeeDiscount);
+    }
+    if (message.verificationFeeDiscount !== 0) {
+      obj.verificationFeeDiscount = Math.round(message.verificationFeeDiscount);
+    }
     return obj;
   },
 
@@ -774,6 +812,8 @@ export const Permission = {
     message.vpCurrentDeposit = object.vpCurrentDeposit ?? 0;
     message.vpSummaryDigestSri = object.vpSummaryDigestSri ?? "";
     message.vpTermRequested = object.vpTermRequested ?? undefined;
+    message.issuanceFeeDiscount = object.issuanceFeeDiscount ?? 0;
+    message.verificationFeeDiscount = object.verificationFeeDiscount ?? 0;
     return message;
   },
 };

@@ -78,6 +78,13 @@ export interface MsgSetPermissionVPToValidated {
   verificationFees: number;
   country: string;
   vpSummaryDigestSri: string;
+  /**
+   * Fee discount fields (scaled: 0 = 0.0, 10000 = 1.0, range 0-10000)
+   * Default to 0 (no discount), maximum 10000 (100% discount)
+   */
+  issuanceFeeDiscount: number;
+  /** Verification fee discount (mandatory, default 0) */
+  verificationFeeDiscount: number;
 }
 
 /** MsgSetPermissionVPToValidatedResponse defines the Msg/SetPermissionVPToValidated response type */
@@ -658,6 +665,8 @@ function createBaseMsgSetPermissionVPToValidated(): MsgSetPermissionVPToValidate
     verificationFees: 0,
     country: "",
     vpSummaryDigestSri: "",
+    issuanceFeeDiscount: 0,
+    verificationFeeDiscount: 0,
   };
 }
 
@@ -686,6 +695,12 @@ export const MsgSetPermissionVPToValidated = {
     }
     if (message.vpSummaryDigestSri !== "") {
       writer.uint32(66).string(message.vpSummaryDigestSri);
+    }
+    if (message.issuanceFeeDiscount !== 0) {
+      writer.uint32(72).uint64(message.issuanceFeeDiscount);
+    }
+    if (message.verificationFeeDiscount !== 0) {
+      writer.uint32(80).uint64(message.verificationFeeDiscount);
     }
     return writer;
   },
@@ -753,6 +768,20 @@ export const MsgSetPermissionVPToValidated = {
 
           message.vpSummaryDigestSri = reader.string();
           continue;
+        case 9:
+          if (tag !== 72) {
+            break;
+          }
+
+          message.issuanceFeeDiscount = longToNumber(reader.uint64() as Long);
+          continue;
+        case 10:
+          if (tag !== 80) {
+            break;
+          }
+
+          message.verificationFeeDiscount = longToNumber(reader.uint64() as Long);
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -772,6 +801,10 @@ export const MsgSetPermissionVPToValidated = {
       verificationFees: isSet(object.verificationFees) ? globalThis.Number(object.verificationFees) : 0,
       country: isSet(object.country) ? globalThis.String(object.country) : "",
       vpSummaryDigestSri: isSet(object.vpSummaryDigestSri) ? globalThis.String(object.vpSummaryDigestSri) : "",
+      issuanceFeeDiscount: isSet(object.issuanceFeeDiscount) ? globalThis.Number(object.issuanceFeeDiscount) : 0,
+      verificationFeeDiscount: isSet(object.verificationFeeDiscount)
+        ? globalThis.Number(object.verificationFeeDiscount)
+        : 0,
     };
   },
 
@@ -801,6 +834,12 @@ export const MsgSetPermissionVPToValidated = {
     if (message.vpSummaryDigestSri !== "") {
       obj.vpSummaryDigestSri = message.vpSummaryDigestSri;
     }
+    if (message.issuanceFeeDiscount !== 0) {
+      obj.issuanceFeeDiscount = Math.round(message.issuanceFeeDiscount);
+    }
+    if (message.verificationFeeDiscount !== 0) {
+      obj.verificationFeeDiscount = Math.round(message.verificationFeeDiscount);
+    }
     return obj;
   },
 
@@ -819,6 +858,8 @@ export const MsgSetPermissionVPToValidated = {
     message.verificationFees = object.verificationFees ?? 0;
     message.country = object.country ?? "";
     message.vpSummaryDigestSri = object.vpSummaryDigestSri ?? "";
+    message.issuanceFeeDiscount = object.issuanceFeeDiscount ?? 0;
+    message.verificationFeeDiscount = object.verificationFeeDiscount ?? 0;
     return message;
   },
 };

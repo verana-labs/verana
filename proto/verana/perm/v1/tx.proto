@@ -96,6 +96,10 @@ message MsgSetPermissionVPToValidated {
   uint64 verification_fees = 6;
   string country = 7;
   string vp_summary_digest_sri = 8;
+  // Fee discount fields (scaled: 0 = 0.0, 10000 = 1.0, range 0-10000)
+  // Default to 0 (no discount), maximum 10000 (100% discount)
+  uint64 issuance_fee_discount = 9; // Issuance fee discount (mandatory, default 0)
+  uint64 verification_fee_discount = 10; // Verification fee discount (mandatory, default 0)
 }
 
 // MsgSetPermissionVPToValidatedResponse defines the Msg/SetPermissionVPToValidated response type

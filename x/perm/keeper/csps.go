@@ -1,13 +1,15 @@
 package keeper
 
 import (
-	"cosmossdk.io/math"
 	"errors"
 	"fmt"
+
+	"cosmossdk.io/math"
 	credentialschematypes "github.com/verana-labs/verana/x/cs/types"
 
-	"cosmossdk.io/collections"
 	"time"
+
+	"cosmossdk.io/collections"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/verana-labs/verana/x/perm/types"
@@ -107,16 +109,32 @@ func (ms msgServer) validateCreateOrUpdatePermissionSessionFees(ctx sdk.Context,
 	}
 
 	// calculate the required beneficiary fees
+	// Apply discounts from permissions in the subtree chain
 	beneficiaryFees := uint64(0)
 	verifierPerm := msg.VerifierPermId != 0
+	const discountScale = 10000 // 10000 = 1.0 = 100% discount
 
 	for _, perm := range foundPermSet {
+		var fees uint64
+		var discount uint64
+
 		if verifierPerm {
 			// if verifier_perm is NOT null: iterate over permissions perm of found_perm_set and set beneficiary_fees = beneficiary_fees + perm.verification_fees
-			beneficiaryFees += perm.VerificationFees
+			fees = perm.VerificationFees
+			discount = perm.VerificationFeeDiscount
 		} else {
 			// if verifier_perm is null: iterate over permissions perm of found_perm_set and set beneficiary_fees = beneficiary_fees + perm.issuance_fees
-			beneficiaryFees += perm.IssuanceFees
+			fees = perm.IssuanceFees
+			discount = perm.IssuanceFeeDiscount
+		}
+
+		// Apply discount if set: discounted_fees = fees * (1 - discount/10000)
+		if discount > 0 {
+			// Calculate: fees * (10000 - discount) / 10000
+			discountedFees := (fees * (discountScale - discount)) / discountScale
+			beneficiaryFees += discountedFees
+		} else {
+			beneficiaryFees += fees
 		}
 	}
 

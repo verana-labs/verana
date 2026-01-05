@@ -193,7 +193,9 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 - issuance-fees: Optional issuance fees
 - verification-fees: Optional verification fees
 - country: Optional country code (ISO 3166-1 alpha-2)
-- vp-summary-digest-sri: Optional digest SRI of validation information`,
+- vp-summary-digest-sri: Optional digest SRI of validation information
+- issuance-fee-discount: Issuance fee discount (0-10000, where 10000 = 100% discount, default 0)
+- verification-fee-discount: Verification fee discount (0-10000, where 10000 = 100% discount, default 0)`,
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{
 							ProtoField: "id",
@@ -229,6 +231,16 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 							Name:         "vp-summary-digest-sri",
 							Usage:        "Digest SRI of validation information",
 							DefaultValue: "",
+						},
+						"issuance_fee_discount": {
+							Name:         "issuance-fee-discount",
+							Usage:        "Issuance fee discount (0-10000, where 10000 = 100% discount)",
+							DefaultValue: "0",
+						},
+						"verification_fee_discount": {
+							Name:         "verification-fee-discount",
+							Usage:        "Verification fee discount (0-10000, where 10000 = 100% discount)",
+							DefaultValue: "0",
 						},
 					},
 				},

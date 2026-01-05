@@ -444,6 +444,17 @@
         "vp_term_requested": {
           "type": "string",
           "format": "date-time"
+        },
+        "issuance_fee_discount": {
+          "type": "string",
+          "format": "uint64",
+          "description": "Issuance fee discount (0-10000, where 10000 = 100% discount)",
+          "title": "Fee discount fields (scaled: 0 = 0.0, 10000 = 1.0, range 0-10000)"
+        },
+        "verification_fee_discount": {
+          "type": "string",
+          "format": "uint64",
+          "title": "Verification fee discount (0-10000, where 10000 = 100% discount)"
         }
       }
     },

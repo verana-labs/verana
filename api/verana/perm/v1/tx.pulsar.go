@@ -2982,15 +2982,17 @@ func (x *fastReflection_MsgRenewPermissionVPResponse) ProtoMethods() *protoiface
 }
 
 var (
-	md_MsgSetPermissionVPToValidated                       protoreflect.MessageDescriptor
-	fd_MsgSetPermissionVPToValidated_creator               protoreflect.FieldDescriptor
-	fd_MsgSetPermissionVPToValidated_id                    protoreflect.FieldDescriptor
-	fd_MsgSetPermissionVPToValidated_effective_until       protoreflect.FieldDescriptor
-	fd_MsgSetPermissionVPToValidated_validation_fees       protoreflect.FieldDescriptor
-	fd_MsgSetPermissionVPToValidated_issuance_fees         protoreflect.FieldDescriptor
-	fd_MsgSetPermissionVPToValidated_verification_fees     protoreflect.FieldDescriptor
-	fd_MsgSetPermissionVPToValidated_country               protoreflect.FieldDescriptor
-	fd_MsgSetPermissionVPToValidated_vp_summary_digest_sri protoreflect.FieldDescriptor
+	md_MsgSetPermissionVPToValidated                           protoreflect.MessageDescriptor
+	fd_MsgSetPermissionVPToValidated_creator                   protoreflect.FieldDescriptor
+	fd_MsgSetPermissionVPToValidated_id                        protoreflect.FieldDescriptor
+	fd_MsgSetPermissionVPToValidated_effective_until           protoreflect.FieldDescriptor
+	fd_MsgSetPermissionVPToValidated_validation_fees           protoreflect.FieldDescriptor
+	fd_MsgSetPermissionVPToValidated_issuance_fees             protoreflect.FieldDescriptor
+	fd_MsgSetPermissionVPToValidated_verification_fees         protoreflect.FieldDescriptor
+	fd_MsgSetPermissionVPToValidated_country                   protoreflect.FieldDescriptor
+	fd_MsgSetPermissionVPToValidated_vp_summary_digest_sri     protoreflect.FieldDescriptor
+	fd_MsgSetPermissionVPToValidated_issuance_fee_discount     protoreflect.FieldDescriptor
+	fd_MsgSetPermissionVPToValidated_verification_fee_discount protoreflect.FieldDescriptor
 )
 
 func init() {
@@ -3004,6 +3006,8 @@ func init() {
 	fd_MsgSetPermissionVPToValidated_verification_fees = md_MsgSetPermissionVPToValidated.Fields().ByName("verification_fees")
 	fd_MsgSetPermissionVPToValidated_country = md_MsgSetPermissionVPToValidated.Fields().ByName("country")
 	fd_MsgSetPermissionVPToValidated_vp_summary_digest_sri = md_MsgSetPermissionVPToValidated.Fields().ByName("vp_summary_digest_sri")
+	fd_MsgSetPermissionVPToValidated_issuance_fee_discount = md_MsgSetPermissionVPToValidated.Fields().ByName("issuance_fee_discount")
+	fd_MsgSetPermissionVPToValidated_verification_fee_discount = md_MsgSetPermissionVPToValidated.Fields().ByName("verification_fee_discount")
 }
 
 var _ protoreflect.Message = (*fastReflection_MsgSetPermissionVPToValidated)(nil)
@@ -3119,6 +3123,18 @@ func (x *fastReflection_MsgSetPermissionVPToValidated) Range(f func(protoreflect
 			return
 		}
 	}
+	if x.IssuanceFeeDiscount != uint64(0) {
+		value := protoreflect.ValueOfUint64(x.IssuanceFeeDiscount)
+		if !f(fd_MsgSetPermissionVPToValidated_issuance_fee_discount, value) {
+			return
+		}
+	}
+	if x.VerificationFeeDiscount != uint64(0) {
+		value := protoreflect.ValueOfUint64(x.VerificationFeeDiscount)
+		if !f(fd_MsgSetPermissionVPToValidated_verification_fee_discount, value) {
+			return
+		}
+	}
 }
 
 // Has reports whether a field is populated.
@@ -3150,6 +3166,10 @@ func (x *fastReflection_MsgSetPermissionVPToValidated) Has(fd protoreflect.Field
 		return x.Country != ""
 	case "verana.perm.v1.MsgSetPermissionVPToValidated.vp_summary_digest_sri":
 		return x.VpSummaryDigestSri != ""
+	case "verana.perm.v1.MsgSetPermissionVPToValidated.issuance_fee_discount":
+		return x.IssuanceFeeDiscount != uint64(0)
+	case "verana.perm.v1.MsgSetPermissionVPToValidated.verification_fee_discount":
+		return x.VerificationFeeDiscount != uint64(0)
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.perm.v1.MsgSetPermissionVPToValidated"))
@@ -3182,6 +3202,10 @@ func (x *fastReflection_MsgSetPermissionVPToValidated) Clear(fd protoreflect.Fie
 		x.Country = ""
 	case "verana.perm.v1.MsgSetPermissionVPToValidated.vp_summary_digest_sri":
 		x.VpSummaryDigestSri = ""
+	case "verana.perm.v1.MsgSetPermissionVPToValidated.issuance_fee_discount":
+		x.IssuanceFeeDiscount = uint64(0)
+	case "verana.perm.v1.MsgSetPermissionVPToValidated.verification_fee_discount":
+		x.VerificationFeeDiscount = uint64(0)
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.perm.v1.MsgSetPermissionVPToValidated"))
@@ -3222,6 +3246,12 @@ func (x *fastReflection_MsgSetPermissionVPToValidated) Get(descriptor protorefle
 	case "verana.perm.v1.MsgSetPermissionVPToValidated.vp_summary_digest_sri":
 		value := x.VpSummaryDigestSri
 		return protoreflect.ValueOfString(value)
+	case "verana.perm.v1.MsgSetPermissionVPToValidated.issuance_fee_discount":
+		value := x.IssuanceFeeDiscount
+		return protoreflect.ValueOfUint64(value)
+	case "verana.perm.v1.MsgSetPermissionVPToValidated.verification_fee_discount":
+		value := x.VerificationFeeDiscount
+		return protoreflect.ValueOfUint64(value)
 	default:
 		if descriptor.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.perm.v1.MsgSetPermissionVPToValidated"))
@@ -3258,6 +3288,10 @@ func (x *fastReflection_MsgSetPermissionVPToValidated) Set(fd protoreflect.Field
 		x.Country = value.Interface().(string)
 	case "verana.perm.v1.MsgSetPermissionVPToValidated.vp_summary_digest_sri":
 		x.VpSummaryDigestSri = value.Interface().(string)
+	case "verana.perm.v1.MsgSetPermissionVPToValidated.issuance_fee_discount":
+		x.IssuanceFeeDiscount = value.Uint()
+	case "verana.perm.v1.MsgSetPermissionVPToValidated.verification_fee_discount":
+		x.VerificationFeeDiscount = value.Uint()
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.perm.v1.MsgSetPermissionVPToValidated"))
@@ -3297,6 +3331,10 @@ func (x *fastReflection_MsgSetPermissionVPToValidated) Mutable(fd protoreflect.F
 		panic(fmt.Errorf("field country of message verana.perm.v1.MsgSetPermissionVPToValidated is not mutable"))
 	case "verana.perm.v1.MsgSetPermissionVPToValidated.vp_summary_digest_sri":
 		panic(fmt.Errorf("field vp_summary_digest_sri of message verana.perm.v1.MsgSetPermissionVPToValidated is not mutable"))
+	case "verana.perm.v1.MsgSetPermissionVPToValidated.issuance_fee_discount":
+		panic(fmt.Errorf("field issuance_fee_discount of message verana.perm.v1.MsgSetPermissionVPToValidated is not mutable"))
+	case "verana.perm.v1.MsgSetPermissionVPToValidated.verification_fee_discount":
+		panic(fmt.Errorf("field verification_fee_discount of message verana.perm.v1.MsgSetPermissionVPToValidated is not mutable"))
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.perm.v1.MsgSetPermissionVPToValidated"))
@@ -3327,6 +3365,10 @@ func (x *fastReflection_MsgSetPermissionVPToValidated) NewField(fd protoreflect.
 		return protoreflect.ValueOfString("")
 	case "verana.perm.v1.MsgSetPermissionVPToValidated.vp_summary_digest_sri":
 		return protoreflect.ValueOfString("")
+	case "verana.perm.v1.MsgSetPermissionVPToValidated.issuance_fee_discount":
+		return protoreflect.ValueOfUint64(uint64(0))
+	case "verana.perm.v1.MsgSetPermissionVPToValidated.verification_fee_discount":
+		return protoreflect.ValueOfUint64(uint64(0))
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.perm.v1.MsgSetPermissionVPToValidated"))
@@ -3424,6 +3466,12 @@ func (x *fastReflection_MsgSetPermissionVPToValidated) ProtoMethods() *protoifac
 		if l > 0 {
 			n += 1 + l + runtime.Sov(uint64(l))
 		}
+		if x.IssuanceFeeDiscount != 0 {
+			n += 1 + runtime.Sov(uint64(x.IssuanceFeeDiscount))
+		}
+		if x.VerificationFeeDiscount != 0 {
+			n += 1 + runtime.Sov(uint64(x.VerificationFeeDiscount))
+		}
 		if x.unknownFields != nil {
 			n += len(x.unknownFields)
 		}
@@ -3452,6 +3500,16 @@ func (x *fastReflection_MsgSetPermissionVPToValidated) ProtoMethods() *protoifac
 		if x.unknownFields != nil {
 			i -= len(x.unknownFields)
 			copy(dAtA[i:], x.unknownFields)
+		}
+		if x.VerificationFeeDiscount != 0 {
+			i = runtime.EncodeVarint(dAtA, i, uint64(x.VerificationFeeDiscount))
+			i--
+			dAtA[i] = 0x50
+		}
+		if x.IssuanceFeeDiscount != 0 {
+			i = runtime.EncodeVarint(dAtA, i, uint64(x.IssuanceFeeDiscount))
+			i--
+			dAtA[i] = 0x48
 		}
 		if len(x.VpSummaryDigestSri) > 0 {
 			i -= len(x.VpSummaryDigestSri)
@@ -3765,6 +3823,44 @@ func (x *fastReflection_MsgSetPermissionVPToValidated) ProtoMethods() *protoifac
 				}
 				x.VpSummaryDigestSri = string(dAtA[iNdEx:postIndex])
 				iNdEx = postIndex
+			case 9:
+				if wireType != 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field IssuanceFeeDiscount", wireType)
+				}
+				x.IssuanceFeeDiscount = 0
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					x.IssuanceFeeDiscount |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+			case 10:
+				if wireType != 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field VerificationFeeDiscount", wireType)
+				}
+				x.VerificationFeeDiscount = 0
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					x.VerificationFeeDiscount |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
 			default:
 				iNdEx = preIndex
 				skippy, err := runtime.Skip(dAtA[iNdEx:])
@@ -12405,6 +12501,10 @@ type MsgSetPermissionVPToValidated struct {
 	VerificationFees   uint64                 `protobuf:"varint,6,opt,name=verification_fees,json=verificationFees,proto3" json:"verification_fees,omitempty"`
 	Country            string                 `protobuf:"bytes,7,opt,name=country,proto3" json:"country,omitempty"`
 	VpSummaryDigestSri string                 `protobuf:"bytes,8,opt,name=vp_summary_digest_sri,json=vpSummaryDigestSri,proto3" json:"vp_summary_digest_sri,omitempty"`
+	// Fee discount fields (scaled: 0 = 0.0, 10000 = 1.0, range 0-10000)
+	// Default to 0 (no discount), maximum 10000 (100% discount)
+	IssuanceFeeDiscount     uint64 `protobuf:"varint,9,opt,name=issuance_fee_discount,json=issuanceFeeDiscount,proto3" json:"issuance_fee_discount,omitempty"`              // Issuance fee discount (mandatory, default 0)
+	VerificationFeeDiscount uint64 `protobuf:"varint,10,opt,name=verification_fee_discount,json=verificationFeeDiscount,proto3" json:"verification_fee_discount,omitempty"` // Verification fee discount (mandatory, default 0)
 }
 
 func (x *MsgSetPermissionVPToValidated) Reset() {
@@ -12481,6 +12581,20 @@ func (x *MsgSetPermissionVPToValidated) GetVpSummaryDigestSri() string {
 		return x.VpSummaryDigestSri
 	}
 	return ""
+}
+
+func (x *MsgSetPermissionVPToValidated) GetIssuanceFeeDiscount() uint64 {
+	if x != nil {
+		return x.IssuanceFeeDiscount
+	}
+	return 0
+}
+
+func (x *MsgSetPermissionVPToValidated) GetVerificationFeeDiscount() uint64 {
+	if x != nil {
+		return x.VerificationFeeDiscount
+	}
+	return 0
 }
 
 // MsgSetPermissionVPToValidatedResponse defines the Msg/SetPermissionVPToValidated response type
@@ -13321,7 +13435,7 @@ var file_verana_perm_v1_tx_proto_rawDesc = []byte{
 	0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x04, 0x52, 0x02, 0x69, 0x64, 0x3a,
 	0x0c, 0x82, 0xe7, 0xb0, 0x2a, 0x07, 0x63, 0x72, 0x65, 0x61, 0x74, 0x6f, 0x72, 0x22, 0x1e, 0x0a,
 	0x1c, 0x4d, 0x73, 0x67, 0x52, 0x65, 0x6e, 0x65, 0x77, 0x50, 0x65, 0x72, 0x6d, 0x69, 0x73, 0x73,
-	0x69, 0x6f, 0x6e, 0x56, 0x50, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x88, 0x03,
+	0x69, 0x6f, 0x6e, 0x56, 0x50, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0xf8, 0x03,
 	0x0a, 0x1d, 0x4d, 0x73, 0x67, 0x53, 0x65, 0x74, 0x50, 0x65, 0x72, 0x6d, 0x69, 0x73, 0x73, 0x69,
 	0x6f, 0x6e, 0x56, 0x50, 0x54, 0x6f, 0x56, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x65, 0x64, 0x12,
 	0x32, 0x0a, 0x07, 0x63, 0x72, 0x65, 0x61, 0x74, 0x6f, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09,
@@ -13345,7 +13459,14 @@ var file_verana_perm_v1_tx_proto_rawDesc = []byte{
 	0x63, 0x6f, 0x75, 0x6e, 0x74, 0x72, 0x79, 0x12, 0x31, 0x0a, 0x15, 0x76, 0x70, 0x5f, 0x73, 0x75,
 	0x6d, 0x6d, 0x61, 0x72, 0x79, 0x5f, 0x64, 0x69, 0x67, 0x65, 0x73, 0x74, 0x5f, 0x73, 0x72, 0x69,
 	0x18, 0x08, 0x20, 0x01, 0x28, 0x09, 0x52, 0x12, 0x76, 0x70, 0x53, 0x75, 0x6d, 0x6d, 0x61, 0x72,
-	0x79, 0x44, 0x69, 0x67, 0x65, 0x73, 0x74, 0x53, 0x72, 0x69, 0x3a, 0x0c, 0x82, 0xe7, 0xb0, 0x2a,
+	0x79, 0x44, 0x69, 0x67, 0x65, 0x73, 0x74, 0x53, 0x72, 0x69, 0x12, 0x32, 0x0a, 0x15, 0x69, 0x73,
+	0x73, 0x75, 0x61, 0x6e, 0x63, 0x65, 0x5f, 0x66, 0x65, 0x65, 0x5f, 0x64, 0x69, 0x73, 0x63, 0x6f,
+	0x75, 0x6e, 0x74, 0x18, 0x09, 0x20, 0x01, 0x28, 0x04, 0x52, 0x13, 0x69, 0x73, 0x73, 0x75, 0x61,
+	0x6e, 0x63, 0x65, 0x46, 0x65, 0x65, 0x44, 0x69, 0x73, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x12, 0x3a,
+	0x0a, 0x19, 0x76, 0x65, 0x72, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x66,
+	0x65, 0x65, 0x5f, 0x64, 0x69, 0x73, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x18, 0x0a, 0x20, 0x01, 0x28,
+	0x04, 0x52, 0x17, 0x76, 0x65, 0x72, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x46,
+	0x65, 0x65, 0x44, 0x69, 0x73, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x3a, 0x0c, 0x82, 0xe7, 0xb0, 0x2a,
 	0x07, 0x63, 0x72, 0x65, 0x61, 0x74, 0x6f, 0x72, 0x22, 0x27, 0x0a, 0x25, 0x4d, 0x73, 0x67, 0x53,
 	0x65, 0x74, 0x50, 0x65, 0x72, 0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x56, 0x50, 0x54, 0x6f,
 	0x56, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x65, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,

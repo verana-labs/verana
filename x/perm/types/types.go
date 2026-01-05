@@ -95,6 +95,15 @@ func (msg *MsgSetPermissionVPToValidated) ValidateBasic() error {
 		return fmt.Errorf("invalid vp_summary_digest_sri format")
 	}
 
+	// Validate discount fields (scaled: 0 = 0.0, 10000 = 1.0, range 0-10000)
+	const maxDiscount = 10000 // 10000 = 100% discount = 1.0
+	if msg.IssuanceFeeDiscount > maxDiscount {
+		return fmt.Errorf("issuance_fee_discount cannot exceed %d (100%% discount)", maxDiscount)
+	}
+	if msg.VerificationFeeDiscount > maxDiscount {
+		return fmt.Errorf("verification_fee_discount cannot exceed %d (100%% discount)", maxDiscount)
+	}
+
 	// NOTE: Do NOT validate effective_until against current time in stateless validation
 	// This will be done in stateful validation where we have access to block time
 

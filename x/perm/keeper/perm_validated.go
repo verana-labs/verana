@@ -1,10 +1,11 @@
 package keeper
 
 import (
-	"cosmossdk.io/math"
 	"fmt"
 	"strconv"
 	"time"
+
+	"cosmossdk.io/math"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	cstypes "github.com/verana-labs/verana/x/cs/types"
@@ -72,8 +73,11 @@ func (ms msgServer) executeSetPermissionVPToValidated(
 		applicantPerm.IssuanceFees = msg.IssuanceFees
 		applicantPerm.VerificationFees = msg.VerificationFees
 		applicantPerm.Country = msg.Country
+		applicantPerm.IssuanceFeeDiscount = msg.IssuanceFeeDiscount
+		applicantPerm.VerificationFeeDiscount = msg.VerificationFeeDiscount
 		applicantPerm.EffectiveFrom = &now
 	}
+	// Renewal case: discounts are already validated to match existing, so no need to set them again
 
 	// Fees and Trust Deposits:
 	// transfer the full amount applicant_perm.vp_current_fees from escrow account to validator account

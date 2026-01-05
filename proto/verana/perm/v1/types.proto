@@ -67,6 +67,9 @@ message Permission {
   uint64 vp_current_deposit = 32;
   string vp_summary_digest_sri = 33;
   google.protobuf.Timestamp vp_term_requested = 34 [(gogoproto.stdtime) = true];
+  // Fee discount fields (scaled: 0 = 0.0, 10000 = 1.0, range 0-10000)
+  uint64 issuance_fee_discount = 35; // Issuance fee discount (0-10000, where 10000 = 100% discount)
+  uint64 verification_fee_discount = 36; // Verification fee discount (0-10000, where 10000 = 100% discount)
 }
 
 message PermissionSession {
