@@ -8,7 +8,7 @@
 import * as _m0 from "protobufjs/minimal";
 import { Timestamp } from "../../../google/protobuf/timestamp";
 import { Params } from "./params";
-import { PermissionType, permissionTypeFromJSON, permissionTypeToJSON } from "./types";
+import { OptionalUInt64, PermissionType, permissionTypeFromJSON, permissionTypeToJSON } from "./types";
 import Long = require("long");
 
 export const protobufPackage = "verana.perm.v1";
@@ -37,6 +37,16 @@ export interface MsgStartPermissionVP {
   creator: string;
   type: PermissionType;
   validatorPermId: number;
+  /** optional: Requested validation_fees for this permission (can be modified by validator) */
+  validationFees:
+    | OptionalUInt64
+    | undefined;
+  /** optional: Requested issuance_fees for this permission (can be modified by validator) */
+  issuanceFees:
+    | OptionalUInt64
+    | undefined;
+  /** optional: Requested verification_fees for this permission (can be modified by validator) */
+  verificationFees: OptionalUInt64 | undefined;
   country: string;
   /** optional */
   did: string;
@@ -68,6 +78,13 @@ export interface MsgSetPermissionVPToValidated {
   verificationFees: number;
   country: string;
   vpSummaryDigestSri: string;
+  /**
+   * Fee discount fields (scaled: 0 = 0.0, 10000 = 1.0, range 0-10000)
+   * Default to 0 (no discount), maximum 10000 (100% discount)
+   */
+  issuanceFeeDiscount: number;
+  /** Verification fee discount (mandatory, default 0) */
+  verificationFeeDiscount: number;
 }
 
 /** MsgSetPermissionVPToValidatedResponse defines the Msg/SetPermissionVPToValidated response type */
@@ -286,7 +303,16 @@ export const MsgUpdateParamsResponse = {
 };
 
 function createBaseMsgStartPermissionVP(): MsgStartPermissionVP {
-  return { creator: "", type: 0, validatorPermId: 0, country: "", did: "" };
+  return {
+    creator: "",
+    type: 0,
+    validatorPermId: 0,
+    validationFees: undefined,
+    issuanceFees: undefined,
+    verificationFees: undefined,
+    country: "",
+    did: "",
+  };
 }
 
 export const MsgStartPermissionVP = {
@@ -299,6 +325,15 @@ export const MsgStartPermissionVP = {
     }
     if (message.validatorPermId !== 0) {
       writer.uint32(24).uint64(message.validatorPermId);
+    }
+    if (message.validationFees !== undefined) {
+      OptionalUInt64.encode(message.validationFees, writer.uint32(50).fork()).ldelim();
+    }
+    if (message.issuanceFees !== undefined) {
+      OptionalUInt64.encode(message.issuanceFees, writer.uint32(58).fork()).ldelim();
+    }
+    if (message.verificationFees !== undefined) {
+      OptionalUInt64.encode(message.verificationFees, writer.uint32(66).fork()).ldelim();
     }
     if (message.country !== "") {
       writer.uint32(34).string(message.country);
@@ -337,6 +372,27 @@ export const MsgStartPermissionVP = {
 
           message.validatorPermId = longToNumber(reader.uint64() as Long);
           continue;
+        case 6:
+          if (tag !== 50) {
+            break;
+          }
+
+          message.validationFees = OptionalUInt64.decode(reader, reader.uint32());
+          continue;
+        case 7:
+          if (tag !== 58) {
+            break;
+          }
+
+          message.issuanceFees = OptionalUInt64.decode(reader, reader.uint32());
+          continue;
+        case 8:
+          if (tag !== 66) {
+            break;
+          }
+
+          message.verificationFees = OptionalUInt64.decode(reader, reader.uint32());
+          continue;
         case 4:
           if (tag !== 34) {
             break;
@@ -365,6 +421,9 @@ export const MsgStartPermissionVP = {
       creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
       type: isSet(object.type) ? permissionTypeFromJSON(object.type) : 0,
       validatorPermId: isSet(object.validatorPermId) ? globalThis.Number(object.validatorPermId) : 0,
+      validationFees: isSet(object.validationFees) ? OptionalUInt64.fromJSON(object.validationFees) : undefined,
+      issuanceFees: isSet(object.issuanceFees) ? OptionalUInt64.fromJSON(object.issuanceFees) : undefined,
+      verificationFees: isSet(object.verificationFees) ? OptionalUInt64.fromJSON(object.verificationFees) : undefined,
       country: isSet(object.country) ? globalThis.String(object.country) : "",
       did: isSet(object.did) ? globalThis.String(object.did) : "",
     };
@@ -380,6 +439,15 @@ export const MsgStartPermissionVP = {
     }
     if (message.validatorPermId !== 0) {
       obj.validatorPermId = Math.round(message.validatorPermId);
+    }
+    if (message.validationFees !== undefined) {
+      obj.validationFees = OptionalUInt64.toJSON(message.validationFees);
+    }
+    if (message.issuanceFees !== undefined) {
+      obj.issuanceFees = OptionalUInt64.toJSON(message.issuanceFees);
+    }
+    if (message.verificationFees !== undefined) {
+      obj.verificationFees = OptionalUInt64.toJSON(message.verificationFees);
     }
     if (message.country !== "") {
       obj.country = message.country;
@@ -398,6 +466,15 @@ export const MsgStartPermissionVP = {
     message.creator = object.creator ?? "";
     message.type = object.type ?? 0;
     message.validatorPermId = object.validatorPermId ?? 0;
+    message.validationFees = (object.validationFees !== undefined && object.validationFees !== null)
+      ? OptionalUInt64.fromPartial(object.validationFees)
+      : undefined;
+    message.issuanceFees = (object.issuanceFees !== undefined && object.issuanceFees !== null)
+      ? OptionalUInt64.fromPartial(object.issuanceFees)
+      : undefined;
+    message.verificationFees = (object.verificationFees !== undefined && object.verificationFees !== null)
+      ? OptionalUInt64.fromPartial(object.verificationFees)
+      : undefined;
     message.country = object.country ?? "";
     message.did = object.did ?? "";
     return message;
@@ -588,6 +665,8 @@ function createBaseMsgSetPermissionVPToValidated(): MsgSetPermissionVPToValidate
     verificationFees: 0,
     country: "",
     vpSummaryDigestSri: "",
+    issuanceFeeDiscount: 0,
+    verificationFeeDiscount: 0,
   };
 }
 
@@ -616,6 +695,12 @@ export const MsgSetPermissionVPToValidated = {
     }
     if (message.vpSummaryDigestSri !== "") {
       writer.uint32(66).string(message.vpSummaryDigestSri);
+    }
+    if (message.issuanceFeeDiscount !== 0) {
+      writer.uint32(72).uint64(message.issuanceFeeDiscount);
+    }
+    if (message.verificationFeeDiscount !== 0) {
+      writer.uint32(80).uint64(message.verificationFeeDiscount);
     }
     return writer;
   },
@@ -683,6 +768,20 @@ export const MsgSetPermissionVPToValidated = {
 
           message.vpSummaryDigestSri = reader.string();
           continue;
+        case 9:
+          if (tag !== 72) {
+            break;
+          }
+
+          message.issuanceFeeDiscount = longToNumber(reader.uint64() as Long);
+          continue;
+        case 10:
+          if (tag !== 80) {
+            break;
+          }
+
+          message.verificationFeeDiscount = longToNumber(reader.uint64() as Long);
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -702,6 +801,10 @@ export const MsgSetPermissionVPToValidated = {
       verificationFees: isSet(object.verificationFees) ? globalThis.Number(object.verificationFees) : 0,
       country: isSet(object.country) ? globalThis.String(object.country) : "",
       vpSummaryDigestSri: isSet(object.vpSummaryDigestSri) ? globalThis.String(object.vpSummaryDigestSri) : "",
+      issuanceFeeDiscount: isSet(object.issuanceFeeDiscount) ? globalThis.Number(object.issuanceFeeDiscount) : 0,
+      verificationFeeDiscount: isSet(object.verificationFeeDiscount)
+        ? globalThis.Number(object.verificationFeeDiscount)
+        : 0,
     };
   },
 
@@ -731,6 +834,12 @@ export const MsgSetPermissionVPToValidated = {
     if (message.vpSummaryDigestSri !== "") {
       obj.vpSummaryDigestSri = message.vpSummaryDigestSri;
     }
+    if (message.issuanceFeeDiscount !== 0) {
+      obj.issuanceFeeDiscount = Math.round(message.issuanceFeeDiscount);
+    }
+    if (message.verificationFeeDiscount !== 0) {
+      obj.verificationFeeDiscount = Math.round(message.verificationFeeDiscount);
+    }
     return obj;
   },
 
@@ -749,6 +858,8 @@ export const MsgSetPermissionVPToValidated = {
     message.verificationFees = object.verificationFees ?? 0;
     message.country = object.country ?? "";
     message.vpSummaryDigestSri = object.vpSummaryDigestSri ?? "";
+    message.issuanceFeeDiscount = object.issuanceFeeDiscount ?? 0;
+    message.verificationFeeDiscount = object.verificationFeeDiscount ?? 0;
     return message;
   },
 };

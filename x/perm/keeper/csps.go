@@ -1,13 +1,15 @@
 package keeper
 
 import (
-	"cosmossdk.io/math"
 	"errors"
 	"fmt"
+
+	"cosmossdk.io/math"
 	credentialschematypes "github.com/verana-labs/verana/x/cs/types"
 
-	"cosmossdk.io/collections"
 	"time"
+
+	"cosmossdk.io/collections"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/verana-labs/verana/x/perm/types"
@@ -107,16 +109,57 @@ func (ms msgServer) validateCreateOrUpdatePermissionSessionFees(ctx sdk.Context,
 	}
 
 	// calculate the required beneficiary fees
+	// Apply discounts from permissions in the subtree chain
 	beneficiaryFees := uint64(0)
 	verifierPerm := msg.VerifierPermId != 0
+	const discountScale = 10000 // 10000 = 1.0 = 100% discount
 
 	for _, perm := range foundPermSet {
+		var fees uint64
+		var discount uint64
+
 		if verifierPerm {
 			// if verifier_perm is NOT null: iterate over permissions perm of found_perm_set and set beneficiary_fees = beneficiary_fees + perm.verification_fees
-			beneficiaryFees += perm.VerificationFees
+			fees = perm.VerificationFees
+			discount = perm.VerificationFeeDiscount
 		} else {
 			// if verifier_perm is null: iterate over permissions perm of found_perm_set and set beneficiary_fees = beneficiary_fees + perm.issuance_fees
-			beneficiaryFees += perm.IssuanceFees
+			fees = perm.IssuanceFees
+			discount = perm.IssuanceFeeDiscount
+		}
+
+		// Apply discount if set: discounted_fees = fees * (1 - discount/10000)
+		if discount > 0 {
+			// Calculate: fees * (10000 - discount) / 10000
+			discountedFees := (fees * (discountScale - discount)) / discountScale
+			beneficiaryFees += discountedFees
+		} else {
+			beneficiaryFees += fees
+		}
+	}
+
+	// Apply exemption from executor permission (issuer_perm or verifier_perm)
+	// Get executor permission to retrieve exemption
+	var executorPerm types.Permission
+	if verifierPerm {
+		executorPerm, err = ms.Permission.Get(ctx, msg.VerifierPermId)
+		if err != nil {
+			return nil, 0, 0, fmt.Errorf("failed to get verifier permission: %w", err)
+		}
+		// Apply verification_fee_exemption: beneficiary_fees = beneficiary_fees * (1 - verifier_perm.verification_fee_exemption)
+		if executorPerm.VerificationFeeExemption > 0 {
+			exemptedFees := (beneficiaryFees * (discountScale - executorPerm.VerificationFeeExemption)) / discountScale
+			beneficiaryFees = exemptedFees
+		}
+	} else {
+		executorPerm, err = ms.Permission.Get(ctx, msg.IssuerPermId)
+		if err != nil {
+			return nil, 0, 0, fmt.Errorf("failed to get issuer permission: %w", err)
+		}
+		// Apply issuance_fee_exemption: beneficiary_fees = beneficiary_fees * (1 - issuer_perm.issuance_fee_exemption)
+		if executorPerm.IssuanceFeeExemption > 0 {
+			exemptedFees := (beneficiaryFees * (discountScale - executorPerm.IssuanceFeeExemption)) / discountScale
+			beneficiaryFees = exemptedFees
 		}
 	}
 
@@ -170,18 +213,33 @@ func (ms msgServer) executeCreateOrUpdatePermissionSession(ctx sdk.Context, msg 
 	}
 
 	// Process fees for each permission in found_perm_set
+	const exemptionScale = 10000 // 10000 = 1.0 = 100% exemption
 	for _, perm := range foundPermSet {
 		var fees uint64
+		var exemption uint64
 		if verifierPerm {
 			fees = perm.VerificationFees
+			exemption = executorPerm.VerificationFeeExemption
 		} else {
 			fees = perm.IssuanceFees
+			exemption = executorPerm.IssuanceFeeExemption
 		}
 
 		if fees > 0 {
-			// Calculate amounts
-			totalFeesAmount := fees * trustUnitPrice
+			// Apply exemption: fees * (1 - exemption/10000)
+			var exemptedFees uint64
+			if exemption > 0 {
+				exemptedFees = (fees * (exemptionScale - exemption)) / exemptionScale
+			} else {
+				exemptedFees = fees
+			}
+
+			// Calculate amounts with exempted fees
+			// totalFeesAmount = exemptedFees * trust_unit_price
+			totalFeesAmount := exemptedFees * trustUnitPrice
+			// trustDepositAmount = totalFeesAmount * trust_deposit_rate
 			trustDepositAmount := uint64(math.LegacyNewDec(int64(totalFeesAmount)).Mul(trustDepositRate).TruncateInt64())
+			// directFeesAmount = totalFeesAmount * (1 - trust_deposit_rate)
 			directFeesAmount := totalFeesAmount - trustDepositAmount
 
 			// transfer direct fees to perm.grantee
