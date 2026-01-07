@@ -173,6 +173,10 @@ export interface Permission {
   issuanceFeeDiscount: number;
   /** Verification fee discount (0-10000, where 10000 = 100% discount) */
   verificationFeeDiscount: number;
+  /** Fee exemption fields (scaled: 0 = 0.0, 10000 = 1.0, range 0-10000) */
+  issuanceFeeExemption: number;
+  /** Verification fee exemption (0-10000, where 10000 = 100% exemption) */
+  verificationFeeExemption: number;
 }
 
 export interface PermissionSession {
@@ -233,6 +237,8 @@ function createBasePermission(): Permission {
     vpTermRequested: undefined,
     issuanceFeeDiscount: 0,
     verificationFeeDiscount: 0,
+    issuanceFeeExemption: 0,
+    verificationFeeExemption: 0,
   };
 }
 
@@ -345,6 +351,12 @@ export const Permission = {
     }
     if (message.verificationFeeDiscount !== 0) {
       writer.uint32(288).uint64(message.verificationFeeDiscount);
+    }
+    if (message.issuanceFeeExemption !== 0) {
+      writer.uint32(296).uint64(message.issuanceFeeExemption);
+    }
+    if (message.verificationFeeExemption !== 0) {
+      writer.uint32(304).uint64(message.verificationFeeExemption);
     }
     return writer;
   },
@@ -608,6 +620,20 @@ export const Permission = {
 
           message.verificationFeeDiscount = longToNumber(reader.uint64() as Long);
           continue;
+        case 37:
+          if (tag !== 296) {
+            break;
+          }
+
+          message.issuanceFeeExemption = longToNumber(reader.uint64() as Long);
+          continue;
+        case 38:
+          if (tag !== 304) {
+            break;
+          }
+
+          message.verificationFeeExemption = longToNumber(reader.uint64() as Long);
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -656,6 +682,10 @@ export const Permission = {
       issuanceFeeDiscount: isSet(object.issuanceFeeDiscount) ? globalThis.Number(object.issuanceFeeDiscount) : 0,
       verificationFeeDiscount: isSet(object.verificationFeeDiscount)
         ? globalThis.Number(object.verificationFeeDiscount)
+        : 0,
+      issuanceFeeExemption: isSet(object.issuanceFeeExemption) ? globalThis.Number(object.issuanceFeeExemption) : 0,
+      verificationFeeExemption: isSet(object.verificationFeeExemption)
+        ? globalThis.Number(object.verificationFeeExemption)
         : 0,
     };
   },
@@ -770,6 +800,12 @@ export const Permission = {
     if (message.verificationFeeDiscount !== 0) {
       obj.verificationFeeDiscount = Math.round(message.verificationFeeDiscount);
     }
+    if (message.issuanceFeeExemption !== 0) {
+      obj.issuanceFeeExemption = Math.round(message.issuanceFeeExemption);
+    }
+    if (message.verificationFeeExemption !== 0) {
+      obj.verificationFeeExemption = Math.round(message.verificationFeeExemption);
+    }
     return obj;
   },
 
@@ -814,6 +850,8 @@ export const Permission = {
     message.vpTermRequested = object.vpTermRequested ?? undefined;
     message.issuanceFeeDiscount = object.issuanceFeeDiscount ?? 0;
     message.verificationFeeDiscount = object.verificationFeeDiscount ?? 0;
+    message.issuanceFeeExemption = object.issuanceFeeExemption ?? 0;
+    message.verificationFeeExemption = object.verificationFeeExemption ?? 0;
     return message;
   },
 };

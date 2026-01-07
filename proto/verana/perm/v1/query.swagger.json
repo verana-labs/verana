@@ -455,6 +455,17 @@
           "type": "string",
           "format": "uint64",
           "title": "Verification fee discount (0-10000, where 10000 = 100% discount)"
+        },
+        "issuance_fee_exemption": {
+          "type": "string",
+          "format": "uint64",
+          "description": "Issuance fee exemption (0-10000, where 10000 = 100% exemption)",
+          "title": "Fee exemption fields (scaled: 0 = 0.0, 10000 = 1.0, range 0-10000)"
+        },
+        "verification_fee_exemption": {
+          "type": "string",
+          "format": "uint64",
+          "title": "Verification fee exemption (0-10000, where 10000 = 100% exemption)"
         }
       }
     },

@@ -70,6 +70,9 @@ message Permission {
   // Fee discount fields (scaled: 0 = 0.0, 10000 = 1.0, range 0-10000)
   uint64 issuance_fee_discount = 35; // Issuance fee discount (0-10000, where 10000 = 100% discount)
   uint64 verification_fee_discount = 36; // Verification fee discount (0-10000, where 10000 = 100% discount)
+  // Fee exemption fields (scaled: 0 = 0.0, 10000 = 1.0, range 0-10000)
+  uint64 issuance_fee_exemption = 37; // Issuance fee exemption (0-10000, where 10000 = 100% exemption)
+  uint64 verification_fee_exemption = 38; // Verification fee exemption (0-10000, where 10000 = 100% exemption)
 }
 
 message PermissionSession {

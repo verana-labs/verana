@@ -138,6 +138,31 @@ func (ms msgServer) validateCreateOrUpdatePermissionSessionFees(ctx sdk.Context,
 		}
 	}
 
+	// Apply exemption from executor permission (issuer_perm or verifier_perm)
+	// Get executor permission to retrieve exemption
+	var executorPerm types.Permission
+	if verifierPerm {
+		executorPerm, err = ms.Permission.Get(ctx, msg.VerifierPermId)
+		if err != nil {
+			return nil, 0, 0, fmt.Errorf("failed to get verifier permission: %w", err)
+		}
+		// Apply verification_fee_exemption: beneficiary_fees = beneficiary_fees * (1 - verifier_perm.verification_fee_exemption)
+		if executorPerm.VerificationFeeExemption > 0 {
+			exemptedFees := (beneficiaryFees * (discountScale - executorPerm.VerificationFeeExemption)) / discountScale
+			beneficiaryFees = exemptedFees
+		}
+	} else {
+		executorPerm, err = ms.Permission.Get(ctx, msg.IssuerPermId)
+		if err != nil {
+			return nil, 0, 0, fmt.Errorf("failed to get issuer permission: %w", err)
+		}
+		// Apply issuance_fee_exemption: beneficiary_fees = beneficiary_fees * (1 - issuer_perm.issuance_fee_exemption)
+		if executorPerm.IssuanceFeeExemption > 0 {
+			exemptedFees := (beneficiaryFees * (discountScale - executorPerm.IssuanceFeeExemption)) / discountScale
+			beneficiaryFees = exemptedFees
+		}
+	}
+
 	// Get global variables for calculations
 	userAgentRewardRate := ms.trustDeposit.GetUserAgentRewardRate(ctx)
 	walletUserAgentRewardRate := ms.trustDeposit.GetWalletUserAgentRewardRate(ctx)
@@ -188,18 +213,33 @@ func (ms msgServer) executeCreateOrUpdatePermissionSession(ctx sdk.Context, msg 
 	}
 
 	// Process fees for each permission in found_perm_set
+	const exemptionScale = 10000 // 10000 = 1.0 = 100% exemption
 	for _, perm := range foundPermSet {
 		var fees uint64
+		var exemption uint64
 		if verifierPerm {
 			fees = perm.VerificationFees
+			exemption = executorPerm.VerificationFeeExemption
 		} else {
 			fees = perm.IssuanceFees
+			exemption = executorPerm.IssuanceFeeExemption
 		}
 
 		if fees > 0 {
-			// Calculate amounts
-			totalFeesAmount := fees * trustUnitPrice
+			// Apply exemption: fees * (1 - exemption/10000)
+			var exemptedFees uint64
+			if exemption > 0 {
+				exemptedFees = (fees * (exemptionScale - exemption)) / exemptionScale
+			} else {
+				exemptedFees = fees
+			}
+
+			// Calculate amounts with exempted fees
+			// totalFeesAmount = exemptedFees * trust_unit_price
+			totalFeesAmount := exemptedFees * trustUnitPrice
+			// trustDepositAmount = totalFeesAmount * trust_deposit_rate
 			trustDepositAmount := uint64(math.LegacyNewDec(int64(totalFeesAmount)).Mul(trustDepositRate).TruncateInt64())
+			// directFeesAmount = totalFeesAmount * (1 - trust_deposit_rate)
 			directFeesAmount := totalFeesAmount - trustDepositAmount
 
 			// transfer direct fees to perm.grantee
