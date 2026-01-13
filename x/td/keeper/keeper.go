@@ -23,9 +23,16 @@ type (
 		// the address capable of executing a MsgUpdateParams message. Typically, this
 		// should be the x/gov module account.
 		authority string
+
 		// state
 		TrustDeposit collections.Map[string, types.TrustDeposit]
 		Dust         collections.Item[string] // Accumulated fractional yield (stored as string)
+
+		// Anchor-based POC state
+		Anchors            collections.Map[string, types.Anchor]                                      // anchor_id -> Anchor
+		VerifiableServices collections.Map[string, types.VerifiableService]                           // operator_account -> VS
+		OperatorAllowances collections.Map[collections.Pair[string, string], types.OperatorAllowance] // (anchor_id, operator) -> allowance
+
 		// external keeper
 		bankKeeper types.BankKeeper
 		mintKeeper types.MintKeeper
@@ -51,10 +58,36 @@ func NewKeeper(
 		storeService: storeService,
 		authority:    authority,
 		logger:       logger,
+
+		// Existing collections
 		TrustDeposit: collections.NewMap(sb, types.TrustDepositKey, "trust_deposit", collections.StringKey, codec.CollValue[types.TrustDeposit](cdc)),
 		Dust:         collections.NewItem(sb, types.DustKey, "dust", collections.StringValue),
-		bankKeeper:   bankKeeper,
-		mintKeeper:   mintKeeper,
+
+		// Anchor-based POC collections
+		Anchors: collections.NewMap(
+			sb,
+			types.AnchorKey,
+			"anchors",
+			collections.StringKey,
+			codec.CollValue[types.Anchor](cdc),
+		),
+		VerifiableServices: collections.NewMap(
+			sb,
+			types.VerifiableServiceKey,
+			"verifiable_services",
+			collections.StringKey,
+			codec.CollValue[types.VerifiableService](cdc),
+		),
+		OperatorAllowances: collections.NewMap(
+			sb,
+			types.OperatorAllowanceKey,
+			"operator_allowances",
+			collections.PairKeyCodec(collections.StringKey, collections.StringKey),
+			codec.CollValue[types.OperatorAllowance](cdc),
+		),
+
+		bankKeeper: bankKeeper,
+		mintKeeper: mintKeeper,
 	}
 }
 
