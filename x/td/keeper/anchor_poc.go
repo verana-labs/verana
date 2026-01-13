@@ -64,8 +64,8 @@ func (k Keeper) IsAnchor(ctx context.Context, anchorID string) bool {
 	return exists
 }
 
-// GetAnchor retrieves an Anchor by ID.
-func (k Keeper) GetAnchor(ctx context.Context, anchorID string) (types.Anchor, error) {
+// GetAnchorInfo retrieves an Anchor by ID (internal keeper method).
+func (k Keeper) GetAnchorInfo(ctx context.Context, anchorID string) (types.Anchor, error) {
 	return k.Anchors.Get(ctx, anchorID)
 }
 
@@ -201,8 +201,8 @@ func (k Keeper) SetOperatorAllowance(
 	return nil
 }
 
-// GetOperatorAllowance retrieves allowance for an operator.
-func (k Keeper) GetOperatorAllowance(ctx context.Context, anchorID, operatorAccount string) (types.OperatorAllowance, error) {
+// GetOperatorAllowanceInfo retrieves allowance for an operator (internal keeper method).
+func (k Keeper) GetOperatorAllowanceInfo(ctx context.Context, anchorID, operatorAccount string) (types.OperatorAllowance, error) {
 	key := collections.Join(anchorID, operatorAccount)
 	return k.OperatorAllowances.Get(ctx, key)
 }

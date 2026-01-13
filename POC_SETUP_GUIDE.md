@@ -132,6 +132,7 @@ Since anchor operations require `creator == anchor_id`, we must submit via group
 # Create the proposal message JSON
 cat > /tmp/register_anchor_msg.json << EOF
 {
+  "group_policy_address": "$ANCHOR_ID",
   "messages": [
     {
       "@type": "/verana.td.v1.MsgRegisterAnchor",
@@ -165,8 +166,8 @@ veranad tx group submit-proposal /tmp/register_anchor_msg.json \
 # Get proposal ID (usually 1)
 veranad query group proposals-by-group-policy $ANCHOR_ID
 
-# Vote yes
-veranad tx group vote 1 VOTE_OPTION_YES \
+# Vote yes (args: proposal-id, voter, vote-option, metadata)
+veranad tx group vote 1 $ADMIN1 VOTE_OPTION_YES "" \
   --from anchor_admin1 \
   --keyring-backend test \
   --chain-id vna-testnet-1 \
@@ -185,6 +186,23 @@ veranad tx group exec 1 \
   -y
 ```
 
+### 4.5 Verify Anchor Registration
+
+```bash
+# Query the anchor directly
+veranad query td get-anchor $ANCHOR_ID
+
+# Expected output:
+# anchor:
+#   anchor_id: verana1...
+#   created: "2026-01-13T..."
+#   group_id: "1"
+#   metadata: POC Test Anchor
+
+# Query proposal status (should be PROPOSAL_EXECUTOR_RESULT_SUCCESS)
+veranad query group proposals-by-group-policy $ANCHOR_ID
+```
+
 ---
 
 ## Step 5: Register VS Operators via Group Proposal
@@ -195,6 +213,7 @@ veranad tx group exec 1 \
 # Register VS Operator 1
 cat > /tmp/register_vs1_msg.json << EOF
 {
+  "group_policy_address": "$ANCHOR_ID",
   "messages": [
     {
       "@type": "/verana.td.v1.MsgRegisterVerifiableService",
@@ -219,7 +238,7 @@ veranad tx group submit-proposal /tmp/register_vs1_msg.json \
   -y
 
 # Vote and execute (after voting period)
-veranad tx group vote 2 VOTE_OPTION_YES --from anchor_admin1 --keyring-backend test --chain-id vna-testnet-1 -y
+veranad tx group vote 2 $ADMIN1 VOTE_OPTION_YES "" --from anchor_admin1 --keyring-backend test --chain-id vna-testnet-1 -y
 sleep 65
 veranad tx group exec 2 --from anchor_admin1 --keyring-backend test --chain-id vna-testnet-1 -y
 ```
@@ -228,6 +247,7 @@ Repeat for Operator 2:
 ```bash
 cat > /tmp/register_vs2_msg.json << EOF
 {
+  "group_policy_address": "$ANCHOR_ID",
   "messages": [
     {
       "@type": "/verana.td.v1.MsgRegisterVerifiableService",
@@ -245,7 +265,7 @@ cat > /tmp/register_vs2_msg.json << EOF
 EOF
 
 veranad tx group submit-proposal /tmp/register_vs2_msg.json --from anchor_admin1 --keyring-backend test --chain-id vna-testnet-1 -y
-veranad tx group vote 3 VOTE_OPTION_YES --from anchor_admin1 --keyring-backend test --chain-id vna-testnet-1 -y
+veranad tx group vote 3 $ADMIN1 VOTE_OPTION_YES "" --from anchor_admin1 --keyring-backend test --chain-id vna-testnet-1 -y
 sleep 65
 veranad tx group exec 3 --from anchor_admin1 --keyring-backend test --chain-id vna-testnet-1 -y
 ```
@@ -258,6 +278,7 @@ veranad tx group exec 3 --from anchor_admin1 --keyring-backend test --chain-id v
 # Set allowance for Operator 1: 500,000 uvna per day
 cat > /tmp/set_allowance1_msg.json << EOF
 {
+  "group_policy_address": "$ANCHOR_ID",
   "messages": [
     {
       "@type": "/verana.td.v1.MsgSetOperatorAllowance",
@@ -276,7 +297,7 @@ cat > /tmp/set_allowance1_msg.json << EOF
 EOF
 
 veranad tx group submit-proposal /tmp/set_allowance1_msg.json --from anchor_admin1 --keyring-backend test --chain-id vna-testnet-1 -y
-veranad tx group vote 4 VOTE_OPTION_YES --from anchor_admin1 --keyring-backend test --chain-id vna-testnet-1 -y
+veranad tx group vote 4 $ADMIN1 VOTE_OPTION_YES "" --from anchor_admin1 --keyring-backend test --chain-id vna-testnet-1 -y
 sleep 65
 veranad tx group exec 4 --from anchor_admin1 --keyring-backend test --chain-id vna-testnet-1 -y
 ```
@@ -291,6 +312,7 @@ To allow VS operators to execute certain transactions on behalf of the anchor:
 # Grant Operator 1 permission to execute MsgAddDID
 cat > /tmp/authz_grant_msg.json << EOF
 {
+  "group_policy_address": "$ANCHOR_ID",
   "messages": [
     {
       "@type": "/cosmos.authz.v1beta1.MsgGrant",
@@ -312,7 +334,7 @@ cat > /tmp/authz_grant_msg.json << EOF
 EOF
 
 veranad tx group submit-proposal /tmp/authz_grant_msg.json --from anchor_admin1 --keyring-backend test --chain-id vna-testnet-1 -y
-veranad tx group vote 5 VOTE_OPTION_YES --from anchor_admin1 --keyring-backend test --chain-id vna-testnet-1 -y
+veranad tx group vote 5 $ADMIN1 VOTE_OPTION_YES "" --from anchor_admin1 --keyring-backend test --chain-id vna-testnet-1 -y
 sleep 65
 veranad tx group exec 5 --from anchor_admin1 --keyring-backend test --chain-id vna-testnet-1 -y
 ```

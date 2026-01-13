@@ -32,7 +32,7 @@ func TestAnchorRegistration(t *testing.T) {
 		require.True(t, k.IsAnchor(sdkCtx, anchorID))
 
 		// Verify anchor data
-		anchor, err := k.GetAnchor(sdkCtx, anchorID)
+		anchor, err := k.GetAnchorInfo(sdkCtx, anchorID)
 		require.NoError(t, err)
 		require.Equal(t, anchorID, anchor.AnchorId)
 		require.Equal(t, uint64(1), anchor.GroupId)
@@ -149,7 +149,7 @@ func TestOperatorAllowance(t *testing.T) {
 		require.NoError(t, err)
 
 		// Verify allowance
-		allowance, err := k.GetOperatorAllowance(sdkCtx, anchorID, operatorAccount)
+		allowance, err := k.GetOperatorAllowanceInfo(sdkCtx, anchorID, operatorAccount)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1000000), allowance.AllowanceLimit)
 		require.Equal(t, uint64(0), allowance.Spent)
@@ -282,7 +282,7 @@ func TestOperatorSpending(t *testing.T) {
 		require.Equal(t, uint64(4500000), updatedTd.Amount) // 5M - 500K
 
 		// Verify allowance updated
-		allowance, err := k.GetOperatorAllowance(sdkCtx, anchorID, operatorAccount)
+		allowance, err := k.GetOperatorAllowanceInfo(sdkCtx, anchorID, operatorAccount)
 		require.NoError(t, err)
 		require.Equal(t, uint64(500000), allowance.Spent)
 	})
@@ -296,7 +296,7 @@ func TestOperatorSpending(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, uint64(4100000), updatedTd.Amount) // 4.5M - 400K
 
-		allowance, err := k.GetOperatorAllowance(sdkCtx, anchorID, operatorAccount)
+		allowance, err := k.GetOperatorAllowanceInfo(sdkCtx, anchorID, operatorAccount)
 		require.NoError(t, err)
 		require.Equal(t, uint64(900000), allowance.Spent) // 500K + 400K
 	})
@@ -429,7 +429,7 @@ func TestAllowanceResetOnPeriodExpiry(t *testing.T) {
 		require.NoError(t, err)
 
 		// Verify close to limit
-		allowance, err := k.GetOperatorAllowance(sdkCtx, anchorID, operatorAccount)
+		allowance, err := k.GetOperatorAllowanceInfo(sdkCtx, anchorID, operatorAccount)
 		require.NoError(t, err)
 		require.Equal(t, uint64(900000), allowance.Spent)
 
@@ -448,7 +448,7 @@ func TestAllowanceResetOnPeriodExpiry(t *testing.T) {
 		require.NoError(t, err)
 
 		// Verify spent was reset to just this spend
-		allowance, err := k.GetOperatorAllowance(newSdkCtx, anchorID, operatorAccount)
+		allowance, err := k.GetOperatorAllowanceInfo(newSdkCtx, anchorID, operatorAccount)
 		require.NoError(t, err)
 		require.Equal(t, uint64(500000), allowance.Spent)
 	})
