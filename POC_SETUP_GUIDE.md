@@ -270,6 +270,16 @@ sleep 65
 veranad tx group exec 3 --from anchor_admin1 --keyring-backend test --chain-id vna-testnet-1 -y
 ```
 
+### 5.2 Verify VS Registrations
+
+```bash
+# Verify Operator 1 is registered
+veranad query td get-verifiable-service $OPERATOR1
+
+# Verify Operator 2 is registered
+veranad query td get-verifiable-service $OPERATOR2
+```
+
 ---
 
 ## Step 6: Set Operator Allowances via Group Proposal
@@ -300,6 +310,21 @@ veranad tx group submit-proposal /tmp/set_allowance1_msg.json --from anchor_admi
 veranad tx group vote 4 $ADMIN1 VOTE_OPTION_YES "" --from anchor_admin1 --keyring-backend test --chain-id vna-testnet-1 -y
 sleep 65
 veranad tx group exec 4 --from anchor_admin1 --keyring-backend test --chain-id vna-testnet-1 -y
+```
+
+### 6.1 Verify Operator Allowance
+
+```bash
+# Verify allowance for Operator 1
+veranad query td get-operator-allowance $ANCHOR_ID $OPERATOR1
+
+# Expected output:
+# operator_allowance:
+#   allowance_limit: "500000"
+#   anchor_id: verana1...
+#   operator_account: verana1...
+#   reset_period: "86400"
+#   spent: "0"
 ```
 
 ---
