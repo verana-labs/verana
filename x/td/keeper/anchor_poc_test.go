@@ -172,10 +172,10 @@ func TestOperatorAllowance(t *testing.T) {
 }
 
 // =============================================================================
-// ANCHOR TRUST DEPOSIT TESTS
+// ANCHOR TRUST DEPOSIT ADJUSTMENT TESTS
 // =============================================================================
 
-func TestAnchorTrustDeposit(t *testing.T) {
+func TestAnchorTrustDepositAdjustment(t *testing.T) {
 	k, ctx := keepertest.TrustdepositKeeper(t)
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
@@ -185,36 +185,27 @@ func TestAnchorTrustDeposit(t *testing.T) {
 	err := k.RegisterAnchor(sdkCtx, anchorID, 1, "Test Anchor")
 	require.NoError(t, err)
 
-	funder := sdk.AccAddress([]byte("funder_address_0001"))
+	// Set params first
+	params := types.Params{
+		TrustDepositShareValue:      math.LegacyMustNewDecFromStr("1.0"),
+		TrustDepositRate:            math.LegacyMustNewDecFromStr("0.2"),
+		TrustDepositReclaimBurnRate: math.LegacyMustNewDecFromStr("0.6"),
+		WalletUserAgentRewardRate:   math.LegacyMustNewDecFromStr("0.3"),
+		UserAgentRewardRate:         math.LegacyMustNewDecFromStr("0.2"),
+	}
+	err = k.SetParams(ctx, params)
+	require.NoError(t, err)
 
-	t.Run("Create trust deposit for non-existent anchor fails", func(t *testing.T) {
+	t.Run("Adjust trust deposit for non-existent anchor fails", func(t *testing.T) {
 		nonExistent := sdk.AccAddress([]byte("non_existent_anchor")).String()
-		err := k.CreateAnchorTrustDeposit(sdkCtx, nonExistent, 5000000, funder)
+		err := k.AdjustAnchorTrustDeposit(sdkCtx, nonExistent, 1000000, "")
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "anchor not found")
 	})
 
-	t.Run("Create trust deposit successfully", func(t *testing.T) {
-		// Set params first
-		params := types.Params{
-			TrustDepositShareValue:      math.LegacyMustNewDecFromStr("1.0"),
-			TrustDepositRate:            math.LegacyMustNewDecFromStr("0.2"),
-			TrustDepositReclaimBurnRate: math.LegacyMustNewDecFromStr("0.6"),
-			WalletUserAgentRewardRate:   math.LegacyMustNewDecFromStr("0.3"),
-			UserAgentRewardRate:         math.LegacyMustNewDecFromStr("0.2"),
-		}
-		err := k.SetParams(ctx, params)
-		require.NoError(t, err)
-
-		// Note: This will fail on bank transfer in real tests
-		// For POC, we can manually set the trust deposit to simulate success
-		td := types.TrustDeposit{
-			Account:   anchorID,
-			Amount:    5000000,
-			Share:     math.LegacyNewDec(5000000),
-			Claimable: 0,
-		}
-		err = k.TrustDeposit.Set(ctx, anchorID, td)
+	t.Run("Positive adjustment creates trust deposit", func(t *testing.T) {
+		// This simulates a DID registration that increases trust deposit
+		err := k.AdjustAnchorTrustDeposit(sdkCtx, anchorID, 5000000, "")
 		require.NoError(t, err)
 
 		// Verify
@@ -224,11 +215,23 @@ func TestAnchorTrustDeposit(t *testing.T) {
 		require.Equal(t, uint64(5000000), savedTd.Amount)
 	})
 
-	t.Run("Duplicate trust deposit fails", func(t *testing.T) {
-		// Try to create again (would fail due to already existing)
-		err := k.CreateAnchorTrustDeposit(sdkCtx, anchorID, 1000000, funder)
-		require.Error(t, err)
-		require.Contains(t, err.Error(), "already exists")
+	t.Run("Second positive adjustment accumulates", func(t *testing.T) {
+		err := k.AdjustAnchorTrustDeposit(sdkCtx, anchorID, 1000000, "")
+		require.NoError(t, err)
+
+		savedTd, err := k.TrustDeposit.Get(ctx, anchorID)
+		require.NoError(t, err)
+		require.Equal(t, uint64(6000000), savedTd.Amount) // 5M + 1M
+	})
+
+	t.Run("Negative adjustment without operator succeeds", func(t *testing.T) {
+		// Direct anchor spending (no operator)
+		err := k.AdjustAnchorTrustDeposit(sdkCtx, anchorID, -1000000, "")
+		require.NoError(t, err)
+
+		savedTd, err := k.TrustDeposit.Get(ctx, anchorID)
+		require.NoError(t, err)
+		require.Equal(t, uint64(5000000), savedTd.Amount) // 6M - 1M
 	})
 }
 
@@ -254,7 +257,7 @@ func TestOperatorSpending(t *testing.T) {
 	err = k.SetOperatorAllowance(sdkCtx, anchorID, operatorAccount, 1000000, 86400) // 1M limit per day
 	require.NoError(t, err)
 
-	// Set params and create trust deposit
+	// Set params and create trust deposit via adjustment
 	params := types.Params{
 		TrustDepositShareValue:      math.LegacyMustNewDecFromStr("1.0"),
 		TrustDepositRate:            math.LegacyMustNewDecFromStr("0.2"),
@@ -265,13 +268,8 @@ func TestOperatorSpending(t *testing.T) {
 	err = k.SetParams(ctx, params)
 	require.NoError(t, err)
 
-	td := types.TrustDeposit{
-		Account:   anchorID,
-		Amount:    5000000,
-		Share:     math.LegacyNewDec(5000000),
-		Claimable: 0,
-	}
-	err = k.TrustDeposit.Set(ctx, anchorID, td)
+	// Create trust deposit via positive adjustment (simulates operations)
+	err = k.AdjustAnchorTrustDeposit(sdkCtx, anchorID, 5000000, "")
 	require.NoError(t, err)
 
 	t.Run("Operator spends within limit", func(t *testing.T) {
@@ -355,7 +353,7 @@ func TestDirectAnchorSpending(t *testing.T) {
 	err := k.RegisterAnchor(sdkCtx, anchorID, 1, "Test Anchor")
 	require.NoError(t, err)
 
-	// Set params and create trust deposit
+	// Set params and create trust deposit via adjustment
 	params := types.Params{
 		TrustDepositShareValue:      math.LegacyMustNewDecFromStr("1.0"),
 		TrustDepositRate:            math.LegacyMustNewDecFromStr("0.2"),
@@ -366,13 +364,8 @@ func TestDirectAnchorSpending(t *testing.T) {
 	err = k.SetParams(ctx, params)
 	require.NoError(t, err)
 
-	td := types.TrustDeposit{
-		Account:   anchorID,
-		Amount:    5000000,
-		Share:     math.LegacyNewDec(5000000),
-		Claimable: 0,
-	}
-	err = k.TrustDeposit.Set(ctx, anchorID, td)
+	// Create trust deposit via positive adjustment
+	err = k.AdjustAnchorTrustDeposit(sdkCtx, anchorID, 5000000, "")
 	require.NoError(t, err)
 
 	t.Run("Direct anchor spending (no operator) bypasses allowance check", func(t *testing.T) {
@@ -416,7 +409,7 @@ func TestAllowanceResetOnPeriodExpiry(t *testing.T) {
 	err = k.SetOperatorAllowance(sdkCtx, anchorID, operatorAccount, 1000000, 10)
 	require.NoError(t, err)
 
-	// Set params and create trust deposit
+	// Set params and create trust deposit via adjustment
 	params := types.Params{
 		TrustDepositShareValue:      math.LegacyMustNewDecFromStr("1.0"),
 		TrustDepositRate:            math.LegacyMustNewDecFromStr("0.2"),
@@ -427,13 +420,8 @@ func TestAllowanceResetOnPeriodExpiry(t *testing.T) {
 	err = k.SetParams(ctx, params)
 	require.NoError(t, err)
 
-	td := types.TrustDeposit{
-		Account:   anchorID,
-		Amount:    5000000,
-		Share:     math.LegacyNewDec(5000000),
-		Claimable: 0,
-	}
-	err = k.TrustDeposit.Set(ctx, anchorID, td)
+	// Create trust deposit via positive adjustment
+	err = k.AdjustAnchorTrustDeposit(sdkCtx, anchorID, 5000000, "")
 	require.NoError(t, err)
 
 	t.Run("Spend and exhaust limit", func(t *testing.T) {

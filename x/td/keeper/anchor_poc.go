@@ -211,118 +211,39 @@ func (k Keeper) GetOperatorAllowance(ctx context.Context, anchorID, operatorAcco
 // ANCHOR TRUST DEPOSIT OPERATIONS
 // =============================================================================
 
-// CreateAnchorTrustDeposit creates a trust deposit for an Anchor.
-// Funds are transferred from the funder to the TD module.
-func (k Keeper) CreateAnchorTrustDeposit(
+// AdjustAnchorTrustDeposit is the Anchor-aware version of AdjustTrustDeposit.
+// This is called by other modules (dd, perm) when operating on behalf of an Anchor.
+//
+// Positive augend: Trust deposit increases (e.g., from DID registration)
+// Negative augend: Trust deposit decreases (debited for operations)
+//
+// When operatorAccount is provided, allowance limits are enforced for debits.
+func (k Keeper) AdjustAnchorTrustDeposit(
 	ctx sdk.Context,
 	anchorID string,
-	amount uint64,
-	funder sdk.AccAddress,
+	augend int64,
+	operatorAccount string,
 ) error {
 	// 1. Verify Anchor exists
 	if !k.IsAnchor(ctx, anchorID) {
 		return fmt.Errorf("anchor not found: %s", anchorID)
 	}
 
-	// 2. Check if trust deposit already exists
-	_, err := k.TrustDeposit.Get(ctx, anchorID)
-	if err == nil {
-		return fmt.Errorf("trust deposit already exists for anchor %s", anchorID)
-	}
-
-	// 3. Transfer funds from funder to TD module
-	coins := sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, int64(amount)))
-	if err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, funder, types.ModuleName, coins); err != nil {
-		return fmt.Errorf("failed to transfer funds: %w", err)
-	}
-
-	// 4. Calculate share
-	params := k.GetParams(ctx)
-	share := k.AmountToShare(amount, params.TrustDepositShareValue)
-
-	// 5. Create trust deposit entry (reuse existing TrustDeposit type)
-	// The key change is: Account field now stores anchor_id instead of individual account
-	td := types.TrustDeposit{
-		Account:   anchorID, // anchor_id (group policy address)
-		Amount:    amount,
-		Share:     share,
-		Claimable: 0,
-	}
-
-	// 6. Save
-	if err := k.TrustDeposit.Set(ctx, anchorID, td); err != nil {
-		return fmt.Errorf("failed to save trust deposit: %w", err)
-	}
-
-	// 7. Emit event
-	ctx.EventManager().EmitEvent(
-		sdk.NewEvent(
-			"anchor_trust_deposit_created",
-			sdk.NewAttribute("anchor_id", anchorID),
-			sdk.NewAttribute("amount", fmt.Sprintf("%d", amount)),
-			sdk.NewAttribute("funder", funder.String()),
-		),
-	)
-
-	return nil
-}
-
-// FundAnchorTrustDeposit adds funds to an existing Anchor trust deposit.
-func (k Keeper) FundAnchorTrustDeposit(
-	ctx sdk.Context,
-	anchorID string,
-	amount uint64,
-	funder sdk.AccAddress,
-) error {
-	// 1. Load existing trust deposit
+	// 2. Get existing trust deposit or create new one
 	td, err := k.TrustDeposit.Get(ctx, anchorID)
 	if err != nil {
-		return fmt.Errorf("trust deposit not found for anchor %s", anchorID)
+		// Create new trust deposit for this anchor
+		td = types.TrustDeposit{
+			Account:   anchorID,
+			Amount:    0,
+			Share:     k.AmountToShare(0, k.GetParams(ctx).TrustDepositShareValue),
+			Claimable: 0,
+		}
 	}
 
-	// 2. Transfer funds
-	coins := sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, int64(amount)))
-	if err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, funder, types.ModuleName, coins); err != nil {
-		return fmt.Errorf("failed to transfer funds: %w", err)
-	}
-
-	// 3. Update trust deposit
-	params := k.GetParams(ctx)
-	shareIncrease := k.AmountToShare(amount, params.TrustDepositShareValue)
-
-	td.Amount += amount
-	td.Share = td.Share.Add(shareIncrease)
-
-	// 4. Save
-	if err := k.TrustDeposit.Set(ctx, anchorID, td); err != nil {
-		return fmt.Errorf("failed to update trust deposit: %w", err)
-	}
-
-	// 5. Emit event
-	ctx.EventManager().EmitEvent(
-		sdk.NewEvent(
-			"anchor_trust_deposit_funded",
-			sdk.NewAttribute("anchor_id", anchorID),
-			sdk.NewAttribute("amount", fmt.Sprintf("%d", amount)),
-			sdk.NewAttribute("new_total", fmt.Sprintf("%d", td.Amount)),
-		),
-	)
-
-	return nil
-}
-
-// DebitAnchorTrustDeposit debits from an Anchor's trust deposit.
-// This is the core function that allows VS operators to spend.
-func (k Keeper) DebitAnchorTrustDeposit(
-	ctx sdk.Context,
-	anchorID string,
-	amount uint64,
-	operatorAccount string, // Can be empty for direct Anchor operations
-	reason string,
-) error {
-	// 1. If operator provided, validate and check allowance
-	if operatorAccount != "" {
-		// Resolve operator to anchor
+	// 3. For debits (negative augend), check operator allowance
+	if augend < 0 && operatorAccount != "" {
+		// Validate operator belongs to this anchor
 		resolvedAnchor, err := k.GetAnchorForOperator(ctx, operatorAccount)
 		if err != nil {
 			return fmt.Errorf("operator not authorized: %w", err)
@@ -332,48 +253,58 @@ func (k Keeper) DebitAnchorTrustDeposit(
 		}
 
 		// Check and update allowance
-		if err := k.checkAndUpdateAllowance(ctx, anchorID, operatorAccount, amount); err != nil {
+		if err := k.checkAndUpdateAllowance(ctx, anchorID, operatorAccount, uint64(-augend)); err != nil {
 			return err
 		}
 	}
 
-	// 2. Load trust deposit
-	td, err := k.TrustDeposit.Get(ctx, anchorID)
-	if err != nil {
-		return fmt.Errorf("trust deposit not found for anchor %s", anchorID)
-	}
-
-	// 3. Check sufficient balance
-	if td.Amount < amount {
-		return fmt.Errorf("insufficient trust deposit: have %d, need %d", td.Amount, amount)
-	}
-
-	// 4. Calculate share reduction
+	// 4. Apply adjustment
 	params := k.GetParams(ctx)
-	shareReduction := k.AmountToShare(amount, params.TrustDepositShareValue)
-
-	// 5. Debit
-	td.Amount -= amount
-	td.Share = td.Share.Sub(shareReduction)
-
-	// 6. Save
-	if err := k.TrustDeposit.Set(ctx, anchorID, td); err != nil {
-		return fmt.Errorf("failed to update trust deposit: %w", err)
+	if augend >= 0 {
+		// Positive adjustment (accumulation from operations)
+		td.Amount += uint64(augend)
+		shareIncrease := k.AmountToShare(uint64(augend), params.TrustDepositShareValue)
+		td.Share = td.Share.Add(shareIncrease)
+	} else {
+		// Negative adjustment (debit)
+		debitAmount := uint64(-augend)
+		if td.Amount < debitAmount {
+			return fmt.Errorf("insufficient trust deposit: have %d, need %d", td.Amount, debitAmount)
+		}
+		td.Amount -= debitAmount
+		shareReduction := k.AmountToShare(debitAmount, params.TrustDepositShareValue)
+		td.Share = td.Share.Sub(shareReduction)
 	}
 
-	// 7. Emit event
+	// 5. Save
+	if err := k.TrustDeposit.Set(ctx, anchorID, td); err != nil {
+		return fmt.Errorf("failed to save trust deposit: %w", err)
+	}
+
+	// 6. Emit event
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
-			"anchor_trust_deposit_debited",
+			"anchor_trust_deposit_adjusted",
 			sdk.NewAttribute("anchor_id", anchorID),
-			sdk.NewAttribute("amount", fmt.Sprintf("%d", amount)),
+			sdk.NewAttribute("adjustment", fmt.Sprintf("%d", augend)),
 			sdk.NewAttribute("operator", operatorAccount),
-			sdk.NewAttribute("reason", reason),
-			sdk.NewAttribute("remaining", fmt.Sprintf("%d", td.Amount)),
+			sdk.NewAttribute("new_amount", fmt.Sprintf("%d", td.Amount)),
 		),
 	)
 
 	return nil
+}
+
+// DebitAnchorTrustDeposit debits from an Anchor's trust deposit.
+// This is a convenience wrapper around AdjustAnchorTrustDeposit for debits.
+func (k Keeper) DebitAnchorTrustDeposit(
+	ctx sdk.Context,
+	anchorID string,
+	amount uint64,
+	operatorAccount string,
+	reason string,
+) error {
+	return k.AdjustAnchorTrustDeposit(ctx, anchorID, -int64(amount), operatorAccount)
 }
 
 // checkAndUpdateAllowance validates and updates operator spending allowance.
@@ -404,26 +335,4 @@ func (k Keeper) checkAndUpdateAllowance(ctx sdk.Context, anchorID, operatorAccou
 
 	// Save
 	return k.OperatorAllowances.Set(ctx, key, allowance)
-}
-
-// =============================================================================
-// INTEGRATION: Anchor-aware AdjustTrustDeposit
-// =============================================================================
-
-// AdjustAnchorTrustDeposit is the Anchor-aware version of AdjustTrustDeposit.
-// This should be called by other modules (dd, perm) when operating on behalf of an Anchor.
-func (k Keeper) AdjustAnchorTrustDeposit(
-	ctx sdk.Context,
-	anchorID string,
-	augend int64,
-	operatorAccount string,
-) error {
-	if augend >= 0 {
-		// Positive adjustment - funding
-		// For POC, require explicit funding via FundAnchorTrustDeposit
-		return fmt.Errorf("use FundAnchorTrustDeposit for positive adjustments")
-	}
-
-	// Negative adjustment - debit
-	return k.DebitAnchorTrustDeposit(ctx, anchorID, uint64(-augend), operatorAccount, "trust_deposit_adjustment")
 }

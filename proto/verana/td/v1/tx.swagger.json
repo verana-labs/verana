@@ -16,39 +16,6 @@
     "application/json"
   ],
   "paths": {
-    "/verana.td.v1.Msg/CreateAnchorTrustDeposit": {
-      "post": {
-        "operationId": "Msg_CreateAnchorTrustDeposit",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/verana.td.v1.MsgCreateAnchorTrustDepositResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/google.rpc.Status"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "description": "MsgCreateAnchorTrustDeposit creates a trust deposit for an Anchor.",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/verana.td.v1.MsgCreateAnchorTrustDeposit"
-            }
-          }
-        ],
-        "tags": [
-          "Msg"
-        ]
-      }
-    },
     "/verana.td.v1.Msg/ReclaimTrustDeposit": {
       "post": {
         "operationId": "Msg_ReclaimTrustDeposit",
@@ -341,28 +308,6 @@
           }
         }
       }
-    },
-    "verana.td.v1.MsgCreateAnchorTrustDeposit": {
-      "type": "object",
-      "properties": {
-        "funder": {
-          "type": "string",
-          "title": "funder is the account providing the funds"
-        },
-        "anchor_id": {
-          "type": "string",
-          "title": "anchor_id is the anchor to create the trust deposit for"
-        },
-        "amount": {
-          "type": "string",
-          "format": "uint64",
-          "title": "amount in uvna to deposit"
-        }
-      },
-      "description": "MsgCreateAnchorTrustDeposit creates a trust deposit for an Anchor."
-    },
-    "verana.td.v1.MsgCreateAnchorTrustDepositResponse": {
-      "type": "object"
     },
     "verana.td.v1.MsgReclaimTrustDeposit": {
       "type": "object",

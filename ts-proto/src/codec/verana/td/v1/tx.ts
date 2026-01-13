@@ -126,19 +126,6 @@ export interface MsgSetOperatorAllowance {
 export interface MsgSetOperatorAllowanceResponse {
 }
 
-/** MsgCreateAnchorTrustDeposit creates a trust deposit for an Anchor. */
-export interface MsgCreateAnchorTrustDeposit {
-  /** funder is the account providing the funds */
-  funder: string;
-  /** anchor_id is the anchor to create the trust deposit for */
-  anchorId: string;
-  /** amount in uvna to deposit */
-  amount: number;
-}
-
-export interface MsgCreateAnchorTrustDepositResponse {
-}
-
 function createBaseMsgUpdateParams(): MsgUpdateParams {
   return { authority: "", params: undefined };
 }
@@ -1254,142 +1241,6 @@ export const MsgSetOperatorAllowanceResponse = {
   },
 };
 
-function createBaseMsgCreateAnchorTrustDeposit(): MsgCreateAnchorTrustDeposit {
-  return { funder: "", anchorId: "", amount: 0 };
-}
-
-export const MsgCreateAnchorTrustDeposit = {
-  encode(message: MsgCreateAnchorTrustDeposit, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.funder !== "") {
-      writer.uint32(10).string(message.funder);
-    }
-    if (message.anchorId !== "") {
-      writer.uint32(18).string(message.anchorId);
-    }
-    if (message.amount !== 0) {
-      writer.uint32(24).uint64(message.amount);
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): MsgCreateAnchorTrustDeposit {
-    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseMsgCreateAnchorTrustDeposit();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          if (tag !== 10) {
-            break;
-          }
-
-          message.funder = reader.string();
-          continue;
-        case 2:
-          if (tag !== 18) {
-            break;
-          }
-
-          message.anchorId = reader.string();
-          continue;
-        case 3:
-          if (tag !== 24) {
-            break;
-          }
-
-          message.amount = longToNumber(reader.uint64() as Long);
-          continue;
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skipType(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): MsgCreateAnchorTrustDeposit {
-    return {
-      funder: isSet(object.funder) ? globalThis.String(object.funder) : "",
-      anchorId: isSet(object.anchorId) ? globalThis.String(object.anchorId) : "",
-      amount: isSet(object.amount) ? globalThis.Number(object.amount) : 0,
-    };
-  },
-
-  toJSON(message: MsgCreateAnchorTrustDeposit): unknown {
-    const obj: any = {};
-    if (message.funder !== "") {
-      obj.funder = message.funder;
-    }
-    if (message.anchorId !== "") {
-      obj.anchorId = message.anchorId;
-    }
-    if (message.amount !== 0) {
-      obj.amount = Math.round(message.amount);
-    }
-    return obj;
-  },
-
-  create<I extends Exact<DeepPartial<MsgCreateAnchorTrustDeposit>, I>>(base?: I): MsgCreateAnchorTrustDeposit {
-    return MsgCreateAnchorTrustDeposit.fromPartial(base ?? ({} as any));
-  },
-  fromPartial<I extends Exact<DeepPartial<MsgCreateAnchorTrustDeposit>, I>>(object: I): MsgCreateAnchorTrustDeposit {
-    const message = createBaseMsgCreateAnchorTrustDeposit();
-    message.funder = object.funder ?? "";
-    message.anchorId = object.anchorId ?? "";
-    message.amount = object.amount ?? 0;
-    return message;
-  },
-};
-
-function createBaseMsgCreateAnchorTrustDepositResponse(): MsgCreateAnchorTrustDepositResponse {
-  return {};
-}
-
-export const MsgCreateAnchorTrustDepositResponse = {
-  encode(_: MsgCreateAnchorTrustDepositResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): MsgCreateAnchorTrustDepositResponse {
-    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseMsgCreateAnchorTrustDepositResponse();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skipType(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(_: any): MsgCreateAnchorTrustDepositResponse {
-    return {};
-  },
-
-  toJSON(_: MsgCreateAnchorTrustDepositResponse): unknown {
-    const obj: any = {};
-    return obj;
-  },
-
-  create<I extends Exact<DeepPartial<MsgCreateAnchorTrustDepositResponse>, I>>(
-    base?: I,
-  ): MsgCreateAnchorTrustDepositResponse {
-    return MsgCreateAnchorTrustDepositResponse.fromPartial(base ?? ({} as any));
-  },
-  fromPartial<I extends Exact<DeepPartial<MsgCreateAnchorTrustDepositResponse>, I>>(
-    _: I,
-  ): MsgCreateAnchorTrustDepositResponse {
-    const message = createBaseMsgCreateAnchorTrustDepositResponse();
-    return message;
-  },
-};
-
 /** Msg defines the Msg service. */
 export interface Msg {
   /**
@@ -1406,7 +1257,6 @@ export interface Msg {
   RegisterAnchor(request: MsgRegisterAnchor): Promise<MsgRegisterAnchorResponse>;
   RegisterVerifiableService(request: MsgRegisterVerifiableService): Promise<MsgRegisterVerifiableServiceResponse>;
   SetOperatorAllowance(request: MsgSetOperatorAllowance): Promise<MsgSetOperatorAllowanceResponse>;
-  CreateAnchorTrustDeposit(request: MsgCreateAnchorTrustDeposit): Promise<MsgCreateAnchorTrustDepositResponse>;
 }
 
 export const MsgServiceName = "verana.td.v1.Msg";
@@ -1424,7 +1274,6 @@ export class MsgClientImpl implements Msg {
     this.RegisterAnchor = this.RegisterAnchor.bind(this);
     this.RegisterVerifiableService = this.RegisterVerifiableService.bind(this);
     this.SetOperatorAllowance = this.SetOperatorAllowance.bind(this);
-    this.CreateAnchorTrustDeposit = this.CreateAnchorTrustDeposit.bind(this);
   }
   UpdateParams(request: MsgUpdateParams): Promise<MsgUpdateParamsResponse> {
     const data = MsgUpdateParams.encode(request).finish();
@@ -1472,12 +1321,6 @@ export class MsgClientImpl implements Msg {
     const data = MsgSetOperatorAllowance.encode(request).finish();
     const promise = this.rpc.request(this.service, "SetOperatorAllowance", data);
     return promise.then((data) => MsgSetOperatorAllowanceResponse.decode(_m0.Reader.create(data)));
-  }
-
-  CreateAnchorTrustDeposit(request: MsgCreateAnchorTrustDeposit): Promise<MsgCreateAnchorTrustDepositResponse> {
-    const data = MsgCreateAnchorTrustDeposit.encode(request).finish();
-    const promise = this.rpc.request(this.service, "CreateAnchorTrustDeposit", data);
-    return promise.then((data) => MsgCreateAnchorTrustDepositResponse.decode(_m0.Reader.create(data)));
   }
 }
 

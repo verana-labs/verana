@@ -57,19 +57,3 @@ func (ms msgServer) SetOperatorAllowance(goCtx context.Context, msg *types.MsgSe
 
 	return &types.MsgSetOperatorAllowanceResponse{}, nil
 }
-
-// CreateAnchorTrustDeposit handles MsgCreateAnchorTrustDeposit.
-func (ms msgServer) CreateAnchorTrustDeposit(goCtx context.Context, msg *types.MsgCreateAnchorTrustDeposit) (*types.MsgCreateAnchorTrustDepositResponse, error) {
-	ctx := sdk.UnwrapSDKContext(goCtx)
-
-	funder, err := sdk.AccAddressFromBech32(msg.Funder)
-	if err != nil {
-		return nil, types.ErrInvalidAddress.Wrap("invalid funder address")
-	}
-
-	if err := ms.Keeper.CreateAnchorTrustDeposit(ctx, msg.AnchorId, msg.Amount, funder); err != nil {
-		return nil, err
-	}
-
-	return &types.MsgCreateAnchorTrustDepositResponse{}, nil
-}
