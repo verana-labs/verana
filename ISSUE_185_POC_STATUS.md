@@ -1,0 +1,130 @@
+# Issue #185: Anchor-Based Trust Deposit POC - Status Report
+
+> **Issue**: [#185 - Anchor-Based Control, Authorization, and Trust Deposit Architecture](https://github.com/verana-labs/verana/issues/185)
+> **Branch**: `poc/anchor-based-td`
+> **Date**: 2026-01-13
+
+---
+
+## POC Objectives & Status
+
+| # | Objective | Status | Notes |
+|---|-----------|--------|-------|
+| 1 | Anchor-Linked Trust Deposit | ✅ **Complete** | Trust deposits keyed by `anchor_id` (group policy address) |
+| 2 | VS Registration with Hot Keys | ✅ **Complete** | Operators registered via `MsgRegisterVerifiableService` |
+| 3 | Operator Spending from Anchor | ✅ **Complete** | `DebitAnchorTrustDeposit` with operator resolution |
+| 4 | Per-VS Spend Limits | ✅ **Complete** | `OperatorAllowance` with limit, spent, reset_period |
+
+---
+
+## What Was Implemented
+
+### Proto Definitions
+- `proto/verana/td/v1/anchor.proto` - Anchor, VerifiableService, OperatorAllowance messages
+- `proto/verana/td/v1/tx.proto` - RegisterAnchor, RegisterVerifiableService, SetOperatorAllowance RPCs
+- `proto/verana/td/v1/query.proto` - GetAnchor, GetVerifiableService, GetOperatorAllowance queries
+
+### Keeper Functions (`x/td/keeper/anchor_poc.go`)
+- `RegisterAnchor()` - Register group policy as anchor
+- `RegisterVerifiableService()` - Register hot operator key
+- `SetOperatorAllowance()` - Set spending limits
+- `AdjustAnchorTrustDeposit()` - Handle +/- trust deposit adjustments
+- `DebitAnchorTrustDeposit()` - Debit with allowance enforcement
+- `GetAnchorForOperator()` - Resolve operator → anchor
+
+### Query Endpoints (`x/td/keeper/query.go`)
+- `GetAnchor` - Query anchor by ID
+- `GetVerifiableService` - Query VS by operator account
+- `GetOperatorAllowance` - Query allowance for anchor/operator pair
+
+### CLI Commands (AutoCLI)
+- `veranad query td get-anchor [anchor_id]`
+- `veranad query td get-verifiable-service [operator_account]`
+- `veranad query td get-operator-allowance [anchor_id] [operator_account]`
+
+### Transaction Commands (via group proposals)
+- `veranad tx td register-anchor`
+- `veranad tx td register-verifiable-service`
+- `veranad tx td set-operator-allowance`
+
+### Tests
+- Comprehensive unit tests in `x/td/keeper/anchor_poc_test.go`
+- All tests passing ✅
+
+### Documentation
+- `ANCHOR_POC_IMPLEMENTATION.md` - Architecture overview
+- `POC_SETUP_GUIDE.md` - Step-by-step CLI testing guide
+
+---
+
+## What Remains (Future Work)
+
+### High Priority (For Full Implementation)
+
+| Item | Description |
+|------|-------------|
+| **Module Integration** | Update `x/dd` and `x/perm` to call `AdjustAnchorTrustDeposit` when operating on behalf of an Anchor |
+| **x/authz Integration** | Test and document authz grants via group proposals for VS operators |
+| **Trust Deposit Accumulation** | Currently TDs are adjusted via keeper calls; need to wire this into actual operations (DID registration, permission creation) |
+
+### Medium Priority
+
+| Item | Description |
+|------|-------------|
+| **Genesis Export/Import** | Add Anchors, VerifiableServices, OperatorAllowances to genesis |
+| **Migrations** | Migrate existing account-based TDs to anchor-based (if needed) |
+| **List Queries** | Add `ListAnchors`, `ListVerifiableServicesByAnchor`, `ListOperatorAllowances` |
+
+### Low Priority (Nice to Have)
+
+| Item | Description |
+|------|-------------|
+| **Deactivate VS** | Add ability to deactivate (not delete) a VS operator |
+| **Update Allowance** | Allow updating allowance without resetting spent |
+| **Events Indexing** | Ensure all events are properly indexed for off-chain queries |
+| **x/feegrant** | Explore using feegrant for operator gas fees |
+
+---
+
+## Key Design Decisions
+
+1. **Trust deposits accumulate from operations** - TDs are NOT funded directly; they increase when operations (DID registration, etc.) are performed
+
+2. **Anchor = Group Policy Address** - The `anchor_id` IS the group policy account address, making it a real on-chain account that can hold funds and sign transactions
+
+3. **Group Proposals for Anchor Operations** - All anchor management requires group proposals since `creator == anchor_id`
+
+4. **Operator Allowances Reset** - Spent amount resets to 0 when `reset_period` elapses
+
+---
+
+## Commits on `poc/anchor-based-td`
+
+| Commit | Description |
+|--------|-------------|
+| Initial | Proto definitions for Anchor, VS, OperatorAllowance |
+| ... | Keeper collections and functions |
+| ... | MsgServer handlers |
+| ... | Unit tests |
+| `29957ec` | Remove CreateAnchorTrustDeposit (TDs accumulate from ops) |
+| `ad176e2` | Add anchor query endpoints |
+| `36b778e` | Configure AutoCLI with positional args |
+| `dc298cb` | Add verification queries to POC guide |
+
+---
+
+## Testing the POC
+
+See [POC_SETUP_GUIDE.md](./POC_SETUP_GUIDE.md) for complete step-by-step instructions.
+
+Quick verification:
+```bash
+# Query anchor
+veranad query td get-anchor $ANCHOR_ID
+
+# Query VS operator
+veranad query td get-verifiable-service $OPERATOR1
+
+# Query allowance
+veranad query td get-operator-allowance $ANCHOR_ID $OPERATOR1
+```
