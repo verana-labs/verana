@@ -19,11 +19,15 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Msg_UpdateParams_FullMethodName             = "/verana.td.v1.Msg/UpdateParams"
-	Msg_ReclaimTrustDepositYield_FullMethodName = "/verana.td.v1.Msg/ReclaimTrustDepositYield"
-	Msg_ReclaimTrustDeposit_FullMethodName      = "/verana.td.v1.Msg/ReclaimTrustDeposit"
-	Msg_SlashTrustDeposit_FullMethodName        = "/verana.td.v1.Msg/SlashTrustDeposit"
-	Msg_RepaySlashedTrustDeposit_FullMethodName = "/verana.td.v1.Msg/RepaySlashedTrustDeposit"
+	Msg_UpdateParams_FullMethodName              = "/verana.td.v1.Msg/UpdateParams"
+	Msg_ReclaimTrustDepositYield_FullMethodName  = "/verana.td.v1.Msg/ReclaimTrustDepositYield"
+	Msg_ReclaimTrustDeposit_FullMethodName       = "/verana.td.v1.Msg/ReclaimTrustDeposit"
+	Msg_SlashTrustDeposit_FullMethodName         = "/verana.td.v1.Msg/SlashTrustDeposit"
+	Msg_RepaySlashedTrustDeposit_FullMethodName  = "/verana.td.v1.Msg/RepaySlashedTrustDeposit"
+	Msg_RegisterAnchor_FullMethodName            = "/verana.td.v1.Msg/RegisterAnchor"
+	Msg_RegisterVerifiableService_FullMethodName = "/verana.td.v1.Msg/RegisterVerifiableService"
+	Msg_SetOperatorAllowance_FullMethodName      = "/verana.td.v1.Msg/SetOperatorAllowance"
+	Msg_CreateAnchorTrustDeposit_FullMethodName  = "/verana.td.v1.Msg/CreateAnchorTrustDeposit"
 )
 
 // MsgClient is the client API for Msg service.
@@ -40,6 +44,11 @@ type MsgClient interface {
 	// SlashTrustDeposit defines a governance operation to slash an account's trust deposit
 	SlashTrustDeposit(ctx context.Context, in *MsgSlashTrustDeposit, opts ...grpc.CallOption) (*MsgSlashTrustDepositResponse, error)
 	RepaySlashedTrustDeposit(ctx context.Context, in *MsgRepaySlashedTrustDeposit, opts ...grpc.CallOption) (*MsgRepaySlashedTrustDepositResponse, error)
+	// Anchor-based POC operations
+	RegisterAnchor(ctx context.Context, in *MsgRegisterAnchor, opts ...grpc.CallOption) (*MsgRegisterAnchorResponse, error)
+	RegisterVerifiableService(ctx context.Context, in *MsgRegisterVerifiableService, opts ...grpc.CallOption) (*MsgRegisterVerifiableServiceResponse, error)
+	SetOperatorAllowance(ctx context.Context, in *MsgSetOperatorAllowance, opts ...grpc.CallOption) (*MsgSetOperatorAllowanceResponse, error)
+	CreateAnchorTrustDeposit(ctx context.Context, in *MsgCreateAnchorTrustDeposit, opts ...grpc.CallOption) (*MsgCreateAnchorTrustDepositResponse, error)
 }
 
 type msgClient struct {
@@ -100,6 +109,46 @@ func (c *msgClient) RepaySlashedTrustDeposit(ctx context.Context, in *MsgRepaySl
 	return out, nil
 }
 
+func (c *msgClient) RegisterAnchor(ctx context.Context, in *MsgRegisterAnchor, opts ...grpc.CallOption) (*MsgRegisterAnchorResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(MsgRegisterAnchorResponse)
+	err := c.cc.Invoke(ctx, Msg_RegisterAnchor_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *msgClient) RegisterVerifiableService(ctx context.Context, in *MsgRegisterVerifiableService, opts ...grpc.CallOption) (*MsgRegisterVerifiableServiceResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(MsgRegisterVerifiableServiceResponse)
+	err := c.cc.Invoke(ctx, Msg_RegisterVerifiableService_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *msgClient) SetOperatorAllowance(ctx context.Context, in *MsgSetOperatorAllowance, opts ...grpc.CallOption) (*MsgSetOperatorAllowanceResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(MsgSetOperatorAllowanceResponse)
+	err := c.cc.Invoke(ctx, Msg_SetOperatorAllowance_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *msgClient) CreateAnchorTrustDeposit(ctx context.Context, in *MsgCreateAnchorTrustDeposit, opts ...grpc.CallOption) (*MsgCreateAnchorTrustDepositResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(MsgCreateAnchorTrustDepositResponse)
+	err := c.cc.Invoke(ctx, Msg_CreateAnchorTrustDeposit_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MsgServer is the server API for Msg service.
 // All implementations must embed UnimplementedMsgServer
 // for forward compatibility.
@@ -114,6 +163,11 @@ type MsgServer interface {
 	// SlashTrustDeposit defines a governance operation to slash an account's trust deposit
 	SlashTrustDeposit(context.Context, *MsgSlashTrustDeposit) (*MsgSlashTrustDepositResponse, error)
 	RepaySlashedTrustDeposit(context.Context, *MsgRepaySlashedTrustDeposit) (*MsgRepaySlashedTrustDepositResponse, error)
+	// Anchor-based POC operations
+	RegisterAnchor(context.Context, *MsgRegisterAnchor) (*MsgRegisterAnchorResponse, error)
+	RegisterVerifiableService(context.Context, *MsgRegisterVerifiableService) (*MsgRegisterVerifiableServiceResponse, error)
+	SetOperatorAllowance(context.Context, *MsgSetOperatorAllowance) (*MsgSetOperatorAllowanceResponse, error)
+	CreateAnchorTrustDeposit(context.Context, *MsgCreateAnchorTrustDeposit) (*MsgCreateAnchorTrustDepositResponse, error)
 	mustEmbedUnimplementedMsgServer()
 }
 
@@ -138,6 +192,18 @@ func (UnimplementedMsgServer) SlashTrustDeposit(context.Context, *MsgSlashTrustD
 }
 func (UnimplementedMsgServer) RepaySlashedTrustDeposit(context.Context, *MsgRepaySlashedTrustDeposit) (*MsgRepaySlashedTrustDepositResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RepaySlashedTrustDeposit not implemented")
+}
+func (UnimplementedMsgServer) RegisterAnchor(context.Context, *MsgRegisterAnchor) (*MsgRegisterAnchorResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RegisterAnchor not implemented")
+}
+func (UnimplementedMsgServer) RegisterVerifiableService(context.Context, *MsgRegisterVerifiableService) (*MsgRegisterVerifiableServiceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RegisterVerifiableService not implemented")
+}
+func (UnimplementedMsgServer) SetOperatorAllowance(context.Context, *MsgSetOperatorAllowance) (*MsgSetOperatorAllowanceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetOperatorAllowance not implemented")
+}
+func (UnimplementedMsgServer) CreateAnchorTrustDeposit(context.Context, *MsgCreateAnchorTrustDeposit) (*MsgCreateAnchorTrustDepositResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateAnchorTrustDeposit not implemented")
 }
 func (UnimplementedMsgServer) mustEmbedUnimplementedMsgServer() {}
 func (UnimplementedMsgServer) testEmbeddedByValue()             {}
@@ -250,6 +316,78 @@ func _Msg_RepaySlashedTrustDeposit_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Msg_RegisterAnchor_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgRegisterAnchor)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).RegisterAnchor(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Msg_RegisterAnchor_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).RegisterAnchor(ctx, req.(*MsgRegisterAnchor))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Msg_RegisterVerifiableService_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgRegisterVerifiableService)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).RegisterVerifiableService(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Msg_RegisterVerifiableService_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).RegisterVerifiableService(ctx, req.(*MsgRegisterVerifiableService))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Msg_SetOperatorAllowance_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgSetOperatorAllowance)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).SetOperatorAllowance(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Msg_SetOperatorAllowance_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).SetOperatorAllowance(ctx, req.(*MsgSetOperatorAllowance))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Msg_CreateAnchorTrustDeposit_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgCreateAnchorTrustDeposit)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).CreateAnchorTrustDeposit(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Msg_CreateAnchorTrustDeposit_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).CreateAnchorTrustDeposit(ctx, req.(*MsgCreateAnchorTrustDeposit))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Msg_ServiceDesc is the grpc.ServiceDesc for Msg service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -276,6 +414,22 @@ var Msg_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RepaySlashedTrustDeposit",
 			Handler:    _Msg_RepaySlashedTrustDeposit_Handler,
+		},
+		{
+			MethodName: "RegisterAnchor",
+			Handler:    _Msg_RegisterAnchor_Handler,
+		},
+		{
+			MethodName: "RegisterVerifiableService",
+			Handler:    _Msg_RegisterVerifiableService_Handler,
+		},
+		{
+			MethodName: "SetOperatorAllowance",
+			Handler:    _Msg_SetOperatorAllowance_Handler,
+		},
+		{
+			MethodName: "CreateAnchorTrustDeposit",
+			Handler:    _Msg_CreateAnchorTrustDeposit_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

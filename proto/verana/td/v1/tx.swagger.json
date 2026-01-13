@@ -16,6 +16,39 @@
     "application/json"
   ],
   "paths": {
+    "/verana.td.v1.Msg/CreateAnchorTrustDeposit": {
+      "post": {
+        "operationId": "Msg_CreateAnchorTrustDeposit",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.td.v1.MsgCreateAnchorTrustDepositResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "MsgCreateAnchorTrustDeposit creates a trust deposit for an Anchor.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.td.v1.MsgCreateAnchorTrustDeposit"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
     "/verana.td.v1.Msg/ReclaimTrustDeposit": {
       "post": {
         "operationId": "Msg_ReclaimTrustDeposit",
@@ -80,6 +113,73 @@
         ]
       }
     },
+    "/verana.td.v1.Msg/RegisterAnchor": {
+      "post": {
+        "summary": "Anchor-based POC operations",
+        "operationId": "Msg_RegisterAnchor",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.td.v1.MsgRegisterAnchorResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "MsgRegisterAnchor registers a group policy address as an Anchor.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.td.v1.MsgRegisterAnchor"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.td.v1.Msg/RegisterVerifiableService": {
+      "post": {
+        "operationId": "Msg_RegisterVerifiableService",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.td.v1.MsgRegisterVerifiableServiceResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "MsgRegisterVerifiableService registers a hot operator key for an Anchor.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.td.v1.MsgRegisterVerifiableService"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
     "/verana.td.v1.Msg/RepaySlashedTrustDeposit": {
       "post": {
         "operationId": "Msg_RepaySlashedTrustDeposit",
@@ -104,6 +204,39 @@
             "required": true,
             "schema": {
               "$ref": "#/definitions/verana.td.v1.MsgRepaySlashedTrustDeposit"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.td.v1.Msg/SetOperatorAllowance": {
+      "post": {
+        "operationId": "Msg_SetOperatorAllowance",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.td.v1.MsgSetOperatorAllowanceResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "MsgSetOperatorAllowance sets spending limits for a VS operator.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.td.v1.MsgSetOperatorAllowance"
             }
           }
         ],
@@ -209,6 +342,28 @@
         }
       }
     },
+    "verana.td.v1.MsgCreateAnchorTrustDeposit": {
+      "type": "object",
+      "properties": {
+        "funder": {
+          "type": "string",
+          "title": "funder is the account providing the funds"
+        },
+        "anchor_id": {
+          "type": "string",
+          "title": "anchor_id is the anchor to create the trust deposit for"
+        },
+        "amount": {
+          "type": "string",
+          "format": "uint64",
+          "title": "amount in uvna to deposit"
+        }
+      },
+      "description": "MsgCreateAnchorTrustDeposit creates a trust deposit for an Anchor."
+    },
+    "verana.td.v1.MsgCreateAnchorTrustDepositResponse": {
+      "type": "object"
+    },
     "verana.td.v1.MsgReclaimTrustDeposit": {
       "type": "object",
       "properties": {
@@ -256,6 +411,57 @@
       },
       "title": "MsgReclaimTrustDepositYieldResponse defines the response type"
     },
+    "verana.td.v1.MsgRegisterAnchor": {
+      "type": "object",
+      "properties": {
+        "creator": {
+          "type": "string",
+          "title": "creator must be a member of the group or the group policy itself"
+        },
+        "anchor_id": {
+          "type": "string",
+          "title": "anchor_id is the group policy address to register as anchor"
+        },
+        "group_id": {
+          "type": "string",
+          "format": "uint64",
+          "title": "group_id is the x/group group ID"
+        },
+        "metadata": {
+          "type": "string",
+          "title": "metadata is optional description"
+        }
+      },
+      "description": "MsgRegisterAnchor registers a group policy address as an Anchor."
+    },
+    "verana.td.v1.MsgRegisterAnchorResponse": {
+      "type": "object"
+    },
+    "verana.td.v1.MsgRegisterVerifiableService": {
+      "type": "object",
+      "properties": {
+        "creator": {
+          "type": "string",
+          "title": "creator must be the anchor or authorized by the anchor"
+        },
+        "anchor_id": {
+          "type": "string",
+          "title": "anchor_id is the anchor this VS belongs to"
+        },
+        "operator_account": {
+          "type": "string",
+          "title": "operator_account is the hot key address for the VS"
+        },
+        "metadata": {
+          "type": "string",
+          "title": "metadata is optional service description"
+        }
+      },
+      "description": "MsgRegisterVerifiableService registers a hot operator key for an Anchor."
+    },
+    "verana.td.v1.MsgRegisterVerifiableServiceResponse": {
+      "type": "object"
+    },
     "verana.td.v1.MsgRepaySlashedTrustDeposit": {
       "type": "object",
       "properties": {
@@ -272,6 +478,37 @@
       }
     },
     "verana.td.v1.MsgRepaySlashedTrustDepositResponse": {
+      "type": "object"
+    },
+    "verana.td.v1.MsgSetOperatorAllowance": {
+      "type": "object",
+      "properties": {
+        "creator": {
+          "type": "string",
+          "title": "creator must be the anchor or authorized by the anchor"
+        },
+        "anchor_id": {
+          "type": "string",
+          "title": "anchor_id is the anchor this allowance belongs to"
+        },
+        "operator_account": {
+          "type": "string",
+          "title": "operator_account is the VS operator address"
+        },
+        "allowance_limit": {
+          "type": "string",
+          "format": "uint64",
+          "title": "allowance_limit is the max spendable amount per period (in uvna)"
+        },
+        "reset_period": {
+          "type": "string",
+          "format": "uint64",
+          "title": "reset_period in seconds (e.g., 86400 for daily)"
+        }
+      },
+      "description": "MsgSetOperatorAllowance sets spending limits for a VS operator."
+    },
+    "verana.td.v1.MsgSetOperatorAllowanceResponse": {
       "type": "object"
     },
     "verana.td.v1.MsgSlashTrustDeposit": {

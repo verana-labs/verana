@@ -21,6 +21,12 @@ service Msg {
   // SlashTrustDeposit defines a governance operation to slash an account's trust deposit
   rpc SlashTrustDeposit(MsgSlashTrustDeposit) returns (MsgSlashTrustDepositResponse);
   rpc RepaySlashedTrustDeposit(MsgRepaySlashedTrustDeposit) returns (MsgRepaySlashedTrustDepositResponse);
+
+  // Anchor-based POC operations
+  rpc RegisterAnchor(MsgRegisterAnchor) returns (MsgRegisterAnchorResponse);
+  rpc RegisterVerifiableService(MsgRegisterVerifiableService) returns (MsgRegisterVerifiableServiceResponse);
+  rpc SetOperatorAllowance(MsgSetOperatorAllowance) returns (MsgSetOperatorAllowanceResponse);
+  rpc CreateAnchorTrustDeposit(MsgCreateAnchorTrustDeposit) returns (MsgCreateAnchorTrustDepositResponse);
 }
 
 // MsgUpdateParams is the Msg/UpdateParams request type.
@@ -95,3 +101,76 @@ message MsgRepaySlashedTrustDeposit {
 }
 
 message MsgRepaySlashedTrustDepositResponse {}
+
+// =============================================================================
+// ANCHOR-BASED POC MESSAGES
+// =============================================================================
+
+// MsgRegisterAnchor registers a group policy address as an Anchor.
+message MsgRegisterAnchor {
+  option (cosmos.msg.v1.signer) = "creator";
+  option (amino.name) = "verana/x/td/MsgRegisterAnchor";
+
+  // creator must be a member of the group or the group policy itself
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // anchor_id is the group policy address to register as anchor
+  string anchor_id = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // group_id is the x/group group ID
+  uint64 group_id = 3;
+  // metadata is optional description
+  string metadata = 4;
+}
+
+message MsgRegisterAnchorResponse {}
+
+// MsgRegisterVerifiableService registers a hot operator key for an Anchor.
+message MsgRegisterVerifiableService {
+  option (cosmos.msg.v1.signer) = "creator";
+  option (amino.name) = "verana/x/td/MsgRegisterVerifiableService";
+
+  // creator must be the anchor or authorized by the anchor
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // anchor_id is the anchor this VS belongs to
+  string anchor_id = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // operator_account is the hot key address for the VS
+  string operator_account = 3 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // metadata is optional service description
+  string metadata = 4;
+}
+
+message MsgRegisterVerifiableServiceResponse {}
+
+// MsgSetOperatorAllowance sets spending limits for a VS operator.
+message MsgSetOperatorAllowance {
+  option (cosmos.msg.v1.signer) = "creator";
+  option (amino.name) = "verana/x/td/MsgSetOperatorAllowance";
+
+  // creator must be the anchor or authorized by the anchor
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // anchor_id is the anchor this allowance belongs to
+  string anchor_id = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // operator_account is the VS operator address
+  string operator_account = 3 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // allowance_limit is the max spendable amount per period (in uvna)
+  uint64 allowance_limit = 4;
+  // reset_period in seconds (e.g., 86400 for daily)
+  uint64 reset_period = 5;
+}
+
+message MsgSetOperatorAllowanceResponse {}
+
+// MsgCreateAnchorTrustDeposit creates a trust deposit for an Anchor.
+message MsgCreateAnchorTrustDeposit {
+  option (cosmos.msg.v1.signer) = "funder";
+  option (amino.name) = "verana/x/td/MsgCreateAnchorTrustDeposit";
+
+  // funder is the account providing the funds
+  string funder = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // anchor_id is the anchor to create the trust deposit for
+  string anchor_id = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // amount in uvna to deposit
+  uint64 amount = 3;
+}
+
+message MsgCreateAnchorTrustDepositResponse {}
+
