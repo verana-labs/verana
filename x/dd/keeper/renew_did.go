@@ -63,8 +63,8 @@ func (ms msgServer) executeRenewDID(ctx sdk.Context, msg *types.MsgRenewDID) err
 	// Calculate additional deposit
 	additionalDeposit := params.DidDirectoryTrustDeposit * trustUnitPrice * uint64(years)
 
-	// Increase trust deposit
-	if err := ms.trustDeposit.AdjustTrustDeposit(ctx, msg.Creator, int64(additionalDeposit)); err != nil {
+	// Increase trust deposit (anchor-aware: Issue #185)
+	if err := ms.adjustTrustDepositAnchorAware(ctx, msg.Creator, int64(additionalDeposit)); err != nil {
 		return fmt.Errorf("failed to adjust trust deposit: %w", err)
 	}
 

@@ -92,3 +92,23 @@ func (ms msgServer) TouchDID(goCtx context.Context, msg *types.MsgTouchDID) (*ty
 
 	return &types.MsgTouchDIDResponse{}, nil
 }
+
+// adjustTrustDepositAnchorAware is an anchor-aware version of AdjustTrustDeposit.
+// It checks if the account is an anchor or VS operator and routes to the appropriate method.
+// Issue #185: Anchor-Based Trust Deposit Architecture
+func (ms msgServer) adjustTrustDepositAnchorAware(ctx sdk.Context, account string, augend int64) error {
+	// Check if account is an anchor
+	if ms.trustDeposit.IsAnchor(ctx, account) {
+		// Direct anchor operation - no operator limit check
+		return ms.trustDeposit.AdjustAnchorTrustDeposit(ctx, account, augend, "")
+	}
+
+	// Check if account is a VS operator
+	if anchorID, err := ms.trustDeposit.GetAnchorForOperator(ctx, account); err == nil && anchorID != "" {
+		// Operator acting on behalf of anchor - with limit enforcement
+		return ms.trustDeposit.AdjustAnchorTrustDeposit(ctx, anchorID, augend, account)
+	}
+
+	// Regular account operation (backward compatible)
+	return ms.trustDeposit.AdjustTrustDeposit(ctx, account, augend)
+}
