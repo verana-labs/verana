@@ -117,9 +117,9 @@ func (ms msgServer) RenewPermissionVP(goCtx context.Context, msg *types.MsgRenew
 }
 
 func (ms msgServer) executeRenewPermissionVP(ctx sdk.Context, perm types.Permission, fees, deposit uint64) error {
-	// Increment trust deposit if deposit is greater than 0
+	// Increment trust deposit if deposit is greater than 0 (anchor-aware: Issue #185)
 	if deposit > 0 {
-		if err := ms.trustDeposit.AdjustTrustDeposit(ctx, perm.Grantee, int64(deposit)); err != nil {
+		if err := ms.adjustTrustDepositAnchorAware(ctx, perm.Grantee, int64(deposit)); err != nil {
 			return fmt.Errorf("failed to increase trust deposit: %w", err)
 		}
 	}
@@ -332,9 +332,9 @@ func (ms msgServer) executeCancelPermissionVPLastRequest(ctx sdk.Context, perm t
 
 	// Handle current deposit if any
 	if perm.VpCurrentDeposit > 0 {
-		// Use AdjustTrustDeposit to reduce trust deposit with negative value
-		// to move funds from deposit to claimable
-		if err := ms.trustDeposit.AdjustTrustDeposit(
+		// Use anchor-aware AdjustTrustDeposit to reduce trust deposit with negative value
+		// to move funds from deposit to claimable (Issue #185)
+		if err := ms.adjustTrustDepositAnchorAware(
 			ctx,
 			perm.Grantee,
 			-int64(perm.VpCurrentDeposit), // Negative value to reduce deposit and increase claimable
@@ -976,8 +976,8 @@ func (ms msgServer) executeRepayPermissionSlashedTrustDeposit(ctx sdk.Context, a
 	applicantPerm.RepaidDeposit = amount
 	applicantPerm.RepaidBy = repaidBy
 
-	// Use AdjustTrustDeposit to transfer amount to trust deposit of applicant_perm.grantee
-	if err := ms.trustDeposit.AdjustTrustDeposit(ctx, applicantPerm.Grantee, int64(amount)); err != nil {
+	// Use anchor-aware AdjustTrustDeposit to transfer amount to trust deposit of applicant_perm.grantee (Issue #185)
+	if err := ms.adjustTrustDepositAnchorAware(ctx, applicantPerm.Grantee, int64(amount)); err != nil {
 		return fmt.Errorf("failed to adjust trust deposit: %w", err)
 	}
 
@@ -1182,4 +1182,24 @@ func (ms msgServer) findEcosystemPermission(ctx sdk.Context, schemaId uint64) (t
 	}
 
 	return foundPerm, nil
+}
+
+// adjustTrustDepositAnchorAware is an anchor-aware version of AdjustTrustDeposit.
+// It checks if the account is an anchor or VS operator and routes to the appropriate method.
+// Issue #185: Anchor-Based Trust Deposit Architecture
+func (ms msgServer) adjustTrustDepositAnchorAware(ctx sdk.Context, account string, augend int64) error {
+	// Check if account is an anchor
+	if ms.trustDeposit.IsAnchor(ctx, account) {
+		// Direct anchor operation - no operator limit check
+		return ms.trustDeposit.AdjustAnchorTrustDeposit(ctx, account, augend, "")
+	}
+
+	// Check if account is a VS operator
+	if anchorID, err := ms.trustDeposit.GetAnchorForOperator(ctx, account); err == nil && anchorID != "" {
+		// Operator acting on behalf of anchor - with limit enforcement
+		return ms.trustDeposit.AdjustAnchorTrustDeposit(ctx, anchorID, augend, account)
+	}
+
+	// Regular account operation (backward compatible)
+	return ms.trustDeposit.AdjustTrustDeposit(ctx, account, augend)
 }

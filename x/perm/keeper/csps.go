@@ -1,13 +1,15 @@
 package keeper
 
 import (
-	"cosmossdk.io/math"
 	"errors"
 	"fmt"
+
+	"cosmossdk.io/math"
 	credentialschematypes "github.com/verana-labs/verana/x/cs/types"
 
-	"cosmossdk.io/collections"
 	"time"
+
+	"cosmossdk.io/collections"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/verana-labs/verana/x/perm/types"
@@ -215,8 +217,8 @@ func (ms msgServer) executeCreateOrUpdatePermissionSession(ctx sdk.Context, msg 
 					return fmt.Errorf("failed to transfer trust deposit to module: %w", err)
 				}
 
-				// Increase trust deposit of perm.grantee
-				err = ms.trustDeposit.AdjustTrustDeposit(ctx, perm.Grantee, int64(trustDepositAmount))
+				// Increase trust deposit of perm.grantee (anchor-aware: Issue #185)
+				err = ms.adjustTrustDepositAnchorAware(ctx, perm.Grantee, int64(trustDepositAmount))
 				if err != nil {
 					return fmt.Errorf("failed to adjust grantee trust deposit: %w", err)
 				}
@@ -227,8 +229,8 @@ func (ms msgServer) executeCreateOrUpdatePermissionSession(ctx sdk.Context, msg 
 					return fmt.Errorf("failed to update grantee permission deposit: %w", err)
 				}
 
-				// use MOD-TD-MSG-1 to increase trust deposit of account executing the method and add to executor_perm.deposit
-				err = ms.trustDeposit.AdjustTrustDeposit(ctx, msg.Creator, int64(trustDepositAmount))
+				// use MOD-TD-MSG-1 to increase trust deposit of account executing the method (anchor-aware: Issue #185)
+				err = ms.adjustTrustDepositAnchorAware(ctx, msg.Creator, int64(trustDepositAmount))
 				if err != nil {
 					return fmt.Errorf("failed to adjust creator trust deposit: %w", err)
 				}
