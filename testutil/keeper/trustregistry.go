@@ -1,8 +1,10 @@
 package keeper
 
 import (
-	"cosmossdk.io/math"
+	"context"
 	"testing"
+
+	"cosmossdk.io/math"
 
 	"cosmossdk.io/log"
 	"cosmossdk.io/store"
@@ -84,4 +86,22 @@ func (m *MockTrustDepositKeeper) GetTrustDepositRate(ctx sdk.Context) math.Legac
 func (m *MockTrustDepositKeeper) AdjustTrustDeposit(ctx sdk.Context, account string, augend int64) error {
 	// For testing, always succeed
 	return nil
+}
+
+// AdjustAnchorTrustDeposit implements the TrustDepositKeeper interface (Issue #185)
+func (m *MockTrustDepositKeeper) AdjustAnchorTrustDeposit(ctx sdk.Context, anchorID string, augend int64, operatorAccount string) error {
+	// For testing, always succeed
+	return nil
+}
+
+// IsAnchor implements the TrustDepositKeeper interface (Issue #185)
+func (m *MockTrustDepositKeeper) IsAnchor(ctx context.Context, anchorID string) bool {
+	// For testing, return false by default
+	return false
+}
+
+// GetAnchorForOperator implements the TrustDepositKeeper interface (Issue #185)
+func (m *MockTrustDepositKeeper) GetAnchorForOperator(ctx context.Context, operatorAccount string) (string, error) {
+	// For testing, return empty (no anchor)
+	return "", nil
 }

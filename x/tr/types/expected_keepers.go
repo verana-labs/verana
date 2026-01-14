@@ -27,4 +27,8 @@ type ParamSubspace interface {
 // TrustDepositKeeper defines the expected interface for the Trust Deposit module.
 type TrustDepositKeeper interface {
 	AdjustTrustDeposit(ctx sdk.Context, account string, augend int64) error
+	// Anchor-aware methods for Issue #185
+	AdjustAnchorTrustDeposit(ctx sdk.Context, anchorID string, augend int64, operatorAccount string) error
+	IsAnchor(ctx context.Context, anchorID string) bool
+	GetAnchorForOperator(ctx context.Context, operatorAccount string) (string, error)
 }

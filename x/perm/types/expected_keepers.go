@@ -2,6 +2,7 @@ package types
 
 import (
 	"context"
+
 	"cosmossdk.io/math"
 
 	credentialschematypes "github.com/verana-labs/verana/x/cs/types"
@@ -48,4 +49,8 @@ type TrustDepositKeeper interface {
 	GetUserAgentRewardRate(ctx sdk.Context) math.LegacyDec
 	GetWalletUserAgentRewardRate(ctx sdk.Context) math.LegacyDec
 	BurnEcosystemSlashedTrustDeposit(ctx sdk.Context, account string, amount uint64) error
+	// Anchor-aware methods for Issue #185
+	AdjustAnchorTrustDeposit(ctx sdk.Context, anchorID string, augend int64, operatorAccount string) error
+	IsAnchor(ctx context.Context, anchorID string) bool
+	GetAnchorForOperator(ctx context.Context, operatorAccount string) (string, error)
 }
