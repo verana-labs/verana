@@ -95,6 +95,8 @@ If you need to modify protobuf definitions or regenerate generated code:
 
 #### Install Ignite CLI v28.10.0
 
+We need Ignite to generate the Swagger documentation.
+
 ```bash
 # Download Ignite v28.10.0
 curl https://get.ignite.com/cli@v28.10.0 | bash
@@ -126,6 +128,9 @@ make proto-clean        # Clean generated files
 ```
 
 #### Generate OpenAPI Documentation
+
+Prerequisite:
+We need Ignite to generate the Swagger documentation.
 
 ```bash
 # Generate OpenAPI documentation
