@@ -1,10 +1,11 @@
 package keeper
 
 import (
-	"cosmossdk.io/math"
 	"fmt"
 	"strconv"
 	"time"
+
+	"cosmossdk.io/math"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	cstypes "github.com/verana-labs/verana/x/cs/types"
@@ -97,9 +98,9 @@ func (ms msgServer) executeSetPermissionVPToValidated(
 		trustDepositRate := ms.trustDeposit.GetTrustDepositRate(ctx)
 		validatorTrustDeposit := ms.Keeper.validatorTrustDepositAmount(applicantPerm.VpCurrentFees, trustDepositRate)
 
-		// Increase validator perm trust deposit: use [MOD-TD-MSG-1] to increase by validator_trust_deposit
+		// Increase validator perm trust deposit: use anchor-aware [MOD-TD-MSG-1] (Issue #185)
 		if validatorTrustDeposit > 0 {
-			err = ms.trustDeposit.AdjustTrustDeposit(
+			err = ms.adjustTrustDepositAnchorAware(
 				ctx,
 				validatorPerm.Grantee,
 				int64(validatorTrustDeposit),

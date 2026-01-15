@@ -19,8 +19,11 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Query_Params_FullMethodName          = "/verana.td.v1.Query/Params"
-	Query_GetTrustDeposit_FullMethodName = "/verana.td.v1.Query/GetTrustDeposit"
+	Query_Params_FullMethodName               = "/verana.td.v1.Query/Params"
+	Query_GetTrustDeposit_FullMethodName      = "/verana.td.v1.Query/GetTrustDeposit"
+	Query_GetAnchor_FullMethodName            = "/verana.td.v1.Query/GetAnchor"
+	Query_GetVerifiableService_FullMethodName = "/verana.td.v1.Query/GetVerifiableService"
+	Query_GetOperatorAllowance_FullMethodName = "/verana.td.v1.Query/GetOperatorAllowance"
 )
 
 // QueryClient is the client API for Query service.
@@ -32,6 +35,10 @@ type QueryClient interface {
 	// Parameters queries the parameters of the module.
 	Params(ctx context.Context, in *QueryParamsRequest, opts ...grpc.CallOption) (*QueryParamsResponse, error)
 	GetTrustDeposit(ctx context.Context, in *QueryGetTrustDepositRequest, opts ...grpc.CallOption) (*QueryGetTrustDepositResponse, error)
+	// Anchor-based POC queries
+	GetAnchor(ctx context.Context, in *QueryGetAnchorRequest, opts ...grpc.CallOption) (*QueryGetAnchorResponse, error)
+	GetVerifiableService(ctx context.Context, in *QueryGetVerifiableServiceRequest, opts ...grpc.CallOption) (*QueryGetVerifiableServiceResponse, error)
+	GetOperatorAllowance(ctx context.Context, in *QueryGetOperatorAllowanceRequest, opts ...grpc.CallOption) (*QueryGetOperatorAllowanceResponse, error)
 }
 
 type queryClient struct {
@@ -62,6 +69,36 @@ func (c *queryClient) GetTrustDeposit(ctx context.Context, in *QueryGetTrustDepo
 	return out, nil
 }
 
+func (c *queryClient) GetAnchor(ctx context.Context, in *QueryGetAnchorRequest, opts ...grpc.CallOption) (*QueryGetAnchorResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(QueryGetAnchorResponse)
+	err := c.cc.Invoke(ctx, Query_GetAnchor_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) GetVerifiableService(ctx context.Context, in *QueryGetVerifiableServiceRequest, opts ...grpc.CallOption) (*QueryGetVerifiableServiceResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(QueryGetVerifiableServiceResponse)
+	err := c.cc.Invoke(ctx, Query_GetVerifiableService_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) GetOperatorAllowance(ctx context.Context, in *QueryGetOperatorAllowanceRequest, opts ...grpc.CallOption) (*QueryGetOperatorAllowanceResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(QueryGetOperatorAllowanceResponse)
+	err := c.cc.Invoke(ctx, Query_GetOperatorAllowance_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // QueryServer is the server API for Query service.
 // All implementations must embed UnimplementedQueryServer
 // for forward compatibility.
@@ -71,6 +108,10 @@ type QueryServer interface {
 	// Parameters queries the parameters of the module.
 	Params(context.Context, *QueryParamsRequest) (*QueryParamsResponse, error)
 	GetTrustDeposit(context.Context, *QueryGetTrustDepositRequest) (*QueryGetTrustDepositResponse, error)
+	// Anchor-based POC queries
+	GetAnchor(context.Context, *QueryGetAnchorRequest) (*QueryGetAnchorResponse, error)
+	GetVerifiableService(context.Context, *QueryGetVerifiableServiceRequest) (*QueryGetVerifiableServiceResponse, error)
+	GetOperatorAllowance(context.Context, *QueryGetOperatorAllowanceRequest) (*QueryGetOperatorAllowanceResponse, error)
 	mustEmbedUnimplementedQueryServer()
 }
 
@@ -86,6 +127,15 @@ func (UnimplementedQueryServer) Params(context.Context, *QueryParamsRequest) (*Q
 }
 func (UnimplementedQueryServer) GetTrustDeposit(context.Context, *QueryGetTrustDepositRequest) (*QueryGetTrustDepositResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTrustDeposit not implemented")
+}
+func (UnimplementedQueryServer) GetAnchor(context.Context, *QueryGetAnchorRequest) (*QueryGetAnchorResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAnchor not implemented")
+}
+func (UnimplementedQueryServer) GetVerifiableService(context.Context, *QueryGetVerifiableServiceRequest) (*QueryGetVerifiableServiceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetVerifiableService not implemented")
+}
+func (UnimplementedQueryServer) GetOperatorAllowance(context.Context, *QueryGetOperatorAllowanceRequest) (*QueryGetOperatorAllowanceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetOperatorAllowance not implemented")
 }
 func (UnimplementedQueryServer) mustEmbedUnimplementedQueryServer() {}
 func (UnimplementedQueryServer) testEmbeddedByValue()               {}
@@ -144,6 +194,60 @@ func _Query_GetTrustDeposit_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Query_GetAnchor_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryGetAnchorRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).GetAnchor(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Query_GetAnchor_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).GetAnchor(ctx, req.(*QueryGetAnchorRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_GetVerifiableService_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryGetVerifiableServiceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).GetVerifiableService(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Query_GetVerifiableService_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).GetVerifiableService(ctx, req.(*QueryGetVerifiableServiceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_GetOperatorAllowance_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryGetOperatorAllowanceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).GetOperatorAllowance(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Query_GetOperatorAllowance_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).GetOperatorAllowance(ctx, req.(*QueryGetOperatorAllowanceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Query_ServiceDesc is the grpc.ServiceDesc for Query service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -158,6 +262,18 @@ var Query_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetTrustDeposit",
 			Handler:    _Query_GetTrustDeposit_Handler,
+		},
+		{
+			MethodName: "GetAnchor",
+			Handler:    _Query_GetAnchor_Handler,
+		},
+		{
+			MethodName: "GetVerifiableService",
+			Handler:    _Query_GetVerifiableService_Handler,
+		},
+		{
+			MethodName: "GetOperatorAllowance",
+			Handler:    _Query_GetOperatorAllowance_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

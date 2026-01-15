@@ -16,6 +16,37 @@
     "application/json"
   ],
   "paths": {
+    "/verana/td/v1/anchor/{anchor_id}": {
+      "get": {
+        "summary": "Anchor-based POC queries",
+        "operationId": "Query_GetAnchor",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.td.v1.QueryGetAnchorResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "anchor_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Query"
+        ]
+      }
+    },
     "/verana/td/v1/get/{account}": {
       "get": {
         "operationId": "Query_GetTrustDeposit",
@@ -46,6 +77,42 @@
         ]
       }
     },
+    "/verana/td/v1/operator-allowance/{anchor_id}/{operator_account}": {
+      "get": {
+        "operationId": "Query_GetOperatorAllowance",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.td.v1.QueryGetOperatorAllowanceResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "anchor_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "operator_account",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Query"
+        ]
+      }
+    },
     "/verana/td/v1/params": {
       "get": {
         "summary": "Parameters queries the parameters of the module.",
@@ -64,6 +131,36 @@
             }
           }
         },
+        "tags": [
+          "Query"
+        ]
+      }
+    },
+    "/verana/td/v1/verifiable-service/{operator_account}": {
+      "get": {
+        "operationId": "Query_GetVerifiableService",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.td.v1.QueryGetVerifiableServiceResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "operator_account",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
         "tags": [
           "Query"
         ]
@@ -99,6 +196,64 @@
         }
       }
     },
+    "verana.td.v1.Anchor": {
+      "type": "object",
+      "properties": {
+        "anchor_id": {
+          "type": "string",
+          "description": "anchor_id is the group policy account address.\nThis is the primary key and identifier."
+        },
+        "group_id": {
+          "type": "string",
+          "format": "uint64",
+          "description": "group_id is the x/group group ID that owns this policy."
+        },
+        "created": {
+          "type": "string",
+          "format": "date-time",
+          "description": "created timestamp."
+        },
+        "metadata": {
+          "type": "string",
+          "description": "metadata for the anchor (optional description)."
+        }
+      },
+      "description": "Anchor represents a group policy account as primary identity.\nThe anchor_id IS the group policy address."
+    },
+    "verana.td.v1.OperatorAllowance": {
+      "type": "object",
+      "properties": {
+        "anchor_id": {
+          "type": "string",
+          "description": "anchor_id (group policy address)."
+        },
+        "operator_account": {
+          "type": "string",
+          "description": "operator_account is the VS hot key address."
+        },
+        "allowance_limit": {
+          "type": "string",
+          "format": "uint64",
+          "description": "allowance_limit is the max spendable amount per period (in uvna)."
+        },
+        "spent": {
+          "type": "string",
+          "format": "uint64",
+          "description": "spent tracks amount spent in current period (in uvna)."
+        },
+        "reset_period": {
+          "type": "string",
+          "format": "uint64",
+          "description": "reset_period in seconds (e.g., 86400 for daily)."
+        },
+        "last_reset": {
+          "type": "string",
+          "format": "date-time",
+          "description": "last_reset timestamp."
+        }
+      },
+      "description": "OperatorAllowance defines spending limits for a VS operator."
+    },
     "verana.td.v1.Params": {
       "type": "object",
       "properties": {
@@ -128,6 +283,22 @@
       },
       "description": "Params defines the parameters for the module."
     },
+    "verana.td.v1.QueryGetAnchorResponse": {
+      "type": "object",
+      "properties": {
+        "anchor": {
+          "$ref": "#/definitions/verana.td.v1.Anchor"
+        }
+      }
+    },
+    "verana.td.v1.QueryGetOperatorAllowanceResponse": {
+      "type": "object",
+      "properties": {
+        "operator_allowance": {
+          "$ref": "#/definitions/verana.td.v1.OperatorAllowance"
+        }
+      }
+    },
     "verana.td.v1.QueryGetTrustDepositResponse": {
       "type": "object",
       "properties": {
@@ -136,6 +307,14 @@
         }
       },
       "title": "QueryGetTrustDepositResponse is response type for the GetTrustDeposit RPC method"
+    },
+    "verana.td.v1.QueryGetVerifiableServiceResponse": {
+      "type": "object",
+      "properties": {
+        "verifiable_service": {
+          "$ref": "#/definitions/verana.td.v1.VerifiableService"
+        }
+      }
     },
     "verana.td.v1.QueryParamsResponse": {
       "type": "object",
@@ -190,6 +369,33 @@
         }
       },
       "title": "TrustDeposit represents an account's trust deposit"
+    },
+    "verana.td.v1.VerifiableService": {
+      "type": "object",
+      "properties": {
+        "anchor_id": {
+          "type": "string",
+          "description": "anchor_id this VS belongs to."
+        },
+        "operator_account": {
+          "type": "string",
+          "description": "operator_account is the hot key address.\nThis is the primary key for VS lookup."
+        },
+        "registered": {
+          "type": "string",
+          "format": "date-time",
+          "description": "registered timestamp."
+        },
+        "active": {
+          "type": "boolean",
+          "description": "active status - can be deactivated without removal."
+        },
+        "metadata": {
+          "type": "string",
+          "description": "metadata (service description, endpoint, etc)."
+        }
+      },
+      "description": "VerifiableService represents a hot operator key for an Anchor.\nVS operators can act on behalf of the Anchor within their allowance."
     }
   }
 }

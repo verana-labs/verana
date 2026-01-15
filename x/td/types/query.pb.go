@@ -6,6 +6,7 @@ package types
 import (
 	context "context"
 	fmt "fmt"
+	_ "github.com/cosmos/cosmos-proto"
 	_ "github.com/cosmos/cosmos-sdk/types/query"
 	_ "github.com/cosmos/cosmos-sdk/types/tx/amino"
 	_ "github.com/cosmos/gogoproto/gogoproto"
@@ -204,44 +205,341 @@ func (m *QueryGetTrustDepositResponse) GetTrustDeposit() TrustDeposit {
 	return TrustDeposit{}
 }
 
+type QueryGetAnchorRequest struct {
+	AnchorId string `protobuf:"bytes,1,opt,name=anchor_id,json=anchorId,proto3" json:"anchor_id,omitempty"`
+}
+
+func (m *QueryGetAnchorRequest) Reset()         { *m = QueryGetAnchorRequest{} }
+func (m *QueryGetAnchorRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryGetAnchorRequest) ProtoMessage()    {}
+func (*QueryGetAnchorRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1e3f9fbb2238b25c, []int{4}
+}
+func (m *QueryGetAnchorRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryGetAnchorRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryGetAnchorRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryGetAnchorRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryGetAnchorRequest.Merge(m, src)
+}
+func (m *QueryGetAnchorRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryGetAnchorRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryGetAnchorRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryGetAnchorRequest proto.InternalMessageInfo
+
+func (m *QueryGetAnchorRequest) GetAnchorId() string {
+	if m != nil {
+		return m.AnchorId
+	}
+	return ""
+}
+
+type QueryGetAnchorResponse struct {
+	Anchor Anchor `protobuf:"bytes,1,opt,name=anchor,proto3" json:"anchor"`
+}
+
+func (m *QueryGetAnchorResponse) Reset()         { *m = QueryGetAnchorResponse{} }
+func (m *QueryGetAnchorResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryGetAnchorResponse) ProtoMessage()    {}
+func (*QueryGetAnchorResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1e3f9fbb2238b25c, []int{5}
+}
+func (m *QueryGetAnchorResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryGetAnchorResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryGetAnchorResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryGetAnchorResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryGetAnchorResponse.Merge(m, src)
+}
+func (m *QueryGetAnchorResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryGetAnchorResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryGetAnchorResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryGetAnchorResponse proto.InternalMessageInfo
+
+func (m *QueryGetAnchorResponse) GetAnchor() Anchor {
+	if m != nil {
+		return m.Anchor
+	}
+	return Anchor{}
+}
+
+type QueryGetVerifiableServiceRequest struct {
+	OperatorAccount string `protobuf:"bytes,1,opt,name=operator_account,json=operatorAccount,proto3" json:"operator_account,omitempty"`
+}
+
+func (m *QueryGetVerifiableServiceRequest) Reset()         { *m = QueryGetVerifiableServiceRequest{} }
+func (m *QueryGetVerifiableServiceRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryGetVerifiableServiceRequest) ProtoMessage()    {}
+func (*QueryGetVerifiableServiceRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1e3f9fbb2238b25c, []int{6}
+}
+func (m *QueryGetVerifiableServiceRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryGetVerifiableServiceRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryGetVerifiableServiceRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryGetVerifiableServiceRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryGetVerifiableServiceRequest.Merge(m, src)
+}
+func (m *QueryGetVerifiableServiceRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryGetVerifiableServiceRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryGetVerifiableServiceRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryGetVerifiableServiceRequest proto.InternalMessageInfo
+
+func (m *QueryGetVerifiableServiceRequest) GetOperatorAccount() string {
+	if m != nil {
+		return m.OperatorAccount
+	}
+	return ""
+}
+
+type QueryGetVerifiableServiceResponse struct {
+	VerifiableService VerifiableService `protobuf:"bytes,1,opt,name=verifiable_service,json=verifiableService,proto3" json:"verifiable_service"`
+}
+
+func (m *QueryGetVerifiableServiceResponse) Reset()         { *m = QueryGetVerifiableServiceResponse{} }
+func (m *QueryGetVerifiableServiceResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryGetVerifiableServiceResponse) ProtoMessage()    {}
+func (*QueryGetVerifiableServiceResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1e3f9fbb2238b25c, []int{7}
+}
+func (m *QueryGetVerifiableServiceResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryGetVerifiableServiceResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryGetVerifiableServiceResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryGetVerifiableServiceResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryGetVerifiableServiceResponse.Merge(m, src)
+}
+func (m *QueryGetVerifiableServiceResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryGetVerifiableServiceResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryGetVerifiableServiceResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryGetVerifiableServiceResponse proto.InternalMessageInfo
+
+func (m *QueryGetVerifiableServiceResponse) GetVerifiableService() VerifiableService {
+	if m != nil {
+		return m.VerifiableService
+	}
+	return VerifiableService{}
+}
+
+type QueryGetOperatorAllowanceRequest struct {
+	AnchorId        string `protobuf:"bytes,1,opt,name=anchor_id,json=anchorId,proto3" json:"anchor_id,omitempty"`
+	OperatorAccount string `protobuf:"bytes,2,opt,name=operator_account,json=operatorAccount,proto3" json:"operator_account,omitempty"`
+}
+
+func (m *QueryGetOperatorAllowanceRequest) Reset()         { *m = QueryGetOperatorAllowanceRequest{} }
+func (m *QueryGetOperatorAllowanceRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryGetOperatorAllowanceRequest) ProtoMessage()    {}
+func (*QueryGetOperatorAllowanceRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1e3f9fbb2238b25c, []int{8}
+}
+func (m *QueryGetOperatorAllowanceRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryGetOperatorAllowanceRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryGetOperatorAllowanceRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryGetOperatorAllowanceRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryGetOperatorAllowanceRequest.Merge(m, src)
+}
+func (m *QueryGetOperatorAllowanceRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryGetOperatorAllowanceRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryGetOperatorAllowanceRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryGetOperatorAllowanceRequest proto.InternalMessageInfo
+
+func (m *QueryGetOperatorAllowanceRequest) GetAnchorId() string {
+	if m != nil {
+		return m.AnchorId
+	}
+	return ""
+}
+
+func (m *QueryGetOperatorAllowanceRequest) GetOperatorAccount() string {
+	if m != nil {
+		return m.OperatorAccount
+	}
+	return ""
+}
+
+type QueryGetOperatorAllowanceResponse struct {
+	OperatorAllowance OperatorAllowance `protobuf:"bytes,1,opt,name=operator_allowance,json=operatorAllowance,proto3" json:"operator_allowance"`
+}
+
+func (m *QueryGetOperatorAllowanceResponse) Reset()         { *m = QueryGetOperatorAllowanceResponse{} }
+func (m *QueryGetOperatorAllowanceResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryGetOperatorAllowanceResponse) ProtoMessage()    {}
+func (*QueryGetOperatorAllowanceResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1e3f9fbb2238b25c, []int{9}
+}
+func (m *QueryGetOperatorAllowanceResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryGetOperatorAllowanceResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryGetOperatorAllowanceResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryGetOperatorAllowanceResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryGetOperatorAllowanceResponse.Merge(m, src)
+}
+func (m *QueryGetOperatorAllowanceResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryGetOperatorAllowanceResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryGetOperatorAllowanceResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryGetOperatorAllowanceResponse proto.InternalMessageInfo
+
+func (m *QueryGetOperatorAllowanceResponse) GetOperatorAllowance() OperatorAllowance {
+	if m != nil {
+		return m.OperatorAllowance
+	}
+	return OperatorAllowance{}
+}
+
 func init() {
 	proto.RegisterType((*QueryParamsRequest)(nil), "verana.td.v1.QueryParamsRequest")
 	proto.RegisterType((*QueryParamsResponse)(nil), "verana.td.v1.QueryParamsResponse")
 	proto.RegisterType((*QueryGetTrustDepositRequest)(nil), "verana.td.v1.QueryGetTrustDepositRequest")
 	proto.RegisterType((*QueryGetTrustDepositResponse)(nil), "verana.td.v1.QueryGetTrustDepositResponse")
+	proto.RegisterType((*QueryGetAnchorRequest)(nil), "verana.td.v1.QueryGetAnchorRequest")
+	proto.RegisterType((*QueryGetAnchorResponse)(nil), "verana.td.v1.QueryGetAnchorResponse")
+	proto.RegisterType((*QueryGetVerifiableServiceRequest)(nil), "verana.td.v1.QueryGetVerifiableServiceRequest")
+	proto.RegisterType((*QueryGetVerifiableServiceResponse)(nil), "verana.td.v1.QueryGetVerifiableServiceResponse")
+	proto.RegisterType((*QueryGetOperatorAllowanceRequest)(nil), "verana.td.v1.QueryGetOperatorAllowanceRequest")
+	proto.RegisterType((*QueryGetOperatorAllowanceResponse)(nil), "verana.td.v1.QueryGetOperatorAllowanceResponse")
 }
 
 func init() { proto.RegisterFile("verana/td/v1/query.proto", fileDescriptor_1e3f9fbb2238b25c) }
 
 var fileDescriptor_1e3f9fbb2238b25c = []byte{
-	// 429 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x92, 0x41, 0xab, 0xd3, 0x40,
-	0x10, 0xc7, 0x93, 0x87, 0x56, 0xde, 0xfa, 0x44, 0x5c, 0x83, 0xd4, 0xbc, 0x1a, 0x9f, 0xf1, 0x52,
-	0x0b, 0x66, 0x49, 0x3d, 0xf4, 0x1e, 0x14, 0x6f, 0xa2, 0xc1, 0x93, 0x17, 0xd9, 0xa4, 0x4b, 0x0c,
-	0x36, 0xbb, 0x69, 0x76, 0x12, 0x2c, 0xe2, 0x45, 0xbc, 0x0a, 0x82, 0x5f, 0xc2, 0xa3, 0x1f, 0xa3,
-	0xc7, 0x82, 0x17, 0x4f, 0x22, 0xad, 0xe0, 0xd7, 0x90, 0xec, 0x6e, 0xa1, 0xd1, 0x20, 0xef, 0x12,
-	0x36, 0x33, 0xff, 0xfd, 0xcf, 0x6f, 0x66, 0x07, 0x0d, 0x1b, 0x56, 0x51, 0x4e, 0x09, 0xcc, 0x49,
-	0x13, 0x92, 0x65, 0xcd, 0xaa, 0x55, 0x50, 0x56, 0x02, 0x04, 0x3e, 0xd1, 0x99, 0x00, 0xe6, 0x41,
-	0x13, 0xba, 0xd7, 0x68, 0x91, 0x73, 0x41, 0xd4, 0x57, 0x0b, 0x5c, 0x27, 0x13, 0x99, 0x50, 0x47,
-	0xd2, 0x9e, 0x4c, 0x74, 0x94, 0x09, 0x91, 0x2d, 0x18, 0xa1, 0x65, 0x4e, 0x28, 0xe7, 0x02, 0x28,
-	0xe4, 0x82, 0x4b, 0x93, 0x9d, 0xa4, 0x42, 0x16, 0x42, 0x92, 0x84, 0x4a, 0xa6, 0xab, 0x91, 0x26,
-	0x4c, 0x18, 0xd0, 0x90, 0x94, 0x34, 0xcb, 0xb9, 0x12, 0x1b, 0xed, 0xcd, 0x0e, 0x5a, 0x49, 0x2b,
-	0x5a, 0xec, 0x6d, 0xba, 0xd4, 0xb0, 0x2a, 0x99, 0xc9, 0xf8, 0x0e, 0xc2, 0xcf, 0x5a, 0xdb, 0xa7,
-	0x4a, 0x1e, 0xb3, 0x65, 0xcd, 0x24, 0xf8, 0x4f, 0xd0, 0xf5, 0x4e, 0x54, 0x96, 0x82, 0x4b, 0x86,
-	0x67, 0x68, 0xa0, 0x6d, 0x87, 0xf6, 0x99, 0x3d, 0xbe, 0x3c, 0x75, 0x82, 0xc3, 0x9e, 0x03, 0xad,
-	0x8e, 0x8e, 0xd7, 0x3f, 0x6e, 0x5b, 0x5f, 0x7e, 0x7f, 0x9d, 0xd8, 0xb1, 0x91, 0xfb, 0x33, 0x74,
-	0xaa, 0xfc, 0x1e, 0x33, 0x78, 0x5e, 0xd5, 0x12, 0x1e, 0xb2, 0x52, 0xc8, 0x1c, 0x4c, 0x39, 0x3c,
-	0x44, 0x97, 0x68, 0x9a, 0x8a, 0x9a, 0x83, 0x32, 0x3e, 0x8e, 0xf7, 0xbf, 0x3e, 0x43, 0xa3, 0xfe,
-	0x8b, 0x86, 0xe8, 0x11, 0xba, 0x02, 0x6d, 0xfc, 0xe5, 0x5c, 0x27, 0x0c, 0x98, 0xdb, 0x05, 0x3b,
-	0xbc, 0x1a, 0x5d, 0x68, 0xf1, 0xe2, 0x13, 0x38, 0x88, 0x4d, 0x3f, 0x1c, 0xa1, 0x8b, 0xaa, 0x0e,
-	0x7e, 0x8d, 0x06, 0xba, 0x0d, 0x7c, 0xd6, 0xf5, 0xf8, 0x77, 0x4a, 0xee, 0x9d, 0xff, 0x28, 0x34,
-	0x9f, 0x3f, 0x7a, 0xff, 0xed, 0xd7, 0xe7, 0xa3, 0x1b, 0xd8, 0x21, 0x3d, 0x8f, 0x83, 0x3f, 0xda,
-	0xe8, 0xea, 0x5f, 0x9d, 0xe1, 0x7b, 0x3d, 0xa6, 0xfd, 0x63, 0x73, 0x27, 0xe7, 0x91, 0x1a, 0x90,
-	0xbb, 0x0a, 0xe4, 0x16, 0x3e, 0xed, 0x82, 0x64, 0x0c, 0xc8, 0x5b, 0x33, 0xec, 0x77, 0x51, 0xb4,
-	0xde, 0x7a, 0xf6, 0x66, 0xeb, 0xd9, 0x3f, 0xb7, 0x9e, 0xfd, 0x69, 0xe7, 0x59, 0x9b, 0x9d, 0x67,
-	0x7d, 0xdf, 0x79, 0xd6, 0x8b, 0x71, 0x96, 0xc3, 0xab, 0x3a, 0x09, 0x52, 0x51, 0x18, 0x83, 0xfb,
-	0x0b, 0x9a, 0xc8, 0xbd, 0xd9, 0x9b, 0xd6, 0x4e, 0xad, 0x55, 0x32, 0x50, 0x7b, 0xf5, 0xe0, 0x4f,
-	0x00, 0x00, 0x00, 0xff, 0xff, 0x4f, 0x1f, 0x4a, 0x08, 0x29, 0x03, 0x00, 0x00,
+	// 732 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xa4, 0x95, 0x4f, 0x6b, 0x13, 0x4f,
+	0x18, 0xc7, 0xb3, 0xe5, 0xf7, 0x8b, 0x66, 0xac, 0xd4, 0x8e, 0xb1, 0xc4, 0x6d, 0x4d, 0xd3, 0xad,
+	0x87, 0x5a, 0xc8, 0x0e, 0x69, 0x29, 0x3d, 0x78, 0x90, 0x44, 0xa5, 0x08, 0x52, 0x35, 0x2d, 0x1e,
+	0xbc, 0x84, 0x49, 0x76, 0xdc, 0x2e, 0x26, 0x3b, 0xdb, 0xdd, 0xc9, 0x6a, 0x29, 0x05, 0xf5, 0x2e,
+	0x08, 0xde, 0x3d, 0x7b, 0xf4, 0xd0, 0x17, 0xe0, 0xb1, 0xc7, 0xa2, 0x17, 0x4f, 0x22, 0x8d, 0xe0,
+	0xdb, 0x90, 0xcc, 0x9f, 0x24, 0x9b, 0x4c, 0x42, 0xd1, 0x4b, 0xc8, 0xce, 0xf3, 0x9d, 0xe7, 0xfb,
+	0x79, 0x9e, 0x99, 0x67, 0x17, 0xe4, 0x62, 0x12, 0x62, 0x1f, 0x23, 0xe6, 0xa0, 0xb8, 0x84, 0xf6,
+	0xdb, 0x24, 0x3c, 0xb0, 0x83, 0x90, 0x32, 0x0a, 0xa7, 0x45, 0xc4, 0x66, 0x8e, 0x1d, 0x97, 0xcc,
+	0x59, 0xdc, 0xf2, 0x7c, 0x8a, 0xf8, 0xaf, 0x10, 0x98, 0x59, 0x97, 0xba, 0x94, 0xff, 0x45, 0xdd,
+	0x7f, 0x72, 0x75, 0xc1, 0xa5, 0xd4, 0x6d, 0x12, 0x84, 0x03, 0x0f, 0x61, 0xdf, 0xa7, 0x0c, 0x33,
+	0x8f, 0xfa, 0x91, 0x8c, 0xae, 0x36, 0x68, 0xd4, 0xa2, 0x11, 0xaa, 0xe3, 0x88, 0x08, 0x37, 0x14,
+	0x97, 0xea, 0x84, 0xe1, 0x12, 0x0a, 0xb0, 0xeb, 0xf9, 0x5c, 0x2c, 0xb5, 0xd7, 0x85, 0xb6, 0x26,
+	0x2c, 0xc4, 0x83, 0x0a, 0x25, 0xa8, 0x03, 0x1c, 0xe2, 0x96, 0x0a, 0x25, 0x0b, 0x62, 0x07, 0x01,
+	0xd1, 0x6f, 0xc2, 0x7e, 0x63, 0x8f, 0x86, 0x22, 0x64, 0x65, 0x01, 0x7c, 0xd2, 0x85, 0x79, 0xcc,
+	0x33, 0x55, 0xc9, 0x7e, 0x9b, 0x44, 0xcc, 0xda, 0x06, 0x57, 0x13, 0xab, 0x51, 0x40, 0xfd, 0x88,
+	0xc0, 0x4d, 0x90, 0x16, 0x8e, 0x39, 0xa3, 0x60, 0xac, 0x5c, 0x5a, 0xcb, 0xda, 0x83, 0x9d, 0xb2,
+	0x85, 0xba, 0x92, 0x39, 0xf9, 0xb1, 0x98, 0xfa, 0xf4, 0xfb, 0xf3, 0xaa, 0x51, 0x95, 0x72, 0x6b,
+	0x13, 0xcc, 0xf3, 0x7c, 0x5b, 0x84, 0xed, 0x86, 0xed, 0x88, 0xdd, 0x23, 0x01, 0x8d, 0x3c, 0x26,
+	0xed, 0x60, 0x0e, 0x5c, 0xc0, 0x8d, 0x06, 0x6d, 0xfb, 0x8c, 0x27, 0xce, 0x54, 0xd5, 0xa3, 0x45,
+	0xc0, 0x82, 0x7e, 0xa3, 0x24, 0xba, 0x0f, 0x2e, 0xb3, 0xee, 0x7a, 0xcd, 0x11, 0x01, 0x09, 0x66,
+	0x26, 0xc1, 0x06, 0xb7, 0x56, 0xfe, 0xeb, 0xe2, 0x55, 0xa7, 0xd9, 0xc0, 0x9a, 0xb5, 0x0d, 0xae,
+	0x29, 0x9b, 0x32, 0xef, 0x8e, 0x22, 0xdb, 0x00, 0x19, 0xd1, 0xae, 0x9a, 0xe7, 0x08, 0xb6, 0x4a,
+	0xee, 0xeb, 0x71, 0x31, 0x2b, 0xcf, 0xa4, 0xec, 0x38, 0x21, 0x89, 0xa2, 0x1d, 0x16, 0x7a, 0xbe,
+	0x5b, 0xbd, 0x28, 0xa4, 0x0f, 0x1c, 0xeb, 0x21, 0x98, 0x1b, 0xce, 0x27, 0x81, 0xd7, 0x40, 0x5a,
+	0xa8, 0xf4, 0x2d, 0x14, 0x6a, 0xc9, 0x28, 0x95, 0x96, 0x0b, 0x0a, 0x2a, 0xdb, 0x53, 0x12, 0x7a,
+	0xcf, 0x3d, 0x5c, 0x6f, 0x92, 0x1d, 0x12, 0xc6, 0x5e, 0x83, 0x28, 0xd0, 0xbb, 0xe0, 0x0a, 0x0d,
+	0x48, 0x88, 0x19, 0x0d, 0x6b, 0x89, 0x5e, 0x4e, 0xe0, 0x9d, 0x51, 0x3b, 0xca, 0xb2, 0xdb, 0x07,
+	0x60, 0x69, 0x82, 0x91, 0xac, 0x60, 0x17, 0xc0, 0xb8, 0x17, 0xac, 0x45, 0x22, 0x2a, 0xab, 0x59,
+	0x4c, 0x56, 0x33, 0x92, 0x44, 0x16, 0x36, 0x1b, 0x0f, 0x07, 0xac, 0x8f, 0x46, 0xbf, 0xc8, 0x47,
+	0x0a, 0xab, 0xd9, 0xa4, 0x2f, 0xb1, 0xdf, 0x2f, 0xf2, 0xef, 0x4e, 0x43, 0xdb, 0x9b, 0xa9, 0x7f,
+	0xe8, 0x8d, 0x86, 0xaf, 0xdf, 0x9b, 0xbe, 0x93, 0x8a, 0xea, 0x7b, 0x33, 0x92, 0x44, 0xf5, 0x86,
+	0x0e, 0x07, 0xd6, 0xde, 0xa4, 0xc1, 0xff, 0xdc, 0x1b, 0xbe, 0x00, 0x69, 0x31, 0x64, 0xb0, 0x90,
+	0xcc, 0x36, 0x3a, 0xc3, 0xe6, 0xd2, 0x04, 0x85, 0xc0, 0xb5, 0x16, 0xde, 0x7e, 0xfb, 0xf5, 0x61,
+	0x6a, 0x0e, 0x66, 0x91, 0xe6, 0xad, 0x02, 0xdf, 0x19, 0x60, 0x66, 0x68, 0xee, 0xe0, 0x2d, 0x4d,
+	0x52, 0xfd, 0x50, 0x9b, 0xab, 0xe7, 0x91, 0x4a, 0x90, 0x65, 0x0e, 0x72, 0x03, 0xce, 0x27, 0x41,
+	0x5c, 0xc2, 0xd0, 0xa1, 0x3c, 0xb1, 0x23, 0xf8, 0xda, 0x00, 0x99, 0xde, 0x40, 0xc1, 0x65, 0x7d,
+	0xfa, 0xc4, 0xf8, 0x9a, 0x37, 0x27, 0x8b, 0xa4, 0xfb, 0x0a, 0x77, 0xb7, 0x60, 0x01, 0x69, 0xde,
+	0x93, 0xe8, 0xb0, 0x77, 0xe5, 0x8e, 0xe0, 0xb1, 0x01, 0xb2, 0xba, 0xe1, 0x80, 0xb6, 0xde, 0x68,
+	0xdc, 0xb8, 0x9a, 0xe8, 0xdc, 0x7a, 0xc9, 0x78, 0x9b, 0x33, 0x6e, 0xc0, 0xf5, 0x24, 0x63, 0x7f,
+	0x90, 0x8a, 0x72, 0x12, 0xd1, 0xe1, 0xf0, 0x5d, 0x3f, 0x82, 0x5f, 0x04, 0xf6, 0xc8, 0x95, 0x1b,
+	0x87, 0x3d, 0x6e, 0x00, 0xc7, 0x61, 0x8f, 0x1d, 0x08, 0x6b, 0x8b, 0x63, 0x97, 0xe1, 0x9d, 0x24,
+	0xb6, 0x42, 0x2c, 0xf6, 0x86, 0x64, 0xb0, 0xcd, 0x9a, 0x12, 0x2a, 0x95, 0x93, 0xb3, 0xbc, 0x71,
+	0x7a, 0x96, 0x37, 0x7e, 0x9e, 0xe5, 0x8d, 0xf7, 0x9d, 0x7c, 0xea, 0xb4, 0x93, 0x4f, 0x7d, 0xef,
+	0xe4, 0x53, 0xcf, 0x56, 0x5c, 0x8f, 0xed, 0xb5, 0xeb, 0x76, 0x83, 0xb6, 0xa4, 0x49, 0xb1, 0x89,
+	0xeb, 0x91, 0x32, 0x7c, 0xd5, 0xb5, 0xe4, 0x1f, 0xc3, 0x7a, 0x9a, 0x7f, 0xf2, 0xd6, 0xff, 0x04,
+	0x00, 0x00, 0xff, 0xff, 0xe8, 0x14, 0x65, 0x24, 0xfa, 0x07, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -259,6 +557,10 @@ type QueryClient interface {
 	// Parameters queries the parameters of the module.
 	Params(ctx context.Context, in *QueryParamsRequest, opts ...grpc.CallOption) (*QueryParamsResponse, error)
 	GetTrustDeposit(ctx context.Context, in *QueryGetTrustDepositRequest, opts ...grpc.CallOption) (*QueryGetTrustDepositResponse, error)
+	// Anchor-based POC queries
+	GetAnchor(ctx context.Context, in *QueryGetAnchorRequest, opts ...grpc.CallOption) (*QueryGetAnchorResponse, error)
+	GetVerifiableService(ctx context.Context, in *QueryGetVerifiableServiceRequest, opts ...grpc.CallOption) (*QueryGetVerifiableServiceResponse, error)
+	GetOperatorAllowance(ctx context.Context, in *QueryGetOperatorAllowanceRequest, opts ...grpc.CallOption) (*QueryGetOperatorAllowanceResponse, error)
 }
 
 type queryClient struct {
@@ -287,11 +589,42 @@ func (c *queryClient) GetTrustDeposit(ctx context.Context, in *QueryGetTrustDepo
 	return out, nil
 }
 
+func (c *queryClient) GetAnchor(ctx context.Context, in *QueryGetAnchorRequest, opts ...grpc.CallOption) (*QueryGetAnchorResponse, error) {
+	out := new(QueryGetAnchorResponse)
+	err := c.cc.Invoke(ctx, "/verana.td.v1.Query/GetAnchor", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) GetVerifiableService(ctx context.Context, in *QueryGetVerifiableServiceRequest, opts ...grpc.CallOption) (*QueryGetVerifiableServiceResponse, error) {
+	out := new(QueryGetVerifiableServiceResponse)
+	err := c.cc.Invoke(ctx, "/verana.td.v1.Query/GetVerifiableService", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) GetOperatorAllowance(ctx context.Context, in *QueryGetOperatorAllowanceRequest, opts ...grpc.CallOption) (*QueryGetOperatorAllowanceResponse, error) {
+	out := new(QueryGetOperatorAllowanceResponse)
+	err := c.cc.Invoke(ctx, "/verana.td.v1.Query/GetOperatorAllowance", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // QueryServer is the server API for Query service.
 type QueryServer interface {
 	// Parameters queries the parameters of the module.
 	Params(context.Context, *QueryParamsRequest) (*QueryParamsResponse, error)
 	GetTrustDeposit(context.Context, *QueryGetTrustDepositRequest) (*QueryGetTrustDepositResponse, error)
+	// Anchor-based POC queries
+	GetAnchor(context.Context, *QueryGetAnchorRequest) (*QueryGetAnchorResponse, error)
+	GetVerifiableService(context.Context, *QueryGetVerifiableServiceRequest) (*QueryGetVerifiableServiceResponse, error)
+	GetOperatorAllowance(context.Context, *QueryGetOperatorAllowanceRequest) (*QueryGetOperatorAllowanceResponse, error)
 }
 
 // UnimplementedQueryServer can be embedded to have forward compatible implementations.
@@ -303,6 +636,15 @@ func (*UnimplementedQueryServer) Params(ctx context.Context, req *QueryParamsReq
 }
 func (*UnimplementedQueryServer) GetTrustDeposit(ctx context.Context, req *QueryGetTrustDepositRequest) (*QueryGetTrustDepositResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTrustDeposit not implemented")
+}
+func (*UnimplementedQueryServer) GetAnchor(ctx context.Context, req *QueryGetAnchorRequest) (*QueryGetAnchorResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAnchor not implemented")
+}
+func (*UnimplementedQueryServer) GetVerifiableService(ctx context.Context, req *QueryGetVerifiableServiceRequest) (*QueryGetVerifiableServiceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetVerifiableService not implemented")
+}
+func (*UnimplementedQueryServer) GetOperatorAllowance(ctx context.Context, req *QueryGetOperatorAllowanceRequest) (*QueryGetOperatorAllowanceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetOperatorAllowance not implemented")
 }
 
 func RegisterQueryServer(s grpc1.Server, srv QueryServer) {
@@ -345,6 +687,60 @@ func _Query_GetTrustDeposit_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Query_GetAnchor_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryGetAnchorRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).GetAnchor(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/verana.td.v1.Query/GetAnchor",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).GetAnchor(ctx, req.(*QueryGetAnchorRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_GetVerifiableService_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryGetVerifiableServiceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).GetVerifiableService(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/verana.td.v1.Query/GetVerifiableService",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).GetVerifiableService(ctx, req.(*QueryGetVerifiableServiceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_GetOperatorAllowance_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryGetOperatorAllowanceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).GetOperatorAllowance(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/verana.td.v1.Query/GetOperatorAllowance",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).GetOperatorAllowance(ctx, req.(*QueryGetOperatorAllowanceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var Query_serviceDesc = _Query_serviceDesc
 var _Query_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "verana.td.v1.Query",
@@ -357,6 +753,18 @@ var _Query_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetTrustDeposit",
 			Handler:    _Query_GetTrustDeposit_Handler,
+		},
+		{
+			MethodName: "GetAnchor",
+			Handler:    _Query_GetAnchor_Handler,
+		},
+		{
+			MethodName: "GetVerifiableService",
+			Handler:    _Query_GetVerifiableService_Handler,
+		},
+		{
+			MethodName: "GetOperatorAllowance",
+			Handler:    _Query_GetOperatorAllowance_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -482,6 +890,202 @@ func (m *QueryGetTrustDepositResponse) MarshalToSizedBuffer(dAtA []byte) (int, e
 	return len(dAtA) - i, nil
 }
 
+func (m *QueryGetAnchorRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryGetAnchorRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryGetAnchorRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.AnchorId) > 0 {
+		i -= len(m.AnchorId)
+		copy(dAtA[i:], m.AnchorId)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.AnchorId)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryGetAnchorResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryGetAnchorResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryGetAnchorResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	{
+		size, err := m.Anchor.MarshalToSizedBuffer(dAtA[:i])
+		if err != nil {
+			return 0, err
+		}
+		i -= size
+		i = encodeVarintQuery(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0xa
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryGetVerifiableServiceRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryGetVerifiableServiceRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryGetVerifiableServiceRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.OperatorAccount) > 0 {
+		i -= len(m.OperatorAccount)
+		copy(dAtA[i:], m.OperatorAccount)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.OperatorAccount)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryGetVerifiableServiceResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryGetVerifiableServiceResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryGetVerifiableServiceResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	{
+		size, err := m.VerifiableService.MarshalToSizedBuffer(dAtA[:i])
+		if err != nil {
+			return 0, err
+		}
+		i -= size
+		i = encodeVarintQuery(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0xa
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryGetOperatorAllowanceRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryGetOperatorAllowanceRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryGetOperatorAllowanceRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.OperatorAccount) > 0 {
+		i -= len(m.OperatorAccount)
+		copy(dAtA[i:], m.OperatorAccount)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.OperatorAccount)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.AnchorId) > 0 {
+		i -= len(m.AnchorId)
+		copy(dAtA[i:], m.AnchorId)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.AnchorId)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryGetOperatorAllowanceResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryGetOperatorAllowanceResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryGetOperatorAllowanceResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	{
+		size, err := m.OperatorAllowance.MarshalToSizedBuffer(dAtA[:i])
+		if err != nil {
+			return 0, err
+		}
+		i -= size
+		i = encodeVarintQuery(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0xa
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintQuery(dAtA []byte, offset int, v uint64) int {
 	offset -= sovQuery(v)
 	base := offset
@@ -533,6 +1137,82 @@ func (m *QueryGetTrustDepositResponse) Size() (n int) {
 	var l int
 	_ = l
 	l = m.TrustDeposit.Size()
+	n += 1 + l + sovQuery(uint64(l))
+	return n
+}
+
+func (m *QueryGetAnchorRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.AnchorId)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryGetAnchorResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = m.Anchor.Size()
+	n += 1 + l + sovQuery(uint64(l))
+	return n
+}
+
+func (m *QueryGetVerifiableServiceRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.OperatorAccount)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryGetVerifiableServiceResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = m.VerifiableService.Size()
+	n += 1 + l + sovQuery(uint64(l))
+	return n
+}
+
+func (m *QueryGetOperatorAllowanceRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.AnchorId)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	l = len(m.OperatorAccount)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryGetOperatorAllowanceResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = m.OperatorAllowance.Size()
 	n += 1 + l + sovQuery(uint64(l))
 	return n
 }
@@ -817,6 +1497,533 @@ func (m *QueryGetTrustDepositResponse) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			if err := m.TrustDeposit.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryGetAnchorRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryGetAnchorRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryGetAnchorRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AnchorId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.AnchorId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryGetAnchorResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryGetAnchorResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryGetAnchorResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Anchor", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.Anchor.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryGetVerifiableServiceRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryGetVerifiableServiceRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryGetVerifiableServiceRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field OperatorAccount", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.OperatorAccount = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryGetVerifiableServiceResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryGetVerifiableServiceResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryGetVerifiableServiceResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field VerifiableService", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.VerifiableService.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryGetOperatorAllowanceRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryGetOperatorAllowanceRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryGetOperatorAllowanceRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AnchorId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.AnchorId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field OperatorAccount", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.OperatorAccount = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryGetOperatorAllowanceResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryGetOperatorAllowanceResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryGetOperatorAllowanceResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field OperatorAllowance", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.OperatorAllowance.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex

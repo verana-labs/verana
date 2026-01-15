@@ -1,0 +1,66 @@
+syntax = "proto3";
+package verana.td.v1;
+
+import "gogoproto/gogo.proto";
+import "google/protobuf/timestamp.proto";
+import "cosmos_proto/cosmos.proto";
+
+option go_package = "github.com/verana-labs/verana/x/td/types";
+
+// Anchor represents a group policy account as primary identity.
+// The anchor_id IS the group policy address.
+message Anchor {
+  // anchor_id is the group policy account address.
+  // This is the primary key and identifier.
+  string anchor_id = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  
+  // group_id is the x/group group ID that owns this policy.
+  uint64 group_id = 2;
+  
+  // created timestamp.
+  google.protobuf.Timestamp created = 3 [(gogoproto.stdtime) = true, (gogoproto.nullable) = false];
+  
+  // metadata for the anchor (optional description).
+  string metadata = 4;
+}
+
+// VerifiableService represents a hot operator key for an Anchor.
+// VS operators can act on behalf of the Anchor within their allowance.
+message VerifiableService {
+  // anchor_id this VS belongs to.
+  string anchor_id = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  
+  // operator_account is the hot key address.
+  // This is the primary key for VS lookup.
+  string operator_account = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  
+  // registered timestamp.
+  google.protobuf.Timestamp registered = 3 [(gogoproto.stdtime) = true, (gogoproto.nullable) = false];
+  
+  // active status - can be deactivated without removal.
+  bool active = 4;
+  
+  // metadata (service description, endpoint, etc).
+  string metadata = 5;
+}
+
+// OperatorAllowance defines spending limits for a VS operator.
+message OperatorAllowance {
+  // anchor_id (group policy address).
+  string anchor_id = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  
+  // operator_account is the VS hot key address.
+  string operator_account = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  
+  // allowance_limit is the max spendable amount per period (in uvna).
+  uint64 allowance_limit = 3;
+  
+  // spent tracks amount spent in current period (in uvna).
+  uint64 spent = 4;
+  
+  // reset_period in seconds (e.g., 86400 for daily).
+  uint64 reset_period = 5;
+  
+  // last_reset timestamp.
+  google.protobuf.Timestamp last_reset = 6 [(gogoproto.stdtime) = true, (gogoproto.nullable) = false];
+}

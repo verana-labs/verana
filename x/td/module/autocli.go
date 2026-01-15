@@ -1,9 +1,10 @@
 package trustdeposit
 
 import (
+	"fmt"
+
 	autocliv1 "cosmossdk.io/api/cosmos/autocli/v1"
 	"cosmossdk.io/math"
-	"fmt"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
@@ -37,6 +38,35 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 						{
 							ProtoField: "account",
 						},
+					},
+				},
+				// Anchor-based POC queries
+				{
+					RpcMethod: "GetAnchor",
+					Use:       "get-anchor [anchor_id]",
+					Short:     "Query anchor by ID",
+					Long:      "Get the anchor registration info for a given anchor_id (group policy address)",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
+						{ProtoField: "anchor_id"},
+					},
+				},
+				{
+					RpcMethod: "GetVerifiableService",
+					Use:       "get-verifiable-service [operator_account]",
+					Short:     "Query verifiable service by operator",
+					Long:      "Get the verifiable service registration for a given operator account",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
+						{ProtoField: "operator_account"},
+					},
+				},
+				{
+					RpcMethod: "GetOperatorAllowance",
+					Use:       "get-operator-allowance [anchor_id] [operator_account]",
+					Short:     "Query operator allowance",
+					Long:      "Get the spending allowance for a given operator within an anchor",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
+						{ProtoField: "anchor_id"},
+						{ProtoField: "operator_account"},
 					},
 				},
 				// this line is used by ignite scaffolding # autocli/query

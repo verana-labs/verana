@@ -24,6 +24,11 @@ This file captures the expected troubleshooting approach for this repo. Use it a
 - Keep commits focused and message them clearly.
 - This enables backtracking, clean rebases, and precise review once the root cause is understood.
 
+## Verana Public Registry (VPR) spec
+
+- Verana implementation is mostly derived from the VPR spec
+- VPR spec is available under: [this repo]/../verifiable-trust-vpr-spec/spec.md
+
 ## Veranad Introspection (CLI)
 
 Use these commands to validate chain state and debug signing issues:
@@ -81,3 +86,67 @@ In such cases:
 - Confirm whether tests should be run and whether sandbox escalation is allowed.
 - Report test results and include command outputs that affect conclusions.
 - Prefer small, reversible steps and frequent commits until the fix is proven.
+
+## Infra Access (Devnet/Testnet)
+
+### SSH
+Use local SSH keys or agent (not in repo). Default user is `ubuntu`.
+
+- Devnet nodes:
+  - node1: `ssh ubuntu@node1.devnet.verana.network`
+  - node2: `ssh ubuntu@node2.devnet.verana.network`
+  - node3: `ssh ubuntu@node3.devnet.verana.network`
+
+- Testnet nodes:
+  - node1: `ssh ubuntu@node1.testnet.verana.network`
+  - node2: `ssh ubuntu@node2.testnet.verana.network`
+  - node3: `ssh ubuntu@node3.testnet.verana.network`
+
+### Veranad service (VMs)
+Systemd unit and cosmovisor paths are standard on devnet/testnet nodes.
+
+- Service:
+  - `sudo systemctl status veranad --no-pager`
+  - `sudo systemctl restart veranad`
+  - Unit file: `/etc/systemd/system/veranad.service` (User=ubuntu, ExecStart=`/home/ubuntu/.verana/cosmovisor/start.sh`)
+- Cosmovisor:
+  - Home: `/home/ubuntu/.verana/cosmovisor`
+  - Current symlink: `/home/ubuntu/.verana/cosmovisor/current`
+  - Upgrades live in `/home/ubuntu/.verana/cosmovisor/upgrades/<version>/bin/veranad`
+  - Upgrade info file: `/home/ubuntu/.verana/data/upgrade-info.json`
+  - `cosmovisor.env` has `DAEMON_ALLOW_DOWNLOAD_BINARIES=false` (binaries must be present)
+
+### Remote RPC (no SSH)
+Use `veranad` locally with `--chain-id` and `--node $NODE_RPC` to query testnet/devnet.
+
+- Testnet:
+  - `CHAIN_ID=vna-testnet-1`
+  - `NODE_RPC=http://node1.testnet.verana.network:26657`
+  - Example: `veranad q gov proposals --chain-id $CHAIN_ID --node $NODE_RPC -o json`
+- Devnet:
+  - `CHAIN_ID=vna-devnet-1`
+  - `NODE_RPC=http://node1.devnet.verana.network:26657`
+  - Example: `veranad q gov proposals --chain-id $CHAIN_ID --node $NODE_RPC -o json`
+
+### Disk cleanup (common offenders)
+Large space usage tends to come from chain data and backups.
+
+- Chain data: `/home/ubuntu/.verana/data`
+- Cosmovisor backups: `/home/ubuntu/.verana_backup_*`
+- Data backups: `/home/ubuntu/.verana/data-backup-*`
+- Logs: `/var/log/journal` (clean via `sudo journalctl --vacuum-size=200M`)
+
+### Kubernetes
+Kubeconfig is stored locally (not in repo). Export it before running kubectl.
+
+- `export KUBECONFIG=<PATH_TO_KUBECONFIG>`
+- `kubectl get nodes`
+- `kubectl get pods -n <NAMESPACE>`
+- `kubectl describe pod <POD> -n <NAMESPACE>`
+
+### S3 (OVH)
+s3cmd config is stored locally (not in repo). Verify config, then list buckets/paths.
+
+- `s3cmd --config=<PATH_TO_S3CFG> ls`
+- `s3cmd --config=<PATH_TO_S3CFG> ls s3://<BUCKET>/<PREFIX>/`
+- `s3cmd --config=<PATH_TO_S3CFG> get s3://<BUCKET>/<OBJECT> <LOCAL_PATH>`

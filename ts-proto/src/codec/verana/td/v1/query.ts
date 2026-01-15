@@ -6,6 +6,7 @@
 
 /* eslint-disable */
 import * as _m0 from "protobufjs/minimal";
+import { Anchor, OperatorAllowance, VerifiableService } from "./anchor";
 import { Params } from "./params";
 import { TrustDeposit } from "./types";
 
@@ -29,6 +30,31 @@ export interface QueryGetTrustDepositRequest {
 /** QueryGetTrustDepositResponse is response type for the GetTrustDeposit RPC method */
 export interface QueryGetTrustDepositResponse {
   trustDeposit: TrustDeposit | undefined;
+}
+
+export interface QueryGetAnchorRequest {
+  anchorId: string;
+}
+
+export interface QueryGetAnchorResponse {
+  anchor: Anchor | undefined;
+}
+
+export interface QueryGetVerifiableServiceRequest {
+  operatorAccount: string;
+}
+
+export interface QueryGetVerifiableServiceResponse {
+  verifiableService: VerifiableService | undefined;
+}
+
+export interface QueryGetOperatorAllowanceRequest {
+  anchorId: string;
+  operatorAccount: string;
+}
+
+export interface QueryGetOperatorAllowanceResponse {
+  operatorAllowance: OperatorAllowance | undefined;
 }
 
 function createBaseQueryParamsRequest(): QueryParamsRequest {
@@ -249,11 +275,404 @@ export const QueryGetTrustDepositResponse = {
   },
 };
 
+function createBaseQueryGetAnchorRequest(): QueryGetAnchorRequest {
+  return { anchorId: "" };
+}
+
+export const QueryGetAnchorRequest = {
+  encode(message: QueryGetAnchorRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.anchorId !== "") {
+      writer.uint32(10).string(message.anchorId);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryGetAnchorRequest {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryGetAnchorRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.anchorId = reader.string();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryGetAnchorRequest {
+    return { anchorId: isSet(object.anchorId) ? globalThis.String(object.anchorId) : "" };
+  },
+
+  toJSON(message: QueryGetAnchorRequest): unknown {
+    const obj: any = {};
+    if (message.anchorId !== "") {
+      obj.anchorId = message.anchorId;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<QueryGetAnchorRequest>, I>>(base?: I): QueryGetAnchorRequest {
+    return QueryGetAnchorRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<QueryGetAnchorRequest>, I>>(object: I): QueryGetAnchorRequest {
+    const message = createBaseQueryGetAnchorRequest();
+    message.anchorId = object.anchorId ?? "";
+    return message;
+  },
+};
+
+function createBaseQueryGetAnchorResponse(): QueryGetAnchorResponse {
+  return { anchor: undefined };
+}
+
+export const QueryGetAnchorResponse = {
+  encode(message: QueryGetAnchorResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.anchor !== undefined) {
+      Anchor.encode(message.anchor, writer.uint32(10).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryGetAnchorResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryGetAnchorResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.anchor = Anchor.decode(reader, reader.uint32());
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryGetAnchorResponse {
+    return { anchor: isSet(object.anchor) ? Anchor.fromJSON(object.anchor) : undefined };
+  },
+
+  toJSON(message: QueryGetAnchorResponse): unknown {
+    const obj: any = {};
+    if (message.anchor !== undefined) {
+      obj.anchor = Anchor.toJSON(message.anchor);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<QueryGetAnchorResponse>, I>>(base?: I): QueryGetAnchorResponse {
+    return QueryGetAnchorResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<QueryGetAnchorResponse>, I>>(object: I): QueryGetAnchorResponse {
+    const message = createBaseQueryGetAnchorResponse();
+    message.anchor = (object.anchor !== undefined && object.anchor !== null)
+      ? Anchor.fromPartial(object.anchor)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseQueryGetVerifiableServiceRequest(): QueryGetVerifiableServiceRequest {
+  return { operatorAccount: "" };
+}
+
+export const QueryGetVerifiableServiceRequest = {
+  encode(message: QueryGetVerifiableServiceRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.operatorAccount !== "") {
+      writer.uint32(10).string(message.operatorAccount);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryGetVerifiableServiceRequest {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryGetVerifiableServiceRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.operatorAccount = reader.string();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryGetVerifiableServiceRequest {
+    return { operatorAccount: isSet(object.operatorAccount) ? globalThis.String(object.operatorAccount) : "" };
+  },
+
+  toJSON(message: QueryGetVerifiableServiceRequest): unknown {
+    const obj: any = {};
+    if (message.operatorAccount !== "") {
+      obj.operatorAccount = message.operatorAccount;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<QueryGetVerifiableServiceRequest>, I>>(
+    base?: I,
+  ): QueryGetVerifiableServiceRequest {
+    return QueryGetVerifiableServiceRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<QueryGetVerifiableServiceRequest>, I>>(
+    object: I,
+  ): QueryGetVerifiableServiceRequest {
+    const message = createBaseQueryGetVerifiableServiceRequest();
+    message.operatorAccount = object.operatorAccount ?? "";
+    return message;
+  },
+};
+
+function createBaseQueryGetVerifiableServiceResponse(): QueryGetVerifiableServiceResponse {
+  return { verifiableService: undefined };
+}
+
+export const QueryGetVerifiableServiceResponse = {
+  encode(message: QueryGetVerifiableServiceResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.verifiableService !== undefined) {
+      VerifiableService.encode(message.verifiableService, writer.uint32(10).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryGetVerifiableServiceResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryGetVerifiableServiceResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.verifiableService = VerifiableService.decode(reader, reader.uint32());
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryGetVerifiableServiceResponse {
+    return {
+      verifiableService: isSet(object.verifiableService)
+        ? VerifiableService.fromJSON(object.verifiableService)
+        : undefined,
+    };
+  },
+
+  toJSON(message: QueryGetVerifiableServiceResponse): unknown {
+    const obj: any = {};
+    if (message.verifiableService !== undefined) {
+      obj.verifiableService = VerifiableService.toJSON(message.verifiableService);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<QueryGetVerifiableServiceResponse>, I>>(
+    base?: I,
+  ): QueryGetVerifiableServiceResponse {
+    return QueryGetVerifiableServiceResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<QueryGetVerifiableServiceResponse>, I>>(
+    object: I,
+  ): QueryGetVerifiableServiceResponse {
+    const message = createBaseQueryGetVerifiableServiceResponse();
+    message.verifiableService = (object.verifiableService !== undefined && object.verifiableService !== null)
+      ? VerifiableService.fromPartial(object.verifiableService)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseQueryGetOperatorAllowanceRequest(): QueryGetOperatorAllowanceRequest {
+  return { anchorId: "", operatorAccount: "" };
+}
+
+export const QueryGetOperatorAllowanceRequest = {
+  encode(message: QueryGetOperatorAllowanceRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.anchorId !== "") {
+      writer.uint32(10).string(message.anchorId);
+    }
+    if (message.operatorAccount !== "") {
+      writer.uint32(18).string(message.operatorAccount);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryGetOperatorAllowanceRequest {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryGetOperatorAllowanceRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.anchorId = reader.string();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.operatorAccount = reader.string();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryGetOperatorAllowanceRequest {
+    return {
+      anchorId: isSet(object.anchorId) ? globalThis.String(object.anchorId) : "",
+      operatorAccount: isSet(object.operatorAccount) ? globalThis.String(object.operatorAccount) : "",
+    };
+  },
+
+  toJSON(message: QueryGetOperatorAllowanceRequest): unknown {
+    const obj: any = {};
+    if (message.anchorId !== "") {
+      obj.anchorId = message.anchorId;
+    }
+    if (message.operatorAccount !== "") {
+      obj.operatorAccount = message.operatorAccount;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<QueryGetOperatorAllowanceRequest>, I>>(
+    base?: I,
+  ): QueryGetOperatorAllowanceRequest {
+    return QueryGetOperatorAllowanceRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<QueryGetOperatorAllowanceRequest>, I>>(
+    object: I,
+  ): QueryGetOperatorAllowanceRequest {
+    const message = createBaseQueryGetOperatorAllowanceRequest();
+    message.anchorId = object.anchorId ?? "";
+    message.operatorAccount = object.operatorAccount ?? "";
+    return message;
+  },
+};
+
+function createBaseQueryGetOperatorAllowanceResponse(): QueryGetOperatorAllowanceResponse {
+  return { operatorAllowance: undefined };
+}
+
+export const QueryGetOperatorAllowanceResponse = {
+  encode(message: QueryGetOperatorAllowanceResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.operatorAllowance !== undefined) {
+      OperatorAllowance.encode(message.operatorAllowance, writer.uint32(10).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryGetOperatorAllowanceResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryGetOperatorAllowanceResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.operatorAllowance = OperatorAllowance.decode(reader, reader.uint32());
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryGetOperatorAllowanceResponse {
+    return {
+      operatorAllowance: isSet(object.operatorAllowance)
+        ? OperatorAllowance.fromJSON(object.operatorAllowance)
+        : undefined,
+    };
+  },
+
+  toJSON(message: QueryGetOperatorAllowanceResponse): unknown {
+    const obj: any = {};
+    if (message.operatorAllowance !== undefined) {
+      obj.operatorAllowance = OperatorAllowance.toJSON(message.operatorAllowance);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<QueryGetOperatorAllowanceResponse>, I>>(
+    base?: I,
+  ): QueryGetOperatorAllowanceResponse {
+    return QueryGetOperatorAllowanceResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<QueryGetOperatorAllowanceResponse>, I>>(
+    object: I,
+  ): QueryGetOperatorAllowanceResponse {
+    const message = createBaseQueryGetOperatorAllowanceResponse();
+    message.operatorAllowance = (object.operatorAllowance !== undefined && object.operatorAllowance !== null)
+      ? OperatorAllowance.fromPartial(object.operatorAllowance)
+      : undefined;
+    return message;
+  },
+};
+
 /** Query defines the gRPC querier service. */
 export interface Query {
   /** Parameters queries the parameters of the module. */
   Params(request: QueryParamsRequest): Promise<QueryParamsResponse>;
   GetTrustDeposit(request: QueryGetTrustDepositRequest): Promise<QueryGetTrustDepositResponse>;
+  /** Anchor-based POC queries */
+  GetAnchor(request: QueryGetAnchorRequest): Promise<QueryGetAnchorResponse>;
+  GetVerifiableService(request: QueryGetVerifiableServiceRequest): Promise<QueryGetVerifiableServiceResponse>;
+  GetOperatorAllowance(request: QueryGetOperatorAllowanceRequest): Promise<QueryGetOperatorAllowanceResponse>;
 }
 
 export const QueryServiceName = "verana.td.v1.Query";
@@ -265,6 +684,9 @@ export class QueryClientImpl implements Query {
     this.rpc = rpc;
     this.Params = this.Params.bind(this);
     this.GetTrustDeposit = this.GetTrustDeposit.bind(this);
+    this.GetAnchor = this.GetAnchor.bind(this);
+    this.GetVerifiableService = this.GetVerifiableService.bind(this);
+    this.GetOperatorAllowance = this.GetOperatorAllowance.bind(this);
   }
   Params(request: QueryParamsRequest): Promise<QueryParamsResponse> {
     const data = QueryParamsRequest.encode(request).finish();
@@ -276,6 +698,24 @@ export class QueryClientImpl implements Query {
     const data = QueryGetTrustDepositRequest.encode(request).finish();
     const promise = this.rpc.request(this.service, "GetTrustDeposit", data);
     return promise.then((data) => QueryGetTrustDepositResponse.decode(_m0.Reader.create(data)));
+  }
+
+  GetAnchor(request: QueryGetAnchorRequest): Promise<QueryGetAnchorResponse> {
+    const data = QueryGetAnchorRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "GetAnchor", data);
+    return promise.then((data) => QueryGetAnchorResponse.decode(_m0.Reader.create(data)));
+  }
+
+  GetVerifiableService(request: QueryGetVerifiableServiceRequest): Promise<QueryGetVerifiableServiceResponse> {
+    const data = QueryGetVerifiableServiceRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "GetVerifiableService", data);
+    return promise.then((data) => QueryGetVerifiableServiceResponse.decode(_m0.Reader.create(data)));
+  }
+
+  GetOperatorAllowance(request: QueryGetOperatorAllowanceRequest): Promise<QueryGetOperatorAllowanceResponse> {
+    const data = QueryGetOperatorAllowanceRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "GetOperatorAllowance", data);
+    return promise.then((data) => QueryGetOperatorAllowanceResponse.decode(_m0.Reader.create(data)));
   }
 }
 

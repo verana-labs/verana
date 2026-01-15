@@ -5,8 +5,10 @@ import "amino/amino.proto";
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
 import "cosmos/base/query/v1beta1/pagination.proto";
+import "cosmos_proto/cosmos.proto";
 import "verana/td/v1/params.proto";
 import "verana/td/v1/types.proto";
+import "verana/td/v1/anchor.proto";
 
 option go_package = "github.com/verana-labs/verana/x/td/types";
 
@@ -18,6 +20,17 @@ service Query {
   }
   rpc GetTrustDeposit(QueryGetTrustDepositRequest) returns (QueryGetTrustDepositResponse) {
     option (google.api.http).get = "/verana/td/v1/get/{account}";
+  }
+
+  // Anchor-based POC queries
+  rpc GetAnchor(QueryGetAnchorRequest) returns (QueryGetAnchorResponse) {
+    option (google.api.http).get = "/verana/td/v1/anchor/{anchor_id}";
+  }
+  rpc GetVerifiableService(QueryGetVerifiableServiceRequest) returns (QueryGetVerifiableServiceResponse) {
+    option (google.api.http).get = "/verana/td/v1/verifiable-service/{operator_account}";
+  }
+  rpc GetOperatorAllowance(QueryGetOperatorAllowanceRequest) returns (QueryGetOperatorAllowanceResponse) {
+    option (google.api.http).get = "/verana/td/v1/operator-allowance/{anchor_id}/{operator_account}";
   }
 }
 
@@ -41,4 +54,33 @@ message QueryGetTrustDepositRequest {
 // QueryGetTrustDepositResponse is response type for the GetTrustDeposit RPC method
 message QueryGetTrustDepositResponse {
   TrustDeposit trust_deposit = 1 [(gogoproto.nullable) = false];
+}
+
+// =============================================================================
+// ANCHOR-BASED POC QUERIES
+// =============================================================================
+
+message QueryGetAnchorRequest {
+  string anchor_id = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+}
+
+message QueryGetAnchorResponse {
+  Anchor anchor = 1 [(gogoproto.nullable) = false];
+}
+
+message QueryGetVerifiableServiceRequest {
+  string operator_account = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+}
+
+message QueryGetVerifiableServiceResponse {
+  VerifiableService verifiable_service = 1 [(gogoproto.nullable) = false];
+}
+
+message QueryGetOperatorAllowanceRequest {
+  string anchor_id = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string operator_account = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+}
+
+message QueryGetOperatorAllowanceResponse {
+  OperatorAllowance operator_allowance = 1 [(gogoproto.nullable) = false];
 }

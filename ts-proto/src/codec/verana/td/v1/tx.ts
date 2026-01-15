@@ -79,6 +79,53 @@ export interface MsgRepaySlashedTrustDeposit {
 export interface MsgRepaySlashedTrustDepositResponse {
 }
 
+/** MsgRegisterAnchor registers a group policy address as an Anchor. */
+export interface MsgRegisterAnchor {
+  /** creator must be a member of the group or the group policy itself */
+  creator: string;
+  /** anchor_id is the group policy address to register as anchor */
+  anchorId: string;
+  /** group_id is the x/group group ID */
+  groupId: number;
+  /** metadata is optional description */
+  metadata: string;
+}
+
+export interface MsgRegisterAnchorResponse {
+}
+
+/** MsgRegisterVerifiableService registers a hot operator key for an Anchor. */
+export interface MsgRegisterVerifiableService {
+  /** creator must be the anchor or authorized by the anchor */
+  creator: string;
+  /** anchor_id is the anchor this VS belongs to */
+  anchorId: string;
+  /** operator_account is the hot key address for the VS */
+  operatorAccount: string;
+  /** metadata is optional service description */
+  metadata: string;
+}
+
+export interface MsgRegisterVerifiableServiceResponse {
+}
+
+/** MsgSetOperatorAllowance sets spending limits for a VS operator. */
+export interface MsgSetOperatorAllowance {
+  /** creator must be the anchor or authorized by the anchor */
+  creator: string;
+  /** anchor_id is the anchor this allowance belongs to */
+  anchorId: string;
+  /** operator_account is the VS operator address */
+  operatorAccount: string;
+  /** allowance_limit is the max spendable amount per period (in uvna) */
+  allowanceLimit: number;
+  /** reset_period in seconds (e.g., 86400 for daily) */
+  resetPeriod: number;
+}
+
+export interface MsgSetOperatorAllowanceResponse {
+}
+
 function createBaseMsgUpdateParams(): MsgUpdateParams {
   return { authority: "", params: undefined };
 }
@@ -734,6 +781,466 @@ export const MsgRepaySlashedTrustDepositResponse = {
   },
 };
 
+function createBaseMsgRegisterAnchor(): MsgRegisterAnchor {
+  return { creator: "", anchorId: "", groupId: 0, metadata: "" };
+}
+
+export const MsgRegisterAnchor = {
+  encode(message: MsgRegisterAnchor, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.creator !== "") {
+      writer.uint32(10).string(message.creator);
+    }
+    if (message.anchorId !== "") {
+      writer.uint32(18).string(message.anchorId);
+    }
+    if (message.groupId !== 0) {
+      writer.uint32(24).uint64(message.groupId);
+    }
+    if (message.metadata !== "") {
+      writer.uint32(34).string(message.metadata);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgRegisterAnchor {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgRegisterAnchor();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.creator = reader.string();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.anchorId = reader.string();
+          continue;
+        case 3:
+          if (tag !== 24) {
+            break;
+          }
+
+          message.groupId = longToNumber(reader.uint64() as Long);
+          continue;
+        case 4:
+          if (tag !== 34) {
+            break;
+          }
+
+          message.metadata = reader.string();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MsgRegisterAnchor {
+    return {
+      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
+      anchorId: isSet(object.anchorId) ? globalThis.String(object.anchorId) : "",
+      groupId: isSet(object.groupId) ? globalThis.Number(object.groupId) : 0,
+      metadata: isSet(object.metadata) ? globalThis.String(object.metadata) : "",
+    };
+  },
+
+  toJSON(message: MsgRegisterAnchor): unknown {
+    const obj: any = {};
+    if (message.creator !== "") {
+      obj.creator = message.creator;
+    }
+    if (message.anchorId !== "") {
+      obj.anchorId = message.anchorId;
+    }
+    if (message.groupId !== 0) {
+      obj.groupId = Math.round(message.groupId);
+    }
+    if (message.metadata !== "") {
+      obj.metadata = message.metadata;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MsgRegisterAnchor>, I>>(base?: I): MsgRegisterAnchor {
+    return MsgRegisterAnchor.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgRegisterAnchor>, I>>(object: I): MsgRegisterAnchor {
+    const message = createBaseMsgRegisterAnchor();
+    message.creator = object.creator ?? "";
+    message.anchorId = object.anchorId ?? "";
+    message.groupId = object.groupId ?? 0;
+    message.metadata = object.metadata ?? "";
+    return message;
+  },
+};
+
+function createBaseMsgRegisterAnchorResponse(): MsgRegisterAnchorResponse {
+  return {};
+}
+
+export const MsgRegisterAnchorResponse = {
+  encode(_: MsgRegisterAnchorResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgRegisterAnchorResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgRegisterAnchorResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(_: any): MsgRegisterAnchorResponse {
+    return {};
+  },
+
+  toJSON(_: MsgRegisterAnchorResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MsgRegisterAnchorResponse>, I>>(base?: I): MsgRegisterAnchorResponse {
+    return MsgRegisterAnchorResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgRegisterAnchorResponse>, I>>(_: I): MsgRegisterAnchorResponse {
+    const message = createBaseMsgRegisterAnchorResponse();
+    return message;
+  },
+};
+
+function createBaseMsgRegisterVerifiableService(): MsgRegisterVerifiableService {
+  return { creator: "", anchorId: "", operatorAccount: "", metadata: "" };
+}
+
+export const MsgRegisterVerifiableService = {
+  encode(message: MsgRegisterVerifiableService, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.creator !== "") {
+      writer.uint32(10).string(message.creator);
+    }
+    if (message.anchorId !== "") {
+      writer.uint32(18).string(message.anchorId);
+    }
+    if (message.operatorAccount !== "") {
+      writer.uint32(26).string(message.operatorAccount);
+    }
+    if (message.metadata !== "") {
+      writer.uint32(34).string(message.metadata);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgRegisterVerifiableService {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgRegisterVerifiableService();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.creator = reader.string();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.anchorId = reader.string();
+          continue;
+        case 3:
+          if (tag !== 26) {
+            break;
+          }
+
+          message.operatorAccount = reader.string();
+          continue;
+        case 4:
+          if (tag !== 34) {
+            break;
+          }
+
+          message.metadata = reader.string();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MsgRegisterVerifiableService {
+    return {
+      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
+      anchorId: isSet(object.anchorId) ? globalThis.String(object.anchorId) : "",
+      operatorAccount: isSet(object.operatorAccount) ? globalThis.String(object.operatorAccount) : "",
+      metadata: isSet(object.metadata) ? globalThis.String(object.metadata) : "",
+    };
+  },
+
+  toJSON(message: MsgRegisterVerifiableService): unknown {
+    const obj: any = {};
+    if (message.creator !== "") {
+      obj.creator = message.creator;
+    }
+    if (message.anchorId !== "") {
+      obj.anchorId = message.anchorId;
+    }
+    if (message.operatorAccount !== "") {
+      obj.operatorAccount = message.operatorAccount;
+    }
+    if (message.metadata !== "") {
+      obj.metadata = message.metadata;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MsgRegisterVerifiableService>, I>>(base?: I): MsgRegisterVerifiableService {
+    return MsgRegisterVerifiableService.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgRegisterVerifiableService>, I>>(object: I): MsgRegisterVerifiableService {
+    const message = createBaseMsgRegisterVerifiableService();
+    message.creator = object.creator ?? "";
+    message.anchorId = object.anchorId ?? "";
+    message.operatorAccount = object.operatorAccount ?? "";
+    message.metadata = object.metadata ?? "";
+    return message;
+  },
+};
+
+function createBaseMsgRegisterVerifiableServiceResponse(): MsgRegisterVerifiableServiceResponse {
+  return {};
+}
+
+export const MsgRegisterVerifiableServiceResponse = {
+  encode(_: MsgRegisterVerifiableServiceResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgRegisterVerifiableServiceResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgRegisterVerifiableServiceResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(_: any): MsgRegisterVerifiableServiceResponse {
+    return {};
+  },
+
+  toJSON(_: MsgRegisterVerifiableServiceResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MsgRegisterVerifiableServiceResponse>, I>>(
+    base?: I,
+  ): MsgRegisterVerifiableServiceResponse {
+    return MsgRegisterVerifiableServiceResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgRegisterVerifiableServiceResponse>, I>>(
+    _: I,
+  ): MsgRegisterVerifiableServiceResponse {
+    const message = createBaseMsgRegisterVerifiableServiceResponse();
+    return message;
+  },
+};
+
+function createBaseMsgSetOperatorAllowance(): MsgSetOperatorAllowance {
+  return { creator: "", anchorId: "", operatorAccount: "", allowanceLimit: 0, resetPeriod: 0 };
+}
+
+export const MsgSetOperatorAllowance = {
+  encode(message: MsgSetOperatorAllowance, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.creator !== "") {
+      writer.uint32(10).string(message.creator);
+    }
+    if (message.anchorId !== "") {
+      writer.uint32(18).string(message.anchorId);
+    }
+    if (message.operatorAccount !== "") {
+      writer.uint32(26).string(message.operatorAccount);
+    }
+    if (message.allowanceLimit !== 0) {
+      writer.uint32(32).uint64(message.allowanceLimit);
+    }
+    if (message.resetPeriod !== 0) {
+      writer.uint32(40).uint64(message.resetPeriod);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgSetOperatorAllowance {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgSetOperatorAllowance();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.creator = reader.string();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.anchorId = reader.string();
+          continue;
+        case 3:
+          if (tag !== 26) {
+            break;
+          }
+
+          message.operatorAccount = reader.string();
+          continue;
+        case 4:
+          if (tag !== 32) {
+            break;
+          }
+
+          message.allowanceLimit = longToNumber(reader.uint64() as Long);
+          continue;
+        case 5:
+          if (tag !== 40) {
+            break;
+          }
+
+          message.resetPeriod = longToNumber(reader.uint64() as Long);
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MsgSetOperatorAllowance {
+    return {
+      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
+      anchorId: isSet(object.anchorId) ? globalThis.String(object.anchorId) : "",
+      operatorAccount: isSet(object.operatorAccount) ? globalThis.String(object.operatorAccount) : "",
+      allowanceLimit: isSet(object.allowanceLimit) ? globalThis.Number(object.allowanceLimit) : 0,
+      resetPeriod: isSet(object.resetPeriod) ? globalThis.Number(object.resetPeriod) : 0,
+    };
+  },
+
+  toJSON(message: MsgSetOperatorAllowance): unknown {
+    const obj: any = {};
+    if (message.creator !== "") {
+      obj.creator = message.creator;
+    }
+    if (message.anchorId !== "") {
+      obj.anchorId = message.anchorId;
+    }
+    if (message.operatorAccount !== "") {
+      obj.operatorAccount = message.operatorAccount;
+    }
+    if (message.allowanceLimit !== 0) {
+      obj.allowanceLimit = Math.round(message.allowanceLimit);
+    }
+    if (message.resetPeriod !== 0) {
+      obj.resetPeriod = Math.round(message.resetPeriod);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MsgSetOperatorAllowance>, I>>(base?: I): MsgSetOperatorAllowance {
+    return MsgSetOperatorAllowance.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgSetOperatorAllowance>, I>>(object: I): MsgSetOperatorAllowance {
+    const message = createBaseMsgSetOperatorAllowance();
+    message.creator = object.creator ?? "";
+    message.anchorId = object.anchorId ?? "";
+    message.operatorAccount = object.operatorAccount ?? "";
+    message.allowanceLimit = object.allowanceLimit ?? 0;
+    message.resetPeriod = object.resetPeriod ?? 0;
+    return message;
+  },
+};
+
+function createBaseMsgSetOperatorAllowanceResponse(): MsgSetOperatorAllowanceResponse {
+  return {};
+}
+
+export const MsgSetOperatorAllowanceResponse = {
+  encode(_: MsgSetOperatorAllowanceResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgSetOperatorAllowanceResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgSetOperatorAllowanceResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(_: any): MsgSetOperatorAllowanceResponse {
+    return {};
+  },
+
+  toJSON(_: MsgSetOperatorAllowanceResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MsgSetOperatorAllowanceResponse>, I>>(base?: I): MsgSetOperatorAllowanceResponse {
+    return MsgSetOperatorAllowanceResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgSetOperatorAllowanceResponse>, I>>(_: I): MsgSetOperatorAllowanceResponse {
+    const message = createBaseMsgSetOperatorAllowanceResponse();
+    return message;
+  },
+};
+
 /** Msg defines the Msg service. */
 export interface Msg {
   /**
@@ -746,6 +1253,10 @@ export interface Msg {
   /** SlashTrustDeposit defines a governance operation to slash an account's trust deposit */
   SlashTrustDeposit(request: MsgSlashTrustDeposit): Promise<MsgSlashTrustDepositResponse>;
   RepaySlashedTrustDeposit(request: MsgRepaySlashedTrustDeposit): Promise<MsgRepaySlashedTrustDepositResponse>;
+  /** Anchor-based POC operations */
+  RegisterAnchor(request: MsgRegisterAnchor): Promise<MsgRegisterAnchorResponse>;
+  RegisterVerifiableService(request: MsgRegisterVerifiableService): Promise<MsgRegisterVerifiableServiceResponse>;
+  SetOperatorAllowance(request: MsgSetOperatorAllowance): Promise<MsgSetOperatorAllowanceResponse>;
 }
 
 export const MsgServiceName = "verana.td.v1.Msg";
@@ -760,6 +1271,9 @@ export class MsgClientImpl implements Msg {
     this.ReclaimTrustDeposit = this.ReclaimTrustDeposit.bind(this);
     this.SlashTrustDeposit = this.SlashTrustDeposit.bind(this);
     this.RepaySlashedTrustDeposit = this.RepaySlashedTrustDeposit.bind(this);
+    this.RegisterAnchor = this.RegisterAnchor.bind(this);
+    this.RegisterVerifiableService = this.RegisterVerifiableService.bind(this);
+    this.SetOperatorAllowance = this.SetOperatorAllowance.bind(this);
   }
   UpdateParams(request: MsgUpdateParams): Promise<MsgUpdateParamsResponse> {
     const data = MsgUpdateParams.encode(request).finish();
@@ -789,6 +1303,24 @@ export class MsgClientImpl implements Msg {
     const data = MsgRepaySlashedTrustDeposit.encode(request).finish();
     const promise = this.rpc.request(this.service, "RepaySlashedTrustDeposit", data);
     return promise.then((data) => MsgRepaySlashedTrustDepositResponse.decode(_m0.Reader.create(data)));
+  }
+
+  RegisterAnchor(request: MsgRegisterAnchor): Promise<MsgRegisterAnchorResponse> {
+    const data = MsgRegisterAnchor.encode(request).finish();
+    const promise = this.rpc.request(this.service, "RegisterAnchor", data);
+    return promise.then((data) => MsgRegisterAnchorResponse.decode(_m0.Reader.create(data)));
+  }
+
+  RegisterVerifiableService(request: MsgRegisterVerifiableService): Promise<MsgRegisterVerifiableServiceResponse> {
+    const data = MsgRegisterVerifiableService.encode(request).finish();
+    const promise = this.rpc.request(this.service, "RegisterVerifiableService", data);
+    return promise.then((data) => MsgRegisterVerifiableServiceResponse.decode(_m0.Reader.create(data)));
+  }
+
+  SetOperatorAllowance(request: MsgSetOperatorAllowance): Promise<MsgSetOperatorAllowanceResponse> {
+    const data = MsgSetOperatorAllowance.encode(request).finish();
+    const promise = this.rpc.request(this.service, "SetOperatorAllowance", data);
+    return promise.then((data) => MsgSetOperatorAllowanceResponse.decode(_m0.Reader.create(data)));
   }
 }
 

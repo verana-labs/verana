@@ -52,8 +52,8 @@ func (ms msgServer) executeRemoveDID(ctx sdk.Context, msg *types.MsgRemoveDID) e
 		// Convert to signed integer for adjustment
 		depositAmount := didEntry.Deposit
 
-		// Use negative value to decrease deposit and increase claimable amount
-		if err := ms.trustDeposit.AdjustTrustDeposit(ctx, didEntry.Controller, -depositAmount); err != nil {
+		// Use negative value to decrease deposit and increase claimable amount (anchor-aware: Issue #185)
+		if err := ms.adjustTrustDepositAnchorAware(ctx, didEntry.Controller, -depositAmount); err != nil {
 			return fmt.Errorf("failed to adjust trust deposit for controller %s: %w", didEntry.Controller, err)
 		}
 	}

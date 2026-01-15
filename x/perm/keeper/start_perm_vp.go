@@ -1,8 +1,9 @@
 package keeper
 
 import (
-	"cosmossdk.io/math"
 	"fmt"
+
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	credentialschematypes "github.com/verana-labs/verana/x/cs/types"
 	"github.com/verana-labs/verana/x/perm/types"
@@ -61,9 +62,9 @@ func (ms msgServer) executeStartPermissionVP(ctx sdk.Context, msg *types.MsgStar
 	validationFeesInDenom := fees
 	validationTrustDepositInDenom := deposit
 
-	// Increment trust deposit if deposit is greater than 0
+	// Increment trust deposit if deposit is greater than 0 (anchor-aware: Issue #185)
 	if validationTrustDepositInDenom > 0 {
-		if err := ms.trustDeposit.AdjustTrustDeposit(ctx, msg.Creator, int64(validationTrustDepositInDenom)); err != nil {
+		if err := ms.adjustTrustDepositAnchorAware(ctx, msg.Creator, int64(validationTrustDepositInDenom)); err != nil {
 			return 0, fmt.Errorf("failed to increase trust deposit: %w", err)
 		}
 	}

@@ -20,6 +20,11 @@ var (
 	ParamsKey       = []byte("p_trustdeposit")
 	TrustDepositKey = collections.NewPrefix(1)
 	DustKey         = collections.NewPrefix(2)
+
+	// Anchor-based POC keys
+	AnchorKey            = collections.NewPrefix(3) // anchor_id -> Anchor
+	VerifiableServiceKey = collections.NewPrefix(4) // operator_account -> VerifiableService
+	OperatorAllowanceKey = collections.NewPrefix(5) // (anchor_id, operator) -> OperatorAllowance
 )
 
 const (
