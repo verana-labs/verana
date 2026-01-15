@@ -55,6 +55,17 @@ veranad tx bank send cooluser $OPERATOR1 2000000uvna --from cooluser --keyring-b
 veranad tx bank send cooluser $OPERATOR2 2000000uvna --from cooluser --keyring-backend test --chain-id vna-testnet-1 -y
 ```
 
+### Check Balances (Visual Verification)
+
+After sending funds, verify each account's balance:
+
+```bash
+veranad query bank balances $ADMIN1
+veranad query bank balances $ADMIN2
+veranad query bank balances $OPERATOR1
+veranad query bank balances $OPERATOR2
+```
+
 ---
 
 ## Step 3: Create Group and Group Policy (Anchor)
