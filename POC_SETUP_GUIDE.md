@@ -329,12 +329,19 @@ veranad query td get-operator-allowance $ANCHOR_ID $OPERATOR1
 
 ---
 
-## Step 7: Grant x/authz Permissions (Optional)
+## Step 7: Grant x/authz Permissions (Required)
 
-To allow VS operators to execute certain transactions on behalf of the anchor:
+> **Important**: For VS operators to execute transactions **on behalf of the anchor** (where the anchor is the creator/owner of the resulting on-chain entity), x/authz grants are **required**. This is essential for the anchor-based model where:
+> - DIDs are owned by the anchor (not the operator)
+> - Permissions are granted to the anchor (not the operator)
+> - The anchor accumulates trust deposits from operations
+
+Without x/authz: Operators can only sign as themselves. The TD module will route trust deposits to the anchor, but the created resources would be owned by the operator's account.
+
+With x/authz: Operators execute `MsgExec` wrapping the actual message, where `creator = anchor_id`. The anchor becomes the owner.
 
 ```bash
-# Grant Operator 1 permission to execute MsgAddDID
+# Grant Operator 1 permission to execute MsgAddDID on behalf of anchor
 cat > /tmp/authz_grant_msg.json << EOF
 {
   "group_policy_address": "$ANCHOR_ID",
@@ -362,6 +369,25 @@ veranad tx group submit-proposal /tmp/authz_grant_msg.json --from anchor_admin1 
 veranad tx group vote 5 $ADMIN1 VOTE_OPTION_YES "" --from anchor_admin1 --keyring-backend test --chain-id vna-testnet-1 -y
 sleep 65
 veranad tx group exec 5 --from anchor_admin1 --keyring-backend test --chain-id vna-testnet-1 -y
+```
+
+### 7.1 Operator Executing via Authz
+
+Once the grant is in place, the operator can execute operations on behalf of the anchor:
+
+```bash
+# Operator 1 registers a DID on behalf of anchor
+veranad tx authz exec /tmp/add_did_msg.json --from vs_operator1 --keyring-backend test --chain-id vna-testnet-1 -y
+```
+
+Where `/tmp/add_did_msg.json` contains:
+```json
+{
+  "@type": "/verana.dd.v1.MsgAddDID",
+  "creator": "$ANCHOR_ID",
+  "did": "did:web:example.com",
+  "years": 1
+}
 ```
 
 ---

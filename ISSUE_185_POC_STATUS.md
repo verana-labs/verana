@@ -73,7 +73,7 @@
 | **Genesis Export/Import** | Add Anchors, VerifiableServices, OperatorAllowances to genesis |
 | **Migrations** | Migrate existing account-based TDs to anchor-based (if needed) |
 | **List Queries** | Add `ListAnchors`, `ListVerifiableServicesByAnchor`, `ListOperatorAllowances` |
-| **x/authz Integration** | Test and document authz grants via group proposals for VS operators |
+| **x/authz Documentation** | Document required authz grants for each VPR operation type (no code changes needed; x/authz is built into Cosmos SDK) |
 
 ### Medium Priority
 
