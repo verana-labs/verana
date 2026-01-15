@@ -119,16 +119,20 @@ veranad tx group create-group-with-policy \
   -y
 ```
 
-Query to get the group policy address (this is the ANCHOR_ID):
+Query to get the group policy address (this is the ANCHOR_ID). This pulls the first policy in the list and prints its admin address, which is used as the ANCHOR_ID:
 ```bash
 # Get group policy address (ANCHOR_ID)
-veranad query group group-policies-by-group 1
+veranad query group group-policies-by-group 1 -o json | jq '.group_policies[0].admin'
 ```
 
 Save the group policy address:
 ```bash
 # Copy address from query result
 ANCHOR_ID="verana1..."
+
+# Or assign directly from the query
+ANCHOR_ID=$(veranad query group group-policies-by-group 1 -o json | jq -r '.group_policies[0].admin')
+echo "ANCHOR_ID=$ANCHOR_ID"
 ```
 
 ---
