@@ -373,22 +373,31 @@ veranad tx group exec 5 --from anchor_admin1 --keyring-backend test --chain-id v
 
 ### 7.1 Operator Executing via Authz
 
-Once the grant is in place, the operator can execute operations on behalf of the anchor:
+Once the grant is in place, the operator can execute operations on behalf of the anchor. The workflow requires two steps:
 
+**Step 1: Generate the unsigned transaction (as if from anchor)**
 ```bash
-# Operator 1 registers a DID on behalf of anchor
-veranad tx authz exec /tmp/add_did_msg.json --from vs_operator1 --keyring-backend test --chain-id vna-testnet-1 -y
+# Generate the DID registration tx as if from anchor (unsigned)
+veranad tx dd add-did "did:web:example.com" 1 \
+  --from $ANCHOR_ID \
+  --chain-id vna-testnet-1 \
+  --generate-only > /tmp/add_did_tx.json
 ```
 
-Where `/tmp/add_did_msg.json` contains:
-```json
-{
-  "@type": "/verana.dd.v1.MsgAddDID",
-  "creator": "$ANCHOR_ID",
-  "did": "did:web:example.com",
-  "years": 1
-}
+**Step 2: Execute via authz (signed by operator)**
+```bash
+# Operator executes the tx on behalf of anchor
+veranad tx authz exec /tmp/add_did_tx.json \
+  --from vs_operator1 \
+  --keyring-backend test \
+  --chain-id vna-testnet-1 \
+  -y
 ```
+
+This creates a DID where:
+- **Owner**: `$ANCHOR_ID` (the anchor)
+- **Signer**: `vs_operator1` (the operator with authz grant)
+- **Trust Deposit**: Routed to the anchor via `adjustTrustDepositAnchorAware`
 
 ---
 
