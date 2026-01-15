@@ -378,7 +378,8 @@ Once the grant is in place, the operator can execute operations on behalf of the
 **Step 1: Generate the unsigned transaction (as if from anchor)**
 ```bash
 # Generate the DID registration tx as if from anchor (unsigned)
-veranad tx dd add-did "did:web:example.com" 1 \
+# Syntax: veranad tx dd add-did [did] [years] [flags]
+veranad tx dd add-did did:web:example.com 1 \
   --from $ANCHOR_ID \
   --chain-id vna-testnet-1 \
   --generate-only > /tmp/add_did_tx.json
