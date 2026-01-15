@@ -60,6 +60,16 @@ go mod download
 go mod verify
 ```
 
+If `go mod verify` fails with "dir has been modified", your module cache no longer matches the module zip.
+On macOS this can happen if a tool deletes or adds files in `$GOMODCACHE` (some modules even ship `.DS_Store` in their zip).
+Fix by deleting the module directory and re-downloading it:
+
+```bash
+# Example for a single module
+rm -rf "$(go env GOMODCACHE)/github.com/dgraph-io/badger/v4@v4.2.0"
+go mod download github.com/dgraph-io/badger/v4@v4.2.0
+```
+
 ### 3. Build and Install
 
 ```bash
