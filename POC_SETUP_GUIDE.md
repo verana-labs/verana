@@ -178,15 +178,20 @@ veranad tx group submit-proposal /tmp/register_anchor_msg.json \
 ### 4.3 Vote on Proposal
 
 ```bash
-# Get proposal ID (usually 1)
-veranad query group proposals-by-group-policy $ANCHOR_ID
+# Get latest proposal ID
+PROPOSAL_ID=$(veranad query group proposals-by-group-policy "$ANCHOR_ID" -o json | jq -r '.proposals[-1].id')
+echo "PROPOSAL_ID=$PROPOSAL_ID"
 
 # Vote yes (args: proposal-id, voter, vote-option, metadata)
-veranad tx group vote 1 $ADMIN1 VOTE_OPTION_YES "" \
+veranad tx group vote "$PROPOSAL_ID" $ADMIN1 VOTE_OPTION_YES "" \
   --from anchor_admin1 \
   --keyring-backend test \
   --chain-id vna-testnet-1 \
   -y
+
+# Wait for the voting period to end (60s in testharness), then check the result
+sleep 65
+veranad query group proposals-by-group-policy "$ANCHOR_ID" -o json
 ```
 
 ### 4.4 Execute Proposal (wait 1 minute for voting period)
@@ -194,7 +199,7 @@ veranad tx group vote 1 $ADMIN1 VOTE_OPTION_YES "" \
 ```bash
 # Wait for voting period to end, then execute
 sleep 65
-veranad tx group exec 1 \
+veranad tx group exec $PROPOSAL_ID \
   --from anchor_admin1 \
   --keyring-backend test \
   --chain-id vna-testnet-1 \
@@ -205,7 +210,7 @@ veranad tx group exec 1 \
 
 ```bash
 # Query the anchor directly
-veranad query td get-anchor $ANCHOR_ID
+veranad query td get-anchor $ANCHOR_ID  -o json
 
 # Expected output:
 # anchor:
