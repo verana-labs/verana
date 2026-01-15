@@ -167,6 +167,8 @@ EOF
 
 ### 4.2 Submit Proposal
 
+Any one of the members could submit this proposal.
+
 ```bash
 veranad tx group submit-proposal /tmp/register_anchor_msg.json \
   --from anchor_admin1 \
@@ -227,7 +229,7 @@ veranad query group proposals-by-group-policy $ANCHOR_ID
 
 ## Step 5: Register VS Operators via Group Proposal
 
-### 5.1 Create VS Registration Proposals
+### 5.1 Create VS Operators Registration Proposals
 
 ```bash
 # Register VS Operator 1
