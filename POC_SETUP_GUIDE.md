@@ -122,7 +122,7 @@ veranad tx group create-group-with-policy \
 Query to get the group policy address (this is the ANCHOR_ID). This pulls the first policy in the list and prints its admin address, which is used as the ANCHOR_ID:
 ```bash
 # Get group policy address (ANCHOR_ID)
-veranad query group group-policies-by-group 1 -o json | jq '.group_policies[0].admin'
+veranad query group group-policies-by-group 1 -o json | jq -r '.group_policies[0].admin'
 ```
 
 Save the group policy address:
@@ -144,7 +144,7 @@ Since anchor operations require `creator == anchor_id`, we must submit via group
 ### 4.1 Create Register Anchor Proposal
 
 ```bash
-# Create the proposal message JSON
+# Create the proposal message JSON (use a single pair of quotes around variables)
 cat > /tmp/register_anchor_msg.json << EOF
 {
   "group_policy_address": "$ANCHOR_ID",
