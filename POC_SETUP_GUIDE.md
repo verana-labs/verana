@@ -382,10 +382,14 @@ veranad tx group exec 5 --from anchor_admin1 --keyring-backend test --chain-id v
 ## Understanding the Flow
 
 1. **Trust Deposits Accumulate from Operations** - NOT from direct funding
-2. When a VS operator performs an operation (e.g., registers a DID), the operation calls `AdjustAnchorTrustDeposit`
-3. Positive adjustments increase the trust deposit
-4. Negative adjustments (debits) check operator allowance first
-5. All anchor-level operations require group proposals
+2. When a VS operator performs an operation (e.g., registers a DID), the `adjustTrustDepositAnchorAware` helper is called
+3. **Module Integration Complete**: All VPR modules (`x/dd`, `x/perm`, `x/cs`, `x/tr`) now automatically:
+   - Check if the account is an **anchor** → route to `AdjustAnchorTrustDeposit`
+   - Check if the account is a **VS operator** → resolve anchor and enforce spending limits
+   - Fall back to regular `AdjustTrustDeposit` for non-anchor accounts
+4. Positive adjustments increase the trust deposit
+5. Negative adjustments (debits) check operator allowance first
+6. All anchor-level operations require group proposals
 
 ---
 

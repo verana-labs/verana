@@ -2,7 +2,7 @@
 
 > **Issue**: [#185 - Anchor-Based Control, Authorization, and Trust Deposit Architecture](https://github.com/verana-labs/verana/issues/185)
 > **Branch**: `poc/anchor-based-td`
-> **Date**: 2026-01-13
+> **Last Updated**: 2026-01-15
 
 ---
 
@@ -14,6 +14,7 @@
 | 2 | VS Registration with Hot Keys | ✅ **Complete** | Operators registered via `MsgRegisterVerifiableService` |
 | 3 | Operator Spending from Anchor | ✅ **Complete** | `DebitAnchorTrustDeposit` with operator resolution |
 | 4 | Per-VS Spend Limits | ✅ **Complete** | `OperatorAllowance` with limit, spent, reset_period |
+| 5 | **Module Integration** | ✅ **Complete** | All VPR modules updated with anchor-aware trust deposits |
 
 ---
 
@@ -37,6 +38,12 @@
 - `GetVerifiableService` - Query VS by operator account
 - `GetOperatorAllowance` - Query allowance for anchor/operator pair
 
+### Module Integration (Completed 2026-01-15)
+- **x/dd**: `add_did.go`, `renew_did.go`, `remove_did.go` use `adjustTrustDepositAnchorAware`
+- **x/perm**: `msg_server.go`, `start_perm_vp.go`, `csps.go`, `perm_validated.go` use anchor-aware helper
+- **x/cs**: `credential_schema.go` uses `adjustTrustDepositAnchorAware`
+- **x/tr**: `msg_server.go` uses `adjustTrustDepositAnchorAware`
+
 ### CLI Commands (AutoCLI)
 - `veranad query td get-anchor [anchor_id]`
 - `veranad query td get-verifiable-service [operator_account]`
@@ -59,13 +66,14 @@
 
 ## What Remains (Future Work)
 
-### High Priority (For Full Implementation)
+### Medium Priority
 
 | Item | Description |
 |------|-------------|
-| **Module Integration** | Update `x/dd` and `x/perm` to call `AdjustAnchorTrustDeposit` when operating on behalf of an Anchor |
+| **Genesis Export/Import** | Add Anchors, VerifiableServices, OperatorAllowances to genesis |
+| **Migrations** | Migrate existing account-based TDs to anchor-based (if needed) |
+| **List Queries** | Add `ListAnchors`, `ListVerifiableServicesByAnchor`, `ListOperatorAllowances` |
 | **x/authz Integration** | Test and document authz grants via group proposals for VS operators |
-| **Trust Deposit Accumulation** | Currently TDs are adjusted via keeper calls; need to wire this into actual operations (DID registration, permission creation) |
 
 ### Medium Priority
 
@@ -74,16 +82,6 @@
 | **Genesis Export/Import** | Add Anchors, VerifiableServices, OperatorAllowances to genesis |
 | **Migrations** | Migrate existing account-based TDs to anchor-based (if needed) |
 | **List Queries** | Add `ListAnchors`, `ListVerifiableServicesByAnchor`, `ListOperatorAllowances` |
-
-### Low Priority (Nice to Have)
-
-| Item | Description |
-|------|-------------|
-| **Deactivate VS** | Add ability to deactivate (not delete) a VS operator |
-| **Update Allowance** | Allow updating allowance without resetting spent |
-| **Events Indexing** | Ensure all events are properly indexed for off-chain queries |
-| **x/feegrant** | Explore using feegrant for operator gas fees |
-
 ---
 
 ## Key Design Decisions
@@ -110,6 +108,10 @@
 | `ad176e2` | Add anchor query endpoints |
 | `36b778e` | Configure AutoCLI with positional args |
 | `dc298cb` | Add verification queries to POC guide |
+| `79405f9` | Add anchor-aware methods to TrustDepositKeeper interfaces |
+| `9e0f27d` | x/dd: DID operations use anchor-aware adjustment |
+| `0c97ff1` | x/perm: Permission operations use anchor-aware adjustment |
+| `de7f1b5` | x/cs, x/tr: Schema and registry use anchor-aware adjustment |
 
 ---
 
