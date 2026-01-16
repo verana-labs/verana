@@ -25,7 +25,7 @@ func DefaultConfig() ClientConfig {
 		AddressPrefix: getEnvOrDefault("ADDRESS_PREFIX", "verana"),
 		HomeDir:       getEnvOrDefault("HOME_DIR", "~/.verana"),
 		NodeAddress:   getEnvOrDefault("NODE_RPC", ""),
-		Gas:           getEnvOrDefault("GAS", "300000"),
+		Gas:           getEnvOrDefault("GAS", "400000"),
 		Fees:          getEnvOrDefault("FEES", "750000uvna"),
 	}
 }

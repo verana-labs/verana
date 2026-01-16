@@ -60,7 +60,7 @@ export FEES="750000uvna"
 export ADDRESS_PREFIX="verana"
 export HOME_DIR="~/.verana"
 export NODE_RPC="http://node1.devnet.verana.network:26657"
-export GAS="300000"
+export GAS="400000"
 export FEES="750000uvna"
 ```
 
@@ -70,7 +70,7 @@ export FEES="750000uvna"
 export ADDRESS_PREFIX="verana"
 export HOME_DIR="~/.verana"
 export NODE_RPC="http://node1.testnet.verana.network:26657"
-export GAS="300000"
+export GAS="400000"
 export FEES="750000uvna"
 ```
 
