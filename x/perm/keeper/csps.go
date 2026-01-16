@@ -169,9 +169,9 @@ func (ms msgServer) validateCreateOrUpdatePermissionSessionFees(ctx sdk.Context,
 	trustDepositRate := ms.trustDeposit.GetTrustDepositRate(ctx)
 	trustUnitPrice := ms.trustRegistryKeeper.GetTrustUnitPrice(ctx)
 
-	// Calculate trust_fees = beneficiary_fees * (1 + (user_agent_reward_rate + wallet_user_agent_reward_rate)) * (1 + trust_deposit_rate) * trust_unit_price
-	agentRewardRate := userAgentRewardRate.Add(walletUserAgentRewardRate)
-	multiplier := math.LegacyOneDec().Add(agentRewardRate).Mul(math.LegacyOneDec().Add(trustDepositRate))
+	// Calculate trust_fees = beneficiary_fees * (1 + user_agent_reward_rate + wallet_user_agent_reward_rate + trust_deposit_rate) * trust_unit_price
+	// Updated to additive formula per VPR spec (Issue #187)
+	multiplier := math.LegacyOneDec().Add(userAgentRewardRate).Add(walletUserAgentRewardRate).Add(trustDepositRate)
 	trustFees := uint64(math.LegacyNewDec(int64(beneficiaryFees)).Mul(multiplier).Mul(math.LegacyNewDec(int64(trustUnitPrice))).TruncateInt64())
 
 	// Account MUST have sufficient available balance
@@ -195,6 +195,8 @@ func (ms msgServer) executeCreateOrUpdatePermissionSession(ctx sdk.Context, msg 
 	verifierPerm := msg.VerifierPermId != 0
 	trustUnitPrice := ms.trustRegistryKeeper.GetTrustUnitPrice(ctx)
 	trustDepositRate := ms.trustDeposit.GetTrustDepositRate(ctx)
+	userAgentRewardRate := ms.trustDeposit.GetUserAgentRewardRate(ctx)
+	walletUserAgentRewardRate := ms.trustDeposit.GetWalletUserAgentRewardRate(ctx)
 
 	creatorAddr, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
@@ -211,6 +213,10 @@ func (ms msgServer) executeCreateOrUpdatePermissionSession(ctx sdk.Context, msg 
 	if err != nil {
 		return fmt.Errorf("failed to get executor permission: %w", err)
 	}
+
+	// Initialize agent reward accumulators (per VPR spec Issue #187)
+	userAgentReward := math.LegacyZeroDec()
+	walletUserAgentReward := math.LegacyZeroDec()
 
 	// Process fees for each permission in found_perm_set
 	const exemptionScale = 10000 // 10000 = 1.0 = 100% exemption
@@ -234,13 +240,16 @@ func (ms msgServer) executeCreateOrUpdatePermissionSession(ctx sdk.Context, msg 
 				exemptedFees = fees
 			}
 
-			// Calculate amounts with exempted fees
-			// totalFeesAmount = exemptedFees * trust_unit_price
-			totalFeesAmount := exemptedFees * trustUnitPrice
-			// trustDepositAmount = totalFeesAmount * trust_deposit_rate
-			trustDepositAmount := uint64(math.LegacyNewDec(int64(totalFeesAmount)).Mul(trustDepositRate).TruncateInt64())
-			// directFeesAmount = totalFeesAmount * (1 - trust_deposit_rate)
-			directFeesAmount := totalFeesAmount - trustDepositAmount
+			// Calculate perm_total_trust_fees = exemptedFees * trust_unit_price
+			permTotalTrustFees := math.LegacyNewDec(int64(exemptedFees * trustUnitPrice))
+
+			// Calculate trust deposit and direct account amounts
+			trustDepositAmount := uint64(permTotalTrustFees.Mul(trustDepositRate).TruncateInt64())
+			directFeesAmount := uint64(permTotalTrustFees.TruncateInt64()) - trustDepositAmount
+
+			// Accumulate agent rewards from perm_total_trust_fees (not TD-inflated per Issue #187)
+			userAgentReward = userAgentReward.Add(permTotalTrustFees.Mul(userAgentRewardRate))
+			walletUserAgentReward = walletUserAgentReward.Add(permTotalTrustFees.Mul(walletUserAgentRewardRate))
 
 			// transfer direct fees to perm.grantee
 			if directFeesAmount > 0 {
@@ -296,6 +305,112 @@ func (ms msgServer) executeCreateOrUpdatePermissionSession(ctx sdk.Context, msg 
 				if err := ms.Keeper.UpdatePermission(ctx, executorPerm); err != nil {
 					return fmt.Errorf("failed to update executor permission deposit: %w", err)
 				}
+			}
+		}
+	}
+
+	// Process user agent rewards (per VPR spec Issue #187)
+	if userAgentReward.IsPositive() && msg.AgentPermId != 0 {
+		agentPerm, err := ms.Permission.Get(ctx, msg.AgentPermId)
+		if err != nil {
+			return fmt.Errorf("failed to get agent permission: %w", err)
+		}
+
+		// Calculate trust deposit and account amounts for user agent
+		uaToTd := uint64(userAgentReward.Mul(trustDepositRate).TruncateInt64())
+		uaToAccount := uint64(userAgentReward.TruncateInt64()) - uaToTd
+
+		// Transfer direct amount to agent_perm.grantee
+		if uaToAccount > 0 {
+			agentGranteeAddr, err := sdk.AccAddressFromBech32(agentPerm.Grantee)
+			if err != nil {
+				return fmt.Errorf("invalid agent grantee address: %w", err)
+			}
+
+			err = ms.bankKeeper.SendCoins(
+				ctx,
+				creatorAddr,
+				agentGranteeAddr,
+				sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, int64(uaToAccount))),
+			)
+			if err != nil {
+				return fmt.Errorf("failed to transfer user agent reward: %w", err)
+			}
+		}
+
+		// Increase trust deposit of agent_perm.grantee and agent_perm.deposit
+		if uaToTd > 0 {
+			err = ms.bankKeeper.SendCoinsFromAccountToModule(
+				ctx,
+				creatorAddr,
+				types.ModuleName,
+				sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, int64(uaToTd))),
+			)
+			if err != nil {
+				return fmt.Errorf("failed to transfer user agent trust deposit to module: %w", err)
+			}
+
+			err = ms.trustDeposit.AdjustTrustDeposit(ctx, agentPerm.Grantee, int64(uaToTd))
+			if err != nil {
+				return fmt.Errorf("failed to adjust agent trust deposit: %w", err)
+			}
+
+			agentPerm.Deposit += uaToTd
+			if err := ms.Keeper.UpdatePermission(ctx, agentPerm); err != nil {
+				return fmt.Errorf("failed to update agent permission deposit: %w", err)
+			}
+		}
+	}
+
+	// Process wallet user agent rewards (per VPR spec Issue #187)
+	if walletUserAgentReward.IsPositive() && msg.WalletAgentPermId != 0 {
+		walletAgentPerm, err := ms.Permission.Get(ctx, msg.WalletAgentPermId)
+		if err != nil {
+			return fmt.Errorf("failed to get wallet agent permission: %w", err)
+		}
+
+		// Calculate trust deposit and account amounts for wallet user agent
+		wuaToTd := uint64(walletUserAgentReward.Mul(trustDepositRate).TruncateInt64())
+		wuaToAccount := uint64(walletUserAgentReward.TruncateInt64()) - wuaToTd
+
+		// Transfer direct amount to wallet_agent_perm.grantee
+		if wuaToAccount > 0 {
+			walletAgentGranteeAddr, err := sdk.AccAddressFromBech32(walletAgentPerm.Grantee)
+			if err != nil {
+				return fmt.Errorf("invalid wallet agent grantee address: %w", err)
+			}
+
+			err = ms.bankKeeper.SendCoins(
+				ctx,
+				creatorAddr,
+				walletAgentGranteeAddr,
+				sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, int64(wuaToAccount))),
+			)
+			if err != nil {
+				return fmt.Errorf("failed to transfer wallet user agent reward: %w", err)
+			}
+		}
+
+		// Increase trust deposit of wallet_agent_perm.grantee and wallet_agent_perm.deposit
+		if wuaToTd > 0 {
+			err = ms.bankKeeper.SendCoinsFromAccountToModule(
+				ctx,
+				creatorAddr,
+				types.ModuleName,
+				sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, int64(wuaToTd))),
+			)
+			if err != nil {
+				return fmt.Errorf("failed to transfer wallet user agent trust deposit to module: %w", err)
+			}
+
+			err = ms.trustDeposit.AdjustTrustDeposit(ctx, walletAgentPerm.Grantee, int64(wuaToTd))
+			if err != nil {
+				return fmt.Errorf("failed to adjust wallet agent trust deposit: %w", err)
+			}
+
+			walletAgentPerm.Deposit += wuaToTd
+			if err := ms.Keeper.UpdatePermission(ctx, walletAgentPerm); err != nil {
+				return fmt.Errorf("failed to update wallet agent permission deposit: %w", err)
 			}
 		}
 	}
