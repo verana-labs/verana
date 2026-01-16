@@ -205,6 +205,96 @@ func (ms msgServer) SetPermissionVPToValidated(goCtx context.Context, msg *types
 		return nil, fmt.Errorf("credential schema not found: %w", err)
 	}
 
+	// [MOD-PERM-MSG-3-2-1] Validate issuance_fee_discount
+	// Load validator_perm early for discount validation
+	validatorPerm, err := ms.Keeper.GetPermissionByID(ctx, applicantPerm.ValidatorPermId)
+	if err != nil {
+		return nil, fmt.Errorf("validator perm not found: %w", err)
+	}
+
+	const maxDiscount = 10000 // 10000 = 1.0 = 100% discount
+
+	// If renewal, discount must equal existing discount
+	if applicantPerm.EffectiveFrom != nil {
+		if msg.IssuanceFeeDiscount != applicantPerm.IssuanceFeeDiscount {
+			return nil, fmt.Errorf("issuance_fee_discount cannot be changed during renewal")
+		}
+		if msg.VerificationFeeDiscount != applicantPerm.VerificationFeeDiscount {
+			return nil, fmt.Errorf("verification_fee_discount cannot be changed during renewal")
+		}
+	} else {
+		// First time validation - validate discount range and applicability
+		// Validate issuance_fee_discount
+		if msg.IssuanceFeeDiscount > maxDiscount {
+			return nil, fmt.Errorf("issuance_fee_discount cannot exceed %d (100%% discount)", maxDiscount)
+		}
+
+		// Only validate applicability if discount > 0 (0 is always allowed as default)
+		if msg.IssuanceFeeDiscount > 0 {
+			if cs.IssuerPermManagementMode == credentialschematypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION {
+				if applicantPerm.Type == types.PermissionType_ISSUER_GRANTOR {
+					// ISSUER_GRANTOR: can set 0-1 (100% discount)
+					// Already validated range above
+				} else if applicantPerm.Type == types.PermissionType_ISSUER {
+					// ISSUER in GRANTOR mode: if validator_perm.issuance_fee_discount is defined,
+					// can only set 0 to validator_perm.issuance_fee_discount inclusive
+					if validatorPerm.IssuanceFeeDiscount > 0 {
+						if msg.IssuanceFeeDiscount > validatorPerm.IssuanceFeeDiscount {
+							return nil, fmt.Errorf("issuance_fee_discount cannot exceed validator's discount of %d", validatorPerm.IssuanceFeeDiscount)
+						}
+					}
+				} else {
+					return nil, fmt.Errorf("issuance_fee_discount can only be set on ISSUER_GRANTOR or ISSUER permissions in GRANTOR mode")
+				}
+			} else if cs.IssuerPermManagementMode == credentialschematypes.CredentialSchemaPermManagementMode_ECOSYSTEM {
+				if applicantPerm.Type == types.PermissionType_ISSUER {
+					// ISSUER in ECOSYSTEM mode: can set 0-1 (100% discount)
+					// Already validated range above
+				} else {
+					return nil, fmt.Errorf("issuance_fee_discount can only be set on ISSUER permissions in ECOSYSTEM mode")
+				}
+			} else {
+				// OPEN mode or other - issuance_fee_discount not applicable
+				return nil, fmt.Errorf("issuance_fee_discount cannot be set in this permission management mode")
+			}
+		}
+
+		// Validate verification_fee_discount
+		if msg.VerificationFeeDiscount > maxDiscount {
+			return nil, fmt.Errorf("verification_fee_discount cannot exceed %d (100%% discount)", maxDiscount)
+		}
+
+		// Only validate applicability if discount > 0 (0 is always allowed as default)
+		if msg.VerificationFeeDiscount > 0 {
+			if cs.VerifierPermManagementMode == credentialschematypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION {
+				if applicantPerm.Type == types.PermissionType_VERIFIER_GRANTOR {
+					// VERIFIER_GRANTOR: can set 0-1 (100% discount)
+					// Already validated range above
+				} else if applicantPerm.Type == types.PermissionType_VERIFIER {
+					// VERIFIER in GRANTOR mode: if validator_perm.verification_fee_discount is defined,
+					// can only set 0 to validator_perm.verification_fee_discount inclusive
+					if validatorPerm.VerificationFeeDiscount > 0 {
+						if msg.VerificationFeeDiscount > validatorPerm.VerificationFeeDiscount {
+							return nil, fmt.Errorf("verification_fee_discount cannot exceed validator's discount of %d", validatorPerm.VerificationFeeDiscount)
+						}
+					}
+				} else {
+					return nil, fmt.Errorf("verification_fee_discount can only be set on VERIFIER_GRANTOR or VERIFIER permissions in GRANTOR mode")
+				}
+			} else if cs.VerifierPermManagementMode == credentialschematypes.CredentialSchemaPermManagementMode_ECOSYSTEM {
+				if applicantPerm.Type == types.PermissionType_VERIFIER {
+					// VERIFIER in ECOSYSTEM mode: can set 0-1 (100% discount)
+					// Already validated range above
+				} else {
+					return nil, fmt.Errorf("verification_fee_discount can only be set on VERIFIER permissions in ECOSYSTEM mode")
+				}
+			} else {
+				// OPEN mode or other - verification_fee_discount not applicable
+				return nil, fmt.Errorf("verification_fee_discount cannot be set in this permission management mode")
+			}
+		}
+	}
+
 	// Calculate vp_exp
 	validityPeriod := getValidityPeriod(uint32(applicantPerm.Type), cs)
 	var vpExp *time.Time
@@ -242,12 +332,11 @@ func (ms msgServer) SetPermissionVPToValidated(goCtx context.Context, msg *types
 	}
 
 	// [MOD-PERM-MSG-3-2-2] Validator perms
-	// load validator_perm from applicant_perm.validator_perm_id
-	validatorPerm, err := ms.Keeper.GetPermissionByID(ctx, applicantPerm.ValidatorPermId)
-	if err != nil {
-		return nil, fmt.Errorf("validator perm not found: %w", err)
+	// validator_perm already loaded above for discount validation
+	// validator_perm MUST be a valid permission (checked via IsValidPermission)
+	if err := IsValidPermission(validatorPerm, validatorPerm.Country, now); err != nil {
+		return nil, fmt.Errorf("validator perm is not valid: %w", err)
 	}
-	// TODO: check for valid perm
 
 	// account running the method MUST be validator_perm.grantee
 	if validatorPerm.Grantee != msg.Creator {

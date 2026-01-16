@@ -16,6 +16,10 @@ export interface Params {
   trustDepositRate: string;
   walletUserAgentRewardRate: string;
   userAgentRewardRate: string;
+  /** trust_deposit_max_yield_rate is the maximum annualized yield rate (e.g. 0.15 for 15%) */
+  trustDepositMaxYieldRate: string;
+  /** yield_intermediate_pool is the Bech32 string for the Yield Intermediate Pool module account */
+  yieldIntermediatePool: string;
 }
 
 function createBaseParams(): Params {
@@ -25,6 +29,8 @@ function createBaseParams(): Params {
     trustDepositRate: "",
     walletUserAgentRewardRate: "",
     userAgentRewardRate: "",
+    trustDepositMaxYieldRate: "",
+    yieldIntermediatePool: "",
   };
 }
 
@@ -44,6 +50,12 @@ export const Params = {
     }
     if (message.userAgentRewardRate !== "") {
       writer.uint32(42).string(message.userAgentRewardRate);
+    }
+    if (message.trustDepositMaxYieldRate !== "") {
+      writer.uint32(50).string(message.trustDepositMaxYieldRate);
+    }
+    if (message.yieldIntermediatePool !== "") {
+      writer.uint32(58).string(message.yieldIntermediatePool);
     }
     return writer;
   },
@@ -90,6 +102,20 @@ export const Params = {
 
           message.userAgentRewardRate = reader.string();
           continue;
+        case 6:
+          if (tag !== 50) {
+            break;
+          }
+
+          message.trustDepositMaxYieldRate = reader.string();
+          continue;
+        case 7:
+          if (tag !== 58) {
+            break;
+          }
+
+          message.yieldIntermediatePool = reader.string();
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -112,6 +138,10 @@ export const Params = {
         ? globalThis.String(object.walletUserAgentRewardRate)
         : "",
       userAgentRewardRate: isSet(object.userAgentRewardRate) ? globalThis.String(object.userAgentRewardRate) : "",
+      trustDepositMaxYieldRate: isSet(object.trustDepositMaxYieldRate)
+        ? globalThis.String(object.trustDepositMaxYieldRate)
+        : "",
+      yieldIntermediatePool: isSet(object.yieldIntermediatePool) ? globalThis.String(object.yieldIntermediatePool) : "",
     };
   },
 
@@ -132,6 +162,12 @@ export const Params = {
     if (message.userAgentRewardRate !== "") {
       obj.userAgentRewardRate = message.userAgentRewardRate;
     }
+    if (message.trustDepositMaxYieldRate !== "") {
+      obj.trustDepositMaxYieldRate = message.trustDepositMaxYieldRate;
+    }
+    if (message.yieldIntermediatePool !== "") {
+      obj.yieldIntermediatePool = message.yieldIntermediatePool;
+    }
     return obj;
   },
 
@@ -145,6 +181,8 @@ export const Params = {
     message.trustDepositRate = object.trustDepositRate ?? "";
     message.walletUserAgentRewardRate = object.walletUserAgentRewardRate ?? "";
     message.userAgentRewardRate = object.userAgentRewardRate ?? "";
+    message.trustDepositMaxYieldRate = object.trustDepositMaxYieldRate ?? "";
+    message.yieldIntermediatePool = object.yieldIntermediatePool ?? "";
     return message;
   },
 };

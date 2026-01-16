@@ -129,12 +129,11 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 				},
 				{
 					RpcMethod: "StartPermissionVP",
-					Use:       "start-perm-vp [type] [validator-perm-id] [country]",
+					Use:       "start-perm-vp [type] [validator-perm-id]",
 					Short:     "Start a new perm validation process",
 					Long: `Start a new perm validation process with the specified parameters:
 - type: Permission type (issuer, verifier, issuer-grantor, verifier-grantor, ecosystem, holder)
-- validator-perm-id: ID of the validator perm
-- country: ISO 3166-1 alpha-2 country code`,
+- validator-perm-id: ID of the validator perm`,
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{
 							ProtoField: "type",
@@ -142,15 +141,32 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 						{
 							ProtoField: "validator_perm_id",
 						},
-						{
-							ProtoField: "country",
-						},
 					},
 					FlagOptions: map[string]*autocliv1.FlagOptions{
+						"country": {
+							Name:         "country",
+							Usage:        "Optional ISO 3166-1 alpha-2 country code",
+							DefaultValue: "",
+						},
 						"did": {
 							Name:         "did",
 							Usage:        "Optional DID for this perm",
 							DefaultValue: "",
+						},
+						"validation_fees": {
+							Name:         "validation-fees",
+							Usage:        "Optional requested validation fees (can be modified by validator)",
+							DefaultValue: "0",
+						},
+						"issuance_fees": {
+							Name:         "issuance-fees",
+							Usage:        "Optional requested issuance fees (can be modified by validator)",
+							DefaultValue: "0",
+						},
+						"verification_fees": {
+							Name:         "verification-fees",
+							Usage:        "Optional requested verification fees (can be modified by validator)",
+							DefaultValue: "0",
 						},
 					},
 				},
@@ -177,7 +193,9 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 - issuance-fees: Optional issuance fees
 - verification-fees: Optional verification fees
 - country: Optional country code (ISO 3166-1 alpha-2)
-- vp-summary-digest-sri: Optional digest SRI of validation information`,
+- vp-summary-digest-sri: Optional digest SRI of validation information
+- issuance-fee-discount: Issuance fee discount (0-10000, where 10000 = 100% discount, default 0)
+- verification-fee-discount: Verification fee discount (0-10000, where 10000 = 100% discount, default 0)`,
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{
 							ProtoField: "id",
@@ -213,6 +231,16 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 							Name:         "vp-summary-digest-sri",
 							Usage:        "Digest SRI of validation information",
 							DefaultValue: "",
+						},
+						"issuance_fee_discount": {
+							Name:         "issuance-fee-discount",
+							Usage:        "Issuance fee discount (0-10000, where 10000 = 100% discount)",
+							DefaultValue: "0",
+						},
+						"verification_fee_discount": {
+							Name:         "verification-fee-discount",
+							Usage:        "Verification fee discount (0-10000, where 10000 = 100% discount)",
+							DefaultValue: "0",
 						},
 					},
 				},

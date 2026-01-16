@@ -255,12 +255,19 @@ func StartValidationProcess(client cosmosclient.Client, ctx context.Context, acc
 
 // ValidatePermission validates a permission, panicking on error
 func ValidatePermission(client cosmosclient.Client, ctx context.Context, account cosmosaccount.Account, permID, validationFees, issuanceFees, verificationFees uint64, country string) {
+	ValidatePermissionWithDiscounts(client, ctx, account, permID, validationFees, issuanceFees, verificationFees, country, 0, 0)
+}
+
+// ValidatePermissionWithDiscounts validates a permission with optional fee discounts, panicking on error
+func ValidatePermissionWithDiscounts(client cosmosclient.Client, ctx context.Context, account cosmosaccount.Account, permID, validationFees, issuanceFees, verificationFees uint64, country string, issuanceFeeDiscount, verificationFeeDiscount uint64) {
 	validateMsg := permtypes.MsgSetPermissionVPToValidated{
-		Id:               permID,
-		ValidationFees:   validationFees,
-		IssuanceFees:     issuanceFees,
-		VerificationFees: verificationFees,
-		Country:          country,
+		Id:                      permID,
+		ValidationFees:          validationFees,
+		IssuanceFees:            issuanceFees,
+		VerificationFees:        verificationFees,
+		Country:                 country,
+		IssuanceFeeDiscount:     issuanceFeeDiscount,
+		VerificationFeeDiscount: verificationFeeDiscount,
 	}
 
 	_, err := SetPermissionVPToValidated(client, ctx, account, validateMsg)
