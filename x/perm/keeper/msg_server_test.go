@@ -1890,8 +1890,8 @@ func TestCreateOrUpdatePermissionSession(t *testing.T) {
 	}
 }
 
-// TestExemptionApplicationInFeeCalculation tests that exemptions are correctly applied when calculating fees
-func TestExemptionApplicationInFeeCalculation(t *testing.T) {
+// TestDiscountApplicationInFeeCalculation tests that discounts are correctly applied when calculating fees
+func TestDiscountApplicationInFeeCalculation(t *testing.T) {
 	k, ms, csKeeper, _, ctx := setupMsgServer(t)
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
@@ -1921,20 +1921,20 @@ func TestExemptionApplicationInFeeCalculation(t *testing.T) {
 	validatorPermID, err := k.CreatePermission(sdkCtx, validatorPerm)
 	require.NoError(t, err)
 
-	// Create ISSUER perm with exemption set
+	// Create ISSUER perm with discount set (per Issue #94: use discount instead of exemption)
 	issuerPerm := types.Permission{
-		SchemaId:             1,
-		Type:                 types.PermissionType_ISSUER,
-		Grantee:              creator,
-		Created:              &now,
-		CreatedBy:            creator,
-		Extended:             &now,
-		ExtendedBy:           creator,
-		Modified:             &now,
-		Country:              "US",
-		ValidatorPermId:      validatorPermID,
-		VpState:              types.ValidationState_VALIDATED,
-		IssuanceFeeExemption: 5000, // 50% exemption
+		SchemaId:            1,
+		Type:                types.PermissionType_ISSUER,
+		Grantee:             creator,
+		Created:             &now,
+		CreatedBy:           creator,
+		Extended:            &now,
+		ExtendedBy:          creator,
+		Modified:            &now,
+		Country:             "US",
+		ValidatorPermId:     validatorPermID,
+		VpState:             types.ValidationState_VALIDATED,
+		IssuanceFeeDiscount: 5000, // 50% discount
 	}
 	issuerPermID, err := k.CreatePermission(sdkCtx, issuerPerm)
 	require.NoError(t, err)
@@ -1958,7 +1958,7 @@ func TestExemptionApplicationInFeeCalculation(t *testing.T) {
 
 	walletAgentPermID := agentPermID // Use same for simplicity
 
-	t.Run("Exemption applied to beneficiary fees", func(t *testing.T) {
+	t.Run("Discount applied to beneficiary fees", func(t *testing.T) {
 		// When creating a session with issuerPermID:
 		// 1. Sum fees from found_perm_set (validatorPerm with IssuanceFees=100)
 		// 2. Apply exemption from issuerPerm: beneficiary_fees = 100 * (1 - 0.5) = 50
@@ -1979,21 +1979,21 @@ func TestExemptionApplicationInFeeCalculation(t *testing.T) {
 		require.Equal(t, msg.Id, resp.Id)
 	})
 
-	t.Run("Exemption applied in execution", func(t *testing.T) {
-		// Create another issuer perm with different exemption
+	t.Run("Discount applied in execution", func(t *testing.T) {
+		// Create another issuer perm with different discount
 		issuerPerm2 := types.Permission{
-			SchemaId:             1,
-			Type:                 types.PermissionType_ISSUER,
-			Grantee:              creator,
-			Created:              &now,
-			CreatedBy:            creator,
-			Extended:             &now,
-			ExtendedBy:           creator,
-			Modified:             &now,
-			Country:              "US",
-			ValidatorPermId:      validatorPermID,
-			VpState:              types.ValidationState_VALIDATED,
-			IssuanceFeeExemption: 3000, // 30% exemption
+			SchemaId:            1,
+			Type:                types.PermissionType_ISSUER,
+			Grantee:             creator,
+			Created:             &now,
+			CreatedBy:           creator,
+			Extended:            &now,
+			ExtendedBy:          creator,
+			Modified:            &now,
+			Country:             "US",
+			ValidatorPermId:     validatorPermID,
+			VpState:             types.ValidationState_VALIDATED,
+			IssuanceFeeDiscount: 3000, // 30% discount
 		}
 		issuerPerm2ID, err := k.CreatePermission(sdkCtx, issuerPerm2)
 		require.NoError(t, err)
@@ -2013,7 +2013,7 @@ func TestExemptionApplicationInFeeCalculation(t *testing.T) {
 		require.NotNil(t, resp)
 	})
 
-	t.Run("Exemption with discounts", func(t *testing.T) {
+	t.Run("Multiple discounts applied", func(t *testing.T) {
 		// Create validator with discount
 		validatorWithDiscount := types.Permission{
 			SchemaId:            1,
@@ -2032,33 +2032,32 @@ func TestExemptionApplicationInFeeCalculation(t *testing.T) {
 		validatorWithDiscountID, err := k.CreatePermission(sdkCtx, validatorWithDiscount)
 		require.NoError(t, err)
 
-		// Create issuer with exemption
-		issuerWithExemption := types.Permission{
-			SchemaId:             1,
-			Type:                 types.PermissionType_ISSUER,
-			Grantee:              creator,
-			Created:              &now,
-			CreatedBy:            creator,
-			Extended:             &now,
-			ExtendedBy:           creator,
-			Modified:             &now,
-			Country:              "US",
-			ValidatorPermId:      validatorWithDiscountID,
-			VpState:              types.ValidationState_VALIDATED,
-			IssuanceFeeExemption: 3000, // 30% exemption
+		// Create issuer with discount (per Issue #94: use discount instead of exemption)
+		issuerWithDiscount := types.Permission{
+			SchemaId:            1,
+			Type:                types.PermissionType_ISSUER,
+			Grantee:             creator,
+			Created:             &now,
+			CreatedBy:           creator,
+			Extended:            &now,
+			ExtendedBy:          creator,
+			Modified:            &now,
+			Country:             "US",
+			ValidatorPermId:     validatorWithDiscountID,
+			VpState:             types.ValidationState_VALIDATED,
+			IssuanceFeeDiscount: 3000, // 30% discount
 		}
-		issuerWithExemptionID, err := k.CreatePermission(sdkCtx, issuerWithExemption)
+		issuerWithDiscountID, err := k.CreatePermission(sdkCtx, issuerWithDiscount)
 		require.NoError(t, err)
 
 		// Expected calculation:
-		// 1. Apply discount: 200 * (1 - 0.2) = 160
-		// 2. Apply exemption: 160 * (1 - 0.3) = 112
-		// Final beneficiary_fees = 112
+		// 1. Apply issuer discount: 200 * (1 - 0.3) = 140
+		// Final beneficiary_fees = 140
 
 		msg := &types.MsgCreateOrUpdatePermissionSession{
 			Creator:           creator,
 			Id:                uuid.New().String(),
-			IssuerPermId:      issuerWithExemptionID,
+			IssuerPermId:      issuerWithDiscountID,
 			VerifierPermId:    0,
 			AgentPermId:       agentPermID,
 			WalletAgentPermId: walletAgentPermID,
