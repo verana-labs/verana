@@ -743,8 +743,8 @@ func TestAgentRewardsWithZeroFees(t *testing.T) {
 	require.Equal(t, 0, len(tdKeeper.AdjustmentLog), "No TD adjustments should occur with zero fees")
 }
 
-// TestAgentRewardsWithExemption tests fee distribution with exemptions applied
-func TestAgentRewardsWithExemption(t *testing.T) {
+// TestAgentRewardsWithDiscount tests fee distribution with discounts applied
+func TestAgentRewardsWithDiscount(t *testing.T) {
 	k, ms, csKeeper, trkKeeper, bankKeeper, tdKeeper, ctx := setupTrackingMsgServer(t,
 		"0.1",  // user_agent_reward_rate
 		"0.05", // wallet_user_agent_reward_rate
@@ -796,20 +796,20 @@ func TestAgentRewardsWithExemption(t *testing.T) {
 	ecosystemPermID, err := k.CreatePermission(sdkCtx, ecosystemPerm)
 	require.NoError(t, err)
 
-	// Create issuer permission with 50% exemption
+	// Create issuer permission with 50% discount (per Issue #94: use discount instead of exemption)
 	issuerPerm := types.Permission{
-		SchemaId:             1,
-		Type:                 types.PermissionType_ISSUER,
-		Grantee:              issuerAcc,
-		Created:              &now,
-		CreatedBy:            ecosystem,
-		Extended:             &now,
-		ExtendedBy:           ecosystem,
-		Modified:             &now,
-		Country:              "US",
-		ValidatorPermId:      ecosystemPermID,
-		VpState:              types.ValidationState_VALIDATED,
-		IssuanceFeeExemption: 5000, // 50% exemption
+		SchemaId:            1,
+		Type:                types.PermissionType_ISSUER,
+		Grantee:             issuerAcc,
+		Created:             &now,
+		CreatedBy:           ecosystem,
+		Extended:            &now,
+		ExtendedBy:          ecosystem,
+		Modified:            &now,
+		Country:             "US",
+		ValidatorPermId:     ecosystemPermID,
+		VpState:             types.ValidationState_VALIDATED,
+		IssuanceFeeDiscount: 5000, // 50% discount (per Issue #94)
 	}
 	issuerPermID, err := k.CreatePermission(sdkCtx, issuerPerm)
 	require.NoError(t, err)
@@ -843,8 +843,8 @@ func TestAgentRewardsWithExemption(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, resp)
 
-	// With 50% exemption on 100 fees:
-	// exempted_fees = 100 * (1 - 0.5) = 50
+	// With 50% discount on 100 fees:
+	// discounted_fees = 100 * (1 - 0.5) = 50
 	// perm_total_trust_fees = 50 * 1 = 50
 	// to_td = 50 * 0.2 = 10
 	// to_account = 50 - 10 = 40
@@ -852,10 +852,10 @@ func TestAgentRewardsWithExemption(t *testing.T) {
 	// ua_to_td = 5 * 0.2 = 1
 	// ua_to_account = 5 - 1 = 4
 
-	t.Run("Verify exemption applied correctly", func(t *testing.T) {
+	t.Run("Verify discount applied correctly", func(t *testing.T) {
 		ecosystemReceived := bankKeeper.GetTotalReceived(ecosystem)
 		require.Equal(t, int64(40), ecosystemReceived.AmountOf(types.BondDenom).Int64(),
-			"Ecosystem should receive 40 (after 50% exemption)")
+			"Ecosystem should receive 40 (after 50% discount)")
 
 		agentReceived := bankKeeper.GetTotalReceived(agent)
 		require.Equal(t, int64(4), agentReceived.AmountOf(types.BondDenom).Int64(),

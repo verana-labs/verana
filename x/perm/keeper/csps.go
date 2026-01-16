@@ -138,28 +138,28 @@ func (ms msgServer) validateCreateOrUpdatePermissionSessionFees(ctx sdk.Context,
 		}
 	}
 
-	// Apply exemption from executor permission (issuer_perm or verifier_perm)
-	// Get executor permission to retrieve exemption
+	// Apply discount from executor permission (issuer_perm or verifier_perm)
+	// Per Issue #94: spec merged exemption and discount into single *_fee_discount field
 	var executorPerm types.Permission
 	if verifierPerm {
 		executorPerm, err = ms.Permission.Get(ctx, msg.VerifierPermId)
 		if err != nil {
 			return nil, 0, 0, fmt.Errorf("failed to get verifier permission: %w", err)
 		}
-		// Apply verification_fee_exemption: beneficiary_fees = beneficiary_fees * (1 - verifier_perm.verification_fee_exemption)
-		if executorPerm.VerificationFeeExemption > 0 {
-			exemptedFees := (beneficiaryFees * (discountScale - executorPerm.VerificationFeeExemption)) / discountScale
-			beneficiaryFees = exemptedFees
+		// Apply verification_fee_discount: beneficiary_fees = beneficiary_fees * (1 - verifier_perm.verification_fee_discount)
+		if executorPerm.VerificationFeeDiscount > 0 {
+			discountedFees := (beneficiaryFees * (discountScale - executorPerm.VerificationFeeDiscount)) / discountScale
+			beneficiaryFees = discountedFees
 		}
 	} else {
 		executorPerm, err = ms.Permission.Get(ctx, msg.IssuerPermId)
 		if err != nil {
 			return nil, 0, 0, fmt.Errorf("failed to get issuer permission: %w", err)
 		}
-		// Apply issuance_fee_exemption: beneficiary_fees = beneficiary_fees * (1 - issuer_perm.issuance_fee_exemption)
-		if executorPerm.IssuanceFeeExemption > 0 {
-			exemptedFees := (beneficiaryFees * (discountScale - executorPerm.IssuanceFeeExemption)) / discountScale
-			beneficiaryFees = exemptedFees
+		// Apply issuance_fee_discount: beneficiary_fees = beneficiary_fees * (1 - issuer_perm.issuance_fee_discount)
+		if executorPerm.IssuanceFeeDiscount > 0 {
+			discountedFees := (beneficiaryFees * (discountScale - executorPerm.IssuanceFeeDiscount)) / discountScale
+			beneficiaryFees = discountedFees
 		}
 	}
 
@@ -219,29 +219,29 @@ func (ms msgServer) executeCreateOrUpdatePermissionSession(ctx sdk.Context, msg 
 	walletUserAgentReward := math.LegacyZeroDec()
 
 	// Process fees for each permission in found_perm_set
-	const exemptionScale = 10000 // 10000 = 1.0 = 100% exemption
+	const discountScale = 10000 // 10000 = 1.0 = 100% discount
 	for _, perm := range foundPermSet {
 		var fees uint64
-		var exemption uint64
+		var discount uint64
 		if verifierPerm {
 			fees = perm.VerificationFees
-			exemption = executorPerm.VerificationFeeExemption
+			discount = executorPerm.VerificationFeeDiscount
 		} else {
 			fees = perm.IssuanceFees
-			exemption = executorPerm.IssuanceFeeExemption
+			discount = executorPerm.IssuanceFeeDiscount
 		}
 
 		if fees > 0 {
-			// Apply exemption: fees * (1 - exemption/10000)
-			var exemptedFees uint64
-			if exemption > 0 {
-				exemptedFees = (fees * (exemptionScale - exemption)) / exemptionScale
+			// Apply discount: fees * (1 - discount/10000) per spec Issue #94
+			var discountedFees uint64
+			if discount > 0 {
+				discountedFees = (fees * (discountScale - discount)) / discountScale
 			} else {
-				exemptedFees = fees
+				discountedFees = fees
 			}
 
-			// Calculate perm_total_trust_fees = exemptedFees * trust_unit_price
-			permTotalTrustFees := math.LegacyNewDec(int64(exemptedFees * trustUnitPrice))
+			// Calculate perm_total_trust_fees = discountedFees * trust_unit_price
+			permTotalTrustFees := math.LegacyNewDec(int64(discountedFees * trustUnitPrice))
 
 			// Calculate trust deposit and direct account amounts
 			trustDepositAmount := uint64(permTotalTrustFees.Mul(trustDepositRate).TruncateInt64())
