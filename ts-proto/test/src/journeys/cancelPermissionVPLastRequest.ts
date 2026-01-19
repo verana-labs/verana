@@ -64,9 +64,16 @@ async function main() {
     console.log("Step 4: Creating schema, validator permission, and starting VP (creates permission in PENDING state)...");
     // Create schema and root permission (validator)
     const { schemaId, did } = await createSchemaForTest(client, account.address);
+    // Wait for sequence to propagate after schema creation
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+    await client.getSequence(account.address);
+
     const validatorPermId = await createRootPermissionForTest(client, account.address, schemaId, did);
+    // Wait for sequence to propagate after root permission creation
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+    await client.getSequence(account.address);
     console.log(`  ✓ Created Validator Permission (Root) with ID: ${validatorPermId}`);
-    
+
     // Wait for validator permission to become effective (permissions are created with effectiveFrom 10 seconds in future)
     console.log(`  ⏳ Waiting for validator permission to become effective (permissions require effective_from to be in the future)...`);
     const queryClient = await createQueryClient();
@@ -74,7 +81,7 @@ async function main() {
       // Wait for blockchain block time to advance (check every second)
       const startTime = Date.now();
       const maxWait = 20000; // 20 seconds max wait
-      
+
       while (Date.now() - startTime < maxWait) {
         const waitElapsed = Date.now() - startTime;
         if (waitElapsed >= 15000) {
@@ -89,7 +96,7 @@ async function main() {
     } finally {
       queryClient.disconnect();
     }
-    
+
     // Start Permission VP - this creates a permission in PENDING state
     const applicantDid = generateUniqueDID();
     const startVPMsg = {
