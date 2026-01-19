@@ -2,7 +2,7 @@
 
 > **Issue**: [#185 - Anchor-Based Control, Authorization, and Trust Deposit Architecture](https://github.com/verana-labs/verana/issues/185)
 > **Branch**: `poc/anchor-based-td`
-> **Last Updated**: 2026-01-15
+> **Last Updated**: 2026-01-19
 
 ---
 
@@ -15,6 +15,8 @@
 | 3 | Operator Spending from Anchor | ✅ **Complete** | `DebitAnchorTrustDeposit` with operator resolution |
 | 4 | Per-VS Spend Limits | ✅ **Complete** | `OperatorAllowance` with limit, spent, reset_period |
 | 5 | **Module Integration** | ✅ **Complete** | All VPR modules updated with anchor-aware trust deposits |
+| 6 | **Auto-Execution** | ✅ **Complete** | Group proposals auto-execute after voting period (EndBlocker) |
+| 7 | **Fee Payment (x/feegrant)** | ✅ **Complete** | Documented in POC guide; native Cosmos SDK support |
 
 ---
 
@@ -33,6 +35,10 @@
 - `DebitAnchorTrustDeposit()` - Debit with allowance enforcement
 - `GetAnchorForOperator()` - Resolve operator → anchor
 
+### Auto-Execution (`x/td/module/module.go`)
+- `EndBlocker` - Automatically executes ACCEPTED proposals after voting period
+- Queries all groups, policies, proposals each block
+- Eliminates manual `veranad tx group exec` commands
 ### Query Endpoints (`x/td/keeper/query.go`)
 - `GetAnchor` - Query anchor by ID
 - `GetVerifiableService` - Query VS by operator account
@@ -60,7 +66,11 @@
 
 ### Documentation
 - `ANCHOR_POC_IMPLEMENTATION.md` - Architecture overview
-- `POC_SETUP_GUIDE.md` - Step-by-step CLI testing guide
+- `POC_SETUP_GUIDE.md` - Step-by-step CLI testing guide with:
+  - Multisend for funding (single tx)
+  - Auto-execution (no manual exec commands)
+  - x/feegrant setup for operator fee allowances
+- `feegrant_implementation.md` - Analysis of x/feegrant for fee payment requirement
 
 ---
 
