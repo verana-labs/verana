@@ -16,6 +16,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/module"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
+	"github.com/cosmos/cosmos-sdk/x/group"
 	mintkeeper "github.com/cosmos/cosmos-sdk/x/mint/keeper"
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
@@ -173,19 +174,82 @@ func (am AppModule) EndBlock(ctx context.Context) error {
 // This eliminates the need for manual `veranad tx group exec` commands
 func (am AppModule) executePendingGroupProposals(ctx context.Context) error {
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	currentTime := sdkCtx.BlockTime()
 
-	// TODO: Implement full auto-execution logic
-	// The group keeper is wired via depinject but we don't have type-safe access here
-	// To fully implement this, we would need to:
-	// 1. Type assert am.groupKeeper to the actual group keeper interface
-	// 2. Query all proposals that are ACCEPTED and past voting period
-	// 3. Call Exec on each eligible proposal
-	//
-	// For now, the infrastructure is in place. Users still manually exec proposals.
-	// Future enhancement: cast groupKeeper and implement the reference logic from
-	// https://github.com/pratikasr/veranatest/blob/main/x/validatorregistry/module/module.go
+	// Query all groups
+	groupsResp, err := am.groupKeeper.Groups(ctx, &group.QueryGroupsRequest{})
+	if err != nil {
+		sdkCtx.Logger().Error("failed to query groups", "error", err)
+		return nil // Don't fail the block
+	}
 
-	sdkCtx.Logger().Debug("group proposal auto-execution infrastructure ready (manual exec still required)")
+	// Iterate through all groups
+	for _, groupInfo := range groupsResp.Groups {
+		// Get group policies for this group
+		policiesResp, err := am.groupKeeper.GroupPoliciesByGroup(ctx, &group.QueryGroupPoliciesByGroupRequest{
+			GroupId: groupInfo.Id,
+		})
+		if err != nil {
+			sdkCtx.Logger().Error("failed to query group policies", "group_id", groupInfo.Id, "error", err)
+			continue
+		}
+
+		// Iterate through all policies
+		for _, policy := range policiesResp.GroupPolicies {
+			// Get proposals for this policy
+			proposalsResp, err := am.groupKeeper.ProposalsByGroupPolicy(ctx, &group.QueryProposalsByGroupPolicyRequest{
+				Address: policy.Address,
+			})
+			if err != nil {
+				sdkCtx.Logger().Error("failed to query proposals", "policy", policy.Address, "error", err)
+				continue
+			}
+
+			// Check each proposal
+			for _, proposal := range proposalsResp.Proposals {
+				// Skip if voting period hasn't ended
+				if currentTime.Before(proposal.VotingPeriodEnd) {
+					continue
+				}
+
+				// Skip if already executed
+				if proposal.ExecutorResult == group.PROPOSAL_EXECUTOR_RESULT_SUCCESS {
+					continue
+				}
+
+				// Skip if already failed
+				if proposal.ExecutorResult == group.PROPOSAL_EXECUTOR_RESULT_FAILURE {
+					continue
+				}
+
+				// Execute the proposal if it's accepted
+				if proposal.Status == group.PROPOSAL_STATUS_ACCEPTED {
+					sdkCtx.Logger().Info("executing accepted group proposal",
+						"proposal_id", proposal.Id,
+						"group_policy", policy.Address,
+						"voting_period_end", proposal.VotingPeriodEnd,
+						"current_time", currentTime)
+
+					// Execute using the group policy address as executor
+					_, err := am.groupKeeper.Exec(ctx, &group.MsgExec{
+						ProposalId: proposal.Id,
+						Executor:   proposal.GroupPolicyAddress,
+					})
+					if err != nil {
+						sdkCtx.Logger().Error("failed to execute proposal",
+							"proposal_id", proposal.Id,
+							"error", err)
+						// Continue with other proposals even if one fails
+					} else {
+						sdkCtx.Logger().Info("successfully executed group proposal",
+							"proposal_id", proposal.Id,
+							"group_policy", policy.Address)
+					}
+				}
+			}
+		}
+	}
+
 	return nil
 }
 
