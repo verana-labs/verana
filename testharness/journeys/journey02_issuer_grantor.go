@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"time"
 
 	"cosmossdk.io/math"
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
@@ -53,6 +54,11 @@ func RunIssuerGrantorJourney(ctx context.Context, client cosmosclient.Client) er
 		Country:         countryCode,
 		Did:             issuerGrantorDID,
 	}
+
+	// Wait for the root permission to become effective
+	// Root permissions have effective_from set 10 seconds after creation
+	fmt.Println("    - Waiting for root permission to become effective...")
+	time.Sleep(15 * time.Second)
 
 	permissionID := lib.StartValidationProcess(client, ctx, issuerGrantorAccount, startVPMsg)
 	fmt.Printf("✅ Step 3: Issuer_Grantor_Applicant started validation process with permission ID: %s\n", permissionID)
