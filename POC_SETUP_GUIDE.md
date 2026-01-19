@@ -409,6 +409,55 @@ This creates a DID where:
 
 ---
 
+## Step 8: Grant Fee Allowances (Optional)
+
+To enable VS operators to execute transactions without holding funds, grant them fee allowances via x/feegrant:
+
+```bash
+# Create feegrant proposal for Operator 1
+cat > /tmp/feegrant_op1_msg.json << EOF
+{
+  "group_policy_address": "$ANCHOR_ID",
+  "messages": [
+    {
+      "@type": "/cosmos.feegrant.v1beta1.MsgGrantAllowance",
+      "granter": "$ANCHOR_ID",
+      "grantee": "$OPERATOR1",
+      "allowance": {
+        "@type": "/cosmos.feegrant.v1beta1.BasicAllowance",
+        "spend_limit": [
+          {
+            "denom": "uvna",
+            "amount": "1000000"
+          }
+        ],
+        "expiration": "2026-12-31T23:59:59Z"
+      }
+    }
+  ],
+  "metadata": "Grant 1 VNA fee allowance to Operator 1",
+  "proposers": ["$ADMIN1"],
+  "title": "Grant Fee Allowance to Operator 1",
+  "summary": "Allow operator 1 to spend up to 1 VNA on transaction fees from anchor funds"
+}
+EOF
+
+veranad tx group submit-proposal /tmp/feegrant_op1_msg.json --from anchor_admin1 --keyring-backend test --chain-id vna-testnet-1 -y
+veranad tx group vote 6 $ADMIN1 VOTE_OPTION_YES "" --from anchor_admin1 --keyring-backend test --chain-id vna-testnet-1 -y
+sleep 65
+```
+
+**Note**: With feegrant active, operators can execute transactions without holding any funds. The anchor automatically pays their gas fees (up to the spend limit).
+
+### 8.1 Verify Fee Allowance
+
+```bash
+# Check operator's fee allowance
+veranad query feegrant grant $ANCHOR_ID $OPERATOR1
+```
+
+---
+
 ## Quick Reference
 
 | Entity | Key Name | Purpose |
