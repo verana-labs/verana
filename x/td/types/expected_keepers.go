@@ -4,6 +4,7 @@ import (
 	"context"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	groupkeeper "github.com/cosmos/cosmos-sdk/x/group/keeper"
 )
 
 // AccountKeeper defines the expected interface for the Account module.
@@ -35,3 +36,7 @@ type MintKeeper interface {
 	// GetBlocksPerYear returns the blocks_per_year parameter from mint module
 	GetBlocksPerYear(ctx context.Context) (uint64, error)
 }
+
+// GroupKeeper is an alias for the group keeper
+// Used for auto-executing group proposals in EndBlocker.
+type GroupKeeper = groupkeeper.Keeper

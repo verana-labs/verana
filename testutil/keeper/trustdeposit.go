@@ -34,6 +34,12 @@ func (k *MockMintKeeper) GetBlocksPerYear(ctx context.Context) (uint64, error) {
 	return 6311520, nil
 }
 
+// MockGroupKeeper returns a zero-value group keeper for testing
+func NewMockGroupKeeper() types.GroupKeeper {
+	// Return zero value - sufficient for tests that don't use group features
+	return types.GroupKeeper{}
+}
+
 func TrustdepositKeeper(t testing.TB) (keeper.Keeper, sdk.Context) {
 	storeKey := storetypes.NewKVStoreKey(types.StoreKey)
 
@@ -47,6 +53,7 @@ func TrustdepositKeeper(t testing.TB) (keeper.Keeper, sdk.Context) {
 	authority := authtypes.NewModuleAddress(govtypes.ModuleName)
 	bankKeeper := NewMockBankKeeper()
 	mintKeeper := NewMockMintKeeper()
+	groupKeeper := NewMockGroupKeeper()
 
 	k := keeper.NewKeeper(
 		cdc,
@@ -55,6 +62,7 @@ func TrustdepositKeeper(t testing.TB) (keeper.Keeper, sdk.Context) {
 		authority.String(),
 		bankKeeper,
 		mintKeeper,
+		groupKeeper,
 	)
 
 	ctx := sdk.NewContext(stateStore, cmtproto.Header{}, false, log.NewNopLogger())

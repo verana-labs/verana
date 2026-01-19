@@ -34,8 +34,9 @@ type (
 		OperatorAllowances collections.Map[collections.Pair[string, string], types.OperatorAllowance] // (anchor_id, operator) -> allowance
 
 		// external keeper
-		bankKeeper types.BankKeeper
-		mintKeeper types.MintKeeper
+		bankKeeper  types.BankKeeper
+		mintKeeper  types.MintKeeper
+		groupKeeper types.GroupKeeper
 	}
 )
 
@@ -46,6 +47,7 @@ func NewKeeper(
 	authority string,
 	bankKeeper types.BankKeeper,
 	mintKeeper types.MintKeeper,
+	groupKeeper types.GroupKeeper,
 ) Keeper {
 	sb := collections.NewSchemaBuilder(storeService)
 
@@ -86,8 +88,9 @@ func NewKeeper(
 			codec.CollValue[types.OperatorAllowance](cdc),
 		),
 
-		bankKeeper: bankKeeper,
-		mintKeeper: mintKeeper,
+		bankKeeper:  bankKeeper,
+		mintKeeper:  mintKeeper,
+		groupKeeper: groupKeeper,
 	}
 }
 

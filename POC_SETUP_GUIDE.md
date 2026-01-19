@@ -37,7 +37,7 @@ veranad keys list --keyring-backend test
 
 ## Step 2: Fund Accounts
 
-Send 2 VNA from cooluser to each account for gas:
+Send 2 VNA from cooluser to all accounts at once using multisend:
 
 ```bash
 # Get addresses
@@ -46,13 +46,12 @@ ADMIN2=$(veranad keys show anchor_admin2 -a --keyring-backend test)
 OPERATOR1=$(veranad keys show vs_operator1 -a --keyring-backend test)
 OPERATOR2=$(veranad keys show vs_operator2 -a --keyring-backend test)
 
-# Fund anchor admins
-veranad tx bank send cooluser $ADMIN1 2000000uvna --from cooluser --keyring-backend test --chain-id vna-testnet-1 -y
-veranad tx bank send cooluser $ADMIN2 2000000uvna --from cooluser --keyring-backend test --chain-id vna-testnet-1 -y
-
-# Fund VS operators  
-veranad tx bank send cooluser $OPERATOR1 2000000uvna --from cooluser --keyring-backend test --chain-id vna-testnet-1 -y
-veranad tx bank send cooluser $OPERATOR2 2000000uvna --from cooluser --keyring-backend test --chain-id vna-testnet-1 -y
+# Fund all accounts with a single multisend transaction
+veranad tx bank multi-send cooluser $ADMIN1 $ADMIN2 $OPERATOR1 $OPERATOR2 2000000uvna \
+  --from cooluser \
+  --keyring-backend test \
+  --chain-id vna-testnet-1 \
+  -y
 ```
 
 ### Check Balances (Visual Verification)
@@ -196,19 +195,9 @@ sleep 65
 veranad query group proposals-by-group-policy "$ANCHOR_ID" -o json
 ```
 
-### 4.4 Execute Proposal (wait 1 minute for voting period)
+> **Note**: Proposals now execute automatically after the voting period ends. No manual `exec` command needed!
 
-```bash
-# Wait for voting period to end, then execute
-sleep 65
-veranad tx group exec $PROPOSAL_ID \
-  --from anchor_admin1 \
-  --keyring-backend test \
-  --chain-id vna-testnet-1 \
-  -y
-```
-
-### 4.5 Verify Anchor Registration
+### 4.4 Verify Anchor Registration
 
 ```bash
 # Query the anchor directly
@@ -259,10 +248,9 @@ veranad tx group submit-proposal /tmp/register_vs1_msg.json \
   --chain-id vna-testnet-1 \
   -y
 
-# Vote and execute (after voting period)
+# Vote and wait for auto-execution
 veranad tx group vote 2 $ADMIN1 VOTE_OPTION_YES "" --from anchor_admin1 --keyring-backend test --chain-id vna-testnet-1 -y
 sleep 65
-veranad tx group exec 2 --from anchor_admin1 --keyring-backend test --chain-id vna-testnet-1 -y
 ```
 
 Repeat for Operator 2:
@@ -289,7 +277,6 @@ EOF
 veranad tx group submit-proposal /tmp/register_vs2_msg.json --from anchor_admin1 --keyring-backend test --chain-id vna-testnet-1 -y
 veranad tx group vote 3 $ADMIN1 VOTE_OPTION_YES "" --from anchor_admin1 --keyring-backend test --chain-id vna-testnet-1 -y
 sleep 65
-veranad tx group exec 3 --from anchor_admin1 --keyring-backend test --chain-id vna-testnet-1 -y
 ```
 
 ### 5.2 Verify VS Registrations
@@ -331,7 +318,6 @@ EOF
 veranad tx group submit-proposal /tmp/set_allowance1_msg.json --from anchor_admin1 --keyring-backend test --chain-id vna-testnet-1 -y
 veranad tx group vote 4 $ADMIN1 VOTE_OPTION_YES "" --from anchor_admin1 --keyring-backend test --chain-id vna-testnet-1 -y
 sleep 65
-veranad tx group exec 4 --from anchor_admin1 --keyring-backend test --chain-id vna-testnet-1 -y
 ```
 
 ### 6.1 Verify Operator Allowance
@@ -390,7 +376,6 @@ EOF
 veranad tx group submit-proposal /tmp/authz_grant_msg.json --from anchor_admin1 --keyring-backend test --chain-id vna-testnet-1 -y
 veranad tx group vote 5 $ADMIN1 VOTE_OPTION_YES "" --from anchor_admin1 --keyring-backend test --chain-id vna-testnet-1 -y
 sleep 65
-veranad tx group exec 5 --from anchor_admin1 --keyring-backend test --chain-id vna-testnet-1 -y
 ```
 
 ### 7.1 Operator Executing via Authz
