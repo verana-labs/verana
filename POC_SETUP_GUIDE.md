@@ -372,44 +372,16 @@ cat > /tmp/authz_grant_msg.json << EOF
 EOF
 
 veranad tx group submit-proposal /tmp/authz_grant_msg.json --from anchor_admin1 --keyring-backend test --chain-id vna-testnet-1 -y
-veranad tx group vote 6 $ADMIN1 VOTE_OPTION_YES "" --from anchor_admin1 --keyring-backend test --chain-id vna-testnet-1 -y
+veranad tx group vote 5 $ADMIN1 VOTE_OPTION_YES "" --from anchor_admin1 --keyring-backend test --chain-id vna-testnet-1 -y
 sleep 65
+veranad q authz grants-by-granter $ANCHOR_ID
 ```
-
-### 7.1 Operator Executing via Authz
-
-Once the grant is in place, the operator can execute operations on behalf of the anchor. The workflow requires two steps:
-
-**Step 1: Generate the unsigned transaction (as if from anchor)**
-```bash
-# Generate the DID registration tx as if from anchor (unsigned)
-# Syntax: veranad tx dd add-did [did] [years] [flags]
-veranad tx dd add-did did:web:example.com 1 \
-  --from $ANCHOR_ID \
-  --chain-id vna-testnet-1 \
-  --generate-only > /tmp/add_did_tx.json
-```
-
-**Step 2: Execute via authz (signed by operator)**
-```bash
-# Operator executes the tx on behalf of anchor
-veranad tx authz exec /tmp/add_did_tx.json \
-  --from vs_operator1 \
-  --keyring-backend test \
-  --chain-id vna-testnet-1 \
-  -y
-```
-
-This creates a DID where:
-- **Owner**: `$ANCHOR_ID` (the anchor)
-- **Signer**: `vs_operator1` (the operator with authz grant)
-- **Trust Deposit**: Routed to the anchor via `adjustTrustDepositAnchorAware`
 
 ---
 
-## Step 8: Grant Fee Allowances (Optional)
+## Step 8: Grant Fee Allowances (Required for Zero-Balance Operators)
 
-To enable VS operators to execute transactions without holding funds, grant them fee allowances via x/feegrant:
+To enable VS operators to execute transactions without holding funds, grant them fee allowances via x/feegrant. **This must be done before draining operator funds.**
 
 ```bash
 # Create feegrant proposal for Operator 1
@@ -441,13 +413,14 @@ cat > /tmp/feegrant_op1_msg.json << EOF
 EOF
 
 veranad tx group submit-proposal /tmp/feegrant_op1_msg.json --from anchor_admin1 --keyring-backend test --chain-id vna-testnet-1 -y
-veranad tx group vote 6 $ADMIN1 VOTE_OPTION_YES "" --from anchor_admin1 --keyring-backend test --chain-id vna-testnet-1 -y
+veranad tx group vote 6 $ADMIN1 VOTE_OPTION_YES "" --from anchor_admin1 --keyring-backend test --chain-id vna-testnet-1 -y 
 sleep 65
+veranad q feegrant grants-by-granter $ANCHOR_ID 
 ```
 
 **Note**: With feegrant active, operators can execute transactions without holding any funds. The anchor automatically pays their gas fees (up to the spend limit).
 
-### 8.1 Verify Fee Allowance
+### 8.1 Verify Fee Allowance 
 
 ```bash
 # Check operator's fee allowance
@@ -456,43 +429,54 @@ veranad query feegrant grant $ANCHOR_ID $OPERATOR1
 
 ---
 
-## Quick Reference
+## Step 9: Test Operator Execution with Zero Balance
 
-| Entity | Key Name | Purpose |
-|--------|----------|---------|
-| Admin 1 | `anchor_admin1` | Group member, can sign txs |
-| Admin 2 | `anchor_admin2` | Group member, can sign txs |
-| Operator 1 | `vs_operator1` | VS hot key, 500K daily limit |
-| Operator 2 | `vs_operator2` | VS hot key |
-| Funder | `cooluser` | Genesis account with funds |
-| Anchor | `$ANCHOR_ID` | Group policy address |
+Now we test the full flow: drain the operator's funds, then execute a DID registration via authz (with fees paid by the anchor via feegrant).
 
----
+### 9.1 Drain Operator Funds
 
-## Understanding the Flow
+Transfer all funds from Operator 1 to Operator 2 so that Operator 1 has 0 balance:
 
-1. **Trust Deposits Accumulate from Operations** - NOT from direct funding
-2. When a VS operator performs an operation (e.g., registers a DID), the `adjustTrustDepositAnchorAware` helper is called
-3. **Module Integration Complete**: All VPR modules (`x/dd`, `x/perm`, `x/cs`, `x/tr`) now automatically:
-   - Check if the account is an **anchor** → route to `AdjustAnchorTrustDeposit`
-   - Check if the account is a **VS operator** → resolve anchor and enforce spending limits
-   - Fall back to regular `AdjustTrustDeposit` for non-anchor accounts
-4. Positive adjustments increase the trust deposit
-5. Negative adjustments (debits) check operator allowance first
-6. All anchor-level operations require group proposals
+```bash
+veranad tx bank send vs_operator1 $OPERATOR2 2000000uvna \
+  --from vs_operator1 \
+  --keyring-backend test \
+  --chain-id vna-testnet-1 \
+  -y
 
----
+# Verify operator has no funds
+veranad query bank balances $OPERATOR1
+```
 
-## Troubleshooting
+### 9.2 Operator Executing via Authz
 
-**Error: unauthorized - creator must be the anchor**
-- Submit the transaction via group proposal (see Step 4)
+Once the grant is in place and the operator has no funds (but has a valid FeeGrant), the operator can execute operations on behalf of the anchor:
 
-**Error: anchor not found**
-- Make sure to register the anchor first before registering VS or setting allowances
+**Step 1: Generate the unsigned transaction (as if from anchor)**
+```bash
+# Generate the DID registration tx as if from anchor (unsigned)
+# Syntax: veranad tx dd add-did [did] [years] [flags]
+veranad tx dd add-did did:web:example.com 1 \
+  --from $ANCHOR_ID \
+  --chain-id vna-testnet-1 \
+  --generate-only > /tmp/add_did_tx.json
+```
 
-**Error: proposal not found**
-- Check proposal IDs with: `veranad query group proposals-by-group-policy $ANCHOR_ID`
+**Step 2: Execute via authz (signed by operator, fees paid by anchor)**
+```bash
+# Operator executes the tx on behalf of anchor
+# --fee-granter specifies that the anchor pays the fees
+veranad tx authz exec /tmp/add_did_tx.json \
+  --from vs_operator1 \
+  --fee-granter $ANCHOR_ID \
+  --keyring-backend test \
+  --chain-id vna-testnet-1 \
+  -y
+```
 
-**Error: voting period not ended**
-- Wait 60 seconds (or check the voting_period in your policy)
+This creates a DID where:
+- **Owner**: `$ANCHOR_ID` (the anchor)
+- **Signer**: `vs_operator1` (the operator with authz grant)
+- **Fee Payer**: `$ANCHOR_ID` (via feegrant)
+- **Trust Deposit**: Routed to the anchor via `adjustTrustDepositAnchorAware`
+
