@@ -210,8 +210,6 @@ veranad query td get-anchor $ANCHOR_ID  -o json
 #   group_id: "1"
 #   metadata: POC Test Anchor
 
-# Query proposal status (should be PROPOSAL_EXECUTOR_RESULT_SUCCESS)
-veranad query group proposals-by-group-policy $ANCHOR_ID
 ```
 
 ---
@@ -374,7 +372,7 @@ cat > /tmp/authz_grant_msg.json << EOF
 EOF
 
 veranad tx group submit-proposal /tmp/authz_grant_msg.json --from anchor_admin1 --keyring-backend test --chain-id vna-testnet-1 -y
-veranad tx group vote 5 $ADMIN1 VOTE_OPTION_YES "" --from anchor_admin1 --keyring-backend test --chain-id vna-testnet-1 -y
+veranad tx group vote 6 $ADMIN1 VOTE_OPTION_YES "" --from anchor_admin1 --keyring-backend test --chain-id vna-testnet-1 -y
 sleep 65
 ```
 
