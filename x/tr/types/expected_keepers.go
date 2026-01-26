@@ -27,4 +27,7 @@ type ParamSubspace interface {
 // TrustDepositKeeper defines the expected interface for the Trust Deposit module.
 type TrustDepositKeeper interface {
 	AdjustTrustDeposit(ctx sdk.Context, account string, augend int64) error
+	// Operator allowance methods
+	IsAuthorizedOperator(ctx sdk.Context, group, operator string) bool
+	IncrementOperatorUsage(ctx sdk.Context, group, operator string, amount uint64) error
 }

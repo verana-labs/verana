@@ -16,6 +16,39 @@
     "application/json"
   ],
   "paths": {
+    "/verana.td.v1.Msg/AddOperator": {
+      "post": {
+        "summary": "Operator management (must be called via group proposal)",
+        "operationId": "Msg_AddOperator",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.td.v1.MsgAddOperatorResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.td.v1.MsgAddOperator"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
     "/verana.td.v1.Msg/ReclaimTrustDeposit": {
       "post": {
         "operationId": "Msg_ReclaimTrustDeposit",
@@ -80,6 +113,38 @@
         ]
       }
     },
+    "/verana.td.v1.Msg/RemoveOperator": {
+      "post": {
+        "operationId": "Msg_RemoveOperator",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.td.v1.MsgRemoveOperatorResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.td.v1.MsgRemoveOperator"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
     "/verana.td.v1.Msg/RepaySlashedTrustDeposit": {
       "post": {
         "operationId": "Msg_RepaySlashedTrustDeposit",
@@ -104,6 +169,38 @@
             "required": true,
             "schema": {
               "$ref": "#/definitions/verana.td.v1.MsgRepaySlashedTrustDeposit"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.td.v1.Msg/ResetOperatorUsage": {
+      "post": {
+        "operationId": "Msg_ResetOperatorUsage",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.td.v1.MsgResetOperatorUsageResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.td.v1.MsgResetOperatorUsage"
             }
           }
         ],
@@ -137,6 +234,38 @@
             "required": true,
             "schema": {
               "$ref": "#/definitions/verana.td.v1.MsgSlashTrustDeposit"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.td.v1.Msg/UpdateOperatorAllowance": {
+      "post": {
+        "operationId": "Msg_UpdateOperatorAllowance",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.td.v1.MsgUpdateOperatorAllowanceResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.td.v1.MsgUpdateOperatorAllowance"
             }
           }
         ],
@@ -209,6 +338,33 @@
         }
       }
     },
+    "verana.td.v1.MsgAddOperator": {
+      "type": "object",
+      "properties": {
+        "creator": {
+          "type": "string",
+          "title": "creator must be the group address (executed via group proposal)"
+        },
+        "operator": {
+          "type": "string",
+          "title": "operator is the account being added as an operator"
+        },
+        "allowance": {
+          "type": "string",
+          "format": "uint64",
+          "title": "allowance is the maximum spend per period (in uvna)"
+        },
+        "reset_period_seconds": {
+          "type": "string",
+          "format": "int64",
+          "title": "reset_period_seconds is the duration after which usage resets (0 = never)"
+        }
+      },
+      "title": "MsgAddOperator adds an operator to a group with specified allowance\nMust be called by the group itself (via group proposal)"
+    },
+    "verana.td.v1.MsgAddOperatorResponse": {
+      "type": "object"
+    },
     "verana.td.v1.MsgReclaimTrustDeposit": {
       "type": "object",
       "properties": {
@@ -256,6 +412,21 @@
       },
       "title": "MsgReclaimTrustDepositYieldResponse defines the response type"
     },
+    "verana.td.v1.MsgRemoveOperator": {
+      "type": "object",
+      "properties": {
+        "creator": {
+          "type": "string"
+        },
+        "operator": {
+          "type": "string"
+        }
+      },
+      "title": "MsgRemoveOperator removes an operator from a group"
+    },
+    "verana.td.v1.MsgRemoveOperatorResponse": {
+      "type": "object"
+    },
     "verana.td.v1.MsgRepaySlashedTrustDeposit": {
       "type": "object",
       "properties": {
@@ -272,6 +443,21 @@
       }
     },
     "verana.td.v1.MsgRepaySlashedTrustDepositResponse": {
+      "type": "object"
+    },
+    "verana.td.v1.MsgResetOperatorUsage": {
+      "type": "object",
+      "properties": {
+        "creator": {
+          "type": "string"
+        },
+        "operator": {
+          "type": "string"
+        }
+      },
+      "title": "MsgResetOperatorUsage manually resets an operator's usage counter"
+    },
+    "verana.td.v1.MsgResetOperatorUsageResponse": {
       "type": "object"
     },
     "verana.td.v1.MsgSlashTrustDeposit": {
@@ -295,6 +481,29 @@
     "verana.td.v1.MsgSlashTrustDepositResponse": {
       "type": "object",
       "title": "MsgSlashTrustDepositResponse defines the response for MsgSlashTrustDeposit"
+    },
+    "verana.td.v1.MsgUpdateOperatorAllowance": {
+      "type": "object",
+      "properties": {
+        "creator": {
+          "type": "string"
+        },
+        "operator": {
+          "type": "string"
+        },
+        "allowance": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "reset_period_seconds": {
+          "type": "string",
+          "format": "int64"
+        }
+      },
+      "title": "MsgUpdateOperatorAllowance updates an operator's allowance configuration"
+    },
+    "verana.td.v1.MsgUpdateOperatorAllowanceResponse": {
+      "type": "object"
     },
     "verana.td.v1.MsgUpdateParams": {
       "type": "object",

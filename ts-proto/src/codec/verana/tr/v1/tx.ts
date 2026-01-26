@@ -33,6 +33,8 @@ export interface MsgUpdateParamsResponse {
 /** MsgCreateTrustRegistry defines the Msg/CreateTrustRegistry request type. */
 export interface MsgCreateTrustRegistry {
   creator: string;
+  /** group is the optional group policy address when operator acts on behalf of group */
+  group: string;
   did: string;
   aka: string;
   language: string;
@@ -212,7 +214,7 @@ export const MsgUpdateParamsResponse = {
 };
 
 function createBaseMsgCreateTrustRegistry(): MsgCreateTrustRegistry {
-  return { creator: "", did: "", aka: "", language: "", docUrl: "", docDigestSri: "" };
+  return { creator: "", group: "", did: "", aka: "", language: "", docUrl: "", docDigestSri: "" };
 }
 
 export const MsgCreateTrustRegistry = {
@@ -220,20 +222,23 @@ export const MsgCreateTrustRegistry = {
     if (message.creator !== "") {
       writer.uint32(10).string(message.creator);
     }
+    if (message.group !== "") {
+      writer.uint32(18).string(message.group);
+    }
     if (message.did !== "") {
-      writer.uint32(18).string(message.did);
+      writer.uint32(26).string(message.did);
     }
     if (message.aka !== "") {
-      writer.uint32(26).string(message.aka);
+      writer.uint32(34).string(message.aka);
     }
     if (message.language !== "") {
-      writer.uint32(34).string(message.language);
+      writer.uint32(42).string(message.language);
     }
     if (message.docUrl !== "") {
-      writer.uint32(42).string(message.docUrl);
+      writer.uint32(50).string(message.docUrl);
     }
     if (message.docDigestSri !== "") {
-      writer.uint32(50).string(message.docDigestSri);
+      writer.uint32(58).string(message.docDigestSri);
     }
     return writer;
   },
@@ -257,31 +262,38 @@ export const MsgCreateTrustRegistry = {
             break;
           }
 
-          message.did = reader.string();
+          message.group = reader.string();
           continue;
         case 3:
           if (tag !== 26) {
             break;
           }
 
-          message.aka = reader.string();
+          message.did = reader.string();
           continue;
         case 4:
           if (tag !== 34) {
             break;
           }
 
-          message.language = reader.string();
+          message.aka = reader.string();
           continue;
         case 5:
           if (tag !== 42) {
             break;
           }
 
-          message.docUrl = reader.string();
+          message.language = reader.string();
           continue;
         case 6:
           if (tag !== 50) {
+            break;
+          }
+
+          message.docUrl = reader.string();
+          continue;
+        case 7:
+          if (tag !== 58) {
             break;
           }
 
@@ -299,6 +311,7 @@ export const MsgCreateTrustRegistry = {
   fromJSON(object: any): MsgCreateTrustRegistry {
     return {
       creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
+      group: isSet(object.group) ? globalThis.String(object.group) : "",
       did: isSet(object.did) ? globalThis.String(object.did) : "",
       aka: isSet(object.aka) ? globalThis.String(object.aka) : "",
       language: isSet(object.language) ? globalThis.String(object.language) : "",
@@ -311,6 +324,9 @@ export const MsgCreateTrustRegistry = {
     const obj: any = {};
     if (message.creator !== "") {
       obj.creator = message.creator;
+    }
+    if (message.group !== "") {
+      obj.group = message.group;
     }
     if (message.did !== "") {
       obj.did = message.did;
@@ -336,6 +352,7 @@ export const MsgCreateTrustRegistry = {
   fromPartial<I extends Exact<DeepPartial<MsgCreateTrustRegistry>, I>>(object: I): MsgCreateTrustRegistry {
     const message = createBaseMsgCreateTrustRegistry();
     message.creator = object.creator ?? "";
+    message.group = object.group ?? "";
     message.did = object.did ?? "";
     message.aka = object.aka ?? "";
     message.language = object.language ?? "";

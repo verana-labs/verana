@@ -874,6 +874,7 @@ func (x *fastReflection_MsgUpdateParamsResponse) ProtoMethods() *protoiface.Meth
 var (
 	md_MsgCreateTrustRegistry                protoreflect.MessageDescriptor
 	fd_MsgCreateTrustRegistry_creator        protoreflect.FieldDescriptor
+	fd_MsgCreateTrustRegistry_group          protoreflect.FieldDescriptor
 	fd_MsgCreateTrustRegistry_did            protoreflect.FieldDescriptor
 	fd_MsgCreateTrustRegistry_aka            protoreflect.FieldDescriptor
 	fd_MsgCreateTrustRegistry_language       protoreflect.FieldDescriptor
@@ -885,6 +886,7 @@ func init() {
 	file_verana_tr_v1_tx_proto_init()
 	md_MsgCreateTrustRegistry = File_verana_tr_v1_tx_proto.Messages().ByName("MsgCreateTrustRegistry")
 	fd_MsgCreateTrustRegistry_creator = md_MsgCreateTrustRegistry.Fields().ByName("creator")
+	fd_MsgCreateTrustRegistry_group = md_MsgCreateTrustRegistry.Fields().ByName("group")
 	fd_MsgCreateTrustRegistry_did = md_MsgCreateTrustRegistry.Fields().ByName("did")
 	fd_MsgCreateTrustRegistry_aka = md_MsgCreateTrustRegistry.Fields().ByName("aka")
 	fd_MsgCreateTrustRegistry_language = md_MsgCreateTrustRegistry.Fields().ByName("language")
@@ -963,6 +965,12 @@ func (x *fastReflection_MsgCreateTrustRegistry) Range(f func(protoreflect.FieldD
 			return
 		}
 	}
+	if x.Group != "" {
+		value := protoreflect.ValueOfString(x.Group)
+		if !f(fd_MsgCreateTrustRegistry_group, value) {
+			return
+		}
+	}
 	if x.Did != "" {
 		value := protoreflect.ValueOfString(x.Did)
 		if !f(fd_MsgCreateTrustRegistry_did, value) {
@@ -1010,6 +1018,8 @@ func (x *fastReflection_MsgCreateTrustRegistry) Has(fd protoreflect.FieldDescrip
 	switch fd.FullName() {
 	case "verana.tr.v1.MsgCreateTrustRegistry.creator":
 		return x.Creator != ""
+	case "verana.tr.v1.MsgCreateTrustRegistry.group":
+		return x.Group != ""
 	case "verana.tr.v1.MsgCreateTrustRegistry.did":
 		return x.Did != ""
 	case "verana.tr.v1.MsgCreateTrustRegistry.aka":
@@ -1038,6 +1048,8 @@ func (x *fastReflection_MsgCreateTrustRegistry) Clear(fd protoreflect.FieldDescr
 	switch fd.FullName() {
 	case "verana.tr.v1.MsgCreateTrustRegistry.creator":
 		x.Creator = ""
+	case "verana.tr.v1.MsgCreateTrustRegistry.group":
+		x.Group = ""
 	case "verana.tr.v1.MsgCreateTrustRegistry.did":
 		x.Did = ""
 	case "verana.tr.v1.MsgCreateTrustRegistry.aka":
@@ -1066,6 +1078,9 @@ func (x *fastReflection_MsgCreateTrustRegistry) Get(descriptor protoreflect.Fiel
 	switch descriptor.FullName() {
 	case "verana.tr.v1.MsgCreateTrustRegistry.creator":
 		value := x.Creator
+		return protoreflect.ValueOfString(value)
+	case "verana.tr.v1.MsgCreateTrustRegistry.group":
+		value := x.Group
 		return protoreflect.ValueOfString(value)
 	case "verana.tr.v1.MsgCreateTrustRegistry.did":
 		value := x.Did
@@ -1104,6 +1119,8 @@ func (x *fastReflection_MsgCreateTrustRegistry) Set(fd protoreflect.FieldDescrip
 	switch fd.FullName() {
 	case "verana.tr.v1.MsgCreateTrustRegistry.creator":
 		x.Creator = value.Interface().(string)
+	case "verana.tr.v1.MsgCreateTrustRegistry.group":
+		x.Group = value.Interface().(string)
 	case "verana.tr.v1.MsgCreateTrustRegistry.did":
 		x.Did = value.Interface().(string)
 	case "verana.tr.v1.MsgCreateTrustRegistry.aka":
@@ -1136,6 +1153,8 @@ func (x *fastReflection_MsgCreateTrustRegistry) Mutable(fd protoreflect.FieldDes
 	switch fd.FullName() {
 	case "verana.tr.v1.MsgCreateTrustRegistry.creator":
 		panic(fmt.Errorf("field creator of message verana.tr.v1.MsgCreateTrustRegistry is not mutable"))
+	case "verana.tr.v1.MsgCreateTrustRegistry.group":
+		panic(fmt.Errorf("field group of message verana.tr.v1.MsgCreateTrustRegistry is not mutable"))
 	case "verana.tr.v1.MsgCreateTrustRegistry.did":
 		panic(fmt.Errorf("field did of message verana.tr.v1.MsgCreateTrustRegistry is not mutable"))
 	case "verana.tr.v1.MsgCreateTrustRegistry.aka":
@@ -1160,6 +1179,8 @@ func (x *fastReflection_MsgCreateTrustRegistry) Mutable(fd protoreflect.FieldDes
 func (x *fastReflection_MsgCreateTrustRegistry) NewField(fd protoreflect.FieldDescriptor) protoreflect.Value {
 	switch fd.FullName() {
 	case "verana.tr.v1.MsgCreateTrustRegistry.creator":
+		return protoreflect.ValueOfString("")
+	case "verana.tr.v1.MsgCreateTrustRegistry.group":
 		return protoreflect.ValueOfString("")
 	case "verana.tr.v1.MsgCreateTrustRegistry.did":
 		return protoreflect.ValueOfString("")
@@ -1244,6 +1265,10 @@ func (x *fastReflection_MsgCreateTrustRegistry) ProtoMethods() *protoiface.Metho
 		if l > 0 {
 			n += 1 + l + runtime.Sov(uint64(l))
 		}
+		l = len(x.Group)
+		if l > 0 {
+			n += 1 + l + runtime.Sov(uint64(l))
+		}
 		l = len(x.Did)
 		if l > 0 {
 			n += 1 + l + runtime.Sov(uint64(l))
@@ -1298,33 +1323,40 @@ func (x *fastReflection_MsgCreateTrustRegistry) ProtoMethods() *protoiface.Metho
 			copy(dAtA[i:], x.DocDigestSri)
 			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.DocDigestSri)))
 			i--
-			dAtA[i] = 0x32
+			dAtA[i] = 0x3a
 		}
 		if len(x.DocUrl) > 0 {
 			i -= len(x.DocUrl)
 			copy(dAtA[i:], x.DocUrl)
 			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.DocUrl)))
 			i--
-			dAtA[i] = 0x2a
+			dAtA[i] = 0x32
 		}
 		if len(x.Language) > 0 {
 			i -= len(x.Language)
 			copy(dAtA[i:], x.Language)
 			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Language)))
 			i--
-			dAtA[i] = 0x22
+			dAtA[i] = 0x2a
 		}
 		if len(x.Aka) > 0 {
 			i -= len(x.Aka)
 			copy(dAtA[i:], x.Aka)
 			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Aka)))
 			i--
-			dAtA[i] = 0x1a
+			dAtA[i] = 0x22
 		}
 		if len(x.Did) > 0 {
 			i -= len(x.Did)
 			copy(dAtA[i:], x.Did)
 			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Did)))
+			i--
+			dAtA[i] = 0x1a
+		}
+		if len(x.Group) > 0 {
+			i -= len(x.Group)
+			copy(dAtA[i:], x.Group)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Group)))
 			i--
 			dAtA[i] = 0x12
 		}
@@ -1418,6 +1450,38 @@ func (x *fastReflection_MsgCreateTrustRegistry) ProtoMethods() *protoiface.Metho
 				iNdEx = postIndex
 			case 2:
 				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Group", wireType)
+				}
+				var stringLen uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					stringLen |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				intStringLen := int(stringLen)
+				if intStringLen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + intStringLen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				x.Group = string(dAtA[iNdEx:postIndex])
+				iNdEx = postIndex
+			case 3:
+				if wireType != 2 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Did", wireType)
 				}
 				var stringLen uint64
@@ -1448,7 +1512,7 @@ func (x *fastReflection_MsgCreateTrustRegistry) ProtoMethods() *protoiface.Metho
 				}
 				x.Did = string(dAtA[iNdEx:postIndex])
 				iNdEx = postIndex
-			case 3:
+			case 4:
 				if wireType != 2 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Aka", wireType)
 				}
@@ -1480,7 +1544,7 @@ func (x *fastReflection_MsgCreateTrustRegistry) ProtoMethods() *protoiface.Metho
 				}
 				x.Aka = string(dAtA[iNdEx:postIndex])
 				iNdEx = postIndex
-			case 4:
+			case 5:
 				if wireType != 2 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Language", wireType)
 				}
@@ -1512,7 +1576,7 @@ func (x *fastReflection_MsgCreateTrustRegistry) ProtoMethods() *protoiface.Metho
 				}
 				x.Language = string(dAtA[iNdEx:postIndex])
 				iNdEx = postIndex
-			case 5:
+			case 6:
 				if wireType != 2 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field DocUrl", wireType)
 				}
@@ -1544,7 +1608,7 @@ func (x *fastReflection_MsgCreateTrustRegistry) ProtoMethods() *protoiface.Metho
 				}
 				x.DocUrl = string(dAtA[iNdEx:postIndex])
 				iNdEx = postIndex
-			case 6:
+			case 7:
 				if wireType != 2 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field DocDigestSri", wireType)
 				}
@@ -5780,12 +5844,14 @@ type MsgCreateTrustRegistry struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Creator      string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
-	Did          string `protobuf:"bytes,2,opt,name=did,proto3" json:"did,omitempty"`
-	Aka          string `protobuf:"bytes,3,opt,name=aka,proto3" json:"aka,omitempty"`
-	Language     string `protobuf:"bytes,4,opt,name=language,proto3" json:"language,omitempty"`
-	DocUrl       string `protobuf:"bytes,5,opt,name=doc_url,json=docUrl,proto3" json:"doc_url,omitempty"`
-	DocDigestSri string `protobuf:"bytes,6,opt,name=doc_digest_sri,json=docDigestSri,proto3" json:"doc_digest_sri,omitempty"`
+	Creator string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
+	// group is the optional group policy address when operator acts on behalf of group
+	Group        string `protobuf:"bytes,2,opt,name=group,proto3" json:"group,omitempty"`
+	Did          string `protobuf:"bytes,3,opt,name=did,proto3" json:"did,omitempty"`
+	Aka          string `protobuf:"bytes,4,opt,name=aka,proto3" json:"aka,omitempty"`
+	Language     string `protobuf:"bytes,5,opt,name=language,proto3" json:"language,omitempty"`
+	DocUrl       string `protobuf:"bytes,6,opt,name=doc_url,json=docUrl,proto3" json:"doc_url,omitempty"`
+	DocDigestSri string `protobuf:"bytes,7,opt,name=doc_digest_sri,json=docDigestSri,proto3" json:"doc_digest_sri,omitempty"`
 }
 
 func (x *MsgCreateTrustRegistry) Reset() {
@@ -5811,6 +5877,13 @@ func (*MsgCreateTrustRegistry) Descriptor() ([]byte, []int) {
 func (x *MsgCreateTrustRegistry) GetCreator() string {
 	if x != nil {
 		return x.Creator
+	}
+	return ""
+}
+
+func (x *MsgCreateTrustRegistry) GetGroup() string {
+	if x != nil {
+		return x.Group
 	}
 	return ""
 }
@@ -6242,19 +6315,22 @@ var file_verana_tr_v1_tx_proto_rawDesc = []byte{
 	0x74, 0x79, 0x8a, 0xe7, 0xb0, 0x2a, 0x1b, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2f, 0x78, 0x2f,
 	0x74, 0x72, 0x2f, 0x4d, 0x73, 0x67, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x50, 0x61, 0x72, 0x61,
 	0x6d, 0x73, 0x22, 0x19, 0x0a, 0x17, 0x4d, 0x73, 0x67, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x50,
-	0x61, 0x72, 0x61, 0x6d, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0xdf, 0x01,
+	0x61, 0x72, 0x61, 0x6d, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x8f, 0x02,
 	0x0a, 0x16, 0x4d, 0x73, 0x67, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x54, 0x72, 0x75, 0x73, 0x74,
 	0x52, 0x65, 0x67, 0x69, 0x73, 0x74, 0x72, 0x79, 0x12, 0x32, 0x0a, 0x07, 0x63, 0x72, 0x65, 0x61,
 	0x74, 0x6f, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63,
 	0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72,
-	0x69, 0x6e, 0x67, 0x52, 0x07, 0x63, 0x72, 0x65, 0x61, 0x74, 0x6f, 0x72, 0x12, 0x10, 0x0a, 0x03,
-	0x64, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x64, 0x69, 0x64, 0x12, 0x16,
-	0x0a, 0x03, 0x61, 0x6b, 0x61, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x42, 0x04, 0xc8, 0xde, 0x1f,
+	0x69, 0x6e, 0x67, 0x52, 0x07, 0x63, 0x72, 0x65, 0x61, 0x74, 0x6f, 0x72, 0x12, 0x2e, 0x0a, 0x05,
+	0x67, 0x72, 0x6f, 0x75, 0x70, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d,
+	0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53,
+	0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x05, 0x67, 0x72, 0x6f, 0x75, 0x70, 0x12, 0x10, 0x0a, 0x03,
+	0x64, 0x69, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x64, 0x69, 0x64, 0x12, 0x16,
+	0x0a, 0x03, 0x61, 0x6b, 0x61, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x42, 0x04, 0xc8, 0xde, 0x1f,
 	0x01, 0x52, 0x03, 0x61, 0x6b, 0x61, 0x12, 0x1a, 0x0a, 0x08, 0x6c, 0x61, 0x6e, 0x67, 0x75, 0x61,
-	0x67, 0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x6c, 0x61, 0x6e, 0x67, 0x75, 0x61,
-	0x67, 0x65, 0x12, 0x17, 0x0a, 0x07, 0x64, 0x6f, 0x63, 0x5f, 0x75, 0x72, 0x6c, 0x18, 0x05, 0x20,
+	0x67, 0x65, 0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x6c, 0x61, 0x6e, 0x67, 0x75, 0x61,
+	0x67, 0x65, 0x12, 0x17, 0x0a, 0x07, 0x64, 0x6f, 0x63, 0x5f, 0x75, 0x72, 0x6c, 0x18, 0x06, 0x20,
 	0x01, 0x28, 0x09, 0x52, 0x06, 0x64, 0x6f, 0x63, 0x55, 0x72, 0x6c, 0x12, 0x24, 0x0a, 0x0e, 0x64,
-	0x6f, 0x63, 0x5f, 0x64, 0x69, 0x67, 0x65, 0x73, 0x74, 0x5f, 0x73, 0x72, 0x69, 0x18, 0x06, 0x20,
+	0x6f, 0x63, 0x5f, 0x64, 0x69, 0x67, 0x65, 0x73, 0x74, 0x5f, 0x73, 0x72, 0x69, 0x18, 0x07, 0x20,
 	0x01, 0x28, 0x09, 0x52, 0x0c, 0x64, 0x6f, 0x63, 0x44, 0x69, 0x67, 0x65, 0x73, 0x74, 0x53, 0x72,
 	0x69, 0x3a, 0x0c, 0x82, 0xe7, 0xb0, 0x2a, 0x07, 0x63, 0x72, 0x65, 0x61, 0x74, 0x6f, 0x72, 0x22,
 	0x20, 0x0a, 0x1e, 0x4d, 0x73, 0x67, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x54, 0x72, 0x75, 0x73,

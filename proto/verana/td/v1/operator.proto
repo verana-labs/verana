@@ -1,0 +1,28 @@
+syntax = "proto3";
+package verana.td.v1;
+
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/verana-labs/verana/x/td/types";
+
+// OperatorAllowance defines the allowance state for an operator acting on behalf of a group
+message OperatorAllowance {
+    // group is the group policy address
+    string group = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+    // operator is the operator account address
+    string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+    // allowance is the maximum allowed spend per period (in uvna)
+    uint64 allowance = 3;
+    // usage is the current period usage (in uvna)
+    uint64 usage = 4;
+    // reset_period_seconds is the duration in seconds after which usage resets (0 = never)
+    int64 reset_period_seconds = 5;
+    // last_reset_at is when usage was last reset
+    google.protobuf.Timestamp last_reset_at = 6 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+    // last_usage_at is when operator last used their allowance
+    google.protobuf.Timestamp last_usage_at = 7 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+    // active indicates whether the operator is currently active
+    bool active = 8;
+}

@@ -1,8 +1,9 @@
 package keeper
 
 import (
-	"cosmossdk.io/math"
 	"testing"
+
+	"cosmossdk.io/math"
 
 	"cosmossdk.io/log"
 	"cosmossdk.io/store"
@@ -82,6 +83,18 @@ func (m *MockTrustDepositKeeper) GetTrustDepositRate(ctx sdk.Context) math.Legac
 
 // AdjustTrustDeposit implements the TrustDepositKeeper interface
 func (m *MockTrustDepositKeeper) AdjustTrustDeposit(ctx sdk.Context, account string, augend int64) error {
+	// For testing, always succeed
+	return nil
+}
+
+// IsAuthorizedOperator implements the TrustDepositKeeper interface
+func (m *MockTrustDepositKeeper) IsAuthorizedOperator(ctx sdk.Context, group, operator string) bool {
+	// For testing, always authorize
+	return true
+}
+
+// IncrementOperatorUsage implements the TrustDepositKeeper interface
+func (m *MockTrustDepositKeeper) IncrementOperatorUsage(ctx sdk.Context, group, operator string, amount uint64) error {
 	// For testing, always succeed
 	return nil
 }
