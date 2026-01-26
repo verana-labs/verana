@@ -599,12 +599,16 @@ export async function waitForSequencePropagation(
       const seqInfo = await client.getSequence(address);
       lastSequence = seqInfo.sequence;
 
-      // If no expected sequence, we just need a few successful refreshes
+      // If no expected sequence, do multiple refreshes to ensure cache is fully updated
+      // This handles rapid multi-transaction scenarios where cache propagation may lag
       if (expectedSequence === undefined) {
-        // Do a couple more refreshes to ensure cache is fully updated
-        await new Promise((resolve) => setTimeout(resolve, pollInterval));
-        await client.getSequence(address);
-        console.log(`  ✓ Sequence cache refreshed, current sequence: ${lastSequence}`);
+        // Do 3 refreshes with 1-second gaps to ensure full propagation
+        for (let refreshCount = 0; refreshCount < 3; refreshCount++) {
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          const refreshedSeq = await client.getSequence(address);
+          lastSequence = refreshedSeq.sequence;
+        }
+        console.log(`  ✓ Sequence cache refreshed (3x), current sequence: ${lastSequence}`);
         return lastSequence;
       }
 
