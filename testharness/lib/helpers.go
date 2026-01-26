@@ -1690,6 +1690,90 @@ func WaitForProposalToPass(client cosmosclient.Client, ctx context.Context, prop
 	return fmt.Errorf("proposal %d did not pass, status: %s", proposalID, proposal.Status.String())
 }
 
+// WaitForPermissionEffective polls until the permission becomes effective by checking block time.
+// Uses polling with 1-second intervals and a configurable timeout (default 60s).
+// This handles race conditions where block time may not have advanced sufficiently.
+func WaitForPermissionEffective(client cosmosclient.Client, ctx context.Context, effectiveFrom time.Time, timeoutSeconds int) error {
+	if timeoutSeconds <= 0 {
+		timeoutSeconds = 60 // Default 60s timeout as per PR #186 review
+	}
+
+	fmt.Printf("⏳ Polling for permission to become effective (timeout: %ds)...\n", timeoutSeconds)
+
+	pollInterval := 1 * time.Second
+	timeout := time.Duration(timeoutSeconds) * time.Second
+	startTime := time.Now()
+
+	for {
+		// Get current block time
+		blockTime, err := GetBlockTime(client, ctx)
+		if err != nil {
+			// If we can't get block time, wait and retry
+			fmt.Printf("    ⚠️ Error getting block time: %v, retrying...\n", err)
+			time.Sleep(pollInterval)
+			continue
+		}
+
+		// Check if block time has passed effectiveFrom
+		if blockTime.After(effectiveFrom) || blockTime.Equal(effectiveFrom) {
+			elapsed := time.Since(startTime)
+			fmt.Printf("    ✓ Permission is now effective (waited %.1fs, block time: %s)\n",
+				elapsed.Seconds(), blockTime.Format(time.RFC3339))
+			return nil
+		}
+
+		// Check timeout
+		if time.Since(startTime) >= timeout {
+			return fmt.Errorf("timeout after %ds waiting for permission to become effective. Block time: %s, effective_from: %s",
+				timeoutSeconds, blockTime.Format(time.RFC3339), effectiveFrom.Format(time.RFC3339))
+		}
+
+		// Wait before next poll
+		time.Sleep(pollInterval)
+	}
+}
+
+// GetBlockTime gets the current block time from the blockchain
+func GetBlockTime(client cosmosclient.Client, ctx context.Context) (time.Time, error) {
+	// Query latest block via command line
+	cmd := exec.Command("veranad", "q", "block", "-o", "json")
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return time.Time{}, fmt.Errorf("failed to query latest block: %v, output: %s", err, string(output))
+	}
+
+	// Remove any prefix text
+	outputStr := string(output)
+	jsonStart := -1
+	for i := 0; i < len(outputStr); i++ {
+		if outputStr[i] == '{' {
+			jsonStart = i
+			break
+		}
+	}
+	if jsonStart == -1 {
+		return time.Time{}, fmt.Errorf("no JSON found in output: %s", outputStr)
+	}
+	jsonOutput := outputStr[jsonStart:]
+
+	var block struct {
+		Header struct {
+			Time string `json:"time"`
+		} `json:"header"`
+	}
+
+	if err := json.Unmarshal([]byte(jsonOutput), &block); err != nil {
+		return time.Time{}, fmt.Errorf("failed to parse block JSON: %v, output: %s", err, jsonOutput)
+	}
+
+	blockTime, err := time.Parse(time.RFC3339Nano, block.Header.Time)
+	if err != nil {
+		return time.Time{}, fmt.Errorf("failed to parse block time: %v", err)
+	}
+
+	return blockTime, nil
+}
+
 // GetYIPIncomingAmountFromBlockResults queries block results for yield_distribution events
 // Returns the YIP incoming balance from the yield_distribution event
 // This queries via command line since cosmosclient doesn't expose block results directly
