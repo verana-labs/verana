@@ -24,6 +24,10 @@ const (
 	Msg_ReclaimTrustDeposit_FullMethodName      = "/verana.td.v1.Msg/ReclaimTrustDeposit"
 	Msg_SlashTrustDeposit_FullMethodName        = "/verana.td.v1.Msg/SlashTrustDeposit"
 	Msg_RepaySlashedTrustDeposit_FullMethodName = "/verana.td.v1.Msg/RepaySlashedTrustDeposit"
+	Msg_AddOperator_FullMethodName              = "/verana.td.v1.Msg/AddOperator"
+	Msg_RemoveOperator_FullMethodName           = "/verana.td.v1.Msg/RemoveOperator"
+	Msg_UpdateOperatorAllowance_FullMethodName  = "/verana.td.v1.Msg/UpdateOperatorAllowance"
+	Msg_ResetOperatorUsage_FullMethodName       = "/verana.td.v1.Msg/ResetOperatorUsage"
 )
 
 // MsgClient is the client API for Msg service.
@@ -40,6 +44,11 @@ type MsgClient interface {
 	// SlashTrustDeposit defines a governance operation to slash an account's trust deposit
 	SlashTrustDeposit(ctx context.Context, in *MsgSlashTrustDeposit, opts ...grpc.CallOption) (*MsgSlashTrustDepositResponse, error)
 	RepaySlashedTrustDeposit(ctx context.Context, in *MsgRepaySlashedTrustDeposit, opts ...grpc.CallOption) (*MsgRepaySlashedTrustDepositResponse, error)
+	// Operator management (must be called via group proposal)
+	AddOperator(ctx context.Context, in *MsgAddOperator, opts ...grpc.CallOption) (*MsgAddOperatorResponse, error)
+	RemoveOperator(ctx context.Context, in *MsgRemoveOperator, opts ...grpc.CallOption) (*MsgRemoveOperatorResponse, error)
+	UpdateOperatorAllowance(ctx context.Context, in *MsgUpdateOperatorAllowance, opts ...grpc.CallOption) (*MsgUpdateOperatorAllowanceResponse, error)
+	ResetOperatorUsage(ctx context.Context, in *MsgResetOperatorUsage, opts ...grpc.CallOption) (*MsgResetOperatorUsageResponse, error)
 }
 
 type msgClient struct {
@@ -100,6 +109,46 @@ func (c *msgClient) RepaySlashedTrustDeposit(ctx context.Context, in *MsgRepaySl
 	return out, nil
 }
 
+func (c *msgClient) AddOperator(ctx context.Context, in *MsgAddOperator, opts ...grpc.CallOption) (*MsgAddOperatorResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(MsgAddOperatorResponse)
+	err := c.cc.Invoke(ctx, Msg_AddOperator_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *msgClient) RemoveOperator(ctx context.Context, in *MsgRemoveOperator, opts ...grpc.CallOption) (*MsgRemoveOperatorResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(MsgRemoveOperatorResponse)
+	err := c.cc.Invoke(ctx, Msg_RemoveOperator_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *msgClient) UpdateOperatorAllowance(ctx context.Context, in *MsgUpdateOperatorAllowance, opts ...grpc.CallOption) (*MsgUpdateOperatorAllowanceResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(MsgUpdateOperatorAllowanceResponse)
+	err := c.cc.Invoke(ctx, Msg_UpdateOperatorAllowance_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *msgClient) ResetOperatorUsage(ctx context.Context, in *MsgResetOperatorUsage, opts ...grpc.CallOption) (*MsgResetOperatorUsageResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(MsgResetOperatorUsageResponse)
+	err := c.cc.Invoke(ctx, Msg_ResetOperatorUsage_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MsgServer is the server API for Msg service.
 // All implementations must embed UnimplementedMsgServer
 // for forward compatibility.
@@ -114,6 +163,11 @@ type MsgServer interface {
 	// SlashTrustDeposit defines a governance operation to slash an account's trust deposit
 	SlashTrustDeposit(context.Context, *MsgSlashTrustDeposit) (*MsgSlashTrustDepositResponse, error)
 	RepaySlashedTrustDeposit(context.Context, *MsgRepaySlashedTrustDeposit) (*MsgRepaySlashedTrustDepositResponse, error)
+	// Operator management (must be called via group proposal)
+	AddOperator(context.Context, *MsgAddOperator) (*MsgAddOperatorResponse, error)
+	RemoveOperator(context.Context, *MsgRemoveOperator) (*MsgRemoveOperatorResponse, error)
+	UpdateOperatorAllowance(context.Context, *MsgUpdateOperatorAllowance) (*MsgUpdateOperatorAllowanceResponse, error)
+	ResetOperatorUsage(context.Context, *MsgResetOperatorUsage) (*MsgResetOperatorUsageResponse, error)
 	mustEmbedUnimplementedMsgServer()
 }
 
@@ -138,6 +192,18 @@ func (UnimplementedMsgServer) SlashTrustDeposit(context.Context, *MsgSlashTrustD
 }
 func (UnimplementedMsgServer) RepaySlashedTrustDeposit(context.Context, *MsgRepaySlashedTrustDeposit) (*MsgRepaySlashedTrustDepositResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RepaySlashedTrustDeposit not implemented")
+}
+func (UnimplementedMsgServer) AddOperator(context.Context, *MsgAddOperator) (*MsgAddOperatorResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddOperator not implemented")
+}
+func (UnimplementedMsgServer) RemoveOperator(context.Context, *MsgRemoveOperator) (*MsgRemoveOperatorResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RemoveOperator not implemented")
+}
+func (UnimplementedMsgServer) UpdateOperatorAllowance(context.Context, *MsgUpdateOperatorAllowance) (*MsgUpdateOperatorAllowanceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateOperatorAllowance not implemented")
+}
+func (UnimplementedMsgServer) ResetOperatorUsage(context.Context, *MsgResetOperatorUsage) (*MsgResetOperatorUsageResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ResetOperatorUsage not implemented")
 }
 func (UnimplementedMsgServer) mustEmbedUnimplementedMsgServer() {}
 func (UnimplementedMsgServer) testEmbeddedByValue()             {}
@@ -250,6 +316,78 @@ func _Msg_RepaySlashedTrustDeposit_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Msg_AddOperator_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgAddOperator)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).AddOperator(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Msg_AddOperator_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).AddOperator(ctx, req.(*MsgAddOperator))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Msg_RemoveOperator_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgRemoveOperator)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).RemoveOperator(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Msg_RemoveOperator_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).RemoveOperator(ctx, req.(*MsgRemoveOperator))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Msg_UpdateOperatorAllowance_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgUpdateOperatorAllowance)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).UpdateOperatorAllowance(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Msg_UpdateOperatorAllowance_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).UpdateOperatorAllowance(ctx, req.(*MsgUpdateOperatorAllowance))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Msg_ResetOperatorUsage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgResetOperatorUsage)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).ResetOperatorUsage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Msg_ResetOperatorUsage_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).ResetOperatorUsage(ctx, req.(*MsgResetOperatorUsage))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Msg_ServiceDesc is the grpc.ServiceDesc for Msg service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -276,6 +414,22 @@ var Msg_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RepaySlashedTrustDeposit",
 			Handler:    _Msg_RepaySlashedTrustDeposit_Handler,
+		},
+		{
+			MethodName: "AddOperator",
+			Handler:    _Msg_AddOperator_Handler,
+		},
+		{
+			MethodName: "RemoveOperator",
+			Handler:    _Msg_RemoveOperator_Handler,
+		},
+		{
+			MethodName: "UpdateOperatorAllowance",
+			Handler:    _Msg_UpdateOperatorAllowance_Handler,
+		},
+		{
+			MethodName: "ResetOperatorUsage",
+			Handler:    _Msg_ResetOperatorUsage_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

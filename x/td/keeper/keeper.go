@@ -24,8 +24,9 @@ type (
 		// should be the x/gov module account.
 		authority string
 		// state
-		TrustDeposit collections.Map[string, types.TrustDeposit]
-		Dust         collections.Item[string] // Accumulated fractional yield (stored as string)
+		TrustDeposit      collections.Map[string, types.TrustDeposit]
+		Dust              collections.Item[string] // Accumulated fractional yield (stored as string)
+		OperatorAllowance collections.Map[string, types.OperatorAllowance]
 		// external keeper
 		bankKeeper types.BankKeeper
 		mintKeeper types.MintKeeper
@@ -47,14 +48,15 @@ func NewKeeper(
 	}
 
 	return Keeper{
-		cdc:          cdc,
-		storeService: storeService,
-		authority:    authority,
-		logger:       logger,
-		TrustDeposit: collections.NewMap(sb, types.TrustDepositKey, "trust_deposit", collections.StringKey, codec.CollValue[types.TrustDeposit](cdc)),
-		Dust:         collections.NewItem(sb, types.DustKey, "dust", collections.StringValue),
-		bankKeeper:   bankKeeper,
-		mintKeeper:   mintKeeper,
+		cdc:               cdc,
+		storeService:      storeService,
+		authority:         authority,
+		logger:            logger,
+		TrustDeposit:      collections.NewMap(sb, types.TrustDepositKey, "trust_deposit", collections.StringKey, codec.CollValue[types.TrustDeposit](cdc)),
+		Dust:              collections.NewItem(sb, types.DustKey, "dust", collections.StringValue),
+		OperatorAllowance: collections.NewMap(sb, types.OperatorAllowanceKey, "operator_allowance", collections.StringKey, codec.CollValue[types.OperatorAllowance](cdc)),
+		bankKeeper:        bankKeeper,
+		mintKeeper:        mintKeeper,
 	}
 }
 

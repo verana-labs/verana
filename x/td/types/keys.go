@@ -17,9 +17,10 @@ const (
 )
 
 var (
-	ParamsKey       = []byte("p_trustdeposit")
-	TrustDepositKey = collections.NewPrefix(1)
-	DustKey         = collections.NewPrefix(2)
+	ParamsKey            = []byte("p_trustdeposit")
+	TrustDepositKey      = collections.NewPrefix(1)
+	DustKey              = collections.NewPrefix(2)
+	OperatorAllowanceKey = collections.NewPrefix(3)
 )
 
 const (

@@ -93,6 +93,11 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 							DefaultValue: "",
 							Usage:        "aka uri",
 						},
+						"group": {
+							Name:         "group",
+							DefaultValue: "",
+							Usage:        "Group policy address to act on behalf of (for delegated execution)",
+						},
 					},
 				},
 				{
