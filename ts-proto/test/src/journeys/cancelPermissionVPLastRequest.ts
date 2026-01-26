@@ -20,6 +20,7 @@ import {
   generateUniqueDID,
   createQueryClient,
   getBlockTime,
+  waitForSequencePropagation,
 } from "../helpers/client";
 import { typeUrls } from "../helpers/registry";
 import { MsgCancelPermissionVPLastRequest, MsgStartPermissionVP } from "../../../src/codec/verana/perm/v1/tx";
@@ -64,14 +65,12 @@ async function main() {
     console.log("Step 4: Creating schema, validator permission, and starting VP (creates permission in PENDING state)...");
     // Create schema and root permission (validator)
     const { schemaId, did } = await createSchemaForTest(client, account.address);
-    // Wait for sequence to propagate after schema creation
-    await new Promise((resolve) => setTimeout(resolve, 3000));
-    await client.getSequence(account.address);
+    // Wait for sequence to propagate after schema creation (poll with 60s timeout)
+    await waitForSequencePropagation(client, account.address);
 
     const validatorPermId = await createRootPermissionForTest(client, account.address, schemaId, did);
-    // Wait for sequence to propagate after root permission creation
-    await new Promise((resolve) => setTimeout(resolve, 3000));
-    await client.getSequence(account.address);
+    // Wait for sequence to propagate after root permission creation (poll with 60s timeout)
+    await waitForSequencePropagation(client, account.address);
     console.log(`  ✓ Created Validator Permission (Root) with ID: ${validatorPermId}`);
 
     // Wait for validator permission to become effective (permissions are created with effectiveFrom 10 seconds in future)

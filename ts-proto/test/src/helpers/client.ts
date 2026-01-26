@@ -177,15 +177,15 @@ export async function createSigningClient(
 
   try {
     const gasPriceObj = GasPrice.fromString(config.gasPrice);
-    
+
     // Determine if this is an Amino wallet (Secp256k1HdWallet from @cosmjs/amino)
     const isAminoWallet = wallet instanceof Secp256k1HdWallet;
-    
+
     // Retry connection up to 3 times with exponential backoff
     // This handles cases where the blockchain is still initializing
     const maxRetries = 3;
     let lastError: Error | null = null;
-    
+
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         // Use Amino Sign if wallet is Amino wallet, otherwise use Direct Sign
@@ -193,21 +193,21 @@ export async function createSigningClient(
           registry,
           gasPrice: gasPriceObj,
         };
-        
+
         if (isAminoWallet) {
           // Add Amino types for Amino Sign (matches frontend)
           clientOptions.aminoTypes = createVeranaAminoTypes();
         }
-        
+
         const client = await SigningStargateClient.connectWithSigner(
-          config.rpcEndpoint, 
-          wallet, 
+          config.rpcEndpoint,
+          wallet,
           clientOptions
         );
         return client;
       } catch (error: any) {
         lastError = error;
-        
+
         // If it's the "must provide a non-empty value" error, it might be a timing issue
         // Wait before retrying (exponential backoff)
         if (attempt < maxRetries && error.message?.includes("must provide a non-empty value")) {
@@ -215,12 +215,12 @@ export async function createSigningClient(
           await new Promise(resolve => setTimeout(resolve, waitTime));
           continue;
         }
-        
+
         // For other errors or last attempt, throw immediately
         throw error;
       }
     }
-    
+
     // Should never reach here, but just in case
     throw lastError || new Error("Failed to connect after retries");
   } catch (error: any) {
@@ -259,7 +259,7 @@ export async function calculateFeeWithSimulation(
   const simulated = await client.simulate(address, messages, memo);
   const gasLimit = Math.ceil(simulated * config.gasAdjustment);
   const gasPrice = GasPrice.fromString(config.gasPrice);
-  
+
   // Use calculateFee from @cosmjs/stargate (same as frontend)
   return calculateFee(gasLimit, gasPrice);
 }
@@ -288,7 +288,7 @@ export async function signAndBroadcastWithRetry(
   if (!wallet) {
     throw new Error("Cannot extract wallet from client. Client must have a signer.");
   }
-  
+
   // CRITICAL: Get current on-chain sequence BEFORE creating new client
   // This ensures we know what sequence we should be using
   const queryClientBefore = await createQueryClient();
@@ -300,32 +300,32 @@ export async function signAndBroadcastWithRetry(
   } finally {
     queryClientBefore.disconnect();
   }
-  
+
   // Create fresh client for this transaction (matches frontend signAndBroadcastManualAmino)
   // This gives us a fresh cache, but we still need to ensure sequence is correct
   const freshClient = await createSigningClient(wallet);
-  
+
   try {
     // Get sequence from fresh client - should match on-chain sequence
     const cachedSeq = await freshClient.getSequence(address);
-    
+
     // If there's a mismatch, wait a bit and try again
     if (cachedSeq.sequence !== expectedSequence) {
       console.log(`  ⚠️  Sequence mismatch: on-chain=${expectedSequence}, cached=${cachedSeq.sequence}, waiting...`);
       await new Promise((resolve) => setTimeout(resolve, 1000));
       await freshClient.getSequence(address); // Force refresh
     }
-    
+
     // Match frontend: getSequence() once before signing
     await freshClient.getSequence(address);
-    
+
     let res = await freshClient.signAndBroadcast(address, messages, fee, memo);
-    
+
     // If unauthorized error, wait for previous transaction and retry
     const unauthorized = res.code === 4 && typeof res.rawLog === 'string' && res.rawLog.includes('signature verification failed');
     if (unauthorized) {
       console.log(`  ⚠️  Unauthorized error detected. Waiting for previous transaction to confirm...`);
-      
+
       // CRITICAL: Wait for previous transaction to be FULLY confirmed
       // 1. Wait for it to be included in a block
       // 2. Wait for sequence to increment on-chain
@@ -344,10 +344,10 @@ export async function signAndBroadcastWithRetry(
       } finally {
         queryClientWait.disconnect();
       }
-      
+
       // Wait a bit more to ensure sequence is fully propagated
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      
+
       // Create another fresh client for retry (fresh cache with updated sequence)
       const retryClient = await createSigningClient(wallet);
       try {
@@ -358,7 +358,7 @@ export async function signAndBroadcastWithRetry(
         retryClient.disconnect();
       }
     }
-    
+
     // Wait for this transaction to be confirmed (helps with next transaction)
     if (res.code === 0) {
       const queryClient = await createQueryClient();
@@ -379,7 +379,7 @@ export async function signAndBroadcastWithRetry(
         queryClient.disconnect();
       }
     }
-    
+
     return res;
   } finally {
     // Always disconnect the fresh client
@@ -395,7 +395,7 @@ export function getDefaultFee(gas: string = config.gasLimit) {
   // Calculate fee based on gas limit and gas price (matches frontend)
   const gasPriceValue = parseFloat(config.gasPrice.replace("uvna", ""));
   const feeAmount = Math.ceil(parseInt(gas) * gasPriceValue);
-  
+
   return {
     amount: [{ denom: config.denom, amount: String(feeAmount) }],
     gas,
@@ -444,7 +444,7 @@ export async function fundAccount(
   // The format is: <number><denom> (e.g., "1000000000uvna")
   let amountValue = "";
   let denom = "";
-  
+
   for (let i = 0; i < amount.length; i++) {
     if (amount[i] >= '0' && amount[i] <= '9') {
       amountValue += amount[i];
@@ -453,20 +453,20 @@ export async function fundAccount(
       break;
     }
   }
-  
+
   if (!amountValue || !denom) {
     throw new Error(`Invalid amount format: ${amount}. Expected format: "1000000000uvna"`);
   }
-  
+
   // Create a DirectSigningClient for bank send (uses Direct signing, not Amino)
   const { DirectSecp256k1HdWallet } = await import("@cosmjs/proto-signing");
   const { createVeranaRegistry } = await import("./registry");
   const registry = createVeranaRegistry();
-  
+
   const directWallet = await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {
     prefix: config.addressPrefix,
   });
-  
+
   // Create DirectSigningClient without Amino types (uses Direct signing)
   const directClient = await SigningStargateClient.connectWithSigner(
     config.rpcEndpoint,
@@ -477,7 +477,7 @@ export async function fundAccount(
       // No aminoTypes - use Direct signing for bank send
     }
   );
-  
+
   // Use sendTokens which works with Direct signing
   return await directClient.sendTokens(
     fromAddress,
@@ -544,20 +544,20 @@ export async function waitForPermissionToBecomeEffective(
 ): Promise<void> {
   const startTime = Date.now();
   let lastBlockTime: Date | null = null;
-  
+
   while (Date.now() - startTime < maxWaitMs) {
     const blockTime = await getBlockTime(client);
     lastBlockTime = blockTime;
-    
+
     // Check if block time has passed effective_from
     if (blockTime >= effectiveFrom) {
       return;
     }
-    
+
     // Wait a bit before checking again (check every second)
     await new Promise((resolve) => setTimeout(resolve, 1000));
   }
-  
+
   // If we timeout, provide helpful error message
   const timeRemaining = effectiveFrom.getTime() - (lastBlockTime?.getTime() || Date.now());
   throw new Error(
@@ -565,4 +565,74 @@ export async function waitForPermissionToBecomeEffective(
     `effective_from: ${effectiveFrom.toISOString()}, ` +
     `time remaining: ${Math.ceil(timeRemaining / 1000)}s`
   );
+}
+
+/**
+ * Waits for the account sequence to propagate after a transaction.
+ * Uses polling with exponential backoff instead of hardcoded waits.
+ * This handles race conditions where the sequence may not have incremented yet.
+ * 
+ * @param client - The signing client to use for sequence queries
+ * @param address - The account address to check sequence for
+ * @param expectedSequence - Optional expected sequence number. If provided, waits until
+ *                          the sequence is greater than this value. If not provided,
+ *                          just refreshes the sequence cache multiple times.
+ * @param maxWaitMs - Maximum time to wait in milliseconds (default: 60000 = 60s)
+ * @returns Promise<number> - The current sequence number after propagation
+ */
+export async function waitForSequencePropagation(
+  client: SigningStargateClient,
+  address: string,
+  expectedSequence?: number,
+  maxWaitMs: number = 60000
+): Promise<number> {
+  const startTime = Date.now();
+  let pollInterval = 500; // Start with 500ms
+  const maxPollInterval = 2000; // Cap at 2s
+  let lastSequence = 0;
+
+  console.log(`  ⏳ Polling for sequence propagation (timeout: ${maxWaitMs / 1000}s)...`);
+
+  while (Date.now() - startTime < maxWaitMs) {
+    try {
+      // Force refresh sequence from the chain
+      const seqInfo = await client.getSequence(address);
+      lastSequence = seqInfo.sequence;
+
+      // If no expected sequence, we just need a few successful refreshes
+      if (expectedSequence === undefined) {
+        // Do a couple more refreshes to ensure cache is fully updated
+        await new Promise((resolve) => setTimeout(resolve, pollInterval));
+        await client.getSequence(address);
+        console.log(`  ✓ Sequence cache refreshed, current sequence: ${lastSequence}`);
+        return lastSequence;
+      }
+
+      // If we have an expected sequence, wait until current > expected
+      if (lastSequence > expectedSequence) {
+        console.log(`  ✓ Sequence propagated: ${expectedSequence} -> ${lastSequence}`);
+        return lastSequence;
+      }
+
+      // Wait before polling again (exponential backoff)
+      await new Promise((resolve) => setTimeout(resolve, pollInterval));
+      pollInterval = Math.min(pollInterval * 1.5, maxPollInterval);
+
+    } catch (error: any) {
+      // If there's an error querying sequence, wait and retry
+      console.log(`  ⚠️  Error querying sequence: ${error.message}, retrying...`);
+      await new Promise((resolve) => setTimeout(resolve, pollInterval));
+    }
+  }
+
+  // Timeout reached
+  if (expectedSequence !== undefined) {
+    throw new Error(
+      `Sequence propagation timeout after ${maxWaitMs / 1000}s. ` +
+      `Expected sequence > ${expectedSequence}, but current is ${lastSequence}`
+    );
+  }
+
+  console.log(`  ⚠️  Sequence propagation timeout, but continuing with sequence: ${lastSequence}`);
+  return lastSequence;
 }

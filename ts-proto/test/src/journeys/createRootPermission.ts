@@ -32,6 +32,7 @@ import {
   signAndBroadcastWithRetry,
   fundAccount,
   config,
+  waitForSequencePropagation,
 } from "../helpers/client";
 import { typeUrls } from "../helpers/registry";
 import { MsgCreateRootPermission } from "../../../src/codec/verana/perm/v1/tx";
@@ -154,11 +155,8 @@ async function main() {
         const newSchema = await createSchemaForTest(client, account13.address);
         schemaId = newSchema.schemaId;
         did = newSchema.did;
-        // Wait for sequence to fully propagate after creating TR and CS
-        console.log("  ⏳ Waiting for sequence to propagate...");
-        await new Promise((resolve) => setTimeout(resolve, 5000));
-        // Force sequence refresh
-        await client.getSequence(account13.address);
+        // Wait for sequence to fully propagate after creating TR and CS (poll with 60s timeout)
+        await waitForSequencePropagation(client, account13.address);
         console.log(`  ✓ Created new Schema ID: ${schemaId}, DID: ${did}`);
       }
     } else {
@@ -168,11 +166,8 @@ async function main() {
       const newSchema = await createSchemaForTest(client, account13.address);
       schemaId = newSchema.schemaId;
       did = newSchema.did;
-      // Wait for sequence to fully propagate after creating TR and CS
-      console.log("  ⏳ Waiting for sequence to propagate...");
-      await new Promise((resolve) => setTimeout(resolve, 5000));
-      // Force sequence refresh
-      await client.getSequence(account13.address);
+      // Wait for sequence to fully propagate after creating TR and CS (poll with 60s timeout)
+      await waitForSequencePropagation(client, account13.address);
       console.log(`  ✓ Created new Schema ID: ${schemaId}, DID: ${did}`);
     }
   }
