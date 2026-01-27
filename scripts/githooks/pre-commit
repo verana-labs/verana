@@ -18,4 +18,9 @@ if [ -z "$staged_go_files" ]; then
 fi
 
 echo "--> golangci-lint (new issues since HEAD)"
-golangci-lint run --new-from-rev=HEAD --timeout=10m
+base_ref=$(git merge-base HEAD origin/main 2>/dev/null || true)
+if [ -z "$base_ref" ]; then
+  base_ref=HEAD
+fi
+echo "    base: $base_ref"
+golangci-lint run --new-from-rev="$base_ref" --timeout=10m
