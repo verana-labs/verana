@@ -1,0 +1,21 @@
+#!/bin/sh
+set -eu
+
+if ! command -v golangci-lint >/dev/null 2>&1; then
+  echo "golangci-lint not found. Install with:" >&2
+  echo "  go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.54.2" >&2
+  exit 1
+fi
+
+if ! git rev-parse --git-dir >/dev/null 2>&1; then
+  echo "Not a git repo; skipping golangci-lint." >&2
+  exit 0
+fi
+
+staged_go_files=$(git diff --cached --name-only -- '*.go')
+if [ -z "$staged_go_files" ]; then
+  exit 0
+fi
+
+echo "--> golangci-lint (new issues since HEAD)"
+golangci-lint run --new-from-rev=HEAD --timeout=10m

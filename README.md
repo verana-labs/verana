@@ -226,6 +226,16 @@ make proto-lint       # Lint protobuf files
 make help             # Show all available commands
 ```
 
+## Git Hooks (Lint-Only)
+
+To catch new lint issues without reformatting files, enable the repo hook:
+
+```bash
+git config core.hooksPath scripts/githooks
+```
+
+The hook runs `golangci-lint` with `--new-from-rev=HEAD` and does not modify files.
+
 ## Testing
 
 ### Unit Tests
