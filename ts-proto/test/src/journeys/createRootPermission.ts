@@ -103,7 +103,7 @@ async function main() {
   console.log(`  RPC Endpoint: ${config.rpcEndpoint}`);
   const client = await createSigningClient(account13Wallet);
   console.log("  ✓ Connected successfully");
-
+  
   // Verify balance
   const balance = await client.getBalance(account13.address, config.denom);
   console.log(`  Balance: ${balance.amount} ${balance.denom}`);
@@ -116,7 +116,7 @@ async function main() {
   // Step 6: Get Schema ID and DID from journey results or create new ones
   let schemaId: number | undefined;
   let did: string;
-
+  
   if (process.env.SCHEMA_ID && process.env.DID) {
     // Use provided values
     schemaId = parseInt(process.env.SCHEMA_ID, 10);
@@ -130,13 +130,13 @@ async function main() {
     // Try to load active TR/CS from journey results (reuse existing TR/CS from earlier journeys)
     console.log("Step 6: Loading active Trust Registry and Schema from journey results...");
     const trAndSchema = getActiveTRAndSchema();
-
+    
     if (trAndSchema) {
       // Try to verify the schema exists on-chain by querying LCD endpoint
       try {
         const lcdEndpoint = process.env.VERANA_LCD_ENDPOINT || "http://localhost:1317";
         const response = await fetch(`${lcdEndpoint}/verana/cs/v1/credential_schema/${trAndSchema.schemaId}`);
-
+        
         if (response.ok) {
           // Schema exists, reuse it
           schemaId = trAndSchema.schemaId;
@@ -225,7 +225,7 @@ async function main() {
       "Creating Root Permission via TypeScript client"
     );
     console.log(`  Calculated gas: ${fee.gas}, fee: ${fee.amount[0].amount}${fee.amount[0].denom}`);
-
+    
     // Use retry logic for consistency (matches frontend pattern)
     const result = await signAndBroadcastWithRetry(
       client,
@@ -242,7 +242,7 @@ async function main() {
       console.log(`  Transaction Hash: ${result.transactionHash}`);
       console.log(`  Block Height: ${result.height}`);
       console.log(`  Gas Used: ${result.gasUsed}/${result.gasWanted}`);
-
+      
       // Extract permission ID from events and save to journey results
       let rootPermissionId: number | null = null;
       const events = result.events || [];
@@ -256,7 +256,7 @@ async function main() {
           }
         }
       }
-
+      
       // Save root permission ID for reuse in other journeys
       if (rootPermissionId !== null) {
         saveRootPermissionId(rootPermissionId);
@@ -273,13 +273,13 @@ async function main() {
   } catch (error: any) {
     console.log("❌ ERROR! Transaction failed with exception:");
     console.error(error);
-
+    
     if (error.cause?.code === "ECONNREFUSED" || error.message?.includes("fetch failed")) {
       console.error("\n⚠️  Connection Error: Cannot connect to the blockchain.");
       console.error(`   Make sure the Verana blockchain is running at ${config.rpcEndpoint}`);
       console.error("   Start it with: ./scripts/setup_primary_validator.sh");
     }
-
+    
     process.exit(1);
   }
 
@@ -289,13 +289,13 @@ async function main() {
 
 main().catch((error: any) => {
   console.error("\n❌ Fatal error:", error.message || error);
-
+  
   if (error.cause?.code === "ECONNREFUSED" || error.message?.includes("fetch failed")) {
     console.error("\n⚠️  Connection Error: Cannot connect to the blockchain.");
     console.error(`   Make sure the Verana blockchain is running at ${config.rpcEndpoint}`);
     console.error("   Start it with: ./scripts/setup_primary_validator.sh");
   }
-
+  
   process.exit(1);
 });
 

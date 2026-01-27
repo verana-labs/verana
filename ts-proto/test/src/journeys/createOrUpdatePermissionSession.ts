@@ -95,7 +95,7 @@ async function main() {
     } catch (error: any) {
       throw new Error(`Failed to create root (ecosystem) permission prerequisite for schema ${schemaId}: ${error.message}`);
     }
-
+    
     // Now create regular permissions (they won't try to create root permission again)
     issuerPermId = await createPermissionForTest(client, account.address, schemaId, did, PermissionType.ISSUER, true); // Pass skipRoot=true
     // Wait for sequence to propagate after issuer permission creation (poll with 60s timeout)
@@ -108,7 +108,7 @@ async function main() {
     console.log(`    - Issuer: ${issuerPermId}`);
     console.log(`    - Verifier: ${verifierPermId}`);
     console.log(`    - Agent: ${agentPermId} (using issuer permission)`);
-
+    
     // Wait for permissions to become effective (permissions are created with effectiveFrom 10 seconds in future)
     console.log(`  ⏳ Waiting for permissions to become effective (permissions require effective_from to be in the future)...`);
     const queryClient = await createQueryClient();
@@ -116,7 +116,7 @@ async function main() {
       // Wait for blockchain block time to advance (check every second)
       const startTime = Date.now();
       const maxWait = 20000; // 20 seconds max wait
-
+      
       while (Date.now() - startTime < maxWait) {
         const waitElapsed = Date.now() - startTime;
         if (waitElapsed >= 15000) {
