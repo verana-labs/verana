@@ -79,10 +79,30 @@ func TestStartPermissionVP(t *testing.T) {
 	verifierGrantorPermID, err := k.CreatePermission(sdkCtx, verifierGrantorPerm)
 	require.NoError(t, err)
 
+	// Create a validator perm without country (for testing optional country)
+	validatorPermNoCountry := types.Permission{
+		SchemaId:   1,
+		Type:       types.PermissionType_ISSUER_GRANTOR,
+		Grantee:    creator,
+		Created:    &now,
+		CreatedBy:  creator,
+		Extended:   &now,
+		ExtendedBy: creator,
+		Modified:   &now,
+		Country:    "", // No country restriction
+		VpState:    types.ValidationState_VALIDATED,
+	}
+	validatorPermNoCountryID, err := k.CreatePermission(sdkCtx, validatorPermNoCountry)
+	require.NoError(t, err)
+
 	testCases := []struct {
-		name string
-		msg  *types.MsgStartPermissionVP
-		err  string
+		name                     string
+		msg                      *types.MsgStartPermissionVP
+		err                      string
+		checkFees                bool
+		expectedValidationFees   uint64
+		expectedIssuanceFees     uint64
+		expectedVerificationFees uint64
 	}{
 		{
 			name: "Valid ISSUER Permission Request",
@@ -93,7 +113,72 @@ func TestStartPermissionVP(t *testing.T) {
 				Country:         "US",
 				Did:             validDid,
 			},
-			err: "",
+			err:       "",
+			checkFees: false,
+		},
+		{
+			name: "Valid ISSUER Permission Request with optional fees",
+			msg: &types.MsgStartPermissionVP{
+				Creator:          creator,
+				Type:             types.PermissionType_ISSUER,
+				ValidatorPermId:  validatorPermID,
+				Country:          "US",
+				Did:              validDid,
+				ValidationFees:   &types.OptionalUInt64{Value: 100},
+				IssuanceFees:     &types.OptionalUInt64{Value: 50},
+				VerificationFees: &types.OptionalUInt64{Value: 25},
+			},
+			err:                      "",
+			checkFees:                true,
+			expectedValidationFees:   100,
+			expectedIssuanceFees:     50,
+			expectedVerificationFees: 25,
+		},
+		{
+			name: "Valid ISSUER Permission Request with partial fees",
+			msg: &types.MsgStartPermissionVP{
+				Creator:         creator,
+				Type:            types.PermissionType_ISSUER,
+				ValidatorPermId: validatorPermID,
+				Country:         "US",
+				Did:             validDid,
+				ValidationFees:  &types.OptionalUInt64{Value: 75},
+			},
+			err:                      "",
+			checkFees:                true,
+			expectedValidationFees:   75,
+			expectedIssuanceFees:     0,
+			expectedVerificationFees: 0,
+		},
+		{
+			name: "Valid ISSUER Permission Request with zero fees",
+			msg: &types.MsgStartPermissionVP{
+				Creator:          creator,
+				Type:             types.PermissionType_ISSUER,
+				ValidatorPermId:  validatorPermID,
+				Country:          "US",
+				Did:              validDid,
+				ValidationFees:   &types.OptionalUInt64{Value: 0},
+				IssuanceFees:     &types.OptionalUInt64{Value: 0},
+				VerificationFees: &types.OptionalUInt64{Value: 0},
+			},
+			err:                      "",
+			checkFees:                true,
+			expectedValidationFees:   0,
+			expectedIssuanceFees:     0,
+			expectedVerificationFees: 0,
+		},
+		{
+			name: "Valid ISSUER Permission Request without country (optional)",
+			msg: &types.MsgStartPermissionVP{
+				Creator:         creator,
+				Type:            types.PermissionType_ISSUER,
+				ValidatorPermId: validatorPermNoCountryID, // Use validator without country
+				Country:         "",                       // Optional country
+				Did:             validDid,
+			},
+			err:       "",
+			checkFees: false,
 		},
 		{
 			name: "Non-existent Validator Permission",
@@ -104,19 +189,9 @@ func TestStartPermissionVP(t *testing.T) {
 				Country:         "US",
 				Did:             validDid,
 			},
-			err: "validator perm not found",
+			err:       "validator perm not found",
+			checkFees: false,
 		},
-		//{
-		//	name: "Country Mismatch",
-		//	msg: &types.MsgStartPermissionVP{
-		//		Creator:         creator,
-		//		Type:            uint32(types.PermissionType_PERMISSION_TYPE_ISSUER),
-		//		ValidatorPermId: validatorPermID,
-		//		Country:         "FR", // Different from validator's country
-		//		Did:             validDid,
-		//	},
-		//	err: "perm validation failed: validator perm is not valid: perm country mismatch: perm has US, requested FR does not contain validator perm country mismatch",
-		//},
 		{
 			name: "Invalid Permission Type Combination - ISSUER with wrong validator",
 			msg: &types.MsgStartPermissionVP{
@@ -126,7 +201,8 @@ func TestStartPermissionVP(t *testing.T) {
 				Country:         "FR",
 				Did:             validDid,
 			},
-			err: "issuer perm requires ISSUER_GRANTOR validator",
+			err:       "issuer perm requires ISSUER_GRANTOR validator",
+			checkFees: false,
 		},
 	}
 
@@ -153,6 +229,18 @@ func TestStartPermissionVP(t *testing.T) {
 				require.NotNil(t, perm.Created)
 				require.NotNil(t, perm.Modified)
 				require.NotNil(t, perm.VpLastStateChange)
+
+				// Verify requested fees if provided
+				if tc.checkFees {
+					require.Equal(t, tc.expectedValidationFees, perm.ValidationFees, "Validation fees should match requested value")
+					require.Equal(t, tc.expectedIssuanceFees, perm.IssuanceFees, "Issuance fees should match requested value")
+					require.Equal(t, tc.expectedVerificationFees, perm.VerificationFees, "Verification fees should match requested value")
+				} else {
+					// If fees were not provided, they should be 0
+					require.Equal(t, uint64(0), perm.ValidationFees, "Validation fees should be 0 when not provided")
+					require.Equal(t, uint64(0), perm.IssuanceFees, "Issuance fees should be 0 when not provided")
+					require.Equal(t, uint64(0), perm.VerificationFees, "Verification fees should be 0 when not provided")
+				}
 			}
 		})
 	}
@@ -298,14 +386,16 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 
 		// Set perm to validated
 		msg := &types.MsgSetPermissionVPToValidated{
-			Creator:            validatorAddr,
-			Id:                 newPermID,
-			ValidationFees:     10,
-			IssuanceFees:       5,
-			VerificationFees:   3,
-			Country:            "US",
-			EffectiveUntil:     &futureTime,
-			VpSummaryDigestSri: "sha384-validDigest",
+			Creator:                 validatorAddr,
+			Id:                      newPermID,
+			ValidationFees:          10,
+			IssuanceFees:            5,
+			VerificationFees:        3,
+			Country:                 "US",
+			EffectiveUntil:          &futureTime,
+			VpSummaryDigestSri:      "sha384-validDigest",
+			IssuanceFeeDiscount:     0, // Default no discount
+			VerificationFeeDiscount: 0, // Default no discount
 		}
 
 		resp, err := ms.SetPermissionVPToValidated(ctx, msg)
@@ -320,6 +410,8 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 		require.Equal(t, msg.IssuanceFees, updatedPerm.IssuanceFees)
 		require.Equal(t, msg.VerificationFees, updatedPerm.VerificationFees)
 		require.Equal(t, msg.Country, updatedPerm.Country)
+		require.Equal(t, msg.IssuanceFeeDiscount, updatedPerm.IssuanceFeeDiscount)
+		require.Equal(t, msg.VerificationFeeDiscount, updatedPerm.VerificationFeeDiscount)
 		require.NotNil(t, updatedPerm.EffectiveFrom)
 		require.NotNil(t, updatedPerm.EffectiveUntil)
 		require.Equal(t, msg.VpSummaryDigestSri, updatedPerm.VpSummaryDigestSri)
@@ -470,19 +562,329 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 		require.NoError(t, err)
 
 		msg := &types.MsgSetPermissionVPToValidated{
-			Creator:            validatorAddr,
-			Id:                 holderPermID,
-			ValidationFees:     10,
-			IssuanceFees:       5,
-			VerificationFees:   3,
-			Country:            "US",
-			VpSummaryDigestSri: "sha384-someDigest", // Should be empty for HOLDER
+			Creator:                 validatorAddr,
+			Id:                      holderPermID,
+			ValidationFees:          10,
+			IssuanceFees:            5,
+			VerificationFees:        3,
+			Country:                 "US",
+			VpSummaryDigestSri:      "sha384-someDigest", // Should be empty for HOLDER
+			IssuanceFeeDiscount:     0,
+			VerificationFeeDiscount: 0,
 		}
 
 		resp, err := ms.SetPermissionVPToValidated(ctx, msg)
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "vp_summary_digest_sri must be null for HOLDER type")
 		require.Nil(t, resp)
+	})
+
+	// 7. Test discount validation - ISSUER_GRANTOR with valid discount
+	t.Run("ISSUER_GRANTOR with valid discount", func(t *testing.T) {
+		// Create ISSUER_GRANTOR perm in PENDING state
+		grantorPerm := types.Permission{
+			SchemaId:        1,
+			Type:            types.PermissionType_ISSUER_GRANTOR,
+			Grantee:         creator,
+			Created:         &now,
+			CreatedBy:       creator,
+			Extended:        &now,
+			ExtendedBy:      creator,
+			Modified:        &now,
+			Country:         "US",
+			ValidatorPermId: validatorPermID,
+			VpState:         types.ValidationState_PENDING,
+		}
+		grantorPermID, err := k.CreatePermission(sdkCtx, grantorPerm)
+		require.NoError(t, err)
+
+		msg := &types.MsgSetPermissionVPToValidated{
+			Creator:                 validatorAddr,
+			Id:                      grantorPermID,
+			ValidationFees:          10,
+			IssuanceFees:            5,
+			VerificationFees:        3,
+			Country:                 "US",
+			EffectiveUntil:          &futureTime,
+			VpSummaryDigestSri:      "sha384-validDigest",
+			IssuanceFeeDiscount:     5000, // 50% discount
+			VerificationFeeDiscount: 0,
+		}
+
+		resp, err := ms.SetPermissionVPToValidated(ctx, msg)
+		require.NoError(t, err)
+		require.NotNil(t, resp)
+
+		updatedPerm, err := k.GetPermissionByID(sdkCtx, grantorPermID)
+		require.NoError(t, err)
+		require.Equal(t, uint64(5000), updatedPerm.IssuanceFeeDiscount)
+	})
+
+	// 8. Test discount validation - ISSUER in GRANTOR mode with discount within validator's limit
+	t.Run("ISSUER in GRANTOR mode with valid discount", func(t *testing.T) {
+		// First create a validator with a discount
+		validatorWithDiscount := types.Permission{
+			SchemaId:            1,
+			Type:                types.PermissionType_ISSUER_GRANTOR,
+			Grantee:             validatorAddr,
+			Created:             &now,
+			CreatedBy:           validatorAddr,
+			Extended:            &now,
+			ExtendedBy:          validatorAddr,
+			Modified:            &now,
+			Country:             "US",
+			VpState:             types.ValidationState_VALIDATED,
+			IssuanceFeeDiscount: 7000, // 70% discount
+		}
+		validatorWithDiscountID, err := k.CreatePermission(sdkCtx, validatorWithDiscount)
+		require.NoError(t, err)
+
+		// Create ISSUER perm with this validator
+		issuerPerm := types.Permission{
+			SchemaId:        1,
+			Type:            types.PermissionType_ISSUER,
+			Grantee:         creator,
+			Created:         &now,
+			CreatedBy:       creator,
+			Extended:        &now,
+			ExtendedBy:      creator,
+			Modified:        &now,
+			Country:         "US",
+			ValidatorPermId: validatorWithDiscountID,
+			VpState:         types.ValidationState_PENDING,
+		}
+		issuerPermID, err := k.CreatePermission(sdkCtx, issuerPerm)
+		require.NoError(t, err)
+
+		// Can set discount up to validator's discount (7000)
+		msg := &types.MsgSetPermissionVPToValidated{
+			Creator:                 validatorAddr,
+			Id:                      issuerPermID,
+			ValidationFees:          10,
+			IssuanceFees:            5,
+			VerificationFees:        3,
+			Country:                 "US",
+			EffectiveUntil:          &futureTime,
+			VpSummaryDigestSri:      "sha384-validDigest",
+			IssuanceFeeDiscount:     5000, // 50% discount (within validator's 70%)
+			VerificationFeeDiscount: 0,
+		}
+
+		resp, err := ms.SetPermissionVPToValidated(ctx, msg)
+		require.NoError(t, err)
+		require.NotNil(t, resp)
+
+		updatedPerm, err := k.GetPermissionByID(sdkCtx, issuerPermID)
+		require.NoError(t, err)
+		require.Equal(t, uint64(5000), updatedPerm.IssuanceFeeDiscount)
+	})
+
+	// 9. Test discount validation - ISSUER in GRANTOR mode exceeding validator's discount
+	t.Run("ISSUER in GRANTOR mode exceeding validator discount", func(t *testing.T) {
+		// Create ISSUER perm with validator that has 50% discount
+		validatorWithDiscount := types.Permission{
+			SchemaId:            1,
+			Type:                types.PermissionType_ISSUER_GRANTOR,
+			Grantee:             validatorAddr,
+			Created:             &now,
+			CreatedBy:           validatorAddr,
+			Extended:            &now,
+			ExtendedBy:          validatorAddr,
+			Modified:            &now,
+			Country:             "US",
+			VpState:             types.ValidationState_VALIDATED,
+			IssuanceFeeDiscount: 5000, // 50% discount
+		}
+		validatorWithDiscountID, err := k.CreatePermission(sdkCtx, validatorWithDiscount)
+		require.NoError(t, err)
+
+		issuerPerm := types.Permission{
+			SchemaId:        1,
+			Type:            types.PermissionType_ISSUER,
+			Grantee:         creator,
+			Created:         &now,
+			CreatedBy:       creator,
+			Extended:        &now,
+			ExtendedBy:      creator,
+			Modified:        &now,
+			Country:         "US",
+			ValidatorPermId: validatorWithDiscountID,
+			VpState:         types.ValidationState_PENDING,
+		}
+		issuerPermID, err := k.CreatePermission(sdkCtx, issuerPerm)
+		require.NoError(t, err)
+
+		// Try to set discount exceeding validator's discount
+		msg := &types.MsgSetPermissionVPToValidated{
+			Creator:                 validatorAddr,
+			Id:                      issuerPermID,
+			ValidationFees:          10,
+			IssuanceFees:            5,
+			VerificationFees:        3,
+			Country:                 "US",
+			EffectiveUntil:          &futureTime,
+			VpSummaryDigestSri:      "sha384-validDigest",
+			IssuanceFeeDiscount:     6000, // 60% discount (exceeds validator's 50%)
+			VerificationFeeDiscount: 0,
+		}
+
+		resp, err := ms.SetPermissionVPToValidated(ctx, msg)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "cannot exceed validator's discount")
+		require.Nil(t, resp)
+	})
+
+	// 10. Test discount validation - discount exceeds maximum
+	t.Run("Discount exceeds maximum", func(t *testing.T) {
+		grantorPerm := types.Permission{
+			SchemaId:        1,
+			Type:            types.PermissionType_ISSUER_GRANTOR,
+			Grantee:         creator,
+			Created:         &now,
+			CreatedBy:       creator,
+			Extended:        &now,
+			ExtendedBy:      creator,
+			Modified:        &now,
+			Country:         "US",
+			ValidatorPermId: validatorPermID,
+			VpState:         types.ValidationState_PENDING,
+		}
+		grantorPermID, err := k.CreatePermission(sdkCtx, grantorPerm)
+		require.NoError(t, err)
+
+		msg := &types.MsgSetPermissionVPToValidated{
+			Creator:                 validatorAddr,
+			Id:                      grantorPermID,
+			ValidationFees:          10,
+			IssuanceFees:            5,
+			VerificationFees:        3,
+			Country:                 "US",
+			EffectiveUntil:          &futureTime,
+			VpSummaryDigestSri:      "sha384-validDigest",
+			IssuanceFeeDiscount:     10001, // Exceeds maximum of 10000
+			VerificationFeeDiscount: 0,
+		}
+
+		resp, err := ms.SetPermissionVPToValidated(ctx, msg)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "cannot exceed")
+		require.Nil(t, resp)
+	})
+
+	// 11. Test renewal with discount - must match existing discount
+	t.Run("Renewal with discount must match existing", func(t *testing.T) {
+		effectiveFrom := now.Add(-90 * 24 * time.Hour) // 90 days ago
+		renewalPerm := types.Permission{
+			SchemaId:            1,
+			Type:                types.PermissionType_ISSUER_GRANTOR,
+			Grantee:             creator,
+			Created:             &now,
+			CreatedBy:           creator,
+			Extended:            &now,
+			ExtendedBy:          creator,
+			Modified:            &now,
+			Country:             "US",
+			ValidatorPermId:     validatorPermID,
+			VpState:             types.ValidationState_PENDING,
+			EffectiveFrom:       &effectiveFrom,
+			ValidationFees:      10,
+			IssuanceFees:        5,
+			VerificationFees:    3,
+			IssuanceFeeDiscount: 3000, // 30% discount set initially
+		}
+		renewalPermID, err := k.CreatePermission(sdkCtx, renewalPerm)
+		require.NoError(t, err)
+
+		// Try to change discount during renewal
+		msg := &types.MsgSetPermissionVPToValidated{
+			Creator:                 validatorAddr,
+			Id:                      renewalPermID,
+			ValidationFees:          10,   // Must match
+			IssuanceFees:            5,    // Must match
+			VerificationFees:        3,    // Must match
+			Country:                 "US", // Must match
+			EffectiveUntil:          &futureTime,
+			VpSummaryDigestSri:      "sha384-validDigest",
+			IssuanceFeeDiscount:     4000, // Different from existing 3000
+			VerificationFeeDiscount: 0,
+		}
+
+		resp, err := ms.SetPermissionVPToValidated(ctx, msg)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "cannot be changed during renewal")
+		require.Nil(t, resp)
+
+		// Try with matching discount
+		msg.IssuanceFeeDiscount = 3000 // Match existing
+		resp, err = ms.SetPermissionVPToValidated(ctx, msg)
+		require.NoError(t, err)
+		require.NotNil(t, resp)
+
+		updatedPerm, err := k.GetPermissionByID(sdkCtx, renewalPermID)
+		require.NoError(t, err)
+		require.Equal(t, uint64(3000), updatedPerm.IssuanceFeeDiscount)
+	})
+
+	// 12. Test ECOSYSTEM mode - ISSUER with discount
+	t.Run("ISSUER in ECOSYSTEM mode with discount", func(t *testing.T) {
+		// Create schema with ECOSYSTEM mode
+		csKeeper.CreateMockCredentialSchema(2,
+			cstypes.CredentialSchemaPermManagementMode_ECOSYSTEM,
+			cstypes.CredentialSchemaPermManagementMode_ECOSYSTEM)
+
+		// Create ECOSYSTEM validator
+		ecosystemValidator := types.Permission{
+			SchemaId:   2,
+			Type:       types.PermissionType_ECOSYSTEM,
+			Grantee:    validatorAddr,
+			Created:    &now,
+			CreatedBy:  validatorAddr,
+			Extended:   &now,
+			ExtendedBy: validatorAddr,
+			Modified:   &now,
+			Country:    "US",
+			VpState:    types.ValidationState_VALIDATED,
+		}
+		ecosystemValidatorID, err := k.CreatePermission(sdkCtx, ecosystemValidator)
+		require.NoError(t, err)
+
+		// Create ISSUER perm with ECOSYSTEM validator
+		issuerPerm := types.Permission{
+			SchemaId:        2,
+			Type:            types.PermissionType_ISSUER,
+			Grantee:         creator,
+			Created:         &now,
+			CreatedBy:       creator,
+			Extended:        &now,
+			ExtendedBy:      creator,
+			Modified:        &now,
+			Country:         "US",
+			ValidatorPermId: ecosystemValidatorID,
+			VpState:         types.ValidationState_PENDING,
+		}
+		issuerPermID, err := k.CreatePermission(sdkCtx, issuerPerm)
+		require.NoError(t, err)
+
+		msg := &types.MsgSetPermissionVPToValidated{
+			Creator:                 validatorAddr,
+			Id:                      issuerPermID,
+			ValidationFees:          10,
+			IssuanceFees:            5,
+			VerificationFees:        3,
+			Country:                 "US",
+			EffectiveUntil:          &futureTime,
+			VpSummaryDigestSri:      "sha384-validDigest",
+			IssuanceFeeDiscount:     8000, // 80% discount (allowed in ECOSYSTEM mode)
+			VerificationFeeDiscount: 0,
+		}
+
+		resp, err := ms.SetPermissionVPToValidated(ctx, msg)
+		require.NoError(t, err)
+		require.NotNil(t, resp)
+
+		updatedPerm, err := k.GetPermissionByID(sdkCtx, issuerPermID)
+		require.NoError(t, err)
+		require.Equal(t, uint64(8000), updatedPerm.IssuanceFeeDiscount)
 	})
 }
 
@@ -1486,6 +1888,185 @@ func TestCreateOrUpdatePermissionSession(t *testing.T) {
 			}
 		})
 	}
+}
+
+// TestDiscountApplicationInFeeCalculation tests that discounts are correctly applied when calculating fees
+func TestDiscountApplicationInFeeCalculation(t *testing.T) {
+	k, ms, csKeeper, _, ctx := setupMsgServer(t)
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	creator := sdk.AccAddress([]byte("test_creator")).String()
+
+	// Create mock credential schema
+	csKeeper.CreateMockCredentialSchema(1,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
+
+	now := time.Now()
+
+	// Create validator perm (ISSUER_GRANTOR) with issuance fees
+	validatorPerm := types.Permission{
+		SchemaId:     1,
+		Type:         types.PermissionType_ISSUER_GRANTOR,
+		Grantee:      creator,
+		Created:      &now,
+		CreatedBy:    creator,
+		Extended:     &now,
+		ExtendedBy:   creator,
+		Modified:     &now,
+		Country:      "US",
+		VpState:      types.ValidationState_VALIDATED,
+		IssuanceFees: 100, // 100 trust units
+	}
+	validatorPermID, err := k.CreatePermission(sdkCtx, validatorPerm)
+	require.NoError(t, err)
+
+	// Create ISSUER perm with discount set (per Issue #94: use discount instead of exemption)
+	issuerPerm := types.Permission{
+		SchemaId:            1,
+		Type:                types.PermissionType_ISSUER,
+		Grantee:             creator,
+		Created:             &now,
+		CreatedBy:           creator,
+		Extended:            &now,
+		ExtendedBy:          creator,
+		Modified:            &now,
+		Country:             "US",
+		ValidatorPermId:     validatorPermID,
+		VpState:             types.ValidationState_VALIDATED,
+		IssuanceFeeDiscount: 5000, // 50% discount
+	}
+	issuerPermID, err := k.CreatePermission(sdkCtx, issuerPerm)
+	require.NoError(t, err)
+
+	// Create agent perm (HOLDER type)
+	agentPerm := types.Permission{
+		SchemaId:        1,
+		Type:            types.PermissionType_ISSUER,
+		Grantee:         creator,
+		Created:         &now,
+		CreatedBy:       creator,
+		Extended:        &now,
+		ExtendedBy:      creator,
+		Modified:        &now,
+		Country:         "US",
+		ValidatorPermId: issuerPermID,
+		VpState:         types.ValidationState_VALIDATED,
+	}
+	agentPermID, err := k.CreatePermission(sdkCtx, agentPerm)
+	require.NoError(t, err)
+
+	walletAgentPermID := agentPermID // Use same for simplicity
+
+	t.Run("Discount applied to beneficiary fees", func(t *testing.T) {
+		// When creating a session with issuerPermID:
+		// 1. Sum fees from found_perm_set (validatorPerm with IssuanceFees=100)
+		// 2. Apply exemption from issuerPerm: beneficiary_fees = 100 * (1 - 0.5) = 50
+		// Expected: beneficiary_fees = 50
+
+		msg := &types.MsgCreateOrUpdatePermissionSession{
+			Creator:           creator,
+			Id:                uuid.New().String(),
+			IssuerPermId:      issuerPermID,
+			VerifierPermId:    0,
+			AgentPermId:       agentPermID,
+			WalletAgentPermId: walletAgentPermID,
+		}
+
+		resp, err := ms.CreateOrUpdatePermissionSession(ctx, msg)
+		require.NoError(t, err)
+		require.NotNil(t, resp)
+		require.Equal(t, msg.Id, resp.Id)
+	})
+
+	t.Run("Discount applied in execution", func(t *testing.T) {
+		// Create another issuer perm with different discount
+		issuerPerm2 := types.Permission{
+			SchemaId:            1,
+			Type:                types.PermissionType_ISSUER,
+			Grantee:             creator,
+			Created:             &now,
+			CreatedBy:           creator,
+			Extended:            &now,
+			ExtendedBy:          creator,
+			Modified:            &now,
+			Country:             "US",
+			ValidatorPermId:     validatorPermID,
+			VpState:             types.ValidationState_VALIDATED,
+			IssuanceFeeDiscount: 3000, // 30% discount
+		}
+		issuerPerm2ID, err := k.CreatePermission(sdkCtx, issuerPerm2)
+		require.NoError(t, err)
+
+		// Expected: fees from validatorPerm (100) * (1 - 0.3) = 70
+		msg := &types.MsgCreateOrUpdatePermissionSession{
+			Creator:           creator,
+			Id:                uuid.New().String(),
+			IssuerPermId:      issuerPerm2ID,
+			VerifierPermId:    0,
+			AgentPermId:       agentPermID,
+			WalletAgentPermId: walletAgentPermID,
+		}
+
+		resp, err := ms.CreateOrUpdatePermissionSession(ctx, msg)
+		require.NoError(t, err)
+		require.NotNil(t, resp)
+	})
+
+	t.Run("Multiple discounts applied", func(t *testing.T) {
+		// Create validator with discount
+		validatorWithDiscount := types.Permission{
+			SchemaId:            1,
+			Type:                types.PermissionType_ISSUER_GRANTOR,
+			Grantee:             creator,
+			Created:             &now,
+			CreatedBy:           creator,
+			Extended:            &now,
+			ExtendedBy:          creator,
+			Modified:            &now,
+			Country:             "US",
+			VpState:             types.ValidationState_VALIDATED,
+			IssuanceFees:        200,  // 200 trust units
+			IssuanceFeeDiscount: 2000, // 20% discount
+		}
+		validatorWithDiscountID, err := k.CreatePermission(sdkCtx, validatorWithDiscount)
+		require.NoError(t, err)
+
+		// Create issuer with discount (per Issue #94: use discount instead of exemption)
+		issuerWithDiscount := types.Permission{
+			SchemaId:            1,
+			Type:                types.PermissionType_ISSUER,
+			Grantee:             creator,
+			Created:             &now,
+			CreatedBy:           creator,
+			Extended:            &now,
+			ExtendedBy:          creator,
+			Modified:            &now,
+			Country:             "US",
+			ValidatorPermId:     validatorWithDiscountID,
+			VpState:             types.ValidationState_VALIDATED,
+			IssuanceFeeDiscount: 3000, // 30% discount
+		}
+		issuerWithDiscountID, err := k.CreatePermission(sdkCtx, issuerWithDiscount)
+		require.NoError(t, err)
+
+		// Expected calculation:
+		// 1. Apply issuer discount: 200 * (1 - 0.3) = 140
+		// Final beneficiary_fees = 140
+
+		msg := &types.MsgCreateOrUpdatePermissionSession{
+			Creator:           creator,
+			Id:                uuid.New().String(),
+			IssuerPermId:      issuerWithDiscountID,
+			VerifierPermId:    0,
+			AgentPermId:       agentPermID,
+			WalletAgentPermId: walletAgentPermID,
+		}
+
+		resp, err := ms.CreateOrUpdatePermissionSession(ctx, msg)
+		require.NoError(t, err)
+		require.NotNil(t, resp)
+	})
 }
 
 // TestGetPermissionByID tests the GetPermissionByID function

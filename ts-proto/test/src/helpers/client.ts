@@ -259,7 +259,7 @@ export async function calculateFeeWithSimulation(
   const simulated = await client.simulate(address, messages, memo);
   const gasLimit = Math.ceil(simulated * config.gasAdjustment);
   const gasPrice = GasPrice.fromString(config.gasPrice);
-  
+
   // Use calculateFee from @cosmjs/stargate (same as frontend)
   return calculateFee(gasLimit, gasPrice);
 }
@@ -267,7 +267,7 @@ export async function calculateFeeWithSimulation(
 /**
  * Sign and broadcast with retry logic for unauthorized errors.
  * CRITICAL FIX: Creates a NEW client instance for each transaction (matches frontend).
- * 
+ *
  * The key difference from previous attempts:
  * 1. We wait for previous transaction to be FULLY confirmed (included in block AND sequence incremented)
  * 2. THEN create a fresh client (fresh cache)
@@ -565,4 +565,78 @@ export async function waitForPermissionToBecomeEffective(
     `effective_from: ${effectiveFrom.toISOString()}, ` +
     `time remaining: ${Math.ceil(timeRemaining / 1000)}s`
   );
+}
+
+/**
+ * Waits for the account sequence to propagate after a transaction.
+ * Uses polling with exponential backoff instead of hardcoded waits.
+ * This handles race conditions where the sequence may not have incremented yet.
+ * 
+ * @param client - The signing client to use for sequence queries
+ * @param address - The account address to check sequence for
+ * @param expectedSequence - Optional expected sequence number. If provided, waits until
+ *                          the sequence is greater than this value. If not provided,
+ *                          just refreshes the sequence cache multiple times.
+ * @param maxWaitMs - Maximum time to wait in milliseconds (default: 60000 = 60s)
+ * @returns Promise<number> - The current sequence number after propagation
+ */
+export async function waitForSequencePropagation(
+  client: SigningStargateClient,
+  address: string,
+  expectedSequence?: number,
+  maxWaitMs: number = 60000
+): Promise<number> {
+  const startTime = Date.now();
+  let pollInterval = 500; // Start with 500ms
+  const maxPollInterval = 2000; // Cap at 2s
+  let lastSequence = 0;
+
+  console.log(`  ⏳ Polling for sequence propagation (timeout: ${maxWaitMs / 1000}s)...`);
+
+  while (Date.now() - startTime < maxWaitMs) {
+    try {
+      // Force refresh sequence from the chain
+      const seqInfo = await client.getSequence(address);
+      lastSequence = seqInfo.sequence;
+
+      // If no expected sequence, do multiple refreshes to ensure cache is fully updated
+      // This handles rapid multi-transaction scenarios where cache propagation may lag
+      if (expectedSequence === undefined) {
+        // Do 3 refreshes with 1-second gaps to ensure full propagation
+        for (let refreshCount = 0; refreshCount < 3; refreshCount++) {
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          const refreshedSeq = await client.getSequence(address);
+          lastSequence = refreshedSeq.sequence;
+        }
+        console.log(`  ✓ Sequence cache refreshed (3x), current sequence: ${lastSequence}`);
+        return lastSequence;
+      }
+
+      // If we have an expected sequence, wait until current > expected
+      if (lastSequence > expectedSequence) {
+        console.log(`  ✓ Sequence propagated: ${expectedSequence} -> ${lastSequence}`);
+        return lastSequence;
+      }
+
+      // Wait before polling again (exponential backoff)
+      await new Promise((resolve) => setTimeout(resolve, pollInterval));
+      pollInterval = Math.min(pollInterval * 1.5, maxPollInterval);
+
+    } catch (error: any) {
+      // If there's an error querying sequence, wait and retry
+      console.log(`  ⚠️  Error querying sequence: ${error.message}, retrying...`);
+      await new Promise((resolve) => setTimeout(resolve, pollInterval));
+    }
+  }
+
+  // Timeout reached
+  if (expectedSequence !== undefined) {
+    throw new Error(
+      `Sequence propagation timeout after ${maxWaitMs / 1000}s. ` +
+      `Expected sequence > ${expectedSequence}, but current is ${lastSequence}`
+    );
+  }
+
+  console.log(`  ⚠️  Sequence propagation timeout, but continuing with sequence: ${lastSequence}`);
+  return lastSequence;
 }

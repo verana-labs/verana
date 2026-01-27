@@ -1,8 +1,9 @@
 package keeper
 
 import (
-	"cosmossdk.io/math"
 	"fmt"
+
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	credentialschematypes "github.com/verana-labs/verana/x/cs/types"
 	"github.com/verana-labs/verana/x/perm/types"
@@ -15,14 +16,11 @@ func (ms msgServer) validatePermissionChecks(ctx sdk.Context, msg *types.MsgStar
 		return types.Permission{}, fmt.Errorf("validator perm not found: %w", err)
 	}
 
-	// Check if validator perm is valid
+	// [MOD-PERM-MSG-1-2-2] Check if validator perm is valid AND country compatibility
+	// Spec: "It MUST be a valid permission AND (validator_perm.country MUST be equal to country, or validator_perm.country MUST be null)"
+	// IsValidPermission already checks both: validity (time, revoked, slashed) AND country compatibility
 	if err := IsValidPermission(validatorPerm, msg.Country, ctx.BlockTime()); err != nil {
 		return types.Permission{}, fmt.Errorf("validator perm is not valid: %w", err)
-	}
-
-	// Check country compatibility
-	if validatorPerm.Country != "" && validatorPerm.Country != msg.Country {
-		return types.Permission{}, fmt.Errorf("validator perm country mismatch")
 	}
 
 	// Load credential schema
@@ -89,6 +87,22 @@ func (ms msgServer) executeStartPermissionVP(ctx sdk.Context, msg *types.MsgStar
 
 	// Create new perm entry as specified in spec
 	now := ctx.BlockTime()
+
+	// Extract requested fees from optional fields
+	var requestedValidationFees uint64
+	var requestedIssuanceFees uint64
+	var requestedVerificationFees uint64
+
+	if msg.ValidationFees != nil {
+		requestedValidationFees = msg.ValidationFees.Value
+	}
+	if msg.IssuanceFees != nil {
+		requestedIssuanceFees = msg.IssuanceFees.Value
+	}
+	if msg.VerificationFees != nil {
+		requestedVerificationFees = msg.VerificationFees.Value
+	}
+
 	applicantPerm := types.Permission{
 		Grantee:            msg.Creator,                    // applicant_perm.grantee: applicant's account
 		Type:               types.PermissionType(msg.Type), // applicant_perm.type: type
@@ -98,9 +112,9 @@ func (ms msgServer) executeStartPermissionVP(ctx sdk.Context, msg *types.MsgStar
 		CreatedBy:          msg.Creator,
 		Modified:           &now,                          // applicant_perm.modified: now
 		Deposit:            validationTrustDepositInDenom, // applicant_perm.deposit: validation_trust_deposit_in_denom
-		ValidationFees:     0,                             // applicant_perm.validation_fees: 0
-		IssuanceFees:       0,                             // applicant_perm.issuance_fees: 0
-		VerificationFees:   0,                             // applicant_perm.verification_fees: 0
+		ValidationFees:     requestedValidationFees,       // applicant_perm.validation_fees: validation_fees (from request)
+		IssuanceFees:       requestedIssuanceFees,         // applicant_perm.issuance_fees: issuance_fees (from request)
+		VerificationFees:   requestedVerificationFees,     // applicant_perm.verification_fees: verification_fees (from request)
 		Country:            msg.Country,
 		ValidatorPermId:    msg.ValidatorPermId,           // applicant_perm.validator_perm_id: validator_perm_id
 		VpLastStateChange:  &now,                          // applicant_perm.vp_last_state_change: now

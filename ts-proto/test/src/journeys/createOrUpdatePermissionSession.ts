@@ -19,6 +19,7 @@ import {
   config,
   createQueryClient,
   getBlockTime,
+  waitForSequencePropagation,
 } from "../helpers/client";
 import { typeUrls } from "../helpers/registry";
 import { MsgCreateOrUpdatePermissionSession } from "../../../src/codec/verana/perm/v1/tx";
@@ -79,24 +80,26 @@ async function main() {
   } else {
     console.log("Step 4: Creating schema and permissions first...");
     const { schemaId, did } = await createSchemaForTest(client, account.address);
-    
+
+    // Wait for sequence to propagate after schema creation (poll with 60s timeout)
+    await waitForSequencePropagation(client, account.address);
+
     // Create root permission once for the schema (required prerequisite)
     // This ensures we only create it once, not once per permission type
     console.log(`  Creating root (ecosystem) permission for schema ${schemaId} first (required prerequisite)...`);
     try {
       await createRootPermissionForTest(client, account.address, schemaId, did);
       console.log(`  ✓ Root (ecosystem) permission created successfully`);
-      // Wait and refresh sequence before creating regular permissions
-      // The createRootPermissionForTest already waits for transaction confirmation
-      await client.getSequence(account.address);
+      // Wait for sequence to propagate after root permission creation (poll with 60s timeout)
+      await waitForSequencePropagation(client, account.address);
     } catch (error: any) {
       throw new Error(`Failed to create root (ecosystem) permission prerequisite for schema ${schemaId}: ${error.message}`);
     }
     
     // Now create regular permissions (they won't try to create root permission again)
     issuerPermId = await createPermissionForTest(client, account.address, schemaId, did, PermissionType.ISSUER, true); // Pass skipRoot=true
-    // The createPermissionForTest already waits for transaction confirmation
-    await client.getSequence(account.address);
+    // Wait for sequence to propagate after issuer permission creation (poll with 60s timeout)
+    await waitForSequencePropagation(client, account.address);
     verifierPermId = await createPermissionForTest(client, account.address, schemaId, did, PermissionType.VERIFIER, true); // Pass skipRoot=true
     // Agent permission must be ISSUER type (not ISSUER_GRANTOR)
     // Use issuer permission as agent permission (matching test harness pattern)
