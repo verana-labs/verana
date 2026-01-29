@@ -18,14 +18,18 @@ export interface JourneyResult {
   schemaId?: string;
   rootPermissionId?: string;
   did?: string;
-  
+
+  // Permission IDs for permission session setup
+  issuerPermId?: string;
+  verifierPermId?: string;
+  agentPermId?: string;
+  permissionId?: string;
+
   // Additional fields for other journeys
   issuerGrantorDid?: string;
   issuerGrantorPermId?: string;
   issuerDid?: string;
-  issuerPermId?: string;
   verifierDid?: string;
-  verifierPermId?: string;
   // ... add more as needed
 }
 
@@ -57,11 +61,11 @@ export function saveJourneyResult(journeyName: string, result: JourneyResult): v
  */
 export function loadJourneyResult(journeyName: string): JourneyResult | null {
   const filePath = path.join(JOURNEY_RESULTS_DIR, `${journeyName}.json`);
-  
+
   if (!fs.existsSync(filePath)) {
     return null;
   }
-  
+
   try {
     const content = fs.readFileSync(filePath, "utf-8");
     return JSON.parse(content) as JourneyResult;
@@ -90,7 +94,7 @@ export function getActiveTRAndSchema(): { trustRegistryId: number; schemaId: num
   // Load active TR and CS
   const trResult = loadJourneyResult("active-tr");
   const csResult = loadJourneyResult("active-cs");
-  
+
   if (trResult?.trustRegistryId && csResult?.schemaId && (trResult?.did || csResult?.did)) {
     return {
       trustRegistryId: parseInt(trResult.trustRegistryId, 10),
@@ -98,7 +102,7 @@ export function getActiveTRAndSchema(): { trustRegistryId: number; schemaId: num
       did: trResult.did || csResult.did || "",
     };
   }
-  
+
   return null;
 }
 
@@ -164,12 +168,12 @@ export async function isTrustRegistryArchived(
     // Query TR via LCD endpoint
     const lcdEndpoint = process.env.VERANA_LCD_ENDPOINT || "http://localhost:1317";
     const response = await fetch(`${lcdEndpoint}/verana/tr/v1/trust_registry/${trId}`);
-    
+
     if (!response.ok) {
       // If not found, consider it as "needs creation"
       return true;
     }
-    
+
     const data = await response.json() as { trust_registry?: { archived?: string | null } };
     // Check if archived field exists and is not null
     return data.trust_registry?.archived != null;
@@ -191,12 +195,12 @@ export async function isCredentialSchemaArchived(
     // Query CS via LCD endpoint
     const lcdEndpoint = process.env.VERANA_LCD_ENDPOINT || "http://localhost:1317";
     const response = await fetch(`${lcdEndpoint}/verana/cs/v1/credential_schema/${schemaId}`);
-    
+
     if (!response.ok) {
       // If not found, consider it as "needs creation"
       return true;
     }
-    
+
     const data = await response.json() as { credential_schema?: { archived?: string | null } };
     // Check if archived field exists and is not null
     return data.credential_schema?.archived != null;

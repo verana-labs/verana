@@ -1,13 +1,15 @@
 /**
  * Journey: Create Or Update Permission Session
  *
- * This script demonstrates how to create or update a Permission Session using the
- * TypeScript client and the generated protobuf types.
+ * Step 3 of 3 for Permission Session creation.
+ * Loads prerequisites from Steps 1 & 2, creates the Permission Session.
  *
  * Usage:
- *   ISSUER_PERM_ID=1 VERIFIER_PERM_ID=2 AGENT_PERM_ID=3 npm run test:create-perm-session
- *   # Or let it create permissions first, then create session
+ *   # Using prerequisites from previous steps (recommended)
  *   npm run test:create-perm-session
+ *
+ *   # Or provide specific permission IDs
+ *   ISSUER_PERM_ID=1 VERIFIER_PERM_ID=2 AGENT_PERM_ID=3 npm run test:create-perm-session
  */
 
 import {
@@ -19,12 +21,10 @@ import {
   config,
   createQueryClient,
   getBlockTime,
-  waitForSequencePropagation,
 } from "../helpers/client";
 import { typeUrls } from "../helpers/registry";
 import { MsgCreateOrUpdatePermissionSession } from "../../../src/codec/verana/perm/v1/tx";
-import { createSchemaForTest, createPermissionForTest, createRootPermissionForTest } from "../helpers/permissionHelpers";
-import { PermissionType } from "../../../src/codec/verana/perm/v1/types";
+import { loadJourneyResult } from "../helpers/journeyResults";
 
 const TEST_MNEMONIC =
   process.env.MNEMONIC ||
@@ -41,108 +41,91 @@ function generateUUID(): string {
 
 async function main() {
   console.log("=".repeat(60));
-  console.log("Journey: Create Or Update Permission Session (TypeScript Client)");
+  console.log("Journey: Create Or Update Permission Session (Step 3/3)");
   console.log("=".repeat(60));
   console.log();
 
-  // Using Amino Sign for Permission Session
+  // Setup wallet and client
   const wallet = await createAminoWallet(TEST_MNEMONIC);
   const account = await getAccountInfo(wallet);
   const client = await createSigningClient(wallet);
-  console.log(`  ✓ Using Amino Sign`);
-
   console.log(`  ✓ Wallet address: ${account.address}`);
   console.log(`  ✓ Connected to ${config.rpcEndpoint}`);
   console.log();
 
+  // Check balance
   const balance = await client.getBalance(account.address, config.denom);
   if (BigInt(balance.amount) < BigInt(1000000)) {
     console.log("  ⚠️  Warning: Low balance.");
     process.exit(1);
   }
 
-  let issuerPermId: number | undefined;
-  let verifierPermId: number | undefined;
-  let agentPermId: number | undefined;
+  let issuerPermId: number;
+  let verifierPermId: number;
+  let agentPermId: number;
 
+  // Check for environment variables first
   if (process.env.ISSUER_PERM_ID && process.env.VERIFIER_PERM_ID && process.env.AGENT_PERM_ID) {
     issuerPermId = parseInt(process.env.ISSUER_PERM_ID, 10);
     verifierPermId = parseInt(process.env.VERIFIER_PERM_ID, 10);
     agentPermId = parseInt(process.env.AGENT_PERM_ID, 10);
+
     if (isNaN(issuerPermId) || isNaN(verifierPermId) || isNaN(agentPermId)) {
       console.log("  ❌ Invalid permission IDs provided");
       process.exit(1);
     }
-    console.log(`Step 4: Using provided Permission IDs:`);
+
+    console.log("Using provided Permission IDs:");
+    console.log(`  - Issuer: ${issuerPermId}`);
+    console.log(`  - Verifier: ${verifierPermId}`);
+    console.log(`  - Agent: ${agentPermId}`);
+  } else {
+    // Load from journey results (created by Steps 1 & 2)
+    console.log("Loading permission IDs from previous steps...");
+    const perms = loadJourneyResult("perm-session-perms");
+
+    if (!perms?.issuerPermId || !perms?.verifierPermId) {
+      console.log("  ❌ Permission IDs not found. Run the setup steps first:");
+      console.log("     npm run test:setup-perm-session-prereqs");
+      console.log("     npm run test:setup-perm-session-perms");
+      process.exit(1);
+    }
+
+    issuerPermId = parseInt(perms.issuerPermId, 10);
+    verifierPermId = parseInt(perms.verifierPermId, 10);
+    agentPermId = perms.agentPermId ? parseInt(perms.agentPermId, 10) : issuerPermId;
+
+    console.log(`  ✓ Loaded from journey_results/perm-session-perms.json:`);
     console.log(`    - Issuer: ${issuerPermId}`);
     console.log(`    - Verifier: ${verifierPermId}`);
     console.log(`    - Agent: ${agentPermId}`);
-  } else {
-    console.log("Step 4: Creating schema and permissions first...");
-    const { schemaId, did } = await createSchemaForTest(client, account.address);
-
-    // Wait for sequence to propagate after schema creation (poll with 60s timeout)
-    await waitForSequencePropagation(client, account.address);
-
-    // Create root permission once for the schema (required prerequisite)
-    // This ensures we only create it once, not once per permission type
-    console.log(`  Creating root (ecosystem) permission for schema ${schemaId} first (required prerequisite)...`);
-    try {
-      await createRootPermissionForTest(client, account.address, schemaId, did);
-      console.log(`  ✓ Root (ecosystem) permission created successfully`);
-      // Wait for sequence to propagate after root permission creation (poll with 60s timeout)
-      await waitForSequencePropagation(client, account.address);
-    } catch (error: any) {
-      throw new Error(`Failed to create root (ecosystem) permission prerequisite for schema ${schemaId}: ${error.message}`);
-    }
-    
-    // Now create regular permissions (they won't try to create root permission again)
-    issuerPermId = await createPermissionForTest(client, account.address, schemaId, did, PermissionType.ISSUER, true); // Pass skipRoot=true
-    // Wait for sequence to propagate after issuer permission creation (poll with 60s timeout)
-    await waitForSequencePropagation(client, account.address);
-    verifierPermId = await createPermissionForTest(client, account.address, schemaId, did, PermissionType.VERIFIER, true); // Pass skipRoot=true
-    // Agent permission must be ISSUER type (not ISSUER_GRANTOR)
-    // Use issuer permission as agent permission (matching test harness pattern)
-    agentPermId = issuerPermId;
-    console.log(`  ✓ Created Permissions:`);
-    console.log(`    - Issuer: ${issuerPermId}`);
-    console.log(`    - Verifier: ${verifierPermId}`);
-    console.log(`    - Agent: ${agentPermId} (using issuer permission)`);
-    
-    // Wait for permissions to become effective (permissions are created with effectiveFrom 10 seconds in future)
-    console.log(`  ⏳ Waiting for permissions to become effective (permissions require effective_from to be in the future)...`);
-    const queryClient = await createQueryClient();
-    try {
-      // Wait for blockchain block time to advance (check every second)
-      const startTime = Date.now();
-      const maxWait = 20000; // 20 seconds max wait
-      
-      while (Date.now() - startTime < maxWait) {
-        const waitElapsed = Date.now() - startTime;
-        if (waitElapsed >= 15000) {
-          // Double-check block time has advanced sufficiently
-          const currentBlockTime = await getBlockTime(queryClient);
-          console.log(`  ✓ Waited ${Math.ceil(waitElapsed / 1000)} seconds, block time: ${currentBlockTime.toISOString()}`);
-          break;
-        }
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-      }
-      console.log(`  ✓ Permissions should now be effective`);
-    } finally {
-      queryClient.disconnect();
-    }
   }
-
-  if (!issuerPermId || !verifierPermId || !agentPermId) {
-    console.log("  ❌ All permission IDs are required");
-    process.exit(1);
-  }
-
   console.log();
 
-  console.log("Step 5: Creating Permission Session transaction...");
+  // Wait for permissions to become effective (created with 10s future effectiveFrom)
+  console.log("Waiting for permissions to become effective...");
+  const queryClient = await createQueryClient();
+  try {
+    const startTime = Date.now();
+    const maxWait = 15000; // 15 seconds
+
+    while (Date.now() - startTime < maxWait) {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const elapsed = Date.now() - startTime;
+      if (elapsed >= 12000) {
+        const currentBlockTime = await getBlockTime(queryClient);
+        console.log(`  ✓ Waited ${Math.ceil(elapsed / 1000)} seconds, block time: ${currentBlockTime.toISOString()}`);
+        break;
+      }
+    }
+  } finally {
+    queryClient.disconnect();
+  }
+  console.log();
+
+  // Create Permission Session
+  console.log("Creating Permission Session...");
   const sessionId = generateUUID();
-  // walletAgentPermId is mandatory - use issuer permission ID (matching test harness pattern)
   const walletAgentPermId = process.env.WALLET_AGENT_PERM_ID
     ? parseInt(process.env.WALLET_AGENT_PERM_ID, 10)
     : issuerPermId;
@@ -158,16 +141,15 @@ async function main() {
       walletAgentPermId: walletAgentPermId,
     }),
   };
-  console.log(`    - Session ID: ${sessionId}`);
-  console.log(`    - Issuer Permission ID: ${issuerPermId}`);
-  console.log(`    - Verifier Permission ID: ${verifierPermId}`);
-  console.log(`    - Agent Permission ID: ${agentPermId}`);
-  if (walletAgentPermId) {
-    console.log(`    - Wallet Agent Permission ID: ${walletAgentPermId}`);
-  }
+
+  console.log(`  - Session ID: ${sessionId}`);
+  console.log(`  - Issuer Permission ID: ${issuerPermId}`);
+  console.log(`  - Verifier Permission ID: ${verifierPermId}`);
+  console.log(`  - Agent Permission ID: ${agentPermId}`);
+  console.log(`  - Wallet Agent Permission ID: ${walletAgentPermId}`);
   console.log();
 
-  console.log("Step 6: Signing and broadcasting transaction...");
+  console.log("Signing and broadcasting transaction...");
   try {
     const fee = await calculateFeeWithSimulation(
       client,
@@ -177,7 +159,6 @@ async function main() {
     );
     console.log(`  Calculated gas: ${fee.gas}, fee: ${fee.amount[0].amount}${fee.amount[0].denom}`);
 
-    // Use retry logic for consistency (matches frontend pattern)
     const result = await signAndBroadcastWithRetry(
       client,
       account.address,
@@ -188,12 +169,14 @@ async function main() {
 
     console.log();
     if (result.code === 0) {
-      console.log("✅ SUCCESS! Permission Session created/updated successfully!");
+      console.log("=".repeat(60));
+      console.log("✅ SUCCESS! Permission Session created successfully!");
       console.log("=".repeat(60));
       console.log(`  Transaction Hash: ${result.transactionHash}`);
       console.log(`  Block Height: ${result.height}`);
       console.log(`  Gas Used: ${result.gasUsed}/${result.gasWanted}`);
       console.log(`  Session ID: ${sessionId}`);
+      console.log("=".repeat(60));
     } else {
       console.log("❌ FAILED! Transaction failed.");
       console.log(`  Error Code: ${result.code}`);
@@ -209,9 +192,6 @@ async function main() {
     }
     process.exit(1);
   }
-
-  console.log();
-  console.log("=".repeat(60));
 }
 
 main().catch((error: any) => {

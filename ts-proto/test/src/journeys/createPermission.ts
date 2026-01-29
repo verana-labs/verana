@@ -100,7 +100,7 @@ async function main() {
   console.log(`  RPC Endpoint: ${config.rpcEndpoint}`);
   const client = await createSigningClient(account14Wallet);
   console.log("  ✓ Connected successfully");
-  
+
   // Verify balance
   const balance = await client.getBalance(account14.address, config.denom);
   console.log(`  Balance: ${balance.amount} ${balance.denom}`);
@@ -113,7 +113,7 @@ async function main() {
   // Step 6: Get Schema ID and DID from journey results or create new ones
   let schemaId: number | undefined;
   let did: string;
-  
+
   if (process.env.SCHEMA_ID && process.env.DID) {
     schemaId = parseInt(process.env.SCHEMA_ID, 10);
     did = process.env.DID;
@@ -125,7 +125,7 @@ async function main() {
   } else {
     // Try to load from active TR/CS
     const trAndSchema = getActiveTRAndSchema();
-    
+
     if (trAndSchema) {
       schemaId = trAndSchema.schemaId;
       did = trAndSchema.did;
@@ -181,7 +181,6 @@ async function main() {
       effectiveUntil: effectiveUntil,
       verificationFees: verificationFees,
       validationFees: validationFees,
-      validatorPermId: rootPermId, // Use root permission from Journey 13
     }),
   };
   console.log("  Message details:");
@@ -207,7 +206,7 @@ async function main() {
       "Creating Permission via TypeScript client"
     );
     console.log(`  Calculated gas: ${fee.gas}, fee: ${fee.amount[0].amount}${fee.amount[0].denom}`);
-    
+
     // Use retry logic for consistency (matches frontend pattern)
     const result = await signAndBroadcastWithRetry(
       client,
@@ -224,7 +223,7 @@ async function main() {
       console.log(`  Transaction Hash: ${result.transactionHash}`);
       console.log(`  Block Height: ${result.height}`);
       console.log(`  Gas Used: ${result.gasUsed}/${result.gasWanted}`);
-      
+
       // Extract permission ID from events and save to journey results
       let permissionId: number | null = null;
       const events = result.events || [];
@@ -238,7 +237,7 @@ async function main() {
           }
         }
       }
-      
+
       // Save permission ID for reuse in Journeys 15-16
       if (permissionId !== null) {
         savePermissionId(permissionId, "create-permission");
@@ -255,19 +254,19 @@ async function main() {
   } catch (error: any) {
     console.log("❌ ERROR! Transaction failed with exception:");
     console.error(error);
-    
+
     if (error.cause?.code === "ECONNREFUSED" || error.message?.includes("fetch failed")) {
       console.error("\n⚠️  Connection Error: Cannot connect to the blockchain.");
       console.error(`   Make sure the Verana blockchain is running at ${config.rpcEndpoint}`);
       console.error("   Start it with: ./scripts/setup_primary_validator.sh");
     }
-    
+
     if (error.message?.includes("ecosystem permission not found")) {
       console.error("\n⚠️  Prerequisite Error: Ecosystem permission (root permission) not found.");
       console.error(`   This means the root permission for schema ${schemaId} was not created or committed properly.`);
       console.error("   The root permission must be created and committed before creating regular permissions.");
     }
-    
+
     process.exit(1);
   }
 
@@ -277,13 +276,13 @@ async function main() {
 
 main().catch((error: any) => {
   console.error("\n❌ Fatal error:", error.message || error);
-  
+
   if (error.cause?.code === "ECONNREFUSED" || error.message?.includes("fetch failed")) {
     console.error("\n⚠️  Connection Error: Cannot connect to the blockchain.");
     console.error(`   Make sure the Verana blockchain is running at ${config.rpcEndpoint}`);
     console.error("   Start it with: ./scripts/setup_primary_validator.sh");
   }
-  
+
   process.exit(1);
 });
 

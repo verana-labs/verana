@@ -53,6 +53,9 @@ const tests: TestConfig[] = [
   { name: "Renew Permission VP", script: "test:renew-perm-vp" },
   { name: "Set Permission VP To Validated", script: "test:set-perm-vp-validated" },
   { name: "Cancel Permission VP Last Request", script: "test:cancel-perm-vp" },
+  // Permission Session - now split into 3 steps to avoid race conditions
+  { name: "Setup Permission Session Prerequisites", script: "test:setup-perm-session-prereqs" },
+  { name: "Setup Permission Session Permissions", script: "test:setup-perm-session-perms" },
   { name: "Create Or Update Permission Session", script: "test:create-perm-session" },
   // Trust Deposit (td) module - Setup funding proposal first (Journey 20)
   { name: "Setup TD Yield Funding Proposal (Journey 20)", script: "test:setup-td-proposal", isGoJourney: true },
@@ -71,7 +74,7 @@ async function runTest(test: TestConfig): Promise<TestResult> {
 
   return new Promise((resolve) => {
     let child;
-    
+
     if (test.isGoJourney) {
       // Run Go test harness journey (journey 20 for TD yield proposal setup)
       // Assumes the Go binary is available in the testharness directory
