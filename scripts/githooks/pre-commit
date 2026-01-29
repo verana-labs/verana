@@ -6,6 +6,24 @@ if ! git rev-parse --git-dir >/dev/null 2>&1; then
   exit 0
 fi
 
+staged_files=$(git diff --cached --name-only)
+if [ -n "$staged_files" ]; then
+  whitespace_only=""
+  for file in $staged_files; do
+    if git diff --cached --ignore-all-space --quiet -- "$file"; then
+      whitespace_only="$whitespace_only $file"
+    fi
+  done
+
+  if [ -n "$whitespace_only" ]; then
+    echo "Whitespace-only changes detected (blocked):" >&2
+    for file in $whitespace_only; do
+      echo "  $file" >&2
+    done
+    exit 1
+  fi
+fi
+
 staged_go_files=$(git diff --cached --name-only -- '*.go')
 if [ -z "$staged_go_files" ]; then
   :
@@ -35,19 +53,6 @@ if [ -n "$staged_ts_files" ]; then
     echo "--> prettier (check, staged TS files)"
     echo "$staged_ts_files" | xargs prettier -c
   else
-    whitespace_only=""
-    for file in $staged_ts_files; do
-      if git diff --cached --ignore-all-space --quiet -- "$file"; then
-        whitespace_only="$whitespace_only $file"
-      fi
-    done
-    if [ -n "$whitespace_only" ]; then
-      echo "TS whitespace-only changes detected:" >&2
-      for file in $whitespace_only; do
-        echo "  $file" >&2
-      done
-      echo "Abort to avoid formatting-only diffs." >&2
-      exit 1
-    fi
+    :
   fi
 fi

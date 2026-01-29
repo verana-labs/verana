@@ -234,7 +234,7 @@ To catch new lint issues without reformatting files, enable the repo hook:
 git config core.hooksPath scripts/githooks
 ```
 
-The hook runs `golangci-lint` with `--new-from-rev=<merge-base>` (against `origin/main`) and does not modify files. For TypeScript, it checks staged files with `eslint` or `prettier` if available, and otherwise blocks whitespace-only TS diffs.
+The hook runs `golangci-lint` with `--new-from-rev=<merge-base>` (against `origin/main`) and does not modify files. It also blocks whitespace-only diffs for any staged files. For TypeScript, it checks staged files with `eslint` or `prettier` if available.
 
 ## Testing
 
