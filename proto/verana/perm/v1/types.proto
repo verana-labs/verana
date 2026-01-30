@@ -67,6 +67,11 @@ message Permission {
   uint64 vp_current_deposit = 32;
   string vp_summary_digest_sri = 33;
   google.protobuf.Timestamp vp_term_requested = 34 [(gogoproto.stdtime) = true];
+  // Fee discount fields (scaled: 0 = 0.0, 10000 = 1.0, range 0-10000)
+  // Per Issue #94: spec merged exemption and discount into single *_fee_discount field
+  uint64 issuance_fee_discount = 35; // Issuance fee discount (0-10000, where 10000 = 100% discount)
+  uint64 verification_fee_discount = 36; // Verification fee discount (0-10000, where 10000 = 100% discount)
+  // Note: Fields 37-38 (issuance_fee_exemption, verification_fee_exemption) removed per Issue #94
 }
 
 message PermissionSession {
@@ -82,4 +87,9 @@ message SessionAuthz {
   uint64 executor_perm_id = 1;
   uint64 beneficiary_perm_id = 2;
   uint64 wallet_agent_perm_id = 3;
+}
+
+// OptionalUInt64 is a wrapper for optional uint64 values
+message OptionalUInt64 {
+  uint64 value = 1;
 }

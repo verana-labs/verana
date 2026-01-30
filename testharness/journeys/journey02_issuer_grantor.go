@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"time"
 
 	"cosmossdk.io/math"
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
@@ -52,6 +53,14 @@ func RunIssuerGrantorJourney(ctx context.Context, client cosmosclient.Client) er
 		ValidatorPermId: rootPermID,
 		Country:         countryCode,
 		Did:             issuerGrantorDID,
+	}
+
+	// Wait for the root permission to become effective
+	// Root permissions have effective_from set 10 seconds after creation
+	// Poll for permission to become effective (60s timeout as per PR #186 review)
+	effectiveFrom := time.Now().Add(10 * time.Second) // Root perms are created with 10s delay
+	if err := lib.WaitForPermissionEffective(client, ctx, effectiveFrom, 60); err != nil {
+		return fmt.Errorf("failed waiting for root permission to become effective: %w", err)
 	}
 
 	permissionID := lib.StartValidationProcess(client, ctx, issuerGrantorAccount, startVPMsg)

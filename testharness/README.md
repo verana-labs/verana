@@ -50,7 +50,7 @@ Set up environment variables for the test harness:
 export ADDRESS_PREFIX="verana"
 export HOME_DIR="~/.verana"
 export NODE_RPC="http://localhost:26657"
-export GAS="200000"
+export GAS="auto"  # or a fixed value like "500000"
 export FEES="750000uvna"
 ```
 
@@ -60,7 +60,7 @@ export FEES="750000uvna"
 export ADDRESS_PREFIX="verana"
 export HOME_DIR="~/.verana"
 export NODE_RPC="http://node1.devnet.verana.network:26657"
-export GAS="300000"
+export GAS="auto"  # auto-estimates with 1.5x adjustment
 export FEES="750000uvna"
 ```
 
@@ -70,7 +70,7 @@ export FEES="750000uvna"
 export ADDRESS_PREFIX="verana"
 export HOME_DIR="~/.verana"
 export NODE_RPC="http://node1.testnet.verana.network:26657"
-export GAS="300000"
+export GAS="auto"  # auto-estimates with 1.5x adjustment
 export FEES="750000uvna"
 ```
 

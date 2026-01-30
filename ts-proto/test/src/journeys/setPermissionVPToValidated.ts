@@ -1,13 +1,15 @@
 /**
  * Journey: Set Permission VP To Validated
  *
- * This script demonstrates how to set a Permission Validation Process to validated state using the
- * TypeScript client and the generated protobuf types.
+ * Step 2 of 2 for Set Permission VP To Validated.
+ * Loads prerequisites from Step 1, sets the Permission VP to validated state.
  *
  * Usage:
- *   PERM_ID=1 npm run test:set-perm-vp-validated
- *   # Or let it create a permission and start VP first, then validate it
+ *   # Using prerequisites from Step 1 (recommended)
  *   npm run test:set-perm-vp-validated
+ *
+ *   # Or provide specific Permission ID
+ *   PERM_ID=1 npm run test:set-perm-vp-validated
  */
 
 import {
@@ -17,14 +19,10 @@ import {
   calculateFeeWithSimulation,
   signAndBroadcastWithRetry,
   config,
-  createQueryClient,
-  getBlockTime,
 } from "../helpers/client";
 import { typeUrls } from "../helpers/registry";
-import { MsgSetPermissionVPToValidated, MsgStartPermissionVP } from "../../../src/codec/verana/perm/v1/tx";
-import { PermissionType } from "../../../src/codec/verana/perm/v1/types";
-import { createSchemaForTest, createRootPermissionForTest } from "../helpers/permissionHelpers";
-import { generateUniqueDID } from "../helpers/client";
+import { MsgSetPermissionVPToValidated } from "../../../src/codec/verana/perm/v1/tx";
+import { loadJourneyResult } from "../helpers/journeyResults";
 
 const TEST_MNEMONIC =
   process.env.MNEMONIC ||
@@ -32,9 +30,13 @@ const TEST_MNEMONIC =
 
 async function main() {
   console.log("=".repeat(60));
-  console.log("Journey: Set Permission VP To Validated (TypeScript Client)");
+  console.log("Journey: Set Permission VP To Validated (Step 2/2)");
   console.log("=".repeat(60));
   console.log();
+
+  // Load prerequisites from Step 1
+  console.log("Loading prerequisites from Step 1...");
+  const prereqs = loadJourneyResult("set-perm-vp-validated-prereqs");
 
   // Using Amino Sign to match frontend
   const wallet = await createWallet(TEST_MNEMONIC);
@@ -46,12 +48,6 @@ async function main() {
   console.log(`  ✓ Connected to ${config.rpcEndpoint}`);
   console.log();
 
-  // Refresh sequence at the start to ensure we have the latest sequence from blockchain
-  // This is critical when running multiple tests in sequence
-  await client.getSequence(account.address);
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  await client.getSequence(account.address);
-
   const balance = await client.getBalance(account.address, config.denom);
   if (BigInt(balance.amount) < BigInt(1000000)) {
     console.log("  ⚠️  Warning: Low balance.");
@@ -59,110 +55,28 @@ async function main() {
   }
 
   let permId: number | undefined;
-  if (process.env.PERM_ID) {
+  if (prereqs?.permissionId) {
+    permId = parseInt(prereqs.permissionId, 10);
+    console.log(`  ✓ Loaded prerequisites:`);
+    console.log(`    - Permission ID: ${permId} (PENDING state)`);
+    if (prereqs.schemaId) {
+      console.log(`    - Schema ID: ${prereqs.schemaId}`);
+    }
+    if (prereqs.validatorPermId) {
+      console.log(`    - Validator Permission ID: ${prereqs.validatorPermId}`);
+    }
+  } else if (process.env.PERM_ID) {
     permId = parseInt(process.env.PERM_ID, 10);
     if (isNaN(permId)) {
       console.log("  ❌ Invalid PERM_ID provided");
       process.exit(1);
     }
-    console.log(`Step 4: Using provided Permission ID: ${permId}`);
+    console.log(`  Using provided Permission ID: ${permId}`);
   } else {
-    console.log("Step 4: Creating schema, validator permission, and starting VP first...");
-    const { schemaId, did } = await createSchemaForTest(client, account.address);
-    // Refresh sequence after schema creation
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    await client.getSequence(account.address);
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    await client.getSequence(account.address);
-    
-    const validatorPermId = await createRootPermissionForTest(client, account.address, schemaId, did);
-    // Refresh sequence after root permission creation
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    await client.getSequence(account.address);
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    await client.getSequence(account.address);
-    
-    // Wait for validator permission to become effective (permissions are created with effectiveFrom 10 seconds in future)
-    console.log(`  ⏳ Waiting for validator permission to become effective (permissions require effective_from to be in the future)...`);
-    const queryClient = await createQueryClient();
-    try {
-      // Wait for blockchain block time to advance (check every second)
-      const startTime = Date.now();
-      const maxWait = 20000; // 20 seconds max wait
-      
-      while (Date.now() - startTime < maxWait) {
-        const waitElapsed = Date.now() - startTime;
-        if (waitElapsed >= 15000) {
-          // Double-check block time has advanced sufficiently
-          const currentBlockTime = await getBlockTime(queryClient);
-          console.log(`  ✓ Waited ${Math.ceil(waitElapsed / 1000)} seconds, block time: ${currentBlockTime.toISOString()}`);
-          break;
-        }
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-      }
-      console.log(`  ✓ Validator permission should now be effective`);
-    } finally {
-      queryClient.disconnect();
-    }
-    
-    // Start a VP to get a permission in pending state
-    const startVPMsg = {
-      typeUrl: typeUrls.MsgStartPermissionVP,
-      value: MsgStartPermissionVP.fromPartial({
-        creator: account.address,
-        type: PermissionType.ISSUER,
-        validatorPermId: validatorPermId,
-        country: "US",
-        did: generateUniqueDID(),
-      }),
-    };
-    const startVPFee = await calculateFeeWithSimulation(
-      client,
-      account.address,
-      [startVPMsg],
-      "Starting VP for validation test"
-    );
-    // Use retry logic for consistency (matches frontend pattern)
-    const startVPResult = await signAndBroadcastWithRetry(
-      client,
-      account.address,
-      [startVPMsg],
-      startVPFee,
-      "Starting VP for validation test"
-    );
-    if (startVPResult.code !== 0) {
-      console.log("  ❌ Failed to start VP");
-      console.log(`  Error: ${startVPResult.rawLog}`);
-      process.exit(1);
-    }
-    
-    // Refresh sequence after starting VP
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    await client.getSequence(account.address);
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    await client.getSequence(account.address);
-    
-    // Extract permission ID from events
-    const events = startVPResult.events || [];
-    for (const event of events) {
-      if (event.type === "start_permission_vp" || event.type === "verana.perm.v1.EventStartPermissionVP") {
-        for (const attr of event.attributes) {
-          if (attr.key === "permission_id" || attr.key === "id") {
-            permId = parseInt(attr.value, 10);
-            if (!isNaN(permId)) {
-              console.log(`  ✓ Started VP, Permission ID: ${permId}`);
-              break;
-            }
-          }
-        }
-        if (permId) break;
-      }
-    }
-    
-    if (!permId) {
-      console.log("  ❌ Could not extract Permission ID from VP start events");
-      process.exit(1);
-    }
+    console.log("  ❌ Permission ID not found. Run Step 1 first:");
+    console.log("     npm run test:setup-set-perm-vp-validated-prereqs");
+    console.log("  Or provide PERM_ID via environment variable.");
+    process.exit(1);
   }
 
   if (!permId) {
@@ -172,15 +86,7 @@ async function main() {
 
   console.log();
 
-  // Refresh sequence before set validated transaction to ensure cache is up to date
-  await new Promise((resolve) => setTimeout(resolve, 2000));
-  await client.getSequence(account.address);
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  await client.getSequence(account.address);
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  await client.getSequence(account.address);
-
-  console.log("Step 5: Setting Permission VP To Validated transaction...");
+  console.log("Step 1: Setting Permission VP To Validated transaction...");
   const effectiveUntil = new Date(Date.now() + 360 * 24 * 60 * 60 * 1000); // 360 days from now
   const validationFees = 1000;
   const issuanceFees = 1000;
@@ -210,7 +116,7 @@ async function main() {
   console.log(`    - VP Summary Digest SRI: ${vpSummaryDigestSri}`);
   console.log();
 
-  console.log("Step 6: Signing and broadcasting transaction...");
+  console.log("Step 2: Signing and broadcasting transaction...");
   try {
     const fee = await calculateFeeWithSimulation(
       client,

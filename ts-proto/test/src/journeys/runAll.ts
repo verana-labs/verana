@@ -45,14 +45,25 @@ const tests: TestConfig[] = [
   { name: "Update Credential Schema", script: "test:update-cs" },
   { name: "Archive Credential Schema", script: "test:archive-cs" },
   // Permission (perm) module
+  // Create Root Permission - now split into 2 steps to avoid race conditions
+  { name: "Setup Create Root Permission Prerequisites", script: "test:setup-create-root-perm-prereqs" },
   { name: "Create Root Permission", script: "test:create-root-perm" },
+  // Create Permission - now split into 2 steps to avoid race conditions
+  { name: "Setup Create Permission Prerequisites", script: "test:setup-create-perm-prereqs" },
   { name: "Create Permission", script: "test:create-perm" },
   { name: "Extend Permission", script: "test:extend-perm" },
   { name: "Revoke Permission", script: "test:revoke-perm" },
   { name: "Start Permission VP", script: "test:start-perm-vp" },
   { name: "Renew Permission VP", script: "test:renew-perm-vp" },
+  // Set Permission VP To Validated - now split into 2 steps to avoid race conditions
+  { name: "Setup Set Permission VP To Validated Prerequisites", script: "test:setup-set-perm-vp-validated-prereqs" },
   { name: "Set Permission VP To Validated", script: "test:set-perm-vp-validated" },
+  // Cancel Permission VP - now split into 2 steps to avoid race conditions
+  { name: "Setup Cancel Permission VP Prerequisites", script: "test:setup-cancel-perm-vp-prereqs" },
   { name: "Cancel Permission VP Last Request", script: "test:cancel-perm-vp" },
+  // Permission Session - now split into 3 steps to avoid race conditions
+  { name: "Setup Permission Session Prerequisites", script: "test:setup-perm-session-prereqs" },
+  { name: "Setup Permission Session Permissions", script: "test:setup-perm-session-perms" },
   { name: "Create Or Update Permission Session", script: "test:create-perm-session" },
   // Trust Deposit (td) module - Setup funding proposal first (Journey 20)
   { name: "Setup TD Yield Funding Proposal (Journey 20)", script: "test:setup-td-proposal", isGoJourney: true },
@@ -71,7 +82,7 @@ async function runTest(test: TestConfig): Promise<TestResult> {
 
   return new Promise((resolve) => {
     let child;
-    
+
     if (test.isGoJourney) {
       // Run Go test harness journey (journey 20 for TD yield proposal setup)
       // Assumes the Go binary is available in the testharness directory

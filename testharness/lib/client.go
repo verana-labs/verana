@@ -25,7 +25,7 @@ func DefaultConfig() ClientConfig {
 		AddressPrefix: getEnvOrDefault("ADDRESS_PREFIX", "verana"),
 		HomeDir:       getEnvOrDefault("HOME_DIR", "~/.verana"),
 		NodeAddress:   getEnvOrDefault("NODE_RPC", ""),
-		Gas:           getEnvOrDefault("GAS", "300000"),
+		Gas:           getEnvOrDefault("GAS", "auto"),
 		Fees:          getEnvOrDefault("FEES", "750000uvna"),
 	}
 }
@@ -35,8 +35,17 @@ func NewClient(ctx context.Context, config ClientConfig) (cosmosclient.Client, e
 	clientOpts := []cosmosclient.Option{
 		cosmosclient.WithAddressPrefix(config.AddressPrefix),
 		cosmosclient.WithHome(config.HomeDir),
-		cosmosclient.WithGas(config.Gas),
 		cosmosclient.WithFees(config.Fees),
+	}
+
+	// Use gas auto estimation with adjustment for reliable gas handling
+	if config.Gas == "auto" {
+		clientOpts = append(clientOpts,
+			cosmosclient.WithGas("auto"),
+			cosmosclient.WithGasAdjustment(1.5),
+		)
+	} else {
+		clientOpts = append(clientOpts, cosmosclient.WithGas(config.Gas))
 	}
 
 	if config.NodeAddress != "" {

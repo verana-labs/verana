@@ -1,0 +1,58 @@
+#!/bin/sh
+set -eu
+
+if ! git rev-parse --git-dir >/dev/null 2>&1; then
+  echo "Not a git repo; skipping golangci-lint." >&2
+  exit 0
+fi
+
+staged_files=$(git diff --cached --name-only)
+if [ -n "$staged_files" ]; then
+  whitespace_only=""
+  for file in $staged_files; do
+    if git diff --cached --ignore-all-space --quiet -- "$file"; then
+      whitespace_only="$whitespace_only $file"
+    fi
+  done
+
+  if [ -n "$whitespace_only" ]; then
+    echo "Whitespace-only changes detected (blocked):" >&2
+    for file in $whitespace_only; do
+      echo "  $file" >&2
+    done
+    exit 1
+  fi
+fi
+
+staged_go_files=$(git diff --cached --name-only -- '*.go')
+if [ -z "$staged_go_files" ]; then
+  :
+fi
+
+if [ -n "$staged_go_files" ]; then
+  if ! command -v golangci-lint >/dev/null 2>&1; then
+    echo "golangci-lint not found. Install with:" >&2
+    echo "  go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.54.2" >&2
+    exit 1
+  fi
+  echo "--> golangci-lint (new issues since base)"
+  base_ref=$(git merge-base HEAD origin/main 2>/dev/null || true)
+  if [ -z "$base_ref" ]; then
+    base_ref=HEAD
+  fi
+  echo "    base: $base_ref"
+  golangci-lint run --new-from-rev="$base_ref" --timeout=10m
+fi
+
+staged_ts_files=$(git diff --cached --name-only -- '*.ts' '*.tsx')
+if [ -n "$staged_ts_files" ]; then
+  if command -v eslint >/dev/null 2>&1; then
+    echo "--> eslint (staged TS files)"
+    echo "$staged_ts_files" | xargs eslint
+  elif command -v prettier >/dev/null 2>&1; then
+    echo "--> prettier (check, staged TS files)"
+    echo "$staged_ts_files" | xargs prettier -c
+  else
+    :
+  fi
+fi
