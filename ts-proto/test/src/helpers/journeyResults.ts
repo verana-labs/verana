@@ -35,6 +35,10 @@ export interface JourneyResult {
   accountIndex?: string;
   accountAddress?: string;
   cooluserAddress?: string;
+  
+  // Cancel Permission VP prerequisites
+  validatorPermId?: string;
+  applicantDid?: string;
   // ... add more as needed
 }
 

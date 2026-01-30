@@ -55,7 +55,11 @@ const tests: TestConfig[] = [
   { name: "Revoke Permission", script: "test:revoke-perm" },
   { name: "Start Permission VP", script: "test:start-perm-vp" },
   { name: "Renew Permission VP", script: "test:renew-perm-vp" },
+  // Set Permission VP To Validated - now split into 2 steps to avoid race conditions
+  { name: "Setup Set Permission VP To Validated Prerequisites", script: "test:setup-set-perm-vp-validated-prereqs" },
   { name: "Set Permission VP To Validated", script: "test:set-perm-vp-validated" },
+  // Cancel Permission VP - now split into 2 steps to avoid race conditions
+  { name: "Setup Cancel Permission VP Prerequisites", script: "test:setup-cancel-perm-vp-prereqs" },
   { name: "Cancel Permission VP Last Request", script: "test:cancel-perm-vp" },
   // Permission Session - now split into 3 steps to avoid race conditions
   { name: "Setup Permission Session Prerequisites", script: "test:setup-perm-session-prereqs" },
