@@ -21,6 +21,12 @@ service Msg {
   // SlashTrustDeposit defines a governance operation to slash an account's trust deposit
   rpc SlashTrustDeposit(MsgSlashTrustDeposit) returns (MsgSlashTrustDepositResponse);
   rpc RepaySlashedTrustDeposit(MsgRepaySlashedTrustDeposit) returns (MsgRepaySlashedTrustDepositResponse);
+  
+  // Operator management (must be called via group proposal)
+  rpc AddOperator(MsgAddOperator) returns (MsgAddOperatorResponse);
+  rpc RemoveOperator(MsgRemoveOperator) returns (MsgRemoveOperatorResponse);
+  rpc UpdateOperatorAllowance(MsgUpdateOperatorAllowance) returns (MsgUpdateOperatorAllowanceResponse);
+  rpc ResetOperatorUsage(MsgResetOperatorUsage) returns (MsgResetOperatorUsageResponse);
 }
 
 // MsgUpdateParams is the Msg/UpdateParams request type.
@@ -95,3 +101,53 @@ message MsgRepaySlashedTrustDeposit {
 }
 
 message MsgRepaySlashedTrustDepositResponse {}
+
+// MsgAddOperator adds an operator to a group with specified allowance
+// Must be called by the group itself (via group proposal)
+message MsgAddOperator {
+  option (cosmos.msg.v1.signer) = "creator";
+
+  // creator must be the group address (executed via group proposal)
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // operator is the account being added as an operator
+  string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // allowance is the maximum spend per period (in uvna)
+  uint64 allowance = 3;
+  // reset_period_seconds is the duration after which usage resets (0 = never)
+  int64 reset_period_seconds = 4;
+}
+
+message MsgAddOperatorResponse {}
+
+// MsgRemoveOperator removes an operator from a group
+message MsgRemoveOperator {
+  option (cosmos.msg.v1.signer) = "creator";
+
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+}
+
+message MsgRemoveOperatorResponse {}
+
+// MsgUpdateOperatorAllowance updates an operator's allowance configuration
+message MsgUpdateOperatorAllowance {
+  option (cosmos.msg.v1.signer) = "creator";
+
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  uint64 allowance = 3;
+  int64 reset_period_seconds = 4;
+}
+
+message MsgUpdateOperatorAllowanceResponse {}
+
+// MsgResetOperatorUsage manually resets an operator's usage counter
+message MsgResetOperatorUsage {
+  option (cosmos.msg.v1.signer) = "creator";
+
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+}
+
+message MsgResetOperatorUsageResponse {}
+

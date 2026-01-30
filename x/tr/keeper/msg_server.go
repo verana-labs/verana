@@ -27,13 +27,34 @@ func (ms msgServer) CreateTrustRegistry(goCtx context.Context, msg *types.MsgCre
 	// [MOD-TR-MSG-1-3] Create New Trust Registry execution
 	now := ctx.BlockTime()
 
+	// Determine the controller (group or creator)
+	operator := msg.Creator
+	controller := msg.Creator
+
+	// If group is specified, validate operator authorization
+	if msg.Group != "" {
+		controller = msg.Group
+
+		// Check if operator is authorized for this group
+		if !ms.Keeper.trustDeposit.IsAuthorizedOperator(ctx, msg.Group, operator) {
+			return nil, fmt.Errorf("operator %s is not authorized for group %s", operator, msg.Group)
+		}
+	}
+
 	// Calculate trust deposit amount
 	params := ms.Keeper.GetParams(ctx)
 	trustDeposit := params.TrustRegistryTrustDeposit * params.TrustUnitPrice
 
-	// Increase trust deposit
-	if err := ms.Keeper.trustDeposit.AdjustTrustDeposit(ctx, msg.Creator, int64(trustDeposit)); err != nil {
+	// Increase trust deposit from controller (group or creator)
+	if err := ms.Keeper.trustDeposit.AdjustTrustDeposit(ctx, controller, int64(trustDeposit)); err != nil {
 		return nil, fmt.Errorf("failed to adjust trust deposit: %w", err)
+	}
+
+	// Track operator usage if group is specified
+	if msg.Group != "" {
+		if err := ms.Keeper.trustDeposit.IncrementOperatorUsage(ctx, msg.Group, operator, trustDeposit); err != nil {
+			return nil, fmt.Errorf("failed to increment operator usage: %w", err)
+		}
 	}
 
 	tr, gfv, gfd, err := ms.createTrustRegistryEntries(ctx, msg, now)
@@ -43,6 +64,8 @@ func (ms msgServer) CreateTrustRegistry(goCtx context.Context, msg *types.MsgCre
 
 	// Update trust deposit amount in the trust registry entry
 	tr.Deposit = int64(trustDeposit)
+	// Set controller to group if specified, otherwise creator
+	tr.Controller = controller
 
 	if err := ms.persistEntries(ctx, tr, gfv, gfd); err != nil {
 		return nil, err
@@ -58,6 +81,7 @@ func (ms msgServer) CreateTrustRegistry(goCtx context.Context, msg *types.MsgCre
 			sdk.NewAttribute(types.AttributeKeyLanguage, tr.Language),
 			sdk.NewAttribute(types.AttributeKeyDeposit, strconv.FormatUint(uint64(tr.Deposit), 10)),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
+			sdk.NewAttribute("operator", operator),
 		),
 		sdk.NewEvent(
 			types.EventTypeCreateGovernanceFrameworkVersion,
