@@ -1,19 +1,15 @@
 /**
  * Journey: Create Root Permission
  *
- * This script demonstrates how to create a Root Permission using the
- * TypeScript client and the generated protobuf types.
+ * Step 2 of 2 for Create Root Permission.
+ * Loads prerequisites from Step 1, creates the Root Permission transaction.
  *
  * Usage:
- *   # Reuse existing TR/CS from journey results (recommended)
+ *   # Using prerequisites from Step 1 (recommended)
  *   npm run test:create-root-perm
- *   
- *   # Or provide specific Schema ID and DID
+ *
+ *   # Or provide specific values
  *   SCHEMA_ID=1 DID="did:verana:example" npm run test:create-root-perm
- *   
- *   # First create TR and CS if they don't exist:
- *   npm run test:create-tr
- *   npm run test:create-cs
  *
  * Or with environment variables:
  *   export MNEMONIC="your mnemonic here"
@@ -24,20 +20,16 @@
  */
 
 import {
-  createWallet,
   createAccountFromMnemonic,
   createSigningClient,
   getAccountInfo,
   calculateFeeWithSimulation,
   signAndBroadcastWithRetry,
-  fundAccount,
   config,
-  waitForSequencePropagation,
 } from "../helpers/client";
 import { typeUrls } from "../helpers/registry";
 import { MsgCreateRootPermission } from "../../../src/codec/verana/perm/v1/tx";
-import { getActiveTRAndSchema, saveRootPermissionId } from "../helpers/journeyResults";
-import { createSchemaForTest } from "../helpers/permissionHelpers";
+import { getActiveTRAndSchema, saveRootPermissionId, loadJourneyResult } from "../helpers/journeyResults";
 
 // Master mnemonic - same for all accounts
 const MASTER_MNEMONIC =
@@ -50,137 +42,91 @@ const ACCOUNT_INDEX = 13;
 
 async function main() {
   console.log("=".repeat(60));
-  console.log("Journey: Create Root Permission (TypeScript Client)");
+  console.log("Journey: Create Root Permission (Step 2/2)");
   console.log("=".repeat(60));
   console.log();
 
-  // Step 1: Setup cooluser account (for funding)
-  console.log("Step 1: Setting up cooluser account (for funding)...");
-  const cooluserWallet = await createWallet(MASTER_MNEMONIC);
-  const cooluserAccount = await getAccountInfo(cooluserWallet);
-  const cooluserClient = await createSigningClient(cooluserWallet);
-  console.log(`  ✓ Cooluser address: ${cooluserAccount.address}`);
-  console.log();
+  // Load prerequisites from Step 1
+  console.log("Loading prerequisites from Step 1...");
+  const prereqs = loadJourneyResult("create-root-perm-prereqs");
 
-  // Step 2: Create account_13 from mnemonic with derivation path 13
-  console.log(`Step 2: Creating account_${ACCOUNT_INDEX} from mnemonic (derivation path ${ACCOUNT_INDEX})...`);
+  // Create account wallet (needed for both prerequisites and connection)
   const account13Wallet = await createAccountFromMnemonic(MASTER_MNEMONIC, ACCOUNT_INDEX);
   const account13 = await getAccountInfo(account13Wallet);
-  console.log(`  ✓ Account_${ACCOUNT_INDEX} address: ${account13.address}`);
-  console.log();
+  const account13Address = account13.address;
 
-  // Step 3: Fund account_13 from cooluser
-  console.log("Step 3: Funding account_13 from cooluser...");
-  const fundingAmount = "1000000000uvna"; // 1 VNA
-  try {
-    const fundResult = await fundAccount(
-      MASTER_MNEMONIC,
-      cooluserAccount.address,
-      account13.address,
-      fundingAmount
-    );
-    if (fundResult.code === 0) {
-      console.log(`  ✓ Funded account_13 with ${fundingAmount}`);
-      console.log(`  Transaction Hash: ${fundResult.transactionHash}`);
-    } else {
-      console.log(`  ❌ Funding failed: ${fundResult.rawLog}`);
-      process.exit(1);
+  let schemaId: number | undefined;
+  let did: string | undefined;
+
+  if (prereqs?.accountAddress) {
+    // Use address from prerequisites (should match, but use loaded one for consistency)
+    schemaId = prereqs.schemaId ? parseInt(prereqs.schemaId, 10) : undefined;
+    did = prereqs.did || undefined;
+    console.log(`  ✓ Loaded prerequisites:`);
+    console.log(`    - Account address: ${account13Address}`);
+    if (schemaId) {
+      console.log(`    - Schema ID: ${schemaId}`);
     }
-  } catch (error: any) {
-    console.log(`  ❌ Funding failed: ${error.message}`);
-    process.exit(1);
+    if (did) {
+      console.log(`    - DID: ${did}`);
+    }
+  } else {
+    console.log("  ⚠️  Prerequisites not found. Run Step 1 first:");
+    console.log("     npm run test:setup-create-root-perm-prereqs");
+    console.log("  Or provide SCHEMA_ID and DID via environment variables.");
+
+    // Fallback to environment variables or active TR/CS
+    if (process.env.SCHEMA_ID && process.env.DID) {
+      schemaId = parseInt(process.env.SCHEMA_ID, 10);
+      did = process.env.DID;
+      if (isNaN(schemaId)) {
+        console.log("  ❌ Invalid SCHEMA_ID provided");
+        process.exit(1);
+      }
+      console.log(`  Using provided Schema ID: ${schemaId} and DID: ${did}`);
+    } else {
+      // Try to load from active TR/CS
+      const trAndSchema = getActiveTRAndSchema();
+      if (trAndSchema) {
+        schemaId = trAndSchema.schemaId;
+        did = trAndSchema.did;
+        console.log(`  Using active TR/CS from journey results:`);
+        console.log(`    - Schema ID: ${schemaId}`);
+        console.log(`    - DID: ${did}`);
+      } else {
+        console.log("  ❌ Schema ID and DID are required. Run Step 1 first or provide via environment variables.");
+        process.exit(1);
+      }
+    }
+
+    console.log(`  Account address: ${account13Address}`);
   }
+
   console.log();
 
-  // Step 4: Wait for balance to be reflected (10 seconds)
-  console.log("Step 4: Waiting 10 seconds for balance to be reflected...");
-  await new Promise((resolve) => setTimeout(resolve, 10000));
-  console.log("  ✓ Wait complete");
-  console.log();
-
-  // Step 5: Connect account_13 to blockchain
-  console.log("Step 5: Connecting account_13 to Verana blockchain...");
+  // Step 1: Connect account_13 to blockchain
+  console.log("Step 1: Connecting account_13 to Verana blockchain...");
   console.log(`  RPC Endpoint: ${config.rpcEndpoint}`);
   const client = await createSigningClient(account13Wallet);
   console.log("  ✓ Connected successfully");
-  
+
   // Verify balance
-  const balance = await client.getBalance(account13.address, config.denom);
+  const balance = await client.getBalance(account13Address, config.denom);
   console.log(`  Balance: ${balance.amount} ${balance.denom}`);
   if (BigInt(balance.amount) < BigInt(1000000)) {
-    console.log("  ⚠️  Warning: Low balance. Funding may not have completed.");
+    console.log("  ⚠️  Warning: Low balance. Run Step 1 to fund the account.");
     process.exit(1);
   }
   console.log();
 
-  // Step 6: Get Schema ID and DID from journey results or create new ones
-  let schemaId: number | undefined;
-  let did: string;
-  
-  if (process.env.SCHEMA_ID && process.env.DID) {
-    // Use provided values
-    schemaId = parseInt(process.env.SCHEMA_ID, 10);
-    did = process.env.DID;
-    if (isNaN(schemaId)) {
-      console.log("  ❌ Invalid SCHEMA_ID provided");
-      process.exit(1);
-    }
-    console.log(`Step 6: Using provided Schema ID: ${schemaId} and DID: ${did}`);
-  } else {
-    // Try to load active TR/CS from journey results (reuse existing TR/CS from earlier journeys)
-    console.log("Step 6: Loading active Trust Registry and Schema from journey results...");
-    const trAndSchema = getActiveTRAndSchema();
-    
-    if (trAndSchema) {
-      // Try to verify the schema exists on-chain by querying LCD endpoint
-      try {
-        const lcdEndpoint = process.env.VERANA_LCD_ENDPOINT || "http://localhost:1317";
-        const response = await fetch(`${lcdEndpoint}/verana/cs/v1/credential_schema/${trAndSchema.schemaId}`);
-        
-        if (response.ok) {
-          // Schema exists, reuse it
-          schemaId = trAndSchema.schemaId;
-          did = trAndSchema.did;
-          console.log(`  ✓ Reusing TR/CS from journey results:`);
-          console.log(`    - Trust Registry ID: ${trAndSchema.trustRegistryId}`);
-          console.log(`    - Schema ID: ${schemaId}`);
-          console.log(`    - DID: ${did}`);
-        } else {
-          throw new Error("Schema not found");
-        }
-      } catch (error) {
-        // Schema doesn't exist on-chain, create a new one with account_13
-        // This ensures account_13 is the TR controller and can create root permission
-        console.log("  ⚠️  Schema from journey results doesn't exist on-chain, creating new Trust Registry and Schema with account_13...");
-        const newSchema = await createSchemaForTest(client, account13.address);
-        schemaId = newSchema.schemaId;
-        did = newSchema.did;
-        // Wait for sequence to fully propagate after creating TR and CS (poll with 60s timeout)
-        await waitForSequencePropagation(client, account13.address);
-        console.log(`  ✓ Created new Schema ID: ${schemaId}, DID: ${did}`);
-      }
-    } else {
-      // No journey results found - create new TR/CS using account_13
-      // This ensures account_13 is the TR controller and can create root permission
-      console.log("  No journey results found, creating new Trust Registry and Schema with account_13...");
-      const newSchema = await createSchemaForTest(client, account13.address);
-      schemaId = newSchema.schemaId;
-      did = newSchema.did;
-      // Wait for sequence to fully propagate after creating TR and CS (poll with 60s timeout)
-      await waitForSequencePropagation(client, account13.address);
-      console.log(`  ✓ Created new Schema ID: ${schemaId}, DID: ${did}`);
-    }
-  }
-
+  // Step 2: Validate prerequisites
   if (!schemaId || !did) {
     console.log("  ❌ Schema ID and DID are required");
     process.exit(1);
   }
 
-  console.log();
-
-  // Step 7: Create Root Permission message
-  console.log("Step 7: Creating Root Permission transaction...");
+  // Step 3: Create Root Permission message
+  console.log("Step 2: Creating Root Permission transaction...");
   // Set effectiveFrom to 10 seconds in the future as required by blockchain (matches test harness)
   const effectiveFrom = new Date(Date.now() + 10000);
   const effectiveUntil = new Date(effectiveFrom.getTime() + 360 * 24 * 60 * 60 * 1000); // 360 days from effectiveFrom
@@ -215,8 +161,8 @@ async function main() {
   console.log(`    - Issuance Fees: ${issuanceFees}`);
   console.log();
 
-  // Step 8: Sign and broadcast
-  console.log("Step 8: Signing and broadcasting transaction...");
+  // Step 4: Sign and broadcast
+  console.log("Step 3: Signing and broadcasting transaction...");
   try {
     const fee = await calculateFeeWithSimulation(
       client,

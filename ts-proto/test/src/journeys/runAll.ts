@@ -45,7 +45,11 @@ const tests: TestConfig[] = [
   { name: "Update Credential Schema", script: "test:update-cs" },
   { name: "Archive Credential Schema", script: "test:archive-cs" },
   // Permission (perm) module
+  // Create Root Permission - now split into 2 steps to avoid race conditions
+  { name: "Setup Create Root Permission Prerequisites", script: "test:setup-create-root-perm-prereqs" },
   { name: "Create Root Permission", script: "test:create-root-perm" },
+  // Create Permission - now split into 2 steps to avoid race conditions
+  { name: "Setup Create Permission Prerequisites", script: "test:setup-create-perm-prereqs" },
   { name: "Create Permission", script: "test:create-perm" },
   { name: "Extend Permission", script: "test:extend-perm" },
   { name: "Revoke Permission", script: "test:revoke-perm" },

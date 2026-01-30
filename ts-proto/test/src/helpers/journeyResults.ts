@@ -30,6 +30,11 @@ export interface JourneyResult {
   issuerGrantorPermId?: string;
   issuerDid?: string;
   verifierDid?: string;
+  
+  // Create Permission prerequisites
+  accountIndex?: string;
+  accountAddress?: string;
+  cooluserAddress?: string;
   // ... add more as needed
 }
 
