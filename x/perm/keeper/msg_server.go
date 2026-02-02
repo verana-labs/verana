@@ -738,10 +738,8 @@ func (ms msgServer) validateRevokePermissionBasicChecks(ctx sdk.Context, msg *ty
 	}
 	applicantPerm = perm
 
-	// applicant_perm MUST be a valid permission
-	if err := IsValidPermission(applicantPerm, applicantPerm.Country, now); err != nil {
-		return applicantPerm, fmt.Errorf("applicant permission is not valid: %w", err)
-	}
+	// Note: Per spec, a permission that is not yet active CAN be revoked.
+	// No IsValidPermission check is required here.
 
 	return applicantPerm, nil
 }
