@@ -487,8 +487,11 @@ func (ms msgServer) validateCreateRootPermissionBasicChecks(ctx sdk.Context, msg
 		return fmt.Errorf("credential schema not found: %w", err)
 	}
 
-	// effective_from must be in the future
-	if msg.EffectiveFrom != nil && !msg.EffectiveFrom.After(now) {
+	// effective_from is mandatory and must be in the future
+	if msg.EffectiveFrom == nil {
+		return fmt.Errorf("effective_from is required")
+	}
+	if !msg.EffectiveFrom.After(now) {
 		return fmt.Errorf("effective_from must be in the future")
 	}
 
