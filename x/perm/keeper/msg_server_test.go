@@ -2882,3 +2882,447 @@ func TestCreatePermission(t *testing.T) {
 		})
 	}
 }
+
+// =============================================================================
+// ISSUE #191: CreateRootPermission - effective_from MUST be set
+// =============================================================================
+// This test validates that CreateRootPermission requires effective_from to be set
+// and it must be in the future. Per spec [MOD-PERM-MSG-7-2-1]:
+// - effective_from is mandatory
+// - effective_from must be in the future
+
+func TestCreateRootPermission_EffectiveFromRequired(t *testing.T) {
+	k, ms, csKeeper, trkKeeper, ctx := setupMsgServer(t)
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	// Set specific block time for consistent testing
+	blockTime := time.Date(2023, 1, 15, 0, 0, 0, 0, time.UTC)
+	sdkCtx = sdkCtx.WithBlockTime(blockTime)
+	ctx = sdk.WrapSDKContext(sdkCtx)
+
+	validDid := "did:example:123456789abcdefghi"
+	creator := sdk.AccAddress([]byte("test_creator")).String()
+
+	// Create trust registry where creator is the controller
+	trID := trkKeeper.CreateMockTrustRegistry(creator, validDid)
+
+	// Create credential schema linked to the trust registry
+	csKeeper.UpdateMockCredentialSchema(1, trID,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
+
+	now := sdkCtx.BlockTime()
+	futureTime := now.Add(1 * time.Hour)
+	pastTime := now.Add(-1 * time.Hour)
+	farFutureTime := now.Add(24 * time.Hour)
+
+	testCases := []struct {
+		name      string
+		msg       *types.MsgCreateRootPermission
+		expectErr bool
+		errMsg    string
+	}{
+		{
+			// Issue #191: Test that nil effective_from is rejected
+			name: "Issue #191: Reject nil effective_from - mandatory field",
+			msg: &types.MsgCreateRootPermission{
+				Creator:          creator,
+				SchemaId:         1,
+				Did:              validDid,
+				EffectiveFrom:    nil, // NIL - should be rejected
+				EffectiveUntil:   nil,
+				ValidationFees:   0,
+				IssuanceFees:     0,
+				VerificationFees: 0,
+			},
+			expectErr: true,
+			errMsg:    "effective_from is required",
+		},
+		{
+			// Issue #191: Test that past effective_from is rejected
+			name: "Issue #191: Reject past effective_from - must be in the future",
+			msg: &types.MsgCreateRootPermission{
+				Creator:          creator,
+				SchemaId:         1,
+				Did:              validDid,
+				EffectiveFrom:    &pastTime, // PAST - should be rejected
+				EffectiveUntil:   nil,
+				ValidationFees:   0,
+				IssuanceFees:     0,
+				VerificationFees: 0,
+			},
+			expectErr: true,
+			errMsg:    "effective_from must be in the future",
+		},
+		{
+			// Issue #191: Test that current time (now) is rejected
+			name: "Issue #191: Reject effective_from equal to now - must be strictly in the future",
+			msg: &types.MsgCreateRootPermission{
+				Creator:          creator,
+				SchemaId:         1,
+				Did:              validDid,
+				EffectiveFrom:    &now, // EQUAL TO NOW - should be rejected (not strictly in future)
+				EffectiveUntil:   nil,
+				ValidationFees:   0,
+				IssuanceFees:     0,
+				VerificationFees: 0,
+			},
+			expectErr: true,
+			errMsg:    "effective_from must be in the future",
+		},
+		{
+			// Issue #191: Test that future effective_from is accepted
+			name: "Issue #191: Accept future effective_from - valid case",
+			msg: &types.MsgCreateRootPermission{
+				Creator:          creator,
+				SchemaId:         1,
+				Did:              validDid,
+				EffectiveFrom:    &futureTime, // FUTURE - should be accepted
+				EffectiveUntil:   &farFutureTime,
+				ValidationFees:   0,
+				IssuanceFees:     0,
+				VerificationFees: 0,
+			},
+			expectErr: false,
+			errMsg:    "",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			resp, err := ms.CreateRootPermission(ctx, tc.msg)
+
+			if tc.expectErr {
+				require.Error(t, err)
+				require.Contains(t, err.Error(), tc.errMsg)
+				require.Nil(t, resp)
+			} else {
+				require.NoError(t, err)
+				require.NotNil(t, resp)
+
+				// Verify the permission was created with correct effective_from
+				perm, err := k.GetPermissionByID(sdkCtx, resp.Id)
+				require.NoError(t, err)
+				require.NotNil(t, perm.EffectiveFrom)
+				require.Equal(t, tc.msg.EffectiveFrom.Unix(), perm.EffectiveFrom.Unix())
+			}
+		})
+	}
+}
+
+// =============================================================================
+// ISSUE #193: StartPermissionVP - Validator permission must be ACTIVE
+// =============================================================================
+// This test validates that StartPermissionVP requires the validator permission
+// to be ACTIVE (not INACTIVE, REVOKED, EXPIRED, etc). Per spec:
+// - validator_perm must be a valid permission
+// - If effective_from is null or in the future, perm is INACTIVE/FUTURE
+// - If revoked, slashed, or expired, perm is invalid
+
+func TestStartPermissionVP_ValidatorMustBeActive(t *testing.T) {
+	k, ms, csKeeper, trkKeeper, ctx := setupMsgServer(t)
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	// Set specific block time for consistent testing
+	blockTime := time.Date(2023, 1, 15, 0, 0, 0, 0, time.UTC)
+	sdkCtx = sdkCtx.WithBlockTime(blockTime)
+	ctx = sdk.WrapSDKContext(sdkCtx)
+
+	creator := sdk.AccAddress([]byte("test_creator")).String()
+	validDid := "did:example:123456789abcdefghi"
+
+	// Create trust registry
+	trID := trkKeeper.CreateMockTrustRegistry(creator, validDid)
+
+	// Create mock credential schema
+	csKeeper.UpdateMockCredentialSchema(1, trID,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
+
+	now := sdkCtx.BlockTime()
+	pastTime := now.Add(-1 * time.Hour)     // In the past - for ACTIVE permissions
+	futureTime := now.Add(1 * time.Hour)    // In the future - for FUTURE/INACTIVE permissions
+	expiredTime := now.Add(-24 * time.Hour) // Far in the past - for EXPIRED permissions
+
+	// Create an ACTIVE validator permission (valid case for comparison)
+	activeValidatorPerm := types.Permission{
+		SchemaId:      1,
+		Type:          types.PermissionType_ISSUER_GRANTOR,
+		Grantee:       creator,
+		Created:       &now,
+		CreatedBy:     creator,
+		Extended:      &now,
+		ExtendedBy:    creator,
+		Modified:      &now,
+		Country:       "US",
+		VpState:       types.ValidationState_VALIDATED,
+		EffectiveFrom: &pastTime, // In the past = ACTIVE
+	}
+	activeValidatorPermID, err := k.CreatePermission(sdkCtx, activeValidatorPerm)
+	require.NoError(t, err)
+
+	// Issue #193: Create a validator permission with NO effective_from (INACTIVE)
+	inactiveValidatorPerm := types.Permission{
+		SchemaId:      1,
+		Type:          types.PermissionType_ISSUER_GRANTOR,
+		Grantee:       creator,
+		Created:       &now,
+		CreatedBy:     creator,
+		Extended:      &now,
+		ExtendedBy:    creator,
+		Modified:      &now,
+		Country:       "US",
+		VpState:       types.ValidationState_VALIDATED,
+		EffectiveFrom: nil, // NULL effective_from = INACTIVE
+	}
+	inactiveValidatorPermID, err := k.CreatePermission(sdkCtx, inactiveValidatorPerm)
+	require.NoError(t, err)
+
+	// Issue #193: Create a validator permission with FUTURE effective_from
+	futureValidatorPerm := types.Permission{
+		SchemaId:      1,
+		Type:          types.PermissionType_ISSUER_GRANTOR,
+		Grantee:       creator,
+		Created:       &now,
+		CreatedBy:     creator,
+		Extended:      &now,
+		ExtendedBy:    creator,
+		Modified:      &now,
+		Country:       "US",
+		VpState:       types.ValidationState_VALIDATED,
+		EffectiveFrom: &futureTime, // Future effective_from = not yet ACTIVE
+	}
+	futureValidatorPermID, err := k.CreatePermission(sdkCtx, futureValidatorPerm)
+	require.NoError(t, err)
+
+	// Issue #193: Create an EXPIRED validator permission
+	expiredValidatorPerm := types.Permission{
+		SchemaId:       1,
+		Type:           types.PermissionType_ISSUER_GRANTOR,
+		Grantee:        creator,
+		Created:        &now,
+		CreatedBy:      creator,
+		Extended:       &now,
+		ExtendedBy:     creator,
+		Modified:       &now,
+		Country:        "US",
+		VpState:        types.ValidationState_VALIDATED,
+		EffectiveFrom:  &expiredTime,
+		EffectiveUntil: &pastTime, // Already expired
+	}
+	expiredValidatorPermID, err := k.CreatePermission(sdkCtx, expiredValidatorPerm)
+	require.NoError(t, err)
+
+	testCases := []struct {
+		name      string
+		msg       *types.MsgStartPermissionVP
+		expectErr bool
+		errMsg    string
+	}{
+		{
+			// Baseline: Active validator should work
+			name: "Issue #193: Accept ACTIVE validator - valid case",
+			msg: &types.MsgStartPermissionVP{
+				Creator:         creator,
+				Type:            types.PermissionType_ISSUER,
+				ValidatorPermId: activeValidatorPermID,
+				Country:         "US",
+				Did:             validDid,
+			},
+			expectErr: false,
+			errMsg:    "",
+		},
+		{
+			// Issue #193: Validator with null effective_from should be rejected
+			name: "Issue #193: Reject INACTIVE validator - effective_from is null",
+			msg: &types.MsgStartPermissionVP{
+				Creator:         creator,
+				Type:            types.PermissionType_ISSUER,
+				ValidatorPermId: inactiveValidatorPermID,
+				Country:         "US",
+				Did:             validDid,
+			},
+			expectErr: true,
+			errMsg:    "validator perm is not valid",
+		},
+		{
+			// Issue #193: Validator with future effective_from should be rejected
+			name: "Issue #193: Reject FUTURE validator - effective_from is in the future",
+			msg: &types.MsgStartPermissionVP{
+				Creator:         creator,
+				Type:            types.PermissionType_ISSUER,
+				ValidatorPermId: futureValidatorPermID,
+				Country:         "US",
+				Did:             validDid,
+			},
+			expectErr: true,
+			errMsg:    "validator perm is not valid",
+		},
+		{
+			// Issue #193: Expired validator should be rejected
+			name: "Issue #193: Reject EXPIRED validator - effective_until has passed",
+			msg: &types.MsgStartPermissionVP{
+				Creator:         creator,
+				Type:            types.PermissionType_ISSUER,
+				ValidatorPermId: expiredValidatorPermID,
+				Country:         "US",
+				Did:             validDid,
+			},
+			expectErr: true,
+			errMsg:    "validator perm is not valid",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			resp, err := ms.StartPermissionVP(ctx, tc.msg)
+
+			if tc.expectErr {
+				require.Error(t, err)
+				require.Contains(t, err.Error(), tc.errMsg)
+				require.Nil(t, resp)
+			} else {
+				require.NoError(t, err)
+				require.NotNil(t, resp)
+			}
+		})
+	}
+}
+
+// =============================================================================
+// ISSUE #196: RevokePermission - Allow revoking not-yet-active permissions
+// =============================================================================
+// This test validates that RevokePermission allows revoking permissions that
+// are not yet active (e.g., effective_from is in the future or null).
+// Per spec, no IsValidPermission check is required for revocation.
+
+func TestRevokePermission_AllowNotYetActivePermissions(t *testing.T) {
+	k, ms, csKeeper, _, ctx := setupMsgServer(t)
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	// Set specific block time for consistent testing
+	blockTime := time.Date(2023, 1, 15, 0, 0, 0, 0, time.UTC)
+	sdkCtx = sdkCtx.WithBlockTime(blockTime)
+	ctx = sdk.WrapSDKContext(sdkCtx)
+
+	creator := sdk.AccAddress([]byte("test_creator")).String()
+
+	// Create mock credential schema
+	csKeeper.CreateMockCredentialSchema(1,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
+
+	now := sdkCtx.BlockTime()
+	pastTime := now.Add(-1 * time.Hour)
+	futureTime := now.Add(1 * time.Hour)
+
+	// Create an ACTIVE permission (for comparison)
+	activePerm := types.Permission{
+		SchemaId:      1,
+		Type:          types.PermissionType_ISSUER_GRANTOR,
+		Grantee:       creator,
+		Created:       &now,
+		CreatedBy:     creator,
+		Extended:      &now,
+		ExtendedBy:    creator,
+		Modified:      &now,
+		Country:       "US",
+		VpState:       types.ValidationState_VALIDATED,
+		EffectiveFrom: &pastTime, // ACTIVE
+	}
+	activePermID, err := k.CreatePermission(sdkCtx, activePerm)
+	require.NoError(t, err)
+
+	// Issue #196: Create a permission with FUTURE effective_from (not yet active)
+	futurePerm := types.Permission{
+		SchemaId:      1,
+		Type:          types.PermissionType_ISSUER_GRANTOR,
+		Grantee:       creator,
+		Created:       &now,
+		CreatedBy:     creator,
+		Extended:      &now,
+		ExtendedBy:    creator,
+		Modified:      &now,
+		Country:       "US",
+		VpState:       types.ValidationState_VALIDATED,
+		EffectiveFrom: &futureTime, // FUTURE - not yet active
+	}
+	futurePermID, err := k.CreatePermission(sdkCtx, futurePerm)
+	require.NoError(t, err)
+
+	// Issue #196: Create a permission with NULL effective_from (inactive)
+	inactivePerm := types.Permission{
+		SchemaId:      1,
+		Type:          types.PermissionType_ISSUER_GRANTOR,
+		Grantee:       creator,
+		Created:       &now,
+		CreatedBy:     creator,
+		Extended:      &now,
+		ExtendedBy:    creator,
+		Modified:      &now,
+		Country:       "US",
+		VpState:       types.ValidationState_VALIDATED,
+		EffectiveFrom: nil, // INACTIVE - no effective_from
+	}
+	inactivePermID, err := k.CreatePermission(sdkCtx, inactivePerm)
+	require.NoError(t, err)
+
+	testCases := []struct {
+		name      string
+		msg       *types.MsgRevokePermission
+		expectErr bool
+		errMsg    string
+	}{
+		{
+			// Baseline: Revoking an ACTIVE permission should work
+			name: "Issue #196: Revoke ACTIVE permission - valid case",
+			msg: &types.MsgRevokePermission{
+				Creator: creator, // Grantee can revoke their own permission
+				Id:      activePermID,
+			},
+			expectErr: false,
+			errMsg:    "",
+		},
+		{
+			// Issue #196: Revoking a FUTURE permission (not yet active) should work
+			name: "Issue #196: Revoke FUTURE permission - not yet active should be allowed",
+			msg: &types.MsgRevokePermission{
+				Creator: creator,
+				Id:      futurePermID,
+			},
+			expectErr: false, // Should succeed - this is the fix for Issue #196
+			errMsg:    "",
+		},
+		{
+			// Issue #196: Revoking an INACTIVE permission (null effective_from) should work
+			name: "Issue #196: Revoke INACTIVE permission - null effective_from should be allowed",
+			msg: &types.MsgRevokePermission{
+				Creator: creator,
+				Id:      inactivePermID,
+			},
+			expectErr: false, // Should succeed - this is the fix for Issue #196
+			errMsg:    "",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			resp, err := ms.RevokePermission(ctx, tc.msg)
+
+			if tc.expectErr {
+				require.Error(t, err)
+				require.Contains(t, err.Error(), tc.errMsg)
+				require.Nil(t, resp)
+			} else {
+				require.NoError(t, err)
+				require.NotNil(t, resp)
+
+				// Verify the permission was revoked
+				perm, err := k.GetPermissionByID(sdkCtx, tc.msg.Id)
+				require.NoError(t, err)
+				require.NotNil(t, perm.Revoked, "Permission should be revoked")
+				require.Equal(t, tc.msg.Creator, perm.RevokedBy, "RevokedBy should match creator")
+			}
+		})
+	}
+}
