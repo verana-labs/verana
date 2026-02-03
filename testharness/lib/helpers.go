@@ -1902,3 +1902,252 @@ func GetLatestBlockHeight(client cosmosclient.Client, ctx context.Context) (int6
 
 	return height, nil
 }
+
+// =============================================================================
+// ERROR SCENARIO TESTING HELPERS
+// =============================================================================
+// These functions are designed for testing error scenarios.
+// Unlike the standard helpers, they return errors instead of calling log.Fatal.
+
+// ParseSchemaID parses a schema ID string to uint64
+func ParseSchemaID(schemaIDStr string) uint64 {
+	schemaID, err := strconv.ParseUint(schemaIDStr, 10, 64)
+	if err != nil {
+		panic(fmt.Sprintf("failed to parse schema ID: %v", err))
+	}
+	return schemaID
+}
+
+// CreateRootPermissionWithError creates a root permission and returns any error
+// instead of calling log.Fatal. This is useful for testing error scenarios.
+func CreateRootPermissionWithError(client cosmosclient.Client, ctx context.Context,
+	creator cosmosaccount.Account, msg permtypes.MsgCreateRootPermission) error {
+
+	creatorAddr, err := creator.Address(addressPrefix)
+	if err != nil {
+		return fmt.Errorf("failed to get creator address: %v", err)
+	}
+
+	// Create the message
+	fullMsg := &permtypes.MsgCreateRootPermission{
+		Creator:          creatorAddr,
+		SchemaId:         msg.SchemaId,
+		Did:              msg.Did,
+		EffectiveFrom:    msg.EffectiveFrom,
+		EffectiveUntil:   msg.EffectiveUntil,
+		ValidationFees:   msg.ValidationFees,
+		VerificationFees: msg.VerificationFees,
+		IssuanceFees:     msg.IssuanceFees,
+		Country:          msg.Country,
+	}
+
+	txResp, err := client.BroadcastTx(ctx, creator, fullMsg)
+	if err != nil {
+		return fmt.Errorf("broadcast error: %v", err)
+	}
+
+	// Check transaction code - non-zero means error
+	if txResp.TxResponse.Code != 0 {
+		return fmt.Errorf("transaction failed (code %d): %s",
+			txResp.TxResponse.Code, txResp.TxResponse.RawLog)
+	}
+
+	return nil
+}
+
+// CreateRootPermissionAndGetID creates a root permission and returns its ID
+// Returns the permission ID or an error
+func CreateRootPermissionAndGetID(client cosmosclient.Client, ctx context.Context,
+	creator cosmosaccount.Account, msg permtypes.MsgCreateRootPermission) (uint64, error) {
+
+	creatorAddr, err := creator.Address(addressPrefix)
+	if err != nil {
+		return 0, fmt.Errorf("failed to get creator address: %v", err)
+	}
+
+	// Create the message
+	fullMsg := &permtypes.MsgCreateRootPermission{
+		Creator:          creatorAddr,
+		SchemaId:         msg.SchemaId,
+		Did:              msg.Did,
+		EffectiveFrom:    msg.EffectiveFrom,
+		EffectiveUntil:   msg.EffectiveUntil,
+		ValidationFees:   msg.ValidationFees,
+		VerificationFees: msg.VerificationFees,
+		IssuanceFees:     msg.IssuanceFees,
+		Country:          msg.Country,
+	}
+
+	txResp, err := client.BroadcastTx(ctx, creator, fullMsg)
+	if err != nil {
+		return 0, fmt.Errorf("broadcast error: %v", err)
+	}
+
+	// Check transaction code
+	if txResp.TxResponse.Code != 0 {
+		return 0, fmt.Errorf("transaction failed (code %d): %s",
+			txResp.TxResponse.Code, txResp.TxResponse.RawLog)
+	}
+
+	// Extract permission ID from events
+	var txResponse sdk.TxResponse
+	txResponseBytes, err := client.Context().Codec.MarshalJSON(txResp.TxResponse)
+	if err != nil {
+		return 0, fmt.Errorf("failed to marshal tx response: %v", err)
+	}
+	err = client.Context().Codec.UnmarshalJSON(txResponseBytes, &txResponse)
+	if err != nil {
+		return 0, fmt.Errorf("failed to unmarshal tx response: %v", err)
+	}
+
+	for _, event := range txResponse.Events {
+		if event.Type == "create_root_permission" {
+			for _, attribute := range event.Attributes {
+				if attribute.Key == "root_permission_id" {
+					permID, parseErr := strconv.ParseUint(attribute.Value, 10, 64)
+					if parseErr != nil {
+						return 0, fmt.Errorf("failed to parse permission ID: %v", parseErr)
+					}
+					return permID, nil
+				}
+			}
+		}
+	}
+
+	return 0, fmt.Errorf("permission ID not found in events")
+}
+
+// StartPermissionVPWithError starts a permission VP and returns any error
+// instead of calling log.Fatal. This is useful for testing error scenarios.
+func StartPermissionVPWithError(client cosmosclient.Client, ctx context.Context,
+	creator cosmosaccount.Account, msg permtypes.MsgStartPermissionVP) error {
+
+	creatorAddr, err := creator.Address(addressPrefix)
+	if err != nil {
+		return fmt.Errorf("failed to get creator address: %v", err)
+	}
+
+	// Create the message
+	fullMsg := &permtypes.MsgStartPermissionVP{
+		Creator:          creatorAddr,
+		Type:             msg.Type,
+		Did:              msg.Did,
+		ValidatorPermId:  msg.ValidatorPermId,
+		Country:          msg.Country,
+		ValidationFees:   msg.ValidationFees,
+		IssuanceFees:     msg.IssuanceFees,
+		VerificationFees: msg.VerificationFees,
+	}
+
+	txResp, err := client.BroadcastTx(ctx, creator, fullMsg)
+	if err != nil {
+		return fmt.Errorf("broadcast error: %v", err)
+	}
+
+	// Check transaction code - non-zero means error
+	if txResp.TxResponse.Code != 0 {
+		return fmt.Errorf("transaction failed (code %d): %s",
+			txResp.TxResponse.Code, txResp.TxResponse.RawLog)
+	}
+
+	return nil
+}
+
+// RevokePermissionWithError revokes a permission and returns any error
+// instead of calling log.Fatal. This is useful for testing error scenarios.
+func RevokePermissionWithError(client cosmosclient.Client, ctx context.Context,
+	creator cosmosaccount.Account, msg permtypes.MsgRevokePermission) error {
+
+	creatorAddr, err := creator.Address(addressPrefix)
+	if err != nil {
+		return fmt.Errorf("failed to get creator address: %v", err)
+	}
+
+	// Create the message
+	fullMsg := &permtypes.MsgRevokePermission{
+		Creator: creatorAddr,
+		Id:      msg.Id,
+	}
+
+	txResp, err := client.BroadcastTx(ctx, creator, fullMsg)
+	if err != nil {
+		return fmt.Errorf("broadcast error: %v", err)
+	}
+
+	// Check transaction code - non-zero means error
+	if txResp.TxResponse.Code != 0 {
+		return fmt.Errorf("transaction failed (code %d): %s",
+			txResp.TxResponse.Code, txResp.TxResponse.RawLog)
+	}
+
+	return nil
+}
+
+// CreateInactiveValidatorPermission creates a permission with no effective_from
+// This is an INACTIVE permission that can be used to test Issue #193
+// Returns the permission ID or an error
+func CreateInactiveValidatorPermission(client cosmosclient.Client, ctx context.Context,
+	creator cosmosaccount.Account, schemaIDStr string, did string) (uint64, error) {
+
+	// For ECOSYSTEM type permissions, we can create them directly without effective_from
+	// But for this test, we need to create a permission programmatically that's inactive
+	// Since the API now requires effective_from, we'll use a workaround:
+	// Create a permission with future effective_from (making it INACTIVE/FUTURE state)
+
+	schemaID := ParseSchemaID(schemaIDStr)
+	futureTime := time.Now().Add(24 * time.Hour)
+	farFuture := time.Now().Add(48 * time.Hour)
+
+	creatorAddr, err := creator.Address(addressPrefix)
+	if err != nil {
+		return 0, fmt.Errorf("failed to get creator address: %v", err)
+	}
+
+	// Create an ECOSYSTEM (root) permission with future effective_from
+	// This will be in FUTURE state (not ACTIVE)
+	msg := &permtypes.MsgCreateRootPermission{
+		Creator:        creatorAddr,
+		SchemaId:       schemaID,
+		Did:            did,
+		EffectiveFrom:  &futureTime, // Future = not yet active
+		EffectiveUntil: &farFuture,
+	}
+
+	txResp, err := client.BroadcastTx(ctx, creator, msg)
+	if err != nil {
+		return 0, fmt.Errorf("broadcast error: %v", err)
+	}
+
+	if txResp.TxResponse.Code != 0 {
+		return 0, fmt.Errorf("transaction failed (code %d): %s",
+			txResp.TxResponse.Code, txResp.TxResponse.RawLog)
+	}
+
+	// Extract permission ID from events
+	var txResponse sdk.TxResponse
+	txResponseBytes, err := client.Context().Codec.MarshalJSON(txResp.TxResponse)
+	if err != nil {
+		return 0, fmt.Errorf("failed to marshal tx response: %v", err)
+	}
+	err = client.Context().Codec.UnmarshalJSON(txResponseBytes, &txResponse)
+	if err != nil {
+		return 0, fmt.Errorf("failed to unmarshal tx response: %v", err)
+	}
+
+	for _, event := range txResponse.Events {
+		if event.Type == "create_root_permission" {
+			for _, attribute := range event.Attributes {
+				if attribute.Key == "root_permission_id" {
+					permID, parseErr := strconv.ParseUint(attribute.Value, 10, 64)
+					if parseErr != nil {
+						return 0, fmt.Errorf("failed to parse permission ID: %v", parseErr)
+					}
+					fmt.Printf("   Created inactive (FUTURE) validator permission ID: %d\n", permID)
+					return permID, nil
+				}
+			}
+		}
+	}
+
+	return 0, fmt.Errorf("permission ID not found in events")
+}
