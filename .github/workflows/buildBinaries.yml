@@ -113,6 +113,7 @@ jobs:
 
       - name: Publish ts-proto package
         if: env.VERSION != 'dev'
+        working-directory: ts-proto
         run: npm publish
 
       - name: Build binary for Linux AMD64
