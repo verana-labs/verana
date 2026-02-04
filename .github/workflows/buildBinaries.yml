@@ -9,8 +9,8 @@ on:
   workflow_dispatch:
 
 permissions:
-  id-token: write   # Required for OIDC
-  contents: write   # Required for updating npm versions
+  id-token: write   # Required for npm trusted publishing (OIDC)
+  contents: write   # Required for release asset uploads via action-gh-release
 
 env:
   OVH_S3_APPLICATION_KEY: ${{ secrets.OVH_S3_APPLICATION_KEY }}
@@ -130,7 +130,7 @@ jobs:
         if: env.VERSION != 'dev' && github.event_name == 'release'
         working-directory: ts-proto
         continue-on-error: true        
-        run: npm publish
+        run: npm publish --provenance # Required for npm OIDC trusted publishing
 
       - name: Build binary for Linux AMD64
         run: |
