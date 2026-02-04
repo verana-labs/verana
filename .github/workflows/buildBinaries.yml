@@ -122,6 +122,7 @@ jobs:
         working-directory: ts-proto
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        continue-on-error: true
         run: npm publish
 
       - name: Build binary for Linux AMD64
