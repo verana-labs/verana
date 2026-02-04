@@ -35,6 +35,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          registry-url: https://registry.npmjs.org
 
       - name: Set up Go environment
         uses: actions/setup-go@v3
@@ -119,6 +120,8 @@ jobs:
       - name: Publish ts-proto package
         if: env.VERSION != 'dev' && github.event_name == 'release'
         working-directory: ts-proto
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish
 
       - name: Build binary for Linux AMD64
