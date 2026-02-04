@@ -1,9 +1,6 @@
 name: 1.Build Binaries
 
 on:
-  push:
-      tags:
-      - '*' # Trigger on tag creation
   release:
     types: [published, prereleased]
   workflow_dispatch:
