@@ -5,7 +5,7 @@
  * They convert between Proto messages and Amino JSON format.
  */
 
-import { AminoConverter } from "@cosmjs/stargate";
+import type { AminoConverter } from "@cosmjs/stargate";
 import Long from "long";
 import {
   MsgCreateTrustRegistry,
@@ -545,4 +545,3 @@ export const MsgCreateOrUpdatePermissionSessionAminoConverter: AminoConverter = 
       walletAgentPermId: strToU64(a.wallet_agent_perm_id) != null ? Number(strToU64(a.wallet_agent_perm_id)!.toString()) : 0,
     }),
 };
-
