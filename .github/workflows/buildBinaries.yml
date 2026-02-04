@@ -129,8 +129,8 @@ jobs:
       - name: Publish ts-proto package
         if: env.VERSION != 'dev' && github.event_name == 'release'
         working-directory: ts-proto
+        continue-on-error: true        
         run: npm publish
-        continue-on-error: true
 
       - name: Build binary for Linux AMD64
         run: |
