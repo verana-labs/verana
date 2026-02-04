@@ -37,7 +37,7 @@ import {
   MsgSetPermissionVPToValidatedAminoConverter,
   MsgCancelPermissionVPLastRequestAminoConverter,
   MsgCreateOrUpdatePermissionSessionAminoConverter,
-} from "./aminoConverters";
+} from "../../../src/helpers/aminoConverters";
 
 // Default configuration - can be overridden via environment variables
 // Matches frontend configuration from veranaChain.sign.client.ts
