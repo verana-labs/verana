@@ -201,7 +201,6 @@
         "parameters": [
           {
             "name": "body",
-            "description": "MsgUpdateTrustRegistry defines the Msg/UpdateTrustRegistry request type.",
             "in": "body",
             "required": true,
             "schema": {
@@ -381,21 +380,29 @@
     "verana.tr.v1.MsgUpdateTrustRegistry": {
       "type": "object",
       "properties": {
-        "creator": {
-          "type": "string"
+        "authority": {
+          "type": "string",
+          "title": "authority is the group account on whose behalf this message is executed"
+        },
+        "operator": {
+          "type": "string",
+          "title": "operator is the account authorized by the authority to run this Msg"
         },
         "id": {
           "type": "string",
-          "format": "uint64"
+          "format": "uint64",
+          "title": "id is the trust registry id (mandatory)"
         },
         "did": {
-          "type": "string"
+          "type": "string",
+          "title": "did is the DID of the trust registry (mandatory)"
         },
         "aka": {
-          "type": "string"
+          "type": "string",
+          "title": "aka is an optional additional URI of this trust registry"
         }
       },
-      "description": "MsgUpdateTrustRegistry defines the Msg/UpdateTrustRegistry request type."
+      "title": "MsgUpdateTrustRegistry defines the Msg/UpdateTrustRegistry request type.\n[MOD-TR-MSG-4] Update Trust Registry"
     },
     "verana.tr.v1.MsgUpdateTrustRegistryResponse": {
       "type": "object",

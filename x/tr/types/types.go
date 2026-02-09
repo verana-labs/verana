@@ -117,13 +117,23 @@ func (msg *MsgIncreaseActiveGovernanceFrameworkVersion) ValidateBasic() error {
 	return nil
 }
 
+// ValidateBasic performs stateless validation of MsgUpdateTrustRegistry
+// [MOD-TR-MSG-4-2-1] Update Trust Registry basic checks
 func (msg *MsgUpdateTrustRegistry) ValidateBasic() error {
-	if msg.Creator == "" {
-		return fmt.Errorf("creator address is required")
+	// Validate authority address (group account)
+	if msg.Authority == "" {
+		return fmt.Errorf("authority address is required")
+	}
+	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
+		return sdkerrors.ErrInvalidAddress.Wrapf("invalid authority address: %s", err)
 	}
 
-	if _, err := sdk.AccAddressFromBech32(msg.Creator); err != nil {
-		return sdkerrors.ErrInvalidAddress.Wrapf("invalid creator address: %s", err)
+	// Validate operator address (signer authorized by authority)
+	if msg.Operator == "" {
+		return fmt.Errorf("operator address is required")
+	}
+	if _, err := sdk.AccAddressFromBech32(msg.Operator); err != nil {
+		return sdkerrors.ErrInvalidAddress.Wrapf("invalid operator address: %s", err)
 	}
 
 	if msg.Id == 0 {

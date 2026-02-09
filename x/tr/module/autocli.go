@@ -121,10 +121,11 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 				},
 				{
 					RpcMethod: "UpdateTrustRegistry",
-					Use:       "update-trust-registry [id] [did]",
+					Use:       "update-trust-registry [authority] [id] [did]",
 					Short:     "Update a trust registry",
-					Long:      "Update a trust registry's DID and AKA URI. Only the controller can update a trust registry.",
+					Long:      "Update a trust registry's DID and AKA URI. The operator (transaction signer) must be authorized by the authority.",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
+						{ProtoField: "authority"},
 						{ProtoField: "id"},
 						{ProtoField: "did"},
 					},

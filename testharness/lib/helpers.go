@@ -736,9 +736,11 @@ func AddGovernanceFrameworkDocument(
 		return "", fmt.Errorf("failed to get creator address: %v", err)
 	}
 
-	// Create the complete message with creator address
+	// Create the complete message with authority and operator addresses
+	// For v4 spec, authority and operator are both the creator's address
 	msgWithCreator := trtypes.MsgAddGovernanceFrameworkDocument{
-		Creator:      creatorAddr,
+		Authority:    creatorAddr,
+		Operator:     creatorAddr,
 		Id:           msg.Id,
 		DocLanguage:  msg.DocLanguage,
 		DocUrl:       msg.DocUrl,

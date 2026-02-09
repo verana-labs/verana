@@ -51,8 +51,10 @@ func CreateTrustRegistry(client cosmosclient.Client, ctx context.Context, creato
 	}
 
 	// Define a message to create a post
+	// For v4 spec, authority and operator are both the creator's address
 	msg := &types.MsgCreateTrustRegistry{
-		Creator:      addr,
+		Authority:    addr,
+		Operator:     addr,
 		Did:          did,
 		Aka:          aka,
 		Language:     language,

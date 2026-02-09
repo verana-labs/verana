@@ -138,8 +138,8 @@ func (ms msgServer) UpdateTrustRegistry(goCtx context.Context, msg *types.MsgUpd
 		return nil, fmt.Errorf("trust registry not found: %w", err)
 	}
 
-	// Check controller
-	if tr.Controller != msg.Creator {
+	// Check controller - authority must match the trust registry controller
+	if tr.Controller != msg.Authority {
 		return nil, fmt.Errorf("only trust registry controller can update trust registry")
 	}
 
@@ -157,7 +157,7 @@ func (ms msgServer) UpdateTrustRegistry(goCtx context.Context, msg *types.MsgUpd
 		sdk.NewEvent(
 			types.EventTypeUpdateTrustRegistry,
 			sdk.NewAttribute(types.AttributeKeyTrustRegistryID, strconv.FormatUint(msg.Id, 10)),
-			sdk.NewAttribute(types.AttributeKeyController, msg.Creator),
+			sdk.NewAttribute(types.AttributeKeyController, msg.Authority),
 			sdk.NewAttribute(types.AttributeKeyDID, msg.Did),
 			sdk.NewAttribute(types.AttributeKeyAka, msg.Aka),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),

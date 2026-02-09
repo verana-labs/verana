@@ -105,13 +105,20 @@ message MsgIncreaseActiveGovernanceFrameworkVersion {
 message MsgIncreaseActiveGovernanceFrameworkVersionResponse {}
 
 // MsgUpdateTrustRegistry defines the Msg/UpdateTrustRegistry request type.
+// [MOD-TR-MSG-4] Update Trust Registry
 message MsgUpdateTrustRegistry {
-  option (cosmos.msg.v1.signer) = "creator";
+  option (cosmos.msg.v1.signer) = "operator";
 
-  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  uint64 id = 2;
-  string did = 3;
-  string aka = 4 [(gogoproto.nullable) = true];
+  // authority is the group account on whose behalf this message is executed
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // operator is the account authorized by the authority to run this Msg
+  string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // id is the trust registry id (mandatory)
+  uint64 id = 3;
+  // did is the DID of the trust registry (mandatory)
+  string did = 4;
+  // aka is an optional additional URI of this trust registry
+  string aka = 5 [(gogoproto.nullable) = true];
 }
 
 // MsgUpdateTrustRegistryResponse defines the Msg/UpdateTrustRegistry response type.
