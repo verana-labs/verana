@@ -30,13 +30,24 @@ export interface MsgUpdateParams {
 export interface MsgUpdateParamsResponse {
 }
 
-/** MsgCreateTrustRegistry defines the Msg/CreateTrustRegistry request type. */
+/**
+ * MsgCreateTrustRegistry defines the Msg/CreateTrustRegistry request type.
+ * [MOD-TR-MSG-1] Create New Trust Registry
+ */
 export interface MsgCreateTrustRegistry {
-  creator: string;
+  /** authority is the group account on whose behalf this message is executed */
+  authority: string;
+  /** operator is the account authorized by the authority to run this Msg */
+  operator: string;
+  /** did is the DID of the ecosystem creating this trust registry (mandatory) */
   did: string;
+  /** aka is an optional additional URI of this trust registry */
   aka: string;
+  /** language is the primary language tag (RFC1766) of this trust registry (mandatory) */
   language: string;
+  /** doc_url is the URL where the governance framework document is published (mandatory) */
   docUrl: string;
+  /** doc_digest_sri is the SRI digest of the governance framework document (mandatory) */
   docDigestSri: string;
 }
 
@@ -212,28 +223,31 @@ export const MsgUpdateParamsResponse = {
 };
 
 function createBaseMsgCreateTrustRegistry(): MsgCreateTrustRegistry {
-  return { creator: "", did: "", aka: "", language: "", docUrl: "", docDigestSri: "" };
+  return { authority: "", operator: "", did: "", aka: "", language: "", docUrl: "", docDigestSri: "" };
 }
 
 export const MsgCreateTrustRegistry = {
   encode(message: MsgCreateTrustRegistry, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.creator !== "") {
-      writer.uint32(10).string(message.creator);
+    if (message.authority !== "") {
+      writer.uint32(10).string(message.authority);
+    }
+    if (message.operator !== "") {
+      writer.uint32(18).string(message.operator);
     }
     if (message.did !== "") {
-      writer.uint32(18).string(message.did);
+      writer.uint32(26).string(message.did);
     }
     if (message.aka !== "") {
-      writer.uint32(26).string(message.aka);
+      writer.uint32(34).string(message.aka);
     }
     if (message.language !== "") {
-      writer.uint32(34).string(message.language);
+      writer.uint32(42).string(message.language);
     }
     if (message.docUrl !== "") {
-      writer.uint32(42).string(message.docUrl);
+      writer.uint32(50).string(message.docUrl);
     }
     if (message.docDigestSri !== "") {
-      writer.uint32(50).string(message.docDigestSri);
+      writer.uint32(58).string(message.docDigestSri);
     }
     return writer;
   },
@@ -250,38 +264,45 @@ export const MsgCreateTrustRegistry = {
             break;
           }
 
-          message.creator = reader.string();
+          message.authority = reader.string();
           continue;
         case 2:
           if (tag !== 18) {
             break;
           }
 
-          message.did = reader.string();
+          message.operator = reader.string();
           continue;
         case 3:
           if (tag !== 26) {
             break;
           }
 
-          message.aka = reader.string();
+          message.did = reader.string();
           continue;
         case 4:
           if (tag !== 34) {
             break;
           }
 
-          message.language = reader.string();
+          message.aka = reader.string();
           continue;
         case 5:
           if (tag !== 42) {
             break;
           }
 
-          message.docUrl = reader.string();
+          message.language = reader.string();
           continue;
         case 6:
           if (tag !== 50) {
+            break;
+          }
+
+          message.docUrl = reader.string();
+          continue;
+        case 7:
+          if (tag !== 58) {
             break;
           }
 
@@ -298,7 +319,8 @@ export const MsgCreateTrustRegistry = {
 
   fromJSON(object: any): MsgCreateTrustRegistry {
     return {
-      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
+      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
       did: isSet(object.did) ? globalThis.String(object.did) : "",
       aka: isSet(object.aka) ? globalThis.String(object.aka) : "",
       language: isSet(object.language) ? globalThis.String(object.language) : "",
@@ -309,8 +331,11 @@ export const MsgCreateTrustRegistry = {
 
   toJSON(message: MsgCreateTrustRegistry): unknown {
     const obj: any = {};
-    if (message.creator !== "") {
-      obj.creator = message.creator;
+    if (message.authority !== "") {
+      obj.authority = message.authority;
+    }
+    if (message.operator !== "") {
+      obj.operator = message.operator;
     }
     if (message.did !== "") {
       obj.did = message.did;
@@ -335,7 +360,8 @@ export const MsgCreateTrustRegistry = {
   },
   fromPartial<I extends Exact<DeepPartial<MsgCreateTrustRegistry>, I>>(object: I): MsgCreateTrustRegistry {
     const message = createBaseMsgCreateTrustRegistry();
-    message.creator = object.creator ?? "";
+    message.authority = object.authority ?? "";
+    message.operator = object.operator ?? "";
     message.did = object.did ?? "";
     message.aka = object.aka ?? "";
     message.language = object.language ?? "";

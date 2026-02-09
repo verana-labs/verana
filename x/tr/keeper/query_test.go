@@ -17,9 +17,12 @@ func setupTestData(t *testing.T) (keeper.Keeper, types.QueryServer, context.Cont
 	ms := keeper.NewMsgServerImpl(k)
 
 	// Create a trust registry
-	creator := sdk.AccAddress([]byte("test_creator")).String()
+	authority := sdk.AccAddress([]byte("test_authority")).String()
+	operator := sdk.AccAddress([]byte("test_operator")).String()
+	creator := authority // For backward compatibility in test, creator refers to authority
 	createMsg := &types.MsgCreateTrustRegistry{
-		Creator:      creator,
+		Authority:    authority,
+		Operator:     operator,
 		Did:          "did:example:123",
 		Language:     "en",
 		DocUrl:       "http://example.com/doc1",
@@ -145,7 +148,8 @@ func TestListTrustRegistries(t *testing.T) {
 	// Create additional trust registry for testing
 	ms := keeper.NewMsgServerImpl(k)
 	createMsg := &types.MsgCreateTrustRegistry{
-		Creator:      "another_creator",
+		Authority:    "another_authority",
+		Operator:     "another_operator",
 		Did:          "did:example:456",
 		Language:     "fr",
 		DocUrl:       "http://example.com/doc-fr",
@@ -181,13 +185,13 @@ func TestListTrustRegistries(t *testing.T) {
 		{
 			name: "Filter by Controller",
 			request: &types.QueryListTrustRegistriesRequest{
-				Controller:      "another_creator",
+				Controller:      "another_authority",
 				ResponseMaxSize: 10,
 			},
 			expectedError: false,
 			check: func(t *testing.T, response *types.QueryListTrustRegistriesResponse) {
 				require.Len(t, response.TrustRegistries, 1)
-				require.Equal(t, "another_creator", response.TrustRegistries[0].Controller)
+				require.Equal(t, "another_authority", response.TrustRegistries[0].Controller)
 
 				// Check nested structure
 				tr := response.TrustRegistries[0]

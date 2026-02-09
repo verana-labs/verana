@@ -26,11 +26,11 @@ func (ms msgServer) createTrustRegistryEntries(ctx sdk.Context, msg *types.MsgCr
 		return types.TrustRegistry{}, types.GovernanceFrameworkVersion{}, types.GovernanceFrameworkDocument{}, fmt.Errorf("failed to generate trust registry ID: %w", err)
 	}
 
-	// Create trust registry
+	// Create trust registry - authority becomes the controller
 	tr := types.TrustRegistry{
 		Id:            nextTrId,
 		Did:           msg.Did,
-		Controller:    msg.Creator,
+		Controller:    msg.Authority, // Authority is the controller of the trust registry
 		Created:       now,
 		Modified:      now,
 		Deposit:       0,

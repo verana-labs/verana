@@ -103,7 +103,6 @@
         "parameters": [
           {
             "name": "body",
-            "description": "MsgCreateTrustRegistry defines the Msg/CreateTrustRegistry request type.",
             "in": "body",
             "required": true,
             "schema": {
@@ -299,26 +298,36 @@
     "verana.tr.v1.MsgCreateTrustRegistry": {
       "type": "object",
       "properties": {
-        "creator": {
-          "type": "string"
+        "authority": {
+          "type": "string",
+          "title": "authority is the group account on whose behalf this message is executed"
+        },
+        "operator": {
+          "type": "string",
+          "title": "operator is the account authorized by the authority to run this Msg"
         },
         "did": {
-          "type": "string"
+          "type": "string",
+          "title": "did is the DID of the ecosystem creating this trust registry (mandatory)"
         },
         "aka": {
-          "type": "string"
+          "type": "string",
+          "title": "aka is an optional additional URI of this trust registry"
         },
         "language": {
-          "type": "string"
+          "type": "string",
+          "title": "language is the primary language tag (RFC1766) of this trust registry (mandatory)"
         },
         "doc_url": {
-          "type": "string"
+          "type": "string",
+          "title": "doc_url is the URL where the governance framework document is published (mandatory)"
         },
         "doc_digest_sri": {
-          "type": "string"
+          "type": "string",
+          "title": "doc_digest_sri is the SRI digest of the governance framework document (mandatory)"
         }
       },
-      "description": "MsgCreateTrustRegistry defines the Msg/CreateTrustRegistry request type."
+      "title": "MsgCreateTrustRegistry defines the Msg/CreateTrustRegistry request type.\n[MOD-TR-MSG-1] Create New Trust Registry"
     },
     "verana.tr.v1.MsgCreateTrustRegistryResponse": {
       "type": "object",

@@ -78,10 +78,11 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 			RpcCommandOptions: []*autocliv1.RpcCommandOptions{
 				{
 					RpcMethod: "CreateTrustRegistry",
-					Use:       "create-trust-registry [did] [language] [doc-url] [doc-digest-sri]",
+					Use:       "create-trust-registry [authority] [did] [language] [doc-url] [doc-digest-sri]",
 					Short:     "Create a new trust registry",
-					Long:      "Create a new trust registry with the specified DID, language, and initial governance framework document",
+					Long:      "Create a new trust registry on behalf of an authority (group account). The operator (transaction signer) must be authorized by the authority.",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
+						{ProtoField: "authority"},
 						{ProtoField: "did"},
 						{ProtoField: "language"},
 						{ProtoField: "doc_url"},
@@ -91,7 +92,7 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 						"aka": {
 							Name:         "aka",
 							DefaultValue: "",
-							Usage:        "aka uri",
+							Usage:        "optional additional URI of this trust registry",
 						},
 					},
 				},

@@ -31,8 +31,8 @@ func (ms msgServer) CreateTrustRegistry(goCtx context.Context, msg *types.MsgCre
 	params := ms.Keeper.GetParams(ctx)
 	trustDeposit := params.TrustRegistryTrustDeposit * params.TrustUnitPrice
 
-	// Increase trust deposit
-	if err := ms.Keeper.trustDeposit.AdjustTrustDeposit(ctx, msg.Creator, int64(trustDeposit)); err != nil {
+	// Increase trust deposit (charged to operator)
+	if err := ms.Keeper.trustDeposit.AdjustTrustDeposit(ctx, msg.Operator, int64(trustDeposit)); err != nil {
 		return nil, fmt.Errorf("failed to adjust trust deposit: %w", err)
 	}
 

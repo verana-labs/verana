@@ -9,26 +9,35 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
+// ValidateBasic performs stateless validation of MsgCreateTrustRegistry
+// [MOD-TR-MSG-1-2-1] Create New Trust Registry basic checks
 func (msg *MsgCreateTrustRegistry) ValidateBasic() error {
+	// Check mandatory parameters
 	if msg.Did == "" || msg.Language == "" || msg.DocUrl == "" || msg.DocDigestSri == "" {
 		return fmt.Errorf("missing mandatory parameter")
 	}
 
-	if _, err := sdk.AccAddressFromBech32(msg.Creator); err != nil {
-		return sdkerrors.ErrInvalidAddress.Wrapf("invalid creator address: %s", err)
+	// Validate authority address (group account)
+	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
+		return sdkerrors.ErrInvalidAddress.Wrapf("invalid authority address: %s", err)
 	}
 
-	// DID syntax validation can be added here
+	// Validate operator address (signer authorized by authority)
+	if _, err := sdk.AccAddressFromBech32(msg.Operator); err != nil {
+		return sdkerrors.ErrInvalidAddress.Wrapf("invalid operator address: %s", err)
+	}
+
+	// DID syntax validation - must conform to DID-CORE spec
 	if !isValidDID(msg.Did) {
 		return fmt.Errorf("invalid DID syntax")
 	}
 
-	// Validate AKA URI if present
+	// Validate AKA URI if present - must be a valid URI
 	if msg.Aka != "" && !isValidURI(msg.Aka) {
 		return fmt.Errorf("invalid AKA URI")
 	}
 
-	// Validate language tag (RFC1766)
+	// Validate language tag (RFC1766, max 17 chars)
 	if !isValidLanguageTagForCreateTrustRegistry(msg.Language) {
 		return fmt.Errorf("invalid language tag (must conform to RFC 1766 and be 2 characters long)")
 	}

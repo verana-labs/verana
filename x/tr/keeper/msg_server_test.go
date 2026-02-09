@@ -28,7 +28,10 @@ func TestMsgServer(t *testing.T) {
 func TestMsgServerCreateTrustRegistry(t *testing.T) {
 	k, ms, ctx := setupMsgServer(t)
 
-	creator := sdk.AccAddress([]byte("test_creator")).String()
+	// Authority is the group account that will become the controller
+	authority := sdk.AccAddress([]byte("test_authority")).String()
+	// Operator is the signer authorized to execute on behalf of authority
+	operator := sdk.AccAddress([]byte("test_operator")).String()
 	validDid := "did:example:123456789abcdefghi"
 
 	testCases := []struct {
@@ -39,7 +42,8 @@ func TestMsgServerCreateTrustRegistry(t *testing.T) {
 		{
 			name: "Valid Create Trust Registry",
 			msg: &types.MsgCreateTrustRegistry{
-				Creator:      creator,
+				Authority:    authority,
+				Operator:     operator,
 				Did:          validDid,
 				Aka:          "http://example.com",
 				Language:     "en",
@@ -65,7 +69,8 @@ func TestMsgServerCreateTrustRegistry(t *testing.T) {
 				tr, err := k.TrustRegistry.Get(ctx, id)
 				require.NoError(t, err)
 				require.Equal(t, tc.msg.Did, tr.Did)
-				require.Equal(t, tc.msg.Creator, tr.Controller)
+				// Verify authority becomes the controller
+				require.Equal(t, tc.msg.Authority, tr.Controller)
 				require.Equal(t, int32(1), tr.ActiveVersion)
 				require.Equal(t, tc.msg.Language, tr.Language)
 			} else {
@@ -79,12 +84,15 @@ func TestMsgServerCreateTrustRegistry(t *testing.T) {
 func TestMsgServerAddGovernanceFrameworkDocument(t *testing.T) {
 	k, ms, ctx := setupMsgServer(t)
 
-	creator := sdk.AccAddress([]byte("test_creator")).String()
+	authority := sdk.AccAddress([]byte("test_authority")).String()
+	operator := sdk.AccAddress([]byte("test_operator")).String()
+	creator := authority // For backward compatibility in this test, creator refers to authority
 	validDid := "did:example:123456789abcdefghi"
 
 	// First, create a trust registry
 	createMsg := &types.MsgCreateTrustRegistry{
-		Creator:      creator,
+		Authority:    authority,
+		Operator:     operator,
 		Did:          validDid,
 		Language:     "en",
 		DocUrl:       "http://example.com/doc",
@@ -247,12 +255,15 @@ func TestMsgServerAddGovernanceFrameworkDocument(t *testing.T) {
 func TestMsgServerIncreaseActiveGovernanceFrameworkVersion(t *testing.T) {
 	k, ms, ctx := setupMsgServer(t)
 
-	creator := sdk.AccAddress([]byte("test_creator")).String()
+	authority := sdk.AccAddress([]byte("test_authority")).String()
+	operator := sdk.AccAddress([]byte("test_operator")).String()
+	creator := authority // For backward compatibility in this test, creator refers to authority
 	validDid := "did:example:123456789abcdefghi"
 
 	// Create initial trust registry
 	createMsg := &types.MsgCreateTrustRegistry{
-		Creator:      creator,
+		Authority:    authority,
+		Operator:     operator,
 		Did:          validDid,
 		Language:     "en",
 		DocUrl:       "http://example.com/doc",
@@ -358,10 +369,13 @@ func TestMsgServerUpdateTrustRegistry(t *testing.T) {
 	k, ms, ctx := setupMsgServer(t)
 
 	// Create initial trust registry
-	creator := sdk.AccAddress([]byte("test_creator")).String()
+	authority := sdk.AccAddress([]byte("test_authority")).String()
+	operator := sdk.AccAddress([]byte("test_operator")).String()
+	creator := authority // Authority is the controller for update/archive checks
 	validDid := "did:example:123456789abcdefghi"
 	createMsg := &types.MsgCreateTrustRegistry{
-		Creator:      creator,
+		Authority:    authority,
+		Operator:     operator,
 		Did:          validDid,
 		Language:     "en",
 		DocUrl:       "http://example.com/doc",
@@ -455,10 +469,13 @@ func TestMsgServerArchiveTrustRegistry(t *testing.T) {
 	k, ms, ctx := setupMsgServer(t)
 
 	// Create initial trust registry
-	creator := sdk.AccAddress([]byte("test_creator")).String()
+	authority := sdk.AccAddress([]byte("test_authority")).String()
+	operator := sdk.AccAddress([]byte("test_operator")).String()
+	creator := authority // Authority is the controller for update/archive checks
 	validDid := "did:example:123456789abcdefghi"
 	createMsg := &types.MsgCreateTrustRegistry{
-		Creator:      creator,
+		Authority:    authority,
+		Operator:     operator,
 		Did:          validDid,
 		Language:     "en",
 		DocUrl:       "http://example.com/doc",
