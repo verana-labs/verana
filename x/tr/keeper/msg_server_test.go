@@ -86,7 +86,6 @@ func TestMsgServerAddGovernanceFrameworkDocument(t *testing.T) {
 
 	authority := sdk.AccAddress([]byte("test_authority")).String()
 	operator := sdk.AccAddress([]byte("test_operator")).String()
-	creator := authority // For backward compatibility in this test, creator refers to authority
 	validDid := "did:example:123456789abcdefghi"
 
 	// First, create a trust registry
@@ -114,7 +113,8 @@ func TestMsgServerAddGovernanceFrameworkDocument(t *testing.T) {
 		{
 			name: "Valid Add Document with Next Version",
 			msg: &types.MsgAddGovernanceFrameworkDocument{
-				Creator:      creator,
+				Authority:    authority,
+				Operator:     operator,
 				Id:           trID,
 				DocLanguage:  "en",
 				DocUrl:       "http://example.com/doc2",
@@ -126,7 +126,8 @@ func TestMsgServerAddGovernanceFrameworkDocument(t *testing.T) {
 		{
 			name: "Valid Add Document to Same Version with Different Language",
 			msg: &types.MsgAddGovernanceFrameworkDocument{
-				Creator:      creator,
+				Authority:    authority,
+				Operator:     operator,
 				Id:           trID,
 				DocLanguage:  "fr",
 				DocUrl:       "http://example.com/doc2-fr",
@@ -138,7 +139,8 @@ func TestMsgServerAddGovernanceFrameworkDocument(t *testing.T) {
 		{
 			name: "Valid Add Next Version",
 			msg: &types.MsgAddGovernanceFrameworkDocument{
-				Creator:      creator,
+				Authority:    authority,
+				Operator:     operator,
 				Id:           trID,
 				DocLanguage:  "en",
 				DocUrl:       "http://example.com/doc3",
@@ -150,7 +152,8 @@ func TestMsgServerAddGovernanceFrameworkDocument(t *testing.T) {
 		{
 			name: "Invalid Version (Less than Active Version)",
 			msg: &types.MsgAddGovernanceFrameworkDocument{
-				Creator:      creator,
+				Authority:    authority,
+				Operator:     operator,
 				Id:           trID,
 				DocLanguage:  "en",
 				DocUrl:       "http://example.com/doc-old",
@@ -162,7 +165,8 @@ func TestMsgServerAddGovernanceFrameworkDocument(t *testing.T) {
 		{
 			name: "Invalid Trust Registry ID",
 			msg: &types.MsgAddGovernanceFrameworkDocument{
-				Creator:      creator,
+				Authority:    authority,
+				Operator:     operator,
 				Id:           99999,
 				DocLanguage:  "en",
 				DocUrl:       "http://example.com/doc2",
@@ -174,7 +178,8 @@ func TestMsgServerAddGovernanceFrameworkDocument(t *testing.T) {
 		{
 			name: "Invalid Language Format",
 			msg: &types.MsgAddGovernanceFrameworkDocument{
-				Creator:      creator,
+				Authority:    authority,
+				Operator:     operator,
 				Id:           trID,
 				DocLanguage:  "invalid-language",
 				DocUrl:       "http://example.com/doc2",
@@ -186,7 +191,8 @@ func TestMsgServerAddGovernanceFrameworkDocument(t *testing.T) {
 		{
 			name: "Wrong Controller",
 			msg: &types.MsgAddGovernanceFrameworkDocument{
-				Creator:      "wrong-controller",
+				Authority:    "wrong-controller",
+				Operator:     "wrong-controller",
 				Id:           trID,
 				DocLanguage:  "en",
 				DocUrl:       "http://example.com/doc2",
@@ -200,7 +206,8 @@ func TestMsgServerAddGovernanceFrameworkDocument(t *testing.T) {
 			setupFunc: func() {
 				// Add version 3 document first
 				msg := &types.MsgAddGovernanceFrameworkDocument{
-					Creator:      creator,
+					Authority:    authority,
+					Operator:     operator,
 					Id:           trID,
 					DocLanguage:  "en",
 					DocUrl:       "http://example.com/doc3",
@@ -211,7 +218,8 @@ func TestMsgServerAddGovernanceFrameworkDocument(t *testing.T) {
 				require.NoError(t, err)
 			},
 			msg: &types.MsgAddGovernanceFrameworkDocument{
-				Creator:      creator,
+				Authority:    authority,
+				Operator:     operator,
 				Id:           trID,
 				DocLanguage:  "en",
 				DocUrl:       "http://example.com/doc5",
@@ -257,7 +265,6 @@ func TestMsgServerIncreaseActiveGovernanceFrameworkVersion(t *testing.T) {
 
 	authority := sdk.AccAddress([]byte("test_authority")).String()
 	operator := sdk.AccAddress([]byte("test_operator")).String()
-	creator := authority // For backward compatibility in this test, creator refers to authority
 	validDid := "did:example:123456789abcdefghi"
 
 	// Create initial trust registry
@@ -278,7 +285,8 @@ func TestMsgServerIncreaseActiveGovernanceFrameworkVersion(t *testing.T) {
 
 	// Add version 2 documents
 	addGFDocMsg := &types.MsgAddGovernanceFrameworkDocument{
-		Creator:      creator,
+		Authority:    authority,
+		Operator:     operator,
 		Id:           trID,
 		DocLanguage:  "es", // First add Spanish version
 		DocUrl:       "http://example.com/doc2-es",
@@ -298,7 +306,7 @@ func TestMsgServerIncreaseActiveGovernanceFrameworkVersion(t *testing.T) {
 		{
 			name: "Cannot Increase Version - Missing Default Language Document",
 			msg: &types.MsgIncreaseActiveGovernanceFrameworkVersion{
-				Creator: creator,
+				Creator: authority,
 				Id:      trID,
 			},
 			isValid: false,
@@ -308,7 +316,8 @@ func TestMsgServerIncreaseActiveGovernanceFrameworkVersion(t *testing.T) {
 			setupFunc: func() {
 				// Add English (default language) document for version 2
 				msg := &types.MsgAddGovernanceFrameworkDocument{
-					Creator:      creator,
+					Authority:    authority,
+					Operator:     operator,
 					Id:           trID,
 					DocLanguage:  "en",
 					DocUrl:       "http://example.com/doc2-en",
@@ -319,7 +328,7 @@ func TestMsgServerIncreaseActiveGovernanceFrameworkVersion(t *testing.T) {
 				require.NoError(t, err)
 			},
 			msg: &types.MsgIncreaseActiveGovernanceFrameworkVersion{
-				Creator: creator,
+				Creator: authority,
 				Id:      trID,
 			},
 			isValid: true,
@@ -335,7 +344,7 @@ func TestMsgServerIncreaseActiveGovernanceFrameworkVersion(t *testing.T) {
 		{
 			name: "Non-existent Trust Registry",
 			msg: &types.MsgIncreaseActiveGovernanceFrameworkVersion{
-				Creator: creator,
+				Creator: authority,
 				Id:      99999,
 			},
 			isValid: false,
@@ -371,7 +380,6 @@ func TestMsgServerUpdateTrustRegistry(t *testing.T) {
 	// Create initial trust registry
 	authority := sdk.AccAddress([]byte("test_authority")).String()
 	operator := sdk.AccAddress([]byte("test_operator")).String()
-	creator := authority // Authority is the controller for update/archive checks
 	validDid := "did:example:123456789abcdefghi"
 	createMsg := &types.MsgCreateTrustRegistry{
 		Authority:    authority,
@@ -401,7 +409,7 @@ func TestMsgServerUpdateTrustRegistry(t *testing.T) {
 		{
 			name: "Valid Update",
 			msg: &types.MsgUpdateTrustRegistry{
-				Creator: creator,
+				Creator: authority,
 				Id:      trID,
 				Did:     "did:example:newdid",
 				Aka:     "http://new.example.com",
@@ -421,7 +429,7 @@ func TestMsgServerUpdateTrustRegistry(t *testing.T) {
 		{
 			name: "Non-existent Trust Registry",
 			msg: &types.MsgUpdateTrustRegistry{
-				Creator: creator,
+				Creator: authority,
 				Id:      99999,
 				Did:     "did:example:newdid",
 				Aka:     "http://example.com",
@@ -431,7 +439,7 @@ func TestMsgServerUpdateTrustRegistry(t *testing.T) {
 		{
 			name: "Clear AKA",
 			msg: &types.MsgUpdateTrustRegistry{
-				Creator: creator,
+				Creator: authority,
 				Id:      trID,
 				Did:     "did:example:newdid",
 				Aka:     "", // Empty string to clear AKA
@@ -471,7 +479,6 @@ func TestMsgServerArchiveTrustRegistry(t *testing.T) {
 	// Create initial trust registry
 	authority := sdk.AccAddress([]byte("test_authority")).String()
 	operator := sdk.AccAddress([]byte("test_operator")).String()
-	creator := authority // Authority is the controller for update/archive checks
 	validDid := "did:example:123456789abcdefghi"
 	createMsg := &types.MsgCreateTrustRegistry{
 		Authority:    authority,
@@ -501,7 +508,7 @@ func TestMsgServerArchiveTrustRegistry(t *testing.T) {
 		{
 			name: "Valid Archive",
 			msg: &types.MsgArchiveTrustRegistry{
-				Creator: creator,
+				Creator: authority,
 				Id:      trID,
 				Archive: true,
 			},
@@ -510,7 +517,7 @@ func TestMsgServerArchiveTrustRegistry(t *testing.T) {
 		{
 			name: "Already Archived",
 			msg: &types.MsgArchiveTrustRegistry{
-				Creator: creator,
+				Creator: authority,
 				Id:      trID,
 				Archive: true,
 			},
@@ -519,7 +526,7 @@ func TestMsgServerArchiveTrustRegistry(t *testing.T) {
 		{
 			name: "Valid Unarchive",
 			msg: &types.MsgArchiveTrustRegistry{
-				Creator: creator,
+				Creator: authority,
 				Id:      trID,
 				Archive: false,
 			},
@@ -528,7 +535,7 @@ func TestMsgServerArchiveTrustRegistry(t *testing.T) {
 		{
 			name: "Already Unarchived",
 			msg: &types.MsgArchiveTrustRegistry{
-				Creator: creator,
+				Creator: authority,
 				Id:      trID,
 				Archive: false,
 			},
@@ -546,7 +553,7 @@ func TestMsgServerArchiveTrustRegistry(t *testing.T) {
 		{
 			name: "Non-existent Trust Registry",
 			msg: &types.MsgArchiveTrustRegistry{
-				Creator: creator,
+				Creator: authority,
 				Id:      99999,
 				Archive: true,
 			},

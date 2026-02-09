@@ -36,7 +36,6 @@
         "parameters": [
           {
             "name": "body",
-            "description": "MsgAddGovernanceFrameworkDocument defines the Msg/AddGovernanceFrameworkDocument request type.",
             "in": "body",
             "required": true,
             "schema": {
@@ -248,28 +247,38 @@
     "verana.tr.v1.MsgAddGovernanceFrameworkDocument": {
       "type": "object",
       "properties": {
-        "creator": {
-          "type": "string"
+        "authority": {
+          "type": "string",
+          "title": "authority is the group account on whose behalf this message is executed"
+        },
+        "operator": {
+          "type": "string",
+          "title": "operator is the account authorized by the authority to run this Msg"
         },
         "id": {
           "type": "string",
-          "format": "uint64"
+          "format": "uint64",
+          "title": "id is the trust registry id (mandatory)"
         },
         "doc_language": {
-          "type": "string"
+          "type": "string",
+          "title": "doc_language is the language tag (RFC1766) of the document (mandatory)"
         },
         "doc_url": {
-          "type": "string"
+          "type": "string",
+          "title": "doc_url is the URL where the document is published (mandatory)"
         },
         "doc_digest_sri": {
-          "type": "string"
+          "type": "string",
+          "title": "doc_digest_sri is the digest SRI of the document (mandatory)"
         },
         "version": {
           "type": "integer",
-          "format": "int32"
+          "format": "int32",
+          "title": "version is the targeted version (mandatory)"
         }
       },
-      "description": "MsgAddGovernanceFrameworkDocument defines the Msg/AddGovernanceFrameworkDocument request type."
+      "title": "MsgAddGovernanceFrameworkDocument defines the Msg/AddGovernanceFrameworkDocument request type.\n[MOD-TR-MSG-2] Add Governance Framework Document"
     },
     "verana.tr.v1.MsgAddGovernanceFrameworkDocumentResponse": {
       "type": "object",

@@ -70,15 +70,24 @@ message MsgCreateTrustRegistry {
 message MsgCreateTrustRegistryResponse {}
 
 // MsgAddGovernanceFrameworkDocument defines the Msg/AddGovernanceFrameworkDocument request type.
+// [MOD-TR-MSG-2] Add Governance Framework Document
 message MsgAddGovernanceFrameworkDocument {
-  option (cosmos.msg.v1.signer) = "creator";
+  option (cosmos.msg.v1.signer) = "operator";
 
-  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  uint64 id = 2;
-  string doc_language = 3;
-  string doc_url = 4;
-  string doc_digest_sri = 5;
-  int32 version = 6;
+  // authority is the group account on whose behalf this message is executed
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // operator is the account authorized by the authority to run this Msg
+  string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // id is the trust registry id (mandatory)
+  uint64 id = 3;
+  // doc_language is the language tag (RFC1766) of the document (mandatory)
+  string doc_language = 4;
+  // doc_url is the URL where the document is published (mandatory)
+  string doc_url = 5;
+  // doc_digest_sri is the digest SRI of the document (mandatory)
+  string doc_digest_sri = 6;
+  // version is the targeted version (mandatory)
+  int32 version = 7;
 }
 
 // MsgAddGovernanceFrameworkDocumentResponse defines the Msg/AddGovernanceFrameworkDocument response type.

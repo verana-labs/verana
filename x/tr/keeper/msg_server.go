@@ -96,7 +96,7 @@ func (ms msgServer) AddGovernanceFrameworkDocument(goCtx context.Context, msg *t
 			sdk.NewAttribute(types.AttributeKeyLanguage, msg.DocLanguage),
 			sdk.NewAttribute(types.AttributeKeyDocURL, msg.DocUrl),
 			sdk.NewAttribute(types.AttributeKeyDigestSri, msg.DocDigestSri),
-			sdk.NewAttribute(types.AttributeKeyController, msg.Creator),
+			sdk.NewAttribute(types.AttributeKeyController, msg.Authority),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
 		),
 	})

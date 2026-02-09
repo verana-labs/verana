@@ -98,10 +98,11 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 				},
 				{
 					RpcMethod: "AddGovernanceFrameworkDocument",
-					Use:       "add-governance-framework-document [id] [doc-language] [url] [doc-digest-sri] [version]",
+					Use:       "add-governance-framework-document [authority] [id] [doc-language] [doc-url] [doc-digest-sri] [version]",
 					Short:     "Add a governance framework document",
-					Long:      "Add a new governance framework document to a trust registry",
+					Long:      "Add a new governance framework document to a trust registry. The operator (transaction signer) must be authorized by the authority.",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
+						{ProtoField: "authority"},
 						{ProtoField: "id"},
 						{ProtoField: "doc_language"},
 						{ProtoField: "doc_url"},

@@ -65,13 +65,22 @@ func isValidLanguageTagForCreateTrustRegistry(lang string) bool {
 	return match
 }
 
+// ValidateBasic performs stateless validation of MsgAddGovernanceFrameworkDocument
+// [MOD-TR-MSG-2-2-1] Add Governance Framework Document basic checks
 func (msg *MsgAddGovernanceFrameworkDocument) ValidateBasic() error {
+	// Check mandatory parameters
 	if msg.Id == 0 || msg.DocLanguage == "" || msg.DocUrl == "" || msg.DocDigestSri == "" || msg.Version == 0 {
 		return fmt.Errorf("missing mandatory parameter")
 	}
 
-	if _, err := sdk.AccAddressFromBech32(msg.Creator); err != nil {
-		return sdkerrors.ErrInvalidAddress.Wrapf("invalid creator address: %s", err)
+	// Validate authority address (group account)
+	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
+		return sdkerrors.ErrInvalidAddress.Wrapf("invalid authority address: %s", err)
+	}
+
+	// Validate operator address (signer authorized by authority)
+	if _, err := sdk.AccAddressFromBech32(msg.Operator); err != nil {
+		return sdkerrors.ErrInvalidAddress.Wrapf("invalid operator address: %s", err)
 	}
 
 	// Language tag validation (RFC1766)
@@ -79,7 +88,7 @@ func (msg *MsgAddGovernanceFrameworkDocument) ValidateBasic() error {
 		return fmt.Errorf("invalid language tag (must conform to rfc1766)")
 	}
 
-	// Validate URL and hash
+	// Validate URL
 	if _, err := url.Parse(msg.DocUrl); err != nil {
 		return fmt.Errorf("invalid document URL")
 	}

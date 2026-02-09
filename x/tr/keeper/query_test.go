@@ -19,7 +19,6 @@ func setupTestData(t *testing.T) (keeper.Keeper, types.QueryServer, context.Cont
 	// Create a trust registry
 	authority := sdk.AccAddress([]byte("test_authority")).String()
 	operator := sdk.AccAddress([]byte("test_operator")).String()
-	creator := authority // For backward compatibility in test, creator refers to authority
 	createMsg := &types.MsgCreateTrustRegistry{
 		Authority:    authority,
 		Operator:     operator,
@@ -37,7 +36,8 @@ func setupTestData(t *testing.T) (keeper.Keeper, types.QueryServer, context.Cont
 
 	// Add documents in different languages for version 2
 	addDocMsg := &types.MsgAddGovernanceFrameworkDocument{
-		Creator:      creator,
+		Authority:    authority,
+		Operator:     operator,
 		Id:           trID,
 		DocLanguage:  "en",
 		DocUrl:       "http://example.com/doc2-en",

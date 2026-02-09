@@ -55,13 +55,24 @@ export interface MsgCreateTrustRegistry {
 export interface MsgCreateTrustRegistryResponse {
 }
 
-/** MsgAddGovernanceFrameworkDocument defines the Msg/AddGovernanceFrameworkDocument request type. */
+/**
+ * MsgAddGovernanceFrameworkDocument defines the Msg/AddGovernanceFrameworkDocument request type.
+ * [MOD-TR-MSG-2] Add Governance Framework Document
+ */
 export interface MsgAddGovernanceFrameworkDocument {
-  creator: string;
+  /** authority is the group account on whose behalf this message is executed */
+  authority: string;
+  /** operator is the account authorized by the authority to run this Msg */
+  operator: string;
+  /** id is the trust registry id (mandatory) */
   id: number;
+  /** doc_language is the language tag (RFC1766) of the document (mandatory) */
   docLanguage: string;
+  /** doc_url is the URL where the document is published (mandatory) */
   docUrl: string;
+  /** doc_digest_sri is the digest SRI of the document (mandatory) */
   docDigestSri: string;
+  /** version is the targeted version (mandatory) */
   version: number;
 }
 
@@ -415,28 +426,31 @@ export const MsgCreateTrustRegistryResponse = {
 };
 
 function createBaseMsgAddGovernanceFrameworkDocument(): MsgAddGovernanceFrameworkDocument {
-  return { creator: "", id: 0, docLanguage: "", docUrl: "", docDigestSri: "", version: 0 };
+  return { authority: "", operator: "", id: 0, docLanguage: "", docUrl: "", docDigestSri: "", version: 0 };
 }
 
 export const MsgAddGovernanceFrameworkDocument = {
   encode(message: MsgAddGovernanceFrameworkDocument, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.creator !== "") {
-      writer.uint32(10).string(message.creator);
+    if (message.authority !== "") {
+      writer.uint32(10).string(message.authority);
+    }
+    if (message.operator !== "") {
+      writer.uint32(18).string(message.operator);
     }
     if (message.id !== 0) {
-      writer.uint32(16).uint64(message.id);
+      writer.uint32(24).uint64(message.id);
     }
     if (message.docLanguage !== "") {
-      writer.uint32(26).string(message.docLanguage);
+      writer.uint32(34).string(message.docLanguage);
     }
     if (message.docUrl !== "") {
-      writer.uint32(34).string(message.docUrl);
+      writer.uint32(42).string(message.docUrl);
     }
     if (message.docDigestSri !== "") {
-      writer.uint32(42).string(message.docDigestSri);
+      writer.uint32(50).string(message.docDigestSri);
     }
     if (message.version !== 0) {
-      writer.uint32(48).int32(message.version);
+      writer.uint32(56).int32(message.version);
     }
     return writer;
   },
@@ -453,38 +467,45 @@ export const MsgAddGovernanceFrameworkDocument = {
             break;
           }
 
-          message.creator = reader.string();
+          message.authority = reader.string();
           continue;
         case 2:
-          if (tag !== 16) {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.operator = reader.string();
+          continue;
+        case 3:
+          if (tag !== 24) {
             break;
           }
 
           message.id = longToNumber(reader.uint64() as Long);
-          continue;
-        case 3:
-          if (tag !== 26) {
-            break;
-          }
-
-          message.docLanguage = reader.string();
           continue;
         case 4:
           if (tag !== 34) {
             break;
           }
 
-          message.docUrl = reader.string();
+          message.docLanguage = reader.string();
           continue;
         case 5:
           if (tag !== 42) {
             break;
           }
 
-          message.docDigestSri = reader.string();
+          message.docUrl = reader.string();
           continue;
         case 6:
-          if (tag !== 48) {
+          if (tag !== 50) {
+            break;
+          }
+
+          message.docDigestSri = reader.string();
+          continue;
+        case 7:
+          if (tag !== 56) {
             break;
           }
 
@@ -501,7 +522,8 @@ export const MsgAddGovernanceFrameworkDocument = {
 
   fromJSON(object: any): MsgAddGovernanceFrameworkDocument {
     return {
-      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
+      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
       id: isSet(object.id) ? globalThis.Number(object.id) : 0,
       docLanguage: isSet(object.docLanguage) ? globalThis.String(object.docLanguage) : "",
       docUrl: isSet(object.docUrl) ? globalThis.String(object.docUrl) : "",
@@ -512,8 +534,11 @@ export const MsgAddGovernanceFrameworkDocument = {
 
   toJSON(message: MsgAddGovernanceFrameworkDocument): unknown {
     const obj: any = {};
-    if (message.creator !== "") {
-      obj.creator = message.creator;
+    if (message.authority !== "") {
+      obj.authority = message.authority;
+    }
+    if (message.operator !== "") {
+      obj.operator = message.operator;
     }
     if (message.id !== 0) {
       obj.id = Math.round(message.id);
@@ -542,7 +567,8 @@ export const MsgAddGovernanceFrameworkDocument = {
     object: I,
   ): MsgAddGovernanceFrameworkDocument {
     const message = createBaseMsgAddGovernanceFrameworkDocument();
-    message.creator = object.creator ?? "";
+    message.authority = object.authority ?? "";
+    message.operator = object.operator ?? "";
     message.id = object.id ?? 0;
     message.docLanguage = object.docLanguage ?? "";
     message.docUrl = object.docUrl ?? "";
