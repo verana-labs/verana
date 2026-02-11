@@ -5,7 +5,7 @@
 
 import { DirectSecp256k1HdWallet } from "@cosmjs/proto-signing";
 import { Secp256k1HdWallet } from "@cosmjs/amino";
-import { SigningStargateClient, StargateClient, GasPrice, calculateFee, AminoTypes } from "@cosmjs/stargate";
+import { SigningStargateClient, StargateClient, GasPrice, calculateFee, AminoTypes, DeliverTxResponse } from "@cosmjs/stargate";
 import { stringToPath } from "@cosmjs/crypto";
 import { createVeranaRegistry } from "./registry";
 import {
@@ -282,7 +282,40 @@ export async function signAndBroadcastWithRetry(
   messages: any[],
   fee: any,
   memo: string = ""
-) {
+): Promise<DeliverTxResponse> {
+  const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  const isUnauthorizedSequenceError = (error: any): boolean => {
+    const message = String(error?.message || "");
+    const rawLog = String(error?.rawLog || "");
+    return (
+      (message.includes("signature verification failed") || rawLog.includes("signature verification failed")) &&
+      (error?.code === 4 || message.includes("code 4") || message.includes("unauthorized") || rawLog.includes("unauthorized"))
+    );
+  };
+
+  const waitForOnChainSequenceAdvance = async (previousSequence: number): Promise<number> => {
+    const queryClient = await createQueryClient();
+    try {
+      for (let i = 0; i < 20; i++) {
+        await sleep(500);
+        const currentSeq = await queryClient.getSequence(address);
+        if (currentSeq.sequence > previousSequence) {
+          console.log(`  ✓ Sequence advanced on-chain: ${previousSequence} -> ${currentSeq.sequence}`);
+          return currentSeq.sequence;
+        }
+      }
+
+      const finalSeq = await queryClient.getSequence(address);
+      console.log(
+        `  ⚠️  Sequence did not advance after retry wait. Previous: ${previousSequence}, current: ${finalSeq.sequence}`
+      );
+      return finalSeq.sequence;
+    } finally {
+      queryClient.disconnect();
+    }
+  };
+
   // Extract wallet from client to create fresh client
   const wallet = (client as any).signer;
   if (!wallet) {
@@ -312,51 +345,56 @@ export async function signAndBroadcastWithRetry(
     // If there's a mismatch, wait a bit and try again
     if (cachedSeq.sequence !== expectedSequence) {
       console.log(`  ⚠️  Sequence mismatch: on-chain=${expectedSequence}, cached=${cachedSeq.sequence}, waiting...`);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await sleep(1000);
       await freshClient.getSequence(address); // Force refresh
     }
 
     // Match frontend: getSequence() once before signing
     await freshClient.getSequence(address);
 
-    let res = await freshClient.signAndBroadcast(address, messages, fee, memo);
+    let res: DeliverTxResponse | null = null;
+    let unauthorized = false;
+    try {
+      res = await freshClient.signAndBroadcast(address, messages, fee, memo);
+    } catch (error: any) {
+      if (isUnauthorizedSequenceError(error)) {
+        unauthorized = true;
+      } else {
+        throw error;
+      }
+    }
 
     // If unauthorized error, wait for previous transaction and retry
-    const unauthorized = res.code === 4 && typeof res.rawLog === 'string' && res.rawLog.includes('signature verification failed');
+    if (!unauthorized && res) {
+      unauthorized = res.code === 4 && typeof res.rawLog === 'string' && res.rawLog.includes('signature verification failed');
+    }
     if (unauthorized) {
       console.log(`  ⚠️  Unauthorized error detected. Waiting for previous transaction to confirm...`);
-
-      // CRITICAL: Wait for previous transaction to be FULLY confirmed
-      // 1. Wait for it to be included in a block
-      // 2. Wait for sequence to increment on-chain
-      const queryClientWait = await createQueryClient();
-      try {
-        // Wait for transaction to be queryable (means it's in a block)
-        for (let i = 0; i < 20; i++) {
-          await new Promise((resolve) => setTimeout(resolve, 500));
-          // Check if sequence has incremented
-          const currentSeq = await queryClientWait.getSequence(address);
-          if (currentSeq.sequence > expectedSequence) {
-            console.log(`  ✓ Previous transaction confirmed, sequence now: ${currentSeq.sequence}`);
-            break;
-          }
-        }
-      } finally {
-        queryClientWait.disconnect();
-      }
+      await waitForOnChainSequenceAdvance(expectedSequence);
 
       // Wait a bit more to ensure sequence is fully propagated
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await sleep(1000);
 
       // Create another fresh client for retry (fresh cache with updated sequence)
       const retryClient = await createSigningClient(wallet);
       try {
         // Match frontend: getSequence() once before retry
         await retryClient.getSequence(address);
-        res = await retryClient.signAndBroadcast(address, messages, fee, memo);
+        try {
+          res = await retryClient.signAndBroadcast(address, messages, fee, memo);
+        } catch (error: any) {
+          if (isUnauthorizedSequenceError(error)) {
+            throw new Error(`Retry failed with unauthorized sequence error: ${error.message || error}`);
+          }
+          throw error;
+        }
       } finally {
         retryClient.disconnect();
       }
+    }
+
+    if (!res) {
+      throw new Error("No broadcast response returned after retry flow.");
     }
 
     // Wait for this transaction to be confirmed (helps with next transaction)
@@ -373,11 +411,14 @@ export async function signAndBroadcastWithRetry(
           } catch {
             // Transaction not found yet, continue waiting
           }
-          await new Promise((resolve) => setTimeout(resolve, 500));
+          await sleep(500);
         }
       } finally {
         queryClient.disconnect();
       }
+
+      // Ensure account sequence is advanced on-chain before returning.
+      await waitForOnChainSequenceAdvance(expectedSequence);
     }
 
     return res;
