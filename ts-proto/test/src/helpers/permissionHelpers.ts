@@ -273,7 +273,7 @@ export async function createPermissionForTest(
 export async function createSchemaForTest(
   client: SigningStargateClient,
   address: string
-): Promise<{ schemaId: number; did: string }> {
+): Promise<{ schemaId: number; did: string; trustRegistryId: number }> {
   // Generate schema JSON
   function generateSimpleSchema(trustRegistryId: string): string {
     return JSON.stringify({
@@ -457,6 +457,5 @@ export async function createSchemaForTest(
   saveActiveTR(trId, did);
   saveActiveCS(schemaId, trId, did);
 
-  return { schemaId, did };
+  return { schemaId, did, trustRegistryId: trId };
 }
-
