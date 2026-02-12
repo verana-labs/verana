@@ -78,6 +78,11 @@ jobs:
           cd ${{ env.VERANA_BLOCKCHAIN_PATH }}/ts-proto/test
           npm install
 
+      - name: Type-check TypeScript test harness
+        run: |
+          cd ${{ env.VERANA_BLOCKCHAIN_PATH }}/ts-proto/test
+          npm run build
+
       - name: Start blockchain node asynchronously
         run: |
           cd ${{ env.VERANA_BLOCKCHAIN_PATH }}/testharness
@@ -119,8 +124,23 @@ jobs:
           MNEMONIC: ${{ env.MNEMONIC }}
           FEES: ${{ env.FEES }}
         run: |
-          cd ${{ env.VERANA_BLOCKCHAIN_PATH }}/ts-proto/test
+          cd ${{ env.VERANA_BLOCKCHAIN_PATH }}
           export PATH=$PATH:$BINARYPATH
+
+          echo "==================================================================="
+          echo "Running Amino bench parity checks"
+          echo "==================================================================="
+          echo ""
+
+          # Permission Amino parity (TS vs Go)
+          npx --prefix ts-proto/test tsx ts-proto/test/scripts/benches/amino/perm/ts.ts
+          go run ts-proto/test/scripts/benches/amino/perm/go.go
+          node ts-proto/test/scripts/benches/amino/perm/compare.js
+
+          # Credential Schema Amino parity (TS vs Go)
+          npx --prefix ts-proto/test tsx ts-proto/test/scripts/benches/amino/cs/ts.ts
+          go run ts-proto/test/scripts/benches/amino/cs/go.go
+          node ts-proto/test/scripts/benches/amino/cs/compare.js
           
           echo "==================================================================="
           echo "Running TypeScript Client Tests"
@@ -137,6 +157,7 @@ jobs:
           echo ""
           
           # Run all TypeScript client tests
+          cd ts-proto/test
           npm run test:all || {
             echo "TypeScript client tests failed!"
             exit 1
@@ -155,4 +176,3 @@ jobs:
       - name: Finalize
         if: always()
         run: echo "TypeScript client tests execution completed."
-
