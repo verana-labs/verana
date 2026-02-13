@@ -53,6 +53,51 @@ jobs:
             PR_NUMBER=$(echo "$GITHUB_REF" | awk -F'/' '{print $3}')
             echo "IMAGE_TAG=ghcr.io/verana-labs/verana-node:pr-${PR_NUMBER}" >> $GITHUB_ENV
             echo "NAMESPACE=vna-devnet-pr-${PR_NUMBER}" >> $GITHUB_ENV
+          elif [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            BRANCH_REF="${GITHUB_REF_NAME:-$GITHUB_REF}"
+            export BRANCH_REF
+            PR_NUMBER="$(python3 - <<'PY'
+import json
+import os
+import urllib.request
+
+branch = os.environ.get("BRANCH_REF", "")
+repo = os.environ.get("GITHUB_REPOSITORY", "")
+owner = os.environ.get("GITHUB_REPOSITORY_OWNER", "")
+token = os.environ.get("GITHUB_TOKEN", "")
+
+if not (branch and repo and owner and token):
+    raise SystemExit(0)
+
+url = f"https://api.github.com/repos/{repo}/pulls?head={owner}:{branch}&state=open"
+req = urllib.request.Request(
+    url,
+    headers={
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/vnd.github+json",
+    },
+)
+with urllib.request.urlopen(req, timeout=10) as resp:
+    data = json.loads(resp.read().decode("utf-8"))
+if data:
+    print(data[0].get("number", ""))
+PY
+)"
+            if [ -n "${PR_NUMBER}" ]; then
+              echo "IMAGE_TAG=ghcr.io/verana-labs/verana-node:pr-${PR_NUMBER}" >> $GITHUB_ENV
+              echo "NAMESPACE=vna-devnet-pr-${PR_NUMBER}" >> $GITHUB_ENV
+              echo "Resolved PR #${PR_NUMBER} for ${BRANCH_REF}; using PR image tag." >> $GITHUB_STEP_SUMMARY
+            else
+              BRANCH_TAG="${BRANCH_REF//\//-}"
+              SHORT_SHA="$(echo "${GITHUB_SHA}" | cut -c1-7)"
+              echo "IMAGE_TAG=ghcr.io/verana-labs/verana-node:sha-${SHORT_SHA}" >> $GITHUB_ENV
+              if [ "${BRANCH_TAG}" = "main" ]; then
+                echo "NAMESPACE=vna-devnet-main" >> $GITHUB_ENV
+              else
+                echo "NAMESPACE=vna-devnet-${BRANCH_TAG}" >> $GITHUB_ENV
+              fi
+              echo "No open PR for ${BRANCH_REF}; using sha tag ${SHORT_SHA}." >> $GITHUB_STEP_SUMMARY
+            fi
           else
             BRANCH_REF="${GITHUB_REF_NAME:-$GITHUB_REF}"
             BRANCH_TAG="${BRANCH_REF//\//-}"
