@@ -82,8 +82,13 @@ jobs:
             verana-node:ci \
             /bin/bash -lc 'set -e
               if ! command -v go >/dev/null 2>&1; then
-                apt-get update && apt-get install -y golang && rm -rf /var/lib/apt/lists/*
+                GO_VERSION="1.25.0"
+                curl -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz" -o /tmp/go.tgz
+                rm -rf /usr/local/go
+                tar -C /usr/local -xzf /tmp/go.tgz
+                rm -f /tmp/go.tgz
               fi
+              export PATH="/usr/local/go/bin:$PATH"
               echo ./scripts/setup_primary_validator.sh....
               ./scripts/setup_primary_validator.sh &
               PID=$!
