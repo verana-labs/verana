@@ -42,8 +42,8 @@ jobs:
             elif [ -n "${KUBECONFIG:-}" ]; then
               echo "HARNESS_MODE_EFFECTIVE=k8s" >> $GITHUB_ENV
             else
-              echo "HARNESS_MODE_EFFECTIVE=docker" >> $GITHUB_ENV
-              echo "K8S mode requested but KUBECONFIG is empty; falling back to docker." >> $GITHUB_STEP_SUMMARY
+              echo "Missing KUBECONFIG secret; cannot run K8S harness." >> $GITHUB_STEP_SUMMARY
+              exit 1
             fi
           else
             echo "HARNESS_MODE_EFFECTIVE=docker" >> $GITHUB_ENV
