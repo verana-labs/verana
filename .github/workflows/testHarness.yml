@@ -12,6 +12,9 @@ on:
 jobs:
   test-harness:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
     env:
       TEST_HARNESS_PATH: ./testharness
       HARNESS_MODE: k8s
@@ -43,6 +46,14 @@ jobs:
             BRANCH_TAG="${BRANCH_REF//\//-}"
             echo "IMAGE_TAG=ghcr.io/verana-labs/verana-node:branch-${BRANCH_TAG}" >> $GITHUB_ENV
           fi
+
+      - name: Login to GHCR
+        if: env.HARNESS_MODE_EFFECTIVE == 'docker'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build canonical image
         if: env.HARNESS_MODE_EFFECTIVE == 'docker'
