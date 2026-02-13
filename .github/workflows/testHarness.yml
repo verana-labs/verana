@@ -322,8 +322,7 @@ jobs:
           echo "K8S_RPC_ENDPOINT=$K8S_RPC_ENDPOINT"
           echo "K8S_LCD_ENDPOINT=$K8S_LCD_ENDPOINT"
           cd ${{ env.TEST_HARNESS_PATH }}
-          export VERANA_RPC_ENDPOINT="${K8S_RPC_ENDPOINT}"
-          export VERANA_LCD_ENDPOINT="${K8S_LCD_ENDPOINT}"
+          export NODE_RPC="${K8S_RPC_ENDPOINT}"
           ./scripts/setup_accounts.sh
           ./scripts/run_all.sh
 
