@@ -22,36 +22,27 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.head_ref || github.ref_name }}
 
-      - name: Install dependencies and run setup script asynchronously
+      - name: Build canonical image
         run: |
-          env
-          export PATH=$PATH:$HOME/go/bin
-          export BINARYPATH=$HOME/go/bin
-          make install
-          echo "BINARYPATH=$BINARYPATH" >> $GITHUB_ENV
-          type veranad
-          echo ./scripts/setup_primary_validator.sh....
-          ./scripts/setup_primary_validator.sh &
-          echo $! > /tmp/setup_primary_validator_pid
-          echo "Asynchronous setup process started with PID: $(cat /tmp/setup_primary_validator_pid)"
-          echo "Waiting for setup process to complete..."
+          docker build -f docker/veranad.Dockerfile -t verana-node:ci .
 
-      - name: Run test harness
+      - name: Run test harness in canonical image
         run: |
-          cd ${{ env.TEST_HARNESS_PATH }}
-          pwd
-          find .
-          export PATH=$PATH:$BINARYPATH
-          type veranad
-          ./scripts/setup_accounts.sh
-          ./scripts/run_all.sh
-
-      - name: Kill asynchronous setup process
-        run: |
-          if [ -f /tmp/setup_primary_validator_pid ]; then
-            kill -9 $(cat /tmp/setup_primary_validator_pid) || true
-            rm /tmp/setup_primary_validator_pid
-          fi
+          docker run --rm \
+            -v "$GITHUB_WORKSPACE:/workspace" \
+            -w /workspace \
+            -e TEST_HARNESS_PATH \
+            verana-node:ci \
+            /bin/bash -lc 'set -e
+              echo ./scripts/setup_primary_validator.sh....
+              ./scripts/setup_primary_validator.sh &
+              PID=$!
+              echo "Asynchronous setup process started with PID: $PID"
+              cd $TEST_HARNESS_PATH
+              ./scripts/setup_accounts.sh
+              ./scripts/run_all.sh
+              kill -9 $PID || true
+            '
 
       - name: Finalize without error
         run: echo "Test harness execution completed successfully."
