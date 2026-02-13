@@ -2,6 +2,11 @@ name: 2.Test Harness Execution
 
 on:
   workflow_dispatch:
+    inputs:
+      run_k8s:
+        description: 'Run test harness against K8s (requires KUBECONFIG secret)'
+        type: boolean
+        default: true
   pull_request:
     branches:
       - '*' # Trigger on pull requests to any branch
@@ -31,7 +36,10 @@ jobs:
       - name: Determine harness mode
         run: |
           if [ "$HARNESS_MODE" = "k8s" ]; then
-            if [ -n "${KUBECONFIG:-}" ]; then
+            if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ] && [ "${{ inputs.run_k8s }}" != "true" ]; then
+              echo "HARNESS_MODE_EFFECTIVE=docker" >> $GITHUB_ENV
+              echo "K8S disabled via workflow_dispatch input; falling back to docker." >> $GITHUB_STEP_SUMMARY
+            elif [ -n "${KUBECONFIG:-}" ]; then
               echo "HARNESS_MODE_EFFECTIVE=k8s" >> $GITHUB_ENV
             else
               echo "HARNESS_MODE_EFFECTIVE=docker" >> $GITHUB_ENV
