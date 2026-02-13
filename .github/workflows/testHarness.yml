@@ -24,7 +24,10 @@ jobs:
 
       - name: Build canonical image
         run: |
-          docker build -f docker/veranad.Dockerfile -t verana-node:ci .
+          docker build \
+            -f docker/veranad.Dockerfile \
+            --build-arg INCLUDE_GO=true \
+            -t verana-node:ci .
 
       - name: Run test harness in canonical image
         run: |

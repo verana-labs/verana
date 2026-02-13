@@ -19,6 +19,8 @@ RUN if [ "$USE_PREBUILT" = "true" ] && [ -f "$PREBUILT_BINARY" ]; then \
 
 FROM ${BASE_IMAGE}
 
+ARG INCLUDE_GO=false
+
 RUN apt-get update && apt-get install -y \
     bash \
     ca-certificates \
@@ -27,6 +29,7 @@ RUN apt-get update && apt-get install -y \
     s3cmd \
     tini \
     wget \
+    $(if [ "$INCLUDE_GO" = "true" ]; then echo golang; fi) \
   && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /tmp/veranad /usr/local/bin/veranad
