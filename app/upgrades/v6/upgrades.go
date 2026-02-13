@@ -2,9 +2,11 @@ package v6
 
 import (
 	"context"
+	"fmt"
+	"strconv"
+
 	"cosmossdk.io/math"
 	upgradetypes "cosmossdk.io/x/upgrade/types"
-	"fmt"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/verana-labs/verana/app/upgrades/types"
@@ -13,7 +15,6 @@ import (
 	permissiontypes "github.com/verana-labs/verana/x/perm/types"
 	trustdeposittypes "github.com/verana-labs/verana/x/td/types"
 	trustregistrytypes "github.com/verana-labs/verana/x/tr/types"
-	"strconv"
 )
 
 func CreateUpgradeHandler(

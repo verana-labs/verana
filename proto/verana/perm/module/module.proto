@@ -7,9 +7,7 @@ option go_package = "github.com/verana-labs/verana/x/perm/module;permission";
 
 // Module is the config object for the module.
 message Module {
-  option (cosmos.app.v1alpha1.module) = {
-    go_import: "github.com/verana-labs/verana/x/perm"
-  };
+  option (cosmos.app.v1alpha1.module) = {go_import: "github.com/verana-labs/verana/x/perm"};
 
   // authority defines the custom module authority. If not set, defaults to the governance module.
   string authority = 1;

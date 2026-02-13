@@ -15,4 +15,3 @@ var Upgrade = types.Upgrade{
 		Deleted: []string{},
 	},
 }
-
