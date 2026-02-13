@@ -272,22 +272,6 @@ jobs:
             exit 1
           fi
 
-      - name: Port-forward RPC and API
-        if: env.HARNESS_MODE_EFFECTIVE == 'k8s'
-        run: |
-          export KUBECONFIG=$KUBECONFIG
-          kubectl -n "$NAMESPACE" port-forward svc/verana-testharness 26657:26657 1317:1317 > /tmp/portforward.log 2>&1 &
-          echo $! > /tmp/portforward.pid
-          for i in {1..60}; do
-            if curl -s http://127.0.0.1:26657/status >/dev/null 2>&1; then
-              echo "RPC is ready"
-              break
-            fi
-            sleep 2
-          done
-          echo "K8S_RPC_ENDPOINT=http://127.0.0.1:26657" >> $GITHUB_ENV
-          echo "K8S_LCD_ENDPOINT=http://127.0.0.1:1317" >> $GITHUB_ENV
-
       - name: Run test harness in canonical image
         if: env.HARNESS_MODE_EFFECTIVE == 'docker'
         run: |
@@ -318,20 +302,29 @@ jobs:
       - name: Run test harness against K8s
         if: env.HARNESS_MODE_EFFECTIVE == 'k8s'
         run: |
+          export KUBECONFIG=$KUBECONFIG
+          kubectl -n "$NAMESPACE" port-forward svc/verana-testharness 26657:26657 1317:1317 > /tmp/portforward.log 2>&1 &
+          PORT_FORWARD_PID=$!
+          trap 'kill -9 "$PORT_FORWARD_PID" >/dev/null 2>&1 || true' EXIT
+          for i in {1..60}; do
+            if curl -s http://127.0.0.1:26657/status >/dev/null 2>&1; then
+              echo "RPC is ready"
+              break
+            fi
+            sleep 2
+          done
+          if ! curl -s http://127.0.0.1:26657/status >/dev/null 2>&1; then
+            echo "RPC did not become ready via port-forward." >&2
+            cat /tmp/portforward.log || true
+            exit 1
+          fi
           echo "Running test harness against K8s endpoints"
-          echo "K8S_RPC_ENDPOINT=$K8S_RPC_ENDPOINT"
-          echo "K8S_LCD_ENDPOINT=$K8S_LCD_ENDPOINT"
+          echo "K8S_RPC_ENDPOINT=http://127.0.0.1:26657"
+          echo "K8S_LCD_ENDPOINT=http://127.0.0.1:1317"
           cd ${{ env.TEST_HARNESS_PATH }}
-          export NODE_RPC="${K8S_RPC_ENDPOINT}"
+          export NODE_RPC="http://127.0.0.1:26657"
           ./scripts/setup_accounts.sh
           ./scripts/run_all.sh
-
-      - name: Cleanup port-forward
-        if: env.HARNESS_MODE_EFFECTIVE == 'k8s'
-        run: |
-          if [ -f /tmp/portforward.pid ]; then
-            kill -9 "$(cat /tmp/portforward.pid)" || true
-          fi
 
       - name: Finalize without error
         run: echo "Test harness execution completed successfully."
