@@ -56,7 +56,8 @@ jobs:
           else
             BRANCH_REF="${GITHUB_REF_NAME:-$GITHUB_REF}"
             BRANCH_TAG="${BRANCH_REF//\//-}"
-            echo "IMAGE_TAG=ghcr.io/verana-labs/verana-node:branch-${BRANCH_TAG}" >> $GITHUB_ENV
+            SHORT_SHA="$(echo "${GITHUB_SHA}" | cut -c1-7)"
+            echo "IMAGE_TAG=ghcr.io/verana-labs/verana-node:sha-${SHORT_SHA}" >> $GITHUB_ENV
             if [ "${BRANCH_TAG}" = "main" ]; then
               echo "NAMESPACE=vna-devnet-main" >> $GITHUB_ENV
             else
