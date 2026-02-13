@@ -316,6 +316,9 @@ jobs:
           if ! curl -s http://127.0.0.1:26657/status >/dev/null 2>&1; then
             echo "RPC did not become ready via port-forward." >&2
             cat /tmp/portforward.log || true
+            kubectl -n "$NAMESPACE" get pods -o wide || true
+            kubectl -n "$NAMESPACE" describe pod -l app=verana-testharness || true
+            kubectl -n "$NAMESPACE" logs -l app=verana-testharness --all-containers --tail=200 || true
             exit 1
           fi
           echo "Running test harness against K8s endpoints"
