@@ -18,7 +18,7 @@ jobs:
     env:
       TEST_HARNESS_PATH: ./testharness
       HARNESS_MODE: k8s
-      OVH_KUBECONFIG: ${{ secrets.OVH_KUBECONFIG }}
+      KUBECONFIG: ${{ secrets.OVH_KUBECONFIG }}
       K8S_INGRESS_DOMAIN: testnet.verana.network
 
     steps:
@@ -31,11 +31,11 @@ jobs:
       - name: Determine harness mode
         run: |
           if [ "$HARNESS_MODE" = "k8s" ]; then
-            if [ -n "${OVH_KUBECONFIG:-}" ]; then
+            if [ -n "${KUBECONFIG:-}" ]; then
               echo "HARNESS_MODE_EFFECTIVE=k8s" >> $GITHUB_ENV
             else
               echo "HARNESS_MODE_EFFECTIVE=docker" >> $GITHUB_ENV
-              echo "K8S mode requested but OVH_KUBECONFIG is empty; falling back to docker." >> $GITHUB_STEP_SUMMARY
+              echo "K8S mode requested but KUBECONFIG is empty; falling back to docker." >> $GITHUB_STEP_SUMMARY
             fi
           else
             echo "HARNESS_MODE_EFFECTIVE=docker" >> $GITHUB_ENV
@@ -83,7 +83,7 @@ jobs:
       - name: Configure kubeconfig
         if: env.HARNESS_MODE_EFFECTIVE == 'k8s'
         run: |
-          echo "$OVH_KUBECONFIG" > k8s_config
+          echo "$KUBECONFIG" > k8s_config
           echo "KUBECONFIG=$(pwd)/k8s_config" >> $GITHUB_ENV
 
       - name: Deploy single-node testnet to K8s
