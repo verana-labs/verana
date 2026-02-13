@@ -196,6 +196,7 @@ jobs:
                   args:
                     - |
                       apt-get update && apt-get install -y python3 && rm -rf /var/lib/apt/lists/*
+                      chmod +x /scripts/setup_primary_validator.sh
                       /scripts/setup_primary_validator.sh
                   ports:
                     - containerPort: 26656
