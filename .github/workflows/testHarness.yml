@@ -48,7 +48,17 @@ jobs:
         if: env.HARNESS_MODE_EFFECTIVE == 'docker'
         run: |
           echo "Pulling $IMAGE_TAG"
-          docker pull "$IMAGE_TAG"
+          attempts=0
+          max_attempts=30
+          until docker pull "$IMAGE_TAG"; do
+            attempts=$((attempts + 1))
+            if [ "$attempts" -ge "$max_attempts" ]; then
+              echo "Failed to pull $IMAGE_TAG after $attempts attempts." >&2
+              exit 1
+            fi
+            echo "Image not ready yet, retrying in 20s... ($attempts/$max_attempts)"
+            sleep 20
+          done
           docker tag "$IMAGE_TAG" verana-node:ci
 
       - name: Run test harness in canonical image
