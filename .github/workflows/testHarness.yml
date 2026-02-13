@@ -156,6 +156,11 @@ jobs:
             echo "Image $IMAGE_TAG not available or unauthorized. Set GHCR_READ_TOKEN with read:packages." >&2
             exit 1
           fi
+          echo "Installing veranad from $IMAGE_TAG for local test harness use"
+          container_id="$(docker create "$IMAGE_TAG")"
+          docker cp "${container_id}:/usr/local/bin/veranad" /usr/local/bin/veranad
+          docker rm "$container_id"
+          chmod +x /usr/local/bin/veranad
           kubectl create namespace "$NAMESPACE" || true
           kubectl -n "$NAMESPACE" create secret docker-registry ghcr-auth \
             --docker-server=ghcr.io \
