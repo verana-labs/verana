@@ -267,7 +267,7 @@ jobs:
           kubectl apply -n "$NAMESPACE" -f /tmp/verana-testharness-svc.yaml
           kubectl apply -n "$NAMESPACE" -f /tmp/verana-testharness-ingress.yaml
 
-          if ! kubectl -n "$NAMESPACE" wait --for=condition=ready pod -l app=verana-testharness --timeout=300s; then
+          if ! kubectl -n "$NAMESPACE" rollout status deployment/verana-testharness-node --timeout=300s; then
             kubectl -n "$NAMESPACE" get pods -o wide || true
             kubectl -n "$NAMESPACE" describe pod -l app=verana-testharness || true
             kubectl -n "$NAMESPACE" logs -l app=verana-testharness --all-containers --tail=200 || true
