@@ -1,11 +1,13 @@
 name: 1.Build Binaries
 
 on:
-  push:
-      tags:
-      - '*' # Trigger on tag creation
+  release:
+    types: [prereleased]
   workflow_dispatch:
 
+permissions:
+  id-token: write   # Required for npm trusted publishing (OIDC)
+  contents: write   # Required for release asset uploads via action-gh-release
 
 env:
   OVH_S3_APPLICATION_KEY: ${{ secrets.OVH_S3_APPLICATION_KEY }}
@@ -36,11 +38,18 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          registry-url: https://registry.npmjs.org
 
       - name: Set up Go environment
         uses: actions/setup-go@v3
         with:
           go-version: 1.25
+
+      - name: Corepack pnpm
+        # OIDC publishing requires a very up to date npm version
+        run: |
+          npm install -g npm@latest
+          corepack enable
 
       - name: Set up Buf
         uses: bufbuild/buf-setup-action@v1
@@ -69,7 +78,10 @@ jobs:
           git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr - %an)%Creset' --abbrev-commit --date=relative --all
           echo executing: git describe --tags --exact-match
           git describe --tags --exact-match || true
-          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+          if [ "${GITHUB_EVENT_NAME}" = "release" ]; then
+            VERSION="${{ github.event.release.tag_name }}"
+            echo "VERSION from release tag_name=${VERSION}"
+          elif [ "${GITHUB_REF_TYPE}" = "tag" ]; then
             VERSION="${GITHUB_REF_NAME}"
             echo "VERSION from GITHUB_REF_NAME=${VERSION}"
           elif git describe --tags --exact-match > /dev/null 2>&1; then
@@ -121,8 +133,10 @@ jobs:
           echo "PKG_TGZ=${PKG_TGZ}" >> $GITHUB_ENV
 
       - name: Publish ts-proto package
-        if: env.VERSION != 'dev'
-        run: npm publish
+        if: env.VERSION != 'dev' && github.event_name == 'release'
+        working-directory: ts-proto
+        continue-on-error: true        
+        run: npm publish --provenance # Required for npm OIDC trusted publishing
 
       - name: Build binary for Linux AMD64
         run: |
@@ -207,7 +221,7 @@ jobs:
           s3cmd put manifest.json s3://$BUCKET_NAME/binaries/manifest.json --acl-public --force
 
       - name: Create GitHub Release and Upload Assets
-        if: env.VERSION != 'dev'
+        if: env.VERSION != 'dev' && github.event_name == 'release'
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ env.VERSION }} # Explicitly specify the tag

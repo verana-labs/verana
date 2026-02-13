@@ -18,9 +18,10 @@ func (ms msgServer) validatePermissionChecks(ctx sdk.Context, msg *types.MsgStar
 
 	// [MOD-PERM-MSG-1-2-2] Check if validator perm is valid AND country compatibility
 	// Spec: "It MUST be a valid permission AND (validator_perm.country MUST be equal to country, or validator_perm.country MUST be null)"
-	// IsValidPermission already checks both: validity (time, revoked, slashed) AND country compatibility
+	// Spec: "When starting a Permission VP, if parent (validator) is INACTIVE (not valid) then MUST abort."
+	// IsValidPermission already checks both: validity (ACTIVE state, time, revoked, slashed, repaid) AND country compatibility
 	if err := IsValidPermission(validatorPerm, msg.Country, ctx.BlockTime()); err != nil {
-		return types.Permission{}, fmt.Errorf("validator perm is not valid: %w", err)
+		return types.Permission{}, fmt.Errorf("validator perm is not valid (must be ACTIVE): %w", err)
 	}
 
 	// Load credential schema

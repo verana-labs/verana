@@ -487,8 +487,11 @@ func (ms msgServer) validateCreateRootPermissionBasicChecks(ctx sdk.Context, msg
 		return fmt.Errorf("credential schema not found: %w", err)
 	}
 
-	// effective_from must be in the future
-	if msg.EffectiveFrom != nil && !msg.EffectiveFrom.After(now) {
+	// effective_from is mandatory and must be in the future
+	if msg.EffectiveFrom == nil {
+		return fmt.Errorf("effective_from is required")
+	}
+	if !msg.EffectiveFrom.After(now) {
 		return fmt.Errorf("effective_from must be in the future")
 	}
 
@@ -738,10 +741,8 @@ func (ms msgServer) validateRevokePermissionBasicChecks(ctx sdk.Context, msg *ty
 	}
 	applicantPerm = perm
 
-	// applicant_perm MUST be a valid permission
-	if err := IsValidPermission(applicantPerm, applicantPerm.Country, now); err != nil {
-		return applicantPerm, fmt.Errorf("applicant permission is not valid: %w", err)
-	}
+	// Note: Per spec, a permission that is not yet active CAN be revoked.
+	// No IsValidPermission check is required here.
 
 	return applicantPerm, nil
 }

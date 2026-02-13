@@ -34,6 +34,11 @@ func TestStartPermissionVP(t *testing.T) {
 	k, ms, csKeeper, trkKeeper, ctx := setupMsgServer(t)
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
+	// Set specific block time for consistent testing
+	blockTime := time.Date(2023, 1, 15, 0, 0, 0, 0, time.UTC)
+	sdkCtx = sdkCtx.WithBlockTime(blockTime)
+	ctx = sdk.WrapSDKContext(sdkCtx)
+
 	creator := sdk.AccAddress([]byte("test_creator")).String()
 	validDid := "did:example:123456789abcdefghi"
 
@@ -46,51 +51,57 @@ func TestStartPermissionVP(t *testing.T) {
 		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
 
 	// Create validator perm (ISSUER_GRANTOR)
-	now := time.Now()
+	now := sdkCtx.BlockTime()
+
+	pastTime := now.Add(-1 * time.Hour) // Set effective_from to past relative to block time to make it ACTIVE
 	// This should be VALIDATED as it's a prerequisite
 	validatorPerm := types.Permission{
-		SchemaId:   1,
-		Type:       types.PermissionType_ISSUER_GRANTOR,
-		Grantee:    creator,
-		Created:    &now,
-		CreatedBy:  creator,
-		Extended:   &now,
-		ExtendedBy: creator,
-		Modified:   &now,
-		Country:    "US",
-		VpState:    types.ValidationState_VALIDATED, // validator must be validated
+		SchemaId:      1,
+		Type:          types.PermissionType_ISSUER_GRANTOR,
+		Grantee:       creator,
+		Created:       &now,
+		CreatedBy:     creator,
+		Extended:      &now,
+		ExtendedBy:    creator,
+		Modified:      &now,
+		Country:       "US",
+		VpState:       types.ValidationState_VALIDATED, // validator must be validated
+		EffectiveFrom: &pastTime,                       // Required for ACTIVE state
 	}
+
 	validatorPermID, err := k.CreatePermission(sdkCtx, validatorPerm)
 	require.NoError(t, err)
 
 	// Create another validator perm (VERIFIER_GRANTOR with different country)
 	verifierGrantorPerm := types.Permission{
-		SchemaId:   1,
-		Type:       types.PermissionType_VERIFIER_GRANTOR,
-		Grantee:    creator,
-		Created:    &now,
-		CreatedBy:  creator,
-		Extended:   &now,
-		ExtendedBy: creator,
-		Modified:   &now,
-		Country:    "FR", // Different country
-		VpState:    types.ValidationState_VALIDATED,
+		SchemaId:      1,
+		Type:          types.PermissionType_VERIFIER_GRANTOR,
+		Grantee:       creator,
+		Created:       &now,
+		CreatedBy:     creator,
+		Extended:      &now,
+		ExtendedBy:    creator,
+		Modified:      &now,
+		Country:       "FR", // Different country
+		VpState:       types.ValidationState_VALIDATED,
+		EffectiveFrom: &pastTime, // Required for ACTIVE state
 	}
 	verifierGrantorPermID, err := k.CreatePermission(sdkCtx, verifierGrantorPerm)
 	require.NoError(t, err)
 
 	// Create a validator perm without country (for testing optional country)
 	validatorPermNoCountry := types.Permission{
-		SchemaId:   1,
-		Type:       types.PermissionType_ISSUER_GRANTOR,
-		Grantee:    creator,
-		Created:    &now,
-		CreatedBy:  creator,
-		Extended:   &now,
-		ExtendedBy: creator,
-		Modified:   &now,
-		Country:    "", // No country restriction
-		VpState:    types.ValidationState_VALIDATED,
+		SchemaId:      1,
+		Type:          types.PermissionType_ISSUER_GRANTOR,
+		Grantee:       creator,
+		Created:       &now,
+		CreatedBy:     creator,
+		Extended:      &now,
+		ExtendedBy:    creator,
+		Modified:      &now,
+		Country:       "", // No country restriction
+		VpState:       types.ValidationState_VALIDATED,
+		EffectiveFrom: &pastTime, // Required for ACTIVE state
 	}
 	validatorPermNoCountryID, err := k.CreatePermission(sdkCtx, validatorPermNoCountry)
 	require.NoError(t, err)
@@ -248,6 +259,13 @@ func TestStartPermissionVP(t *testing.T) {
 
 func TestRenewPermissionVP(t *testing.T) {
 	k, ms, csKeeper, _, ctx := setupMsgServer(t)
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	// Set specific block time for consistent testing
+	blockTime := time.Date(2023, 1, 15, 0, 0, 0, 0, time.UTC)
+	sdkCtx = sdkCtx.WithBlockTime(blockTime)
+	ctx = sdk.WrapSDKContext(sdkCtx)
+
 	creator := sdk.AccAddress([]byte("test_creator")).String()
 
 	// Create mock credential schema
@@ -256,20 +274,25 @@ func TestRenewPermissionVP(t *testing.T) {
 		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
 
 	// Create validator perm
-	now := time.Now()
+	now := sdkCtx.BlockTime()
+
+	pastTime := now.Add(-1 * time.Hour) // Set effective_from to past relative to block time to make it ACTIVE
 	validatorPerm := types.Permission{
-		SchemaId:   1,
-		Type:       3, // ISSUER_GRANTOR
-		Grantee:    creator,
-		Created:    &now,
-		CreatedBy:  creator,
-		Extended:   &now,
-		ExtendedBy: creator,
-		Modified:   &now,
-		Country:    "US",
-		VpState:    types.ValidationState_VALIDATED,
+		SchemaId:      1,
+		Type:          3, // ISSUER_GRANTOR
+		Grantee:       creator,
+		Created:       &now,
+		CreatedBy:     creator,
+		Extended:      &now,
+		ExtendedBy:    creator,
+		Modified:      &now,
+		Country:       "US",
+		VpState:       types.ValidationState_VALIDATED,
+		EffectiveFrom: &pastTime, // Required for ACTIVE state
 	}
-	validatorPermID, err := k.CreatePermission(sdk.UnwrapSDKContext(ctx), validatorPerm)
+
+	validatorPermID, err := k.CreatePermission(sdkCtx, validatorPerm)
+
 	require.NoError(t, err)
 
 	// Create applicant perm
@@ -337,6 +360,11 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 	k, ms, csKeeper, _, ctx := setupMsgServer(t)
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
+	// Set specific block time for consistent testing
+	blockTime := time.Date(2023, 1, 15, 0, 0, 0, 0, time.UTC)
+	sdkCtx = sdkCtx.WithBlockTime(blockTime)
+	ctx = sdk.WrapSDKContext(sdkCtx)
+
 	creator := sdk.AccAddress([]byte("test_creator")).String()
 	validatorAddr := sdk.AccAddress([]byte("test_validator")).String()
 	otherAddr := sdk.AccAddress([]byte("other_user")).String()
@@ -346,22 +374,26 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
 		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
 
-	now := time.Now()
+	now := sdkCtx.BlockTime()
+
 	futureTime := now.Add(365 * 24 * time.Hour)
+	pastTime := now.Add(-1 * time.Hour) // Set effective_from to past relative to block time to make it ACTIVE
 
 	// Create validator perm
 	validatorPerm := types.Permission{
-		SchemaId:   1,
-		Type:       types.PermissionType_ISSUER_GRANTOR,
-		Grantee:    validatorAddr,
-		Created:    &now,
-		CreatedBy:  validatorAddr,
-		Extended:   &now,
-		ExtendedBy: validatorAddr,
-		Modified:   &now,
-		Country:    "US",
-		VpState:    types.ValidationState_VALIDATED,
+		SchemaId:      1,
+		Type:          types.PermissionType_ISSUER_GRANTOR,
+		Grantee:       validatorAddr,
+		Created:       &now,
+		CreatedBy:     validatorAddr,
+		Extended:      &now,
+		ExtendedBy:    validatorAddr,
+		Modified:      &now,
+		Country:       "US",
+		VpState:       types.ValidationState_VALIDATED,
+		EffectiveFrom: &pastTime, // Required for ACTIVE state
 	}
+
 	validatorPermID, err := k.CreatePermission(sdkCtx, validatorPerm)
 	require.NoError(t, err)
 
@@ -634,7 +666,8 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 			Modified:            &now,
 			Country:             "US",
 			VpState:             types.ValidationState_VALIDATED,
-			IssuanceFeeDiscount: 7000, // 70% discount
+			IssuanceFeeDiscount: 7000,      // 70% discount
+			EffectiveFrom:       &pastTime, // Required for ACTIVE state
 		}
 		validatorWithDiscountID, err := k.CreatePermission(sdkCtx, validatorWithDiscount)
 		require.NoError(t, err)
@@ -693,7 +726,8 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 			Modified:            &now,
 			Country:             "US",
 			VpState:             types.ValidationState_VALIDATED,
-			IssuanceFeeDiscount: 5000, // 50% discount
+			IssuanceFeeDiscount: 5000,      // 50% discount
+			EffectiveFrom:       &pastTime, // Required for ACTIVE state
 		}
 		validatorWithDiscountID, err := k.CreatePermission(sdkCtx, validatorWithDiscount)
 		require.NoError(t, err)
@@ -834,16 +868,17 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 
 		// Create ECOSYSTEM validator
 		ecosystemValidator := types.Permission{
-			SchemaId:   2,
-			Type:       types.PermissionType_ECOSYSTEM,
-			Grantee:    validatorAddr,
-			Created:    &now,
-			CreatedBy:  validatorAddr,
-			Extended:   &now,
-			ExtendedBy: validatorAddr,
-			Modified:   &now,
-			Country:    "US",
-			VpState:    types.ValidationState_VALIDATED,
+			SchemaId:      2,
+			Type:          types.PermissionType_ECOSYSTEM,
+			Grantee:       validatorAddr,
+			Created:       &now,
+			CreatedBy:     validatorAddr,
+			Extended:      &now,
+			ExtendedBy:    validatorAddr,
+			Modified:      &now,
+			Country:       "US",
+			VpState:       types.ValidationState_VALIDATED,
+			EffectiveFrom: &pastTime, // Required for ACTIVE state
 		}
 		ecosystemValidatorID, err := k.CreatePermission(sdkCtx, ecosystemValidator)
 		require.NoError(t, err)
@@ -1203,19 +1238,21 @@ func TestExtendPermission(t *testing.T) {
 	now := sdkCtx.BlockTime()
 	currentEffectiveUntil := now.Add(30 * 24 * time.Hour) // 30 days in the future
 	futureVpExp := now.Add(365 * 24 * time.Hour)          // 1 year in the future
+	pastTime := now.Add(-1 * time.Hour)                   // Set effective_from to past to make it ACTIVE
 
 	// Create validator perm
 	validatorPerm := types.Permission{
-		SchemaId:   1,
-		Type:       types.PermissionType_ISSUER_GRANTOR,
-		Grantee:    validatorAddr,
-		Created:    &now,
-		CreatedBy:  validatorAddr,
-		Extended:   &now,
-		ExtendedBy: validatorAddr,
-		Modified:   &now,
-		Country:    "US",
-		VpState:    types.ValidationState_VALIDATED,
+		SchemaId:      1,
+		Type:          types.PermissionType_ISSUER_GRANTOR,
+		Grantee:       validatorAddr,
+		Created:       &now,
+		CreatedBy:     validatorAddr,
+		Extended:      &now,
+		ExtendedBy:    validatorAddr,
+		Modified:      &now,
+		Country:       "US",
+		VpState:       types.ValidationState_VALIDATED,
+		EffectiveFrom: &pastTime, // Required for ACTIVE state
 	}
 	validatorPermID, err := k.CreatePermission(sdkCtx, validatorPerm)
 	require.NoError(t, err)
@@ -1235,8 +1272,10 @@ func TestExtendPermission(t *testing.T) {
 		ValidatorPermId: validatorPermID,
 		VpState:         types.ValidationState_VALIDATED,
 		VpExp:           &futureVpExp,
+		EffectiveFrom:   &pastTime, // Required for ACTIVE state
 	}
 	applicantPermID, err := k.CreatePermission(sdkCtx, applicantPerm)
+
 	require.NoError(t, err)
 
 	// Create a trust registry perm to test direct extension
@@ -1252,6 +1291,7 @@ func TestExtendPermission(t *testing.T) {
 		EffectiveUntil: &currentEffectiveUntil,
 		Country:        "US",
 		VpState:        types.ValidationState_VALIDATED,
+		EffectiveFrom:  &pastTime, // Required for ACTIVE state
 	}
 	trustRegistryPermID, err := k.CreatePermission(sdkCtx, trustRegistryPerm)
 	require.NoError(t, err)
@@ -1272,6 +1312,7 @@ func TestExtendPermission(t *testing.T) {
 		ValidatorPermId: validatorPermID,
 		VpState:         types.ValidationState_VALIDATED,
 		VpExp:           &futureVpExp,
+		EffectiveFrom:   &pastTime, // Required for ACTIVE state
 	}
 	wrongCreatorTestPermID, err := k.CreatePermission(sdkCtx, wrongCreatorTestPerm)
 	require.NoError(t, err)
@@ -1291,6 +1332,7 @@ func TestExtendPermission(t *testing.T) {
 		ValidatorPermId: validatorPermID,
 		VpState:         types.ValidationState_VALIDATED,
 		VpExp:           &futureVpExp,
+		EffectiveFrom:   &pastTime, // Required for ACTIVE state
 	}
 	nullEffectiveUntilPermID, err := k.CreatePermission(sdkCtx, nullEffectiveUntilPerm)
 	require.NoError(t, err)
@@ -1308,6 +1350,7 @@ func TestExtendPermission(t *testing.T) {
 		EffectiveUntil: nil, // NULL effective_until
 		Country:        "US",
 		VpState:        types.ValidationState_VALIDATED,
+		EffectiveFrom:  &pastTime, // Required for ACTIVE state
 	}
 	nullEffectiveUntilEcosystemPermID, err := k.CreatePermission(sdkCtx, nullEffectiveUntilEcosystemPerm)
 	require.NoError(t, err)
@@ -1328,6 +1371,7 @@ func TestExtendPermission(t *testing.T) {
 		ValidatorPermId: validatorPermID,
 		VpState:         types.ValidationState_VALIDATED,
 		VpExp:           &futureVpExp,
+		EffectiveFrom:   &pastTime, // Required for ACTIVE state
 	}
 	nullEffectiveUntilPermForPastTestID, err := k.CreatePermission(sdkCtx, nullEffectiveUntilPermForPastTest)
 	require.NoError(t, err)
@@ -1346,6 +1390,7 @@ func TestExtendPermission(t *testing.T) {
 		ValidatorPermId: validatorPermID,
 		VpState:         types.ValidationState_VALIDATED,
 		VpExp:           &futureVpExp,
+		EffectiveFrom:   &pastTime, // Required for ACTIVE state
 	}
 	nullEffectiveUntilPermForEqualTestID, err := k.CreatePermission(sdkCtx, nullEffectiveUntilPermForEqualTest)
 	require.NoError(t, err)
@@ -1497,6 +1542,11 @@ func TestRevokePermission(t *testing.T) {
 	k, ms, csKeeper, _, ctx := setupMsgServer(t)
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
+	// Set specific block time for consistent testing
+	blockTime := time.Date(2023, 1, 15, 0, 0, 0, 0, time.UTC)
+	sdkCtx = sdkCtx.WithBlockTime(blockTime)
+	ctx = sdk.WrapSDKContext(sdkCtx)
+
 	creator := sdk.AccAddress([]byte("test_creator")).String()
 	validatorAddr := sdk.AccAddress([]byte("test_validator")).String()
 
@@ -1505,20 +1555,23 @@ func TestRevokePermission(t *testing.T) {
 		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
 		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
 
-	now := time.Now()
+	now := sdkCtx.BlockTime()
+
+	pastTime := now.Add(-1 * time.Hour) // Set effective_from to past relative to block time to make it ACTIVE
 
 	// Create validator perm
 	validatorPerm := types.Permission{
-		SchemaId:   1,
-		Type:       types.PermissionType_ISSUER_GRANTOR,
-		Grantee:    validatorAddr,
-		Created:    &now,
-		CreatedBy:  validatorAddr,
-		Extended:   &now,
-		ExtendedBy: validatorAddr,
-		Modified:   &now,
-		Country:    "US",
-		VpState:    types.ValidationState_VALIDATED,
+		SchemaId:      1,
+		Type:          types.PermissionType_ISSUER_GRANTOR,
+		Grantee:       validatorAddr,
+		Created:       &now,
+		CreatedBy:     validatorAddr,
+		Extended:      &now,
+		ExtendedBy:    validatorAddr,
+		Modified:      &now,
+		Country:       "US",
+		VpState:       types.ValidationState_VALIDATED,
+		EffectiveFrom: &pastTime, // Required for ACTIVE state
 	}
 	validatorPermID, err := k.CreatePermission(sdkCtx, validatorPerm)
 	require.NoError(t, err)
@@ -1536,7 +1589,9 @@ func TestRevokePermission(t *testing.T) {
 		Country:         "US",
 		ValidatorPermId: validatorPermID,
 		VpState:         types.ValidationState_VALIDATED,
+		EffectiveFrom:   &pastTime, // Required for ACTIVE state
 	}
+
 	applicantPermID, err := k.CreatePermission(sdkCtx, applicantPerm)
 	require.NoError(t, err)
 
@@ -1627,6 +1682,7 @@ func TestCreateOrUpdatePermissionSession(t *testing.T) {
 	// If you want to test with specific values, you'll need to implement Option 1
 
 	now := sdkCtx.BlockTime()
+	pastTime := now.Add(-1 * time.Hour) // Set effective_from to past to make it ACTIVE
 
 	// Create trust registry / validator perm
 	trustPerm := types.Permission{
@@ -1643,6 +1699,7 @@ func TestCreateOrUpdatePermissionSession(t *testing.T) {
 		ValidationFees:   10,
 		IssuanceFees:     5,
 		VerificationFees: 3,
+		EffectiveFrom:    &pastTime, // Required for ACTIVE state
 	}
 	trustPermID, err := k.CreatePermission(sdkCtx, trustPerm)
 	require.NoError(t, err)
@@ -1660,6 +1717,7 @@ func TestCreateOrUpdatePermissionSession(t *testing.T) {
 		Country:         "US",
 		ValidatorPermId: trustPermID,
 		VpState:         types.ValidationState_VALIDATED,
+		EffectiveFrom:   &pastTime, // Required for ACTIVE state
 	}
 	issuerPermID, err := k.CreatePermission(sdkCtx, issuerPerm)
 	require.NoError(t, err)
@@ -1694,6 +1752,7 @@ func TestCreateOrUpdatePermissionSession(t *testing.T) {
 		Country:         "US",
 		ValidatorPermId: issuerPermID, // Issued by the issuer
 		VpState:         types.ValidationState_VALIDATED,
+		EffectiveFrom:   &pastTime, // Required for ACTIVE state
 	}
 	agentPermID, err := k.CreatePermission(sdkCtx, agentPerm)
 	require.NoError(t, err)
@@ -1711,7 +1770,9 @@ func TestCreateOrUpdatePermissionSession(t *testing.T) {
 		Country:         "US",
 		ValidatorPermId: issuerPermID, // Issued by the issuer
 		VpState:         types.ValidationState_VALIDATED,
+		EffectiveFrom:   &pastTime, // Required for ACTIVE state
 	}
+
 	walletAgentPermID, err := k.CreatePermission(sdkCtx, walletAgentPerm)
 	require.NoError(t, err)
 
@@ -1895,6 +1956,11 @@ func TestDiscountApplicationInFeeCalculation(t *testing.T) {
 	k, ms, csKeeper, _, ctx := setupMsgServer(t)
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
+	// Set specific block time for consistent testing
+	blockTime := time.Date(2023, 1, 15, 0, 0, 0, 0, time.UTC)
+	sdkCtx = sdkCtx.WithBlockTime(blockTime)
+	ctx = sdk.WrapSDKContext(sdkCtx)
+
 	creator := sdk.AccAddress([]byte("test_creator")).String()
 
 	// Create mock credential schema
@@ -1902,21 +1968,24 @@ func TestDiscountApplicationInFeeCalculation(t *testing.T) {
 		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
 		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
 
-	now := time.Now()
+	now := sdkCtx.BlockTime()
+
+	pastTime := now.Add(-1 * time.Hour) // Set effective_from to past relative to block time to make it ACTIVE
 
 	// Create validator perm (ISSUER_GRANTOR) with issuance fees
 	validatorPerm := types.Permission{
-		SchemaId:     1,
-		Type:         types.PermissionType_ISSUER_GRANTOR,
-		Grantee:      creator,
-		Created:      &now,
-		CreatedBy:    creator,
-		Extended:     &now,
-		ExtendedBy:   creator,
-		Modified:     &now,
-		Country:      "US",
-		VpState:      types.ValidationState_VALIDATED,
-		IssuanceFees: 100, // 100 trust units
+		SchemaId:      1,
+		Type:          types.PermissionType_ISSUER_GRANTOR,
+		Grantee:       creator,
+		Created:       &now,
+		CreatedBy:     creator,
+		Extended:      &now,
+		ExtendedBy:    creator,
+		Modified:      &now,
+		Country:       "US",
+		VpState:       types.ValidationState_VALIDATED,
+		IssuanceFees:  100, // 100 trust units
+		EffectiveFrom: &pastTime,
 	}
 	validatorPermID, err := k.CreatePermission(sdkCtx, validatorPerm)
 	require.NoError(t, err)
@@ -1935,6 +2004,7 @@ func TestDiscountApplicationInFeeCalculation(t *testing.T) {
 		ValidatorPermId:     validatorPermID,
 		VpState:             types.ValidationState_VALIDATED,
 		IssuanceFeeDiscount: 5000, // 50% discount
+		EffectiveFrom:       &pastTime,
 	}
 	issuerPermID, err := k.CreatePermission(sdkCtx, issuerPerm)
 	require.NoError(t, err)
@@ -1952,6 +2022,7 @@ func TestDiscountApplicationInFeeCalculation(t *testing.T) {
 		Country:         "US",
 		ValidatorPermId: issuerPermID,
 		VpState:         types.ValidationState_VALIDATED,
+		EffectiveFrom:   &pastTime,
 	}
 	agentPermID, err := k.CreatePermission(sdkCtx, agentPerm)
 	require.NoError(t, err)
@@ -1994,6 +2065,7 @@ func TestDiscountApplicationInFeeCalculation(t *testing.T) {
 			ValidatorPermId:     validatorPermID,
 			VpState:             types.ValidationState_VALIDATED,
 			IssuanceFeeDiscount: 3000, // 30% discount
+			EffectiveFrom:       &pastTime,
 		}
 		issuerPerm2ID, err := k.CreatePermission(sdkCtx, issuerPerm2)
 		require.NoError(t, err)
@@ -2028,6 +2100,7 @@ func TestDiscountApplicationInFeeCalculation(t *testing.T) {
 			VpState:             types.ValidationState_VALIDATED,
 			IssuanceFees:        200,  // 200 trust units
 			IssuanceFeeDiscount: 2000, // 20% discount
+			EffectiveFrom:       &pastTime,
 		}
 		validatorWithDiscountID, err := k.CreatePermission(sdkCtx, validatorWithDiscount)
 		require.NoError(t, err)
@@ -2046,8 +2119,11 @@ func TestDiscountApplicationInFeeCalculation(t *testing.T) {
 			ValidatorPermId:     validatorWithDiscountID,
 			VpState:             types.ValidationState_VALIDATED,
 			IssuanceFeeDiscount: 3000, // 30% discount
+			EffectiveFrom:       &pastTime,
 		}
 		issuerWithDiscountID, err := k.CreatePermission(sdkCtx, issuerWithDiscount)
+		require.NoError(t, err)
+
 		require.NoError(t, err)
 
 		// Expected calculation:
@@ -2160,6 +2236,11 @@ func TestQueryPermissions(t *testing.T) {
 	k, _, csKeeper, trkKeeper, ctx := setupMsgServer(t)
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
+	// Set specific block time for consistent testing
+	blockTime := time.Date(2023, 1, 15, 0, 0, 0, 0, time.UTC)
+	sdkCtx = sdkCtx.WithBlockTime(blockTime)
+	ctx = sdk.WrapSDKContext(sdkCtx)
+
 	creator := sdk.AccAddress([]byte("test_creator")).String()
 	validDid := "did:example:123456789abcdefghi"
 
@@ -2171,22 +2252,25 @@ func TestQueryPermissions(t *testing.T) {
 		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
 		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
 
-	now := time.Now()
+	now := sdkCtx.BlockTime()
+
+	pastTime := now.Add(-1 * time.Hour) // Set effective_from to past relative to block time to make it ACTIVE
 
 	// Create several permissions for testing
 	// Trust Registry perm
 	trustPerm := types.Permission{
-		SchemaId:   1,
-		Type:       types.PermissionType_ECOSYSTEM,
-		Did:        validDid,
-		Grantee:    creator,
-		Created:    &now,
-		CreatedBy:  creator,
-		Extended:   &now,
-		ExtendedBy: creator,
-		Modified:   &now,
-		Country:    "US",
-		VpState:    types.ValidationState_VALIDATED,
+		SchemaId:      1,
+		Type:          types.PermissionType_ECOSYSTEM,
+		Did:           validDid,
+		Grantee:       creator,
+		Created:       &now,
+		CreatedBy:     creator,
+		Extended:      &now,
+		ExtendedBy:    creator,
+		Modified:      &now,
+		Country:       "US",
+		VpState:       types.ValidationState_VALIDATED,
+		EffectiveFrom: &pastTime,
 	}
 	trustPermID, err := k.CreatePermission(sdkCtx, trustPerm)
 	require.NoError(t, err)
@@ -2205,6 +2289,7 @@ func TestQueryPermissions(t *testing.T) {
 		Country:         "US",
 		ValidatorPermId: trustPermID,
 		VpState:         types.ValidationState_VALIDATED,
+		EffectiveFrom:   &pastTime,
 	}
 	issuerPermID, err := k.CreatePermission(sdkCtx, issuerPerm)
 	require.NoError(t, err)
@@ -2223,8 +2308,10 @@ func TestQueryPermissions(t *testing.T) {
 		Country:         "FR", // Different country
 		ValidatorPermId: trustPermID,
 		VpState:         types.ValidationState_VALIDATED,
+		EffectiveFrom:   &pastTime,
 	}
 	verifierPermID, err := k.CreatePermission(sdkCtx, verifierPerm)
+
 	require.NoError(t, err)
 
 	// Create a session for testing
@@ -2321,6 +2408,11 @@ func TestSlashPermissionTrustDeposit(t *testing.T) {
 	k, ms, csKeeper, _, ctx := setupMsgServer(t)
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
+	// Set specific block time for consistent testing
+	blockTime := time.Date(2023, 1, 15, 0, 0, 0, 0, time.UTC)
+	sdkCtx = sdkCtx.WithBlockTime(blockTime)
+	ctx = sdk.WrapSDKContext(sdkCtx)
+
 	creator := sdk.AccAddress([]byte("test_creator")).String()
 	validatorAddr := sdk.AccAddress([]byte("test_validator")).String()
 	ecosystemAddr := sdk.AccAddress([]byte("test_ecosystem")).String()
@@ -2330,36 +2422,40 @@ func TestSlashPermissionTrustDeposit(t *testing.T) {
 		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
 		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
 
-	now := time.Now()
+	now := sdkCtx.BlockTime()
+
+	pastTime := now.Add(-1 * time.Hour) // Set effective_from to past relative to block time to make it ACTIVE
 
 	// Create ecosystem perm
 	ecosystemPerm := types.Permission{
-		SchemaId:   1,
-		Type:       types.PermissionType_ECOSYSTEM,
-		Grantee:    ecosystemAddr,
-		Created:    &now,
-		CreatedBy:  ecosystemAddr,
-		Extended:   &now,
-		ExtendedBy: ecosystemAddr,
-		Modified:   &now,
-		Country:    "US",
-		VpState:    types.ValidationState_VALIDATED,
+		SchemaId:      1,
+		Type:          types.PermissionType_ECOSYSTEM,
+		Grantee:       ecosystemAddr,
+		Created:       &now,
+		CreatedBy:     ecosystemAddr,
+		Extended:      &now,
+		ExtendedBy:    ecosystemAddr,
+		Modified:      &now,
+		Country:       "US",
+		VpState:       types.ValidationState_VALIDATED,
+		EffectiveFrom: &pastTime,
 	}
 	_, err := k.CreatePermission(sdkCtx, ecosystemPerm)
 	require.NoError(t, err)
 
 	// Create validator perm
 	validatorPerm := types.Permission{
-		SchemaId:   1,
-		Type:       types.PermissionType_ISSUER_GRANTOR,
-		Grantee:    validatorAddr,
-		Created:    &now,
-		CreatedBy:  validatorAddr,
-		Extended:   &now,
-		ExtendedBy: validatorAddr,
-		Modified:   &now,
-		Country:    "US",
-		VpState:    types.ValidationState_VALIDATED,
+		SchemaId:      1,
+		Type:          types.PermissionType_ISSUER_GRANTOR,
+		Grantee:       validatorAddr,
+		Created:       &now,
+		CreatedBy:     validatorAddr,
+		Extended:      &now,
+		ExtendedBy:    validatorAddr,
+		Modified:      &now,
+		Country:       "US",
+		VpState:       types.ValidationState_VALIDATED,
+		EffectiveFrom: &pastTime,
 	}
 	validatorPermID, err := k.CreatePermission(sdkCtx, validatorPerm)
 	require.NoError(t, err)
@@ -2378,8 +2474,10 @@ func TestSlashPermissionTrustDeposit(t *testing.T) {
 		ValidatorPermId: validatorPermID,
 		VpState:         types.ValidationState_VALIDATED,
 		Deposit:         1000, // Set initial deposit
+		EffectiveFrom:   &pastTime,
 	}
 	applicantPermID, err := k.CreatePermission(sdkCtx, applicantPerm)
+
 	require.NoError(t, err)
 
 	testCases := []struct {
@@ -2466,6 +2564,11 @@ func TestRepayPermissionSlashedTrustDeposit(t *testing.T) {
 	k, ms, csKeeper, _, ctx := setupMsgServer(t)
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
+	// Set specific block time for consistent testing
+	blockTime := time.Date(2023, 1, 15, 0, 0, 0, 0, time.UTC)
+	sdkCtx = sdkCtx.WithBlockTime(blockTime)
+	ctx = sdk.WrapSDKContext(sdkCtx)
+
 	creator := sdk.AccAddress([]byte("test_creator")).String()
 	validatorAddr := sdk.AccAddress([]byte("test_validator")).String()
 	ecosystemAddr := sdk.AccAddress([]byte("test_ecosystem")).String()
@@ -2475,36 +2578,40 @@ func TestRepayPermissionSlashedTrustDeposit(t *testing.T) {
 		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
 		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
 
-	now := time.Now()
+	now := sdkCtx.BlockTime()
+
+	pastTime := now.Add(-1 * time.Hour) // Set effective_from to past relative to block time to make it ACTIVE
 
 	// Create ecosystem perm
 	ecosystemPerm := types.Permission{
-		SchemaId:   1,
-		Type:       types.PermissionType_ECOSYSTEM,
-		Grantee:    ecosystemAddr,
-		Created:    &now,
-		CreatedBy:  ecosystemAddr,
-		Extended:   &now,
-		ExtendedBy: ecosystemAddr,
-		Modified:   &now,
-		Country:    "US",
-		VpState:    types.ValidationState_VALIDATED,
+		SchemaId:      1,
+		Type:          types.PermissionType_ECOSYSTEM,
+		Grantee:       ecosystemAddr,
+		Created:       &now,
+		CreatedBy:     ecosystemAddr,
+		Extended:      &now,
+		ExtendedBy:    ecosystemAddr,
+		Modified:      &now,
+		Country:       "US",
+		VpState:       types.ValidationState_VALIDATED,
+		EffectiveFrom: &pastTime,
 	}
 	_, err := k.CreatePermission(sdkCtx, ecosystemPerm)
 	require.NoError(t, err)
 
 	// Create validator perm
 	validatorPerm := types.Permission{
-		SchemaId:   1,
-		Type:       types.PermissionType_ISSUER_GRANTOR,
-		Grantee:    validatorAddr,
-		Created:    &now,
-		CreatedBy:  validatorAddr,
-		Extended:   &now,
-		ExtendedBy: validatorAddr,
-		Modified:   &now,
-		Country:    "US",
-		VpState:    types.ValidationState_VALIDATED,
+		SchemaId:      1,
+		Type:          types.PermissionType_ISSUER_GRANTOR,
+		Grantee:       validatorAddr,
+		Created:       &now,
+		CreatedBy:     validatorAddr,
+		Extended:      &now,
+		ExtendedBy:    validatorAddr,
+		Modified:      &now,
+		Country:       "US",
+		VpState:       types.ValidationState_VALIDATED,
+		EffectiveFrom: &pastTime,
 	}
 	validatorPermID, err := k.CreatePermission(sdkCtx, validatorPerm)
 	require.NoError(t, err)
@@ -2523,8 +2630,10 @@ func TestRepayPermissionSlashedTrustDeposit(t *testing.T) {
 		ValidatorPermId: validatorPermID,
 		VpState:         types.ValidationState_VALIDATED,
 		Deposit:         1000, // Initial deposit
+		EffectiveFrom:   &pastTime,
 	}
 	applicantPermID, err := k.CreatePermission(sdkCtx, applicantPerm)
+
 	require.NoError(t, err)
 
 	// First slash the perm
@@ -2769,6 +2878,450 @@ func TestCreatePermission(t *testing.T) {
 				require.Error(t, err)
 				require.Contains(t, err.Error(), tc.errMsg)
 				require.Nil(t, resp)
+			}
+		})
+	}
+}
+
+// =============================================================================
+// ISSUE #191: CreateRootPermission - effective_from MUST be set
+// =============================================================================
+// This test validates that CreateRootPermission requires effective_from to be set
+// and it must be in the future. Per spec [MOD-PERM-MSG-7-2-1]:
+// - effective_from is mandatory
+// - effective_from must be in the future
+
+func TestCreateRootPermission_EffectiveFromRequired(t *testing.T) {
+	k, ms, csKeeper, trkKeeper, ctx := setupMsgServer(t)
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	// Set specific block time for consistent testing
+	blockTime := time.Date(2023, 1, 15, 0, 0, 0, 0, time.UTC)
+	sdkCtx = sdkCtx.WithBlockTime(blockTime)
+	ctx = sdk.WrapSDKContext(sdkCtx)
+
+	validDid := "did:example:123456789abcdefghi"
+	creator := sdk.AccAddress([]byte("test_creator")).String()
+
+	// Create trust registry where creator is the controller
+	trID := trkKeeper.CreateMockTrustRegistry(creator, validDid)
+
+	// Create credential schema linked to the trust registry
+	csKeeper.UpdateMockCredentialSchema(1, trID,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
+
+	now := sdkCtx.BlockTime()
+	futureTime := now.Add(1 * time.Hour)
+	pastTime := now.Add(-1 * time.Hour)
+	farFutureTime := now.Add(24 * time.Hour)
+
+	testCases := []struct {
+		name      string
+		msg       *types.MsgCreateRootPermission
+		expectErr bool
+		errMsg    string
+	}{
+		{
+			// Issue #191: Test that nil effective_from is rejected
+			name: "Issue #191: Reject nil effective_from - mandatory field",
+			msg: &types.MsgCreateRootPermission{
+				Creator:          creator,
+				SchemaId:         1,
+				Did:              validDid,
+				EffectiveFrom:    nil, // NIL - should be rejected
+				EffectiveUntil:   nil,
+				ValidationFees:   0,
+				IssuanceFees:     0,
+				VerificationFees: 0,
+			},
+			expectErr: true,
+			errMsg:    "effective_from is required",
+		},
+		{
+			// Issue #191: Test that past effective_from is rejected
+			name: "Issue #191: Reject past effective_from - must be in the future",
+			msg: &types.MsgCreateRootPermission{
+				Creator:          creator,
+				SchemaId:         1,
+				Did:              validDid,
+				EffectiveFrom:    &pastTime, // PAST - should be rejected
+				EffectiveUntil:   nil,
+				ValidationFees:   0,
+				IssuanceFees:     0,
+				VerificationFees: 0,
+			},
+			expectErr: true,
+			errMsg:    "effective_from must be in the future",
+		},
+		{
+			// Issue #191: Test that current time (now) is rejected
+			name: "Issue #191: Reject effective_from equal to now - must be strictly in the future",
+			msg: &types.MsgCreateRootPermission{
+				Creator:          creator,
+				SchemaId:         1,
+				Did:              validDid,
+				EffectiveFrom:    &now, // EQUAL TO NOW - should be rejected (not strictly in future)
+				EffectiveUntil:   nil,
+				ValidationFees:   0,
+				IssuanceFees:     0,
+				VerificationFees: 0,
+			},
+			expectErr: true,
+			errMsg:    "effective_from must be in the future",
+		},
+		{
+			// Issue #191: Test that future effective_from is accepted
+			name: "Issue #191: Accept future effective_from - valid case",
+			msg: &types.MsgCreateRootPermission{
+				Creator:          creator,
+				SchemaId:         1,
+				Did:              validDid,
+				EffectiveFrom:    &futureTime, // FUTURE - should be accepted
+				EffectiveUntil:   &farFutureTime,
+				ValidationFees:   0,
+				IssuanceFees:     0,
+				VerificationFees: 0,
+			},
+			expectErr: false,
+			errMsg:    "",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			resp, err := ms.CreateRootPermission(ctx, tc.msg)
+
+			if tc.expectErr {
+				require.Error(t, err)
+				require.Contains(t, err.Error(), tc.errMsg)
+				require.Nil(t, resp)
+			} else {
+				require.NoError(t, err)
+				require.NotNil(t, resp)
+
+				// Verify the permission was created with correct effective_from
+				perm, err := k.GetPermissionByID(sdkCtx, resp.Id)
+				require.NoError(t, err)
+				require.NotNil(t, perm.EffectiveFrom)
+				require.Equal(t, tc.msg.EffectiveFrom.Unix(), perm.EffectiveFrom.Unix())
+			}
+		})
+	}
+}
+
+// =============================================================================
+// ISSUE #193: StartPermissionVP - Validator permission must be ACTIVE
+// =============================================================================
+// This test validates that StartPermissionVP requires the validator permission
+// to be ACTIVE (not INACTIVE, REVOKED, EXPIRED, etc). Per spec:
+// - validator_perm must be a valid permission
+// - If effective_from is null or in the future, perm is INACTIVE/FUTURE
+// - If revoked, slashed, or expired, perm is invalid
+
+func TestStartPermissionVP_ValidatorMustBeActive(t *testing.T) {
+	k, ms, csKeeper, trkKeeper, ctx := setupMsgServer(t)
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	// Set specific block time for consistent testing
+	blockTime := time.Date(2023, 1, 15, 0, 0, 0, 0, time.UTC)
+	sdkCtx = sdkCtx.WithBlockTime(blockTime)
+	ctx = sdk.WrapSDKContext(sdkCtx)
+
+	creator := sdk.AccAddress([]byte("test_creator")).String()
+	validDid := "did:example:123456789abcdefghi"
+
+	// Create trust registry
+	trID := trkKeeper.CreateMockTrustRegistry(creator, validDid)
+
+	// Create mock credential schema
+	csKeeper.UpdateMockCredentialSchema(1, trID,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
+
+	now := sdkCtx.BlockTime()
+	pastTime := now.Add(-1 * time.Hour)     // In the past - for ACTIVE permissions
+	futureTime := now.Add(1 * time.Hour)    // In the future - for FUTURE/INACTIVE permissions
+	expiredTime := now.Add(-24 * time.Hour) // Far in the past - for EXPIRED permissions
+
+	// Create an ACTIVE validator permission (valid case for comparison)
+	activeValidatorPerm := types.Permission{
+		SchemaId:      1,
+		Type:          types.PermissionType_ISSUER_GRANTOR,
+		Grantee:       creator,
+		Created:       &now,
+		CreatedBy:     creator,
+		Extended:      &now,
+		ExtendedBy:    creator,
+		Modified:      &now,
+		Country:       "US",
+		VpState:       types.ValidationState_VALIDATED,
+		EffectiveFrom: &pastTime, // In the past = ACTIVE
+	}
+	activeValidatorPermID, err := k.CreatePermission(sdkCtx, activeValidatorPerm)
+	require.NoError(t, err)
+
+	// Issue #193: Create a validator permission with NO effective_from (INACTIVE)
+	inactiveValidatorPerm := types.Permission{
+		SchemaId:      1,
+		Type:          types.PermissionType_ISSUER_GRANTOR,
+		Grantee:       creator,
+		Created:       &now,
+		CreatedBy:     creator,
+		Extended:      &now,
+		ExtendedBy:    creator,
+		Modified:      &now,
+		Country:       "US",
+		VpState:       types.ValidationState_VALIDATED,
+		EffectiveFrom: nil, // NULL effective_from = INACTIVE
+	}
+	inactiveValidatorPermID, err := k.CreatePermission(sdkCtx, inactiveValidatorPerm)
+	require.NoError(t, err)
+
+	// Issue #193: Create a validator permission with FUTURE effective_from
+	futureValidatorPerm := types.Permission{
+		SchemaId:      1,
+		Type:          types.PermissionType_ISSUER_GRANTOR,
+		Grantee:       creator,
+		Created:       &now,
+		CreatedBy:     creator,
+		Extended:      &now,
+		ExtendedBy:    creator,
+		Modified:      &now,
+		Country:       "US",
+		VpState:       types.ValidationState_VALIDATED,
+		EffectiveFrom: &futureTime, // Future effective_from = not yet ACTIVE
+	}
+	futureValidatorPermID, err := k.CreatePermission(sdkCtx, futureValidatorPerm)
+	require.NoError(t, err)
+
+	// Issue #193: Create an EXPIRED validator permission
+	expiredValidatorPerm := types.Permission{
+		SchemaId:       1,
+		Type:           types.PermissionType_ISSUER_GRANTOR,
+		Grantee:        creator,
+		Created:        &now,
+		CreatedBy:      creator,
+		Extended:       &now,
+		ExtendedBy:     creator,
+		Modified:       &now,
+		Country:        "US",
+		VpState:        types.ValidationState_VALIDATED,
+		EffectiveFrom:  &expiredTime,
+		EffectiveUntil: &pastTime, // Already expired
+	}
+	expiredValidatorPermID, err := k.CreatePermission(sdkCtx, expiredValidatorPerm)
+	require.NoError(t, err)
+
+	testCases := []struct {
+		name      string
+		msg       *types.MsgStartPermissionVP
+		expectErr bool
+		errMsg    string
+	}{
+		{
+			// Baseline: Active validator should work
+			name: "Issue #193: Accept ACTIVE validator - valid case",
+			msg: &types.MsgStartPermissionVP{
+				Creator:         creator,
+				Type:            types.PermissionType_ISSUER,
+				ValidatorPermId: activeValidatorPermID,
+				Country:         "US",
+				Did:             validDid,
+			},
+			expectErr: false,
+			errMsg:    "",
+		},
+		{
+			// Issue #193: Validator with null effective_from should be rejected
+			name: "Issue #193: Reject INACTIVE validator - effective_from is null",
+			msg: &types.MsgStartPermissionVP{
+				Creator:         creator,
+				Type:            types.PermissionType_ISSUER,
+				ValidatorPermId: inactiveValidatorPermID,
+				Country:         "US",
+				Did:             validDid,
+			},
+			expectErr: true,
+			errMsg:    "validator perm is not valid",
+		},
+		{
+			// Issue #193: Validator with future effective_from should be rejected
+			name: "Issue #193: Reject FUTURE validator - effective_from is in the future",
+			msg: &types.MsgStartPermissionVP{
+				Creator:         creator,
+				Type:            types.PermissionType_ISSUER,
+				ValidatorPermId: futureValidatorPermID,
+				Country:         "US",
+				Did:             validDid,
+			},
+			expectErr: true,
+			errMsg:    "validator perm is not valid",
+		},
+		{
+			// Issue #193: Expired validator should be rejected
+			name: "Issue #193: Reject EXPIRED validator - effective_until has passed",
+			msg: &types.MsgStartPermissionVP{
+				Creator:         creator,
+				Type:            types.PermissionType_ISSUER,
+				ValidatorPermId: expiredValidatorPermID,
+				Country:         "US",
+				Did:             validDid,
+			},
+			expectErr: true,
+			errMsg:    "validator perm is not valid",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			resp, err := ms.StartPermissionVP(ctx, tc.msg)
+
+			if tc.expectErr {
+				require.Error(t, err)
+				require.Contains(t, err.Error(), tc.errMsg)
+				require.Nil(t, resp)
+			} else {
+				require.NoError(t, err)
+				require.NotNil(t, resp)
+			}
+		})
+	}
+}
+
+// =============================================================================
+// ISSUE #196: RevokePermission - Allow revoking not-yet-active permissions
+// =============================================================================
+// This test validates that RevokePermission allows revoking permissions that
+// are not yet active (e.g., effective_from is in the future or null).
+// Per spec, no IsValidPermission check is required for revocation.
+
+func TestRevokePermission_AllowNotYetActivePermissions(t *testing.T) {
+	k, ms, csKeeper, _, ctx := setupMsgServer(t)
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	// Set specific block time for consistent testing
+	blockTime := time.Date(2023, 1, 15, 0, 0, 0, 0, time.UTC)
+	sdkCtx = sdkCtx.WithBlockTime(blockTime)
+	ctx = sdk.WrapSDKContext(sdkCtx)
+
+	creator := sdk.AccAddress([]byte("test_creator")).String()
+
+	// Create mock credential schema
+	csKeeper.CreateMockCredentialSchema(1,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
+
+	now := sdkCtx.BlockTime()
+	pastTime := now.Add(-1 * time.Hour)
+	futureTime := now.Add(1 * time.Hour)
+
+	// Create an ACTIVE permission (for comparison)
+	activePerm := types.Permission{
+		SchemaId:      1,
+		Type:          types.PermissionType_ISSUER_GRANTOR,
+		Grantee:       creator,
+		Created:       &now,
+		CreatedBy:     creator,
+		Extended:      &now,
+		ExtendedBy:    creator,
+		Modified:      &now,
+		Country:       "US",
+		VpState:       types.ValidationState_VALIDATED,
+		EffectiveFrom: &pastTime, // ACTIVE
+	}
+	activePermID, err := k.CreatePermission(sdkCtx, activePerm)
+	require.NoError(t, err)
+
+	// Issue #196: Create a permission with FUTURE effective_from (not yet active)
+	futurePerm := types.Permission{
+		SchemaId:      1,
+		Type:          types.PermissionType_ISSUER_GRANTOR,
+		Grantee:       creator,
+		Created:       &now,
+		CreatedBy:     creator,
+		Extended:      &now,
+		ExtendedBy:    creator,
+		Modified:      &now,
+		Country:       "US",
+		VpState:       types.ValidationState_VALIDATED,
+		EffectiveFrom: &futureTime, // FUTURE - not yet active
+	}
+	futurePermID, err := k.CreatePermission(sdkCtx, futurePerm)
+	require.NoError(t, err)
+
+	// Issue #196: Create a permission with NULL effective_from (inactive)
+	inactivePerm := types.Permission{
+		SchemaId:      1,
+		Type:          types.PermissionType_ISSUER_GRANTOR,
+		Grantee:       creator,
+		Created:       &now,
+		CreatedBy:     creator,
+		Extended:      &now,
+		ExtendedBy:    creator,
+		Modified:      &now,
+		Country:       "US",
+		VpState:       types.ValidationState_VALIDATED,
+		EffectiveFrom: nil, // INACTIVE - no effective_from
+	}
+	inactivePermID, err := k.CreatePermission(sdkCtx, inactivePerm)
+	require.NoError(t, err)
+
+	testCases := []struct {
+		name      string
+		msg       *types.MsgRevokePermission
+		expectErr bool
+		errMsg    string
+	}{
+		{
+			// Baseline: Revoking an ACTIVE permission should work
+			name: "Issue #196: Revoke ACTIVE permission - valid case",
+			msg: &types.MsgRevokePermission{
+				Creator: creator, // Grantee can revoke their own permission
+				Id:      activePermID,
+			},
+			expectErr: false,
+			errMsg:    "",
+		},
+		{
+			// Issue #196: Revoking a FUTURE permission (not yet active) should work
+			name: "Issue #196: Revoke FUTURE permission - not yet active should be allowed",
+			msg: &types.MsgRevokePermission{
+				Creator: creator,
+				Id:      futurePermID,
+			},
+			expectErr: false, // Should succeed - this is the fix for Issue #196
+			errMsg:    "",
+		},
+		{
+			// Issue #196: Revoking an INACTIVE permission (null effective_from) should work
+			name: "Issue #196: Revoke INACTIVE permission - null effective_from should be allowed",
+			msg: &types.MsgRevokePermission{
+				Creator: creator,
+				Id:      inactivePermID,
+			},
+			expectErr: false, // Should succeed - this is the fix for Issue #196
+			errMsg:    "",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			resp, err := ms.RevokePermission(ctx, tc.msg)
+
+			if tc.expectErr {
+				require.Error(t, err)
+				require.Contains(t, err.Error(), tc.errMsg)
+				require.Nil(t, resp)
+			} else {
+				require.NoError(t, err)
+				require.NotNil(t, resp)
+
+				// Verify the permission was revoked
+				perm, err := k.GetPermissionByID(sdkCtx, tc.msg.Id)
+				require.NoError(t, err)
+				require.NotNil(t, perm.Revoked, "Permission should be revoked")
+				require.Equal(t, tc.msg.Creator, perm.RevokedBy, "RevokedBy should match creator")
 			}
 		})
 	}

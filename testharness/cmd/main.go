@@ -94,6 +94,9 @@ func runJourney(ctx context.Context, client cosmosclient.Client, journeyID int) 
 	case 22:
 		// TD Yield Simulation - Insufficient Funding Scenario
 		return td_yield.RunInsufficientFundingSimulation(ctx, client)
+	case 23:
+		// Error Scenario Tests for Issues #191, #193, #196
+		return journeys.RunErrorScenarioTestsJourney(ctx, client)
 	default:
 		return fmt.Errorf("unknown journey ID: %d", journeyID)
 	}
@@ -125,4 +128,6 @@ func printUsage() {
 	fmt.Println("  20 - Setup Funding Proposal (0.05% of block rewards)")
 	fmt.Println("  21 - Sufficient Funding Simulation (allowance < YIP funding)")
 	fmt.Println("  22 - Insufficient Funding Simulation (allowance > YIP funding)")
+	fmt.Println("\n  Error Scenario Tests:")
+	fmt.Println("  23 - Error Scenario Tests (Issues #191, #193, #196)")
 }

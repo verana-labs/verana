@@ -5,7 +5,7 @@
  * They convert between Proto messages and Amino JSON format.
  */
 
-import { AminoConverter } from "@cosmjs/stargate";
+import type { AminoConverter } from "@cosmjs/stargate";
 import Long from "long";
 import {
   MsgCreateTrustRegistry,
@@ -13,22 +13,22 @@ import {
   MsgArchiveTrustRegistry,
   MsgAddGovernanceFrameworkDocument,
   MsgIncreaseActiveGovernanceFrameworkVersion,
-} from "../../../src/codec/verana/tr/v1/tx";
+} from "../codec/verana/tr/v1/tx";
 import {
   MsgAddDID,
   MsgRenewDID,
   MsgTouchDID,
   MsgRemoveDID,
-} from "../../../src/codec/verana/dd/v1/tx";
+} from "../codec/verana/dd/v1/tx";
 import {
   MsgCreateCredentialSchema,
   MsgUpdateCredentialSchema,
   MsgArchiveCredentialSchema,
-} from "../../../src/codec/verana/cs/v1/tx";
+} from "../codec/verana/cs/v1/tx";
 import {
   MsgReclaimTrustDeposit,
   MsgReclaimTrustDepositYield,
-} from "../../../src/codec/verana/td/v1/tx";
+} from "../codec/verana/td/v1/tx";
 import {
   MsgCreateRootPermission,
   MsgCreatePermission,
@@ -39,8 +39,8 @@ import {
   MsgSetPermissionVPToValidated,
   MsgCancelPermissionVPLastRequest,
   MsgCreateOrUpdatePermissionSession,
-} from "../../../src/codec/verana/perm/v1/tx";
-import { PermissionType } from "../../../src/codec/verana/perm/v1/types";
+} from "../codec/verana/perm/v1/tx";
+import { PermissionType } from "../codec/verana/perm/v1/types";
 
 // Helper functions for Amino conversion (matching frontend)
 const u64ToStr = (v?: Long | string | number | null) =>
@@ -545,4 +545,3 @@ export const MsgCreateOrUpdatePermissionSessionAminoConverter: AminoConverter = 
       walletAgentPermId: strToU64(a.wallet_agent_perm_id) != null ? Number(strToU64(a.wallet_agent_perm_id)!.toString()) : 0,
     }),
 };
-

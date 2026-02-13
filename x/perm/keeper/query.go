@@ -283,27 +283,41 @@ func (k Keeper) FindPermissionsWithDID(goCtx context.Context, req *types.QueryFi
 }
 
 // Helper function to check if a perm is valid at a specific time
+// This should align with IsValidPermission logic for consistency
 func isPermissionValidAtTime(perm types.Permission, when time.Time) bool {
-	// Check effective_from
-	if perm.EffectiveFrom != nil && when.Before(*perm.EffectiveFrom) {
+	// Check repaid (REPAID state)
+	if perm.Repaid != nil {
 		return false
 	}
 
-	// Check effective_until
+	// Check slashed (SLASHED state) - use timestamp as per spec
+	if perm.Slashed != nil {
+		return false
+	}
+
+	// Check revoked (REVOKED state)
+	// Spec: "else if `revoked` is lower than now(), => `perm_state` is `REVOKED`"
+	// This means revoked < now(), so we check when.After(*perm.Revoked)
+	if perm.Revoked != nil && when.After(*perm.Revoked) {
+		return false
+	}
+
+	// Check expired (EXPIRED state)
 	if perm.EffectiveUntil != nil && !when.Before(*perm.EffectiveUntil) {
 		return false
 	}
 
-	// Check revoked
-	if perm.Revoked != nil && !when.Before(*perm.Revoked) {
+	// Check FUTURE state
+	if perm.EffectiveFrom != nil && when.Before(*perm.EffectiveFrom) {
 		return false
 	}
 
-	// Check slashed
-	if perm.SlashedDeposit > 0 {
+	// Check INACTIVE state (effective_from is null)
+	if perm.EffectiveFrom == nil {
 		return false
 	}
 
+	// At this point, permission is ACTIVE
 	return true
 }
 

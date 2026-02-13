@@ -336,7 +336,9 @@ func setupTrackingMsgServer(t testing.TB, uaRate, wuaRate, tdRate string, trustU
 		bankKeeper,
 	)
 
-	ctx := sdk.NewContext(stateStore, cmtproto.Header{}, false, log.NewNopLogger())
+	// Set a specific block time for consistent testing
+	blockTime := time.Date(2023, 1, 15, 0, 0, 0, 0, time.UTC)
+	ctx := sdk.NewContext(stateStore, cmtproto.Header{}, false, log.NewNopLogger()).WithBlockTime(blockTime)
 
 	// Initialize params
 	if err := k.SetParams(ctx, types.DefaultParams()); err != nil {
@@ -344,6 +346,7 @@ func setupTrackingMsgServer(t testing.TB, uaRate, wuaRate, tdRate string, trustU
 	}
 
 	return k, keeper.NewMsgServerImpl(k), csKeeper, trkKeeper, bankKeeper, tdKeeper, ctx
+
 }
 
 // TestAgentRewardsDistribution tests the complete fee distribution flow including:
@@ -394,21 +397,23 @@ func TestAgentRewardsDistribution(t *testing.T) {
 		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
 		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
 
-	now := time.Now()
+	now := sdkCtx.BlockTime()
+	pastTime := now.Add(-1 * time.Hour) // Set effective_from to past to make it ACTIVE
 
 	// Create ECOSYSTEM permission (fees: 100)
 	ecosystemPerm := types.Permission{
-		SchemaId:     1,
-		Type:         types.PermissionType_ECOSYSTEM,
-		Grantee:      ecosystem,
-		Created:      &now,
-		CreatedBy:    ecosystem,
-		Extended:     &now,
-		ExtendedBy:   ecosystem,
-		Modified:     &now,
-		Country:      "US",
-		VpState:      types.ValidationState_VALIDATED,
-		IssuanceFees: 100, // Ecosystem charges 100 trust units for issuance
+		SchemaId:      1,
+		Type:          types.PermissionType_ECOSYSTEM,
+		Grantee:       ecosystem,
+		Created:       &now,
+		CreatedBy:     ecosystem,
+		Extended:      &now,
+		ExtendedBy:    ecosystem,
+		Modified:      &now,
+		Country:       "US",
+		VpState:       types.ValidationState_VALIDATED,
+		IssuanceFees:  100, // Ecosystem charges 100 trust units for issuance
+		EffectiveFrom: &pastTime,
 	}
 	ecosystemPermID, err := k.CreatePermission(sdkCtx, ecosystemPerm)
 	require.NoError(t, err)
@@ -427,6 +432,7 @@ func TestAgentRewardsDistribution(t *testing.T) {
 		ValidatorPermId: ecosystemPermID,
 		VpState:         types.ValidationState_VALIDATED,
 		IssuanceFees:    50, // Grantor charges 50 trust units
+		EffectiveFrom:   &pastTime,
 	}
 	grantorPermID, err := k.CreatePermission(sdkCtx, grantorPerm)
 	require.NoError(t, err)
@@ -444,6 +450,7 @@ func TestAgentRewardsDistribution(t *testing.T) {
 		Country:         "US",
 		ValidatorPermId: grantorPermID,
 		VpState:         types.ValidationState_VALIDATED,
+		EffectiveFrom:   &pastTime,
 	}
 	issuerPermID, err := k.CreatePermission(sdkCtx, issuerPerm)
 	require.NoError(t, err)
@@ -461,6 +468,7 @@ func TestAgentRewardsDistribution(t *testing.T) {
 		Country:         "US",
 		ValidatorPermId: issuerPermID,
 		VpState:         types.ValidationState_VALIDATED,
+		EffectiveFrom:   &pastTime,
 	}
 	agentPermID, err := k.CreatePermission(sdkCtx, agentPerm)
 	require.NoError(t, err)
@@ -478,6 +486,7 @@ func TestAgentRewardsDistribution(t *testing.T) {
 		Country:         "US",
 		ValidatorPermId: issuerPermID,
 		VpState:         types.ValidationState_VALIDATED,
+		EffectiveFrom:   &pastTime,
 	}
 	walletAgentPermID, err := k.CreatePermission(sdkCtx, walletAgentPerm)
 	require.NoError(t, err)
@@ -673,21 +682,23 @@ func TestAgentRewardsWithZeroFees(t *testing.T) {
 		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
 		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
 
-	now := time.Now()
+	now := sdkCtx.BlockTime()
+	pastTime := now.Add(-1 * time.Hour) // Set effective_from to past to make it ACTIVE
 
 	// Create permissions with ZERO fees
 	ecosystemPerm := types.Permission{
-		SchemaId:     1,
-		Type:         types.PermissionType_ECOSYSTEM,
-		Grantee:      ecosystem,
-		Created:      &now,
-		CreatedBy:    ecosystem,
-		Extended:     &now,
-		ExtendedBy:   ecosystem,
-		Modified:     &now,
-		Country:      "US",
-		VpState:      types.ValidationState_VALIDATED,
-		IssuanceFees: 0, // Zero fees
+		SchemaId:      1,
+		Type:          types.PermissionType_ECOSYSTEM,
+		Grantee:       ecosystem,
+		Created:       &now,
+		CreatedBy:     ecosystem,
+		Extended:      &now,
+		ExtendedBy:    ecosystem,
+		Modified:      &now,
+		Country:       "US",
+		VpState:       types.ValidationState_VALIDATED,
+		IssuanceFees:  0, // Zero fees
+		EffectiveFrom: &pastTime,
 	}
 	ecosystemPermID, err := k.CreatePermission(sdkCtx, ecosystemPerm)
 	require.NoError(t, err)
@@ -704,6 +715,7 @@ func TestAgentRewardsWithZeroFees(t *testing.T) {
 		Country:         "US",
 		ValidatorPermId: ecosystemPermID,
 		VpState:         types.ValidationState_VALIDATED,
+		EffectiveFrom:   &pastTime,
 	}
 	issuerPermID, err := k.CreatePermission(sdkCtx, issuerPerm)
 	require.NoError(t, err)
@@ -720,8 +732,10 @@ func TestAgentRewardsWithZeroFees(t *testing.T) {
 		Country:         "US",
 		ValidatorPermId: issuerPermID,
 		VpState:         types.ValidationState_VALIDATED,
+		EffectiveFrom:   &pastTime,
 	}
 	agentPermID, err := k.CreatePermission(sdkCtx, agentPerm)
+
 	require.NoError(t, err)
 
 	msg := &types.MsgCreateOrUpdatePermissionSession{
@@ -777,21 +791,23 @@ func TestAgentRewardsWithDiscount(t *testing.T) {
 		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
 		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
 
-	now := time.Now()
+	now := sdkCtx.BlockTime()
+	pastTime := now.Add(-1 * time.Hour) // Set effective_from to past to make it ACTIVE
 
 	// Create ecosystem permission with 100 fees
 	ecosystemPerm := types.Permission{
-		SchemaId:     1,
-		Type:         types.PermissionType_ECOSYSTEM,
-		Grantee:      ecosystem,
-		Created:      &now,
-		CreatedBy:    ecosystem,
-		Extended:     &now,
-		ExtendedBy:   ecosystem,
-		Modified:     &now,
-		Country:      "US",
-		VpState:      types.ValidationState_VALIDATED,
-		IssuanceFees: 100,
+		SchemaId:      1,
+		Type:          types.PermissionType_ECOSYSTEM,
+		Grantee:       ecosystem,
+		Created:       &now,
+		CreatedBy:     ecosystem,
+		Extended:      &now,
+		ExtendedBy:    ecosystem,
+		Modified:      &now,
+		Country:       "US",
+		VpState:       types.ValidationState_VALIDATED,
+		IssuanceFees:  100,
+		EffectiveFrom: &pastTime,
 	}
 	ecosystemPermID, err := k.CreatePermission(sdkCtx, ecosystemPerm)
 	require.NoError(t, err)
@@ -810,6 +826,7 @@ func TestAgentRewardsWithDiscount(t *testing.T) {
 		ValidatorPermId:     ecosystemPermID,
 		VpState:             types.ValidationState_VALIDATED,
 		IssuanceFeeDiscount: 5000, // 50% discount (per Issue #94)
+		EffectiveFrom:       &pastTime,
 	}
 	issuerPermID, err := k.CreatePermission(sdkCtx, issuerPerm)
 	require.NoError(t, err)
@@ -826,8 +843,10 @@ func TestAgentRewardsWithDiscount(t *testing.T) {
 		Country:         "US",
 		ValidatorPermId: issuerPermID,
 		VpState:         types.ValidationState_VALIDATED,
+		EffectiveFrom:   &pastTime,
 	}
 	agentPermID, err := k.CreatePermission(sdkCtx, agentPerm)
+
 	require.NoError(t, err)
 
 	msg := &types.MsgCreateOrUpdatePermissionSession{

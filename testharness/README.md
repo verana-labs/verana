@@ -126,6 +126,7 @@ This script runs journeys 1-19 in order. Each journey is independent and can be 
 | 17 | Repay Permission Slashed Trust Deposit | Repay slashed deposits |
 | 18 | Create Permission | Create new permissions |
 | 19 | Trust Deposit Yield Accumulation | Accumulate and reclaim yield |
+| 23 | Error Scenario Tests | Test error scenarios for Issues #191, #193, #196 |
 
 ## TD Yield Simulations
 
