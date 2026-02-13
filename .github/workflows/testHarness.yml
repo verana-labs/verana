@@ -25,6 +25,7 @@ jobs:
       HARNESS_MODE: k8s
       KUBECONFIG: ${{ secrets.OVH_KUBECONFIG }}
       K8S_INGRESS_DOMAIN: testnet.verana.network
+      GHCR_READ_TOKEN: ${{ secrets.GHCR_READ_TOKEN }}
 
     steps:
       - name: Checkout this repository
@@ -102,11 +103,18 @@ jobs:
         if: env.HARNESS_MODE_EFFECTIVE == 'k8s'
         run: |
           export KUBECONFIG=$KUBECONFIG
+          GHCR_TOKEN="${GHCR_READ_TOKEN:-${{ secrets.GITHUB_TOKEN }}}"
+          docker login ghcr.io -u "${GITHUB_ACTOR}" -p "$GHCR_TOKEN"
+          echo "Checking image availability: $IMAGE_TAG"
+          if ! docker pull "$IMAGE_TAG"; then
+            echo "Image $IMAGE_TAG not available or unauthorized. Set GHCR_READ_TOKEN with read:packages." >&2
+            exit 1
+          fi
           kubectl create namespace "$NAMESPACE" || true
           kubectl -n "$NAMESPACE" create secret docker-registry ghcr-auth \
             --docker-server=ghcr.io \
             --docker-username="${GITHUB_ACTOR}" \
-            --docker-password="${{ secrets.GITHUB_TOKEN }}" \
+            --docker-password="$GHCR_TOKEN" \
             --dry-run=client -o yaml | kubectl apply -f -
           kubectl -n "$NAMESPACE" create configmap verana-testharness-scripts \
             --from-file=scripts/setup_primary_validator.sh \
