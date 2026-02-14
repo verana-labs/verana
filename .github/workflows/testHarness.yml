@@ -73,7 +73,9 @@ jobs:
           fi
           BRANCH_REF="${GITHUB_REF_NAME:-$GITHUB_REF}"
           BRANCH_TAG="${BRANCH_REF//\//-}"
-          if [ "${BRANCH_TAG}" = "main" ]; then
+          if [ -n "${PR_NUMBER:-}" ]; then
+            echo "NAMESPACE=vna-devnet-${BRANCH_TAG}-pr-${PR_NUMBER}" >> $GITHUB_ENV
+          elif [ "${BRANCH_TAG}" = "main" ]; then
             echo "NAMESPACE=vna-devnet-main" >> $GITHUB_ENV
           else
             echo "NAMESPACE=vna-devnet-${BRANCH_TAG}" >> $GITHUB_ENV
