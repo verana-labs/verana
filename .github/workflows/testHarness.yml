@@ -242,6 +242,22 @@ jobs:
             kubectl -n "$NAMESPACE" logs -l app=verana-testharness --all-containers --tail=200 || true
             exit 1
           fi
+          kubectl -n "$NAMESPACE" wait --for=condition=Ready pod -l app=verana-testharness --timeout=300s
+          POD_NAME=$(kubectl -n "$NAMESPACE" get pod -l app=verana-testharness -o jsonpath='{.items[0].metadata.name}')
+          for i in {1..120}; do
+            if kubectl -n "$NAMESPACE" exec "$POD_NAME" -- curl -s http://127.0.0.1:26657/status >/dev/null 2>&1; then
+              echo "RPC is ready inside pod"
+              break
+            fi
+            sleep 2
+          done
+          if ! kubectl -n "$NAMESPACE" exec "$POD_NAME" -- curl -s http://127.0.0.1:26657/status >/dev/null 2>&1; then
+            echo "RPC did not become ready inside pod." >&2
+            kubectl -n "$NAMESPACE" get pods -o wide || true
+            kubectl -n "$NAMESPACE" describe pod -l app=verana-testharness || true
+            kubectl -n "$NAMESPACE" logs -l app=verana-testharness --all-containers --tail=200 || true
+            exit 1
+          fi
 
       - name: Run test harness in canonical image
         if: env.HARNESS_MODE_EFFECTIVE == 'docker'
