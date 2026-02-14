@@ -307,3 +307,10 @@ jobs:
 
       - name: Finalize without error
         run: echo "Test harness execution completed successfully."
+
+      - name: Cleanup K8s namespace
+        if: always() && env.HARNESS_MODE_EFFECTIVE == 'k8s'
+        run: |
+          export KUBECONFIG=$KUBECONFIG
+          echo "Cleaning up namespace $NAMESPACE"
+          kubectl delete namespace "$NAMESPACE" --wait=false || true
