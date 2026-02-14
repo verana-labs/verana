@@ -79,6 +79,53 @@ export interface MsgRepaySlashedTrustDeposit {
 export interface MsgRepaySlashedTrustDepositResponse {
 }
 
+/**
+ * MsgAddOperator adds an operator to a group with specified allowance
+ * Must be called by the group itself (via group proposal)
+ */
+export interface MsgAddOperator {
+  /** creator must be the group address (executed via group proposal) */
+  creator: string;
+  /** operator is the account being added as an operator */
+  operator: string;
+  /** allowance is the maximum spend per period (in uvna) */
+  allowance: number;
+  /** reset_period_seconds is the duration after which usage resets (0 = never) */
+  resetPeriodSeconds: number;
+}
+
+export interface MsgAddOperatorResponse {
+}
+
+/** MsgRemoveOperator removes an operator from a group */
+export interface MsgRemoveOperator {
+  creator: string;
+  operator: string;
+}
+
+export interface MsgRemoveOperatorResponse {
+}
+
+/** MsgUpdateOperatorAllowance updates an operator's allowance configuration */
+export interface MsgUpdateOperatorAllowance {
+  creator: string;
+  operator: string;
+  allowance: number;
+  resetPeriodSeconds: number;
+}
+
+export interface MsgUpdateOperatorAllowanceResponse {
+}
+
+/** MsgResetOperatorUsage manually resets an operator's usage counter */
+export interface MsgResetOperatorUsage {
+  creator: string;
+  operator: string;
+}
+
+export interface MsgResetOperatorUsageResponse {
+}
+
 function createBaseMsgUpdateParams(): MsgUpdateParams {
   return { authority: "", params: undefined };
 }
@@ -734,6 +781,538 @@ export const MsgRepaySlashedTrustDepositResponse = {
   },
 };
 
+function createBaseMsgAddOperator(): MsgAddOperator {
+  return { creator: "", operator: "", allowance: 0, resetPeriodSeconds: 0 };
+}
+
+export const MsgAddOperator = {
+  encode(message: MsgAddOperator, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.creator !== "") {
+      writer.uint32(10).string(message.creator);
+    }
+    if (message.operator !== "") {
+      writer.uint32(18).string(message.operator);
+    }
+    if (message.allowance !== 0) {
+      writer.uint32(24).uint64(message.allowance);
+    }
+    if (message.resetPeriodSeconds !== 0) {
+      writer.uint32(32).int64(message.resetPeriodSeconds);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgAddOperator {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgAddOperator();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.creator = reader.string();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.operator = reader.string();
+          continue;
+        case 3:
+          if (tag !== 24) {
+            break;
+          }
+
+          message.allowance = longToNumber(reader.uint64() as Long);
+          continue;
+        case 4:
+          if (tag !== 32) {
+            break;
+          }
+
+          message.resetPeriodSeconds = longToNumber(reader.int64() as Long);
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MsgAddOperator {
+    return {
+      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
+      operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
+      allowance: isSet(object.allowance) ? globalThis.Number(object.allowance) : 0,
+      resetPeriodSeconds: isSet(object.resetPeriodSeconds) ? globalThis.Number(object.resetPeriodSeconds) : 0,
+    };
+  },
+
+  toJSON(message: MsgAddOperator): unknown {
+    const obj: any = {};
+    if (message.creator !== "") {
+      obj.creator = message.creator;
+    }
+    if (message.operator !== "") {
+      obj.operator = message.operator;
+    }
+    if (message.allowance !== 0) {
+      obj.allowance = Math.round(message.allowance);
+    }
+    if (message.resetPeriodSeconds !== 0) {
+      obj.resetPeriodSeconds = Math.round(message.resetPeriodSeconds);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MsgAddOperator>, I>>(base?: I): MsgAddOperator {
+    return MsgAddOperator.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgAddOperator>, I>>(object: I): MsgAddOperator {
+    const message = createBaseMsgAddOperator();
+    message.creator = object.creator ?? "";
+    message.operator = object.operator ?? "";
+    message.allowance = object.allowance ?? 0;
+    message.resetPeriodSeconds = object.resetPeriodSeconds ?? 0;
+    return message;
+  },
+};
+
+function createBaseMsgAddOperatorResponse(): MsgAddOperatorResponse {
+  return {};
+}
+
+export const MsgAddOperatorResponse = {
+  encode(_: MsgAddOperatorResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgAddOperatorResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgAddOperatorResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(_: any): MsgAddOperatorResponse {
+    return {};
+  },
+
+  toJSON(_: MsgAddOperatorResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MsgAddOperatorResponse>, I>>(base?: I): MsgAddOperatorResponse {
+    return MsgAddOperatorResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgAddOperatorResponse>, I>>(_: I): MsgAddOperatorResponse {
+    const message = createBaseMsgAddOperatorResponse();
+    return message;
+  },
+};
+
+function createBaseMsgRemoveOperator(): MsgRemoveOperator {
+  return { creator: "", operator: "" };
+}
+
+export const MsgRemoveOperator = {
+  encode(message: MsgRemoveOperator, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.creator !== "") {
+      writer.uint32(10).string(message.creator);
+    }
+    if (message.operator !== "") {
+      writer.uint32(18).string(message.operator);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgRemoveOperator {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgRemoveOperator();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.creator = reader.string();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.operator = reader.string();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MsgRemoveOperator {
+    return {
+      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
+      operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
+    };
+  },
+
+  toJSON(message: MsgRemoveOperator): unknown {
+    const obj: any = {};
+    if (message.creator !== "") {
+      obj.creator = message.creator;
+    }
+    if (message.operator !== "") {
+      obj.operator = message.operator;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MsgRemoveOperator>, I>>(base?: I): MsgRemoveOperator {
+    return MsgRemoveOperator.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgRemoveOperator>, I>>(object: I): MsgRemoveOperator {
+    const message = createBaseMsgRemoveOperator();
+    message.creator = object.creator ?? "";
+    message.operator = object.operator ?? "";
+    return message;
+  },
+};
+
+function createBaseMsgRemoveOperatorResponse(): MsgRemoveOperatorResponse {
+  return {};
+}
+
+export const MsgRemoveOperatorResponse = {
+  encode(_: MsgRemoveOperatorResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgRemoveOperatorResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgRemoveOperatorResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(_: any): MsgRemoveOperatorResponse {
+    return {};
+  },
+
+  toJSON(_: MsgRemoveOperatorResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MsgRemoveOperatorResponse>, I>>(base?: I): MsgRemoveOperatorResponse {
+    return MsgRemoveOperatorResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgRemoveOperatorResponse>, I>>(_: I): MsgRemoveOperatorResponse {
+    const message = createBaseMsgRemoveOperatorResponse();
+    return message;
+  },
+};
+
+function createBaseMsgUpdateOperatorAllowance(): MsgUpdateOperatorAllowance {
+  return { creator: "", operator: "", allowance: 0, resetPeriodSeconds: 0 };
+}
+
+export const MsgUpdateOperatorAllowance = {
+  encode(message: MsgUpdateOperatorAllowance, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.creator !== "") {
+      writer.uint32(10).string(message.creator);
+    }
+    if (message.operator !== "") {
+      writer.uint32(18).string(message.operator);
+    }
+    if (message.allowance !== 0) {
+      writer.uint32(24).uint64(message.allowance);
+    }
+    if (message.resetPeriodSeconds !== 0) {
+      writer.uint32(32).int64(message.resetPeriodSeconds);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgUpdateOperatorAllowance {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgUpdateOperatorAllowance();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.creator = reader.string();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.operator = reader.string();
+          continue;
+        case 3:
+          if (tag !== 24) {
+            break;
+          }
+
+          message.allowance = longToNumber(reader.uint64() as Long);
+          continue;
+        case 4:
+          if (tag !== 32) {
+            break;
+          }
+
+          message.resetPeriodSeconds = longToNumber(reader.int64() as Long);
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MsgUpdateOperatorAllowance {
+    return {
+      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
+      operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
+      allowance: isSet(object.allowance) ? globalThis.Number(object.allowance) : 0,
+      resetPeriodSeconds: isSet(object.resetPeriodSeconds) ? globalThis.Number(object.resetPeriodSeconds) : 0,
+    };
+  },
+
+  toJSON(message: MsgUpdateOperatorAllowance): unknown {
+    const obj: any = {};
+    if (message.creator !== "") {
+      obj.creator = message.creator;
+    }
+    if (message.operator !== "") {
+      obj.operator = message.operator;
+    }
+    if (message.allowance !== 0) {
+      obj.allowance = Math.round(message.allowance);
+    }
+    if (message.resetPeriodSeconds !== 0) {
+      obj.resetPeriodSeconds = Math.round(message.resetPeriodSeconds);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MsgUpdateOperatorAllowance>, I>>(base?: I): MsgUpdateOperatorAllowance {
+    return MsgUpdateOperatorAllowance.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgUpdateOperatorAllowance>, I>>(object: I): MsgUpdateOperatorAllowance {
+    const message = createBaseMsgUpdateOperatorAllowance();
+    message.creator = object.creator ?? "";
+    message.operator = object.operator ?? "";
+    message.allowance = object.allowance ?? 0;
+    message.resetPeriodSeconds = object.resetPeriodSeconds ?? 0;
+    return message;
+  },
+};
+
+function createBaseMsgUpdateOperatorAllowanceResponse(): MsgUpdateOperatorAllowanceResponse {
+  return {};
+}
+
+export const MsgUpdateOperatorAllowanceResponse = {
+  encode(_: MsgUpdateOperatorAllowanceResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgUpdateOperatorAllowanceResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgUpdateOperatorAllowanceResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(_: any): MsgUpdateOperatorAllowanceResponse {
+    return {};
+  },
+
+  toJSON(_: MsgUpdateOperatorAllowanceResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MsgUpdateOperatorAllowanceResponse>, I>>(
+    base?: I,
+  ): MsgUpdateOperatorAllowanceResponse {
+    return MsgUpdateOperatorAllowanceResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgUpdateOperatorAllowanceResponse>, I>>(
+    _: I,
+  ): MsgUpdateOperatorAllowanceResponse {
+    const message = createBaseMsgUpdateOperatorAllowanceResponse();
+    return message;
+  },
+};
+
+function createBaseMsgResetOperatorUsage(): MsgResetOperatorUsage {
+  return { creator: "", operator: "" };
+}
+
+export const MsgResetOperatorUsage = {
+  encode(message: MsgResetOperatorUsage, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.creator !== "") {
+      writer.uint32(10).string(message.creator);
+    }
+    if (message.operator !== "") {
+      writer.uint32(18).string(message.operator);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgResetOperatorUsage {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgResetOperatorUsage();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.creator = reader.string();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.operator = reader.string();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MsgResetOperatorUsage {
+    return {
+      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
+      operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
+    };
+  },
+
+  toJSON(message: MsgResetOperatorUsage): unknown {
+    const obj: any = {};
+    if (message.creator !== "") {
+      obj.creator = message.creator;
+    }
+    if (message.operator !== "") {
+      obj.operator = message.operator;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MsgResetOperatorUsage>, I>>(base?: I): MsgResetOperatorUsage {
+    return MsgResetOperatorUsage.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgResetOperatorUsage>, I>>(object: I): MsgResetOperatorUsage {
+    const message = createBaseMsgResetOperatorUsage();
+    message.creator = object.creator ?? "";
+    message.operator = object.operator ?? "";
+    return message;
+  },
+};
+
+function createBaseMsgResetOperatorUsageResponse(): MsgResetOperatorUsageResponse {
+  return {};
+}
+
+export const MsgResetOperatorUsageResponse = {
+  encode(_: MsgResetOperatorUsageResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgResetOperatorUsageResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgResetOperatorUsageResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(_: any): MsgResetOperatorUsageResponse {
+    return {};
+  },
+
+  toJSON(_: MsgResetOperatorUsageResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MsgResetOperatorUsageResponse>, I>>(base?: I): MsgResetOperatorUsageResponse {
+    return MsgResetOperatorUsageResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgResetOperatorUsageResponse>, I>>(_: I): MsgResetOperatorUsageResponse {
+    const message = createBaseMsgResetOperatorUsageResponse();
+    return message;
+  },
+};
+
 /** Msg defines the Msg service. */
 export interface Msg {
   /**
@@ -746,6 +1325,11 @@ export interface Msg {
   /** SlashTrustDeposit defines a governance operation to slash an account's trust deposit */
   SlashTrustDeposit(request: MsgSlashTrustDeposit): Promise<MsgSlashTrustDepositResponse>;
   RepaySlashedTrustDeposit(request: MsgRepaySlashedTrustDeposit): Promise<MsgRepaySlashedTrustDepositResponse>;
+  /** Operator management (must be called via group proposal) */
+  AddOperator(request: MsgAddOperator): Promise<MsgAddOperatorResponse>;
+  RemoveOperator(request: MsgRemoveOperator): Promise<MsgRemoveOperatorResponse>;
+  UpdateOperatorAllowance(request: MsgUpdateOperatorAllowance): Promise<MsgUpdateOperatorAllowanceResponse>;
+  ResetOperatorUsage(request: MsgResetOperatorUsage): Promise<MsgResetOperatorUsageResponse>;
 }
 
 export const MsgServiceName = "verana.td.v1.Msg";
@@ -760,6 +1344,10 @@ export class MsgClientImpl implements Msg {
     this.ReclaimTrustDeposit = this.ReclaimTrustDeposit.bind(this);
     this.SlashTrustDeposit = this.SlashTrustDeposit.bind(this);
     this.RepaySlashedTrustDeposit = this.RepaySlashedTrustDeposit.bind(this);
+    this.AddOperator = this.AddOperator.bind(this);
+    this.RemoveOperator = this.RemoveOperator.bind(this);
+    this.UpdateOperatorAllowance = this.UpdateOperatorAllowance.bind(this);
+    this.ResetOperatorUsage = this.ResetOperatorUsage.bind(this);
   }
   UpdateParams(request: MsgUpdateParams): Promise<MsgUpdateParamsResponse> {
     const data = MsgUpdateParams.encode(request).finish();
@@ -789,6 +1377,30 @@ export class MsgClientImpl implements Msg {
     const data = MsgRepaySlashedTrustDeposit.encode(request).finish();
     const promise = this.rpc.request(this.service, "RepaySlashedTrustDeposit", data);
     return promise.then((data) => MsgRepaySlashedTrustDepositResponse.decode(_m0.Reader.create(data)));
+  }
+
+  AddOperator(request: MsgAddOperator): Promise<MsgAddOperatorResponse> {
+    const data = MsgAddOperator.encode(request).finish();
+    const promise = this.rpc.request(this.service, "AddOperator", data);
+    return promise.then((data) => MsgAddOperatorResponse.decode(_m0.Reader.create(data)));
+  }
+
+  RemoveOperator(request: MsgRemoveOperator): Promise<MsgRemoveOperatorResponse> {
+    const data = MsgRemoveOperator.encode(request).finish();
+    const promise = this.rpc.request(this.service, "RemoveOperator", data);
+    return promise.then((data) => MsgRemoveOperatorResponse.decode(_m0.Reader.create(data)));
+  }
+
+  UpdateOperatorAllowance(request: MsgUpdateOperatorAllowance): Promise<MsgUpdateOperatorAllowanceResponse> {
+    const data = MsgUpdateOperatorAllowance.encode(request).finish();
+    const promise = this.rpc.request(this.service, "UpdateOperatorAllowance", data);
+    return promise.then((data) => MsgUpdateOperatorAllowanceResponse.decode(_m0.Reader.create(data)));
+  }
+
+  ResetOperatorUsage(request: MsgResetOperatorUsage): Promise<MsgResetOperatorUsageResponse> {
+    const data = MsgResetOperatorUsage.encode(request).finish();
+    const promise = this.rpc.request(this.service, "ResetOperatorUsage", data);
+    return promise.then((data) => MsgResetOperatorUsageResponse.decode(_m0.Reader.create(data)));
   }
 }
 

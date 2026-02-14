@@ -302,6 +302,10 @@
         "creator": {
           "type": "string"
         },
+        "group": {
+          "type": "string",
+          "title": "group is the optional group policy address when operator acts on behalf of group"
+        },
         "did": {
           "type": "string"
         },
