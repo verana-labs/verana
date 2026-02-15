@@ -35,6 +35,10 @@ func (ms msgServer) GrantOperatorAuthorization(goCtx context.Context, msg *types
 
 	// Check mutual exclusivity: VSOperatorAuthorization must NOT exist for
 	// this authority/grantee pair.
+	// TODO(MOD-DE-MSG-5): The reverse check must also be enforced — when granting
+	// a VSOperatorAuthorization, verify that no OperatorAuthorization exists for
+	// the same (authority, grantee) pair. Implement this in the
+	// GrantVSOperatorAuthorization handler.
 	vsKey := collections.Join(msg.Authority, msg.Grantee)
 	hasVSOA, err := ms.VSOperatorAuthorizations.Has(ctx, vsKey)
 	if err != nil {
