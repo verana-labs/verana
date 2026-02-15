@@ -6,6 +6,9 @@
 
 /* eslint-disable */
 import * as _m0 from "protobufjs/minimal";
+import { Coin } from "../../../cosmos/base/v1beta1/coin";
+import { Duration } from "../../../google/protobuf/duration";
+import { Timestamp } from "../../../google/protobuf/timestamp";
 import { Params } from "./params";
 
 export const protobufPackage = "verana.de.v1";
@@ -27,6 +30,59 @@ export interface MsgUpdateParams {
  * MsgUpdateParams message.
  */
 export interface MsgUpdateParamsResponse {
+}
+
+/**
+ * [MOD-DE-MSG-3] MsgGrantOperatorAuthorization grants an operator authorization
+ * to a grantee on behalf of an authority.
+ */
+export interface MsgGrantOperatorAuthorization {
+  /** authority is the group account granting the authorization. */
+  authority: string;
+  /**
+   * operator is the optional account authorized by the authority to run this
+   * Msg.
+   */
+  operator: string;
+  /** grantee is the account that receives the authorization from authority. */
+  grantee: string;
+  /**
+   * msg_types is the list of VPR delegable message types for which
+   * authorization is granted.
+   */
+  msgTypes: string[];
+  /** expiration is the optional timestamp after which the authorization expires. */
+  expiration:
+    | Date
+    | undefined;
+  /** authz_spend_limit is the optional maximum spendable amount. */
+  authzSpendLimit: Coin[];
+  /**
+   * authz_spend_limit_period is the optional reset period for
+   * authz_spend_limit.
+   */
+  authzSpendLimitPeriod:
+    | Duration
+    | undefined;
+  /** with_feegrant indicates whether to also grant a fee allowance. */
+  withFeegrant: boolean;
+  /**
+   * feegrant_spend_limit is the optional maximum fee amount. Ignored if
+   * with_feegrant is false.
+   */
+  feegrantSpendLimit: Coin[];
+  /**
+   * feegrant_spend_limit_period is the optional reset period for
+   * feegrant_spend_limit. Ignored if with_feegrant is false.
+   */
+  feegrantSpendLimitPeriod: Duration | undefined;
+}
+
+/**
+ * MsgGrantOperatorAuthorizationResponse defines the response for
+ * MsgGrantOperatorAuthorization.
+ */
+export interface MsgGrantOperatorAuthorizationResponse {
 }
 
 function createBaseMsgUpdateParams(): MsgUpdateParams {
@@ -148,6 +204,274 @@ export const MsgUpdateParamsResponse = {
   },
 };
 
+function createBaseMsgGrantOperatorAuthorization(): MsgGrantOperatorAuthorization {
+  return {
+    authority: "",
+    operator: "",
+    grantee: "",
+    msgTypes: [],
+    expiration: undefined,
+    authzSpendLimit: [],
+    authzSpendLimitPeriod: undefined,
+    withFeegrant: false,
+    feegrantSpendLimit: [],
+    feegrantSpendLimitPeriod: undefined,
+  };
+}
+
+export const MsgGrantOperatorAuthorization = {
+  encode(message: MsgGrantOperatorAuthorization, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.authority !== "") {
+      writer.uint32(10).string(message.authority);
+    }
+    if (message.operator !== "") {
+      writer.uint32(18).string(message.operator);
+    }
+    if (message.grantee !== "") {
+      writer.uint32(26).string(message.grantee);
+    }
+    for (const v of message.msgTypes) {
+      writer.uint32(34).string(v!);
+    }
+    if (message.expiration !== undefined) {
+      Timestamp.encode(toTimestamp(message.expiration), writer.uint32(42).fork()).ldelim();
+    }
+    for (const v of message.authzSpendLimit) {
+      Coin.encode(v!, writer.uint32(50).fork()).ldelim();
+    }
+    if (message.authzSpendLimitPeriod !== undefined) {
+      Duration.encode(message.authzSpendLimitPeriod, writer.uint32(58).fork()).ldelim();
+    }
+    if (message.withFeegrant !== false) {
+      writer.uint32(64).bool(message.withFeegrant);
+    }
+    for (const v of message.feegrantSpendLimit) {
+      Coin.encode(v!, writer.uint32(74).fork()).ldelim();
+    }
+    if (message.feegrantSpendLimitPeriod !== undefined) {
+      Duration.encode(message.feegrantSpendLimitPeriod, writer.uint32(82).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgGrantOperatorAuthorization {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgGrantOperatorAuthorization();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.authority = reader.string();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.operator = reader.string();
+          continue;
+        case 3:
+          if (tag !== 26) {
+            break;
+          }
+
+          message.grantee = reader.string();
+          continue;
+        case 4:
+          if (tag !== 34) {
+            break;
+          }
+
+          message.msgTypes.push(reader.string());
+          continue;
+        case 5:
+          if (tag !== 42) {
+            break;
+          }
+
+          message.expiration = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
+          continue;
+        case 6:
+          if (tag !== 50) {
+            break;
+          }
+
+          message.authzSpendLimit.push(Coin.decode(reader, reader.uint32()));
+          continue;
+        case 7:
+          if (tag !== 58) {
+            break;
+          }
+
+          message.authzSpendLimitPeriod = Duration.decode(reader, reader.uint32());
+          continue;
+        case 8:
+          if (tag !== 64) {
+            break;
+          }
+
+          message.withFeegrant = reader.bool();
+          continue;
+        case 9:
+          if (tag !== 74) {
+            break;
+          }
+
+          message.feegrantSpendLimit.push(Coin.decode(reader, reader.uint32()));
+          continue;
+        case 10:
+          if (tag !== 82) {
+            break;
+          }
+
+          message.feegrantSpendLimitPeriod = Duration.decode(reader, reader.uint32());
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MsgGrantOperatorAuthorization {
+    return {
+      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
+      grantee: isSet(object.grantee) ? globalThis.String(object.grantee) : "",
+      msgTypes: globalThis.Array.isArray(object?.msgTypes) ? object.msgTypes.map((e: any) => globalThis.String(e)) : [],
+      expiration: isSet(object.expiration) ? fromJsonTimestamp(object.expiration) : undefined,
+      authzSpendLimit: globalThis.Array.isArray(object?.authzSpendLimit)
+        ? object.authzSpendLimit.map((e: any) => Coin.fromJSON(e))
+        : [],
+      authzSpendLimitPeriod: isSet(object.authzSpendLimitPeriod)
+        ? Duration.fromJSON(object.authzSpendLimitPeriod)
+        : undefined,
+      withFeegrant: isSet(object.withFeegrant) ? globalThis.Boolean(object.withFeegrant) : false,
+      feegrantSpendLimit: globalThis.Array.isArray(object?.feegrantSpendLimit)
+        ? object.feegrantSpendLimit.map((e: any) => Coin.fromJSON(e))
+        : [],
+      feegrantSpendLimitPeriod: isSet(object.feegrantSpendLimitPeriod)
+        ? Duration.fromJSON(object.feegrantSpendLimitPeriod)
+        : undefined,
+    };
+  },
+
+  toJSON(message: MsgGrantOperatorAuthorization): unknown {
+    const obj: any = {};
+    if (message.authority !== "") {
+      obj.authority = message.authority;
+    }
+    if (message.operator !== "") {
+      obj.operator = message.operator;
+    }
+    if (message.grantee !== "") {
+      obj.grantee = message.grantee;
+    }
+    if (message.msgTypes?.length) {
+      obj.msgTypes = message.msgTypes;
+    }
+    if (message.expiration !== undefined) {
+      obj.expiration = message.expiration.toISOString();
+    }
+    if (message.authzSpendLimit?.length) {
+      obj.authzSpendLimit = message.authzSpendLimit.map((e) => Coin.toJSON(e));
+    }
+    if (message.authzSpendLimitPeriod !== undefined) {
+      obj.authzSpendLimitPeriod = Duration.toJSON(message.authzSpendLimitPeriod);
+    }
+    if (message.withFeegrant !== false) {
+      obj.withFeegrant = message.withFeegrant;
+    }
+    if (message.feegrantSpendLimit?.length) {
+      obj.feegrantSpendLimit = message.feegrantSpendLimit.map((e) => Coin.toJSON(e));
+    }
+    if (message.feegrantSpendLimitPeriod !== undefined) {
+      obj.feegrantSpendLimitPeriod = Duration.toJSON(message.feegrantSpendLimitPeriod);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MsgGrantOperatorAuthorization>, I>>(base?: I): MsgGrantOperatorAuthorization {
+    return MsgGrantOperatorAuthorization.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgGrantOperatorAuthorization>, I>>(
+    object: I,
+  ): MsgGrantOperatorAuthorization {
+    const message = createBaseMsgGrantOperatorAuthorization();
+    message.authority = object.authority ?? "";
+    message.operator = object.operator ?? "";
+    message.grantee = object.grantee ?? "";
+    message.msgTypes = object.msgTypes?.map((e) => e) || [];
+    message.expiration = object.expiration ?? undefined;
+    message.authzSpendLimit = object.authzSpendLimit?.map((e) => Coin.fromPartial(e)) || [];
+    message.authzSpendLimitPeriod =
+      (object.authzSpendLimitPeriod !== undefined && object.authzSpendLimitPeriod !== null)
+        ? Duration.fromPartial(object.authzSpendLimitPeriod)
+        : undefined;
+    message.withFeegrant = object.withFeegrant ?? false;
+    message.feegrantSpendLimit = object.feegrantSpendLimit?.map((e) => Coin.fromPartial(e)) || [];
+    message.feegrantSpendLimitPeriod =
+      (object.feegrantSpendLimitPeriod !== undefined && object.feegrantSpendLimitPeriod !== null)
+        ? Duration.fromPartial(object.feegrantSpendLimitPeriod)
+        : undefined;
+    return message;
+  },
+};
+
+function createBaseMsgGrantOperatorAuthorizationResponse(): MsgGrantOperatorAuthorizationResponse {
+  return {};
+}
+
+export const MsgGrantOperatorAuthorizationResponse = {
+  encode(_: MsgGrantOperatorAuthorizationResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgGrantOperatorAuthorizationResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgGrantOperatorAuthorizationResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(_: any): MsgGrantOperatorAuthorizationResponse {
+    return {};
+  },
+
+  toJSON(_: MsgGrantOperatorAuthorizationResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MsgGrantOperatorAuthorizationResponse>, I>>(
+    base?: I,
+  ): MsgGrantOperatorAuthorizationResponse {
+    return MsgGrantOperatorAuthorizationResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgGrantOperatorAuthorizationResponse>, I>>(
+    _: I,
+  ): MsgGrantOperatorAuthorizationResponse {
+    const message = createBaseMsgGrantOperatorAuthorizationResponse();
+    return message;
+  },
+};
+
 /** Msg defines the Msg service. */
 export interface Msg {
   /**
@@ -155,6 +479,8 @@ export interface Msg {
    * parameters. The authority defaults to the x/gov module account.
    */
   UpdateParams(request: MsgUpdateParams): Promise<MsgUpdateParamsResponse>;
+  /** [MOD-DE-MSG-3] Grant Operator Authorization */
+  GrantOperatorAuthorization(request: MsgGrantOperatorAuthorization): Promise<MsgGrantOperatorAuthorizationResponse>;
 }
 
 export const MsgServiceName = "verana.de.v1.Msg";
@@ -165,11 +491,18 @@ export class MsgClientImpl implements Msg {
     this.service = opts?.service || MsgServiceName;
     this.rpc = rpc;
     this.UpdateParams = this.UpdateParams.bind(this);
+    this.GrantOperatorAuthorization = this.GrantOperatorAuthorization.bind(this);
   }
   UpdateParams(request: MsgUpdateParams): Promise<MsgUpdateParamsResponse> {
     const data = MsgUpdateParams.encode(request).finish();
     const promise = this.rpc.request(this.service, "UpdateParams", data);
     return promise.then((data) => MsgUpdateParamsResponse.decode(_m0.Reader.create(data)));
+  }
+
+  GrantOperatorAuthorization(request: MsgGrantOperatorAuthorization): Promise<MsgGrantOperatorAuthorizationResponse> {
+    const data = MsgGrantOperatorAuthorization.encode(request).finish();
+    const promise = this.rpc.request(this.service, "GrantOperatorAuthorization", data);
+    return promise.then((data) => MsgGrantOperatorAuthorizationResponse.decode(_m0.Reader.create(data)));
   }
 }
 
@@ -188,6 +521,28 @@ export type DeepPartial<T> = T extends Builtin ? T
 type KeysOfUnion<T> = T extends T ? keyof T : never;
 export type Exact<P, I extends P> = P extends Builtin ? P
   : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
+
+function toTimestamp(date: Date): Timestamp {
+  const seconds = Math.trunc(date.getTime() / 1_000);
+  const nanos = (date.getTime() % 1_000) * 1_000_000;
+  return { seconds, nanos };
+}
+
+function fromTimestamp(t: Timestamp): Date {
+  let millis = (t.seconds || 0) * 1_000;
+  millis += (t.nanos || 0) / 1_000_000;
+  return new globalThis.Date(millis);
+}
+
+function fromJsonTimestamp(o: any): Date {
+  if (o instanceof globalThis.Date) {
+    return o;
+  } else if (typeof o === "string") {
+    return new globalThis.Date(o);
+  } else {
+    return fromTimestamp(Timestamp.fromJSON(o));
+  }
+}
 
 function isSet(value: any): boolean {
   return value !== null && value !== undefined;

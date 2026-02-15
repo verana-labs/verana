@@ -28,6 +28,51 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					RpcMethod: "UpdateParams",
 					Skip:      true, // skipped because authority gated
 				},
+				{
+					RpcMethod: "GrantOperatorAuthorization",
+					Use:       "grant-operator-authz [authority] [grantee]",
+					Short:     "Grant operator authorization to a grantee on behalf of an authority",
+					Long:      "[MOD-DE-MSG-3] Grant operator authorization. The grantee receives authorization to execute specified message types on behalf of the authority. Optionally includes a fee grant.",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
+						{ProtoField: "authority"},
+						{ProtoField: "grantee"},
+					},
+					FlagOptions: map[string]*autocliv1.FlagOptions{
+						"operator": {
+							Name:  "operator",
+							Usage: "optional operator account authorized to run this Msg",
+						},
+						"msg_types": {
+							Name:  "msg-types",
+							Usage: "comma-separated list of VPR delegable message type URLs",
+						},
+						"expiration": {
+							Name:  "expiration",
+							Usage: "authorization expiration timestamp (RFC3339)",
+						},
+						"authz_spend_limit": {
+							Name:  "authz-spend-limit",
+							Usage: "maximum spendable amount (e.g. 100stake)",
+						},
+						"authz_spend_limit_period": {
+							Name:  "authz-spend-limit-period",
+							Usage: "reset period for authz spend limit",
+						},
+						"with_feegrant": {
+							Name:         "with-feegrant",
+							Usage:        "whether to also grant fee allowance",
+							DefaultValue: "false",
+						},
+						"feegrant_spend_limit": {
+							Name:  "feegrant-spend-limit",
+							Usage: "maximum fee amount (e.g. 100stake). Ignored if --with-feegrant is false",
+						},
+						"feegrant_spend_limit_period": {
+							Name:  "feegrant-spend-limit-period",
+							Usage: "reset period for fee spend limit. Ignored if --with-feegrant is false",
+						},
+					},
+				},
 				// this line is used by ignite scaffolding # autocli/tx
 			},
 		},

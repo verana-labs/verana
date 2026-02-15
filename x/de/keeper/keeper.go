@@ -19,8 +19,16 @@ type Keeper struct {
 	// Typically, this should be the x/gov module account.
 	authority []byte
 
-	Schema collections.Schema
-	Params collections.Item[types.Params]
+	Schema                   collections.Schema
+	Params                   collections.Item[types.Params]
+	OperatorAuthorizations   collections.Map[string, types.OperatorAuthorization]
+	FeeGrants                collections.Map[string, types.FeeGrant]
+	VSOperatorAuthorizations collections.Map[string, types.VSOperatorAuthorization]
+}
+
+// CompositeKey builds a composite map key from two addresses.
+func CompositeKey(a, b string) string {
+	return a + "/" + b
 }
 
 func NewKeeper(
@@ -43,6 +51,12 @@ func NewKeeper(
 		authority:    authority,
 
 		Params: collections.NewItem(sb, types.ParamsKey, "params", codec.CollValue[types.Params](cdc)),
+		OperatorAuthorizations: collections.NewMap(sb, types.OperatorAuthorizationKey, "operator_authorization",
+			collections.StringKey, codec.CollValue[types.OperatorAuthorization](cdc)),
+		FeeGrants: collections.NewMap(sb, types.FeeGrantKey, "fee_grant",
+			collections.StringKey, codec.CollValue[types.FeeGrant](cdc)),
+		VSOperatorAuthorizations: collections.NewMap(sb, types.VSOperatorAuthorizationKey, "vs_operator_authorization",
+			collections.StringKey, codec.CollValue[types.VSOperatorAuthorization](cdc)),
 	}
 
 	schema, err := sb.Build()

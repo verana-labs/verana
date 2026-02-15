@@ -19,7 +19,8 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Msg_UpdateParams_FullMethodName = "/verana.de.v1.Msg/UpdateParams"
+	Msg_UpdateParams_FullMethodName               = "/verana.de.v1.Msg/UpdateParams"
+	Msg_GrantOperatorAuthorization_FullMethodName = "/verana.de.v1.Msg/GrantOperatorAuthorization"
 )
 
 // MsgClient is the client API for Msg service.
@@ -31,6 +32,8 @@ type MsgClient interface {
 	// UpdateParams defines a (governance) operation for updating the module
 	// parameters. The authority defaults to the x/gov module account.
 	UpdateParams(ctx context.Context, in *MsgUpdateParams, opts ...grpc.CallOption) (*MsgUpdateParamsResponse, error)
+	// [MOD-DE-MSG-3] Grant Operator Authorization
+	GrantOperatorAuthorization(ctx context.Context, in *MsgGrantOperatorAuthorization, opts ...grpc.CallOption) (*MsgGrantOperatorAuthorizationResponse, error)
 }
 
 type msgClient struct {
@@ -51,6 +54,16 @@ func (c *msgClient) UpdateParams(ctx context.Context, in *MsgUpdateParams, opts 
 	return out, nil
 }
 
+func (c *msgClient) GrantOperatorAuthorization(ctx context.Context, in *MsgGrantOperatorAuthorization, opts ...grpc.CallOption) (*MsgGrantOperatorAuthorizationResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(MsgGrantOperatorAuthorizationResponse)
+	err := c.cc.Invoke(ctx, Msg_GrantOperatorAuthorization_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MsgServer is the server API for Msg service.
 // All implementations must embed UnimplementedMsgServer
 // for forward compatibility.
@@ -60,6 +73,8 @@ type MsgServer interface {
 	// UpdateParams defines a (governance) operation for updating the module
 	// parameters. The authority defaults to the x/gov module account.
 	UpdateParams(context.Context, *MsgUpdateParams) (*MsgUpdateParamsResponse, error)
+	// [MOD-DE-MSG-3] Grant Operator Authorization
+	GrantOperatorAuthorization(context.Context, *MsgGrantOperatorAuthorization) (*MsgGrantOperatorAuthorizationResponse, error)
 	mustEmbedUnimplementedMsgServer()
 }
 
@@ -72,6 +87,9 @@ type UnimplementedMsgServer struct{}
 
 func (UnimplementedMsgServer) UpdateParams(context.Context, *MsgUpdateParams) (*MsgUpdateParamsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateParams not implemented")
+}
+func (UnimplementedMsgServer) GrantOperatorAuthorization(context.Context, *MsgGrantOperatorAuthorization) (*MsgGrantOperatorAuthorizationResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GrantOperatorAuthorization not implemented")
 }
 func (UnimplementedMsgServer) mustEmbedUnimplementedMsgServer() {}
 func (UnimplementedMsgServer) testEmbeddedByValue()             {}
@@ -112,6 +130,24 @@ func _Msg_UpdateParams_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Msg_GrantOperatorAuthorization_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgGrantOperatorAuthorization)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).GrantOperatorAuthorization(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Msg_GrantOperatorAuthorization_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).GrantOperatorAuthorization(ctx, req.(*MsgGrantOperatorAuthorization))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Msg_ServiceDesc is the grpc.ServiceDesc for Msg service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -122,6 +158,10 @@ var Msg_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateParams",
 			Handler:    _Msg_UpdateParams_Handler,
+		},
+		{
+			MethodName: "GrantOperatorAuthorization",
+			Handler:    _Msg_GrantOperatorAuthorization_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

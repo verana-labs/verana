@@ -15,5 +15,13 @@ const (
 	GovModuleName = "gov"
 )
 
-// ParamsKey is the prefix to retrieve all Params
-var ParamsKey = collections.NewPrefix("p_de")
+var (
+	// ParamsKey is the prefix to retrieve all Params
+	ParamsKey = collections.NewPrefix("p_de")
+	// OperatorAuthorizationKey is the prefix for OperatorAuthorization storage
+	OperatorAuthorizationKey = collections.NewPrefix("oa_de")
+	// FeeGrantKey is the prefix for FeeGrant storage
+	FeeGrantKey = collections.NewPrefix("fg_de")
+	// VSOperatorAuthorizationKey is the prefix for VSOperatorAuthorization storage
+	VSOperatorAuthorizationKey = collections.NewPrefix("vsoa_de")
+)

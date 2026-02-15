@@ -2,9 +2,12 @@ syntax = "proto3";
 package verana.de.v1;
 
 import "amino/amino.proto";
+import "cosmos/base/v1beta1/coin.proto";
 import "cosmos/msg/v1/msg.proto";
 import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
 import "verana/de/v1/params.proto";
 
 option go_package = "github.com/verana-labs/verana/x/de/types";
@@ -16,6 +19,10 @@ service Msg {
   // UpdateParams defines a (governance) operation for updating the module
   // parameters. The authority defaults to the x/gov module account.
   rpc UpdateParams(MsgUpdateParams) returns (MsgUpdateParamsResponse);
+
+  // [MOD-DE-MSG-3] Grant Operator Authorization
+  rpc GrantOperatorAuthorization(MsgGrantOperatorAuthorization)
+      returns (MsgGrantOperatorAuthorizationResponse);
 }
 
 // MsgUpdateParams is the Msg/UpdateParams request type.
@@ -38,3 +45,48 @@ message MsgUpdateParams {
 // MsgUpdateParamsResponse defines the response structure for executing a
 // MsgUpdateParams message.
 message MsgUpdateParamsResponse {}
+
+// [MOD-DE-MSG-3] MsgGrantOperatorAuthorization grants an operator authorization
+// to a grantee on behalf of an authority.
+message MsgGrantOperatorAuthorization {
+  option (cosmos.msg.v1.signer) = "authority";
+
+  // authority is the group account granting the authorization.
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // operator is the optional account authorized by the authority to run this
+  // Msg.
+  string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // grantee is the account that receives the authorization from authority.
+  string grantee = 3 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // msg_types is the list of VPR delegable message types for which
+  // authorization is granted.
+  repeated string msg_types = 4;
+  // expiration is the optional timestamp after which the authorization expires.
+  google.protobuf.Timestamp expiration = 5
+      [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  // authz_spend_limit is the optional maximum spendable amount.
+  repeated cosmos.base.v1beta1.Coin authz_spend_limit = 6 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+  // authz_spend_limit_period is the optional reset period for
+  // authz_spend_limit.
+  google.protobuf.Duration authz_spend_limit_period = 7
+      [(gogoproto.stdduration) = true, (gogoproto.nullable) = true];
+  // with_feegrant indicates whether to also grant a fee allowance.
+  bool with_feegrant = 8;
+  // feegrant_spend_limit is the optional maximum fee amount. Ignored if
+  // with_feegrant is false.
+  repeated cosmos.base.v1beta1.Coin feegrant_spend_limit = 9 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+  // feegrant_spend_limit_period is the optional reset period for
+  // feegrant_spend_limit. Ignored if with_feegrant is false.
+  google.protobuf.Duration feegrant_spend_limit_period = 10
+      [(gogoproto.stdduration) = true, (gogoproto.nullable) = true];
+}
+
+// MsgGrantOperatorAuthorizationResponse defines the response for
+// MsgGrantOperatorAuthorization.
+message MsgGrantOperatorAuthorizationResponse {}
