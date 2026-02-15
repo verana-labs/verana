@@ -21,14 +21,9 @@ type Keeper struct {
 
 	Schema                   collections.Schema
 	Params                   collections.Item[types.Params]
-	OperatorAuthorizations   collections.Map[string, types.OperatorAuthorization]
-	FeeGrants                collections.Map[string, types.FeeGrant]
-	VSOperatorAuthorizations collections.Map[string, types.VSOperatorAuthorization]
-}
-
-// CompositeKey builds a composite map key from two addresses.
-func CompositeKey(a, b string) string {
-	return a + "/" + b
+	OperatorAuthorizations   collections.Map[collections.Pair[string, string], types.OperatorAuthorization]
+	FeeGrants                collections.Map[collections.Pair[string, string], types.FeeGrant]
+	VSOperatorAuthorizations collections.Map[collections.Pair[string, string], types.VSOperatorAuthorization]
 }
 
 func NewKeeper(
@@ -44,6 +39,8 @@ func NewKeeper(
 
 	sb := collections.NewSchemaBuilder(storeService)
 
+	pairKeyCodec := collections.PairKeyCodec(collections.StringKey, collections.StringKey)
+
 	k := Keeper{
 		storeService: storeService,
 		cdc:          cdc,
@@ -52,11 +49,11 @@ func NewKeeper(
 
 		Params: collections.NewItem(sb, types.ParamsKey, "params", codec.CollValue[types.Params](cdc)),
 		OperatorAuthorizations: collections.NewMap(sb, types.OperatorAuthorizationKey, "operator_authorization",
-			collections.StringKey, codec.CollValue[types.OperatorAuthorization](cdc)),
+			pairKeyCodec, codec.CollValue[types.OperatorAuthorization](cdc)),
 		FeeGrants: collections.NewMap(sb, types.FeeGrantKey, "fee_grant",
-			collections.StringKey, codec.CollValue[types.FeeGrant](cdc)),
+			pairKeyCodec, codec.CollValue[types.FeeGrant](cdc)),
 		VSOperatorAuthorizations: collections.NewMap(sb, types.VSOperatorAuthorizationKey, "vs_operator_authorization",
-			collections.StringKey, codec.CollValue[types.VSOperatorAuthorization](cdc)),
+			pairKeyCodec, codec.CollValue[types.VSOperatorAuthorization](cdc)),
 	}
 
 	schema, err := sb.Build()

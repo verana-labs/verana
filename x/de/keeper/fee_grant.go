@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"cosmossdk.io/collections"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/verana-labs/verana/x/de/types"
@@ -20,7 +21,7 @@ func (k Keeper) GrantFeeAllowance(
 	spendLimit sdk.Coins,
 	period *time.Duration,
 ) error {
-	key := CompositeKey(grantor, grantee)
+	key := collections.Join(grantor, grantee)
 	feeGrant := types.FeeGrant{
 		Grantor:    grantor,
 		Grantee:    grantee,
@@ -36,7 +37,7 @@ func (k Keeper) GrantFeeAllowance(
 // pair. This is an internal method (MOD-DE-MSG-2). It is a no-op if no grant
 // exists.
 func (k Keeper) RevokeFeeAllowance(ctx context.Context, grantor string, grantee string) error {
-	key := CompositeKey(grantor, grantee)
+	key := collections.Join(grantor, grantee)
 	has, err := k.FeeGrants.Has(ctx, key)
 	if err != nil {
 		return err

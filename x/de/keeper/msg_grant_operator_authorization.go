@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"cosmossdk.io/collections"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/verana-labs/verana/x/de/types"
@@ -16,7 +17,16 @@ func (ms msgServer) GrantOperatorAuthorization(goCtx context.Context, msg *types
 
 	// [MOD-DE-MSG-3-2] Basic checks (stateful)
 
-	// TODO: [AUTHZ-CHECK] for (authority, operator) pair - skipped for now
+	// [AUTHZ-CHECK-1] Verify operator authorization for this (authority, operator) pair
+	if err := ms.CheckOperatorAuthorization(
+		ctx,
+		msg.Authority,
+		msg.Operator,
+		"/verana.de.v1.MsgGrantOperatorAuthorization",
+		now,
+	); err != nil {
+		return nil, err
+	}
 
 	// Expiration must be in the future if specified
 	if msg.Expiration != nil && !msg.Expiration.After(now) {
@@ -25,7 +35,7 @@ func (ms msgServer) GrantOperatorAuthorization(goCtx context.Context, msg *types
 
 	// Check mutual exclusivity: VSOperatorAuthorization must NOT exist for
 	// this authority/grantee pair.
-	vsKey := CompositeKey(msg.Authority, msg.Grantee)
+	vsKey := collections.Join(msg.Authority, msg.Grantee)
 	hasVSOA, err := ms.VSOperatorAuthorizations.Has(ctx, vsKey)
 	if err != nil {
 		return nil, fmt.Errorf("failed to check VSOperatorAuthorization: %w", err)
@@ -37,7 +47,7 @@ func (ms msgServer) GrantOperatorAuthorization(goCtx context.Context, msg *types
 	// [MOD-DE-MSG-3-4] Execution
 
 	// 1. Create or update OperatorAuthorization
-	oaKey := CompositeKey(msg.Authority, msg.Grantee)
+	oaKey := collections.Join(msg.Authority, msg.Grantee)
 	oa := types.OperatorAuthorization{
 		Authority:  msg.Authority,
 		Operator:   msg.Grantee,
