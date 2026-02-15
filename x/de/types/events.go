@@ -1,9 +1,10 @@
 package types
 
 const (
-	EventTypeGrantOperatorAuthorization = "grant_operator_authorization"
-	EventTypeGrantFeeAllowance          = "grant_fee_allowance"
-	EventTypeRevokeFeeAllowance         = "revoke_fee_allowance"
+	EventTypeGrantOperatorAuthorization  = "grant_operator_authorization"
+	EventTypeRevokeOperatorAuthorization = "revoke_operator_authorization"
+	EventTypeGrantFeeAllowance           = "grant_fee_allowance"
+	EventTypeRevokeFeeAllowance          = "revoke_fee_allowance"
 
 	AttributeKeyAuthority    = "authority"
 	AttributeKeyOperator     = "operator"

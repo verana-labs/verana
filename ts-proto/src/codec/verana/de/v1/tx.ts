@@ -85,6 +85,29 @@ export interface MsgGrantOperatorAuthorization {
 export interface MsgGrantOperatorAuthorizationResponse {
 }
 
+/**
+ * [MOD-DE-MSG-4] MsgRevokeOperatorAuthorization revokes an operator
+ * authorization for a grantee on behalf of an authority.
+ */
+export interface MsgRevokeOperatorAuthorization {
+  /** authority is the group account revoking the authorization. */
+  authority: string;
+  /**
+   * operator is the optional account authorized by the authority to run this
+   * Msg.
+   */
+  operator: string;
+  /** grantee is the account whose authorization is being revoked. */
+  grantee: string;
+}
+
+/**
+ * MsgRevokeOperatorAuthorizationResponse defines the response for
+ * MsgRevokeOperatorAuthorization.
+ */
+export interface MsgRevokeOperatorAuthorizationResponse {
+}
+
 function createBaseMsgUpdateParams(): MsgUpdateParams {
   return { authority: "", params: undefined };
 }
@@ -472,6 +495,144 @@ export const MsgGrantOperatorAuthorizationResponse = {
   },
 };
 
+function createBaseMsgRevokeOperatorAuthorization(): MsgRevokeOperatorAuthorization {
+  return { authority: "", operator: "", grantee: "" };
+}
+
+export const MsgRevokeOperatorAuthorization = {
+  encode(message: MsgRevokeOperatorAuthorization, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.authority !== "") {
+      writer.uint32(10).string(message.authority);
+    }
+    if (message.operator !== "") {
+      writer.uint32(18).string(message.operator);
+    }
+    if (message.grantee !== "") {
+      writer.uint32(26).string(message.grantee);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgRevokeOperatorAuthorization {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgRevokeOperatorAuthorization();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.authority = reader.string();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.operator = reader.string();
+          continue;
+        case 3:
+          if (tag !== 26) {
+            break;
+          }
+
+          message.grantee = reader.string();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MsgRevokeOperatorAuthorization {
+    return {
+      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
+      grantee: isSet(object.grantee) ? globalThis.String(object.grantee) : "",
+    };
+  },
+
+  toJSON(message: MsgRevokeOperatorAuthorization): unknown {
+    const obj: any = {};
+    if (message.authority !== "") {
+      obj.authority = message.authority;
+    }
+    if (message.operator !== "") {
+      obj.operator = message.operator;
+    }
+    if (message.grantee !== "") {
+      obj.grantee = message.grantee;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MsgRevokeOperatorAuthorization>, I>>(base?: I): MsgRevokeOperatorAuthorization {
+    return MsgRevokeOperatorAuthorization.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgRevokeOperatorAuthorization>, I>>(
+    object: I,
+  ): MsgRevokeOperatorAuthorization {
+    const message = createBaseMsgRevokeOperatorAuthorization();
+    message.authority = object.authority ?? "";
+    message.operator = object.operator ?? "";
+    message.grantee = object.grantee ?? "";
+    return message;
+  },
+};
+
+function createBaseMsgRevokeOperatorAuthorizationResponse(): MsgRevokeOperatorAuthorizationResponse {
+  return {};
+}
+
+export const MsgRevokeOperatorAuthorizationResponse = {
+  encode(_: MsgRevokeOperatorAuthorizationResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgRevokeOperatorAuthorizationResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgRevokeOperatorAuthorizationResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(_: any): MsgRevokeOperatorAuthorizationResponse {
+    return {};
+  },
+
+  toJSON(_: MsgRevokeOperatorAuthorizationResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MsgRevokeOperatorAuthorizationResponse>, I>>(
+    base?: I,
+  ): MsgRevokeOperatorAuthorizationResponse {
+    return MsgRevokeOperatorAuthorizationResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgRevokeOperatorAuthorizationResponse>, I>>(
+    _: I,
+  ): MsgRevokeOperatorAuthorizationResponse {
+    const message = createBaseMsgRevokeOperatorAuthorizationResponse();
+    return message;
+  },
+};
+
 /** Msg defines the Msg service. */
 export interface Msg {
   /**
@@ -481,6 +642,8 @@ export interface Msg {
   UpdateParams(request: MsgUpdateParams): Promise<MsgUpdateParamsResponse>;
   /** [MOD-DE-MSG-3] Grant Operator Authorization */
   GrantOperatorAuthorization(request: MsgGrantOperatorAuthorization): Promise<MsgGrantOperatorAuthorizationResponse>;
+  /** [MOD-DE-MSG-4] Revoke Operator Authorization */
+  RevokeOperatorAuthorization(request: MsgRevokeOperatorAuthorization): Promise<MsgRevokeOperatorAuthorizationResponse>;
 }
 
 export const MsgServiceName = "verana.de.v1.Msg";
@@ -492,6 +655,7 @@ export class MsgClientImpl implements Msg {
     this.rpc = rpc;
     this.UpdateParams = this.UpdateParams.bind(this);
     this.GrantOperatorAuthorization = this.GrantOperatorAuthorization.bind(this);
+    this.RevokeOperatorAuthorization = this.RevokeOperatorAuthorization.bind(this);
   }
   UpdateParams(request: MsgUpdateParams): Promise<MsgUpdateParamsResponse> {
     const data = MsgUpdateParams.encode(request).finish();
@@ -503,6 +667,14 @@ export class MsgClientImpl implements Msg {
     const data = MsgGrantOperatorAuthorization.encode(request).finish();
     const promise = this.rpc.request(this.service, "GrantOperatorAuthorization", data);
     return promise.then((data) => MsgGrantOperatorAuthorizationResponse.decode(_m0.Reader.create(data)));
+  }
+
+  RevokeOperatorAuthorization(
+    request: MsgRevokeOperatorAuthorization,
+  ): Promise<MsgRevokeOperatorAuthorizationResponse> {
+    const data = MsgRevokeOperatorAuthorization.encode(request).finish();
+    const promise = this.rpc.request(this.service, "RevokeOperatorAuthorization", data);
+    return promise.then((data) => MsgRevokeOperatorAuthorizationResponse.decode(_m0.Reader.create(data)));
   }
 }
 

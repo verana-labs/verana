@@ -73,6 +73,22 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 						},
 					},
 				},
+				{
+					RpcMethod: "RevokeOperatorAuthorization",
+					Use:       "revoke-operator-authz [authority] [grantee]",
+					Short:     "Revoke operator authorization for a grantee",
+					Long:      "[MOD-DE-MSG-4] Revoke operator authorization. Removes the authorization entry and any associated fee grant for the given authority/grantee pair.",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
+						{ProtoField: "authority"},
+						{ProtoField: "grantee"},
+					},
+					FlagOptions: map[string]*autocliv1.FlagOptions{
+						"operator": {
+							Name:  "operator",
+							Usage: "optional operator account authorized to run this Msg",
+						},
+					},
+				},
 				// this line is used by ignite scaffolding # autocli/tx
 			},
 		},

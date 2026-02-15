@@ -19,8 +19,9 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Msg_UpdateParams_FullMethodName               = "/verana.de.v1.Msg/UpdateParams"
-	Msg_GrantOperatorAuthorization_FullMethodName = "/verana.de.v1.Msg/GrantOperatorAuthorization"
+	Msg_UpdateParams_FullMethodName                = "/verana.de.v1.Msg/UpdateParams"
+	Msg_GrantOperatorAuthorization_FullMethodName  = "/verana.de.v1.Msg/GrantOperatorAuthorization"
+	Msg_RevokeOperatorAuthorization_FullMethodName = "/verana.de.v1.Msg/RevokeOperatorAuthorization"
 )
 
 // MsgClient is the client API for Msg service.
@@ -34,6 +35,8 @@ type MsgClient interface {
 	UpdateParams(ctx context.Context, in *MsgUpdateParams, opts ...grpc.CallOption) (*MsgUpdateParamsResponse, error)
 	// [MOD-DE-MSG-3] Grant Operator Authorization
 	GrantOperatorAuthorization(ctx context.Context, in *MsgGrantOperatorAuthorization, opts ...grpc.CallOption) (*MsgGrantOperatorAuthorizationResponse, error)
+	// [MOD-DE-MSG-4] Revoke Operator Authorization
+	RevokeOperatorAuthorization(ctx context.Context, in *MsgRevokeOperatorAuthorization, opts ...grpc.CallOption) (*MsgRevokeOperatorAuthorizationResponse, error)
 }
 
 type msgClient struct {
@@ -64,6 +67,16 @@ func (c *msgClient) GrantOperatorAuthorization(ctx context.Context, in *MsgGrant
 	return out, nil
 }
 
+func (c *msgClient) RevokeOperatorAuthorization(ctx context.Context, in *MsgRevokeOperatorAuthorization, opts ...grpc.CallOption) (*MsgRevokeOperatorAuthorizationResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(MsgRevokeOperatorAuthorizationResponse)
+	err := c.cc.Invoke(ctx, Msg_RevokeOperatorAuthorization_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MsgServer is the server API for Msg service.
 // All implementations must embed UnimplementedMsgServer
 // for forward compatibility.
@@ -75,6 +88,8 @@ type MsgServer interface {
 	UpdateParams(context.Context, *MsgUpdateParams) (*MsgUpdateParamsResponse, error)
 	// [MOD-DE-MSG-3] Grant Operator Authorization
 	GrantOperatorAuthorization(context.Context, *MsgGrantOperatorAuthorization) (*MsgGrantOperatorAuthorizationResponse, error)
+	// [MOD-DE-MSG-4] Revoke Operator Authorization
+	RevokeOperatorAuthorization(context.Context, *MsgRevokeOperatorAuthorization) (*MsgRevokeOperatorAuthorizationResponse, error)
 	mustEmbedUnimplementedMsgServer()
 }
 
@@ -90,6 +105,9 @@ func (UnimplementedMsgServer) UpdateParams(context.Context, *MsgUpdateParams) (*
 }
 func (UnimplementedMsgServer) GrantOperatorAuthorization(context.Context, *MsgGrantOperatorAuthorization) (*MsgGrantOperatorAuthorizationResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GrantOperatorAuthorization not implemented")
+}
+func (UnimplementedMsgServer) RevokeOperatorAuthorization(context.Context, *MsgRevokeOperatorAuthorization) (*MsgRevokeOperatorAuthorizationResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RevokeOperatorAuthorization not implemented")
 }
 func (UnimplementedMsgServer) mustEmbedUnimplementedMsgServer() {}
 func (UnimplementedMsgServer) testEmbeddedByValue()             {}
@@ -148,6 +166,24 @@ func _Msg_GrantOperatorAuthorization_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Msg_RevokeOperatorAuthorization_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgRevokeOperatorAuthorization)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).RevokeOperatorAuthorization(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Msg_RevokeOperatorAuthorization_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).RevokeOperatorAuthorization(ctx, req.(*MsgRevokeOperatorAuthorization))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Msg_ServiceDesc is the grpc.ServiceDesc for Msg service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -162,6 +198,10 @@ var Msg_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GrantOperatorAuthorization",
 			Handler:    _Msg_GrantOperatorAuthorization_Handler,
+		},
+		{
+			MethodName: "RevokeOperatorAuthorization",
+			Handler:    _Msg_RevokeOperatorAuthorization_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

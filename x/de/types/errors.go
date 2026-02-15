@@ -17,4 +17,5 @@ var (
 	ErrAuthzExpired          = errors.Register(ModuleName, 1106, "operator authorization has expired")
 	ErrAuthzMsgTypeNotFound  = errors.Register(ModuleName, 1107, "operator authorization does not include requested message type")
 	ErrAuthzSpendLimitExceeded = errors.Register(ModuleName, 1108, "operator authorization spend limit exceeded")
+	ErrOperatorAuthzNotFound   = errors.Register(ModuleName, 1109, "operator authorization not found for this authority/grantee pair")
 )

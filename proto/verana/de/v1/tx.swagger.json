@@ -50,6 +50,40 @@
         ]
       }
     },
+    "/verana.de.v1.Msg/RevokeOperatorAuthorization": {
+      "post": {
+        "summary": "[MOD-DE-MSG-4] Revoke Operator Authorization",
+        "operationId": "Msg_RevokeOperatorAuthorization",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.de.v1.MsgRevokeOperatorAuthorizationResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "[MOD-DE-MSG-4] MsgRevokeOperatorAuthorization revokes an operator\nauthorization for a grantee on behalf of an authority.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.de.v1.MsgRevokeOperatorAuthorization"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
     "/verana.de.v1.Msg/UpdateParams": {
       "post": {
         "summary": "UpdateParams defines a (governance) operation for updating the module\nparameters. The authority defaults to the x/gov module account.",
@@ -187,6 +221,28 @@
     "verana.de.v1.MsgGrantOperatorAuthorizationResponse": {
       "type": "object",
       "description": "MsgGrantOperatorAuthorizationResponse defines the response for\nMsgGrantOperatorAuthorization."
+    },
+    "verana.de.v1.MsgRevokeOperatorAuthorization": {
+      "type": "object",
+      "properties": {
+        "authority": {
+          "type": "string",
+          "description": "authority is the group account revoking the authorization."
+        },
+        "operator": {
+          "type": "string",
+          "description": "operator is the optional account authorized by the authority to run this\nMsg."
+        },
+        "grantee": {
+          "type": "string",
+          "description": "grantee is the account whose authorization is being revoked."
+        }
+      },
+      "description": "[MOD-DE-MSG-4] MsgRevokeOperatorAuthorization revokes an operator\nauthorization for a grantee on behalf of an authority."
+    },
+    "verana.de.v1.MsgRevokeOperatorAuthorizationResponse": {
+      "type": "object",
+      "description": "MsgRevokeOperatorAuthorizationResponse defines the response for\nMsgRevokeOperatorAuthorization."
     },
     "verana.de.v1.MsgUpdateParams": {
       "type": "object",

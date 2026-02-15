@@ -37,6 +37,7 @@ var VPRDelegableMsgTypes = map[string]bool{
 	"/verana.td.v1.MsgRepaySlashedTrustDeposit":                   true,
 	// Delegation (DE)
 	"/verana.de.v1.MsgGrantOperatorAuthorization":                  true,
+	"/verana.de.v1.MsgRevokeOperatorAuthorization":                 true,
 }
 
 // ValidateBasic performs stateless validation on MsgGrantOperatorAuthorization.
@@ -76,6 +77,28 @@ func (msg *MsgGrantOperatorAuthorization) ValidateBasic() error {
 	// feegrant_spend_limit if specified must be valid (only relevant if with_feegrant)
 	if msg.WithFeegrant && len(msg.FeegrantSpendLimit) > 0 && !msg.FeegrantSpendLimit.IsValid() {
 		return fmt.Errorf("invalid feegrant_spend_limit")
+	}
+
+	return nil
+}
+
+// ValidateBasic performs stateless validation on MsgRevokeOperatorAuthorization.
+func (msg *MsgRevokeOperatorAuthorization) ValidateBasic() error {
+	// authority is mandatory
+	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
+		return fmt.Errorf("invalid authority address: %w", err)
+	}
+
+	// operator is optional; if present, must be valid
+	if msg.Operator != "" {
+		if _, err := sdk.AccAddressFromBech32(msg.Operator); err != nil {
+			return fmt.Errorf("invalid operator address: %w", err)
+		}
+	}
+
+	// grantee is mandatory
+	if _, err := sdk.AccAddressFromBech32(msg.Grantee); err != nil {
+		return fmt.Errorf("invalid grantee address: %w", err)
 	}
 
 	return nil

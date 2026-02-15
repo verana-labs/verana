@@ -23,6 +23,10 @@ service Msg {
   // [MOD-DE-MSG-3] Grant Operator Authorization
   rpc GrantOperatorAuthorization(MsgGrantOperatorAuthorization)
       returns (MsgGrantOperatorAuthorizationResponse);
+
+  // [MOD-DE-MSG-4] Revoke Operator Authorization
+  rpc RevokeOperatorAuthorization(MsgRevokeOperatorAuthorization)
+      returns (MsgRevokeOperatorAuthorizationResponse);
 }
 
 // MsgUpdateParams is the Msg/UpdateParams request type.
@@ -90,3 +94,21 @@ message MsgGrantOperatorAuthorization {
 // MsgGrantOperatorAuthorizationResponse defines the response for
 // MsgGrantOperatorAuthorization.
 message MsgGrantOperatorAuthorizationResponse {}
+
+// [MOD-DE-MSG-4] MsgRevokeOperatorAuthorization revokes an operator
+// authorization for a grantee on behalf of an authority.
+message MsgRevokeOperatorAuthorization {
+  option (cosmos.msg.v1.signer) = "authority";
+
+  // authority is the group account revoking the authorization.
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // operator is the optional account authorized by the authority to run this
+  // Msg.
+  string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // grantee is the account whose authorization is being revoked.
+  string grantee = 3 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+}
+
+// MsgRevokeOperatorAuthorizationResponse defines the response for
+// MsgRevokeOperatorAuthorization.
+message MsgRevokeOperatorAuthorizationResponse {}
