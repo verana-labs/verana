@@ -327,3 +327,103 @@ func TestIntegration_FullBootstrapToTrustRegistryCreation(t *testing.T) {
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "authorization check failed")
 }
+
+// ---------------------------------------------------------------------------
+// Integration tests: DE operator authorization → TR add governance framework document
+// ---------------------------------------------------------------------------
+
+// TestIntegration_OperatorAddsGovernanceFrameworkDocument models the flow:
+//
+//  1. Grant operator with both MsgCreateTrustRegistry and MsgAddGovernanceFrameworkDocument.
+//  2. Operator creates a trust registry.
+//  3. Operator adds a governance framework document to the trust registry.
+func TestIntegration_OperatorAddsGovernanceFrameworkDocument(t *testing.T) {
+	f := setupIntegrationFixture(t)
+
+	groupAccount := sdk.AccAddress([]byte("group_policy_addr___")).String()
+	operator := sdk.AccAddress([]byte("gfd_operator________")).String()
+
+	// Grant operator both permissions
+	_, err := f.deMsgServer.GrantOperatorAuthorization(f.ctx, &detypes.MsgGrantOperatorAuthorization{
+		Authority: groupAccount,
+		Operator:  "",
+		Grantee:   operator,
+		MsgTypes: []string{
+			"/verana.tr.v1.MsgCreateTrustRegistry",
+			"/verana.tr.v1.MsgAddGovernanceFrameworkDocument",
+		},
+	})
+	require.NoError(t, err)
+
+	// Create trust registry
+	_, err = f.trMsgServer.CreateTrustRegistry(f.ctx, &trtypes.MsgCreateTrustRegistry{
+		Authority:    groupAccount,
+		Operator:     operator,
+		Did:          "did:example:gfd-test",
+		Language:     "en",
+		DocUrl:       "https://example.com/gf-v1",
+		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+	})
+	require.NoError(t, err)
+
+	trID, err := f.trKeeper.TrustRegistryDIDIndex.Get(f.ctx, "did:example:gfd-test")
+	require.NoError(t, err)
+
+	// Add a governance framework document for version 2 (next version after active=1)
+	_, err = f.trMsgServer.AddGovernanceFrameworkDocument(f.ctx, &trtypes.MsgAddGovernanceFrameworkDocument{
+		Authority:    groupAccount,
+		Operator:     operator,
+		Id:           trID,
+		DocLanguage:  "fr",
+		DocUrl:       "https://example.com/gf-v2-fr",
+		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+		Version:      2,
+	})
+	require.NoError(t, err)
+}
+
+// TestIntegration_UnauthorizedOperatorCannotAddGFDocument verifies that an
+// operator without MsgAddGovernanceFrameworkDocument permission is rejected.
+func TestIntegration_UnauthorizedOperatorCannotAddGFDocument(t *testing.T) {
+	f := setupIntegrationFixture(t)
+
+	groupAccount := sdk.AccAddress([]byte("group_policy_addr___")).String()
+	createOnlyOp := sdk.AccAddress([]byte("create_only_op______")).String()
+
+	// Grant operator ONLY MsgCreateTrustRegistry (not MsgAddGovernanceFrameworkDocument)
+	_, err := f.deMsgServer.GrantOperatorAuthorization(f.ctx, &detypes.MsgGrantOperatorAuthorization{
+		Authority: groupAccount,
+		Operator:  "",
+		Grantee:   createOnlyOp,
+		MsgTypes:  []string{"/verana.tr.v1.MsgCreateTrustRegistry"},
+	})
+	require.NoError(t, err)
+
+	// Create trust registry (should succeed)
+	_, err = f.trMsgServer.CreateTrustRegistry(f.ctx, &trtypes.MsgCreateTrustRegistry{
+		Authority:    groupAccount,
+		Operator:     createOnlyOp,
+		Did:          "did:example:gfd-unauth-test",
+		Language:     "en",
+		DocUrl:       "https://example.com/gf-v1",
+		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+	})
+	require.NoError(t, err)
+
+	trID, err := f.trKeeper.TrustRegistryDIDIndex.Get(f.ctx, "did:example:gfd-unauth-test")
+	require.NoError(t, err)
+
+	// Try to add GF document — should fail (no MsgAddGovernanceFrameworkDocument permission)
+	_, err = f.trMsgServer.AddGovernanceFrameworkDocument(f.ctx, &trtypes.MsgAddGovernanceFrameworkDocument{
+		Authority:    groupAccount,
+		Operator:     createOnlyOp,
+		Id:           trID,
+		DocLanguage:  "fr",
+		DocUrl:       "https://example.com/gf-v2-fr",
+		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+		Version:      2,
+	})
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "authorization check failed")
+	require.Contains(t, err.Error(), "does not include requested message type")
+}
