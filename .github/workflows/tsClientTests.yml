@@ -4,14 +4,14 @@ on:
   workflow_dispatch:
   pull_request:
     branches:
-      - '*' # Trigger on pull requests to any branch
+      - '**' # Trigger on pull requests to any branch
     paths:
       - 'proto/**'
       - 'ts-proto/**'
       - '.github/workflows/tsClientTests.yml'
   push:
     branches:
-      - '*' # Trigger on every commit to any branch
+      - '**' # Trigger on every commit to any branch
     paths:
       - 'proto/**'
       - 'ts-proto/**'
