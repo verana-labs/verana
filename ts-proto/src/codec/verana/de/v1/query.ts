@@ -7,6 +7,7 @@
 /* eslint-disable */
 import * as _m0 from "protobufjs/minimal";
 import { Params } from "./params";
+import { OperatorAuthorization } from "./types";
 
 export const protobufPackage = "verana.de.v1";
 
@@ -18,6 +19,27 @@ export interface QueryParamsRequest {
 export interface QueryParamsResponse {
   /** params holds all the parameters of this module. */
   params: Params | undefined;
+}
+
+/**
+ * QueryListOperatorAuthorizationsRequest is the request type for the
+ * Query/ListOperatorAuthorizations RPC method.
+ */
+export interface QueryListOperatorAuthorizationsRequest {
+  /** authority filters by the authority group that granted the authorization. */
+  authority: string;
+  /** operator filters by the operator account that received the authorization. */
+  operator: string;
+  /** response_max_size limits the number of results. Must be 1-1024, defaults to 64. */
+  responseMaxSize: number;
+}
+
+/**
+ * QueryListOperatorAuthorizationsResponse is the response type for the
+ * Query/ListOperatorAuthorizations RPC method.
+ */
+export interface QueryListOperatorAuthorizationsResponse {
+  operatorAuthorizations: OperatorAuthorization[];
 }
 
 function createBaseQueryParamsRequest(): QueryParamsRequest {
@@ -122,10 +144,173 @@ export const QueryParamsResponse = {
   },
 };
 
+function createBaseQueryListOperatorAuthorizationsRequest(): QueryListOperatorAuthorizationsRequest {
+  return { authority: "", operator: "", responseMaxSize: 0 };
+}
+
+export const QueryListOperatorAuthorizationsRequest = {
+  encode(message: QueryListOperatorAuthorizationsRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.authority !== "") {
+      writer.uint32(10).string(message.authority);
+    }
+    if (message.operator !== "") {
+      writer.uint32(18).string(message.operator);
+    }
+    if (message.responseMaxSize !== 0) {
+      writer.uint32(24).uint32(message.responseMaxSize);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryListOperatorAuthorizationsRequest {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryListOperatorAuthorizationsRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.authority = reader.string();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.operator = reader.string();
+          continue;
+        case 3:
+          if (tag !== 24) {
+            break;
+          }
+
+          message.responseMaxSize = reader.uint32();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryListOperatorAuthorizationsRequest {
+    return {
+      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
+      responseMaxSize: isSet(object.responseMaxSize) ? globalThis.Number(object.responseMaxSize) : 0,
+    };
+  },
+
+  toJSON(message: QueryListOperatorAuthorizationsRequest): unknown {
+    const obj: any = {};
+    if (message.authority !== "") {
+      obj.authority = message.authority;
+    }
+    if (message.operator !== "") {
+      obj.operator = message.operator;
+    }
+    if (message.responseMaxSize !== 0) {
+      obj.responseMaxSize = Math.round(message.responseMaxSize);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<QueryListOperatorAuthorizationsRequest>, I>>(
+    base?: I,
+  ): QueryListOperatorAuthorizationsRequest {
+    return QueryListOperatorAuthorizationsRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<QueryListOperatorAuthorizationsRequest>, I>>(
+    object: I,
+  ): QueryListOperatorAuthorizationsRequest {
+    const message = createBaseQueryListOperatorAuthorizationsRequest();
+    message.authority = object.authority ?? "";
+    message.operator = object.operator ?? "";
+    message.responseMaxSize = object.responseMaxSize ?? 0;
+    return message;
+  },
+};
+
+function createBaseQueryListOperatorAuthorizationsResponse(): QueryListOperatorAuthorizationsResponse {
+  return { operatorAuthorizations: [] };
+}
+
+export const QueryListOperatorAuthorizationsResponse = {
+  encode(message: QueryListOperatorAuthorizationsResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    for (const v of message.operatorAuthorizations) {
+      OperatorAuthorization.encode(v!, writer.uint32(10).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryListOperatorAuthorizationsResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryListOperatorAuthorizationsResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.operatorAuthorizations.push(OperatorAuthorization.decode(reader, reader.uint32()));
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryListOperatorAuthorizationsResponse {
+    return {
+      operatorAuthorizations: globalThis.Array.isArray(object?.operatorAuthorizations)
+        ? object.operatorAuthorizations.map((e: any) => OperatorAuthorization.fromJSON(e))
+        : [],
+    };
+  },
+
+  toJSON(message: QueryListOperatorAuthorizationsResponse): unknown {
+    const obj: any = {};
+    if (message.operatorAuthorizations?.length) {
+      obj.operatorAuthorizations = message.operatorAuthorizations.map((e) => OperatorAuthorization.toJSON(e));
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<QueryListOperatorAuthorizationsResponse>, I>>(
+    base?: I,
+  ): QueryListOperatorAuthorizationsResponse {
+    return QueryListOperatorAuthorizationsResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<QueryListOperatorAuthorizationsResponse>, I>>(
+    object: I,
+  ): QueryListOperatorAuthorizationsResponse {
+    const message = createBaseQueryListOperatorAuthorizationsResponse();
+    message.operatorAuthorizations = object.operatorAuthorizations?.map((e) => OperatorAuthorization.fromPartial(e)) ||
+      [];
+    return message;
+  },
+};
+
 /** Query defines the gRPC querier service. */
 export interface Query {
   /** Parameters queries the parameters of the module. */
   Params(request: QueryParamsRequest): Promise<QueryParamsResponse>;
+  /** ListOperatorAuthorizations returns operator authorizations matching optional filters. */
+  ListOperatorAuthorizations(
+    request: QueryListOperatorAuthorizationsRequest,
+  ): Promise<QueryListOperatorAuthorizationsResponse>;
 }
 
 export const QueryServiceName = "verana.de.v1.Query";
@@ -136,11 +321,20 @@ export class QueryClientImpl implements Query {
     this.service = opts?.service || QueryServiceName;
     this.rpc = rpc;
     this.Params = this.Params.bind(this);
+    this.ListOperatorAuthorizations = this.ListOperatorAuthorizations.bind(this);
   }
   Params(request: QueryParamsRequest): Promise<QueryParamsResponse> {
     const data = QueryParamsRequest.encode(request).finish();
     const promise = this.rpc.request(this.service, "Params", data);
     return promise.then((data) => QueryParamsResponse.decode(_m0.Reader.create(data)));
+  }
+
+  ListOperatorAuthorizations(
+    request: QueryListOperatorAuthorizationsRequest,
+  ): Promise<QueryListOperatorAuthorizationsResponse> {
+    const data = QueryListOperatorAuthorizationsRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "ListOperatorAuthorizations", data);
+    return promise.then((data) => QueryListOperatorAuthorizationsResponse.decode(_m0.Reader.create(data)));
   }
 }
 

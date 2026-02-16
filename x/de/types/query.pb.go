@@ -6,6 +6,7 @@ package types
 import (
 	context "context"
 	fmt "fmt"
+	_ "github.com/cosmos/cosmos-proto"
 	_ "github.com/cosmos/cosmos-sdk/types/query"
 	_ "github.com/cosmos/cosmos-sdk/types/tx/amino"
 	_ "github.com/cosmos/gogoproto/gogoproto"
@@ -114,35 +115,164 @@ func (m *QueryParamsResponse) GetParams() Params {
 	return Params{}
 }
 
+// QueryListOperatorAuthorizationsRequest is the request type for the
+// Query/ListOperatorAuthorizations RPC method.
+type QueryListOperatorAuthorizationsRequest struct {
+	// authority filters by the authority group that granted the authorization.
+	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
+	// operator filters by the operator account that received the authorization.
+	Operator string `protobuf:"bytes,2,opt,name=operator,proto3" json:"operator,omitempty"`
+	// response_max_size limits the number of results. Must be 1-1024, defaults to 64.
+	ResponseMaxSize uint32 `protobuf:"varint,3,opt,name=response_max_size,json=responseMaxSize,proto3" json:"response_max_size,omitempty"`
+}
+
+func (m *QueryListOperatorAuthorizationsRequest) Reset() {
+	*m = QueryListOperatorAuthorizationsRequest{}
+}
+func (m *QueryListOperatorAuthorizationsRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryListOperatorAuthorizationsRequest) ProtoMessage()    {}
+func (*QueryListOperatorAuthorizationsRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_41e9e1468cb47da6, []int{2}
+}
+func (m *QueryListOperatorAuthorizationsRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryListOperatorAuthorizationsRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryListOperatorAuthorizationsRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryListOperatorAuthorizationsRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryListOperatorAuthorizationsRequest.Merge(m, src)
+}
+func (m *QueryListOperatorAuthorizationsRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryListOperatorAuthorizationsRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryListOperatorAuthorizationsRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryListOperatorAuthorizationsRequest proto.InternalMessageInfo
+
+func (m *QueryListOperatorAuthorizationsRequest) GetAuthority() string {
+	if m != nil {
+		return m.Authority
+	}
+	return ""
+}
+
+func (m *QueryListOperatorAuthorizationsRequest) GetOperator() string {
+	if m != nil {
+		return m.Operator
+	}
+	return ""
+}
+
+func (m *QueryListOperatorAuthorizationsRequest) GetResponseMaxSize() uint32 {
+	if m != nil {
+		return m.ResponseMaxSize
+	}
+	return 0
+}
+
+// QueryListOperatorAuthorizationsResponse is the response type for the
+// Query/ListOperatorAuthorizations RPC method.
+type QueryListOperatorAuthorizationsResponse struct {
+	OperatorAuthorizations []OperatorAuthorization `protobuf:"bytes,1,rep,name=operator_authorizations,json=operatorAuthorizations,proto3" json:"operator_authorizations"`
+}
+
+func (m *QueryListOperatorAuthorizationsResponse) Reset() {
+	*m = QueryListOperatorAuthorizationsResponse{}
+}
+func (m *QueryListOperatorAuthorizationsResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryListOperatorAuthorizationsResponse) ProtoMessage()    {}
+func (*QueryListOperatorAuthorizationsResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_41e9e1468cb47da6, []int{3}
+}
+func (m *QueryListOperatorAuthorizationsResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryListOperatorAuthorizationsResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryListOperatorAuthorizationsResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryListOperatorAuthorizationsResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryListOperatorAuthorizationsResponse.Merge(m, src)
+}
+func (m *QueryListOperatorAuthorizationsResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryListOperatorAuthorizationsResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryListOperatorAuthorizationsResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryListOperatorAuthorizationsResponse proto.InternalMessageInfo
+
+func (m *QueryListOperatorAuthorizationsResponse) GetOperatorAuthorizations() []OperatorAuthorization {
+	if m != nil {
+		return m.OperatorAuthorizations
+	}
+	return nil
+}
+
 func init() {
 	proto.RegisterType((*QueryParamsRequest)(nil), "verana.de.v1.QueryParamsRequest")
 	proto.RegisterType((*QueryParamsResponse)(nil), "verana.de.v1.QueryParamsResponse")
+	proto.RegisterType((*QueryListOperatorAuthorizationsRequest)(nil), "verana.de.v1.QueryListOperatorAuthorizationsRequest")
+	proto.RegisterType((*QueryListOperatorAuthorizationsResponse)(nil), "verana.de.v1.QueryListOperatorAuthorizationsResponse")
 }
 
 func init() { proto.RegisterFile("verana/de/v1/query.proto", fileDescriptor_41e9e1468cb47da6) }
 
 var fileDescriptor_41e9e1468cb47da6 = []byte{
-	// 318 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x7c, 0x90, 0xc1, 0x4a, 0xf3, 0x40,
-	0x14, 0x85, 0x33, 0x3f, 0xfc, 0x05, 0xa3, 0x1b, 0x63, 0x17, 0xb5, 0x48, 0xac, 0x59, 0x95, 0x82,
-	0xb9, 0xa4, 0x2e, 0xdc, 0xf7, 0x01, 0x44, 0xbb, 0x74, 0x77, 0xd3, 0x0e, 0x63, 0xa0, 0x99, 0x3b,
-	0xcd, 0x4c, 0xa3, 0xdd, 0x89, 0x4f, 0x20, 0xf8, 0x12, 0x2e, 0x7d, 0x8c, 0x2e, 0x0b, 0x6e, 0x5c,
-	0x89, 0xb4, 0x82, 0xaf, 0x21, 0x9d, 0xc9, 0xc2, 0x60, 0x71, 0x13, 0x2e, 0xf7, 0x7c, 0xe7, 0xe4,
-	0xdc, 0xf1, 0x5b, 0x25, 0x2f, 0x50, 0x22, 0x8c, 0x39, 0x94, 0x09, 0x4c, 0x67, 0xbc, 0x98, 0xc7,
-	0xaa, 0x20, 0x43, 0xc1, 0x9e, 0x53, 0xe2, 0x31, 0x8f, 0xcb, 0xa4, 0xbd, 0x8f, 0x79, 0x26, 0x09,
-	0xec, 0xd7, 0x01, 0xed, 0xde, 0x88, 0x74, 0x4e, 0x1a, 0x52, 0xd4, 0xdc, 0x39, 0xa1, 0x4c, 0x52,
-	0x6e, 0x30, 0x01, 0x85, 0x22, 0x93, 0x68, 0x32, 0x92, 0x15, 0xdb, 0x14, 0x24, 0xc8, 0x8e, 0xb0,
-	0x99, 0xaa, 0xed, 0x91, 0x20, 0x12, 0x13, 0x0e, 0xa8, 0x32, 0x40, 0x29, 0xc9, 0x58, 0x8b, 0xae,
-	0xd4, 0xc3, 0x5a, 0x35, 0x85, 0x05, 0xe6, 0x95, 0x14, 0x35, 0xfd, 0xe0, 0x6a, 0xf3, 0xc3, 0x4b,
-	0xbb, 0x1c, 0xf2, 0xe9, 0x8c, 0x6b, 0x13, 0x5d, 0xf8, 0x07, 0xb5, 0xad, 0x56, 0x24, 0x35, 0x0f,
-	0xce, 0xfd, 0x86, 0x33, 0xb7, 0x58, 0x87, 0x75, 0x77, 0xfb, 0xcd, 0xf8, 0xe7, 0x65, 0xb1, 0xa3,
-	0x07, 0x3b, 0x8b, 0xf7, 0x63, 0xef, 0xf9, 0xeb, 0xa5, 0xc7, 0x86, 0x15, 0xde, 0xbf, 0x67, 0xfe,
-	0x7f, 0x1b, 0x18, 0xdc, 0xfa, 0x0d, 0x87, 0x05, 0x9d, 0xba, 0xf9, 0x77, 0x8b, 0xf6, 0xc9, 0x1f,
-	0x84, 0x6b, 0x14, 0x75, 0x1f, 0x5e, 0x3f, 0x9f, 0xfe, 0x45, 0x41, 0x07, 0x1c, 0x7a, 0x3a, 0xc1,
-	0x54, 0xc3, 0x96, 0x73, 0x07, 0x83, 0xc5, 0x2a, 0x64, 0xcb, 0x55, 0xc8, 0x3e, 0x56, 0x21, 0x7b,
-	0x5c, 0x87, 0xde, 0x72, 0x1d, 0x7a, 0x6f, 0xeb, 0xd0, 0xbb, 0xee, 0x8a, 0xcc, 0xdc, 0xcc, 0xd2,
-	0x78, 0x44, 0xf9, 0xb6, 0x94, 0xbb, 0x4d, 0x8e, 0x99, 0x2b, 0xae, 0xd3, 0x86, 0x7d, 0xb3, 0xb3,
-	0xef, 0x00, 0x00, 0x00, 0xff, 0xff, 0xae, 0x20, 0xd2, 0x0b, 0xeb, 0x01, 0x00, 0x00,
+	// 510 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x53, 0xbf, 0x8f, 0xd3, 0x30,
+	0x18, 0xad, 0x7b, 0x50, 0x51, 0x1f, 0x08, 0x9d, 0xa9, 0x20, 0x57, 0xa1, 0x50, 0x82, 0xe0, 0xa2,
+	0x4a, 0x8d, 0xd5, 0x72, 0xc0, 0x7c, 0x99, 0xf9, 0x99, 0xdb, 0x58, 0x2a, 0xe7, 0x6a, 0xe5, 0x2c,
+	0x5d, 0xe2, 0x9c, 0xed, 0x96, 0xb6, 0x23, 0x3b, 0x12, 0x12, 0xff, 0x04, 0x23, 0x03, 0x03, 0x12,
+	0x1b, 0xd3, 0x8d, 0x27, 0x58, 0x98, 0x10, 0x6a, 0x91, 0xf8, 0x37, 0x50, 0x6d, 0x07, 0x88, 0x08,
+	0x54, 0x2c, 0x51, 0xec, 0xf7, 0xbe, 0xf7, 0xbd, 0xef, 0xd9, 0x86, 0xce, 0x84, 0x0a, 0x92, 0x11,
+	0x3c, 0xa2, 0x78, 0xd2, 0xc7, 0xc7, 0x63, 0x2a, 0x66, 0x41, 0x2e, 0xb8, 0xe2, 0xe8, 0xbc, 0x41,
+	0x82, 0x11, 0x0d, 0x26, 0xfd, 0xf6, 0x16, 0x49, 0x59, 0xc6, 0xb1, 0xfe, 0x1a, 0x42, 0xbb, 0x7b,
+	0xc0, 0x65, 0xca, 0x25, 0x8e, 0x89, 0xa4, 0xa6, 0x12, 0x4f, 0xfa, 0x31, 0x55, 0xa4, 0x8f, 0x73,
+	0x92, 0xb0, 0x8c, 0x28, 0xc6, 0x33, 0xcb, 0xdd, 0x36, 0xdc, 0xa1, 0x5e, 0x61, 0xb3, 0xb0, 0x50,
+	0x2b, 0xe1, 0x09, 0x37, 0xfb, 0xab, 0x3f, 0xbb, 0x7b, 0x35, 0xe1, 0x3c, 0x39, 0xa2, 0x98, 0xe4,
+	0x0c, 0x93, 0x2c, 0xe3, 0x4a, 0xab, 0x15, 0x35, 0xdb, 0x25, 0xd7, 0x39, 0x11, 0x24, 0x2d, 0xa0,
+	0xf2, 0x40, 0x6a, 0x96, 0x53, 0x8b, 0x78, 0x2d, 0x88, 0x9e, 0xac, 0x5c, 0x3e, 0xd6, 0xf4, 0x88,
+	0x1e, 0x8f, 0xa9, 0x54, 0xde, 0x43, 0x78, 0xa9, 0xb4, 0x2b, 0x73, 0x9e, 0x49, 0x8a, 0xee, 0xc1,
+	0x86, 0x91, 0x75, 0x40, 0x07, 0xf8, 0x9b, 0x83, 0x56, 0xf0, 0x7b, 0x1c, 0x81, 0x61, 0x87, 0xcd,
+	0x93, 0x2f, 0xd7, 0x6a, 0xaf, 0xbf, 0xbf, 0xe9, 0x82, 0xc8, 0xd2, 0xbd, 0x0f, 0x00, 0xde, 0xd2,
+	0x82, 0xf7, 0x99, 0x54, 0x8f, 0x72, 0x2a, 0x88, 0xe2, 0x62, 0x6f, 0xac, 0x0e, 0xb9, 0x60, 0x73,
+	0x33, 0x84, 0x6d, 0x8d, 0xee, 0xc2, 0x26, 0x31, 0x80, 0x9a, 0xe9, 0x36, 0xcd, 0xd0, 0xf9, 0xf8,
+	0xb6, 0xd7, 0xb2, 0xf1, 0xec, 0x8d, 0x46, 0x82, 0x4a, 0xb9, 0xaf, 0x04, 0xcb, 0x92, 0xe8, 0x17,
+	0x15, 0xed, 0xc2, 0x73, 0xdc, 0x0a, 0x3b, 0xf5, 0x35, 0x65, 0x3f, 0x99, 0xa8, 0x0b, 0xb7, 0x84,
+	0x9d, 0x6e, 0x98, 0x92, 0xe9, 0x50, 0xb2, 0x39, 0x75, 0x36, 0x3a, 0xc0, 0xbf, 0x10, 0x5d, 0x2c,
+	0x80, 0x07, 0x64, 0xba, 0xcf, 0xe6, 0xd4, 0x7b, 0x01, 0xe0, 0xce, 0xda, 0x21, 0x6c, 0x52, 0x31,
+	0xbc, 0x52, 0xf4, 0x18, 0x92, 0x12, 0xc5, 0x01, 0x9d, 0x0d, 0x7f, 0x73, 0x70, 0xa3, 0x1c, 0x5d,
+	0xa5, 0x5c, 0x78, 0x66, 0x95, 0x64, 0x74, 0x99, 0x57, 0xf6, 0x1a, 0xbc, 0xaf, 0xc3, 0xb3, 0xda,
+	0x0f, 0x7a, 0x06, 0x1b, 0x26, 0x7b, 0xd4, 0x29, 0xcb, 0xfe, 0x79, 0xb4, 0xed, 0xeb, 0xff, 0x60,
+	0x18, 0xf3, 0x9e, 0xff, 0xfc, 0xd3, 0xb7, 0x57, 0x75, 0x0f, 0x75, 0xb0, 0xa1, 0xf6, 0x8e, 0x48,
+	0x2c, 0x71, 0xc5, 0xed, 0x42, 0xef, 0x00, 0x6c, 0xff, 0x3d, 0x0d, 0xb4, 0x5b, 0xd1, 0x6b, 0xed,
+	0x0d, 0x68, 0xdf, 0xf9, 0xcf, 0x2a, 0xeb, 0xba, 0xa7, 0x5d, 0xef, 0xa0, 0x9b, 0x65, 0xa7, 0x45,
+	0x78, 0xbd, 0xf2, 0x31, 0x84, 0xe1, 0xc9, 0xc2, 0x05, 0xa7, 0x0b, 0x17, 0x7c, 0x5d, 0xb8, 0xe0,
+	0xe5, 0xd2, 0xad, 0x9d, 0x2e, 0xdd, 0xda, 0xe7, 0xa5, 0x5b, 0x7b, 0xea, 0x27, 0x4c, 0x1d, 0x8e,
+	0xe3, 0xe0, 0x80, 0xa7, 0x55, 0x01, 0x4c, 0x57, 0xc2, 0xfa, 0x09, 0xc5, 0x0d, 0xfd, 0x86, 0x6e,
+	0xff, 0x08, 0x00, 0x00, 0xff, 0xff, 0x58, 0x74, 0x41, 0xba, 0x30, 0x04, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -159,6 +289,8 @@ const _ = grpc.SupportPackageIsVersion4
 type QueryClient interface {
 	// Parameters queries the parameters of the module.
 	Params(ctx context.Context, in *QueryParamsRequest, opts ...grpc.CallOption) (*QueryParamsResponse, error)
+	// ListOperatorAuthorizations returns operator authorizations matching optional filters.
+	ListOperatorAuthorizations(ctx context.Context, in *QueryListOperatorAuthorizationsRequest, opts ...grpc.CallOption) (*QueryListOperatorAuthorizationsResponse, error)
 }
 
 type queryClient struct {
@@ -178,10 +310,21 @@ func (c *queryClient) Params(ctx context.Context, in *QueryParamsRequest, opts .
 	return out, nil
 }
 
+func (c *queryClient) ListOperatorAuthorizations(ctx context.Context, in *QueryListOperatorAuthorizationsRequest, opts ...grpc.CallOption) (*QueryListOperatorAuthorizationsResponse, error) {
+	out := new(QueryListOperatorAuthorizationsResponse)
+	err := c.cc.Invoke(ctx, "/verana.de.v1.Query/ListOperatorAuthorizations", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // QueryServer is the server API for Query service.
 type QueryServer interface {
 	// Parameters queries the parameters of the module.
 	Params(context.Context, *QueryParamsRequest) (*QueryParamsResponse, error)
+	// ListOperatorAuthorizations returns operator authorizations matching optional filters.
+	ListOperatorAuthorizations(context.Context, *QueryListOperatorAuthorizationsRequest) (*QueryListOperatorAuthorizationsResponse, error)
 }
 
 // UnimplementedQueryServer can be embedded to have forward compatible implementations.
@@ -190,6 +333,9 @@ type UnimplementedQueryServer struct {
 
 func (*UnimplementedQueryServer) Params(ctx context.Context, req *QueryParamsRequest) (*QueryParamsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Params not implemented")
+}
+func (*UnimplementedQueryServer) ListOperatorAuthorizations(ctx context.Context, req *QueryListOperatorAuthorizationsRequest) (*QueryListOperatorAuthorizationsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListOperatorAuthorizations not implemented")
 }
 
 func RegisterQueryServer(s grpc1.Server, srv QueryServer) {
@@ -214,6 +360,24 @@ func _Query_Params_Handler(srv interface{}, ctx context.Context, dec func(interf
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Query_ListOperatorAuthorizations_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryListOperatorAuthorizationsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).ListOperatorAuthorizations(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/verana.de.v1.Query/ListOperatorAuthorizations",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).ListOperatorAuthorizations(ctx, req.(*QueryListOperatorAuthorizationsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var Query_serviceDesc = _Query_serviceDesc
 var _Query_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "verana.de.v1.Query",
@@ -222,6 +386,10 @@ var _Query_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Params",
 			Handler:    _Query_Params_Handler,
+		},
+		{
+			MethodName: "ListOperatorAuthorizations",
+			Handler:    _Query_ListOperatorAuthorizations_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -284,6 +452,85 @@ func (m *QueryParamsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
+func (m *QueryListOperatorAuthorizationsRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryListOperatorAuthorizationsRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryListOperatorAuthorizationsRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.ResponseMaxSize != 0 {
+		i = encodeVarintQuery(dAtA, i, uint64(m.ResponseMaxSize))
+		i--
+		dAtA[i] = 0x18
+	}
+	if len(m.Operator) > 0 {
+		i -= len(m.Operator)
+		copy(dAtA[i:], m.Operator)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Operator)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Authority) > 0 {
+		i -= len(m.Authority)
+		copy(dAtA[i:], m.Authority)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Authority)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryListOperatorAuthorizationsResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryListOperatorAuthorizationsResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryListOperatorAuthorizationsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.OperatorAuthorizations) > 0 {
+		for iNdEx := len(m.OperatorAuthorizations) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.OperatorAuthorizations[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintQuery(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintQuery(dAtA []byte, offset int, v uint64) int {
 	offset -= sovQuery(v)
 	base := offset
@@ -312,6 +559,41 @@ func (m *QueryParamsResponse) Size() (n int) {
 	_ = l
 	l = m.Params.Size()
 	n += 1 + l + sovQuery(uint64(l))
+	return n
+}
+
+func (m *QueryListOperatorAuthorizationsRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Authority)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	l = len(m.Operator)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	if m.ResponseMaxSize != 0 {
+		n += 1 + sovQuery(uint64(m.ResponseMaxSize))
+	}
+	return n
+}
+
+func (m *QueryListOperatorAuthorizationsResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.OperatorAuthorizations) > 0 {
+		for _, e := range m.OperatorAuthorizations {
+			l = e.Size()
+			n += 1 + l + sovQuery(uint64(l))
+		}
+	}
 	return n
 }
 
@@ -430,6 +712,223 @@ func (m *QueryParamsResponse) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			if err := m.Params.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryListOperatorAuthorizationsRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryListOperatorAuthorizationsRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryListOperatorAuthorizationsRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Authority", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Authority = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Operator", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Operator = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ResponseMaxSize", wireType)
+			}
+			m.ResponseMaxSize = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.ResponseMaxSize |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryListOperatorAuthorizationsResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryListOperatorAuthorizationsResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryListOperatorAuthorizationsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field OperatorAuthorizations", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.OperatorAuthorizations = append(m.OperatorAuthorizations, OperatorAuthorization{})
+			if err := m.OperatorAuthorizations[len(m.OperatorAuthorizations)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex

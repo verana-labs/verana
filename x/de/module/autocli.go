@@ -10,12 +10,19 @@ import (
 func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 	return &autocliv1.ModuleOptions{
 		Query: &autocliv1.ServiceCommandDescriptor{
-			Service: types.Query_serviceDesc.ServiceName,
+			Service:              types.Query_serviceDesc.ServiceName,
+			EnhanceCustomCommand: true,
 			RpcCommandOptions: []*autocliv1.RpcCommandOptions{
 				{
 					RpcMethod: "Params",
 					Use:       "params",
 					Short:     "Shows the parameters of the module",
+				},
+				{
+					// Skip autocli for this RPC — custom command provided in cli_query.go
+					// to work around gogo/pulsar proto codec mismatch in autocli JSON rendering.
+					RpcMethod: "ListOperatorAuthorizations",
+					Skip:      true,
 				},
 				// this line is used by ignite scaffolding # autocli/query
 			},

@@ -38,9 +38,68 @@
           "Query"
         ]
       }
+    },
+    "/verana/de/v1/operator-authorizations": {
+      "get": {
+        "summary": "ListOperatorAuthorizations returns operator authorizations matching optional filters.",
+        "operationId": "Query_ListOperatorAuthorizations",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.de.v1.QueryListOperatorAuthorizationsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "authority",
+            "description": "authority filters by the authority group that granted the authorization.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "operator",
+            "description": "operator filters by the operator account that received the authorization.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "response_max_size",
+            "description": "response_max_size limits the number of results. Must be 1-1024, defaults to 64.",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "Query"
+        ]
+      }
     }
   },
   "definitions": {
+    "cosmos.base.v1beta1.Coin": {
+      "type": "object",
+      "properties": {
+        "denom": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "string"
+        }
+      },
+      "description": "Coin defines a token with a denomination and an amount.\n\nNOTE: The amount field is an Int which implements the custom method\nsignatures required by gogoproto."
+    },
     "google.protobuf.Any": {
       "type": "object",
       "properties": {
@@ -69,9 +128,67 @@
         }
       }
     },
+    "verana.de.v1.OperatorAuthorization": {
+      "type": "object",
+      "properties": {
+        "authority": {
+          "type": "string",
+          "description": "authority is the group granting the authorization."
+        },
+        "operator": {
+          "type": "string",
+          "description": "operator is the account receiving the authorization."
+        },
+        "msg_types": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "msg_types is the list of module message types this authorization applies to."
+        },
+        "spend_limit": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
+          },
+          "description": "spend_limit is the maximum amount of funds that the grantee is allowed to\nspend as a direct consequence of executing authorized messages."
+        },
+        "fee_spend_limit": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
+          },
+          "description": "fee_spend_limit is the maximum total amount of fees that can be paid using\nthis authorization."
+        },
+        "expiration": {
+          "type": "string",
+          "format": "date-time",
+          "description": "expiration is the timestamp after which the authorization is no longer\nvalid."
+        },
+        "period": {
+          "type": "string",
+          "description": "period is the reset period for spend_limit and fee_spend_limit."
+        }
+      }
+    },
     "verana.de.v1.Params": {
       "type": "object",
       "description": "Params defines the parameters for the module."
+    },
+    "verana.de.v1.QueryListOperatorAuthorizationsResponse": {
+      "type": "object",
+      "properties": {
+        "operator_authorizations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/verana.de.v1.OperatorAuthorization"
+          }
+        }
+      },
+      "description": "QueryListOperatorAuthorizationsResponse is the response type for the\nQuery/ListOperatorAuthorizations RPC method."
     },
     "verana.de.v1.QueryParamsResponse": {
       "type": "object",
