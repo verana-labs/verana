@@ -27,6 +27,24 @@ func TestMsgServer(t *testing.T) {
 	require.NotEmpty(t, k)
 }
 
+// --- Test address conventions ---
+//
+// In the VPR spec, "authority" is a group account (x/group policy address).
+// At the unit-test level we use plain sdk.AccAddress values to represent these
+// addresses — the DE module never calls the group keeper, it only receives
+// messages after the group proposal has been executed by the Cosmos SDK runtime.
+//
+// The three invocation patterns for MOD-DE-MSG-3 / MOD-DE-MSG-4:
+//
+//   1. Group proposal  – authority signs via group governance; operator is "".
+//                         CheckOperatorAuthorization skips the AUTHZ check.
+//   2. Authority + op  – an existing operator (who was previously onboarded)
+//                         executes on behalf of the authority; AUTHZ is verified.
+//   3. Module call     – internal keeper methods (MOD-DE-MSG-1, MOD-DE-MSG-2)
+//                         called directly, no msg-server routing.
+//
+// The first operator is always bootstrapped via pattern 1 (group proposal).
+
 // ---------------------------------------------------------------------------
 // [MOD-DE-MSG-1] GrantFeeAllowance (internal keeper method)
 // ---------------------------------------------------------------------------
@@ -34,6 +52,7 @@ func TestMsgServer(t *testing.T) {
 func TestGrantFeeAllowance(t *testing.T) {
 	k, _, ctx := setupMsgServer(t)
 
+	// authority represents a group policy account (see conventions above)
 	authority := sdk.AccAddress([]byte("test_authority______")).String()
 	grantee := sdk.AccAddress([]byte("test_grantee________")).String()
 	validMsgTypes := []string{"/verana.tr.v1.MsgCreateTrustRegistry"}
@@ -1441,3 +1460,156 @@ func TestGrantOperatorAuthorization_FeegrantFieldsStoredCorrectly(t *testing.T) 
 	require.Equal(t, period, *fg.Period)
 }
 
+// ---------------------------------------------------------------------------
+// Spec concern: Privilege escalation via operator self-grant
+// ---------------------------------------------------------------------------
+
+// TestOperatorPrivilegeEscalation_SelfGrant demonstrates that an operator
+// who only has MsgGrantOperatorAuthorization permission can escalate their
+// own privileges by granting themselves additional msg_types.
+//
+// This is a potential spec concern: AUTHZ-CHECK only verifies the operator
+// has permission for the current message type (MsgGrantOperatorAuthorization),
+// not that the granted msg_types are a subset of the operator's own permissions.
+//
+// WARNING: This test documents the current behavior. If the spec considers
+// this undesirable, a check should be added to verify that an operator cannot
+// grant msg_types beyond their own authorization scope.
+func TestOperatorPrivilegeEscalation_SelfGrant(t *testing.T) {
+	k, ms, ctx := setupMsgServer(t)
+
+	authority := sdk.AccAddress([]byte("test_authority______")).String()
+	operator := sdk.AccAddress([]byte("test_operator_______")).String()
+
+	// Operator has ONLY MsgGrantOperatorAuthorization permission
+	oaKey := collections.Join(authority, operator)
+	err := k.OperatorAuthorizations.Set(ctx, oaKey, types.OperatorAuthorization{
+		Authority: authority,
+		Operator:  operator,
+		MsgTypes:  []string{"/verana.de.v1.MsgGrantOperatorAuthorization"},
+	})
+	require.NoError(t, err)
+
+	// Operator grants THEMSELVES all VPR delegable msg types
+	allMsgTypes := []string{
+		"/verana.tr.v1.MsgCreateTrustRegistry",
+		"/verana.cs.v1.MsgCreateCredentialSchema",
+		"/verana.perm.v1.MsgCreatePermission",
+		"/verana.de.v1.MsgGrantOperatorAuthorization",
+		"/verana.de.v1.MsgRevokeOperatorAuthorization",
+	}
+
+	// This SUCCEEDS — the operator overwrites their own authorization
+	resp, err := ms.GrantOperatorAuthorization(ctx, &types.MsgGrantOperatorAuthorization{
+		Authority: authority,
+		Operator:  operator,
+		Grantee:   operator, // grantee == operator (self-grant)
+		MsgTypes:  allMsgTypes,
+	})
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+
+	// Verify the operator now has escalated privileges
+	oa, err := k.OperatorAuthorizations.Get(ctx, oaKey)
+	require.NoError(t, err)
+	require.Equal(t, allMsgTypes, oa.MsgTypes) // escalated from 1 to 5 msg types
+
+	// The operator can now execute msg types they originally didn't have
+	err = k.CheckOperatorAuthorization(ctx, authority, operator,
+		"/verana.tr.v1.MsgCreateTrustRegistry", ctx.BlockTime())
+	require.NoError(t, err) // passes — privilege escalated
+}
+
+// ---------------------------------------------------------------------------
+// Bootstrap flow: group proposal → first operator → subsequent operators
+// ---------------------------------------------------------------------------
+
+// TestBootstrapFlow_GroupProposalOnboardsFirstOperator models the real-world
+// onboarding sequence per the VPR spec:
+//
+//  1. A group proposal (operator="") onboards the first operator.
+//  2. That operator then onboards a second operator on behalf of the authority.
+//  3. The second operator can execute delegated messages.
+//  4. The group can also directly revoke any operator (operator="").
+func TestBootstrapFlow_GroupProposalOnboardsFirstOperator(t *testing.T) {
+	k, ms, ctx := setupMsgServer(t)
+
+	// "groupAccount" represents the x/group policy address.
+	// In production this is generated by the group module; in unit tests it's
+	// just an AccAddress — the DE module never calls the group keeper.
+	groupAccount := sdk.AccAddress([]byte("group_policy_addr___")).String()
+
+	firstOperator := sdk.AccAddress([]byte("first_operator______")).String()
+	secondOperator := sdk.AccAddress([]byte("second_operator_____")).String()
+
+	deMsgTypes := []string{
+		"/verana.de.v1.MsgGrantOperatorAuthorization",
+		"/verana.de.v1.MsgRevokeOperatorAuthorization",
+	}
+	trMsgTypes := []string{
+		"/verana.tr.v1.MsgCreateTrustRegistry",
+	}
+
+	// ---- Step 1: Group proposal onboards first operator ----
+	// Operator field is empty → simulates group governance execution.
+	_, err := ms.GrantOperatorAuthorization(ctx, &types.MsgGrantOperatorAuthorization{
+		Authority:    groupAccount,
+		Operator:     "", // group proposal — no operator cosigner
+		Grantee:      firstOperator,
+		MsgTypes:     append(deMsgTypes, trMsgTypes...),
+		WithFeegrant: true,
+	})
+	require.NoError(t, err)
+
+	// Verify first operator was onboarded
+	oaKey := collections.Join(groupAccount, firstOperator)
+	oa, err := k.OperatorAuthorizations.Get(ctx, oaKey)
+	require.NoError(t, err)
+	require.Equal(t, groupAccount, oa.Authority)
+	require.Equal(t, firstOperator, oa.Operator)
+
+	// ---- Step 2: First operator onboards second operator ----
+	// First operator acts on behalf of the group account (operator field set).
+	_, err = ms.GrantOperatorAuthorization(ctx, &types.MsgGrantOperatorAuthorization{
+		Authority: groupAccount,
+		Operator:  firstOperator, // existing operator cosigns
+		Grantee:   secondOperator,
+		MsgTypes:  trMsgTypes, // only TR permissions
+	})
+	require.NoError(t, err)
+
+	// Verify second operator was onboarded with limited permissions
+	oaKey2 := collections.Join(groupAccount, secondOperator)
+	oa2, err := k.OperatorAuthorizations.Get(ctx, oaKey2)
+	require.NoError(t, err)
+	require.Equal(t, trMsgTypes, oa2.MsgTypes)
+
+	// ---- Step 3: Second operator can use delegated msg type ----
+	err = k.CheckOperatorAuthorization(ctx, groupAccount, secondOperator,
+		"/verana.tr.v1.MsgCreateTrustRegistry", ctx.BlockTime())
+	require.NoError(t, err)
+
+	// But second operator CANNOT grant further operators (not in their msg_types)
+	err = k.CheckOperatorAuthorization(ctx, groupAccount, secondOperator,
+		"/verana.de.v1.MsgGrantOperatorAuthorization", ctx.BlockTime())
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "does not include requested message type")
+
+	// ---- Step 4: Group can directly revoke any operator (group proposal) ----
+	_, err = ms.RevokeOperatorAuthorization(ctx, &types.MsgRevokeOperatorAuthorization{
+		Authority: groupAccount,
+		Operator:  "", // group proposal — direct revocation
+		Grantee:   secondOperator,
+	})
+	require.NoError(t, err)
+
+	// Verify second operator was removed
+	has, err := k.OperatorAuthorizations.Has(ctx, oaKey2)
+	require.NoError(t, err)
+	require.False(t, has)
+
+	// First operator still exists
+	has, err = k.OperatorAuthorizations.Has(ctx, oaKey)
+	require.NoError(t, err)
+	require.True(t, has)
+}
