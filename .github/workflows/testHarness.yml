@@ -320,10 +320,29 @@ jobs:
         if: env.HARNESS_MODE_EFFECTIVE == 'k8s'
         run: |
           export KUBECONFIG=$KUBECONFIG
-          kubectl -n "$NAMESPACE" port-forward svc/verana-testharness 26657:26657 1317:1317 > /tmp/portforward.log 2>&1 &
-          PORT_FORWARD_PID=$!
-          trap 'kill -9 "$PORT_FORWARD_PID" >/dev/null 2>&1 || true' EXIT
+          POD_NAME=$(kubectl -n "$NAMESPACE" get pod -l app=verana-testharness -o jsonpath='{.items[0].metadata.name}')
+          PORT_FORWARD_PID=""
+          start_port_forward() {
+            : > /tmp/portforward.log
+            kubectl -n "$NAMESPACE" port-forward "pod/$POD_NAME" 26657:26657 1317:1317 >> /tmp/portforward.log 2>&1 &
+            PORT_FORWARD_PID=$!
+          }
+          stop_port_forward() {
+            if [ -n "${PORT_FORWARD_PID:-}" ] && kill -0 "$PORT_FORWARD_PID" >/dev/null 2>&1; then
+              kill "$PORT_FORWARD_PID" >/dev/null 2>&1 || true
+              wait "$PORT_FORWARD_PID" >/dev/null 2>&1 || true
+            fi
+          }
+          trap 'stop_port_forward' EXIT
+
+          start_port_forward
           for i in {1..120}; do
+            if ! kill -0 "$PORT_FORWARD_PID" >/dev/null 2>&1; then
+              echo "Port-forward process exited; restarting (attempt $i/120)"
+              tail -n 50 /tmp/portforward.log || true
+              start_port_forward
+              sleep 1
+            fi
             if curl -s http://127.0.0.1:26657/status >/dev/null 2>&1; then
               echo "RPC is ready"
               break
