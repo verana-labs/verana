@@ -121,10 +121,17 @@ jobs:
           GHCR_TOKEN="${GHCR_READ_TOKEN:-${{ secrets.GITHUB_TOKEN }}}"
           docker login ghcr.io -u "${GITHUB_ACTOR}" -p "$GHCR_TOKEN"
           echo "Checking image availability: $IMAGE_TAG"
-          if ! docker pull "$IMAGE_TAG"; then
-            echo "Image $IMAGE_TAG not available or unauthorized. Set GHCR_READ_TOKEN with read:packages." >&2
-            exit 1
-          fi
+          attempts=0
+          max_attempts=30
+          until docker pull "$IMAGE_TAG"; do
+            attempts=$((attempts + 1))
+            if [ "$attempts" -ge "$max_attempts" ]; then
+              echo "Image $IMAGE_TAG not available or unauthorized after $attempts attempts. Set GHCR_READ_TOKEN with read:packages." >&2
+              exit 1
+            fi
+            echo "Image not ready yet, retrying in 20s... ($attempts/$max_attempts)"
+            sleep 20
+          done
           echo "Installing veranad from $IMAGE_TAG for local test harness use"
           container_id="$(docker create "$IMAGE_TAG")"
           docker cp "${container_id}:/usr/local/bin/veranad" /usr/local/bin/veranad
