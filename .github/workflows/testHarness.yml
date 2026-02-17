@@ -29,6 +29,7 @@ jobs:
       KUBECONFIG: ${{ secrets.OVH_KUBECONFIG }}
       K8S_INGRESS_DOMAIN: testnet.verana.network
       GHCR_READ_TOKEN: ${{ secrets.GHCR_READ_TOKEN }}
+      VALIDATOR_COUNT: "2"
 
     steps:
       - name: Checkout this repository
@@ -166,6 +167,7 @@ jobs:
             --dry-run=client -o yaml | kubectl apply -f -
           kubectl -n "$NAMESPACE" create configmap verana-testharness-scripts \
             --from-file=scripts/setup_primary_validator.sh \
+            --from-file=scripts/setup_secondary_validator.sh \
             --dry-run=client -o yaml | kubectl apply -f -
 
           cat > /tmp/verana-testharness-deploy.yaml <<EOF
@@ -296,6 +298,7 @@ jobs:
             -v "$GITHUB_WORKSPACE:/workspace" \
             -w /workspace \
             -e TEST_HARNESS_PATH \
+            -e VALIDATOR_COUNT \
             verana-node:ci \
             /bin/bash -lc 'set -e
               if ! command -v go >/dev/null 2>&1; then
@@ -310,6 +313,21 @@ jobs:
               ./scripts/setup_primary_validator.sh &
               PID=$!
               echo "Asynchronous setup process started with PID: $PID"
+              for i in {1..120}; do
+                if curl -s http://127.0.0.1:26657/status >/dev/null 2>&1; then
+                  echo "Primary validator RPC is ready"
+                  break
+                fi
+                sleep 2
+              done
+              if ! curl -s http://127.0.0.1:26657/status >/dev/null 2>&1; then
+                echo "Primary validator RPC did not become ready in docker mode." >&2
+                exit 1
+              fi
+              if [ "${VALIDATOR_COUNT:-1}" -ge 2 ]; then
+                echo "Bootstrapping secondary validator in docker mode..."
+                ./scripts/setup_secondary_validator.sh 2
+              fi
               cd $TEST_HARNESS_PATH
               ./scripts/setup_accounts.sh
               ./scripts/run_all.sh
@@ -356,6 +374,18 @@ jobs:
             kubectl -n "$NAMESPACE" describe pod -l app=verana-testharness || true
             kubectl -n "$NAMESPACE" logs -l app=verana-testharness --all-containers --tail=200 || true
             exit 1
+          fi
+          if [ "${VALIDATOR_COUNT:-1}" -ge 2 ]; then
+            echo "Bootstrapping secondary validator in K8s pod..."
+            if ! kubectl -n "$NAMESPACE" exec "$POD_NAME" -- /bin/bash -lc '
+              cp /scripts/setup_secondary_validator.sh /tmp/setup_secondary_validator.sh
+              chmod +x /tmp/setup_secondary_validator.sh
+              /tmp/setup_secondary_validator.sh 2
+            '; then
+              echo "Secondary validator bootstrap failed." >&2
+              kubectl -n "$NAMESPACE" exec "$POD_NAME" -- /bin/bash -lc 'tail -n 200 /tmp/verana-validator2.log || true'
+              exit 1
+            fi
           fi
           echo "Running test harness against K8s endpoints"
           echo "K8S_RPC_ENDPOINT=http://127.0.0.1:26657"
