@@ -9,7 +9,7 @@ on:
         default: true
   pull_request:
     branches:
-      - '*' # Trigger on pull requests to any branch
+      - '**' # Trigger on pull requests to any branch
 
 jobs:
   test-harness:
