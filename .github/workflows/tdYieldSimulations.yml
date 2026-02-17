@@ -7,7 +7,7 @@ on:
       - '**' # Trigger on pull requests to any branch
   push:
     branches:
-      - '**' # Trigger on every commit to any branch
+      - main # Trigger on main only
 
 jobs:
   td-yield-simulations:

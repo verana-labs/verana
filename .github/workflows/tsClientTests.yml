@@ -11,7 +11,7 @@ on:
       - '.github/workflows/tsClientTests.yml'
   push:
     branches:
-      - '**' # Trigger on every commit to any branch
+      - main # Trigger on main only
     paths:
       - 'proto/**'
       - 'ts-proto/**'
