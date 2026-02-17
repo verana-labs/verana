@@ -32,3 +32,8 @@ vendor/
 
 # Test harness
 testharness/journey_results/*
+
+# TypeScript test harness runtime artifacts
+ts-proto/test/journey_results/*.json
+!ts-proto/test/journey_results/.gitkeep
+ts-proto/test/out/
