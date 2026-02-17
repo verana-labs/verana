@@ -1,0 +1,270 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "verana/de/v1/tx.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "Msg"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/verana.de.v1.Msg/GrantOperatorAuthorization": {
+      "post": {
+        "summary": "[MOD-DE-MSG-3] Grant Operator Authorization",
+        "operationId": "Msg_GrantOperatorAuthorization",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.de.v1.MsgGrantOperatorAuthorizationResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "[MOD-DE-MSG-3] MsgGrantOperatorAuthorization grants an operator authorization\nto a grantee on behalf of an authority.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.de.v1.MsgGrantOperatorAuthorization"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.de.v1.Msg/RevokeOperatorAuthorization": {
+      "post": {
+        "summary": "[MOD-DE-MSG-4] Revoke Operator Authorization",
+        "operationId": "Msg_RevokeOperatorAuthorization",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.de.v1.MsgRevokeOperatorAuthorizationResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "[MOD-DE-MSG-4] MsgRevokeOperatorAuthorization revokes an operator\nauthorization for a grantee on behalf of an authority.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.de.v1.MsgRevokeOperatorAuthorization"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.de.v1.Msg/UpdateParams": {
+      "post": {
+        "summary": "UpdateParams defines a (governance) operation for updating the module\nparameters. The authority defaults to the x/gov module account.",
+        "operationId": "Msg_UpdateParams",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.de.v1.MsgUpdateParamsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "MsgUpdateParams is the Msg/UpdateParams request type.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.de.v1.MsgUpdateParams"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "cosmos.base.v1beta1.Coin": {
+      "type": "object",
+      "properties": {
+        "denom": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "string"
+        }
+      },
+      "description": "Coin defines a token with a denomination and an amount.\n\nNOTE: The amount field is an Int which implements the custom method\nsignatures required by gogoproto."
+    },
+    "google.protobuf.Any": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "google.rpc.Status": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/google.protobuf.Any"
+          }
+        }
+      }
+    },
+    "verana.de.v1.MsgGrantOperatorAuthorization": {
+      "type": "object",
+      "properties": {
+        "authority": {
+          "type": "string",
+          "description": "authority is the group account granting the authorization."
+        },
+        "operator": {
+          "type": "string",
+          "description": "operator is the optional account authorized by the authority to run this\nMsg."
+        },
+        "grantee": {
+          "type": "string",
+          "description": "grantee is the account that receives the authorization from authority."
+        },
+        "msg_types": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "msg_types is the list of VPR delegable message types for which\nauthorization is granted."
+        },
+        "expiration": {
+          "type": "string",
+          "format": "date-time",
+          "description": "expiration is the optional timestamp after which the authorization expires."
+        },
+        "authz_spend_limit": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
+          },
+          "description": "authz_spend_limit is the optional maximum spendable amount."
+        },
+        "authz_spend_limit_period": {
+          "type": "string",
+          "description": "authz_spend_limit_period is the optional reset period for\nauthz_spend_limit."
+        },
+        "with_feegrant": {
+          "type": "boolean",
+          "description": "with_feegrant indicates whether to also grant a fee allowance."
+        },
+        "feegrant_spend_limit": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
+          },
+          "description": "feegrant_spend_limit is the optional maximum fee amount. Ignored if\nwith_feegrant is false."
+        },
+        "feegrant_spend_limit_period": {
+          "type": "string",
+          "description": "feegrant_spend_limit_period is the optional reset period for\nfeegrant_spend_limit. Ignored if with_feegrant is false."
+        }
+      },
+      "description": "[MOD-DE-MSG-3] MsgGrantOperatorAuthorization grants an operator authorization\nto a grantee on behalf of an authority."
+    },
+    "verana.de.v1.MsgGrantOperatorAuthorizationResponse": {
+      "type": "object",
+      "description": "MsgGrantOperatorAuthorizationResponse defines the response for\nMsgGrantOperatorAuthorization."
+    },
+    "verana.de.v1.MsgRevokeOperatorAuthorization": {
+      "type": "object",
+      "properties": {
+        "authority": {
+          "type": "string",
+          "description": "authority is the group account revoking the authorization."
+        },
+        "operator": {
+          "type": "string",
+          "description": "operator is the optional account authorized by the authority to run this\nMsg."
+        },
+        "grantee": {
+          "type": "string",
+          "description": "grantee is the account whose authorization is being revoked."
+        }
+      },
+      "description": "[MOD-DE-MSG-4] MsgRevokeOperatorAuthorization revokes an operator\nauthorization for a grantee on behalf of an authority."
+    },
+    "verana.de.v1.MsgRevokeOperatorAuthorizationResponse": {
+      "type": "object",
+      "description": "MsgRevokeOperatorAuthorizationResponse defines the response for\nMsgRevokeOperatorAuthorization."
+    },
+    "verana.de.v1.MsgUpdateParams": {
+      "type": "object",
+      "properties": {
+        "authority": {
+          "type": "string",
+          "description": "authority is the address that controls the module (defaults to x/gov unless overwritten)."
+        },
+        "params": {
+          "$ref": "#/definitions/verana.de.v1.Params",
+          "description": "params defines the module parameters to update.\n\nNOTE: All parameters must be supplied."
+        }
+      },
+      "description": "MsgUpdateParams is the Msg/UpdateParams request type."
+    },
+    "verana.de.v1.MsgUpdateParamsResponse": {
+      "type": "object",
+      "description": "MsgUpdateParamsResponse defines the response structure for executing a\nMsgUpdateParams message."
+    },
+    "verana.de.v1.Params": {
+      "type": "object",
+      "description": "Params defines the parameters for the module."
+    }
+  }
+}

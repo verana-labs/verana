@@ -4,10 +4,10 @@ on:
   workflow_dispatch:
   pull_request:
     branches:
-      - '*' # Trigger on pull requests to any branch
+      - '**' # Trigger on pull requests to any branch
   push:
     branches:
-      - '*' # Trigger on every commit to any branch
+      - '**' # Trigger on every commit to any branch
 
 jobs:
   td-yield-simulations:

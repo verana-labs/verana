@@ -1,11 +1,12 @@
 package types_test
 
 import (
+	"testing"
+	"time"
+
 	keepertest "github.com/verana-labs/verana/testutil/keeper"
 	"github.com/verana-labs/verana/testutil/nullify"
 	trustregistry "github.com/verana-labs/verana/x/tr/module"
-	"testing"
-	"time"
 
 	"github.com/stretchr/testify/require"
 	"github.com/verana-labs/verana/x/tr/types"

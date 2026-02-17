@@ -58,12 +58,12 @@ message MsgReclaimTrustDepositYieldResponse {
 message MsgReclaimTrustDeposit {
   option (cosmos.msg.v1.signer) = "creator";
   string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  uint64 claimed = 2;  // Amount to reclaim in denom
+  uint64 claimed = 2; // Amount to reclaim in denom
 }
 
 message MsgReclaimTrustDepositResponse {
-  uint64 burned_amount = 1;     // Amount burned
-  uint64 claimed_amount = 2;    // Amount transferred to account
+  uint64 burned_amount = 1; // Amount burned
+  uint64 claimed_amount = 2; // Amount transferred to account
 }
 
 // MsgSlashTrustDeposit defines the message for slashing an account's trust deposit

@@ -2,13 +2,15 @@ package journeys
 
 import (
 	"context"
-	"cosmossdk.io/math"
 	"fmt"
+
+	"cosmossdk.io/math"
 	"github.com/google/uuid"
 
 	//"github.com/google/uuid"
-	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
 	"strconv"
+
+	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
 
 	permtypes "github.com/verana-labs/verana/x/perm/types"
 

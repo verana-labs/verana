@@ -1,8 +1,11 @@
 package keeper
 
 import (
-	"cosmossdk.io/math"
+	"context"
 	"testing"
+	"time"
+
+	"cosmossdk.io/math"
 
 	"cosmossdk.io/log"
 	"cosmossdk.io/store"
@@ -34,8 +37,9 @@ func TrustregistryKeeper(t testing.TB) (keeper.Keeper, sdk.Context) {
 	cdc := codec.NewProtoCodec(registry)
 	authority := authtypes.NewModuleAddress(govtypes.ModuleName)
 
-	// Create mock TrustDepositKeeper
+	// Create mock keepers
 	mockTrustDepositKeeper := &MockTrustDepositKeeper{}
+	mockDelegationKeeper := &MockDelegationKeeper{}
 
 	k := keeper.NewKeeper(
 		cdc,
@@ -43,6 +47,7 @@ func TrustregistryKeeper(t testing.TB) (keeper.Keeper, sdk.Context) {
 		log.NewNopLogger(),
 		authority.String(),
 		mockTrustDepositKeeper,
+		mockDelegationKeeper,
 	)
 
 	ctx := sdk.NewContext(stateStore, cmtproto.Header{}, false, log.NewNopLogger())
@@ -83,5 +88,13 @@ func (m *MockTrustDepositKeeper) GetTrustDepositRate(ctx sdk.Context) math.Legac
 // AdjustTrustDeposit implements the TrustDepositKeeper interface
 func (m *MockTrustDepositKeeper) AdjustTrustDeposit(ctx sdk.Context, account string, augend int64) error {
 	// For testing, always succeed
+	return nil
+}
+
+// MockDelegationKeeper is a mock implementation of the DelegationKeeper interface for testing.
+// By default it allows all operator authorizations (no-op check).
+type MockDelegationKeeper struct{}
+
+func (m *MockDelegationKeeper) CheckOperatorAuthorization(_ context.Context, _, _, _ string, _ time.Time) error {
 	return nil
 }

@@ -63,7 +63,14 @@ fi
   cd "$home"
 done
 
-# Clean up any remaining github.com directory in project root (in case buf generated files there)
+# Move grpc-gateway generated files from project root to x/ directory
+# (grpc-gateway plugin in buf.gen.gogo.yaml outputs to ".." which is the project root)
+if [ -d "$home/github.com/verana-labs/verana/x" ]; then
+  echo "  Moving grpc-gateway generated files to x/ directory..."
+  cp -r "$home/github.com/verana-labs/verana/x/"* "$home/x/"
+fi
+
+# Clean up any remaining github.com directory in project root
 if [ -d "$home/github.com" ]; then
   echo "  Cleaning up github.com directory in project root..."
   rm -rf "$home/github.com"

@@ -2,6 +2,7 @@ package types
 
 import (
 	"context"
+	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -27,4 +28,10 @@ type ParamSubspace interface {
 // TrustDepositKeeper defines the expected interface for the Trust Deposit module.
 type TrustDepositKeeper interface {
 	AdjustTrustDeposit(ctx sdk.Context, account string, augend int64) error
+}
+
+// DelegationKeeper defines the expected interface for the Delegation (DE) module.
+// Used to perform [AUTHZ-CHECK] for (authority, operator) pairs.
+type DelegationKeeper interface {
+	CheckOperatorAuthorization(ctx context.Context, authority string, operator string, msgTypeURL string, now time.Time) error
 }

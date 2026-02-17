@@ -1,6 +1,7 @@
 // Go-side corollary: reproduce legacy Amino sign bytes for MsgCreateCredentialSchema.
 // Run from repo root:
-//   go run ts-proto/test/scripts/benches/amino/cs/go.go
+//
+//	go run ts-proto/test/scripts/benches/amino/cs/go.go
 package main
 
 import (
@@ -28,9 +29,9 @@ func main() {
 
 	address := "verana16mzeyu9l6kua2cdg9x0jk5g6e7h0kk8q6uadu4"
 	msg := &cstypes.MsgCreateCredentialSchema{
-		Creator: address,
-		TrId:    1,
-		JsonSchema: jsonSchema,
+		Creator:                                 address,
+		TrId:                                    1,
+		JsonSchema:                              jsonSchema,
 		IssuerGrantorValidationValidityPeriod:   &cstypes.OptionalUInt32{Value: 0},
 		VerifierGrantorValidationValidityPeriod: &cstypes.OptionalUInt32{Value: 0},
 		IssuerValidationValidityPeriod:          &cstypes.OptionalUInt32{Value: 0},

@@ -1,0 +1,54 @@
+syntax = "proto3";
+package verana.de.v1;
+
+import "amino/amino.proto";
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "verana/de/v1/params.proto";
+import "verana/de/v1/types.proto";
+
+option go_package = "github.com/verana-labs/verana/x/de/types";
+
+// Query defines the gRPC querier service.
+service Query {
+  // Parameters queries the parameters of the module.
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+    option (google.api.http).get = "/verana-labs/verana/de/v1/params";
+  }
+
+  // ListOperatorAuthorizations returns operator authorizations matching optional filters.
+  rpc ListOperatorAuthorizations(QueryListOperatorAuthorizationsRequest) returns (QueryListOperatorAuthorizationsResponse) {
+    option (google.api.http).get = "/verana/de/v1/operator-authorizations";
+  }
+}
+
+// QueryParamsRequest is request type for the Query/Params RPC method.
+message QueryParamsRequest {}
+
+// QueryParamsResponse is response type for the Query/Params RPC method.
+message QueryParamsResponse {
+  // params holds all the parameters of this module.
+  Params params = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+}
+
+// QueryListOperatorAuthorizationsRequest is the request type for the
+// Query/ListOperatorAuthorizations RPC method.
+message QueryListOperatorAuthorizationsRequest {
+  // authority filters by the authority group that granted the authorization.
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // operator filters by the operator account that received the authorization.
+  string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // response_max_size limits the number of results. Must be 1-1024, defaults to 64.
+  uint32 response_max_size = 3;
+}
+
+// QueryListOperatorAuthorizationsResponse is the response type for the
+// Query/ListOperatorAuthorizations RPC method.
+message QueryListOperatorAuthorizationsResponse {
+  repeated OperatorAuthorization operator_authorizations = 1 [(gogoproto.nullable) = false];
+}
