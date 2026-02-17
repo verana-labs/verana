@@ -1,10 +1,13 @@
-name: 1b.Build Canonical Image (PR)
+name: 1b.Build Canonical Image (PR + Main)
 
 on:
   workflow_dispatch:
   pull_request:
     branches:
       - '**'
+  push:
+    branches:
+      - main
 
 permissions:
   contents: read
