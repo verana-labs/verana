@@ -16,7 +16,7 @@ SEED_PHRASE_CREDENTIAL_HOLDER="noodle stamp flip knife pretty sail giraffe drama
 echo "Adding accounts to keyring..."
 
 # Faucet account (cooluser)
-#echo "$SEED_PHRASE_COOLUSER" | $BINARY keys add cooluser --recover --keyring-backend $KEYRING_BACKEND
+echo "$SEED_PHRASE_COOLUSER" | $BINARY keys add cooluser --recover --keyring-backend $KEYRING_BACKEND
 
 # Trust Registry Controller
 echo "$SEED_PHRASE_TRUST_REGISTRY_CONTROLLER" | $BINARY keys add Trust_Registry_Controller --recover --keyring-backend $KEYRING_BACKEND

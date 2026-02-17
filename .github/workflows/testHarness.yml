@@ -2,6 +2,11 @@ name: 2.Test Harness Execution
 
 on:
   workflow_dispatch:
+    inputs:
+      run_k8s:
+        description: 'Run test harness against K8s (requires KUBECONFIG secret)'
+        type: boolean
+        default: true
   pull_request:
     branches:
       - '**' # Trigger on pull requests to any branch
@@ -12,8 +17,15 @@ on:
 jobs:
   test-harness:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
     env:
       TEST_HARNESS_PATH: ./testharness
+      HARNESS_MODE: k8s
+      KUBECONFIG: ${{ secrets.OVH_KUBECONFIG }}
+      K8S_INGRESS_DOMAIN: testnet.verana.network
+      GHCR_READ_TOKEN: ${{ secrets.GHCR_READ_TOKEN }}
 
     steps:
       - name: Checkout this repository
@@ -22,36 +34,297 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.head_ref || github.ref_name }}
 
-      - name: Install dependencies and run setup script asynchronously
+      - name: Determine harness mode
         run: |
-          env
-          export PATH=$PATH:$HOME/go/bin
-          export BINARYPATH=$HOME/go/bin
-          make install
-          echo "BINARYPATH=$BINARYPATH" >> $GITHUB_ENV
-          type veranad
-          echo ./scripts/setup_primary_validator.sh....
-          ./scripts/setup_primary_validator.sh &
-          echo $! > /tmp/setup_primary_validator_pid
-          echo "Asynchronous setup process started with PID: $(cat /tmp/setup_primary_validator_pid)"
-          echo "Waiting for setup process to complete..."
+          if [ "$HARNESS_MODE" = "k8s" ]; then
+            if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ] && [ "${{ inputs.run_k8s }}" != "true" ]; then
+              echo "HARNESS_MODE_EFFECTIVE=docker" >> $GITHUB_ENV
+              echo "K8S disabled via workflow_dispatch input; falling back to docker." >> $GITHUB_STEP_SUMMARY
+            elif [ -n "${KUBECONFIG:-}" ]; then
+              echo "HARNESS_MODE_EFFECTIVE=k8s" >> $GITHUB_ENV
+            else
+              echo "Missing KUBECONFIG secret; cannot run K8S harness." >> $GITHUB_STEP_SUMMARY
+              exit 1
+            fi
+          else
+            echo "HARNESS_MODE_EFFECTIVE=docker" >> $GITHUB_ENV
+          fi
+          if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
+            PR_NUMBER=$(echo "$GITHUB_REF" | awk -F'/' '{print $3}')
+            echo "IMAGE_TAG=ghcr.io/verana-labs/verana-node:pr-${PR_NUMBER}" >> $GITHUB_ENV
+            BRANCH_REF="${GITHUB_HEAD_REF:-${GITHUB_REF_NAME:-$GITHUB_REF}}"
+          elif [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            BRANCH_REF="${GITHUB_REF_NAME:-$GITHUB_REF}"
+            export BRANCH_REF
+            PR_NUMBER="$(python3 scripts/ci/resolve_pr_number.py)"
+            if [ -n "${PR_NUMBER}" ]; then
+              echo "IMAGE_TAG=ghcr.io/verana-labs/verana-node:pr-${PR_NUMBER}" >> $GITHUB_ENV
+              echo "Resolved PR #${PR_NUMBER} for ${BRANCH_REF}; using PR image tag." >> $GITHUB_STEP_SUMMARY
+            else
+              BRANCH_TAG="${BRANCH_REF//\//-}"
+              SHORT_SHA="$(echo "${GITHUB_SHA}" | cut -c1-7)"
+              echo "IMAGE_TAG=ghcr.io/verana-labs/verana-node:sha-${SHORT_SHA}" >> $GITHUB_ENV
+              echo "No open PR for ${BRANCH_REF}; using sha tag ${SHORT_SHA}." >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            BRANCH_REF="${GITHUB_REF_NAME:-$GITHUB_REF}"
+            BRANCH_TAG="${BRANCH_REF//\//-}"
+            SHORT_SHA="$(echo "${GITHUB_SHA}" | cut -c1-7)"
+            echo "IMAGE_TAG=ghcr.io/verana-labs/verana-node:sha-${SHORT_SHA}" >> $GITHUB_ENV
+          fi
+          BRANCH_REF="${BRANCH_REF:-${GITHUB_REF_NAME:-$GITHUB_REF}}"
+          BRANCH_TAG="${BRANCH_REF//\//-}"
+          if [ -n "${PR_NUMBER:-}" ]; then
+            echo "NAMESPACE=vna-devnet-${BRANCH_TAG}-pr-${PR_NUMBER}" >> $GITHUB_ENV
+          elif [ "${BRANCH_TAG}" = "main" ]; then
+            echo "NAMESPACE=vna-devnet-main" >> $GITHUB_ENV
+          else
+            echo "NAMESPACE=vna-devnet-${BRANCH_TAG}" >> $GITHUB_ENV
+          fi
 
-      - name: Run test harness
+      - name: Login to GHCR
+        if: env.HARNESS_MODE_EFFECTIVE == 'docker'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build canonical image
+        if: env.HARNESS_MODE_EFFECTIVE == 'docker'
         run: |
+          echo "Pulling $IMAGE_TAG"
+          attempts=0
+          max_attempts=30
+          until docker pull "$IMAGE_TAG"; do
+            attempts=$((attempts + 1))
+            if [ "$attempts" -ge "$max_attempts" ]; then
+              echo "Failed to pull $IMAGE_TAG after $attempts attempts." >&2
+              exit 1
+            fi
+            echo "Image not ready yet, retrying in 20s... ($attempts/$max_attempts)"
+            sleep 20
+          done
+          docker tag "$IMAGE_TAG" verana-node:ci
+
+      - name: Set up kubectl
+        if: env.HARNESS_MODE_EFFECTIVE == 'k8s'
+        uses: azure/setup-kubectl@v4
+
+      - name: Configure kubeconfig
+        if: env.HARNESS_MODE_EFFECTIVE == 'k8s'
+        run: |
+          echo "$KUBECONFIG" > k8s_config
+          echo "KUBECONFIG=$(pwd)/k8s_config" >> $GITHUB_ENV
+
+      - name: Deploy single-node testnet to K8s
+        if: env.HARNESS_MODE_EFFECTIVE == 'k8s'
+        run: |
+          export KUBECONFIG=$KUBECONFIG
+          GHCR_TOKEN="${GHCR_READ_TOKEN:-${{ secrets.GITHUB_TOKEN }}}"
+          docker login ghcr.io -u "${GITHUB_ACTOR}" -p "$GHCR_TOKEN"
+          echo "Checking image availability: $IMAGE_TAG"
+          if ! docker pull "$IMAGE_TAG"; then
+            echo "Image $IMAGE_TAG not available or unauthorized. Set GHCR_READ_TOKEN with read:packages." >&2
+            exit 1
+          fi
+          echo "Installing veranad from $IMAGE_TAG for local test harness use"
+          container_id="$(docker create "$IMAGE_TAG")"
+          docker cp "${container_id}:/usr/local/bin/veranad" /usr/local/bin/veranad
+          docker rm "$container_id"
+          chmod +x /usr/local/bin/veranad
+          kubectl create namespace "$NAMESPACE" || true
+          kubectl -n "$NAMESPACE" create secret docker-registry ghcr-auth \
+            --docker-server=ghcr.io \
+            --docker-username="${GITHUB_ACTOR}" \
+            --docker-password="$GHCR_TOKEN" \
+            --dry-run=client -o yaml | kubectl apply -f -
+          kubectl -n "$NAMESPACE" create configmap verana-testharness-scripts \
+            --from-file=scripts/setup_primary_validator.sh \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+          cat > /tmp/verana-testharness-deploy.yaml <<EOF
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: verana-testharness-node
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: verana-testharness
+            template:
+              metadata:
+                labels:
+                  app: verana-testharness
+              spec:
+                imagePullSecrets:
+                  - name: ghcr-auth
+                containers:
+                - name: veranad
+                  image: ${IMAGE_TAG}
+                  imagePullPolicy: Always
+                  command: ["/bin/bash","-lc"]
+                  args:
+                    - |
+                      apt-get update && apt-get install -y python3 && rm -rf /var/lib/apt/lists/*
+                      cp /scripts/setup_primary_validator.sh /tmp/setup_primary_validator.sh
+                      chmod +x /tmp/setup_primary_validator.sh
+                      /tmp/setup_primary_validator.sh
+                  ports:
+                    - containerPort: 26656
+                      name: p2p
+                    - containerPort: 26657
+                      name: rpc
+                    - containerPort: 1317
+                      name: api
+                    - containerPort: 9090
+                      name: grpc
+                  volumeMounts:
+                    - name: scripts
+                      mountPath: /scripts
+                volumes:
+                  - name: scripts
+                    configMap:
+                      name: verana-testharness-scripts
+          EOF
+
+          cat > /tmp/verana-testharness-svc.yaml <<EOF
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: verana-testharness
+          spec:
+            selector:
+              app: verana-testharness
+            ports:
+              - name: rpc
+                port: 26657
+                targetPort: 26657
+              - name: api
+                port: 1317
+                targetPort: 1317
+          EOF
+
+          cat > /tmp/verana-testharness-ingress.yaml <<EOF
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            name: verana-testharness
+          spec:
+            rules:
+              - host: rpc-${NAMESPACE}.${K8S_INGRESS_DOMAIN}
+                http:
+                  paths:
+                    - path: /
+                      pathType: Prefix
+                      backend:
+                        service:
+                          name: verana-testharness
+                          port:
+                            number: 26657
+              - host: api-${NAMESPACE}.${K8S_INGRESS_DOMAIN}
+                http:
+                  paths:
+                    - path: /
+                      pathType: Prefix
+                      backend:
+                        service:
+                          name: verana-testharness
+                          port:
+                            number: 1317
+          EOF
+
+          kubectl apply -n "$NAMESPACE" -f /tmp/verana-testharness-deploy.yaml
+          kubectl apply -n "$NAMESPACE" -f /tmp/verana-testharness-svc.yaml
+          kubectl apply -n "$NAMESPACE" -f /tmp/verana-testharness-ingress.yaml
+
+          if ! kubectl -n "$NAMESPACE" rollout status deployment/verana-testharness-node --timeout=300s; then
+            kubectl -n "$NAMESPACE" get pods -o wide || true
+            kubectl -n "$NAMESPACE" describe pod -l app=verana-testharness || true
+            kubectl -n "$NAMESPACE" logs -l app=verana-testharness --all-containers --tail=200 || true
+            exit 1
+          fi
+          kubectl -n "$NAMESPACE" wait --for=condition=Ready pod -l app=verana-testharness --timeout=300s
+          POD_NAME=$(kubectl -n "$NAMESPACE" get pod -l app=verana-testharness -o jsonpath='{.items[0].metadata.name}')
+          for i in {1..120}; do
+            if kubectl -n "$NAMESPACE" exec "$POD_NAME" -- curl -s http://127.0.0.1:26657/status >/dev/null 2>&1; then
+              echo "RPC is ready inside pod"
+              break
+            fi
+            sleep 2
+          done
+          if ! kubectl -n "$NAMESPACE" exec "$POD_NAME" -- curl -s http://127.0.0.1:26657/status >/dev/null 2>&1; then
+            echo "RPC did not become ready inside pod." >&2
+            kubectl -n "$NAMESPACE" get pods -o wide || true
+            kubectl -n "$NAMESPACE" describe pod -l app=verana-testharness || true
+            kubectl -n "$NAMESPACE" logs -l app=verana-testharness --all-containers --tail=200 || true
+            exit 1
+          fi
+
+      - name: Run test harness in canonical image
+        if: env.HARNESS_MODE_EFFECTIVE == 'docker'
+        run: |
+          docker run --rm \
+            -v "$GITHUB_WORKSPACE:/workspace" \
+            -w /workspace \
+            -e TEST_HARNESS_PATH \
+            verana-node:ci \
+            /bin/bash -lc 'set -e
+              if ! command -v go >/dev/null 2>&1; then
+                GO_VERSION="1.25.0"
+                curl -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz" -o /tmp/go.tgz
+                rm -rf /usr/local/go
+                tar -C /usr/local -xzf /tmp/go.tgz
+                rm -f /tmp/go.tgz
+              fi
+              export PATH="/usr/local/go/bin:$PATH"
+              echo ./scripts/setup_primary_validator.sh....
+              ./scripts/setup_primary_validator.sh &
+              PID=$!
+              echo "Asynchronous setup process started with PID: $PID"
+              cd $TEST_HARNESS_PATH
+              ./scripts/setup_accounts.sh
+              ./scripts/run_all.sh
+              kill -9 $PID || true
+            '
+
+      - name: Run test harness against K8s
+        if: env.HARNESS_MODE_EFFECTIVE == 'k8s'
+        run: |
+          export KUBECONFIG=$KUBECONFIG
+          kubectl -n "$NAMESPACE" port-forward svc/verana-testharness 26657:26657 1317:1317 > /tmp/portforward.log 2>&1 &
+          PORT_FORWARD_PID=$!
+          trap 'kill -9 "$PORT_FORWARD_PID" >/dev/null 2>&1 || true' EXIT
+          for i in {1..120}; do
+            if curl -s http://127.0.0.1:26657/status >/dev/null 2>&1; then
+              echo "RPC is ready"
+              break
+            fi
+            sleep 2
+          done
+          if ! curl -s http://127.0.0.1:26657/status >/dev/null 2>&1; then
+            echo "RPC did not become ready via port-forward." >&2
+            cat /tmp/portforward.log || true
+            kubectl -n "$NAMESPACE" get pods -o wide || true
+            kubectl -n "$NAMESPACE" describe pod -l app=verana-testharness || true
+            kubectl -n "$NAMESPACE" logs -l app=verana-testharness --all-containers --tail=200 || true
+            exit 1
+          fi
+          echo "Running test harness against K8s endpoints"
+          echo "K8S_RPC_ENDPOINT=http://127.0.0.1:26657"
+          echo "K8S_LCD_ENDPOINT=http://127.0.0.1:1317"
           cd ${{ env.TEST_HARNESS_PATH }}
-          pwd
-          find .
-          export PATH=$PATH:$BINARYPATH
-          type veranad
+          export NODE_RPC="http://127.0.0.1:26657"
           ./scripts/setup_accounts.sh
           ./scripts/run_all.sh
 
-      - name: Kill asynchronous setup process
-        run: |
-          if [ -f /tmp/setup_primary_validator_pid ]; then
-            kill -9 $(cat /tmp/setup_primary_validator_pid) || true
-            rm /tmp/setup_primary_validator_pid
-          fi
-
       - name: Finalize without error
         run: echo "Test harness execution completed successfully."
+
+      - name: Cleanup K8s namespace
+        if: always() && env.HARNESS_MODE_EFFECTIVE == 'k8s'
+        run: |
+          export KUBECONFIG=$KUBECONFIG
+          echo "Cleaning up namespace $NAMESPACE"
+          kubectl delete namespace "$NAMESPACE" --wait=false || true
