@@ -14,6 +14,9 @@ on:
 jobs:
   test-harness:
     runs-on: ubuntu-latest
+    concurrency:
+      group: test-harness-${{ github.head_ref || github.ref_name }}
+      cancel-in-progress: true
     permissions:
       contents: read
       packages: read
@@ -137,7 +140,22 @@ jobs:
           docker cp "${container_id}:/usr/local/bin/veranad" /usr/local/bin/veranad
           docker rm "$container_id"
           chmod +x /usr/local/bin/veranad
-          kubectl create namespace "$NAMESPACE" || true
+          if kubectl get namespace "$NAMESPACE" >/dev/null 2>&1; then
+            deletion_ts="$(kubectl get namespace "$NAMESPACE" -o jsonpath='{.metadata.deletionTimestamp}')"
+            if [ -n "$deletion_ts" ]; then
+              echo "Namespace $NAMESPACE is terminating; waiting for deletion before recreating..."
+              if ! kubectl wait --for=delete "namespace/$NAMESPACE" --timeout=300s; then
+                echo "Namespace $NAMESPACE is still terminating after 300s." >&2
+                kubectl get namespace "$NAMESPACE" -o yaml || true
+                exit 1
+              fi
+            else
+              echo "Reusing existing namespace $NAMESPACE"
+            fi
+          fi
+          if ! kubectl get namespace "$NAMESPACE" >/dev/null 2>&1; then
+            kubectl create namespace "$NAMESPACE"
+          fi
           kubectl -n "$NAMESPACE" create secret docker-registry ghcr-auth \
             --docker-server=ghcr.io \
             --docker-username="${GITHUB_ACTOR}" \
@@ -161,6 +179,8 @@ jobs:
               metadata:
                 labels:
                   app: verana-testharness
+                annotations:
+                  ci.verana/run-id: "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
               spec:
                 imagePullSecrets:
                   - name: ghcr-auth
@@ -326,8 +346,8 @@ jobs:
       - name: Finalize without error
         run: echo "Test harness execution completed successfully."
 
-      - name: Cleanup K8s namespace
-        if: always() && env.HARNESS_MODE_EFFECTIVE == 'k8s'
+      - name: Cleanup K8s namespace (workflow_dispatch only)
+        if: always() && env.HARNESS_MODE_EFFECTIVE == 'k8s' && github.event_name == 'workflow_dispatch'
         run: |
           export KUBECONFIG=$KUBECONFIG
           echo "Cleaning up namespace $NAMESPACE"
