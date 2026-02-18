@@ -80,10 +80,16 @@ export interface MsgAddGovernanceFrameworkDocument {
 export interface MsgAddGovernanceFrameworkDocumentResponse {
 }
 
-/** MsgIncreaseActiveGovernanceFrameworkVersion defines the Msg/IncreaseActiveGovernanceFrameworkVersion request type. */
+/**
+ * MsgIncreaseActiveGovernanceFrameworkVersion defines the Msg/IncreaseActiveGovernanceFrameworkVersion request type.
+ * [MOD-TR-MSG-3] Increase Active Governance Framework Version
+ */
 export interface MsgIncreaseActiveGovernanceFrameworkVersion {
-  creator: string;
-  /** Changed from tr_id to id */
+  /** authority is the group account on whose behalf this message is executed */
+  authority: string;
+  /** operator is the account authorized by the authority to run this Msg */
+  operator: string;
+  /** id is the trust registry id (mandatory) */
   id: number;
 }
 
@@ -635,16 +641,19 @@ export const MsgAddGovernanceFrameworkDocumentResponse = {
 };
 
 function createBaseMsgIncreaseActiveGovernanceFrameworkVersion(): MsgIncreaseActiveGovernanceFrameworkVersion {
-  return { creator: "", id: 0 };
+  return { authority: "", operator: "", id: 0 };
 }
 
 export const MsgIncreaseActiveGovernanceFrameworkVersion = {
   encode(message: MsgIncreaseActiveGovernanceFrameworkVersion, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.creator !== "") {
-      writer.uint32(10).string(message.creator);
+    if (message.authority !== "") {
+      writer.uint32(10).string(message.authority);
+    }
+    if (message.operator !== "") {
+      writer.uint32(18).string(message.operator);
     }
     if (message.id !== 0) {
-      writer.uint32(16).uint64(message.id);
+      writer.uint32(24).uint64(message.id);
     }
     return writer;
   },
@@ -661,10 +670,17 @@ export const MsgIncreaseActiveGovernanceFrameworkVersion = {
             break;
           }
 
-          message.creator = reader.string();
+          message.authority = reader.string();
           continue;
         case 2:
-          if (tag !== 16) {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.operator = reader.string();
+          continue;
+        case 3:
+          if (tag !== 24) {
             break;
           }
 
@@ -681,15 +697,19 @@ export const MsgIncreaseActiveGovernanceFrameworkVersion = {
 
   fromJSON(object: any): MsgIncreaseActiveGovernanceFrameworkVersion {
     return {
-      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
+      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
       id: isSet(object.id) ? globalThis.Number(object.id) : 0,
     };
   },
 
   toJSON(message: MsgIncreaseActiveGovernanceFrameworkVersion): unknown {
     const obj: any = {};
-    if (message.creator !== "") {
-      obj.creator = message.creator;
+    if (message.authority !== "") {
+      obj.authority = message.authority;
+    }
+    if (message.operator !== "") {
+      obj.operator = message.operator;
     }
     if (message.id !== 0) {
       obj.id = Math.round(message.id);
@@ -706,7 +726,8 @@ export const MsgIncreaseActiveGovernanceFrameworkVersion = {
     object: I,
   ): MsgIncreaseActiveGovernanceFrameworkVersion {
     const message = createBaseMsgIncreaseActiveGovernanceFrameworkVersion();
-    message.creator = object.creator ?? "";
+    message.authority = object.authority ?? "";
+    message.operator = object.operator ?? "";
     message.id = object.id ?? 0;
     return message;
   },

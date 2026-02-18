@@ -101,13 +101,15 @@ func (msg *MsgAddGovernanceFrameworkDocument) ValidateBasic() error {
 	return nil
 }
 
+// ValidateBasic performs stateless validation of MsgIncreaseActiveGovernanceFrameworkVersion
+// [MOD-TR-MSG-3-2-1] Increase Active Governance Framework Version basic checks
 func (msg *MsgIncreaseActiveGovernanceFrameworkVersion) ValidateBasic() error {
-	if msg.Creator == "" {
-		return fmt.Errorf("creator address is required")
+	if msg.Authority == "" {
+		return fmt.Errorf("authority address is required")
 	}
 
-	if _, err := sdk.AccAddressFromBech32(msg.Creator); err != nil {
-		return sdkerrors.ErrInvalidAddress.Wrapf("invalid creator address: %s", err)
+	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
+		return sdkerrors.ErrInvalidAddress.Wrapf("invalid authority address: %s", err)
 	}
 
 	if msg.Id == 0 {

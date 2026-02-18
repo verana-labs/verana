@@ -112,10 +112,11 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 				},
 				{
 					RpcMethod: "IncreaseActiveGovernanceFrameworkVersion",
-					Use:       "increase-active-gf-version [id]",
+					Use:       "increase-active-gf-version [authority] [id]",
 					Short:     "Increase the active governance framework version",
-					Long:      "Increase the active governance framework version for a trust registry. This can only be done by the controller of the trust registry and requires a document in the trust registry's default language for the new version.",
+					Long:      "Increase the active governance framework version for a trust registry. The operator (transaction signer) must be authorized by the authority. Requires a document in the trust registry's default language for the new version.",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
+						{ProtoField: "authority"},
 						{ProtoField: "id"},
 					},
 				},

@@ -133,6 +133,20 @@ func (ms msgServer) AddGovernanceFrameworkDocument(goCtx context.Context, msg *t
 
 func (ms msgServer) IncreaseActiveGovernanceFrameworkVersion(goCtx context.Context, msg *types.MsgIncreaseActiveGovernanceFrameworkVersion) (*types.MsgIncreaseActiveGovernanceFrameworkVersionResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
+	now := ctx.BlockTime()
+
+	// [MOD-TR-MSG-3-2-1] [AUTHZ-CHECK] Verify operator authorization
+	if ms.delegationKeeper != nil {
+		if err := ms.delegationKeeper.CheckOperatorAuthorization(
+			ctx,
+			msg.Authority,
+			msg.Operator,
+			"/verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion",
+			now,
+		); err != nil {
+			return nil, fmt.Errorf("authorization check failed: %w", err)
+		}
+	}
 
 	// Validate parameters
 	if err := ms.validateIncreaseActiveGovernanceFrameworkVersionParams(ctx, msg); err != nil {
@@ -148,8 +162,8 @@ func (ms msgServer) IncreaseActiveGovernanceFrameworkVersion(goCtx context.Conte
 		sdk.NewEvent(
 			types.EventTypeIncreaseActiveGFVersion,
 			sdk.NewAttribute(types.AttributeKeyTrustRegistryID, strconv.FormatUint(msg.Id, 10)),
-			sdk.NewAttribute(types.AttributeKeyController, msg.Creator),
-			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
+			sdk.NewAttribute(types.AttributeKeyController, msg.Authority),
+			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
 		),
 	})
 

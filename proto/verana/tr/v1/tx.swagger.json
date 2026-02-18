@@ -134,7 +134,6 @@
         "parameters": [
           {
             "name": "body",
-            "description": "MsgIncreaseActiveGovernanceFrameworkVersion defines the Msg/IncreaseActiveGovernanceFrameworkVersion request type.",
             "in": "body",
             "required": true,
             "schema": {
@@ -344,16 +343,21 @@
     "verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion": {
       "type": "object",
       "properties": {
-        "creator": {
-          "type": "string"
+        "authority": {
+          "type": "string",
+          "title": "authority is the group account on whose behalf this message is executed"
+        },
+        "operator": {
+          "type": "string",
+          "title": "operator is the account authorized by the authority to run this Msg"
         },
         "id": {
           "type": "string",
           "format": "uint64",
-          "title": "Changed from tr_id to id"
+          "title": "id is the trust registry id (mandatory)"
         }
       },
-      "description": "MsgIncreaseActiveGovernanceFrameworkVersion defines the Msg/IncreaseActiveGovernanceFrameworkVersion request type."
+      "title": "MsgIncreaseActiveGovernanceFrameworkVersion defines the Msg/IncreaseActiveGovernanceFrameworkVersion request type.\n[MOD-TR-MSG-3] Increase Active Governance Framework Version"
     },
     "verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersionResponse": {
       "type": "object",

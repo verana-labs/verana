@@ -427,3 +427,129 @@ func TestIntegration_UnauthorizedOperatorCannotAddGFDocument(t *testing.T) {
 	require.Contains(t, err.Error(), "authorization check failed")
 	require.Contains(t, err.Error(), "does not include requested message type")
 }
+
+// ---------------------------------------------------------------------------
+// Integration tests: DE operator authorization → TR increase active GF version
+// ---------------------------------------------------------------------------
+
+// TestIntegration_OperatorIncreasesActiveGFVersion models the flow:
+//
+//  1. Grant operator with CreateTR, AddGFD, and IncreaseActiveGFVersion permissions.
+//  2. Operator creates a trust registry (active_version=1 with "en" doc).
+//  3. Operator adds a v2 doc for the default language "en".
+//  4. Operator increases active GF version to 2.
+func TestIntegration_OperatorIncreasesActiveGFVersion(t *testing.T) {
+	f := setupIntegrationFixture(t)
+
+	groupAccount := sdk.AccAddress([]byte("group_policy_addr___")).String()
+	operator := sdk.AccAddress([]byte("gfv_operator________")).String()
+
+	// Grant operator all three permissions
+	_, err := f.deMsgServer.GrantOperatorAuthorization(f.ctx, &detypes.MsgGrantOperatorAuthorization{
+		Authority: groupAccount,
+		Operator:  "",
+		Grantee:   operator,
+		MsgTypes: []string{
+			"/verana.tr.v1.MsgCreateTrustRegistry",
+			"/verana.tr.v1.MsgAddGovernanceFrameworkDocument",
+			"/verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion",
+		},
+	})
+	require.NoError(t, err)
+
+	// Create trust registry (active_version=1, language="en")
+	_, err = f.trMsgServer.CreateTrustRegistry(f.ctx, &trtypes.MsgCreateTrustRegistry{
+		Authority:    groupAccount,
+		Operator:     operator,
+		Did:          "did:example:gfv-increase-test",
+		Language:     "en",
+		DocUrl:       "https://example.com/gf-v1",
+		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+	})
+	require.NoError(t, err)
+
+	trID, err := f.trKeeper.TrustRegistryDIDIndex.Get(f.ctx, "did:example:gfv-increase-test")
+	require.NoError(t, err)
+
+	// Add v2 document for default language "en"
+	_, err = f.trMsgServer.AddGovernanceFrameworkDocument(f.ctx, &trtypes.MsgAddGovernanceFrameworkDocument{
+		Authority:    groupAccount,
+		Operator:     operator,
+		Id:           trID,
+		DocLanguage:  "en",
+		DocUrl:       "https://example.com/gf-v2-en",
+		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+		Version:      2,
+	})
+	require.NoError(t, err)
+
+	// Increase active GF version to 2
+	_, err = f.trMsgServer.IncreaseActiveGovernanceFrameworkVersion(f.ctx, &trtypes.MsgIncreaseActiveGovernanceFrameworkVersion{
+		Authority: groupAccount,
+		Operator:  operator,
+		Id:        trID,
+	})
+	require.NoError(t, err)
+
+	// Verify active version is now 2
+	tr, err := f.trKeeper.TrustRegistry.Get(f.ctx, trID)
+	require.NoError(t, err)
+	require.Equal(t, int32(2), tr.ActiveVersion)
+}
+
+// TestIntegration_UnauthorizedOperatorCannotIncreaseGFVersion verifies that an
+// operator without MsgIncreaseActiveGovernanceFrameworkVersion permission is rejected.
+func TestIntegration_UnauthorizedOperatorCannotIncreaseGFVersion(t *testing.T) {
+	f := setupIntegrationFixture(t)
+
+	groupAccount := sdk.AccAddress([]byte("group_policy_addr___")).String()
+	operator := sdk.AccAddress([]byte("gfv_unauth_op_______")).String()
+
+	// Grant operator only CreateTR and AddGFD (NOT IncreaseActiveGFVersion)
+	_, err := f.deMsgServer.GrantOperatorAuthorization(f.ctx, &detypes.MsgGrantOperatorAuthorization{
+		Authority: groupAccount,
+		Operator:  "",
+		Grantee:   operator,
+		MsgTypes: []string{
+			"/verana.tr.v1.MsgCreateTrustRegistry",
+			"/verana.tr.v1.MsgAddGovernanceFrameworkDocument",
+		},
+	})
+	require.NoError(t, err)
+
+	// Create trust registry
+	_, err = f.trMsgServer.CreateTrustRegistry(f.ctx, &trtypes.MsgCreateTrustRegistry{
+		Authority:    groupAccount,
+		Operator:     operator,
+		Did:          "did:example:gfv-unauth-test",
+		Language:     "en",
+		DocUrl:       "https://example.com/gf-v1",
+		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+	})
+	require.NoError(t, err)
+
+	trID, err := f.trKeeper.TrustRegistryDIDIndex.Get(f.ctx, "did:example:gfv-unauth-test")
+	require.NoError(t, err)
+
+	// Add v2 doc for default language
+	_, err = f.trMsgServer.AddGovernanceFrameworkDocument(f.ctx, &trtypes.MsgAddGovernanceFrameworkDocument{
+		Authority:    groupAccount,
+		Operator:     operator,
+		Id:           trID,
+		DocLanguage:  "en",
+		DocUrl:       "https://example.com/gf-v2-en",
+		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+		Version:      2,
+	})
+	require.NoError(t, err)
+
+	// Try to increase active GF version — should fail
+	_, err = f.trMsgServer.IncreaseActiveGovernanceFrameworkVersion(f.ctx, &trtypes.MsgIncreaseActiveGovernanceFrameworkVersion{
+		Authority: groupAccount,
+		Operator:  operator,
+		Id:        trID,
+	})
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "authorization check failed")
+	require.Contains(t, err.Error(), "does not include requested message type")
+}
