@@ -553,3 +553,104 @@ func TestIntegration_UnauthorizedOperatorCannotIncreaseGFVersion(t *testing.T) {
 	require.Contains(t, err.Error(), "authorization check failed")
 	require.Contains(t, err.Error(), "does not include requested message type")
 }
+
+// ---------------------------------------------------------------------------
+// Integration tests: DE operator authorization → TR update trust registry
+// ---------------------------------------------------------------------------
+
+// TestIntegration_OperatorUpdatesTrustRegistry models the flow:
+//
+//  1. Grant operator with CreateTR and UpdateTR permissions.
+//  2. Operator creates a trust registry.
+//  3. Operator updates the trust registry DID and AKA.
+func TestIntegration_OperatorUpdatesTrustRegistry(t *testing.T) {
+	f := setupIntegrationFixture(t)
+
+	groupAccount := sdk.AccAddress([]byte("group_policy_addr___")).String()
+	operator := sdk.AccAddress([]byte("update_operator_____")).String()
+
+	// Grant operator both permissions
+	_, err := f.deMsgServer.GrantOperatorAuthorization(f.ctx, &detypes.MsgGrantOperatorAuthorization{
+		Authority: groupAccount,
+		Operator:  "",
+		Grantee:   operator,
+		MsgTypes: []string{
+			"/verana.tr.v1.MsgCreateTrustRegistry",
+			"/verana.tr.v1.MsgUpdateTrustRegistry",
+		},
+	})
+	require.NoError(t, err)
+
+	// Create trust registry
+	_, err = f.trMsgServer.CreateTrustRegistry(f.ctx, &trtypes.MsgCreateTrustRegistry{
+		Authority:    groupAccount,
+		Operator:     operator,
+		Did:          "did:example:update-test",
+		Language:     "en",
+		DocUrl:       "https://example.com/gf-v1",
+		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+	})
+	require.NoError(t, err)
+
+	trID, err := f.trKeeper.TrustRegistryDIDIndex.Get(f.ctx, "did:example:update-test")
+	require.NoError(t, err)
+
+	// Update trust registry
+	_, err = f.trMsgServer.UpdateTrustRegistry(f.ctx, &trtypes.MsgUpdateTrustRegistry{
+		Authority: groupAccount,
+		Operator:  operator,
+		Id:        trID,
+		Did:       "did:example:update-test-v2",
+		Aka:       "https://example.com/aka",
+	})
+	require.NoError(t, err)
+
+	// Verify update
+	tr, err := f.trKeeper.TrustRegistry.Get(f.ctx, trID)
+	require.NoError(t, err)
+	require.Equal(t, "did:example:update-test-v2", tr.Did)
+	require.Equal(t, "https://example.com/aka", tr.Aka)
+}
+
+// TestIntegration_UnauthorizedOperatorCannotUpdateTrustRegistry verifies that an
+// operator without MsgUpdateTrustRegistry permission is rejected.
+func TestIntegration_UnauthorizedOperatorCannotUpdateTrustRegistry(t *testing.T) {
+	f := setupIntegrationFixture(t)
+
+	groupAccount := sdk.AccAddress([]byte("group_policy_addr___")).String()
+	operator := sdk.AccAddress([]byte("update_unauth_op____")).String()
+
+	// Grant operator ONLY MsgCreateTrustRegistry (not MsgUpdateTrustRegistry)
+	_, err := f.deMsgServer.GrantOperatorAuthorization(f.ctx, &detypes.MsgGrantOperatorAuthorization{
+		Authority: groupAccount,
+		Operator:  "",
+		Grantee:   operator,
+		MsgTypes:  []string{"/verana.tr.v1.MsgCreateTrustRegistry"},
+	})
+	require.NoError(t, err)
+
+	// Create trust registry (should succeed)
+	_, err = f.trMsgServer.CreateTrustRegistry(f.ctx, &trtypes.MsgCreateTrustRegistry{
+		Authority:    groupAccount,
+		Operator:     operator,
+		Did:          "did:example:update-unauth-test",
+		Language:     "en",
+		DocUrl:       "https://example.com/gf-v1",
+		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+	})
+	require.NoError(t, err)
+
+	trID, err := f.trKeeper.TrustRegistryDIDIndex.Get(f.ctx, "did:example:update-unauth-test")
+	require.NoError(t, err)
+
+	// Try to update trust registry — should fail
+	_, err = f.trMsgServer.UpdateTrustRegistry(f.ctx, &trtypes.MsgUpdateTrustRegistry{
+		Authority: groupAccount,
+		Operator:  operator,
+		Id:        trID,
+		Did:       "did:example:should-fail",
+	})
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "authorization check failed")
+	require.Contains(t, err.Error(), "does not include requested message type")
+}
