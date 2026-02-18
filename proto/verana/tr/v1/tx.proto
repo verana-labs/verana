@@ -130,12 +130,18 @@ message MsgUpdateTrustRegistry {
 message MsgUpdateTrustRegistryResponse {}
 
 // MsgArchiveTrustRegistry defines the Msg/ArchiveTrustRegistry request type.
+// [MOD-TR-MSG-5] Archive Trust Registry
 message MsgArchiveTrustRegistry {
-  option (cosmos.msg.v1.signer) = "creator";
+  option (cosmos.msg.v1.signer) = "operator";
 
-  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  uint64 id = 2;
-  bool archive = 3;
+  // authority is the group account on whose behalf this message is executed
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // operator is the account authorized by the authority to run this Msg
+  string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // id is the trust registry id (mandatory)
+  uint64 id = 3;
+  // archive is true to archive, false to unarchive (mandatory)
+  bool archive = 4;
 }
 
 // MsgArchiveTrustRegistryResponse defines the Msg/ArchiveTrustRegistry response type.

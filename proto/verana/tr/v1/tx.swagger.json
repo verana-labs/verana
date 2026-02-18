@@ -68,7 +68,6 @@
         "parameters": [
           {
             "name": "body",
-            "description": "MsgArchiveTrustRegistry defines the Msg/ArchiveTrustRegistry request type.",
             "in": "body",
             "required": true,
             "schema": {
@@ -285,18 +284,25 @@
     "verana.tr.v1.MsgArchiveTrustRegistry": {
       "type": "object",
       "properties": {
-        "creator": {
-          "type": "string"
+        "authority": {
+          "type": "string",
+          "title": "authority is the group account on whose behalf this message is executed"
+        },
+        "operator": {
+          "type": "string",
+          "title": "operator is the account authorized by the authority to run this Msg"
         },
         "id": {
           "type": "string",
-          "format": "uint64"
+          "format": "uint64",
+          "title": "id is the trust registry id (mandatory)"
         },
         "archive": {
-          "type": "boolean"
+          "type": "boolean",
+          "title": "archive is true to archive, false to unarchive (mandatory)"
         }
       },
-      "description": "MsgArchiveTrustRegistry defines the Msg/ArchiveTrustRegistry request type."
+      "title": "MsgArchiveTrustRegistry defines the Msg/ArchiveTrustRegistry request type.\n[MOD-TR-MSG-5] Archive Trust Registry"
     },
     "verana.tr.v1.MsgArchiveTrustRegistryResponse": {
       "type": "object",

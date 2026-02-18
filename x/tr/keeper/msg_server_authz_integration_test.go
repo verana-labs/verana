@@ -654,3 +654,117 @@ func TestIntegration_UnauthorizedOperatorCannotUpdateTrustRegistry(t *testing.T)
 	require.Contains(t, err.Error(), "authorization check failed")
 	require.Contains(t, err.Error(), "does not include requested message type")
 }
+
+// ---------------------------------------------------------------------------
+// Integration tests: DE operator authorization → TR archive trust registry
+// ---------------------------------------------------------------------------
+
+// TestIntegration_OperatorArchivesTrustRegistry models the flow:
+//
+//  1. Grant operator with CreateTR and ArchiveTR permissions.
+//  2. Operator creates a trust registry.
+//  3. Operator archives the trust registry.
+//  4. Operator unarchives the trust registry.
+func TestIntegration_OperatorArchivesTrustRegistry(t *testing.T) {
+	f := setupIntegrationFixture(t)
+
+	groupAccount := sdk.AccAddress([]byte("group_policy_addr___")).String()
+	operator := sdk.AccAddress([]byte("archive_operator____")).String()
+
+	// Grant operator both permissions
+	_, err := f.deMsgServer.GrantOperatorAuthorization(f.ctx, &detypes.MsgGrantOperatorAuthorization{
+		Authority: groupAccount,
+		Operator:  "",
+		Grantee:   operator,
+		MsgTypes: []string{
+			"/verana.tr.v1.MsgCreateTrustRegistry",
+			"/verana.tr.v1.MsgArchiveTrustRegistry",
+		},
+	})
+	require.NoError(t, err)
+
+	// Create trust registry
+	_, err = f.trMsgServer.CreateTrustRegistry(f.ctx, &trtypes.MsgCreateTrustRegistry{
+		Authority:    groupAccount,
+		Operator:     operator,
+		Did:          "did:example:archive-test",
+		Language:     "en",
+		DocUrl:       "https://example.com/gf-v1",
+		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+	})
+	require.NoError(t, err)
+
+	trID, err := f.trKeeper.TrustRegistryDIDIndex.Get(f.ctx, "did:example:archive-test")
+	require.NoError(t, err)
+
+	// Archive trust registry
+	_, err = f.trMsgServer.ArchiveTrustRegistry(f.ctx, &trtypes.MsgArchiveTrustRegistry{
+		Authority: groupAccount,
+		Operator:  operator,
+		Id:        trID,
+		Archive:   true,
+	})
+	require.NoError(t, err)
+
+	// Verify archived
+	tr, err := f.trKeeper.TrustRegistry.Get(f.ctx, trID)
+	require.NoError(t, err)
+	require.NotNil(t, tr.Archived)
+
+	// Unarchive trust registry
+	_, err = f.trMsgServer.ArchiveTrustRegistry(f.ctx, &trtypes.MsgArchiveTrustRegistry{
+		Authority: groupAccount,
+		Operator:  operator,
+		Id:        trID,
+		Archive:   false,
+	})
+	require.NoError(t, err)
+
+	// Verify unarchived
+	tr, err = f.trKeeper.TrustRegistry.Get(f.ctx, trID)
+	require.NoError(t, err)
+	require.Nil(t, tr.Archived)
+}
+
+// TestIntegration_UnauthorizedOperatorCannotArchiveTrustRegistry verifies that an
+// operator without MsgArchiveTrustRegistry permission is rejected.
+func TestIntegration_UnauthorizedOperatorCannotArchiveTrustRegistry(t *testing.T) {
+	f := setupIntegrationFixture(t)
+
+	groupAccount := sdk.AccAddress([]byte("group_policy_addr___")).String()
+	operator := sdk.AccAddress([]byte("archive_unauth_op___")).String()
+
+	// Grant operator ONLY MsgCreateTrustRegistry (not MsgArchiveTrustRegistry)
+	_, err := f.deMsgServer.GrantOperatorAuthorization(f.ctx, &detypes.MsgGrantOperatorAuthorization{
+		Authority: groupAccount,
+		Operator:  "",
+		Grantee:   operator,
+		MsgTypes:  []string{"/verana.tr.v1.MsgCreateTrustRegistry"},
+	})
+	require.NoError(t, err)
+
+	// Create trust registry (should succeed)
+	_, err = f.trMsgServer.CreateTrustRegistry(f.ctx, &trtypes.MsgCreateTrustRegistry{
+		Authority:    groupAccount,
+		Operator:     operator,
+		Did:          "did:example:archive-unauth-test",
+		Language:     "en",
+		DocUrl:       "https://example.com/gf-v1",
+		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+	})
+	require.NoError(t, err)
+
+	trID, err := f.trKeeper.TrustRegistryDIDIndex.Get(f.ctx, "did:example:archive-unauth-test")
+	require.NoError(t, err)
+
+	// Try to archive trust registry — should fail
+	_, err = f.trMsgServer.ArchiveTrustRegistry(f.ctx, &trtypes.MsgArchiveTrustRegistry{
+		Authority: groupAccount,
+		Operator:  operator,
+		Id:        trID,
+		Archive:   true,
+	})
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "authorization check failed")
+	require.Contains(t, err.Error(), "does not include requested message type")
+}

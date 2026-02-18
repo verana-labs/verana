@@ -118,10 +118,18 @@ export interface MsgUpdateTrustRegistry {
 export interface MsgUpdateTrustRegistryResponse {
 }
 
-/** MsgArchiveTrustRegistry defines the Msg/ArchiveTrustRegistry request type. */
+/**
+ * MsgArchiveTrustRegistry defines the Msg/ArchiveTrustRegistry request type.
+ * [MOD-TR-MSG-5] Archive Trust Registry
+ */
 export interface MsgArchiveTrustRegistry {
-  creator: string;
+  /** authority is the group account on whose behalf this message is executed */
+  authority: string;
+  /** operator is the account authorized by the authority to run this Msg */
+  operator: string;
+  /** id is the trust registry id (mandatory) */
   id: number;
+  /** archive is true to archive, false to unarchive (mandatory) */
   archive: boolean;
 }
 
@@ -943,19 +951,22 @@ export const MsgUpdateTrustRegistryResponse = {
 };
 
 function createBaseMsgArchiveTrustRegistry(): MsgArchiveTrustRegistry {
-  return { creator: "", id: 0, archive: false };
+  return { authority: "", operator: "", id: 0, archive: false };
 }
 
 export const MsgArchiveTrustRegistry = {
   encode(message: MsgArchiveTrustRegistry, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.creator !== "") {
-      writer.uint32(10).string(message.creator);
+    if (message.authority !== "") {
+      writer.uint32(10).string(message.authority);
+    }
+    if (message.operator !== "") {
+      writer.uint32(18).string(message.operator);
     }
     if (message.id !== 0) {
-      writer.uint32(16).uint64(message.id);
+      writer.uint32(24).uint64(message.id);
     }
     if (message.archive !== false) {
-      writer.uint32(24).bool(message.archive);
+      writer.uint32(32).bool(message.archive);
     }
     return writer;
   },
@@ -972,17 +983,24 @@ export const MsgArchiveTrustRegistry = {
             break;
           }
 
-          message.creator = reader.string();
+          message.authority = reader.string();
           continue;
         case 2:
-          if (tag !== 16) {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.operator = reader.string();
+          continue;
+        case 3:
+          if (tag !== 24) {
             break;
           }
 
           message.id = longToNumber(reader.uint64() as Long);
           continue;
-        case 3:
-          if (tag !== 24) {
+        case 4:
+          if (tag !== 32) {
             break;
           }
 
@@ -999,7 +1017,8 @@ export const MsgArchiveTrustRegistry = {
 
   fromJSON(object: any): MsgArchiveTrustRegistry {
     return {
-      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
+      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
       id: isSet(object.id) ? globalThis.Number(object.id) : 0,
       archive: isSet(object.archive) ? globalThis.Boolean(object.archive) : false,
     };
@@ -1007,8 +1026,11 @@ export const MsgArchiveTrustRegistry = {
 
   toJSON(message: MsgArchiveTrustRegistry): unknown {
     const obj: any = {};
-    if (message.creator !== "") {
-      obj.creator = message.creator;
+    if (message.authority !== "") {
+      obj.authority = message.authority;
+    }
+    if (message.operator !== "") {
+      obj.operator = message.operator;
     }
     if (message.id !== 0) {
       obj.id = Math.round(message.id);
@@ -1024,7 +1046,8 @@ export const MsgArchiveTrustRegistry = {
   },
   fromPartial<I extends Exact<DeepPartial<MsgArchiveTrustRegistry>, I>>(object: I): MsgArchiveTrustRegistry {
     const message = createBaseMsgArchiveTrustRegistry();
-    message.creator = object.creator ?? "";
+    message.authority = object.authority ?? "";
+    message.operator = object.operator ?? "";
     message.id = object.id ?? 0;
     message.archive = object.archive ?? false;
     return message;

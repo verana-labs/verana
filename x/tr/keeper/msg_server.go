@@ -224,6 +224,20 @@ func (ms msgServer) UpdateTrustRegistry(goCtx context.Context, msg *types.MsgUpd
 
 func (ms msgServer) ArchiveTrustRegistry(goCtx context.Context, msg *types.MsgArchiveTrustRegistry) (*types.MsgArchiveTrustRegistryResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
+	now := ctx.BlockTime()
+
+	// [MOD-TR-MSG-5-2-1] [AUTHZ-CHECK] Verify operator authorization
+	if ms.delegationKeeper != nil {
+		if err := ms.delegationKeeper.CheckOperatorAuthorization(
+			ctx,
+			msg.Authority,
+			msg.Operator,
+			"/verana.tr.v1.MsgArchiveTrustRegistry",
+			now,
+		); err != nil {
+			return nil, fmt.Errorf("authorization check failed: %w", err)
+		}
+	}
 
 	// Get trust registry
 	tr, err := ms.TrustRegistry.Get(ctx, msg.Id)
@@ -232,7 +246,7 @@ func (ms msgServer) ArchiveTrustRegistry(goCtx context.Context, msg *types.MsgAr
 	}
 
 	// Check controller
-	if tr.Controller != msg.Creator {
+	if tr.Controller != msg.Authority {
 		return nil, fmt.Errorf("only trust registry controller can archive trust registry")
 	}
 
@@ -246,9 +260,6 @@ func (ms msgServer) ArchiveTrustRegistry(goCtx context.Context, msg *types.MsgAr
 			return nil, fmt.Errorf("trust registry is not archived")
 		}
 	}
-
-	// Update archive state
-	now := ctx.BlockTime()
 	if msg.Archive {
 		tr.Archived = &now
 	} else {
@@ -270,7 +281,7 @@ func (ms msgServer) ArchiveTrustRegistry(goCtx context.Context, msg *types.MsgAr
 		sdk.NewEvent(
 			types.EventTypeArchiveTrustRegistry,
 			sdk.NewAttribute(types.AttributeKeyTrustRegistryID, strconv.FormatUint(msg.Id, 10)),
-			sdk.NewAttribute(types.AttributeKeyController, msg.Creator),
+			sdk.NewAttribute(types.AttributeKeyController, msg.Authority),
 			sdk.NewAttribute(types.AttributeKeyArchiveStatus, archiveStatus),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
 		),

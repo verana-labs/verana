@@ -153,17 +153,19 @@ func (msg *MsgUpdateTrustRegistry) ValidateBasic() error {
 	return nil
 }
 
+// ValidateBasic performs stateless validation of MsgArchiveTrustRegistry
+// [MOD-TR-MSG-5-2-1] Archive Trust Registry basic checks
 func (msg *MsgArchiveTrustRegistry) ValidateBasic() error {
-	if msg.Creator == "" {
-		return fmt.Errorf("creator address is required")
+	if msg.Authority == "" {
+		return fmt.Errorf("authority address is required")
+	}
+
+	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
+		return sdkerrors.ErrInvalidAddress.Wrapf("invalid authority address: %s", err)
 	}
 
 	if msg.Id == 0 {
 		return fmt.Errorf("trust registry id is required")
-	}
-
-	if _, err := sdk.AccAddressFromBech32(msg.Creator); err != nil {
-		return sdkerrors.ErrInvalidAddress.Wrapf("invalid creator address: %s", err)
 	}
 
 	return nil
