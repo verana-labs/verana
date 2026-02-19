@@ -85,9 +85,16 @@ const clean = <T extends Record<string, any>>(o: T): T => {
   return o;
 };
 
-// Helper for Date/Timestamp: Date -> ISO string, ISO string -> Date
-const dateToAmino = (d?: Date | null) =>
-  d != null ? d.toISOString() : undefined;
+// Helper for Date/Timestamp: Date -> RFC3339Nano-like string, ISO string -> Date
+// Go's legacy Amino JSON trims trailing zeros in fractional seconds (e.g. .830Z -> .83Z).
+// Matching this avoids intermittent sign-byte mismatches on LEGACY_AMINO_JSON signatures.
+const dateToAmino = (d?: Date | null) => {
+  if (d == null) return undefined;
+  return d
+    .toISOString()
+    .replace(/\.000Z$/, "Z")
+    .replace(/(\.\d*?[1-9])0+Z$/, "$1Z");
+};
 
 const dateFromAmino = (s?: string | null) =>
   s != null ? new Date(s) : undefined;
