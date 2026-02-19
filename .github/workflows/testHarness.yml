@@ -16,19 +16,22 @@ on:
 
 jobs:
   test-harness:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     concurrency:
       group: test-harness-${{ github.head_ref || github.ref_name }}
       cancel-in-progress: true
     permissions:
       contents: read
-      packages: read
     env:
       TEST_HARNESS_PATH: ./testharness
       HARNESS_MODE: k8s
       KUBECONFIG: ${{ secrets.OVH_KUBECONFIG }}
       K8S_INGRESS_DOMAIN: testnet.verana.network
-      GHCR_READ_TOKEN: ${{ secrets.GHCR_READ_TOKEN }}
+      DH_USERNAME: ${{ secrets.DOCKER_HUB_LOGIN }}
+      DH_TOKEN: ${{ secrets.DOCKER_HUB_PWD }}
+      IMAGE_REPO: ${{ secrets.DOCKER_HUB_LOGIN }}/verana-node
+      VALIDATOR_COUNT: "2"
 
     steps:
       - name: Checkout this repository
@@ -54,26 +57,26 @@ jobs:
           fi
           if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
             PR_NUMBER=$(echo "$GITHUB_REF" | awk -F'/' '{print $3}')
-            echo "IMAGE_TAG=ghcr.io/verana-labs/verana-node:pr-${PR_NUMBER}" >> $GITHUB_ENV
+            echo "IMAGE_TAG=${IMAGE_REPO}:pr-${PR_NUMBER}" >> $GITHUB_ENV
             BRANCH_REF="${GITHUB_HEAD_REF:-${GITHUB_REF_NAME:-$GITHUB_REF}}"
           elif [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
             BRANCH_REF="${GITHUB_REF_NAME:-$GITHUB_REF}"
             export BRANCH_REF
             PR_NUMBER="$(python3 scripts/ci/resolve_pr_number.py)"
             if [ -n "${PR_NUMBER}" ]; then
-              echo "IMAGE_TAG=ghcr.io/verana-labs/verana-node:pr-${PR_NUMBER}" >> $GITHUB_ENV
+              echo "IMAGE_TAG=${IMAGE_REPO}:pr-${PR_NUMBER}" >> $GITHUB_ENV
               echo "Resolved PR #${PR_NUMBER} for ${BRANCH_REF}; using PR image tag." >> $GITHUB_STEP_SUMMARY
             else
               BRANCH_TAG="${BRANCH_REF//\//-}"
               SHORT_SHA="$(echo "${GITHUB_SHA}" | cut -c1-7)"
-              echo "IMAGE_TAG=ghcr.io/verana-labs/verana-node:sha-${SHORT_SHA}" >> $GITHUB_ENV
+              echo "IMAGE_TAG=${IMAGE_REPO}:sha-${SHORT_SHA}" >> $GITHUB_ENV
               echo "No open PR for ${BRANCH_REF}; using sha tag ${SHORT_SHA}." >> $GITHUB_STEP_SUMMARY
             fi
           else
             BRANCH_REF="${GITHUB_REF_NAME:-$GITHUB_REF}"
             BRANCH_TAG="${BRANCH_REF//\//-}"
             SHORT_SHA="$(echo "${GITHUB_SHA}" | cut -c1-7)"
-            echo "IMAGE_TAG=ghcr.io/verana-labs/verana-node:sha-${SHORT_SHA}" >> $GITHUB_ENV
+            echo "IMAGE_TAG=${IMAGE_REPO}:sha-${SHORT_SHA}" >> $GITHUB_ENV
           fi
           BRANCH_REF="${BRANCH_REF:-${GITHUB_REF_NAME:-$GITHUB_REF}}"
           BRANCH_TAG="${BRANCH_REF//\//-}"
@@ -85,13 +88,12 @@ jobs:
             echo "NAMESPACE=vna-devnet-${BRANCH_TAG}" >> $GITHUB_ENV
           fi
 
-      - name: Login to GHCR
+      - name: Login to Docker Hub
         if: env.HARNESS_MODE_EFFECTIVE == 'docker'
         uses: docker/login-action@v3
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: ${{ env.DH_USERNAME }}
+          password: ${{ env.DH_TOKEN }}
 
       - name: Build canonical image
         if: env.HARNESS_MODE_EFFECTIVE == 'docker'
@@ -124,41 +126,17 @@ jobs:
         if: env.HARNESS_MODE_EFFECTIVE == 'k8s'
         run: |
           export KUBECONFIG=$KUBECONFIG
-          GHCR_TOKEN="${GHCR_READ_TOKEN:-${{ secrets.GITHUB_TOKEN }}}"
-          docker login ghcr.io -u "${GITHUB_ACTOR}" -p "$GHCR_TOKEN"
           echo "Checking image availability: $IMAGE_TAG"
-          attempts=0
-          max_attempts=30
-          until docker pull "$IMAGE_TAG"; do
-            attempts=$((attempts + 1))
-            if [ "$attempts" -ge "$max_attempts" ]; then
-              echo "Image $IMAGE_TAG not available or unauthorized after $attempts attempts. Set GHCR_READ_TOKEN with read:packages." >&2
-              exit 1
-            fi
-            echo "Image not ready yet, retrying in 20s... ($attempts/$max_attempts)"
-            sleep 20
-          done
+          if ! docker pull "$IMAGE_TAG"; then
+            echo "Image $IMAGE_TAG not available or unauthorized. Set GHCR_READ_TOKEN with read:packages." >&2
+            exit 1
+          fi
           echo "Installing veranad from $IMAGE_TAG for local test harness use"
           container_id="$(docker create "$IMAGE_TAG")"
           docker cp "${container_id}:/usr/local/bin/veranad" /usr/local/bin/veranad
           docker rm "$container_id"
           chmod +x /usr/local/bin/veranad
-          if kubectl get namespace "$NAMESPACE" >/dev/null 2>&1; then
-            deletion_ts="$(kubectl get namespace "$NAMESPACE" -o jsonpath='{.metadata.deletionTimestamp}')"
-            if [ -n "$deletion_ts" ]; then
-              echo "Namespace $NAMESPACE is terminating; waiting for deletion before recreating..."
-              if ! kubectl wait --for=delete "namespace/$NAMESPACE" --timeout=300s; then
-                echo "Namespace $NAMESPACE is still terminating after 300s." >&2
-                kubectl get namespace "$NAMESPACE" -o yaml || true
-                exit 1
-              fi
-            else
-              echo "Reusing existing namespace $NAMESPACE"
-            fi
-          fi
-          if ! kubectl get namespace "$NAMESPACE" >/dev/null 2>&1; then
-            kubectl create namespace "$NAMESPACE"
-          fi
+          kubectl create namespace "$NAMESPACE" || true
           kubectl -n "$NAMESPACE" create secret docker-registry ghcr-auth \
             --docker-server=ghcr.io \
             --docker-username="${GITHUB_ACTOR}" \
@@ -166,6 +144,7 @@ jobs:
             --dry-run=client -o yaml | kubectl apply -f -
           kubectl -n "$NAMESPACE" create configmap verana-testharness-scripts \
             --from-file=scripts/setup_primary_validator.sh \
+            --from-file=scripts/setup_secondary_validator.sh \
             --dry-run=client -o yaml | kubectl apply -f -
 
           cat > /tmp/verana-testharness-deploy.yaml <<EOF
@@ -185,8 +164,6 @@ jobs:
                 annotations:
                   ci.verana/run-id: "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
               spec:
-                imagePullSecrets:
-                  - name: ghcr-auth
                 containers:
                 - name: veranad
                   image: ${IMAGE_TAG}
@@ -272,8 +249,19 @@ jobs:
             kubectl -n "$NAMESPACE" logs -l app=verana-testharness --all-containers --tail=200 || true
             exit 1
           fi
-          kubectl -n "$NAMESPACE" wait --for=condition=Ready pod -l app=verana-testharness --timeout=300s
-          POD_NAME=$(kubectl -n "$NAMESPACE" get pod -l app=verana-testharness -o jsonpath='{.items[0].metadata.name}')
+          POD_NAME="$(kubectl -n "$NAMESPACE" get pods -l app=verana-testharness --sort-by=.metadata.creationTimestamp -o name | tail -n1 | cut -d/ -f2)"
+          if [ -z "$POD_NAME" ]; then
+            echo "No verana-testharness pod found after rollout." >&2
+            kubectl -n "$NAMESPACE" get pods -o wide || true
+            exit 1
+          fi
+          if ! kubectl -n "$NAMESPACE" wait --for=condition=Ready "pod/$POD_NAME" --timeout=300s; then
+            echo "Pod $POD_NAME did not become Ready." >&2
+            kubectl -n "$NAMESPACE" get pods -o wide || true
+            kubectl -n "$NAMESPACE" describe "pod/$POD_NAME" || true
+            kubectl -n "$NAMESPACE" logs "pod/$POD_NAME" --all-containers --tail=200 || true
+            exit 1
+          fi
           for i in {1..120}; do
             if kubectl -n "$NAMESPACE" exec "$POD_NAME" -- curl -s http://127.0.0.1:26657/status >/dev/null 2>&1; then
               echo "RPC is ready inside pod"
@@ -296,6 +284,7 @@ jobs:
             -v "$GITHUB_WORKSPACE:/workspace" \
             -w /workspace \
             -e TEST_HARNESS_PATH \
+            -e VALIDATOR_COUNT \
             verana-node:ci \
             /bin/bash -lc 'set -e
               if ! command -v go >/dev/null 2>&1; then
@@ -310,6 +299,21 @@ jobs:
               ./scripts/setup_primary_validator.sh &
               PID=$!
               echo "Asynchronous setup process started with PID: $PID"
+              for i in {1..120}; do
+                if curl -s http://127.0.0.1:26657/status >/dev/null 2>&1; then
+                  echo "Primary validator RPC is ready"
+                  break
+                fi
+                sleep 2
+              done
+              if ! curl -s http://127.0.0.1:26657/status >/dev/null 2>&1; then
+                echo "Primary validator RPC did not become ready in docker mode." >&2
+                exit 1
+              fi
+              if [ "${VALIDATOR_COUNT:-1}" -ge 2 ]; then
+                echo "Bootstrapping secondary validator in docker mode..."
+                ./scripts/setup_secondary_validator.sh 2
+              fi
               cd $TEST_HARNESS_PATH
               ./scripts/setup_accounts.sh
               ./scripts/run_all.sh
@@ -320,22 +324,9 @@ jobs:
         if: env.HARNESS_MODE_EFFECTIVE == 'k8s'
         run: |
           export KUBECONFIG=$KUBECONFIG
-          POD_NAME=$(kubectl -n "$NAMESPACE" get pod -l app=verana-testharness -o jsonpath='{.items[0].metadata.name}')
-          PORT_FORWARD_PID=""
-          start_port_forward() {
-            : > /tmp/portforward.log
-            kubectl -n "$NAMESPACE" port-forward "pod/$POD_NAME" 26657:26657 1317:1317 >> /tmp/portforward.log 2>&1 &
-            PORT_FORWARD_PID=$!
-          }
-          stop_port_forward() {
-            if [ -n "${PORT_FORWARD_PID:-}" ] && kill -0 "$PORT_FORWARD_PID" >/dev/null 2>&1; then
-              kill "$PORT_FORWARD_PID" >/dev/null 2>&1 || true
-              wait "$PORT_FORWARD_PID" >/dev/null 2>&1 || true
-            fi
-          }
-          trap 'stop_port_forward' EXIT
-
-          start_port_forward
+          kubectl -n "$NAMESPACE" port-forward svc/verana-testharness 26657:26657 1317:1317 > /tmp/portforward.log 2>&1 &
+          PORT_FORWARD_PID=$!
+          trap 'kill -9 "$PORT_FORWARD_PID" >/dev/null 2>&1 || true' EXIT
           for i in {1..120}; do
             if ! kill -0 "$PORT_FORWARD_PID" >/dev/null 2>&1; then
               echo "Port-forward process exited; restarting (attempt $i/120)"
@@ -356,6 +347,18 @@ jobs:
             kubectl -n "$NAMESPACE" describe pod -l app=verana-testharness || true
             kubectl -n "$NAMESPACE" logs -l app=verana-testharness --all-containers --tail=200 || true
             exit 1
+          fi
+          if [ "${VALIDATOR_COUNT:-1}" -ge 2 ]; then
+            echo "Bootstrapping secondary validator in K8s pod..."
+            if ! kubectl -n "$NAMESPACE" exec "$POD_NAME" -- /bin/bash -lc '
+              cp /scripts/setup_secondary_validator.sh /tmp/setup_secondary_validator.sh
+              chmod +x /tmp/setup_secondary_validator.sh
+              /tmp/setup_secondary_validator.sh 2
+            '; then
+              echo "Secondary validator bootstrap failed." >&2
+              kubectl -n "$NAMESPACE" exec "$POD_NAME" -- /bin/bash -lc 'tail -n 200 /tmp/verana-validator2.log || true'
+              exit 1
+            fi
           fi
           echo "Running test harness against K8s endpoints"
           echo "K8S_RPC_ENDPOINT=http://127.0.0.1:26657"
