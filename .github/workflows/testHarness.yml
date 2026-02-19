@@ -266,8 +266,19 @@ jobs:
             kubectl -n "$NAMESPACE" logs -l app=verana-testharness --all-containers --tail=200 || true
             exit 1
           fi
-          kubectl -n "$NAMESPACE" wait --for=condition=Ready pod -l app=verana-testharness --timeout=300s
-          POD_NAME=$(kubectl -n "$NAMESPACE" get pod -l app=verana-testharness -o jsonpath='{.items[0].metadata.name}')
+          POD_NAME="$(kubectl -n "$NAMESPACE" get pods -l app=verana-testharness --sort-by=.metadata.creationTimestamp -o name | tail -n1 | cut -d/ -f2)"
+          if [ -z "$POD_NAME" ]; then
+            echo "No verana-testharness pod found after rollout." >&2
+            kubectl -n "$NAMESPACE" get pods -o wide || true
+            exit 1
+          fi
+          if ! kubectl -n "$NAMESPACE" wait --for=condition=Ready "pod/$POD_NAME" --timeout=300s; then
+            echo "Pod $POD_NAME did not become Ready." >&2
+            kubectl -n "$NAMESPACE" get pods -o wide || true
+            kubectl -n "$NAMESPACE" describe "pod/$POD_NAME" || true
+            kubectl -n "$NAMESPACE" logs "pod/$POD_NAME" --all-containers --tail=200 || true
+            exit 1
+          fi
           for i in {1..120}; do
             if kubectl -n "$NAMESPACE" exec "$POD_NAME" -- curl -s http://127.0.0.1:26657/status >/dev/null 2>&1; then
               echo "RPC is ready inside pod"
@@ -330,7 +341,12 @@ jobs:
         if: env.HARNESS_MODE_EFFECTIVE == 'k8s'
         run: |
           export KUBECONFIG=$KUBECONFIG
-          POD_NAME=$(kubectl -n "$NAMESPACE" get pod -l app=verana-testharness -o jsonpath='{.items[0].metadata.name}')
+          POD_NAME="$(kubectl -n "$NAMESPACE" get pods -l app=verana-testharness --sort-by=.metadata.creationTimestamp -o name | tail -n1 | cut -d/ -f2)"
+          if [ -z "$POD_NAME" ]; then
+            echo "No verana-testharness pod found before port-forward." >&2
+            kubectl -n "$NAMESPACE" get pods -o wide || true
+            exit 1
+          fi
           PORT_FORWARD_PID=""
           start_port_forward() {
             : > /tmp/portforward.log
