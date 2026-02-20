@@ -3,6 +3,7 @@ package keeper_test
 import (
 	"context"
 	"testing"
+	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
@@ -208,9 +209,9 @@ func TestListTrustRegistries(t *testing.T) {
 			expectedError: true,
 		},
 		{
-			name: "Default Response Max Size",
+			name: "Default Response Max Size (unspecified defaults to 64)",
 			request: &types.QueryListTrustRegistriesRequest{
-				ResponseMaxSize: 10,
+				ResponseMaxSize: 0, // unspecified, should default to 64
 			},
 			expectedError: false,
 			check: func(t *testing.T, response *types.QueryListTrustRegistriesResponse) {
@@ -241,6 +242,58 @@ func TestListTrustRegistries(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestPreferredLanguageFallbackToDefaultLanguage(t *testing.T) {
+	_, qs, ctx, trID := setupTestData(t)
+
+	// Request with preferred_language="de" which doesn't exist.
+	// TR default language is "en", so should fall back to "en" document.
+	response, err := qs.GetTrustRegistry(ctx, &types.QueryGetTrustRegistryRequest{
+		TrId:              trID,
+		PreferredLanguage: "de", // no German doc exists
+	})
+	require.NoError(t, err)
+	require.NotNil(t, response.TrustRegistry)
+
+	for _, version := range response.TrustRegistry.Versions {
+		// Each version should return exactly 1 document (fallback to "en")
+		require.Len(t, version.Documents, 1, "version %d should have exactly 1 fallback doc", version.Version)
+		require.Equal(t, "en", version.Documents[0].Language, "version %d should fall back to TR default language 'en'", version.Version)
+	}
+}
+
+func TestListTrustRegistriesSortOrderWithModifiedAfter(t *testing.T) {
+	k, qs, ctx, _ := setupTestData(t)
+	ms := keeper.NewMsgServerImpl(k)
+
+	// The first TR was created at block time. Create a second one with a later modified time.
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	pastTime := sdkCtx.BlockTime().Add(-1 * time.Hour)
+
+	// Query with modified_after set to a time in the past — results should be sorted by modified desc
+	response, err := qs.ListTrustRegistries(ctx, &types.QueryListTrustRegistriesRequest{
+		ModifiedAfter:   &pastTime,
+		ResponseMaxSize: 10,
+	})
+	require.NoError(t, err)
+	require.NotEmpty(t, response.TrustRegistries)
+
+	// Verify descending order by modified time
+	for i := 1; i < len(response.TrustRegistries); i++ {
+		require.False(t,
+			response.TrustRegistries[i].Modified.After(response.TrustRegistries[i-1].Modified),
+			"results should be sorted by modified descending",
+		)
+	}
+
+	// Query without modified_after — should not be sorted (or at least not error)
+	_ = ms // suppress unused warning if needed
+	response2, err := qs.ListTrustRegistries(ctx, &types.QueryListTrustRegistriesRequest{
+		ResponseMaxSize: 10,
+	})
+	require.NoError(t, err)
+	require.NotEmpty(t, response2.TrustRegistries)
 }
 
 func TestParams(t *testing.T) {

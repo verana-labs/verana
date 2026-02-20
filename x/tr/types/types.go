@@ -104,12 +104,17 @@ func (msg *MsgAddGovernanceFrameworkDocument) ValidateBasic() error {
 // ValidateBasic performs stateless validation of MsgIncreaseActiveGovernanceFrameworkVersion
 // [MOD-TR-MSG-3-2-1] Increase Active Governance Framework Version basic checks
 func (msg *MsgIncreaseActiveGovernanceFrameworkVersion) ValidateBasic() error {
+	// Validate authority address (group account)
 	if msg.Authority == "" {
 		return fmt.Errorf("authority address is required")
 	}
-
 	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
 		return sdkerrors.ErrInvalidAddress.Wrapf("invalid authority address: %s", err)
+	}
+
+	// Validate operator address (signer authorized by authority)
+	if _, err := sdk.AccAddressFromBech32(msg.Operator); err != nil {
+		return sdkerrors.ErrInvalidAddress.Wrapf("invalid operator address: %s", err)
 	}
 
 	if msg.Id == 0 {
@@ -156,12 +161,17 @@ func (msg *MsgUpdateTrustRegistry) ValidateBasic() error {
 // ValidateBasic performs stateless validation of MsgArchiveTrustRegistry
 // [MOD-TR-MSG-5-2-1] Archive Trust Registry basic checks
 func (msg *MsgArchiveTrustRegistry) ValidateBasic() error {
+	// Validate authority address (group account)
 	if msg.Authority == "" {
 		return fmt.Errorf("authority address is required")
 	}
-
 	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
 		return sdkerrors.ErrInvalidAddress.Wrapf("invalid authority address: %s", err)
+	}
+
+	// Validate operator address (signer authorized by authority)
+	if _, err := sdk.AccAddressFromBech32(msg.Operator); err != nil {
+		return sdkerrors.ErrInvalidAddress.Wrapf("invalid operator address: %s", err)
 	}
 
 	if msg.Id == 0 {
