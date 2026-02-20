@@ -406,9 +406,14 @@ jobs:
       - name: Finalize without error
         run: echo "Test harness execution completed successfully."
 
-      - name: Cleanup K8s namespace (workflow_dispatch only)
-        if: always() && env.HARNESS_MODE_EFFECTIVE == 'k8s' && github.event_name == 'workflow_dispatch'
+      - name: Cleanup K8s namespace after successful K8s run
+        if: success() && env.HARNESS_MODE_EFFECTIVE == 'k8s' && (github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch')
         run: |
           export KUBECONFIG=$KUBECONFIG
           echo "Cleaning up namespace $NAMESPACE"
-          kubectl delete namespace "$NAMESPACE" --wait=false || true
+          kubectl delete namespace "$NAMESPACE" --ignore-not-found=true --wait=false
+          if ! kubectl wait --for=delete "namespace/$NAMESPACE" --timeout=300s; then
+            echo "Namespace $NAMESPACE is still present after cleanup timeout." >&2
+            kubectl get namespace "$NAMESPACE" -o yaml || true
+            exit 1
+          fi
