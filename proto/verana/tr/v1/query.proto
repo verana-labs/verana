@@ -2,13 +2,13 @@ syntax = "proto3";
 package verana.tr.v1;
 
 import "amino/amino.proto";
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
-import "cosmos/base/query/v1beta1/pagination.proto";
+import "google/protobuf/timestamp.proto";
 import "verana/tr/v1/params.proto";
 import "verana/tr/v1/types.proto";
-import "cosmos_proto/cosmos.proto";
-import "google/protobuf/timestamp.proto";
 
 option go_package = "github.com/verana-labs/verana/x/tr/types";
 
@@ -43,7 +43,7 @@ message QueryParamsResponse {
 
 // QueryGetTrustRegistryRequest is the request type for the Query/GetTrustRegistry RPC method.
 message QueryGetTrustRegistryRequest {
-  uint64 tr_id = 1;  // Changed from string did to uint64 tr_id
+  uint64 tr_id = 1; // Changed from string did to uint64 tr_id
   bool active_gf_only = 2;
   string preferred_language = 3;
 }
@@ -55,8 +55,11 @@ message QueryGetTrustRegistryResponse {
 
 // QueryListTrustRegistriesRequest is the request type for the Query/ListTrustRegistries RPC method.
 message QueryListTrustRegistriesRequest {
-  string controller = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];  // Added controller field
-  google.protobuf.Timestamp modified_after = 2 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  string controller = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"]; // Added controller field
+  google.protobuf.Timestamp modified_after = 2 [
+    (gogoproto.stdtime) = true,
+    (gogoproto.nullable) = true
+  ];
   bool active_gf_only = 3;
   string preferred_language = 4;
   uint32 response_max_size = 5;

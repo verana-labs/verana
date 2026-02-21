@@ -655,19 +655,19 @@ func RegisterQueryHandlerClient(ctx context.Context, mux *runtime.ServeMux, clie
 }
 
 var (
-	pattern_Query_Params_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"verana", "perm", "v1", "params"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_Params_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"verana", "perm", "v1", "params"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_Query_ListPermissions_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"verana", "perm", "v1", "list"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_ListPermissions_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"verana", "perm", "v1", "list"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_Query_GetPermission_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"verana", "perm", "v1", "get", "id"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_GetPermission_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"verana", "perm", "v1", "get", "id"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_Query_GetPermissionSession_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"verana", "perm", "v1", "get_session", "id"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_GetPermissionSession_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"verana", "perm", "v1", "get_session", "id"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_Query_ListPermissionSessions_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"verana", "perm", "v1", "list_session"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_ListPermissionSessions_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"verana", "perm", "v1", "list_session"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_Query_FindPermissionsWithDID_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"verana", "perm", "v1", "find_with_did"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_FindPermissionsWithDID_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"verana", "perm", "v1", "find_with_did"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_Query_FindBeneficiaries_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"verana", "perm", "v1", "beneficiaries"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_FindBeneficiaries_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"verana", "perm", "v1", "beneficiaries"}, "", runtime.AssumeColonVerbOpt(true)))
 )
 
 var (

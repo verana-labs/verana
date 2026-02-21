@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   pull_request:
     branches:
-      - '*' # Trigger on pull requests to any branch
+      - '**' # Trigger on pull requests to any branch
   push:
     branches:
       - main # Trigger on main only

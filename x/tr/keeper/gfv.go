@@ -15,8 +15,8 @@ func (ms msgServer) validateIncreaseActiveGovernanceFrameworkVersionParams(ctx s
 		return fmt.Errorf("trust registry with ID %d does not exist: %w", msg.Id, err)
 	}
 
-	if tr.Controller != msg.Creator {
-		return errors.New("creator is not the controller of the trust registry")
+	if tr.Controller != msg.Authority {
+		return errors.New("authority is not the controller of the trust registry")
 	}
 
 	nextVersion := tr.ActiveVersion + 1

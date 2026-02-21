@@ -3,6 +3,7 @@ package journeys
 import (
 	"context"
 	"fmt"
+
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
 )
 

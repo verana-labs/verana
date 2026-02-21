@@ -1,0 +1,66 @@
+syntax = "proto3";
+package verana.de.v1;
+
+import "cosmos/base/v1beta1/coin.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/verana-labs/verana/x/de/types";
+
+message OperatorAuthorization {
+  // authority is the group granting the authorization.
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // operator is the account receiving the authorization.
+  string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // msg_types is the list of module message types this authorization applies to.
+  repeated string msg_types = 3;
+  // spend_limit is the maximum amount of funds that the grantee is allowed to
+  // spend as a direct consequence of executing authorized messages.
+  repeated cosmos.base.v1beta1.Coin spend_limit = 4 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+  // fee_spend_limit is the maximum total amount of fees that can be paid using
+  // this authorization.
+  repeated cosmos.base.v1beta1.Coin fee_spend_limit = 5 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+  // expiration is the timestamp after which the authorization is no longer
+  // valid.
+  google.protobuf.Timestamp expiration = 6 [(gogoproto.stdtime) = true];
+  // period is the reset period for spend_limit and fee_spend_limit.
+  google.protobuf.Duration period = 7 [(gogoproto.stdduration) = true];
+}
+
+message FeeGrant {
+  // grantor is the authority group granting the fee allowance.
+  string grantor = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // grantee is the account that receives the fee grant from grantor.
+  string grantee = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // msg_types is the list of VPR delegable message types for which the fee
+  // allowance applies.
+  repeated string msg_types = 3;
+  // spend_limit is the maximum amount of fees that can be spent using this
+  // grant.
+  repeated cosmos.base.v1beta1.Coin spend_limit = 4 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+  // expiration is the timestamp after which the fee grant is no longer valid.
+  google.protobuf.Timestamp expiration = 5 [(gogoproto.stdtime) = true];
+  // period is the reset period for spend_limit.
+  google.protobuf.Duration period = 6 [(gogoproto.stdduration) = true];
+}
+
+message VSOperatorAuthorization {
+  // authority is the group granting the authorization.
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // vs_operator is the operator account receiving the authorization.
+  string vs_operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // permissions is the list of permission ids for which this authorization is
+  // granted.
+  repeated uint64 permissions = 3;
+}

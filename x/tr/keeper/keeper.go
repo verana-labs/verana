@@ -30,7 +30,8 @@ type (
 		Counter               collections.Map[string, uint64]
 		// module references
 		//bankKeeper    types.BankKeeper
-		trustDeposit types.TrustDepositKeeper
+		trustDeposit     types.TrustDepositKeeper
+		delegationKeeper types.DelegationKeeper
 	}
 )
 
@@ -40,6 +41,7 @@ func NewKeeper(
 	logger log.Logger,
 	authority string,
 	trustDeposit types.TrustDepositKeeper,
+	delegationKeeper types.DelegationKeeper,
 ) Keeper {
 	if _, err := sdk.AccAddressFromBech32(authority); err != nil {
 		panic(fmt.Sprintf("invalid authority address: %s", authority))
@@ -59,6 +61,7 @@ func NewKeeper(
 		GFDocument:            collections.NewMap(sb, types.GovernanceFrameworkDocumentKey, "gf_document", collections.Uint64Key, codec.CollValue[types.GovernanceFrameworkDocument](cdc)),
 		Counter:               collections.NewMap(sb, types.CounterKey, "counter", collections.StringKey, collections.Uint64Value),
 		trustDeposit:          trustDeposit,
+		delegationKeeper:      delegationKeeper,
 	}
 
 	schema, err := sb.Build()

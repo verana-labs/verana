@@ -3,9 +3,10 @@ package lib
 import (
 	"context"
 	"fmt"
+	"time"
+
 	didtypes "github.com/verana-labs/verana/x/dd/types"
 	permtypes "github.com/verana-labs/verana/x/perm/types"
-	"time"
 
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
 

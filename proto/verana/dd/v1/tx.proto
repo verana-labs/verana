@@ -43,7 +43,6 @@ message MsgUpdateParams {
 // MsgUpdateParams message.
 message MsgUpdateParamsResponse {}
 
-
 // MsgAddDID defines the Msg/AddDID request type
 message MsgAddDID {
   option (cosmos.msg.v1.signer) = "creator";

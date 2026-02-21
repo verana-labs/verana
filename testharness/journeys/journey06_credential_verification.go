@@ -3,8 +3,9 @@ package journeys
 import (
 	"context"
 	"fmt"
-	"github.com/google/uuid"
 	"strconv"
+
+	"github.com/google/uuid"
 
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
 

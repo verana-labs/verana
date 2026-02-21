@@ -1,0 +1,17 @@
+syntax = "proto3";
+package verana.de.v1;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+import "verana/de/v1/params.proto";
+
+option go_package = "github.com/verana-labs/verana/x/de/types";
+
+// GenesisState defines the de module's genesis state.
+message GenesisState {
+  // params defines all the parameters of the module.
+  Params params = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+}
