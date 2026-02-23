@@ -127,21 +127,38 @@ jobs:
         run: |
           export KUBECONFIG=$KUBECONFIG
           echo "Checking image availability: $IMAGE_TAG"
-          if ! docker pull "$IMAGE_TAG"; then
-            echo "Image $IMAGE_TAG not available or unauthorized. Set GHCR_READ_TOKEN with read:packages." >&2
-            exit 1
-          fi
+          attempts=0
+          max_attempts=30
+          until docker pull "$IMAGE_TAG"; do
+            attempts=$((attempts + 1))
+            if [ "$attempts" -ge "$max_attempts" ]; then
+              echo "Image $IMAGE_TAG not available after $attempts attempts." >&2
+              exit 1
+            fi
+            echo "Image not ready yet, retrying in 20s... ($attempts/$max_attempts)"
+            sleep 20
+          done
           echo "Installing veranad from $IMAGE_TAG for local test harness use"
           container_id="$(docker create "$IMAGE_TAG")"
           docker cp "${container_id}:/usr/local/bin/veranad" /usr/local/bin/veranad
           docker rm "$container_id"
           chmod +x /usr/local/bin/veranad
-          kubectl create namespace "$NAMESPACE" || true
-          kubectl -n "$NAMESPACE" create secret docker-registry ghcr-auth \
-            --docker-server=ghcr.io \
-            --docker-username="${GITHUB_ACTOR}" \
-            --docker-password="$GHCR_TOKEN" \
-            --dry-run=client -o yaml | kubectl apply -f -
+          if kubectl get namespace "$NAMESPACE" >/dev/null 2>&1; then
+            deletion_ts="$(kubectl get namespace "$NAMESPACE" -o jsonpath='{.metadata.deletionTimestamp}')"
+            if [ -n "$deletion_ts" ]; then
+              echo "Namespace $NAMESPACE is terminating; waiting for deletion before recreating..."
+              if ! kubectl wait --for=delete "namespace/$NAMESPACE" --timeout=300s; then
+                echo "Namespace $NAMESPACE is still terminating after 300s." >&2
+                kubectl get namespace "$NAMESPACE" -o yaml || true
+                exit 1
+              fi
+            else
+              echo "Reusing existing namespace $NAMESPACE"
+            fi
+          fi
+          if ! kubectl get namespace "$NAMESPACE" >/dev/null 2>&1; then
+            kubectl create namespace "$NAMESPACE"
+          fi
           kubectl -n "$NAMESPACE" create configmap verana-testharness-scripts \
             --from-file=scripts/setup_primary_validator.sh \
             --from-file=scripts/setup_secondary_validator.sh \
@@ -324,9 +341,27 @@ jobs:
         if: env.HARNESS_MODE_EFFECTIVE == 'k8s'
         run: |
           export KUBECONFIG=$KUBECONFIG
-          kubectl -n "$NAMESPACE" port-forward svc/verana-testharness 26657:26657 1317:1317 > /tmp/portforward.log 2>&1 &
-          PORT_FORWARD_PID=$!
-          trap 'kill -9 "$PORT_FORWARD_PID" >/dev/null 2>&1 || true' EXIT
+          POD_NAME="$(kubectl -n "$NAMESPACE" get pods -l app=verana-testharness --sort-by=.metadata.creationTimestamp -o name | tail -n1 | cut -d/ -f2)"
+          if [ -z "$POD_NAME" ]; then
+            echo "No verana-testharness pod found before port-forward." >&2
+            kubectl -n "$NAMESPACE" get pods -o wide || true
+            exit 1
+          fi
+          PORT_FORWARD_PID=""
+          start_port_forward() {
+            : > /tmp/portforward.log
+            kubectl -n "$NAMESPACE" port-forward "pod/$POD_NAME" 26657:26657 1317:1317 >> /tmp/portforward.log 2>&1 &
+            PORT_FORWARD_PID=$!
+          }
+          stop_port_forward() {
+            if [ -n "${PORT_FORWARD_PID:-}" ] && kill -0 "$PORT_FORWARD_PID" >/dev/null 2>&1; then
+              kill "$PORT_FORWARD_PID" >/dev/null 2>&1 || true
+              wait "$PORT_FORWARD_PID" >/dev/null 2>&1 || true
+            fi
+          }
+          trap 'stop_port_forward' EXIT
+
+          start_port_forward
           for i in {1..120}; do
             if ! kill -0 "$PORT_FORWARD_PID" >/dev/null 2>&1; then
               echo "Port-forward process exited; restarting (attempt $i/120)"
