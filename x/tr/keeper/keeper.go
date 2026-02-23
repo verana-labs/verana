@@ -29,8 +29,6 @@ type (
 		GFDocument            collections.Map[uint64, types.GovernanceFrameworkDocument]
 		Counter               collections.Map[string, uint64]
 		// module references
-		//bankKeeper    types.BankKeeper
-		trustDeposit     types.TrustDepositKeeper
 		delegationKeeper types.DelegationKeeper
 	}
 )
@@ -40,7 +38,6 @@ func NewKeeper(
 	storeService store.KVStoreService,
 	logger log.Logger,
 	authority string,
-	trustDeposit types.TrustDepositKeeper,
 	delegationKeeper types.DelegationKeeper,
 ) Keeper {
 	if _, err := sdk.AccAddressFromBech32(authority); err != nil {
@@ -60,7 +57,6 @@ func NewKeeper(
 		GFVersion:             collections.NewMap(sb, types.GovernanceFrameworkVersionKey, "gf_version", collections.Uint64Key, codec.CollValue[types.GovernanceFrameworkVersion](cdc)),
 		GFDocument:            collections.NewMap(sb, types.GovernanceFrameworkDocumentKey, "gf_document", collections.Uint64Key, codec.CollValue[types.GovernanceFrameworkDocument](cdc)),
 		Counter:               collections.NewMap(sb, types.CounterKey, "counter", collections.StringKey, collections.Uint64Value),
-		trustDeposit:          trustDeposit,
 		delegationKeeper:      delegationKeeper,
 	}
 

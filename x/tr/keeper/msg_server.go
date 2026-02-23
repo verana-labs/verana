@@ -40,22 +40,10 @@ func (ms msgServer) CreateTrustRegistry(goCtx context.Context, msg *types.MsgCre
 
 	// [MOD-TR-MSG-1-3] Create New Trust Registry execution
 
-	// Calculate trust deposit amount
-	params := ms.Keeper.GetParams(ctx)
-	trustDeposit := params.TrustRegistryTrustDeposit * params.TrustUnitPrice
-
-	// Increase trust deposit (charged to operator)
-	if err := ms.Keeper.trustDeposit.AdjustTrustDeposit(ctx, msg.Operator, int64(trustDeposit)); err != nil {
-		return nil, fmt.Errorf("failed to adjust trust deposit: %w", err)
-	}
-
 	tr, gfv, gfd, err := ms.createTrustRegistryEntries(ctx, msg, now)
 	if err != nil {
 		return nil, err
 	}
-
-	// Update trust deposit amount in the trust registry entry
-	tr.Deposit = int64(trustDeposit)
 
 	if err := ms.persistEntries(ctx, tr, gfv, gfd); err != nil {
 		return nil, err
@@ -69,7 +57,6 @@ func (ms msgServer) CreateTrustRegistry(goCtx context.Context, msg *types.MsgCre
 			sdk.NewAttribute(types.AttributeKeyController, tr.Controller),
 			sdk.NewAttribute(types.AttributeKeyAka, tr.Aka),
 			sdk.NewAttribute(types.AttributeKeyLanguage, tr.Language),
-			sdk.NewAttribute(types.AttributeKeyDeposit, strconv.FormatUint(uint64(tr.Deposit), 10)),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
 		),
 		sdk.NewEvent(
@@ -196,6 +183,19 @@ func (ms msgServer) UpdateTrustRegistry(goCtx context.Context, msg *types.MsgUpd
 	// Check controller - authority must match the trust registry controller
 	if tr.Controller != msg.Authority {
 		return nil, fmt.Errorf("only trust registry controller can update trust registry")
+	}
+
+	// Update DID index if DID changed
+	oldDID := tr.Did
+	if msg.Did != oldDID {
+		// Remove old DID index entry
+		if err := ms.TrustRegistryDIDIndex.Remove(ctx, oldDID); err != nil {
+			return nil, fmt.Errorf("failed to remove old DID index: %w", err)
+		}
+		// Add new DID index entry
+		if err := ms.TrustRegistryDIDIndex.Set(ctx, msg.Did, tr.Id); err != nil {
+			return nil, fmt.Errorf("failed to set new DID index: %w", err)
+		}
 	}
 
 	// Update fields

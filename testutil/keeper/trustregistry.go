@@ -38,7 +38,6 @@ func TrustregistryKeeper(t testing.TB) (keeper.Keeper, sdk.Context) {
 	authority := authtypes.NewModuleAddress(govtypes.ModuleName)
 
 	// Create mock keepers
-	mockTrustDepositKeeper := &MockTrustDepositKeeper{}
 	mockDelegationKeeper := &MockDelegationKeeper{}
 
 	k := keeper.NewKeeper(
@@ -46,7 +45,6 @@ func TrustregistryKeeper(t testing.TB) (keeper.Keeper, sdk.Context) {
 		runtime.NewKVStoreService(storeKey),
 		log.NewNopLogger(),
 		authority.String(),
-		mockTrustDepositKeeper,
 		mockDelegationKeeper,
 	)
 
@@ -60,34 +58,30 @@ func TrustregistryKeeper(t testing.TB) (keeper.Keeper, sdk.Context) {
 	return k, ctx
 }
 
-// MockTrustDepositKeeper is a mock implementation of the TrustDepositKeeper interface for testing
+// MockTrustDepositKeeper is a mock implementation of the TrustDepositKeeper interface for testing.
+// Used by CS, DD, and PERM module test utilities (not by TR module itself).
 type MockTrustDepositKeeper struct{}
 
-func (m *MockTrustDepositKeeper) BurnEcosystemSlashedTrustDeposit(ctx sdk.Context, account string, amount uint64) error {
+func (m *MockTrustDepositKeeper) AdjustTrustDeposit(_ sdk.Context, _ string, _ int64) error {
 	return nil
 }
 
-func (m *MockTrustDepositKeeper) GetUserAgentRewardRate(ctx sdk.Context) math.LegacyDec {
-	//unimplemented
+func (m *MockTrustDepositKeeper) GetTrustDepositRate(_ sdk.Context) math.LegacyDec {
 	v, _ := math.LegacyNewDecFromStr("0")
 	return v
 }
 
-func (m *MockTrustDepositKeeper) GetWalletUserAgentRewardRate(ctx sdk.Context) math.LegacyDec {
-	//unimplemented
+func (m *MockTrustDepositKeeper) GetUserAgentRewardRate(_ sdk.Context) math.LegacyDec {
 	v, _ := math.LegacyNewDecFromStr("0")
 	return v
 }
 
-func (m *MockTrustDepositKeeper) GetTrustDepositRate(ctx sdk.Context) math.LegacyDec {
-	//unimplemented
+func (m *MockTrustDepositKeeper) GetWalletUserAgentRewardRate(_ sdk.Context) math.LegacyDec {
 	v, _ := math.LegacyNewDecFromStr("0")
 	return v
 }
 
-// AdjustTrustDeposit implements the TrustDepositKeeper interface
-func (m *MockTrustDepositKeeper) AdjustTrustDeposit(ctx sdk.Context, account string, augend int64) error {
-	// For testing, always succeed
+func (m *MockTrustDepositKeeper) BurnEcosystemSlashedTrustDeposit(_ sdk.Context, _ string, _ uint64) error {
 	return nil
 }
 

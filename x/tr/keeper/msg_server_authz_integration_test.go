@@ -40,13 +40,6 @@ type integrationFixture struct {
 	addressCodec   address.Codec
 }
 
-// MockTrustDepositKeeper is a no-op trust deposit keeper for integration tests.
-type mockTrustDepositKeeper struct{}
-
-func (m *mockTrustDepositKeeper) AdjustTrustDeposit(_ sdk.Context, _ string, _ int64) error {
-	return nil
-}
-
 func setupIntegrationFixture(t *testing.T) *integrationFixture {
 	t.Helper()
 
@@ -83,7 +76,6 @@ func setupIntegrationFixture(t *testing.T) *integrationFixture {
 		runtime.NewKVStoreService(trStoreKey),
 		log.NewNopLogger(),
 		trAuthority.String(),
-		&mockTrustDepositKeeper{},
 		deK, // real DE keeper as DelegationKeeper
 	)
 

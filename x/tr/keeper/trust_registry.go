@@ -33,7 +33,6 @@ func (ms msgServer) createTrustRegistryEntries(ctx sdk.Context, msg *types.MsgCr
 		Controller:    msg.Authority, // Authority is the controller of the trust registry
 		Created:       now,
 		Modified:      now,
-		Deposit:       0,
 		Archived:      nil,
 		Aka:           msg.Aka,
 		ActiveVersion: 1,
