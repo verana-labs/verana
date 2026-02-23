@@ -339,8 +339,8 @@ Use the correct type URL from `typeUrls` and ensure the message is registered in
 
 ### Connection refused
 Check that the blockchain node is running and accessible at the configured endpoints:
-- RPC: `http://localhost:26657`
-- REST: `http://localhost:1317`
+- RPC: `http://localhost:26657` 
+- REST: `http://localhost:1317` 
 
 ### Gas simulation fails
 If gas simulation fails, you can fall back to a fixed fee:
