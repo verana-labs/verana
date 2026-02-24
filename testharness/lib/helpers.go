@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
+	"strings"
 	"time"
 
 	"cosmossdk.io/math"
@@ -16,8 +17,10 @@ import (
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
+	"github.com/cosmos/cosmos-sdk/x/group"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	protocolpooltypes "github.com/cosmos/cosmos-sdk/x/protocolpool/types"
+	detypes "github.com/verana-labs/verana/x/de/types"
 	didtypes "github.com/verana-labs/verana/x/dd/types"
 	tdtypes "github.com/verana-labs/verana/x/td/types"
 	trtypes "github.com/verana-labs/verana/x/tr/types"
@@ -736,9 +739,11 @@ func AddGovernanceFrameworkDocument(
 		return "", fmt.Errorf("failed to get creator address: %v", err)
 	}
 
-	// Create the complete message with creator address
+	// Create the complete message with authority and operator addresses
+	// For v4 spec, authority and operator are both the creator's address
 	msgWithCreator := trtypes.MsgAddGovernanceFrameworkDocument{
-		Creator:      creatorAddr,
+		Authority:    creatorAddr,
+		Operator:     creatorAddr,
 		Id:           msg.Id,
 		DocLanguage:  msg.DocLanguage,
 		DocUrl:       msg.DocUrl,
@@ -776,10 +781,12 @@ func IncreaseActiveGovernanceFrameworkVersion(
 		return "", fmt.Errorf("failed to get creator address: %v", err)
 	}
 
-	// Create the complete message with creator address
+	// Create the complete message with authority and operator addresses
+	// For v4 spec, authority and operator are both the creator's address
 	msgWithCreator := trtypes.MsgIncreaseActiveGovernanceFrameworkVersion{
-		Creator: creatorAddr,
-		Id:      msg.Id,
+		Authority: creatorAddr,
+		Operator:  creatorAddr,
+		Id:        msg.Id,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, creator, &msgWithCreator)
@@ -2150,4 +2157,536 @@ func CreateInactiveValidatorPermission(client cosmosclient.Client, ctx context.C
 	}
 
 	return 0, fmt.Errorf("permission ID not found in events")
+}
+
+// =============================================================================
+// GROUP + OPERATOR AUTHORIZATION HELPERS
+// =============================================================================
+
+// CreateGroupWithPolicy creates a group with a threshold decision policy.
+// Returns the group ID and group policy address.
+func CreateGroupWithPolicy(
+	client cosmosclient.Client,
+	ctx context.Context,
+	admin cosmosaccount.Account,
+	memberAddresses []string,
+	threshold string,
+	votingPeriod time.Duration,
+) (uint64, string, error) {
+	adminAddr, err := admin.Address(addressPrefix)
+	if err != nil {
+		return 0, "", fmt.Errorf("failed to get admin address: %w", err)
+	}
+
+	// Build member requests
+	members := make([]group.MemberRequest, len(memberAddresses))
+	for i, addr := range memberAddresses {
+		members[i] = group.MemberRequest{
+			Address:  addr,
+			Weight:   "1",
+			Metadata: fmt.Sprintf("member_%d", i+1),
+		}
+	}
+
+	// Create threshold decision policy
+	decisionPolicy := &group.ThresholdDecisionPolicy{
+		Threshold: threshold,
+		Windows: &group.DecisionPolicyWindows{
+			VotingPeriod: votingPeriod,
+		},
+	}
+	decisionPolicyAny, err := codectypes.NewAnyWithValue(decisionPolicy)
+	if err != nil {
+		return 0, "", fmt.Errorf("failed to create decision policy any: %w", err)
+	}
+
+	msg := &group.MsgCreateGroupWithPolicy{
+		Admin:               adminAddr,
+		Members:             members,
+		GroupMetadata:       "test group for TR authz",
+		GroupPolicyMetadata: "threshold policy",
+		GroupPolicyAsAdmin:  true,
+		DecisionPolicy:     decisionPolicyAny,
+	}
+
+	txResp, err := client.BroadcastTx(ctx, admin, msg)
+	if err != nil {
+		return 0, "", fmt.Errorf("failed to broadcast CreateGroupWithPolicy: %w", err)
+	}
+
+	fmt.Print("CreateGroupWithPolicy:\n\n")
+	fmt.Println(txResp)
+
+	if txResp.TxResponse.Code != 0 {
+		return 0, "", fmt.Errorf("CreateGroupWithPolicy failed with code %d: %s",
+			txResp.TxResponse.Code, txResp.TxResponse.RawLog)
+	}
+
+	// Extract group ID and policy address from events
+	var groupID uint64
+	var policyAddr string
+
+	var txResponse sdk.TxResponse
+	txResponseBytes, err := client.Context().Codec.MarshalJSON(txResp.TxResponse)
+	if err != nil {
+		return 0, "", fmt.Errorf("failed to marshal tx response: %w", err)
+	}
+	err = client.Context().Codec.UnmarshalJSON(txResponseBytes, &txResponse)
+	if err != nil {
+		return 0, "", fmt.Errorf("failed to unmarshal tx response: %w", err)
+	}
+
+	for _, event := range txResponse.Events {
+		if event.Type == "cosmos.group.v1.EventCreateGroup" {
+			for _, attr := range event.Attributes {
+				if attr.Key == "group_id" {
+					groupID, _ = strconv.ParseUint(strings.Trim(attr.Value, "\""), 10, 64)
+				}
+			}
+		}
+		if event.Type == "cosmos.group.v1.EventCreateGroupPolicy" {
+			for _, attr := range event.Attributes {
+				if attr.Key == "address" {
+					policyAddr = strings.Trim(attr.Value, "\"")
+				}
+			}
+		}
+	}
+
+	if groupID == 0 || policyAddr == "" {
+		return 0, "", fmt.Errorf("failed to extract group ID or policy address from events")
+	}
+
+	fmt.Printf("✅ Created group ID: %d, policy address: %s\n", groupID, policyAddr)
+	return groupID, policyAddr, nil
+}
+
+// SubmitGroupProposal submits a group proposal with the given messages.
+// Returns the proposal ID.
+func SubmitGroupProposal(
+	client cosmosclient.Client,
+	ctx context.Context,
+	proposer cosmosaccount.Account,
+	policyAddr string,
+	innerMsgs []sdk.Msg,
+	title string,
+	summary string,
+) (uint64, error) {
+	proposerAddr, err := proposer.Address(addressPrefix)
+	if err != nil {
+		return 0, fmt.Errorf("failed to get proposer address: %w", err)
+	}
+
+	// Wrap messages in Any
+	anyMsgs := make([]*codectypes.Any, len(innerMsgs))
+	for i, innerMsg := range innerMsgs {
+		anyMsg, err := codectypes.NewAnyWithValue(innerMsg)
+		if err != nil {
+			return 0, fmt.Errorf("failed to create any for msg %d: %w", i, err)
+		}
+		anyMsgs[i] = anyMsg
+	}
+
+	msg := &group.MsgSubmitProposal{
+		GroupPolicyAddress: policyAddr,
+		Proposers:          []string{proposerAddr},
+		Messages:           anyMsgs,
+		Exec:               group.Exec_EXEC_UNSPECIFIED,
+		Title:              title,
+		Summary:            summary,
+	}
+
+	txResp, err := client.BroadcastTx(ctx, proposer, msg)
+	if err != nil {
+		return 0, fmt.Errorf("failed to broadcast SubmitGroupProposal: %w", err)
+	}
+
+	fmt.Print("SubmitGroupProposal:\n\n")
+	fmt.Println(txResp)
+
+	if txResp.TxResponse.Code != 0 {
+		return 0, fmt.Errorf("SubmitGroupProposal failed with code %d: %s",
+			txResp.TxResponse.Code, txResp.TxResponse.RawLog)
+	}
+
+	// Extract proposal ID from events
+	var txResponse sdk.TxResponse
+	txResponseBytes, err := client.Context().Codec.MarshalJSON(txResp.TxResponse)
+	if err != nil {
+		return 0, fmt.Errorf("failed to marshal tx response: %w", err)
+	}
+	err = client.Context().Codec.UnmarshalJSON(txResponseBytes, &txResponse)
+	if err != nil {
+		return 0, fmt.Errorf("failed to unmarshal tx response: %w", err)
+	}
+
+	for _, event := range txResponse.Events {
+		if event.Type == "cosmos.group.v1.EventSubmitProposal" {
+			for _, attr := range event.Attributes {
+				if attr.Key == "proposal_id" {
+					proposalID, parseErr := strconv.ParseUint(strings.Trim(attr.Value, "\""), 10, 64)
+					if parseErr != nil {
+						return 0, fmt.Errorf("failed to parse proposal ID: %w", parseErr)
+					}
+					fmt.Printf("✅ Submitted group proposal ID: %d\n", proposalID)
+					return proposalID, nil
+				}
+			}
+		}
+	}
+
+	return 0, fmt.Errorf("proposal ID not found in events")
+}
+
+// VoteOnGroupProposal votes YES on a group proposal.
+// If tryExec is true, uses EXEC_TRY for auto-execution.
+func VoteOnGroupProposal(
+	client cosmosclient.Client,
+	ctx context.Context,
+	voter cosmosaccount.Account,
+	proposalID uint64,
+	tryExec bool,
+) error {
+	voterAddr, err := voter.Address(addressPrefix)
+	if err != nil {
+		return fmt.Errorf("failed to get voter address: %w", err)
+	}
+
+	execMode := group.Exec_EXEC_UNSPECIFIED
+	if tryExec {
+		execMode = group.Exec_EXEC_TRY
+	}
+
+	msg := &group.MsgVote{
+		ProposalId: proposalID,
+		Voter:      voterAddr,
+		Option:     group.VOTE_OPTION_YES,
+		Exec:       execMode,
+	}
+
+	txResp, err := client.BroadcastTx(ctx, voter, msg)
+	if err != nil {
+		return fmt.Errorf("failed to broadcast VoteOnGroupProposal: %w", err)
+	}
+
+	fmt.Print("VoteOnGroupProposal:\n\n")
+	fmt.Println(txResp)
+
+	if txResp.TxResponse.Code != 0 {
+		return fmt.Errorf("VoteOnGroupProposal failed with code %d: %s",
+			txResp.TxResponse.Code, txResp.TxResponse.RawLog)
+	}
+
+	fmt.Printf("✅ Voted YES on group proposal %d (tryExec=%v)\n", proposalID, tryExec)
+	return nil
+}
+
+// ExecGroupProposal executes a group proposal.
+func ExecGroupProposal(
+	client cosmosclient.Client,
+	ctx context.Context,
+	executor cosmosaccount.Account,
+	proposalID uint64,
+) error {
+	executorAddr, err := executor.Address(addressPrefix)
+	if err != nil {
+		return fmt.Errorf("failed to get executor address: %w", err)
+	}
+
+	msg := &group.MsgExec{
+		ProposalId: proposalID,
+		Executor:   executorAddr,
+	}
+
+	txResp, err := client.BroadcastTx(ctx, executor, msg)
+	if err != nil {
+		return fmt.Errorf("failed to broadcast ExecGroupProposal: %w", err)
+	}
+
+	fmt.Print("ExecGroupProposal:\n\n")
+	fmt.Println(txResp)
+
+	if txResp.TxResponse.Code != 0 {
+		return fmt.Errorf("ExecGroupProposal failed with code %d: %s",
+			txResp.TxResponse.Code, txResp.TxResponse.RawLog)
+	}
+
+	fmt.Printf("✅ Executed group proposal %d\n", proposalID)
+	return nil
+}
+
+// GrantOperatorAuthorizationViaGroup grants operator authorization via a group proposal.
+// Submits a proposal containing MsgGrantOperatorAuthorization, votes from admin and voter2, auto-executes.
+func GrantOperatorAuthorizationViaGroup(
+	client cosmosclient.Client,
+	ctx context.Context,
+	admin cosmosaccount.Account,
+	voter2 cosmosaccount.Account,
+	policyAddr string,
+	operatorAddr string,
+	granteeAddr string,
+	msgTypes []string,
+) error {
+	// Create the MsgGrantOperatorAuthorization
+	// Operator is empty because this is executed via group proposal (authority signs directly)
+	grantMsg := &detypes.MsgGrantOperatorAuthorization{
+		Authority: policyAddr,
+		Operator:  "",
+		Grantee:   granteeAddr,
+		MsgTypes:  msgTypes,
+	}
+
+	// Submit group proposal
+	proposalID, err := SubmitGroupProposal(
+		client, ctx, admin, policyAddr,
+		[]sdk.Msg{grantMsg},
+		fmt.Sprintf("Grant operator auth for %v", msgTypes),
+		"Grant operator authorization via group proposal",
+	)
+	if err != nil {
+		return fmt.Errorf("failed to submit group proposal: %w", err)
+	}
+
+	// Wait for proposal tx to be fully processed before admin votes
+	fmt.Println("    - Waiting for proposal to be processed...")
+	time.Sleep(3 * time.Second)
+
+	// Vote YES from admin
+	err = VoteOnGroupProposal(client, ctx, admin, proposalID, false)
+	if err != nil {
+		return fmt.Errorf("failed to vote from admin: %w", err)
+	}
+
+	// Wait for admin vote to be processed before voter2 votes
+	fmt.Println("    - Waiting for admin vote to be processed...")
+	time.Sleep(3 * time.Second)
+
+	// Vote YES from voter2 with EXEC_TRY (auto-execute on threshold met)
+	err = VoteOnGroupProposal(client, ctx, voter2, proposalID, true)
+	if err != nil {
+		return fmt.Errorf("failed to vote from voter2: %w", err)
+	}
+
+	// Wait for execution to complete
+	fmt.Println("    - Waiting for proposal execution to complete...")
+	time.Sleep(3 * time.Second)
+
+	fmt.Printf("✅ Granted operator authorization for %s via group proposal\n", granteeAddr)
+	return nil
+}
+
+// CreateTrustRegistryWithAuthority creates a trust registry where authority and operator are different.
+func CreateTrustRegistryWithAuthority(
+	client cosmosclient.Client,
+	ctx context.Context,
+	operatorAccount cosmosaccount.Account,
+	authority string,
+	did string,
+	aka string,
+	docURL string,
+	docHash string,
+	language string,
+) (string, error) {
+	operatorAddr, err := operatorAccount.Address(addressPrefix)
+	if err != nil {
+		return "", fmt.Errorf("failed to get operator address: %w", err)
+	}
+
+	msg := &trtypes.MsgCreateTrustRegistry{
+		Authority:    authority,
+		Operator:     operatorAddr,
+		Did:          did,
+		Aka:          aka,
+		Language:     language,
+		DocUrl:       docURL,
+		DocDigestSri: docHash,
+	}
+
+	txResp, err := client.BroadcastTx(ctx, operatorAccount, msg)
+	if err != nil {
+		return "", fmt.Errorf("failed to broadcast CreateTrustRegistry: %w", err)
+	}
+
+	fmt.Print("CreateTrustRegistryWithAuthority:\n\n")
+	fmt.Println(txResp)
+
+	if txResp.TxResponse.Code != 0 {
+		return "", fmt.Errorf("CreateTrustRegistry failed with code %d: %s",
+			txResp.TxResponse.Code, txResp.TxResponse.RawLog)
+	}
+
+	var txResponse sdk.TxResponse
+	txResponseBytes, err := client.Context().Codec.MarshalJSON(txResp.TxResponse)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal tx response: %w", err)
+	}
+	err = client.Context().Codec.UnmarshalJSON(txResponseBytes, &txResponse)
+	if err != nil {
+		return "", fmt.Errorf("failed to unmarshal tx response: %w", err)
+	}
+
+	for _, event := range txResponse.Events {
+		if event.Type == "create_trust_registry" {
+			for _, attr := range event.Attributes {
+				if attr.Key == "trust_registry_id" {
+					return attr.Value, nil
+				}
+			}
+		}
+	}
+	return "", fmt.Errorf("trust_registry_id not found in events")
+}
+
+// AddGFDWithAuthority adds a governance framework document with separate authority/operator.
+func AddGFDWithAuthority(
+	client cosmosclient.Client,
+	ctx context.Context,
+	operatorAccount cosmosaccount.Account,
+	authority string,
+	trID uint64,
+	docLanguage string,
+	docURL string,
+	docHash string,
+	version int32,
+) error {
+	operatorAddr, err := operatorAccount.Address(addressPrefix)
+	if err != nil {
+		return fmt.Errorf("failed to get operator address: %w", err)
+	}
+
+	msg := &trtypes.MsgAddGovernanceFrameworkDocument{
+		Authority:    authority,
+		Operator:     operatorAddr,
+		Id:           trID,
+		DocLanguage:  docLanguage,
+		DocUrl:       docURL,
+		DocDigestSri: docHash,
+		Version:      version,
+	}
+
+	txResp, err := client.BroadcastTx(ctx, operatorAccount, msg)
+	if err != nil {
+		return fmt.Errorf("failed to broadcast AddGFD: %w", err)
+	}
+
+	fmt.Print("AddGFDWithAuthority:\n\n")
+	fmt.Println(txResp)
+
+	if txResp.TxResponse.Code != 0 {
+		return fmt.Errorf("AddGFD failed with code %d: %s",
+			txResp.TxResponse.Code, txResp.TxResponse.RawLog)
+	}
+
+	return nil
+}
+
+// IncreaseActiveGFVersionWithAuthority increases the active GF version with separate authority/operator.
+func IncreaseActiveGFVersionWithAuthority(
+	client cosmosclient.Client,
+	ctx context.Context,
+	operatorAccount cosmosaccount.Account,
+	authority string,
+	trID uint64,
+) error {
+	operatorAddr, err := operatorAccount.Address(addressPrefix)
+	if err != nil {
+		return fmt.Errorf("failed to get operator address: %w", err)
+	}
+
+	msg := &trtypes.MsgIncreaseActiveGovernanceFrameworkVersion{
+		Authority: authority,
+		Operator:  operatorAddr,
+		Id:        trID,
+	}
+
+	txResp, err := client.BroadcastTx(ctx, operatorAccount, msg)
+	if err != nil {
+		return fmt.Errorf("failed to broadcast IncreaseActiveGFVersion: %w", err)
+	}
+
+	fmt.Print("IncreaseActiveGFVersionWithAuthority:\n\n")
+	fmt.Println(txResp)
+
+	if txResp.TxResponse.Code != 0 {
+		return fmt.Errorf("IncreaseActiveGFVersion failed with code %d: %s",
+			txResp.TxResponse.Code, txResp.TxResponse.RawLog)
+	}
+
+	return nil
+}
+
+// UpdateTrustRegistryWithAuthority updates a trust registry with separate authority/operator.
+func UpdateTrustRegistryWithAuthority(
+	client cosmosclient.Client,
+	ctx context.Context,
+	operatorAccount cosmosaccount.Account,
+	authority string,
+	trID uint64,
+	did string,
+	aka string,
+) error {
+	operatorAddr, err := operatorAccount.Address(addressPrefix)
+	if err != nil {
+		return fmt.Errorf("failed to get operator address: %w", err)
+	}
+
+	msg := &trtypes.MsgUpdateTrustRegistry{
+		Authority: authority,
+		Operator:  operatorAddr,
+		Id:        trID,
+		Did:       did,
+		Aka:       aka,
+	}
+
+	txResp, err := client.BroadcastTx(ctx, operatorAccount, msg)
+	if err != nil {
+		return fmt.Errorf("failed to broadcast UpdateTrustRegistry: %w", err)
+	}
+
+	fmt.Print("UpdateTrustRegistryWithAuthority:\n\n")
+	fmt.Println(txResp)
+
+	if txResp.TxResponse.Code != 0 {
+		return fmt.Errorf("UpdateTrustRegistry failed with code %d: %s",
+			txResp.TxResponse.Code, txResp.TxResponse.RawLog)
+	}
+
+	return nil
+}
+
+// ArchiveTrustRegistryWithAuthority archives/unarchives a trust registry with separate authority/operator.
+func ArchiveTrustRegistryWithAuthority(
+	client cosmosclient.Client,
+	ctx context.Context,
+	operatorAccount cosmosaccount.Account,
+	authority string,
+	trID uint64,
+	archive bool,
+) error {
+	operatorAddr, err := operatorAccount.Address(addressPrefix)
+	if err != nil {
+		return fmt.Errorf("failed to get operator address: %w", err)
+	}
+
+	msg := &trtypes.MsgArchiveTrustRegistry{
+		Authority: authority,
+		Operator:  operatorAddr,
+		Id:        trID,
+		Archive:   archive,
+	}
+
+	txResp, err := client.BroadcastTx(ctx, operatorAccount, msg)
+	if err != nil {
+		return fmt.Errorf("failed to broadcast ArchiveTrustRegistry: %w", err)
+	}
+
+	fmt.Print("ArchiveTrustRegistryWithAuthority:\n\n")
+	fmt.Println(txResp)
+
+	if txResp.TxResponse.Code != 0 {
+		return fmt.Errorf("ArchiveTrustRegistry failed with code %d: %s",
+			txResp.TxResponse.Code, txResp.TxResponse.RawLog)
+	}
+
+	return nil
 }

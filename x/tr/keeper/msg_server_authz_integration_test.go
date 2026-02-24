@@ -1,0 +1,762 @@
+package keeper_test
+
+import (
+	"testing"
+	"time"
+
+	"cosmossdk.io/collections"
+	"cosmossdk.io/core/address"
+	"cosmossdk.io/log"
+	"cosmossdk.io/store"
+	"cosmossdk.io/store/metrics"
+	storetypes "cosmossdk.io/store/types"
+	cmtproto "github.com/cometbft/cometbft/proto/tendermint/types"
+	dbm "github.com/cosmos/cosmos-db"
+	"github.com/cosmos/cosmos-sdk/codec"
+	addresscodec "github.com/cosmos/cosmos-sdk/codec/address"
+	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
+	"github.com/cosmos/cosmos-sdk/runtime"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	moduletestutil "github.com/cosmos/cosmos-sdk/types/module/testutil"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
+	"github.com/stretchr/testify/require"
+
+	dekeeper "github.com/verana-labs/verana/x/de/keeper"
+	demodule "github.com/verana-labs/verana/x/de/module"
+	detypes "github.com/verana-labs/verana/x/de/types"
+	trkeeper "github.com/verana-labs/verana/x/tr/keeper"
+	trtypes "github.com/verana-labs/verana/x/tr/types"
+)
+
+// integrationFixture holds both DE and TR keepers wired together so that the
+// TR module's AUTHZ-CHECK calls the real DE module's CheckOperatorAuthorization.
+type integrationFixture struct {
+	deKeeper       dekeeper.Keeper
+	deMsgServer    detypes.MsgServer
+	trKeeper       trkeeper.Keeper
+	trMsgServer    trtypes.MsgServer
+	ctx            sdk.Context
+	addressCodec   address.Codec
+}
+
+func setupIntegrationFixture(t *testing.T) *integrationFixture {
+	t.Helper()
+
+	db := dbm.NewMemDB()
+	stateStore := store.NewCommitMultiStore(db, log.NewNopLogger(), metrics.NewNoOpMetrics())
+
+	// Store keys for both modules
+	deStoreKey := storetypes.NewKVStoreKey(detypes.StoreKey)
+	trStoreKey := storetypes.NewKVStoreKey(trtypes.StoreKey)
+
+	stateStore.MountStoreWithDB(deStoreKey, storetypes.StoreTypeIAVL, db)
+	stateStore.MountStoreWithDB(trStoreKey, storetypes.StoreTypeIAVL, db)
+	require.NoError(t, stateStore.LoadLatestVersion())
+
+	// DE module setup
+	deEncCfg := moduletestutil.MakeTestEncodingConfig(demodule.AppModule{})
+	deAddressCodec := addresscodec.NewBech32Codec(sdk.GetConfig().GetBech32AccountAddrPrefix())
+	deAuthority := authtypes.NewModuleAddress(detypes.GovModuleName)
+
+	deK := dekeeper.NewKeeper(
+		runtime.NewKVStoreService(deStoreKey),
+		deEncCfg.Codec,
+		deAddressCodec,
+		deAuthority,
+	)
+
+	// TR module setup — uses the real DE keeper for AUTHZ-CHECK
+	trRegistry := codectypes.NewInterfaceRegistry()
+	trCdc := codec.NewProtoCodec(trRegistry)
+	trAuthority := authtypes.NewModuleAddress(govtypes.ModuleName)
+
+	trK := trkeeper.NewKeeper(
+		trCdc,
+		runtime.NewKVStoreService(trStoreKey),
+		log.NewNopLogger(),
+		trAuthority.String(),
+		deK, // real DE keeper as DelegationKeeper
+	)
+
+	// Shared context with a deterministic block time
+	ctx := sdk.NewContext(stateStore, cmtproto.Header{
+		Time: time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC),
+	}, false, log.NewNopLogger())
+
+	// Initialize params for both modules
+	require.NoError(t, deK.Params.Set(ctx, detypes.DefaultParams()))
+	require.NoError(t, trK.SetParams(ctx, trtypes.DefaultParams()))
+
+	return &integrationFixture{
+		deKeeper:     deK,
+		deMsgServer:  dekeeper.NewMsgServerImpl(deK),
+		trKeeper:     trK,
+		trMsgServer:  trkeeper.NewMsgServerImpl(trK),
+		ctx:          ctx,
+		addressCodec: deAddressCodec,
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Integration tests: DE operator authorization → TR create trust registry
+// ---------------------------------------------------------------------------
+
+// TestIntegration_OperatorCreatesTrustRegistry models the full real-world flow:
+//
+//  1. Group proposal onboards an operator with MsgCreateTrustRegistry permission.
+//  2. The operator creates a trust registry on behalf of the group authority.
+//  3. Verify the trust registry was created with the group as controller.
+func TestIntegration_OperatorCreatesTrustRegistry(t *testing.T) {
+	f := setupIntegrationFixture(t)
+
+	groupAccount := sdk.AccAddress([]byte("group_policy_addr___")).String()
+	operator := sdk.AccAddress([]byte("test_operator_______")).String()
+
+	// ---- Step 1: Group proposal onboards operator via DE module ----
+	_, err := f.deMsgServer.GrantOperatorAuthorization(f.ctx, &detypes.MsgGrantOperatorAuthorization{
+		Authority: groupAccount,
+		Operator:  "", // group proposal
+		Grantee:   operator,
+		MsgTypes:  []string{"/verana.tr.v1.MsgCreateTrustRegistry"},
+	})
+	require.NoError(t, err)
+
+	// ---- Step 2: Operator creates trust registry via TR module ----
+	_, err = f.trMsgServer.CreateTrustRegistry(f.ctx, &trtypes.MsgCreateTrustRegistry{
+		Authority:    groupAccount,
+		Operator:     operator,
+		Did:          "did:example:integration-test-123",
+		Language:     "en",
+		DocUrl:       "https://example.com/governance-framework",
+		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+	})
+	require.NoError(t, err)
+
+	// ---- Step 3: Verify the trust registry ----
+	trID, err := f.trKeeper.TrustRegistryDIDIndex.Get(f.ctx, "did:example:integration-test-123")
+	require.NoError(t, err)
+
+	tr, err := f.trKeeper.TrustRegistry.Get(f.ctx, trID)
+	require.NoError(t, err)
+	require.Equal(t, "did:example:integration-test-123", tr.Did)
+	require.Equal(t, groupAccount, tr.Controller) // authority is the controller
+	require.Equal(t, "en", tr.Language)
+	require.Equal(t, int32(1), tr.ActiveVersion)
+}
+
+// TestIntegration_UnauthorizedOperatorCannotCreateTrustRegistry verifies
+// that an operator without authorization is rejected by AUTHZ-CHECK.
+func TestIntegration_UnauthorizedOperatorCannotCreateTrustRegistry(t *testing.T) {
+	f := setupIntegrationFixture(t)
+
+	groupAccount := sdk.AccAddress([]byte("group_policy_addr___")).String()
+	unauthorizedOp := sdk.AccAddress([]byte("unauthorized_op_____")).String()
+
+	// No operator authorization granted — attempt should fail
+	_, err := f.trMsgServer.CreateTrustRegistry(f.ctx, &trtypes.MsgCreateTrustRegistry{
+		Authority:    groupAccount,
+		Operator:     unauthorizedOp,
+		Did:          "did:example:should-fail",
+		Language:     "en",
+		DocUrl:       "https://example.com/doc",
+		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+	})
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "authorization check failed")
+	require.Contains(t, err.Error(), "operator authorization not found")
+}
+
+// TestIntegration_OperatorWithWrongMsgTypeCannotCreateTrustRegistry verifies
+// that an operator authorized for a different msg type is rejected.
+func TestIntegration_OperatorWithWrongMsgTypeCannotCreateTrustRegistry(t *testing.T) {
+	f := setupIntegrationFixture(t)
+
+	groupAccount := sdk.AccAddress([]byte("group_policy_addr___")).String()
+	operator := sdk.AccAddress([]byte("wrong_type_op_______")).String()
+
+	// Grant operator authorization for a DIFFERENT msg type
+	_, err := f.deMsgServer.GrantOperatorAuthorization(f.ctx, &detypes.MsgGrantOperatorAuthorization{
+		Authority: groupAccount,
+		Operator:  "", // group proposal
+		Grantee:   operator,
+		MsgTypes:  []string{"/verana.cs.v1.MsgCreateCredentialSchema"}, // NOT MsgCreateTrustRegistry
+	})
+	require.NoError(t, err)
+
+	// Operator tries to create trust registry — should fail
+	_, err = f.trMsgServer.CreateTrustRegistry(f.ctx, &trtypes.MsgCreateTrustRegistry{
+		Authority:    groupAccount,
+		Operator:     operator,
+		Did:          "did:example:wrong-type",
+		Language:     "en",
+		DocUrl:       "https://example.com/doc",
+		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+	})
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "authorization check failed")
+	require.Contains(t, err.Error(), "does not include requested message type")
+}
+
+// TestIntegration_ExpiredOperatorCannotCreateTrustRegistry verifies that
+// an operator with an expired authorization is rejected.
+func TestIntegration_ExpiredOperatorCannotCreateTrustRegistry(t *testing.T) {
+	f := setupIntegrationFixture(t)
+
+	groupAccount := sdk.AccAddress([]byte("group_policy_addr___")).String()
+	operator := sdk.AccAddress([]byte("expired_op__________")).String()
+
+	// Manually create an expired OperatorAuthorization in the DE store
+	pastTime := f.ctx.BlockTime().Add(-1 * time.Hour)
+	oaKey := collections.Join(groupAccount, operator)
+	err := f.deKeeper.OperatorAuthorizations.Set(f.ctx, oaKey, detypes.OperatorAuthorization{
+		Authority:  groupAccount,
+		Operator:   operator,
+		MsgTypes:   []string{"/verana.tr.v1.MsgCreateTrustRegistry"},
+		Expiration: &pastTime,
+	})
+	require.NoError(t, err)
+
+	// Operator tries to create trust registry — should fail
+	_, err = f.trMsgServer.CreateTrustRegistry(f.ctx, &trtypes.MsgCreateTrustRegistry{
+		Authority:    groupAccount,
+		Operator:     operator,
+		Did:          "did:example:expired",
+		Language:     "en",
+		DocUrl:       "https://example.com/doc",
+		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+	})
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "authorization check failed")
+	require.Contains(t, err.Error(), "expired")
+}
+
+// TestIntegration_FullBootstrapToTrustRegistryCreation models the complete
+// end-to-end flow from group proposal to trust registry creation:
+//
+//  1. Group proposal onboards first operator (admin + TR permissions).
+//  2. First operator onboards a second operator (TR-only permissions).
+//  3. Second operator creates a trust registry.
+//  4. Second operator cannot grant further operators (no DE permissions).
+//  5. Group revokes second operator.
+//  6. Revoked operator cannot create trust registries anymore.
+func TestIntegration_FullBootstrapToTrustRegistryCreation(t *testing.T) {
+	f := setupIntegrationFixture(t)
+
+	groupAccount := sdk.AccAddress([]byte("group_policy_addr___")).String()
+	adminOperator := sdk.AccAddress([]byte("admin_operator______")).String()
+	trOperator := sdk.AccAddress([]byte("tr_operator_________")).String()
+
+	// ---- Step 1: Group proposal onboards admin operator ----
+	_, err := f.deMsgServer.GrantOperatorAuthorization(f.ctx, &detypes.MsgGrantOperatorAuthorization{
+		Authority: groupAccount,
+		Operator:  "", // group proposal
+		Grantee:   adminOperator,
+		MsgTypes: []string{
+			"/verana.de.v1.MsgGrantOperatorAuthorization",
+			"/verana.de.v1.MsgRevokeOperatorAuthorization",
+			"/verana.tr.v1.MsgCreateTrustRegistry",
+		},
+	})
+	require.NoError(t, err)
+
+	// ---- Step 2: Admin operator onboards TR-only operator ----
+	_, err = f.deMsgServer.GrantOperatorAuthorization(f.ctx, &detypes.MsgGrantOperatorAuthorization{
+		Authority: groupAccount,
+		Operator:  adminOperator, // admin cosigns
+		Grantee:   trOperator,
+		MsgTypes:  []string{"/verana.tr.v1.MsgCreateTrustRegistry"},
+	})
+	require.NoError(t, err)
+
+	// ---- Step 3: TR operator creates a trust registry ----
+	_, err = f.trMsgServer.CreateTrustRegistry(f.ctx, &trtypes.MsgCreateTrustRegistry{
+		Authority:    groupAccount,
+		Operator:     trOperator,
+		Did:          "did:example:full-bootstrap-test",
+		Aka:          "https://example.com/my-registry",
+		Language:     "en",
+		DocUrl:       "https://example.com/governance-framework-v1",
+		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+	})
+	require.NoError(t, err)
+
+	// Verify trust registry created
+	trID, err := f.trKeeper.TrustRegistryDIDIndex.Get(f.ctx, "did:example:full-bootstrap-test")
+	require.NoError(t, err)
+	tr, err := f.trKeeper.TrustRegistry.Get(f.ctx, trID)
+	require.NoError(t, err)
+	require.Equal(t, groupAccount, tr.Controller)
+	require.Equal(t, "https://example.com/my-registry", tr.Aka)
+
+	// ---- Step 4: TR operator CANNOT grant further operators ----
+	_, err = f.deMsgServer.GrantOperatorAuthorization(f.ctx, &detypes.MsgGrantOperatorAuthorization{
+		Authority: groupAccount,
+		Operator:  trOperator, // TR operator doesn't have DE grant permission
+		Grantee:   sdk.AccAddress([]byte("another_operator____")).String(),
+		MsgTypes:  []string{"/verana.tr.v1.MsgCreateTrustRegistry"},
+	})
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "does not include requested message type")
+
+	// ---- Step 5: Group revokes TR operator ----
+	_, err = f.deMsgServer.RevokeOperatorAuthorization(f.ctx, &detypes.MsgRevokeOperatorAuthorization{
+		Authority: groupAccount,
+		Operator:  "", // group proposal
+		Grantee:   trOperator,
+	})
+	require.NoError(t, err)
+
+	// ---- Step 6: Revoked operator cannot create trust registries ----
+	_, err = f.trMsgServer.CreateTrustRegistry(f.ctx, &trtypes.MsgCreateTrustRegistry{
+		Authority:    groupAccount,
+		Operator:     trOperator,
+		Did:          "did:example:should-fail-revoked",
+		Language:     "en",
+		DocUrl:       "https://example.com/doc",
+		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+	})
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "authorization check failed")
+}
+
+// ---------------------------------------------------------------------------
+// Integration tests: DE operator authorization → TR add governance framework document
+// ---------------------------------------------------------------------------
+
+// TestIntegration_OperatorAddsGovernanceFrameworkDocument models the flow:
+//
+//  1. Grant operator with both MsgCreateTrustRegistry and MsgAddGovernanceFrameworkDocument.
+//  2. Operator creates a trust registry.
+//  3. Operator adds a governance framework document to the trust registry.
+func TestIntegration_OperatorAddsGovernanceFrameworkDocument(t *testing.T) {
+	f := setupIntegrationFixture(t)
+
+	groupAccount := sdk.AccAddress([]byte("group_policy_addr___")).String()
+	operator := sdk.AccAddress([]byte("gfd_operator________")).String()
+
+	// Grant operator both permissions
+	_, err := f.deMsgServer.GrantOperatorAuthorization(f.ctx, &detypes.MsgGrantOperatorAuthorization{
+		Authority: groupAccount,
+		Operator:  "",
+		Grantee:   operator,
+		MsgTypes: []string{
+			"/verana.tr.v1.MsgCreateTrustRegistry",
+			"/verana.tr.v1.MsgAddGovernanceFrameworkDocument",
+		},
+	})
+	require.NoError(t, err)
+
+	// Create trust registry
+	_, err = f.trMsgServer.CreateTrustRegistry(f.ctx, &trtypes.MsgCreateTrustRegistry{
+		Authority:    groupAccount,
+		Operator:     operator,
+		Did:          "did:example:gfd-test",
+		Language:     "en",
+		DocUrl:       "https://example.com/gf-v1",
+		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+	})
+	require.NoError(t, err)
+
+	trID, err := f.trKeeper.TrustRegistryDIDIndex.Get(f.ctx, "did:example:gfd-test")
+	require.NoError(t, err)
+
+	// Add a governance framework document for version 2 (next version after active=1)
+	_, err = f.trMsgServer.AddGovernanceFrameworkDocument(f.ctx, &trtypes.MsgAddGovernanceFrameworkDocument{
+		Authority:    groupAccount,
+		Operator:     operator,
+		Id:           trID,
+		DocLanguage:  "fr",
+		DocUrl:       "https://example.com/gf-v2-fr",
+		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+		Version:      2,
+	})
+	require.NoError(t, err)
+}
+
+// TestIntegration_UnauthorizedOperatorCannotAddGFDocument verifies that an
+// operator without MsgAddGovernanceFrameworkDocument permission is rejected.
+func TestIntegration_UnauthorizedOperatorCannotAddGFDocument(t *testing.T) {
+	f := setupIntegrationFixture(t)
+
+	groupAccount := sdk.AccAddress([]byte("group_policy_addr___")).String()
+	createOnlyOp := sdk.AccAddress([]byte("create_only_op______")).String()
+
+	// Grant operator ONLY MsgCreateTrustRegistry (not MsgAddGovernanceFrameworkDocument)
+	_, err := f.deMsgServer.GrantOperatorAuthorization(f.ctx, &detypes.MsgGrantOperatorAuthorization{
+		Authority: groupAccount,
+		Operator:  "",
+		Grantee:   createOnlyOp,
+		MsgTypes:  []string{"/verana.tr.v1.MsgCreateTrustRegistry"},
+	})
+	require.NoError(t, err)
+
+	// Create trust registry (should succeed)
+	_, err = f.trMsgServer.CreateTrustRegistry(f.ctx, &trtypes.MsgCreateTrustRegistry{
+		Authority:    groupAccount,
+		Operator:     createOnlyOp,
+		Did:          "did:example:gfd-unauth-test",
+		Language:     "en",
+		DocUrl:       "https://example.com/gf-v1",
+		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+	})
+	require.NoError(t, err)
+
+	trID, err := f.trKeeper.TrustRegistryDIDIndex.Get(f.ctx, "did:example:gfd-unauth-test")
+	require.NoError(t, err)
+
+	// Try to add GF document — should fail (no MsgAddGovernanceFrameworkDocument permission)
+	_, err = f.trMsgServer.AddGovernanceFrameworkDocument(f.ctx, &trtypes.MsgAddGovernanceFrameworkDocument{
+		Authority:    groupAccount,
+		Operator:     createOnlyOp,
+		Id:           trID,
+		DocLanguage:  "fr",
+		DocUrl:       "https://example.com/gf-v2-fr",
+		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+		Version:      2,
+	})
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "authorization check failed")
+	require.Contains(t, err.Error(), "does not include requested message type")
+}
+
+// ---------------------------------------------------------------------------
+// Integration tests: DE operator authorization → TR increase active GF version
+// ---------------------------------------------------------------------------
+
+// TestIntegration_OperatorIncreasesActiveGFVersion models the flow:
+//
+//  1. Grant operator with CreateTR, AddGFD, and IncreaseActiveGFVersion permissions.
+//  2. Operator creates a trust registry (active_version=1 with "en" doc).
+//  3. Operator adds a v2 doc for the default language "en".
+//  4. Operator increases active GF version to 2.
+func TestIntegration_OperatorIncreasesActiveGFVersion(t *testing.T) {
+	f := setupIntegrationFixture(t)
+
+	groupAccount := sdk.AccAddress([]byte("group_policy_addr___")).String()
+	operator := sdk.AccAddress([]byte("gfv_operator________")).String()
+
+	// Grant operator all three permissions
+	_, err := f.deMsgServer.GrantOperatorAuthorization(f.ctx, &detypes.MsgGrantOperatorAuthorization{
+		Authority: groupAccount,
+		Operator:  "",
+		Grantee:   operator,
+		MsgTypes: []string{
+			"/verana.tr.v1.MsgCreateTrustRegistry",
+			"/verana.tr.v1.MsgAddGovernanceFrameworkDocument",
+			"/verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion",
+		},
+	})
+	require.NoError(t, err)
+
+	// Create trust registry (active_version=1, language="en")
+	_, err = f.trMsgServer.CreateTrustRegistry(f.ctx, &trtypes.MsgCreateTrustRegistry{
+		Authority:    groupAccount,
+		Operator:     operator,
+		Did:          "did:example:gfv-increase-test",
+		Language:     "en",
+		DocUrl:       "https://example.com/gf-v1",
+		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+	})
+	require.NoError(t, err)
+
+	trID, err := f.trKeeper.TrustRegistryDIDIndex.Get(f.ctx, "did:example:gfv-increase-test")
+	require.NoError(t, err)
+
+	// Add v2 document for default language "en"
+	_, err = f.trMsgServer.AddGovernanceFrameworkDocument(f.ctx, &trtypes.MsgAddGovernanceFrameworkDocument{
+		Authority:    groupAccount,
+		Operator:     operator,
+		Id:           trID,
+		DocLanguage:  "en",
+		DocUrl:       "https://example.com/gf-v2-en",
+		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+		Version:      2,
+	})
+	require.NoError(t, err)
+
+	// Increase active GF version to 2
+	_, err = f.trMsgServer.IncreaseActiveGovernanceFrameworkVersion(f.ctx, &trtypes.MsgIncreaseActiveGovernanceFrameworkVersion{
+		Authority: groupAccount,
+		Operator:  operator,
+		Id:        trID,
+	})
+	require.NoError(t, err)
+
+	// Verify active version is now 2
+	tr, err := f.trKeeper.TrustRegistry.Get(f.ctx, trID)
+	require.NoError(t, err)
+	require.Equal(t, int32(2), tr.ActiveVersion)
+}
+
+// TestIntegration_UnauthorizedOperatorCannotIncreaseGFVersion verifies that an
+// operator without MsgIncreaseActiveGovernanceFrameworkVersion permission is rejected.
+func TestIntegration_UnauthorizedOperatorCannotIncreaseGFVersion(t *testing.T) {
+	f := setupIntegrationFixture(t)
+
+	groupAccount := sdk.AccAddress([]byte("group_policy_addr___")).String()
+	operator := sdk.AccAddress([]byte("gfv_unauth_op_______")).String()
+
+	// Grant operator only CreateTR and AddGFD (NOT IncreaseActiveGFVersion)
+	_, err := f.deMsgServer.GrantOperatorAuthorization(f.ctx, &detypes.MsgGrantOperatorAuthorization{
+		Authority: groupAccount,
+		Operator:  "",
+		Grantee:   operator,
+		MsgTypes: []string{
+			"/verana.tr.v1.MsgCreateTrustRegistry",
+			"/verana.tr.v1.MsgAddGovernanceFrameworkDocument",
+		},
+	})
+	require.NoError(t, err)
+
+	// Create trust registry
+	_, err = f.trMsgServer.CreateTrustRegistry(f.ctx, &trtypes.MsgCreateTrustRegistry{
+		Authority:    groupAccount,
+		Operator:     operator,
+		Did:          "did:example:gfv-unauth-test",
+		Language:     "en",
+		DocUrl:       "https://example.com/gf-v1",
+		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+	})
+	require.NoError(t, err)
+
+	trID, err := f.trKeeper.TrustRegistryDIDIndex.Get(f.ctx, "did:example:gfv-unauth-test")
+	require.NoError(t, err)
+
+	// Add v2 doc for default language
+	_, err = f.trMsgServer.AddGovernanceFrameworkDocument(f.ctx, &trtypes.MsgAddGovernanceFrameworkDocument{
+		Authority:    groupAccount,
+		Operator:     operator,
+		Id:           trID,
+		DocLanguage:  "en",
+		DocUrl:       "https://example.com/gf-v2-en",
+		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+		Version:      2,
+	})
+	require.NoError(t, err)
+
+	// Try to increase active GF version — should fail
+	_, err = f.trMsgServer.IncreaseActiveGovernanceFrameworkVersion(f.ctx, &trtypes.MsgIncreaseActiveGovernanceFrameworkVersion{
+		Authority: groupAccount,
+		Operator:  operator,
+		Id:        trID,
+	})
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "authorization check failed")
+	require.Contains(t, err.Error(), "does not include requested message type")
+}
+
+// ---------------------------------------------------------------------------
+// Integration tests: DE operator authorization → TR update trust registry
+// ---------------------------------------------------------------------------
+
+// TestIntegration_OperatorUpdatesTrustRegistry models the flow:
+//
+//  1. Grant operator with CreateTR and UpdateTR permissions.
+//  2. Operator creates a trust registry.
+//  3. Operator updates the trust registry DID and AKA.
+func TestIntegration_OperatorUpdatesTrustRegistry(t *testing.T) {
+	f := setupIntegrationFixture(t)
+
+	groupAccount := sdk.AccAddress([]byte("group_policy_addr___")).String()
+	operator := sdk.AccAddress([]byte("update_operator_____")).String()
+
+	// Grant operator both permissions
+	_, err := f.deMsgServer.GrantOperatorAuthorization(f.ctx, &detypes.MsgGrantOperatorAuthorization{
+		Authority: groupAccount,
+		Operator:  "",
+		Grantee:   operator,
+		MsgTypes: []string{
+			"/verana.tr.v1.MsgCreateTrustRegistry",
+			"/verana.tr.v1.MsgUpdateTrustRegistry",
+		},
+	})
+	require.NoError(t, err)
+
+	// Create trust registry
+	_, err = f.trMsgServer.CreateTrustRegistry(f.ctx, &trtypes.MsgCreateTrustRegistry{
+		Authority:    groupAccount,
+		Operator:     operator,
+		Did:          "did:example:update-test",
+		Language:     "en",
+		DocUrl:       "https://example.com/gf-v1",
+		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+	})
+	require.NoError(t, err)
+
+	trID, err := f.trKeeper.TrustRegistryDIDIndex.Get(f.ctx, "did:example:update-test")
+	require.NoError(t, err)
+
+	// Update trust registry
+	_, err = f.trMsgServer.UpdateTrustRegistry(f.ctx, &trtypes.MsgUpdateTrustRegistry{
+		Authority: groupAccount,
+		Operator:  operator,
+		Id:        trID,
+		Did:       "did:example:update-test-v2",
+		Aka:       "https://example.com/aka",
+	})
+	require.NoError(t, err)
+
+	// Verify update
+	tr, err := f.trKeeper.TrustRegistry.Get(f.ctx, trID)
+	require.NoError(t, err)
+	require.Equal(t, "did:example:update-test-v2", tr.Did)
+	require.Equal(t, "https://example.com/aka", tr.Aka)
+}
+
+// TestIntegration_UnauthorizedOperatorCannotUpdateTrustRegistry verifies that an
+// operator without MsgUpdateTrustRegistry permission is rejected.
+func TestIntegration_UnauthorizedOperatorCannotUpdateTrustRegistry(t *testing.T) {
+	f := setupIntegrationFixture(t)
+
+	groupAccount := sdk.AccAddress([]byte("group_policy_addr___")).String()
+	operator := sdk.AccAddress([]byte("update_unauth_op____")).String()
+
+	// Grant operator ONLY MsgCreateTrustRegistry (not MsgUpdateTrustRegistry)
+	_, err := f.deMsgServer.GrantOperatorAuthorization(f.ctx, &detypes.MsgGrantOperatorAuthorization{
+		Authority: groupAccount,
+		Operator:  "",
+		Grantee:   operator,
+		MsgTypes:  []string{"/verana.tr.v1.MsgCreateTrustRegistry"},
+	})
+	require.NoError(t, err)
+
+	// Create trust registry (should succeed)
+	_, err = f.trMsgServer.CreateTrustRegistry(f.ctx, &trtypes.MsgCreateTrustRegistry{
+		Authority:    groupAccount,
+		Operator:     operator,
+		Did:          "did:example:update-unauth-test",
+		Language:     "en",
+		DocUrl:       "https://example.com/gf-v1",
+		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+	})
+	require.NoError(t, err)
+
+	trID, err := f.trKeeper.TrustRegistryDIDIndex.Get(f.ctx, "did:example:update-unauth-test")
+	require.NoError(t, err)
+
+	// Try to update trust registry — should fail
+	_, err = f.trMsgServer.UpdateTrustRegistry(f.ctx, &trtypes.MsgUpdateTrustRegistry{
+		Authority: groupAccount,
+		Operator:  operator,
+		Id:        trID,
+		Did:       "did:example:should-fail",
+	})
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "authorization check failed")
+	require.Contains(t, err.Error(), "does not include requested message type")
+}
+
+// ---------------------------------------------------------------------------
+// Integration tests: DE operator authorization → TR archive trust registry
+// ---------------------------------------------------------------------------
+
+// TestIntegration_OperatorArchivesTrustRegistry models the flow:
+//
+//  1. Grant operator with CreateTR and ArchiveTR permissions.
+//  2. Operator creates a trust registry.
+//  3. Operator archives the trust registry.
+//  4. Operator unarchives the trust registry.
+func TestIntegration_OperatorArchivesTrustRegistry(t *testing.T) {
+	f := setupIntegrationFixture(t)
+
+	groupAccount := sdk.AccAddress([]byte("group_policy_addr___")).String()
+	operator := sdk.AccAddress([]byte("archive_operator____")).String()
+
+	// Grant operator both permissions
+	_, err := f.deMsgServer.GrantOperatorAuthorization(f.ctx, &detypes.MsgGrantOperatorAuthorization{
+		Authority: groupAccount,
+		Operator:  "",
+		Grantee:   operator,
+		MsgTypes: []string{
+			"/verana.tr.v1.MsgCreateTrustRegistry",
+			"/verana.tr.v1.MsgArchiveTrustRegistry",
+		},
+	})
+	require.NoError(t, err)
+
+	// Create trust registry
+	_, err = f.trMsgServer.CreateTrustRegistry(f.ctx, &trtypes.MsgCreateTrustRegistry{
+		Authority:    groupAccount,
+		Operator:     operator,
+		Did:          "did:example:archive-test",
+		Language:     "en",
+		DocUrl:       "https://example.com/gf-v1",
+		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+	})
+	require.NoError(t, err)
+
+	trID, err := f.trKeeper.TrustRegistryDIDIndex.Get(f.ctx, "did:example:archive-test")
+	require.NoError(t, err)
+
+	// Archive trust registry
+	_, err = f.trMsgServer.ArchiveTrustRegistry(f.ctx, &trtypes.MsgArchiveTrustRegistry{
+		Authority: groupAccount,
+		Operator:  operator,
+		Id:        trID,
+		Archive:   true,
+	})
+	require.NoError(t, err)
+
+	// Verify archived
+	tr, err := f.trKeeper.TrustRegistry.Get(f.ctx, trID)
+	require.NoError(t, err)
+	require.NotNil(t, tr.Archived)
+
+	// Unarchive trust registry
+	_, err = f.trMsgServer.ArchiveTrustRegistry(f.ctx, &trtypes.MsgArchiveTrustRegistry{
+		Authority: groupAccount,
+		Operator:  operator,
+		Id:        trID,
+		Archive:   false,
+	})
+	require.NoError(t, err)
+
+	// Verify unarchived
+	tr, err = f.trKeeper.TrustRegistry.Get(f.ctx, trID)
+	require.NoError(t, err)
+	require.Nil(t, tr.Archived)
+}
+
+// TestIntegration_UnauthorizedOperatorCannotArchiveTrustRegistry verifies that an
+// operator without MsgArchiveTrustRegistry permission is rejected.
+func TestIntegration_UnauthorizedOperatorCannotArchiveTrustRegistry(t *testing.T) {
+	f := setupIntegrationFixture(t)
+
+	groupAccount := sdk.AccAddress([]byte("group_policy_addr___")).String()
+	operator := sdk.AccAddress([]byte("archive_unauth_op___")).String()
+
+	// Grant operator ONLY MsgCreateTrustRegistry (not MsgArchiveTrustRegistry)
+	_, err := f.deMsgServer.GrantOperatorAuthorization(f.ctx, &detypes.MsgGrantOperatorAuthorization{
+		Authority: groupAccount,
+		Operator:  "",
+		Grantee:   operator,
+		MsgTypes:  []string{"/verana.tr.v1.MsgCreateTrustRegistry"},
+	})
+	require.NoError(t, err)
+
+	// Create trust registry (should succeed)
+	_, err = f.trMsgServer.CreateTrustRegistry(f.ctx, &trtypes.MsgCreateTrustRegistry{
+		Authority:    groupAccount,
+		Operator:     operator,
+		Did:          "did:example:archive-unauth-test",
+		Language:     "en",
+		DocUrl:       "https://example.com/gf-v1",
+		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+	})
+	require.NoError(t, err)
+
+	trID, err := f.trKeeper.TrustRegistryDIDIndex.Get(f.ctx, "did:example:archive-unauth-test")
+	require.NoError(t, err)
+
+	// Try to archive trust registry — should fail
+	_, err = f.trMsgServer.ArchiveTrustRegistry(f.ctx, &trtypes.MsgArchiveTrustRegistry{
+		Authority: groupAccount,
+		Operator:  operator,
+		Id:        trID,
+		Archive:   true,
+	})
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "authorization check failed")
+	require.Contains(t, err.Error(), "does not include requested message type")
+}

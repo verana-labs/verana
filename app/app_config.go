@@ -60,9 +60,12 @@ import (
 	trustregistrymodulev1 "github.com/verana-labs/verana/api/verana/tr/module"
 	credentialschemamoduletypes "github.com/verana-labs/verana/x/cs/types"
 	diddirectorymoduletypes "github.com/verana-labs/verana/x/dd/types"
+	_ "github.com/verana-labs/verana/x/de/module"
+	demoduletypes "github.com/verana-labs/verana/x/de/types"
 	permissionmoduletypes "github.com/verana-labs/verana/x/perm/types"
 	trustdepositmoduletypes "github.com/verana-labs/verana/x/td/types"
 	trustregistrymoduletypes "github.com/verana-labs/verana/x/tr/types"
+
 	// this line is used by starport scaffolding # stargate/app/moduleImport
 	protocolpoolmodulev1 "cosmossdk.io/api/cosmos/protocolpool/module/v1" // import for side-effects
 	_ "github.com/cosmos/cosmos-sdk/x/protocolpool"
@@ -109,6 +112,7 @@ var (
 		credentialschemamoduletypes.ModuleName,
 		permissionmoduletypes.ModuleName,
 		trustdepositmoduletypes.ModuleName,
+		demoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/initGenesis
 	}
 
@@ -139,6 +143,7 @@ var (
 		credentialschemamoduletypes.ModuleName,
 		permissionmoduletypes.ModuleName,
 		trustdepositmoduletypes.ModuleName,
+		demoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/beginBlockers
 	}
 
@@ -163,6 +168,7 @@ var (
 		credentialschemamoduletypes.ModuleName,
 		permissionmoduletypes.ModuleName,
 		trustdepositmoduletypes.ModuleName,
+		demoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/endBlockers
 	}
 
@@ -348,6 +354,10 @@ var (
 			{
 				Name:   trustdepositmoduletypes.ModuleName,
 				Config: appconfig.WrapAny(&trustdepositmodulev1.Module{}),
+			},
+			{
+				Name:   demoduletypes.ModuleName,
+				Config: appconfig.WrapAny(&demoduletypes.Module{}),
 			},
 			// this line is used by starport scaffolding # stargate/app/moduleConfig
 		},

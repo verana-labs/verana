@@ -97,6 +97,12 @@ func runJourney(ctx context.Context, client cosmosclient.Client, journeyID int) 
 	case 23:
 		// Error Scenario Tests for Issues #191, #193, #196
 		return journeys.RunErrorScenarioTestsJourney(ctx, client)
+	case 101:
+		// Trust Registry Operator Authorization Setup (Group + Fund)
+		return journeys.RunTrustRegistryAuthzSetupJourney(ctx, client)
+	case 102:
+		// Trust Registry Operations with Operator Authorization (fail-then-pass)
+		return journeys.RunTrustRegistryAuthzOperationsJourney(ctx, client)
 	default:
 		return fmt.Errorf("unknown journey ID: %d", journeyID)
 	}
@@ -130,4 +136,7 @@ func printUsage() {
 	fmt.Println("  22 - Insufficient Funding Simulation (allowance > YIP funding)")
 	fmt.Println("\n  Error Scenario Tests:")
 	fmt.Println("  23 - Error Scenario Tests (Issues #191, #193, #196)")
+	fmt.Println("\n  Trust Registry Authorization Journeys:")
+	fmt.Println("  101 - TR Operator Authorization Setup (Group + Fund)")
+	fmt.Println("  102 - TR Operations with Operator Authorization (fail-then-pass)")
 }

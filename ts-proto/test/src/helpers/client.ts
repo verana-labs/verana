@@ -37,6 +37,9 @@ import {
   MsgSetPermissionVPToValidatedAminoConverter,
   MsgCancelPermissionVPLastRequestAminoConverter,
   MsgCreateOrUpdatePermissionSessionAminoConverter,
+  // DE module
+  MsgGrantOperatorAuthorizationAminoConverter,
+  MsgRevokeOperatorAuthorizationAminoConverter,
 } from "../../../src/helpers/aminoConverters";
 
 // Default configuration - can be overridden via environment variables
@@ -121,6 +124,24 @@ export async function createAccountFromMnemonic(
 }
 
 /**
+ * Creates a Direct Sign wallet from a mnemonic phrase with a custom derivation path.
+ * Used for creating accounts that need Direct (proto) signing.
+ * @param mnemonic - Master mnemonic phrase
+ * @param accountIndex - Account index for derivation path
+ * @returns Promise<DirectSecp256k1HdWallet> for Direct signing
+ */
+export async function createDirectAccountFromMnemonic(
+  mnemonic: string,
+  accountIndex: number
+): Promise<DirectSecp256k1HdWallet> {
+  const hdPath = stringToPath(`m/44'/118'/0'/0/${accountIndex}`);
+  return DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {
+    prefix: config.addressPrefix,
+    hdPaths: [hdPath],
+  });
+}
+
+/**
  * Creates Amino Types for Verana messages.
  * Matches frontend implementation in veranaChain.sign.client.ts
  */
@@ -154,6 +175,9 @@ export function createVeranaAminoTypes(): AminoTypes {
     '/verana.perm.v1.MsgSetPermissionVPToValidated': MsgSetPermissionVPToValidatedAminoConverter,
     '/verana.perm.v1.MsgCancelPermissionVPLastRequest': MsgCancelPermissionVPLastRequestAminoConverter,
     '/verana.perm.v1.MsgCreateOrUpdatePermissionSession': MsgCreateOrUpdatePermissionSessionAminoConverter,
+    // Delegation Engine (de) module
+    '/verana.de.v1.MsgGrantOperatorAuthorization': MsgGrantOperatorAuthorizationAminoConverter,
+    '/verana.de.v1.MsgRevokeOperatorAuthorization': MsgRevokeOperatorAuthorizationAminoConverter,
   });
 }
 

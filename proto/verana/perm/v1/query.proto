@@ -2,12 +2,12 @@ syntax = "proto3";
 package verana.perm.v1;
 
 import "amino/amino.proto";
+import "cosmos/base/query/v1beta1/pagination.proto";
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
-import "cosmos/base/query/v1beta1/pagination.proto";
+import "google/protobuf/timestamp.proto";
 import "verana/perm/v1/params.proto";
 import "verana/perm/v1/types.proto";
-import "google/protobuf/timestamp.proto";
 
 option go_package = "github.com/verana-labs/verana/x/perm/types";
 
@@ -50,8 +50,11 @@ message QueryParamsResponse {
 }
 
 message QueryListPermissionsRequest {
-  google.protobuf.Timestamp modified_after = 1 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
-  uint32 response_max_size = 2;  // Default 64, min 1, max 1024
+  google.protobuf.Timestamp modified_after = 1 [
+    (gogoproto.stdtime) = true,
+    (gogoproto.nullable) = true
+  ];
+  uint32 response_max_size = 2; // Default 64, min 1, max 1024
 }
 
 message QueryListPermissionsResponse {
@@ -67,7 +70,7 @@ message QueryGetPermissionResponse {
 }
 
 message QueryGetPermissionSessionRequest {
-  string id = 1;  // UUID
+  string id = 1; // UUID
 }
 
 message QueryGetPermissionSessionResponse {
@@ -75,7 +78,10 @@ message QueryGetPermissionSessionResponse {
 }
 
 message QueryListPermissionSessionsRequest {
-  google.protobuf.Timestamp modified_after = 1 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  google.protobuf.Timestamp modified_after = 1 [
+    (gogoproto.stdtime) = true,
+    (gogoproto.nullable) = true
+  ];
   uint32 response_max_size = 2;
 }
 
@@ -88,7 +94,10 @@ message QueryFindPermissionsWithDIDRequest {
   uint32 type = 2;
   uint64 schema_id = 3;
   string country = 4 [(gogoproto.nullable) = true];
-  google.protobuf.Timestamp when = 5 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  google.protobuf.Timestamp when = 5 [
+    (gogoproto.stdtime) = true,
+    (gogoproto.nullable) = true
+  ];
 }
 
 message QueryFindPermissionsWithDIDResponse {

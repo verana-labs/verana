@@ -1,6 +1,7 @@
 // Go-side corollary: reproduce the server's legacy Amino sign bytes.
 // Run from repo root:
-//   go run ts-proto/test/scripts/benches/amino/perm/go.go
+//
+//	go run ts-proto/test/scripts/benches/amino/perm/go.go
 //
 // This prints:
 // - server sign bytes (legacy amino JSON with omitempty semantics)

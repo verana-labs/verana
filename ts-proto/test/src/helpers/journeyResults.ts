@@ -39,7 +39,10 @@ export interface JourneyResult {
   // Cancel Permission VP prerequisites
   validatorPermId?: string;
   applicantDid?: string;
-  // ... add more as needed
+
+  // DE + TR authz setup
+  authorityAddress?: string;
+  operatorAddress?: string;
 }
 
 /**
@@ -256,6 +259,30 @@ export function getPermissionId(journeyName: string): number | null {
   const result = loadJourneyResult(`permission-${journeyName}`);
   if (result?.permissionId) {
     return parseInt(result.permissionId, 10);
+  }
+  return null;
+}
+
+/**
+ * Saves the TR authz setup (authority + operator addresses)
+ */
+export function saveTrAuthzSetup(authorityAddress: string, operatorAddress: string): void {
+  saveJourneyResult("tr-authz-setup", {
+    authorityAddress,
+    operatorAddress,
+  });
+}
+
+/**
+ * Gets the TR authz setup (authority + operator addresses)
+ */
+export function getTrAuthzSetup(): { authorityAddress: string; operatorAddress: string } | null {
+  const result = loadJourneyResult("tr-authz-setup");
+  if (result?.authorityAddress && result?.operatorAddress) {
+    return {
+      authorityAddress: result.authorityAddress,
+      operatorAddress: result.operatorAddress,
+    };
   }
   return null;
 }

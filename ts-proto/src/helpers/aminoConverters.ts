@@ -15,6 +15,10 @@ import {
   MsgIncreaseActiveGovernanceFrameworkVersion,
 } from "../codec/verana/tr/v1/tx";
 import {
+  MsgGrantOperatorAuthorization,
+  MsgRevokeOperatorAuthorization,
+} from "../codec/verana/de/v1/tx";
+import {
   MsgAddDID,
   MsgRenewDID,
   MsgTouchDID,
@@ -106,14 +110,16 @@ const dateFromAmino = (s?: string | null) =>
 export const MsgCreateTrustRegistryAminoConverter: AminoConverter = {
   aminoType: '/verana.tr.v1.MsgCreateTrustRegistry',
   toAmino: ({
-    creator,
+    authority,
+    operator,
     did,
     aka,
     language,
     docUrl,
     docDigestSri,
   }: MsgCreateTrustRegistry) => ({
-    creator,
+    authority,
+    operator,
     did,
     aka,
     language,
@@ -121,7 +127,8 @@ export const MsgCreateTrustRegistryAminoConverter: AminoConverter = {
     doc_digest_sri: docDigestSri,
   }),
   fromAmino: (value: {
-    creator: string;
+    authority: string;
+    operator: string;
     did: string;
     aka: string;
     language: string;
@@ -129,7 +136,8 @@ export const MsgCreateTrustRegistryAminoConverter: AminoConverter = {
     doc_digest_sri: string;
   }) =>
     MsgCreateTrustRegistry.fromPartial({
-      creator: value.creator,
+      authority: value.authority,
+      operator: value.operator,
       did: value.did,
       aka: value.aka,
       language: value.language,
@@ -140,15 +148,17 @@ export const MsgCreateTrustRegistryAminoConverter: AminoConverter = {
 
 export const MsgUpdateTrustRegistryAminoConverter: AminoConverter = {
   aminoType: '/verana.tr.v1.MsgUpdateTrustRegistry',
-  toAmino: ({ creator, id, did, aka }: MsgUpdateTrustRegistry) => ({
-    creator,
+  toAmino: ({ authority, operator, id, did, aka }: MsgUpdateTrustRegistry) => ({
+    authority,
+    operator,
     id: id != null ? id.toString() : undefined,
     did,
     aka,
   }),
-  fromAmino: (value: { creator: string; id: string; did: string; aka: string }) =>
+  fromAmino: (value: { authority: string; operator: string; id: string; did: string; aka: string }) =>
     MsgUpdateTrustRegistry.fromPartial({
-      creator: value.creator,
+      authority: value.authority,
+      operator: value.operator,
       id: value.id != null ? Number(value.id) : 0,
       did: value.did,
       aka: value.aka,
@@ -157,14 +167,16 @@ export const MsgUpdateTrustRegistryAminoConverter: AminoConverter = {
 
 export const MsgArchiveTrustRegistryAminoConverter: AminoConverter = {
   aminoType: '/verana.tr.v1.MsgArchiveTrustRegistry',
-  toAmino: ({ creator, id, archive }: MsgArchiveTrustRegistry) => ({
-    creator,
+  toAmino: ({ authority, operator, id, archive }: MsgArchiveTrustRegistry) => ({
+    authority,
+    operator,
     id: id != null ? id.toString() : undefined,
     archive,
   }),
-  fromAmino: (value: { creator: string; id: string; archive: boolean }) =>
+  fromAmino: (value: { authority: string; operator: string; id: string; archive: boolean }) =>
     MsgArchiveTrustRegistry.fromPartial({
-      creator: value.creator,
+      authority: value.authority,
+      operator: value.operator,
       id: value.id != null ? Number(value.id) : 0,
       archive: value.archive,
     }),
@@ -173,14 +185,16 @@ export const MsgArchiveTrustRegistryAminoConverter: AminoConverter = {
 export const MsgAddGovernanceFrameworkDocumentAminoConverter: AminoConverter = {
   aminoType: '/verana.tr.v1.MsgAddGovernanceFrameworkDocument',
   toAmino: ({
-    creator,
+    authority,
+    operator,
     id,
     docLanguage,
     docUrl,
     docDigestSri,
     version,
   }: MsgAddGovernanceFrameworkDocument) => ({
-    creator,
+    authority,
+    operator,
     id: id != null ? id.toString() : undefined,
     doc_language: docLanguage,
     doc_url: docUrl,
@@ -188,7 +202,8 @@ export const MsgAddGovernanceFrameworkDocumentAminoConverter: AminoConverter = {
     version,
   }),
   fromAmino: (value: {
-    creator: string;
+    authority: string;
+    operator: string;
     id: string;
     doc_language: string;
     doc_url: string;
@@ -196,7 +211,8 @@ export const MsgAddGovernanceFrameworkDocumentAminoConverter: AminoConverter = {
     version: number;
   }) =>
     MsgAddGovernanceFrameworkDocument.fromPartial({
-      creator: value.creator,
+      authority: value.authority,
+      operator: value.operator,
       id: value.id != null ? Number(value.id) : 0,
       docLanguage: value.doc_language,
       docUrl: value.doc_url,
@@ -207,13 +223,15 @@ export const MsgAddGovernanceFrameworkDocumentAminoConverter: AminoConverter = {
 
 export const MsgIncreaseActiveGovernanceFrameworkVersionAminoConverter: AminoConverter = {
   aminoType: '/verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion',
-  toAmino: ({ creator, id }: MsgIncreaseActiveGovernanceFrameworkVersion) => ({
-    creator,
+  toAmino: ({ authority, operator, id }: MsgIncreaseActiveGovernanceFrameworkVersion) => ({
+    authority,
+    operator,
     id: id != null ? id.toString() : undefined,
   }),
-  fromAmino: (value: { creator: string; id: string }) =>
+  fromAmino: (value: { authority: string; operator: string; id: string }) =>
     MsgIncreaseActiveGovernanceFrameworkVersion.fromPartial({
-      creator: value.creator,
+      authority: value.authority,
+      operator: value.operator,
       id: value.id != null ? Number(value.id) : 0,
     }),
 };
@@ -550,5 +568,57 @@ export const MsgCreateOrUpdatePermissionSessionAminoConverter: AminoConverter = 
       verifierPermId: strToU64(a.verifier_perm_id) != null ? Number(strToU64(a.verifier_perm_id)!.toString()) : 0,
       agentPermId: strToU64(a.agent_perm_id) != null ? Number(strToU64(a.agent_perm_id)!.toString()) : 0,
       walletAgentPermId: strToU64(a.wallet_agent_perm_id) != null ? Number(strToU64(a.wallet_agent_perm_id)!.toString()) : 0,
+    }),
+};
+
+// ============================================================================
+// Delegation Engine (DE) Module Converters
+// ============================================================================
+
+export const MsgGrantOperatorAuthorizationAminoConverter: AminoConverter = {
+  aminoType: '/verana.de.v1.MsgGrantOperatorAuthorization',
+  toAmino: (m: MsgGrantOperatorAuthorization) => clean({
+    authority: m.authority || undefined,
+    operator: m.operator || undefined,
+    grantee: m.grantee || undefined,
+    msg_types: m.msgTypes?.length ? m.msgTypes : undefined,
+    expiration: dateToAmino(m.expiration),
+    authz_spend_limit: m.authzSpendLimit?.length ? m.authzSpendLimit : undefined,
+    authz_spend_limit_period: m.authzSpendLimitPeriod ? {
+      seconds: m.authzSpendLimitPeriod.seconds?.toString(),
+      nanos: m.authzSpendLimitPeriod.nanos,
+    } : undefined,
+    with_feegrant: m.withFeegrant || undefined,
+    feegrant_spend_limit: m.feegrantSpendLimit?.length ? m.feegrantSpendLimit : undefined,
+    feegrant_spend_limit_period: m.feegrantSpendLimitPeriod ? {
+      seconds: m.feegrantSpendLimitPeriod.seconds?.toString(),
+      nanos: m.feegrantSpendLimitPeriod.nanos,
+    } : undefined,
+  }),
+  fromAmino: (a: any): MsgGrantOperatorAuthorization =>
+    MsgGrantOperatorAuthorization.fromPartial({
+      authority: a.authority ?? '',
+      operator: a.operator ?? '',
+      grantee: a.grantee ?? '',
+      msgTypes: a.msg_types ?? [],
+      expiration: dateFromAmino(a.expiration),
+      authzSpendLimit: a.authz_spend_limit ?? [],
+      withFeegrant: a.with_feegrant ?? false,
+      feegrantSpendLimit: a.feegrant_spend_limit ?? [],
+    }),
+};
+
+export const MsgRevokeOperatorAuthorizationAminoConverter: AminoConverter = {
+  aminoType: '/verana.de.v1.MsgRevokeOperatorAuthorization',
+  toAmino: ({ authority, operator, grantee }: MsgRevokeOperatorAuthorization) => clean({
+    authority: authority || undefined,
+    operator: operator || undefined,
+    grantee: grantee || undefined,
+  }),
+  fromAmino: (value: { authority: string; operator: string; grantee: string }) =>
+    MsgRevokeOperatorAuthorization.fromPartial({
+      authority: value.authority,
+      operator: value.operator,
+      grantee: value.grantee,
     }),
 };

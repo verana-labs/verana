@@ -30,13 +30,24 @@ export interface MsgUpdateParams {
 export interface MsgUpdateParamsResponse {
 }
 
-/** MsgCreateTrustRegistry defines the Msg/CreateTrustRegistry request type. */
+/**
+ * MsgCreateTrustRegistry defines the Msg/CreateTrustRegistry request type.
+ * [MOD-TR-MSG-1] Create New Trust Registry
+ */
 export interface MsgCreateTrustRegistry {
-  creator: string;
+  /** authority is the group account on whose behalf this message is executed */
+  authority: string;
+  /** operator is the account authorized by the authority to run this Msg */
+  operator: string;
+  /** did is the DID of the ecosystem creating this trust registry (mandatory) */
   did: string;
+  /** aka is an optional additional URI of this trust registry */
   aka: string;
+  /** language is the primary language tag (RFC1766) of this trust registry (mandatory) */
   language: string;
+  /** doc_url is the URL where the governance framework document is published (mandatory) */
   docUrl: string;
+  /** doc_digest_sri is the SRI digest of the governance framework document (mandatory) */
   docDigestSri: string;
 }
 
@@ -44,13 +55,24 @@ export interface MsgCreateTrustRegistry {
 export interface MsgCreateTrustRegistryResponse {
 }
 
-/** MsgAddGovernanceFrameworkDocument defines the Msg/AddGovernanceFrameworkDocument request type. */
+/**
+ * MsgAddGovernanceFrameworkDocument defines the Msg/AddGovernanceFrameworkDocument request type.
+ * [MOD-TR-MSG-2] Add Governance Framework Document
+ */
 export interface MsgAddGovernanceFrameworkDocument {
-  creator: string;
+  /** authority is the group account on whose behalf this message is executed */
+  authority: string;
+  /** operator is the account authorized by the authority to run this Msg */
+  operator: string;
+  /** id is the trust registry id (mandatory) */
   id: number;
+  /** doc_language is the language tag (RFC1766) of the document (mandatory) */
   docLanguage: string;
+  /** doc_url is the URL where the document is published (mandatory) */
   docUrl: string;
+  /** doc_digest_sri is the digest SRI of the document (mandatory) */
   docDigestSri: string;
+  /** version is the targeted version (mandatory) */
   version: number;
 }
 
@@ -58,10 +80,16 @@ export interface MsgAddGovernanceFrameworkDocument {
 export interface MsgAddGovernanceFrameworkDocumentResponse {
 }
 
-/** MsgIncreaseActiveGovernanceFrameworkVersion defines the Msg/IncreaseActiveGovernanceFrameworkVersion request type. */
+/**
+ * MsgIncreaseActiveGovernanceFrameworkVersion defines the Msg/IncreaseActiveGovernanceFrameworkVersion request type.
+ * [MOD-TR-MSG-3] Increase Active Governance Framework Version
+ */
 export interface MsgIncreaseActiveGovernanceFrameworkVersion {
-  creator: string;
-  /** Changed from tr_id to id */
+  /** authority is the group account on whose behalf this message is executed */
+  authority: string;
+  /** operator is the account authorized by the authority to run this Msg */
+  operator: string;
+  /** id is the trust registry id (mandatory) */
   id: number;
 }
 
@@ -69,11 +97,20 @@ export interface MsgIncreaseActiveGovernanceFrameworkVersion {
 export interface MsgIncreaseActiveGovernanceFrameworkVersionResponse {
 }
 
-/** MsgUpdateTrustRegistry defines the Msg/UpdateTrustRegistry request type. */
+/**
+ * MsgUpdateTrustRegistry defines the Msg/UpdateTrustRegistry request type.
+ * [MOD-TR-MSG-4] Update Trust Registry
+ */
 export interface MsgUpdateTrustRegistry {
-  creator: string;
+  /** authority is the group account on whose behalf this message is executed */
+  authority: string;
+  /** operator is the account authorized by the authority to run this Msg */
+  operator: string;
+  /** id is the trust registry id (mandatory) */
   id: number;
+  /** did is the DID of the trust registry (mandatory) */
   did: string;
+  /** aka is an optional additional URI of this trust registry */
   aka: string;
 }
 
@@ -81,10 +118,18 @@ export interface MsgUpdateTrustRegistry {
 export interface MsgUpdateTrustRegistryResponse {
 }
 
-/** MsgArchiveTrustRegistry defines the Msg/ArchiveTrustRegistry request type. */
+/**
+ * MsgArchiveTrustRegistry defines the Msg/ArchiveTrustRegistry request type.
+ * [MOD-TR-MSG-5] Archive Trust Registry
+ */
 export interface MsgArchiveTrustRegistry {
-  creator: string;
+  /** authority is the group account on whose behalf this message is executed */
+  authority: string;
+  /** operator is the account authorized by the authority to run this Msg */
+  operator: string;
+  /** id is the trust registry id (mandatory) */
   id: number;
+  /** archive is true to archive, false to unarchive (mandatory) */
   archive: boolean;
 }
 
@@ -212,28 +257,31 @@ export const MsgUpdateParamsResponse = {
 };
 
 function createBaseMsgCreateTrustRegistry(): MsgCreateTrustRegistry {
-  return { creator: "", did: "", aka: "", language: "", docUrl: "", docDigestSri: "" };
+  return { authority: "", operator: "", did: "", aka: "", language: "", docUrl: "", docDigestSri: "" };
 }
 
 export const MsgCreateTrustRegistry = {
   encode(message: MsgCreateTrustRegistry, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.creator !== "") {
-      writer.uint32(10).string(message.creator);
+    if (message.authority !== "") {
+      writer.uint32(10).string(message.authority);
+    }
+    if (message.operator !== "") {
+      writer.uint32(18).string(message.operator);
     }
     if (message.did !== "") {
-      writer.uint32(18).string(message.did);
+      writer.uint32(26).string(message.did);
     }
     if (message.aka !== "") {
-      writer.uint32(26).string(message.aka);
+      writer.uint32(34).string(message.aka);
     }
     if (message.language !== "") {
-      writer.uint32(34).string(message.language);
+      writer.uint32(42).string(message.language);
     }
     if (message.docUrl !== "") {
-      writer.uint32(42).string(message.docUrl);
+      writer.uint32(50).string(message.docUrl);
     }
     if (message.docDigestSri !== "") {
-      writer.uint32(50).string(message.docDigestSri);
+      writer.uint32(58).string(message.docDigestSri);
     }
     return writer;
   },
@@ -250,38 +298,45 @@ export const MsgCreateTrustRegistry = {
             break;
           }
 
-          message.creator = reader.string();
+          message.authority = reader.string();
           continue;
         case 2:
           if (tag !== 18) {
             break;
           }
 
-          message.did = reader.string();
+          message.operator = reader.string();
           continue;
         case 3:
           if (tag !== 26) {
             break;
           }
 
-          message.aka = reader.string();
+          message.did = reader.string();
           continue;
         case 4:
           if (tag !== 34) {
             break;
           }
 
-          message.language = reader.string();
+          message.aka = reader.string();
           continue;
         case 5:
           if (tag !== 42) {
             break;
           }
 
-          message.docUrl = reader.string();
+          message.language = reader.string();
           continue;
         case 6:
           if (tag !== 50) {
+            break;
+          }
+
+          message.docUrl = reader.string();
+          continue;
+        case 7:
+          if (tag !== 58) {
             break;
           }
 
@@ -298,7 +353,8 @@ export const MsgCreateTrustRegistry = {
 
   fromJSON(object: any): MsgCreateTrustRegistry {
     return {
-      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
+      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
       did: isSet(object.did) ? globalThis.String(object.did) : "",
       aka: isSet(object.aka) ? globalThis.String(object.aka) : "",
       language: isSet(object.language) ? globalThis.String(object.language) : "",
@@ -309,8 +365,11 @@ export const MsgCreateTrustRegistry = {
 
   toJSON(message: MsgCreateTrustRegistry): unknown {
     const obj: any = {};
-    if (message.creator !== "") {
-      obj.creator = message.creator;
+    if (message.authority !== "") {
+      obj.authority = message.authority;
+    }
+    if (message.operator !== "") {
+      obj.operator = message.operator;
     }
     if (message.did !== "") {
       obj.did = message.did;
@@ -335,7 +394,8 @@ export const MsgCreateTrustRegistry = {
   },
   fromPartial<I extends Exact<DeepPartial<MsgCreateTrustRegistry>, I>>(object: I): MsgCreateTrustRegistry {
     const message = createBaseMsgCreateTrustRegistry();
-    message.creator = object.creator ?? "";
+    message.authority = object.authority ?? "";
+    message.operator = object.operator ?? "";
     message.did = object.did ?? "";
     message.aka = object.aka ?? "";
     message.language = object.language ?? "";
@@ -389,28 +449,31 @@ export const MsgCreateTrustRegistryResponse = {
 };
 
 function createBaseMsgAddGovernanceFrameworkDocument(): MsgAddGovernanceFrameworkDocument {
-  return { creator: "", id: 0, docLanguage: "", docUrl: "", docDigestSri: "", version: 0 };
+  return { authority: "", operator: "", id: 0, docLanguage: "", docUrl: "", docDigestSri: "", version: 0 };
 }
 
 export const MsgAddGovernanceFrameworkDocument = {
   encode(message: MsgAddGovernanceFrameworkDocument, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.creator !== "") {
-      writer.uint32(10).string(message.creator);
+    if (message.authority !== "") {
+      writer.uint32(10).string(message.authority);
+    }
+    if (message.operator !== "") {
+      writer.uint32(18).string(message.operator);
     }
     if (message.id !== 0) {
-      writer.uint32(16).uint64(message.id);
+      writer.uint32(24).uint64(message.id);
     }
     if (message.docLanguage !== "") {
-      writer.uint32(26).string(message.docLanguage);
+      writer.uint32(34).string(message.docLanguage);
     }
     if (message.docUrl !== "") {
-      writer.uint32(34).string(message.docUrl);
+      writer.uint32(42).string(message.docUrl);
     }
     if (message.docDigestSri !== "") {
-      writer.uint32(42).string(message.docDigestSri);
+      writer.uint32(50).string(message.docDigestSri);
     }
     if (message.version !== 0) {
-      writer.uint32(48).int32(message.version);
+      writer.uint32(56).int32(message.version);
     }
     return writer;
   },
@@ -427,38 +490,45 @@ export const MsgAddGovernanceFrameworkDocument = {
             break;
           }
 
-          message.creator = reader.string();
+          message.authority = reader.string();
           continue;
         case 2:
-          if (tag !== 16) {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.operator = reader.string();
+          continue;
+        case 3:
+          if (tag !== 24) {
             break;
           }
 
           message.id = longToNumber(reader.uint64() as Long);
-          continue;
-        case 3:
-          if (tag !== 26) {
-            break;
-          }
-
-          message.docLanguage = reader.string();
           continue;
         case 4:
           if (tag !== 34) {
             break;
           }
 
-          message.docUrl = reader.string();
+          message.docLanguage = reader.string();
           continue;
         case 5:
           if (tag !== 42) {
             break;
           }
 
-          message.docDigestSri = reader.string();
+          message.docUrl = reader.string();
           continue;
         case 6:
-          if (tag !== 48) {
+          if (tag !== 50) {
+            break;
+          }
+
+          message.docDigestSri = reader.string();
+          continue;
+        case 7:
+          if (tag !== 56) {
             break;
           }
 
@@ -475,7 +545,8 @@ export const MsgAddGovernanceFrameworkDocument = {
 
   fromJSON(object: any): MsgAddGovernanceFrameworkDocument {
     return {
-      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
+      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
       id: isSet(object.id) ? globalThis.Number(object.id) : 0,
       docLanguage: isSet(object.docLanguage) ? globalThis.String(object.docLanguage) : "",
       docUrl: isSet(object.docUrl) ? globalThis.String(object.docUrl) : "",
@@ -486,8 +557,11 @@ export const MsgAddGovernanceFrameworkDocument = {
 
   toJSON(message: MsgAddGovernanceFrameworkDocument): unknown {
     const obj: any = {};
-    if (message.creator !== "") {
-      obj.creator = message.creator;
+    if (message.authority !== "") {
+      obj.authority = message.authority;
+    }
+    if (message.operator !== "") {
+      obj.operator = message.operator;
     }
     if (message.id !== 0) {
       obj.id = Math.round(message.id);
@@ -516,7 +590,8 @@ export const MsgAddGovernanceFrameworkDocument = {
     object: I,
   ): MsgAddGovernanceFrameworkDocument {
     const message = createBaseMsgAddGovernanceFrameworkDocument();
-    message.creator = object.creator ?? "";
+    message.authority = object.authority ?? "";
+    message.operator = object.operator ?? "";
     message.id = object.id ?? 0;
     message.docLanguage = object.docLanguage ?? "";
     message.docUrl = object.docUrl ?? "";
@@ -574,16 +649,19 @@ export const MsgAddGovernanceFrameworkDocumentResponse = {
 };
 
 function createBaseMsgIncreaseActiveGovernanceFrameworkVersion(): MsgIncreaseActiveGovernanceFrameworkVersion {
-  return { creator: "", id: 0 };
+  return { authority: "", operator: "", id: 0 };
 }
 
 export const MsgIncreaseActiveGovernanceFrameworkVersion = {
   encode(message: MsgIncreaseActiveGovernanceFrameworkVersion, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.creator !== "") {
-      writer.uint32(10).string(message.creator);
+    if (message.authority !== "") {
+      writer.uint32(10).string(message.authority);
+    }
+    if (message.operator !== "") {
+      writer.uint32(18).string(message.operator);
     }
     if (message.id !== 0) {
-      writer.uint32(16).uint64(message.id);
+      writer.uint32(24).uint64(message.id);
     }
     return writer;
   },
@@ -600,10 +678,17 @@ export const MsgIncreaseActiveGovernanceFrameworkVersion = {
             break;
           }
 
-          message.creator = reader.string();
+          message.authority = reader.string();
           continue;
         case 2:
-          if (tag !== 16) {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.operator = reader.string();
+          continue;
+        case 3:
+          if (tag !== 24) {
             break;
           }
 
@@ -620,15 +705,19 @@ export const MsgIncreaseActiveGovernanceFrameworkVersion = {
 
   fromJSON(object: any): MsgIncreaseActiveGovernanceFrameworkVersion {
     return {
-      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
+      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
       id: isSet(object.id) ? globalThis.Number(object.id) : 0,
     };
   },
 
   toJSON(message: MsgIncreaseActiveGovernanceFrameworkVersion): unknown {
     const obj: any = {};
-    if (message.creator !== "") {
-      obj.creator = message.creator;
+    if (message.authority !== "") {
+      obj.authority = message.authority;
+    }
+    if (message.operator !== "") {
+      obj.operator = message.operator;
     }
     if (message.id !== 0) {
       obj.id = Math.round(message.id);
@@ -645,7 +734,8 @@ export const MsgIncreaseActiveGovernanceFrameworkVersion = {
     object: I,
   ): MsgIncreaseActiveGovernanceFrameworkVersion {
     const message = createBaseMsgIncreaseActiveGovernanceFrameworkVersion();
-    message.creator = object.creator ?? "";
+    message.authority = object.authority ?? "";
+    message.operator = object.operator ?? "";
     message.id = object.id ?? 0;
     return message;
   },
@@ -699,22 +789,25 @@ export const MsgIncreaseActiveGovernanceFrameworkVersionResponse = {
 };
 
 function createBaseMsgUpdateTrustRegistry(): MsgUpdateTrustRegistry {
-  return { creator: "", id: 0, did: "", aka: "" };
+  return { authority: "", operator: "", id: 0, did: "", aka: "" };
 }
 
 export const MsgUpdateTrustRegistry = {
   encode(message: MsgUpdateTrustRegistry, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.creator !== "") {
-      writer.uint32(10).string(message.creator);
+    if (message.authority !== "") {
+      writer.uint32(10).string(message.authority);
+    }
+    if (message.operator !== "") {
+      writer.uint32(18).string(message.operator);
     }
     if (message.id !== 0) {
-      writer.uint32(16).uint64(message.id);
+      writer.uint32(24).uint64(message.id);
     }
     if (message.did !== "") {
-      writer.uint32(26).string(message.did);
+      writer.uint32(34).string(message.did);
     }
     if (message.aka !== "") {
-      writer.uint32(34).string(message.aka);
+      writer.uint32(42).string(message.aka);
     }
     return writer;
   },
@@ -731,24 +824,31 @@ export const MsgUpdateTrustRegistry = {
             break;
           }
 
-          message.creator = reader.string();
+          message.authority = reader.string();
           continue;
         case 2:
-          if (tag !== 16) {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.operator = reader.string();
+          continue;
+        case 3:
+          if (tag !== 24) {
             break;
           }
 
           message.id = longToNumber(reader.uint64() as Long);
           continue;
-        case 3:
-          if (tag !== 26) {
+        case 4:
+          if (tag !== 34) {
             break;
           }
 
           message.did = reader.string();
           continue;
-        case 4:
-          if (tag !== 34) {
+        case 5:
+          if (tag !== 42) {
             break;
           }
 
@@ -765,7 +865,8 @@ export const MsgUpdateTrustRegistry = {
 
   fromJSON(object: any): MsgUpdateTrustRegistry {
     return {
-      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
+      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
       id: isSet(object.id) ? globalThis.Number(object.id) : 0,
       did: isSet(object.did) ? globalThis.String(object.did) : "",
       aka: isSet(object.aka) ? globalThis.String(object.aka) : "",
@@ -774,8 +875,11 @@ export const MsgUpdateTrustRegistry = {
 
   toJSON(message: MsgUpdateTrustRegistry): unknown {
     const obj: any = {};
-    if (message.creator !== "") {
-      obj.creator = message.creator;
+    if (message.authority !== "") {
+      obj.authority = message.authority;
+    }
+    if (message.operator !== "") {
+      obj.operator = message.operator;
     }
     if (message.id !== 0) {
       obj.id = Math.round(message.id);
@@ -794,7 +898,8 @@ export const MsgUpdateTrustRegistry = {
   },
   fromPartial<I extends Exact<DeepPartial<MsgUpdateTrustRegistry>, I>>(object: I): MsgUpdateTrustRegistry {
     const message = createBaseMsgUpdateTrustRegistry();
-    message.creator = object.creator ?? "";
+    message.authority = object.authority ?? "";
+    message.operator = object.operator ?? "";
     message.id = object.id ?? 0;
     message.did = object.did ?? "";
     message.aka = object.aka ?? "";
@@ -846,19 +951,22 @@ export const MsgUpdateTrustRegistryResponse = {
 };
 
 function createBaseMsgArchiveTrustRegistry(): MsgArchiveTrustRegistry {
-  return { creator: "", id: 0, archive: false };
+  return { authority: "", operator: "", id: 0, archive: false };
 }
 
 export const MsgArchiveTrustRegistry = {
   encode(message: MsgArchiveTrustRegistry, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.creator !== "") {
-      writer.uint32(10).string(message.creator);
+    if (message.authority !== "") {
+      writer.uint32(10).string(message.authority);
+    }
+    if (message.operator !== "") {
+      writer.uint32(18).string(message.operator);
     }
     if (message.id !== 0) {
-      writer.uint32(16).uint64(message.id);
+      writer.uint32(24).uint64(message.id);
     }
     if (message.archive !== false) {
-      writer.uint32(24).bool(message.archive);
+      writer.uint32(32).bool(message.archive);
     }
     return writer;
   },
@@ -875,17 +983,24 @@ export const MsgArchiveTrustRegistry = {
             break;
           }
 
-          message.creator = reader.string();
+          message.authority = reader.string();
           continue;
         case 2:
-          if (tag !== 16) {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.operator = reader.string();
+          continue;
+        case 3:
+          if (tag !== 24) {
             break;
           }
 
           message.id = longToNumber(reader.uint64() as Long);
           continue;
-        case 3:
-          if (tag !== 24) {
+        case 4:
+          if (tag !== 32) {
             break;
           }
 
@@ -902,7 +1017,8 @@ export const MsgArchiveTrustRegistry = {
 
   fromJSON(object: any): MsgArchiveTrustRegistry {
     return {
-      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
+      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
       id: isSet(object.id) ? globalThis.Number(object.id) : 0,
       archive: isSet(object.archive) ? globalThis.Boolean(object.archive) : false,
     };
@@ -910,8 +1026,11 @@ export const MsgArchiveTrustRegistry = {
 
   toJSON(message: MsgArchiveTrustRegistry): unknown {
     const obj: any = {};
-    if (message.creator !== "") {
-      obj.creator = message.creator;
+    if (message.authority !== "") {
+      obj.authority = message.authority;
+    }
+    if (message.operator !== "") {
+      obj.operator = message.operator;
     }
     if (message.id !== 0) {
       obj.id = Math.round(message.id);
@@ -927,7 +1046,8 @@ export const MsgArchiveTrustRegistry = {
   },
   fromPartial<I extends Exact<DeepPartial<MsgArchiveTrustRegistry>, I>>(object: I): MsgArchiveTrustRegistry {
     const message = createBaseMsgArchiveTrustRegistry();
-    message.creator = object.creator ?? "";
+    message.authority = object.authority ?? "";
+    message.operator = object.operator ?? "";
     message.id = object.id ?? 0;
     message.archive = object.archive ?? false;
     return message;
