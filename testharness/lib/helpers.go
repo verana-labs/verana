@@ -123,6 +123,9 @@ func CreateSimpleCredentialSchema(
 		JsonSchema:                 schemaData,
 		IssuerPermManagementMode:   uint32(issuerMode),
 		VerifierPermManagementMode: uint32(verifierMode),
+		PricingAssetType:           uint32(cschema.PricingAssetType_TU),
+		PricingAsset:               "tu",
+		DigestAlgorithm:            "sha256",
 		// Validity periods are mandatory - use 0 (never expire) as default
 		IssuerGrantorValidationValidityPeriod:   &cschema.OptionalUInt32{Value: 0},
 		VerifierGrantorValidationValidityPeriod: &cschema.OptionalUInt32{Value: 0},
@@ -1031,11 +1034,13 @@ func UpdateCredentialSchema(
 		return "", fmt.Errorf("failed to get creator address: %w", err)
 	}
 
-	// Create complete message with creator address
+	// Create complete message with authority/operator addresses
 	// All validity period fields are mandatory - always set them (use 0 if not updating)
+	// For v4 spec, authority and operator are both the creator's address
 	msgWithCreator := cschema.MsgUpdateCredentialSchema{
-		Creator: creatorAddr,
-		Id:      schemaID,
+		Authority: creatorAddr,
+		Operator:  creatorAddr,
+		Id:        schemaID,
 		// Always set OptionalUInt32 fields (mandatory in new version)
 		IssuerGrantorValidationValidityPeriod: &cschema.OptionalUInt32{
 			Value: issuerGrantorValidationValidityPeriod,

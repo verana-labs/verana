@@ -29,7 +29,8 @@ func main() {
 
 	address := "verana16mzeyu9l6kua2cdg9x0jk5g6e7h0kk8q6uadu4"
 	msg := &cstypes.MsgCreateCredentialSchema{
-		Creator:                                 address,
+		Authority:                               address,
+		Operator:                                address,
 		TrId:                                    1,
 		JsonSchema:                              jsonSchema,
 		IssuerGrantorValidationValidityPeriod:   &cstypes.OptionalUInt32{Value: 0},
@@ -39,6 +40,9 @@ func main() {
 		HolderValidationValidityPeriod:          &cstypes.OptionalUInt32{Value: 0},
 		IssuerPermManagementMode:                2,
 		VerifierPermManagementMode:              1,
+		PricingAssetType:                        1,
+		PricingAsset:                            "tu",
+		DigestAlgorithm:                         "sha256",
 	}
 
 	fee := legacytx.StdFee{
