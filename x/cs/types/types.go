@@ -404,9 +404,16 @@ func validateDigestAlgorithm(algorithm string) error {
 }
 
 func (msg *MsgUpdateCredentialSchema) ValidateBasic() error {
-	_, err := sdk.AccAddressFromBech32(msg.Creator)
+	// Validate authority address
+	_, err := sdk.AccAddressFromBech32(msg.Authority)
 	if err != nil {
-		return errors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid creator address (%s)", err)
+		return errors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid authority address (%s)", err)
+	}
+
+	// Validate operator address
+	_, err = sdk.AccAddressFromBech32(msg.Operator)
+	if err != nil {
+		return errors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid operator address (%s)", err)
 	}
 
 	if msg.Id == 0 {

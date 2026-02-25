@@ -55,10 +55,13 @@ export interface MsgCreateCredentialSchemaResponse {
   id: number;
 }
 
+/** [MOD-CS-MSG-2] Update Credential Schema */
 export interface MsgUpdateCredentialSchema {
-  creator: string;
+  /** authority is the group account on whose behalf this message is executed */
+  authority: string;
+  /** operator is the account authorized by the authority to run this Msg */
+  operator: string;
   id: number;
-  /** Optional fields: nil/not set means don't update, 0 means never expires */
   issuerGrantorValidationValidityPeriod: OptionalUInt32 | undefined;
   verifierGrantorValidationValidityPeriod: OptionalUInt32 | undefined;
   issuerValidationValidityPeriod: OptionalUInt32 | undefined;
@@ -567,7 +570,8 @@ export const MsgCreateCredentialSchemaResponse = {
 
 function createBaseMsgUpdateCredentialSchema(): MsgUpdateCredentialSchema {
   return {
-    creator: "",
+    authority: "",
+    operator: "",
     id: 0,
     issuerGrantorValidationValidityPeriod: undefined,
     verifierGrantorValidationValidityPeriod: undefined,
@@ -579,26 +583,29 @@ function createBaseMsgUpdateCredentialSchema(): MsgUpdateCredentialSchema {
 
 export const MsgUpdateCredentialSchema = {
   encode(message: MsgUpdateCredentialSchema, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.creator !== "") {
-      writer.uint32(10).string(message.creator);
+    if (message.authority !== "") {
+      writer.uint32(10).string(message.authority);
+    }
+    if (message.operator !== "") {
+      writer.uint32(18).string(message.operator);
     }
     if (message.id !== 0) {
-      writer.uint32(16).uint64(message.id);
+      writer.uint32(24).uint64(message.id);
     }
     if (message.issuerGrantorValidationValidityPeriod !== undefined) {
-      OptionalUInt32.encode(message.issuerGrantorValidationValidityPeriod, writer.uint32(26).fork()).ldelim();
+      OptionalUInt32.encode(message.issuerGrantorValidationValidityPeriod, writer.uint32(34).fork()).ldelim();
     }
     if (message.verifierGrantorValidationValidityPeriod !== undefined) {
-      OptionalUInt32.encode(message.verifierGrantorValidationValidityPeriod, writer.uint32(34).fork()).ldelim();
+      OptionalUInt32.encode(message.verifierGrantorValidationValidityPeriod, writer.uint32(42).fork()).ldelim();
     }
     if (message.issuerValidationValidityPeriod !== undefined) {
-      OptionalUInt32.encode(message.issuerValidationValidityPeriod, writer.uint32(42).fork()).ldelim();
+      OptionalUInt32.encode(message.issuerValidationValidityPeriod, writer.uint32(50).fork()).ldelim();
     }
     if (message.verifierValidationValidityPeriod !== undefined) {
-      OptionalUInt32.encode(message.verifierValidationValidityPeriod, writer.uint32(50).fork()).ldelim();
+      OptionalUInt32.encode(message.verifierValidationValidityPeriod, writer.uint32(58).fork()).ldelim();
     }
     if (message.holderValidationValidityPeriod !== undefined) {
-      OptionalUInt32.encode(message.holderValidationValidityPeriod, writer.uint32(58).fork()).ldelim();
+      OptionalUInt32.encode(message.holderValidationValidityPeriod, writer.uint32(66).fork()).ldelim();
     }
     return writer;
   },
@@ -615,45 +622,52 @@ export const MsgUpdateCredentialSchema = {
             break;
           }
 
-          message.creator = reader.string();
+          message.authority = reader.string();
           continue;
         case 2:
-          if (tag !== 16) {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.operator = reader.string();
+          continue;
+        case 3:
+          if (tag !== 24) {
             break;
           }
 
           message.id = longToNumber(reader.uint64() as Long);
-          continue;
-        case 3:
-          if (tag !== 26) {
-            break;
-          }
-
-          message.issuerGrantorValidationValidityPeriod = OptionalUInt32.decode(reader, reader.uint32());
           continue;
         case 4:
           if (tag !== 34) {
             break;
           }
 
-          message.verifierGrantorValidationValidityPeriod = OptionalUInt32.decode(reader, reader.uint32());
+          message.issuerGrantorValidationValidityPeriod = OptionalUInt32.decode(reader, reader.uint32());
           continue;
         case 5:
           if (tag !== 42) {
             break;
           }
 
-          message.issuerValidationValidityPeriod = OptionalUInt32.decode(reader, reader.uint32());
+          message.verifierGrantorValidationValidityPeriod = OptionalUInt32.decode(reader, reader.uint32());
           continue;
         case 6:
           if (tag !== 50) {
             break;
           }
 
-          message.verifierValidationValidityPeriod = OptionalUInt32.decode(reader, reader.uint32());
+          message.issuerValidationValidityPeriod = OptionalUInt32.decode(reader, reader.uint32());
           continue;
         case 7:
           if (tag !== 58) {
+            break;
+          }
+
+          message.verifierValidationValidityPeriod = OptionalUInt32.decode(reader, reader.uint32());
+          continue;
+        case 8:
+          if (tag !== 66) {
             break;
           }
 
@@ -670,7 +684,8 @@ export const MsgUpdateCredentialSchema = {
 
   fromJSON(object: any): MsgUpdateCredentialSchema {
     return {
-      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
+      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
       id: isSet(object.id) ? globalThis.Number(object.id) : 0,
       issuerGrantorValidationValidityPeriod: isSet(object.issuerGrantorValidationValidityPeriod)
         ? OptionalUInt32.fromJSON(object.issuerGrantorValidationValidityPeriod)
@@ -692,8 +707,11 @@ export const MsgUpdateCredentialSchema = {
 
   toJSON(message: MsgUpdateCredentialSchema): unknown {
     const obj: any = {};
-    if (message.creator !== "") {
-      obj.creator = message.creator;
+    if (message.authority !== "") {
+      obj.authority = message.authority;
+    }
+    if (message.operator !== "") {
+      obj.operator = message.operator;
     }
     if (message.id !== 0) {
       obj.id = Math.round(message.id);
@@ -723,7 +741,8 @@ export const MsgUpdateCredentialSchema = {
   },
   fromPartial<I extends Exact<DeepPartial<MsgUpdateCredentialSchema>, I>>(object: I): MsgUpdateCredentialSchema {
     const message = createBaseMsgUpdateCredentialSchema();
-    message.creator = object.creator ?? "";
+    message.authority = object.authority ?? "";
+    message.operator = object.operator ?? "";
     message.id = object.id ?? 0;
     message.issuerGrantorValidationValidityPeriod =
       (object.issuerGrantorValidationValidityPeriod !== undefined &&

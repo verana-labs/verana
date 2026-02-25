@@ -496,24 +496,24 @@ func TestUpdateCredentialSchema(t *testing.T) {
 	}{
 		{
 			name:    "valid update",
-			msg:     keeper.CreateUpdateMsgWithValidityPeriods(authority, schemaID.Id, 365, 365, 180, 180, 180),
+			msg:     keeper.CreateUpdateMsgWithValidityPeriods(authority, operator, schemaID.Id, 365, 365, 180, 180, 180),
 			expPass: true,
 		},
 		{
 			name:          "non-existent schema",
-			msg:           keeper.CreateUpdateMsgWithValidityPeriods(authority, 999, 365, 365, 180, 180, 180),
+			msg:           keeper.CreateUpdateMsgWithValidityPeriods(authority, operator, 999, 365, 365, 180, 180, 180),
 			expPass:       false,
 			errorContains: "credential schema not found",
 		},
 		{
 			name:          "unauthorized update - not controller",
-			msg:           keeper.CreateUpdateMsgWithValidityPeriods("verana1unauthorized", schemaID.Id, 365, 365, 180, 180, 180),
+			msg:           keeper.CreateUpdateMsgWithValidityPeriods(sdk.AccAddress([]byte("wrong_authority_____")).String(), operator, schemaID.Id, 365, 365, 180, 180, 180),
 			expPass:       false,
-			errorContains: "creator is not the controller",
+			errorContains: "authority is not the controller",
 		},
 		{
 			name:          "invalid validity period - exceeds maximum",
-			msg:           keeper.CreateUpdateMsgWithValidityPeriods(authority, schemaID.Id, 99999, 365, 180, 180, 180),
+			msg:           keeper.CreateUpdateMsgWithValidityPeriods(authority, operator, schemaID.Id, 99999, 365, 180, 180, 180),
 			expPass:       false,
 			errorContains: "exceeds maximum",
 		},

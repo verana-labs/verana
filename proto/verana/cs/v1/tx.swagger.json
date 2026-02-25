@@ -264,16 +264,20 @@
     "verana.cs.v1.MsgUpdateCredentialSchema": {
       "type": "object",
       "properties": {
-        "creator": {
-          "type": "string"
+        "authority": {
+          "type": "string",
+          "title": "authority is the group account on whose behalf this message is executed"
+        },
+        "operator": {
+          "type": "string",
+          "title": "operator is the account authorized by the authority to run this Msg"
         },
         "id": {
           "type": "string",
           "format": "uint64"
         },
         "issuer_grantor_validation_validity_period": {
-          "$ref": "#/definitions/verana.cs.v1.OptionalUInt32",
-          "title": "Optional fields: nil/not set means don't update, 0 means never expires"
+          "$ref": "#/definitions/verana.cs.v1.OptionalUInt32"
         },
         "verifier_grantor_validation_validity_period": {
           "$ref": "#/definitions/verana.cs.v1.OptionalUInt32"
@@ -287,7 +291,8 @@
         "holder_validation_validity_period": {
           "$ref": "#/definitions/verana.cs.v1.OptionalUInt32"
         }
-      }
+      },
+      "title": "[MOD-CS-MSG-2] Update Credential Schema"
     },
     "verana.cs.v1.MsgUpdateCredentialSchemaResponse": {
       "type": "object"

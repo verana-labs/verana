@@ -152,10 +152,11 @@ func CreateMsgWithValidityPeriods(authority string, operator string, trID uint64
 	return msg
 }
 
-func CreateUpdateMsgWithValidityPeriods(creator string, id uint64, issuerGrantor, verifierGrantor, issuer, verifier, holder uint32) *types.MsgUpdateCredentialSchema {
+func CreateUpdateMsgWithValidityPeriods(authority string, operator string, id uint64, issuerGrantor, verifierGrantor, issuer, verifier, holder uint32) *types.MsgUpdateCredentialSchema {
 	msg := &types.MsgUpdateCredentialSchema{
-		Creator: creator,
-		Id:      id,
+		Authority: authority,
+		Operator:  operator,
+		Id:        id,
 	}
 
 	// Set optional fields using wrapper messages (0 is valid - means never expires)
