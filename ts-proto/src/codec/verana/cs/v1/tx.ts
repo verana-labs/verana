@@ -30,8 +30,12 @@ export interface MsgUpdateParams {
 export interface MsgUpdateParamsResponse {
 }
 
+/** [MOD-CS-MSG-1] Create New Credential Schema */
 export interface MsgCreateCredentialSchema {
-  creator: string;
+  /** authority is the group account on whose behalf this message is executed */
+  authority: string;
+  /** operator is the account authorized by the authority to run this Msg */
+  operator: string;
   trId: number;
   jsonSchema: string;
   issuerGrantorValidationValidityPeriod: OptionalUInt32 | undefined;
@@ -41,6 +45,9 @@ export interface MsgCreateCredentialSchema {
   holderValidationValidityPeriod: OptionalUInt32 | undefined;
   issuerPermManagementMode: number;
   verifierPermManagementMode: number;
+  pricingAssetType: number;
+  pricingAsset: string;
+  digestAlgorithm: string;
 }
 
 export interface MsgCreateCredentialSchemaResponse {
@@ -197,7 +204,8 @@ export const MsgUpdateParamsResponse = {
 
 function createBaseMsgCreateCredentialSchema(): MsgCreateCredentialSchema {
   return {
-    creator: "",
+    authority: "",
+    operator: "",
     trId: 0,
     jsonSchema: "",
     issuerGrantorValidationValidityPeriod: undefined,
@@ -207,40 +215,55 @@ function createBaseMsgCreateCredentialSchema(): MsgCreateCredentialSchema {
     holderValidationValidityPeriod: undefined,
     issuerPermManagementMode: 0,
     verifierPermManagementMode: 0,
+    pricingAssetType: 0,
+    pricingAsset: "",
+    digestAlgorithm: "",
   };
 }
 
 export const MsgCreateCredentialSchema = {
   encode(message: MsgCreateCredentialSchema, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.creator !== "") {
-      writer.uint32(10).string(message.creator);
+    if (message.authority !== "") {
+      writer.uint32(10).string(message.authority);
+    }
+    if (message.operator !== "") {
+      writer.uint32(18).string(message.operator);
     }
     if (message.trId !== 0) {
-      writer.uint32(16).uint64(message.trId);
+      writer.uint32(24).uint64(message.trId);
     }
     if (message.jsonSchema !== "") {
-      writer.uint32(26).string(message.jsonSchema);
+      writer.uint32(34).string(message.jsonSchema);
     }
     if (message.issuerGrantorValidationValidityPeriod !== undefined) {
-      OptionalUInt32.encode(message.issuerGrantorValidationValidityPeriod, writer.uint32(34).fork()).ldelim();
+      OptionalUInt32.encode(message.issuerGrantorValidationValidityPeriod, writer.uint32(42).fork()).ldelim();
     }
     if (message.verifierGrantorValidationValidityPeriod !== undefined) {
-      OptionalUInt32.encode(message.verifierGrantorValidationValidityPeriod, writer.uint32(42).fork()).ldelim();
+      OptionalUInt32.encode(message.verifierGrantorValidationValidityPeriod, writer.uint32(50).fork()).ldelim();
     }
     if (message.issuerValidationValidityPeriod !== undefined) {
-      OptionalUInt32.encode(message.issuerValidationValidityPeriod, writer.uint32(50).fork()).ldelim();
+      OptionalUInt32.encode(message.issuerValidationValidityPeriod, writer.uint32(58).fork()).ldelim();
     }
     if (message.verifierValidationValidityPeriod !== undefined) {
-      OptionalUInt32.encode(message.verifierValidationValidityPeriod, writer.uint32(58).fork()).ldelim();
+      OptionalUInt32.encode(message.verifierValidationValidityPeriod, writer.uint32(66).fork()).ldelim();
     }
     if (message.holderValidationValidityPeriod !== undefined) {
-      OptionalUInt32.encode(message.holderValidationValidityPeriod, writer.uint32(66).fork()).ldelim();
+      OptionalUInt32.encode(message.holderValidationValidityPeriod, writer.uint32(74).fork()).ldelim();
     }
     if (message.issuerPermManagementMode !== 0) {
-      writer.uint32(72).uint32(message.issuerPermManagementMode);
+      writer.uint32(80).uint32(message.issuerPermManagementMode);
     }
     if (message.verifierPermManagementMode !== 0) {
-      writer.uint32(80).uint32(message.verifierPermManagementMode);
+      writer.uint32(88).uint32(message.verifierPermManagementMode);
+    }
+    if (message.pricingAssetType !== 0) {
+      writer.uint32(96).uint32(message.pricingAssetType);
+    }
+    if (message.pricingAsset !== "") {
+      writer.uint32(106).string(message.pricingAsset);
+    }
+    if (message.digestAlgorithm !== "") {
+      writer.uint32(114).string(message.digestAlgorithm);
     }
     return writer;
   },
@@ -257,70 +280,98 @@ export const MsgCreateCredentialSchema = {
             break;
           }
 
-          message.creator = reader.string();
+          message.authority = reader.string();
           continue;
         case 2:
-          if (tag !== 16) {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.operator = reader.string();
+          continue;
+        case 3:
+          if (tag !== 24) {
             break;
           }
 
           message.trId = longToNumber(reader.uint64() as Long);
-          continue;
-        case 3:
-          if (tag !== 26) {
-            break;
-          }
-
-          message.jsonSchema = reader.string();
           continue;
         case 4:
           if (tag !== 34) {
             break;
           }
 
-          message.issuerGrantorValidationValidityPeriod = OptionalUInt32.decode(reader, reader.uint32());
+          message.jsonSchema = reader.string();
           continue;
         case 5:
           if (tag !== 42) {
             break;
           }
 
-          message.verifierGrantorValidationValidityPeriod = OptionalUInt32.decode(reader, reader.uint32());
+          message.issuerGrantorValidationValidityPeriod = OptionalUInt32.decode(reader, reader.uint32());
           continue;
         case 6:
           if (tag !== 50) {
             break;
           }
 
-          message.issuerValidationValidityPeriod = OptionalUInt32.decode(reader, reader.uint32());
+          message.verifierGrantorValidationValidityPeriod = OptionalUInt32.decode(reader, reader.uint32());
           continue;
         case 7:
           if (tag !== 58) {
             break;
           }
 
-          message.verifierValidationValidityPeriod = OptionalUInt32.decode(reader, reader.uint32());
+          message.issuerValidationValidityPeriod = OptionalUInt32.decode(reader, reader.uint32());
           continue;
         case 8:
           if (tag !== 66) {
             break;
           }
 
-          message.holderValidationValidityPeriod = OptionalUInt32.decode(reader, reader.uint32());
+          message.verifierValidationValidityPeriod = OptionalUInt32.decode(reader, reader.uint32());
           continue;
         case 9:
-          if (tag !== 72) {
+          if (tag !== 74) {
             break;
           }
 
-          message.issuerPermManagementMode = reader.uint32();
+          message.holderValidationValidityPeriod = OptionalUInt32.decode(reader, reader.uint32());
           continue;
         case 10:
           if (tag !== 80) {
             break;
           }
 
+          message.issuerPermManagementMode = reader.uint32();
+          continue;
+        case 11:
+          if (tag !== 88) {
+            break;
+          }
+
           message.verifierPermManagementMode = reader.uint32();
+          continue;
+        case 12:
+          if (tag !== 96) {
+            break;
+          }
+
+          message.pricingAssetType = reader.uint32();
+          continue;
+        case 13:
+          if (tag !== 106) {
+            break;
+          }
+
+          message.pricingAsset = reader.string();
+          continue;
+        case 14:
+          if (tag !== 114) {
+            break;
+          }
+
+          message.digestAlgorithm = reader.string();
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -333,7 +384,8 @@ export const MsgCreateCredentialSchema = {
 
   fromJSON(object: any): MsgCreateCredentialSchema {
     return {
-      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
+      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
       trId: isSet(object.trId) ? globalThis.Number(object.trId) : 0,
       jsonSchema: isSet(object.jsonSchema) ? globalThis.String(object.jsonSchema) : "",
       issuerGrantorValidationValidityPeriod: isSet(object.issuerGrantorValidationValidityPeriod)
@@ -357,13 +409,19 @@ export const MsgCreateCredentialSchema = {
       verifierPermManagementMode: isSet(object.verifierPermManagementMode)
         ? globalThis.Number(object.verifierPermManagementMode)
         : 0,
+      pricingAssetType: isSet(object.pricingAssetType) ? globalThis.Number(object.pricingAssetType) : 0,
+      pricingAsset: isSet(object.pricingAsset) ? globalThis.String(object.pricingAsset) : "",
+      digestAlgorithm: isSet(object.digestAlgorithm) ? globalThis.String(object.digestAlgorithm) : "",
     };
   },
 
   toJSON(message: MsgCreateCredentialSchema): unknown {
     const obj: any = {};
-    if (message.creator !== "") {
-      obj.creator = message.creator;
+    if (message.authority !== "") {
+      obj.authority = message.authority;
+    }
+    if (message.operator !== "") {
+      obj.operator = message.operator;
     }
     if (message.trId !== 0) {
       obj.trId = Math.round(message.trId);
@@ -394,6 +452,15 @@ export const MsgCreateCredentialSchema = {
     if (message.verifierPermManagementMode !== 0) {
       obj.verifierPermManagementMode = Math.round(message.verifierPermManagementMode);
     }
+    if (message.pricingAssetType !== 0) {
+      obj.pricingAssetType = Math.round(message.pricingAssetType);
+    }
+    if (message.pricingAsset !== "") {
+      obj.pricingAsset = message.pricingAsset;
+    }
+    if (message.digestAlgorithm !== "") {
+      obj.digestAlgorithm = message.digestAlgorithm;
+    }
     return obj;
   },
 
@@ -402,7 +469,8 @@ export const MsgCreateCredentialSchema = {
   },
   fromPartial<I extends Exact<DeepPartial<MsgCreateCredentialSchema>, I>>(object: I): MsgCreateCredentialSchema {
     const message = createBaseMsgCreateCredentialSchema();
-    message.creator = object.creator ?? "";
+    message.authority = object.authority ?? "";
+    message.operator = object.operator ?? "";
     message.trId = object.trId ?? 0;
     message.jsonSchema = object.jsonSchema ?? "";
     message.issuerGrantorValidationValidityPeriod =
@@ -429,6 +497,9 @@ export const MsgCreateCredentialSchema = {
         : undefined;
     message.issuerPermManagementMode = object.issuerPermManagementMode ?? 0;
     message.verifierPermManagementMode = object.verifierPermManagementMode ?? 0;
+    message.pricingAssetType = object.pricingAssetType ?? 0;
+    message.pricingAsset = object.pricingAsset ?? "";
+    message.digestAlgorithm = object.digestAlgorithm ?? "";
     return message;
   },
 };

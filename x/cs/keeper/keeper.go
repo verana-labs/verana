@@ -24,13 +24,13 @@ type (
 		authority           string
 		bankKeeper          types.BankKeeper
 		trustRegistryKeeper types.TrustRegistryKeeper
+		delegationKeeper    types.DelegationKeeper
 
 		// State management
 		Schema collections.Schema
 		//Params           collections.Item[types.Params]
 		CredentialSchema collections.Map[uint64, types.CredentialSchema]
 		Counter          collections.Map[string, uint64]
-		trustDeposit     types.TrustDepositKeeper
 	}
 )
 
@@ -41,7 +41,7 @@ func NewKeeper(
 	authority string,
 	bankKeeper types.BankKeeper,
 	trustRegistryKeeper types.TrustRegistryKeeper,
-	trustDeposit types.TrustDepositKeeper,
+	delegationKeeper types.DelegationKeeper,
 ) Keeper {
 	if _, err := sdk.AccAddressFromBech32(authority); err != nil {
 		panic(fmt.Sprintf("invalid authority address: %s", authority))
@@ -56,6 +56,7 @@ func NewKeeper(
 		authority:           authority,
 		bankKeeper:          bankKeeper,
 		trustRegistryKeeper: trustRegistryKeeper,
+		delegationKeeper:    delegationKeeper,
 
 		// Initialize collections
 		CredentialSchema: collections.NewMap(
@@ -72,7 +73,6 @@ func NewKeeper(
 			collections.StringKey,
 			collections.Uint64Value,
 		),
-		trustDeposit: trustDeposit,
 	}
 
 	schema, err := sb.Build()
@@ -131,11 +131,12 @@ func (k Keeper) GetNextID(ctx sdk.Context, entityType string) (uint64, error) {
 	return nextID, nil
 }
 
-func CreateMsgWithValidityPeriods(creator string, trID uint64, jsonSchema string, issuerGrantor, verifierGrantor, issuer, verifier, holder uint32, issuerMode, verifierMode uint32) *types.MsgCreateCredentialSchema {
+func CreateMsgWithValidityPeriods(authority string, operator string, trID uint64, jsonSchema string, issuerGrantor, verifierGrantor, issuer, verifier, holder uint32, issuerMode, verifierMode uint32, pricingAssetType uint32, pricingAsset string, digestAlgorithm string) *types.MsgCreateCredentialSchema {
 	msg := &types.MsgCreateCredentialSchema{
-		Creator:                                 creator,
-		TrId:                                    trID,
-		JsonSchema:                              jsonSchema,
+		Authority:                              authority,
+		Operator:                               operator,
+		TrId:                                   trID,
+		JsonSchema:                             jsonSchema,
 		IssuerGrantorValidationValidityPeriod:   &types.OptionalUInt32{Value: issuerGrantor},
 		VerifierGrantorValidationValidityPeriod: &types.OptionalUInt32{Value: verifierGrantor},
 		IssuerValidationValidityPeriod:          &types.OptionalUInt32{Value: issuer},
@@ -143,6 +144,9 @@ func CreateMsgWithValidityPeriods(creator string, trID uint64, jsonSchema string
 		HolderValidationValidityPeriod:          &types.OptionalUInt32{Value: holder},
 		IssuerPermManagementMode:                issuerMode,
 		VerifierPermManagementMode:              verifierMode,
+		PricingAssetType:                        pricingAssetType,
+		PricingAsset:                            pricingAsset,
+		DigestAlgorithm:                         digestAlgorithm,
 	}
 
 	return msg

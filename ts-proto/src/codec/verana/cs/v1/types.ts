@@ -61,6 +61,56 @@ export function credentialSchemaPermManagementModeToJSON(object: CredentialSchem
   }
 }
 
+/** PricingAssetType defines the type of asset used for paying business fees */
+export enum PricingAssetType {
+  /** PRICING_ASSET_TYPE_UNSPECIFIED - Default to prevent accidental omission */
+  PRICING_ASSET_TYPE_UNSPECIFIED = 0,
+  /** TU - Trust Unit (non-transferable token for fee definitions) */
+  TU = 1,
+  /** COIN - Native blockchain token or IBC asset */
+  COIN = 2,
+  /** FIAT - Fiat currency (off-chain settlement) */
+  FIAT = 3,
+  UNRECOGNIZED = -1,
+}
+
+export function pricingAssetTypeFromJSON(object: any): PricingAssetType {
+  switch (object) {
+    case 0:
+    case "PRICING_ASSET_TYPE_UNSPECIFIED":
+      return PricingAssetType.PRICING_ASSET_TYPE_UNSPECIFIED;
+    case 1:
+    case "TU":
+      return PricingAssetType.TU;
+    case 2:
+    case "COIN":
+      return PricingAssetType.COIN;
+    case 3:
+    case "FIAT":
+      return PricingAssetType.FIAT;
+    case -1:
+    case "UNRECOGNIZED":
+    default:
+      return PricingAssetType.UNRECOGNIZED;
+  }
+}
+
+export function pricingAssetTypeToJSON(object: PricingAssetType): string {
+  switch (object) {
+    case PricingAssetType.PRICING_ASSET_TYPE_UNSPECIFIED:
+      return "PRICING_ASSET_TYPE_UNSPECIFIED";
+    case PricingAssetType.TU:
+      return "TU";
+    case PricingAssetType.COIN:
+      return "COIN";
+    case PricingAssetType.FIAT:
+      return "FIAT";
+    case PricingAssetType.UNRECOGNIZED:
+    default:
+      return "UNRECOGNIZED";
+  }
+}
+
 /** CredentialSchema defines the structure for a credential schema */
 export interface CredentialSchema {
   id: number;
@@ -68,7 +118,6 @@ export interface CredentialSchema {
   created: Date | undefined;
   modified: Date | undefined;
   archived: Date | undefined;
-  deposit: number;
   jsonSchema: string;
   issuerGrantorValidationValidityPeriod: number;
   verifierGrantorValidationValidityPeriod: number;
@@ -77,6 +126,9 @@ export interface CredentialSchema {
   holderValidationValidityPeriod: number;
   issuerPermManagementMode: CredentialSchemaPermManagementMode;
   verifierPermManagementMode: CredentialSchemaPermManagementMode;
+  pricingAssetType: PricingAssetType;
+  pricingAsset: string;
+  digestAlgorithm: string;
 }
 
 function createBaseCredentialSchema(): CredentialSchema {
@@ -86,7 +138,6 @@ function createBaseCredentialSchema(): CredentialSchema {
     created: undefined,
     modified: undefined,
     archived: undefined,
-    deposit: 0,
     jsonSchema: "",
     issuerGrantorValidationValidityPeriod: 0,
     verifierGrantorValidationValidityPeriod: 0,
@@ -95,6 +146,9 @@ function createBaseCredentialSchema(): CredentialSchema {
     holderValidationValidityPeriod: 0,
     issuerPermManagementMode: 0,
     verifierPermManagementMode: 0,
+    pricingAssetType: 0,
+    pricingAsset: "",
+    digestAlgorithm: "",
   };
 }
 
@@ -114,9 +168,6 @@ export const CredentialSchema = {
     }
     if (message.archived !== undefined) {
       Timestamp.encode(toTimestamp(message.archived), writer.uint32(42).fork()).ldelim();
-    }
-    if (message.deposit !== 0) {
-      writer.uint32(48).uint64(message.deposit);
     }
     if (message.jsonSchema !== "") {
       writer.uint32(58).string(message.jsonSchema);
@@ -141,6 +192,15 @@ export const CredentialSchema = {
     }
     if (message.verifierPermManagementMode !== 0) {
       writer.uint32(112).int32(message.verifierPermManagementMode);
+    }
+    if (message.pricingAssetType !== 0) {
+      writer.uint32(120).int32(message.pricingAssetType);
+    }
+    if (message.pricingAsset !== "") {
+      writer.uint32(130).string(message.pricingAsset);
+    }
+    if (message.digestAlgorithm !== "") {
+      writer.uint32(138).string(message.digestAlgorithm);
     }
     return writer;
   },
@@ -186,13 +246,6 @@ export const CredentialSchema = {
           }
 
           message.archived = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
-          continue;
-        case 6:
-          if (tag !== 48) {
-            break;
-          }
-
-          message.deposit = longToNumber(reader.uint64() as Long);
           continue;
         case 7:
           if (tag !== 58) {
@@ -250,6 +303,27 @@ export const CredentialSchema = {
 
           message.verifierPermManagementMode = reader.int32() as any;
           continue;
+        case 15:
+          if (tag !== 120) {
+            break;
+          }
+
+          message.pricingAssetType = reader.int32() as any;
+          continue;
+        case 16:
+          if (tag !== 130) {
+            break;
+          }
+
+          message.pricingAsset = reader.string();
+          continue;
+        case 17:
+          if (tag !== 138) {
+            break;
+          }
+
+          message.digestAlgorithm = reader.string();
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -266,7 +340,6 @@ export const CredentialSchema = {
       created: isSet(object.created) ? fromJsonTimestamp(object.created) : undefined,
       modified: isSet(object.modified) ? fromJsonTimestamp(object.modified) : undefined,
       archived: isSet(object.archived) ? fromJsonTimestamp(object.archived) : undefined,
-      deposit: isSet(object.deposit) ? globalThis.Number(object.deposit) : 0,
       jsonSchema: isSet(object.jsonSchema) ? globalThis.String(object.jsonSchema) : "",
       issuerGrantorValidationValidityPeriod: isSet(object.issuerGrantorValidationValidityPeriod)
         ? globalThis.Number(object.issuerGrantorValidationValidityPeriod)
@@ -289,6 +362,9 @@ export const CredentialSchema = {
       verifierPermManagementMode: isSet(object.verifierPermManagementMode)
         ? credentialSchemaPermManagementModeFromJSON(object.verifierPermManagementMode)
         : 0,
+      pricingAssetType: isSet(object.pricingAssetType) ? pricingAssetTypeFromJSON(object.pricingAssetType) : 0,
+      pricingAsset: isSet(object.pricingAsset) ? globalThis.String(object.pricingAsset) : "",
+      digestAlgorithm: isSet(object.digestAlgorithm) ? globalThis.String(object.digestAlgorithm) : "",
     };
   },
 
@@ -308,9 +384,6 @@ export const CredentialSchema = {
     }
     if (message.archived !== undefined) {
       obj.archived = message.archived.toISOString();
-    }
-    if (message.deposit !== 0) {
-      obj.deposit = Math.round(message.deposit);
     }
     if (message.jsonSchema !== "") {
       obj.jsonSchema = message.jsonSchema;
@@ -336,6 +409,15 @@ export const CredentialSchema = {
     if (message.verifierPermManagementMode !== 0) {
       obj.verifierPermManagementMode = credentialSchemaPermManagementModeToJSON(message.verifierPermManagementMode);
     }
+    if (message.pricingAssetType !== 0) {
+      obj.pricingAssetType = pricingAssetTypeToJSON(message.pricingAssetType);
+    }
+    if (message.pricingAsset !== "") {
+      obj.pricingAsset = message.pricingAsset;
+    }
+    if (message.digestAlgorithm !== "") {
+      obj.digestAlgorithm = message.digestAlgorithm;
+    }
     return obj;
   },
 
@@ -349,7 +431,6 @@ export const CredentialSchema = {
     message.created = object.created ?? undefined;
     message.modified = object.modified ?? undefined;
     message.archived = object.archived ?? undefined;
-    message.deposit = object.deposit ?? 0;
     message.jsonSchema = object.jsonSchema ?? "";
     message.issuerGrantorValidationValidityPeriod = object.issuerGrantorValidationValidityPeriod ?? 0;
     message.verifierGrantorValidationValidityPeriod = object.verifierGrantorValidationValidityPeriod ?? 0;
@@ -358,6 +439,9 @@ export const CredentialSchema = {
     message.holderValidationValidityPeriod = object.holderValidationValidityPeriod ?? 0;
     message.issuerPermManagementMode = object.issuerPermManagementMode ?? 0;
     message.verifierPermManagementMode = object.verifierPermManagementMode ?? 0;
+    message.pricingAssetType = object.pricingAssetType ?? 0;
+    message.pricingAsset = object.pricingAsset ?? "";
+    message.digestAlgorithm = object.digestAlgorithm ?? "";
     return message;
   },
 };

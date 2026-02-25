@@ -203,10 +203,6 @@
           "type": "string",
           "format": "date-time"
         },
-        "deposit": {
-          "type": "string",
-          "format": "uint64"
-        },
         "json_schema": {
           "type": "string"
         },
@@ -235,6 +231,15 @@
         },
         "verifier_perm_management_mode": {
           "$ref": "#/definitions/verana.cs.v1.CredentialSchemaPermManagementMode"
+        },
+        "pricing_asset_type": {
+          "$ref": "#/definitions/verana.cs.v1.PricingAssetType"
+        },
+        "pricing_asset": {
+          "type": "string"
+        },
+        "digest_algorithm": {
+          "type": "string"
         }
       },
       "title": "CredentialSchema defines the structure for a credential schema"
@@ -254,10 +259,6 @@
     "verana.cs.v1.Params": {
       "type": "object",
       "properties": {
-        "credential_schema_trust_deposit": {
-          "type": "string",
-          "format": "uint64"
-        },
         "credential_schema_schema_max_size": {
           "type": "string",
           "format": "uint64"
@@ -284,6 +285,18 @@
         }
       },
       "description": "Params defines the parameters for the module."
+    },
+    "verana.cs.v1.PricingAssetType": {
+      "type": "string",
+      "enum": [
+        "PRICING_ASSET_TYPE_UNSPECIFIED",
+        "TU",
+        "COIN",
+        "FIAT"
+      ],
+      "default": "PRICING_ASSET_TYPE_UNSPECIFIED",
+      "description": "- PRICING_ASSET_TYPE_UNSPECIFIED: Default to prevent accidental omission\n - TU: Trust Unit (non-transferable token for fee definitions)\n - COIN: Native blockchain token or IBC asset\n - FIAT: Fiat currency (off-chain settlement)",
+      "title": "PricingAssetType defines the type of asset used for paying business fees"
     },
     "verana.cs.v1.QueryGetCredentialSchemaResponse": {
       "type": "object",

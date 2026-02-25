@@ -24,6 +24,20 @@ var _ types.MsgServer = msgServer{}
 
 func (ms msgServer) CreateCredentialSchema(goCtx context.Context, msg *types.MsgCreateCredentialSchema) (*types.MsgCreateCredentialSchemaResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
+	now := ctx.BlockTime()
+
+	// [MOD-CS-MSG-1-2-1] [AUTHZ-CHECK] Verify operator authorization
+	if ms.delegationKeeper != nil {
+		if err := ms.delegationKeeper.CheckOperatorAuthorization(
+			ctx,
+			msg.Authority,
+			msg.Operator,
+			"/verana.cs.v1.MsgCreateCredentialSchema",
+			now,
+		); err != nil {
+			return nil, fmt.Errorf("authorization check failed: %w", err)
+		}
+	}
 
 	// Generate next ID
 	nextID, err := ms.GetNextID(ctx, "cs")
@@ -46,7 +60,8 @@ func (ms msgServer) CreateCredentialSchema(goCtx context.Context, msg *types.Msg
 			types.EventTypeCreateCredentialSchema,
 			sdk.NewAttribute(types.AttributeKeyId, strconv.FormatUint(nextID, 10)),
 			sdk.NewAttribute(types.AttributeKeyTrId, strconv.FormatUint(msg.TrId, 10)),
-			sdk.NewAttribute(types.AttributeKeyCreator, msg.Creator),
+			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Authority),
+			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
 		),
 	})
@@ -81,7 +96,6 @@ func (ms msgServer) UpdateCredentialSchema(goCtx context.Context, msg *types.Msg
 	}
 
 	// [MOD-CS-MSG-2-3] Update mutable fields
-	// All validity period fields are mandatory (already validated), 0 means never expires
 	cs.IssuerGrantorValidationValidityPeriod = msg.GetIssuerGrantorValidationValidityPeriod().GetValue()
 	cs.VerifierGrantorValidationValidityPeriod = msg.GetVerifierGrantorValidationValidityPeriod().GetValue()
 	cs.IssuerValidationValidityPeriod = msg.GetIssuerValidationValidityPeriod().GetValue()
@@ -112,13 +126,10 @@ func (ms msgServer) UpdateCredentialSchema(goCtx context.Context, msg *types.Msg
 }
 
 // ValidateValidityPeriods checks if all validity periods are within allowed ranges
-// [MOD-CS-MSG-2-2-1] All validity period fields are mandatory, must be between 0 (never expire) and max_days
 func ValidateValidityPeriods(
 	params types.Params,
 	msg *types.MsgUpdateCredentialSchema,
 ) error {
-	// All validity period fields are mandatory (already checked in ValidateBasic)
-	// Validate ranges: must be between 0 (never expire) and max_days
 	val := msg.GetIssuerGrantorValidationValidityPeriod().GetValue()
 	if val > 0 && val > params.CredentialSchemaIssuerGrantorValidationValidityPeriodMaxDays {
 		return errors.New("issuer grantor validation validity period exceeds maximum allowed days")

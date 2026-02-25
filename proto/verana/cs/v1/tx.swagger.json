@@ -200,8 +200,13 @@
     "verana.cs.v1.MsgCreateCredentialSchema": {
       "type": "object",
       "properties": {
-        "creator": {
-          "type": "string"
+        "authority": {
+          "type": "string",
+          "title": "authority is the group account on whose behalf this message is executed"
+        },
+        "operator": {
+          "type": "string",
+          "title": "operator is the account authorized by the authority to run this Msg"
         },
         "tr_id": {
           "type": "string",
@@ -232,8 +237,19 @@
         "verifier_perm_management_mode": {
           "type": "integer",
           "format": "int64"
+        },
+        "pricing_asset_type": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "pricing_asset": {
+          "type": "string"
+        },
+        "digest_algorithm": {
+          "type": "string"
         }
-      }
+      },
+      "title": "[MOD-CS-MSG-1] Create New Credential Schema"
     },
     "verana.cs.v1.MsgCreateCredentialSchemaResponse": {
       "type": "object",
@@ -307,10 +323,6 @@
     "verana.cs.v1.Params": {
       "type": "object",
       "properties": {
-        "credential_schema_trust_deposit": {
-          "type": "string",
-          "format": "uint64"
-        },
         "credential_schema_schema_max_size": {
           "type": "string",
           "format": "uint64"

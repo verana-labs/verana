@@ -10,8 +10,9 @@ const (
 	// Attribute keys
 	AttributeKeyId                                      = "credential_schema_id"
 	AttributeKeyTrId                                    = "trust_registry_id"
+	AttributeKeyAuthority                               = "authority"
+	AttributeKeyOperator                                = "operator"
 	AttributeKeyCreator                                 = "creator"
-	AttributeKeyDeposit                                 = "deposit"
 	AttributeKeyTimestamp                               = "timestamp"
 	AttributeKeyArchiveStatus                           = "archive_status"
 	AttributeKeyIssuerGrantorValidationValidityPeriod   = "issuer_grantor_validation_validity_period"
@@ -19,4 +20,7 @@ const (
 	AttributeKeyIssuerValidationValidityPeriod          = "issuer_validation_validity_period"
 	AttributeKeyVerifierValidationValidityPeriod        = "verifier_validation_validity_period"
 	AttributeKeyHolderValidationValidityPeriod          = "holder_validation_validity_period"
+	AttributeKeyPricingAssetType                        = "pricing_asset_type"
+	AttributeKeyPricingAsset                            = "pricing_asset"
+	AttributeKeyDigestAlgorithm                         = "digest_algorithm"
 )
