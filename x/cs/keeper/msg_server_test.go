@@ -594,27 +594,30 @@ func TestArchiveCredentialSchema(t *testing.T) {
 		{
 			name: "valid archive",
 			msg: &types.MsgArchiveCredentialSchema{
-				Creator: authority,
-				Id:      schemaID.Id,
-				Archive: true,
+				Authority: authority,
+				Operator:  operator,
+				Id:        schemaID.Id,
+				Archive:   true,
 			},
 			expPass: true,
 		},
 		{
 			name: "valid unarchive",
 			msg: &types.MsgArchiveCredentialSchema{
-				Creator: authority,
-				Id:      schemaID.Id,
-				Archive: false,
+				Authority: authority,
+				Operator:  operator,
+				Id:        schemaID.Id,
+				Archive:   false,
 			},
 			expPass: true,
 		},
 		{
 			name: "non-existent schema",
 			msg: &types.MsgArchiveCredentialSchema{
-				Creator: authority,
-				Id:      999,
-				Archive: true,
+				Authority: authority,
+				Operator:  operator,
+				Id:        999,
+				Archive:   true,
 			},
 			expPass:       false,
 			errorContains: "credential schema not found",
@@ -622,25 +625,28 @@ func TestArchiveCredentialSchema(t *testing.T) {
 		{
 			name: "unauthorized archive - not controller",
 			msg: &types.MsgArchiveCredentialSchema{
-				Creator: "verana1unauthorized",
-				Id:      schemaID.Id,
-				Archive: true,
+				Authority: sdk.AccAddress([]byte("wrong_authority_____")).String(),
+				Operator:  operator,
+				Id:        schemaID.Id,
+				Archive:   true,
 			},
 			expPass:       false,
-			errorContains: "only trust registry controller can archive credential schema",
+			errorContains: "authority is not the controller",
 		},
 		{
 			name: "already archived",
 			msg: &types.MsgArchiveCredentialSchema{
-				Creator: authority,
-				Id:      schemaID.Id,
-				Archive: true,
+				Authority: authority,
+				Operator:  operator,
+				Id:        schemaID.Id,
+				Archive:   true,
 			},
 			setupFn: func() {
 				_, err := ms.ArchiveCredentialSchema(ctx, &types.MsgArchiveCredentialSchema{
-					Creator: authority,
-					Id:      schemaID.Id,
-					Archive: true,
+					Authority: authority,
+					Operator:  operator,
+					Id:        schemaID.Id,
+					Archive:   true,
 				})
 				require.NoError(t, err)
 			},
@@ -650,15 +656,17 @@ func TestArchiveCredentialSchema(t *testing.T) {
 		{
 			name: "already unarchived",
 			msg: &types.MsgArchiveCredentialSchema{
-				Creator: authority,
-				Id:      schemaID.Id,
-				Archive: false,
+				Authority: authority,
+				Operator:  operator,
+				Id:        schemaID.Id,
+				Archive:   false,
 			},
 			setupFn: func() {
 				_, err := ms.ArchiveCredentialSchema(ctx, &types.MsgArchiveCredentialSchema{
-					Creator: authority,
-					Id:      schemaID.Id,
-					Archive: false,
+					Authority: authority,
+					Operator:  operator,
+					Id:        schemaID.Id,
+					Archive:   false,
 				})
 				require.NoError(t, err)
 			},

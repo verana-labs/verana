@@ -364,13 +364,15 @@ export const MsgUpdateCredentialSchemaAminoConverter: AminoConverter = {
 export const MsgArchiveCredentialSchemaAminoConverter: AminoConverter = {
   aminoType: '/verana.cs.v1.MsgArchiveCredentialSchema',
   toAmino: (m: MsgArchiveCredentialSchema) => ({
-    creator: m.creator ?? '',
+    authority: m.authority ?? '',
+    operator: m.operator ?? '',
     id: u64ToStr(m.id), // Use u64ToStr to match frontend
     archive: m.archive ?? false,
   }),
-  fromAmino: (a: { creator: string; id: string; archive: boolean }): MsgArchiveCredentialSchema =>
+  fromAmino: (a: { authority: string; operator: string; id: string; archive: boolean }): MsgArchiveCredentialSchema =>
     MsgArchiveCredentialSchema.fromPartial({
-      creator: a.creator,
+      authority: a.authority,
+      operator: a.operator,
       id: strToU64(a.id) != null ? Number(strToU64(a.id)!.toString()) : 0, // Convert Long to number
       archive: a.archive ?? false,
     }),

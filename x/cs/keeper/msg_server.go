@@ -175,6 +175,20 @@ func ValidateValidityPeriods(
 
 func (ms msgServer) ArchiveCredentialSchema(goCtx context.Context, msg *types.MsgArchiveCredentialSchema) (*types.MsgArchiveCredentialSchemaResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
+	now := ctx.BlockTime()
+
+	// [MOD-CS-MSG-3-2-1] [AUTHZ-CHECK] Verify operator authorization
+	if ms.delegationKeeper != nil {
+		if err := ms.delegationKeeper.CheckOperatorAuthorization(
+			ctx,
+			msg.Authority,
+			msg.Operator,
+			"/verana.cs.v1.MsgArchiveCredentialSchema",
+			now,
+		); err != nil {
+			return nil, fmt.Errorf("authorization check failed: %w", err)
+		}
+	}
 
 	// Get credential schema
 	cs, err := ms.CredentialSchema.Get(ctx, msg.Id)
@@ -182,16 +196,16 @@ func (ms msgServer) ArchiveCredentialSchema(goCtx context.Context, msg *types.Ms
 		return nil, fmt.Errorf("credential schema not found: %w", err)
 	}
 
-	// Check trust registry controller
+	// [MOD-CS-MSG-3-2-1] Check trust registry authority
 	tr, err := ms.trustRegistryKeeper.GetTrustRegistry(ctx, cs.TrId)
 	if err != nil {
 		return nil, fmt.Errorf("trust registry not found: %w", err)
 	}
-	if tr.Controller != msg.Creator {
-		return nil, fmt.Errorf("only trust registry controller can archive credential schema")
+	if tr.Controller != msg.Authority {
+		return nil, fmt.Errorf("authority is not the controller of the trust registry")
 	}
 
-	// Check archive state
+	// [MOD-CS-MSG-3-2-1] Check archive state
 	if msg.Archive {
 		if cs.Archived != nil {
 			return nil, fmt.Errorf("credential schema is already archived")
@@ -202,8 +216,7 @@ func (ms msgServer) ArchiveCredentialSchema(goCtx context.Context, msg *types.Ms
 		}
 	}
 
-	// Update archive state
-	now := ctx.BlockTime()
+	// [MOD-CS-MSG-3-3] Update archive state and modified timestamp
 	if msg.Archive {
 		cs.Archived = &now
 	} else {
@@ -211,12 +224,10 @@ func (ms msgServer) ArchiveCredentialSchema(goCtx context.Context, msg *types.Ms
 	}
 	cs.Modified = now
 
-	// Save updated credential schema
 	if err := ms.CredentialSchema.Set(ctx, cs.Id, cs); err != nil {
 		return nil, fmt.Errorf("failed to update credential schema: %w", err)
 	}
 
-	// Determine archive status string
 	archiveStatus := "archived"
 	if !msg.Archive {
 		archiveStatus = "unarchived"
@@ -227,7 +238,8 @@ func (ms msgServer) ArchiveCredentialSchema(goCtx context.Context, msg *types.Ms
 			types.EventTypeArchiveCredentialSchema,
 			sdk.NewAttribute(types.AttributeKeyId, strconv.FormatUint(msg.Id, 10)),
 			sdk.NewAttribute(types.AttributeKeyTrId, strconv.FormatUint(cs.TrId, 10)),
-			sdk.NewAttribute(types.AttributeKeyCreator, msg.Creator),
+			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Authority),
+			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
 			sdk.NewAttribute(types.AttributeKeyArchiveStatus, archiveStatus),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
 		),

@@ -1084,11 +1084,13 @@ func ArchiveCredentialSchema(client cosmosclient.Client, ctx context.Context, cr
 		return "", fmt.Errorf("failed to get creator address: %w", err)
 	}
 
-	// Create complete message with creator address
+	// Create complete message with authority/operator addresses
+	// For v4 spec, authority and operator are both the creator's address
 	msgWithCreator := cschema.MsgArchiveCredentialSchema{
-		Creator: creatorAddr,
-		Id:      msg.Id,
-		Archive: msg.Archive,
+		Authority: creatorAddr,
+		Operator:  creatorAddr,
+		Id:        msg.Id,
+		Archive:   msg.Archive,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, creator, &msgWithCreator)

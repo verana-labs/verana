@@ -12,7 +12,6 @@ const (
 	AttributeKeyTrId                                    = "trust_registry_id"
 	AttributeKeyAuthority                               = "authority"
 	AttributeKeyOperator                                = "operator"
-	AttributeKeyCreator                                 = "creator"
 	AttributeKeyTimestamp                               = "timestamp"
 	AttributeKeyArchiveStatus                           = "archive_status"
 	AttributeKeyIssuerGrantorValidationValidityPeriod   = "issuer_grantor_validation_validity_period"
