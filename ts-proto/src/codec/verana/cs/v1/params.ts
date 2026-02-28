@@ -12,7 +12,6 @@ export const protobufPackage = "verana.cs.v1";
 
 /** Params defines the parameters for the module. */
 export interface Params {
-  credentialSchemaTrustDeposit: number;
   credentialSchemaSchemaMaxSize: number;
   credentialSchemaIssuerGrantorValidationValidityPeriodMaxDays: number;
   credentialSchemaVerifierGrantorValidationValidityPeriodMaxDays: number;
@@ -23,7 +22,6 @@ export interface Params {
 
 function createBaseParams(): Params {
   return {
-    credentialSchemaTrustDeposit: 0,
     credentialSchemaSchemaMaxSize: 0,
     credentialSchemaIssuerGrantorValidationValidityPeriodMaxDays: 0,
     credentialSchemaVerifierGrantorValidationValidityPeriodMaxDays: 0,
@@ -35,9 +33,6 @@ function createBaseParams(): Params {
 
 export const Params = {
   encode(message: Params, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.credentialSchemaTrustDeposit !== 0) {
-      writer.uint32(8).uint64(message.credentialSchemaTrustDeposit);
-    }
     if (message.credentialSchemaSchemaMaxSize !== 0) {
       writer.uint32(16).uint64(message.credentialSchemaSchemaMaxSize);
     }
@@ -66,13 +61,6 @@ export const Params = {
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
-        case 1:
-          if (tag !== 8) {
-            break;
-          }
-
-          message.credentialSchemaTrustDeposit = longToNumber(reader.uint64() as Long);
-          continue;
         case 2:
           if (tag !== 16) {
             break;
@@ -126,9 +114,6 @@ export const Params = {
 
   fromJSON(object: any): Params {
     return {
-      credentialSchemaTrustDeposit: isSet(object.credentialSchemaTrustDeposit)
-        ? globalThis.Number(object.credentialSchemaTrustDeposit)
-        : 0,
       credentialSchemaSchemaMaxSize: isSet(object.credentialSchemaSchemaMaxSize)
         ? globalThis.Number(object.credentialSchemaSchemaMaxSize)
         : 0,
@@ -157,9 +142,6 @@ export const Params = {
 
   toJSON(message: Params): unknown {
     const obj: any = {};
-    if (message.credentialSchemaTrustDeposit !== 0) {
-      obj.credentialSchemaTrustDeposit = Math.round(message.credentialSchemaTrustDeposit);
-    }
     if (message.credentialSchemaSchemaMaxSize !== 0) {
       obj.credentialSchemaSchemaMaxSize = Math.round(message.credentialSchemaSchemaMaxSize);
     }
@@ -196,7 +178,6 @@ export const Params = {
   },
   fromPartial<I extends Exact<DeepPartial<Params>, I>>(object: I): Params {
     const message = createBaseParams();
-    message.credentialSchemaTrustDeposit = object.credentialSchemaTrustDeposit ?? 0;
     message.credentialSchemaSchemaMaxSize = object.credentialSchemaSchemaMaxSize ?? 0;
     message.credentialSchemaIssuerGrantorValidationValidityPeriodMaxDays =
       object.credentialSchemaIssuerGrantorValidationValidityPeriodMaxDays ?? 0;

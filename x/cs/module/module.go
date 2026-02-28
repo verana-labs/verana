@@ -185,7 +185,7 @@ type ModuleInputs struct {
 	BankKeeper          types.BankKeeper          `optional:"true"`
 	AccountKeeper       types.AccountKeeper       `optional:"true"`
 	TrustRegistryKeeper types.TrustRegistryKeeper `optional:"true"`
-	TrustDepositKeeper  types.TrustDepositKeeper  `optional:"true"`
+	DelegationKeeper    types.DelegationKeeper    `optional:"true"`
 }
 
 type ModuleOutputs struct {
@@ -208,7 +208,7 @@ func ProvideModule(in ModuleInputs) ModuleOutputs {
 		authority.String(),
 		in.BankKeeper,
 		in.TrustRegistryKeeper,
-		in.TrustDepositKeeper,
+		in.DelegationKeeper,
 	)
 	m := NewAppModule(
 		in.Cdc,

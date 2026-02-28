@@ -83,17 +83,20 @@ $ veranad query cs schema 1`,
 				},
 				{
 					RpcMethod: "CreateCredentialSchema",
-					Use:       "create-credential-schema [tr-id] [json-schema] [issuer-mode] [verifier-mode]",
+					Use:       "create-credential-schema [tr-id] [json-schema] [issuer-mode] [verifier-mode] [pricing-asset-type] [pricing-asset] [digest-algorithm]",
 					Short:     "Create a new credential schema",
 					Long: `Create a new credential schema with the specified parameters. The JSON schema supports placeholder replacement:
-- VPR_CREDENTIAL_SCHEMA_ID: Replaced with the generated schema ID  
+- VPR_CREDENTIAL_SCHEMA_ID: Replaced with the generated schema ID
 - VPR_CHAIN_ID: Replaced with the current chain ID
 
 Required Parameters:
-- tr-id: Trust registry ID (must be controlled by creator)
+- tr-id: Trust registry ID (must be controlled by authority)
 - json-schema: Path to JSON schema file or inline JSON string
 - issuer-mode: Permission management mode (1=OPEN, 2=GRANTOR_VALIDATION, 3=ECOSYSTEM)
 - verifier-mode: Permission management mode (same options as issuer-mode)
+- pricing-asset-type: Asset type for business fees (1=TU, 2=COIN, 3=FIAT)
+- pricing-asset: Asset identifier ("tu" for TU, denom for COIN, ISO-4217 code for FIAT)
+- digest-algorithm: Algorithm for credential digest (sha256, sha384, sha512)
 
 Required Flags (default to 0 days, 0 means never expires):
 - --issuer-grantor-validation-validity-period: Validation period for issuer grantors (days, default: 0)
@@ -103,8 +106,8 @@ Required Flags (default to 0 days, 0 means never expires):
 - --holder-validation-validity-period: Validation period for holders (days, default: 0)
 
 Example:
-$ veranad tx cs create-credential-schema 1 schema.json 2 2 --issuer-grantor-validation-validity-period 365 --verifier-grantor-validation-validity-period 365
-$ veranad tx cs create-credential-schema 1 schema.json 2 2`,
+$ veranad tx cs create-credential-schema 1 schema.json 2 2 1 tu sha256 --issuer-grantor-validation-validity-period 365 --verifier-grantor-validation-validity-period 365
+$ veranad tx cs create-credential-schema 1 schema.json 2 2 2 uvna sha256`,
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{
 							ProtoField: "tr_id",
@@ -117,6 +120,15 @@ $ veranad tx cs create-credential-schema 1 schema.json 2 2`,
 						},
 						{
 							ProtoField: "verifier_perm_management_mode",
+						},
+						{
+							ProtoField: "pricing_asset_type",
+						},
+						{
+							ProtoField: "pricing_asset",
+						},
+						{
+							ProtoField: "digest_algorithm",
 						},
 					},
 					FlagOptions: map[string]*autocliv1.FlagOptions{

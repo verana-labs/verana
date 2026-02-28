@@ -102,11 +102,19 @@ const JsonSchemaMetaSchema = `{
 `
 const TypeMsgCreateCredentialSchema = "create_credential_schema"
 
+// ValidDigestAlgorithms defines the valid digest algorithms per W3C SRI spec
+var ValidDigestAlgorithms = map[string]bool{
+	"sha256": true,
+	"sha384": true,
+	"sha512": true,
+}
+
 var _ sdk.Msg = &MsgCreateCredentialSchema{}
 
 // NewMsgCreateCredentialSchema creates a new MsgCreateCredentialSchema instance
 func NewMsgCreateCredentialSchema(
-	creator string,
+	authority string,
+	operator string,
 	trId uint64,
 	jsonSchema string,
 	issuerGrantorValidationValidityPeriod uint32,
@@ -116,11 +124,15 @@ func NewMsgCreateCredentialSchema(
 	holderValidationValidityPeriod uint32,
 	issuerPermManagementMode uint32,
 	verifierPermManagementMode uint32,
+	pricingAssetType uint32,
+	pricingAsset string,
+	digestAlgorithm string,
 ) *MsgCreateCredentialSchema {
 	msg := &MsgCreateCredentialSchema{
-		Creator:                                 creator,
-		TrId:                                    trId,
-		JsonSchema:                              jsonSchema,
+		Authority:                              authority,
+		Operator:                               operator,
+		TrId:                                   trId,
+		JsonSchema:                             jsonSchema,
 		IssuerGrantorValidationValidityPeriod:   &OptionalUInt32{Value: issuerGrantorValidationValidityPeriod},
 		VerifierGrantorValidationValidityPeriod: &OptionalUInt32{Value: verifierGrantorValidationValidityPeriod},
 		IssuerValidationValidityPeriod:          &OptionalUInt32{Value: issuerValidationValidityPeriod},
@@ -128,6 +140,9 @@ func NewMsgCreateCredentialSchema(
 		HolderValidationValidityPeriod:          &OptionalUInt32{Value: holderValidationValidityPeriod},
 		IssuerPermManagementMode:                issuerPermManagementMode,
 		VerifierPermManagementMode:              verifierPermManagementMode,
+		PricingAssetType:                        pricingAssetType,
+		PricingAsset:                            pricingAsset,
+		DigestAlgorithm:                         digestAlgorithm,
 	}
 
 	return msg
@@ -145,19 +160,25 @@ func (msg *MsgCreateCredentialSchema) Type() string {
 
 // GetSigners implements sdk.Msg
 func (msg *MsgCreateCredentialSchema) GetSigners() []sdk.AccAddress {
-	creator, err := sdk.AccAddressFromBech32(msg.Creator)
+	operator, err := sdk.AccAddressFromBech32(msg.Operator)
 	if err != nil {
 		panic(err)
 	}
-	return []sdk.AccAddress{creator}
+	return []sdk.AccAddress{operator}
 }
 
 // ValidateBasic implements sdk.Msg
 func (msg *MsgCreateCredentialSchema) ValidateBasic() error {
-	// Validate creator address
-	_, err := sdk.AccAddressFromBech32(msg.Creator)
+	// Validate authority address
+	_, err := sdk.AccAddressFromBech32(msg.Authority)
 	if err != nil {
-		return errors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid creator address (%s)", err)
+		return errors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid authority address (%s)", err)
+	}
+
+	// Validate operator address
+	_, err = sdk.AccAddressFromBech32(msg.Operator)
+	if err != nil {
+		return errors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid operator address (%s)", err)
 	}
 
 	// Check mandatory parameters
@@ -177,6 +198,16 @@ func (msg *MsgCreateCredentialSchema) ValidateBasic() error {
 
 	// Validate perm management modes
 	if err := validatePermManagementModes(msg); err != nil {
+		return errors.Wrap(sdkerrors.ErrInvalidRequest, err.Error())
+	}
+
+	// Validate pricing asset type and pricing asset
+	if err := validatePricingAsset(msg); err != nil {
+		return errors.Wrap(sdkerrors.ErrInvalidRequest, err.Error())
+	}
+
+	// Validate digest algorithm
+	if err := validateDigestAlgorithm(msg.DigestAlgorithm); err != nil {
 		return errors.Wrap(sdkerrors.ErrInvalidRequest, err.Error())
 	}
 
@@ -279,9 +310,6 @@ func EnsureCanonicalID(schemaJSON string, chainID string, schemaID uint64) (stri
 
 func validateValidityPeriods(msg *MsgCreateCredentialSchema) error {
 	// [MOD-CS-MSG-1-2-1] All validity period fields are mandatory
-	// A value of 0 indicates no expiration (never expire)
-	// All other values must be within the allowed range (between 0 and max_days)
-
 	if msg.GetIssuerGrantorValidationValidityPeriod() == nil {
 		return fmt.Errorf("issuer_grantor_validation_validity_period is mandatory")
 	}
@@ -328,7 +356,6 @@ func validateValidityPeriods(msg *MsgCreateCredentialSchema) error {
 }
 
 func validatePermManagementModes(msg *MsgCreateCredentialSchema) error {
-	// Check issuer perm management mode
 	if msg.IssuerPermManagementMode == 0 {
 		return fmt.Errorf("issuer perm management mode must be specified")
 	}
@@ -336,7 +363,6 @@ func validatePermManagementModes(msg *MsgCreateCredentialSchema) error {
 		return fmt.Errorf("invalid issuer perm management mode: must be between 1 and 3")
 	}
 
-	// Check verifier perm management mode
 	if msg.VerifierPermManagementMode == 0 {
 		return fmt.Errorf("verifier perm management mode must be specified")
 	}
@@ -347,19 +373,53 @@ func validatePermManagementModes(msg *MsgCreateCredentialSchema) error {
 	return nil
 }
 
-func (msg *MsgUpdateCredentialSchema) ValidateBasic() error {
-	// Validate creator address
-	_, err := sdk.AccAddressFromBech32(msg.Creator)
-	if err != nil {
-		return errors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid creator address (%s)", err)
+func validatePricingAsset(msg *MsgCreateCredentialSchema) error {
+	if msg.PricingAssetType == 0 {
+		return fmt.Errorf("pricing_asset_type must be specified")
+	}
+	if msg.PricingAssetType > 3 {
+		return fmt.Errorf("invalid pricing_asset_type: must be between 1 and 3")
 	}
 
-	// [MOD-CS-MSG-2-2-1] Check mandatory parameters
+	if msg.PricingAsset == "" {
+		return fmt.Errorf("pricing_asset is mandatory")
+	}
+
+	// If TU, pricing_asset must be "tu"
+	if msg.PricingAssetType == uint32(PricingAssetType_TU) && msg.PricingAsset != "tu" {
+		return fmt.Errorf("pricing_asset must be 'tu' when pricing_asset_type is TU")
+	}
+
+	return nil
+}
+
+func validateDigestAlgorithm(algorithm string) error {
+	if algorithm == "" {
+		return fmt.Errorf("digest_algorithm is mandatory")
+	}
+	if !ValidDigestAlgorithms[algorithm] {
+		return fmt.Errorf("invalid digest_algorithm '%s': must be one of sha256, sha384, sha512", algorithm)
+	}
+	return nil
+}
+
+func (msg *MsgUpdateCredentialSchema) ValidateBasic() error {
+	// Validate authority address
+	_, err := sdk.AccAddressFromBech32(msg.Authority)
+	if err != nil {
+		return errors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid authority address (%s)", err)
+	}
+
+	// Validate operator address
+	_, err = sdk.AccAddressFromBech32(msg.Operator)
+	if err != nil {
+		return errors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid operator address (%s)", err)
+	}
+
 	if msg.Id == 0 {
 		return errors.Wrap(sdkerrors.ErrInvalidRequest, "id cannot be 0")
 	}
 
-	// [MOD-CS-MSG-2-2-1] All validity period fields are mandatory
 	if msg.GetIssuerGrantorValidationValidityPeriod() == nil {
 		return errors.Wrap(sdkerrors.ErrInvalidRequest, "issuer_grantor_validation_validity_period is mandatory")
 	}
@@ -380,12 +440,16 @@ func (msg *MsgUpdateCredentialSchema) ValidateBasic() error {
 }
 
 func (msg *MsgArchiveCredentialSchema) ValidateBasic() error {
-	if msg.Creator == "" {
-		return fmt.Errorf("creator address is required")
+	// Validate authority address
+	_, err := sdk.AccAddressFromBech32(msg.Authority)
+	if err != nil {
+		return errors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid authority address (%s)", err)
 	}
 
-	if _, err := sdk.AccAddressFromBech32(msg.Creator); err != nil {
-		return errors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid creator address (%s)", err)
+	// Validate operator address
+	_, err = sdk.AccAddressFromBech32(msg.Operator)
+	if err != nil {
+		return errors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid operator address (%s)", err)
 	}
 
 	if msg.Id == 0 {

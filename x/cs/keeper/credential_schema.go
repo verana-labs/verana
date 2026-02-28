@@ -10,13 +10,13 @@ import (
 func (ms msgServer) validateCreateCredentialSchemaParams(ctx sdk.Context, msg *types.MsgCreateCredentialSchema) error {
 	params := ms.GetParams(ctx)
 
-	// Validate trust registry ownership
+	// Validate trust registry ownership - authority must be the controller
 	tr, err := ms.trustRegistryKeeper.GetTrustRegistry(ctx, msg.TrId)
 	if err != nil {
 		return fmt.Errorf("trust registry not found: %w", err)
 	}
-	if tr.Controller != msg.Creator {
-		return fmt.Errorf("creator is not the controller of the trust registry")
+	if tr.Controller != msg.Authority {
+		return fmt.Errorf("authority is not the controller of the trust registry")
 	}
 
 	// Check schema size
@@ -88,17 +88,6 @@ func validateValidityPeriodsWithParams(msg *types.MsgCreateCredentialSchema, par
 }
 
 func (ms msgServer) executeCreateCredentialSchema(ctx sdk.Context, schemaID uint64, msg *types.MsgCreateCredentialSchema) error {
-	// Get params using the getter method
-	params := ms.GetParams(ctx)
-
-	// Calculate trust deposit amount
-	trustDepositAmount := params.CredentialSchemaTrustDeposit * ms.trustRegistryKeeper.GetTrustUnitPrice(ctx)
-
-	// Increase trust deposit
-	if err := ms.trustDeposit.AdjustTrustDeposit(ctx, msg.Creator, int64(trustDepositAmount)); err != nil {
-		return fmt.Errorf("failed to adjust trust deposit: %w", err)
-	}
-
 	// Inject canonical $id into the JSON schema
 	processedJsonSchema, err := types.InjectCanonicalID(msg.JsonSchema, ctx.ChainID(), schemaID)
 	if err != nil {
@@ -106,14 +95,12 @@ func (ms msgServer) executeCreateCredentialSchema(ctx sdk.Context, schemaID uint
 	}
 
 	// [MOD-CS-MSG-1-3] Create the credential schema
-	// All validity period fields are mandatory (already validated), 0 means never expires
 	credentialSchema := types.CredentialSchema{
-		Id:                                      schemaID, // Use the generated ID
+		Id:                                      schemaID,
 		TrId:                                    msg.TrId,
 		Created:                                 ctx.BlockTime(),
 		Modified:                                ctx.BlockTime(),
-		Deposit:                                 trustDepositAmount,
-		JsonSchema:                              processedJsonSchema, // Now includes chain ID replacement
+		JsonSchema:                              processedJsonSchema,
 		IssuerGrantorValidationValidityPeriod:   msg.GetIssuerGrantorValidationValidityPeriod().GetValue(),
 		VerifierGrantorValidationValidityPeriod: msg.GetVerifierGrantorValidationValidityPeriod().GetValue(),
 		IssuerValidationValidityPeriod:          msg.GetIssuerValidationValidityPeriod().GetValue(),
@@ -121,6 +108,9 @@ func (ms msgServer) executeCreateCredentialSchema(ctx sdk.Context, schemaID uint
 		HolderValidationValidityPeriod:          msg.GetHolderValidationValidityPeriod().GetValue(),
 		IssuerPermManagementMode:                types.CredentialSchemaPermManagementMode(msg.IssuerPermManagementMode),
 		VerifierPermManagementMode:              types.CredentialSchemaPermManagementMode(msg.VerifierPermManagementMode),
+		PricingAssetType:                        types.PricingAssetType(msg.PricingAssetType),
+		PricingAsset:                            msg.PricingAsset,
+		DigestAlgorithm:                         msg.DigestAlgorithm,
 	}
 
 	// Persist the credential schema using keeper method
@@ -134,8 +124,8 @@ func (ms msgServer) executeCreateCredentialSchema(ctx sdk.Context, schemaID uint
 			types.EventTypeCreateCredentialSchema,
 			sdk.NewAttribute(types.AttributeKeyId, fmt.Sprintf("%d", schemaID)),
 			sdk.NewAttribute(types.AttributeKeyTrId, fmt.Sprintf("%d", msg.TrId)),
-			sdk.NewAttribute(types.AttributeKeyCreator, msg.Creator),
-			sdk.NewAttribute(types.AttributeKeyDeposit, fmt.Sprintf("%d", trustDepositAmount)),
+			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Authority),
+			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
 		),
 	)
 

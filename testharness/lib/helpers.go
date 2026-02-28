@@ -123,6 +123,9 @@ func CreateSimpleCredentialSchema(
 		JsonSchema:                 schemaData,
 		IssuerPermManagementMode:   uint32(issuerMode),
 		VerifierPermManagementMode: uint32(verifierMode),
+		PricingAssetType:           uint32(cschema.PricingAssetType_TU),
+		PricingAsset:               "tu",
+		DigestAlgorithm:            "sha256",
 		// Validity periods are mandatory - use 0 (never expire) as default
 		IssuerGrantorValidationValidityPeriod:   &cschema.OptionalUInt32{Value: 0},
 		VerifierGrantorValidationValidityPeriod: &cschema.OptionalUInt32{Value: 0},
@@ -1031,11 +1034,13 @@ func UpdateCredentialSchema(
 		return "", fmt.Errorf("failed to get creator address: %w", err)
 	}
 
-	// Create complete message with creator address
+	// Create complete message with authority/operator addresses
 	// All validity period fields are mandatory - always set them (use 0 if not updating)
+	// For v4 spec, authority and operator are both the creator's address
 	msgWithCreator := cschema.MsgUpdateCredentialSchema{
-		Creator: creatorAddr,
-		Id:      schemaID,
+		Authority: creatorAddr,
+		Operator:  creatorAddr,
+		Id:        schemaID,
 		// Always set OptionalUInt32 fields (mandatory in new version)
 		IssuerGrantorValidationValidityPeriod: &cschema.OptionalUInt32{
 			Value: issuerGrantorValidationValidityPeriod,
@@ -1079,11 +1084,13 @@ func ArchiveCredentialSchema(client cosmosclient.Client, ctx context.Context, cr
 		return "", fmt.Errorf("failed to get creator address: %w", err)
 	}
 
-	// Create complete message with creator address
+	// Create complete message with authority/operator addresses
+	// For v4 spec, authority and operator are both the creator's address
 	msgWithCreator := cschema.MsgArchiveCredentialSchema{
-		Creator: creatorAddr,
-		Id:      msg.Id,
-		Archive: msg.Archive,
+		Authority: creatorAddr,
+		Operator:  creatorAddr,
+		Id:        msg.Id,
+		Archive:   msg.Archive,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, creator, &msgWithCreator)
@@ -2685,6 +2692,156 @@ func ArchiveTrustRegistryWithAuthority(
 
 	if txResp.TxResponse.Code != 0 {
 		return fmt.Errorf("ArchiveTrustRegistry failed with code %d: %s",
+			txResp.TxResponse.Code, txResp.TxResponse.RawLog)
+	}
+
+	return nil
+}
+
+// CreateCredentialSchemaWithAuthority creates a credential schema with separate authority/operator.
+func CreateCredentialSchemaWithAuthority(
+	client cosmosclient.Client,
+	ctx context.Context,
+	operatorAccount cosmosaccount.Account,
+	authority string,
+	trID uint64,
+	schemaData string,
+	issuerMode cschema.CredentialSchemaPermManagementMode,
+	verifierMode cschema.CredentialSchemaPermManagementMode,
+) (string, error) {
+	operatorAddr, err := operatorAccount.Address(addressPrefix)
+	if err != nil {
+		return "", fmt.Errorf("failed to get operator address: %w", err)
+	}
+
+	msg := &cschema.MsgCreateCredentialSchema{
+		Authority:                               authority,
+		Operator:                                operatorAddr,
+		TrId:                                    trID,
+		JsonSchema:                              schemaData,
+		IssuerPermManagementMode:                uint32(issuerMode),
+		VerifierPermManagementMode:              uint32(verifierMode),
+		PricingAssetType:                        uint32(cschema.PricingAssetType_TU),
+		PricingAsset:                            "tu",
+		DigestAlgorithm:                         "sha256",
+		IssuerGrantorValidationValidityPeriod:   &cschema.OptionalUInt32{Value: 0},
+		VerifierGrantorValidationValidityPeriod: &cschema.OptionalUInt32{Value: 0},
+		IssuerValidationValidityPeriod:          &cschema.OptionalUInt32{Value: 0},
+		VerifierValidationValidityPeriod:        &cschema.OptionalUInt32{Value: 0},
+		HolderValidationValidityPeriod:          &cschema.OptionalUInt32{Value: 0},
+	}
+
+	txResp, err := client.BroadcastTx(ctx, operatorAccount, msg)
+	if err != nil {
+		return "", fmt.Errorf("failed to broadcast CreateCredentialSchema: %w", err)
+	}
+
+	fmt.Print("CreateCredentialSchemaWithAuthority:\n\n")
+	fmt.Println(txResp)
+
+	if txResp.TxResponse.Code != 0 {
+		return "", fmt.Errorf("CreateCredentialSchema failed with code %d: %s",
+			txResp.TxResponse.Code, txResp.TxResponse.RawLog)
+	}
+
+	var txResponse sdk.TxResponse
+	txResponseBytes, err := client.Context().Codec.MarshalJSON(txResp.TxResponse)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal tx response: %w", err)
+	}
+	err = client.Context().Codec.UnmarshalJSON(txResponseBytes, &txResponse)
+	if err != nil {
+		return "", fmt.Errorf("failed to unmarshal tx response: %w", err)
+	}
+
+	for _, event := range txResponse.Events {
+		if event.Type == "create_credential_schema" {
+			for _, attr := range event.Attributes {
+				if attr.Key == "credential_schema_id" {
+					return attr.Value, nil
+				}
+			}
+		}
+	}
+	return "", fmt.Errorf("credential_schema_id not found in events")
+}
+
+// UpdateCredentialSchemaWithAuthority updates a credential schema with separate authority/operator.
+func UpdateCredentialSchemaWithAuthority(
+	client cosmosclient.Client,
+	ctx context.Context,
+	operatorAccount cosmosaccount.Account,
+	authority string,
+	csID uint64,
+	issuerGrantorValidityPeriod uint32,
+	verifierGrantorValidityPeriod uint32,
+	issuerValidityPeriod uint32,
+	verifierValidityPeriod uint32,
+	holderValidityPeriod uint32,
+) error {
+	operatorAddr, err := operatorAccount.Address(addressPrefix)
+	if err != nil {
+		return fmt.Errorf("failed to get operator address: %w", err)
+	}
+
+	msg := &cschema.MsgUpdateCredentialSchema{
+		Authority:                               authority,
+		Operator:                                operatorAddr,
+		Id:                                      csID,
+		IssuerGrantorValidationValidityPeriod:   &cschema.OptionalUInt32{Value: issuerGrantorValidityPeriod},
+		VerifierGrantorValidationValidityPeriod: &cschema.OptionalUInt32{Value: verifierGrantorValidityPeriod},
+		IssuerValidationValidityPeriod:          &cschema.OptionalUInt32{Value: issuerValidityPeriod},
+		VerifierValidationValidityPeriod:        &cschema.OptionalUInt32{Value: verifierValidityPeriod},
+		HolderValidationValidityPeriod:          &cschema.OptionalUInt32{Value: holderValidityPeriod},
+	}
+
+	txResp, err := client.BroadcastTx(ctx, operatorAccount, msg)
+	if err != nil {
+		return fmt.Errorf("failed to broadcast UpdateCredentialSchema: %w", err)
+	}
+
+	fmt.Print("UpdateCredentialSchemaWithAuthority:\n\n")
+	fmt.Println(txResp)
+
+	if txResp.TxResponse.Code != 0 {
+		return fmt.Errorf("UpdateCredentialSchema failed with code %d: %s",
+			txResp.TxResponse.Code, txResp.TxResponse.RawLog)
+	}
+
+	return nil
+}
+
+// ArchiveCredentialSchemaWithAuthority archives/unarchives a credential schema with separate authority/operator.
+func ArchiveCredentialSchemaWithAuthority(
+	client cosmosclient.Client,
+	ctx context.Context,
+	operatorAccount cosmosaccount.Account,
+	authority string,
+	csID uint64,
+	archive bool,
+) error {
+	operatorAddr, err := operatorAccount.Address(addressPrefix)
+	if err != nil {
+		return fmt.Errorf("failed to get operator address: %w", err)
+	}
+
+	msg := &cschema.MsgArchiveCredentialSchema{
+		Authority: authority,
+		Operator:  operatorAddr,
+		Id:        csID,
+		Archive:   archive,
+	}
+
+	txResp, err := client.BroadcastTx(ctx, operatorAccount, msg)
+	if err != nil {
+		return fmt.Errorf("failed to broadcast ArchiveCredentialSchema: %w", err)
+	}
+
+	fmt.Print("ArchiveCredentialSchemaWithAuthority:\n\n")
+	fmt.Println(txResp)
+
+	if txResp.TxResponse.Code != 0 {
+		return fmt.Errorf("ArchiveCredentialSchema failed with code %d: %s",
 			txResp.TxResponse.Code, txResp.TxResponse.RawLog)
 	}
 

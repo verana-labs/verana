@@ -24,6 +24,20 @@ var _ types.MsgServer = msgServer{}
 
 func (ms msgServer) CreateCredentialSchema(goCtx context.Context, msg *types.MsgCreateCredentialSchema) (*types.MsgCreateCredentialSchemaResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
+	now := ctx.BlockTime()
+
+	// [MOD-CS-MSG-1-2-1] [AUTHZ-CHECK] Verify operator authorization
+	if ms.delegationKeeper != nil {
+		if err := ms.delegationKeeper.CheckOperatorAuthorization(
+			ctx,
+			msg.Authority,
+			msg.Operator,
+			"/verana.cs.v1.MsgCreateCredentialSchema",
+			now,
+		); err != nil {
+			return nil, fmt.Errorf("authorization check failed: %w", err)
+		}
+	}
 
 	// Generate next ID
 	nextID, err := ms.GetNextID(ctx, "cs")
@@ -46,7 +60,8 @@ func (ms msgServer) CreateCredentialSchema(goCtx context.Context, msg *types.Msg
 			types.EventTypeCreateCredentialSchema,
 			sdk.NewAttribute(types.AttributeKeyId, strconv.FormatUint(nextID, 10)),
 			sdk.NewAttribute(types.AttributeKeyTrId, strconv.FormatUint(msg.TrId, 10)),
-			sdk.NewAttribute(types.AttributeKeyCreator, msg.Creator),
+			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Authority),
+			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
 		),
 	})
@@ -58,6 +73,20 @@ func (ms msgServer) CreateCredentialSchema(goCtx context.Context, msg *types.Msg
 
 func (ms msgServer) UpdateCredentialSchema(goCtx context.Context, msg *types.MsgUpdateCredentialSchema) (*types.MsgUpdateCredentialSchemaResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
+	now := ctx.BlockTime()
+
+	// [MOD-CS-MSG-2-2-1] [AUTHZ-CHECK] Verify operator authorization
+	if ms.delegationKeeper != nil {
+		if err := ms.delegationKeeper.CheckOperatorAuthorization(
+			ctx,
+			msg.Authority,
+			msg.Operator,
+			"/verana.cs.v1.MsgUpdateCredentialSchema",
+			now,
+		); err != nil {
+			return nil, fmt.Errorf("authorization check failed: %w", err)
+		}
+	}
 
 	// Get credential schema
 	cs, err := ms.CredentialSchema.Get(ctx, msg.Id)
@@ -65,29 +94,28 @@ func (ms msgServer) UpdateCredentialSchema(goCtx context.Context, msg *types.Msg
 		return nil, fmt.Errorf("credential schema not found: %w", err)
 	}
 
-	// Check trust registry controller
+	// [MOD-CS-MSG-2-2-1] Check trust registry authority
 	tr, err := ms.trustRegistryKeeper.GetTrustRegistry(ctx, cs.TrId)
 	if err != nil {
 		return nil, fmt.Errorf("trust registry not found: %w", err)
 	}
-	if tr.Controller != msg.Creator {
-		return nil, fmt.Errorf("creator is not the controller of the trust registry")
+	if tr.Controller != msg.Authority {
+		return nil, fmt.Errorf("authority is not the controller of the trust registry")
 	}
 
-	// Validate validity periods against params (only for fields that are set)
+	// Validate validity periods against params
 	params := ms.GetParams(ctx)
 	if err := ValidateValidityPeriods(params, msg); err != nil {
 		return nil, fmt.Errorf("invalid validity period: %w", err)
 	}
 
 	// [MOD-CS-MSG-2-3] Update mutable fields
-	// All validity period fields are mandatory (already validated), 0 means never expires
 	cs.IssuerGrantorValidationValidityPeriod = msg.GetIssuerGrantorValidationValidityPeriod().GetValue()
 	cs.VerifierGrantorValidationValidityPeriod = msg.GetVerifierGrantorValidationValidityPeriod().GetValue()
 	cs.IssuerValidationValidityPeriod = msg.GetIssuerValidationValidityPeriod().GetValue()
 	cs.VerifierValidationValidityPeriod = msg.GetVerifierValidationValidityPeriod().GetValue()
 	cs.HolderValidationValidityPeriod = msg.GetHolderValidationValidityPeriod().GetValue()
-	cs.Modified = ctx.BlockTime()
+	cs.Modified = now
 
 	if err := ms.CredentialSchema.Set(ctx, cs.Id, cs); err != nil {
 		return nil, fmt.Errorf("failed to update credential schema: %w", err)
@@ -98,13 +126,14 @@ func (ms msgServer) UpdateCredentialSchema(goCtx context.Context, msg *types.Msg
 			types.EventTypeUpdateCredentialSchema,
 			sdk.NewAttribute(types.AttributeKeyId, strconv.FormatUint(msg.Id, 10)),
 			sdk.NewAttribute(types.AttributeKeyTrId, strconv.FormatUint(cs.TrId, 10)),
-			sdk.NewAttribute(types.AttributeKeyCreator, msg.Creator),
+			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Authority),
+			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
 			sdk.NewAttribute(types.AttributeKeyIssuerGrantorValidationValidityPeriod, strconv.FormatUint(uint64(msg.GetIssuerGrantorValidationValidityPeriod().GetValue()), 10)),
 			sdk.NewAttribute(types.AttributeKeyVerifierGrantorValidationValidityPeriod, strconv.FormatUint(uint64(msg.GetVerifierGrantorValidationValidityPeriod().GetValue()), 10)),
 			sdk.NewAttribute(types.AttributeKeyIssuerValidationValidityPeriod, strconv.FormatUint(uint64(msg.GetIssuerValidationValidityPeriod().GetValue()), 10)),
 			sdk.NewAttribute(types.AttributeKeyVerifierValidationValidityPeriod, strconv.FormatUint(uint64(msg.GetVerifierValidationValidityPeriod().GetValue()), 10)),
 			sdk.NewAttribute(types.AttributeKeyHolderValidationValidityPeriod, strconv.FormatUint(uint64(msg.GetHolderValidationValidityPeriod().GetValue()), 10)),
-			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
+			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
 		),
 	})
 
@@ -112,13 +141,10 @@ func (ms msgServer) UpdateCredentialSchema(goCtx context.Context, msg *types.Msg
 }
 
 // ValidateValidityPeriods checks if all validity periods are within allowed ranges
-// [MOD-CS-MSG-2-2-1] All validity period fields are mandatory, must be between 0 (never expire) and max_days
 func ValidateValidityPeriods(
 	params types.Params,
 	msg *types.MsgUpdateCredentialSchema,
 ) error {
-	// All validity period fields are mandatory (already checked in ValidateBasic)
-	// Validate ranges: must be between 0 (never expire) and max_days
 	val := msg.GetIssuerGrantorValidationValidityPeriod().GetValue()
 	if val > 0 && val > params.CredentialSchemaIssuerGrantorValidationValidityPeriodMaxDays {
 		return errors.New("issuer grantor validation validity period exceeds maximum allowed days")
@@ -149,6 +175,20 @@ func ValidateValidityPeriods(
 
 func (ms msgServer) ArchiveCredentialSchema(goCtx context.Context, msg *types.MsgArchiveCredentialSchema) (*types.MsgArchiveCredentialSchemaResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
+	now := ctx.BlockTime()
+
+	// [MOD-CS-MSG-3-2-1] [AUTHZ-CHECK] Verify operator authorization
+	if ms.delegationKeeper != nil {
+		if err := ms.delegationKeeper.CheckOperatorAuthorization(
+			ctx,
+			msg.Authority,
+			msg.Operator,
+			"/verana.cs.v1.MsgArchiveCredentialSchema",
+			now,
+		); err != nil {
+			return nil, fmt.Errorf("authorization check failed: %w", err)
+		}
+	}
 
 	// Get credential schema
 	cs, err := ms.CredentialSchema.Get(ctx, msg.Id)
@@ -156,16 +196,16 @@ func (ms msgServer) ArchiveCredentialSchema(goCtx context.Context, msg *types.Ms
 		return nil, fmt.Errorf("credential schema not found: %w", err)
 	}
 
-	// Check trust registry controller
+	// [MOD-CS-MSG-3-2-1] Check trust registry authority
 	tr, err := ms.trustRegistryKeeper.GetTrustRegistry(ctx, cs.TrId)
 	if err != nil {
 		return nil, fmt.Errorf("trust registry not found: %w", err)
 	}
-	if tr.Controller != msg.Creator {
-		return nil, fmt.Errorf("only trust registry controller can archive credential schema")
+	if tr.Controller != msg.Authority {
+		return nil, fmt.Errorf("authority is not the controller of the trust registry")
 	}
 
-	// Check archive state
+	// [MOD-CS-MSG-3-2-1] Check archive state
 	if msg.Archive {
 		if cs.Archived != nil {
 			return nil, fmt.Errorf("credential schema is already archived")
@@ -176,8 +216,7 @@ func (ms msgServer) ArchiveCredentialSchema(goCtx context.Context, msg *types.Ms
 		}
 	}
 
-	// Update archive state
-	now := ctx.BlockTime()
+	// [MOD-CS-MSG-3-3] Update archive state and modified timestamp
 	if msg.Archive {
 		cs.Archived = &now
 	} else {
@@ -185,12 +224,10 @@ func (ms msgServer) ArchiveCredentialSchema(goCtx context.Context, msg *types.Ms
 	}
 	cs.Modified = now
 
-	// Save updated credential schema
 	if err := ms.CredentialSchema.Set(ctx, cs.Id, cs); err != nil {
 		return nil, fmt.Errorf("failed to update credential schema: %w", err)
 	}
 
-	// Determine archive status string
 	archiveStatus := "archived"
 	if !msg.Archive {
 		archiveStatus = "unarchived"
@@ -201,7 +238,8 @@ func (ms msgServer) ArchiveCredentialSchema(goCtx context.Context, msg *types.Ms
 			types.EventTypeArchiveCredentialSchema,
 			sdk.NewAttribute(types.AttributeKeyId, strconv.FormatUint(msg.Id, 10)),
 			sdk.NewAttribute(types.AttributeKeyTrId, strconv.FormatUint(cs.TrId, 10)),
-			sdk.NewAttribute(types.AttributeKeyCreator, msg.Creator),
+			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Authority),
+			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
 			sdk.NewAttribute(types.AttributeKeyArchiveStatus, archiveStatus),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
 		),

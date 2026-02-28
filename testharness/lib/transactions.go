@@ -197,8 +197,10 @@ func CreateCredentialSchema(client cosmosclient.Client, ctx context.Context, cre
 
 	// Create message with all required fields
 	// Validity period fields are mandatory - use 0 if not specified
+	// For v4 spec, authority and operator are both the creator's address
 	msg := &cschema.MsgCreateCredentialSchema{
-		Creator:    creatorAddr,
+		Authority:  creatorAddr,
+		Operator:   creatorAddr,
 		TrId:       override.TrId,
 		JsonSchema: override.JsonSchema,
 	}
@@ -246,6 +248,11 @@ func CreateCredentialSchema(client cosmosclient.Client, ctx context.Context, cre
 	// Set permission management modes
 	msg.IssuerPermManagementMode = override.IssuerPermManagementMode
 	msg.VerifierPermManagementMode = override.VerifierPermManagementMode
+
+	// Set pricing and digest fields
+	msg.PricingAssetType = override.PricingAssetType
+	msg.PricingAsset = override.PricingAsset
+	msg.DigestAlgorithm = override.DigestAlgorithm
 
 	txResp, err := client.BroadcastTx(ctx, creator, msg)
 	if err != nil {

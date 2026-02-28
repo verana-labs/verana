@@ -63,6 +63,23 @@ func (gs GenesisState) Validate() error {
 				i, cs.VerifierPermManagementMode)
 		}
 
+		// Validate pricing_asset_type
+		if cs.PricingAssetType <= PricingAssetType_PRICING_ASSET_TYPE_UNSPECIFIED ||
+			cs.PricingAssetType > PricingAssetType_FIAT {
+			return fmt.Errorf("credential schema at index %d has invalid pricing_asset_type: %d",
+				i, cs.PricingAssetType)
+		}
+
+		// Validate pricing_asset
+		if cs.PricingAsset == "" {
+			return fmt.Errorf("credential schema at index %d has empty pricing_asset", i)
+		}
+
+		// Validate digest_algorithm
+		if !ValidDigestAlgorithms[cs.DigestAlgorithm] {
+			return fmt.Errorf("credential schema at index %d has invalid digest_algorithm: %s", i, cs.DigestAlgorithm)
+		}
+
 		// Validate JSON schema format (basic check)
 		if err := validateJSONSchema(cs.JsonSchema); err != nil {
 			return fmt.Errorf("credential schema at index %d has invalid JSON schema: %w", i, err)

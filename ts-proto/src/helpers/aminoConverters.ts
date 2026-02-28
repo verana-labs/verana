@@ -303,7 +303,8 @@ export const MsgRemoveDIDAminoConverter: AminoConverter = {
 export const MsgCreateCredentialSchemaAminoConverter: AminoConverter = {
   aminoType: '/verana.cs.v1.MsgCreateCredentialSchema',
   toAmino: (m: MsgCreateCredentialSchema) => clean({
-    creator: m.creator ?? '',
+    authority: m.authority ?? '',
+    operator: m.operator ?? '',
     tr_id: u64ToStr(m.trId), // Use u64ToStr to match frontend (handles number/Long)
     json_schema: m.jsonSchema ?? '',
     issuer_grantor_validation_validity_period: toOptU32Amino(m.issuerGrantorValidationValidityPeriod),
@@ -313,10 +314,14 @@ export const MsgCreateCredentialSchemaAminoConverter: AminoConverter = {
     holder_validation_validity_period: toOptU32Amino(m.holderValidationValidityPeriod),
     issuer_perm_management_mode: u32ToAmino(m.issuerPermManagementMode),
     verifier_perm_management_mode: u32ToAmino(m.verifierPermManagementMode),
+    pricing_asset_type: m.pricingAssetType ?? 0,
+    pricing_asset: m.pricingAsset ?? '',
+    digest_algorithm: m.digestAlgorithm ?? '',
   }),
   fromAmino: (a: any): MsgCreateCredentialSchema =>
     MsgCreateCredentialSchema.fromPartial({
-      creator: a.creator ?? '',
+      authority: a.authority ?? '',
+      operator: a.operator ?? '',
       trId: strToU64(a.tr_id) != null ? Number(strToU64(a.tr_id)!.toString()) : 0, // Convert Long to number
       jsonSchema: a.json_schema ?? '',
       issuerGrantorValidationValidityPeriod: fromOptU32Amino(a.issuer_grantor_validation_validity_period),
@@ -326,13 +331,17 @@ export const MsgCreateCredentialSchemaAminoConverter: AminoConverter = {
       holderValidationValidityPeriod: fromOptU32Amino(a.holder_validation_validity_period),
       issuerPermManagementMode: a.issuer_perm_management_mode ?? 0,
       verifierPermManagementMode: a.verifier_perm_management_mode ?? 0,
+      pricingAssetType: a.pricing_asset_type ?? 0,
+      pricingAsset: a.pricing_asset ?? '',
+      digestAlgorithm: a.digest_algorithm ?? '',
     }),
 };
 
 export const MsgUpdateCredentialSchemaAminoConverter: AminoConverter = {
   aminoType: '/verana.cs.v1.MsgUpdateCredentialSchema',
   toAmino: (m: MsgUpdateCredentialSchema) => clean({
-    creator: m.creator ?? '',
+    authority: m.authority ?? '',
+    operator: m.operator ?? '',
     id: u64ToStr(m.id), // Use u64ToStr to match frontend
     issuer_grantor_validation_validity_period: toOptU32Amino(m.issuerGrantorValidationValidityPeriod),
     verifier_grantor_validation_validity_period: toOptU32Amino(m.verifierGrantorValidationValidityPeriod),
@@ -341,7 +350,8 @@ export const MsgUpdateCredentialSchemaAminoConverter: AminoConverter = {
     holder_validation_validity_period: toOptU32Amino(m.holderValidationValidityPeriod),
   }),
   fromAmino: (a: any) => MsgUpdateCredentialSchema.fromPartial({
-    creator: a.creator ?? '',
+    authority: a.authority ?? '',
+    operator: a.operator ?? '',
     id: strToU64(a.id) != null ? Number(strToU64(a.id)!.toString()) : 0, // Convert Long to number
     issuerGrantorValidationValidityPeriod: fromOptU32Amino(a.issuer_grantor_validation_validity_period),
     verifierGrantorValidationValidityPeriod: fromOptU32Amino(a.verifier_grantor_validation_validity_period),
@@ -354,13 +364,15 @@ export const MsgUpdateCredentialSchemaAminoConverter: AminoConverter = {
 export const MsgArchiveCredentialSchemaAminoConverter: AminoConverter = {
   aminoType: '/verana.cs.v1.MsgArchiveCredentialSchema',
   toAmino: (m: MsgArchiveCredentialSchema) => ({
-    creator: m.creator ?? '',
+    authority: m.authority ?? '',
+    operator: m.operator ?? '',
     id: u64ToStr(m.id), // Use u64ToStr to match frontend
     archive: m.archive ?? false,
   }),
-  fromAmino: (a: { creator: string; id: string; archive: boolean }): MsgArchiveCredentialSchema =>
+  fromAmino: (a: { authority: string; operator: string; id: string; archive: boolean }): MsgArchiveCredentialSchema =>
     MsgArchiveCredentialSchema.fromPartial({
-      creator: a.creator,
+      authority: a.authority,
+      operator: a.operator,
       id: strToU64(a.id) != null ? Number(strToU64(a.id)!.toString()) : 0, // Convert Long to number
       archive: a.archive ?? false,
     }),

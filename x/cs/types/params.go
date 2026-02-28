@@ -10,7 +10,6 @@ var _ paramtypes.ParamSet = (*Params)(nil)
 
 const (
 	// Default parameter values
-	DefaultCredentialSchemaTrustDeposit                                   = uint64(10)   // 10 trust units
 	DefaultCredentialSchemaSchemaMaxSize                                  = uint64(8192) // 8KB
 	DefaultCredentialSchemaIssuerGrantorValidationValidityPeriodMaxDays   = uint32(3650) // 10 years
 	DefaultCredentialSchemaVerifierGrantorValidationValidityPeriodMaxDays = uint32(3650)
@@ -26,7 +25,6 @@ func ParamKeyTable() paramtypes.KeyTable {
 
 // NewParams creates a new Params instance
 func NewParams(
-	trustDeposit uint64,
 	schemaMaxSize uint64,
 	issuerGrantorValidityPeriod uint32,
 	verifierGrantorValidityPeriod uint32,
@@ -35,7 +33,6 @@ func NewParams(
 	holderValidityPeriod uint32,
 ) Params {
 	return Params{
-		CredentialSchemaTrustDeposit:                                   trustDeposit,
 		CredentialSchemaSchemaMaxSize:                                  schemaMaxSize,
 		CredentialSchemaIssuerGrantorValidationValidityPeriodMaxDays:   issuerGrantorValidityPeriod,
 		CredentialSchemaVerifierGrantorValidationValidityPeriodMaxDays: verifierGrantorValidityPeriod,
@@ -48,7 +45,6 @@ func NewParams(
 // DefaultParams returns a default set of parameters
 func DefaultParams() Params {
 	return NewParams(
-		DefaultCredentialSchemaTrustDeposit,
 		DefaultCredentialSchemaSchemaMaxSize,
 		DefaultCredentialSchemaIssuerGrantorValidationValidityPeriodMaxDays,
 		DefaultCredentialSchemaVerifierGrantorValidationValidityPeriodMaxDays,
@@ -61,11 +57,6 @@ func DefaultParams() Params {
 // ParamSetPairs get the params.ParamSet
 func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 	return paramtypes.ParamSetPairs{
-		paramtypes.NewParamSetPair(
-			[]byte("CredentialSchemaTrustDeposit"),
-			&p.CredentialSchemaTrustDeposit,
-			validatePositiveUint64,
-		),
 		paramtypes.NewParamSetPair(
 			[]byte("CredentialSchemaSchemaMaxSize"),
 			&p.CredentialSchemaSchemaMaxSize,
@@ -101,9 +92,6 @@ func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 
 // Validate validates the set of params
 func (p Params) Validate() error {
-	if p.CredentialSchemaTrustDeposit == 0 {
-		return fmt.Errorf("credential schema trust deposit must be positive")
-	}
 	if p.CredentialSchemaSchemaMaxSize == 0 {
 		return fmt.Errorf("credential schema max size must be positive")
 	}

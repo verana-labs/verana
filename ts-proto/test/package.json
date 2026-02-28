@@ -11,6 +11,10 @@
     "test:tr-increase-gf-version": "npx tsx src/journeys/trIncreaseActiveGovernanceFrameworkVersion.ts",
     "test:tr-update": "npx tsx src/journeys/trUpdateTrustRegistry.ts",
     "test:tr-archive": "npx tsx src/journeys/trArchiveTrustRegistry.ts",
+    "test:de-grant-cs-auth": "npx tsx src/journeys/deGrantCsOperatorAuthorization.ts",
+    "test:cs-create": "npx tsx src/journeys/csCreateCredentialSchema.ts",
+    "test:cs-update": "npx tsx src/journeys/csUpdateCredentialSchema.ts",
+    "test:cs-archive": "npx tsx src/journeys/csArchiveCredentialSchema.ts",
     "test:all": "npx tsx src/journeys/runAll.ts"
   },
   "dependencies": {
