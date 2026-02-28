@@ -37,6 +37,11 @@ const tests: TestConfig[] = [
   { name: "TR: Increase Active GF Version", script: "test:tr-increase-gf-version" },
   { name: "TR: Update Trust Registry", script: "test:tr-update" },
   { name: "TR: Archive Trust Registry", script: "test:tr-archive" },
+  // Credential Schema (CS) module: Grant + all 3 operations (operator-signed)
+  { name: "DE: Grant CS Operator Authorization", script: "test:de-grant-cs-auth" },
+  { name: "CS: Create Credential Schema", script: "test:cs-create" },
+  { name: "CS: Update Credential Schema", script: "test:cs-update" },
+  { name: "CS: Archive Credential Schema", script: "test:cs-archive" },
 ];
 
 /**
