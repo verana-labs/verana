@@ -8,7 +8,12 @@
 import * as _m0 from "protobufjs/minimal";
 import { Timestamp } from "../../../google/protobuf/timestamp";
 import { Params } from "./params";
-import { CredentialSchema } from "./types";
+import {
+  CredentialSchema,
+  CredentialSchemaPermManagementMode,
+  credentialSchemaPermManagementModeFromJSON,
+  credentialSchemaPermManagementModeToJSON,
+} from "./types";
 import Long = require("long");
 
 export const protobufPackage = "verana.cs.v1";
@@ -28,6 +33,9 @@ export interface QueryListCredentialSchemasRequest {
   trId: number;
   modifiedAfter: Date | undefined;
   responseMaxSize: number;
+  onlyActive: boolean;
+  issuerPermManagementMode: CredentialSchemaPermManagementMode;
+  verifierPermManagementMode: CredentialSchemaPermManagementMode;
 }
 
 export interface QueryListCredentialSchemasResponse {
@@ -153,7 +161,14 @@ export const QueryParamsResponse = {
 };
 
 function createBaseQueryListCredentialSchemasRequest(): QueryListCredentialSchemasRequest {
-  return { trId: 0, modifiedAfter: undefined, responseMaxSize: 0 };
+  return {
+    trId: 0,
+    modifiedAfter: undefined,
+    responseMaxSize: 0,
+    onlyActive: false,
+    issuerPermManagementMode: 0,
+    verifierPermManagementMode: 0,
+  };
 }
 
 export const QueryListCredentialSchemasRequest = {
@@ -166,6 +181,15 @@ export const QueryListCredentialSchemasRequest = {
     }
     if (message.responseMaxSize !== 0) {
       writer.uint32(24).uint32(message.responseMaxSize);
+    }
+    if (message.onlyActive !== false) {
+      writer.uint32(32).bool(message.onlyActive);
+    }
+    if (message.issuerPermManagementMode !== 0) {
+      writer.uint32(40).int32(message.issuerPermManagementMode);
+    }
+    if (message.verifierPermManagementMode !== 0) {
+      writer.uint32(48).int32(message.verifierPermManagementMode);
     }
     return writer;
   },
@@ -198,6 +222,27 @@ export const QueryListCredentialSchemasRequest = {
 
           message.responseMaxSize = reader.uint32();
           continue;
+        case 4:
+          if (tag !== 32) {
+            break;
+          }
+
+          message.onlyActive = reader.bool();
+          continue;
+        case 5:
+          if (tag !== 40) {
+            break;
+          }
+
+          message.issuerPermManagementMode = reader.int32() as any;
+          continue;
+        case 6:
+          if (tag !== 48) {
+            break;
+          }
+
+          message.verifierPermManagementMode = reader.int32() as any;
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -212,6 +257,13 @@ export const QueryListCredentialSchemasRequest = {
       trId: isSet(object.trId) ? globalThis.Number(object.trId) : 0,
       modifiedAfter: isSet(object.modifiedAfter) ? fromJsonTimestamp(object.modifiedAfter) : undefined,
       responseMaxSize: isSet(object.responseMaxSize) ? globalThis.Number(object.responseMaxSize) : 0,
+      onlyActive: isSet(object.onlyActive) ? globalThis.Boolean(object.onlyActive) : false,
+      issuerPermManagementMode: isSet(object.issuerPermManagementMode)
+        ? credentialSchemaPermManagementModeFromJSON(object.issuerPermManagementMode)
+        : 0,
+      verifierPermManagementMode: isSet(object.verifierPermManagementMode)
+        ? credentialSchemaPermManagementModeFromJSON(object.verifierPermManagementMode)
+        : 0,
     };
   },
 
@@ -225,6 +277,15 @@ export const QueryListCredentialSchemasRequest = {
     }
     if (message.responseMaxSize !== 0) {
       obj.responseMaxSize = Math.round(message.responseMaxSize);
+    }
+    if (message.onlyActive !== false) {
+      obj.onlyActive = message.onlyActive;
+    }
+    if (message.issuerPermManagementMode !== 0) {
+      obj.issuerPermManagementMode = credentialSchemaPermManagementModeToJSON(message.issuerPermManagementMode);
+    }
+    if (message.verifierPermManagementMode !== 0) {
+      obj.verifierPermManagementMode = credentialSchemaPermManagementModeToJSON(message.verifierPermManagementMode);
     }
     return obj;
   },
@@ -241,6 +302,9 @@ export const QueryListCredentialSchemasRequest = {
     message.trId = object.trId ?? 0;
     message.modifiedAfter = object.modifiedAfter ?? undefined;
     message.responseMaxSize = object.responseMaxSize ?? 0;
+    message.onlyActive = object.onlyActive ?? false;
+    message.issuerPermManagementMode = object.issuerPermManagementMode ?? 0;
+    message.verifierPermManagementMode = object.verifierPermManagementMode ?? 0;
     return message;
   },
 };

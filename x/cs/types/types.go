@@ -308,6 +308,21 @@ func EnsureCanonicalID(schemaJSON string, chainID string, schemaID uint64) (stri
 	return string(updatedSchema), nil
 }
 
+// CanonicalizeJCS serializes a JSON string using the JSON Canonicalization Scheme (JCS)
+// as defined in RFC 8785: keys sorted alphabetically, no insignificant whitespace.
+// json.Marshal on interface{} sorts map keys in Unicode code point order, satisfying JCS.
+func CanonicalizeJCS(schemaJSON string) (string, error) {
+	var doc interface{}
+	if err := json.Unmarshal([]byte(schemaJSON), &doc); err != nil {
+		return "", fmt.Errorf("failed to parse JSON for JCS canonicalization: %w", err)
+	}
+	canonical, err := json.Marshal(doc)
+	if err != nil {
+		return "", fmt.Errorf("failed to JCS-canonicalize JSON: %w", err)
+	}
+	return string(canonical), nil
+}
+
 func validateValidityPeriods(msg *MsgCreateCredentialSchema) error {
 	// [MOD-CS-MSG-1-2-1] All validity period fields are mandatory
 	if msg.GetIssuerGrantorValidationValidityPeriod() == nil {

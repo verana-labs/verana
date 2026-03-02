@@ -120,6 +120,40 @@
             "required": false,
             "type": "integer",
             "format": "int64"
+          },
+          {
+            "name": "only_active",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "issuer_perm_management_mode",
+            "description": " - MODE_UNSPECIFIED: Default to prevent accidental omission\n - OPEN: Anyone can create their own permission\n - GRANTOR_VALIDATION: Requires validation from a grantor\n - ECOSYSTEM: Requires validation from ecosystem (was TRUST_REGISTRY_VALIDATION)",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "MODE_UNSPECIFIED",
+              "OPEN",
+              "GRANTOR_VALIDATION",
+              "ECOSYSTEM"
+            ],
+            "default": "MODE_UNSPECIFIED"
+          },
+          {
+            "name": "verifier_perm_management_mode",
+            "description": " - MODE_UNSPECIFIED: Default to prevent accidental omission\n - OPEN: Anyone can create their own permission\n - GRANTOR_VALIDATION: Requires validation from a grantor\n - ECOSYSTEM: Requires validation from ecosystem (was TRUST_REGISTRY_VALIDATION)",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "MODE_UNSPECIFIED",
+              "OPEN",
+              "GRANTOR_VALIDATION",
+              "ECOSYSTEM"
+            ],
+            "default": "MODE_UNSPECIFIED"
           }
         ],
         "tags": [

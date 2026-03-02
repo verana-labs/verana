@@ -36,7 +36,24 @@ func (k Keeper) ListCredentialSchemas(goCtx context.Context, req *types.QueryLis
 		}
 
 		// Filter by modification time if specified
-		if req.ModifiedAfter != nil && schema.Modified.Before(*req.ModifiedAfter) {
+		if req.ModifiedAfter != nil && !schema.Modified.After(*req.ModifiedAfter) {
+			return false, nil
+		}
+
+		// Filter archived entries if only_active is set
+		if req.OnlyActive && schema.Archived != nil {
+			return false, nil
+		}
+
+		// Filter by issuer_perm_management_mode if specified
+		if req.IssuerPermManagementMode != types.CredentialSchemaPermManagementMode_MODE_UNSPECIFIED &&
+			schema.IssuerPermManagementMode != req.IssuerPermManagementMode {
+			return false, nil
+		}
+
+		// Filter by verifier_perm_management_mode if specified
+		if req.VerifierPermManagementMode != types.CredentialSchemaPermManagementMode_MODE_UNSPECIFIED &&
+			schema.VerifierPermManagementMode != req.VerifierPermManagementMode {
 			return false, nil
 		}
 
@@ -50,17 +67,22 @@ func (k Keeper) ListCredentialSchemas(goCtx context.Context, req *types.QueryLis
 		}
 
 		schemas = append(schemas, schema)
-		return len(schemas) >= int(req.ResponseMaxSize), nil
+		return false, nil
 	})
 
 	if err != nil {
 		return nil, err
 	}
 
-	// Sort by created timestamp ascending
+	// Sort by modified timestamp descending (spec: results MUST be ordered by modified DESC)
 	sort.Slice(schemas, func(i, j int) bool {
-		return schemas[i].Created.Before(schemas[j].Created)
+		return schemas[i].Modified.After(schemas[j].Modified)
 	})
+
+	// Apply response_max_size limit after sorting
+	if len(schemas) > int(req.ResponseMaxSize) {
+		schemas = schemas[:req.ResponseMaxSize]
+	}
 
 	return &types.QueryListCredentialSchemasResponse{
 		Schemas: schemas,
@@ -109,7 +131,13 @@ func (k Keeper) RenderJsonSchema(goCtx context.Context, req *types.QueryRenderJs
 		return nil, status.Error(codes.Internal, fmt.Sprintf("failed to ensure canonical ID: %v", err))
 	}
 
+	// Apply full JCS canonicalization (RFC 8785): sorted keys, no insignificant whitespace
+	canonicalized, err := types.CanonicalizeJCS(schemaWithCanonicalID)
+	if err != nil {
+		return nil, status.Error(codes.Internal, fmt.Sprintf("failed to JCS-canonicalize schema: %v", err))
+	}
+
 	return &types.QueryRenderJsonSchemaResponse{
-		Schema: schemaWithCanonicalID,
+		Schema: canonicalized,
 	}, nil
 }
