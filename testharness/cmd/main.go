@@ -103,6 +103,12 @@ func runJourney(ctx context.Context, client cosmosclient.Client, journeyID int) 
 	case 102:
 		// Trust Registry Operations with Operator Authorization (fail-then-pass)
 		return journeys.RunTrustRegistryAuthzOperationsJourney(ctx, client)
+	case 201:
+		// Credential Schema Operator Authorization Setup (Group + Fund)
+		return journeys.RunCredentialSchemaAuthzSetupJourney(ctx, client)
+	case 202:
+		// Credential Schema Operations with Operator Authorization (fail-then-pass)
+		return journeys.RunCredentialSchemaAuthzOperationsJourney(ctx, client)
 	default:
 		return fmt.Errorf("unknown journey ID: %d", journeyID)
 	}
@@ -139,4 +145,7 @@ func printUsage() {
 	fmt.Println("\n  Trust Registry Authorization Journeys:")
 	fmt.Println("  101 - TR Operator Authorization Setup (Group + Fund)")
 	fmt.Println("  102 - TR Operations with Operator Authorization (fail-then-pass)")
+	fmt.Println("\n  Credential Schema Authorization Journeys:")
+	fmt.Println("  201 - CS Operator Authorization Setup (Group + Fund)")
+	fmt.Println("  202 - CS Operations with Operator Authorization (fail-then-pass)")
 }

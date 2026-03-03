@@ -50,6 +50,9 @@ message QueryListCredentialSchemasRequest {
     (gogoproto.nullable) = true
   ];
   uint32 response_max_size = 3;
+  bool only_active = 4;
+  CredentialSchemaPermManagementMode issuer_perm_management_mode = 5;
+  CredentialSchemaPermManagementMode verifier_perm_management_mode = 6;
 }
 
 message QueryListCredentialSchemasResponse {

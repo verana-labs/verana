@@ -126,17 +126,24 @@ func (m *MsgUpdateParamsResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgUpdateParamsResponse proto.InternalMessageInfo
 
+// [MOD-CS-MSG-1] Create New Credential Schema
 type MsgCreateCredentialSchema struct {
-	Creator                                 string          `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
-	TrId                                    uint64          `protobuf:"varint,2,opt,name=tr_id,json=trId,proto3" json:"tr_id,omitempty"`
-	JsonSchema                              string          `protobuf:"bytes,3,opt,name=json_schema,json=jsonSchema,proto3" json:"json_schema,omitempty"`
-	IssuerGrantorValidationValidityPeriod   *OptionalUInt32 `protobuf:"bytes,4,opt,name=issuer_grantor_validation_validity_period,json=issuerGrantorValidationValidityPeriod,proto3" json:"issuer_grantor_validation_validity_period,omitempty"`
-	VerifierGrantorValidationValidityPeriod *OptionalUInt32 `protobuf:"bytes,5,opt,name=verifier_grantor_validation_validity_period,json=verifierGrantorValidationValidityPeriod,proto3" json:"verifier_grantor_validation_validity_period,omitempty"`
-	IssuerValidationValidityPeriod          *OptionalUInt32 `protobuf:"bytes,6,opt,name=issuer_validation_validity_period,json=issuerValidationValidityPeriod,proto3" json:"issuer_validation_validity_period,omitempty"`
-	VerifierValidationValidityPeriod        *OptionalUInt32 `protobuf:"bytes,7,opt,name=verifier_validation_validity_period,json=verifierValidationValidityPeriod,proto3" json:"verifier_validation_validity_period,omitempty"`
-	HolderValidationValidityPeriod          *OptionalUInt32 `protobuf:"bytes,8,opt,name=holder_validation_validity_period,json=holderValidationValidityPeriod,proto3" json:"holder_validation_validity_period,omitempty"`
-	IssuerPermManagementMode                uint32          `protobuf:"varint,9,opt,name=issuer_perm_management_mode,json=issuerPermManagementMode,proto3" json:"issuer_perm_management_mode,omitempty"`
-	VerifierPermManagementMode              uint32          `protobuf:"varint,10,opt,name=verifier_perm_management_mode,json=verifierPermManagementMode,proto3" json:"verifier_perm_management_mode,omitempty"`
+	// authority is the group account on whose behalf this message is executed
+	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
+	// operator is the account authorized by the authority to run this Msg
+	Operator                                string          `protobuf:"bytes,2,opt,name=operator,proto3" json:"operator,omitempty"`
+	TrId                                    uint64          `protobuf:"varint,3,opt,name=tr_id,json=trId,proto3" json:"tr_id,omitempty"`
+	JsonSchema                              string          `protobuf:"bytes,4,opt,name=json_schema,json=jsonSchema,proto3" json:"json_schema,omitempty"`
+	IssuerGrantorValidationValidityPeriod   *OptionalUInt32 `protobuf:"bytes,5,opt,name=issuer_grantor_validation_validity_period,json=issuerGrantorValidationValidityPeriod,proto3" json:"issuer_grantor_validation_validity_period,omitempty"`
+	VerifierGrantorValidationValidityPeriod *OptionalUInt32 `protobuf:"bytes,6,opt,name=verifier_grantor_validation_validity_period,json=verifierGrantorValidationValidityPeriod,proto3" json:"verifier_grantor_validation_validity_period,omitempty"`
+	IssuerValidationValidityPeriod          *OptionalUInt32 `protobuf:"bytes,7,opt,name=issuer_validation_validity_period,json=issuerValidationValidityPeriod,proto3" json:"issuer_validation_validity_period,omitempty"`
+	VerifierValidationValidityPeriod        *OptionalUInt32 `protobuf:"bytes,8,opt,name=verifier_validation_validity_period,json=verifierValidationValidityPeriod,proto3" json:"verifier_validation_validity_period,omitempty"`
+	HolderValidationValidityPeriod          *OptionalUInt32 `protobuf:"bytes,9,opt,name=holder_validation_validity_period,json=holderValidationValidityPeriod,proto3" json:"holder_validation_validity_period,omitempty"`
+	IssuerPermManagementMode                uint32          `protobuf:"varint,10,opt,name=issuer_perm_management_mode,json=issuerPermManagementMode,proto3" json:"issuer_perm_management_mode,omitempty"`
+	VerifierPermManagementMode              uint32          `protobuf:"varint,11,opt,name=verifier_perm_management_mode,json=verifierPermManagementMode,proto3" json:"verifier_perm_management_mode,omitempty"`
+	PricingAssetType                        uint32          `protobuf:"varint,12,opt,name=pricing_asset_type,json=pricingAssetType,proto3" json:"pricing_asset_type,omitempty"`
+	PricingAsset                            string          `protobuf:"bytes,13,opt,name=pricing_asset,json=pricingAsset,proto3" json:"pricing_asset,omitempty"`
+	DigestAlgorithm                         string          `protobuf:"bytes,14,opt,name=digest_algorithm,json=digestAlgorithm,proto3" json:"digest_algorithm,omitempty"`
 }
 
 func (m *MsgCreateCredentialSchema) Reset()         { *m = MsgCreateCredentialSchema{} }
@@ -172,9 +179,16 @@ func (m *MsgCreateCredentialSchema) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgCreateCredentialSchema proto.InternalMessageInfo
 
-func (m *MsgCreateCredentialSchema) GetCreator() string {
+func (m *MsgCreateCredentialSchema) GetAuthority() string {
 	if m != nil {
-		return m.Creator
+		return m.Authority
+	}
+	return ""
+}
+
+func (m *MsgCreateCredentialSchema) GetOperator() string {
+	if m != nil {
+		return m.Operator
 	}
 	return ""
 }
@@ -242,6 +256,27 @@ func (m *MsgCreateCredentialSchema) GetVerifierPermManagementMode() uint32 {
 	return 0
 }
 
+func (m *MsgCreateCredentialSchema) GetPricingAssetType() uint32 {
+	if m != nil {
+		return m.PricingAssetType
+	}
+	return 0
+}
+
+func (m *MsgCreateCredentialSchema) GetPricingAsset() string {
+	if m != nil {
+		return m.PricingAsset
+	}
+	return ""
+}
+
+func (m *MsgCreateCredentialSchema) GetDigestAlgorithm() string {
+	if m != nil {
+		return m.DigestAlgorithm
+	}
+	return ""
+}
+
 type MsgCreateCredentialSchemaResponse struct {
 	Id uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 }
@@ -286,15 +321,18 @@ func (m *MsgCreateCredentialSchemaResponse) GetId() uint64 {
 	return 0
 }
 
+// [MOD-CS-MSG-2] Update Credential Schema
 type MsgUpdateCredentialSchema struct {
-	Creator string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
-	Id      uint64 `protobuf:"varint,2,opt,name=id,proto3" json:"id,omitempty"`
-	// Optional fields: nil/not set means don't update, 0 means never expires
-	IssuerGrantorValidationValidityPeriod   *OptionalUInt32 `protobuf:"bytes,3,opt,name=issuer_grantor_validation_validity_period,json=issuerGrantorValidationValidityPeriod,proto3" json:"issuer_grantor_validation_validity_period,omitempty"`
-	VerifierGrantorValidationValidityPeriod *OptionalUInt32 `protobuf:"bytes,4,opt,name=verifier_grantor_validation_validity_period,json=verifierGrantorValidationValidityPeriod,proto3" json:"verifier_grantor_validation_validity_period,omitempty"`
-	IssuerValidationValidityPeriod          *OptionalUInt32 `protobuf:"bytes,5,opt,name=issuer_validation_validity_period,json=issuerValidationValidityPeriod,proto3" json:"issuer_validation_validity_period,omitempty"`
-	VerifierValidationValidityPeriod        *OptionalUInt32 `protobuf:"bytes,6,opt,name=verifier_validation_validity_period,json=verifierValidationValidityPeriod,proto3" json:"verifier_validation_validity_period,omitempty"`
-	HolderValidationValidityPeriod          *OptionalUInt32 `protobuf:"bytes,7,opt,name=holder_validation_validity_period,json=holderValidationValidityPeriod,proto3" json:"holder_validation_validity_period,omitempty"`
+	// authority is the group account on whose behalf this message is executed
+	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
+	// operator is the account authorized by the authority to run this Msg
+	Operator                                string          `protobuf:"bytes,2,opt,name=operator,proto3" json:"operator,omitempty"`
+	Id                                      uint64          `protobuf:"varint,3,opt,name=id,proto3" json:"id,omitempty"`
+	IssuerGrantorValidationValidityPeriod   *OptionalUInt32 `protobuf:"bytes,4,opt,name=issuer_grantor_validation_validity_period,json=issuerGrantorValidationValidityPeriod,proto3" json:"issuer_grantor_validation_validity_period,omitempty"`
+	VerifierGrantorValidationValidityPeriod *OptionalUInt32 `protobuf:"bytes,5,opt,name=verifier_grantor_validation_validity_period,json=verifierGrantorValidationValidityPeriod,proto3" json:"verifier_grantor_validation_validity_period,omitempty"`
+	IssuerValidationValidityPeriod          *OptionalUInt32 `protobuf:"bytes,6,opt,name=issuer_validation_validity_period,json=issuerValidationValidityPeriod,proto3" json:"issuer_validation_validity_period,omitempty"`
+	VerifierValidationValidityPeriod        *OptionalUInt32 `protobuf:"bytes,7,opt,name=verifier_validation_validity_period,json=verifierValidationValidityPeriod,proto3" json:"verifier_validation_validity_period,omitempty"`
+	HolderValidationValidityPeriod          *OptionalUInt32 `protobuf:"bytes,8,opt,name=holder_validation_validity_period,json=holderValidationValidityPeriod,proto3" json:"holder_validation_validity_period,omitempty"`
 }
 
 func (m *MsgUpdateCredentialSchema) Reset()         { *m = MsgUpdateCredentialSchema{} }
@@ -330,9 +368,16 @@ func (m *MsgUpdateCredentialSchema) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgUpdateCredentialSchema proto.InternalMessageInfo
 
-func (m *MsgUpdateCredentialSchema) GetCreator() string {
+func (m *MsgUpdateCredentialSchema) GetAuthority() string {
 	if m != nil {
-		return m.Creator
+		return m.Authority
+	}
+	return ""
+}
+
+func (m *MsgUpdateCredentialSchema) GetOperator() string {
+	if m != nil {
+		return m.Operator
 	}
 	return ""
 }
@@ -460,10 +505,14 @@ func (m *MsgUpdateCredentialSchemaResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgUpdateCredentialSchemaResponse proto.InternalMessageInfo
 
+// [MOD-CS-MSG-3] Archive Credential Schema
 type MsgArchiveCredentialSchema struct {
-	Creator string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
-	Id      uint64 `protobuf:"varint,2,opt,name=id,proto3" json:"id,omitempty"`
-	Archive bool   `protobuf:"varint,3,opt,name=archive,proto3" json:"archive,omitempty"`
+	// authority is the group account on whose behalf this message is executed
+	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
+	// operator is the account authorized by the authority to run this Msg
+	Operator string `protobuf:"bytes,2,opt,name=operator,proto3" json:"operator,omitempty"`
+	Id       uint64 `protobuf:"varint,3,opt,name=id,proto3" json:"id,omitempty"`
+	Archive  bool   `protobuf:"varint,4,opt,name=archive,proto3" json:"archive,omitempty"`
 }
 
 func (m *MsgArchiveCredentialSchema) Reset()         { *m = MsgArchiveCredentialSchema{} }
@@ -499,9 +548,16 @@ func (m *MsgArchiveCredentialSchema) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgArchiveCredentialSchema proto.InternalMessageInfo
 
-func (m *MsgArchiveCredentialSchema) GetCreator() string {
+func (m *MsgArchiveCredentialSchema) GetAuthority() string {
 	if m != nil {
-		return m.Creator
+		return m.Authority
+	}
+	return ""
+}
+
+func (m *MsgArchiveCredentialSchema) GetOperator() string {
+	if m != nil {
+		return m.Operator
 	}
 	return ""
 }
@@ -571,58 +627,63 @@ func init() {
 func init() { proto.RegisterFile("verana/cs/v1/tx.proto", fileDescriptor_28caaebe5b206ca2) }
 
 var fileDescriptor_28caaebe5b206ca2 = []byte{
-	// 803 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xc4, 0x56, 0x4f, 0x4f, 0xdb, 0x48,
-	0x1c, 0x8d, 0xf3, 0x97, 0x0c, 0x7f, 0x56, 0xeb, 0xcd, 0x2e, 0xc6, 0x2c, 0x21, 0x84, 0x65, 0xc9,
-	0xb2, 0x22, 0x5e, 0x82, 0xb4, 0x2b, 0x21, 0xed, 0x81, 0x70, 0x58, 0x71, 0x88, 0x16, 0x99, 0x85,
-	0xc3, 0x5e, 0xac, 0x21, 0x9e, 0x3a, 0x53, 0xc5, 0x1e, 0x77, 0x66, 0x12, 0x81, 0xd4, 0x03, 0xea,
-	0xa9, 0xea, 0xa9, 0x1f, 0xa3, 0x47, 0x54, 0xf5, 0x5e, 0xf5, 0xc6, 0x11, 0xf5, 0xd4, 0x13, 0xaa,
-	0xe0, 0x90, 0xaf, 0x51, 0xd9, 0x63, 0x07, 0x12, 0x70, 0x70, 0x25, 0x0a, 0x97, 0x28, 0x33, 0xf3,
-	0xe6, 0xbd, 0xf7, 0xfb, 0x79, 0x9e, 0x3d, 0xe0, 0xc7, 0x2e, 0xa2, 0xd0, 0x81, 0x5a, 0x93, 0x69,
-	0xdd, 0x35, 0x8d, 0x1f, 0x56, 0x5d, 0x4a, 0x38, 0x91, 0x27, 0xc4, 0x74, 0xb5, 0xc9, 0xaa, 0xdd,
-	0x35, 0xf5, 0x7b, 0x68, 0x63, 0x87, 0x68, 0xfe, 0xaf, 0x00, 0xa8, 0xd3, 0x4d, 0xc2, 0x6c, 0xc2,
-	0x34, 0x9b, 0x59, 0xde, 0x46, 0x9b, 0x59, 0xc1, 0xc2, 0x8c, 0x58, 0x30, 0xfc, 0x91, 0x26, 0x06,
-	0xc1, 0x52, 0xc1, 0x22, 0x16, 0x11, 0xf3, 0xde, 0xbf, 0x70, 0xc3, 0x80, 0x03, 0x17, 0x52, 0x68,
-	0x87, 0x1b, 0x94, 0x41, 0x73, 0x47, 0x2e, 0x0a, 0x56, 0xca, 0x6f, 0x25, 0xf0, 0x5d, 0x83, 0x59,
-	0x7b, 0xae, 0x09, 0x39, 0xda, 0xf1, 0xf7, 0xc8, 0x7f, 0x82, 0x3c, 0xec, 0xf0, 0x16, 0xa1, 0x98,
-	0x1f, 0x29, 0x52, 0x49, 0xaa, 0xe4, 0xeb, 0xca, 0xc7, 0x77, 0xab, 0x85, 0xc0, 0xc3, 0xa6, 0x69,
-	0x52, 0xc4, 0xd8, 0x2e, 0xa7, 0xd8, 0xb1, 0xf4, 0x2b, 0xa8, 0xfc, 0x17, 0xc8, 0x0a, 0x55, 0x25,
-	0x59, 0x92, 0x2a, 0xe3, 0xb5, 0x42, 0xf5, 0x7a, 0xf1, 0x55, 0xc1, 0x5e, 0xcf, 0x9f, 0x9e, 0xcf,
-	0x27, 0xde, 0xf4, 0x4e, 0x56, 0x24, 0x3d, 0x80, 0x6f, 0x54, 0x5f, 0xf4, 0x4e, 0x56, 0xae, 0x88,
-	0x5e, 0xf5, 0x4e, 0x56, 0x66, 0x03, 0xc7, 0x87, 0x9e, 0xe7, 0x21, 0x83, 0xe5, 0x19, 0x30, 0x3d,
-	0x34, 0xa5, 0x23, 0xe6, 0x12, 0x87, 0xa1, 0x72, 0x2f, 0x0b, 0x66, 0x1a, 0xcc, 0xda, 0xa2, 0x08,
-	0x72, 0xb4, 0x45, 0x91, 0x89, 0x1c, 0x8e, 0x61, 0x7b, 0xb7, 0xd9, 0x42, 0x36, 0x94, 0x6b, 0x20,
-	0xd7, 0xf4, 0x56, 0x08, 0xbd, 0xb3, 0xae, 0x10, 0x28, 0xff, 0x00, 0x32, 0x9c, 0x1a, 0xd8, 0xf4,
-	0x8b, 0x4a, 0xeb, 0x69, 0x4e, 0xb7, 0x4d, 0x79, 0x1e, 0x8c, 0x3f, 0x65, 0xc4, 0x31, 0x98, 0xcf,
-	0xab, 0xa4, 0x3c, 0x32, 0x1d, 0x78, 0x53, 0x81, 0xd2, 0x73, 0xf0, 0x1b, 0x66, 0xac, 0x83, 0xa8,
-	0x61, 0x51, 0xe8, 0x70, 0x42, 0x8d, 0x2e, 0x6c, 0x63, 0x13, 0x72, 0x4c, 0x1c, 0xf1, 0x17, 0xf3,
-	0x23, 0xc3, 0x45, 0x14, 0x13, 0x53, 0x49, 0xfb, 0xed, 0xfa, 0x79, 0xb0, 0x5d, 0xff, 0xba, 0x1e,
-	0x16, 0xb6, 0xf7, 0xb6, 0x1d, 0xbe, 0x5e, 0xab, 0xa7, 0x4f, 0xcf, 0xe7, 0x25, 0x7d, 0x49, 0x90,
-	0xfe, 0x23, 0x38, 0xf7, 0xfb, 0x94, 0xfb, 0x01, 0xe3, 0x8e, 0x4f, 0x28, 0x1f, 0x4b, 0xe0, 0xf7,
-	0x2e, 0xa2, 0xf8, 0x09, 0x8e, 0x67, 0x20, 0x13, 0xdb, 0xc0, 0x72, 0x48, 0x7b, 0x97, 0x05, 0x1b,
-	0x2c, 0x04, 0x0d, 0x18, 0xa1, 0x9b, 0x8d, 0xad, 0x5b, 0x14, 0x64, 0x91, 0x72, 0xcf, 0xc0, 0x62,
-	0xbf, 0xe0, 0x11, 0x82, 0xb9, 0xd8, 0x82, 0xa5, 0x90, 0x6e, 0x54, 0x85, 0x2d, 0xd2, 0x36, 0x47,
-	0x0b, 0x8e, 0xc5, 0xaf, 0x50, 0x90, 0x45, 0xca, 0xfd, 0x0d, 0x66, 0x83, 0x86, 0xba, 0x88, 0xda,
-	0x86, 0x0d, 0x1d, 0x68, 0x21, 0x1b, 0x39, 0xdc, 0xb0, 0x89, 0x89, 0x94, 0x7c, 0x49, 0xaa, 0x4c,
-	0xea, 0x8a, 0x80, 0xec, 0x20, 0x6a, 0x37, 0xfa, 0x80, 0x06, 0x31, 0x91, 0xbc, 0x09, 0xe6, 0xfa,
-	0x0d, 0xba, 0x95, 0x00, 0xf8, 0x04, 0x6a, 0x08, 0xba, 0x49, 0xb1, 0x31, 0xe1, 0xc5, 0x34, 0xcc,
-	0x45, 0x79, 0x1d, 0x2c, 0x44, 0x06, 0x2d, 0x8c, 0xa3, 0x3c, 0x05, 0x92, 0xd8, 0xf4, 0xb3, 0x96,
-	0xd6, 0x93, 0xd8, 0x2c, 0xbf, 0xcf, 0xf8, 0xf1, 0x14, 0xd1, 0xbd, 0x97, 0x78, 0x0a, 0x85, 0x64,
-	0xa8, 0xf0, 0x75, 0xc1, 0x4b, 0x3d, 0x76, 0xf0, 0xd2, 0x8f, 0x14, 0xbc, 0xcc, 0x43, 0x07, 0x2f,
-	0xfb, 0xd0, 0xc1, 0xcb, 0xdd, 0x57, 0xf0, 0x86, 0x8e, 0xfd, 0xaf, 0x60, 0x6a, 0x90, 0x45, 0x2e,
-	0x80, 0x4c, 0x17, 0xb6, 0x3b, 0xc8, 0x3f, 0xb3, 0x93, 0xba, 0x18, 0x94, 0x17, 0xfd, 0x78, 0xdc,
-	0x7e, 0xd0, 0xfb, 0x5f, 0xab, 0x97, 0x12, 0x50, 0x1b, 0xcc, 0xda, 0xa4, 0xcd, 0x16, 0xee, 0x7e,
-	0x9b, 0x3c, 0x28, 0x20, 0x07, 0x05, 0xbd, 0x7f, 0xda, 0xc7, 0xf4, 0x70, 0x38, 0x54, 0xd7, 0x2f,
-	0xa0, 0x1c, 0xed, 0x24, 0x34, 0x5c, 0xfb, 0x90, 0x02, 0xa9, 0x06, 0xb3, 0xe4, 0xff, 0xc0, 0xc4,
-	0xc0, 0x95, 0x61, 0x6e, 0xb0, 0xcf, 0x43, 0x5f, 0x67, 0x75, 0x69, 0xe4, 0x72, 0xff, 0x6d, 0x41,
-	0xc1, 0x4f, 0x11, 0x1f, 0xee, 0xe5, 0x1b, 0x04, 0xb7, 0x03, 0x55, 0x2d, 0x26, 0xf0, 0xba, 0x66,
-	0xc4, 0xdb, 0x68, 0x39, 0xc2, 0x74, 0x0c, 0xcd, 0xd1, 0x8f, 0x5d, 0xee, 0x80, 0xe9, 0xa8, 0x47,
-	0x5e, 0xb9, 0xc1, 0x15, 0x81, 0x54, 0xff, 0x88, 0x8b, 0x0c, 0x65, 0xd5, 0xcc, 0xb1, 0x77, 0xeb,
-	0xaa, 0xd7, 0x4f, 0x2f, 0x8a, 0xd2, 0xd9, 0x45, 0x51, 0xfa, 0x7c, 0x51, 0x94, 0x5e, 0x5f, 0x16,
-	0x13, 0x67, 0x97, 0xc5, 0xc4, 0xa7, 0xcb, 0x62, 0xe2, 0xff, 0x8a, 0x85, 0x79, 0xab, 0x73, 0x50,
-	0x6d, 0x12, 0x5b, 0x13, 0xe4, 0xab, 0x6d, 0x78, 0xc0, 0xb4, 0xeb, 0x77, 0x31, 0xff, 0xf2, 0x78,
-	0x90, 0xf5, 0x6f, 0x8f, 0xeb, 0x5f, 0x02, 0x00, 0x00, 0xff, 0xff, 0xea, 0xcf, 0xa8, 0x4c, 0xf6,
-	0x0a, 0x00, 0x00,
+	// 881 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xcc, 0x56, 0xcf, 0x6f, 0xe3, 0x44,
+	0x14, 0x8e, 0x9b, 0x1f, 0x4d, 0xa6, 0x49, 0x77, 0x31, 0x81, 0xba, 0x5e, 0x36, 0xcd, 0xa6, 0x2c,
+	0xcd, 0x16, 0x36, 0x66, 0x5b, 0x04, 0xd2, 0x4a, 0x1c, 0x92, 0x3d, 0xa0, 0x3d, 0x44, 0x54, 0xde,
+	0x6d, 0x0f, 0x5c, 0xac, 0x69, 0x3c, 0x38, 0x83, 0x62, 0x8f, 0x99, 0x99, 0x44, 0x8d, 0xc4, 0xa1,
+	0xe2, 0xc8, 0x89, 0x3f, 0x81, 0x23, 0xc7, 0x0a, 0xf1, 0x0f, 0x20, 0x2e, 0x3d, 0x56, 0x9c, 0x38,
+	0x55, 0xa8, 0x3d, 0xf4, 0x7f, 0xe0, 0x84, 0x3c, 0x63, 0xbb, 0x49, 0x1a, 0x07, 0x83, 0x50, 0xcb,
+	0xa5, 0xf2, 0xcc, 0xfb, 0xe6, 0x7b, 0xdf, 0x9b, 0xce, 0xfb, 0xf2, 0xc0, 0x5b, 0x23, 0x44, 0xa1,
+	0x07, 0x8d, 0x1e, 0x33, 0x46, 0xcf, 0x0c, 0x7e, 0xd4, 0xf2, 0x29, 0xe1, 0x44, 0x2d, 0xcb, 0xed,
+	0x56, 0x8f, 0xb5, 0x46, 0xcf, 0xf4, 0x37, 0xa0, 0x8b, 0x3d, 0x62, 0x88, 0xbf, 0x12, 0xa0, 0xaf,
+	0xf5, 0x08, 0x73, 0x09, 0x33, 0x5c, 0xe6, 0x04, 0x07, 0x5d, 0xe6, 0x84, 0x81, 0x75, 0x19, 0xb0,
+	0xc4, 0xca, 0x90, 0x8b, 0x30, 0x54, 0x75, 0x88, 0x43, 0xe4, 0x7e, 0xf0, 0x15, 0x1d, 0x98, 0x52,
+	0xe0, 0x43, 0x0a, 0xdd, 0xe8, 0x80, 0x36, 0x2d, 0x6e, 0xec, 0xa3, 0x30, 0xd2, 0xf8, 0x49, 0x01,
+	0xf7, 0xba, 0xcc, 0xd9, 0xf7, 0x6d, 0xc8, 0xd1, 0x9e, 0x38, 0xa3, 0x7e, 0x0c, 0x4a, 0x70, 0xc8,
+	0xfb, 0x84, 0x62, 0x3e, 0xd6, 0x94, 0xba, 0xd2, 0x2c, 0x75, 0xb4, 0xdf, 0x7e, 0x7e, 0x5a, 0x0d,
+	0x35, 0xb4, 0x6d, 0x9b, 0x22, 0xc6, 0x5e, 0x71, 0x8a, 0x3d, 0xc7, 0xbc, 0x86, 0xaa, 0x9f, 0x80,
+	0x82, 0xcc, 0xaa, 0x2d, 0xd5, 0x95, 0xe6, 0xca, 0x4e, 0xb5, 0x35, 0x59, 0x7c, 0x4b, 0xb2, 0x77,
+	0x4a, 0xa7, 0xe7, 0x1b, 0x99, 0x1f, 0xaf, 0x4e, 0xb6, 0x15, 0x33, 0x84, 0x3f, 0x6f, 0x7d, 0x7b,
+	0x75, 0xb2, 0x7d, 0x4d, 0xf4, 0xdd, 0xd5, 0xc9, 0xf6, 0x83, 0x50, 0xf1, 0x51, 0xa0, 0x79, 0x46,
+	0x60, 0x63, 0x1d, 0xac, 0xcd, 0x6c, 0x99, 0x88, 0xf9, 0xc4, 0x63, 0xa8, 0xf1, 0x43, 0x11, 0xac,
+	0x77, 0x99, 0xf3, 0x82, 0x22, 0xc8, 0xd1, 0x0b, 0x8a, 0x6c, 0xe4, 0x71, 0x0c, 0x07, 0xaf, 0x7a,
+	0x7d, 0xe4, 0xc2, 0x7f, 0x5d, 0xd9, 0x47, 0xa0, 0x48, 0x7c, 0x44, 0x21, 0x27, 0x54, 0xd4, 0xb6,
+	0xe8, 0x58, 0x8c, 0x54, 0xdf, 0x04, 0x79, 0x4e, 0x2d, 0x6c, 0x6b, 0xd9, 0xba, 0xd2, 0xcc, 0x99,
+	0x39, 0x4e, 0x5f, 0xda, 0xea, 0x06, 0x58, 0xf9, 0x8a, 0x11, 0xcf, 0x62, 0x42, 0x91, 0x96, 0x0b,
+	0xd8, 0x4c, 0x10, 0x6c, 0x85, 0x1a, 0xbf, 0x01, 0x4f, 0x30, 0x63, 0x43, 0x44, 0x2d, 0x87, 0x42,
+	0x8f, 0x13, 0x6a, 0x8d, 0xe0, 0x00, 0xdb, 0x90, 0x63, 0xe2, 0xc9, 0x4f, 0xcc, 0xc7, 0x96, 0x8f,
+	0x28, 0x26, 0xb6, 0x96, 0x17, 0x17, 0xfd, 0xce, 0xf4, 0x45, 0x7f, 0xee, 0x07, 0x58, 0x38, 0xd8,
+	0x7f, 0xe9, 0xf1, 0xdd, 0x9d, 0x4e, 0xee, 0xf4, 0x7c, 0x43, 0x31, 0x1f, 0x4b, 0xd2, 0xcf, 0x24,
+	0xe7, 0x41, 0x4c, 0x79, 0x10, 0x32, 0xee, 0x09, 0x42, 0xf5, 0x58, 0x01, 0xef, 0x8f, 0x10, 0xc5,
+	0x5f, 0xe2, 0x74, 0x02, 0x0a, 0xa9, 0x05, 0x6c, 0x45, 0xb4, 0x7f, 0x27, 0xc1, 0x05, 0x8f, 0xc2,
+	0x0b, 0x58, 0x90, 0x77, 0x39, 0x75, 0xde, 0x9a, 0x24, 0x4b, 0x4c, 0xf7, 0x35, 0xd8, 0x8c, 0x0b,
+	0x5e, 0x90, 0xb0, 0x98, 0x3a, 0x61, 0x3d, 0xa2, 0x5b, 0x54, 0x61, 0x9f, 0x0c, 0xec, 0xc5, 0x09,
+	0x4b, 0xe9, 0x2b, 0x94, 0x64, 0x89, 0xe9, 0x3e, 0x05, 0x0f, 0xc2, 0x0b, 0xf5, 0x11, 0x75, 0x2d,
+	0x17, 0x7a, 0xd0, 0x41, 0x2e, 0xf2, 0xb8, 0xe5, 0x12, 0x1b, 0x69, 0xa0, 0xae, 0x34, 0x2b, 0xa6,
+	0x26, 0x21, 0x7b, 0x88, 0xba, 0xdd, 0x18, 0xd0, 0x25, 0x36, 0x52, 0xdb, 0xe0, 0x61, 0x7c, 0x41,
+	0x73, 0x09, 0x56, 0x04, 0x81, 0x1e, 0x81, 0xe6, 0x50, 0x7c, 0x00, 0x54, 0x9f, 0xe2, 0x1e, 0xf6,
+	0x1c, 0x0b, 0x32, 0x86, 0xb8, 0x15, 0x58, 0x90, 0x56, 0x16, 0xe7, 0xee, 0x87, 0x91, 0x76, 0x10,
+	0x78, 0x3d, 0xf6, 0x91, 0xba, 0x09, 0x2a, 0x53, 0x68, 0xad, 0x22, 0x9a, 0xa4, 0x3c, 0x09, 0x54,
+	0x9f, 0x80, 0xfb, 0x36, 0x76, 0x10, 0xe3, 0x16, 0x1c, 0x38, 0x41, 0x97, 0xf6, 0x5d, 0x6d, 0x55,
+	0xe0, 0xee, 0xc9, 0xfd, 0x76, 0xb4, 0xfd, 0xbc, 0x12, 0xd8, 0x4b, 0xdc, 0x96, 0x8d, 0x5d, 0xf0,
+	0x28, 0xd1, 0x21, 0x22, 0x1f, 0x51, 0x57, 0xc1, 0x12, 0xb6, 0x85, 0x45, 0xe4, 0xcc, 0x25, 0x6c,
+	0x37, 0xfe, 0xcc, 0x0b, 0x5f, 0x91, 0x9e, 0x73, 0xc7, 0xbe, 0x22, 0xb5, 0x65, 0x23, 0x6d, 0xff,
+	0xcc, 0x31, 0x72, 0x77, 0xed, 0x18, 0xf9, 0x3b, 0x72, 0x8c, 0xc2, 0x6d, 0x3b, 0xc6, 0xf2, 0x6d,
+	0x3b, 0x46, 0xf1, 0xbf, 0x72, 0x8c, 0xd9, 0x8e, 0x79, 0x0f, 0xac, 0x4e, 0xd3, 0xa8, 0x55, 0x90,
+	0x1f, 0xc1, 0xc1, 0x10, 0x89, 0xc7, 0x5e, 0x31, 0xe5, 0xa2, 0xb1, 0x29, 0x3a, 0x6b, 0x7e, 0x8f,
+	0xc4, 0xbf, 0xd0, 0xbf, 0x2a, 0x40, 0xef, 0x32, 0xa7, 0x4d, 0x7b, 0x7d, 0x3c, 0xfa, 0xbf, 0xb5,
+	0x92, 0x06, 0x96, 0xa1, 0x14, 0x26, 0x1a, 0xa5, 0x68, 0x46, 0xcb, 0xd9, 0x2b, 0x79, 0x17, 0x34,
+	0x92, 0x8b, 0x88, 0x6a, 0xdd, 0xf9, 0x25, 0x0b, 0xb2, 0x5d, 0xe6, 0xa8, 0xaf, 0x41, 0x79, 0x6a,
+	0xc2, 0x7a, 0x38, 0xfd, 0x3f, 0x9a, 0x19, 0x66, 0xf4, 0xc7, 0x0b, 0xc3, 0xb1, 0x47, 0x51, 0xf0,
+	0x76, 0xc2, 0x9c, 0xb3, 0x75, 0x83, 0x60, 0x3e, 0x50, 0x37, 0x52, 0x02, 0x27, 0x73, 0x26, 0x78,
+	0xe0, 0x56, 0x82, 0xe8, 0x14, 0x39, 0x17, 0xbf, 0x18, 0x75, 0x08, 0xd6, 0x92, 0x5e, 0x4b, 0xf3,
+	0x06, 0x57, 0x02, 0x52, 0xff, 0x30, 0x2d, 0x32, 0x4a, 0xab, 0xe7, 0x8f, 0x83, 0x21, 0xb5, 0xd3,
+	0x39, 0xbd, 0xa8, 0x29, 0x67, 0x17, 0x35, 0xe5, 0x8f, 0x8b, 0x9a, 0xf2, 0xfd, 0x65, 0x2d, 0x73,
+	0x76, 0x59, 0xcb, 0xfc, 0x7e, 0x59, 0xcb, 0x7c, 0xd1, 0x74, 0x30, 0xef, 0x0f, 0x0f, 0x5b, 0x3d,
+	0xe2, 0x1a, 0x92, 0xfc, 0xe9, 0x00, 0x1e, 0x32, 0x63, 0x72, 0x74, 0x15, 0xb3, 0xf6, 0x61, 0x41,
+	0x0c, 0xdb, 0xbb, 0x7f, 0x05, 0x00, 0x00, 0xff, 0xff, 0xa5, 0x3d, 0x85, 0x22, 0x25, 0x0c, 0x00,
+	0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -907,15 +968,34 @@ func (m *MsgCreateCredentialSchema) MarshalToSizedBuffer(dAtA []byte) (int, erro
 	_ = i
 	var l int
 	_ = l
+	if len(m.DigestAlgorithm) > 0 {
+		i -= len(m.DigestAlgorithm)
+		copy(dAtA[i:], m.DigestAlgorithm)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.DigestAlgorithm)))
+		i--
+		dAtA[i] = 0x72
+	}
+	if len(m.PricingAsset) > 0 {
+		i -= len(m.PricingAsset)
+		copy(dAtA[i:], m.PricingAsset)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.PricingAsset)))
+		i--
+		dAtA[i] = 0x6a
+	}
+	if m.PricingAssetType != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.PricingAssetType))
+		i--
+		dAtA[i] = 0x60
+	}
 	if m.VerifierPermManagementMode != 0 {
 		i = encodeVarintTx(dAtA, i, uint64(m.VerifierPermManagementMode))
 		i--
-		dAtA[i] = 0x50
+		dAtA[i] = 0x58
 	}
 	if m.IssuerPermManagementMode != 0 {
 		i = encodeVarintTx(dAtA, i, uint64(m.IssuerPermManagementMode))
 		i--
-		dAtA[i] = 0x48
+		dAtA[i] = 0x50
 	}
 	if m.HolderValidationValidityPeriod != nil {
 		{
@@ -927,7 +1007,7 @@ func (m *MsgCreateCredentialSchema) MarshalToSizedBuffer(dAtA []byte) (int, erro
 			i = encodeVarintTx(dAtA, i, uint64(size))
 		}
 		i--
-		dAtA[i] = 0x42
+		dAtA[i] = 0x4a
 	}
 	if m.VerifierValidationValidityPeriod != nil {
 		{
@@ -939,7 +1019,7 @@ func (m *MsgCreateCredentialSchema) MarshalToSizedBuffer(dAtA []byte) (int, erro
 			i = encodeVarintTx(dAtA, i, uint64(size))
 		}
 		i--
-		dAtA[i] = 0x3a
+		dAtA[i] = 0x42
 	}
 	if m.IssuerValidationValidityPeriod != nil {
 		{
@@ -951,7 +1031,7 @@ func (m *MsgCreateCredentialSchema) MarshalToSizedBuffer(dAtA []byte) (int, erro
 			i = encodeVarintTx(dAtA, i, uint64(size))
 		}
 		i--
-		dAtA[i] = 0x32
+		dAtA[i] = 0x3a
 	}
 	if m.VerifierGrantorValidationValidityPeriod != nil {
 		{
@@ -963,7 +1043,7 @@ func (m *MsgCreateCredentialSchema) MarshalToSizedBuffer(dAtA []byte) (int, erro
 			i = encodeVarintTx(dAtA, i, uint64(size))
 		}
 		i--
-		dAtA[i] = 0x2a
+		dAtA[i] = 0x32
 	}
 	if m.IssuerGrantorValidationValidityPeriod != nil {
 		{
@@ -975,24 +1055,31 @@ func (m *MsgCreateCredentialSchema) MarshalToSizedBuffer(dAtA []byte) (int, erro
 			i = encodeVarintTx(dAtA, i, uint64(size))
 		}
 		i--
-		dAtA[i] = 0x22
+		dAtA[i] = 0x2a
 	}
 	if len(m.JsonSchema) > 0 {
 		i -= len(m.JsonSchema)
 		copy(dAtA[i:], m.JsonSchema)
 		i = encodeVarintTx(dAtA, i, uint64(len(m.JsonSchema)))
 		i--
-		dAtA[i] = 0x1a
+		dAtA[i] = 0x22
 	}
 	if m.TrId != 0 {
 		i = encodeVarintTx(dAtA, i, uint64(m.TrId))
 		i--
-		dAtA[i] = 0x10
+		dAtA[i] = 0x18
 	}
-	if len(m.Creator) > 0 {
-		i -= len(m.Creator)
-		copy(dAtA[i:], m.Creator)
-		i = encodeVarintTx(dAtA, i, uint64(len(m.Creator)))
+	if len(m.Operator) > 0 {
+		i -= len(m.Operator)
+		copy(dAtA[i:], m.Operator)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Operator)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Authority) > 0 {
+		i -= len(m.Authority)
+		copy(dAtA[i:], m.Authority)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Authority)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -1057,7 +1144,7 @@ func (m *MsgUpdateCredentialSchema) MarshalToSizedBuffer(dAtA []byte) (int, erro
 			i = encodeVarintTx(dAtA, i, uint64(size))
 		}
 		i--
-		dAtA[i] = 0x3a
+		dAtA[i] = 0x42
 	}
 	if m.VerifierValidationValidityPeriod != nil {
 		{
@@ -1069,7 +1156,7 @@ func (m *MsgUpdateCredentialSchema) MarshalToSizedBuffer(dAtA []byte) (int, erro
 			i = encodeVarintTx(dAtA, i, uint64(size))
 		}
 		i--
-		dAtA[i] = 0x32
+		dAtA[i] = 0x3a
 	}
 	if m.IssuerValidationValidityPeriod != nil {
 		{
@@ -1081,7 +1168,7 @@ func (m *MsgUpdateCredentialSchema) MarshalToSizedBuffer(dAtA []byte) (int, erro
 			i = encodeVarintTx(dAtA, i, uint64(size))
 		}
 		i--
-		dAtA[i] = 0x2a
+		dAtA[i] = 0x32
 	}
 	if m.VerifierGrantorValidationValidityPeriod != nil {
 		{
@@ -1093,7 +1180,7 @@ func (m *MsgUpdateCredentialSchema) MarshalToSizedBuffer(dAtA []byte) (int, erro
 			i = encodeVarintTx(dAtA, i, uint64(size))
 		}
 		i--
-		dAtA[i] = 0x22
+		dAtA[i] = 0x2a
 	}
 	if m.IssuerGrantorValidationValidityPeriod != nil {
 		{
@@ -1105,17 +1192,24 @@ func (m *MsgUpdateCredentialSchema) MarshalToSizedBuffer(dAtA []byte) (int, erro
 			i = encodeVarintTx(dAtA, i, uint64(size))
 		}
 		i--
-		dAtA[i] = 0x1a
+		dAtA[i] = 0x22
 	}
 	if m.Id != 0 {
 		i = encodeVarintTx(dAtA, i, uint64(m.Id))
 		i--
-		dAtA[i] = 0x10
+		dAtA[i] = 0x18
 	}
-	if len(m.Creator) > 0 {
-		i -= len(m.Creator)
-		copy(dAtA[i:], m.Creator)
-		i = encodeVarintTx(dAtA, i, uint64(len(m.Creator)))
+	if len(m.Operator) > 0 {
+		i -= len(m.Operator)
+		copy(dAtA[i:], m.Operator)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Operator)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Authority) > 0 {
+		i -= len(m.Authority)
+		copy(dAtA[i:], m.Authority)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Authority)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -1201,17 +1295,24 @@ func (m *MsgArchiveCredentialSchema) MarshalToSizedBuffer(dAtA []byte) (int, err
 			dAtA[i] = 0
 		}
 		i--
-		dAtA[i] = 0x18
+		dAtA[i] = 0x20
 	}
 	if m.Id != 0 {
 		i = encodeVarintTx(dAtA, i, uint64(m.Id))
 		i--
-		dAtA[i] = 0x10
+		dAtA[i] = 0x18
 	}
-	if len(m.Creator) > 0 {
-		i -= len(m.Creator)
-		copy(dAtA[i:], m.Creator)
-		i = encodeVarintTx(dAtA, i, uint64(len(m.Creator)))
+	if len(m.Operator) > 0 {
+		i -= len(m.Operator)
+		copy(dAtA[i:], m.Operator)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Operator)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Authority) > 0 {
+		i -= len(m.Authority)
+		copy(dAtA[i:], m.Authority)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Authority)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -1282,7 +1383,11 @@ func (m *MsgCreateCredentialSchema) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.Creator)
+	l = len(m.Authority)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.Operator)
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
@@ -1319,6 +1424,17 @@ func (m *MsgCreateCredentialSchema) Size() (n int) {
 	if m.VerifierPermManagementMode != 0 {
 		n += 1 + sovTx(uint64(m.VerifierPermManagementMode))
 	}
+	if m.PricingAssetType != 0 {
+		n += 1 + sovTx(uint64(m.PricingAssetType))
+	}
+	l = len(m.PricingAsset)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.DigestAlgorithm)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
 	return n
 }
 
@@ -1340,7 +1456,11 @@ func (m *MsgUpdateCredentialSchema) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.Creator)
+	l = len(m.Authority)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.Operator)
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
@@ -1397,7 +1517,11 @@ func (m *MsgArchiveCredentialSchema) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.Creator)
+	l = len(m.Authority)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.Operator)
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
@@ -1621,7 +1745,7 @@ func (m *MsgCreateCredentialSchema) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Creator", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Authority", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -1649,9 +1773,41 @@ func (m *MsgCreateCredentialSchema) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Creator = string(dAtA[iNdEx:postIndex])
+			m.Authority = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Operator", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Operator = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field TrId", wireType)
 			}
@@ -1670,7 +1826,7 @@ func (m *MsgCreateCredentialSchema) Unmarshal(dAtA []byte) error {
 					break
 				}
 			}
-		case 3:
+		case 4:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field JsonSchema", wireType)
 			}
@@ -1702,6 +1858,509 @@ func (m *MsgCreateCredentialSchema) Unmarshal(dAtA []byte) error {
 			}
 			m.JsonSchema = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field IssuerGrantorValidationValidityPeriod", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.IssuerGrantorValidationValidityPeriod == nil {
+				m.IssuerGrantorValidationValidityPeriod = &OptionalUInt32{}
+			}
+			if err := m.IssuerGrantorValidationValidityPeriod.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 6:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field VerifierGrantorValidationValidityPeriod", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.VerifierGrantorValidationValidityPeriod == nil {
+				m.VerifierGrantorValidationValidityPeriod = &OptionalUInt32{}
+			}
+			if err := m.VerifierGrantorValidationValidityPeriod.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 7:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field IssuerValidationValidityPeriod", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.IssuerValidationValidityPeriod == nil {
+				m.IssuerValidationValidityPeriod = &OptionalUInt32{}
+			}
+			if err := m.IssuerValidationValidityPeriod.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 8:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field VerifierValidationValidityPeriod", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.VerifierValidationValidityPeriod == nil {
+				m.VerifierValidationValidityPeriod = &OptionalUInt32{}
+			}
+			if err := m.VerifierValidationValidityPeriod.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 9:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field HolderValidationValidityPeriod", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.HolderValidationValidityPeriod == nil {
+				m.HolderValidationValidityPeriod = &OptionalUInt32{}
+			}
+			if err := m.HolderValidationValidityPeriod.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 10:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field IssuerPermManagementMode", wireType)
+			}
+			m.IssuerPermManagementMode = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.IssuerPermManagementMode |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 11:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field VerifierPermManagementMode", wireType)
+			}
+			m.VerifierPermManagementMode = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.VerifierPermManagementMode |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 12:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PricingAssetType", wireType)
+			}
+			m.PricingAssetType = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.PricingAssetType |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 13:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PricingAsset", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.PricingAsset = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 14:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field DigestAlgorithm", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.DigestAlgorithm = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgCreateCredentialSchemaResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgCreateCredentialSchemaResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgCreateCredentialSchemaResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Id", wireType)
+			}
+			m.Id = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Id |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgUpdateCredentialSchema) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgUpdateCredentialSchema: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgUpdateCredentialSchema: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Authority", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Authority = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Operator", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Operator = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Id", wireType)
+			}
+			m.Id = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Id |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
 		case 4:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field IssuerGrantorValidationValidityPeriod", wireType)
@@ -1847,394 +2506,6 @@ func (m *MsgCreateCredentialSchema) Unmarshal(dAtA []byte) error {
 			}
 			iNdEx = postIndex
 		case 8:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field HolderValidationValidityPeriod", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTx
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthTx
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthTx
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if m.HolderValidationValidityPeriod == nil {
-				m.HolderValidationValidityPeriod = &OptionalUInt32{}
-			}
-			if err := m.HolderValidationValidityPeriod.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		case 9:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field IssuerPermManagementMode", wireType)
-			}
-			m.IssuerPermManagementMode = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTx
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.IssuerPermManagementMode |= uint32(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		case 10:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field VerifierPermManagementMode", wireType)
-			}
-			m.VerifierPermManagementMode = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTx
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.VerifierPermManagementMode |= uint32(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		default:
-			iNdEx = preIndex
-			skippy, err := skipTx(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthTx
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *MsgCreateCredentialSchemaResponse) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowTx
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: MsgCreateCredentialSchemaResponse: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: MsgCreateCredentialSchemaResponse: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Id", wireType)
-			}
-			m.Id = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTx
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.Id |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		default:
-			iNdEx = preIndex
-			skippy, err := skipTx(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthTx
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *MsgUpdateCredentialSchema) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowTx
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: MsgUpdateCredentialSchema: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: MsgUpdateCredentialSchema: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Creator", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTx
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthTx
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthTx
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Creator = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 2:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Id", wireType)
-			}
-			m.Id = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTx
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.Id |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		case 3:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field IssuerGrantorValidationValidityPeriod", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTx
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthTx
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthTx
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if m.IssuerGrantorValidationValidityPeriod == nil {
-				m.IssuerGrantorValidationValidityPeriod = &OptionalUInt32{}
-			}
-			if err := m.IssuerGrantorValidationValidityPeriod.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		case 4:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field VerifierGrantorValidationValidityPeriod", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTx
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthTx
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthTx
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if m.VerifierGrantorValidationValidityPeriod == nil {
-				m.VerifierGrantorValidationValidityPeriod = &OptionalUInt32{}
-			}
-			if err := m.VerifierGrantorValidationValidityPeriod.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		case 5:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field IssuerValidationValidityPeriod", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTx
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthTx
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthTx
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if m.IssuerValidationValidityPeriod == nil {
-				m.IssuerValidationValidityPeriod = &OptionalUInt32{}
-			}
-			if err := m.IssuerValidationValidityPeriod.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		case 6:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field VerifierValidationValidityPeriod", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTx
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthTx
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthTx
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if m.VerifierValidationValidityPeriod == nil {
-				m.VerifierValidationValidityPeriod = &OptionalUInt32{}
-			}
-			if err := m.VerifierValidationValidityPeriod.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		case 7:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field HolderValidationValidityPeriod", wireType)
 			}
@@ -2441,7 +2712,7 @@ func (m *MsgArchiveCredentialSchema) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Creator", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Authority", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -2469,9 +2740,41 @@ func (m *MsgArchiveCredentialSchema) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Creator = string(dAtA[iNdEx:postIndex])
+			m.Authority = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Operator", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Operator = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Id", wireType)
 			}
@@ -2490,7 +2793,7 @@ func (m *MsgArchiveCredentialSchema) Unmarshal(dAtA []byte) error {
 					break
 				}
 			}
-		case 3:
+		case 4:
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Archive", wireType)
 			}

@@ -12,19 +12,15 @@ export const protobufPackage = "verana.tr.v1";
 
 /** Params defines the parameters for the module. */
 export interface Params {
-  trustRegistryTrustDeposit: number;
   trustUnitPrice: number;
 }
 
 function createBaseParams(): Params {
-  return { trustRegistryTrustDeposit: 0, trustUnitPrice: 0 };
+  return { trustUnitPrice: 0 };
 }
 
 export const Params = {
   encode(message: Params, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.trustRegistryTrustDeposit !== 0) {
-      writer.uint32(8).uint64(message.trustRegistryTrustDeposit);
-    }
     if (message.trustUnitPrice !== 0) {
       writer.uint32(16).uint64(message.trustUnitPrice);
     }
@@ -38,13 +34,6 @@ export const Params = {
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
-        case 1:
-          if (tag !== 8) {
-            break;
-          }
-
-          message.trustRegistryTrustDeposit = longToNumber(reader.uint64() as Long);
-          continue;
         case 2:
           if (tag !== 16) {
             break;
@@ -62,19 +51,11 @@ export const Params = {
   },
 
   fromJSON(object: any): Params {
-    return {
-      trustRegistryTrustDeposit: isSet(object.trustRegistryTrustDeposit)
-        ? globalThis.Number(object.trustRegistryTrustDeposit)
-        : 0,
-      trustUnitPrice: isSet(object.trustUnitPrice) ? globalThis.Number(object.trustUnitPrice) : 0,
-    };
+    return { trustUnitPrice: isSet(object.trustUnitPrice) ? globalThis.Number(object.trustUnitPrice) : 0 };
   },
 
   toJSON(message: Params): unknown {
     const obj: any = {};
-    if (message.trustRegistryTrustDeposit !== 0) {
-      obj.trustRegistryTrustDeposit = Math.round(message.trustRegistryTrustDeposit);
-    }
     if (message.trustUnitPrice !== 0) {
       obj.trustUnitPrice = Math.round(message.trustUnitPrice);
     }
@@ -86,7 +67,6 @@ export const Params = {
   },
   fromPartial<I extends Exact<DeepPartial<Params>, I>>(object: I): Params {
     const message = createBaseParams();
-    message.trustRegistryTrustDeposit = object.trustRegistryTrustDeposit ?? 0;
     message.trustUnitPrice = object.trustUnitPrice ?? 0;
     return message;
   },

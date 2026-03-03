@@ -20,6 +20,18 @@ enum CredentialSchemaPermManagementMode {
   ECOSYSTEM = 3;
 }
 
+// PricingAssetType defines the type of asset used for paying business fees
+enum PricingAssetType {
+  // Default to prevent accidental omission
+  PRICING_ASSET_TYPE_UNSPECIFIED = 0;
+  // Trust Unit (non-transferable token for fee definitions)
+  TU = 1;
+  // Native blockchain token or IBC asset
+  COIN = 2;
+  // Fiat currency (off-chain settlement)
+  FIAT = 3;
+}
+
 // CredentialSchema defines the structure for a credential schema
 message CredentialSchema {
   uint64 id = 1;
@@ -36,7 +48,6 @@ message CredentialSchema {
     (gogoproto.nullable) = true,
     (gogoproto.stdtime) = true
   ];
-  uint64 deposit = 6;
   string json_schema = 7;
   uint32 issuer_grantor_validation_validity_period = 8;
   uint32 verifier_grantor_validation_validity_period = 9;
@@ -45,4 +56,7 @@ message CredentialSchema {
   uint32 holder_validation_validity_period = 12;
   CredentialSchemaPermManagementMode issuer_perm_management_mode = 13;
   CredentialSchemaPermManagementMode verifier_perm_management_mode = 14;
+  PricingAssetType pricing_asset_type = 15;
+  string pricing_asset = 16;
+  string digest_algorithm = 17;
 }

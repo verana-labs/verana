@@ -287,3 +287,49 @@ export function getTrAuthzSetup(): { authorityAddress: string; operatorAddress: 
   return null;
 }
 
+/**
+ * Saves the CS authz setup (authority + operator addresses)
+ */
+export function saveCsAuthzSetup(authorityAddress: string, operatorAddress: string): void {
+  saveJourneyResult("cs-authz-setup", {
+    authorityAddress,
+    operatorAddress,
+  });
+}
+
+/**
+ * Gets the CS authz setup (authority + operator addresses)
+ */
+export function getCsAuthzSetup(): { authorityAddress: string; operatorAddress: string } | null {
+  const result = loadJourneyResult("cs-authz-setup");
+  if (result?.authorityAddress && result?.operatorAddress) {
+    return {
+      authorityAddress: result.authorityAddress,
+      operatorAddress: result.operatorAddress,
+    };
+  }
+  return null;
+}
+
+/**
+ * Saves the active Trust Registry created for CS journeys
+ */
+export function saveCsActiveTR(trustRegistryId: number): void {
+  saveJourneyResult("cs-active-tr", {
+    trustRegistryId: trustRegistryId.toString(),
+  });
+}
+
+/**
+ * Gets the active Trust Registry created for CS journeys
+ */
+export function getCsActiveTR(): { trustRegistryId: number } | null {
+  const result = loadJourneyResult("cs-active-tr");
+  if (result?.trustRegistryId) {
+    return {
+      trustRegistryId: parseInt(result.trustRegistryId, 10),
+    };
+  }
+  return null;
+}
+
