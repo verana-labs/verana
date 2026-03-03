@@ -75,7 +75,6 @@ func RunCredentialIssuanceJourney(ctx context.Context, client cosmosclient.Clien
 	startVPMsg := permtypes.MsgStartPermissionVP{
 		Type:            permtypes.PermissionType_HOLDER,
 		ValidatorPermId: issuerPermID,
-		Country:         countryCode,
 		Did:             holderWalletDID,
 	}
 	fmt.Println("..........issuerPermID......", issuerPermID)

@@ -51,7 +51,6 @@ func RunVerifierValidationJourney(ctx context.Context, client cosmosclient.Clien
 	startVPMsg := permtypes.MsgStartPermissionVP{
 		Type:            permtypes.PermissionType_VERIFIER,
 		ValidatorPermId: rootPermID,
-		Country:         countryCode,
 		Did:             verifierDID,
 	}
 

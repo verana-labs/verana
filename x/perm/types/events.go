@@ -8,6 +8,8 @@ const (
 	EventTypeStartPermissionVP                  = "start_permission_vp"
 	AttributeKeyPermissionID                    = "permission_id"
 	AttributeKeyCreator                         = "creator"
+	AttributeKeyAuthority                       = "authority"
+	AttributeKeyOperator                        = "operator"
 	AttributeKeyFees                            = "fees"
 	AttributeKeyDeposit                         = "deposit"
 	EventTypeCreateOrUpdatePermissionSession    = "create_update_csps"

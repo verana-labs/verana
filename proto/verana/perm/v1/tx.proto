@@ -2,9 +2,11 @@ syntax = "proto3";
 package verana.perm.v1;
 
 import "amino/amino.proto";
+import "cosmos/base/v1beta1/coin.proto";
 import "cosmos/msg/v1/msg.proto";
 import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
+import "google/protobuf/duration.proto";
 import "google/protobuf/timestamp.proto";
 import "verana/perm/v1/params.proto";
 import "verana/perm/v1/types.proto";
@@ -56,16 +58,33 @@ message MsgUpdateParamsResponse {}
 
 // MsgStartPermissionVP represents a message to start a permission validation process
 message MsgStartPermissionVP {
-  option (cosmos.msg.v1.signer) = "creator";
+  option (cosmos.msg.v1.signer) = "operator";
 
-  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  PermissionType type = 2;
-  uint64 validator_perm_id = 3;
-  OptionalUInt64 validation_fees = 6 [(gogoproto.nullable) = true]; // optional: Requested validation_fees for this permission (can be modified by validator)
-  OptionalUInt64 issuance_fees = 7 [(gogoproto.nullable) = true]; // optional: Requested issuance_fees for this permission (can be modified by validator)
-  OptionalUInt64 verification_fees = 8 [(gogoproto.nullable) = true]; // optional: Requested verification_fees for this permission (can be modified by validator)
-  string country = 4;
-  string did = 5 [(gogoproto.nullable) = true]; // optional
+  // authority is the group account on whose behalf this message is executed
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // operator is the account authorized by the authority to run this Msg
+  string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  PermissionType type = 3;
+  uint64 validator_perm_id = 4;
+  string did = 5; // mandatory: MUST conform to DID Syntax
+  OptionalUInt64 validation_fees = 6 [(gogoproto.nullable) = true];
+  OptionalUInt64 issuance_fees = 7 [(gogoproto.nullable) = true];
+  OptionalUInt64 verification_fees = 8 [(gogoproto.nullable) = true];
+  // vs_operator: the account of the Verifiable Service (optional)
+  string vs_operator = 9 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  bool vs_operator_authz_enabled = 10;
+  repeated cosmos.base.v1beta1.Coin vs_operator_authz_spend_limit = 11 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (amino.dont_omitempty) = true
+  ];
+  bool vs_operator_authz_with_feegrant = 12;
+  repeated cosmos.base.v1beta1.Coin vs_operator_authz_fee_spend_limit = 13 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (amino.dont_omitempty) = true
+  ];
+  google.protobuf.Duration vs_operator_authz_spend_period = 14 [(gogoproto.stdduration) = true];
 }
 
 // MsgStartPermissionVPResponse defines the Msg/StartPermissionVP response type

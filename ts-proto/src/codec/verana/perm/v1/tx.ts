@@ -6,6 +6,8 @@
 
 /* eslint-disable */
 import * as _m0 from "protobufjs/minimal";
+import { Coin } from "../../../cosmos/base/v1beta1/coin";
+import { Duration } from "../../../google/protobuf/duration";
 import { Timestamp } from "../../../google/protobuf/timestamp";
 import { Params } from "./params";
 import { OptionalUInt64, PermissionType, permissionTypeFromJSON, permissionTypeToJSON } from "./types";
@@ -34,22 +36,26 @@ export interface MsgUpdateParamsResponse {
 
 /** MsgStartPermissionVP represents a message to start a permission validation process */
 export interface MsgStartPermissionVP {
-  creator: string;
+  /** authority is the group account on whose behalf this message is executed */
+  authority: string;
+  /** operator is the account authorized by the authority to run this Msg */
+  operator: string;
   type: PermissionType;
   validatorPermId: number;
-  /** optional: Requested validation_fees for this permission (can be modified by validator) */
-  validationFees:
-    | OptionalUInt64
-    | undefined;
-  /** optional: Requested issuance_fees for this permission (can be modified by validator) */
-  issuanceFees:
-    | OptionalUInt64
-    | undefined;
-  /** optional: Requested verification_fees for this permission (can be modified by validator) */
-  verificationFees: OptionalUInt64 | undefined;
-  country: string;
-  /** optional */
+  /** mandatory: MUST conform to DID Syntax */
   did: string;
+  validationFees: OptionalUInt64 | undefined;
+  issuanceFees: OptionalUInt64 | undefined;
+  verificationFees:
+    | OptionalUInt64
+    | undefined;
+  /** vs_operator: the account of the Verifiable Service (optional) */
+  vsOperator: string;
+  vsOperatorAuthzEnabled: boolean;
+  vsOperatorAuthzSpendLimit: Coin[];
+  vsOperatorAuthzWithFeegrant: boolean;
+  vsOperatorAuthzFeeSpendLimit: Coin[];
+  vsOperatorAuthzSpendPeriod: Duration | undefined;
 }
 
 /** MsgStartPermissionVPResponse defines the Msg/StartPermissionVP response type */
@@ -304,27 +310,39 @@ export const MsgUpdateParamsResponse = {
 
 function createBaseMsgStartPermissionVP(): MsgStartPermissionVP {
   return {
-    creator: "",
+    authority: "",
+    operator: "",
     type: 0,
     validatorPermId: 0,
+    did: "",
     validationFees: undefined,
     issuanceFees: undefined,
     verificationFees: undefined,
-    country: "",
-    did: "",
+    vsOperator: "",
+    vsOperatorAuthzEnabled: false,
+    vsOperatorAuthzSpendLimit: [],
+    vsOperatorAuthzWithFeegrant: false,
+    vsOperatorAuthzFeeSpendLimit: [],
+    vsOperatorAuthzSpendPeriod: undefined,
   };
 }
 
 export const MsgStartPermissionVP = {
   encode(message: MsgStartPermissionVP, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.creator !== "") {
-      writer.uint32(10).string(message.creator);
+    if (message.authority !== "") {
+      writer.uint32(10).string(message.authority);
+    }
+    if (message.operator !== "") {
+      writer.uint32(18).string(message.operator);
     }
     if (message.type !== 0) {
-      writer.uint32(16).int32(message.type);
+      writer.uint32(24).int32(message.type);
     }
     if (message.validatorPermId !== 0) {
-      writer.uint32(24).uint64(message.validatorPermId);
+      writer.uint32(32).uint64(message.validatorPermId);
+    }
+    if (message.did !== "") {
+      writer.uint32(42).string(message.did);
     }
     if (message.validationFees !== undefined) {
       OptionalUInt64.encode(message.validationFees, writer.uint32(50).fork()).ldelim();
@@ -335,11 +353,23 @@ export const MsgStartPermissionVP = {
     if (message.verificationFees !== undefined) {
       OptionalUInt64.encode(message.verificationFees, writer.uint32(66).fork()).ldelim();
     }
-    if (message.country !== "") {
-      writer.uint32(34).string(message.country);
+    if (message.vsOperator !== "") {
+      writer.uint32(74).string(message.vsOperator);
     }
-    if (message.did !== "") {
-      writer.uint32(42).string(message.did);
+    if (message.vsOperatorAuthzEnabled !== false) {
+      writer.uint32(80).bool(message.vsOperatorAuthzEnabled);
+    }
+    for (const v of message.vsOperatorAuthzSpendLimit) {
+      Coin.encode(v!, writer.uint32(90).fork()).ldelim();
+    }
+    if (message.vsOperatorAuthzWithFeegrant !== false) {
+      writer.uint32(96).bool(message.vsOperatorAuthzWithFeegrant);
+    }
+    for (const v of message.vsOperatorAuthzFeeSpendLimit) {
+      Coin.encode(v!, writer.uint32(106).fork()).ldelim();
+    }
+    if (message.vsOperatorAuthzSpendPeriod !== undefined) {
+      Duration.encode(message.vsOperatorAuthzSpendPeriod, writer.uint32(114).fork()).ldelim();
     }
     return writer;
   },
@@ -356,21 +386,35 @@ export const MsgStartPermissionVP = {
             break;
           }
 
-          message.creator = reader.string();
+          message.authority = reader.string();
           continue;
         case 2:
-          if (tag !== 16) {
+          if (tag !== 18) {
             break;
           }
 
-          message.type = reader.int32() as any;
+          message.operator = reader.string();
           continue;
         case 3:
           if (tag !== 24) {
             break;
           }
 
+          message.type = reader.int32() as any;
+          continue;
+        case 4:
+          if (tag !== 32) {
+            break;
+          }
+
           message.validatorPermId = longToNumber(reader.uint64() as Long);
+          continue;
+        case 5:
+          if (tag !== 42) {
+            break;
+          }
+
+          message.did = reader.string();
           continue;
         case 6:
           if (tag !== 50) {
@@ -393,19 +437,47 @@ export const MsgStartPermissionVP = {
 
           message.verificationFees = OptionalUInt64.decode(reader, reader.uint32());
           continue;
-        case 4:
-          if (tag !== 34) {
+        case 9:
+          if (tag !== 74) {
             break;
           }
 
-          message.country = reader.string();
+          message.vsOperator = reader.string();
           continue;
-        case 5:
-          if (tag !== 42) {
+        case 10:
+          if (tag !== 80) {
             break;
           }
 
-          message.did = reader.string();
+          message.vsOperatorAuthzEnabled = reader.bool();
+          continue;
+        case 11:
+          if (tag !== 90) {
+            break;
+          }
+
+          message.vsOperatorAuthzSpendLimit.push(Coin.decode(reader, reader.uint32()));
+          continue;
+        case 12:
+          if (tag !== 96) {
+            break;
+          }
+
+          message.vsOperatorAuthzWithFeegrant = reader.bool();
+          continue;
+        case 13:
+          if (tag !== 106) {
+            break;
+          }
+
+          message.vsOperatorAuthzFeeSpendLimit.push(Coin.decode(reader, reader.uint32()));
+          continue;
+        case 14:
+          if (tag !== 114) {
+            break;
+          }
+
+          message.vsOperatorAuthzSpendPeriod = Duration.decode(reader, reader.uint32());
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -418,27 +490,49 @@ export const MsgStartPermissionVP = {
 
   fromJSON(object: any): MsgStartPermissionVP {
     return {
-      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
+      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
       type: isSet(object.type) ? permissionTypeFromJSON(object.type) : 0,
       validatorPermId: isSet(object.validatorPermId) ? globalThis.Number(object.validatorPermId) : 0,
+      did: isSet(object.did) ? globalThis.String(object.did) : "",
       validationFees: isSet(object.validationFees) ? OptionalUInt64.fromJSON(object.validationFees) : undefined,
       issuanceFees: isSet(object.issuanceFees) ? OptionalUInt64.fromJSON(object.issuanceFees) : undefined,
       verificationFees: isSet(object.verificationFees) ? OptionalUInt64.fromJSON(object.verificationFees) : undefined,
-      country: isSet(object.country) ? globalThis.String(object.country) : "",
-      did: isSet(object.did) ? globalThis.String(object.did) : "",
+      vsOperator: isSet(object.vsOperator) ? globalThis.String(object.vsOperator) : "",
+      vsOperatorAuthzEnabled: isSet(object.vsOperatorAuthzEnabled)
+        ? globalThis.Boolean(object.vsOperatorAuthzEnabled)
+        : false,
+      vsOperatorAuthzSpendLimit: globalThis.Array.isArray(object?.vsOperatorAuthzSpendLimit)
+        ? object.vsOperatorAuthzSpendLimit.map((e: any) => Coin.fromJSON(e))
+        : [],
+      vsOperatorAuthzWithFeegrant: isSet(object.vsOperatorAuthzWithFeegrant)
+        ? globalThis.Boolean(object.vsOperatorAuthzWithFeegrant)
+        : false,
+      vsOperatorAuthzFeeSpendLimit: globalThis.Array.isArray(object?.vsOperatorAuthzFeeSpendLimit)
+        ? object.vsOperatorAuthzFeeSpendLimit.map((e: any) => Coin.fromJSON(e))
+        : [],
+      vsOperatorAuthzSpendPeriod: isSet(object.vsOperatorAuthzSpendPeriod)
+        ? Duration.fromJSON(object.vsOperatorAuthzSpendPeriod)
+        : undefined,
     };
   },
 
   toJSON(message: MsgStartPermissionVP): unknown {
     const obj: any = {};
-    if (message.creator !== "") {
-      obj.creator = message.creator;
+    if (message.authority !== "") {
+      obj.authority = message.authority;
+    }
+    if (message.operator !== "") {
+      obj.operator = message.operator;
     }
     if (message.type !== 0) {
       obj.type = permissionTypeToJSON(message.type);
     }
     if (message.validatorPermId !== 0) {
       obj.validatorPermId = Math.round(message.validatorPermId);
+    }
+    if (message.did !== "") {
+      obj.did = message.did;
     }
     if (message.validationFees !== undefined) {
       obj.validationFees = OptionalUInt64.toJSON(message.validationFees);
@@ -449,11 +543,23 @@ export const MsgStartPermissionVP = {
     if (message.verificationFees !== undefined) {
       obj.verificationFees = OptionalUInt64.toJSON(message.verificationFees);
     }
-    if (message.country !== "") {
-      obj.country = message.country;
+    if (message.vsOperator !== "") {
+      obj.vsOperator = message.vsOperator;
     }
-    if (message.did !== "") {
-      obj.did = message.did;
+    if (message.vsOperatorAuthzEnabled !== false) {
+      obj.vsOperatorAuthzEnabled = message.vsOperatorAuthzEnabled;
+    }
+    if (message.vsOperatorAuthzSpendLimit?.length) {
+      obj.vsOperatorAuthzSpendLimit = message.vsOperatorAuthzSpendLimit.map((e) => Coin.toJSON(e));
+    }
+    if (message.vsOperatorAuthzWithFeegrant !== false) {
+      obj.vsOperatorAuthzWithFeegrant = message.vsOperatorAuthzWithFeegrant;
+    }
+    if (message.vsOperatorAuthzFeeSpendLimit?.length) {
+      obj.vsOperatorAuthzFeeSpendLimit = message.vsOperatorAuthzFeeSpendLimit.map((e) => Coin.toJSON(e));
+    }
+    if (message.vsOperatorAuthzSpendPeriod !== undefined) {
+      obj.vsOperatorAuthzSpendPeriod = Duration.toJSON(message.vsOperatorAuthzSpendPeriod);
     }
     return obj;
   },
@@ -463,9 +569,11 @@ export const MsgStartPermissionVP = {
   },
   fromPartial<I extends Exact<DeepPartial<MsgStartPermissionVP>, I>>(object: I): MsgStartPermissionVP {
     const message = createBaseMsgStartPermissionVP();
-    message.creator = object.creator ?? "";
+    message.authority = object.authority ?? "";
+    message.operator = object.operator ?? "";
     message.type = object.type ?? 0;
     message.validatorPermId = object.validatorPermId ?? 0;
+    message.did = object.did ?? "";
     message.validationFees = (object.validationFees !== undefined && object.validationFees !== null)
       ? OptionalUInt64.fromPartial(object.validationFees)
       : undefined;
@@ -475,8 +583,15 @@ export const MsgStartPermissionVP = {
     message.verificationFees = (object.verificationFees !== undefined && object.verificationFees !== null)
       ? OptionalUInt64.fromPartial(object.verificationFees)
       : undefined;
-    message.country = object.country ?? "";
-    message.did = object.did ?? "";
+    message.vsOperator = object.vsOperator ?? "";
+    message.vsOperatorAuthzEnabled = object.vsOperatorAuthzEnabled ?? false;
+    message.vsOperatorAuthzSpendLimit = object.vsOperatorAuthzSpendLimit?.map((e) => Coin.fromPartial(e)) || [];
+    message.vsOperatorAuthzWithFeegrant = object.vsOperatorAuthzWithFeegrant ?? false;
+    message.vsOperatorAuthzFeeSpendLimit = object.vsOperatorAuthzFeeSpendLimit?.map((e) => Coin.fromPartial(e)) || [];
+    message.vsOperatorAuthzSpendPeriod =
+      (object.vsOperatorAuthzSpendPeriod !== undefined && object.vsOperatorAuthzSpendPeriod !== null)
+        ? Duration.fromPartial(object.vsOperatorAuthzSpendPeriod)
+        : undefined;
     return message;
   },
 };

@@ -6,6 +6,8 @@
 
 /* eslint-disable */
 import * as _m0 from "protobufjs/minimal";
+import { Coin } from "../../../cosmos/base/v1beta1/coin";
+import { Duration } from "../../../google/protobuf/duration";
 import { Timestamp } from "../../../google/protobuf/timestamp";
 import Long = require("long");
 
@@ -133,7 +135,7 @@ export interface Permission {
   schemaId: number;
   type: PermissionType;
   did: string;
-  grantee: string;
+  authority: string;
   created: Date | undefined;
   createdBy: string;
   extended: Date | undefined;
@@ -176,6 +178,13 @@ export interface Permission {
   issuanceFeeDiscount: number;
   /** Verification fee discount (0-10000, where 10000 = 100% discount) */
   verificationFeeDiscount: number;
+  /** VS Operator fields (spec v4) */
+  vsOperator: string;
+  vsOperatorAuthzEnabled: boolean;
+  vsOperatorAuthzSpendLimit: Coin[];
+  vsOperatorAuthzWithFeegrant: boolean;
+  vsOperatorAuthzFeeSpendLimit: Coin[];
+  vsOperatorAuthzSpendPeriod: Duration | undefined;
 }
 
 export interface PermissionSession {
@@ -204,7 +213,7 @@ function createBasePermission(): Permission {
     schemaId: 0,
     type: 0,
     did: "",
-    grantee: "",
+    authority: "",
     created: undefined,
     createdBy: "",
     extended: undefined,
@@ -236,6 +245,12 @@ function createBasePermission(): Permission {
     vpTermRequested: undefined,
     issuanceFeeDiscount: 0,
     verificationFeeDiscount: 0,
+    vsOperator: "",
+    vsOperatorAuthzEnabled: false,
+    vsOperatorAuthzSpendLimit: [],
+    vsOperatorAuthzWithFeegrant: false,
+    vsOperatorAuthzFeeSpendLimit: [],
+    vsOperatorAuthzSpendPeriod: undefined,
   };
 }
 
@@ -253,8 +268,8 @@ export const Permission = {
     if (message.did !== "") {
       writer.uint32(34).string(message.did);
     }
-    if (message.grantee !== "") {
-      writer.uint32(42).string(message.grantee);
+    if (message.authority !== "") {
+      writer.uint32(42).string(message.authority);
     }
     if (message.created !== undefined) {
       Timestamp.encode(toTimestamp(message.created), writer.uint32(50).fork()).ldelim();
@@ -349,6 +364,24 @@ export const Permission = {
     if (message.verificationFeeDiscount !== 0) {
       writer.uint32(288).uint64(message.verificationFeeDiscount);
     }
+    if (message.vsOperator !== "") {
+      writer.uint32(298).string(message.vsOperator);
+    }
+    if (message.vsOperatorAuthzEnabled !== false) {
+      writer.uint32(304).bool(message.vsOperatorAuthzEnabled);
+    }
+    for (const v of message.vsOperatorAuthzSpendLimit) {
+      Coin.encode(v!, writer.uint32(314).fork()).ldelim();
+    }
+    if (message.vsOperatorAuthzWithFeegrant !== false) {
+      writer.uint32(320).bool(message.vsOperatorAuthzWithFeegrant);
+    }
+    for (const v of message.vsOperatorAuthzFeeSpendLimit) {
+      Coin.encode(v!, writer.uint32(330).fork()).ldelim();
+    }
+    if (message.vsOperatorAuthzSpendPeriod !== undefined) {
+      Duration.encode(message.vsOperatorAuthzSpendPeriod, writer.uint32(338).fork()).ldelim();
+    }
     return writer;
   },
 
@@ -392,7 +425,7 @@ export const Permission = {
             break;
           }
 
-          message.grantee = reader.string();
+          message.authority = reader.string();
           continue;
         case 6:
           if (tag !== 50) {
@@ -611,6 +644,48 @@ export const Permission = {
 
           message.verificationFeeDiscount = longToNumber(reader.uint64() as Long);
           continue;
+        case 37:
+          if (tag !== 298) {
+            break;
+          }
+
+          message.vsOperator = reader.string();
+          continue;
+        case 38:
+          if (tag !== 304) {
+            break;
+          }
+
+          message.vsOperatorAuthzEnabled = reader.bool();
+          continue;
+        case 39:
+          if (tag !== 314) {
+            break;
+          }
+
+          message.vsOperatorAuthzSpendLimit.push(Coin.decode(reader, reader.uint32()));
+          continue;
+        case 40:
+          if (tag !== 320) {
+            break;
+          }
+
+          message.vsOperatorAuthzWithFeegrant = reader.bool();
+          continue;
+        case 41:
+          if (tag !== 330) {
+            break;
+          }
+
+          message.vsOperatorAuthzFeeSpendLimit.push(Coin.decode(reader, reader.uint32()));
+          continue;
+        case 42:
+          if (tag !== 338) {
+            break;
+          }
+
+          message.vsOperatorAuthzSpendPeriod = Duration.decode(reader, reader.uint32());
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -626,7 +701,7 @@ export const Permission = {
       schemaId: isSet(object.schemaId) ? globalThis.Number(object.schemaId) : 0,
       type: isSet(object.type) ? permissionTypeFromJSON(object.type) : 0,
       did: isSet(object.did) ? globalThis.String(object.did) : "",
-      grantee: isSet(object.grantee) ? globalThis.String(object.grantee) : "",
+      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
       created: isSet(object.created) ? fromJsonTimestamp(object.created) : undefined,
       createdBy: isSet(object.createdBy) ? globalThis.String(object.createdBy) : "",
       extended: isSet(object.extended) ? fromJsonTimestamp(object.extended) : undefined,
@@ -660,6 +735,22 @@ export const Permission = {
       verificationFeeDiscount: isSet(object.verificationFeeDiscount)
         ? globalThis.Number(object.verificationFeeDiscount)
         : 0,
+      vsOperator: isSet(object.vsOperator) ? globalThis.String(object.vsOperator) : "",
+      vsOperatorAuthzEnabled: isSet(object.vsOperatorAuthzEnabled)
+        ? globalThis.Boolean(object.vsOperatorAuthzEnabled)
+        : false,
+      vsOperatorAuthzSpendLimit: globalThis.Array.isArray(object?.vsOperatorAuthzSpendLimit)
+        ? object.vsOperatorAuthzSpendLimit.map((e: any) => Coin.fromJSON(e))
+        : [],
+      vsOperatorAuthzWithFeegrant: isSet(object.vsOperatorAuthzWithFeegrant)
+        ? globalThis.Boolean(object.vsOperatorAuthzWithFeegrant)
+        : false,
+      vsOperatorAuthzFeeSpendLimit: globalThis.Array.isArray(object?.vsOperatorAuthzFeeSpendLimit)
+        ? object.vsOperatorAuthzFeeSpendLimit.map((e: any) => Coin.fromJSON(e))
+        : [],
+      vsOperatorAuthzSpendPeriod: isSet(object.vsOperatorAuthzSpendPeriod)
+        ? Duration.fromJSON(object.vsOperatorAuthzSpendPeriod)
+        : undefined,
     };
   },
 
@@ -677,8 +768,8 @@ export const Permission = {
     if (message.did !== "") {
       obj.did = message.did;
     }
-    if (message.grantee !== "") {
-      obj.grantee = message.grantee;
+    if (message.authority !== "") {
+      obj.authority = message.authority;
     }
     if (message.created !== undefined) {
       obj.created = message.created.toISOString();
@@ -773,6 +864,24 @@ export const Permission = {
     if (message.verificationFeeDiscount !== 0) {
       obj.verificationFeeDiscount = Math.round(message.verificationFeeDiscount);
     }
+    if (message.vsOperator !== "") {
+      obj.vsOperator = message.vsOperator;
+    }
+    if (message.vsOperatorAuthzEnabled !== false) {
+      obj.vsOperatorAuthzEnabled = message.vsOperatorAuthzEnabled;
+    }
+    if (message.vsOperatorAuthzSpendLimit?.length) {
+      obj.vsOperatorAuthzSpendLimit = message.vsOperatorAuthzSpendLimit.map((e) => Coin.toJSON(e));
+    }
+    if (message.vsOperatorAuthzWithFeegrant !== false) {
+      obj.vsOperatorAuthzWithFeegrant = message.vsOperatorAuthzWithFeegrant;
+    }
+    if (message.vsOperatorAuthzFeeSpendLimit?.length) {
+      obj.vsOperatorAuthzFeeSpendLimit = message.vsOperatorAuthzFeeSpendLimit.map((e) => Coin.toJSON(e));
+    }
+    if (message.vsOperatorAuthzSpendPeriod !== undefined) {
+      obj.vsOperatorAuthzSpendPeriod = Duration.toJSON(message.vsOperatorAuthzSpendPeriod);
+    }
     return obj;
   },
 
@@ -785,7 +894,7 @@ export const Permission = {
     message.schemaId = object.schemaId ?? 0;
     message.type = object.type ?? 0;
     message.did = object.did ?? "";
-    message.grantee = object.grantee ?? "";
+    message.authority = object.authority ?? "";
     message.created = object.created ?? undefined;
     message.createdBy = object.createdBy ?? "";
     message.extended = object.extended ?? undefined;
@@ -817,6 +926,15 @@ export const Permission = {
     message.vpTermRequested = object.vpTermRequested ?? undefined;
     message.issuanceFeeDiscount = object.issuanceFeeDiscount ?? 0;
     message.verificationFeeDiscount = object.verificationFeeDiscount ?? 0;
+    message.vsOperator = object.vsOperator ?? "";
+    message.vsOperatorAuthzEnabled = object.vsOperatorAuthzEnabled ?? false;
+    message.vsOperatorAuthzSpendLimit = object.vsOperatorAuthzSpendLimit?.map((e) => Coin.fromPartial(e)) || [];
+    message.vsOperatorAuthzWithFeegrant = object.vsOperatorAuthzWithFeegrant ?? false;
+    message.vsOperatorAuthzFeeSpendLimit = object.vsOperatorAuthzFeeSpendLimit?.map((e) => Coin.fromPartial(e)) || [];
+    message.vsOperatorAuthzSpendPeriod =
+      (object.vsOperatorAuthzSpendPeriod !== undefined && object.vsOperatorAuthzSpendPeriod !== null)
+        ? Duration.fromPartial(object.vsOperatorAuthzSpendPeriod)
+        : undefined;
     return message;
   },
 };

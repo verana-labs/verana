@@ -275,6 +275,18 @@
     }
   },
   "definitions": {
+    "cosmos.base.v1beta1.Coin": {
+      "type": "object",
+      "properties": {
+        "denom": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "string"
+        }
+      },
+      "description": "Coin defines a token with a denomination and an amount.\n\nNOTE: The amount field is an Int which implements the custom method\nsignatures required by gogoproto."
+    },
     "google.protobuf.Any": {
       "type": "object",
       "properties": {
@@ -330,7 +342,7 @@
         "did": {
           "type": "string"
         },
-        "grantee": {
+        "authority": {
           "type": "string"
         },
         "created": {
@@ -455,6 +467,33 @@
           "type": "string",
           "format": "uint64",
           "title": "Verification fee discount (0-10000, where 10000 = 100% discount)"
+        },
+        "vs_operator": {
+          "type": "string",
+          "title": "VS Operator fields (spec v4)"
+        },
+        "vs_operator_authz_enabled": {
+          "type": "boolean"
+        },
+        "vs_operator_authz_spend_limit": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
+          }
+        },
+        "vs_operator_authz_with_feegrant": {
+          "type": "boolean"
+        },
+        "vs_operator_authz_fee_spend_limit": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
+          }
+        },
+        "vs_operator_authz_spend_period": {
+          "type": "string"
         }
       }
     },

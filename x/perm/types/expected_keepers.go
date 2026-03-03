@@ -2,6 +2,7 @@ package types
 
 import (
 	"context"
+	"time"
 
 	"cosmossdk.io/math"
 
@@ -49,4 +50,10 @@ type TrustDepositKeeper interface {
 	GetUserAgentRewardRate(ctx sdk.Context) math.LegacyDec
 	GetWalletUserAgentRewardRate(ctx sdk.Context) math.LegacyDec
 	BurnEcosystemSlashedTrustDeposit(ctx sdk.Context, account string, amount uint64) error
+}
+
+// DelegationKeeper defines the expected interface for the Delegation Engine (DE) module.
+// Used to perform [AUTHZ-CHECK] for (authority, operator) pairs.
+type DelegationKeeper interface {
+	CheckOperatorAuthorization(ctx context.Context, authority string, operator string, msgTypeURL string, now time.Time) error
 }

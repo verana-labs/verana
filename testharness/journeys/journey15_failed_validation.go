@@ -76,11 +76,9 @@ func RunFailedValidationJourney(ctx context.Context, client cosmosclient.Client)
 
 	// Start validation process as ISSUER type
 	startVPMsg := permtypes.MsgStartPermissionVP{
-		Creator:         failedApplicantAddr,
 		Type:            permtypes.PermissionType_ISSUER,
 		ValidatorPermId: validatorPermID,
 		Did:             applicantDID,
-		Country:         "US", // Example country code
 	}
 
 	permissionID, err := lib.StartPermissionVP(client, ctx, failedApplicantAccount, startVPMsg)

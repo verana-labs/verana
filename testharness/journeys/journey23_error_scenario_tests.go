@@ -158,7 +158,6 @@ func RunErrorScenarioTestsJourney(ctx context.Context, client cosmosclient.Clien
 			Type:            permtypes.PermissionType_ISSUER,
 			ValidatorPermId: inactiveValidatorPermID,
 			Did:             applicantDID,
-			Country:         "US",
 		})
 
 		if err193_1 != nil && strings.Contains(err193_1.Error(), "validator perm is not valid") {

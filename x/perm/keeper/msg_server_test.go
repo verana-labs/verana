@@ -2,6 +2,7 @@ package keeper_test
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
@@ -18,8 +19,13 @@ import (
 )
 
 func setupMsgServer(t testing.TB) (keeper.Keeper, types.MsgServer, *keepertest.MockCredentialSchemaKeeper, *keepertest.MockTrustRegistryKeeper, context.Context) {
-	k, csKeeper, trkKeeper, ctx := keepertest.PermissionKeeper(t)
+	k, csKeeper, trkKeeper, ctx, _ := keepertest.PermissionKeeper(t)
 	return k, keeper.NewMsgServerImpl(k), csKeeper, trkKeeper, ctx
+}
+
+func setupMsgServerWithDelegation(t testing.TB) (keeper.Keeper, types.MsgServer, *keepertest.MockCredentialSchemaKeeper, *keepertest.MockTrustRegistryKeeper, context.Context, *keepertest.MockDelegationKeeper) {
+	k, csKeeper, trkKeeper, ctx, delKeeper := keepertest.PermissionKeeper(t)
+	return k, keeper.NewMsgServerImpl(k), csKeeper, trkKeeper, ctx, delKeeper
 }
 
 func TestMsgServer(t *testing.T) {
@@ -40,6 +46,9 @@ func TestStartPermissionVP(t *testing.T) {
 	ctx = sdk.WrapSDKContext(sdkCtx)
 
 	creator := sdk.AccAddress([]byte("test_creator")).String()
+	creator2 := sdk.AccAddress([]byte("test_creator_two")).String()
+	creator3 := sdk.AccAddress([]byte("test_creator_thr")).String()
+	creator4 := sdk.AccAddress([]byte("test_creator_fou")).String()
 	validDid := "did:example:123456789abcdefghi"
 
 	// First create a trust registry for our credential schema
@@ -58,7 +67,7 @@ func TestStartPermissionVP(t *testing.T) {
 	validatorPerm := types.Permission{
 		SchemaId:      1,
 		Type:          types.PermissionType_ISSUER_GRANTOR,
-		Grantee:       creator,
+		Authority:       creator,
 		Created:       &now,
 		CreatedBy:     creator,
 		Extended:      &now,
@@ -76,7 +85,7 @@ func TestStartPermissionVP(t *testing.T) {
 	verifierGrantorPerm := types.Permission{
 		SchemaId:      1,
 		Type:          types.PermissionType_VERIFIER_GRANTOR,
-		Grantee:       creator,
+		Authority:       creator,
 		Created:       &now,
 		CreatedBy:     creator,
 		Extended:      &now,
@@ -93,7 +102,7 @@ func TestStartPermissionVP(t *testing.T) {
 	validatorPermNoCountry := types.Permission{
 		SchemaId:      1,
 		Type:          types.PermissionType_ISSUER_GRANTOR,
-		Grantee:       creator,
+		Authority:       creator,
 		Created:       &now,
 		CreatedBy:     creator,
 		Extended:      &now,
@@ -118,10 +127,10 @@ func TestStartPermissionVP(t *testing.T) {
 		{
 			name: "Valid ISSUER Permission Request",
 			msg: &types.MsgStartPermissionVP{
-				Creator:         creator,
+				Authority:       creator,
+				Operator:        creator,
 				Type:            types.PermissionType_ISSUER,
 				ValidatorPermId: validatorPermID,
-				Country:         "US",
 				Did:             validDid,
 			},
 			err:       "",
@@ -130,10 +139,10 @@ func TestStartPermissionVP(t *testing.T) {
 		{
 			name: "Valid ISSUER Permission Request with optional fees",
 			msg: &types.MsgStartPermissionVP{
-				Creator:          creator,
+				Authority:        creator2,
+				Operator:         creator2,
 				Type:             types.PermissionType_ISSUER,
 				ValidatorPermId:  validatorPermID,
-				Country:          "US",
 				Did:              validDid,
 				ValidationFees:   &types.OptionalUInt64{Value: 100},
 				IssuanceFees:     &types.OptionalUInt64{Value: 50},
@@ -148,10 +157,10 @@ func TestStartPermissionVP(t *testing.T) {
 		{
 			name: "Valid ISSUER Permission Request with partial fees",
 			msg: &types.MsgStartPermissionVP{
-				Creator:         creator,
+				Authority:       creator3,
+				Operator:        creator3,
 				Type:            types.PermissionType_ISSUER,
 				ValidatorPermId: validatorPermID,
-				Country:         "US",
 				Did:             validDid,
 				ValidationFees:  &types.OptionalUInt64{Value: 75},
 			},
@@ -164,10 +173,10 @@ func TestStartPermissionVP(t *testing.T) {
 		{
 			name: "Valid ISSUER Permission Request with zero fees",
 			msg: &types.MsgStartPermissionVP{
-				Creator:          creator,
+				Authority:        creator4,
+				Operator:         creator4,
 				Type:             types.PermissionType_ISSUER,
 				ValidatorPermId:  validatorPermID,
-				Country:          "US",
 				Did:              validDid,
 				ValidationFees:   &types.OptionalUInt64{Value: 0},
 				IssuanceFees:     &types.OptionalUInt64{Value: 0},
@@ -180,12 +189,12 @@ func TestStartPermissionVP(t *testing.T) {
 			expectedVerificationFees: 0,
 		},
 		{
-			name: "Valid ISSUER Permission Request without country (optional)",
+			name: "Valid ISSUER Permission Request without country on validator",
 			msg: &types.MsgStartPermissionVP{
-				Creator:         creator,
+				Authority:       creator,
+				Operator:        creator,
 				Type:            types.PermissionType_ISSUER,
-				ValidatorPermId: validatorPermNoCountryID, // Use validator without country
-				Country:         "",                       // Optional country
+				ValidatorPermId: validatorPermNoCountryID,
 				Did:             validDid,
 			},
 			err:       "",
@@ -194,10 +203,10 @@ func TestStartPermissionVP(t *testing.T) {
 		{
 			name: "Non-existent Validator Permission",
 			msg: &types.MsgStartPermissionVP{
-				Creator:         creator,
+				Authority:       creator,
+				Operator:        creator,
 				Type:            types.PermissionType_ISSUER,
 				ValidatorPermId: 999,
-				Country:         "US",
 				Did:             validDid,
 			},
 			err:       "validator perm not found",
@@ -206,10 +215,10 @@ func TestStartPermissionVP(t *testing.T) {
 		{
 			name: "Invalid Permission Type Combination - ISSUER with wrong validator",
 			msg: &types.MsgStartPermissionVP{
-				Creator:         creator,
+				Authority:       creator,
+				Operator:        creator,
 				Type:            types.PermissionType_ISSUER,
 				ValidatorPermId: verifierGrantorPermID, // Wrong validator type
-				Country:         "FR",
 				Did:             validDid,
 			},
 			err:       "issuer perm requires ISSUER_GRANTOR validator",
@@ -233,8 +242,7 @@ func TestStartPermissionVP(t *testing.T) {
 				perm, err := k.GetPermissionByID(sdkCtx, resp.PermissionId)
 				require.NoError(t, err)
 				require.Equal(t, tc.msg.Type, perm.Type)
-				require.Equal(t, tc.msg.Creator, perm.Grantee)
-				require.Equal(t, tc.msg.Country, perm.Country)
+				require.Equal(t, tc.msg.Authority, perm.Authority)
 				require.Equal(t, tc.msg.ValidatorPermId, perm.ValidatorPermId)
 				require.Equal(t, types.ValidationState_PENDING, perm.VpState)
 				require.NotNil(t, perm.Created)
@@ -280,7 +288,7 @@ func TestRenewPermissionVP(t *testing.T) {
 	validatorPerm := types.Permission{
 		SchemaId:      1,
 		Type:          3, // ISSUER_GRANTOR
-		Grantee:       creator,
+		Authority:       creator,
 		Created:       &now,
 		CreatedBy:     creator,
 		Extended:      &now,
@@ -299,7 +307,7 @@ func TestRenewPermissionVP(t *testing.T) {
 	applicantPerm := types.Permission{
 		SchemaId:        1,
 		Type:            1, // ISSUER
-		Grantee:         creator,
+		Authority:         creator,
 		Created:         &now,
 		CreatedBy:       creator,
 		Extended:        &now,
@@ -331,7 +339,7 @@ func TestRenewPermissionVP(t *testing.T) {
 				Creator: sdk.AccAddress([]byte("wrong_creator")).String(),
 				Id:      applicantPermID,
 			},
-			err: "creator is not the perm grantee",
+			err: "creator is not the perm authority",
 		},
 	}
 
@@ -383,7 +391,7 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 	validatorPerm := types.Permission{
 		SchemaId:      1,
 		Type:          types.PermissionType_ISSUER_GRANTOR,
-		Grantee:       validatorAddr,
+		Authority:       validatorAddr,
 		Created:       &now,
 		CreatedBy:     validatorAddr,
 		Extended:      &now,
@@ -403,7 +411,7 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 		newPerm := types.Permission{
 			SchemaId:        1,
 			Type:            types.PermissionType_ISSUER,
-			Grantee:         creator,
+			Authority:         creator,
 			Created:         &now,
 			CreatedBy:       creator,
 			Extended:        &now,
@@ -456,7 +464,7 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 	//	renewalPerm := types.Permission{
 	//		SchemaId:         1,
 	//		Type:             types.PermissionType_PERMISSION_TYPE_ISSUER,
-	//		Grantee:          creator,
+	//		Authority:          creator,
 	//		Created:          &now,
 	//		CreatedBy:        creator,
 	//		Extended:         &now,
@@ -520,7 +528,7 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 		notPendingPerm := types.Permission{
 			SchemaId:        1,
 			Type:            types.PermissionType_ISSUER,
-			Grantee:         creator,
+			Authority:         creator,
 			Created:         &now,
 			CreatedBy:       creator,
 			Extended:        &now,
@@ -550,7 +558,7 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 		pendingPerm := types.Permission{
 			SchemaId:        1,
 			Type:            types.PermissionType_ISSUER,
-			Grantee:         creator,
+			Authority:         creator,
 			Created:         &now,
 			CreatedBy:       creator,
 			Extended:        &now,
@@ -580,7 +588,7 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 		holderPerm := types.Permission{
 			SchemaId:        1,
 			Type:            types.PermissionType_HOLDER,
-			Grantee:         creator,
+			Authority:         creator,
 			Created:         &now,
 			CreatedBy:       creator,
 			Extended:        &now,
@@ -617,7 +625,7 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 		grantorPerm := types.Permission{
 			SchemaId:        1,
 			Type:            types.PermissionType_ISSUER_GRANTOR,
-			Grantee:         creator,
+			Authority:         creator,
 			Created:         &now,
 			CreatedBy:       creator,
 			Extended:        &now,
@@ -658,7 +666,7 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 		validatorWithDiscount := types.Permission{
 			SchemaId:            1,
 			Type:                types.PermissionType_ISSUER_GRANTOR,
-			Grantee:             validatorAddr,
+			Authority:             validatorAddr,
 			Created:             &now,
 			CreatedBy:           validatorAddr,
 			Extended:            &now,
@@ -676,7 +684,7 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 		issuerPerm := types.Permission{
 			SchemaId:        1,
 			Type:            types.PermissionType_ISSUER,
-			Grantee:         creator,
+			Authority:         creator,
 			Created:         &now,
 			CreatedBy:       creator,
 			Extended:        &now,
@@ -718,7 +726,7 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 		validatorWithDiscount := types.Permission{
 			SchemaId:            1,
 			Type:                types.PermissionType_ISSUER_GRANTOR,
-			Grantee:             validatorAddr,
+			Authority:             validatorAddr,
 			Created:             &now,
 			CreatedBy:           validatorAddr,
 			Extended:            &now,
@@ -735,7 +743,7 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 		issuerPerm := types.Permission{
 			SchemaId:        1,
 			Type:            types.PermissionType_ISSUER,
-			Grantee:         creator,
+			Authority:         creator,
 			Created:         &now,
 			CreatedBy:       creator,
 			Extended:        &now,
@@ -773,7 +781,7 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 		grantorPerm := types.Permission{
 			SchemaId:        1,
 			Type:            types.PermissionType_ISSUER_GRANTOR,
-			Grantee:         creator,
+			Authority:         creator,
 			Created:         &now,
 			CreatedBy:       creator,
 			Extended:        &now,
@@ -811,7 +819,7 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 		renewalPerm := types.Permission{
 			SchemaId:            1,
 			Type:                types.PermissionType_ISSUER_GRANTOR,
-			Grantee:             creator,
+			Authority:             creator,
 			Created:             &now,
 			CreatedBy:           creator,
 			Extended:            &now,
@@ -870,7 +878,7 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 		ecosystemValidator := types.Permission{
 			SchemaId:      2,
 			Type:          types.PermissionType_ECOSYSTEM,
-			Grantee:       validatorAddr,
+			Authority:       validatorAddr,
 			Created:       &now,
 			CreatedBy:     validatorAddr,
 			Extended:      &now,
@@ -887,7 +895,7 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 		issuerPerm := types.Permission{
 			SchemaId:        2,
 			Type:            types.PermissionType_ISSUER,
-			Grantee:         creator,
+			Authority:         creator,
 			Created:         &now,
 			CreatedBy:       creator,
 			Extended:        &now,
@@ -1007,7 +1015,7 @@ func TestMsgServerCreateRootPermission(t *testing.T) {
 				// Verify all fields are set correctly
 				require.Equal(t, tc.msg.SchemaId, perm.SchemaId)
 				require.Equal(t, tc.msg.Did, perm.Did)
-				require.Equal(t, tc.msg.Creator, perm.Grantee)
+				require.Equal(t, tc.msg.Creator, perm.Authority)
 				require.Equal(t, types.PermissionType_ECOSYSTEM, perm.Type)
 				require.Equal(t, tc.msg.ValidationFees, perm.ValidationFees)
 				require.Equal(t, tc.msg.IssuanceFees, perm.IssuanceFees)
@@ -1060,7 +1068,7 @@ func TestCancelPermissionVPLastRequest(t *testing.T) {
 	validatorPerm := types.Permission{
 		SchemaId:   1,
 		Type:       types.PermissionType_ISSUER_GRANTOR,
-		Grantee:    validatorAddr,
+		Authority:    validatorAddr,
 		Created:    &now,
 		CreatedBy:  validatorAddr,
 		Extended:   &now,
@@ -1077,7 +1085,7 @@ func TestCancelPermissionVPLastRequest(t *testing.T) {
 	neverValidatedPerm := types.Permission{
 		SchemaId:         1,
 		Type:             types.PermissionType_ISSUER,
-		Grantee:          creator,
+		Authority:          creator,
 		Created:          &now,
 		CreatedBy:        creator,
 		Extended:         &now,
@@ -1099,7 +1107,7 @@ func TestCancelPermissionVPLastRequest(t *testing.T) {
 	previouslyValidatedPerm := types.Permission{
 		SchemaId:         1,
 		Type:             types.PermissionType_ISSUER,
-		Grantee:          creator,
+		Authority:          creator,
 		Created:          &now,
 		CreatedBy:        creator,
 		Extended:         &now,
@@ -1119,7 +1127,7 @@ func TestCancelPermissionVPLastRequest(t *testing.T) {
 	notPendingPerm := types.Permission{
 		SchemaId:        1,
 		Type:            types.PermissionType_ISSUER,
-		Grantee:         creator,
+		Authority:         creator,
 		Created:         &now,
 		CreatedBy:       creator,
 		Extended:        &now,
@@ -1176,7 +1184,7 @@ func TestCancelPermissionVPLastRequest(t *testing.T) {
 				Id:      neverValidatedPermID,
 			},
 			expectErr:  true,
-			errMessage: "creator is not the perm grantee",
+			errMessage: "creator is not the perm authority",
 		},
 		{
 			name: "Invalid - not in PENDING state",
@@ -1244,7 +1252,7 @@ func TestExtendPermission(t *testing.T) {
 	validatorPerm := types.Permission{
 		SchemaId:      1,
 		Type:          types.PermissionType_ISSUER_GRANTOR,
-		Grantee:       validatorAddr,
+		Authority:       validatorAddr,
 		Created:       &now,
 		CreatedBy:     validatorAddr,
 		Extended:      &now,
@@ -1261,7 +1269,7 @@ func TestExtendPermission(t *testing.T) {
 	applicantPerm := types.Permission{
 		SchemaId:        1,
 		Type:            types.PermissionType_ISSUER,
-		Grantee:         creator,
+		Authority:         creator,
 		Created:         &now,
 		CreatedBy:       creator,
 		Extended:        &now,
@@ -1282,7 +1290,7 @@ func TestExtendPermission(t *testing.T) {
 	trustRegistryPerm := types.Permission{
 		SchemaId:       1,
 		Type:           types.PermissionType_ECOSYSTEM,
-		Grantee:        trustRegistryAddr,
+		Authority:        trustRegistryAddr,
 		Created:        &now,
 		CreatedBy:      trustRegistryAddr,
 		Extended:       &now,
@@ -1301,7 +1309,7 @@ func TestExtendPermission(t *testing.T) {
 	wrongCreatorTestPerm := types.Permission{
 		SchemaId:        1,
 		Type:            types.PermissionType_ISSUER,
-		Grantee:         creator,
+		Authority:         creator,
 		Created:         &now,
 		CreatedBy:       creator,
 		Extended:        &now,
@@ -1321,7 +1329,7 @@ func TestExtendPermission(t *testing.T) {
 	nullEffectiveUntilPerm := types.Permission{
 		SchemaId:        1,
 		Type:            types.PermissionType_ISSUER,
-		Grantee:         creator,
+		Authority:         creator,
 		Created:         &now,
 		CreatedBy:       creator,
 		Extended:        &now,
@@ -1341,7 +1349,7 @@ func TestExtendPermission(t *testing.T) {
 	nullEffectiveUntilEcosystemPerm := types.Permission{
 		SchemaId:       1,
 		Type:           types.PermissionType_ECOSYSTEM,
-		Grantee:        trustRegistryAddr,
+		Authority:        trustRegistryAddr,
 		Created:        &now,
 		CreatedBy:      trustRegistryAddr,
 		Extended:       &now,
@@ -1360,7 +1368,7 @@ func TestExtendPermission(t *testing.T) {
 	nullEffectiveUntilPermForPastTest := types.Permission{
 		SchemaId:        1,
 		Type:            types.PermissionType_ISSUER,
-		Grantee:         creator,
+		Authority:         creator,
 		Created:         &now,
 		CreatedBy:       creator,
 		Extended:        &now,
@@ -1379,7 +1387,7 @@ func TestExtendPermission(t *testing.T) {
 	nullEffectiveUntilPermForEqualTest := types.Permission{
 		SchemaId:        1,
 		Type:            types.PermissionType_ISSUER,
-		Grantee:         creator,
+		Authority:         creator,
 		Created:         &now,
 		CreatedBy:       creator,
 		Extended:        &now,
@@ -1563,7 +1571,7 @@ func TestRevokePermission(t *testing.T) {
 	validatorPerm := types.Permission{
 		SchemaId:      1,
 		Type:          types.PermissionType_ISSUER_GRANTOR,
-		Grantee:       validatorAddr,
+		Authority:       validatorAddr,
 		Created:       &now,
 		CreatedBy:     validatorAddr,
 		Extended:      &now,
@@ -1580,7 +1588,7 @@ func TestRevokePermission(t *testing.T) {
 	applicantPerm := types.Permission{
 		SchemaId:        1,
 		Type:            types.PermissionType_ISSUER,
-		Grantee:         creator,
+		Authority:         creator,
 		Created:         &now,
 		CreatedBy:       creator,
 		Extended:        &now,
@@ -1688,7 +1696,7 @@ func TestCreateOrUpdatePermissionSession(t *testing.T) {
 	trustPerm := types.Permission{
 		SchemaId:         1,
 		Type:             types.PermissionType_ECOSYSTEM,
-		Grantee:          creator,
+		Authority:          creator,
 		Created:          &now,
 		CreatedBy:        creator,
 		Extended:         &now,
@@ -1708,7 +1716,7 @@ func TestCreateOrUpdatePermissionSession(t *testing.T) {
 	issuerPerm := types.Permission{
 		SchemaId:        1,
 		Type:            types.PermissionType_ISSUER,
-		Grantee:         creator,
+		Authority:         creator,
 		Created:         &now,
 		CreatedBy:       creator,
 		Extended:        &now,
@@ -1726,7 +1734,7 @@ func TestCreateOrUpdatePermissionSession(t *testing.T) {
 	//verifierPerm := types.Permission{
 	//	SchemaId:        1,
 	//	Type:            types.PermissionType_PERMISSION_TYPE_VERIFIER,
-	//	Grantee:         creator,
+	//	Authority:         creator,
 	//	Created:         &now,
 	//	CreatedBy:       creator,
 	//	Extended:        &now,
@@ -1743,7 +1751,7 @@ func TestCreateOrUpdatePermissionSession(t *testing.T) {
 	agentPerm := types.Permission{
 		SchemaId:        1,
 		Type:            types.PermissionType_ISSUER,
-		Grantee:         creator,
+		Authority:         creator,
 		Created:         &now,
 		CreatedBy:       creator,
 		Extended:        &now,
@@ -1761,7 +1769,7 @@ func TestCreateOrUpdatePermissionSession(t *testing.T) {
 	walletAgentPerm := types.Permission{
 		SchemaId:        1,
 		Type:            types.PermissionType_ISSUER,
-		Grantee:         creator,
+		Authority:         creator,
 		Created:         &now,
 		CreatedBy:       creator,
 		Extended:        &now,
@@ -1780,7 +1788,7 @@ func TestCreateOrUpdatePermissionSession(t *testing.T) {
 	//revokedPerm := types.Permission{
 	//	SchemaId:        1,
 	//	Type:            types.PermissionType_PERMISSION_TYPE_ISSUER,
-	//	Grantee:         creator,
+	//	Authority:         creator,
 	//	Created:         &now,
 	//	CreatedBy:       creator,
 	//	Extended:        &now,
@@ -1976,7 +1984,7 @@ func TestDiscountApplicationInFeeCalculation(t *testing.T) {
 	validatorPerm := types.Permission{
 		SchemaId:      1,
 		Type:          types.PermissionType_ISSUER_GRANTOR,
-		Grantee:       creator,
+		Authority:       creator,
 		Created:       &now,
 		CreatedBy:     creator,
 		Extended:      &now,
@@ -1994,7 +2002,7 @@ func TestDiscountApplicationInFeeCalculation(t *testing.T) {
 	issuerPerm := types.Permission{
 		SchemaId:            1,
 		Type:                types.PermissionType_ISSUER,
-		Grantee:             creator,
+		Authority:             creator,
 		Created:             &now,
 		CreatedBy:           creator,
 		Extended:            &now,
@@ -2013,7 +2021,7 @@ func TestDiscountApplicationInFeeCalculation(t *testing.T) {
 	agentPerm := types.Permission{
 		SchemaId:        1,
 		Type:            types.PermissionType_ISSUER,
-		Grantee:         creator,
+		Authority:         creator,
 		Created:         &now,
 		CreatedBy:       creator,
 		Extended:        &now,
@@ -2055,7 +2063,7 @@ func TestDiscountApplicationInFeeCalculation(t *testing.T) {
 		issuerPerm2 := types.Permission{
 			SchemaId:            1,
 			Type:                types.PermissionType_ISSUER,
-			Grantee:             creator,
+			Authority:             creator,
 			Created:             &now,
 			CreatedBy:           creator,
 			Extended:            &now,
@@ -2090,7 +2098,7 @@ func TestDiscountApplicationInFeeCalculation(t *testing.T) {
 		validatorWithDiscount := types.Permission{
 			SchemaId:            1,
 			Type:                types.PermissionType_ISSUER_GRANTOR,
-			Grantee:             creator,
+			Authority:             creator,
 			Created:             &now,
 			CreatedBy:           creator,
 			Extended:            &now,
@@ -2109,7 +2117,7 @@ func TestDiscountApplicationInFeeCalculation(t *testing.T) {
 		issuerWithDiscount := types.Permission{
 			SchemaId:            1,
 			Type:                types.PermissionType_ISSUER,
-			Grantee:             creator,
+			Authority:             creator,
 			Created:             &now,
 			CreatedBy:           creator,
 			Extended:            &now,
@@ -2147,7 +2155,7 @@ func TestDiscountApplicationInFeeCalculation(t *testing.T) {
 
 // TestGetPermissionByID tests the GetPermissionByID function
 func TestGetPermissionByID(t *testing.T) {
-	k, _, _, ctx := keepertest.PermissionKeeper(t)
+	k, _, _, ctx, _ := keepertest.PermissionKeeper(t)
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
 	creator := sdk.AccAddress([]byte("test_creator")).String()
@@ -2157,7 +2165,7 @@ func TestGetPermissionByID(t *testing.T) {
 	testPerm := types.Permission{
 		SchemaId:   1,
 		Type:       types.PermissionType_ISSUER,
-		Grantee:    creator,
+		Authority:    creator,
 		Created:    &now,
 		CreatedBy:  creator,
 		Extended:   &now,
@@ -2175,7 +2183,7 @@ func TestGetPermissionByID(t *testing.T) {
 	require.Equal(t, permID, retrievedPerm.Id, "Permission ID should match")
 	require.Equal(t, testPerm.SchemaId, retrievedPerm.SchemaId, "Schema ID should match")
 	require.Equal(t, testPerm.Type, retrievedPerm.Type, "Type should match")
-	require.Equal(t, testPerm.Grantee, retrievedPerm.Grantee, "Grantee should match")
+	require.Equal(t, testPerm.Authority, retrievedPerm.Authority, "Grantee should match")
 	require.Equal(t, testPerm.Country, retrievedPerm.Country, "Country should match")
 
 	// Test getting a non-existent perm
@@ -2185,7 +2193,7 @@ func TestGetPermissionByID(t *testing.T) {
 
 // TestCreateAndUpdatePermission tests the CreatePermission and UpdatePermission functions
 func TestCreateAndUpdatePermission(t *testing.T) {
-	k, _, _, ctx := keepertest.PermissionKeeper(t)
+	k, _, _, ctx, _ := keepertest.PermissionKeeper(t)
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
 	creator := sdk.AccAddress([]byte("test_creator")).String()
@@ -2195,7 +2203,7 @@ func TestCreateAndUpdatePermission(t *testing.T) {
 	testPerm := types.Permission{
 		SchemaId:   1,
 		Type:       types.PermissionType_ISSUER,
-		Grantee:    creator,
+		Authority:    creator,
 		Created:    &now,
 		CreatedBy:  creator,
 		Extended:   &now,
@@ -2262,7 +2270,7 @@ func TestQueryPermissions(t *testing.T) {
 		SchemaId:      1,
 		Type:          types.PermissionType_ECOSYSTEM,
 		Did:           validDid,
-		Grantee:       creator,
+		Authority:       creator,
 		Created:       &now,
 		CreatedBy:     creator,
 		Extended:      &now,
@@ -2280,7 +2288,7 @@ func TestQueryPermissions(t *testing.T) {
 		SchemaId:        1,
 		Type:            types.PermissionType_ISSUER,
 		Did:             validDid,
-		Grantee:         creator,
+		Authority:         creator,
 		Created:         &now,
 		CreatedBy:       creator,
 		Extended:        &now,
@@ -2299,7 +2307,7 @@ func TestQueryPermissions(t *testing.T) {
 		SchemaId:        1,
 		Type:            types.PermissionType_VERIFIER,
 		Did:             validDid,
-		Grantee:         creator,
+		Authority:         creator,
 		Created:         &now,
 		CreatedBy:       creator,
 		Extended:        &now,
@@ -2430,7 +2438,7 @@ func TestSlashPermissionTrustDeposit(t *testing.T) {
 	ecosystemPerm := types.Permission{
 		SchemaId:      1,
 		Type:          types.PermissionType_ECOSYSTEM,
-		Grantee:       ecosystemAddr,
+		Authority:       ecosystemAddr,
 		Created:       &now,
 		CreatedBy:     ecosystemAddr,
 		Extended:      &now,
@@ -2447,7 +2455,7 @@ func TestSlashPermissionTrustDeposit(t *testing.T) {
 	validatorPerm := types.Permission{
 		SchemaId:      1,
 		Type:          types.PermissionType_ISSUER_GRANTOR,
-		Grantee:       validatorAddr,
+		Authority:       validatorAddr,
 		Created:       &now,
 		CreatedBy:     validatorAddr,
 		Extended:      &now,
@@ -2464,7 +2472,7 @@ func TestSlashPermissionTrustDeposit(t *testing.T) {
 	applicantPerm := types.Permission{
 		SchemaId:        1,
 		Type:            types.PermissionType_ISSUER,
-		Grantee:         creator,
+		Authority:         creator,
 		Created:         &now,
 		CreatedBy:       creator,
 		Extended:        &now,
@@ -2586,7 +2594,7 @@ func TestRepayPermissionSlashedTrustDeposit(t *testing.T) {
 	ecosystemPerm := types.Permission{
 		SchemaId:      1,
 		Type:          types.PermissionType_ECOSYSTEM,
-		Grantee:       ecosystemAddr,
+		Authority:       ecosystemAddr,
 		Created:       &now,
 		CreatedBy:     ecosystemAddr,
 		Extended:      &now,
@@ -2603,7 +2611,7 @@ func TestRepayPermissionSlashedTrustDeposit(t *testing.T) {
 	validatorPerm := types.Permission{
 		SchemaId:      1,
 		Type:          types.PermissionType_ISSUER_GRANTOR,
-		Grantee:       validatorAddr,
+		Authority:       validatorAddr,
 		Created:       &now,
 		CreatedBy:     validatorAddr,
 		Extended:      &now,
@@ -2620,7 +2628,7 @@ func TestRepayPermissionSlashedTrustDeposit(t *testing.T) {
 	applicantPerm := types.Permission{
 		SchemaId:        1,
 		Type:            types.PermissionType_ISSUER,
-		Grantee:         creator,
+		Authority:         creator,
 		Created:         &now,
 		CreatedBy:       creator,
 		Extended:        &now,
@@ -2734,7 +2742,7 @@ func TestCreatePermission(t *testing.T) {
 		SchemaId:  1,
 		Type:      types.PermissionType_ECOSYSTEM,
 		Did:       validDid,
-		Grantee:   creator,
+		Authority:   creator,
 		Created:   &now,
 		CreatedBy: creator,
 		Modified:  &now,
@@ -2854,7 +2862,7 @@ func TestCreatePermission(t *testing.T) {
 				require.Equal(t, tc.msg.SchemaId, perm.SchemaId)
 				require.Equal(t, tc.msg.Type, perm.Type)
 				require.Equal(t, tc.msg.Did, perm.Did)
-				require.Equal(t, tc.msg.Creator, perm.Grantee)
+				require.Equal(t, tc.msg.Creator, perm.Authority)
 				require.Equal(t, tc.msg.Country, perm.Country)
 				require.Equal(t, tc.msg.VerificationFees, perm.VerificationFees)
 				require.Equal(t, ecosystemPermID, perm.ValidatorPermId)
@@ -3048,7 +3056,7 @@ func TestStartPermissionVP_ValidatorMustBeActive(t *testing.T) {
 	activeValidatorPerm := types.Permission{
 		SchemaId:      1,
 		Type:          types.PermissionType_ISSUER_GRANTOR,
-		Grantee:       creator,
+		Authority:       creator,
 		Created:       &now,
 		CreatedBy:     creator,
 		Extended:      &now,
@@ -3065,7 +3073,7 @@ func TestStartPermissionVP_ValidatorMustBeActive(t *testing.T) {
 	inactiveValidatorPerm := types.Permission{
 		SchemaId:      1,
 		Type:          types.PermissionType_ISSUER_GRANTOR,
-		Grantee:       creator,
+		Authority:       creator,
 		Created:       &now,
 		CreatedBy:     creator,
 		Extended:      &now,
@@ -3082,7 +3090,7 @@ func TestStartPermissionVP_ValidatorMustBeActive(t *testing.T) {
 	futureValidatorPerm := types.Permission{
 		SchemaId:      1,
 		Type:          types.PermissionType_ISSUER_GRANTOR,
-		Grantee:       creator,
+		Authority:       creator,
 		Created:       &now,
 		CreatedBy:     creator,
 		Extended:      &now,
@@ -3099,7 +3107,7 @@ func TestStartPermissionVP_ValidatorMustBeActive(t *testing.T) {
 	expiredValidatorPerm := types.Permission{
 		SchemaId:       1,
 		Type:           types.PermissionType_ISSUER_GRANTOR,
-		Grantee:        creator,
+		Authority:        creator,
 		Created:        &now,
 		CreatedBy:      creator,
 		Extended:       &now,
@@ -3123,10 +3131,10 @@ func TestStartPermissionVP_ValidatorMustBeActive(t *testing.T) {
 			// Baseline: Active validator should work
 			name: "Issue #193: Accept ACTIVE validator - valid case",
 			msg: &types.MsgStartPermissionVP{
-				Creator:         creator,
+				Authority:       creator,
+				Operator:        creator,
 				Type:            types.PermissionType_ISSUER,
 				ValidatorPermId: activeValidatorPermID,
-				Country:         "US",
 				Did:             validDid,
 			},
 			expectErr: false,
@@ -3136,10 +3144,10 @@ func TestStartPermissionVP_ValidatorMustBeActive(t *testing.T) {
 			// Issue #193: Validator with null effective_from should be rejected
 			name: "Issue #193: Reject INACTIVE validator - effective_from is null",
 			msg: &types.MsgStartPermissionVP{
-				Creator:         creator,
+				Authority:       creator,
+				Operator:        creator,
 				Type:            types.PermissionType_ISSUER,
 				ValidatorPermId: inactiveValidatorPermID,
-				Country:         "US",
 				Did:             validDid,
 			},
 			expectErr: true,
@@ -3149,10 +3157,10 @@ func TestStartPermissionVP_ValidatorMustBeActive(t *testing.T) {
 			// Issue #193: Validator with future effective_from should be rejected
 			name: "Issue #193: Reject FUTURE validator - effective_from is in the future",
 			msg: &types.MsgStartPermissionVP{
-				Creator:         creator,
+				Authority:       creator,
+				Operator:        creator,
 				Type:            types.PermissionType_ISSUER,
 				ValidatorPermId: futureValidatorPermID,
-				Country:         "US",
 				Did:             validDid,
 			},
 			expectErr: true,
@@ -3162,10 +3170,10 @@ func TestStartPermissionVP_ValidatorMustBeActive(t *testing.T) {
 			// Issue #193: Expired validator should be rejected
 			name: "Issue #193: Reject EXPIRED validator - effective_until has passed",
 			msg: &types.MsgStartPermissionVP{
-				Creator:         creator,
+				Authority:       creator,
+				Operator:        creator,
 				Type:            types.PermissionType_ISSUER,
 				ValidatorPermId: expiredValidatorPermID,
-				Country:         "US",
 				Did:             validDid,
 			},
 			expectErr: true,
@@ -3220,7 +3228,7 @@ func TestRevokePermission_AllowNotYetActivePermissions(t *testing.T) {
 	activePerm := types.Permission{
 		SchemaId:      1,
 		Type:          types.PermissionType_ISSUER_GRANTOR,
-		Grantee:       creator,
+		Authority:       creator,
 		Created:       &now,
 		CreatedBy:     creator,
 		Extended:      &now,
@@ -3237,7 +3245,7 @@ func TestRevokePermission_AllowNotYetActivePermissions(t *testing.T) {
 	futurePerm := types.Permission{
 		SchemaId:      1,
 		Type:          types.PermissionType_ISSUER_GRANTOR,
-		Grantee:       creator,
+		Authority:       creator,
 		Created:       &now,
 		CreatedBy:     creator,
 		Extended:      &now,
@@ -3254,7 +3262,7 @@ func TestRevokePermission_AllowNotYetActivePermissions(t *testing.T) {
 	inactivePerm := types.Permission{
 		SchemaId:      1,
 		Type:          types.PermissionType_ISSUER_GRANTOR,
-		Grantee:       creator,
+		Authority:       creator,
 		Created:       &now,
 		CreatedBy:     creator,
 		Extended:      &now,
@@ -3325,4 +3333,357 @@ func TestRevokePermission_AllowNotYetActivePermissions(t *testing.T) {
 			}
 		})
 	}
+}
+
+// TestStartPermissionVP_OverlapCheck tests [MOD-PERM-MSG-1-2-4]:
+// Cannot have 2 active VPs in the same (schema_id, type, validator_perm_id, authority) context.
+func TestStartPermissionVP_OverlapCheck(t *testing.T) {
+	k, ms, csKeeper, trkKeeper, ctx := setupMsgServer(t)
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	blockTime := time.Date(2023, 1, 15, 0, 0, 0, 0, time.UTC)
+	sdkCtx = sdkCtx.WithBlockTime(blockTime)
+	ctx = sdk.WrapSDKContext(sdkCtx)
+
+	creator := sdk.AccAddress([]byte("test_creator")).String()
+	validDid := "did:example:123456789abcdefghi"
+
+	trID := trkKeeper.CreateMockTrustRegistry(creator, validDid)
+	csKeeper.UpdateMockCredentialSchema(1, trID,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
+
+	now := sdkCtx.BlockTime()
+	pastTime := now.Add(-1 * time.Hour)
+	validatorPerm := types.Permission{
+		SchemaId:      1,
+		Type:          types.PermissionType_ISSUER_GRANTOR,
+		Authority:     creator,
+		Created:       &now,
+		CreatedBy:     creator,
+		Modified:      &now,
+		VpState:       types.ValidationState_VALIDATED,
+		EffectiveFrom: &pastTime,
+	}
+	validatorPermID, err := k.CreatePermission(sdkCtx, validatorPerm)
+	require.NoError(t, err)
+
+	// First VP should succeed
+	msg := &types.MsgStartPermissionVP{
+		Authority:       creator,
+		Operator:        creator,
+		Type:            types.PermissionType_ISSUER,
+		ValidatorPermId: validatorPermID,
+		Did:             validDid,
+	}
+	resp, err := ms.StartPermissionVP(ctx, msg)
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+
+	// Second VP with same (schema_id, type, validator_perm_id, authority) should fail
+	t.Run("Duplicate PENDING VP in same context", func(t *testing.T) {
+		msg2 := &types.MsgStartPermissionVP{
+			Authority:       creator,
+			Operator:        creator,
+			Type:            types.PermissionType_ISSUER,
+			ValidatorPermId: validatorPermID,
+			Did:             "did:example:different-did",
+		}
+		resp2, err := ms.StartPermissionVP(ctx, msg2)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "overlap check failed")
+		require.Contains(t, err.Error(), "an active validation process already exists")
+		require.Nil(t, resp2)
+	})
+
+	// Different authority should succeed (no overlap)
+	t.Run("Different authority no overlap", func(t *testing.T) {
+		otherCreator := sdk.AccAddress([]byte("other_creator")).String()
+		msg3 := &types.MsgStartPermissionVP{
+			Authority:       otherCreator,
+			Operator:        otherCreator,
+			Type:            types.PermissionType_ISSUER,
+			ValidatorPermId: validatorPermID,
+			Did:             validDid,
+		}
+		resp3, err := ms.StartPermissionVP(ctx, msg3)
+		require.NoError(t, err)
+		require.NotNil(t, resp3)
+	})
+
+	// Different type should succeed (no overlap)
+	t.Run("Different type no overlap", func(t *testing.T) {
+		// Need a VERIFIER_GRANTOR validator for VERIFIER type
+		csKeeper.UpdateMockCredentialSchema(1, trID,
+			cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
+			cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
+
+		verifierGrantorPerm := types.Permission{
+			SchemaId:      1,
+			Type:          types.PermissionType_VERIFIER_GRANTOR,
+			Authority:     creator,
+			Created:       &now,
+			CreatedBy:     creator,
+			Modified:      &now,
+			VpState:       types.ValidationState_VALIDATED,
+			EffectiveFrom: &pastTime,
+		}
+		vgPermID, err := k.CreatePermission(sdkCtx, verifierGrantorPerm)
+		require.NoError(t, err)
+
+		msg4 := &types.MsgStartPermissionVP{
+			Authority:       creator,
+			Operator:        creator,
+			Type:            types.PermissionType_VERIFIER,
+			ValidatorPermId: vgPermID,
+			Did:             validDid,
+		}
+		resp4, err := ms.StartPermissionVP(ctx, msg4)
+		require.NoError(t, err)
+		require.NotNil(t, resp4)
+	})
+}
+
+// TestStartPermissionVP_AuthzCheck tests that the AUTHZ-CHECK via DelegationKeeper
+// is properly enforced when the keeper is present.
+func TestStartPermissionVP_AuthzCheck(t *testing.T) {
+	k, ms, csKeeper, trkKeeper, ctx, delKeeper := setupMsgServerWithDelegation(t)
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	blockTime := time.Date(2023, 1, 15, 0, 0, 0, 0, time.UTC)
+	sdkCtx = sdkCtx.WithBlockTime(blockTime)
+	ctx = sdk.WrapSDKContext(sdkCtx)
+
+	creator := sdk.AccAddress([]byte("test_creator")).String()
+	validDid := "did:example:123456789abcdefghi"
+
+	trID := trkKeeper.CreateMockTrustRegistry(creator, validDid)
+	csKeeper.UpdateMockCredentialSchema(1, trID,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
+
+	now := sdkCtx.BlockTime()
+	pastTime := now.Add(-1 * time.Hour)
+	validatorPerm := types.Permission{
+		SchemaId:      1,
+		Type:          types.PermissionType_ISSUER_GRANTOR,
+		Authority:     creator,
+		Created:       &now,
+		CreatedBy:     creator,
+		Modified:      &now,
+		VpState:       types.ValidationState_VALIDATED,
+		EffectiveFrom: &pastTime,
+	}
+	_, err := k.CreatePermission(sdkCtx, validatorPerm)
+	require.NoError(t, err)
+
+	t.Run("AUTHZ-CHECK failure blocks StartPermissionVP", func(t *testing.T) {
+		delKeeper.ErrToReturn = fmt.Errorf("operator not authorized for authority")
+		defer func() { delKeeper.ErrToReturn = nil }()
+
+		msg := &types.MsgStartPermissionVP{
+			Authority:       creator,
+			Operator:        sdk.AccAddress([]byte("unauthorized_op")).String(),
+			Type:            types.PermissionType_ISSUER,
+			ValidatorPermId: 1,
+			Did:             validDid,
+		}
+		resp, err := ms.StartPermissionVP(ctx, msg)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "authorization check failed")
+		require.Contains(t, err.Error(), "operator not authorized")
+		require.Nil(t, resp)
+	})
+
+	t.Run("AUTHZ-CHECK success allows StartPermissionVP", func(t *testing.T) {
+		delKeeper.ErrToReturn = nil
+
+		msg := &types.MsgStartPermissionVP{
+			Authority:       creator,
+			Operator:        creator,
+			Type:            types.PermissionType_ISSUER,
+			ValidatorPermId: 1,
+			Did:             validDid,
+		}
+		resp, err := ms.StartPermissionVP(ctx, msg)
+		require.NoError(t, err)
+		require.NotNil(t, resp)
+	})
+}
+
+// TestStartPermissionVP_VsOperatorAndFields tests that vs_operator fields and DID are correctly
+// persisted, and that empty DID is rejected at the keeper level.
+func TestStartPermissionVP_VsOperatorAndFields(t *testing.T) {
+	k, ms, csKeeper, trkKeeper, ctx := setupMsgServer(t)
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	blockTime := time.Date(2023, 1, 15, 0, 0, 0, 0, time.UTC)
+	sdkCtx = sdkCtx.WithBlockTime(blockTime)
+	ctx = sdk.WrapSDKContext(sdkCtx)
+
+	creator := sdk.AccAddress([]byte("test_creator")).String()
+	vsOperator := sdk.AccAddress([]byte("vs_operator_acct")).String()
+	validDid := "did:example:123456789abcdefghi"
+
+	trID := trkKeeper.CreateMockTrustRegistry(creator, validDid)
+	csKeeper.UpdateMockCredentialSchema(1, trID,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
+
+	now := sdkCtx.BlockTime()
+	pastTime := now.Add(-1 * time.Hour)
+	validatorPerm := types.Permission{
+		SchemaId:      1,
+		Type:          types.PermissionType_ISSUER_GRANTOR,
+		Authority:     creator,
+		Created:       &now,
+		CreatedBy:     creator,
+		Modified:      &now,
+		VpState:       types.ValidationState_VALIDATED,
+		EffectiveFrom: &pastTime,
+	}
+	validatorPermID, err := k.CreatePermission(sdkCtx, validatorPerm)
+	require.NoError(t, err)
+
+	t.Run("vs_operator fields propagated to stored permission", func(t *testing.T) {
+		operator := sdk.AccAddress([]byte("diff_operator_aa")).String()
+		msg := &types.MsgStartPermissionVP{
+			Authority:              creator,
+			Operator:               operator,
+			Type:                   types.PermissionType_ISSUER,
+			ValidatorPermId:        validatorPermID,
+			Did:                    validDid,
+			VsOperator:             vsOperator,
+			VsOperatorAuthzEnabled: true,
+		}
+		resp, err := ms.StartPermissionVP(ctx, msg)
+		require.NoError(t, err)
+		require.NotNil(t, resp)
+
+		perm, err := k.GetPermissionByID(sdkCtx, resp.PermissionId)
+		require.NoError(t, err)
+		require.Equal(t, validDid, perm.Did, "DID should be stored")
+		require.Equal(t, operator, perm.CreatedBy, "CreatedBy should be operator")
+		require.Equal(t, creator, perm.Authority, "Authority should be authority")
+		require.Equal(t, vsOperator, perm.VsOperator, "VsOperator should be stored")
+		require.True(t, perm.VsOperatorAuthzEnabled, "VsOperatorAuthzEnabled should be true")
+		require.Equal(t, uint64(1), perm.SchemaId, "SchemaId should be derived from validator perm")
+		require.Equal(t, types.ValidationState_PENDING, perm.VpState)
+	})
+
+	t.Run("VERIFIER with VERIFIER_GRANTOR validator", func(t *testing.T) {
+		vgPerm := types.Permission{
+			SchemaId:      1,
+			Type:          types.PermissionType_VERIFIER_GRANTOR,
+			Authority:     creator,
+			Created:       &now,
+			CreatedBy:     creator,
+			Modified:      &now,
+			VpState:       types.ValidationState_VALIDATED,
+			EffectiveFrom: &pastTime,
+		}
+		vgPermID, err := k.CreatePermission(sdkCtx, vgPerm)
+		require.NoError(t, err)
+
+		verifierCreator := sdk.AccAddress([]byte("verifier_creator")).String()
+		msg := &types.MsgStartPermissionVP{
+			Authority:       verifierCreator,
+			Operator:        verifierCreator,
+			Type:            types.PermissionType_VERIFIER,
+			ValidatorPermId: vgPermID,
+			Did:             "did:example:verifier-did-123",
+		}
+		resp, err := ms.StartPermissionVP(ctx, msg)
+		require.NoError(t, err)
+		require.NotNil(t, resp)
+
+		perm, err := k.GetPermissionByID(sdkCtx, resp.PermissionId)
+		require.NoError(t, err)
+		require.Equal(t, types.PermissionType_VERIFIER, perm.Type)
+		require.Equal(t, vgPermID, perm.ValidatorPermId)
+	})
+
+	t.Run("HOLDER with ISSUER validator", func(t *testing.T) {
+		// Create ISSUER perm to serve as validator for HOLDER
+		issuerPerm := types.Permission{
+			SchemaId:      1,
+			Type:          types.PermissionType_ISSUER,
+			Authority:     creator,
+			Created:       &now,
+			CreatedBy:     creator,
+			Modified:      &now,
+			VpState:       types.ValidationState_VALIDATED,
+			EffectiveFrom: &pastTime,
+		}
+		issuerPermID, err := k.CreatePermission(sdkCtx, issuerPerm)
+		require.NoError(t, err)
+
+		holderCreator := sdk.AccAddress([]byte("holder_creator_a")).String()
+		msg := &types.MsgStartPermissionVP{
+			Authority:       holderCreator,
+			Operator:        holderCreator,
+			Type:            types.PermissionType_HOLDER,
+			ValidatorPermId: issuerPermID,
+			Did:             "did:example:holder-did-456",
+		}
+		resp, err := ms.StartPermissionVP(ctx, msg)
+		require.NoError(t, err)
+		require.NotNil(t, resp)
+
+		perm, err := k.GetPermissionByID(sdkCtx, resp.PermissionId)
+		require.NoError(t, err)
+		require.Equal(t, types.PermissionType_HOLDER, perm.Type)
+		require.Equal(t, issuerPermID, perm.ValidatorPermId)
+	})
+
+	t.Run("HOLDER with wrong validator type rejects", func(t *testing.T) {
+		holderCreator := sdk.AccAddress([]byte("holder_bad_val_a")).String()
+		msg := &types.MsgStartPermissionVP{
+			Authority:       holderCreator,
+			Operator:        holderCreator,
+			Type:            types.PermissionType_HOLDER,
+			ValidatorPermId: validatorPermID, // ISSUER_GRANTOR, not ISSUER
+			Did:             "did:example:holder-bad-val",
+		}
+		resp, err := ms.StartPermissionVP(ctx, msg)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "holder perm requires ISSUER validator")
+		require.Nil(t, resp)
+	})
+
+	t.Run("ECOSYSTEM type combination - ISSUER_GRANTOR with ECOSYSTEM validator", func(t *testing.T) {
+		// Create schema with ECOSYSTEM mode for issuer
+		csKeeper.UpdateMockCredentialSchema(2, trID,
+			cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
+			cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
+
+		ecosystemPerm := types.Permission{
+			SchemaId:      2,
+			Type:          types.PermissionType_ECOSYSTEM,
+			Authority:     creator,
+			Created:       &now,
+			CreatedBy:     creator,
+			Modified:      &now,
+			VpState:       types.ValidationState_VALIDATED,
+			EffectiveFrom: &pastTime,
+		}
+		ecoPermID, err := k.CreatePermission(sdkCtx, ecosystemPerm)
+		require.NoError(t, err)
+
+		grantorCreator := sdk.AccAddress([]byte("grantor_eco_crea")).String()
+		msg := &types.MsgStartPermissionVP{
+			Authority:       grantorCreator,
+			Operator:        grantorCreator,
+			Type:            types.PermissionType_ISSUER_GRANTOR,
+			ValidatorPermId: ecoPermID,
+			Did:             "did:example:issuer-grantor-eco",
+		}
+		resp, err := ms.StartPermissionVP(ctx, msg)
+		require.NoError(t, err)
+		require.NotNil(t, resp)
+
+		perm, err := k.GetPermissionByID(sdkCtx, resp.PermissionId)
+		require.NoError(t, err)
+		require.Equal(t, types.PermissionType_ISSUER_GRANTOR, perm.Type)
+	})
 }

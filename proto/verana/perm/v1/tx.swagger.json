@@ -405,6 +405,18 @@
     }
   },
   "definitions": {
+    "cosmos.base.v1beta1.Coin": {
+      "type": "object",
+      "properties": {
+        "denom": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "string"
+        }
+      },
+      "description": "Coin defines a token with a denomination and an amount.\n\nNOTE: The amount field is an Int which implements the custom method\nsignatures required by gogoproto."
+    },
     "google.protobuf.Any": {
       "type": "object",
       "properties": {
@@ -720,8 +732,13 @@
     "verana.perm.v1.MsgStartPermissionVP": {
       "type": "object",
       "properties": {
-        "creator": {
-          "type": "string"
+        "authority": {
+          "type": "string",
+          "title": "authority is the group account on whose behalf this message is executed"
+        },
+        "operator": {
+          "type": "string",
+          "title": "operator is the account authorized by the authority to run this Msg"
         },
         "type": {
           "$ref": "#/definitions/verana.perm.v1.PermissionType"
@@ -730,24 +747,45 @@
           "type": "string",
           "format": "uint64"
         },
-        "validation_fees": {
-          "$ref": "#/definitions/verana.perm.v1.OptionalUInt64",
-          "title": "optional: Requested validation_fees for this permission (can be modified by validator)"
-        },
-        "issuance_fees": {
-          "$ref": "#/definitions/verana.perm.v1.OptionalUInt64",
-          "title": "optional: Requested issuance_fees for this permission (can be modified by validator)"
-        },
-        "verification_fees": {
-          "$ref": "#/definitions/verana.perm.v1.OptionalUInt64",
-          "title": "optional: Requested verification_fees for this permission (can be modified by validator)"
-        },
-        "country": {
-          "type": "string"
-        },
         "did": {
           "type": "string",
-          "title": "optional"
+          "title": "mandatory: MUST conform to DID Syntax"
+        },
+        "validation_fees": {
+          "$ref": "#/definitions/verana.perm.v1.OptionalUInt64"
+        },
+        "issuance_fees": {
+          "$ref": "#/definitions/verana.perm.v1.OptionalUInt64"
+        },
+        "verification_fees": {
+          "$ref": "#/definitions/verana.perm.v1.OptionalUInt64"
+        },
+        "vs_operator": {
+          "type": "string",
+          "title": "vs_operator: the account of the Verifiable Service (optional)"
+        },
+        "vs_operator_authz_enabled": {
+          "type": "boolean"
+        },
+        "vs_operator_authz_spend_limit": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
+          }
+        },
+        "vs_operator_authz_with_feegrant": {
+          "type": "boolean"
+        },
+        "vs_operator_authz_fee_spend_limit": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
+          }
+        },
+        "vs_operator_authz_spend_period": {
+          "type": "string"
         }
       },
       "title": "MsgStartPermissionVP represents a message to start a permission validation process"

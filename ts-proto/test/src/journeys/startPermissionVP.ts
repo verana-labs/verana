@@ -5,7 +5,7 @@
  * TypeScript client and the generated protobuf types.
  *
  * Usage:
- *   VALIDATOR_PERM_ID=1 TYPE=ISSUER COUNTRY=US npm run test:start-perm-vp
+ *   VALIDATOR_PERM_ID=1 TYPE=ISSUER npm run test:start-perm-vp
  *   # Or let it create a validator permission first, then start VP
  *   npm run test:start-perm-vp
  */
@@ -101,8 +101,7 @@ async function main() {
 
   // Step 6: Load root permission ID from Journey 13
   const permissionType = process.env.TYPE === "VERIFIER" ? PermissionType.VERIFIER : PermissionType.ISSUER;
-  const country = process.env.COUNTRY || "US";
-  
+
   let validatorPermId: number | undefined;
   if (process.env.VALIDATOR_PERM_ID) {
     validatorPermId = parseInt(process.env.VALIDATOR_PERM_ID, 10);
@@ -144,18 +143,18 @@ async function main() {
   const msg = {
     typeUrl: typeUrls.MsgStartPermissionVP,
     value: MsgStartPermissionVP.fromPartial({
-      creator: account17.address,
+      authority: account17.address,
+      operator: account17.address,
       type: permissionType,
       validatorPermId: validatorPermId,
-      country: country,
       did: did,
     }),
   };
   console.log("  Message details:");
-  console.log(`    - Creator: ${account17.address} (account_${ACCOUNT_INDEX})`);
+  console.log(`    - Authority: ${account17.address} (account_${ACCOUNT_INDEX})`);
+  console.log(`    - Operator: ${account17.address} (account_${ACCOUNT_INDEX})`);
   console.log(`    - Permission Type: ${PermissionType[permissionType]} (${permissionType})`);
   console.log(`    - Validator Permission ID: ${validatorPermId}`);
-  console.log(`    - Country: ${country}`);
   console.log(`    - DID: ${did}`);
   console.log();
 

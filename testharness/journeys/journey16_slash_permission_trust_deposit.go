@@ -24,14 +24,12 @@ func RunSlashPermissionTrustDepositJourney(ctx context.Context, client cosmoscli
 	journey2Result := lib.LoadJourneyResult("journey2")
 
 	fmt.Println("Issuer_Applicant starting Permission Validation Process...")
-	countryCode := "US" // Example country code
 	issuerApplicantAccount := lib.GetAccount(client, lib.ISSUER_APPLICANT_NAME)
 	issuerGrantorPermID, _ := strconv.ParseUint(journey2Result.IssuerGrantorPermID, 10, 64)
 
 	startVPMsg := permtypes.MsgStartPermissionVP{
 		Type:            permtypes.PermissionType_ISSUER,
 		ValidatorPermId: issuerGrantorPermID,
-		Country:         countryCode,
 		Did:             issuerDID,
 	}
 

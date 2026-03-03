@@ -293,7 +293,7 @@ func restorePermissionData(ctx sdk.Context, keepers types.AppKeepers, data Permi
 			SchemaId:         schemaID,
 			Type:             permissiontypes.PermissionType(permType),
 			Did:              perm.DID,
-			Grantee:          perm.Grantee,
+			Authority:        perm.Grantee,
 			Created:          &perm.Created,
 			CreatedBy:        perm.CreatedBy,
 			Extended:         nil,

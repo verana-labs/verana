@@ -28,6 +28,20 @@ var _ types.MsgServer = msgServer{}
 // StartPermissionVP handles the MsgStartPermissionVP message
 func (ms msgServer) StartPermissionVP(goCtx context.Context, msg *types.MsgStartPermissionVP) (*types.MsgStartPermissionVPResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
+	now := ctx.BlockTime()
+
+	// [MOD-PERM-MSG-1-2-1] [AUTHZ-CHECK] Verify operator authorization
+	if ms.delegationKeeper != nil {
+		if err := ms.delegationKeeper.CheckOperatorAuthorization(
+			ctx,
+			msg.Authority,
+			msg.Operator,
+			"/verana.perm.v1.MsgStartPermissionVP",
+			now,
+		); err != nil {
+			return nil, fmt.Errorf("authorization check failed: %w", err)
+		}
+	}
 
 	// [MOD-PERM-MSG-1-2-2] Permission checks
 	validatorPerm, err := ms.validatePermissionChecks(ctx, msg)
@@ -35,8 +49,13 @@ func (ms msgServer) StartPermissionVP(goCtx context.Context, msg *types.MsgStart
 		return nil, fmt.Errorf("perm validation failed: %w", err)
 	}
 
+	// [MOD-PERM-MSG-1-2-4] Overlap checks
+	if err := ms.checkOverlap(ctx, validatorPerm.SchemaId, msg.Type, msg.ValidatorPermId, msg.Authority); err != nil {
+		return nil, fmt.Errorf("overlap check failed: %w", err)
+	}
+
 	// [MOD-PERM-MSG-1-2-3] Fee checks
-	fees, deposit, err := ms.validateAndCalculateFees(ctx, msg.Creator, validatorPerm)
+	fees, deposit, err := ms.validateAndCalculateFees(ctx, validatorPerm)
 	if err != nil {
 		return nil, fmt.Errorf("fee validation failed: %w", err)
 	}
@@ -51,13 +70,13 @@ func (ms msgServer) StartPermissionVP(goCtx context.Context, msg *types.MsgStart
 		sdk.NewEvent(
 			types.EventTypeStartPermissionVP,
 			sdk.NewAttribute(types.AttributeKeyPermissionID, strconv.FormatUint(permID, 10)),
-			sdk.NewAttribute(types.AttributeKeyCreator, msg.Creator),
+			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Authority),
+			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
 			sdk.NewAttribute(types.AttributeKeyValidatorPermID, strconv.FormatUint(msg.ValidatorPermId, 10)),
 			sdk.NewAttribute(types.AttributeKeyType, types.PermissionType(msg.Type).String()),
-			sdk.NewAttribute(types.AttributeKeyCountry, msg.Country),
 			sdk.NewAttribute(types.AttributeKeyFees, strconv.FormatUint(fees, 10)),
 			sdk.NewAttribute(types.AttributeKeyDeposit, strconv.FormatUint(deposit, 10)),
-			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
+			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
 		),
 	})
 
@@ -76,8 +95,8 @@ func (ms msgServer) RenewPermissionVP(goCtx context.Context, msg *types.MsgRenew
 	}
 
 	// Verify creator is the grantee
-	if applicantPerm.Grantee != msg.Creator {
-		return nil, fmt.Errorf("creator is not the perm grantee")
+	if applicantPerm.Authority != msg.Creator {
+		return nil, fmt.Errorf("creator is not the perm authority")
 	}
 
 	// Get validator perm
@@ -91,7 +110,7 @@ func (ms msgServer) RenewPermissionVP(goCtx context.Context, msg *types.MsgRenew
 	}
 
 	// [MOD-PERM-MSG-2-2-3] Fee checks
-	validationFees, validationDeposit, err := ms.validateAndCalculateFees(ctx, msg.Creator, validatorPerm)
+	validationFees, validationDeposit, err := ms.validateAndCalculateFees(ctx, validatorPerm)
 	if err != nil {
 		return nil, fmt.Errorf("fee validation failed: %w", err)
 	}
@@ -119,7 +138,7 @@ func (ms msgServer) RenewPermissionVP(goCtx context.Context, msg *types.MsgRenew
 func (ms msgServer) executeRenewPermissionVP(ctx sdk.Context, perm types.Permission, fees, deposit uint64) error {
 	// Increment trust deposit if deposit is greater than 0
 	if deposit > 0 {
-		if err := ms.trustDeposit.AdjustTrustDeposit(ctx, perm.Grantee, int64(deposit)); err != nil {
+		if err := ms.trustDeposit.AdjustTrustDeposit(ctx, perm.Authority, int64(deposit)); err != nil {
 			return fmt.Errorf("failed to increase trust deposit: %w", err)
 		}
 	}
@@ -127,7 +146,7 @@ func (ms msgServer) executeRenewPermissionVP(ctx sdk.Context, perm types.Permiss
 	// Send validation fees to escrow account if greater than 0
 	if fees > 0 {
 		// Get grantee address
-		granteeAddr, err := sdk.AccAddressFromBech32(perm.Grantee)
+		granteeAddr, err := sdk.AccAddressFromBech32(perm.Authority)
 		if err != nil {
 			return fmt.Errorf("invalid grantee address: %w", err)
 		}
@@ -339,7 +358,7 @@ func (ms msgServer) SetPermissionVPToValidated(goCtx context.Context, msg *types
 	}
 
 	// account running the method MUST be validator_perm.grantee
-	if validatorPerm.Grantee != msg.Creator {
+	if validatorPerm.Authority != msg.Creator {
 		return nil, fmt.Errorf("account running method must be validator grantee")
 	}
 
@@ -357,8 +376,8 @@ func (ms msgServer) CancelPermissionVPLastRequest(goCtx context.Context, msg *ty
 	}
 
 	// Check if creator is the grantee
-	if applicantPerm.Grantee != msg.Creator {
-		return nil, fmt.Errorf("creator is not the perm grantee")
+	if applicantPerm.Authority != msg.Creator {
+		return nil, fmt.Errorf("creator is not the perm authority")
 	}
 
 	// Check perm state
@@ -400,7 +419,7 @@ func (ms msgServer) executeCancelPermissionVPLastRequest(ctx sdk.Context, perm t
 	// Handle current fees if any
 	if perm.VpCurrentFees > 0 {
 		// Transfer escrowed fees back to the applicant
-		granteeAddr, err := sdk.AccAddressFromBech32(perm.Grantee)
+		granteeAddr, err := sdk.AccAddressFromBech32(perm.Authority)
 		if err != nil {
 			return fmt.Errorf("invalid grantee address: %w", err)
 		}
@@ -425,7 +444,7 @@ func (ms msgServer) executeCancelPermissionVPLastRequest(ctx sdk.Context, perm t
 		// to move funds from deposit to claimable
 		if err := ms.trustDeposit.AdjustTrustDeposit(
 			ctx,
-			perm.Grantee,
+			perm.Authority,
 			-int64(perm.VpCurrentDeposit), // Negative value to reduce deposit and increase claimable
 		); err != nil {
 			return fmt.Errorf("failed to adjust trust deposit: %w", err)
@@ -536,7 +555,7 @@ func (ms msgServer) executeCreateRootPermission(ctx sdk.Context, msg *types.MsgC
 		Modified:         &now,
 		Type:             types.PermissionType_ECOSYSTEM,
 		Did:              msg.Did,
-		Grantee:          msg.Creator,
+		Authority:        msg.Creator,
 		Created:          &now,
 		CreatedBy:        msg.Creator,
 		EffectiveFrom:    msg.EffectiveFrom,
@@ -629,8 +648,8 @@ func (ms msgServer) validateExtendPermissionAdvancedChecks(ctx sdk.Context, msg 
 	// 1. ECOSYSTEM permissions
 	if applicantPerm.ValidatorPermId == 0 && applicantPerm.Type == types.PermissionType_ECOSYSTEM {
 		// account running the method MUST be applicant_perm.grantee
-		if applicantPerm.Grantee != msg.Creator {
-			return fmt.Errorf("creator is not the permission grantee")
+		if applicantPerm.Authority != msg.Creator {
+			return fmt.Errorf("creator is not the permission authority")
 		}
 		return nil
 	}
@@ -651,8 +670,8 @@ func (ms msgServer) validateExtendPermissionAdvancedChecks(ctx sdk.Context, msg 
 		// 2. Self-created permissions
 		if validatorPerm.Type == types.PermissionType_ECOSYSTEM {
 			// account running the method MUST be applicant_perm.grantee
-			if applicantPerm.Grantee != msg.Creator {
-				return fmt.Errorf("creator is not the permission grantee")
+			if applicantPerm.Authority != msg.Creator {
+				return fmt.Errorf("creator is not the permission authority")
 			}
 			return nil
 		}
@@ -664,7 +683,7 @@ func (ms msgServer) validateExtendPermissionAdvancedChecks(ctx sdk.Context, msg 
 		}
 
 		// account running the method MUST be validator_perm.grantee
-		if validatorPerm.Grantee != msg.Creator {
+		if validatorPerm.Authority != msg.Creator {
 			return fmt.Errorf("creator is not the validator permission grantee")
 		}
 		return nil
@@ -762,7 +781,7 @@ func (ms msgServer) validateRevokePermissionAdvancedChecks(ctx sdk.Context, msg 
 	}
 
 	// Option #3: executed by applicant_perm.grantee
-	if applicantPerm.Grantee == msg.Creator {
+	if applicantPerm.Authority == msg.Creator {
 		return nil
 	}
 
@@ -789,7 +808,7 @@ func (ms msgServer) checkValidatorAncestorOption(ctx sdk.Context, creator string
 
 		// if validator_perm is a valid permission and validator_perm.grantee is who is running the method
 		if IsValidPermission(validatorPerm, validatorPerm.Country, now) == nil &&
-			validatorPerm.Grantee == creator {
+			validatorPerm.Authority == creator {
 			return true
 		}
 
@@ -973,7 +992,7 @@ func (ms msgServer) executeSlashPermissionTrustDeposit(ctx sdk.Context, applican
 	applicantPerm.SlashedBy = creator
 
 	// use MOD-TD-MSG-7 to burn the slashed amount from the trust deposit of applicant_perm.grantee
-	if err := ms.trustDeposit.BurnEcosystemSlashedTrustDeposit(ctx, applicantPerm.Grantee, amount); err != nil {
+	if err := ms.trustDeposit.BurnEcosystemSlashedTrustDeposit(ctx, applicantPerm.Authority, amount); err != nil {
 		return fmt.Errorf("failed to burn trust deposit: %w", err)
 	}
 
@@ -1067,7 +1086,7 @@ func (ms msgServer) executeRepayPermissionSlashedTrustDeposit(ctx sdk.Context, a
 	applicantPerm.RepaidBy = repaidBy
 
 	// Use AdjustTrustDeposit to transfer amount to trust deposit of applicant_perm.grantee
-	if err := ms.trustDeposit.AdjustTrustDeposit(ctx, applicantPerm.Grantee, int64(amount)); err != nil {
+	if err := ms.trustDeposit.AdjustTrustDeposit(ctx, applicantPerm.Authority, int64(amount)); err != nil {
 		return fmt.Errorf("failed to adjust trust deposit: %w", err)
 	}
 
@@ -1220,7 +1239,7 @@ func (ms msgServer) executeCreatePermission(ctx sdk.Context, msg *types.MsgCreat
 		Modified:         &now,               // perm.modified: now
 		Type:             msg.Type,           // perm.type: type
 		Did:              msg.Did,            // perm.did: did
-		Grantee:          msg.Creator,        // perm.grantee: account executing the method
+		Authority:        msg.Creator,        // perm.authority: account executing the method
 		Created:          &now,               // perm.created: now
 		CreatedBy:        msg.Creator,        // perm.created_by: account executing the method
 		EffectiveFrom:    msg.EffectiveFrom,  // perm.effective_from: effective_from

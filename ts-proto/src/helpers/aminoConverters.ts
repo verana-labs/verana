@@ -495,19 +495,25 @@ export const MsgRevokePermissionAminoConverter: AminoConverter = {
 export const MsgStartPermissionVPAminoConverter: AminoConverter = {
   aminoType: '/verana.perm.v1.MsgStartPermissionVP',
   toAmino: (m: MsgStartPermissionVP) => clean({
-    creator: m.creator ?? '',
+    authority: m.authority ?? '',
+    operator: m.operator ?? '',
     type: m.type ?? PermissionType.UNSPECIFIED,
     validator_perm_id: u64ToStr(m.validatorPermId),
-    country: m.country ?? '',
     did: m.did ?? '',
+    vs_operator: m.vsOperator ?? '',
+    vs_operator_authz_enabled: m.vsOperatorAuthzEnabled || undefined,
+    vs_operator_authz_with_feegrant: m.vsOperatorAuthzWithFeegrant || undefined,
   }),
   fromAmino: (a: any): MsgStartPermissionVP =>
     MsgStartPermissionVP.fromPartial({
-      creator: a.creator ?? '',
+      authority: a.authority ?? '',
+      operator: a.operator ?? '',
       type: a.type ?? PermissionType.UNSPECIFIED,
       validatorPermId: strToU64(a.validator_perm_id) != null ? Number(strToU64(a.validator_perm_id)!.toString()) : 0,
-      country: a.country ?? '',
       did: a.did ?? '',
+      vsOperator: a.vs_operator ?? '',
+      vsOperatorAuthzEnabled: a.vs_operator_authz_enabled ?? false,
+      vsOperatorAuthzWithFeegrant: a.vs_operator_authz_with_feegrant ?? false,
     }),
 };
 

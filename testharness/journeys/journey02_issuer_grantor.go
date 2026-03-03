@@ -51,7 +51,6 @@ func RunIssuerGrantorJourney(ctx context.Context, client cosmosclient.Client) er
 	startVPMsg := permtypes.MsgStartPermissionVP{
 		Type:            permtypes.PermissionType_ISSUER_GRANTOR,
 		ValidatorPermId: rootPermID,
-		Country:         countryCode,
 		Did:             issuerGrantorDID,
 	}
 

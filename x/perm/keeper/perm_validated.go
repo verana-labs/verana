@@ -82,7 +82,7 @@ func (ms msgServer) executeSetPermissionVPToValidated(
 	// Fees and Trust Deposits:
 	// transfer the full amount applicant_perm.vp_current_fees from escrow account to validator account
 	if applicantPerm.VpCurrentFees > 0 {
-		validatorAddr, err := sdk.AccAddressFromBech32(validatorPerm.Grantee)
+		validatorAddr, err := sdk.AccAddressFromBech32(validatorPerm.Authority)
 		if err != nil {
 			return nil, fmt.Errorf("invalid validator address: %w", err)
 		}
@@ -105,7 +105,7 @@ func (ms msgServer) executeSetPermissionVPToValidated(
 		if validatorTrustDeposit > 0 {
 			err = ms.trustDeposit.AdjustTrustDeposit(
 				ctx,
-				validatorPerm.Grantee,
+				validatorPerm.Authority,
 				int64(validatorTrustDeposit),
 			)
 			if err != nil {

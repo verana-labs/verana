@@ -65,7 +65,6 @@ func RunPermissionExtensionJourney(ctx context.Context, client cosmosclient.Clie
 	startVPMsg := permtypes.MsgStartPermissionVP{
 		Type:            permtypes.PermissionType_VERIFIER,
 		ValidatorPermId: rootPermID,
-		Country:         "US",
 		Did:             exampleDID,
 	}
 
@@ -154,12 +153,12 @@ func RunPermissionExtensionJourney(ctx context.Context, client cosmosclient.Clie
 	}
 
 	extendMsg := &permtypes.MsgExtendPermission{
-		Creator:        newPerm.Grantee,
+		Creator:        newPerm.Authority,
 		Id:             permID,
 		EffectiveUntil: &newEffectiveUntil,
 	}
 
-	permGrantee, _ := client.Account(newPerm.Grantee)
+	permGrantee, _ := client.Account(newPerm.Authority)
 	extendResponse, err := lib.ExtendPermission(client, ctx, permGrantee, *extendMsg)
 	if err != nil {
 		return fmt.Errorf("failed to extend permission: %v", err)

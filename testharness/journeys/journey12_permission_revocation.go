@@ -67,7 +67,7 @@ func RunPermissionRevocationJourney(ctx context.Context, client cosmosclient.Cli
 	fmt.Println("Validator revoking permission...")
 
 	revokeMsg := &permtypes.MsgRevokePermission{
-		Creator: issuerPerm.Grantee,
+		Creator: issuerPerm.Authority,
 		Id:      issuerPermID,
 	}
 

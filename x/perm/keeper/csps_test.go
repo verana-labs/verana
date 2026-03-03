@@ -334,6 +334,7 @@ func setupTrackingMsgServer(t testing.TB, uaRate, wuaRate, tdRate string, trustU
 		trkKeeper,
 		tdKeeper,
 		bankKeeper,
+		nil, // delegationKeeper - not needed for CSPS tests
 	)
 
 	// Set a specific block time for consistent testing
@@ -404,7 +405,7 @@ func TestAgentRewardsDistribution(t *testing.T) {
 	ecosystemPerm := types.Permission{
 		SchemaId:      1,
 		Type:          types.PermissionType_ECOSYSTEM,
-		Grantee:       ecosystem,
+		Authority:       ecosystem,
 		Created:       &now,
 		CreatedBy:     ecosystem,
 		Extended:      &now,
@@ -422,7 +423,7 @@ func TestAgentRewardsDistribution(t *testing.T) {
 	grantorPerm := types.Permission{
 		SchemaId:        1,
 		Type:            types.PermissionType_ISSUER_GRANTOR,
-		Grantee:         grantor,
+		Authority:         grantor,
 		Created:         &now,
 		CreatedBy:       ecosystem,
 		Extended:        &now,
@@ -441,7 +442,7 @@ func TestAgentRewardsDistribution(t *testing.T) {
 	issuerPerm := types.Permission{
 		SchemaId:        1,
 		Type:            types.PermissionType_ISSUER,
-		Grantee:         issuer,
+		Authority:         issuer,
 		Created:         &now,
 		CreatedBy:       grantor,
 		Extended:        &now,
@@ -459,7 +460,7 @@ func TestAgentRewardsDistribution(t *testing.T) {
 	agentPerm := types.Permission{
 		SchemaId:        1,
 		Type:            types.PermissionType_ISSUER,
-		Grantee:         agent,
+		Authority:         agent,
 		Created:         &now,
 		CreatedBy:       issuer,
 		Extended:        &now,
@@ -477,7 +478,7 @@ func TestAgentRewardsDistribution(t *testing.T) {
 	walletAgentPerm := types.Permission{
 		SchemaId:        1,
 		Type:            types.PermissionType_ISSUER,
-		Grantee:         walletAgent,
+		Authority:         walletAgent,
 		Created:         &now,
 		CreatedBy:       issuer,
 		Extended:        &now,
@@ -689,7 +690,7 @@ func TestAgentRewardsWithZeroFees(t *testing.T) {
 	ecosystemPerm := types.Permission{
 		SchemaId:      1,
 		Type:          types.PermissionType_ECOSYSTEM,
-		Grantee:       ecosystem,
+		Authority:       ecosystem,
 		Created:       &now,
 		CreatedBy:     ecosystem,
 		Extended:      &now,
@@ -706,7 +707,7 @@ func TestAgentRewardsWithZeroFees(t *testing.T) {
 	issuerPerm := types.Permission{
 		SchemaId:        1,
 		Type:            types.PermissionType_ISSUER,
-		Grantee:         issuerAcc,
+		Authority:         issuerAcc,
 		Created:         &now,
 		CreatedBy:       ecosystem,
 		Extended:        &now,
@@ -723,7 +724,7 @@ func TestAgentRewardsWithZeroFees(t *testing.T) {
 	agentPerm := types.Permission{
 		SchemaId:        1,
 		Type:            types.PermissionType_ISSUER,
-		Grantee:         agent,
+		Authority:         agent,
 		Created:         &now,
 		CreatedBy:       issuerAcc,
 		Extended:        &now,
@@ -798,7 +799,7 @@ func TestAgentRewardsWithDiscount(t *testing.T) {
 	ecosystemPerm := types.Permission{
 		SchemaId:      1,
 		Type:          types.PermissionType_ECOSYSTEM,
-		Grantee:       ecosystem,
+		Authority:       ecosystem,
 		Created:       &now,
 		CreatedBy:     ecosystem,
 		Extended:      &now,
@@ -816,7 +817,7 @@ func TestAgentRewardsWithDiscount(t *testing.T) {
 	issuerPerm := types.Permission{
 		SchemaId:            1,
 		Type:                types.PermissionType_ISSUER,
-		Grantee:             issuerAcc,
+		Authority:             issuerAcc,
 		Created:             &now,
 		CreatedBy:           ecosystem,
 		Extended:            &now,
@@ -834,7 +835,7 @@ func TestAgentRewardsWithDiscount(t *testing.T) {
 	agentPerm := types.Permission{
 		SchemaId:        1,
 		Type:            types.PermissionType_ISSUER,
-		Grantee:         agent,
+		Authority:         agent,
 		Created:         &now,
 		CreatedBy:       issuerAcc,
 		Extended:        &now,

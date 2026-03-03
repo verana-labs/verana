@@ -18,7 +18,7 @@ func TestGenesisState_Validate(t *testing.T) {
 		Id:             1,
 		Type:           types.PermissionType_ECOSYSTEM,
 		Did:            "did:example:12345",
-		Grantee:        creatorAddr,
+		Authority:        creatorAddr,
 		Created:        &nowTime,
 		CreatedBy:      creatorAddr,
 		Modified:       &nowTime,
@@ -32,7 +32,7 @@ func TestGenesisState_Validate(t *testing.T) {
 		Id:              2,
 		Type:            types.PermissionType_ISSUER,
 		Did:             "did:example:67890",
-		Grantee:         creatorAddr,
+		Authority:         creatorAddr,
 		Created:         &nowTime,
 		CreatedBy:       creatorAddr,
 		Modified:        &nowTime,
@@ -110,7 +110,7 @@ func TestGenesisState_Validate(t *testing.T) {
 					{
 						Id:       0, // Invalid ID
 						Type:     types.PermissionType_ISSUER,
-						Grantee:  creatorAddr,
+						Authority:  creatorAddr,
 						Created:  &nowTime,
 						Modified: &nowTime,
 					},
@@ -129,7 +129,7 @@ func TestGenesisState_Validate(t *testing.T) {
 					{
 						Id:              1,
 						Type:            types.PermissionType_ISSUER,
-						Grantee:         creatorAddr,
+						Authority:         creatorAddr,
 						Created:         &nowTime,
 						Modified:        &nowTime,
 						ValidatorPermId: 999, // Non-existent validator

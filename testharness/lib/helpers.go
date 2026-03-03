@@ -2043,14 +2043,17 @@ func StartPermissionVPWithError(client cosmosclient.Client, ctx context.Context,
 
 	// Create the message
 	fullMsg := &permtypes.MsgStartPermissionVP{
-		Creator:          creatorAddr,
+		Authority:        msg.Authority,
+		Operator:         creatorAddr,
 		Type:             msg.Type,
 		Did:              msg.Did,
 		ValidatorPermId:  msg.ValidatorPermId,
-		Country:          msg.Country,
 		ValidationFees:   msg.ValidationFees,
 		IssuanceFees:     msg.IssuanceFees,
 		VerificationFees: msg.VerificationFees,
+	}
+	if fullMsg.Authority == "" {
+		fullMsg.Authority = creatorAddr
 	}
 
 	txResp, err := client.BroadcastTx(ctx, creator, fullMsg)

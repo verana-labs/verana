@@ -86,9 +86,12 @@ func (m *MockTrustDepositKeeper) BurnEcosystemSlashedTrustDeposit(_ sdk.Context,
 }
 
 // MockDelegationKeeper is a mock implementation of the DelegationKeeper interface for testing.
-// By default it allows all operator authorizations (no-op check).
-type MockDelegationKeeper struct{}
+// By default it allows all operator authorizations (ErrToReturn is nil).
+// Set ErrToReturn to simulate authorization failures.
+type MockDelegationKeeper struct {
+	ErrToReturn error
+}
 
 func (m *MockDelegationKeeper) CheckOperatorAuthorization(_ context.Context, _, _, _ string, _ time.Time) error {
-	return nil
+	return m.ErrToReturn
 }

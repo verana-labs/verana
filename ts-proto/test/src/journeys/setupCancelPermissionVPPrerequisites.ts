@@ -91,10 +91,10 @@ async function main() {
   const startVPMsg = {
     typeUrl: typeUrls.MsgStartPermissionVP,
     value: MsgStartPermissionVP.fromPartial({
-      creator: account.address,
+      authority: account.address,
+      operator: account.address,
       type: PermissionType.ISSUER,
       validatorPermId: validatorPermId,
-      country: "US",
       did: applicantDid,
     }),
   };

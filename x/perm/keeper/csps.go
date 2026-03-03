@@ -253,7 +253,7 @@ func (ms msgServer) executeCreateOrUpdatePermissionSession(ctx sdk.Context, msg 
 
 			// transfer direct fees to perm.grantee
 			if directFeesAmount > 0 {
-				granteeAddr, err := sdk.AccAddressFromBech32(perm.Grantee)
+				granteeAddr, err := sdk.AccAddressFromBech32(perm.Authority)
 				if err != nil {
 					return fmt.Errorf("invalid grantee address: %w", err)
 				}
@@ -283,7 +283,7 @@ func (ms msgServer) executeCreateOrUpdatePermissionSession(ctx sdk.Context, msg 
 				}
 
 				// Increase trust deposit of perm.grantee
-				err = ms.trustDeposit.AdjustTrustDeposit(ctx, perm.Grantee, int64(trustDepositAmount))
+				err = ms.trustDeposit.AdjustTrustDeposit(ctx, perm.Authority, int64(trustDepositAmount))
 				if err != nil {
 					return fmt.Errorf("failed to adjust grantee trust deposit: %w", err)
 				}
@@ -322,7 +322,7 @@ func (ms msgServer) executeCreateOrUpdatePermissionSession(ctx sdk.Context, msg 
 
 		// Transfer direct amount to agent_perm.grantee
 		if uaToAccount > 0 {
-			agentGranteeAddr, err := sdk.AccAddressFromBech32(agentPerm.Grantee)
+			agentGranteeAddr, err := sdk.AccAddressFromBech32(agentPerm.Authority)
 			if err != nil {
 				return fmt.Errorf("invalid agent grantee address: %w", err)
 			}
@@ -350,7 +350,7 @@ func (ms msgServer) executeCreateOrUpdatePermissionSession(ctx sdk.Context, msg 
 				return fmt.Errorf("failed to transfer user agent trust deposit to module: %w", err)
 			}
 
-			err = ms.trustDeposit.AdjustTrustDeposit(ctx, agentPerm.Grantee, int64(uaToTd))
+			err = ms.trustDeposit.AdjustTrustDeposit(ctx, agentPerm.Authority, int64(uaToTd))
 			if err != nil {
 				return fmt.Errorf("failed to adjust agent trust deposit: %w", err)
 			}
@@ -375,7 +375,7 @@ func (ms msgServer) executeCreateOrUpdatePermissionSession(ctx sdk.Context, msg 
 
 		// Transfer direct amount to wallet_agent_perm.grantee
 		if wuaToAccount > 0 {
-			walletAgentGranteeAddr, err := sdk.AccAddressFromBech32(walletAgentPerm.Grantee)
+			walletAgentGranteeAddr, err := sdk.AccAddressFromBech32(walletAgentPerm.Authority)
 			if err != nil {
 				return fmt.Errorf("invalid wallet agent grantee address: %w", err)
 			}
@@ -403,7 +403,7 @@ func (ms msgServer) executeCreateOrUpdatePermissionSession(ctx sdk.Context, msg 
 				return fmt.Errorf("failed to transfer wallet user agent trust deposit to module: %w", err)
 			}
 
-			err = ms.trustDeposit.AdjustTrustDeposit(ctx, walletAgentPerm.Grantee, int64(wuaToTd))
+			err = ms.trustDeposit.AdjustTrustDeposit(ctx, walletAgentPerm.Authority, int64(wuaToTd))
 			if err != nil {
 				return fmt.Errorf("failed to adjust wallet agent trust deposit: %w", err)
 			}

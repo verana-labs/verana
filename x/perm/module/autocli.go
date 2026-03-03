@@ -129,11 +129,12 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 				},
 				{
 					RpcMethod: "StartPermissionVP",
-					Use:       "start-perm-vp [type] [validator-perm-id]",
+					Use:       "start-perm-vp [type] [validator-perm-id] [did]",
 					Short:     "Start a new perm validation process",
 					Long: `Start a new perm validation process with the specified parameters:
 - type: Permission type (issuer, verifier, issuer-grantor, verifier-grantor, ecosystem, holder)
-- validator-perm-id: ID of the validator perm`,
+- validator-perm-id: ID of the validator perm
+- did: DID for this perm (mandatory, must conform to DID syntax)`,
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{
 							ProtoField: "type",
@@ -141,17 +142,14 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 						{
 							ProtoField: "validator_perm_id",
 						},
+						{
+							ProtoField: "did",
+						},
 					},
 					FlagOptions: map[string]*autocliv1.FlagOptions{
-						"country": {
-							Name:         "country",
-							Usage:        "Optional ISO 3166-1 alpha-2 country code",
-							DefaultValue: "",
-						},
-						"did": {
-							Name:         "did",
-							Usage:        "Optional DID for this perm",
-							DefaultValue: "",
+						"authority": {
+							Name:  "authority",
+							Usage: "Group account (authority) on whose behalf this message is executed",
 						},
 						"validation_fees": {
 							Name:         "validation-fees",
@@ -167,6 +165,21 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 							Name:         "verification-fees",
 							Usage:        "Optional requested verification fees (can be modified by validator)",
 							DefaultValue: "0",
+						},
+						"vs_operator": {
+							Name:         "vs-operator",
+							Usage:        "Optional Verifiable Service operator account address",
+							DefaultValue: "",
+						},
+						"vs_operator_authz_enabled": {
+							Name:         "vs-operator-authz-enabled",
+							Usage:        "Enable authz grant for vs_operator",
+							DefaultValue: "false",
+						},
+						"vs_operator_authz_with_feegrant": {
+							Name:         "vs-operator-authz-with-feegrant",
+							Usage:        "Enable fee grant for vs_operator",
+							DefaultValue: "false",
 						},
 					},
 				},
@@ -249,7 +262,7 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					RpcMethod: "CancelPermissionVPLastRequest",
 					Use:       "cancel-perm-vp-request [id]",
 					Short:     "Cancel a pending perm VP request",
-					Long:      "Cancel a pending perm VP request. Can only be executed by the perm grantee and only when the perm is in PENDING state.",
+					Long:      "Cancel a pending perm VP request. Can only be executed by the perm authority and only when the perm is in PENDING state.",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{
 							ProtoField: "id",
@@ -300,7 +313,7 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					RpcMethod: "ExtendPermission",
 					Use:       "extend-perm [id] [effective-until]",
 					Short:     "Extend a permission's effective duration",
-					Long:      "Extend a permission's effective duration. Can be executed by the grantee (for ECOSYSTEM or self-created permissions) or by the validator (for VP managed permissions).",
+					Long:      "Extend a permission's effective duration. Can be executed by the authority (for ECOSYSTEM or self-created permissions) or by the validator (for VP managed permissions).",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{
 							ProtoField: "id",
@@ -314,7 +327,7 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					RpcMethod: "RevokePermission",
 					Use:       "revoke-perm [id]",
 					Short:     "Revoke a permission",
-					Long:      "Revoke a permission. Can be executed by the permission grantee, a validator ancestor, or the trust registry controller.",
+					Long:      "Revoke a permission. Can be executed by the permission authority, a validator ancestor, or the trust registry controller.",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{
 							ProtoField: "id",
@@ -369,7 +382,7 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					Use:       "repay-perm-slashed-td [id]",
 					Short:     "Repay a slashed perm's trust deposit",
 					Long: `Repay the slashed trust deposit of a perm. Can be executed by anyone willing to pay.
-This will repay the full remaining slashed amount and credit it to the perm grantee's trust deposit.
+This will repay the full remaining slashed amount and credit it to the perm authority's trust deposit.
 Note: This does not make the slashed perm reusable - a new perm must be requested.
 
 Parameters:

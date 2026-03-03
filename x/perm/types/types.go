@@ -10,25 +10,53 @@ import (
 )
 
 func (msg *MsgStartPermissionVP) ValidateBasic() error {
-	if _, err := sdk.AccAddressFromBech32(msg.Creator); err != nil {
-		return fmt.Errorf("invalid creator address: %w", err)
+	// [MOD-PERM-MSG-1-2-1] authority (group): signature must be verified
+	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
+		return fmt.Errorf("invalid authority address: %w", err)
+	}
+
+	// [MOD-PERM-MSG-1-2-1] operator (account): signature must be verified
+	if _, err := sdk.AccAddressFromBech32(msg.Operator); err != nil {
+		return fmt.Errorf("invalid operator address: %w", err)
 	}
 
 	if msg.ValidatorPermId == 0 {
 		return fmt.Errorf("validator perm ID cannot be 0")
 	}
 
+	// [MOD-PERM-MSG-1-2-1] type MUST be a valid PermissionType
 	if msg.Type == 0 || msg.Type > 6 {
 		return fmt.Errorf("perm type must be between 1 and 6")
 	}
 
-	// country is optional, but if provided must be valid
-	if msg.Country != "" && !isValidCountryCode(msg.Country) {
-		return fmt.Errorf("invalid country code format")
+	// [MOD-PERM-MSG-1-1] did is required and MUST conform to DID Syntax
+	if msg.Did == "" {
+		return fmt.Errorf("did is required")
+	}
+	if !isValidDID(msg.Did) {
+		return fmt.Errorf("invalid DID format")
 	}
 
-	if msg.Did != "" && !isValidDID(msg.Did) {
-		return fmt.Errorf("invalid DID format")
+	// [MOD-PERM-MSG-1-2-1] vs_operator_authz_enabled: if true, vs_operator MUST NOT be null
+	if msg.VsOperatorAuthzEnabled && msg.VsOperator == "" {
+		return fmt.Errorf("vs_operator is required when vs_operator_authz_enabled is true")
+	}
+
+	// [MOD-PERM-MSG-1-2-1] vs_operator_authz_with_feegrant: if true, vs_operator MUST NOT be null
+	if msg.VsOperatorAuthzWithFeegrant && msg.VsOperator == "" {
+		return fmt.Errorf("vs_operator is required when vs_operator_authz_with_feegrant is true")
+	}
+
+	// [MOD-PERM-MSG-1-2-1] vs_operator_authz_spend_period: if not null, vs_operator MUST NOT be null
+	if msg.VsOperatorAuthzSpendPeriod != nil && msg.VsOperator == "" {
+		return fmt.Errorf("vs_operator is required when vs_operator_authz_spend_period is set")
+	}
+
+	// Validate vs_operator address if provided
+	if msg.VsOperator != "" {
+		if _, err := sdk.AccAddressFromBech32(msg.VsOperator); err != nil {
+			return fmt.Errorf("invalid vs_operator address: %w", err)
+		}
 	}
 
 	return nil
