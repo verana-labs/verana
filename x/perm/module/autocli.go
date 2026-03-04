@@ -277,6 +277,12 @@ Parameters:
 							ProtoField: "id",
 						},
 					},
+					FlagOptions: map[string]*autocliv1.FlagOptions{
+						"authority": {
+							Name:  "authority",
+							Usage: "Group account (authority) on whose behalf this message is executed",
+						},
+					},
 				},
 				{
 					RpcMethod: "CreateRootPermission",

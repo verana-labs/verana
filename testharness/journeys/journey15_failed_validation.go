@@ -121,8 +121,9 @@ func RunFailedValidationJourney(ctx context.Context, client cosmosclient.Client)
 	fmt.Println("Failed_Applicant canceling validation process...")
 
 	cancelMsg := &permtypes.MsgCancelPermissionVPLastRequest{
-		Creator: failedApplicantAddr,
-		Id:      permID,
+		Authority: failedApplicantAddr,
+		Operator:  failedApplicantAddr,
+		Id:        permID,
 	}
 
 	cancelResponse, err := lib.CancelPermissionVPLastRequest(client, ctx, failedApplicantAccount, *cancelMsg)

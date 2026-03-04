@@ -144,9 +144,14 @@ func isValidDigestSRI(digestSRI string) bool {
 
 // ValidateBasic for MsgConfirmPermissionVPTermination
 func (msg *MsgCancelPermissionVPLastRequest) ValidateBasic() error {
-	// Validate creator address
-	if _, err := sdk.AccAddressFromBech32(msg.Creator); err != nil {
-		return fmt.Errorf("invalid creator address: %w", err)
+	// Validate authority address
+	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
+		return fmt.Errorf("invalid authority address: %w", err)
+	}
+
+	// Validate operator address
+	if _, err := sdk.AccAddressFromBech32(msg.Operator); err != nil {
+		return fmt.Errorf("invalid operator address: %w", err)
 	}
 
 	// Validate perm ID

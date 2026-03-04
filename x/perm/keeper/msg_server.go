@@ -405,21 +405,40 @@ func (ms msgServer) SetPermissionVPToValidated(goCtx context.Context, msg *types
 
 func (ms msgServer) CancelPermissionVPLastRequest(goCtx context.Context, msg *types.MsgCancelPermissionVPLastRequest) (*types.MsgCancelPermissionVPLastRequestResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
+	now := ctx.BlockTime()
 
-	// Load applicant perm
+	// [MOD-PERM-MSG-6-2-1] [AUTHZ-CHECK] Verify operator authorization
+	if ms.delegationKeeper != nil {
+		if err := ms.delegationKeeper.CheckOperatorAuthorization(
+			ctx,
+			msg.Authority,
+			msg.Operator,
+			"/verana.perm.v1.MsgCancelPermissionVPLastRequest",
+			now,
+		); err != nil {
+			return nil, fmt.Errorf("authorization check failed: %w", err)
+		}
+	}
+
+	// [MOD-PERM-MSG-6-2-1] Load Permission entry applicant_perm from id
 	applicantPerm, err := ms.Keeper.GetPermissionByID(ctx, msg.Id)
 	if err != nil {
 		return nil, fmt.Errorf("perm not found: %w", err)
 	}
 
-	// Check if creator is the grantee
-	if applicantPerm.Authority != msg.Creator {
-		return nil, fmt.Errorf("creator is not the perm authority")
+	// authority running the transaction MUST be applicant_perm.authority
+	if applicantPerm.Authority != msg.Authority {
+		return nil, fmt.Errorf("authority is not the perm authority")
 	}
 
-	// Check perm state
+	// applicant_perm.vp_state MUST be PENDING
 	if applicantPerm.VpState != types.ValidationState_PENDING {
 		return nil, fmt.Errorf("perm must be in PENDING state")
+	}
+
+	// if applicant_perm.deposit has been slashed and not repaid, MUST abort
+	if applicantPerm.Slashed != nil && applicantPerm.Repaid == nil {
+		return nil, fmt.Errorf("permission deposit has been slashed and not repaid")
 	}
 
 	// [MOD-PERM-MSG-6-3] Execution
@@ -431,8 +450,9 @@ func (ms msgServer) CancelPermissionVPLastRequest(goCtx context.Context, msg *ty
 		sdk.NewEvent(
 			types.EventTypeCancelPermissionVPLastRequest,
 			sdk.NewAttribute(types.AttributeKeyPermissionID, strconv.FormatUint(msg.Id, 10)),
-			sdk.NewAttribute(types.AttributeKeyCreator, msg.Creator),
-			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
+			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Authority),
+			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
+			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
 		),
 	})
 

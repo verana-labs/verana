@@ -1120,13 +1120,14 @@ func CancelPermissionVPLastRequest(client cosmosclient.Client, ctx context.Conte
 		return "", fmt.Errorf("failed to get applicant address: %w", err)
 	}
 
-	// Create complete message with creator address
-	msgWithCreator := permtypes.MsgCancelPermissionVPLastRequest{
-		Creator: applicantAddr,
-		Id:      msg.Id,
+	// Create complete message with authority/operator addresses
+	msgComplete := permtypes.MsgCancelPermissionVPLastRequest{
+		Authority: applicantAddr,
+		Operator:  applicantAddr,
+		Id:        msg.Id,
 	}
 
-	txResp, err := client.BroadcastTx(ctx, applicant, &msgWithCreator)
+	txResp, err := client.BroadcastTx(ctx, applicant, &msgComplete)
 	if err != nil {
 		return "", fmt.Errorf("failed to broadcast transaction: %w", err)
 	}
@@ -2973,6 +2974,40 @@ func RenewPermissionVPWithAuthority(
 
 	if txResp.TxResponse.Code != 0 {
 		return fmt.Errorf("RenewPermissionVP failed with code %d: %s",
+			txResp.TxResponse.Code, txResp.TxResponse.RawLog)
+	}
+
+	return nil
+}
+
+func CancelPermissionVPLastRequestWithAuthority(
+	client cosmosclient.Client,
+	ctx context.Context,
+	operatorAccount cosmosaccount.Account,
+	authority string,
+	permID uint64,
+) error {
+	operatorAddr, err := operatorAccount.Address(addressPrefix)
+	if err != nil {
+		return fmt.Errorf("failed to get operator address: %w", err)
+	}
+
+	msg := &permtypes.MsgCancelPermissionVPLastRequest{
+		Authority: authority,
+		Operator:  operatorAddr,
+		Id:        permID,
+	}
+
+	txResp, err := client.BroadcastTx(ctx, operatorAccount, msg)
+	if err != nil {
+		return fmt.Errorf("failed to broadcast CancelPermissionVPLastRequest: %w", err)
+	}
+
+	fmt.Print("CancelPermissionVPLastRequestWithAuthority:\n\n")
+	fmt.Println(txResp)
+
+	if txResp.TxResponse.Code != 0 {
+		return fmt.Errorf("CancelPermissionVPLastRequest failed with code %d: %s",
 			txResp.TxResponse.Code, txResp.TxResponse.RawLog)
 	}
 

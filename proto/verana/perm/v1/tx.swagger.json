@@ -448,8 +448,13 @@
     "verana.perm.v1.MsgCancelPermissionVPLastRequest": {
       "type": "object",
       "properties": {
-        "creator": {
-          "type": "string"
+        "authority": {
+          "type": "string",
+          "title": "authority is the group account on whose behalf this message is executed"
+        },
+        "operator": {
+          "type": "string",
+          "title": "operator is the account authorized by the authority to run this Msg"
         },
         "id": {
           "type": "string",

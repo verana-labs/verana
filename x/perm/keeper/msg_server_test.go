@@ -2569,20 +2569,20 @@ func TestCancelPermissionVPLastRequest(t *testing.T) {
 
 	creator := sdk.AccAddress([]byte("test_creator")).String()
 	validatorAddr := sdk.AccAddress([]byte("test_validator")).String()
+	otherAddr := sdk.AccAddress([]byte("other_user")).String()
 
 	// Create mock credential schema
 	csKeeper.CreateMockCredentialSchema(1,
 		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
 		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
 
-	// Use the block time for permissions
 	now := sdkCtx.BlockTime()
 
 	// Create validator perm
 	validatorPerm := types.Permission{
 		SchemaId:   1,
 		Type:       types.PermissionType_ISSUER_GRANTOR,
-		Authority:    validatorAddr,
+		Authority:  validatorAddr,
 		Created:    &now,
 		CreatedBy:  validatorAddr,
 		Extended:   &now,
@@ -2594,148 +2594,336 @@ func TestCancelPermissionVPLastRequest(t *testing.T) {
 	validatorPermID, err := k.CreatePermission(sdkCtx, validatorPerm)
 	require.NoError(t, err)
 
-	// Create a perm in PENDING state that has never been validated (vp_exp is nil)
-	// This should transition to TERMINATED when cancelled
-	neverValidatedPerm := types.Permission{
-		SchemaId:         1,
-		Type:             types.PermissionType_ISSUER,
-		Authority:          creator,
-		Created:          &now,
-		CreatedBy:        creator,
-		Extended:         &now,
-		ExtendedBy:       creator,
-		Modified:         &now,
-		Country:          "US",
-		ValidatorPermId:  validatorPermID,
-		VpState:          types.ValidationState_PENDING,
-		VpCurrentFees:    100,
-		VpCurrentDeposit: 50,
-		// VpExp is nil, indicating it has never been validated
+	// 1. Valid cancellation - never validated (vp_exp nil → TERMINATED)
+	t.Run("Valid cancellation - never validated before", func(t *testing.T) {
+		neverAddr := sdk.AccAddress([]byte("never_val_cancel")).String()
+		neverValidatedPerm := types.Permission{
+			SchemaId:         1,
+			Type:             types.PermissionType_ISSUER,
+			Authority:        neverAddr,
+			Created:          &now,
+			CreatedBy:        neverAddr,
+			Extended:         &now,
+			ExtendedBy:       neverAddr,
+			Modified:         &now,
+			Country:          "US",
+			ValidatorPermId:  validatorPermID,
+			VpState:          types.ValidationState_PENDING,
+			VpCurrentFees:    100,
+			VpCurrentDeposit: 50,
+		}
+		permID, err := k.CreatePermission(sdkCtx, neverValidatedPerm)
+		require.NoError(t, err)
+
+		msg := &types.MsgCancelPermissionVPLastRequest{
+			Authority: neverAddr,
+			Operator:  neverAddr,
+			Id:        permID,
+		}
+
+		resp, err := ms.CancelPermissionVPLastRequest(ctx, msg)
+		require.NoError(t, err)
+		require.NotNil(t, resp)
+
+		perm, err := k.GetPermissionByID(sdkCtx, permID)
+		require.NoError(t, err)
+		require.Equal(t, types.ValidationState_TERMINATED, perm.VpState)
+		require.Equal(t, uint64(0), perm.VpCurrentFees)
+		require.Equal(t, uint64(0), perm.VpCurrentDeposit)
+		require.NotNil(t, perm.Modified)
+		require.Equal(t, now.Unix(), perm.Modified.Unix())
+		require.NotNil(t, perm.VpLastStateChange)
+		require.Equal(t, now.Unix(), perm.VpLastStateChange.Unix())
+	})
+
+	// 2. Valid cancellation - previously validated (vp_exp not nil → VALIDATED)
+	t.Run("Valid cancellation - previously validated", func(t *testing.T) {
+		prevAddr := sdk.AccAddress([]byte("prev_val_cancel")).String()
+		futureTime := now.Add(24 * time.Hour)
+		previouslyValidatedPerm := types.Permission{
+			SchemaId:         1,
+			Type:             types.PermissionType_ISSUER,
+			Authority:        prevAddr,
+			Created:          &now,
+			CreatedBy:        prevAddr,
+			Extended:         &now,
+			ExtendedBy:       prevAddr,
+			Modified:         &now,
+			Country:          "US",
+			ValidatorPermId:  validatorPermID,
+			VpState:          types.ValidationState_PENDING,
+			VpExp:            &futureTime, // Has a previous validation
+			VpCurrentFees:    100,
+			VpCurrentDeposit: 50,
+		}
+		permID, err := k.CreatePermission(sdkCtx, previouslyValidatedPerm)
+		require.NoError(t, err)
+
+		msg := &types.MsgCancelPermissionVPLastRequest{
+			Authority: prevAddr,
+			Operator:  prevAddr,
+			Id:        permID,
+		}
+
+		resp, err := ms.CancelPermissionVPLastRequest(ctx, msg)
+		require.NoError(t, err)
+		require.NotNil(t, resp)
+
+		perm, err := k.GetPermissionByID(sdkCtx, permID)
+		require.NoError(t, err)
+		require.Equal(t, types.ValidationState_VALIDATED, perm.VpState)
+		require.Equal(t, uint64(0), perm.VpCurrentFees)
+		require.Equal(t, uint64(0), perm.VpCurrentDeposit)
+	})
+
+	// 3. Invalid - perm not found
+	t.Run("Invalid - perm not found", func(t *testing.T) {
+		msg := &types.MsgCancelPermissionVPLastRequest{
+			Authority: creator,
+			Operator:  creator,
+			Id:        9999,
+		}
+
+		resp, err := ms.CancelPermissionVPLastRequest(ctx, msg)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "perm not found")
+		require.Nil(t, resp)
+	})
+
+	// 4. Invalid - wrong authority
+	t.Run("Invalid - wrong authority", func(t *testing.T) {
+		wrongAuthPerm := types.Permission{
+			SchemaId:        1,
+			Type:            types.PermissionType_ISSUER,
+			Authority:       creator,
+			Created:         &now,
+			CreatedBy:       creator,
+			Extended:        &now,
+			ExtendedBy:      creator,
+			Modified:        &now,
+			Country:         "US",
+			ValidatorPermId: validatorPermID,
+			VpState:         types.ValidationState_PENDING,
+		}
+		permID, err := k.CreatePermission(sdkCtx, wrongAuthPerm)
+		require.NoError(t, err)
+
+		msg := &types.MsgCancelPermissionVPLastRequest{
+			Authority: otherAddr, // Not the perm authority
+			Operator:  otherAddr,
+			Id:        permID,
+		}
+
+		resp, err := ms.CancelPermissionVPLastRequest(ctx, msg)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "authority is not the perm authority")
+		require.Nil(t, resp)
+	})
+
+	// 5. Invalid - not in PENDING state
+	t.Run("Invalid - not in PENDING state", func(t *testing.T) {
+		notPendingPerm := types.Permission{
+			SchemaId:        1,
+			Type:            types.PermissionType_ISSUER,
+			Authority:       creator,
+			Created:         &now,
+			CreatedBy:       creator,
+			Extended:        &now,
+			ExtendedBy:      creator,
+			Modified:        &now,
+			Country:         "US",
+			ValidatorPermId: validatorPermID,
+			VpState:         types.ValidationState_VALIDATED,
+		}
+		permID, err := k.CreatePermission(sdkCtx, notPendingPerm)
+		require.NoError(t, err)
+
+		msg := &types.MsgCancelPermissionVPLastRequest{
+			Authority: creator,
+			Operator:  creator,
+			Id:        permID,
+		}
+
+		resp, err := ms.CancelPermissionVPLastRequest(ctx, msg)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "perm must be in PENDING state")
+		require.Nil(t, resp)
+	})
+
+	// 6. Invalid - slashed and not repaid
+	t.Run("Invalid - slashed and not repaid", func(t *testing.T) {
+		slashedTime := now.Add(-1 * time.Hour)
+		slashedPerm := types.Permission{
+			SchemaId:        1,
+			Type:            types.PermissionType_ISSUER,
+			Authority:       creator,
+			Created:         &now,
+			CreatedBy:       creator,
+			Extended:        &now,
+			ExtendedBy:      creator,
+			Modified:        &now,
+			Country:         "US",
+			ValidatorPermId: validatorPermID,
+			VpState:         types.ValidationState_PENDING,
+			Slashed:         &slashedTime, // Slashed
+			// Repaid is nil (not repaid)
+		}
+		permID, err := k.CreatePermission(sdkCtx, slashedPerm)
+		require.NoError(t, err)
+
+		msg := &types.MsgCancelPermissionVPLastRequest{
+			Authority: creator,
+			Operator:  creator,
+			Id:        permID,
+		}
+
+		resp, err := ms.CancelPermissionVPLastRequest(ctx, msg)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "slashed and not repaid")
+		require.Nil(t, resp)
+	})
+
+	// 7. Valid - slashed but repaid (allowed)
+	t.Run("Valid - slashed and repaid is allowed", func(t *testing.T) {
+		repaidAddr := sdk.AccAddress([]byte("repaid_cancel_ad")).String()
+		slashedTime := now.Add(-2 * time.Hour)
+		repaidTime := now.Add(-1 * time.Hour)
+		repaidPerm := types.Permission{
+			SchemaId:         1,
+			Type:             types.PermissionType_ISSUER,
+			Authority:        repaidAddr,
+			Created:          &now,
+			CreatedBy:        repaidAddr,
+			Extended:         &now,
+			ExtendedBy:       repaidAddr,
+			Modified:         &now,
+			Country:          "US",
+			ValidatorPermId:  validatorPermID,
+			VpState:          types.ValidationState_PENDING,
+			Slashed:          &slashedTime,
+			Repaid:           &repaidTime, // Repaid
+			VpCurrentFees:    0,
+			VpCurrentDeposit: 0,
+		}
+		permID, err := k.CreatePermission(sdkCtx, repaidPerm)
+		require.NoError(t, err)
+
+		msg := &types.MsgCancelPermissionVPLastRequest{
+			Authority: repaidAddr,
+			Operator:  repaidAddr,
+			Id:        permID,
+		}
+
+		resp, err := ms.CancelPermissionVPLastRequest(ctx, msg)
+		require.NoError(t, err)
+		require.NotNil(t, resp)
+
+		perm, err := k.GetPermissionByID(sdkCtx, permID)
+		require.NoError(t, err)
+		require.Equal(t, types.ValidationState_TERMINATED, perm.VpState) // vp_exp nil → TERMINATED
+	})
+
+	// 8. Valid cancellation with zero fees (no transfer needed)
+	t.Run("Valid cancellation with zero fees", func(t *testing.T) {
+		zeroFeesAddr := sdk.AccAddress([]byte("zero_fees_cancel")).String()
+		zeroFeesPerm := types.Permission{
+			SchemaId:         1,
+			Type:             types.PermissionType_ISSUER,
+			Authority:        zeroFeesAddr,
+			Created:          &now,
+			CreatedBy:        zeroFeesAddr,
+			Extended:         &now,
+			ExtendedBy:       zeroFeesAddr,
+			Modified:         &now,
+			Country:          "US",
+			ValidatorPermId:  validatorPermID,
+			VpState:          types.ValidationState_PENDING,
+			VpCurrentFees:    0,
+			VpCurrentDeposit: 0,
+		}
+		permID, err := k.CreatePermission(sdkCtx, zeroFeesPerm)
+		require.NoError(t, err)
+
+		msg := &types.MsgCancelPermissionVPLastRequest{
+			Authority: zeroFeesAddr,
+			Operator:  zeroFeesAddr,
+			Id:        permID,
+		}
+
+		resp, err := ms.CancelPermissionVPLastRequest(ctx, msg)
+		require.NoError(t, err)
+		require.NotNil(t, resp)
+	})
+}
+
+// TestCancelPermissionVPLastRequest_AuthzCheckFailure tests AUTHZ-CHECK for CancelPermissionVPLastRequest
+func TestCancelPermissionVPLastRequest_AuthzCheckFailure(t *testing.T) {
+	k, ms, csKeeper, _, ctx, delKeeper := setupMsgServerWithDelegation(t)
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	blockTime := time.Date(2023, 1, 15, 0, 0, 0, 0, time.UTC)
+	sdkCtx = sdkCtx.WithBlockTime(blockTime)
+	ctx = sdk.WrapSDKContext(sdkCtx)
+
+	creatorAddr := sdk.AccAddress([]byte("test_creator")).String()
+	operatorAddr := sdk.AccAddress([]byte("test_operator")).String()
+	validatorAddr := sdk.AccAddress([]byte("test_validator")).String()
+
+	now := sdkCtx.BlockTime()
+
+	csKeeper.CreateMockCredentialSchema(1,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
+
+	validatorPerm := types.Permission{
+		SchemaId:   1,
+		Type:       types.PermissionType_ISSUER_GRANTOR,
+		Authority:  validatorAddr,
+		Created:    &now,
+		CreatedBy:  validatorAddr,
+		Extended:   &now,
+		ExtendedBy: validatorAddr,
+		Modified:   &now,
+		VpState:    types.ValidationState_VALIDATED,
 	}
-	neverValidatedPermID, err := k.CreatePermission(sdkCtx, neverValidatedPerm)
+	validatorPermID, err := k.CreatePermission(sdkCtx, validatorPerm)
 	require.NoError(t, err)
 
-	// Create a perm in PENDING state with a previous validation (has VpExp)
-	// This should transition to VALIDATED when cancelled
-	futureTime := now.Add(24 * time.Hour)
-	previouslyValidatedPerm := types.Permission{
-		SchemaId:         1,
-		Type:             types.PermissionType_ISSUER,
-		Authority:          creator,
-		Created:          &now,
-		CreatedBy:        creator,
-		Extended:         &now,
-		ExtendedBy:       creator,
-		Modified:         &now,
-		Country:          "US",
-		ValidatorPermId:  validatorPermID,
-		VpState:          types.ValidationState_PENDING,
-		VpExp:            &futureTime, // Has a previous validation
-		VpCurrentFees:    100,
-		VpCurrentDeposit: 50,
-	}
-	previouslyValidatedPermID, err := k.CreatePermission(sdkCtx, previouslyValidatedPerm)
-	require.NoError(t, err)
-
-	// Create a perm not in PENDING state for testing validation error
-	notPendingPerm := types.Permission{
+	pendingPerm := types.Permission{
 		SchemaId:        1,
 		Type:            types.PermissionType_ISSUER,
-		Authority:         creator,
+		Authority:       creatorAddr,
 		Created:         &now,
-		CreatedBy:       creator,
+		CreatedBy:       creatorAddr,
 		Extended:        &now,
-		ExtendedBy:      creator,
+		ExtendedBy:      creatorAddr,
 		Modified:        &now,
-		Country:         "US",
 		ValidatorPermId: validatorPermID,
-		VpState:         types.ValidationState_VALIDATED, // Not in PENDING state
+		VpState:         types.ValidationState_PENDING,
 	}
-	notPendingPermID, err := k.CreatePermission(sdkCtx, notPendingPerm)
+	permID, err := k.CreatePermission(sdkCtx, pendingPerm)
 	require.NoError(t, err)
 
-	testCases := []struct {
-		name       string
-		msg        *types.MsgCancelPermissionVPLastRequest
-		expectErr  bool
-		errMessage string
-		checkState bool
-		expState   types.ValidationState
-	}{
-		{
-			name: "Valid cancellation - never validated before",
-			msg: &types.MsgCancelPermissionVPLastRequest{
-				Creator: creator,
-				Id:      neverValidatedPermID,
-			},
-			expectErr:  false,
-			checkState: true,
-			expState:   types.ValidationState_TERMINATED,
-		},
-		{
-			name: "Valid cancellation - previously validated",
-			msg: &types.MsgCancelPermissionVPLastRequest{
-				Creator: creator,
-				Id:      previouslyValidatedPermID,
-			},
-			expectErr:  false,
-			checkState: true,
-			expState:   types.ValidationState_VALIDATED,
-		},
-		{
-			name: "Invalid - perm not found",
-			msg: &types.MsgCancelPermissionVPLastRequest{
-				Creator: creator,
-				Id:      9999,
-			},
-			expectErr:  true,
-			errMessage: "perm not found",
-		},
-		{
-			name: "Invalid - wrong creator",
-			msg: &types.MsgCancelPermissionVPLastRequest{
-				Creator: validatorAddr, // Not the perm grantee
-				Id:      neverValidatedPermID,
-			},
-			expectErr:  true,
-			errMessage: "creator is not the perm authority",
-		},
-		{
-			name: "Invalid - not in PENDING state",
-			msg: &types.MsgCancelPermissionVPLastRequest{
-				Creator: creator,
-				Id:      notPendingPermID, // Not in PENDING state
-			},
-			expectErr:  true,
-			errMessage: "perm must be in PENDING state",
-		},
+	// Set delegation keeper to return error
+	delKeeper.ErrToReturn = fmt.Errorf("operator not authorized")
+
+	msg := &types.MsgCancelPermissionVPLastRequest{
+		Authority: creatorAddr,
+		Operator:  operatorAddr,
+		Id:        permID,
 	}
 
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			resp, err := ms.CancelPermissionVPLastRequest(ctx, tc.msg)
+	resp, err := ms.CancelPermissionVPLastRequest(ctx, msg)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "authorization check failed")
+	require.Contains(t, err.Error(), "operator not authorized")
+	require.Nil(t, resp)
 
-			if tc.expectErr {
-				require.Error(t, err)
-				require.Contains(t, err.Error(), tc.errMessage)
-				require.Nil(t, resp)
-			} else {
-				require.NoError(t, err)
-				require.NotNil(t, resp)
-
-				if tc.checkState {
-					// Verify perm state was updated correctly
-					perm, err := k.GetPermissionByID(sdkCtx, tc.msg.Id)
-					require.NoError(t, err)
-					require.Equal(t, tc.expState, perm.VpState)
-
-					// Check that fees and deposits were properly returned
-					require.Equal(t, uint64(0), perm.VpCurrentFees)
-					require.Equal(t, uint64(0), perm.VpCurrentDeposit)
-				}
-			}
-		})
-	}
+	// Reset and verify it works
+	delKeeper.ErrToReturn = nil
+	resp, err = ms.CancelPermissionVPLastRequest(ctx, msg)
+	require.NoError(t, err)
+	require.NotNil(t, resp)
 }
 
 // TestExtendPermission tests the ExtendPermission message server function

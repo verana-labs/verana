@@ -564,12 +564,14 @@ export const MsgSetPermissionVPToValidatedAminoConverter: AminoConverter = {
 export const MsgCancelPermissionVPLastRequestAminoConverter: AminoConverter = {
   aminoType: '/verana.perm.v1.MsgCancelPermissionVPLastRequest',
   toAmino: (m: MsgCancelPermissionVPLastRequest) => clean({
-    creator: m.creator ?? '',
+    authority: m.authority ?? '',
+    operator: m.operator ?? '',
     id: u64ToStr(m.id),
   }),
   fromAmino: (a: any): MsgCancelPermissionVPLastRequest =>
     MsgCancelPermissionVPLastRequest.fromPartial({
-      creator: a.creator ?? '',
+      authority: a.authority ?? '',
+      operator: a.operator ?? '',
       id: strToU64(a.id) != null ? Number(strToU64(a.id)!.toString()) : 0,
     }),
 };
