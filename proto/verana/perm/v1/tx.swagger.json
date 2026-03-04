@@ -614,7 +614,10 @@
     "verana.perm.v1.MsgRenewPermissionVP": {
       "type": "object",
       "properties": {
-        "creator": {
+        "authority": {
+          "type": "string"
+        },
+        "operator": {
           "type": "string"
         },
         "id": {

@@ -392,19 +392,20 @@ func GetPermission(client cosmosclient.Client, ctx context.Context, permID uint6
 }
 
 // RenewPermissionVP initiates the renewal of a permission validation process
-func RenewPermissionVP(client cosmosclient.Client, ctx context.Context, creator cosmosaccount.Account, msg permtypes.MsgRenewPermissionVP) (string, error) {
-	creatorAddr, err := creator.Address(addressPrefix)
+func RenewPermissionVP(client cosmosclient.Client, ctx context.Context, account cosmosaccount.Account, msg permtypes.MsgRenewPermissionVP) (string, error) {
+	accountAddr, err := account.Address(addressPrefix)
 	if err != nil {
-		return "", fmt.Errorf("failed to get creator address: %v", err)
+		return "", fmt.Errorf("failed to get account address: %v", err)
 	}
 
-	// Ensure creator is set correctly
-	msgWithCreator := permtypes.MsgRenewPermissionVP{
-		Creator: creatorAddr,
-		Id:      msg.Id,
+	// Set authority and operator to the account address
+	msgToSend := permtypes.MsgRenewPermissionVP{
+		Authority: accountAddr,
+		Operator:  accountAddr,
+		Id:        msg.Id,
 	}
 
-	txResp, err := client.BroadcastTx(ctx, creator, &msgWithCreator)
+	txResp, err := client.BroadcastTx(ctx, account, &msgToSend)
 	if err != nil {
 		return "", fmt.Errorf("failed to broadcast renewal transaction: %v", err)
 	}
@@ -2485,6 +2486,41 @@ func GrantOperatorAuthorizationViaGroup(
 	return nil
 }
 
+// GrantSelfDelegation grants an operator self-delegation so they can execute messages
+// with authority=operator (same address). MsgGrantOperatorAuthorization has signer="authority",
+// and operator="" bypasses the AUTHZ-CHECK.
+func GrantSelfDelegation(
+	client cosmosclient.Client,
+	ctx context.Context,
+	account cosmosaccount.Account,
+	msgTypes []string,
+) error {
+	addr, err := account.Address(addressPrefix)
+	if err != nil {
+		return fmt.Errorf("failed to get account address: %w", err)
+	}
+
+	msg := &detypes.MsgGrantOperatorAuthorization{
+		Authority: addr,
+		Operator:  "",
+		Grantee:   addr,
+		MsgTypes:  msgTypes,
+	}
+
+	txResp, err := client.BroadcastTx(ctx, account, msg)
+	if err != nil {
+		return fmt.Errorf("failed to broadcast self-delegation: %w", err)
+	}
+
+	if txResp.TxResponse.Code != 0 {
+		return fmt.Errorf("self-delegation failed with code %d: %s",
+			txResp.TxResponse.Code, txResp.TxResponse.RawLog)
+	}
+
+	fmt.Printf("✅ Granted self-delegation for %s\n", addr)
+	return nil
+}
+
 // CreateTrustRegistryWithAuthority creates a trust registry where authority and operator are different.
 func CreateTrustRegistryWithAuthority(
 	client cosmosclient.Client,
@@ -2845,6 +2881,99 @@ func ArchiveCredentialSchemaWithAuthority(
 
 	if txResp.TxResponse.Code != 0 {
 		return fmt.Errorf("ArchiveCredentialSchema failed with code %d: %s",
+			txResp.TxResponse.Code, txResp.TxResponse.RawLog)
+	}
+
+	return nil
+}
+
+// StartPermissionVPWithAuthority starts a permission VP where authority and operator are different.
+func StartPermissionVPWithAuthority(
+	client cosmosclient.Client,
+	ctx context.Context,
+	operatorAccount cosmosaccount.Account,
+	authority string,
+	permType permtypes.PermissionType,
+	validatorPermId uint64,
+	did string,
+) (string, error) {
+	operatorAddr, err := operatorAccount.Address(addressPrefix)
+	if err != nil {
+		return "", fmt.Errorf("failed to get operator address: %w", err)
+	}
+
+	msg := &permtypes.MsgStartPermissionVP{
+		Authority:       authority,
+		Operator:        operatorAddr,
+		Type:            permType,
+		ValidatorPermId: validatorPermId,
+		Did:             did,
+	}
+
+	txResp, err := client.BroadcastTx(ctx, operatorAccount, msg)
+	if err != nil {
+		return "", fmt.Errorf("failed to broadcast StartPermissionVP: %w", err)
+	}
+
+	fmt.Print("StartPermissionVPWithAuthority:\n\n")
+	fmt.Println(txResp)
+
+	if txResp.TxResponse.Code != 0 {
+		return "", fmt.Errorf("StartPermissionVP failed with code %d: %s",
+			txResp.TxResponse.Code, txResp.TxResponse.RawLog)
+	}
+
+	var txResponse sdk.TxResponse
+	txResponseBytes, err := client.Context().Codec.MarshalJSON(txResp.TxResponse)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal tx response: %w", err)
+	}
+	err = client.Context().Codec.UnmarshalJSON(txResponseBytes, &txResponse)
+	if err != nil {
+		return "", fmt.Errorf("failed to unmarshal tx response: %w", err)
+	}
+
+	for _, event := range txResponse.Events {
+		if event.Type == "start_permission_vp" {
+			for _, attr := range event.Attributes {
+				if attr.Key == "permission_id" {
+					return attr.Value, nil
+				}
+			}
+		}
+	}
+	return "", fmt.Errorf("permission_id not found in events")
+}
+
+// RenewPermissionVPWithAuthority renews a permission VP where authority and operator are different.
+func RenewPermissionVPWithAuthority(
+	client cosmosclient.Client,
+	ctx context.Context,
+	operatorAccount cosmosaccount.Account,
+	authority string,
+	permID uint64,
+) error {
+	operatorAddr, err := operatorAccount.Address(addressPrefix)
+	if err != nil {
+		return fmt.Errorf("failed to get operator address: %w", err)
+	}
+
+	msg := &permtypes.MsgRenewPermissionVP{
+		Authority: authority,
+		Operator:  operatorAddr,
+		Id:        permID,
+	}
+
+	txResp, err := client.BroadcastTx(ctx, operatorAccount, msg)
+	if err != nil {
+		return fmt.Errorf("failed to broadcast RenewPermissionVP: %w", err)
+	}
+
+	fmt.Print("RenewPermissionVPWithAuthority:\n\n")
+	fmt.Println(txResp)
+
+	if txResp.TxResponse.Code != 0 {
+		return fmt.Errorf("RenewPermissionVP failed with code %d: %s",
 			txResp.TxResponse.Code, txResp.TxResponse.RawLog)
 	}
 

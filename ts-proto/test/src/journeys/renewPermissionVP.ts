@@ -99,12 +99,14 @@ async function main() {
   const msg = {
     typeUrl: typeUrls.MsgRenewPermissionVP,
     value: MsgRenewPermissionVP.fromPartial({
-      creator: account17.address,
+      authority: account17.address,
+      operator: account17.address,
       id: permId,
     }),
   };
   console.log("  Message details:");
-  console.log(`    - Creator: ${account17.address} (account_${ACCOUNT_INDEX})`);
+  console.log(`    - Authority: ${account17.address} (account_${ACCOUNT_INDEX})`);
+  console.log(`    - Operator: ${account17.address} (account_${ACCOUNT_INDEX})`);
   console.log(`    - Permission ID: ${permId}`);
   console.log();
 

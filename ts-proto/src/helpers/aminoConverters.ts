@@ -520,12 +520,14 @@ export const MsgStartPermissionVPAminoConverter: AminoConverter = {
 export const MsgRenewPermissionVPAminoConverter: AminoConverter = {
   aminoType: '/verana.perm.v1.MsgRenewPermissionVP',
   toAmino: (m: MsgRenewPermissionVP) => clean({
-    creator: m.creator ?? '',
+    authority: m.authority ?? '',
+    operator: m.operator ?? '',
     id: u64ToStr(m.id),
   }),
   fromAmino: (a: any): MsgRenewPermissionVP =>
     MsgRenewPermissionVP.fromPartial({
-      creator: a.creator ?? '',
+      authority: a.authority ?? '',
+      operator: a.operator ?? '',
       id: strToU64(a.id) != null ? Number(strToU64(a.id)!.toString()) : 0,
     }),
 };

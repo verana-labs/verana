@@ -87,6 +87,20 @@ func (ms msgServer) StartPermissionVP(goCtx context.Context, msg *types.MsgStart
 
 func (ms msgServer) RenewPermissionVP(goCtx context.Context, msg *types.MsgRenewPermissionVP) (*types.MsgRenewPermissionVPResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
+	now := ctx.BlockTime()
+
+	// [MOD-PERM-MSG-2-2-1] [AUTHZ-CHECK] Verify operator authorization
+	if ms.delegationKeeper != nil {
+		if err := ms.delegationKeeper.CheckOperatorAuthorization(
+			ctx,
+			msg.Authority,
+			msg.Operator,
+			"/verana.perm.v1.MsgRenewPermissionVP",
+			now,
+		); err != nil {
+			return nil, fmt.Errorf("authorization check failed: %w", err)
+		}
+	}
 
 	// [MOD-PERM-MSG-2-2-2] Permission checks
 	applicantPerm, err := ms.Keeper.GetPermissionByID(ctx, msg.Id)
@@ -94,9 +108,17 @@ func (ms msgServer) RenewPermissionVP(goCtx context.Context, msg *types.MsgRenew
 		return nil, fmt.Errorf("perm not found: %w", err)
 	}
 
-	// Verify creator is the grantee
-	if applicantPerm.Authority != msg.Creator {
-		return nil, fmt.Errorf("creator is not the perm authority")
+	// [MOD-PERM-MSG-2-2-2] authority MUST be applicant_perm.authority
+	if applicantPerm.Authority != msg.Authority {
+		return nil, fmt.Errorf("authority is not the perm authority")
+	}
+
+	// [MOD-PERM-MSG-2-2-2] applicant_perm.vp_state MUST be VALIDATED to allow renewal.
+	// Renewing a PENDING perm would overwrite vp_current_fees/vp_current_deposit without
+	// refunding the escrowed funds, causing permanent fund loss.
+	// TERMINATED or TERMINATION_REQUESTED perms cannot be renewed either.
+	if applicantPerm.VpState != types.ValidationState_VALIDATED {
+		return nil, fmt.Errorf("perm vp_state must be VALIDATED to renew, current state: %s", applicantPerm.VpState.String())
 	}
 
 	// Get validator perm
@@ -124,11 +146,12 @@ func (ms msgServer) RenewPermissionVP(goCtx context.Context, msg *types.MsgRenew
 		sdk.NewEvent(
 			types.EventTypeRenewPermissionVP,
 			sdk.NewAttribute(types.AttributeKeyPermissionID, strconv.FormatUint(msg.Id, 10)),
-			sdk.NewAttribute(types.AttributeKeyCreator, msg.Creator),
+			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Authority),
+			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
 			sdk.NewAttribute(types.AttributeKeyValidatorPermID, strconv.FormatUint(applicantPerm.ValidatorPermId, 10)),
 			sdk.NewAttribute(types.AttributeKeyValidationFees, strconv.FormatUint(validationFees, 10)),
 			sdk.NewAttribute(types.AttributeKeyValidationDeposit, strconv.FormatUint(validationDeposit, 10)),
-			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
+			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
 		),
 	})
 

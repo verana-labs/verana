@@ -77,9 +77,14 @@ func isValidDID(did string) bool {
 }
 
 func (msg *MsgRenewPermissionVP) ValidateBasic() error {
-	// Validate creator address
-	if _, err := sdk.AccAddressFromBech32(msg.Creator); err != nil {
-		return fmt.Errorf("invalid creator address: %w", err)
+	// [MOD-PERM-MSG-2-2-1] authority (group): signature must be verified
+	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
+		return fmt.Errorf("invalid authority address: %w", err)
+	}
+
+	// [MOD-PERM-MSG-2-2-1] operator (account): signature must be verified
+	if _, err := sdk.AccAddressFromBech32(msg.Operator); err != nil {
+		return fmt.Errorf("invalid operator address: %w", err)
 	}
 
 	// Validate perm ID

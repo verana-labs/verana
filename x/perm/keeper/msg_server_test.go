@@ -328,18 +328,29 @@ func TestRenewPermissionVP(t *testing.T) {
 		{
 			name: "Non-existent Permission",
 			msg: &types.MsgRenewPermissionVP{
-				Creator: creator,
-				Id:      999,
+				Authority: creator,
+				Operator:  creator,
+				Id:        999,
 			},
 			err: "perm not found",
 		},
 		{
-			name: "Wrong Creator",
+			name: "Wrong Authority",
 			msg: &types.MsgRenewPermissionVP{
-				Creator: sdk.AccAddress([]byte("wrong_creator")).String(),
-				Id:      applicantPermID,
+				Authority: sdk.AccAddress([]byte("wrong_creator")).String(),
+				Operator:  sdk.AccAddress([]byte("wrong_creator")).String(),
+				Id:        applicantPermID,
 			},
-			err: "creator is not the perm authority",
+			err: "authority is not the perm authority",
+		},
+		{
+			name: "Successful Renewal",
+			msg: &types.MsgRenewPermissionVP{
+				Authority: creator,
+				Operator:  creator,
+				Id:        applicantPermID,
+			},
+			err: "",
 		},
 	}
 
@@ -359,6 +370,575 @@ func TestRenewPermissionVP(t *testing.T) {
 				require.NoError(t, err)
 				require.Equal(t, types.ValidationState_PENDING, perm.VpState)
 				require.NotNil(t, perm.VpLastStateChange)
+			}
+		})
+	}
+}
+
+func TestRenewPermissionVP_AuthzCheck(t *testing.T) {
+	k, ms, csKeeper, _, ctx, mockDelegation := setupMsgServerWithDelegation(t)
+
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	blockTime := time.Date(2023, 1, 15, 0, 0, 0, 0, time.UTC)
+	sdkCtx = sdkCtx.WithBlockTime(blockTime)
+	ctx = sdk.WrapSDKContext(sdkCtx)
+
+	creator := sdk.AccAddress([]byte("test_creator")).String()
+
+	csKeeper.CreateMockCredentialSchema(1,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
+
+	now := sdkCtx.BlockTime()
+	pastTime := now.Add(-1 * time.Hour)
+
+	validatorPerm := types.Permission{
+		SchemaId:      1,
+		Type:          3,
+		Authority:     creator,
+		Created:       &now,
+		CreatedBy:     creator,
+		Extended:      &now,
+		ExtendedBy:    creator,
+		Modified:      &now,
+		VpState:       types.ValidationState_VALIDATED,
+		EffectiveFrom: &pastTime,
+	}
+	validatorPermID, err := k.CreatePermission(sdkCtx, validatorPerm)
+	require.NoError(t, err)
+
+	applicantPerm := types.Permission{
+		SchemaId:        1,
+		Type:            1,
+		Authority:       creator,
+		Created:         &now,
+		CreatedBy:       creator,
+		Modified:        &now,
+		ValidatorPermId: validatorPermID,
+		VpState:         types.ValidationState_VALIDATED,
+	}
+	applicantPermID, err := k.CreatePermission(sdkCtx, applicantPerm)
+	require.NoError(t, err)
+
+	t.Run("AUTHZ-CHECK failure blocks renewal", func(t *testing.T) {
+		mockDelegation.ErrToReturn = fmt.Errorf("operator not authorized")
+		resp, err := ms.RenewPermissionVP(ctx, &types.MsgRenewPermissionVP{
+			Authority: creator,
+			Operator:  creator,
+			Id:        applicantPermID,
+		})
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "authorization check failed")
+		require.Nil(t, resp)
+	})
+
+	t.Run("AUTHZ-CHECK success allows renewal", func(t *testing.T) {
+		mockDelegation.ErrToReturn = nil
+		resp, err := ms.RenewPermissionVP(ctx, &types.MsgRenewPermissionVP{
+			Authority: creator,
+			Operator:  creator,
+			Id:        applicantPermID,
+		})
+		require.NoError(t, err)
+		require.NotNil(t, resp)
+
+		perm, err := k.GetPermissionByID(sdkCtx, applicantPermID)
+		require.NoError(t, err)
+		require.Equal(t, types.ValidationState_PENDING, perm.VpState)
+	})
+}
+
+func TestRenewPermissionVP_VpStatePrecondition(t *testing.T) {
+	k, ms, csKeeper, _, ctx := setupMsgServer(t)
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	blockTime := time.Date(2023, 1, 15, 0, 0, 0, 0, time.UTC)
+	sdkCtx = sdkCtx.WithBlockTime(blockTime)
+	ctx = sdk.WrapSDKContext(sdkCtx)
+
+	creator := sdk.AccAddress([]byte("test_creator")).String()
+
+	csKeeper.CreateMockCredentialSchema(1,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
+
+	now := sdkCtx.BlockTime()
+	pastTime := now.Add(-1 * time.Hour)
+
+	validatorPerm := types.Permission{
+		SchemaId:      1,
+		Type:          3,
+		Authority:     creator,
+		Created:       &now,
+		CreatedBy:     creator,
+		Extended:      &now,
+		ExtendedBy:    creator,
+		Modified:      &now,
+		VpState:       types.ValidationState_VALIDATED,
+		EffectiveFrom: &pastTime,
+	}
+	validatorPermID, err := k.CreatePermission(sdkCtx, validatorPerm)
+	require.NoError(t, err)
+
+	t.Run("Renewing PENDING perm is blocked (prevents fee accounting loss)", func(t *testing.T) {
+		pendingPerm := types.Permission{
+			SchemaId:        1,
+			Type:            1,
+			Authority:       creator,
+			Created:         &now,
+			CreatedBy:       creator,
+			Modified:        &now,
+			ValidatorPermId: validatorPermID,
+			VpState:         types.ValidationState_PENDING,
+			VpCurrentFees:   1000, // funds already in escrow
+			VpCurrentDeposit: 500,
+		}
+		pendingPermID, err := k.CreatePermission(sdkCtx, pendingPerm)
+		require.NoError(t, err)
+
+		resp, err := ms.RenewPermissionVP(ctx, &types.MsgRenewPermissionVP{
+			Authority: creator,
+			Operator:  creator,
+			Id:        pendingPermID,
+		})
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "vp_state must be VALIDATED to renew")
+		require.Nil(t, resp)
+
+		// Verify the perm was NOT modified (fees still intact)
+		perm, err := k.GetPermissionByID(sdkCtx, pendingPermID)
+		require.NoError(t, err)
+		require.Equal(t, types.ValidationState_PENDING, perm.VpState)
+		require.Equal(t, uint64(1000), perm.VpCurrentFees)
+		require.Equal(t, uint64(500), perm.VpCurrentDeposit)
+	})
+
+	t.Run("Renewing TERMINATED perm is blocked", func(t *testing.T) {
+		terminatedPerm := types.Permission{
+			SchemaId:        1,
+			Type:            1,
+			Authority:       creator,
+			Created:         &now,
+			CreatedBy:       creator,
+			Modified:        &now,
+			ValidatorPermId: validatorPermID,
+			VpState:         types.ValidationState_TERMINATED,
+		}
+		terminatedPermID, err := k.CreatePermission(sdkCtx, terminatedPerm)
+		require.NoError(t, err)
+
+		resp, err := ms.RenewPermissionVP(ctx, &types.MsgRenewPermissionVP{
+			Authority: creator,
+			Operator:  creator,
+			Id:        terminatedPermID,
+		})
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "vp_state must be VALIDATED to renew")
+		require.Nil(t, resp)
+	})
+
+	t.Run("Renewing TERMINATION_REQUESTED perm is blocked", func(t *testing.T) {
+		termReqPerm := types.Permission{
+			SchemaId:        1,
+			Type:            1,
+			Authority:       creator,
+			Created:         &now,
+			CreatedBy:       creator,
+			Modified:        &now,
+			ValidatorPermId: validatorPermID,
+			VpState:         types.ValidationState_TERMINATION_REQUESTED,
+		}
+		termReqPermID, err := k.CreatePermission(sdkCtx, termReqPerm)
+		require.NoError(t, err)
+
+		resp, err := ms.RenewPermissionVP(ctx, &types.MsgRenewPermissionVP{
+			Authority: creator,
+			Operator:  creator,
+			Id:        termReqPermID,
+		})
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "vp_state must be VALIDATED to renew")
+		require.Nil(t, resp)
+	})
+
+	t.Run("Renewing UNSPECIFIED vp_state perm is blocked", func(t *testing.T) {
+		unspecPerm := types.Permission{
+			SchemaId:        1,
+			Type:            1,
+			Authority:       creator,
+			Created:         &now,
+			CreatedBy:       creator,
+			Modified:        &now,
+			ValidatorPermId: validatorPermID,
+			VpState:         types.ValidationState_VALIDATION_STATE_UNSPECIFIED,
+		}
+		unspecPermID, err := k.CreatePermission(sdkCtx, unspecPerm)
+		require.NoError(t, err)
+
+		resp, err := ms.RenewPermissionVP(ctx, &types.MsgRenewPermissionVP{
+			Authority: creator,
+			Operator:  creator,
+			Id:        unspecPermID,
+		})
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "vp_state must be VALIDATED to renew")
+		require.Nil(t, resp)
+	})
+
+	t.Run("Renewing VALIDATED perm succeeds", func(t *testing.T) {
+		validatedPerm := types.Permission{
+			SchemaId:        1,
+			Type:            1,
+			Authority:       creator,
+			Created:         &now,
+			CreatedBy:       creator,
+			Modified:        &now,
+			ValidatorPermId: validatorPermID,
+			VpState:         types.ValidationState_VALIDATED,
+		}
+		validatedPermID, err := k.CreatePermission(sdkCtx, validatedPerm)
+		require.NoError(t, err)
+
+		resp, err := ms.RenewPermissionVP(ctx, &types.MsgRenewPermissionVP{
+			Authority: creator,
+			Operator:  creator,
+			Id:        validatedPermID,
+		})
+		require.NoError(t, err)
+		require.NotNil(t, resp)
+
+		perm, err := k.GetPermissionByID(sdkCtx, validatedPermID)
+		require.NoError(t, err)
+		require.Equal(t, types.ValidationState_PENDING, perm.VpState)
+		require.NotNil(t, perm.VpLastStateChange)
+		require.Equal(t, now, *perm.VpLastStateChange)
+		require.Equal(t, now, *perm.Modified)
+	})
+}
+
+func TestRenewPermissionVP_ValidatorPermChecks(t *testing.T) {
+	k, ms, csKeeper, _, ctx := setupMsgServer(t)
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	blockTime := time.Date(2023, 1, 15, 0, 0, 0, 0, time.UTC)
+	sdkCtx = sdkCtx.WithBlockTime(blockTime)
+	ctx = sdk.WrapSDKContext(sdkCtx)
+
+	creator := sdk.AccAddress([]byte("test_creator")).String()
+
+	csKeeper.CreateMockCredentialSchema(1,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
+
+	now := sdkCtx.BlockTime()
+	pastTime := now.Add(-1 * time.Hour)
+
+	t.Run("Renewal blocked when validator perm is revoked", func(t *testing.T) {
+		revokedTime := now.Add(-30 * time.Minute)
+		revokedValidatorPerm := types.Permission{
+			SchemaId:      1,
+			Type:          3,
+			Authority:     creator,
+			Created:       &now,
+			CreatedBy:     creator,
+			Modified:      &now,
+			VpState:       types.ValidationState_VALIDATED,
+			EffectiveFrom: &pastTime,
+			Revoked:       &revokedTime,
+		}
+		revokedValPermID, err := k.CreatePermission(sdkCtx, revokedValidatorPerm)
+		require.NoError(t, err)
+
+		applicantPerm := types.Permission{
+			SchemaId:        1,
+			Type:            1,
+			Authority:       creator,
+			Created:         &now,
+			CreatedBy:       creator,
+			Modified:        &now,
+			ValidatorPermId: revokedValPermID,
+			VpState:         types.ValidationState_VALIDATED,
+		}
+		applicantPermID, err := k.CreatePermission(sdkCtx, applicantPerm)
+		require.NoError(t, err)
+
+		resp, err := ms.RenewPermissionVP(ctx, &types.MsgRenewPermissionVP{
+			Authority: creator,
+			Operator:  creator,
+			Id:        applicantPermID,
+		})
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "validator perm is not valid")
+		require.Nil(t, resp)
+	})
+
+	t.Run("Renewal blocked when validator perm is expired", func(t *testing.T) {
+		expiredTime := now.Add(-10 * time.Minute)
+		expiredValidatorPerm := types.Permission{
+			SchemaId:       1,
+			Type:           3,
+			Authority:      creator,
+			Created:        &now,
+			CreatedBy:      creator,
+			Modified:       &now,
+			VpState:        types.ValidationState_VALIDATED,
+			EffectiveFrom:  &pastTime,
+			EffectiveUntil: &expiredTime,
+		}
+		expiredValPermID, err := k.CreatePermission(sdkCtx, expiredValidatorPerm)
+		require.NoError(t, err)
+
+		applicantPerm := types.Permission{
+			SchemaId:        1,
+			Type:            1,
+			Authority:       creator,
+			Created:         &now,
+			CreatedBy:       creator,
+			Modified:        &now,
+			ValidatorPermId: expiredValPermID,
+			VpState:         types.ValidationState_VALIDATED,
+		}
+		applicantPermID, err := k.CreatePermission(sdkCtx, applicantPerm)
+		require.NoError(t, err)
+
+		resp, err := ms.RenewPermissionVP(ctx, &types.MsgRenewPermissionVP{
+			Authority: creator,
+			Operator:  creator,
+			Id:        applicantPermID,
+		})
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "validator perm is not valid")
+		require.Nil(t, resp)
+	})
+
+	t.Run("Renewal blocked when validator perm is INACTIVE (no effective_from)", func(t *testing.T) {
+		inactiveValidatorPerm := types.Permission{
+			SchemaId:  1,
+			Type:      3,
+			Authority: creator,
+			Created:   &now,
+			CreatedBy: creator,
+			Modified:  &now,
+			VpState:   types.ValidationState_VALIDATED,
+			// EffectiveFrom is nil => INACTIVE
+		}
+		inactiveValPermID, err := k.CreatePermission(sdkCtx, inactiveValidatorPerm)
+		require.NoError(t, err)
+
+		applicantPerm := types.Permission{
+			SchemaId:        1,
+			Type:            1,
+			Authority:       creator,
+			Created:         &now,
+			CreatedBy:       creator,
+			Modified:        &now,
+			ValidatorPermId: inactiveValPermID,
+			VpState:         types.ValidationState_VALIDATED,
+		}
+		applicantPermID, err := k.CreatePermission(sdkCtx, applicantPerm)
+		require.NoError(t, err)
+
+		resp, err := ms.RenewPermissionVP(ctx, &types.MsgRenewPermissionVP{
+			Authority: creator,
+			Operator:  creator,
+			Id:        applicantPermID,
+		})
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "validator perm is not valid")
+		require.Nil(t, resp)
+	})
+
+	t.Run("Renewal blocked when validator perm does not exist", func(t *testing.T) {
+		applicantPerm := types.Permission{
+			SchemaId:        1,
+			Type:            1,
+			Authority:       creator,
+			Created:         &now,
+			CreatedBy:       creator,
+			Modified:        &now,
+			ValidatorPermId: 99999, // non-existent
+			VpState:         types.ValidationState_VALIDATED,
+		}
+		applicantPermID, err := k.CreatePermission(sdkCtx, applicantPerm)
+		require.NoError(t, err)
+
+		resp, err := ms.RenewPermissionVP(ctx, &types.MsgRenewPermissionVP{
+			Authority: creator,
+			Operator:  creator,
+			Id:        applicantPermID,
+		})
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "validator perm not found")
+		require.Nil(t, resp)
+	})
+}
+
+func TestRenewPermissionVP_FeeAndDepositAccumulation(t *testing.T) {
+	k, ms, csKeeper, _, ctx := setupMsgServer(t)
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	blockTime := time.Date(2023, 1, 15, 0, 0, 0, 0, time.UTC)
+	sdkCtx = sdkCtx.WithBlockTime(blockTime)
+	ctx = sdk.WrapSDKContext(sdkCtx)
+
+	creator := sdk.AccAddress([]byte("test_creator")).String()
+
+	csKeeper.CreateMockCredentialSchema(1,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
+
+	// MockTrustRegistryKeeper returns trust_unit_price=1 by default
+	now := sdkCtx.BlockTime()
+	pastTime := now.Add(-1 * time.Hour)
+
+	validatorPerm := types.Permission{
+		SchemaId:       1,
+		Type:           3,
+		Authority:      creator,
+		Created:        &now,
+		CreatedBy:      creator,
+		Extended:       &now,
+		ExtendedBy:     creator,
+		Modified:       &now,
+		VpState:        types.ValidationState_VALIDATED,
+		EffectiveFrom:  &pastTime,
+		ValidationFees: 50, // 50 trust units * 1 price = 50 denom fees
+	}
+	validatorPermID, err := k.CreatePermission(sdkCtx, validatorPerm)
+	require.NoError(t, err)
+
+	t.Run("Deposit accumulates on renewal", func(t *testing.T) {
+		initialDeposit := uint64(100)
+		applicantPerm := types.Permission{
+			SchemaId:        1,
+			Type:            1,
+			Authority:       creator,
+			Created:         &now,
+			CreatedBy:       creator,
+			Modified:        &now,
+			ValidatorPermId: validatorPermID,
+			VpState:         types.ValidationState_VALIDATED,
+			Deposit:         initialDeposit,
+		}
+		applicantPermID, err := k.CreatePermission(sdkCtx, applicantPerm)
+		require.NoError(t, err)
+
+		resp, err := ms.RenewPermissionVP(ctx, &types.MsgRenewPermissionVP{
+			Authority: creator,
+			Operator:  creator,
+			Id:        applicantPermID,
+		})
+		require.NoError(t, err)
+		require.NotNil(t, resp)
+
+		perm, err := k.GetPermissionByID(sdkCtx, applicantPermID)
+		require.NoError(t, err)
+		require.Equal(t, types.ValidationState_PENDING, perm.VpState)
+		// Deposit should accumulate: initialDeposit + new deposit
+		require.True(t, perm.Deposit >= initialDeposit, "deposit should accumulate, got %d", perm.Deposit)
+		require.True(t, perm.VpCurrentFees > 0 || perm.VpCurrentDeposit > 0 || validatorPerm.ValidationFees == 0,
+			"current fees or deposit should be set based on validator fees")
+	})
+
+	t.Run("Different operator than authority is allowed", func(t *testing.T) {
+		operator := sdk.AccAddress([]byte("different_oper")).String()
+		applicantPerm := types.Permission{
+			SchemaId:        1,
+			Type:            1,
+			Authority:       creator,
+			Created:         &now,
+			CreatedBy:       creator,
+			Modified:        &now,
+			ValidatorPermId: validatorPermID,
+			VpState:         types.ValidationState_VALIDATED,
+		}
+		applicantPermID, err := k.CreatePermission(sdkCtx, applicantPerm)
+		require.NoError(t, err)
+
+		resp, err := ms.RenewPermissionVP(ctx, &types.MsgRenewPermissionVP{
+			Authority: creator,
+			Operator:  operator,
+			Id:        applicantPermID,
+		})
+		require.NoError(t, err)
+		require.NotNil(t, resp)
+
+		perm, err := k.GetPermissionByID(sdkCtx, applicantPermID)
+		require.NoError(t, err)
+		require.Equal(t, types.ValidationState_PENDING, perm.VpState)
+	})
+}
+
+func TestRenewPermissionVP_ValidateBasic(t *testing.T) {
+	testCases := []struct {
+		name string
+		msg  *types.MsgRenewPermissionVP
+		err  string
+	}{
+		{
+			name: "Empty authority address",
+			msg: &types.MsgRenewPermissionVP{
+				Authority: "",
+				Operator:  sdk.AccAddress([]byte("test_operator")).String(),
+				Id:        1,
+			},
+			err: "invalid authority address",
+		},
+		{
+			name: "Invalid authority address",
+			msg: &types.MsgRenewPermissionVP{
+				Authority: "invalid_address",
+				Operator:  sdk.AccAddress([]byte("test_operator")).String(),
+				Id:        1,
+			},
+			err: "invalid authority address",
+		},
+		{
+			name: "Empty operator address",
+			msg: &types.MsgRenewPermissionVP{
+				Authority: sdk.AccAddress([]byte("test_authority")).String(),
+				Operator:  "",
+				Id:        1,
+			},
+			err: "invalid operator address",
+		},
+		{
+			name: "Invalid operator address",
+			msg: &types.MsgRenewPermissionVP{
+				Authority: sdk.AccAddress([]byte("test_authority")).String(),
+				Operator:  "invalid_address",
+				Id:        1,
+			},
+			err: "invalid operator address",
+		},
+		{
+			name: "Zero perm ID",
+			msg: &types.MsgRenewPermissionVP{
+				Authority: sdk.AccAddress([]byte("test_authority")).String(),
+				Operator:  sdk.AccAddress([]byte("test_operator")).String(),
+				Id:        0,
+			},
+			err: "perm ID cannot be 0",
+		},
+		{
+			name: "Valid message",
+			msg: &types.MsgRenewPermissionVP{
+				Authority: sdk.AccAddress([]byte("test_authority")).String(),
+				Operator:  sdk.AccAddress([]byte("test_operator")).String(),
+				Id:        1,
+			},
+			err: "",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			err := tc.msg.ValidateBasic()
+			if tc.err != "" {
+				require.Error(t, err)
+				require.Contains(t, err.Error(), tc.err)
+			} else {
+				require.NoError(t, err)
 			}
 		})
 	}
