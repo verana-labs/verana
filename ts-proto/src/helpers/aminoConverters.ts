@@ -535,25 +535,29 @@ export const MsgRenewPermissionVPAminoConverter: AminoConverter = {
 export const MsgSetPermissionVPToValidatedAminoConverter: AminoConverter = {
   aminoType: '/verana.perm.v1.MsgSetPermissionVPToValidated',
   toAmino: (m: MsgSetPermissionVPToValidated) => clean({
-    creator: m.creator ?? '',
+    authority: m.authority ?? '',
+    operator: m.operator ?? '',
     id: u64ToStr(m.id),
     effective_until: dateToAmino(m.effectiveUntil),
     validation_fees: u64ToStr(m.validationFees),
     issuance_fees: u64ToStr(m.issuanceFees),
     verification_fees: u64ToStr(m.verificationFees),
-    country: m.country ?? '',
     vp_summary_digest_sri: m.vpSummaryDigestSri ?? '',
+    issuance_fee_discount: u64ToStr(m.issuanceFeeDiscount),
+    verification_fee_discount: u64ToStr(m.verificationFeeDiscount),
   }),
   fromAmino: (a: any): MsgSetPermissionVPToValidated =>
     MsgSetPermissionVPToValidated.fromPartial({
-      creator: a.creator ?? '',
+      authority: a.authority ?? '',
+      operator: a.operator ?? '',
       id: strToU64(a.id) != null ? Number(strToU64(a.id)!.toString()) : 0,
       effectiveUntil: dateFromAmino(a.effective_until),
       validationFees: strToU64(a.validation_fees) != null ? Number(strToU64(a.validation_fees)!.toString()) : 0,
       issuanceFees: strToU64(a.issuance_fees) != null ? Number(strToU64(a.issuance_fees)!.toString()) : 0,
       verificationFees: strToU64(a.verification_fees) != null ? Number(strToU64(a.verification_fees)!.toString()) : 0,
-      country: a.country ?? '',
       vpSummaryDigestSri: a.vp_summary_digest_sri ?? '',
+      issuanceFeeDiscount: strToU64(a.issuance_fee_discount) != null ? Number(strToU64(a.issuance_fee_discount)!.toString()) : 0,
+      verificationFeeDiscount: strToU64(a.verification_fee_discount) != null ? Number(strToU64(a.verification_fee_discount)!.toString()) : 0,
     }),
 };
 

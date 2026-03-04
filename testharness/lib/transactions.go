@@ -419,17 +419,20 @@ func SetPermissionVPToValidated(client cosmosclient.Client, ctx context.Context,
 		log.Fatal(err)
 	}
 
-	// Create the message with proper creator address
+	// Create the message with authority/operator pattern
 	msg := &permtypes.MsgSetPermissionVPToValidated{
-		Creator:                 creatorAddr,
+		Authority:               override.Authority,
+		Operator:                creatorAddr,
 		Id:                      override.Id,
 		ValidationFees:          override.ValidationFees,
 		IssuanceFees:            override.IssuanceFees,
 		VerificationFees:        override.VerificationFees,
-		Country:                 override.Country,
 		VpSummaryDigestSri:      override.VpSummaryDigestSri,
 		IssuanceFeeDiscount:     override.IssuanceFeeDiscount,
 		VerificationFeeDiscount: override.VerificationFeeDiscount,
+	}
+	if msg.Authority == "" {
+		msg.Authority = creatorAddr
 	}
 
 	// Only set EffectiveUntil if it's explicitly provided

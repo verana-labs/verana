@@ -1,12 +1,15 @@
 package keeper
 
 import (
+	"context"
 	"fmt"
+	"time"
 
 	"cosmossdk.io/collections"
 	"cosmossdk.io/core/address"
 	corestore "cosmossdk.io/core/store"
 	"github.com/cosmos/cosmos-sdk/codec"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/verana-labs/verana/x/de/types"
 )
@@ -68,4 +71,32 @@ func NewKeeper(
 // GetAuthority returns the module's authority.
 func (k Keeper) GetAuthority() []byte {
 	return k.authority
+}
+
+// GrantVSOperatorAuthorization grants a VS operator the authorization to call
+// CreateOrUpdatePermissionSession on behalf of the authority for a given permission.
+// TODO(MOD-DE-MSG-5): Implement full VS operator authorization logic.
+func (k Keeper) GrantVSOperatorAuthorization(
+	ctx context.Context,
+	authority string,
+	vsOperator string,
+	permissionID uint64,
+	spendLimit sdk.Coins,
+	withFeegrant bool,
+	feeSpendLimit sdk.Coins,
+	spendPeriod *time.Duration,
+) error {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	// Store the VS operator authorization
+	vsKey := collections.Join(authority, vsOperator)
+	vsAuth := types.VSOperatorAuthorization{
+		Authority:  authority,
+		VsOperator: vsOperator,
+	}
+	if err := k.VSOperatorAuthorizations.Set(sdkCtx, vsKey, vsAuth); err != nil {
+		return fmt.Errorf("failed to store VS operator authorization: %w", err)
+	}
+
+	return nil
 }

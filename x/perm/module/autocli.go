@@ -205,13 +205,17 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					RpcMethod: "SetPermissionVPToValidated",
 					Use:       "set-perm-vp-validated [id]",
 					Short:     "Set perm validation process to validated state",
-					Long: `Set a perm validation process to validated state with optional parameters:
+					Long: `Set a perm validation process to validated state.
+
+Requires authority/operator authorization. The authority must be the validator perm's authority.
+
+Parameters:
 - id: ID of the perm to validate
+- authority: Group account (authority) on whose behalf this message is executed
 - effective-until: Optional timestamp until when this perm is effective (RFC3339 format)
-- validation-fees: Optional validation fees
-- issuance-fees: Optional issuance fees
-- verification-fees: Optional verification fees
-- country: Optional country code (ISO 3166-1 alpha-2)
+- validation-fees: Validation fees (mandatory, 0 for no fees)
+- issuance-fees: Issuance fees (mandatory, 0 for no fees)
+- verification-fees: Verification fees (mandatory, 0 for no fees)
 - vp-summary-digest-sri: Optional digest SRI of validation information
 - issuance-fee-discount: Issuance fee discount (0-10000, where 10000 = 100% discount, default 0)
 - verification-fee-discount: Verification fee discount (0-10000, where 10000 = 100% discount, default 0)`,
@@ -221,6 +225,10 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 						},
 					},
 					FlagOptions: map[string]*autocliv1.FlagOptions{
+						"authority": {
+							Name:  "authority",
+							Usage: "Group account (authority) on whose behalf this message is executed",
+						},
 						"effective_until": {
 							Name:         "effective-until",
 							Usage:        "Timestamp until when this perm is effective (RFC3339)",
@@ -240,11 +248,6 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 							Name:         "verification-fees",
 							Usage:        "Verification fees",
 							DefaultValue: "0",
-						},
-						"country": {
-							Name:         "country",
-							Usage:        "Country code (ISO 3166-1 alpha-2)",
-							DefaultValue: "",
 						},
 						"vp_summary_digest_sri": {
 							Name:         "vp-summary-digest-sri",

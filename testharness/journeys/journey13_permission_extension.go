@@ -95,7 +95,6 @@ func RunPermissionExtensionJourney(ctx context.Context, client cosmosclient.Clie
 		ValidationFees:   validationFees,
 		IssuanceFees:     issuanceFees,
 		VerificationFees: verificationFees,
-		Country:          "US",
 	}
 
 	_, err = lib.SetPermissionVPToValidated(client, ctx, trControllerAccount, validateMsg)

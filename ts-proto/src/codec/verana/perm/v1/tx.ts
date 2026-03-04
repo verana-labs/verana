@@ -77,13 +77,15 @@ export interface MsgRenewPermissionVPResponse {
 
 /** MsgSetPermissionVPToValidated represents a message to set a permission validation process to validated state */
 export interface MsgSetPermissionVPToValidated {
-  creator: string;
+  /** authority is the group account on whose behalf this message is executed */
+  authority: string;
+  /** operator is the account authorized by the authority to run this Msg */
+  operator: string;
   id: number;
   effectiveUntil: Date | undefined;
   validationFees: number;
   issuanceFees: number;
   verificationFees: number;
-  country: string;
   vpSummaryDigestSri: string;
   /**
    * Fee discount fields (scaled: 0 = 0.0, 10000 = 1.0, range 0-10000)
@@ -788,13 +790,13 @@ export const MsgRenewPermissionVPResponse = {
 
 function createBaseMsgSetPermissionVPToValidated(): MsgSetPermissionVPToValidated {
   return {
-    creator: "",
+    authority: "",
+    operator: "",
     id: 0,
     effectiveUntil: undefined,
     validationFees: 0,
     issuanceFees: 0,
     verificationFees: 0,
-    country: "",
     vpSummaryDigestSri: "",
     issuanceFeeDiscount: 0,
     verificationFeeDiscount: 0,
@@ -803,26 +805,26 @@ function createBaseMsgSetPermissionVPToValidated(): MsgSetPermissionVPToValidate
 
 export const MsgSetPermissionVPToValidated = {
   encode(message: MsgSetPermissionVPToValidated, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.creator !== "") {
-      writer.uint32(10).string(message.creator);
+    if (message.authority !== "") {
+      writer.uint32(10).string(message.authority);
+    }
+    if (message.operator !== "") {
+      writer.uint32(18).string(message.operator);
     }
     if (message.id !== 0) {
-      writer.uint32(16).uint64(message.id);
+      writer.uint32(24).uint64(message.id);
     }
     if (message.effectiveUntil !== undefined) {
-      Timestamp.encode(toTimestamp(message.effectiveUntil), writer.uint32(26).fork()).ldelim();
+      Timestamp.encode(toTimestamp(message.effectiveUntil), writer.uint32(34).fork()).ldelim();
     }
     if (message.validationFees !== 0) {
-      writer.uint32(32).uint64(message.validationFees);
+      writer.uint32(40).uint64(message.validationFees);
     }
     if (message.issuanceFees !== 0) {
-      writer.uint32(40).uint64(message.issuanceFees);
+      writer.uint32(48).uint64(message.issuanceFees);
     }
     if (message.verificationFees !== 0) {
-      writer.uint32(48).uint64(message.verificationFees);
-    }
-    if (message.country !== "") {
-      writer.uint32(58).string(message.country);
+      writer.uint32(56).uint64(message.verificationFees);
     }
     if (message.vpSummaryDigestSri !== "") {
       writer.uint32(66).string(message.vpSummaryDigestSri);
@@ -848,49 +850,49 @@ export const MsgSetPermissionVPToValidated = {
             break;
           }
 
-          message.creator = reader.string();
+          message.authority = reader.string();
           continue;
         case 2:
-          if (tag !== 16) {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.operator = reader.string();
+          continue;
+        case 3:
+          if (tag !== 24) {
             break;
           }
 
           message.id = longToNumber(reader.uint64() as Long);
           continue;
-        case 3:
-          if (tag !== 26) {
+        case 4:
+          if (tag !== 34) {
             break;
           }
 
           message.effectiveUntil = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
-          continue;
-        case 4:
-          if (tag !== 32) {
-            break;
-          }
-
-          message.validationFees = longToNumber(reader.uint64() as Long);
           continue;
         case 5:
           if (tag !== 40) {
             break;
           }
 
-          message.issuanceFees = longToNumber(reader.uint64() as Long);
+          message.validationFees = longToNumber(reader.uint64() as Long);
           continue;
         case 6:
           if (tag !== 48) {
             break;
           }
 
-          message.verificationFees = longToNumber(reader.uint64() as Long);
+          message.issuanceFees = longToNumber(reader.uint64() as Long);
           continue;
         case 7:
-          if (tag !== 58) {
+          if (tag !== 56) {
             break;
           }
 
-          message.country = reader.string();
+          message.verificationFees = longToNumber(reader.uint64() as Long);
           continue;
         case 8:
           if (tag !== 66) {
@@ -924,13 +926,13 @@ export const MsgSetPermissionVPToValidated = {
 
   fromJSON(object: any): MsgSetPermissionVPToValidated {
     return {
-      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
+      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
       id: isSet(object.id) ? globalThis.Number(object.id) : 0,
       effectiveUntil: isSet(object.effectiveUntil) ? fromJsonTimestamp(object.effectiveUntil) : undefined,
       validationFees: isSet(object.validationFees) ? globalThis.Number(object.validationFees) : 0,
       issuanceFees: isSet(object.issuanceFees) ? globalThis.Number(object.issuanceFees) : 0,
       verificationFees: isSet(object.verificationFees) ? globalThis.Number(object.verificationFees) : 0,
-      country: isSet(object.country) ? globalThis.String(object.country) : "",
       vpSummaryDigestSri: isSet(object.vpSummaryDigestSri) ? globalThis.String(object.vpSummaryDigestSri) : "",
       issuanceFeeDiscount: isSet(object.issuanceFeeDiscount) ? globalThis.Number(object.issuanceFeeDiscount) : 0,
       verificationFeeDiscount: isSet(object.verificationFeeDiscount)
@@ -941,8 +943,11 @@ export const MsgSetPermissionVPToValidated = {
 
   toJSON(message: MsgSetPermissionVPToValidated): unknown {
     const obj: any = {};
-    if (message.creator !== "") {
-      obj.creator = message.creator;
+    if (message.authority !== "") {
+      obj.authority = message.authority;
+    }
+    if (message.operator !== "") {
+      obj.operator = message.operator;
     }
     if (message.id !== 0) {
       obj.id = Math.round(message.id);
@@ -958,9 +963,6 @@ export const MsgSetPermissionVPToValidated = {
     }
     if (message.verificationFees !== 0) {
       obj.verificationFees = Math.round(message.verificationFees);
-    }
-    if (message.country !== "") {
-      obj.country = message.country;
     }
     if (message.vpSummaryDigestSri !== "") {
       obj.vpSummaryDigestSri = message.vpSummaryDigestSri;
@@ -981,13 +983,13 @@ export const MsgSetPermissionVPToValidated = {
     object: I,
   ): MsgSetPermissionVPToValidated {
     const message = createBaseMsgSetPermissionVPToValidated();
-    message.creator = object.creator ?? "";
+    message.authority = object.authority ?? "";
+    message.operator = object.operator ?? "";
     message.id = object.id ?? 0;
     message.effectiveUntil = object.effectiveUntil ?? undefined;
     message.validationFees = object.validationFees ?? 0;
     message.issuanceFees = object.issuanceFees ?? 0;
     message.verificationFees = object.verificationFees ?? 0;
-    message.country = object.country ?? "";
     message.vpSummaryDigestSri = object.vpSummaryDigestSri ?? "";
     message.issuanceFeeDiscount = object.issuanceFeeDiscount ?? 0;
     message.verificationFeeDiscount = object.verificationFeeDiscount ?? 0;

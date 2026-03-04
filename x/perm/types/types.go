@@ -97,30 +97,19 @@ func (msg *MsgRenewPermissionVP) ValidateBasic() error {
 
 // ValidateBasic for MsgSetPermissionVPToValidated
 func (msg *MsgSetPermissionVPToValidated) ValidateBasic() error {
-	// Validate creator address
-	if _, err := sdk.AccAddressFromBech32(msg.Creator); err != nil {
-		return fmt.Errorf("invalid creator address: %w", err)
+	// [MOD-PERM-MSG-3-2-1] authority (group): signature must be verified
+	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
+		return fmt.Errorf("invalid authority address: %w", err)
+	}
+
+	// [MOD-PERM-MSG-3-2-1] operator (account): signature must be verified
+	if _, err := sdk.AccAddressFromBech32(msg.Operator); err != nil {
+		return fmt.Errorf("invalid operator address: %w", err)
 	}
 
 	// Validate perm ID
 	if msg.Id == 0 {
 		return fmt.Errorf("perm ID cannot be 0")
-	}
-
-	// Validate fees are non-negative
-	if msg.ValidationFees < 0 {
-		return fmt.Errorf("validation fees cannot be negative")
-	}
-	if msg.IssuanceFees < 0 {
-		return fmt.Errorf("issuance fees cannot be negative")
-	}
-	if msg.VerificationFees < 0 {
-		return fmt.Errorf("verification fees cannot be negative")
-	}
-
-	// Validate country code if provided
-	if msg.Country != "" && !isValidCountryCode(msg.Country) {
-		return fmt.Errorf("invalid country code format")
 	}
 
 	// Validate digest SRI format if provided (optional)
@@ -136,9 +125,6 @@ func (msg *MsgSetPermissionVPToValidated) ValidateBasic() error {
 	if msg.VerificationFeeDiscount > maxDiscount {
 		return fmt.Errorf("verification_fee_discount cannot exceed %d (100%% discount)", maxDiscount)
 	}
-
-	// NOTE: Do NOT validate effective_until against current time in stateless validation
-	// This will be done in stateful validation where we have access to block time
 
 	return nil
 }

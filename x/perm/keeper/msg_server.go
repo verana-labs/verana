@@ -204,6 +204,19 @@ func (ms msgServer) SetPermissionVPToValidated(goCtx context.Context, msg *types
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	now := ctx.BlockTime()
 
+	// [MOD-PERM-MSG-3-2-1] [AUTHZ-CHECK] Verify operator authorization
+	if ms.delegationKeeper != nil {
+		if err := ms.delegationKeeper.CheckOperatorAuthorization(
+			ctx,
+			msg.Authority,
+			msg.Operator,
+			"/verana.perm.v1.MsgSetPermissionVPToValidated",
+			now,
+		); err != nil {
+			return nil, fmt.Errorf("authorization check failed: %w", err)
+		}
+	}
+
 	// [MOD-PERM-MSG-3-2-1] Basic checks
 	// Load Permission entry applicant_perm from id. If no entry found, abort.
 	applicantPerm, err := ms.Keeper.GetPermissionByID(ctx, msg.Id)
@@ -229,11 +242,6 @@ func (ms msgServer) SetPermissionVPToValidated(goCtx context.Context, msg *types
 	// If applicant_perm.effective_from is not null (renewal) verification_fees MUST be equal to applicant_perm.verification_fees
 	if applicantPerm.EffectiveFrom != nil && msg.VerificationFees != applicantPerm.VerificationFees {
 		return nil, fmt.Errorf("verification_fees cannot be changed during renewal")
-	}
-
-	// country: If applicant_perm.effective_from is not null (renewal) country MUST be equal to applicant_perm.country
-	if applicantPerm.EffectiveFrom != nil && msg.Country != applicantPerm.Country {
-		return nil, fmt.Errorf("country cannot be changed during renewal")
 	}
 
 	// vp_summary_digest_sri: MUST be null if validation.type is set to HOLDER
@@ -337,7 +345,7 @@ func (ms msgServer) SetPermissionVPToValidated(goCtx context.Context, msg *types
 		}
 	}
 
-	// Calculate vp_exp
+	// [MOD-PERM-MSG-3-2-1] Calculate vp_exp
 	validityPeriod := getValidityPeriod(uint32(applicantPerm.Type), cs)
 	var vpExp *time.Time
 	if validityPeriod == 0 {
@@ -350,43 +358,49 @@ func (ms msgServer) SetPermissionVPToValidated(goCtx context.Context, msg *types
 		vpExp = &exp
 	}
 
-	// Verify effective_until
-	if msg.EffectiveUntil != nil {
-		if applicantPerm.EffectiveUntil == nil {
-			// effective_until MUST be greater than current timestamp
-			if !msg.EffectiveUntil.After(now) {
-				return nil, fmt.Errorf("effective_until must be greater than current timestamp")
-			}
-			// if vp_exp is not null, lower or equal to vp_exp
-			if vpExp != nil && msg.EffectiveUntil.After(*vpExp) {
-				return nil, fmt.Errorf("effective_until must be lower or equal to vp_exp")
-			}
-		} else {
-			// effective_until MUST be greater than applicant_perm.effective_until
-			if !msg.EffectiveUntil.After(*applicantPerm.EffectiveUntil) {
-				return nil, fmt.Errorf("effective_until must be greater than current effective_until")
-			}
-			// if vp_exp is not null, lower or equal to vp_exp
-			if vpExp != nil && msg.EffectiveUntil.After(*vpExp) {
-				return nil, fmt.Errorf("effective_until must be lower or equal to vp_exp")
-			}
+	// [MOD-PERM-MSG-3-2-1] Verify effective_until and resolve its final value
+	effectiveUntil := msg.EffectiveUntil
+	if effectiveUntil == nil {
+		// if provided effective_until is NULL: change value to vp_exp
+		effectiveUntil = vpExp
+	} else if applicantPerm.EffectiveUntil == nil {
+		// effective_until MUST be greater than current timestamp
+		if !effectiveUntil.After(now) {
+			return nil, fmt.Errorf("effective_until must be greater than current timestamp")
+		}
+		// if vp_exp is not null, effective_until MUST be lower or equal to vp_exp
+		if vpExp != nil && effectiveUntil.After(*vpExp) {
+			return nil, fmt.Errorf("effective_until must be lower or equal to vp_exp")
+		}
+	} else {
+		// effective_until MUST be greater than applicant_perm.effective_until
+		if !effectiveUntil.After(*applicantPerm.EffectiveUntil) {
+			return nil, fmt.Errorf("effective_until must be greater than current effective_until")
+		}
+		// if vp_exp is not null, effective_until MUST be lower or equal to vp_exp
+		if vpExp != nil && effectiveUntil.After(*vpExp) {
+			return nil, fmt.Errorf("effective_until must be lower or equal to vp_exp")
 		}
 	}
 
 	// [MOD-PERM-MSG-3-2-2] Validator perms
-	// validator_perm already loaded above for discount validation
-	// validator_perm MUST be a valid permission (checked via IsValidPermission)
-	if err := IsValidPermission(validatorPerm, validatorPerm.Country, now); err != nil {
+	// validator_perm MUST be an active permission
+	if err := IsValidPermission(validatorPerm, "", now); err != nil {
 		return nil, fmt.Errorf("validator perm is not valid: %w", err)
 	}
 
-	// account running the method MUST be validator_perm.grantee
-	if validatorPerm.Authority != msg.Creator {
-		return nil, fmt.Errorf("account running method must be validator grantee")
+	// authority running the method MUST be validator_perm.authority
+	if validatorPerm.Authority != msg.Authority {
+		return nil, fmt.Errorf("authority must be validator perm authority")
+	}
+
+	// [MOD-PERM-MSG-3-2-4] Overlap checks (use resolved effectiveUntil)
+	if err := ms.checkValidatedOverlap(ctx, applicantPerm, effectiveUntil); err != nil {
+		return nil, fmt.Errorf("overlap check failed: %w", err)
 	}
 
 	// [MOD-PERM-MSG-3-3] Execution
-	return ms.executeSetPermissionVPToValidated(ctx, applicantPerm, validatorPerm, msg, now, vpExp)
+	return ms.executeSetPermissionVPToValidated(ctx, applicantPerm, validatorPerm, msg, now, vpExp, effectiveUntil)
 }
 
 func (ms msgServer) CancelPermissionVPLastRequest(goCtx context.Context, msg *types.MsgCancelPermissionVPLastRequest) (*types.MsgCancelPermissionVPLastRequestResponse, error) {

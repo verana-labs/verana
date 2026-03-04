@@ -45,11 +45,12 @@ func RunPermissionAuthzOperationsJourney(ctx context.Context, client cosmosclien
 	err := lib.GrantSelfDelegation(client, ctx, operatorAccount, []string{
 		"/verana.tr.v1.MsgCreateTrustRegistry",
 		"/verana.cs.v1.MsgCreateCredentialSchema",
+		"/verana.perm.v1.MsgSetPermissionVPToValidated",
 	})
 	if err != nil {
 		return fmt.Errorf("prerequisite 1 failed: %w", err)
 	}
-	fmt.Println("OK Prerequisite 1: Granted self-delegation for TR and CS creation")
+	fmt.Println("OK Prerequisite 1: Granted self-delegation for TR, CS, and SetPermissionVPToValidated")
 	waitForTx("self-delegation")
 
 	// --- Prerequisite 2: Create Trust Registry (controller = operatorAddr) ---

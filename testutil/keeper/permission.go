@@ -95,3 +95,7 @@ func (k *MockCredentialSchemaKeeper) CreateMockCredentialSchema(id uint64, issue
 		VerifierPermManagementMode: verifierPermMode,
 	}
 }
+
+func (k *MockCredentialSchemaKeeper) CreateMockCredentialSchemaFull(cs cstypes.CredentialSchema) {
+	k.credentialSchemas[cs.Id] = cs
+}

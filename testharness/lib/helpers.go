@@ -271,7 +271,6 @@ func ValidatePermissionWithDiscounts(client cosmosclient.Client, ctx context.Con
 		ValidationFees:          validationFees,
 		IssuanceFees:            issuanceFees,
 		VerificationFees:        verificationFees,
-		Country:                 country,
 		IssuanceFeeDiscount:     issuanceFeeDiscount,
 		VerificationFeeDiscount: verificationFeeDiscount,
 	}

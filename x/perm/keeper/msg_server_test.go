@@ -1006,12 +1006,12 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 
 		// Set perm to validated
 		msg := &types.MsgSetPermissionVPToValidated{
-			Creator:                 validatorAddr,
+			Authority:               validatorAddr,
+			Operator:                validatorAddr,
 			Id:                      newPermID,
 			ValidationFees:          10,
 			IssuanceFees:            5,
 			VerificationFees:        3,
-			Country:                 "US",
 			EffectiveUntil:          &futureTime,
 			VpSummaryDigestSri:      "sha384-validDigest",
 			IssuanceFeeDiscount:     0, // Default no discount
@@ -1029,71 +1029,87 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 		require.Equal(t, msg.ValidationFees, updatedPerm.ValidationFees)
 		require.Equal(t, msg.IssuanceFees, updatedPerm.IssuanceFees)
 		require.Equal(t, msg.VerificationFees, updatedPerm.VerificationFees)
-		require.Equal(t, msg.Country, updatedPerm.Country)
 		require.Equal(t, msg.IssuanceFeeDiscount, updatedPerm.IssuanceFeeDiscount)
 		require.Equal(t, msg.VerificationFeeDiscount, updatedPerm.VerificationFeeDiscount)
 		require.NotNil(t, updatedPerm.EffectiveFrom)
+		require.Equal(t, now.Unix(), updatedPerm.EffectiveFrom.Unix()) // First time: set to now
 		require.NotNil(t, updatedPerm.EffectiveUntil)
+		require.Equal(t, futureTime.Unix(), updatedPerm.EffectiveUntil.Unix())
 		require.Equal(t, msg.VpSummaryDigestSri, updatedPerm.VpSummaryDigestSri)
+		// Execution assertions
+		require.NotNil(t, updatedPerm.Modified)
+		require.Equal(t, now.Unix(), updatedPerm.Modified.Unix())
+		require.NotNil(t, updatedPerm.VpLastStateChange)
+		require.Equal(t, now.Unix(), updatedPerm.VpLastStateChange.Unix())
+		require.Equal(t, uint64(0), updatedPerm.VpCurrentFees)    // Reset to 0
+		require.Equal(t, uint64(0), updatedPerm.VpCurrentDeposit) // Reset to 0
 	})
 
 	// 2. Test renewal case - perm already has EffectiveFrom
-	//t.Run("Renewal perm validation", func(t *testing.T) {
-	//	// Create a perm that already has EffectiveFrom set
-	//	effectiveFrom := now.Add(-90 * 24 * time.Hour) // 90 days ago
-	//	renewalPerm := types.Permission{
-	//		SchemaId:         1,
-	//		Type:             types.PermissionType_PERMISSION_TYPE_ISSUER,
-	//		Authority:          creator,
-	//		Created:          &now,
-	//		CreatedBy:        creator,
-	//		Extended:         &now,
-	//		ExtendedBy:       creator,
-	//		Modified:         &now,
-	//		Country:          "US",
-	//		ValidatorPermId:  validatorPermID,
-	//		VpState:          types.ValidationState_VALIDATION_STATE_PENDING,
-	//		EffectiveFrom:    &effectiveFrom,
-	//		ValidationFees:   10,
-	//		IssuanceFees:     5,
-	//		VerificationFees: 3,
-	//	}
-	//	renewalPermID, err := k.CreatePermission(sdkCtx, renewalPerm)
-	//	require.NoError(t, err)
-	//
-	//	// Set perm to validated with same fees
-	//	msg := &types.MsgSetPermissionVPToValidated{
-	//		Creator:          validatorAddr,
-	//		Id:               renewalPermID,
-	//		ValidationFees:   10,   // Same as existing
-	//		IssuanceFees:     5,    // Same as existing
-	//		VerificationFees: 3,    // Same as existing
-	//		Country:          "US", // Same as existing
-	//		EffectiveUntil:   &futureTime,
-	//	}
-	//
-	//	resp, err := ms.SetPermissionVPToValidated(ctx, msg)
-	//	require.NoError(t, err)
-	//	require.NotNil(t, resp)
-	//
-	//	// Verify perm was updated correctly
-	//	updatedPerm, err := k.GetPermissionByID(sdkCtx, renewalPermID)
-	//	require.NoError(t, err)
-	//	require.Equal(t, types.ValidationState_VALIDATION_STATE_VALIDATED, updatedPerm.VpState)
-	//	require.Equal(t, renewalPerm.ValidationFees, updatedPerm.ValidationFees)
-	//	require.Equal(t, renewalPerm.IssuanceFees, updatedPerm.IssuanceFees)
-	//	require.Equal(t, renewalPerm.VerificationFees, updatedPerm.VerificationFees)
-	//	require.Equal(t, renewalPerm.Country, updatedPerm.Country)
-	//	require.Equal(t, effectiveFrom.Unix(), updatedPerm.EffectiveFrom.Unix())
-	//	require.NotNil(t, updatedPerm.EffectiveUntil)
-	//	require.NotNil(t, updatedPerm.VpExp)
-	//})
+	t.Run("Renewal perm validation", func(t *testing.T) {
+		renewalAddr := sdk.AccAddress([]byte("renewal_creator")).String()
+		// Create a perm that already has EffectiveFrom set (renewal)
+		effectiveFrom := now.Add(-90 * 24 * time.Hour) // 90 days ago
+		currentEffectiveUntil := now.Add(-1 * time.Hour)
+		renewalPerm := types.Permission{
+			SchemaId:         1,
+			Type:             types.PermissionType_ISSUER,
+			Authority:        renewalAddr,
+			Created:          &now,
+			CreatedBy:        renewalAddr,
+			Extended:         &now,
+			ExtendedBy:       renewalAddr,
+			Modified:         &now,
+			Country:          "US",
+			ValidatorPermId:  validatorPermID,
+			VpState:          types.ValidationState_PENDING,
+			EffectiveFrom:    &effectiveFrom,
+			EffectiveUntil:   &currentEffectiveUntil,
+			ValidationFees:   10,
+			IssuanceFees:     5,
+			VerificationFees: 3,
+		}
+		renewalPermID, err := k.CreatePermission(sdkCtx, renewalPerm)
+		require.NoError(t, err)
+
+		// Set perm to validated with same fees
+		msg := &types.MsgSetPermissionVPToValidated{
+			Authority:               validatorAddr,
+			Operator:                validatorAddr,
+			Id:                      renewalPermID,
+			ValidationFees:          10, // Same as existing
+			IssuanceFees:            5,  // Same as existing
+			VerificationFees:        3,  // Same as existing
+			EffectiveUntil:          &futureTime,
+			VpSummaryDigestSri:      "sha384-renewalDigest",
+			IssuanceFeeDiscount:     0,
+			VerificationFeeDiscount: 0,
+		}
+
+		resp, err := ms.SetPermissionVPToValidated(ctx, msg)
+		require.NoError(t, err)
+		require.NotNil(t, resp)
+
+		// Verify perm was updated correctly
+		updatedPerm, err := k.GetPermissionByID(sdkCtx, renewalPermID)
+		require.NoError(t, err)
+		require.Equal(t, types.ValidationState_VALIDATED, updatedPerm.VpState)
+		// Fees should remain unchanged (renewal doesn't overwrite)
+		require.Equal(t, renewalPerm.ValidationFees, updatedPerm.ValidationFees)
+		require.Equal(t, renewalPerm.IssuanceFees, updatedPerm.IssuanceFees)
+		require.Equal(t, renewalPerm.VerificationFees, updatedPerm.VerificationFees)
+		// EffectiveFrom should NOT change on renewal
+		require.Equal(t, effectiveFrom.Unix(), updatedPerm.EffectiveFrom.Unix())
+		require.NotNil(t, updatedPerm.EffectiveUntil)
+		require.Equal(t, futureTime.Unix(), updatedPerm.EffectiveUntil.Unix())
+	})
 
 	// 3. Test validation error - Invalid Permission ID
 	t.Run("Invalid Permission ID", func(t *testing.T) {
 		msg := &types.MsgSetPermissionVPToValidated{
-			Creator: validatorAddr,
-			Id:      9999, // Non-existent ID
+			Authority: validatorAddr,
+			Operator:  validatorAddr,
+			Id:        9999, // Non-existent ID
 		}
 
 		resp, err := ms.SetPermissionVPToValidated(ctx, msg)
@@ -1122,8 +1138,9 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 		require.NoError(t, err)
 
 		msg := &types.MsgSetPermissionVPToValidated{
-			Creator: validatorAddr,
-			Id:      notPendingPermID,
+			Authority: validatorAddr,
+			Operator:  validatorAddr,
+			Id:        notPendingPermID,
 		}
 
 		resp, err := ms.SetPermissionVPToValidated(ctx, msg)
@@ -1152,13 +1169,14 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 		require.NoError(t, err)
 
 		msg := &types.MsgSetPermissionVPToValidated{
-			Creator: otherAddr, // Not the validator
-			Id:      pendingPermID,
+			Authority: otherAddr, // Not the validator
+			Operator:  otherAddr,
+			Id:        pendingPermID,
 		}
 
 		resp, err := ms.SetPermissionVPToValidated(ctx, msg)
 		require.Error(t, err)
-		require.Contains(t, err.Error(), "account running method must be validator grantee")
+		require.Contains(t, err.Error(), "authority must be validator perm authority")
 		require.Nil(t, resp)
 	})
 
@@ -1182,12 +1200,12 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 		require.NoError(t, err)
 
 		msg := &types.MsgSetPermissionVPToValidated{
-			Creator:                 validatorAddr,
+			Authority:               validatorAddr,
+			Operator:                validatorAddr,
 			Id:                      holderPermID,
 			ValidationFees:          10,
 			IssuanceFees:            5,
 			VerificationFees:        3,
-			Country:                 "US",
 			VpSummaryDigestSri:      "sha384-someDigest", // Should be empty for HOLDER
 			IssuanceFeeDiscount:     0,
 			VerificationFeeDiscount: 0,
@@ -1219,12 +1237,12 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 		require.NoError(t, err)
 
 		msg := &types.MsgSetPermissionVPToValidated{
-			Creator:                 validatorAddr,
+			Authority:               validatorAddr,
+			Operator:                validatorAddr,
 			Id:                      grantorPermID,
 			ValidationFees:          10,
 			IssuanceFees:            5,
 			VerificationFees:        3,
-			Country:                 "US",
 			EffectiveUntil:          &futureTime,
 			VpSummaryDigestSri:      "sha384-validDigest",
 			IssuanceFeeDiscount:     5000, // 50% discount
@@ -1279,12 +1297,12 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 
 		// Can set discount up to validator's discount (7000)
 		msg := &types.MsgSetPermissionVPToValidated{
-			Creator:                 validatorAddr,
+			Authority:               validatorAddr,
+			Operator:                validatorAddr,
 			Id:                      issuerPermID,
 			ValidationFees:          10,
 			IssuanceFees:            5,
 			VerificationFees:        3,
-			Country:                 "US",
 			EffectiveUntil:          &futureTime,
 			VpSummaryDigestSri:      "sha384-validDigest",
 			IssuanceFeeDiscount:     5000, // 50% discount (within validator's 70%)
@@ -1338,12 +1356,12 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 
 		// Try to set discount exceeding validator's discount
 		msg := &types.MsgSetPermissionVPToValidated{
-			Creator:                 validatorAddr,
+			Authority:               validatorAddr,
+			Operator:                validatorAddr,
 			Id:                      issuerPermID,
 			ValidationFees:          10,
 			IssuanceFees:            5,
 			VerificationFees:        3,
-			Country:                 "US",
 			EffectiveUntil:          &futureTime,
 			VpSummaryDigestSri:      "sha384-validDigest",
 			IssuanceFeeDiscount:     6000, // 60% discount (exceeds validator's 50%)
@@ -1375,12 +1393,12 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 		require.NoError(t, err)
 
 		msg := &types.MsgSetPermissionVPToValidated{
-			Creator:                 validatorAddr,
+			Authority:               validatorAddr,
+			Operator:                validatorAddr,
 			Id:                      grantorPermID,
 			ValidationFees:          10,
 			IssuanceFees:            5,
 			VerificationFees:        3,
-			Country:                 "US",
 			EffectiveUntil:          &futureTime,
 			VpSummaryDigestSri:      "sha384-validDigest",
 			IssuanceFeeDiscount:     10001, // Exceeds maximum of 10000
@@ -1399,11 +1417,11 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 		renewalPerm := types.Permission{
 			SchemaId:            1,
 			Type:                types.PermissionType_ISSUER_GRANTOR,
-			Authority:             creator,
+			Authority:             otherAddr, // Use different authority to avoid overlap with test 7
 			Created:             &now,
-			CreatedBy:           creator,
+			CreatedBy:           otherAddr,
 			Extended:            &now,
-			ExtendedBy:          creator,
+			ExtendedBy:          otherAddr,
 			Modified:            &now,
 			Country:             "US",
 			ValidatorPermId:     validatorPermID,
@@ -1419,12 +1437,12 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 
 		// Try to change discount during renewal
 		msg := &types.MsgSetPermissionVPToValidated{
-			Creator:                 validatorAddr,
+			Authority:               validatorAddr,
+			Operator:                validatorAddr,
 			Id:                      renewalPermID,
-			ValidationFees:          10,   // Must match
-			IssuanceFees:            5,    // Must match
-			VerificationFees:        3,    // Must match
-			Country:                 "US", // Must match
+			ValidationFees:          10, // Must match
+			IssuanceFees:            5,  // Must match
+			VerificationFees:        3,  // Must match
 			EffectiveUntil:          &futureTime,
 			VpSummaryDigestSri:      "sha384-validDigest",
 			IssuanceFeeDiscount:     4000, // Different from existing 3000
@@ -1489,12 +1507,12 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 		require.NoError(t, err)
 
 		msg := &types.MsgSetPermissionVPToValidated{
-			Creator:                 validatorAddr,
+			Authority:               validatorAddr,
+			Operator:                validatorAddr,
 			Id:                      issuerPermID,
 			ValidationFees:          10,
 			IssuanceFees:            5,
 			VerificationFees:        3,
-			Country:                 "US",
 			EffectiveUntil:          &futureTime,
 			VpSummaryDigestSri:      "sha384-validDigest",
 			IssuanceFeeDiscount:     8000, // 80% discount (allowed in ECOSYSTEM mode)
@@ -1509,6 +1527,922 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, uint64(8000), updatedPerm.IssuanceFeeDiscount)
 	})
+
+	// 13. Test effective_until <= now (first time) should fail
+	t.Run("effective_until must be greater than now for first time", func(t *testing.T) {
+		euAddr := sdk.AccAddress([]byte("eu_now_creator")).String()
+		pendingPerm := types.Permission{
+			SchemaId:        1,
+			Type:            types.PermissionType_ISSUER,
+			Authority:       euAddr,
+			Created:         &now,
+			CreatedBy:       euAddr,
+			Extended:        &now,
+			ExtendedBy:      euAddr,
+			Modified:        &now,
+			Country:         "US",
+			ValidatorPermId: validatorPermID,
+			VpState:         types.ValidationState_PENDING,
+		}
+		permID, err := k.CreatePermission(sdkCtx, pendingPerm)
+		require.NoError(t, err)
+
+		pastEffUntil := now.Add(-1 * time.Hour) // in the past
+		msg := &types.MsgSetPermissionVPToValidated{
+			Authority:          validatorAddr,
+			Operator:           validatorAddr,
+			Id:                 permID,
+			ValidationFees:     10,
+			IssuanceFees:       5,
+			VerificationFees:   3,
+			EffectiveUntil:     &pastEffUntil,
+			VpSummaryDigestSri: "sha384-validDigest",
+		}
+
+		resp, err := ms.SetPermissionVPToValidated(ctx, msg)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "effective_until must be greater than current timestamp")
+		require.Nil(t, resp)
+	})
+
+	// 14. Test effective_until > vp_exp should fail
+	t.Run("effective_until must be lower or equal to vp_exp", func(t *testing.T) {
+		// Create schema with validity period so vpExp is calculated
+		csKeeper.CreateMockCredentialSchemaFull(cstypes.CredentialSchema{
+			Id:                              3,
+			IssuerPermManagementMode:        cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
+			VerifierPermManagementMode:      cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
+			IssuerValidationValidityPeriod:  30, // 30 days
+		})
+
+		// Create validator for schema 3
+		vpAddr := sdk.AccAddress([]byte("vp_exp_validator")).String()
+		vpValidator := types.Permission{
+			SchemaId:      3,
+			Type:          types.PermissionType_ISSUER_GRANTOR,
+			Authority:     vpAddr,
+			Created:       &now,
+			CreatedBy:     vpAddr,
+			Extended:      &now,
+			ExtendedBy:    vpAddr,
+			Modified:      &now,
+			VpState:       types.ValidationState_VALIDATED,
+			EffectiveFrom: &pastTime,
+		}
+		vpValidatorID, err := k.CreatePermission(sdkCtx, vpValidator)
+		require.NoError(t, err)
+
+		vpTestAddr := sdk.AccAddress([]byte("vp_exp_creator")).String()
+		pendingPerm := types.Permission{
+			SchemaId:        3,
+			Type:            types.PermissionType_ISSUER,
+			Authority:       vpTestAddr,
+			Created:         &now,
+			CreatedBy:       vpTestAddr,
+			Extended:        &now,
+			ExtendedBy:      vpTestAddr,
+			Modified:        &now,
+			ValidatorPermId: vpValidatorID,
+			VpState:         types.ValidationState_PENDING,
+		}
+		permID, err := k.CreatePermission(sdkCtx, pendingPerm)
+		require.NoError(t, err)
+
+		// vpExp will be now + 30 days. Set effective_until to now + 60 days (beyond vpExp)
+		farFuture := now.Add(60 * 24 * time.Hour)
+		msg := &types.MsgSetPermissionVPToValidated{
+			Authority:          vpAddr,
+			Operator:           vpAddr,
+			Id:                 permID,
+			ValidationFees:     10,
+			IssuanceFees:       5,
+			VerificationFees:   3,
+			EffectiveUntil:     &farFuture,
+			VpSummaryDigestSri: "sha384-validDigest",
+		}
+
+		resp, err := ms.SetPermissionVPToValidated(ctx, msg)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "effective_until must be lower or equal to vp_exp")
+		require.Nil(t, resp)
+	})
+
+	// 15. Test effective_until nil resolves to vpExp
+	t.Run("effective_until nil resolves to vp_exp", func(t *testing.T) {
+		// Schema 3 already has 30-day validity period from test 14
+		vpAddr := sdk.AccAddress([]byte("vp_exp_validator")).String()
+		// Find the validator perm ID for schema 3
+		vpNilAddr := sdk.AccAddress([]byte("vp_nil_creator")).String()
+
+		// Create validator for schema 3 (separate to avoid overlap)
+		vpValidator2 := types.Permission{
+			SchemaId:      3,
+			Type:          types.PermissionType_ISSUER_GRANTOR,
+			Authority:     vpAddr,
+			Created:       &now,
+			CreatedBy:     vpAddr,
+			Extended:      &now,
+			ExtendedBy:    vpAddr,
+			Modified:      &now,
+			VpState:       types.ValidationState_VALIDATED,
+			EffectiveFrom: &pastTime,
+		}
+		vpValidator2ID, err := k.CreatePermission(sdkCtx, vpValidator2)
+		require.NoError(t, err)
+
+		pendingPerm := types.Permission{
+			SchemaId:        3,
+			Type:            types.PermissionType_ISSUER,
+			Authority:       vpNilAddr,
+			Created:         &now,
+			CreatedBy:       vpNilAddr,
+			Extended:        &now,
+			ExtendedBy:      vpNilAddr,
+			Modified:        &now,
+			ValidatorPermId: vpValidator2ID,
+			VpState:         types.ValidationState_PENDING,
+		}
+		permID, err := k.CreatePermission(sdkCtx, pendingPerm)
+		require.NoError(t, err)
+
+		msg := &types.MsgSetPermissionVPToValidated{
+			Authority:          vpAddr,
+			Operator:           vpAddr,
+			Id:                 permID,
+			ValidationFees:     10,
+			IssuanceFees:       5,
+			VerificationFees:   3,
+			EffectiveUntil:     nil, // nil should resolve to vpExp
+			VpSummaryDigestSri: "sha384-validDigest",
+		}
+
+		resp, err := ms.SetPermissionVPToValidated(ctx, msg)
+		require.NoError(t, err)
+		require.NotNil(t, resp)
+
+		updatedPerm, err := k.GetPermissionByID(sdkCtx, permID)
+		require.NoError(t, err)
+		// effective_until should equal vpExp (now + 30 days)
+		expectedVpExp := now.AddDate(0, 0, 30)
+		require.NotNil(t, updatedPerm.VpExp)
+		require.Equal(t, expectedVpExp.Unix(), updatedPerm.VpExp.Unix())
+		require.NotNil(t, updatedPerm.EffectiveUntil)
+		require.Equal(t, expectedVpExp.Unix(), updatedPerm.EffectiveUntil.Unix())
+	})
+
+	// 16. Test renewal effective_until must be greater than current effective_until
+	t.Run("Renewal effective_until must be greater than current", func(t *testing.T) {
+		renewAddr := sdk.AccAddress([]byte("renew_eu_creator")).String()
+		effectiveFrom := now.Add(-90 * 24 * time.Hour)
+		currentEffUntil := now.Add(30 * 24 * time.Hour) // 30 days in future
+		renewalPerm := types.Permission{
+			SchemaId:         1,
+			Type:             types.PermissionType_ISSUER,
+			Authority:        renewAddr,
+			Created:          &now,
+			CreatedBy:        renewAddr,
+			Extended:         &now,
+			ExtendedBy:       renewAddr,
+			Modified:         &now,
+			Country:          "US",
+			ValidatorPermId:  validatorPermID,
+			VpState:          types.ValidationState_PENDING,
+			EffectiveFrom:    &effectiveFrom,
+			EffectiveUntil:   &currentEffUntil,
+			ValidationFees:   10,
+			IssuanceFees:     5,
+			VerificationFees: 3,
+		}
+		permID, err := k.CreatePermission(sdkCtx, renewalPerm)
+		require.NoError(t, err)
+
+		// Try with effective_until <= current effective_until
+		smallerEffUntil := now.Add(10 * 24 * time.Hour)
+		msg := &types.MsgSetPermissionVPToValidated{
+			Authority:          validatorAddr,
+			Operator:           validatorAddr,
+			Id:                 permID,
+			ValidationFees:     10,
+			IssuanceFees:       5,
+			VerificationFees:   3,
+			EffectiveUntil:     &smallerEffUntil,
+			VpSummaryDigestSri: "sha384-validDigest",
+		}
+
+		resp, err := ms.SetPermissionVPToValidated(ctx, msg)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "effective_until must be greater than current effective_until")
+		require.Nil(t, resp)
+	})
+
+	// 17. Test renewal validation_fees mismatch
+	t.Run("Renewal validation_fees must match", func(t *testing.T) {
+		rvfAddr := sdk.AccAddress([]byte("ren_valfees_addr")).String()
+		effectiveFrom := now.Add(-90 * 24 * time.Hour)
+		currentEffUntil := now.Add(-1 * time.Hour)
+		renewalPerm := types.Permission{
+			SchemaId:         1,
+			Type:             types.PermissionType_ISSUER,
+			Authority:        rvfAddr,
+			Created:          &now,
+			CreatedBy:        rvfAddr,
+			Extended:         &now,
+			ExtendedBy:       rvfAddr,
+			Modified:         &now,
+			Country:          "US",
+			ValidatorPermId:  validatorPermID,
+			VpState:          types.ValidationState_PENDING,
+			EffectiveFrom:    &effectiveFrom,
+			EffectiveUntil:   &currentEffUntil,
+			ValidationFees:   10,
+			IssuanceFees:     5,
+			VerificationFees: 3,
+		}
+		permID, err := k.CreatePermission(sdkCtx, renewalPerm)
+		require.NoError(t, err)
+
+		msg := &types.MsgSetPermissionVPToValidated{
+			Authority:          validatorAddr,
+			Operator:           validatorAddr,
+			Id:                 permID,
+			ValidationFees:     20, // Different from existing 10
+			IssuanceFees:       5,
+			VerificationFees:   3,
+			EffectiveUntil:     &futureTime,
+			VpSummaryDigestSri: "sha384-validDigest",
+		}
+
+		resp, err := ms.SetPermissionVPToValidated(ctx, msg)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "validation_fees cannot be changed during renewal")
+		require.Nil(t, resp)
+	})
+
+	// 18. Test renewal issuance_fees mismatch
+	t.Run("Renewal issuance_fees must match", func(t *testing.T) {
+		rifAddr := sdk.AccAddress([]byte("ren_issfees_addr")).String()
+		effectiveFrom := now.Add(-90 * 24 * time.Hour)
+		currentEffUntil := now.Add(-1 * time.Hour)
+		renewalPerm := types.Permission{
+			SchemaId:         1,
+			Type:             types.PermissionType_ISSUER,
+			Authority:        rifAddr,
+			Created:          &now,
+			CreatedBy:        rifAddr,
+			Extended:         &now,
+			ExtendedBy:       rifAddr,
+			Modified:         &now,
+			Country:          "US",
+			ValidatorPermId:  validatorPermID,
+			VpState:          types.ValidationState_PENDING,
+			EffectiveFrom:    &effectiveFrom,
+			EffectiveUntil:   &currentEffUntil,
+			ValidationFees:   10,
+			IssuanceFees:     5,
+			VerificationFees: 3,
+		}
+		permID, err := k.CreatePermission(sdkCtx, renewalPerm)
+		require.NoError(t, err)
+
+		msg := &types.MsgSetPermissionVPToValidated{
+			Authority:          validatorAddr,
+			Operator:           validatorAddr,
+			Id:                 permID,
+			ValidationFees:     10,
+			IssuanceFees:       99, // Different from existing 5
+			VerificationFees:   3,
+			EffectiveUntil:     &futureTime,
+			VpSummaryDigestSri: "sha384-validDigest",
+		}
+
+		resp, err := ms.SetPermissionVPToValidated(ctx, msg)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "issuance_fees cannot be changed during renewal")
+		require.Nil(t, resp)
+	})
+
+	// 19. Test renewal verification_fees mismatch
+	t.Run("Renewal verification_fees must match", func(t *testing.T) {
+		rvAddr := sdk.AccAddress([]byte("ren_verfees_addr")).String()
+		effectiveFrom := now.Add(-90 * 24 * time.Hour)
+		currentEffUntil := now.Add(-1 * time.Hour)
+		renewalPerm := types.Permission{
+			SchemaId:         1,
+			Type:             types.PermissionType_ISSUER,
+			Authority:        rvAddr,
+			Created:          &now,
+			CreatedBy:        rvAddr,
+			Extended:         &now,
+			ExtendedBy:       rvAddr,
+			Modified:         &now,
+			Country:          "US",
+			ValidatorPermId:  validatorPermID,
+			VpState:          types.ValidationState_PENDING,
+			EffectiveFrom:    &effectiveFrom,
+			EffectiveUntil:   &currentEffUntil,
+			ValidationFees:   10,
+			IssuanceFees:     5,
+			VerificationFees: 3,
+		}
+		permID, err := k.CreatePermission(sdkCtx, renewalPerm)
+		require.NoError(t, err)
+
+		msg := &types.MsgSetPermissionVPToValidated{
+			Authority:          validatorAddr,
+			Operator:           validatorAddr,
+			Id:                 permID,
+			ValidationFees:     10,
+			IssuanceFees:       5,
+			VerificationFees:   99, // Different from existing 3
+			EffectiveUntil:     &futureTime,
+			VpSummaryDigestSri: "sha384-validDigest",
+		}
+
+		resp, err := ms.SetPermissionVPToValidated(ctx, msg)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "verification_fees cannot be changed during renewal")
+		require.Nil(t, resp)
+	})
+
+	// 20. Test overlap - existing perm never expires (nil effective_until)
+	t.Run("Overlap with never-expiring permission", func(t *testing.T) {
+		overlapAddr := sdk.AccAddress([]byte("overlap_never_addr")).String()
+		// Create an existing validated perm with nil effective_until (never expires)
+		existingPerm := types.Permission{
+			SchemaId:        1,
+			Type:            types.PermissionType_ISSUER,
+			Authority:       overlapAddr,
+			Created:         &now,
+			CreatedBy:       overlapAddr,
+			Extended:        &now,
+			ExtendedBy:      overlapAddr,
+			Modified:        &now,
+			Country:         "US",
+			ValidatorPermId: validatorPermID,
+			VpState:         types.ValidationState_VALIDATED,
+			EffectiveFrom:   &pastTime,
+			EffectiveUntil:  nil, // Never expires
+		}
+		_, err := k.CreatePermission(sdkCtx, existingPerm)
+		require.NoError(t, err)
+
+		// Try to create a new validated perm with same (schema, type, validator, authority)
+		newPerm := types.Permission{
+			SchemaId:        1,
+			Type:            types.PermissionType_ISSUER,
+			Authority:       overlapAddr,
+			Created:         &now,
+			CreatedBy:       overlapAddr,
+			Extended:        &now,
+			ExtendedBy:      overlapAddr,
+			Modified:        &now,
+			Country:         "US",
+			ValidatorPermId: validatorPermID,
+			VpState:         types.ValidationState_PENDING,
+		}
+		newPermID, err := k.CreatePermission(sdkCtx, newPerm)
+		require.NoError(t, err)
+
+		msg := &types.MsgSetPermissionVPToValidated{
+			Authority:          validatorAddr,
+			Operator:           validatorAddr,
+			Id:                 newPermID,
+			ValidationFees:     10,
+			IssuanceFees:       5,
+			VerificationFees:   3,
+			EffectiveUntil:     &futureTime,
+			VpSummaryDigestSri: "sha384-validDigest",
+		}
+
+		resp, err := ms.SetPermissionVPToValidated(ctx, msg)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "overlap check failed")
+		require.Contains(t, err.Error(), "never expires")
+		require.Nil(t, resp)
+	})
+
+	// 21. Test overlap - existing perm's effective_until after new perm's effective_from
+	t.Run("Overlap with active permission time range", func(t *testing.T) {
+		overlapAddr2 := sdk.AccAddress([]byte("overlap_range_addr")).String()
+		// Create an existing validated perm that's still active (effective_until in the future)
+		existingEffUntil := now.Add(30 * 24 * time.Hour) // 30 days from now
+		existingPerm := types.Permission{
+			SchemaId:        1,
+			Type:            types.PermissionType_ISSUER,
+			Authority:       overlapAddr2,
+			Created:         &now,
+			CreatedBy:       overlapAddr2,
+			Extended:        &now,
+			ExtendedBy:      overlapAddr2,
+			Modified:        &now,
+			Country:         "US",
+			ValidatorPermId: validatorPermID,
+			VpState:         types.ValidationState_VALIDATED,
+			EffectiveFrom:   &pastTime,
+			EffectiveUntil:  &existingEffUntil,
+		}
+		_, err := k.CreatePermission(sdkCtx, existingPerm)
+		require.NoError(t, err)
+
+		// Try to validate a new perm — effective_from will be set to now, which is before existing's effective_until
+		newPerm := types.Permission{
+			SchemaId:        1,
+			Type:            types.PermissionType_ISSUER,
+			Authority:       overlapAddr2,
+			Created:         &now,
+			CreatedBy:       overlapAddr2,
+			Extended:        &now,
+			ExtendedBy:      overlapAddr2,
+			Modified:        &now,
+			Country:         "US",
+			ValidatorPermId: validatorPermID,
+			VpState:         types.ValidationState_PENDING,
+		}
+		newPermID, err := k.CreatePermission(sdkCtx, newPerm)
+		require.NoError(t, err)
+
+		msg := &types.MsgSetPermissionVPToValidated{
+			Authority:          validatorAddr,
+			Operator:           validatorAddr,
+			Id:                 newPermID,
+			ValidationFees:     10,
+			IssuanceFees:       5,
+			VerificationFees:   3,
+			EffectiveUntil:     &futureTime,
+			VpSummaryDigestSri: "sha384-validDigest",
+		}
+
+		resp, err := ms.SetPermissionVPToValidated(ctx, msg)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "overlap check failed")
+		require.Nil(t, resp)
+	})
+
+	// 22. Test validator perm not active (revoked)
+	t.Run("Validator perm is revoked", func(t *testing.T) {
+		revokedTime := now.Add(-1 * time.Hour)
+		revokedValidator := types.Permission{
+			SchemaId:      1,
+			Type:          types.PermissionType_ISSUER_GRANTOR,
+			Authority:     validatorAddr,
+			Created:       &now,
+			CreatedBy:     validatorAddr,
+			Extended:      &now,
+			ExtendedBy:    validatorAddr,
+			Modified:      &now,
+			VpState:       types.ValidationState_VALIDATED,
+			EffectiveFrom: &pastTime,
+			Revoked:       &revokedTime,
+		}
+		revokedValidatorID, err := k.CreatePermission(sdkCtx, revokedValidator)
+		require.NoError(t, err)
+
+		rvAddr := sdk.AccAddress([]byte("revoked_val_addr")).String()
+		pendingPerm := types.Permission{
+			SchemaId:        1,
+			Type:            types.PermissionType_ISSUER,
+			Authority:       rvAddr,
+			Created:         &now,
+			CreatedBy:       rvAddr,
+			Extended:        &now,
+			ExtendedBy:      rvAddr,
+			Modified:        &now,
+			ValidatorPermId: revokedValidatorID,
+			VpState:         types.ValidationState_PENDING,
+		}
+		permID, err := k.CreatePermission(sdkCtx, pendingPerm)
+		require.NoError(t, err)
+
+		msg := &types.MsgSetPermissionVPToValidated{
+			Authority:          validatorAddr,
+			Operator:           validatorAddr,
+			Id:                 permID,
+			ValidationFees:     10,
+			IssuanceFees:       5,
+			VerificationFees:   3,
+			EffectiveUntil:     &futureTime,
+			VpSummaryDigestSri: "sha384-validDigest",
+		}
+
+		resp, err := ms.SetPermissionVPToValidated(ctx, msg)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "validator perm is not valid")
+		require.Nil(t, resp)
+	})
+
+	// 23. Test with VpCurrentFees and VpCurrentDeposit > 0 (execution: fee transfer + trust deposit)
+	t.Run("Execution with fees and trust deposit", func(t *testing.T) {
+		feeAddr := sdk.AccAddress([]byte("fee_exec_creator")).String()
+		newPerm := types.Permission{
+			SchemaId:         1,
+			Type:             types.PermissionType_ISSUER,
+			Authority:        feeAddr,
+			Created:          &now,
+			CreatedBy:        feeAddr,
+			Extended:         &now,
+			ExtendedBy:       feeAddr,
+			Modified:         &now,
+			Country:          "US",
+			ValidatorPermId:  validatorPermID,
+			VpState:          types.ValidationState_PENDING,
+			VpCurrentFees:    100, // Has fees to transfer
+			VpCurrentDeposit: 50,  // Has deposit to transfer
+		}
+		permID, err := k.CreatePermission(sdkCtx, newPerm)
+		require.NoError(t, err)
+
+		msg := &types.MsgSetPermissionVPToValidated{
+			Authority:          validatorAddr,
+			Operator:           validatorAddr,
+			Id:                 permID,
+			ValidationFees:     10,
+			IssuanceFees:       5,
+			VerificationFees:   3,
+			EffectiveUntil:     &futureTime,
+			VpSummaryDigestSri: "sha384-validDigest",
+		}
+
+		resp, err := ms.SetPermissionVPToValidated(ctx, msg)
+		require.NoError(t, err)
+		require.NotNil(t, resp)
+
+		updatedPerm, err := k.GetPermissionByID(sdkCtx, permID)
+		require.NoError(t, err)
+		require.Equal(t, uint64(0), updatedPerm.VpCurrentFees)    // Reset to 0
+		require.Equal(t, uint64(0), updatedPerm.VpCurrentDeposit) // Reset to 0
+		require.Equal(t, uint64(50), updatedPerm.VpValidatorDeposit) // Accumulated
+	})
+
+	// 24. Test VERIFIER_GRANTOR with verification_fee_discount
+	t.Run("VERIFIER_GRANTOR with verification_fee_discount", func(t *testing.T) {
+		// Create schema with GRANTOR_VALIDATION for verifier mode
+		csKeeper.CreateMockCredentialSchemaFull(cstypes.CredentialSchema{
+			Id:                              4,
+			IssuerPermManagementMode:        cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
+			VerifierPermManagementMode:      cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
+		})
+
+		vgAddr := sdk.AccAddress([]byte("ver_grantor_vali")).String()
+		vgValidator := types.Permission{
+			SchemaId:      4,
+			Type:          types.PermissionType_VERIFIER_GRANTOR,
+			Authority:     vgAddr,
+			Created:       &now,
+			CreatedBy:     vgAddr,
+			Extended:      &now,
+			ExtendedBy:    vgAddr,
+			Modified:      &now,
+			VpState:       types.ValidationState_VALIDATED,
+			EffectiveFrom: &pastTime,
+		}
+		vgValidatorID, err := k.CreatePermission(sdkCtx, vgValidator)
+		require.NoError(t, err)
+
+		// Create VERIFIER_GRANTOR perm (can set its own verification_fee_discount)
+		vgPerm := types.Permission{
+			SchemaId:        4,
+			Type:            types.PermissionType_VERIFIER_GRANTOR,
+			Authority:       sdk.AccAddress([]byte("vg_perm_creator")).String(),
+			Created:         &now,
+			CreatedBy:       sdk.AccAddress([]byte("vg_perm_creator")).String(),
+			Extended:        &now,
+			ExtendedBy:      sdk.AccAddress([]byte("vg_perm_creator")).String(),
+			Modified:        &now,
+			ValidatorPermId: vgValidatorID,
+			VpState:         types.ValidationState_PENDING,
+		}
+		vgPermID, err := k.CreatePermission(sdkCtx, vgPerm)
+		require.NoError(t, err)
+
+		msg := &types.MsgSetPermissionVPToValidated{
+			Authority:               vgAddr,
+			Operator:                vgAddr,
+			Id:                      vgPermID,
+			ValidationFees:          10,
+			IssuanceFees:            5,
+			VerificationFees:        3,
+			EffectiveUntil:          &futureTime,
+			VpSummaryDigestSri:      "sha384-validDigest",
+			IssuanceFeeDiscount:     0,
+			VerificationFeeDiscount: 6000, // 60% discount
+		}
+
+		resp, err := ms.SetPermissionVPToValidated(ctx, msg)
+		require.NoError(t, err)
+		require.NotNil(t, resp)
+
+		updatedPerm, err := k.GetPermissionByID(sdkCtx, vgPermID)
+		require.NoError(t, err)
+		require.Equal(t, uint64(6000), updatedPerm.VerificationFeeDiscount)
+	})
+
+	// 25. Test VERIFIER in GRANTOR mode exceeding validator's verification_fee_discount
+	t.Run("VERIFIER exceeding validator verification_fee_discount", func(t *testing.T) {
+		// Create validator with verification_fee_discount
+		vgAddr2 := sdk.AccAddress([]byte("vg_disc_validato")).String()
+		vgValidator2 := types.Permission{
+			SchemaId:                 4,
+			Type:                     types.PermissionType_VERIFIER_GRANTOR,
+			Authority:                vgAddr2,
+			Created:                  &now,
+			CreatedBy:                vgAddr2,
+			Extended:                 &now,
+			ExtendedBy:               vgAddr2,
+			Modified:                 &now,
+			VpState:                  types.ValidationState_VALIDATED,
+			VerificationFeeDiscount:  5000, // 50% discount
+			EffectiveFrom:            &pastTime,
+		}
+		vgValidator2ID, err := k.CreatePermission(sdkCtx, vgValidator2)
+		require.NoError(t, err)
+
+		verPerm := types.Permission{
+			SchemaId:        4,
+			Type:            types.PermissionType_VERIFIER,
+			Authority:       sdk.AccAddress([]byte("ver_exceed_addr")).String(),
+			Created:         &now,
+			CreatedBy:       sdk.AccAddress([]byte("ver_exceed_addr")).String(),
+			Extended:        &now,
+			ExtendedBy:      sdk.AccAddress([]byte("ver_exceed_addr")).String(),
+			Modified:        &now,
+			ValidatorPermId: vgValidator2ID,
+			VpState:         types.ValidationState_PENDING,
+		}
+		verPermID, err := k.CreatePermission(sdkCtx, verPerm)
+		require.NoError(t, err)
+
+		msg := &types.MsgSetPermissionVPToValidated{
+			Authority:               vgAddr2,
+			Operator:                vgAddr2,
+			Id:                      verPermID,
+			ValidationFees:          10,
+			IssuanceFees:            5,
+			VerificationFees:        3,
+			EffectiveUntil:          &futureTime,
+			VpSummaryDigestSri:      "sha384-validDigest",
+			IssuanceFeeDiscount:     0,
+			VerificationFeeDiscount: 7000, // 70% exceeds validator's 50%
+		}
+
+		resp, err := ms.SetPermissionVPToValidated(ctx, msg)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "cannot exceed validator's discount")
+		require.Nil(t, resp)
+	})
+
+	// 26. Test overlap check skips revoked permissions
+	t.Run("Overlap check skips revoked permissions", func(t *testing.T) {
+		skipAddr := sdk.AccAddress([]byte("overlap_skip_addr")).String()
+		revokedTime := now.Add(-1 * time.Hour)
+		// Create a revoked perm (should be skipped in overlap check)
+		revokedPerm := types.Permission{
+			SchemaId:        1,
+			Type:            types.PermissionType_ISSUER,
+			Authority:       skipAddr,
+			Created:         &now,
+			CreatedBy:       skipAddr,
+			Extended:        &now,
+			ExtendedBy:      skipAddr,
+			Modified:        &now,
+			Country:         "US",
+			ValidatorPermId: validatorPermID,
+			VpState:         types.ValidationState_VALIDATED,
+			EffectiveFrom:   &pastTime,
+			EffectiveUntil:  nil,     // Never expires, but it's revoked
+			Revoked:         &revokedTime,
+		}
+		_, err := k.CreatePermission(sdkCtx, revokedPerm)
+		require.NoError(t, err)
+
+		// This new perm should NOT conflict with the revoked one
+		newPerm := types.Permission{
+			SchemaId:        1,
+			Type:            types.PermissionType_ISSUER,
+			Authority:       skipAddr,
+			Created:         &now,
+			CreatedBy:       skipAddr,
+			Extended:        &now,
+			ExtendedBy:      skipAddr,
+			Modified:        &now,
+			Country:         "US",
+			ValidatorPermId: validatorPermID,
+			VpState:         types.ValidationState_PENDING,
+		}
+		newPermID, err := k.CreatePermission(sdkCtx, newPerm)
+		require.NoError(t, err)
+
+		msg := &types.MsgSetPermissionVPToValidated{
+			Authority:          validatorAddr,
+			Operator:           validatorAddr,
+			Id:                 newPermID,
+			ValidationFees:     10,
+			IssuanceFees:       5,
+			VerificationFees:   3,
+			EffectiveUntil:     &futureTime,
+			VpSummaryDigestSri: "sha384-validDigest",
+		}
+
+		resp, err := ms.SetPermissionVPToValidated(ctx, msg)
+		require.NoError(t, err)
+		require.NotNil(t, resp)
+	})
+
+	// 27. Test verification_fee_discount exceeds maximum
+	t.Run("Verification_fee_discount exceeds maximum", func(t *testing.T) {
+		vfdAddr := sdk.AccAddress([]byte("vfd_max_creator")).String()
+		grantorPerm := types.Permission{
+			SchemaId:        4,
+			Type:            types.PermissionType_VERIFIER_GRANTOR,
+			Authority:       vfdAddr,
+			Created:         &now,
+			CreatedBy:       vfdAddr,
+			Extended:        &now,
+			ExtendedBy:      vfdAddr,
+			Modified:        &now,
+			ValidatorPermId: func() uint64 {
+				// Reuse a schema 4 validator
+				vAddr := sdk.AccAddress([]byte("vfd_max_validato")).String()
+				v := types.Permission{
+					SchemaId:      4,
+					Type:          types.PermissionType_VERIFIER_GRANTOR,
+					Authority:     vAddr,
+					Created:       &now,
+					CreatedBy:     vAddr,
+					Extended:      &now,
+					ExtendedBy:    vAddr,
+					Modified:      &now,
+					VpState:       types.ValidationState_VALIDATED,
+					EffectiveFrom: &pastTime,
+				}
+				id, _ := k.CreatePermission(sdkCtx, v)
+				return id
+			}(),
+			VpState: types.ValidationState_PENDING,
+		}
+		grantorPermID, err := k.CreatePermission(sdkCtx, grantorPerm)
+		require.NoError(t, err)
+
+		msg := &types.MsgSetPermissionVPToValidated{
+			Authority:               sdk.AccAddress([]byte("vfd_max_validato")).String(),
+			Operator:                sdk.AccAddress([]byte("vfd_max_validato")).String(),
+			Id:                      grantorPermID,
+			ValidationFees:          10,
+			IssuanceFees:            5,
+			VerificationFees:        3,
+			EffectiveUntil:          &futureTime,
+			VpSummaryDigestSri:      "sha384-validDigest",
+			IssuanceFeeDiscount:     0,
+			VerificationFeeDiscount: 10001, // Exceeds maximum
+		}
+
+		resp, err := ms.SetPermissionVPToValidated(ctx, msg)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "cannot exceed")
+		require.Nil(t, resp)
+	})
+
+	// 28. Test renewal discount for verification_fee_discount must match
+	t.Run("Renewal verification_fee_discount must match existing", func(t *testing.T) {
+		rvdAddr := sdk.AccAddress([]byte("ren_vfd_creator")).String()
+		effectiveFrom := now.Add(-90 * 24 * time.Hour)
+		currentEffUntil := now.Add(-1 * time.Hour)
+		renewalPerm := types.Permission{
+			SchemaId:                4,
+			Type:                    types.PermissionType_VERIFIER_GRANTOR,
+			Authority:               rvdAddr,
+			Created:                 &now,
+			CreatedBy:               rvdAddr,
+			Extended:                &now,
+			ExtendedBy:              rvdAddr,
+			Modified:                &now,
+			ValidatorPermId: func() uint64 {
+				vAddr := sdk.AccAddress([]byte("rvd_validator_ad")).String()
+				v := types.Permission{
+					SchemaId:      4,
+					Type:          types.PermissionType_VERIFIER_GRANTOR,
+					Authority:     vAddr,
+					Created:       &now,
+					CreatedBy:     vAddr,
+					Extended:      &now,
+					ExtendedBy:    vAddr,
+					Modified:      &now,
+					VpState:       types.ValidationState_VALIDATED,
+					EffectiveFrom: &pastTime,
+				}
+				id, _ := k.CreatePermission(sdkCtx, v)
+				return id
+			}(),
+			VpState:                 types.ValidationState_PENDING,
+			EffectiveFrom:           &effectiveFrom,
+			EffectiveUntil:          &currentEffUntil,
+			ValidationFees:          10,
+			IssuanceFees:            5,
+			VerificationFees:        3,
+			VerificationFeeDiscount: 4000, // Existing 40%
+		}
+		permID, err := k.CreatePermission(sdkCtx, renewalPerm)
+		require.NoError(t, err)
+
+		msg := &types.MsgSetPermissionVPToValidated{
+			Authority:               sdk.AccAddress([]byte("rvd_validator_ad")).String(),
+			Operator:                sdk.AccAddress([]byte("rvd_validator_ad")).String(),
+			Id:                      permID,
+			ValidationFees:          10,
+			IssuanceFees:            5,
+			VerificationFees:        3,
+			EffectiveUntil:          &futureTime,
+			VpSummaryDigestSri:      "sha384-validDigest",
+			IssuanceFeeDiscount:     0,
+			VerificationFeeDiscount: 6000, // Different from existing 4000
+		}
+
+		resp, err := ms.SetPermissionVPToValidated(ctx, msg)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "verification_fee_discount cannot be changed during renewal")
+		require.Nil(t, resp)
+	})
+}
+
+// Test AUTHZ-CHECK failure for SetPermissionVPToValidated
+func TestSetPermissionVPToValidated_AuthzCheckFailure(t *testing.T) {
+	k, ms, csKeeper, _, ctx, delKeeper := setupMsgServerWithDelegation(t)
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	blockTime := time.Date(2023, 1, 15, 0, 0, 0, 0, time.UTC)
+	sdkCtx = sdkCtx.WithBlockTime(blockTime)
+	ctx = sdk.WrapSDKContext(sdkCtx)
+
+	validatorAddr := sdk.AccAddress([]byte("test_validator")).String()
+	operatorAddr := sdk.AccAddress([]byte("test_operator")).String()
+	creatorAddr := sdk.AccAddress([]byte("test_creator")).String()
+
+	now := sdkCtx.BlockTime()
+	pastTime := now.Add(-1 * time.Hour)
+	futureTime := now.Add(365 * 24 * time.Hour)
+
+	csKeeper.CreateMockCredentialSchema(1,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
+
+	// Create validator perm
+	validatorPerm := types.Permission{
+		SchemaId:      1,
+		Type:          types.PermissionType_ISSUER_GRANTOR,
+		Authority:     validatorAddr,
+		Created:       &now,
+		CreatedBy:     validatorAddr,
+		Extended:      &now,
+		ExtendedBy:    validatorAddr,
+		Modified:      &now,
+		VpState:       types.ValidationState_VALIDATED,
+		EffectiveFrom: &pastTime,
+	}
+	validatorPermID, err := k.CreatePermission(sdkCtx, validatorPerm)
+	require.NoError(t, err)
+
+	// Create perm to validate
+	pendingPerm := types.Permission{
+		SchemaId:        1,
+		Type:            types.PermissionType_ISSUER,
+		Authority:       creatorAddr,
+		Created:         &now,
+		CreatedBy:       creatorAddr,
+		Extended:        &now,
+		ExtendedBy:      creatorAddr,
+		Modified:        &now,
+		ValidatorPermId: validatorPermID,
+		VpState:         types.ValidationState_PENDING,
+	}
+	permID, err := k.CreatePermission(sdkCtx, pendingPerm)
+	require.NoError(t, err)
+
+	// Set delegation keeper to return error
+	delKeeper.ErrToReturn = fmt.Errorf("operator not authorized")
+
+	msg := &types.MsgSetPermissionVPToValidated{
+		Authority:          validatorAddr,
+		Operator:           operatorAddr,
+		Id:                 permID,
+		ValidationFees:     10,
+		IssuanceFees:       5,
+		VerificationFees:   3,
+		EffectiveUntil:     &futureTime,
+		VpSummaryDigestSri: "sha384-validDigest",
+	}
+
+	resp, err := ms.SetPermissionVPToValidated(ctx, msg)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "authorization check failed")
+	require.Contains(t, err.Error(), "operator not authorized")
+	require.Nil(t, resp)
+
+	// Reset to allow and verify it works
+	delKeeper.ErrToReturn = nil
+
+	// Need to use validatorAddr as authority (not creatorAddr) since validator perm authority check
+	resp, err = ms.SetPermissionVPToValidated(ctx, msg)
+	require.NoError(t, err)
+	require.NotNil(t, resp)
 }
 
 func TestMsgServerCreateRootPermission(t *testing.T) {

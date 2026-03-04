@@ -106,7 +106,6 @@ func RunPermissionRenewalJourney(ctx context.Context, client cosmosclient.Client
 		ValidationFees:   uint64(perm.ValidationFees),
 		IssuanceFees:     uint64(perm.IssuanceFees),
 		VerificationFees: uint64(perm.VerificationFees),
-		Country:          perm.Country,
 	}
 
 	_, err = lib.SetPermissionVPToValidated(client, ctx, issuerGrantorAccount, *validateMsg)
