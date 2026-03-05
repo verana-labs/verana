@@ -954,20 +954,20 @@ func RemoveDID(client cosmosclient.Client, ctx context.Context, creator cosmosac
 	return "success", nil
 }
 
-// RevokePermission revokes a permission
-func RevokePermission(client cosmosclient.Client, ctx context.Context, validator cosmosaccount.Account, msg permtypes.MsgRevokePermission) (string, error) {
-	validatorAddr, err := validator.Address(addressPrefix)
+// RevokePermission revokes a permission (v4: authority/operator pattern)
+func RevokePermission(client cosmosclient.Client, ctx context.Context, operator cosmosaccount.Account, authority string, id uint64) (string, error) {
+	operatorAddr, err := operator.Address(addressPrefix)
 	if err != nil {
-		return "", fmt.Errorf("failed to get validator address: %w", err)
+		return "", fmt.Errorf("failed to get operator address: %w", err)
 	}
 
-	// Make sure creator is set correctly
-	msgWithCreator := permtypes.MsgRevokePermission{
-		Creator: validatorAddr,
-		Id:      msg.Id,
+	msg := permtypes.MsgRevokePermission{
+		Authority: authority,
+		Operator:  operatorAddr,
+		Id:        id,
 	}
 
-	txResp, err := client.BroadcastTx(ctx, validator, &msgWithCreator)
+	txResp, err := client.BroadcastTx(ctx, operator, &msg)
 	if err != nil {
 		return "", fmt.Errorf("failed to broadcast transaction: %w", err)
 	}
@@ -2072,25 +2072,24 @@ func StartPermissionVPWithError(client cosmosclient.Client, ctx context.Context,
 // RevokePermissionWithError revokes a permission and returns any error
 // instead of calling log.Fatal. This is useful for testing error scenarios.
 func RevokePermissionWithError(client cosmosclient.Client, ctx context.Context,
-	creator cosmosaccount.Account, msg permtypes.MsgRevokePermission) error {
+	operator cosmosaccount.Account, authority string, id uint64) error {
 
-	creatorAddr, err := creator.Address(addressPrefix)
+	operatorAddr, err := operator.Address(addressPrefix)
 	if err != nil {
-		return fmt.Errorf("failed to get creator address: %v", err)
+		return fmt.Errorf("failed to get operator address: %v", err)
 	}
 
-	// Create the message
 	fullMsg := &permtypes.MsgRevokePermission{
-		Creator: creatorAddr,
-		Id:      msg.Id,
+		Authority: authority,
+		Operator:  operatorAddr,
+		Id:        id,
 	}
 
-	txResp, err := client.BroadcastTx(ctx, creator, fullMsg)
+	txResp, err := client.BroadcastTx(ctx, operator, fullMsg)
 	if err != nil {
 		return fmt.Errorf("broadcast error: %v", err)
 	}
 
-	// Check transaction code - non-zero means error
 	if txResp.TxResponse.Code != 0 {
 		return fmt.Errorf("transaction failed (code %d): %s",
 			txResp.TxResponse.Code, txResp.TxResponse.RawLog)

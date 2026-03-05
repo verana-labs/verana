@@ -66,12 +66,7 @@ func RunPermissionRevocationJourney(ctx context.Context, client cosmosclient.Cli
 	// Step 4: Validator revokes the permission
 	fmt.Println("Validator revoking permission...")
 
-	revokeMsg := &permtypes.MsgRevokePermission{
-		Creator: issuerPerm.Authority,
-		Id:      issuerPermID,
-	}
-
-	revokeResponse, err := lib.RevokePermission(client, ctx, validatorAccount, *revokeMsg)
+	revokeResponse, err := lib.RevokePermission(client, ctx, validatorAccount, issuerPerm.Authority, issuerPermID)
 	if err != nil {
 		return fmt.Errorf("failed to revoke permission: %v", err)
 	}

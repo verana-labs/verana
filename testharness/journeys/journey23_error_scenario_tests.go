@@ -200,9 +200,7 @@ func RunErrorScenarioTestsJourney(ctx context.Context, client cosmosclient.Clien
 		fmt.Println("\n📋 Test 5: RevokePermission on FUTURE permission (not yet active)")
 		fmt.Println("   Expected: Transaction should succeed (per Issue #196 fix)")
 
-		err196_1 := lib.RevokePermissionWithError(client, ctx, trController, permtypes.MsgRevokePermission{
-			Id: futurePermID,
-		})
+		err196_1 := lib.RevokePermissionWithError(client, ctx, trController, trControllerAddr, futurePermID)
 
 		if err196_1 == nil {
 			fmt.Println("   ✅ PASS: Transaction succeeded as expected (Issue #196 fix confirmed)")

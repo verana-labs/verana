@@ -3206,23 +3206,27 @@ func TestRevokePermission(t *testing.T) {
 	sdkCtx = sdkCtx.WithBlockTime(blockTime)
 	ctx = sdk.WrapSDKContext(sdkCtx)
 
-	creator := sdk.AccAddress([]byte("test_creator")).String()
-	validatorAddr := sdk.AccAddress([]byte("test_validator")).String()
+	authority := sdk.AccAddress([]byte("test_authority__")).String()
+	operatorAddr := sdk.AccAddress([]byte("test_operator___")).String()
+	validatorAddr := sdk.AccAddress([]byte("test_validator__")).String()
+	wrongAddr := sdk.AccAddress([]byte("wrong_authority_")).String()
 
 	// Create mock credential schema
 	csKeeper.CreateMockCredentialSchema(1,
 		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
 		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
+	csKeeper.CreateMockCredentialSchema(2,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
 
 	now := sdkCtx.BlockTime()
-
 	pastTime := now.Add(-1 * time.Hour) // Set effective_from to past relative to block time to make it ACTIVE
 
-	// Create validator perm
+	// Create validator perm — schema 1
 	validatorPerm := types.Permission{
 		SchemaId:      1,
 		Type:          types.PermissionType_ISSUER_GRANTOR,
-		Authority:       validatorAddr,
+		Authority:     validatorAddr,
 		Created:       &now,
 		CreatedBy:     validatorAddr,
 		Adjusted:      &now,
@@ -3230,28 +3234,45 @@ func TestRevokePermission(t *testing.T) {
 		Modified:      &now,
 		Country:       "US",
 		VpState:       types.ValidationState_VALIDATED,
-		EffectiveFrom: &pastTime, // Required for ACTIVE state
+		EffectiveFrom: &pastTime,
 	}
 	validatorPermID, err := k.CreatePermission(sdkCtx, validatorPerm)
 	require.NoError(t, err)
 
-	// Create a perm to revoke
+	// Create a perm to revoke — schema 2
 	applicantPerm := types.Permission{
-		SchemaId:        1,
+		SchemaId:        2,
 		Type:            types.PermissionType_ISSUER,
-		Authority:         creator,
+		Authority:       authority,
 		Created:         &now,
-		CreatedBy:       creator,
+		CreatedBy:       authority,
 		Adjusted:        &now,
-		AdjustedBy:      creator,
+		AdjustedBy:      authority,
 		Modified:        &now,
 		Country:         "US",
 		ValidatorPermId: validatorPermID,
 		VpState:         types.ValidationState_VALIDATED,
-		EffectiveFrom:   &pastTime, // Required for ACTIVE state
+		EffectiveFrom:   &pastTime,
 	}
-
 	applicantPermID, err := k.CreatePermission(sdkCtx, applicantPerm)
+	require.NoError(t, err)
+
+	// Create another perm for the wrong-authority test — schema 2
+	wrongAuthPerm := types.Permission{
+		SchemaId:        2,
+		Type:            types.PermissionType_ISSUER,
+		Authority:       authority,
+		Created:         &now,
+		CreatedBy:       authority,
+		Adjusted:        &now,
+		AdjustedBy:      authority,
+		Modified:        &now,
+		Country:         "US",
+		ValidatorPermId: validatorPermID,
+		VpState:         types.ValidationState_VALIDATED,
+		EffectiveFrom:   &pastTime,
+	}
+	wrongAuthPermID, err := k.CreatePermission(sdkCtx, wrongAuthPerm)
 	require.NoError(t, err)
 
 	testCases := []struct {
@@ -3261,40 +3282,34 @@ func TestRevokePermission(t *testing.T) {
 		errMessage string
 	}{
 		{
-			name: "Valid revocation by validator",
+			name: "Valid revocation by validator ancestor",
 			msg: &types.MsgRevokePermission{
-				Creator: validatorAddr,
-				Id:      applicantPermID,
+				Authority: validatorAddr,
+				Operator:  operatorAddr,
+				Id:        applicantPermID,
 			},
 			expectErr: false,
 		},
 		{
 			name: "Invalid - perm not found",
 			msg: &types.MsgRevokePermission{
-				Creator: validatorAddr,
-				Id:      9999,
+				Authority: validatorAddr,
+				Operator:  operatorAddr,
+				Id:        9999,
 			},
 			expectErr:  true,
 			errMessage: "permission not found",
 		},
-		//{
-		//	name: "Invalid - validator not found",
-		//	msg: &types.MsgRevokePermission{
-		//		Creator: validatorAddr,
-		//		Id:      validatorPermID, // Validator perm has no validator
-		//	},
-		//	expectErr:  true,
-		//	errMessage: "validator permission not found",
-		//},
-		//{
-		//	name: "Invalid - wrong creator",
-		//	msg: &types.MsgRevokePermission{
-		//		Creator: creator,
-		//		Id:      applicantPermID,
-		//	},
-		//	expectErr:  true,
-		//	errMessage: "creator is not the validator",
-		//},
+		{
+			name: "Invalid - wrong authority (not validator, not self, not TR controller)",
+			msg: &types.MsgRevokePermission{
+				Authority: wrongAddr,
+				Operator:  operatorAddr,
+				Id:        wrongAuthPermID,
+			},
+			expectErr:  true,
+			errMessage: "authority is not authorized to revoke this permission",
+		},
 	}
 
 	for _, tc := range testCases {
@@ -3313,7 +3328,7 @@ func TestRevokePermission(t *testing.T) {
 				perm, err := k.GetPermissionByID(sdkCtx, tc.msg.Id)
 				require.NoError(t, err)
 				require.NotNil(t, perm.Revoked)
-				require.Equal(t, tc.msg.Creator, perm.RevokedBy)
+				require.Equal(t, tc.msg.Authority, perm.RevokedBy)
 			}
 		})
 	}
@@ -5102,7 +5117,9 @@ func TestStartPermissionVP_ValidatorMustBeActive(t *testing.T) {
 // are not yet active (e.g., effective_from is in the future or null).
 // Per spec, no IsValidPermission check is required for revocation.
 
-func TestRevokePermission_AllowNotYetActivePermissions(t *testing.T) {
+// TestRevokePermission_RequiresActivePermission tests that v4 spec requires
+// applicant_perm to be an active permission (reverting Issue #196 relaxation).
+func TestRevokePermission_RequiresActivePermission(t *testing.T) {
 	k, ms, csKeeper, _, ctx := setupMsgServer(t)
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
@@ -5111,7 +5128,8 @@ func TestRevokePermission_AllowNotYetActivePermissions(t *testing.T) {
 	sdkCtx = sdkCtx.WithBlockTime(blockTime)
 	ctx = sdk.WrapSDKContext(sdkCtx)
 
-	creator := sdk.AccAddress([]byte("test_creator")).String()
+	authority := sdk.AccAddress([]byte("test_authority__")).String()
+	operatorAddr := sdk.AccAddress([]byte("test_operator___")).String()
 
 	// Create mock credential schema
 	csKeeper.CreateMockCredentialSchema(1,
@@ -5126,11 +5144,11 @@ func TestRevokePermission_AllowNotYetActivePermissions(t *testing.T) {
 	activePerm := types.Permission{
 		SchemaId:      1,
 		Type:          types.PermissionType_ISSUER_GRANTOR,
-		Authority:       creator,
+		Authority:     authority,
 		Created:       &now,
-		CreatedBy:     creator,
+		CreatedBy:     authority,
 		Adjusted:      &now,
-		AdjustedBy:    creator,
+		AdjustedBy:    authority,
 		Modified:      &now,
 		Country:       "US",
 		VpState:       types.ValidationState_VALIDATED,
@@ -5139,15 +5157,15 @@ func TestRevokePermission_AllowNotYetActivePermissions(t *testing.T) {
 	activePermID, err := k.CreatePermission(sdkCtx, activePerm)
 	require.NoError(t, err)
 
-	// Issue #196: Create a permission with FUTURE effective_from (not yet active)
+	// Create a permission with FUTURE effective_from (not yet active)
 	futurePerm := types.Permission{
 		SchemaId:      1,
 		Type:          types.PermissionType_ISSUER_GRANTOR,
-		Authority:       creator,
+		Authority:     authority,
 		Created:       &now,
-		CreatedBy:     creator,
+		CreatedBy:     authority,
 		Adjusted:      &now,
-		AdjustedBy:    creator,
+		AdjustedBy:    authority,
 		Modified:      &now,
 		Country:       "US",
 		VpState:       types.ValidationState_VALIDATED,
@@ -5156,15 +5174,15 @@ func TestRevokePermission_AllowNotYetActivePermissions(t *testing.T) {
 	futurePermID, err := k.CreatePermission(sdkCtx, futurePerm)
 	require.NoError(t, err)
 
-	// Issue #196: Create a permission with NULL effective_from (inactive)
+	// Create a permission with NULL effective_from (inactive)
 	inactivePerm := types.Permission{
 		SchemaId:      1,
 		Type:          types.PermissionType_ISSUER_GRANTOR,
-		Authority:       creator,
+		Authority:     authority,
 		Created:       &now,
-		CreatedBy:     creator,
+		CreatedBy:     authority,
 		Adjusted:      &now,
-		AdjustedBy:    creator,
+		AdjustedBy:    authority,
 		Modified:      &now,
 		Country:       "US",
 		VpState:       types.ValidationState_VALIDATED,
@@ -5181,33 +5199,36 @@ func TestRevokePermission_AllowNotYetActivePermissions(t *testing.T) {
 	}{
 		{
 			// Baseline: Revoking an ACTIVE permission should work
-			name: "Issue #196: Revoke ACTIVE permission - valid case",
+			name: "Revoke ACTIVE permission - valid case",
 			msg: &types.MsgRevokePermission{
-				Creator: creator, // Grantee can revoke their own permission
-				Id:      activePermID,
+				Authority: authority,
+				Operator:  operatorAddr,
+				Id:        activePermID,
 			},
 			expectErr: false,
 			errMsg:    "",
 		},
 		{
-			// Issue #196: Revoking a FUTURE permission (not yet active) should work
-			name: "Issue #196: Revoke FUTURE permission - not yet active should be allowed",
+			// v4 spec: FUTURE permission (not yet active) should be rejected
+			name: "Revoke FUTURE permission - not yet active should be rejected",
 			msg: &types.MsgRevokePermission{
-				Creator: creator,
-				Id:      futurePermID,
+				Authority: authority,
+				Operator:  operatorAddr,
+				Id:        futurePermID,
 			},
-			expectErr: false, // Should succeed - this is the fix for Issue #196
-			errMsg:    "",
+			expectErr: true,
+			errMsg:    "applicant permission is not active",
 		},
 		{
-			// Issue #196: Revoking an INACTIVE permission (null effective_from) should work
-			name: "Issue #196: Revoke INACTIVE permission - null effective_from should be allowed",
+			// v4 spec: INACTIVE permission (null effective_from) should be rejected
+			name: "Revoke INACTIVE permission - null effective_from should be rejected",
 			msg: &types.MsgRevokePermission{
-				Creator: creator,
-				Id:      inactivePermID,
+				Authority: authority,
+				Operator:  operatorAddr,
+				Id:        inactivePermID,
 			},
-			expectErr: false, // Should succeed - this is the fix for Issue #196
-			errMsg:    "",
+			expectErr: true,
+			errMsg:    "applicant permission is not active",
 		},
 	}
 
@@ -5227,7 +5248,7 @@ func TestRevokePermission_AllowNotYetActivePermissions(t *testing.T) {
 				perm, err := k.GetPermissionByID(sdkCtx, tc.msg.Id)
 				require.NoError(t, err)
 				require.NotNil(t, perm.Revoked, "Permission should be revoked")
-				require.Equal(t, tc.msg.Creator, perm.RevokedBy, "RevokedBy should match creator")
+				require.Equal(t, tc.msg.Authority, perm.RevokedBy, "RevokedBy should match authority")
 			}
 		})
 	}

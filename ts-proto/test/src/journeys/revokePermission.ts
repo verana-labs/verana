@@ -132,12 +132,14 @@ async function main() {
   const msg = {
     typeUrl: typeUrls.MsgRevokePermission,
     value: MsgRevokePermission.fromPartial({
-      creator: account14.address,
+      authority: account14.address,
+      operator: account14.address,
       id: permId,
     }),
   };
   console.log("  Message details:");
-  console.log(`    - Creator: ${account14.address} (account_${ACCOUNT_INDEX})`);
+  console.log(`    - Authority: ${account14.address} (account_${ACCOUNT_INDEX})`);
+  console.log(`    - Operator: ${account14.address} (account_${ACCOUNT_INDEX})`);
   console.log(`    - Permission ID: ${permId}`);
   console.log();
 

@@ -59,4 +59,6 @@ type DelegationKeeper interface {
 	// GrantVSOperatorAuthorization grants a VS operator the authorization to call
 	// CreateOrUpdatePermissionSession on behalf of the authority for a given permission.
 	GrantVSOperatorAuthorization(ctx context.Context, authority string, vsOperator string, permissionID uint64, spendLimit sdk.Coins, withFeegrant bool, feeSpendLimit sdk.Coins, spendPeriod *time.Duration) error
+	// RevokeVSOperatorAuthorization revokes a VS operator's authorization for a given permission.
+	RevokeVSOperatorAuthorization(ctx context.Context, authority string, vsOperator string, permissionID uint64) error
 }

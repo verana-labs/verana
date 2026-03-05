@@ -896,6 +896,19 @@ func (ms msgServer) RevokePermission(goCtx context.Context, msg *types.MsgRevoke
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	now := ctx.BlockTime()
 
+	// [MOD-PERM-MSG-9-2-1] [AUTHZ-CHECK] Verify operator authorization
+	if ms.delegationKeeper != nil {
+		if err := ms.delegationKeeper.CheckOperatorAuthorization(
+			ctx,
+			msg.Authority,
+			msg.Operator,
+			"/verana.perm.v1.MsgRevokePermission",
+			now,
+		); err != nil {
+			return nil, fmt.Errorf("authorization check failed: %w", err)
+		}
+	}
+
 	// [MOD-PERM-MSG-9-2-1] Revoke Permission basic checks
 	applicantPerm, err := ms.validateRevokePermissionBasicChecks(ctx, msg, now)
 	if err != nil {
@@ -912,15 +925,25 @@ func (ms msgServer) RevokePermission(goCtx context.Context, msg *types.MsgRevoke
 	// (This is handled by the SDK automatically during transaction processing)
 
 	// [MOD-PERM-MSG-9-3] Revoke Permission execution
-	if err := ms.executeRevokePermission(ctx, applicantPerm, msg.Creator, now); err != nil {
+	if err := ms.executeRevokePermission(ctx, applicantPerm, msg.Authority, now); err != nil {
 		return nil, fmt.Errorf("failed to revoke permission: %w", err)
+	}
+
+	// [MOD-PERM-MSG-9-3] If applicant_perm.type is ISSUER or VERIFIER:
+	// Delete authorization for applicant_perm.vs_operator
+	if applicantPerm.Type == types.PermissionType_ISSUER || applicantPerm.Type == types.PermissionType_VERIFIER {
+		if err := ms.revokeVSOperatorAuthorization(ctx, applicantPerm); err != nil {
+			return nil, fmt.Errorf("failed to revoke VS operator authorization: %w", err)
+		}
 	}
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeRevokePermission,
 			sdk.NewAttribute(types.AttributeKeyPermissionID, strconv.FormatUint(msg.Id, 10)),
-			sdk.NewAttribute(types.AttributeKeyRevokedBy, msg.Creator),
+			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Authority),
+			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
+			sdk.NewAttribute(types.AttributeKeyRevokedBy, msg.Authority),
 			sdk.NewAttribute(types.AttributeKeyRevokedAt, now.String()),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
 		),
@@ -942,8 +965,10 @@ func (ms msgServer) validateRevokePermissionBasicChecks(ctx sdk.Context, msg *ty
 	}
 	applicantPerm = perm
 
-	// Note: Per spec, a permission that is not yet active CAN be revoked.
-	// No IsValidPermission check is required here.
+	// [MOD-PERM-MSG-9-2-1] applicant_perm MUST be a active permission
+	if err := IsValidPermission(applicantPerm, applicantPerm.Country, now); err != nil {
+		return applicantPerm, fmt.Errorf("applicant permission is not active: %w", err)
+	}
 
 	return applicantPerm, nil
 }
@@ -953,25 +978,25 @@ func (ms msgServer) validateRevokePermissionAdvancedChecks(ctx sdk.Context, msg 
 	// Either Option #1, #2 or #3 MUST return true, else abort
 
 	// Option #1: executed by a validator ancestor
-	if ms.checkValidatorAncestorOption(ctx, msg.Creator, applicantPerm, now) {
+	if ms.checkValidatorAncestorOption(ctx, msg.Authority, applicantPerm, now) {
 		return nil
 	}
 
 	// Option #2: executed by TrustRegistry controller
-	if ms.checkTrustRegistryControllerOption(ctx, msg.Creator, applicantPerm) {
+	if ms.checkTrustRegistryControllerOption(ctx, msg.Authority, applicantPerm) {
 		return nil
 	}
 
-	// Option #3: executed by applicant_perm.grantee
-	if applicantPerm.Authority == msg.Creator {
+	// Option #3: executed by applicant_perm.authority
+	if applicantPerm.Authority == msg.Authority {
 		return nil
 	}
 
-	return fmt.Errorf("creator is not authorized to revoke this permission")
+	return fmt.Errorf("authority is not authorized to revoke this permission")
 }
 
 // Option #1: executed by a validator ancestor
-func (ms msgServer) checkValidatorAncestorOption(ctx sdk.Context, creator string, applicantPerm types.Permission, now time.Time) bool {
+func (ms msgServer) checkValidatorAncestorOption(ctx sdk.Context, authority string, applicantPerm types.Permission, now time.Time) bool {
 	// if applicant_perm.validator_perm_id is defined
 	if applicantPerm.ValidatorPermId == 0 {
 		return false
@@ -988,9 +1013,9 @@ func (ms msgServer) checkValidatorAncestorOption(ctx sdk.Context, creator string
 			return false
 		}
 
-		// if validator_perm is a valid permission and validator_perm.grantee is who is running the method
+		// if validator_perm is a active permission and validator_perm.authority is who is running the method
 		if IsValidPermission(validatorPerm, validatorPerm.Country, now) == nil &&
-			validatorPerm.Authority == creator {
+			validatorPerm.Authority == authority {
 			return true
 		}
 
@@ -1002,7 +1027,7 @@ func (ms msgServer) checkValidatorAncestorOption(ctx sdk.Context, creator string
 }
 
 // Option #2: executed by TrustRegistry controller
-func (ms msgServer) checkTrustRegistryControllerOption(ctx sdk.Context, creator string, applicantPerm types.Permission) bool {
+func (ms msgServer) checkTrustRegistryControllerOption(ctx sdk.Context, authority string, applicantPerm types.Permission) bool {
 	// load CredentialSchema cs from applicant_perm.schema_id
 	cs, err := ms.credentialSchemaKeeper.GetCredentialSchemaById(ctx, applicantPerm.SchemaId)
 	if err != nil {
@@ -1015,22 +1040,42 @@ func (ms msgServer) checkTrustRegistryControllerOption(ctx sdk.Context, creator 
 		return false
 	}
 
-	// if account running the method is tr.controller, return true
-	return tr.Controller == creator
+	// if authority running the method is tr.controller, return true
+	return tr.Controller == authority
 }
 
 // [MOD-PERM-MSG-9-3] Revoke Permission execution
-func (ms msgServer) executeRevokePermission(ctx sdk.Context, perm types.Permission, creator string, now time.Time) error {
+func (ms msgServer) executeRevokePermission(ctx sdk.Context, perm types.Permission, authority string, now time.Time) error {
 	// set applicant_perm.revoked to now
 	perm.Revoked = &now
 
 	// set applicant_perm.modified to now
 	perm.Modified = &now
 
-	// set applicant_perm.revoked_by to account executing the method
-	perm.RevokedBy = creator
+	// set applicant_perm.revoked_by to authority
+	perm.RevokedBy = authority
 
 	return ms.Keeper.UpdatePermission(ctx, perm)
+}
+
+// revokeVSOperatorAuthorization revokes VS operator authorization for ISSUER/VERIFIER permissions
+func (ms msgServer) revokeVSOperatorAuthorization(ctx sdk.Context, perm types.Permission) error {
+	if perm.VsOperator == "" {
+		return nil // No VS operator configured
+	}
+
+	if ms.delegationKeeper != nil {
+		if err := ms.delegationKeeper.RevokeVSOperatorAuthorization(
+			ctx,
+			perm.Authority,
+			perm.VsOperator,
+			perm.Id,
+		); err != nil {
+			return fmt.Errorf("failed to revoke VS operator authorization: %w", err)
+		}
+	}
+
+	return nil
 }
 
 func (ms msgServer) CreateOrUpdatePermissionSession(goCtx context.Context, msg *types.MsgCreateOrUpdatePermissionSession) (*types.MsgCreateOrUpdatePermissionSessionResponse, error) {

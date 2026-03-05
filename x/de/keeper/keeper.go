@@ -100,3 +100,33 @@ func (k Keeper) GrantVSOperatorAuthorization(
 
 	return nil
 }
+
+// RevokeVSOperatorAuthorization removes a VS operator's authorization for a given permission.
+func (k Keeper) RevokeVSOperatorAuthorization(
+	ctx context.Context,
+	authority string,
+	vsOperator string,
+	permissionID uint64,
+) error {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	// Remove the VS operator authorization
+	vsKey := collections.Join(authority, vsOperator)
+	has, err := k.VSOperatorAuthorizations.Has(sdkCtx, vsKey)
+	if err != nil {
+		return fmt.Errorf("failed to check VS operator authorization: %w", err)
+	}
+	if !has {
+		return nil // Already revoked or never existed
+	}
+	if err := k.VSOperatorAuthorizations.Remove(sdkCtx, vsKey); err != nil {
+		return fmt.Errorf("failed to remove VS operator authorization: %w", err)
+	}
+
+	// Revoke associated fee allowance if any
+	if err := k.RevokeFeeAllowance(sdkCtx, authority, vsOperator); err != nil {
+		return fmt.Errorf("failed to revoke fee allowance: %w", err)
+	}
+
+	return nil
+}
