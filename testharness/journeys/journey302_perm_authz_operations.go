@@ -47,6 +47,7 @@ func RunPermissionAuthzOperationsJourney(ctx context.Context, client cosmosclien
 		"/verana.cs.v1.MsgCreateCredentialSchema",
 		"/verana.perm.v1.MsgSetPermissionVPToValidated",
 		"/verana.perm.v1.MsgCreateRootPermission",
+		"/verana.perm.v1.MsgAdjustPermission",
 	})
 	if err != nil {
 		return fmt.Errorf("prerequisite 1 failed: %w", err)

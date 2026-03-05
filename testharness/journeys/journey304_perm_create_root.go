@@ -144,7 +144,7 @@ func RunPermissionCreateRootJourney(ctx context.Context, client cosmosclient.Cli
 	// 1c: Try WITH authorization (expect success)
 	// Set effectiveFrom NOW (after all grants are done) to ensure it's in the future
 	fmt.Println("\n--- Step 1c: Operator creates root permission with auth (expect success) ---")
-	effectiveFrom := time.Now().Add(5 * time.Minute)
+	effectiveFrom := time.Now().Add(10 * time.Second)
 	effectiveUntil := effectiveFrom.Add(360 * 24 * time.Hour)
 	permID, err := lib.CreateRootPermissionWithAuthority(
 		client, ctx, operatorAccount, policyAddr,

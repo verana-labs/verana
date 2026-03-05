@@ -121,6 +121,9 @@ func runJourney(ctx context.Context, client cosmosclient.Client, journeyID int) 
 	case 304:
 		// Permission Create Root Permission with Operator Authorization
 		return journeys.RunPermissionCreateRootJourney(ctx, client)
+	case 305:
+		// Permission Adjust Permission with Operator Authorization
+		return journeys.RunPermissionAdjustJourney(ctx, client)
 	default:
 		return fmt.Errorf("unknown journey ID: %d", journeyID)
 	}
@@ -165,4 +168,5 @@ func printUsage() {
 	fmt.Println("  302 - Perm Operations with Operator Authorization (fail-then-pass)")
 	fmt.Println("  303 - Perm Cancel VP Last Request with Operator Authorization")
 	fmt.Println("  304 - Perm Create Root Permission with Operator Authorization")
+	fmt.Println("  305 - Perm Adjust Permission with Operator Authorization")
 }
