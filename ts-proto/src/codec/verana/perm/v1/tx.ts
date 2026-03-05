@@ -129,14 +129,15 @@ export interface MsgCreateRootPermissionResponse {
   id: number;
 }
 
-export interface MsgExtendPermission {
-  creator: string;
+export interface MsgAdjustPermission {
+  authority: string;
+  operator: string;
   /** Permission ID */
   id: number;
   effectiveUntil: Date | undefined;
 }
 
-export interface MsgExtendPermissionResponse {
+export interface MsgAdjustPermissionResponse {
 }
 
 export interface MsgRevokePermission {
@@ -1435,28 +1436,31 @@ export const MsgCreateRootPermissionResponse = {
   },
 };
 
-function createBaseMsgExtendPermission(): MsgExtendPermission {
-  return { creator: "", id: 0, effectiveUntil: undefined };
+function createBaseMsgAdjustPermission(): MsgAdjustPermission {
+  return { authority: "", operator: "", id: 0, effectiveUntil: undefined };
 }
 
-export const MsgExtendPermission = {
-  encode(message: MsgExtendPermission, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.creator !== "") {
-      writer.uint32(10).string(message.creator);
+export const MsgAdjustPermission = {
+  encode(message: MsgAdjustPermission, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.authority !== "") {
+      writer.uint32(10).string(message.authority);
+    }
+    if (message.operator !== "") {
+      writer.uint32(18).string(message.operator);
     }
     if (message.id !== 0) {
-      writer.uint32(16).uint64(message.id);
+      writer.uint32(24).uint64(message.id);
     }
     if (message.effectiveUntil !== undefined) {
-      Timestamp.encode(toTimestamp(message.effectiveUntil), writer.uint32(26).fork()).ldelim();
+      Timestamp.encode(toTimestamp(message.effectiveUntil), writer.uint32(34).fork()).ldelim();
     }
     return writer;
   },
 
-  decode(input: _m0.Reader | Uint8Array, length?: number): MsgExtendPermission {
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgAdjustPermission {
     const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseMsgExtendPermission();
+    const message = createBaseMsgAdjustPermission();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -1465,17 +1469,24 @@ export const MsgExtendPermission = {
             break;
           }
 
-          message.creator = reader.string();
+          message.authority = reader.string();
           continue;
         case 2:
-          if (tag !== 16) {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.operator = reader.string();
+          continue;
+        case 3:
+          if (tag !== 24) {
             break;
           }
 
           message.id = longToNumber(reader.uint64() as Long);
           continue;
-        case 3:
-          if (tag !== 26) {
+        case 4:
+          if (tag !== 34) {
             break;
           }
 
@@ -1490,18 +1501,22 @@ export const MsgExtendPermission = {
     return message;
   },
 
-  fromJSON(object: any): MsgExtendPermission {
+  fromJSON(object: any): MsgAdjustPermission {
     return {
-      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
+      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
       id: isSet(object.id) ? globalThis.Number(object.id) : 0,
       effectiveUntil: isSet(object.effectiveUntil) ? fromJsonTimestamp(object.effectiveUntil) : undefined,
     };
   },
 
-  toJSON(message: MsgExtendPermission): unknown {
+  toJSON(message: MsgAdjustPermission): unknown {
     const obj: any = {};
-    if (message.creator !== "") {
-      obj.creator = message.creator;
+    if (message.authority !== "") {
+      obj.authority = message.authority;
+    }
+    if (message.operator !== "") {
+      obj.operator = message.operator;
     }
     if (message.id !== 0) {
       obj.id = Math.round(message.id);
@@ -1512,31 +1527,32 @@ export const MsgExtendPermission = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<MsgExtendPermission>, I>>(base?: I): MsgExtendPermission {
-    return MsgExtendPermission.fromPartial(base ?? ({} as any));
+  create<I extends Exact<DeepPartial<MsgAdjustPermission>, I>>(base?: I): MsgAdjustPermission {
+    return MsgAdjustPermission.fromPartial(base ?? ({} as any));
   },
-  fromPartial<I extends Exact<DeepPartial<MsgExtendPermission>, I>>(object: I): MsgExtendPermission {
-    const message = createBaseMsgExtendPermission();
-    message.creator = object.creator ?? "";
+  fromPartial<I extends Exact<DeepPartial<MsgAdjustPermission>, I>>(object: I): MsgAdjustPermission {
+    const message = createBaseMsgAdjustPermission();
+    message.authority = object.authority ?? "";
+    message.operator = object.operator ?? "";
     message.id = object.id ?? 0;
     message.effectiveUntil = object.effectiveUntil ?? undefined;
     return message;
   },
 };
 
-function createBaseMsgExtendPermissionResponse(): MsgExtendPermissionResponse {
+function createBaseMsgAdjustPermissionResponse(): MsgAdjustPermissionResponse {
   return {};
 }
 
-export const MsgExtendPermissionResponse = {
-  encode(_: MsgExtendPermissionResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+export const MsgAdjustPermissionResponse = {
+  encode(_: MsgAdjustPermissionResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     return writer;
   },
 
-  decode(input: _m0.Reader | Uint8Array, length?: number): MsgExtendPermissionResponse {
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgAdjustPermissionResponse {
     const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseMsgExtendPermissionResponse();
+    const message = createBaseMsgAdjustPermissionResponse();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -1549,20 +1565,20 @@ export const MsgExtendPermissionResponse = {
     return message;
   },
 
-  fromJSON(_: any): MsgExtendPermissionResponse {
+  fromJSON(_: any): MsgAdjustPermissionResponse {
     return {};
   },
 
-  toJSON(_: MsgExtendPermissionResponse): unknown {
+  toJSON(_: MsgAdjustPermissionResponse): unknown {
     const obj: any = {};
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<MsgExtendPermissionResponse>, I>>(base?: I): MsgExtendPermissionResponse {
-    return MsgExtendPermissionResponse.fromPartial(base ?? ({} as any));
+  create<I extends Exact<DeepPartial<MsgAdjustPermissionResponse>, I>>(base?: I): MsgAdjustPermissionResponse {
+    return MsgAdjustPermissionResponse.fromPartial(base ?? ({} as any));
   },
-  fromPartial<I extends Exact<DeepPartial<MsgExtendPermissionResponse>, I>>(_: I): MsgExtendPermissionResponse {
-    const message = createBaseMsgExtendPermissionResponse();
+  fromPartial<I extends Exact<DeepPartial<MsgAdjustPermissionResponse>, I>>(_: I): MsgAdjustPermissionResponse {
+    const message = createBaseMsgAdjustPermissionResponse();
     return message;
   },
 };
@@ -2410,7 +2426,7 @@ export interface Msg {
     request: MsgCancelPermissionVPLastRequest,
   ): Promise<MsgCancelPermissionVPLastRequestResponse>;
   CreateRootPermission(request: MsgCreateRootPermission): Promise<MsgCreateRootPermissionResponse>;
-  ExtendPermission(request: MsgExtendPermission): Promise<MsgExtendPermissionResponse>;
+  AdjustPermission(request: MsgAdjustPermission): Promise<MsgAdjustPermissionResponse>;
   RevokePermission(request: MsgRevokePermission): Promise<MsgRevokePermissionResponse>;
   CreateOrUpdatePermissionSession(
     request: MsgCreateOrUpdatePermissionSession,
@@ -2435,7 +2451,7 @@ export class MsgClientImpl implements Msg {
     this.SetPermissionVPToValidated = this.SetPermissionVPToValidated.bind(this);
     this.CancelPermissionVPLastRequest = this.CancelPermissionVPLastRequest.bind(this);
     this.CreateRootPermission = this.CreateRootPermission.bind(this);
-    this.ExtendPermission = this.ExtendPermission.bind(this);
+    this.AdjustPermission = this.AdjustPermission.bind(this);
     this.RevokePermission = this.RevokePermission.bind(this);
     this.CreateOrUpdatePermissionSession = this.CreateOrUpdatePermissionSession.bind(this);
     this.SlashPermissionTrustDeposit = this.SlashPermissionTrustDeposit.bind(this);
@@ -2480,10 +2496,10 @@ export class MsgClientImpl implements Msg {
     return promise.then((data) => MsgCreateRootPermissionResponse.decode(_m0.Reader.create(data)));
   }
 
-  ExtendPermission(request: MsgExtendPermission): Promise<MsgExtendPermissionResponse> {
-    const data = MsgExtendPermission.encode(request).finish();
-    const promise = this.rpc.request(this.service, "ExtendPermission", data);
-    return promise.then((data) => MsgExtendPermissionResponse.decode(_m0.Reader.create(data)));
+  AdjustPermission(request: MsgAdjustPermission): Promise<MsgAdjustPermissionResponse> {
+    const data = MsgAdjustPermission.encode(request).finish();
+    const promise = this.rpc.request(this.service, "AdjustPermission", data);
+    return promise.then((data) => MsgAdjustPermissionResponse.decode(_m0.Reader.create(data)));
   }
 
   RevokePermission(request: MsgRevokePermission): Promise<MsgRevokePermissionResponse> {

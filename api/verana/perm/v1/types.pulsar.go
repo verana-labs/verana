@@ -129,8 +129,8 @@ var (
 	fd_Permission_authority                         protoreflect.FieldDescriptor
 	fd_Permission_created                           protoreflect.FieldDescriptor
 	fd_Permission_created_by                        protoreflect.FieldDescriptor
-	fd_Permission_extended                          protoreflect.FieldDescriptor
-	fd_Permission_extended_by                       protoreflect.FieldDescriptor
+	fd_Permission_adjusted                          protoreflect.FieldDescriptor
+	fd_Permission_adjusted_by                       protoreflect.FieldDescriptor
 	fd_Permission_slashed                           protoreflect.FieldDescriptor
 	fd_Permission_slashed_by                        protoreflect.FieldDescriptor
 	fd_Permission_repaid                            protoreflect.FieldDescriptor
@@ -176,8 +176,8 @@ func init() {
 	fd_Permission_authority = md_Permission.Fields().ByName("authority")
 	fd_Permission_created = md_Permission.Fields().ByName("created")
 	fd_Permission_created_by = md_Permission.Fields().ByName("created_by")
-	fd_Permission_extended = md_Permission.Fields().ByName("extended")
-	fd_Permission_extended_by = md_Permission.Fields().ByName("extended_by")
+	fd_Permission_adjusted = md_Permission.Fields().ByName("adjusted")
+	fd_Permission_adjusted_by = md_Permission.Fields().ByName("adjusted_by")
 	fd_Permission_slashed = md_Permission.Fields().ByName("slashed")
 	fd_Permission_slashed_by = md_Permission.Fields().ByName("slashed_by")
 	fd_Permission_repaid = md_Permission.Fields().ByName("repaid")
@@ -320,15 +320,15 @@ func (x *fastReflection_Permission) Range(f func(protoreflect.FieldDescriptor, p
 			return
 		}
 	}
-	if x.Extended != nil {
-		value := protoreflect.ValueOfMessage(x.Extended.ProtoReflect())
-		if !f(fd_Permission_extended, value) {
+	if x.Adjusted != nil {
+		value := protoreflect.ValueOfMessage(x.Adjusted.ProtoReflect())
+		if !f(fd_Permission_adjusted, value) {
 			return
 		}
 	}
-	if x.ExtendedBy != "" {
-		value := protoreflect.ValueOfString(x.ExtendedBy)
-		if !f(fd_Permission_extended_by, value) {
+	if x.AdjustedBy != "" {
+		value := protoreflect.ValueOfString(x.AdjustedBy)
+		if !f(fd_Permission_adjusted_by, value) {
 			return
 		}
 	}
@@ -559,10 +559,10 @@ func (x *fastReflection_Permission) Has(fd protoreflect.FieldDescriptor) bool {
 		return x.Created != nil
 	case "verana.perm.v1.Permission.created_by":
 		return x.CreatedBy != ""
-	case "verana.perm.v1.Permission.extended":
-		return x.Extended != nil
-	case "verana.perm.v1.Permission.extended_by":
-		return x.ExtendedBy != ""
+	case "verana.perm.v1.Permission.adjusted":
+		return x.Adjusted != nil
+	case "verana.perm.v1.Permission.adjusted_by":
+		return x.AdjustedBy != ""
 	case "verana.perm.v1.Permission.slashed":
 		return x.Slashed != nil
 	case "verana.perm.v1.Permission.slashed_by":
@@ -659,10 +659,10 @@ func (x *fastReflection_Permission) Clear(fd protoreflect.FieldDescriptor) {
 		x.Created = nil
 	case "verana.perm.v1.Permission.created_by":
 		x.CreatedBy = ""
-	case "verana.perm.v1.Permission.extended":
-		x.Extended = nil
-	case "verana.perm.v1.Permission.extended_by":
-		x.ExtendedBy = ""
+	case "verana.perm.v1.Permission.adjusted":
+		x.Adjusted = nil
+	case "verana.perm.v1.Permission.adjusted_by":
+		x.AdjustedBy = ""
 	case "verana.perm.v1.Permission.slashed":
 		x.Slashed = nil
 	case "verana.perm.v1.Permission.slashed_by":
@@ -766,11 +766,11 @@ func (x *fastReflection_Permission) Get(descriptor protoreflect.FieldDescriptor)
 	case "verana.perm.v1.Permission.created_by":
 		value := x.CreatedBy
 		return protoreflect.ValueOfString(value)
-	case "verana.perm.v1.Permission.extended":
-		value := x.Extended
+	case "verana.perm.v1.Permission.adjusted":
+		value := x.Adjusted
 		return protoreflect.ValueOfMessage(value.ProtoReflect())
-	case "verana.perm.v1.Permission.extended_by":
-		value := x.ExtendedBy
+	case "verana.perm.v1.Permission.adjusted_by":
+		value := x.AdjustedBy
 		return protoreflect.ValueOfString(value)
 	case "verana.perm.v1.Permission.slashed":
 		value := x.Slashed
@@ -911,10 +911,10 @@ func (x *fastReflection_Permission) Set(fd protoreflect.FieldDescriptor, value p
 		x.Created = value.Message().Interface().(*timestamppb.Timestamp)
 	case "verana.perm.v1.Permission.created_by":
 		x.CreatedBy = value.Interface().(string)
-	case "verana.perm.v1.Permission.extended":
-		x.Extended = value.Message().Interface().(*timestamppb.Timestamp)
-	case "verana.perm.v1.Permission.extended_by":
-		x.ExtendedBy = value.Interface().(string)
+	case "verana.perm.v1.Permission.adjusted":
+		x.Adjusted = value.Message().Interface().(*timestamppb.Timestamp)
+	case "verana.perm.v1.Permission.adjusted_by":
+		x.AdjustedBy = value.Interface().(string)
 	case "verana.perm.v1.Permission.slashed":
 		x.Slashed = value.Message().Interface().(*timestamppb.Timestamp)
 	case "verana.perm.v1.Permission.slashed_by":
@@ -1010,11 +1010,11 @@ func (x *fastReflection_Permission) Mutable(fd protoreflect.FieldDescriptor) pro
 			x.Created = new(timestamppb.Timestamp)
 		}
 		return protoreflect.ValueOfMessage(x.Created.ProtoReflect())
-	case "verana.perm.v1.Permission.extended":
-		if x.Extended == nil {
-			x.Extended = new(timestamppb.Timestamp)
+	case "verana.perm.v1.Permission.adjusted":
+		if x.Adjusted == nil {
+			x.Adjusted = new(timestamppb.Timestamp)
 		}
-		return protoreflect.ValueOfMessage(x.Extended.ProtoReflect())
+		return protoreflect.ValueOfMessage(x.Adjusted.ProtoReflect())
 	case "verana.perm.v1.Permission.slashed":
 		if x.Slashed == nil {
 			x.Slashed = new(timestamppb.Timestamp)
@@ -1089,8 +1089,8 @@ func (x *fastReflection_Permission) Mutable(fd protoreflect.FieldDescriptor) pro
 		panic(fmt.Errorf("field authority of message verana.perm.v1.Permission is not mutable"))
 	case "verana.perm.v1.Permission.created_by":
 		panic(fmt.Errorf("field created_by of message verana.perm.v1.Permission is not mutable"))
-	case "verana.perm.v1.Permission.extended_by":
-		panic(fmt.Errorf("field extended_by of message verana.perm.v1.Permission is not mutable"))
+	case "verana.perm.v1.Permission.adjusted_by":
+		panic(fmt.Errorf("field adjusted_by of message verana.perm.v1.Permission is not mutable"))
 	case "verana.perm.v1.Permission.slashed_by":
 		panic(fmt.Errorf("field slashed_by of message verana.perm.v1.Permission is not mutable"))
 	case "verana.perm.v1.Permission.repaid_by":
@@ -1161,10 +1161,10 @@ func (x *fastReflection_Permission) NewField(fd protoreflect.FieldDescriptor) pr
 		return protoreflect.ValueOfMessage(m.ProtoReflect())
 	case "verana.perm.v1.Permission.created_by":
 		return protoreflect.ValueOfString("")
-	case "verana.perm.v1.Permission.extended":
+	case "verana.perm.v1.Permission.adjusted":
 		m := new(timestamppb.Timestamp)
 		return protoreflect.ValueOfMessage(m.ProtoReflect())
-	case "verana.perm.v1.Permission.extended_by":
+	case "verana.perm.v1.Permission.adjusted_by":
 		return protoreflect.ValueOfString("")
 	case "verana.perm.v1.Permission.slashed":
 		m := new(timestamppb.Timestamp)
@@ -1338,11 +1338,11 @@ func (x *fastReflection_Permission) ProtoMethods() *protoiface.Methods {
 		if l > 0 {
 			n += 1 + l + runtime.Sov(uint64(l))
 		}
-		if x.Extended != nil {
-			l = options.Size(x.Extended)
+		if x.Adjusted != nil {
+			l = options.Size(x.Adjusted)
 			n += 1 + l + runtime.Sov(uint64(l))
 		}
-		l = len(x.ExtendedBy)
+		l = len(x.AdjustedBy)
 		if l > 0 {
 			n += 1 + l + runtime.Sov(uint64(l))
 		}
@@ -1849,15 +1849,15 @@ func (x *fastReflection_Permission) ProtoMethods() *protoiface.Methods {
 			i--
 			dAtA[i] = 0x52
 		}
-		if len(x.ExtendedBy) > 0 {
-			i -= len(x.ExtendedBy)
-			copy(dAtA[i:], x.ExtendedBy)
-			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.ExtendedBy)))
+		if len(x.AdjustedBy) > 0 {
+			i -= len(x.AdjustedBy)
+			copy(dAtA[i:], x.AdjustedBy)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.AdjustedBy)))
 			i--
 			dAtA[i] = 0x4a
 		}
-		if x.Extended != nil {
-			encoded, err := options.Marshal(x.Extended)
+		if x.Adjusted != nil {
+			encoded, err := options.Marshal(x.Adjusted)
 			if err != nil {
 				return protoiface.MarshalOutput{
 					NoUnkeyedLiterals: input.NoUnkeyedLiterals,
@@ -2160,7 +2160,7 @@ func (x *fastReflection_Permission) ProtoMethods() *protoiface.Methods {
 				iNdEx = postIndex
 			case 8:
 				if wireType != 2 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Extended", wireType)
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Adjusted", wireType)
 				}
 				var msglen int
 				for shift := uint(0); ; shift += 7 {
@@ -2187,16 +2187,16 @@ func (x *fastReflection_Permission) ProtoMethods() *protoiface.Methods {
 				if postIndex > l {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
 				}
-				if x.Extended == nil {
-					x.Extended = &timestamppb.Timestamp{}
+				if x.Adjusted == nil {
+					x.Adjusted = &timestamppb.Timestamp{}
 				}
-				if err := options.Unmarshal(dAtA[iNdEx:postIndex], x.Extended); err != nil {
+				if err := options.Unmarshal(dAtA[iNdEx:postIndex], x.Adjusted); err != nil {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, err
 				}
 				iNdEx = postIndex
 			case 9:
 				if wireType != 2 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field ExtendedBy", wireType)
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field AdjustedBy", wireType)
 				}
 				var stringLen uint64
 				for shift := uint(0); ; shift += 7 {
@@ -2224,7 +2224,7 @@ func (x *fastReflection_Permission) ProtoMethods() *protoiface.Methods {
 				if postIndex > l {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
 				}
-				x.ExtendedBy = string(dAtA[iNdEx:postIndex])
+				x.AdjustedBy = string(dAtA[iNdEx:postIndex])
 				iNdEx = postIndex
 			case 10:
 				if wireType != 2 {
@@ -5043,8 +5043,8 @@ type Permission struct {
 	Authority  string                 `protobuf:"bytes,5,opt,name=authority,proto3" json:"authority,omitempty"`
 	Created    *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=created,proto3" json:"created,omitempty"`
 	CreatedBy  string                 `protobuf:"bytes,7,opt,name=created_by,json=createdBy,proto3" json:"created_by,omitempty"`
-	Extended   *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=extended,proto3" json:"extended,omitempty"`
-	ExtendedBy string                 `protobuf:"bytes,9,opt,name=extended_by,json=extendedBy,proto3" json:"extended_by,omitempty"`
+	Adjusted   *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=adjusted,proto3" json:"adjusted,omitempty"`
+	AdjustedBy string                 `protobuf:"bytes,9,opt,name=adjusted_by,json=adjustedBy,proto3" json:"adjusted_by,omitempty"`
 	// NEW: Slashing related fields
 	Slashed   *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=slashed,proto3" json:"slashed,omitempty"`
 	SlashedBy string                 `protobuf:"bytes,11,opt,name=slashed_by,json=slashedBy,proto3" json:"slashed_by,omitempty"`
@@ -5156,16 +5156,16 @@ func (x *Permission) GetCreatedBy() string {
 	return ""
 }
 
-func (x *Permission) GetExtended() *timestamppb.Timestamp {
+func (x *Permission) GetAdjusted() *timestamppb.Timestamp {
 	if x != nil {
-		return x.Extended
+		return x.Adjusted
 	}
 	return nil
 }
 
-func (x *Permission) GetExtendedBy() string {
+func (x *Permission) GetAdjustedBy() string {
 	if x != nil {
-		return x.ExtendedBy
+		return x.AdjustedBy
 	}
 	return ""
 }
@@ -5598,14 +5598,14 @@ var file_verana_perm_v1_types_proto_rawDesc = []byte{
 	0x65, 0x64, 0x5f, 0x62, 0x79, 0x18, 0x07, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d,
 	0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53,
 	0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x09, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x42, 0x79,
-	0x12, 0x3c, 0x0a, 0x08, 0x65, 0x78, 0x74, 0x65, 0x6e, 0x64, 0x65, 0x64, 0x18, 0x08, 0x20, 0x01,
+	0x12, 0x3c, 0x0a, 0x08, 0x61, 0x64, 0x6a, 0x75, 0x73, 0x74, 0x65, 0x64, 0x18, 0x08, 0x20, 0x01,
 	0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74,
 	0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x42, 0x04,
-	0x90, 0xdf, 0x1f, 0x01, 0x52, 0x08, 0x65, 0x78, 0x74, 0x65, 0x6e, 0x64, 0x65, 0x64, 0x12, 0x39,
-	0x0a, 0x0b, 0x65, 0x78, 0x74, 0x65, 0x6e, 0x64, 0x65, 0x64, 0x5f, 0x62, 0x79, 0x18, 0x09, 0x20,
+	0x90, 0xdf, 0x1f, 0x01, 0x52, 0x08, 0x61, 0x64, 0x6a, 0x75, 0x73, 0x74, 0x65, 0x64, 0x12, 0x39,
+	0x0a, 0x0b, 0x61, 0x64, 0x6a, 0x75, 0x73, 0x74, 0x65, 0x64, 0x5f, 0x62, 0x79, 0x18, 0x09, 0x20,
 	0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e,
-	0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x0a, 0x65,
-	0x78, 0x74, 0x65, 0x6e, 0x64, 0x65, 0x64, 0x42, 0x79, 0x12, 0x3a, 0x0a, 0x07, 0x73, 0x6c, 0x61,
+	0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x0a, 0x61,
+	0x64, 0x6a, 0x75, 0x73, 0x74, 0x65, 0x64, 0x42, 0x79, 0x12, 0x3a, 0x0a, 0x07, 0x73, 0x6c, 0x61,
 	0x73, 0x68, 0x65, 0x64, 0x18, 0x0a, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f,
 	0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d,
 	0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x42, 0x04, 0x90, 0xdf, 0x1f, 0x01, 0x52, 0x07, 0x73, 0x6c,
@@ -5820,7 +5820,7 @@ var file_verana_perm_v1_types_proto_goTypes = []interface{}{
 var file_verana_perm_v1_types_proto_depIdxs = []int32{
 	0,  // 0: verana.perm.v1.Permission.type:type_name -> verana.perm.v1.PermissionType
 	6,  // 1: verana.perm.v1.Permission.created:type_name -> google.protobuf.Timestamp
-	6,  // 2: verana.perm.v1.Permission.extended:type_name -> google.protobuf.Timestamp
+	6,  // 2: verana.perm.v1.Permission.adjusted:type_name -> google.protobuf.Timestamp
 	6,  // 3: verana.perm.v1.Permission.slashed:type_name -> google.protobuf.Timestamp
 	6,  // 4: verana.perm.v1.Permission.repaid:type_name -> google.protobuf.Timestamp
 	6,  // 5: verana.perm.v1.Permission.effective_from:type_name -> google.protobuf.Timestamp

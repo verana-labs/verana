@@ -686,41 +686,70 @@ func (ms msgServer) executeCreateRootPermission(ctx sdk.Context, msg *types.MsgC
 	return id, nil
 }
 
-func (ms msgServer) ExtendPermission(goCtx context.Context, msg *types.MsgExtendPermission) (*types.MsgExtendPermissionResponse, error) {
+func (ms msgServer) AdjustPermission(goCtx context.Context, msg *types.MsgAdjustPermission) (*types.MsgAdjustPermissionResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	now := ctx.BlockTime()
 
-	// [MOD-PERM-MSG-8-2-1] Extend Permission basic checks
-	applicantPerm, err := ms.validateExtendPermissionBasicChecks(ctx, msg, now)
+	// [MOD-PERM-MSG-8-2-1] [AUTHZ-CHECK] Verify operator authorization
+	if ms.delegationKeeper != nil {
+		if err := ms.delegationKeeper.CheckOperatorAuthorization(
+			ctx,
+			msg.Authority,
+			msg.Operator,
+			"/verana.perm.v1.MsgAdjustPermission",
+			now,
+		); err != nil {
+			return nil, fmt.Errorf("authorization check failed: %w", err)
+		}
+	}
+
+	// [MOD-PERM-MSG-8-2-1] Adjust Permission basic checks
+	applicantPerm, err := ms.validateAdjustPermissionBasicChecks(ctx, msg, now)
 	if err != nil {
 		return nil, err
 	}
 
-	// [MOD-PERM-MSG-8-2-2] Extend Permission advanced checks
-	if err := ms.validateExtendPermissionAdvancedChecks(ctx, msg, applicantPerm, now); err != nil {
+	// [MOD-PERM-MSG-8-2-2] Adjust Permission advanced checks
+	if err := ms.validateAdjustPermissionAdvancedChecks(ctx, msg, applicantPerm, now); err != nil {
 		return nil, err
 	}
 
-	// [MOD-PERM-MSG-8-3] Extend Permission execution
-	if err := ms.executeExtendPermission(ctx, applicantPerm, msg.Creator, msg.EffectiveUntil, now); err != nil {
-		return nil, fmt.Errorf("failed to extend perm: %w", err)
+	// [MOD-PERM-MSG-8-2-4] Overlap checks
+	if err := ms.checkAdjustPermissionOverlap(ctx, applicantPerm, msg.EffectiveUntil); err != nil {
+		return nil, fmt.Errorf("overlap check failed: %w", err)
+	}
+
+	// [MOD-PERM-MSG-8-3] Adjust Permission execution
+	if err := ms.executeAdjustPermission(ctx, applicantPerm, msg.Authority, msg.EffectiveUntil, now); err != nil {
+		return nil, fmt.Errorf("failed to adjust perm: %w", err)
+	}
+
+	// [MOD-PERM-MSG-8-3] If applicant_perm.type is ISSUER or VERIFIER and vs_operator_authz_enabled:
+	// Grant VS Operator Authorization
+	if (applicantPerm.Type == types.PermissionType_ISSUER || applicantPerm.Type == types.PermissionType_VERIFIER) &&
+		applicantPerm.VsOperatorAuthzEnabled {
+		if err := ms.grantVSOperatorAuthorization(ctx, applicantPerm); err != nil {
+			return nil, fmt.Errorf("failed to grant VS operator authorization: %w", err)
+		}
 	}
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
-			types.EventTypeExtendPermission,
+			types.EventTypeAdjustPermission,
 			sdk.NewAttribute(types.AttributeKeyPermissionID, strconv.FormatUint(msg.Id, 10)),
-			sdk.NewAttribute(types.AttributeKeyExtendedBy, msg.Creator),
+			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Authority),
+			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
+			sdk.NewAttribute(types.AttributeKeyAdjustedBy, msg.Authority),
 			sdk.NewAttribute(types.AttributeKeyNewEffectiveUntil, msg.EffectiveUntil.String()),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
 		),
 	})
 
-	return &types.MsgExtendPermissionResponse{}, nil
+	return &types.MsgAdjustPermissionResponse{}, nil
 }
 
-// [MOD-PERM-MSG-8-2-1] Extend Permission basic checks
-func (ms msgServer) validateExtendPermissionBasicChecks(ctx sdk.Context, msg *types.MsgExtendPermission, now time.Time) (types.Permission, error) {
+// [MOD-PERM-MSG-8-2-1] Adjust Permission basic checks
+func (ms msgServer) validateAdjustPermissionBasicChecks(ctx sdk.Context, msg *types.MsgAdjustPermission, now time.Time) (types.Permission, error) {
 	var applicantPerm types.Permission
 
 	// id MUST be a valid uint64 (already validated in ValidateBasic)
@@ -737,29 +766,21 @@ func (ms msgServer) validateExtendPermissionBasicChecks(ctx sdk.Context, msg *ty
 		return applicantPerm, fmt.Errorf("applicant permission is not valid: %w", err)
 	}
 
-	// if applicant_perm.effective_until is NULL: effective_until MUST be greater than now()
-	// else effective_until MUST be greater than applicant_perm.effective_until
-	// else MUST abort
-	if applicantPerm.EffectiveUntil == nil {
-		if !msg.EffectiveUntil.After(now) {
-			return applicantPerm, fmt.Errorf("effective_until must be greater than current timestamp")
-		}
-	} else {
-		if !msg.EffectiveUntil.After(*applicantPerm.EffectiveUntil) {
-			return applicantPerm, fmt.Errorf("effective_until must be greater than current effective_until")
-		}
+	// [MOD-PERM-MSG-8-2-1] effective_until MUST be greater than now()
+	if !msg.EffectiveUntil.After(now) {
+		return applicantPerm, fmt.Errorf("effective_until must be greater than current timestamp")
 	}
 
 	return applicantPerm, nil
 }
 
-// [MOD-PERM-MSG-8-2-2] Extend Permission advanced checks
-func (ms msgServer) validateExtendPermissionAdvancedChecks(ctx sdk.Context, msg *types.MsgExtendPermission, applicantPerm types.Permission, now time.Time) error {
+// [MOD-PERM-MSG-8-2-2] Adjust Permission advanced checks
+func (ms msgServer) validateAdjustPermissionAdvancedChecks(ctx sdk.Context, msg *types.MsgAdjustPermission, applicantPerm types.Permission, now time.Time) error {
 	// 1. ECOSYSTEM permissions
 	if applicantPerm.ValidatorPermId == 0 && applicantPerm.Type == types.PermissionType_ECOSYSTEM {
-		// account running the method MUST be applicant_perm.grantee
-		if applicantPerm.Authority != msg.Creator {
-			return fmt.Errorf("creator is not the permission authority")
+		// applicant_perm.authority MUST be msg.Authority else MUST abort
+		if applicantPerm.Authority != msg.Authority {
+			return fmt.Errorf("authority is not the permission authority")
 		}
 		return nil
 	}
@@ -777,11 +798,11 @@ func (ms msgServer) validateExtendPermissionAdvancedChecks(ctx sdk.Context, msg 
 			return fmt.Errorf("validator permission is not valid: %w", err)
 		}
 
-		// 2. Self-created permissions
+		// 2. Self-created permissions (validator is ECOSYSTEM)
 		if validatorPerm.Type == types.PermissionType_ECOSYSTEM {
-			// account running the method MUST be applicant_perm.grantee
-			if applicantPerm.Authority != msg.Creator {
-				return fmt.Errorf("creator is not the permission authority")
+			// applicant_perm.authority MUST be msg.Authority else MUST abort
+			if applicantPerm.Authority != msg.Authority {
+				return fmt.Errorf("authority is not the permission authority")
 			}
 			return nil
 		}
@@ -792,29 +813,80 @@ func (ms msgServer) validateExtendPermissionAdvancedChecks(ctx sdk.Context, msg 
 			return fmt.Errorf("effective_until cannot be after validation expiration")
 		}
 
-		// account running the method MUST be validator_perm.grantee
-		if validatorPerm.Authority != msg.Creator {
-			return fmt.Errorf("creator is not the validator permission grantee")
+		// validator_perm.authority MUST be msg.Authority else MUST abort
+		if validatorPerm.Authority != msg.Authority {
+			return fmt.Errorf("authority is not the validator permission authority")
 		}
 		return nil
 	}
 
-	return fmt.Errorf("invalid permission configuration for extension")
+	return fmt.Errorf("invalid permission configuration for adjustment")
 }
 
-// [MOD-PERM-MSG-8-3] Extend Permission execution
-func (ms msgServer) executeExtendPermission(ctx sdk.Context, perm types.Permission, creator string, effectiveUntil *time.Time, now time.Time) error {
+// [MOD-PERM-MSG-8-2-4] Overlap checks for AdjustPermission
+// Walk all permissions for same (schema_id, type, validator_perm_id, authority),
+// skipping self and inactive (revoked/slashed/repaid).
+func (ms msgServer) checkAdjustPermissionOverlap(ctx sdk.Context, applicantPerm types.Permission, effectiveUntil *time.Time) error {
+	err := ms.Permission.Walk(ctx, nil, func(key uint64, perm types.Permission) (bool, error) {
+		// Skip self
+		if perm.Id == applicantPerm.Id {
+			return false, nil
+		}
+
+		// Match on schema_id, type, validator_perm_id, authority
+		if perm.SchemaId != applicantPerm.SchemaId ||
+			perm.Type != applicantPerm.Type ||
+			perm.ValidatorPermId != applicantPerm.ValidatorPermId ||
+			perm.Authority != applicantPerm.Authority {
+			return false, nil
+		}
+
+		// Skip non-active permissions (revoked, slashed, repaid)
+		if perm.Revoked != nil || perm.Slashed != nil || perm.Repaid != nil {
+			return false, nil
+		}
+
+		// Skip permissions without effective_from (not yet validated)
+		if perm.EffectiveFrom == nil {
+			return false, nil
+		}
+
+		// [MOD-PERM-MSG-8-2-4] if p.effective_until is NULL (never expire), abort
+		if perm.EffectiveUntil == nil {
+			return true, fmt.Errorf("existing permission %d never expires, cannot create overlapping permission", perm.Id)
+		}
+
+		// if p.effective_until > applicant_perm.effective_from, abort
+		if applicantPerm.EffectiveFrom != nil && perm.EffectiveUntil.After(*applicantPerm.EffectiveFrom) {
+			return true, fmt.Errorf("existing permission %d overlaps: its effective_until is after this permission's effective_from", perm.Id)
+		}
+
+		// if p.effective_from < msg.effective_until, abort
+		if effectiveUntil != nil && perm.EffectiveFrom.Before(*effectiveUntil) {
+			return true, fmt.Errorf("existing permission %d overlaps: its effective_from is before the requested effective_until", perm.Id)
+		}
+
+		return false, nil
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// [MOD-PERM-MSG-8-3] Adjust Permission execution
+func (ms msgServer) executeAdjustPermission(ctx sdk.Context, perm types.Permission, authority string, effectiveUntil *time.Time, now time.Time) error {
 	// set applicant_perm.effective_until to effective_until
 	perm.EffectiveUntil = effectiveUntil
 
-	// set applicant_perm.extended to now
-	perm.Extended = &now
+	// set applicant_perm.adjusted to now
+	perm.Adjusted = &now
 
 	// set applicant_perm.modified to now
 	perm.Modified = &now
 
-	// set applicant_perm.extended_by to account executing the method
-	perm.ExtendedBy = creator
+	// set applicant_perm.adjusted_by to msg.authority
+	perm.AdjustedBy = authority
 
 	return ms.Keeper.UpdatePermission(ctx, perm)
 }

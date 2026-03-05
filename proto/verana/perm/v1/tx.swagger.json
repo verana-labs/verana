@@ -16,6 +16,38 @@
     "application/json"
   ],
   "paths": {
+    "/verana.perm.v1.Msg/AdjustPermission": {
+      "post": {
+        "operationId": "Msg_AdjustPermission",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.perm.v1.MsgAdjustPermissionResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.perm.v1.MsgAdjustPermission"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
     "/verana.perm.v1.Msg/CancelPermissionVPLastRequest": {
       "post": {
         "summary": "rpc RequestPermissionVPTermination(MsgRequestPermissionVPTermination) returns (MsgRequestPermissionVPTerminationResponse);\n rpc ConfirmPermissionVPTermination(MsgConfirmPermissionVPTermination) returns (MsgConfirmPermissionVPTerminationResponse);",
@@ -137,38 +169,6 @@
             "required": true,
             "schema": {
               "$ref": "#/definitions/verana.perm.v1.MsgCreateRootPermission"
-            }
-          }
-        ],
-        "tags": [
-          "Msg"
-        ]
-      }
-    },
-    "/verana.perm.v1.Msg/ExtendPermission": {
-      "post": {
-        "operationId": "Msg_ExtendPermission",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/verana.perm.v1.MsgExtendPermissionResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/google.rpc.Status"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/verana.perm.v1.MsgExtendPermission"
             }
           }
         ],
@@ -445,6 +445,29 @@
         }
       }
     },
+    "verana.perm.v1.MsgAdjustPermission": {
+      "type": "object",
+      "properties": {
+        "authority": {
+          "type": "string"
+        },
+        "operator": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string",
+          "format": "uint64",
+          "title": "Permission ID"
+        },
+        "effective_until": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "verana.perm.v1.MsgAdjustPermissionResponse": {
+      "type": "object"
+    },
     "verana.perm.v1.MsgCancelPermissionVPLastRequest": {
       "type": "object",
       "properties": {
@@ -595,26 +618,6 @@
           "title": "ID of the created permission"
         }
       }
-    },
-    "verana.perm.v1.MsgExtendPermission": {
-      "type": "object",
-      "properties": {
-        "creator": {
-          "type": "string"
-        },
-        "id": {
-          "type": "string",
-          "format": "uint64",
-          "title": "Permission ID"
-        },
-        "effective_until": {
-          "type": "string",
-          "format": "date-time"
-        }
-      }
-    },
-    "verana.perm.v1.MsgExtendPermissionResponse": {
-      "type": "object"
     },
     "verana.perm.v1.MsgRenewPermissionVP": {
       "type": "object",

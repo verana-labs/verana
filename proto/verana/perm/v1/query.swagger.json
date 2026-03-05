@@ -352,11 +352,11 @@
         "created_by": {
           "type": "string"
         },
-        "extended": {
+        "adjusted": {
           "type": "string",
           "format": "date-time"
         },
-        "extended_by": {
+        "adjusted_by": {
           "type": "string"
         },
         "slashed": {

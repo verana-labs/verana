@@ -193,10 +193,15 @@ func (msg *MsgCreateRootPermission) ValidateBasic() error {
 	return nil
 }
 
-func (msg *MsgExtendPermission) ValidateBasic() error {
-	// Validate creator address
-	if _, err := sdk.AccAddressFromBech32(msg.Creator); err != nil {
-		return fmt.Errorf("invalid creator address: %w", err)
+func (msg *MsgAdjustPermission) ValidateBasic() error {
+	// Validate authority address
+	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
+		return fmt.Errorf("invalid authority address: %w", err)
+	}
+
+	// Validate operator address
+	if _, err := sdk.AccAddressFromBech32(msg.Operator); err != nil {
+		return fmt.Errorf("invalid operator address: %w", err)
 	}
 
 	// if a mandatory parameter is not present, transaction MUST abort
@@ -209,9 +214,6 @@ func (msg *MsgExtendPermission) ValidateBasic() error {
 	if msg.EffectiveUntil == nil {
 		return fmt.Errorf("effective_until is required")
 	}
-
-	// Note: Time-based validations are moved to the main function
-	// to use blockchain time instead of system time
 
 	return nil
 }

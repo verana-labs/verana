@@ -43,8 +43,8 @@ const (
 
 	EventTypeCancelPermissionVPLastRequest = "cancel_permission_vp_last_request"
 
-	EventTypeExtendPermission     = "extend_permission"
-	AttributeKeyExtendedBy        = "extended_by"
+	EventTypeAdjustPermission     = "adjust_permission"
+	AttributeKeyAdjustedBy        = "adjusted_by"
 	AttributeKeyNewEffectiveUntil = "new_effective_until"
 
 	EventTypeRevokePermission = "revoke_permission"

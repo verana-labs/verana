@@ -138,8 +138,8 @@ export interface Permission {
   authority: string;
   created: Date | undefined;
   createdBy: string;
-  extended: Date | undefined;
-  extendedBy: string;
+  adjusted: Date | undefined;
+  adjustedBy: string;
   /** NEW: Slashing related fields */
   slashed: Date | undefined;
   slashedBy: string;
@@ -216,8 +216,8 @@ function createBasePermission(): Permission {
     authority: "",
     created: undefined,
     createdBy: "",
-    extended: undefined,
-    extendedBy: "",
+    adjusted: undefined,
+    adjustedBy: "",
     slashed: undefined,
     slashedBy: "",
     repaid: undefined,
@@ -277,11 +277,11 @@ export const Permission = {
     if (message.createdBy !== "") {
       writer.uint32(58).string(message.createdBy);
     }
-    if (message.extended !== undefined) {
-      Timestamp.encode(toTimestamp(message.extended), writer.uint32(66).fork()).ldelim();
+    if (message.adjusted !== undefined) {
+      Timestamp.encode(toTimestamp(message.adjusted), writer.uint32(66).fork()).ldelim();
     }
-    if (message.extendedBy !== "") {
-      writer.uint32(74).string(message.extendedBy);
+    if (message.adjustedBy !== "") {
+      writer.uint32(74).string(message.adjustedBy);
     }
     if (message.slashed !== undefined) {
       Timestamp.encode(toTimestamp(message.slashed), writer.uint32(82).fork()).ldelim();
@@ -446,14 +446,14 @@ export const Permission = {
             break;
           }
 
-          message.extended = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
+          message.adjusted = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
           continue;
         case 9:
           if (tag !== 74) {
             break;
           }
 
-          message.extendedBy = reader.string();
+          message.adjustedBy = reader.string();
           continue;
         case 10:
           if (tag !== 82) {
@@ -704,8 +704,8 @@ export const Permission = {
       authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
       created: isSet(object.created) ? fromJsonTimestamp(object.created) : undefined,
       createdBy: isSet(object.createdBy) ? globalThis.String(object.createdBy) : "",
-      extended: isSet(object.extended) ? fromJsonTimestamp(object.extended) : undefined,
-      extendedBy: isSet(object.extendedBy) ? globalThis.String(object.extendedBy) : "",
+      adjusted: isSet(object.adjusted) ? fromJsonTimestamp(object.adjusted) : undefined,
+      adjustedBy: isSet(object.adjustedBy) ? globalThis.String(object.adjustedBy) : "",
       slashed: isSet(object.slashed) ? fromJsonTimestamp(object.slashed) : undefined,
       slashedBy: isSet(object.slashedBy) ? globalThis.String(object.slashedBy) : "",
       repaid: isSet(object.repaid) ? fromJsonTimestamp(object.repaid) : undefined,
@@ -777,11 +777,11 @@ export const Permission = {
     if (message.createdBy !== "") {
       obj.createdBy = message.createdBy;
     }
-    if (message.extended !== undefined) {
-      obj.extended = message.extended.toISOString();
+    if (message.adjusted !== undefined) {
+      obj.adjusted = message.adjusted.toISOString();
     }
-    if (message.extendedBy !== "") {
-      obj.extendedBy = message.extendedBy;
+    if (message.adjustedBy !== "") {
+      obj.adjustedBy = message.adjustedBy;
     }
     if (message.slashed !== undefined) {
       obj.slashed = message.slashed.toISOString();
@@ -897,8 +897,8 @@ export const Permission = {
     message.authority = object.authority ?? "";
     message.created = object.created ?? undefined;
     message.createdBy = object.createdBy ?? "";
-    message.extended = object.extended ?? undefined;
-    message.extendedBy = object.extendedBy ?? "";
+    message.adjusted = object.adjusted ?? undefined;
+    message.adjustedBy = object.adjustedBy ?? "";
     message.slashed = object.slashed ?? undefined;
     message.slashedBy = object.slashedBy ?? "";
     message.repaid = object.repaid ?? undefined;

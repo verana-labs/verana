@@ -129,13 +129,13 @@ func RunPermissionRenewalJourney(ctx context.Context, client cosmosclient.Client
 	// Display the new state
 	fmt.Println("✅ Step 7: Permission renewal details:")
 	fmt.Printf("    - Permission State: %s\n", renewedPerm.VpState)
-	fmt.Printf("    - Extended By: %s\n", renewedPerm.ExtendedBy)
+	fmt.Printf("    - Adjusted By: %s\n", renewedPerm.AdjustedBy)
 
 	// Get validator address for comparison
 	validatorAddr, err := issuerGrantorAccount.Address(lib.GetAddressPrefix())
 	if err == nil { // Only verify if we can get the address
-		if renewedPerm.ExtendedBy == validatorAddr {
-			fmt.Printf("    - Verified permission was extended by the validator (%s)\n", validatorAddr)
+		if renewedPerm.AdjustedBy == validatorAddr {
+			fmt.Printf("    - Verified permission was adjusted by the validator (%s)\n", validatorAddr)
 		}
 	}
 

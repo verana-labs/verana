@@ -70,8 +70,8 @@ func TestStartPermissionVP(t *testing.T) {
 		Authority:       creator,
 		Created:       &now,
 		CreatedBy:     creator,
-		Extended:      &now,
-		ExtendedBy:    creator,
+		Adjusted:      &now,
+		AdjustedBy:    creator,
 		Modified:      &now,
 		Country:       "US",
 		VpState:       types.ValidationState_VALIDATED, // validator must be validated
@@ -88,8 +88,8 @@ func TestStartPermissionVP(t *testing.T) {
 		Authority:       creator,
 		Created:       &now,
 		CreatedBy:     creator,
-		Extended:      &now,
-		ExtendedBy:    creator,
+		Adjusted:      &now,
+		AdjustedBy:    creator,
 		Modified:      &now,
 		Country:       "FR", // Different country
 		VpState:       types.ValidationState_VALIDATED,
@@ -105,8 +105,8 @@ func TestStartPermissionVP(t *testing.T) {
 		Authority:       creator,
 		Created:       &now,
 		CreatedBy:     creator,
-		Extended:      &now,
-		ExtendedBy:    creator,
+		Adjusted:      &now,
+		AdjustedBy:    creator,
 		Modified:      &now,
 		Country:       "", // No country restriction
 		VpState:       types.ValidationState_VALIDATED,
@@ -291,8 +291,8 @@ func TestRenewPermissionVP(t *testing.T) {
 		Authority:       creator,
 		Created:       &now,
 		CreatedBy:     creator,
-		Extended:      &now,
-		ExtendedBy:    creator,
+		Adjusted:      &now,
+		AdjustedBy:    creator,
 		Modified:      &now,
 		Country:       "US",
 		VpState:       types.ValidationState_VALIDATED,
@@ -310,8 +310,8 @@ func TestRenewPermissionVP(t *testing.T) {
 		Authority:         creator,
 		Created:         &now,
 		CreatedBy:       creator,
-		Extended:        &now,
-		ExtendedBy:      creator,
+		Adjusted:        &now,
+		AdjustedBy:      creator,
 		Modified:        &now,
 		Country:         "US",
 		ValidatorPermId: validatorPermID,
@@ -398,8 +398,8 @@ func TestRenewPermissionVP_AuthzCheck(t *testing.T) {
 		Authority:     creator,
 		Created:       &now,
 		CreatedBy:     creator,
-		Extended:      &now,
-		ExtendedBy:    creator,
+		Adjusted:      &now,
+		AdjustedBy:    creator,
 		Modified:      &now,
 		VpState:       types.ValidationState_VALIDATED,
 		EffectiveFrom: &pastTime,
@@ -471,8 +471,8 @@ func TestRenewPermissionVP_VpStatePrecondition(t *testing.T) {
 		Authority:     creator,
 		Created:       &now,
 		CreatedBy:     creator,
-		Extended:      &now,
-		ExtendedBy:    creator,
+		Adjusted:      &now,
+		AdjustedBy:    creator,
 		Modified:      &now,
 		VpState:       types.ValidationState_VALIDATED,
 		EffectiveFrom: &pastTime,
@@ -797,8 +797,8 @@ func TestRenewPermissionVP_FeeAndDepositAccumulation(t *testing.T) {
 		Authority:      creator,
 		Created:        &now,
 		CreatedBy:      creator,
-		Extended:       &now,
-		ExtendedBy:     creator,
+		Adjusted:       &now,
+		AdjustedBy:     creator,
 		Modified:       &now,
 		VpState:        types.ValidationState_VALIDATED,
 		EffectiveFrom:  &pastTime,
@@ -974,8 +974,8 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 		Authority:       validatorAddr,
 		Created:       &now,
 		CreatedBy:     validatorAddr,
-		Extended:      &now,
-		ExtendedBy:    validatorAddr,
+		Adjusted:      &now,
+		AdjustedBy:    validatorAddr,
 		Modified:      &now,
 		Country:       "US",
 		VpState:       types.ValidationState_VALIDATED,
@@ -994,8 +994,8 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 			Authority:         creator,
 			Created:         &now,
 			CreatedBy:       creator,
-			Extended:        &now,
-			ExtendedBy:      creator,
+			Adjusted:        &now,
+			AdjustedBy:      creator,
 			Modified:        &now,
 			Country:         "US",
 			ValidatorPermId: validatorPermID,
@@ -1057,8 +1057,8 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 			Authority:        renewalAddr,
 			Created:          &now,
 			CreatedBy:        renewalAddr,
-			Extended:         &now,
-			ExtendedBy:       renewalAddr,
+			Adjusted:         &now,
+			AdjustedBy:       renewalAddr,
 			Modified:         &now,
 			Country:          "US",
 			ValidatorPermId:  validatorPermID,
@@ -1127,8 +1127,8 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 			Authority:         creator,
 			Created:         &now,
 			CreatedBy:       creator,
-			Extended:        &now,
-			ExtendedBy:      creator,
+			Adjusted:        &now,
+			AdjustedBy:      creator,
 			Modified:        &now,
 			Country:         "US",
 			ValidatorPermId: validatorPermID,
@@ -1158,8 +1158,8 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 			Authority:         creator,
 			Created:         &now,
 			CreatedBy:       creator,
-			Extended:        &now,
-			ExtendedBy:      creator,
+			Adjusted:        &now,
+			AdjustedBy:      creator,
 			Modified:        &now,
 			Country:         "US",
 			ValidatorPermId: validatorPermID,
@@ -1189,8 +1189,8 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 			Authority:         creator,
 			Created:         &now,
 			CreatedBy:       creator,
-			Extended:        &now,
-			ExtendedBy:      creator,
+			Adjusted:        &now,
+			AdjustedBy:      creator,
 			Modified:        &now,
 			Country:         "US",
 			ValidatorPermId: validatorPermID,
@@ -1226,8 +1226,8 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 			Authority:         creator,
 			Created:         &now,
 			CreatedBy:       creator,
-			Extended:        &now,
-			ExtendedBy:      creator,
+			Adjusted:        &now,
+			AdjustedBy:      creator,
 			Modified:        &now,
 			Country:         "US",
 			ValidatorPermId: validatorPermID,
@@ -1267,8 +1267,8 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 			Authority:             validatorAddr,
 			Created:             &now,
 			CreatedBy:           validatorAddr,
-			Extended:            &now,
-			ExtendedBy:          validatorAddr,
+			Adjusted:            &now,
+			AdjustedBy:          validatorAddr,
 			Modified:            &now,
 			Country:             "US",
 			VpState:             types.ValidationState_VALIDATED,
@@ -1285,8 +1285,8 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 			Authority:         creator,
 			Created:         &now,
 			CreatedBy:       creator,
-			Extended:        &now,
-			ExtendedBy:      creator,
+			Adjusted:        &now,
+			AdjustedBy:      creator,
 			Modified:        &now,
 			Country:         "US",
 			ValidatorPermId: validatorWithDiscountID,
@@ -1327,8 +1327,8 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 			Authority:             validatorAddr,
 			Created:             &now,
 			CreatedBy:           validatorAddr,
-			Extended:            &now,
-			ExtendedBy:          validatorAddr,
+			Adjusted:            &now,
+			AdjustedBy:          validatorAddr,
 			Modified:            &now,
 			Country:             "US",
 			VpState:             types.ValidationState_VALIDATED,
@@ -1344,8 +1344,8 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 			Authority:         creator,
 			Created:         &now,
 			CreatedBy:       creator,
-			Extended:        &now,
-			ExtendedBy:      creator,
+			Adjusted:        &now,
+			AdjustedBy:      creator,
 			Modified:        &now,
 			Country:         "US",
 			ValidatorPermId: validatorWithDiscountID,
@@ -1382,8 +1382,8 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 			Authority:         creator,
 			Created:         &now,
 			CreatedBy:       creator,
-			Extended:        &now,
-			ExtendedBy:      creator,
+			Adjusted:        &now,
+			AdjustedBy:      creator,
 			Modified:        &now,
 			Country:         "US",
 			ValidatorPermId: validatorPermID,
@@ -1420,8 +1420,8 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 			Authority:             otherAddr, // Use different authority to avoid overlap with test 7
 			Created:             &now,
 			CreatedBy:           otherAddr,
-			Extended:            &now,
-			ExtendedBy:          otherAddr,
+			Adjusted:            &now,
+			AdjustedBy:          otherAddr,
 			Modified:            &now,
 			Country:             "US",
 			ValidatorPermId:     validatorPermID,
@@ -1479,8 +1479,8 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 			Authority:       validatorAddr,
 			Created:       &now,
 			CreatedBy:     validatorAddr,
-			Extended:      &now,
-			ExtendedBy:    validatorAddr,
+			Adjusted:      &now,
+			AdjustedBy:    validatorAddr,
 			Modified:      &now,
 			Country:       "US",
 			VpState:       types.ValidationState_VALIDATED,
@@ -1496,8 +1496,8 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 			Authority:         creator,
 			Created:         &now,
 			CreatedBy:       creator,
-			Extended:        &now,
-			ExtendedBy:      creator,
+			Adjusted:        &now,
+			AdjustedBy:      creator,
 			Modified:        &now,
 			Country:         "US",
 			ValidatorPermId: ecosystemValidatorID,
@@ -1537,8 +1537,8 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 			Authority:       euAddr,
 			Created:         &now,
 			CreatedBy:       euAddr,
-			Extended:        &now,
-			ExtendedBy:      euAddr,
+			Adjusted:        &now,
+			AdjustedBy:      euAddr,
 			Modified:        &now,
 			Country:         "US",
 			ValidatorPermId: validatorPermID,
@@ -1583,8 +1583,8 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 			Authority:     vpAddr,
 			Created:       &now,
 			CreatedBy:     vpAddr,
-			Extended:      &now,
-			ExtendedBy:    vpAddr,
+			Adjusted:      &now,
+			AdjustedBy:    vpAddr,
 			Modified:      &now,
 			VpState:       types.ValidationState_VALIDATED,
 			EffectiveFrom: &pastTime,
@@ -1599,8 +1599,8 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 			Authority:       vpTestAddr,
 			Created:         &now,
 			CreatedBy:       vpTestAddr,
-			Extended:        &now,
-			ExtendedBy:      vpTestAddr,
+			Adjusted:        &now,
+			AdjustedBy:      vpTestAddr,
 			Modified:        &now,
 			ValidatorPermId: vpValidatorID,
 			VpState:         types.ValidationState_PENDING,
@@ -1641,8 +1641,8 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 			Authority:     vpAddr,
 			Created:       &now,
 			CreatedBy:     vpAddr,
-			Extended:      &now,
-			ExtendedBy:    vpAddr,
+			Adjusted:      &now,
+			AdjustedBy:    vpAddr,
 			Modified:      &now,
 			VpState:       types.ValidationState_VALIDATED,
 			EffectiveFrom: &pastTime,
@@ -1656,8 +1656,8 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 			Authority:       vpNilAddr,
 			Created:         &now,
 			CreatedBy:       vpNilAddr,
-			Extended:        &now,
-			ExtendedBy:      vpNilAddr,
+			Adjusted:        &now,
+			AdjustedBy:      vpNilAddr,
 			Modified:        &now,
 			ValidatorPermId: vpValidator2ID,
 			VpState:         types.ValidationState_PENDING,
@@ -1701,8 +1701,8 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 			Authority:        renewAddr,
 			Created:          &now,
 			CreatedBy:        renewAddr,
-			Extended:         &now,
-			ExtendedBy:       renewAddr,
+			Adjusted:         &now,
+			AdjustedBy:       renewAddr,
 			Modified:         &now,
 			Country:          "US",
 			ValidatorPermId:  validatorPermID,
@@ -1746,8 +1746,8 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 			Authority:        rvfAddr,
 			Created:          &now,
 			CreatedBy:        rvfAddr,
-			Extended:         &now,
-			ExtendedBy:       rvfAddr,
+			Adjusted:         &now,
+			AdjustedBy:       rvfAddr,
 			Modified:         &now,
 			Country:          "US",
 			ValidatorPermId:  validatorPermID,
@@ -1789,8 +1789,8 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 			Authority:        rifAddr,
 			Created:          &now,
 			CreatedBy:        rifAddr,
-			Extended:         &now,
-			ExtendedBy:       rifAddr,
+			Adjusted:         &now,
+			AdjustedBy:       rifAddr,
 			Modified:         &now,
 			Country:          "US",
 			ValidatorPermId:  validatorPermID,
@@ -1832,8 +1832,8 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 			Authority:        rvAddr,
 			Created:          &now,
 			CreatedBy:        rvAddr,
-			Extended:         &now,
-			ExtendedBy:       rvAddr,
+			Adjusted:         &now,
+			AdjustedBy:       rvAddr,
 			Modified:         &now,
 			Country:          "US",
 			ValidatorPermId:  validatorPermID,
@@ -1874,8 +1874,8 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 			Authority:       overlapAddr,
 			Created:         &now,
 			CreatedBy:       overlapAddr,
-			Extended:        &now,
-			ExtendedBy:      overlapAddr,
+			Adjusted:        &now,
+			AdjustedBy:      overlapAddr,
 			Modified:        &now,
 			Country:         "US",
 			ValidatorPermId: validatorPermID,
@@ -1893,8 +1893,8 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 			Authority:       overlapAddr,
 			Created:         &now,
 			CreatedBy:       overlapAddr,
-			Extended:        &now,
-			ExtendedBy:      overlapAddr,
+			Adjusted:        &now,
+			AdjustedBy:      overlapAddr,
 			Modified:        &now,
 			Country:         "US",
 			ValidatorPermId: validatorPermID,
@@ -1932,8 +1932,8 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 			Authority:       overlapAddr2,
 			Created:         &now,
 			CreatedBy:       overlapAddr2,
-			Extended:        &now,
-			ExtendedBy:      overlapAddr2,
+			Adjusted:        &now,
+			AdjustedBy:      overlapAddr2,
 			Modified:        &now,
 			Country:         "US",
 			ValidatorPermId: validatorPermID,
@@ -1951,8 +1951,8 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 			Authority:       overlapAddr2,
 			Created:         &now,
 			CreatedBy:       overlapAddr2,
-			Extended:        &now,
-			ExtendedBy:      overlapAddr2,
+			Adjusted:        &now,
+			AdjustedBy:      overlapAddr2,
 			Modified:        &now,
 			Country:         "US",
 			ValidatorPermId: validatorPermID,
@@ -1987,8 +1987,8 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 			Authority:     validatorAddr,
 			Created:       &now,
 			CreatedBy:     validatorAddr,
-			Extended:      &now,
-			ExtendedBy:    validatorAddr,
+			Adjusted:      &now,
+			AdjustedBy:    validatorAddr,
 			Modified:      &now,
 			VpState:       types.ValidationState_VALIDATED,
 			EffectiveFrom: &pastTime,
@@ -2004,8 +2004,8 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 			Authority:       rvAddr,
 			Created:         &now,
 			CreatedBy:       rvAddr,
-			Extended:        &now,
-			ExtendedBy:      rvAddr,
+			Adjusted:        &now,
+			AdjustedBy:      rvAddr,
 			Modified:        &now,
 			ValidatorPermId: revokedValidatorID,
 			VpState:         types.ValidationState_PENDING,
@@ -2039,8 +2039,8 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 			Authority:        feeAddr,
 			Created:          &now,
 			CreatedBy:        feeAddr,
-			Extended:         &now,
-			ExtendedBy:       feeAddr,
+			Adjusted:         &now,
+			AdjustedBy:       feeAddr,
 			Modified:         &now,
 			Country:          "US",
 			ValidatorPermId:  validatorPermID,
@@ -2089,8 +2089,8 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 			Authority:     vgAddr,
 			Created:       &now,
 			CreatedBy:     vgAddr,
-			Extended:      &now,
-			ExtendedBy:    vgAddr,
+			Adjusted:      &now,
+			AdjustedBy:    vgAddr,
 			Modified:      &now,
 			VpState:       types.ValidationState_VALIDATED,
 			EffectiveFrom: &pastTime,
@@ -2105,8 +2105,8 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 			Authority:       sdk.AccAddress([]byte("vg_perm_creator")).String(),
 			Created:         &now,
 			CreatedBy:       sdk.AccAddress([]byte("vg_perm_creator")).String(),
-			Extended:        &now,
-			ExtendedBy:      sdk.AccAddress([]byte("vg_perm_creator")).String(),
+			Adjusted:        &now,
+			AdjustedBy:      sdk.AccAddress([]byte("vg_perm_creator")).String(),
 			Modified:        &now,
 			ValidatorPermId: vgValidatorID,
 			VpState:         types.ValidationState_PENDING,
@@ -2146,8 +2146,8 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 			Authority:                vgAddr2,
 			Created:                  &now,
 			CreatedBy:                vgAddr2,
-			Extended:                 &now,
-			ExtendedBy:               vgAddr2,
+			Adjusted:                 &now,
+			AdjustedBy:               vgAddr2,
 			Modified:                 &now,
 			VpState:                  types.ValidationState_VALIDATED,
 			VerificationFeeDiscount:  5000, // 50% discount
@@ -2162,8 +2162,8 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 			Authority:       sdk.AccAddress([]byte("ver_exceed_addr")).String(),
 			Created:         &now,
 			CreatedBy:       sdk.AccAddress([]byte("ver_exceed_addr")).String(),
-			Extended:        &now,
-			ExtendedBy:      sdk.AccAddress([]byte("ver_exceed_addr")).String(),
+			Adjusted:        &now,
+			AdjustedBy:      sdk.AccAddress([]byte("ver_exceed_addr")).String(),
 			Modified:        &now,
 			ValidatorPermId: vgValidator2ID,
 			VpState:         types.ValidationState_PENDING,
@@ -2201,8 +2201,8 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 			Authority:       skipAddr,
 			Created:         &now,
 			CreatedBy:       skipAddr,
-			Extended:        &now,
-			ExtendedBy:      skipAddr,
+			Adjusted:        &now,
+			AdjustedBy:      skipAddr,
 			Modified:        &now,
 			Country:         "US",
 			ValidatorPermId: validatorPermID,
@@ -2221,8 +2221,8 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 			Authority:       skipAddr,
 			Created:         &now,
 			CreatedBy:       skipAddr,
-			Extended:        &now,
-			ExtendedBy:      skipAddr,
+			Adjusted:        &now,
+			AdjustedBy:      skipAddr,
 			Modified:        &now,
 			Country:         "US",
 			ValidatorPermId: validatorPermID,
@@ -2256,8 +2256,8 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 			Authority:       vfdAddr,
 			Created:         &now,
 			CreatedBy:       vfdAddr,
-			Extended:        &now,
-			ExtendedBy:      vfdAddr,
+			Adjusted:        &now,
+			AdjustedBy:      vfdAddr,
 			Modified:        &now,
 			ValidatorPermId: func() uint64 {
 				// Reuse a schema 4 validator
@@ -2268,8 +2268,8 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 					Authority:     vAddr,
 					Created:       &now,
 					CreatedBy:     vAddr,
-					Extended:      &now,
-					ExtendedBy:    vAddr,
+					Adjusted:      &now,
+					AdjustedBy:    vAddr,
 					Modified:      &now,
 					VpState:       types.ValidationState_VALIDATED,
 					EffectiveFrom: &pastTime,
@@ -2312,8 +2312,8 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 			Authority:               rvdAddr,
 			Created:                 &now,
 			CreatedBy:               rvdAddr,
-			Extended:                &now,
-			ExtendedBy:              rvdAddr,
+			Adjusted:                &now,
+			AdjustedBy:              rvdAddr,
 			Modified:                &now,
 			ValidatorPermId: func() uint64 {
 				vAddr := sdk.AccAddress([]byte("rvd_validator_ad")).String()
@@ -2323,8 +2323,8 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 					Authority:     vAddr,
 					Created:       &now,
 					CreatedBy:     vAddr,
-					Extended:      &now,
-					ExtendedBy:    vAddr,
+					Adjusted:      &now,
+					AdjustedBy:    vAddr,
 					Modified:      &now,
 					VpState:       types.ValidationState_VALIDATED,
 					EffectiveFrom: &pastTime,
@@ -2391,8 +2391,8 @@ func TestSetPermissionVPToValidated_AuthzCheckFailure(t *testing.T) {
 		Authority:     validatorAddr,
 		Created:       &now,
 		CreatedBy:     validatorAddr,
-		Extended:      &now,
-		ExtendedBy:    validatorAddr,
+		Adjusted:      &now,
+		AdjustedBy:    validatorAddr,
 		Modified:      &now,
 		VpState:       types.ValidationState_VALIDATED,
 		EffectiveFrom: &pastTime,
@@ -2407,8 +2407,8 @@ func TestSetPermissionVPToValidated_AuthzCheckFailure(t *testing.T) {
 		Authority:       creatorAddr,
 		Created:         &now,
 		CreatedBy:       creatorAddr,
-		Extended:        &now,
-		ExtendedBy:      creatorAddr,
+		Adjusted:        &now,
+		AdjustedBy:      creatorAddr,
 		Modified:        &now,
 		ValidatorPermId: validatorPermID,
 		VpState:         types.ValidationState_PENDING,
@@ -2521,8 +2521,8 @@ func TestCancelPermissionVPLastRequest(t *testing.T) {
 		Authority:  validatorAddr,
 		Created:    &now,
 		CreatedBy:  validatorAddr,
-		Extended:   &now,
-		ExtendedBy: validatorAddr,
+		Adjusted:   &now,
+		AdjustedBy: validatorAddr,
 		Modified:   &now,
 		Country:    "US",
 		VpState:    types.ValidationState_VALIDATED,
@@ -2539,8 +2539,8 @@ func TestCancelPermissionVPLastRequest(t *testing.T) {
 			Authority:        neverAddr,
 			Created:          &now,
 			CreatedBy:        neverAddr,
-			Extended:         &now,
-			ExtendedBy:       neverAddr,
+			Adjusted:         &now,
+			AdjustedBy:       neverAddr,
 			Modified:         &now,
 			Country:          "US",
 			ValidatorPermId:  validatorPermID,
@@ -2582,8 +2582,8 @@ func TestCancelPermissionVPLastRequest(t *testing.T) {
 			Authority:        prevAddr,
 			Created:          &now,
 			CreatedBy:        prevAddr,
-			Extended:         &now,
-			ExtendedBy:       prevAddr,
+			Adjusted:         &now,
+			AdjustedBy:       prevAddr,
 			Modified:         &now,
 			Country:          "US",
 			ValidatorPermId:  validatorPermID,
@@ -2634,8 +2634,8 @@ func TestCancelPermissionVPLastRequest(t *testing.T) {
 			Authority:       creator,
 			Created:         &now,
 			CreatedBy:       creator,
-			Extended:        &now,
-			ExtendedBy:      creator,
+			Adjusted:        &now,
+			AdjustedBy:      creator,
 			Modified:        &now,
 			Country:         "US",
 			ValidatorPermId: validatorPermID,
@@ -2664,8 +2664,8 @@ func TestCancelPermissionVPLastRequest(t *testing.T) {
 			Authority:       creator,
 			Created:         &now,
 			CreatedBy:       creator,
-			Extended:        &now,
-			ExtendedBy:      creator,
+			Adjusted:        &now,
+			AdjustedBy:      creator,
 			Modified:        &now,
 			Country:         "US",
 			ValidatorPermId: validatorPermID,
@@ -2695,8 +2695,8 @@ func TestCancelPermissionVPLastRequest(t *testing.T) {
 			Authority:       creator,
 			Created:         &now,
 			CreatedBy:       creator,
-			Extended:        &now,
-			ExtendedBy:      creator,
+			Adjusted:        &now,
+			AdjustedBy:      creator,
 			Modified:        &now,
 			Country:         "US",
 			ValidatorPermId: validatorPermID,
@@ -2730,8 +2730,8 @@ func TestCancelPermissionVPLastRequest(t *testing.T) {
 			Authority:        repaidAddr,
 			Created:          &now,
 			CreatedBy:        repaidAddr,
-			Extended:         &now,
-			ExtendedBy:       repaidAddr,
+			Adjusted:         &now,
+			AdjustedBy:       repaidAddr,
 			Modified:         &now,
 			Country:          "US",
 			ValidatorPermId:  validatorPermID,
@@ -2768,8 +2768,8 @@ func TestCancelPermissionVPLastRequest(t *testing.T) {
 			Authority:        zeroFeesAddr,
 			Created:          &now,
 			CreatedBy:        zeroFeesAddr,
-			Extended:         &now,
-			ExtendedBy:       zeroFeesAddr,
+			Adjusted:         &now,
+			AdjustedBy:       zeroFeesAddr,
 			Modified:         &now,
 			Country:          "US",
 			ValidatorPermId:  validatorPermID,
@@ -2817,8 +2817,8 @@ func TestCancelPermissionVPLastRequest_AuthzCheckFailure(t *testing.T) {
 		Authority:  validatorAddr,
 		Created:    &now,
 		CreatedBy:  validatorAddr,
-		Extended:   &now,
-		ExtendedBy: validatorAddr,
+		Adjusted:   &now,
+		AdjustedBy: validatorAddr,
 		Modified:   &now,
 		VpState:    types.ValidationState_VALIDATED,
 	}
@@ -2831,8 +2831,8 @@ func TestCancelPermissionVPLastRequest_AuthzCheckFailure(t *testing.T) {
 		Authority:       creatorAddr,
 		Created:         &now,
 		CreatedBy:       creatorAddr,
-		Extended:        &now,
-		ExtendedBy:      creatorAddr,
+		Adjusted:        &now,
+		AdjustedBy:      creatorAddr,
 		Modified:        &now,
 		ValidatorPermId: validatorPermID,
 		VpState:         types.ValidationState_PENDING,
@@ -2862,8 +2862,8 @@ func TestCancelPermissionVPLastRequest_AuthzCheckFailure(t *testing.T) {
 	require.NotNil(t, resp)
 }
 
-// TestExtendPermission tests the ExtendPermission message server function
-func TestExtendPermission(t *testing.T) {
+// TestAdjustPermission tests the AdjustPermission message server function
+func TestAdjustPermission(t *testing.T) {
 	k, ms, csKeeper, _, ctx := setupMsgServer(t)
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
@@ -2872,208 +2872,213 @@ func TestExtendPermission(t *testing.T) {
 	sdkCtx = sdkCtx.WithBlockTime(blockTime)
 	ctx = sdk.WrapSDKContext(sdkCtx)
 
-	creator := sdk.AccAddress([]byte("test_creator")).String()
-	validatorAddr := sdk.AccAddress([]byte("test_validator")).String()
-	trustRegistryAddr := sdk.AccAddress([]byte("trust_registry")).String()
+	authority := sdk.AccAddress([]byte("test_authority__")).String()
+	operatorAddr := sdk.AccAddress([]byte("test_operator___")).String()
+	validatorAddr := sdk.AccAddress([]byte("test_validator__")).String()
+	ecosystemAddr := sdk.AccAddress([]byte("trust_registry__")).String()
+	wrongAddr := sdk.AccAddress([]byte("wrong_authority_")).String()
 
-	// Create mock credential schema
-	csKeeper.CreateMockCredentialSchema(1,
-		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
-		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
+	// Create distinct mock credential schemas to avoid overlap between test permissions.
+	// Each permission uses a unique schema_id so the overlap check doesn't fire across test cases.
+	for i := uint64(1); i <= 10; i++ {
+		csKeeper.CreateMockCredentialSchema(i,
+			cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
+			cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
+	}
 
 	now := sdkCtx.BlockTime()
 	currentEffectiveUntil := now.Add(30 * 24 * time.Hour) // 30 days in the future
 	futureVpExp := now.Add(365 * 24 * time.Hour)          // 1 year in the future
 	pastTime := now.Add(-1 * time.Hour)                   // Set effective_from to past to make it ACTIVE
 
-	// Create validator perm
+	// Create validator perm (ISSUER_GRANTOR) — schema 1
 	validatorPerm := types.Permission{
 		SchemaId:      1,
 		Type:          types.PermissionType_ISSUER_GRANTOR,
-		Authority:       validatorAddr,
+		Authority:     validatorAddr,
 		Created:       &now,
 		CreatedBy:     validatorAddr,
-		Extended:      &now,
-		ExtendedBy:    validatorAddr,
+		Adjusted:      &now,
+		AdjustedBy:    validatorAddr,
 		Modified:      &now,
 		Country:       "US",
 		VpState:       types.ValidationState_VALIDATED,
-		EffectiveFrom: &pastTime, // Required for ACTIVE state
+		EffectiveFrom: &pastTime,
 	}
 	validatorPermID, err := k.CreatePermission(sdkCtx, validatorPerm)
 	require.NoError(t, err)
 
-	// Create a perm to extend
+	// Create a VP managed perm to adjust — schema 2
 	applicantPerm := types.Permission{
-		SchemaId:        1,
+		SchemaId:        2,
 		Type:            types.PermissionType_ISSUER,
-		Authority:         creator,
+		Authority:       authority,
 		Created:         &now,
-		CreatedBy:       creator,
-		Extended:        &now,
-		ExtendedBy:      creator,
+		CreatedBy:       authority,
+		Adjusted:        &now,
+		AdjustedBy:      authority,
 		Modified:        &now,
 		EffectiveUntil:  &currentEffectiveUntil,
 		Country:         "US",
 		ValidatorPermId: validatorPermID,
 		VpState:         types.ValidationState_VALIDATED,
 		VpExp:           &futureVpExp,
-		EffectiveFrom:   &pastTime, // Required for ACTIVE state
+		EffectiveFrom:   &pastTime,
 	}
 	applicantPermID, err := k.CreatePermission(sdkCtx, applicantPerm)
-
 	require.NoError(t, err)
 
-	// Create a trust registry perm to test direct extension
-	trustRegistryPerm := types.Permission{
-		SchemaId:       1,
+	// Create an ECOSYSTEM perm — schema 3
+	ecosystemPerm := types.Permission{
+		SchemaId:       3,
 		Type:           types.PermissionType_ECOSYSTEM,
-		Authority:        trustRegistryAddr,
+		Authority:      ecosystemAddr,
 		Created:        &now,
-		CreatedBy:      trustRegistryAddr,
-		Extended:       &now,
-		ExtendedBy:     trustRegistryAddr,
+		CreatedBy:      ecosystemAddr,
+		Adjusted:       &now,
+		AdjustedBy:     ecosystemAddr,
 		Modified:       &now,
 		EffectiveUntil: &currentEffectiveUntil,
 		Country:        "US",
 		VpState:        types.ValidationState_VALIDATED,
-		EffectiveFrom:  &pastTime, // Required for ACTIVE state
+		EffectiveFrom:  &pastTime,
 	}
-	trustRegistryPermID, err := k.CreatePermission(sdkCtx, trustRegistryPerm)
+	ecosystemPermID, err := k.CreatePermission(sdkCtx, ecosystemPerm)
 	require.NoError(t, err)
 
-	// Create a separate perm for the "wrong creator" test
-	// Use same validator but has a different effective_until date
-	wrongCreatorTestPerm := types.Permission{
-		SchemaId:        1,
+	// Create a perm for the "wrong authority" test — schema 4
+	wrongAuthTestPerm := types.Permission{
+		SchemaId:        4,
 		Type:            types.PermissionType_ISSUER,
-		Authority:         creator,
+		Authority:       authority,
 		Created:         &now,
-		CreatedBy:       creator,
-		Extended:        &now,
-		ExtendedBy:      creator,
+		CreatedBy:       authority,
+		Adjusted:        &now,
+		AdjustedBy:      authority,
 		Modified:        &now,
-		EffectiveUntil:  &currentEffectiveUntil, // Same as the regular test
+		EffectiveUntil:  &currentEffectiveUntil,
 		Country:         "US",
 		ValidatorPermId: validatorPermID,
 		VpState:         types.ValidationState_VALIDATED,
 		VpExp:           &futureVpExp,
-		EffectiveFrom:   &pastTime, // Required for ACTIVE state
+		EffectiveFrom:   &pastTime,
 	}
-	wrongCreatorTestPermID, err := k.CreatePermission(sdkCtx, wrongCreatorTestPerm)
+	wrongAuthTestPermID, err := k.CreatePermission(sdkCtx, wrongAuthTestPerm)
 	require.NoError(t, err)
 
-	// Create a perm with NULL effective_until for testing NULL case
+	// Create a perm with NULL effective_until — schema 5
 	nullEffectiveUntilPerm := types.Permission{
-		SchemaId:        1,
+		SchemaId:        5,
 		Type:            types.PermissionType_ISSUER,
-		Authority:         creator,
+		Authority:       authority,
 		Created:         &now,
-		CreatedBy:       creator,
-		Extended:        &now,
-		ExtendedBy:      creator,
+		CreatedBy:       authority,
+		Adjusted:        &now,
+		AdjustedBy:      authority,
 		Modified:        &now,
-		EffectiveUntil:  nil, // NULL effective_until
+		EffectiveUntil:  nil,
 		Country:         "US",
 		ValidatorPermId: validatorPermID,
 		VpState:         types.ValidationState_VALIDATED,
 		VpExp:           &futureVpExp,
-		EffectiveFrom:   &pastTime, // Required for ACTIVE state
+		EffectiveFrom:   &pastTime,
 	}
 	nullEffectiveUntilPermID, err := k.CreatePermission(sdkCtx, nullEffectiveUntilPerm)
 	require.NoError(t, err)
 
-	// Create an ecosystem perm with NULL effective_until
+	// Create an ecosystem perm with NULL effective_until — schema 6
 	nullEffectiveUntilEcosystemPerm := types.Permission{
-		SchemaId:       1,
+		SchemaId:       6,
 		Type:           types.PermissionType_ECOSYSTEM,
-		Authority:        trustRegistryAddr,
+		Authority:      ecosystemAddr,
 		Created:        &now,
-		CreatedBy:      trustRegistryAddr,
-		Extended:       &now,
-		ExtendedBy:     trustRegistryAddr,
+		CreatedBy:      ecosystemAddr,
+		Adjusted:       &now,
+		AdjustedBy:     ecosystemAddr,
 		Modified:       &now,
-		EffectiveUntil: nil, // NULL effective_until
+		EffectiveUntil: nil,
 		Country:        "US",
 		VpState:        types.ValidationState_VALIDATED,
-		EffectiveFrom:  &pastTime, // Required for ACTIVE state
+		EffectiveFrom:  &pastTime,
 	}
 	nullEffectiveUntilEcosystemPermID, err := k.CreatePermission(sdkCtx, nullEffectiveUntilEcosystemPerm)
 	require.NoError(t, err)
 
-	// Create additional perms with NULL effective_until for invalid test cases
-	// (each test case needs its own perm since extending modifies the state)
-	nullEffectiveUntilPermForPastTest := types.Permission{
-		SchemaId:        1,
+	// Create perm for past effective_until test — schema 7
+	nullEffUntilPastTestPerm := types.Permission{
+		SchemaId:        7,
 		Type:            types.PermissionType_ISSUER,
-		Authority:         creator,
+		Authority:       authority,
 		Created:         &now,
-		CreatedBy:       creator,
-		Extended:        &now,
-		ExtendedBy:      creator,
+		CreatedBy:       authority,
+		Adjusted:        &now,
+		AdjustedBy:      authority,
 		Modified:        &now,
-		EffectiveUntil:  nil, // NULL effective_until
+		EffectiveUntil:  nil,
 		Country:         "US",
 		ValidatorPermId: validatorPermID,
 		VpState:         types.ValidationState_VALIDATED,
 		VpExp:           &futureVpExp,
-		EffectiveFrom:   &pastTime, // Required for ACTIVE state
+		EffectiveFrom:   &pastTime,
 	}
-	nullEffectiveUntilPermForPastTestID, err := k.CreatePermission(sdkCtx, nullEffectiveUntilPermForPastTest)
+	nullEffUntilPastTestPermID, err := k.CreatePermission(sdkCtx, nullEffUntilPastTestPerm)
 	require.NoError(t, err)
 
-	nullEffectiveUntilPermForEqualTest := types.Permission{
-		SchemaId:        1,
+	// Create perm for reduce effective_until test — schema 8
+	reducePerm := types.Permission{
+		SchemaId:        8,
 		Type:            types.PermissionType_ISSUER,
-		Authority:         creator,
+		Authority:       authority,
 		Created:         &now,
-		CreatedBy:       creator,
-		Extended:        &now,
-		ExtendedBy:      creator,
+		CreatedBy:       authority,
 		Modified:        &now,
-		EffectiveUntil:  nil, // NULL effective_until
+		EffectiveUntil:  &currentEffectiveUntil, // 30 days
 		Country:         "US",
 		ValidatorPermId: validatorPermID,
 		VpState:         types.ValidationState_VALIDATED,
 		VpExp:           &futureVpExp,
-		EffectiveFrom:   &pastTime, // Required for ACTIVE state
+		EffectiveFrom:   &pastTime,
 	}
-	nullEffectiveUntilPermForEqualTestID, err := k.CreatePermission(sdkCtx, nullEffectiveUntilPermForEqualTest)
+	reducePermID, err := k.CreatePermission(sdkCtx, reducePerm)
 	require.NoError(t, err)
 
-	newEffectiveUntil := now.Add(60 * 24 * time.Hour)     // 60 days in the future
-	pastEffectiveUntil := now.Add(-1 * 24 * time.Hour)    // 1 day in the past
-	tooFarEffectiveUntil := now.Add(500 * 24 * time.Hour) // Past VP expiration
-	equalToNowEffectiveUntil := now                       // Equal to now (should fail)
+	newEffectiveUntil := now.Add(60 * 24 * time.Hour)      // 60 days in the future
+	pastEffectiveUntil := now.Add(-1 * 24 * time.Hour)     // 1 day in the past
+	tooFarEffectiveUntil := now.Add(500 * 24 * time.Hour)  // Past VP expiration
+	equalToNowEffectiveUntil := now                        // Equal to now (should fail)
+	reducedEffectiveUntil := now.Add(15 * 24 * time.Hour)  // 15 days — less than current 30 days
 
 	testCases := []struct {
 		name       string
-		msg        *types.MsgExtendPermission
+		msg        *types.MsgAdjustPermission
 		expectErr  bool
 		errMessage string
 	}{
 		{
-			name: "Valid extension by validator",
-			msg: &types.MsgExtendPermission{
-				Creator:        validatorAddr,
+			name: "Valid adjustment by validator authority (VP managed)",
+			msg: &types.MsgAdjustPermission{
+				Authority:      validatorAddr,
+				Operator:       operatorAddr,
 				Id:             applicantPermID,
 				EffectiveUntil: &newEffectiveUntil,
 			},
 			expectErr: false,
 		},
 		{
-			name: "Valid extension by trust registry controller",
-			msg: &types.MsgExtendPermission{
-				Creator:        trustRegistryAddr,
-				Id:             trustRegistryPermID,
+			name: "Valid adjustment by ecosystem authority",
+			msg: &types.MsgAdjustPermission{
+				Authority:      ecosystemAddr,
+				Operator:       operatorAddr,
+				Id:             ecosystemPermID,
 				EffectiveUntil: &newEffectiveUntil,
 			},
 			expectErr: false,
 		},
 		{
 			name: "Invalid - perm not found",
-			msg: &types.MsgExtendPermission{
-				Creator:        validatorAddr,
+			msg: &types.MsgAdjustPermission{
+				Authority:      validatorAddr,
+				Operator:       operatorAddr,
 				Id:             9999,
 				EffectiveUntil: &newEffectiveUntil,
 			},
@@ -3081,29 +3086,32 @@ func TestExtendPermission(t *testing.T) {
 			errMessage: "permission not found",
 		},
 		{
-			name: "Invalid - effective_until not after current effective_until",
-			msg: &types.MsgExtendPermission{
-				Creator:        validatorAddr,
-				Id:             applicantPermID,
-				EffectiveUntil: &currentEffectiveUntil,
-			},
-			expectErr:  true,
-			errMessage: "effective_until must be greater than current effective_until",
-		},
-		{
 			name: "Invalid - effective_until in the past",
-			msg: &types.MsgExtendPermission{
-				Creator:        validatorAddr,
+			msg: &types.MsgAdjustPermission{
+				Authority:      validatorAddr,
+				Operator:       operatorAddr,
 				Id:             applicantPermID,
 				EffectiveUntil: &pastEffectiveUntil,
 			},
 			expectErr:  true,
-			errMessage: "effective_until must be greater than current effective_until",
+			errMessage: "effective_until must be greater than current timestamp",
 		},
 		{
-			name: "Invalid - effective_until beyond validation expiration",
-			msg: &types.MsgExtendPermission{
-				Creator:        validatorAddr,
+			name: "Invalid - effective_until equal to now",
+			msg: &types.MsgAdjustPermission{
+				Authority:      validatorAddr,
+				Operator:       operatorAddr,
+				Id:             applicantPermID,
+				EffectiveUntil: &equalToNowEffectiveUntil,
+			},
+			expectErr:  true,
+			errMessage: "effective_until must be greater than current timestamp",
+		},
+		{
+			name: "Invalid - effective_until beyond validation expiration (VP managed)",
+			msg: &types.MsgAdjustPermission{
+				Authority:      validatorAddr,
+				Operator:       operatorAddr,
 				Id:             applicantPermID,
 				EffectiveUntil: &tooFarEffectiveUntil,
 			},
@@ -3111,58 +3119,62 @@ func TestExtendPermission(t *testing.T) {
 			errMessage: "effective_until cannot be after validation expiration",
 		},
 		{
-			name: "Invalid - wrong creator",
-			msg: &types.MsgExtendPermission{
-				Creator:        creator,
-				Id:             wrongCreatorTestPermID, // Using separate test perm
-				EffectiveUntil: &newEffectiveUntil,     // Valid future time
+			name: "Invalid - wrong authority (VP managed)",
+			msg: &types.MsgAdjustPermission{
+				Authority:      wrongAddr,
+				Operator:       operatorAddr,
+				Id:             wrongAuthTestPermID,
+				EffectiveUntil: &newEffectiveUntil,
 			},
 			expectErr:  true,
-			errMessage: "creator is not the validator",
+			errMessage: "authority is not the validator permission authority",
 		},
 		{
-			name: "Valid - extend permission with NULL effective_until (validator-managed)",
-			msg: &types.MsgExtendPermission{
-				Creator:        validatorAddr,
+			name: "Valid - adjust permission with NULL effective_until (VP managed)",
+			msg: &types.MsgAdjustPermission{
+				Authority:      validatorAddr,
+				Operator:       operatorAddr,
 				Id:             nullEffectiveUntilPermID,
 				EffectiveUntil: &newEffectiveUntil,
 			},
 			expectErr: false,
 		},
 		{
-			name: "Valid - extend permission with NULL effective_until (ecosystem)",
-			msg: &types.MsgExtendPermission{
-				Creator:        trustRegistryAddr,
+			name: "Valid - adjust permission with NULL effective_until (ecosystem)",
+			msg: &types.MsgAdjustPermission{
+				Authority:      ecosystemAddr,
+				Operator:       operatorAddr,
 				Id:             nullEffectiveUntilEcosystemPermID,
 				EffectiveUntil: &newEffectiveUntil,
 			},
 			expectErr: false,
 		},
 		{
-			name: "Invalid - extend permission with NULL effective_until but new effective_until not greater than now (past)",
-			msg: &types.MsgExtendPermission{
-				Creator:        validatorAddr,
-				Id:             nullEffectiveUntilPermForPastTestID,
+			name: "Invalid - effective_until in the past (NULL current effective_until)",
+			msg: &types.MsgAdjustPermission{
+				Authority:      validatorAddr,
+				Operator:       operatorAddr,
+				Id:             nullEffUntilPastTestPermID,
 				EffectiveUntil: &pastEffectiveUntil,
 			},
 			expectErr:  true,
 			errMessage: "effective_until must be greater than current timestamp",
 		},
 		{
-			name: "Invalid - extend permission with NULL effective_until but new effective_until equals now",
-			msg: &types.MsgExtendPermission{
-				Creator:        validatorAddr,
-				Id:             nullEffectiveUntilPermForEqualTestID,
-				EffectiveUntil: &equalToNowEffectiveUntil,
+			name: "Valid - reduce effective_until (v4 allows reduction)",
+			msg: &types.MsgAdjustPermission{
+				Authority:      validatorAddr,
+				Operator:       operatorAddr,
+				Id:             reducePermID,
+				EffectiveUntil: &reducedEffectiveUntil,
 			},
-			expectErr:  true,
-			errMessage: "effective_until must be greater than current timestamp",
+			expectErr: false,
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			resp, err := ms.ExtendPermission(ctx, tc.msg)
+			resp, err := ms.AdjustPermission(ctx, tc.msg)
 
 			if tc.expectErr {
 				require.Error(t, err)
@@ -3172,12 +3184,13 @@ func TestExtendPermission(t *testing.T) {
 				require.NoError(t, err)
 				require.NotNil(t, resp)
 
-				// Verify perm was extended
+				// Verify perm was adjusted
 				perm, err := k.GetPermissionByID(sdkCtx, tc.msg.Id)
 				require.NoError(t, err)
 				require.Equal(t, tc.msg.EffectiveUntil.Unix(), perm.EffectiveUntil.Unix())
-				require.Equal(t, tc.msg.Creator, perm.ExtendedBy)
-				require.NotNil(t, perm.Extended)
+				require.Equal(t, tc.msg.Authority, perm.AdjustedBy)
+				require.NotNil(t, perm.Adjusted)
+				require.NotNil(t, perm.Modified)
 			}
 		})
 	}
@@ -3212,8 +3225,8 @@ func TestRevokePermission(t *testing.T) {
 		Authority:       validatorAddr,
 		Created:       &now,
 		CreatedBy:     validatorAddr,
-		Extended:      &now,
-		ExtendedBy:    validatorAddr,
+		Adjusted:      &now,
+		AdjustedBy:    validatorAddr,
 		Modified:      &now,
 		Country:       "US",
 		VpState:       types.ValidationState_VALIDATED,
@@ -3229,8 +3242,8 @@ func TestRevokePermission(t *testing.T) {
 		Authority:         creator,
 		Created:         &now,
 		CreatedBy:       creator,
-		Extended:        &now,
-		ExtendedBy:      creator,
+		Adjusted:        &now,
+		AdjustedBy:      creator,
 		Modified:        &now,
 		Country:         "US",
 		ValidatorPermId: validatorPermID,
@@ -3337,8 +3350,8 @@ func TestCreateOrUpdatePermissionSession(t *testing.T) {
 		Authority:          creator,
 		Created:          &now,
 		CreatedBy:        creator,
-		Extended:         &now,
-		ExtendedBy:       creator,
+		Adjusted:         &now,
+		AdjustedBy:       creator,
 		Modified:         &now,
 		Country:          "US",
 		VpState:          types.ValidationState_VALIDATED,
@@ -3357,8 +3370,8 @@ func TestCreateOrUpdatePermissionSession(t *testing.T) {
 		Authority:         creator,
 		Created:         &now,
 		CreatedBy:       creator,
-		Extended:        &now,
-		ExtendedBy:      creator,
+		Adjusted:        &now,
+		AdjustedBy:      creator,
 		Modified:        &now,
 		Country:         "US",
 		ValidatorPermId: trustPermID,
@@ -3375,8 +3388,8 @@ func TestCreateOrUpdatePermissionSession(t *testing.T) {
 	//	Authority:         creator,
 	//	Created:         &now,
 	//	CreatedBy:       creator,
-	//	Extended:        &now,
-	//	ExtendedBy:      creator,
+	//	Adjusted:        &now,
+	//	AdjustedBy:      creator,
 	//	Modified:        &now,
 	//	Country:         "US",
 	//	ValidatorPermId: trustPermID,
@@ -3392,8 +3405,8 @@ func TestCreateOrUpdatePermissionSession(t *testing.T) {
 		Authority:         creator,
 		Created:         &now,
 		CreatedBy:       creator,
-		Extended:        &now,
-		ExtendedBy:      creator,
+		Adjusted:        &now,
+		AdjustedBy:      creator,
 		Modified:        &now,
 		Country:         "US",
 		ValidatorPermId: issuerPermID, // Issued by the issuer
@@ -3410,8 +3423,8 @@ func TestCreateOrUpdatePermissionSession(t *testing.T) {
 		Authority:         creator,
 		Created:         &now,
 		CreatedBy:       creator,
-		Extended:        &now,
-		ExtendedBy:      creator,
+		Adjusted:        &now,
+		AdjustedBy:      creator,
 		Modified:        &now,
 		Country:         "US",
 		ValidatorPermId: issuerPermID, // Issued by the issuer
@@ -3429,8 +3442,8 @@ func TestCreateOrUpdatePermissionSession(t *testing.T) {
 	//	Authority:         creator,
 	//	Created:         &now,
 	//	CreatedBy:       creator,
-	//	Extended:        &now,
-	//	ExtendedBy:      creator,
+	//	Adjusted:        &now,
+	//	AdjustedBy:      creator,
 	//	Modified:        &now,
 	//	Country:         "US",
 	//	ValidatorPermId: trustPermID,
@@ -3625,8 +3638,8 @@ func TestDiscountApplicationInFeeCalculation(t *testing.T) {
 		Authority:       creator,
 		Created:       &now,
 		CreatedBy:     creator,
-		Extended:      &now,
-		ExtendedBy:    creator,
+		Adjusted:      &now,
+		AdjustedBy:    creator,
 		Modified:      &now,
 		Country:       "US",
 		VpState:       types.ValidationState_VALIDATED,
@@ -3643,8 +3656,8 @@ func TestDiscountApplicationInFeeCalculation(t *testing.T) {
 		Authority:             creator,
 		Created:             &now,
 		CreatedBy:           creator,
-		Extended:            &now,
-		ExtendedBy:          creator,
+		Adjusted:            &now,
+		AdjustedBy:          creator,
 		Modified:            &now,
 		Country:             "US",
 		ValidatorPermId:     validatorPermID,
@@ -3662,8 +3675,8 @@ func TestDiscountApplicationInFeeCalculation(t *testing.T) {
 		Authority:         creator,
 		Created:         &now,
 		CreatedBy:       creator,
-		Extended:        &now,
-		ExtendedBy:      creator,
+		Adjusted:        &now,
+		AdjustedBy:      creator,
 		Modified:        &now,
 		Country:         "US",
 		ValidatorPermId: issuerPermID,
@@ -3704,8 +3717,8 @@ func TestDiscountApplicationInFeeCalculation(t *testing.T) {
 			Authority:             creator,
 			Created:             &now,
 			CreatedBy:           creator,
-			Extended:            &now,
-			ExtendedBy:          creator,
+			Adjusted:            &now,
+			AdjustedBy:          creator,
 			Modified:            &now,
 			Country:             "US",
 			ValidatorPermId:     validatorPermID,
@@ -3739,8 +3752,8 @@ func TestDiscountApplicationInFeeCalculation(t *testing.T) {
 			Authority:             creator,
 			Created:             &now,
 			CreatedBy:           creator,
-			Extended:            &now,
-			ExtendedBy:          creator,
+			Adjusted:            &now,
+			AdjustedBy:          creator,
 			Modified:            &now,
 			Country:             "US",
 			VpState:             types.ValidationState_VALIDATED,
@@ -3758,8 +3771,8 @@ func TestDiscountApplicationInFeeCalculation(t *testing.T) {
 			Authority:             creator,
 			Created:             &now,
 			CreatedBy:           creator,
-			Extended:            &now,
-			ExtendedBy:          creator,
+			Adjusted:            &now,
+			AdjustedBy:          creator,
 			Modified:            &now,
 			Country:             "US",
 			ValidatorPermId:     validatorWithDiscountID,
@@ -3806,8 +3819,8 @@ func TestGetPermissionByID(t *testing.T) {
 		Authority:    creator,
 		Created:    &now,
 		CreatedBy:  creator,
-		Extended:   &now,
-		ExtendedBy: creator,
+		Adjusted:   &now,
+		AdjustedBy: creator,
 		Modified:   &now,
 		Country:    "US",
 		VpState:    types.ValidationState_VALIDATED,
@@ -3844,8 +3857,8 @@ func TestCreateAndUpdatePermission(t *testing.T) {
 		Authority:    creator,
 		Created:    &now,
 		CreatedBy:  creator,
-		Extended:   &now,
-		ExtendedBy: creator,
+		Adjusted:   &now,
+		AdjustedBy: creator,
 		Modified:   &now,
 		Country:    "US",
 		VpState:    types.ValidationState_VALIDATED,
@@ -3911,8 +3924,8 @@ func TestQueryPermissions(t *testing.T) {
 		Authority:       creator,
 		Created:       &now,
 		CreatedBy:     creator,
-		Extended:      &now,
-		ExtendedBy:    creator,
+		Adjusted:      &now,
+		AdjustedBy:    creator,
 		Modified:      &now,
 		Country:       "US",
 		VpState:       types.ValidationState_VALIDATED,
@@ -3929,8 +3942,8 @@ func TestQueryPermissions(t *testing.T) {
 		Authority:         creator,
 		Created:         &now,
 		CreatedBy:       creator,
-		Extended:        &now,
-		ExtendedBy:      creator,
+		Adjusted:        &now,
+		AdjustedBy:      creator,
 		Modified:        &now,
 		Country:         "US",
 		ValidatorPermId: trustPermID,
@@ -3948,8 +3961,8 @@ func TestQueryPermissions(t *testing.T) {
 		Authority:         creator,
 		Created:         &now,
 		CreatedBy:       creator,
-		Extended:        &now,
-		ExtendedBy:      creator,
+		Adjusted:        &now,
+		AdjustedBy:      creator,
 		Modified:        &now,
 		Country:         "FR", // Different country
 		ValidatorPermId: trustPermID,
@@ -4079,8 +4092,8 @@ func TestSlashPermissionTrustDeposit(t *testing.T) {
 		Authority:       ecosystemAddr,
 		Created:       &now,
 		CreatedBy:     ecosystemAddr,
-		Extended:      &now,
-		ExtendedBy:    ecosystemAddr,
+		Adjusted:      &now,
+		AdjustedBy:    ecosystemAddr,
 		Modified:      &now,
 		Country:       "US",
 		VpState:       types.ValidationState_VALIDATED,
@@ -4096,8 +4109,8 @@ func TestSlashPermissionTrustDeposit(t *testing.T) {
 		Authority:       validatorAddr,
 		Created:       &now,
 		CreatedBy:     validatorAddr,
-		Extended:      &now,
-		ExtendedBy:    validatorAddr,
+		Adjusted:      &now,
+		AdjustedBy:    validatorAddr,
 		Modified:      &now,
 		Country:       "US",
 		VpState:       types.ValidationState_VALIDATED,
@@ -4113,8 +4126,8 @@ func TestSlashPermissionTrustDeposit(t *testing.T) {
 		Authority:         creator,
 		Created:         &now,
 		CreatedBy:       creator,
-		Extended:        &now,
-		ExtendedBy:      creator,
+		Adjusted:        &now,
+		AdjustedBy:      creator,
 		Modified:        &now,
 		Country:         "US",
 		ValidatorPermId: validatorPermID,
@@ -4235,8 +4248,8 @@ func TestRepayPermissionSlashedTrustDeposit(t *testing.T) {
 		Authority:       ecosystemAddr,
 		Created:       &now,
 		CreatedBy:     ecosystemAddr,
-		Extended:      &now,
-		ExtendedBy:    ecosystemAddr,
+		Adjusted:      &now,
+		AdjustedBy:    ecosystemAddr,
 		Modified:      &now,
 		Country:       "US",
 		VpState:       types.ValidationState_VALIDATED,
@@ -4252,8 +4265,8 @@ func TestRepayPermissionSlashedTrustDeposit(t *testing.T) {
 		Authority:       validatorAddr,
 		Created:       &now,
 		CreatedBy:     validatorAddr,
-		Extended:      &now,
-		ExtendedBy:    validatorAddr,
+		Adjusted:      &now,
+		AdjustedBy:    validatorAddr,
 		Modified:      &now,
 		Country:       "US",
 		VpState:       types.ValidationState_VALIDATED,
@@ -4269,8 +4282,8 @@ func TestRepayPermissionSlashedTrustDeposit(t *testing.T) {
 		Authority:         creator,
 		Created:         &now,
 		CreatedBy:       creator,
-		Extended:        &now,
-		ExtendedBy:      creator,
+		Adjusted:        &now,
+		AdjustedBy:      creator,
 		Modified:        &now,
 		Country:         "US",
 		ValidatorPermId: validatorPermID,
@@ -4944,8 +4957,8 @@ func TestStartPermissionVP_ValidatorMustBeActive(t *testing.T) {
 		Authority:       creator,
 		Created:       &now,
 		CreatedBy:     creator,
-		Extended:      &now,
-		ExtendedBy:    creator,
+		Adjusted:      &now,
+		AdjustedBy:    creator,
 		Modified:      &now,
 		Country:       "US",
 		VpState:       types.ValidationState_VALIDATED,
@@ -4961,8 +4974,8 @@ func TestStartPermissionVP_ValidatorMustBeActive(t *testing.T) {
 		Authority:       creator,
 		Created:       &now,
 		CreatedBy:     creator,
-		Extended:      &now,
-		ExtendedBy:    creator,
+		Adjusted:      &now,
+		AdjustedBy:    creator,
 		Modified:      &now,
 		Country:       "US",
 		VpState:       types.ValidationState_VALIDATED,
@@ -4978,8 +4991,8 @@ func TestStartPermissionVP_ValidatorMustBeActive(t *testing.T) {
 		Authority:       creator,
 		Created:       &now,
 		CreatedBy:     creator,
-		Extended:      &now,
-		ExtendedBy:    creator,
+		Adjusted:      &now,
+		AdjustedBy:    creator,
 		Modified:      &now,
 		Country:       "US",
 		VpState:       types.ValidationState_VALIDATED,
@@ -4995,8 +5008,8 @@ func TestStartPermissionVP_ValidatorMustBeActive(t *testing.T) {
 		Authority:        creator,
 		Created:        &now,
 		CreatedBy:      creator,
-		Extended:       &now,
-		ExtendedBy:     creator,
+		Adjusted:       &now,
+		AdjustedBy:     creator,
 		Modified:       &now,
 		Country:        "US",
 		VpState:        types.ValidationState_VALIDATED,
@@ -5116,8 +5129,8 @@ func TestRevokePermission_AllowNotYetActivePermissions(t *testing.T) {
 		Authority:       creator,
 		Created:       &now,
 		CreatedBy:     creator,
-		Extended:      &now,
-		ExtendedBy:    creator,
+		Adjusted:      &now,
+		AdjustedBy:    creator,
 		Modified:      &now,
 		Country:       "US",
 		VpState:       types.ValidationState_VALIDATED,
@@ -5133,8 +5146,8 @@ func TestRevokePermission_AllowNotYetActivePermissions(t *testing.T) {
 		Authority:       creator,
 		Created:       &now,
 		CreatedBy:     creator,
-		Extended:      &now,
-		ExtendedBy:    creator,
+		Adjusted:      &now,
+		AdjustedBy:    creator,
 		Modified:      &now,
 		Country:       "US",
 		VpState:       types.ValidationState_VALIDATED,
@@ -5150,8 +5163,8 @@ func TestRevokePermission_AllowNotYetActivePermissions(t *testing.T) {
 		Authority:       creator,
 		Created:       &now,
 		CreatedBy:     creator,
-		Extended:      &now,
-		ExtendedBy:    creator,
+		Adjusted:      &now,
+		AdjustedBy:    creator,
 		Modified:      &now,
 		Country:       "US",
 		VpState:       types.ValidationState_VALIDATED,

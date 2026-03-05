@@ -134,10 +134,10 @@ func validatePermissionTimestamps(perm Permission) error {
 		}
 	}
 
-	// If extended time exists, it should be after created time
-	if perm.Extended != nil && perm.Created != nil {
-		if !perm.Created.Before(*perm.Extended) {
-			return fmt.Errorf("extended timestamp must be after created timestamp for perm ID %d", perm.Id)
+	// If adjusted time exists, it should be after created time
+	if perm.Adjusted != nil && perm.Created != nil {
+		if !perm.Created.Before(*perm.Adjusted) {
+			return fmt.Errorf("adjusted timestamp must be after created timestamp for perm ID %d", perm.Id)
 		}
 	}
 

@@ -151,57 +151,48 @@ func RunPermissionExtensionJourney(ctx context.Context, client cosmosclient.Clie
 		return fmt.Errorf("failed to get Trust_Registry_Controller address: %v", err)
 	}
 
-	extendMsg := &permtypes.MsgExtendPermission{
-		Creator:        newPerm.Authority,
-		Id:             permID,
-		EffectiveUntil: &newEffectiveUntil,
-	}
-
 	permGrantee, _ := client.Account(newPerm.Authority)
-	extendResponse, err := lib.ExtendPermission(client, ctx, permGrantee, *extendMsg)
+	adjustResponse, err := lib.AdjustPermission(client, ctx, permGrantee, newPerm.Authority, permID, &newEffectiveUntil)
 	if err != nil {
-		return fmt.Errorf("failed to extend permission: %v", err)
+		return fmt.Errorf("failed to adjust permission: %v", err)
 	}
 
-	fmt.Printf("✅ Step 4: Validator extended permission validity\n")
+	fmt.Printf("Step 4: Validator adjusted permission validity\n")
 	fmt.Printf("    - New effective until: %s\n", newEffectiveUntil.Format(time.RFC3339))
-	fmt.Printf("    - Response: %s\n", extendResponse)
+	fmt.Printf("    - Response: %s\n", adjustResponse)
 
 	// Wait for extension to be processed
 	fmt.Println("    - Waiting for extension to be processed...")
 	time.Sleep(3 * time.Second)
 
-	// Verify the permission has been extended
-	extendedPerm, err := lib.GetPermission(client, ctx, permID)
+	// Verify the permission has been adjusted
+	adjustedPerm, err := lib.GetPermission(client, ctx, permID)
 	if err != nil {
-		return fmt.Errorf("failed to get extended permission: %v", err)
+		return fmt.Errorf("failed to get adjusted permission: %v", err)
 	}
 
-	var extendedUntil string
-	if extendedPerm.EffectiveUntil == nil {
-		extendedUntil = "never expires"
+	var adjustedUntil string
+	if adjustedPerm.EffectiveUntil == nil {
+		adjustedUntil = "never expires"
 	} else {
-		extendedUntil = extendedPerm.EffectiveUntil.Format(time.RFC3339)
+		adjustedUntil = adjustedPerm.EffectiveUntil.Format(time.RFC3339)
 	}
 
-	fmt.Println("Step 5: Verify permission extension")
-	fmt.Printf("    - Extended effective until: %s\n", extendedUntil)
+	fmt.Println("Step 5: Verify permission adjustment")
+	fmt.Printf("    - Adjusted effective until: %s\n", adjustedUntil)
 
-	if extendedPerm.Extended != nil {
-		fmt.Printf("    - Permission extended at: %v\n", extendedPerm.Extended)
-		fmt.Printf("    - Extended by: %s\n", extendedPerm.ExtendedBy)
+	if adjustedPerm.Adjusted != nil {
+		fmt.Printf("    - Permission adjusted at: %v\n", adjustedPerm.Adjusted)
+		fmt.Printf("    - Adjusted by: %s\n", adjustedPerm.AdjustedBy)
 	} else {
-		fmt.Println("⚠️ Warning: Permission extension verification failed, extended timestamp not set")
+		fmt.Println("Warning: Permission adjustment verification failed, adjusted timestamp not set")
 	}
 
-	fmt.Println("    - Permission_Holder can continue operations with the extended validity period")
+	fmt.Println("    - Permission_Holder can continue operations with the adjusted validity period")
 
-	fmt.Println("Journey 13 completed successfully! ✨")
-	fmt.Println("    - Successfully demonstrated permission extension")
-	fmt.Println("    - Extended effective_until from 6 months to 9 months")
-	fmt.Println("    - Extension worked because:")
-	fmt.Println("      1. New date is after current effective_until")
-	fmt.Println("      2. New date is not after validation expiration")
+	fmt.Println("Journey 13 completed successfully!")
+	fmt.Println("    - Successfully demonstrated permission adjustment")
+	fmt.Println("    - Adjusted effective_until from 6 months to 9 months")
 
 	// Store the result for future reference
 	result := lib.JourneyResult{
@@ -209,7 +200,7 @@ func RunPermissionExtensionJourney(ctx context.Context, client cosmosclient.Clie
 		DID:                exampleDID,
 		PermissionID:       permissionID,
 		ExtensionTimestamp: time.Now().Format(time.RFC3339),
-		NewEffectiveUntil:  extendedUntil,
+		NewEffectiveUntil:  adjustedUntil,
 	}
 
 	// Save result to global state or file for other journeys to use

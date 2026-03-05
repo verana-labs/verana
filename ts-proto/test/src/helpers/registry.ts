@@ -34,7 +34,7 @@ import {
 import {
   MsgCreatePermission,
   MsgCreateRootPermission,
-  MsgExtendPermission,
+  MsgAdjustPermission,
   MsgRevokePermission,
   MsgStartPermissionVP,
   MsgRenewPermissionVP,
@@ -82,7 +82,7 @@ export const typeUrls = {
   // Permission
   MsgCreatePermission: "/verana.perm.v1.MsgCreatePermission",
   MsgCreateRootPermission: "/verana.perm.v1.MsgCreateRootPermission",
-  MsgExtendPermission: "/verana.perm.v1.MsgExtendPermission",
+  MsgAdjustPermission: "/verana.perm.v1.MsgAdjustPermission",
   MsgRevokePermission: "/verana.perm.v1.MsgRevokePermission",
   MsgStartPermissionVP: "/verana.perm.v1.MsgStartPermissionVP",
   MsgRenewPermissionVP: "/verana.perm.v1.MsgRenewPermissionVP",
@@ -130,7 +130,7 @@ export function createVeranaRegistry(): Registry {
   // Permission messages
   registry.register(typeUrls.MsgCreatePermission, MsgCreatePermission as GeneratedType);
   registry.register(typeUrls.MsgCreateRootPermission, MsgCreateRootPermission as GeneratedType);
-  registry.register(typeUrls.MsgExtendPermission, MsgExtendPermission as GeneratedType);
+  registry.register(typeUrls.MsgAdjustPermission, MsgAdjustPermission as GeneratedType);
   registry.register(typeUrls.MsgRevokePermission, MsgRevokePermission as GeneratedType);
   registry.register(typeUrls.MsgStartPermissionVP, MsgStartPermissionVP as GeneratedType);
   registry.register(typeUrls.MsgRenewPermissionVP, MsgRenewPermissionVP as GeneratedType);

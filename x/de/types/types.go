@@ -26,7 +26,7 @@ var VPRDelegableMsgTypes = map[string]bool{
 	"/verana.perm.v1.MsgSetPermissionVPToValidated":               true,
 	"/verana.perm.v1.MsgCancelPermissionVPLastRequest":            true,
 	"/verana.perm.v1.MsgCreateRootPermission":                     true,
-	"/verana.perm.v1.MsgExtendPermission":                         true,
+	"/verana.perm.v1.MsgAdjustPermission":                         true,
 	"/verana.perm.v1.MsgRevokePermission":                         true,
 	"/verana.perm.v1.MsgSlashPermissionTrustDeposit":              true,
 	"/verana.perm.v1.MsgRepayPermissionSlashedTrustDeposit":       true,

@@ -985,30 +985,28 @@ func RevokePermission(client cosmosclient.Client, ctx context.Context, validator
 	return "success", nil
 }
 
-// ExtendPermission extends the validity period of a permission
-func ExtendPermission(client cosmosclient.Client, ctx context.Context, validator cosmosaccount.Account, msg permtypes.MsgExtendPermission) (string, error) {
-	validatorAddr, err := validator.Address(addressPrefix)
+// AdjustPermission adjusts the validity period of a permission
+func AdjustPermission(client cosmosclient.Client, ctx context.Context, operator cosmosaccount.Account, authority string, id uint64, effectiveUntil *time.Time) (string, error) {
+	operatorAddr, err := operator.Address(addressPrefix)
 	if err != nil {
-		return "", fmt.Errorf("failed to get validator address: %w", err)
+		return "", fmt.Errorf("failed to get operator address: %w", err)
 	}
 
-	// Make sure creator is set correctly
-	msgWithCreator := permtypes.MsgExtendPermission{
-		Creator:        validatorAddr,
-		Id:             msg.Id,
-		EffectiveUntil: msg.EffectiveUntil,
+	msg := permtypes.MsgAdjustPermission{
+		Authority:      authority,
+		Operator:       operatorAddr,
+		Id:             id,
+		EffectiveUntil: effectiveUntil,
 	}
 
-	txResp, err := client.BroadcastTx(ctx, validator, &msgWithCreator)
+	txResp, err := client.BroadcastTx(ctx, operator, &msg)
 	if err != nil {
 		return "", fmt.Errorf("failed to broadcast transaction: %w", err)
 	}
 
-	// Print response from broadcasting a transaction
-	fmt.Print("ExtendPermission:\n\n")
+	fmt.Print("AdjustPermission:\n\n")
 	fmt.Println(txResp)
 
-	// Check if the transaction was successful
 	if txResp.TxResponse.Code != 0 {
 		return "", fmt.Errorf("transaction failed with code %d: %s",
 			txResp.TxResponse.Code, txResp.TxResponse.RawLog)

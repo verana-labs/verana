@@ -36,7 +36,7 @@ import {
 import {
   MsgCreateRootPermission,
   MsgCreatePermission,
-  MsgExtendPermission,
+  MsgAdjustPermission,
   MsgRevokePermission,
   MsgStartPermissionVP,
   MsgRenewPermissionVP,
@@ -464,16 +464,18 @@ export const MsgCreatePermissionAminoConverter: AminoConverter = {
     }),
 };
 
-export const MsgExtendPermissionAminoConverter: AminoConverter = {
-  aminoType: '/verana.perm.v1.MsgExtendPermission',
-  toAmino: (m: MsgExtendPermission) => clean({
-    creator: m.creator ?? '',
+export const MsgAdjustPermissionAminoConverter: AminoConverter = {
+  aminoType: '/verana.perm.v1.MsgAdjustPermission',
+  toAmino: (m: MsgAdjustPermission) => clean({
+    authority: m.authority ?? '',
+    operator: m.operator ?? '',
     id: u64ToStr(m.id),
     effective_until: dateToAmino(m.effectiveUntil),
   }),
-  fromAmino: (a: any): MsgExtendPermission =>
-    MsgExtendPermission.fromPartial({
-      creator: a.creator ?? '',
+  fromAmino: (a: any): MsgAdjustPermission =>
+    MsgAdjustPermission.fromPartial({
+      authority: a.authority ?? '',
+      operator: a.operator ?? '',
       id: strToU64(a.id) != null ? Number(strToU64(a.id)!.toString()) : 0,
       effectiveUntil: dateFromAmino(a.effective_until),
     }),

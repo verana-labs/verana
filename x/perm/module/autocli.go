@@ -324,16 +324,22 @@ Parameters:
 					},
 				},
 				{
-					RpcMethod: "ExtendPermission",
-					Use:       "extend-perm [id] [effective-until]",
-					Short:     "Extend a permission's effective duration",
-					Long:      "Extend a permission's effective duration. Can be executed by the authority (for ECOSYSTEM or self-created permissions) or by the validator (for VP managed permissions).",
+					RpcMethod: "AdjustPermission",
+					Use:       "adjust-perm [id] [effective-until]",
+					Short:     "Adjust a permission's effective duration",
+					Long:      "Adjust a permission's effective duration. Can be executed by the authority (for ECOSYSTEM or self-created permissions) or by the validator (for VP managed permissions).",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{
 							ProtoField: "id",
 						},
 						{
 							ProtoField: "effective_until",
+						},
+					},
+					FlagOptions: map[string]*autocliv1.FlagOptions{
+						"authority": {
+							DefaultValue: "",
+							Usage:        "The group policy address (authority) on whose behalf this message is executed",
 						},
 					},
 				},
