@@ -163,9 +163,14 @@ func (msg *MsgCancelPermissionVPLastRequest) ValidateBasic() error {
 }
 
 func (msg *MsgCreateRootPermission) ValidateBasic() error {
-	// Validate creator address
-	if _, err := sdk.AccAddressFromBech32(msg.Creator); err != nil {
-		return fmt.Errorf("invalid creator address: %w", err)
+	// Validate authority address
+	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
+		return fmt.Errorf("invalid authority address: %w", err)
+	}
+
+	// Validate operator address
+	if _, err := sdk.AccAddressFromBech32(msg.Operator); err != nil {
+		return fmt.Errorf("invalid operator address: %w", err)
 	}
 
 	// if a mandatory parameter is not present, transaction MUST abort
@@ -180,26 +185,6 @@ func (msg *MsgCreateRootPermission) ValidateBasic() error {
 	// did, if specified, MUST conform to the DID Syntax
 	if !isValidDID(msg.Did) {
 		return fmt.Errorf("invalid DID format")
-	}
-
-	// validation_fees MUST be >= 0
-	if msg.ValidationFees < 0 {
-		return fmt.Errorf("validation fees cannot be negative")
-	}
-
-	// issuance_fees MUST be >= 0
-	if msg.IssuanceFees < 0 {
-		return fmt.Errorf("issuance fees cannot be negative")
-	}
-
-	// verification_fees MUST be >= 0
-	if msg.VerificationFees < 0 {
-		return fmt.Errorf("verification fees cannot be negative")
-	}
-
-	// country if not null, MUST be a valid alpha-2 code (ISO 3166)
-	if msg.Country != "" && !isValidCountryCode(msg.Country) {
-		return fmt.Errorf("invalid country code format")
 	}
 
 	// Note: Time-based validations are moved to the main function

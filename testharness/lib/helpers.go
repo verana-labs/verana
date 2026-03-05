@@ -1945,7 +1945,8 @@ func CreateRootPermissionWithError(client cosmosclient.Client, ctx context.Conte
 
 	// Create the message
 	fullMsg := &permtypes.MsgCreateRootPermission{
-		Creator:          creatorAddr,
+		Authority:        creatorAddr,
+		Operator:         creatorAddr,
 		SchemaId:         msg.SchemaId,
 		Did:              msg.Did,
 		EffectiveFrom:    msg.EffectiveFrom,
@@ -1953,7 +1954,6 @@ func CreateRootPermissionWithError(client cosmosclient.Client, ctx context.Conte
 		ValidationFees:   msg.ValidationFees,
 		VerificationFees: msg.VerificationFees,
 		IssuanceFees:     msg.IssuanceFees,
-		Country:          msg.Country,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, creator, fullMsg)
@@ -1982,7 +1982,8 @@ func CreateRootPermissionAndGetID(client cosmosclient.Client, ctx context.Contex
 
 	// Create the message
 	fullMsg := &permtypes.MsgCreateRootPermission{
-		Creator:          creatorAddr,
+		Authority:        creatorAddr,
+		Operator:         creatorAddr,
 		SchemaId:         msg.SchemaId,
 		Did:              msg.Did,
 		EffectiveFrom:    msg.EffectiveFrom,
@@ -1990,7 +1991,6 @@ func CreateRootPermissionAndGetID(client cosmosclient.Client, ctx context.Contex
 		ValidationFees:   msg.ValidationFees,
 		VerificationFees: msg.VerificationFees,
 		IssuanceFees:     msg.IssuanceFees,
-		Country:          msg.Country,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, creator, fullMsg)
@@ -2124,7 +2124,8 @@ func CreateInactiveValidatorPermission(client cosmosclient.Client, ctx context.C
 	// Create an ECOSYSTEM (root) permission with future effective_from
 	// This will be in FUTURE state (not ACTIVE)
 	msg := &permtypes.MsgCreateRootPermission{
-		Creator:        creatorAddr,
+		Authority:      creatorAddr,
+		Operator:       creatorAddr,
 		SchemaId:       schemaID,
 		Did:            did,
 		EffectiveFrom:  &futureTime, // Future = not yet active
@@ -2978,6 +2979,77 @@ func RenewPermissionVPWithAuthority(
 	}
 
 	return nil
+}
+
+func CreateRootPermissionWithAuthority(
+	client cosmosclient.Client,
+	ctx context.Context,
+	operatorAccount cosmosaccount.Account,
+	authority string,
+	schemaID uint64,
+	did string,
+	effectiveFrom *time.Time,
+	effectiveUntil *time.Time,
+	validationFees uint64,
+	issuanceFees uint64,
+	verificationFees uint64,
+) (uint64, error) {
+	operatorAddr, err := operatorAccount.Address(addressPrefix)
+	if err != nil {
+		return 0, fmt.Errorf("failed to get operator address: %w", err)
+	}
+
+	msg := &permtypes.MsgCreateRootPermission{
+		Authority:        authority,
+		Operator:         operatorAddr,
+		SchemaId:         schemaID,
+		Did:              did,
+		EffectiveFrom:    effectiveFrom,
+		EffectiveUntil:   effectiveUntil,
+		ValidationFees:   validationFees,
+		IssuanceFees:     issuanceFees,
+		VerificationFees: verificationFees,
+	}
+
+	txResp, err := client.BroadcastTx(ctx, operatorAccount, msg)
+	if err != nil {
+		return 0, fmt.Errorf("failed to broadcast CreateRootPermission: %w", err)
+	}
+
+	fmt.Print("CreateRootPermissionWithAuthority:\n\n")
+	fmt.Println(txResp)
+
+	if txResp.TxResponse.Code != 0 {
+		return 0, fmt.Errorf("CreateRootPermission failed with code %d: %s",
+			txResp.TxResponse.Code, txResp.TxResponse.RawLog)
+	}
+
+	// Extract permission ID from events
+	var txResponse sdk.TxResponse
+	txResponseBytes, err := client.Context().Codec.MarshalJSON(txResp.TxResponse)
+	if err != nil {
+		return 0, fmt.Errorf("failed to marshal tx response: %v", err)
+	}
+	err = client.Context().Codec.UnmarshalJSON(txResponseBytes, &txResponse)
+	if err != nil {
+		return 0, fmt.Errorf("failed to unmarshal tx response: %v", err)
+	}
+
+	for _, event := range txResponse.Events {
+		if event.Type == "create_root_permission" {
+			for _, attribute := range event.Attributes {
+				if attribute.Key == "root_permission_id" {
+					permID, parseErr := strconv.ParseUint(attribute.Value, 10, 64)
+					if parseErr != nil {
+						return 0, fmt.Errorf("failed to parse permission ID: %v", parseErr)
+					}
+					return permID, nil
+				}
+			}
+		}
+	}
+
+	return 0, fmt.Errorf("permission ID not found in events")
 }
 
 func CancelPermissionVPLastRequestWithAuthority(

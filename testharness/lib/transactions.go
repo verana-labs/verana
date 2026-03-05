@@ -295,7 +295,8 @@ func CreateRootPermission(client cosmosclient.Client, ctx context.Context, creat
 
 	// Start with an empty struct and set only the defined attributes from override
 	msg := &permtypes.MsgCreateRootPermission{
-		Creator:          creatorAddr,
+		Authority:        creatorAddr,
+		Operator:         creatorAddr,
 		SchemaId:         override.SchemaId,
 		Did:              override.Did,
 		EffectiveFrom:    override.EffectiveFrom,
@@ -307,9 +308,6 @@ func CreateRootPermission(client cosmosclient.Client, ctx context.Context, creat
 
 	if override.Did != "" {
 		msg.Did = override.Did
-	}
-	if override.Country != "" {
-		msg.Country = override.Country
 	}
 	if override.ValidationFees != 0 {
 		msg.ValidationFees = override.ValidationFees

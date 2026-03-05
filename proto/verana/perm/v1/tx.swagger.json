@@ -551,7 +551,10 @@
     "verana.perm.v1.MsgCreateRootPermission": {
       "type": "object",
       "properties": {
-        "creator": {
+        "authority": {
+          "type": "string"
+        },
+        "operator": {
           "type": "string"
         },
         "schema_id": {
@@ -559,9 +562,6 @@
           "format": "uint64"
         },
         "did": {
-          "type": "string"
-        },
-        "country": {
           "type": "string"
         },
         "effective_from": {

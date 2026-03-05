@@ -113,10 +113,10 @@ export interface MsgCancelPermissionVPLastRequestResponse {
 }
 
 export interface MsgCreateRootPermission {
-  creator: string;
+  authority: string;
+  operator: string;
   schemaId: number;
   did: string;
-  country: string;
   effectiveFrom: Date | undefined;
   effectiveUntil: Date | undefined;
   validationFees: number;
@@ -1189,10 +1189,10 @@ export const MsgCancelPermissionVPLastRequestResponse = {
 
 function createBaseMsgCreateRootPermission(): MsgCreateRootPermission {
   return {
-    creator: "",
+    authority: "",
+    operator: "",
     schemaId: 0,
     did: "",
-    country: "",
     effectiveFrom: undefined,
     effectiveUntil: undefined,
     validationFees: 0,
@@ -1203,17 +1203,17 @@ function createBaseMsgCreateRootPermission(): MsgCreateRootPermission {
 
 export const MsgCreateRootPermission = {
   encode(message: MsgCreateRootPermission, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.creator !== "") {
-      writer.uint32(10).string(message.creator);
+    if (message.authority !== "") {
+      writer.uint32(10).string(message.authority);
+    }
+    if (message.operator !== "") {
+      writer.uint32(18).string(message.operator);
     }
     if (message.schemaId !== 0) {
-      writer.uint32(16).uint64(message.schemaId);
+      writer.uint32(24).uint64(message.schemaId);
     }
     if (message.did !== "") {
-      writer.uint32(26).string(message.did);
-    }
-    if (message.country !== "") {
-      writer.uint32(34).string(message.country);
+      writer.uint32(34).string(message.did);
     }
     if (message.effectiveFrom !== undefined) {
       Timestamp.encode(toTimestamp(message.effectiveFrom), writer.uint32(42).fork()).ldelim();
@@ -1245,28 +1245,28 @@ export const MsgCreateRootPermission = {
             break;
           }
 
-          message.creator = reader.string();
+          message.authority = reader.string();
           continue;
         case 2:
-          if (tag !== 16) {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.operator = reader.string();
+          continue;
+        case 3:
+          if (tag !== 24) {
             break;
           }
 
           message.schemaId = longToNumber(reader.uint64() as Long);
-          continue;
-        case 3:
-          if (tag !== 26) {
-            break;
-          }
-
-          message.did = reader.string();
           continue;
         case 4:
           if (tag !== 34) {
             break;
           }
 
-          message.country = reader.string();
+          message.did = reader.string();
           continue;
         case 5:
           if (tag !== 42) {
@@ -1314,10 +1314,10 @@ export const MsgCreateRootPermission = {
 
   fromJSON(object: any): MsgCreateRootPermission {
     return {
-      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
+      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
       schemaId: isSet(object.schemaId) ? globalThis.Number(object.schemaId) : 0,
       did: isSet(object.did) ? globalThis.String(object.did) : "",
-      country: isSet(object.country) ? globalThis.String(object.country) : "",
       effectiveFrom: isSet(object.effectiveFrom) ? fromJsonTimestamp(object.effectiveFrom) : undefined,
       effectiveUntil: isSet(object.effectiveUntil) ? fromJsonTimestamp(object.effectiveUntil) : undefined,
       validationFees: isSet(object.validationFees) ? globalThis.Number(object.validationFees) : 0,
@@ -1328,17 +1328,17 @@ export const MsgCreateRootPermission = {
 
   toJSON(message: MsgCreateRootPermission): unknown {
     const obj: any = {};
-    if (message.creator !== "") {
-      obj.creator = message.creator;
+    if (message.authority !== "") {
+      obj.authority = message.authority;
+    }
+    if (message.operator !== "") {
+      obj.operator = message.operator;
     }
     if (message.schemaId !== 0) {
       obj.schemaId = Math.round(message.schemaId);
     }
     if (message.did !== "") {
       obj.did = message.did;
-    }
-    if (message.country !== "") {
-      obj.country = message.country;
     }
     if (message.effectiveFrom !== undefined) {
       obj.effectiveFrom = message.effectiveFrom.toISOString();
@@ -1363,10 +1363,10 @@ export const MsgCreateRootPermission = {
   },
   fromPartial<I extends Exact<DeepPartial<MsgCreateRootPermission>, I>>(object: I): MsgCreateRootPermission {
     const message = createBaseMsgCreateRootPermission();
-    message.creator = object.creator ?? "";
+    message.authority = object.authority ?? "";
+    message.operator = object.operator ?? "";
     message.schemaId = object.schemaId ?? 0;
     message.did = object.did ?? "";
-    message.country = object.country ?? "";
     message.effectiveFrom = object.effectiveFrom ?? undefined;
     message.effectiveUntil = object.effectiveUntil ?? undefined;
     message.validationFees = object.validationFees ?? 0;

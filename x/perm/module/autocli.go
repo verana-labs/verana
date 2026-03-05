@@ -307,15 +307,14 @@ Parameters:
 						},
 					},
 					FlagOptions: map[string]*autocliv1.FlagOptions{
-						"country": {
-							Name:         "country",
-							DefaultValue: "",
-							Usage:        "Optional country code (ISO 3166-1 alpha-2)",
+						"authority": {
+							Name:  "authority",
+							Usage: "Group account (authority) on whose behalf this message is executed",
 						},
 						"effective_from": {
 							Name:         "effective-from",
 							DefaultValue: "",
-							Usage:        "Optional timestamp (RFC3339) from when the perm is effective",
+							Usage:        "Timestamp (RFC3339) from when the perm is effective (mandatory, must be in the future)",
 						},
 						"effective_until": {
 							Name:         "effective-until",

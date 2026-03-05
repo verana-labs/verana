@@ -133,15 +133,13 @@ async function main() {
   const validationFees = 5;
   const verificationFees = 5;
   const issuanceFees = 5;
-  const country = "US";
-
   const msg = {
     typeUrl: typeUrls.MsgCreateRootPermission,
     value: MsgCreateRootPermission.fromPartial({
-      creator: account13.address,
+      authority: account13.address,
+      operator: account13.address,
       schemaId: schemaId,
       did: did,
-      country: country,
       effectiveFrom: effectiveFrom,
       effectiveUntil: effectiveUntil,
       validationFees: validationFees,
@@ -150,10 +148,10 @@ async function main() {
     }),
   };
   console.log("  Message details:");
-  console.log(`    - Creator: ${account13.address} (account_${ACCOUNT_INDEX})`);
+  console.log(`    - Authority: ${account13.address} (account_${ACCOUNT_INDEX})`);
+  console.log(`    - Operator: ${account13.address} (account_${ACCOUNT_INDEX})`);
   console.log(`    - Schema ID: ${schemaId}`);
   console.log(`    - DID: ${did}`);
-  console.log(`    - Country: ${country}`);
   console.log(`    - Effective From: ${effectiveFrom.toISOString()}`);
   console.log(`    - Effective Until: ${effectiveUntil.toISOString()}`);
   console.log(`    - Validation Fees: ${validationFees}`);

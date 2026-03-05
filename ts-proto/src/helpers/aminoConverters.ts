@@ -413,10 +413,10 @@ export const MsgReclaimTrustDepositYieldAminoConverter: AminoConverter = {
 export const MsgCreateRootPermissionAminoConverter: AminoConverter = {
   aminoType: '/verana.perm.v1.MsgCreateRootPermission',
   toAmino: (m: MsgCreateRootPermission) => clean({
-    creator: m.creator ?? '',
+    authority: m.authority ?? '',
+    operator: m.operator ?? '',
     schema_id: u64ToStr(m.schemaId),
     did: m.did ?? '',
-    country: m.country ?? '',
     effective_from: dateToAmino(m.effectiveFrom),
     effective_until: dateToAmino(m.effectiveUntil),
     validation_fees: u64ToStr(m.validationFees),
@@ -425,10 +425,10 @@ export const MsgCreateRootPermissionAminoConverter: AminoConverter = {
   }),
   fromAmino: (a: any): MsgCreateRootPermission =>
     MsgCreateRootPermission.fromPartial({
-      creator: a.creator ?? '',
+      authority: a.authority ?? '',
+      operator: a.operator ?? '',
       schemaId: strToU64(a.schema_id) != null ? Number(strToU64(a.schema_id)!.toString()) : 0,
       did: a.did ?? '',
-      country: a.country ?? '',
       effectiveFrom: dateFromAmino(a.effective_from),
       effectiveUntil: dateFromAmino(a.effective_until),
       validationFees: strToU64(a.validation_fees) != null ? Number(strToU64(a.validation_fees)!.toString()) : 0,

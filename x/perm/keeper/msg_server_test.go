@@ -2445,117 +2445,53 @@ func TestSetPermissionVPToValidated_AuthzCheckFailure(t *testing.T) {
 	require.NotNil(t, resp)
 }
 
+// TestMsgServerCreateRootPermission is superseded by TestCreateRootPermission which has
+// comprehensive coverage of all spec v4 checks including overlap and AUTHZ.
+// Keeping as a simple smoke test with updated field names.
 func TestMsgServerCreateRootPermission(t *testing.T) {
 	k, ms, mockCsKeeper, trkKeeper, ctx := setupMsgServer(t)
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
-	creator := sdk.AccAddress([]byte("test_creator")).String()
+	authority := sdk.AccAddress([]byte("test_creator________")).String()
+	operator := authority
 	validDid := "did:example:123456789abcdefghi"
 
-	// First create a trust registry and store its ID
-	trID := trkKeeper.CreateMockTrustRegistry(creator, validDid)
-
-	// Create mock credential schema with specific perm management modes and trust registry ID
-	mockCsKeeper.UpdateMockCredentialSchema(1,
-		trID, // Set the trust registry ID
+	trID := trkKeeper.CreateMockTrustRegistry(authority, validDid)
+	mockCsKeeper.UpdateMockCredentialSchema(1, trID,
 		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
 		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
 
-	now := time.Now()
-	futureTime := now.Add(24 * time.Hour)
+	blockTime := time.Date(2023, 6, 1, 0, 0, 0, 0, time.UTC)
+	sdkCtx = sdkCtx.WithBlockTime(blockTime)
+	ctx = sdk.WrapSDKContext(sdkCtx)
 
-	testCases := []struct {
-		name    string
-		msg     *types.MsgCreateRootPermission
-		isValid bool
-	}{
-		{
-			name: "Valid Create Root Permission",
-			msg: &types.MsgCreateRootPermission{
-				Creator:          creator,
-				SchemaId:         1,
-				Did:              validDid,
-				ValidationFees:   100,
-				IssuanceFees:     50,
-				VerificationFees: 25,
-				Country:          "US",
-				EffectiveFrom:    &now,
-				EffectiveUntil:   &futureTime,
-			},
-			isValid: true,
-		},
-		{
-			name: "Non-existent Schema ID",
-			msg: &types.MsgCreateRootPermission{
-				Creator:          creator,
-				SchemaId:         999,
-				Did:              validDid,
-				ValidationFees:   100,
-				IssuanceFees:     50,
-				VerificationFees: 25,
-			},
-			isValid: false,
-		},
-		{
-			name: "Wrong Creator (Not Trust Registry Controller)",
-			msg: &types.MsgCreateRootPermission{
-				Creator:          sdk.AccAddress([]byte("wrong_creator")).String(),
-				SchemaId:         1,
-				Did:              validDid,
-				ValidationFees:   100,
-				IssuanceFees:     50,
-				VerificationFees: 25,
-			},
-			isValid: false,
-		},
-	}
+	now := sdkCtx.BlockTime()
+	futureTime := now.Add(1 * time.Hour)
+	farFuture := now.Add(24 * time.Hour)
 
-	var expectedID uint64 = 1 // Track expected auto-generated ID
+	// Valid creation
+	resp, err := ms.CreateRootPermission(ctx, &types.MsgCreateRootPermission{
+		Authority: authority, Operator: operator,
+		SchemaId: 1, Did: validDid,
+		ValidationFees: 100, IssuanceFees: 50, VerificationFees: 25,
+		EffectiveFrom: &futureTime, EffectiveUntil: &farFuture,
+	})
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+	require.Equal(t, uint64(1), resp.Id)
 
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			resp, err := ms.CreateRootPermission(ctx, tc.msg)
-			if tc.isValid {
-				require.NoError(t, err)
-				require.NotNil(t, resp)
-
-				// Verify ID was auto-generated correctly
-				require.Equal(t, expectedID, resp.Id)
-
-				// Get the created perm
-				perm, err := k.GetPermissionByID(sdkCtx, resp.Id)
-				require.NoError(t, err)
-
-				// Verify all fields are set correctly
-				require.Equal(t, tc.msg.SchemaId, perm.SchemaId)
-				require.Equal(t, tc.msg.Did, perm.Did)
-				require.Equal(t, tc.msg.Creator, perm.Authority)
-				require.Equal(t, types.PermissionType_ECOSYSTEM, perm.Type)
-				require.Equal(t, tc.msg.ValidationFees, perm.ValidationFees)
-				require.Equal(t, tc.msg.IssuanceFees, perm.IssuanceFees)
-				require.Equal(t, tc.msg.VerificationFees, perm.VerificationFees)
-				require.Equal(t, tc.msg.Country, perm.Country)
-
-				// Verify time fields if set
-				if tc.msg.EffectiveFrom != nil {
-					require.Equal(t, tc.msg.EffectiveFrom.Unix(), perm.EffectiveFrom.Unix())
-				}
-				if tc.msg.EffectiveUntil != nil {
-					require.Equal(t, tc.msg.EffectiveUntil.Unix(), perm.EffectiveUntil.Unix())
-				}
-
-				// Verify auto-populated fields
-				require.NotNil(t, perm.Created)
-				require.NotNil(t, perm.Modified)
-				require.Equal(t, tc.msg.Creator, perm.CreatedBy)
-
-				expectedID++ // Increment expected ID for next valid creation
-			} else {
-				require.Error(t, err)
-				require.Nil(t, resp)
-			}
-		})
-	}
+	perm, err := k.GetPermissionByID(sdkCtx, resp.Id)
+	require.NoError(t, err)
+	require.Equal(t, uint64(1), perm.SchemaId)
+	require.Equal(t, validDid, perm.Did)
+	require.Equal(t, authority, perm.Authority)
+	require.Equal(t, types.PermissionType_ECOSYSTEM, perm.Type)
+	require.Equal(t, uint64(100), perm.ValidationFees)
+	require.Equal(t, uint64(50), perm.IssuanceFees)
+	require.Equal(t, uint64(25), perm.VerificationFees)
+	require.Equal(t, uint64(0), perm.Deposit)
+	require.NotNil(t, perm.Created)
+	require.NotNil(t, perm.Modified)
 }
 
 func TestCancelPermissionVPLastRequest(t *testing.T) {
@@ -4601,20 +4537,21 @@ func TestCreatePermission(t *testing.T) {
 // - effective_from is mandatory
 // - effective_from must be in the future
 
-func TestCreateRootPermission_EffectiveFromRequired(t *testing.T) {
+func TestCreateRootPermission(t *testing.T) {
 	k, ms, csKeeper, trkKeeper, ctx := setupMsgServer(t)
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
-	// Set specific block time for consistent testing
 	blockTime := time.Date(2023, 1, 15, 0, 0, 0, 0, time.UTC)
 	sdkCtx = sdkCtx.WithBlockTime(blockTime)
 	ctx = sdk.WrapSDKContext(sdkCtx)
 
 	validDid := "did:example:123456789abcdefghi"
-	creator := sdk.AccAddress([]byte("test_creator")).String()
+	authority := sdk.AccAddress([]byte("test_authority______")).String()
+	operator := authority // self-delegation
+	otherAddr := sdk.AccAddress([]byte("other_address_______")).String()
 
-	// Create trust registry where creator is the controller
-	trID := trkKeeper.CreateMockTrustRegistry(creator, validDid)
+	// Create trust registry where authority is the controller
+	trID := trkKeeper.CreateMockTrustRegistry(authority, validDid)
 
 	// Create credential schema linked to the trust registry
 	csKeeper.UpdateMockCredentialSchema(1, trID,
@@ -4625,6 +4562,7 @@ func TestCreateRootPermission_EffectiveFromRequired(t *testing.T) {
 	futureTime := now.Add(1 * time.Hour)
 	pastTime := now.Add(-1 * time.Hour)
 	farFutureTime := now.Add(24 * time.Hour)
+	veryFarFuture := now.Add(48 * time.Hour)
 
 	testCases := []struct {
 		name      string
@@ -4632,69 +4570,93 @@ func TestCreateRootPermission_EffectiveFromRequired(t *testing.T) {
 		expectErr bool
 		errMsg    string
 	}{
+		// === Basic checks [MOD-PERM-MSG-7-2-1] ===
 		{
-			// Issue #191: Test that nil effective_from is rejected
-			name: "Issue #191: Reject nil effective_from - mandatory field",
+			name: "1. Reject nil effective_from",
 			msg: &types.MsgCreateRootPermission{
-				Creator:          creator,
-				SchemaId:         1,
-				Did:              validDid,
-				EffectiveFrom:    nil, // NIL - should be rejected
-				EffectiveUntil:   nil,
-				ValidationFees:   0,
-				IssuanceFees:     0,
-				VerificationFees: 0,
+				Authority: authority, Operator: operator,
+				SchemaId: 1, Did: validDid,
+				EffectiveFrom: nil,
 			},
 			expectErr: true,
 			errMsg:    "effective_from is required",
 		},
 		{
-			// Issue #191: Test that past effective_from is rejected
-			name: "Issue #191: Reject past effective_from - must be in the future",
+			name: "2. Reject past effective_from",
 			msg: &types.MsgCreateRootPermission{
-				Creator:          creator,
-				SchemaId:         1,
-				Did:              validDid,
-				EffectiveFrom:    &pastTime, // PAST - should be rejected
-				EffectiveUntil:   nil,
-				ValidationFees:   0,
-				IssuanceFees:     0,
-				VerificationFees: 0,
+				Authority: authority, Operator: operator,
+				SchemaId: 1, Did: validDid,
+				EffectiveFrom: &pastTime,
 			},
 			expectErr: true,
 			errMsg:    "effective_from must be in the future",
 		},
 		{
-			// Issue #191: Test that current time (now) is rejected
-			name: "Issue #191: Reject effective_from equal to now - must be strictly in the future",
+			name: "3. Reject effective_from equal to now",
 			msg: &types.MsgCreateRootPermission{
-				Creator:          creator,
-				SchemaId:         1,
-				Did:              validDid,
-				EffectiveFrom:    &now, // EQUAL TO NOW - should be rejected (not strictly in future)
-				EffectiveUntil:   nil,
-				ValidationFees:   0,
-				IssuanceFees:     0,
-				VerificationFees: 0,
+				Authority: authority, Operator: operator,
+				SchemaId: 1, Did: validDid,
+				EffectiveFrom: &now,
 			},
 			expectErr: true,
 			errMsg:    "effective_from must be in the future",
 		},
 		{
-			// Issue #191: Test that future effective_from is accepted
-			name: "Issue #191: Accept future effective_from - valid case",
+			name: "4. Reject effective_until <= effective_from",
 			msg: &types.MsgCreateRootPermission{
-				Creator:          creator,
-				SchemaId:         1,
-				Did:              validDid,
-				EffectiveFrom:    &futureTime, // FUTURE - should be accepted
+				Authority: authority, Operator: operator,
+				SchemaId: 1, Did: validDid,
+				EffectiveFrom:  &futureTime,
+				EffectiveUntil: &futureTime, // equal, not greater
+			},
+			expectErr: true,
+			errMsg:    "effective_until must be greater than effective_from",
+		},
+		{
+			name: "5. Reject invalid schema ID (not found)",
+			msg: &types.MsgCreateRootPermission{
+				Authority: authority, Operator: operator,
+				SchemaId: 999, Did: validDid,
+				EffectiveFrom: &futureTime,
+			},
+			expectErr: true,
+			errMsg:    "credential schema not found",
+		},
+		// === Permission checks [MOD-PERM-MSG-7-2-2] ===
+		{
+			name: "6. Reject authority not TR controller",
+			msg: &types.MsgCreateRootPermission{
+				Authority: otherAddr, Operator: otherAddr,
+				SchemaId: 1, Did: validDid,
+				EffectiveFrom:  &futureTime,
+				EffectiveUntil: &farFutureTime,
+			},
+			expectErr: true,
+			errMsg:    "authority is not the trust registry controller",
+		},
+		// === Happy path [MOD-PERM-MSG-7-3] ===
+		{
+			name: "7. Happy path with effective_until",
+			msg: &types.MsgCreateRootPermission{
+				Authority: authority, Operator: operator,
+				SchemaId: 1, Did: validDid,
+				EffectiveFrom:    &futureTime,
 				EffectiveUntil:   &farFutureTime,
-				ValidationFees:   0,
-				IssuanceFees:     0,
-				VerificationFees: 0,
+				ValidationFees:   100,
+				IssuanceFees:     200,
+				VerificationFees: 300,
 			},
 			expectErr: false,
-			errMsg:    "",
+		},
+		{
+			name: "8. Happy path with nil effective_until (never expires)",
+			msg: &types.MsgCreateRootPermission{
+				Authority: authority, Operator: operator,
+				SchemaId: 1, Did: "did:example:second",
+				EffectiveFrom:  &veryFarFuture,
+				EffectiveUntil: nil,
+			},
+			expectErr: false,
 		},
 	}
 
@@ -4710,14 +4672,235 @@ func TestCreateRootPermission_EffectiveFromRequired(t *testing.T) {
 				require.NoError(t, err)
 				require.NotNil(t, resp)
 
-				// Verify the permission was created with correct effective_from
+				// Verify the created permission fields match spec [MOD-PERM-MSG-7-3]
 				perm, err := k.GetPermissionByID(sdkCtx, resp.Id)
 				require.NoError(t, err)
-				require.NotNil(t, perm.EffectiveFrom)
+				require.Equal(t, tc.msg.SchemaId, perm.SchemaId)
+				require.Equal(t, types.PermissionType_ECOSYSTEM, perm.Type)
+				require.Equal(t, tc.msg.Did, perm.Did)
+				require.Equal(t, tc.msg.Authority, perm.Authority)
+				require.Equal(t, now, *perm.Created)
+				require.Equal(t, now, *perm.Modified)
 				require.Equal(t, tc.msg.EffectiveFrom.Unix(), perm.EffectiveFrom.Unix())
+				if tc.msg.EffectiveUntil != nil {
+					require.Equal(t, tc.msg.EffectiveUntil.Unix(), perm.EffectiveUntil.Unix())
+				} else {
+					require.Nil(t, perm.EffectiveUntil)
+				}
+				require.Equal(t, tc.msg.ValidationFees, perm.ValidationFees)
+				require.Equal(t, tc.msg.IssuanceFees, perm.IssuanceFees)
+				require.Equal(t, tc.msg.VerificationFees, perm.VerificationFees)
+				require.Equal(t, uint64(0), perm.Deposit)
 			}
 		})
 	}
+}
+
+func TestCreateRootPermission_OverlapChecks(t *testing.T) {
+	k, ms, csKeeper, trkKeeper, ctx := setupMsgServer(t)
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	blockTime := time.Date(2023, 1, 15, 0, 0, 0, 0, time.UTC)
+	sdkCtx = sdkCtx.WithBlockTime(blockTime)
+	ctx = sdk.WrapSDKContext(sdkCtx)
+
+	validDid := "did:example:overlap_test"
+	authority := sdk.AccAddress([]byte("test_authority______")).String()
+	operator := authority
+
+	trID := trkKeeper.CreateMockTrustRegistry(authority, validDid)
+	csKeeper.UpdateMockCredentialSchema(1, trID,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
+
+	now := sdkCtx.BlockTime()
+
+	// Create an existing permission: effective_from=+1h, effective_until=+24h
+	existingFrom := now.Add(1 * time.Hour)
+	existingUntil := now.Add(24 * time.Hour)
+	resp, err := ms.CreateRootPermission(ctx, &types.MsgCreateRootPermission{
+		Authority: authority, Operator: operator,
+		SchemaId: 1, Did: validDid,
+		EffectiveFrom:  &existingFrom,
+		EffectiveUntil: &existingUntil,
+	})
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+
+	t.Run("1. Overlap: new effective_from before existing effective_until", func(t *testing.T) {
+		// new effective_from = +12h, existing effective_until = +24h
+		// existing.effective_until > new.effective_from → abort
+		newFrom := now.Add(12 * time.Hour)
+		newUntil := now.Add(48 * time.Hour)
+		_, err := ms.CreateRootPermission(ctx, &types.MsgCreateRootPermission{
+			Authority: authority, Operator: operator,
+			SchemaId: 1, Did: validDid,
+			EffectiveFrom:  &newFrom,
+			EffectiveUntil: &newUntil,
+		})
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "overlap")
+	})
+
+	t.Run("2. Overlap: existing effective_from before new effective_until", func(t *testing.T) {
+		// new effective_from = +25h (after existing), new effective_until = +48h
+		// But existing.effective_from (+1h) < new.effective_until (+48h) → abort
+		newFrom := now.Add(25 * time.Hour)
+		newUntil := now.Add(48 * time.Hour)
+		_, err := ms.CreateRootPermission(ctx, &types.MsgCreateRootPermission{
+			Authority: authority, Operator: operator,
+			SchemaId: 1, Did: validDid,
+			EffectiveFrom:  &newFrom,
+			EffectiveUntil: &newUntil,
+		})
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "overlap")
+	})
+
+	t.Run("3. Overlap: existing perm with nil effective_until (never expires)", func(t *testing.T) {
+		// Create a new schema to test with nil effective_until
+		csKeeper.UpdateMockCredentialSchema(2, trID,
+			cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
+			cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
+
+		neverExpiresFrom := now.Add(1 * time.Hour)
+		resp2, err := ms.CreateRootPermission(ctx, &types.MsgCreateRootPermission{
+			Authority: authority, Operator: operator,
+			SchemaId: 2, Did: validDid,
+			EffectiveFrom:  &neverExpiresFrom,
+			EffectiveUntil: nil, // Never expires
+		})
+		require.NoError(t, err)
+		require.NotNil(t, resp2)
+
+		// Now try to create another one → should fail because existing never expires
+		newFrom := now.Add(48 * time.Hour)
+		newUntil := now.Add(72 * time.Hour)
+		_, err = ms.CreateRootPermission(ctx, &types.MsgCreateRootPermission{
+			Authority: authority, Operator: operator,
+			SchemaId: 2, Did: validDid,
+			EffectiveFrom:  &newFrom,
+			EffectiveUntil: &newUntil,
+		})
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "never expires")
+	})
+
+	t.Run("4. Revoked/slashed/repaid perms excluded from overlap", func(t *testing.T) {
+		// Create a new schema to test with
+		csKeeper.UpdateMockCredentialSchema(3, trID,
+			cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
+			cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
+
+		revokedFrom := now.Add(1 * time.Hour)
+		revokedUntil := now.Add(100 * time.Hour)
+		resp3, err := ms.CreateRootPermission(ctx, &types.MsgCreateRootPermission{
+			Authority: authority, Operator: operator,
+			SchemaId: 3, Did: validDid,
+			EffectiveFrom:  &revokedFrom,
+			EffectiveUntil: &revokedUntil,
+		})
+		require.NoError(t, err)
+
+		// Mark the perm as revoked
+		perm, err := k.GetPermissionByID(sdkCtx, resp3.Id)
+		require.NoError(t, err)
+		revokedTime := now
+		perm.Revoked = &revokedTime
+		err = k.Permission.Set(sdkCtx, perm.Id, perm)
+		require.NoError(t, err)
+
+		// Now create a new perm that would overlap if the revoked one was active → should succeed
+		newFrom := now.Add(2 * time.Hour)
+		newUntil := now.Add(50 * time.Hour)
+		_, err = ms.CreateRootPermission(ctx, &types.MsgCreateRootPermission{
+			Authority: authority, Operator: operator,
+			SchemaId: 3, Did: validDid,
+			EffectiveFrom:  &newFrom,
+			EffectiveUntil: &newUntil,
+		})
+		require.NoError(t, err)
+	})
+
+	t.Run("5. No overlap: new perm starts after existing ends", func(t *testing.T) {
+		// Use schema 1 with existing perm: +1h to +24h
+		// But existing.effective_from < new.effective_until still causes overlap
+		// To truly avoid overlap, need perm on a different schema OR existing must be expired/revoked
+		csKeeper.UpdateMockCredentialSchema(4, trID,
+			cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
+			cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
+
+		firstFrom := now.Add(1 * time.Hour)
+		firstUntil := now.Add(5 * time.Hour)
+		_, err := ms.CreateRootPermission(ctx, &types.MsgCreateRootPermission{
+			Authority: authority, Operator: operator,
+			SchemaId: 4, Did: validDid,
+			EffectiveFrom:  &firstFrom,
+			EffectiveUntil: &firstUntil,
+		})
+		require.NoError(t, err)
+
+		// New perm starts after first ends: +6h to +10h
+		// existing.effective_until (+5h) < new.effective_from (+6h) → OK
+		// existing.effective_from (+1h) < new.effective_until (+10h) → overlap!
+		// Per spec this is still an overlap, so it should fail
+		secondFrom := now.Add(6 * time.Hour)
+		secondUntil := now.Add(10 * time.Hour)
+		_, err = ms.CreateRootPermission(ctx, &types.MsgCreateRootPermission{
+			Authority: authority, Operator: operator,
+			SchemaId: 4, Did: validDid,
+			EffectiveFrom:  &secondFrom,
+			EffectiveUntil: &secondUntil,
+		})
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "overlap")
+	})
+}
+
+func TestCreateRootPermission_AuthzCheck(t *testing.T) {
+	_, ms, csKeeper, trkKeeper, ctx, delKeeper := setupMsgServerWithDelegation(t)
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	blockTime := time.Date(2023, 1, 15, 0, 0, 0, 0, time.UTC)
+	sdkCtx = sdkCtx.WithBlockTime(blockTime)
+	ctx = sdk.WrapSDKContext(sdkCtx)
+
+	validDid := "did:example:authzcheck"
+	authority := sdk.AccAddress([]byte("test_authority______")).String()
+	operator := authority
+
+	trID := trkKeeper.CreateMockTrustRegistry(authority, validDid)
+	csKeeper.UpdateMockCredentialSchema(1, trID,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
+
+	futureTime := sdkCtx.BlockTime().Add(1 * time.Hour)
+	farFuture := sdkCtx.BlockTime().Add(24 * time.Hour)
+
+	t.Run("AUTHZ-CHECK failure aborts", func(t *testing.T) {
+		delKeeper.ErrToReturn = fmt.Errorf("operator authorization not found")
+		defer func() { delKeeper.ErrToReturn = nil }()
+
+		_, err := ms.CreateRootPermission(ctx, &types.MsgCreateRootPermission{
+			Authority: authority, Operator: operator,
+			SchemaId: 1, Did: validDid,
+			EffectiveFrom:  &futureTime,
+			EffectiveUntil: &farFuture,
+		})
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "authorization check failed")
+	})
+
+	t.Run("AUTHZ-CHECK success allows creation", func(t *testing.T) {
+		resp, err := ms.CreateRootPermission(ctx, &types.MsgCreateRootPermission{
+			Authority: authority, Operator: operator,
+			SchemaId: 1, Did: validDid,
+			EffectiveFrom:  &futureTime,
+			EffectiveUntil: &farFuture,
+		})
+		require.NoError(t, err)
+		require.NotNil(t, resp)
+	})
 }
 
 // =============================================================================

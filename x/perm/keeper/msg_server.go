@@ -518,6 +518,19 @@ func (ms msgServer) CreateRootPermission(goCtx context.Context, msg *types.MsgCr
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	now := ctx.BlockTime()
 
+	// [MOD-PERM-MSG-7-2-1] [AUTHZ-CHECK] Verify operator authorization
+	if ms.delegationKeeper != nil {
+		if err := ms.delegationKeeper.CheckOperatorAuthorization(
+			ctx,
+			msg.Authority,
+			msg.Operator,
+			"/verana.perm.v1.MsgCreateRootPermission",
+			now,
+		); err != nil {
+			return nil, fmt.Errorf("authorization check failed: %w", err)
+		}
+	}
+
 	// [MOD-PERM-MSG-7-2-1] Create Root Permission basic checks
 	if err := ms.validateCreateRootPermissionBasicChecks(ctx, msg, now); err != nil {
 		return nil, err
@@ -526,6 +539,11 @@ func (ms msgServer) CreateRootPermission(goCtx context.Context, msg *types.MsgCr
 	// [MOD-PERM-MSG-7-2-2] Permission checks
 	if err := ms.validateCreateRootPermissionAuthority(ctx, msg); err != nil {
 		return nil, err
+	}
+
+	// [MOD-PERM-MSG-7-2-4] Overlap checks
+	if err := ms.checkCreateRootPermissionOverlap(ctx, msg); err != nil {
+		return nil, fmt.Errorf("overlap check failed: %w", err)
 	}
 
 	// [MOD-PERM-MSG-7-3] Execution
@@ -539,8 +557,8 @@ func (ms msgServer) CreateRootPermission(goCtx context.Context, msg *types.MsgCr
 			types.EventTypeCreateRootPermission,
 			sdk.NewAttribute(types.AttributeKeyRootPermissionID, strconv.FormatUint(id, 10)),
 			sdk.NewAttribute(types.AttributeKeySchemaID, strconv.FormatUint(msg.SchemaId, 10)),
-			sdk.NewAttribute(types.AttributeKeyCreator, msg.Creator),
-			sdk.NewAttribute(types.AttributeKeyCountry, msg.Country),
+			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Authority),
+			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
 			sdk.NewAttribute(types.AttributeKeyEffectiveFrom, formatTimePtr(msg.EffectiveFrom)),
 			sdk.NewAttribute(types.AttributeKeyEffectiveUntil, formatTimePtr(msg.EffectiveUntil)),
 			sdk.NewAttribute(types.AttributeKeyValidationFees, strconv.FormatUint(msg.ValidationFees, 10)),
@@ -595,12 +613,49 @@ func (ms msgServer) validateCreateRootPermissionAuthority(ctx sdk.Context, msg *
 		return fmt.Errorf("trust registry not found: %w", err)
 	}
 
-	// account executing the method MUST be the controller of tr
-	if tr.Controller != msg.Creator {
-		return fmt.Errorf("creator is not the trust registry controller")
+	// authority executing the method MUST be tr.authority (controller)
+	if tr.Controller != msg.Authority {
+		return fmt.Errorf("authority is not the trust registry controller")
 	}
 
 	return nil
+}
+
+// [MOD-PERM-MSG-7-2-4] Create Root Permission overlap checks
+// Find all active permissions (not revoked, not slashed, not repaid) for schema_id, ECOSYSTEM, authority.
+// For ECOSYSTEM type permissions, validator_perm_id is NULL (0), so we don't check it.
+func (ms msgServer) checkCreateRootPermissionOverlap(ctx sdk.Context, msg *types.MsgCreateRootPermission) error {
+	err := ms.Permission.Walk(ctx, nil, func(key uint64, perm types.Permission) (bool, error) {
+		// Match on schema_id, ECOSYSTEM type, and authority
+		if perm.SchemaId != msg.SchemaId ||
+			perm.Type != types.PermissionType_ECOSYSTEM ||
+			perm.Authority != msg.Authority {
+			return false, nil
+		}
+
+		// Skip non-active permissions (revoked, slashed, or repaid)
+		if perm.Revoked != nil || perm.Slashed != nil || perm.Repaid != nil {
+			return false, nil
+		}
+
+		// if p.effective_until is NULL (never expire), abort
+		if perm.EffectiveUntil == nil {
+			return true, fmt.Errorf("existing permission %d never expires, cannot create new permission", perm.Id)
+		}
+
+		// if p.effective_until is greater than effective_from, abort
+		if perm.EffectiveUntil.After(*msg.EffectiveFrom) {
+			return true, fmt.Errorf("existing permission %d overlaps: its effective_until is after the new effective_from", perm.Id)
+		}
+
+		// if p.effective_from is lower than effective_until, abort
+		if msg.EffectiveUntil != nil && perm.EffectiveFrom != nil && perm.EffectiveFrom.Before(*msg.EffectiveUntil) {
+			return true, fmt.Errorf("existing permission %d overlaps: its effective_from is before the new effective_until", perm.Id)
+		}
+
+		return false, nil
+	})
+	return err
 }
 
 // [MOD-PERM-MSG-7-3] Create Root Permission execution
@@ -612,12 +667,10 @@ func (ms msgServer) executeCreateRootPermission(ctx sdk.Context, msg *types.MsgC
 		Modified:         &now,
 		Type:             types.PermissionType_ECOSYSTEM,
 		Did:              msg.Did,
-		Authority:        msg.Creator,
+		Authority:        msg.Authority,
 		Created:          &now,
-		CreatedBy:        msg.Creator,
 		EffectiveFrom:    msg.EffectiveFrom,
 		EffectiveUntil:   msg.EffectiveUntil,
-		Country:          msg.Country,
 		ValidationFees:   msg.ValidationFees,
 		IssuanceFees:     msg.IssuanceFees,
 		VerificationFees: msg.VerificationFees,
