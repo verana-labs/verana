@@ -1,13 +1,14 @@
 name: 1.Build Binaries
 
 on:
-  release:
-    types: [prereleased]
-  workflow_dispatch:
+  push:
+    branches: [main, 'release/**']
 
 permissions:
   id-token: write   # Required for npm trusted publishing (OIDC)
   contents: write   # Required for release asset uploads via action-gh-release
+  issues: write     # Required by release-please
+  pull-requests: write  # Required by release-please
 
 env:
   OVH_S3_APPLICATION_KEY: ${{ secrets.OVH_S3_APPLICATION_KEY }}
@@ -25,8 +26,18 @@ env:
 
 
 jobs:
+  resolve-version:
+    uses: 2060-io/organization/.github/workflows/resolve-version-call.yml@main
+    with:
+      bump-minor-pre-major: false
+
   build-binaries-s3:
     runs-on: ubuntu-latest
+    needs: [resolve-version]
+    if: needs.resolve-version.outputs.new-release-published == 'true'
+    env:
+      VERSION: ${{ needs.resolve-version.outputs.release-version }}
+      RELEASE_TYPE: ${{ needs.resolve-version.outputs.release-type }}
     outputs:
       version: ${{ steps.set-outputs.outputs.version }}
       commit: ${{ steps.set-outputs.outputs.commit }}
@@ -59,41 +70,8 @@ jobs:
         with:
           github_token: ${{ github.token }}
 
-      - name: Determine Branch or Environment
-        id: determine-branch
-        run: |
-          if [ -z "${{ github.event.inputs.NAME_SPACE }}" ]; then
-            if [ "${{ github.event.inputs.VERANA_BRANCH }}" == "main" ]; then
-              echo "BRANCH_NAME=vna-devnet-main" >> $GITHUB_ENV
-            else
-              BRANCH_NAME=$(echo "vna-devnet-${{ github.event.inputs.VERANA_BRANCH }}" | sed 's/\//-/g')
-              echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
-            fi
-          else
-            echo "BRANCH_NAME=${{ github.event.inputs.NAME_SPACE }}" >> $GITHUB_ENV
-          fi
-
       - name: Set LDFLAGS environment variable
         run: |
-          echo environment:
-          ls -al
-          echo pwd=$(pwd)
-          git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr - %an)%Creset' --abbrev-commit --date=relative --all
-          echo executing: git describe --tags --exact-match
-          git describe --tags --exact-match || true
-          if [ "${GITHUB_EVENT_NAME}" = "release" ]; then
-            VERSION="${{ github.event.release.tag_name }}"
-            echo "VERSION from release tag_name=${VERSION}"
-          elif [ "${GITHUB_REF_TYPE}" = "tag" ]; then
-            VERSION="${GITHUB_REF_NAME}"
-            echo "VERSION from GITHUB_REF_NAME=${VERSION}"
-          elif git describe --tags --exact-match > /dev/null 2>&1; then
-            VERSION=$(git describe --tags --exact-match)
-            echo "VERSION from git describe=${VERSION}"
-          else
-            VERSION="dev"
-            echo "VERSION default=${VERSION}"
-          fi
           NPM_VERSION="${VERSION#v}"
           COMMIT=$(git rev-parse --short HEAD)
           LDFLAGS="-X github.com/cosmos/cosmos-sdk/version.Name=verana \
@@ -107,7 +85,7 @@ jobs:
           echo "LDFLAGS=${LDFLAGS}" >> $GITHUB_ENV
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
           echo "NPM_VERSION=${NPM_VERSION}" >> $GITHUB_ENV
-          echo "COMMIT=${COMMIT}" >> $GITHUB_ENV          
+          echo "COMMIT=${COMMIT}" >> $GITHUB_ENV
 
       - name: Set build outputs
         id: set-outputs
@@ -126,9 +104,7 @@ jobs:
             npm install
           fi
           rm -f verana-labs-verana-types-*.tgz
-          if [ -n "${NPM_VERSION}" ]; then
-            npm pkg set version="${NPM_VERSION}"
-          fi
+          npm pkg set version="${NPM_VERSION}"
           npm pack
           PKG_VERSION=$(node -p "require('./package.json').version")
           echo "Package version now: ${PKG_VERSION}"
@@ -136,10 +112,14 @@ jobs:
           echo "PKG_TGZ=${PKG_TGZ}" >> $GITHUB_ENV
 
       - name: Publish ts-proto package
-        if: env.VERSION != 'dev' && github.event_name == 'release'
         working-directory: ts-proto
-        continue-on-error: true        
-        run: npm publish --provenance # Required for npm OIDC trusted publishing
+        continue-on-error: true
+        run: |
+          if [ "$RELEASE_TYPE" = "stable" ]; then
+            npm publish --provenance
+          else
+            npm publish --provenance --tag dev
+          fi
 
       - name: Build binary for Linux AMD64
         run: |
@@ -176,7 +156,7 @@ jobs:
           mkdir -p binaries/checksums
           echo VERSION=$VERSION >> binaries/checksums/commit.sha1
           echo COMMIT=$(git rev-parse --long HEAD) >> binaries/checksums/commit.sha1
-          cat binaries/checksums/commit.sha1          
+          cat binaries/checksums/commit.sha1
 
       - name: Upload linux-amd64 binary artifact
         uses: actions/upload-artifact@v4
@@ -184,10 +164,6 @@ jobs:
           name: veranad-linux-amd64
           path: binaries/${{env.BINARY_NAME}}-linux-amd64
           if-no-files-found: error
-
-      - name: Generate timestamp tag
-        id: generate_tag
-        run: echo "TIMESTAMP_TAG=v$(date +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
 
       - name: Install s3cmd
         run: sudo apt-get install s3cmd
@@ -202,11 +178,7 @@ jobs:
           s3cmd put binaries/${{env.BINARY_NAME}}-darwin-amd64 s3://$BUCKET_NAME/binaries/${{ env.VERSION }}/${{env.BINARY_NAME}}-${{ env.COMMIT }}-darwin-amd64 --acl-public
           s3cmd put binaries/${{env.BINARY_NAME}}-darwin-arm64 s3://$BUCKET_NAME/binaries/${{ env.VERSION }}/${{env.BINARY_NAME}}-${{ env.COMMIT }}-darwin-arm64 --acl-public
           s3cmd put binaries/checksums/commit.sha1 s3://$BUCKET_NAME/binaries/${{ env.VERSION }}/${{ env.COMMIT }}.sha1 --acl-public
-          if [[ "${{ env.VERSION }}" == "dev" ]]; then
-            s3cmd put binaries/checksums/md5sums.txt s3://$BUCKET_NAME/binaries/${{ env.VERSION }}/md5sums-${{ env.COMMIT }}.txt --acl-public
-          else
-            s3cmd put binaries/checksums/md5sums.txt s3://$BUCKET_NAME/binaries/${{ env.VERSION }}/md5sums.txt --acl-public
-          fi
+          s3cmd put binaries/checksums/md5sums.txt s3://$BUCKET_NAME/binaries/${{ env.VERSION }}/md5sums.txt --acl-public
 
       - name: Update manifest.json
         run: |
@@ -224,7 +196,7 @@ jobs:
           s3cmd put manifest.json s3://$BUCKET_NAME/binaries/manifest.json --acl-public --force
 
       - name: Create GitHub Release and Upload Assets
-        if: env.VERSION != 'dev' && github.event_name == 'release'
+        if: env.RELEASE_TYPE == 'stable'
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ env.VERSION }} # Explicitly specify the tag
