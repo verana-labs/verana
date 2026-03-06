@@ -38,7 +38,7 @@ jobs:
             fetch-depth: 0  # Fetch all history
 
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 22
           registry-url: https://registry.npmjs.org
@@ -139,7 +139,7 @@ jobs:
         if: env.VERSION != 'dev' && github.event_name == 'release'
         working-directory: ts-proto
         continue-on-error: true        
-        run: npm publish --provenance # Required for npm OIDC trusted publishing
+        run: npm publish --provenance --tag dev # Required for npm OIDC trusted publishing
 
       - name: Build binary for Linux AMD64
         run: |
