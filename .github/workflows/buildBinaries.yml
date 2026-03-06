@@ -3,6 +3,8 @@ name: 1.Build Binaries
 on:
   push:
     branches: [main, 'release/**']
+  release:
+    types: [released, prereleased]
 
 permissions:
   id-token: write   # Required for npm trusted publishing (OIDC)
@@ -27,6 +29,7 @@ env:
 
 jobs:
   resolve-version:
+    if: github.event_name != 'release'
     uses: 2060-io/organization/.github/workflows/resolve-version-call.yml@v0.4.0
     with:
       bump-minor-pre-major: false
@@ -34,10 +37,7 @@ jobs:
   build-binaries-s3:
     runs-on: ubuntu-latest
     needs: [resolve-version]
-    if: needs.resolve-version.outputs.new-release-published == 'true'
-    env:
-      VERSION: ${{ needs.resolve-version.outputs.release-version }}
-      RELEASE_TYPE: ${{ needs.resolve-version.outputs.release-type }}
+    if: always() && (github.event_name == 'release' || needs.resolve-version.outputs.new-release-published == 'true')
     outputs:
       version: ${{ steps.set-outputs.outputs.version }}
       commit: ${{ steps.set-outputs.outputs.commit }}
@@ -49,7 +49,7 @@ jobs:
             fetch-depth: 0  # Fetch all history
 
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 22
           registry-url: https://registry.npmjs.org
@@ -69,6 +69,24 @@ jobs:
         uses: bufbuild/buf-setup-action@v1
         with:
           github_token: ${{ github.token }}
+
+      - name: Resolve effective release context
+        run: |
+          if [ "${GITHUB_EVENT_NAME}" = "release" ]; then
+            VERSION="${{ github.event.release.tag_name }}"
+            if [ "${{ github.event.release.prerelease }}" = "true" ]; then
+              RELEASE_TYPE="dev"
+            else
+              RELEASE_TYPE="stable"
+            fi
+          else
+            VERSION="${{ needs.resolve-version.outputs.release-version }}"
+            RELEASE_TYPE="${{ needs.resolve-version.outputs.release-type }}"
+          fi
+          echo "VERSION=${VERSION}"
+          echo "RELEASE_TYPE=${RELEASE_TYPE}"
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "RELEASE_TYPE=${RELEASE_TYPE}" >> $GITHUB_ENV
 
       - name: Set LDFLAGS environment variable
         run: |
