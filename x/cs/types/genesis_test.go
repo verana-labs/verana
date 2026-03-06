@@ -63,7 +63,6 @@ func TestGenesisState_Validate(t *testing.T) {
 		Created:                                 now.Add(-24 * time.Hour),
 		Modified:                                now.Add(-12 * time.Hour),
 		JsonSchema:                              validJsonSchema,
-		Deposit:                                 1000,
 		IssuerGrantorValidationValidityPeriod:   365,
 		VerifierGrantorValidationValidityPeriod: 365,
 		IssuerValidationValidityPeriod:          180,
@@ -71,6 +70,9 @@ func TestGenesisState_Validate(t *testing.T) {
 		HolderValidationValidityPeriod:          180,
 		IssuerPermManagementMode:                types.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
 		VerifierPermManagementMode:              types.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
+		PricingAssetType:                        types.PricingAssetType_TU,
+		PricingAsset:                            "tu",
+		DigestAlgorithm:                         "sha256",
 	}
 
 	tests := []struct {
@@ -105,6 +107,9 @@ func TestGenesisState_Validate(t *testing.T) {
 						JsonSchema:                 validJsonSchema,
 						IssuerPermManagementMode:   types.CredentialSchemaPermManagementMode_OPEN,
 						VerifierPermManagementMode: types.CredentialSchemaPermManagementMode_ECOSYSTEM,
+						PricingAssetType:           types.PricingAssetType_TU,
+						PricingAsset:               "tu",
+						DigestAlgorithm:            "sha256",
 					},
 				},
 			},
@@ -123,6 +128,9 @@ func TestGenesisState_Validate(t *testing.T) {
 						JsonSchema:                 "", // Empty schema
 						IssuerPermManagementMode:   types.CredentialSchemaPermManagementMode_OPEN,
 						VerifierPermManagementMode: types.CredentialSchemaPermManagementMode_ECOSYSTEM,
+						PricingAssetType:           types.PricingAssetType_TU,
+						PricingAsset:               "tu",
+						DigestAlgorithm:            "sha256",
 					},
 				},
 			},
@@ -132,8 +140,7 @@ func TestGenesisState_Validate(t *testing.T) {
 			name: "invalid parameter values",
 			genState: &types.GenesisState{
 				Params: types.Params{
-					CredentialSchemaTrustDeposit:                                   0, // Invalid - must be positive
-					CredentialSchemaSchemaMaxSize:                                  1000,
+					CredentialSchemaSchemaMaxSize:                                  0, // Invalid - must be positive
 					CredentialSchemaIssuerGrantorValidationValidityPeriodMaxDays:   365,
 					CredentialSchemaVerifierGrantorValidationValidityPeriodMaxDays: 365,
 					CredentialSchemaIssuerValidationValidityPeriodMaxDays:          180,

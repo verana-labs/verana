@@ -16,9 +16,9 @@ func (ms msgServer) validateAddGovernanceFrameworkDocumentParams(ctx sdk.Context
 		return fmt.Errorf("trust registry with ID %d does not exist: %w", msg.Id, err)
 	}
 
-	// Check controller
-	if tr.Controller != msg.Creator {
-		return errors.New("creator is not the controller of the trust registry")
+	// Check controller - authority must match the trust registry controller
+	if tr.Controller != msg.Authority {
+		return errors.New("authority is not the controller of the trust registry")
 	}
 
 	// Check version validity

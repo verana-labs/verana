@@ -69,10 +69,10 @@ func (qs queryServer) getTrustRegistryWithVersions(ctx context.Context, tr types
 				}
 
 				// If we have a preferred language but didn't find a matching document,
-				// include the first document as fallback
+				// fall back to the trust registry's default language document
 				if preferredLang != "" && len(docs) == 0 {
 					err := qs.k.GFDocument.Walk(ctx, nil, func(docId uint64, gfd types.GovernanceFrameworkDocument) (bool, error) {
-						if gfd.GfvId == gfv.Id {
+						if gfd.GfvId == gfv.Id && gfd.Language == tr.Language {
 							docs = append(docs, gfd)
 							return true, nil
 						}
@@ -116,8 +116,12 @@ func (qs queryServer) getTrustRegistryWithVersions(ctx context.Context, tr types
 }
 
 func (qs queryServer) ListTrustRegistries(ctx context.Context, req *types.QueryListTrustRegistriesRequest) (*types.QueryListTrustRegistriesResponse, error) {
+	// Default response_max_size to 64 if unspecified
+	if req.ResponseMaxSize == 0 {
+		req.ResponseMaxSize = 64
+	}
 	// Validate response_max_size
-	if req.ResponseMaxSize < 1 || req.ResponseMaxSize > 1024 {
+	if req.ResponseMaxSize > 1024 {
 		return nil, status.Error(codes.InvalidArgument, "response_max_size must be between 1 and 1,024")
 	}
 
@@ -146,10 +150,12 @@ func (qs queryServer) ListTrustRegistries(ctx context.Context, req *types.QueryL
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	// Sort by modified time ascending
-	sort.Slice(registriesWithVersions, func(i, j int) bool {
-		return registriesWithVersions[i].Modified.Before(registriesWithVersions[j].Modified)
-	})
+	// If modified_after is specified, order by modified desc
+	if req.ModifiedAfter != nil {
+		sort.Slice(registriesWithVersions, func(i, j int) bool {
+			return registriesWithVersions[i].Modified.After(registriesWithVersions[j].Modified)
+		})
+	}
 
 	return &types.QueryListTrustRegistriesResponse{
 		TrustRegistries: registriesWithVersions,

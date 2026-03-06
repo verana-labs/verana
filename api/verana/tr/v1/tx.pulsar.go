@@ -873,7 +873,8 @@ func (x *fastReflection_MsgUpdateParamsResponse) ProtoMethods() *protoiface.Meth
 
 var (
 	md_MsgCreateTrustRegistry                protoreflect.MessageDescriptor
-	fd_MsgCreateTrustRegistry_creator        protoreflect.FieldDescriptor
+	fd_MsgCreateTrustRegistry_authority      protoreflect.FieldDescriptor
+	fd_MsgCreateTrustRegistry_operator       protoreflect.FieldDescriptor
 	fd_MsgCreateTrustRegistry_did            protoreflect.FieldDescriptor
 	fd_MsgCreateTrustRegistry_aka            protoreflect.FieldDescriptor
 	fd_MsgCreateTrustRegistry_language       protoreflect.FieldDescriptor
@@ -884,7 +885,8 @@ var (
 func init() {
 	file_verana_tr_v1_tx_proto_init()
 	md_MsgCreateTrustRegistry = File_verana_tr_v1_tx_proto.Messages().ByName("MsgCreateTrustRegistry")
-	fd_MsgCreateTrustRegistry_creator = md_MsgCreateTrustRegistry.Fields().ByName("creator")
+	fd_MsgCreateTrustRegistry_authority = md_MsgCreateTrustRegistry.Fields().ByName("authority")
+	fd_MsgCreateTrustRegistry_operator = md_MsgCreateTrustRegistry.Fields().ByName("operator")
 	fd_MsgCreateTrustRegistry_did = md_MsgCreateTrustRegistry.Fields().ByName("did")
 	fd_MsgCreateTrustRegistry_aka = md_MsgCreateTrustRegistry.Fields().ByName("aka")
 	fd_MsgCreateTrustRegistry_language = md_MsgCreateTrustRegistry.Fields().ByName("language")
@@ -957,9 +959,15 @@ func (x *fastReflection_MsgCreateTrustRegistry) Interface() protoreflect.ProtoMe
 // While iterating, mutating operations may only be performed
 // on the current field descriptor.
 func (x *fastReflection_MsgCreateTrustRegistry) Range(f func(protoreflect.FieldDescriptor, protoreflect.Value) bool) {
-	if x.Creator != "" {
-		value := protoreflect.ValueOfString(x.Creator)
-		if !f(fd_MsgCreateTrustRegistry_creator, value) {
+	if x.Authority != "" {
+		value := protoreflect.ValueOfString(x.Authority)
+		if !f(fd_MsgCreateTrustRegistry_authority, value) {
+			return
+		}
+	}
+	if x.Operator != "" {
+		value := protoreflect.ValueOfString(x.Operator)
+		if !f(fd_MsgCreateTrustRegistry_operator, value) {
 			return
 		}
 	}
@@ -1008,8 +1016,10 @@ func (x *fastReflection_MsgCreateTrustRegistry) Range(f func(protoreflect.FieldD
 // a repeated field is populated if it is non-empty.
 func (x *fastReflection_MsgCreateTrustRegistry) Has(fd protoreflect.FieldDescriptor) bool {
 	switch fd.FullName() {
-	case "verana.tr.v1.MsgCreateTrustRegistry.creator":
-		return x.Creator != ""
+	case "verana.tr.v1.MsgCreateTrustRegistry.authority":
+		return x.Authority != ""
+	case "verana.tr.v1.MsgCreateTrustRegistry.operator":
+		return x.Operator != ""
 	case "verana.tr.v1.MsgCreateTrustRegistry.did":
 		return x.Did != ""
 	case "verana.tr.v1.MsgCreateTrustRegistry.aka":
@@ -1036,8 +1046,10 @@ func (x *fastReflection_MsgCreateTrustRegistry) Has(fd protoreflect.FieldDescrip
 // Clear is a mutating operation and unsafe for concurrent use.
 func (x *fastReflection_MsgCreateTrustRegistry) Clear(fd protoreflect.FieldDescriptor) {
 	switch fd.FullName() {
-	case "verana.tr.v1.MsgCreateTrustRegistry.creator":
-		x.Creator = ""
+	case "verana.tr.v1.MsgCreateTrustRegistry.authority":
+		x.Authority = ""
+	case "verana.tr.v1.MsgCreateTrustRegistry.operator":
+		x.Operator = ""
 	case "verana.tr.v1.MsgCreateTrustRegistry.did":
 		x.Did = ""
 	case "verana.tr.v1.MsgCreateTrustRegistry.aka":
@@ -1064,8 +1076,11 @@ func (x *fastReflection_MsgCreateTrustRegistry) Clear(fd protoreflect.FieldDescr
 // of the value; to obtain a mutable reference, use Mutable.
 func (x *fastReflection_MsgCreateTrustRegistry) Get(descriptor protoreflect.FieldDescriptor) protoreflect.Value {
 	switch descriptor.FullName() {
-	case "verana.tr.v1.MsgCreateTrustRegistry.creator":
-		value := x.Creator
+	case "verana.tr.v1.MsgCreateTrustRegistry.authority":
+		value := x.Authority
+		return protoreflect.ValueOfString(value)
+	case "verana.tr.v1.MsgCreateTrustRegistry.operator":
+		value := x.Operator
 		return protoreflect.ValueOfString(value)
 	case "verana.tr.v1.MsgCreateTrustRegistry.did":
 		value := x.Did
@@ -1102,8 +1117,10 @@ func (x *fastReflection_MsgCreateTrustRegistry) Get(descriptor protoreflect.Fiel
 // Set is a mutating operation and unsafe for concurrent use.
 func (x *fastReflection_MsgCreateTrustRegistry) Set(fd protoreflect.FieldDescriptor, value protoreflect.Value) {
 	switch fd.FullName() {
-	case "verana.tr.v1.MsgCreateTrustRegistry.creator":
-		x.Creator = value.Interface().(string)
+	case "verana.tr.v1.MsgCreateTrustRegistry.authority":
+		x.Authority = value.Interface().(string)
+	case "verana.tr.v1.MsgCreateTrustRegistry.operator":
+		x.Operator = value.Interface().(string)
 	case "verana.tr.v1.MsgCreateTrustRegistry.did":
 		x.Did = value.Interface().(string)
 	case "verana.tr.v1.MsgCreateTrustRegistry.aka":
@@ -1134,8 +1151,10 @@ func (x *fastReflection_MsgCreateTrustRegistry) Set(fd protoreflect.FieldDescrip
 // Mutable is a mutating operation and unsafe for concurrent use.
 func (x *fastReflection_MsgCreateTrustRegistry) Mutable(fd protoreflect.FieldDescriptor) protoreflect.Value {
 	switch fd.FullName() {
-	case "verana.tr.v1.MsgCreateTrustRegistry.creator":
-		panic(fmt.Errorf("field creator of message verana.tr.v1.MsgCreateTrustRegistry is not mutable"))
+	case "verana.tr.v1.MsgCreateTrustRegistry.authority":
+		panic(fmt.Errorf("field authority of message verana.tr.v1.MsgCreateTrustRegistry is not mutable"))
+	case "verana.tr.v1.MsgCreateTrustRegistry.operator":
+		panic(fmt.Errorf("field operator of message verana.tr.v1.MsgCreateTrustRegistry is not mutable"))
 	case "verana.tr.v1.MsgCreateTrustRegistry.did":
 		panic(fmt.Errorf("field did of message verana.tr.v1.MsgCreateTrustRegistry is not mutable"))
 	case "verana.tr.v1.MsgCreateTrustRegistry.aka":
@@ -1159,7 +1178,9 @@ func (x *fastReflection_MsgCreateTrustRegistry) Mutable(fd protoreflect.FieldDes
 // For lists, maps, and messages, this returns a new, empty, mutable value.
 func (x *fastReflection_MsgCreateTrustRegistry) NewField(fd protoreflect.FieldDescriptor) protoreflect.Value {
 	switch fd.FullName() {
-	case "verana.tr.v1.MsgCreateTrustRegistry.creator":
+	case "verana.tr.v1.MsgCreateTrustRegistry.authority":
+		return protoreflect.ValueOfString("")
+	case "verana.tr.v1.MsgCreateTrustRegistry.operator":
 		return protoreflect.ValueOfString("")
 	case "verana.tr.v1.MsgCreateTrustRegistry.did":
 		return protoreflect.ValueOfString("")
@@ -1240,7 +1261,11 @@ func (x *fastReflection_MsgCreateTrustRegistry) ProtoMethods() *protoiface.Metho
 		var n int
 		var l int
 		_ = l
-		l = len(x.Creator)
+		l = len(x.Authority)
+		if l > 0 {
+			n += 1 + l + runtime.Sov(uint64(l))
+		}
+		l = len(x.Operator)
 		if l > 0 {
 			n += 1 + l + runtime.Sov(uint64(l))
 		}
@@ -1298,40 +1323,47 @@ func (x *fastReflection_MsgCreateTrustRegistry) ProtoMethods() *protoiface.Metho
 			copy(dAtA[i:], x.DocDigestSri)
 			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.DocDigestSri)))
 			i--
-			dAtA[i] = 0x32
+			dAtA[i] = 0x3a
 		}
 		if len(x.DocUrl) > 0 {
 			i -= len(x.DocUrl)
 			copy(dAtA[i:], x.DocUrl)
 			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.DocUrl)))
 			i--
-			dAtA[i] = 0x2a
+			dAtA[i] = 0x32
 		}
 		if len(x.Language) > 0 {
 			i -= len(x.Language)
 			copy(dAtA[i:], x.Language)
 			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Language)))
 			i--
-			dAtA[i] = 0x22
+			dAtA[i] = 0x2a
 		}
 		if len(x.Aka) > 0 {
 			i -= len(x.Aka)
 			copy(dAtA[i:], x.Aka)
 			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Aka)))
 			i--
-			dAtA[i] = 0x1a
+			dAtA[i] = 0x22
 		}
 		if len(x.Did) > 0 {
 			i -= len(x.Did)
 			copy(dAtA[i:], x.Did)
 			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Did)))
 			i--
+			dAtA[i] = 0x1a
+		}
+		if len(x.Operator) > 0 {
+			i -= len(x.Operator)
+			copy(dAtA[i:], x.Operator)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Operator)))
+			i--
 			dAtA[i] = 0x12
 		}
-		if len(x.Creator) > 0 {
-			i -= len(x.Creator)
-			copy(dAtA[i:], x.Creator)
-			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Creator)))
+		if len(x.Authority) > 0 {
+			i -= len(x.Authority)
+			copy(dAtA[i:], x.Authority)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Authority)))
 			i--
 			dAtA[i] = 0xa
 		}
@@ -1386,7 +1418,7 @@ func (x *fastReflection_MsgCreateTrustRegistry) ProtoMethods() *protoiface.Metho
 			switch fieldNum {
 			case 1:
 				if wireType != 2 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Creator", wireType)
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Authority", wireType)
 				}
 				var stringLen uint64
 				for shift := uint(0); ; shift += 7 {
@@ -1414,9 +1446,41 @@ func (x *fastReflection_MsgCreateTrustRegistry) ProtoMethods() *protoiface.Metho
 				if postIndex > l {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
 				}
-				x.Creator = string(dAtA[iNdEx:postIndex])
+				x.Authority = string(dAtA[iNdEx:postIndex])
 				iNdEx = postIndex
 			case 2:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Operator", wireType)
+				}
+				var stringLen uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					stringLen |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				intStringLen := int(stringLen)
+				if intStringLen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + intStringLen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				x.Operator = string(dAtA[iNdEx:postIndex])
+				iNdEx = postIndex
+			case 3:
 				if wireType != 2 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Did", wireType)
 				}
@@ -1448,7 +1512,7 @@ func (x *fastReflection_MsgCreateTrustRegistry) ProtoMethods() *protoiface.Metho
 				}
 				x.Did = string(dAtA[iNdEx:postIndex])
 				iNdEx = postIndex
-			case 3:
+			case 4:
 				if wireType != 2 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Aka", wireType)
 				}
@@ -1480,7 +1544,7 @@ func (x *fastReflection_MsgCreateTrustRegistry) ProtoMethods() *protoiface.Metho
 				}
 				x.Aka = string(dAtA[iNdEx:postIndex])
 				iNdEx = postIndex
-			case 4:
+			case 5:
 				if wireType != 2 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Language", wireType)
 				}
@@ -1512,7 +1576,7 @@ func (x *fastReflection_MsgCreateTrustRegistry) ProtoMethods() *protoiface.Metho
 				}
 				x.Language = string(dAtA[iNdEx:postIndex])
 				iNdEx = postIndex
-			case 5:
+			case 6:
 				if wireType != 2 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field DocUrl", wireType)
 				}
@@ -1544,7 +1608,7 @@ func (x *fastReflection_MsgCreateTrustRegistry) ProtoMethods() *protoiface.Metho
 				}
 				x.DocUrl = string(dAtA[iNdEx:postIndex])
 				iNdEx = postIndex
-			case 6:
+			case 7:
 				if wireType != 2 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field DocDigestSri", wireType)
 				}
@@ -1969,7 +2033,8 @@ func (x *fastReflection_MsgCreateTrustRegistryResponse) ProtoMethods() *protoifa
 
 var (
 	md_MsgAddGovernanceFrameworkDocument                protoreflect.MessageDescriptor
-	fd_MsgAddGovernanceFrameworkDocument_creator        protoreflect.FieldDescriptor
+	fd_MsgAddGovernanceFrameworkDocument_authority      protoreflect.FieldDescriptor
+	fd_MsgAddGovernanceFrameworkDocument_operator       protoreflect.FieldDescriptor
 	fd_MsgAddGovernanceFrameworkDocument_id             protoreflect.FieldDescriptor
 	fd_MsgAddGovernanceFrameworkDocument_doc_language   protoreflect.FieldDescriptor
 	fd_MsgAddGovernanceFrameworkDocument_doc_url        protoreflect.FieldDescriptor
@@ -1980,7 +2045,8 @@ var (
 func init() {
 	file_verana_tr_v1_tx_proto_init()
 	md_MsgAddGovernanceFrameworkDocument = File_verana_tr_v1_tx_proto.Messages().ByName("MsgAddGovernanceFrameworkDocument")
-	fd_MsgAddGovernanceFrameworkDocument_creator = md_MsgAddGovernanceFrameworkDocument.Fields().ByName("creator")
+	fd_MsgAddGovernanceFrameworkDocument_authority = md_MsgAddGovernanceFrameworkDocument.Fields().ByName("authority")
+	fd_MsgAddGovernanceFrameworkDocument_operator = md_MsgAddGovernanceFrameworkDocument.Fields().ByName("operator")
 	fd_MsgAddGovernanceFrameworkDocument_id = md_MsgAddGovernanceFrameworkDocument.Fields().ByName("id")
 	fd_MsgAddGovernanceFrameworkDocument_doc_language = md_MsgAddGovernanceFrameworkDocument.Fields().ByName("doc_language")
 	fd_MsgAddGovernanceFrameworkDocument_doc_url = md_MsgAddGovernanceFrameworkDocument.Fields().ByName("doc_url")
@@ -2053,9 +2119,15 @@ func (x *fastReflection_MsgAddGovernanceFrameworkDocument) Interface() protorefl
 // While iterating, mutating operations may only be performed
 // on the current field descriptor.
 func (x *fastReflection_MsgAddGovernanceFrameworkDocument) Range(f func(protoreflect.FieldDescriptor, protoreflect.Value) bool) {
-	if x.Creator != "" {
-		value := protoreflect.ValueOfString(x.Creator)
-		if !f(fd_MsgAddGovernanceFrameworkDocument_creator, value) {
+	if x.Authority != "" {
+		value := protoreflect.ValueOfString(x.Authority)
+		if !f(fd_MsgAddGovernanceFrameworkDocument_authority, value) {
+			return
+		}
+	}
+	if x.Operator != "" {
+		value := protoreflect.ValueOfString(x.Operator)
+		if !f(fd_MsgAddGovernanceFrameworkDocument_operator, value) {
 			return
 		}
 	}
@@ -2104,8 +2176,10 @@ func (x *fastReflection_MsgAddGovernanceFrameworkDocument) Range(f func(protoref
 // a repeated field is populated if it is non-empty.
 func (x *fastReflection_MsgAddGovernanceFrameworkDocument) Has(fd protoreflect.FieldDescriptor) bool {
 	switch fd.FullName() {
-	case "verana.tr.v1.MsgAddGovernanceFrameworkDocument.creator":
-		return x.Creator != ""
+	case "verana.tr.v1.MsgAddGovernanceFrameworkDocument.authority":
+		return x.Authority != ""
+	case "verana.tr.v1.MsgAddGovernanceFrameworkDocument.operator":
+		return x.Operator != ""
 	case "verana.tr.v1.MsgAddGovernanceFrameworkDocument.id":
 		return x.Id != uint64(0)
 	case "verana.tr.v1.MsgAddGovernanceFrameworkDocument.doc_language":
@@ -2132,8 +2206,10 @@ func (x *fastReflection_MsgAddGovernanceFrameworkDocument) Has(fd protoreflect.F
 // Clear is a mutating operation and unsafe for concurrent use.
 func (x *fastReflection_MsgAddGovernanceFrameworkDocument) Clear(fd protoreflect.FieldDescriptor) {
 	switch fd.FullName() {
-	case "verana.tr.v1.MsgAddGovernanceFrameworkDocument.creator":
-		x.Creator = ""
+	case "verana.tr.v1.MsgAddGovernanceFrameworkDocument.authority":
+		x.Authority = ""
+	case "verana.tr.v1.MsgAddGovernanceFrameworkDocument.operator":
+		x.Operator = ""
 	case "verana.tr.v1.MsgAddGovernanceFrameworkDocument.id":
 		x.Id = uint64(0)
 	case "verana.tr.v1.MsgAddGovernanceFrameworkDocument.doc_language":
@@ -2160,8 +2236,11 @@ func (x *fastReflection_MsgAddGovernanceFrameworkDocument) Clear(fd protoreflect
 // of the value; to obtain a mutable reference, use Mutable.
 func (x *fastReflection_MsgAddGovernanceFrameworkDocument) Get(descriptor protoreflect.FieldDescriptor) protoreflect.Value {
 	switch descriptor.FullName() {
-	case "verana.tr.v1.MsgAddGovernanceFrameworkDocument.creator":
-		value := x.Creator
+	case "verana.tr.v1.MsgAddGovernanceFrameworkDocument.authority":
+		value := x.Authority
+		return protoreflect.ValueOfString(value)
+	case "verana.tr.v1.MsgAddGovernanceFrameworkDocument.operator":
+		value := x.Operator
 		return protoreflect.ValueOfString(value)
 	case "verana.tr.v1.MsgAddGovernanceFrameworkDocument.id":
 		value := x.Id
@@ -2198,8 +2277,10 @@ func (x *fastReflection_MsgAddGovernanceFrameworkDocument) Get(descriptor protor
 // Set is a mutating operation and unsafe for concurrent use.
 func (x *fastReflection_MsgAddGovernanceFrameworkDocument) Set(fd protoreflect.FieldDescriptor, value protoreflect.Value) {
 	switch fd.FullName() {
-	case "verana.tr.v1.MsgAddGovernanceFrameworkDocument.creator":
-		x.Creator = value.Interface().(string)
+	case "verana.tr.v1.MsgAddGovernanceFrameworkDocument.authority":
+		x.Authority = value.Interface().(string)
+	case "verana.tr.v1.MsgAddGovernanceFrameworkDocument.operator":
+		x.Operator = value.Interface().(string)
 	case "verana.tr.v1.MsgAddGovernanceFrameworkDocument.id":
 		x.Id = value.Uint()
 	case "verana.tr.v1.MsgAddGovernanceFrameworkDocument.doc_language":
@@ -2230,8 +2311,10 @@ func (x *fastReflection_MsgAddGovernanceFrameworkDocument) Set(fd protoreflect.F
 // Mutable is a mutating operation and unsafe for concurrent use.
 func (x *fastReflection_MsgAddGovernanceFrameworkDocument) Mutable(fd protoreflect.FieldDescriptor) protoreflect.Value {
 	switch fd.FullName() {
-	case "verana.tr.v1.MsgAddGovernanceFrameworkDocument.creator":
-		panic(fmt.Errorf("field creator of message verana.tr.v1.MsgAddGovernanceFrameworkDocument is not mutable"))
+	case "verana.tr.v1.MsgAddGovernanceFrameworkDocument.authority":
+		panic(fmt.Errorf("field authority of message verana.tr.v1.MsgAddGovernanceFrameworkDocument is not mutable"))
+	case "verana.tr.v1.MsgAddGovernanceFrameworkDocument.operator":
+		panic(fmt.Errorf("field operator of message verana.tr.v1.MsgAddGovernanceFrameworkDocument is not mutable"))
 	case "verana.tr.v1.MsgAddGovernanceFrameworkDocument.id":
 		panic(fmt.Errorf("field id of message verana.tr.v1.MsgAddGovernanceFrameworkDocument is not mutable"))
 	case "verana.tr.v1.MsgAddGovernanceFrameworkDocument.doc_language":
@@ -2255,7 +2338,9 @@ func (x *fastReflection_MsgAddGovernanceFrameworkDocument) Mutable(fd protorefle
 // For lists, maps, and messages, this returns a new, empty, mutable value.
 func (x *fastReflection_MsgAddGovernanceFrameworkDocument) NewField(fd protoreflect.FieldDescriptor) protoreflect.Value {
 	switch fd.FullName() {
-	case "verana.tr.v1.MsgAddGovernanceFrameworkDocument.creator":
+	case "verana.tr.v1.MsgAddGovernanceFrameworkDocument.authority":
+		return protoreflect.ValueOfString("")
+	case "verana.tr.v1.MsgAddGovernanceFrameworkDocument.operator":
 		return protoreflect.ValueOfString("")
 	case "verana.tr.v1.MsgAddGovernanceFrameworkDocument.id":
 		return protoreflect.ValueOfUint64(uint64(0))
@@ -2336,7 +2421,11 @@ func (x *fastReflection_MsgAddGovernanceFrameworkDocument) ProtoMethods() *proto
 		var n int
 		var l int
 		_ = l
-		l = len(x.Creator)
+		l = len(x.Authority)
+		if l > 0 {
+			n += 1 + l + runtime.Sov(uint64(l))
+		}
+		l = len(x.Operator)
 		if l > 0 {
 			n += 1 + l + runtime.Sov(uint64(l))
 		}
@@ -2390,38 +2479,45 @@ func (x *fastReflection_MsgAddGovernanceFrameworkDocument) ProtoMethods() *proto
 		if x.Version != 0 {
 			i = runtime.EncodeVarint(dAtA, i, uint64(x.Version))
 			i--
-			dAtA[i] = 0x30
+			dAtA[i] = 0x38
 		}
 		if len(x.DocDigestSri) > 0 {
 			i -= len(x.DocDigestSri)
 			copy(dAtA[i:], x.DocDigestSri)
 			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.DocDigestSri)))
 			i--
-			dAtA[i] = 0x2a
+			dAtA[i] = 0x32
 		}
 		if len(x.DocUrl) > 0 {
 			i -= len(x.DocUrl)
 			copy(dAtA[i:], x.DocUrl)
 			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.DocUrl)))
 			i--
-			dAtA[i] = 0x22
+			dAtA[i] = 0x2a
 		}
 		if len(x.DocLanguage) > 0 {
 			i -= len(x.DocLanguage)
 			copy(dAtA[i:], x.DocLanguage)
 			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.DocLanguage)))
 			i--
-			dAtA[i] = 0x1a
+			dAtA[i] = 0x22
 		}
 		if x.Id != 0 {
 			i = runtime.EncodeVarint(dAtA, i, uint64(x.Id))
 			i--
-			dAtA[i] = 0x10
+			dAtA[i] = 0x18
 		}
-		if len(x.Creator) > 0 {
-			i -= len(x.Creator)
-			copy(dAtA[i:], x.Creator)
-			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Creator)))
+		if len(x.Operator) > 0 {
+			i -= len(x.Operator)
+			copy(dAtA[i:], x.Operator)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Operator)))
+			i--
+			dAtA[i] = 0x12
+		}
+		if len(x.Authority) > 0 {
+			i -= len(x.Authority)
+			copy(dAtA[i:], x.Authority)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Authority)))
 			i--
 			dAtA[i] = 0xa
 		}
@@ -2476,7 +2572,7 @@ func (x *fastReflection_MsgAddGovernanceFrameworkDocument) ProtoMethods() *proto
 			switch fieldNum {
 			case 1:
 				if wireType != 2 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Creator", wireType)
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Authority", wireType)
 				}
 				var stringLen uint64
 				for shift := uint(0); ; shift += 7 {
@@ -2504,9 +2600,41 @@ func (x *fastReflection_MsgAddGovernanceFrameworkDocument) ProtoMethods() *proto
 				if postIndex > l {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
 				}
-				x.Creator = string(dAtA[iNdEx:postIndex])
+				x.Authority = string(dAtA[iNdEx:postIndex])
 				iNdEx = postIndex
 			case 2:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Operator", wireType)
+				}
+				var stringLen uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					stringLen |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				intStringLen := int(stringLen)
+				if intStringLen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + intStringLen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				x.Operator = string(dAtA[iNdEx:postIndex])
+				iNdEx = postIndex
+			case 3:
 				if wireType != 0 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Id", wireType)
 				}
@@ -2525,7 +2653,7 @@ func (x *fastReflection_MsgAddGovernanceFrameworkDocument) ProtoMethods() *proto
 						break
 					}
 				}
-			case 3:
+			case 4:
 				if wireType != 2 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field DocLanguage", wireType)
 				}
@@ -2557,7 +2685,7 @@ func (x *fastReflection_MsgAddGovernanceFrameworkDocument) ProtoMethods() *proto
 				}
 				x.DocLanguage = string(dAtA[iNdEx:postIndex])
 				iNdEx = postIndex
-			case 4:
+			case 5:
 				if wireType != 2 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field DocUrl", wireType)
 				}
@@ -2589,7 +2717,7 @@ func (x *fastReflection_MsgAddGovernanceFrameworkDocument) ProtoMethods() *proto
 				}
 				x.DocUrl = string(dAtA[iNdEx:postIndex])
 				iNdEx = postIndex
-			case 5:
+			case 6:
 				if wireType != 2 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field DocDigestSri", wireType)
 				}
@@ -2621,7 +2749,7 @@ func (x *fastReflection_MsgAddGovernanceFrameworkDocument) ProtoMethods() *proto
 				}
 				x.DocDigestSri = string(dAtA[iNdEx:postIndex])
 				iNdEx = postIndex
-			case 6:
+			case 7:
 				if wireType != 0 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Version", wireType)
 				}
@@ -3032,15 +3160,17 @@ func (x *fastReflection_MsgAddGovernanceFrameworkDocumentResponse) ProtoMethods(
 }
 
 var (
-	md_MsgIncreaseActiveGovernanceFrameworkVersion         protoreflect.MessageDescriptor
-	fd_MsgIncreaseActiveGovernanceFrameworkVersion_creator protoreflect.FieldDescriptor
-	fd_MsgIncreaseActiveGovernanceFrameworkVersion_id      protoreflect.FieldDescriptor
+	md_MsgIncreaseActiveGovernanceFrameworkVersion           protoreflect.MessageDescriptor
+	fd_MsgIncreaseActiveGovernanceFrameworkVersion_authority protoreflect.FieldDescriptor
+	fd_MsgIncreaseActiveGovernanceFrameworkVersion_operator  protoreflect.FieldDescriptor
+	fd_MsgIncreaseActiveGovernanceFrameworkVersion_id        protoreflect.FieldDescriptor
 )
 
 func init() {
 	file_verana_tr_v1_tx_proto_init()
 	md_MsgIncreaseActiveGovernanceFrameworkVersion = File_verana_tr_v1_tx_proto.Messages().ByName("MsgIncreaseActiveGovernanceFrameworkVersion")
-	fd_MsgIncreaseActiveGovernanceFrameworkVersion_creator = md_MsgIncreaseActiveGovernanceFrameworkVersion.Fields().ByName("creator")
+	fd_MsgIncreaseActiveGovernanceFrameworkVersion_authority = md_MsgIncreaseActiveGovernanceFrameworkVersion.Fields().ByName("authority")
+	fd_MsgIncreaseActiveGovernanceFrameworkVersion_operator = md_MsgIncreaseActiveGovernanceFrameworkVersion.Fields().ByName("operator")
 	fd_MsgIncreaseActiveGovernanceFrameworkVersion_id = md_MsgIncreaseActiveGovernanceFrameworkVersion.Fields().ByName("id")
 }
 
@@ -3109,9 +3239,15 @@ func (x *fastReflection_MsgIncreaseActiveGovernanceFrameworkVersion) Interface()
 // While iterating, mutating operations may only be performed
 // on the current field descriptor.
 func (x *fastReflection_MsgIncreaseActiveGovernanceFrameworkVersion) Range(f func(protoreflect.FieldDescriptor, protoreflect.Value) bool) {
-	if x.Creator != "" {
-		value := protoreflect.ValueOfString(x.Creator)
-		if !f(fd_MsgIncreaseActiveGovernanceFrameworkVersion_creator, value) {
+	if x.Authority != "" {
+		value := protoreflect.ValueOfString(x.Authority)
+		if !f(fd_MsgIncreaseActiveGovernanceFrameworkVersion_authority, value) {
+			return
+		}
+	}
+	if x.Operator != "" {
+		value := protoreflect.ValueOfString(x.Operator)
+		if !f(fd_MsgIncreaseActiveGovernanceFrameworkVersion_operator, value) {
 			return
 		}
 	}
@@ -3136,8 +3272,10 @@ func (x *fastReflection_MsgIncreaseActiveGovernanceFrameworkVersion) Range(f fun
 // a repeated field is populated if it is non-empty.
 func (x *fastReflection_MsgIncreaseActiveGovernanceFrameworkVersion) Has(fd protoreflect.FieldDescriptor) bool {
 	switch fd.FullName() {
-	case "verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion.creator":
-		return x.Creator != ""
+	case "verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion.authority":
+		return x.Authority != ""
+	case "verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion.operator":
+		return x.Operator != ""
 	case "verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion.id":
 		return x.Id != uint64(0)
 	default:
@@ -3156,8 +3294,10 @@ func (x *fastReflection_MsgIncreaseActiveGovernanceFrameworkVersion) Has(fd prot
 // Clear is a mutating operation and unsafe for concurrent use.
 func (x *fastReflection_MsgIncreaseActiveGovernanceFrameworkVersion) Clear(fd protoreflect.FieldDescriptor) {
 	switch fd.FullName() {
-	case "verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion.creator":
-		x.Creator = ""
+	case "verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion.authority":
+		x.Authority = ""
+	case "verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion.operator":
+		x.Operator = ""
 	case "verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion.id":
 		x.Id = uint64(0)
 	default:
@@ -3176,8 +3316,11 @@ func (x *fastReflection_MsgIncreaseActiveGovernanceFrameworkVersion) Clear(fd pr
 // of the value; to obtain a mutable reference, use Mutable.
 func (x *fastReflection_MsgIncreaseActiveGovernanceFrameworkVersion) Get(descriptor protoreflect.FieldDescriptor) protoreflect.Value {
 	switch descriptor.FullName() {
-	case "verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion.creator":
-		value := x.Creator
+	case "verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion.authority":
+		value := x.Authority
+		return protoreflect.ValueOfString(value)
+	case "verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion.operator":
+		value := x.Operator
 		return protoreflect.ValueOfString(value)
 	case "verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion.id":
 		value := x.Id
@@ -3202,8 +3345,10 @@ func (x *fastReflection_MsgIncreaseActiveGovernanceFrameworkVersion) Get(descrip
 // Set is a mutating operation and unsafe for concurrent use.
 func (x *fastReflection_MsgIncreaseActiveGovernanceFrameworkVersion) Set(fd protoreflect.FieldDescriptor, value protoreflect.Value) {
 	switch fd.FullName() {
-	case "verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion.creator":
-		x.Creator = value.Interface().(string)
+	case "verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion.authority":
+		x.Authority = value.Interface().(string)
+	case "verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion.operator":
+		x.Operator = value.Interface().(string)
 	case "verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion.id":
 		x.Id = value.Uint()
 	default:
@@ -3226,8 +3371,10 @@ func (x *fastReflection_MsgIncreaseActiveGovernanceFrameworkVersion) Set(fd prot
 // Mutable is a mutating operation and unsafe for concurrent use.
 func (x *fastReflection_MsgIncreaseActiveGovernanceFrameworkVersion) Mutable(fd protoreflect.FieldDescriptor) protoreflect.Value {
 	switch fd.FullName() {
-	case "verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion.creator":
-		panic(fmt.Errorf("field creator of message verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion is not mutable"))
+	case "verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion.authority":
+		panic(fmt.Errorf("field authority of message verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion is not mutable"))
+	case "verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion.operator":
+		panic(fmt.Errorf("field operator of message verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion is not mutable"))
 	case "verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion.id":
 		panic(fmt.Errorf("field id of message verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion is not mutable"))
 	default:
@@ -3243,7 +3390,9 @@ func (x *fastReflection_MsgIncreaseActiveGovernanceFrameworkVersion) Mutable(fd 
 // For lists, maps, and messages, this returns a new, empty, mutable value.
 func (x *fastReflection_MsgIncreaseActiveGovernanceFrameworkVersion) NewField(fd protoreflect.FieldDescriptor) protoreflect.Value {
 	switch fd.FullName() {
-	case "verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion.creator":
+	case "verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion.authority":
+		return protoreflect.ValueOfString("")
+	case "verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion.operator":
 		return protoreflect.ValueOfString("")
 	case "verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion.id":
 		return protoreflect.ValueOfUint64(uint64(0))
@@ -3316,7 +3465,11 @@ func (x *fastReflection_MsgIncreaseActiveGovernanceFrameworkVersion) ProtoMethod
 		var n int
 		var l int
 		_ = l
-		l = len(x.Creator)
+		l = len(x.Authority)
+		if l > 0 {
+			n += 1 + l + runtime.Sov(uint64(l))
+		}
+		l = len(x.Operator)
 		if l > 0 {
 			n += 1 + l + runtime.Sov(uint64(l))
 		}
@@ -3355,12 +3508,19 @@ func (x *fastReflection_MsgIncreaseActiveGovernanceFrameworkVersion) ProtoMethod
 		if x.Id != 0 {
 			i = runtime.EncodeVarint(dAtA, i, uint64(x.Id))
 			i--
-			dAtA[i] = 0x10
+			dAtA[i] = 0x18
 		}
-		if len(x.Creator) > 0 {
-			i -= len(x.Creator)
-			copy(dAtA[i:], x.Creator)
-			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Creator)))
+		if len(x.Operator) > 0 {
+			i -= len(x.Operator)
+			copy(dAtA[i:], x.Operator)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Operator)))
+			i--
+			dAtA[i] = 0x12
+		}
+		if len(x.Authority) > 0 {
+			i -= len(x.Authority)
+			copy(dAtA[i:], x.Authority)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Authority)))
 			i--
 			dAtA[i] = 0xa
 		}
@@ -3415,7 +3575,7 @@ func (x *fastReflection_MsgIncreaseActiveGovernanceFrameworkVersion) ProtoMethod
 			switch fieldNum {
 			case 1:
 				if wireType != 2 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Creator", wireType)
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Authority", wireType)
 				}
 				var stringLen uint64
 				for shift := uint(0); ; shift += 7 {
@@ -3443,9 +3603,41 @@ func (x *fastReflection_MsgIncreaseActiveGovernanceFrameworkVersion) ProtoMethod
 				if postIndex > l {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
 				}
-				x.Creator = string(dAtA[iNdEx:postIndex])
+				x.Authority = string(dAtA[iNdEx:postIndex])
 				iNdEx = postIndex
 			case 2:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Operator", wireType)
+				}
+				var stringLen uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					stringLen |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				intStringLen := int(stringLen)
+				if intStringLen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + intStringLen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				x.Operator = string(dAtA[iNdEx:postIndex])
+				iNdEx = postIndex
+			case 3:
 				if wireType != 0 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Id", wireType)
 				}
@@ -3856,17 +4048,19 @@ func (x *fastReflection_MsgIncreaseActiveGovernanceFrameworkVersionResponse) Pro
 }
 
 var (
-	md_MsgUpdateTrustRegistry         protoreflect.MessageDescriptor
-	fd_MsgUpdateTrustRegistry_creator protoreflect.FieldDescriptor
-	fd_MsgUpdateTrustRegistry_id      protoreflect.FieldDescriptor
-	fd_MsgUpdateTrustRegistry_did     protoreflect.FieldDescriptor
-	fd_MsgUpdateTrustRegistry_aka     protoreflect.FieldDescriptor
+	md_MsgUpdateTrustRegistry           protoreflect.MessageDescriptor
+	fd_MsgUpdateTrustRegistry_authority protoreflect.FieldDescriptor
+	fd_MsgUpdateTrustRegistry_operator  protoreflect.FieldDescriptor
+	fd_MsgUpdateTrustRegistry_id        protoreflect.FieldDescriptor
+	fd_MsgUpdateTrustRegistry_did       protoreflect.FieldDescriptor
+	fd_MsgUpdateTrustRegistry_aka       protoreflect.FieldDescriptor
 )
 
 func init() {
 	file_verana_tr_v1_tx_proto_init()
 	md_MsgUpdateTrustRegistry = File_verana_tr_v1_tx_proto.Messages().ByName("MsgUpdateTrustRegistry")
-	fd_MsgUpdateTrustRegistry_creator = md_MsgUpdateTrustRegistry.Fields().ByName("creator")
+	fd_MsgUpdateTrustRegistry_authority = md_MsgUpdateTrustRegistry.Fields().ByName("authority")
+	fd_MsgUpdateTrustRegistry_operator = md_MsgUpdateTrustRegistry.Fields().ByName("operator")
 	fd_MsgUpdateTrustRegistry_id = md_MsgUpdateTrustRegistry.Fields().ByName("id")
 	fd_MsgUpdateTrustRegistry_did = md_MsgUpdateTrustRegistry.Fields().ByName("did")
 	fd_MsgUpdateTrustRegistry_aka = md_MsgUpdateTrustRegistry.Fields().ByName("aka")
@@ -3937,9 +4131,15 @@ func (x *fastReflection_MsgUpdateTrustRegistry) Interface() protoreflect.ProtoMe
 // While iterating, mutating operations may only be performed
 // on the current field descriptor.
 func (x *fastReflection_MsgUpdateTrustRegistry) Range(f func(protoreflect.FieldDescriptor, protoreflect.Value) bool) {
-	if x.Creator != "" {
-		value := protoreflect.ValueOfString(x.Creator)
-		if !f(fd_MsgUpdateTrustRegistry_creator, value) {
+	if x.Authority != "" {
+		value := protoreflect.ValueOfString(x.Authority)
+		if !f(fd_MsgUpdateTrustRegistry_authority, value) {
+			return
+		}
+	}
+	if x.Operator != "" {
+		value := protoreflect.ValueOfString(x.Operator)
+		if !f(fd_MsgUpdateTrustRegistry_operator, value) {
 			return
 		}
 	}
@@ -3976,8 +4176,10 @@ func (x *fastReflection_MsgUpdateTrustRegistry) Range(f func(protoreflect.FieldD
 // a repeated field is populated if it is non-empty.
 func (x *fastReflection_MsgUpdateTrustRegistry) Has(fd protoreflect.FieldDescriptor) bool {
 	switch fd.FullName() {
-	case "verana.tr.v1.MsgUpdateTrustRegistry.creator":
-		return x.Creator != ""
+	case "verana.tr.v1.MsgUpdateTrustRegistry.authority":
+		return x.Authority != ""
+	case "verana.tr.v1.MsgUpdateTrustRegistry.operator":
+		return x.Operator != ""
 	case "verana.tr.v1.MsgUpdateTrustRegistry.id":
 		return x.Id != uint64(0)
 	case "verana.tr.v1.MsgUpdateTrustRegistry.did":
@@ -4000,8 +4202,10 @@ func (x *fastReflection_MsgUpdateTrustRegistry) Has(fd protoreflect.FieldDescrip
 // Clear is a mutating operation and unsafe for concurrent use.
 func (x *fastReflection_MsgUpdateTrustRegistry) Clear(fd protoreflect.FieldDescriptor) {
 	switch fd.FullName() {
-	case "verana.tr.v1.MsgUpdateTrustRegistry.creator":
-		x.Creator = ""
+	case "verana.tr.v1.MsgUpdateTrustRegistry.authority":
+		x.Authority = ""
+	case "verana.tr.v1.MsgUpdateTrustRegistry.operator":
+		x.Operator = ""
 	case "verana.tr.v1.MsgUpdateTrustRegistry.id":
 		x.Id = uint64(0)
 	case "verana.tr.v1.MsgUpdateTrustRegistry.did":
@@ -4024,8 +4228,11 @@ func (x *fastReflection_MsgUpdateTrustRegistry) Clear(fd protoreflect.FieldDescr
 // of the value; to obtain a mutable reference, use Mutable.
 func (x *fastReflection_MsgUpdateTrustRegistry) Get(descriptor protoreflect.FieldDescriptor) protoreflect.Value {
 	switch descriptor.FullName() {
-	case "verana.tr.v1.MsgUpdateTrustRegistry.creator":
-		value := x.Creator
+	case "verana.tr.v1.MsgUpdateTrustRegistry.authority":
+		value := x.Authority
+		return protoreflect.ValueOfString(value)
+	case "verana.tr.v1.MsgUpdateTrustRegistry.operator":
+		value := x.Operator
 		return protoreflect.ValueOfString(value)
 	case "verana.tr.v1.MsgUpdateTrustRegistry.id":
 		value := x.Id
@@ -4056,8 +4263,10 @@ func (x *fastReflection_MsgUpdateTrustRegistry) Get(descriptor protoreflect.Fiel
 // Set is a mutating operation and unsafe for concurrent use.
 func (x *fastReflection_MsgUpdateTrustRegistry) Set(fd protoreflect.FieldDescriptor, value protoreflect.Value) {
 	switch fd.FullName() {
-	case "verana.tr.v1.MsgUpdateTrustRegistry.creator":
-		x.Creator = value.Interface().(string)
+	case "verana.tr.v1.MsgUpdateTrustRegistry.authority":
+		x.Authority = value.Interface().(string)
+	case "verana.tr.v1.MsgUpdateTrustRegistry.operator":
+		x.Operator = value.Interface().(string)
 	case "verana.tr.v1.MsgUpdateTrustRegistry.id":
 		x.Id = value.Uint()
 	case "verana.tr.v1.MsgUpdateTrustRegistry.did":
@@ -4084,8 +4293,10 @@ func (x *fastReflection_MsgUpdateTrustRegistry) Set(fd protoreflect.FieldDescrip
 // Mutable is a mutating operation and unsafe for concurrent use.
 func (x *fastReflection_MsgUpdateTrustRegistry) Mutable(fd protoreflect.FieldDescriptor) protoreflect.Value {
 	switch fd.FullName() {
-	case "verana.tr.v1.MsgUpdateTrustRegistry.creator":
-		panic(fmt.Errorf("field creator of message verana.tr.v1.MsgUpdateTrustRegistry is not mutable"))
+	case "verana.tr.v1.MsgUpdateTrustRegistry.authority":
+		panic(fmt.Errorf("field authority of message verana.tr.v1.MsgUpdateTrustRegistry is not mutable"))
+	case "verana.tr.v1.MsgUpdateTrustRegistry.operator":
+		panic(fmt.Errorf("field operator of message verana.tr.v1.MsgUpdateTrustRegistry is not mutable"))
 	case "verana.tr.v1.MsgUpdateTrustRegistry.id":
 		panic(fmt.Errorf("field id of message verana.tr.v1.MsgUpdateTrustRegistry is not mutable"))
 	case "verana.tr.v1.MsgUpdateTrustRegistry.did":
@@ -4105,7 +4316,9 @@ func (x *fastReflection_MsgUpdateTrustRegistry) Mutable(fd protoreflect.FieldDes
 // For lists, maps, and messages, this returns a new, empty, mutable value.
 func (x *fastReflection_MsgUpdateTrustRegistry) NewField(fd protoreflect.FieldDescriptor) protoreflect.Value {
 	switch fd.FullName() {
-	case "verana.tr.v1.MsgUpdateTrustRegistry.creator":
+	case "verana.tr.v1.MsgUpdateTrustRegistry.authority":
+		return protoreflect.ValueOfString("")
+	case "verana.tr.v1.MsgUpdateTrustRegistry.operator":
 		return protoreflect.ValueOfString("")
 	case "verana.tr.v1.MsgUpdateTrustRegistry.id":
 		return protoreflect.ValueOfUint64(uint64(0))
@@ -4182,7 +4395,11 @@ func (x *fastReflection_MsgUpdateTrustRegistry) ProtoMethods() *protoiface.Metho
 		var n int
 		var l int
 		_ = l
-		l = len(x.Creator)
+		l = len(x.Authority)
+		if l > 0 {
+			n += 1 + l + runtime.Sov(uint64(l))
+		}
+		l = len(x.Operator)
 		if l > 0 {
 			n += 1 + l + runtime.Sov(uint64(l))
 		}
@@ -4231,24 +4448,31 @@ func (x *fastReflection_MsgUpdateTrustRegistry) ProtoMethods() *protoiface.Metho
 			copy(dAtA[i:], x.Aka)
 			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Aka)))
 			i--
-			dAtA[i] = 0x22
+			dAtA[i] = 0x2a
 		}
 		if len(x.Did) > 0 {
 			i -= len(x.Did)
 			copy(dAtA[i:], x.Did)
 			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Did)))
 			i--
-			dAtA[i] = 0x1a
+			dAtA[i] = 0x22
 		}
 		if x.Id != 0 {
 			i = runtime.EncodeVarint(dAtA, i, uint64(x.Id))
 			i--
-			dAtA[i] = 0x10
+			dAtA[i] = 0x18
 		}
-		if len(x.Creator) > 0 {
-			i -= len(x.Creator)
-			copy(dAtA[i:], x.Creator)
-			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Creator)))
+		if len(x.Operator) > 0 {
+			i -= len(x.Operator)
+			copy(dAtA[i:], x.Operator)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Operator)))
+			i--
+			dAtA[i] = 0x12
+		}
+		if len(x.Authority) > 0 {
+			i -= len(x.Authority)
+			copy(dAtA[i:], x.Authority)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Authority)))
 			i--
 			dAtA[i] = 0xa
 		}
@@ -4303,7 +4527,7 @@ func (x *fastReflection_MsgUpdateTrustRegistry) ProtoMethods() *protoiface.Metho
 			switch fieldNum {
 			case 1:
 				if wireType != 2 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Creator", wireType)
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Authority", wireType)
 				}
 				var stringLen uint64
 				for shift := uint(0); ; shift += 7 {
@@ -4331,9 +4555,41 @@ func (x *fastReflection_MsgUpdateTrustRegistry) ProtoMethods() *protoiface.Metho
 				if postIndex > l {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
 				}
-				x.Creator = string(dAtA[iNdEx:postIndex])
+				x.Authority = string(dAtA[iNdEx:postIndex])
 				iNdEx = postIndex
 			case 2:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Operator", wireType)
+				}
+				var stringLen uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					stringLen |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				intStringLen := int(stringLen)
+				if intStringLen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + intStringLen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				x.Operator = string(dAtA[iNdEx:postIndex])
+				iNdEx = postIndex
+			case 3:
 				if wireType != 0 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Id", wireType)
 				}
@@ -4352,7 +4608,7 @@ func (x *fastReflection_MsgUpdateTrustRegistry) ProtoMethods() *protoiface.Metho
 						break
 					}
 				}
-			case 3:
+			case 4:
 				if wireType != 2 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Did", wireType)
 				}
@@ -4384,7 +4640,7 @@ func (x *fastReflection_MsgUpdateTrustRegistry) ProtoMethods() *protoiface.Metho
 				}
 				x.Did = string(dAtA[iNdEx:postIndex])
 				iNdEx = postIndex
-			case 4:
+			case 5:
 				if wireType != 2 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Aka", wireType)
 				}
@@ -4808,16 +5064,18 @@ func (x *fastReflection_MsgUpdateTrustRegistryResponse) ProtoMethods() *protoifa
 }
 
 var (
-	md_MsgArchiveTrustRegistry         protoreflect.MessageDescriptor
-	fd_MsgArchiveTrustRegistry_creator protoreflect.FieldDescriptor
-	fd_MsgArchiveTrustRegistry_id      protoreflect.FieldDescriptor
-	fd_MsgArchiveTrustRegistry_archive protoreflect.FieldDescriptor
+	md_MsgArchiveTrustRegistry           protoreflect.MessageDescriptor
+	fd_MsgArchiveTrustRegistry_authority protoreflect.FieldDescriptor
+	fd_MsgArchiveTrustRegistry_operator  protoreflect.FieldDescriptor
+	fd_MsgArchiveTrustRegistry_id        protoreflect.FieldDescriptor
+	fd_MsgArchiveTrustRegistry_archive   protoreflect.FieldDescriptor
 )
 
 func init() {
 	file_verana_tr_v1_tx_proto_init()
 	md_MsgArchiveTrustRegistry = File_verana_tr_v1_tx_proto.Messages().ByName("MsgArchiveTrustRegistry")
-	fd_MsgArchiveTrustRegistry_creator = md_MsgArchiveTrustRegistry.Fields().ByName("creator")
+	fd_MsgArchiveTrustRegistry_authority = md_MsgArchiveTrustRegistry.Fields().ByName("authority")
+	fd_MsgArchiveTrustRegistry_operator = md_MsgArchiveTrustRegistry.Fields().ByName("operator")
 	fd_MsgArchiveTrustRegistry_id = md_MsgArchiveTrustRegistry.Fields().ByName("id")
 	fd_MsgArchiveTrustRegistry_archive = md_MsgArchiveTrustRegistry.Fields().ByName("archive")
 }
@@ -4887,9 +5145,15 @@ func (x *fastReflection_MsgArchiveTrustRegistry) Interface() protoreflect.ProtoM
 // While iterating, mutating operations may only be performed
 // on the current field descriptor.
 func (x *fastReflection_MsgArchiveTrustRegistry) Range(f func(protoreflect.FieldDescriptor, protoreflect.Value) bool) {
-	if x.Creator != "" {
-		value := protoreflect.ValueOfString(x.Creator)
-		if !f(fd_MsgArchiveTrustRegistry_creator, value) {
+	if x.Authority != "" {
+		value := protoreflect.ValueOfString(x.Authority)
+		if !f(fd_MsgArchiveTrustRegistry_authority, value) {
+			return
+		}
+	}
+	if x.Operator != "" {
+		value := protoreflect.ValueOfString(x.Operator)
+		if !f(fd_MsgArchiveTrustRegistry_operator, value) {
 			return
 		}
 	}
@@ -4920,8 +5184,10 @@ func (x *fastReflection_MsgArchiveTrustRegistry) Range(f func(protoreflect.Field
 // a repeated field is populated if it is non-empty.
 func (x *fastReflection_MsgArchiveTrustRegistry) Has(fd protoreflect.FieldDescriptor) bool {
 	switch fd.FullName() {
-	case "verana.tr.v1.MsgArchiveTrustRegistry.creator":
-		return x.Creator != ""
+	case "verana.tr.v1.MsgArchiveTrustRegistry.authority":
+		return x.Authority != ""
+	case "verana.tr.v1.MsgArchiveTrustRegistry.operator":
+		return x.Operator != ""
 	case "verana.tr.v1.MsgArchiveTrustRegistry.id":
 		return x.Id != uint64(0)
 	case "verana.tr.v1.MsgArchiveTrustRegistry.archive":
@@ -4942,8 +5208,10 @@ func (x *fastReflection_MsgArchiveTrustRegistry) Has(fd protoreflect.FieldDescri
 // Clear is a mutating operation and unsafe for concurrent use.
 func (x *fastReflection_MsgArchiveTrustRegistry) Clear(fd protoreflect.FieldDescriptor) {
 	switch fd.FullName() {
-	case "verana.tr.v1.MsgArchiveTrustRegistry.creator":
-		x.Creator = ""
+	case "verana.tr.v1.MsgArchiveTrustRegistry.authority":
+		x.Authority = ""
+	case "verana.tr.v1.MsgArchiveTrustRegistry.operator":
+		x.Operator = ""
 	case "verana.tr.v1.MsgArchiveTrustRegistry.id":
 		x.Id = uint64(0)
 	case "verana.tr.v1.MsgArchiveTrustRegistry.archive":
@@ -4964,8 +5232,11 @@ func (x *fastReflection_MsgArchiveTrustRegistry) Clear(fd protoreflect.FieldDesc
 // of the value; to obtain a mutable reference, use Mutable.
 func (x *fastReflection_MsgArchiveTrustRegistry) Get(descriptor protoreflect.FieldDescriptor) protoreflect.Value {
 	switch descriptor.FullName() {
-	case "verana.tr.v1.MsgArchiveTrustRegistry.creator":
-		value := x.Creator
+	case "verana.tr.v1.MsgArchiveTrustRegistry.authority":
+		value := x.Authority
+		return protoreflect.ValueOfString(value)
+	case "verana.tr.v1.MsgArchiveTrustRegistry.operator":
+		value := x.Operator
 		return protoreflect.ValueOfString(value)
 	case "verana.tr.v1.MsgArchiveTrustRegistry.id":
 		value := x.Id
@@ -4993,8 +5264,10 @@ func (x *fastReflection_MsgArchiveTrustRegistry) Get(descriptor protoreflect.Fie
 // Set is a mutating operation and unsafe for concurrent use.
 func (x *fastReflection_MsgArchiveTrustRegistry) Set(fd protoreflect.FieldDescriptor, value protoreflect.Value) {
 	switch fd.FullName() {
-	case "verana.tr.v1.MsgArchiveTrustRegistry.creator":
-		x.Creator = value.Interface().(string)
+	case "verana.tr.v1.MsgArchiveTrustRegistry.authority":
+		x.Authority = value.Interface().(string)
+	case "verana.tr.v1.MsgArchiveTrustRegistry.operator":
+		x.Operator = value.Interface().(string)
 	case "verana.tr.v1.MsgArchiveTrustRegistry.id":
 		x.Id = value.Uint()
 	case "verana.tr.v1.MsgArchiveTrustRegistry.archive":
@@ -5019,8 +5292,10 @@ func (x *fastReflection_MsgArchiveTrustRegistry) Set(fd protoreflect.FieldDescri
 // Mutable is a mutating operation and unsafe for concurrent use.
 func (x *fastReflection_MsgArchiveTrustRegistry) Mutable(fd protoreflect.FieldDescriptor) protoreflect.Value {
 	switch fd.FullName() {
-	case "verana.tr.v1.MsgArchiveTrustRegistry.creator":
-		panic(fmt.Errorf("field creator of message verana.tr.v1.MsgArchiveTrustRegistry is not mutable"))
+	case "verana.tr.v1.MsgArchiveTrustRegistry.authority":
+		panic(fmt.Errorf("field authority of message verana.tr.v1.MsgArchiveTrustRegistry is not mutable"))
+	case "verana.tr.v1.MsgArchiveTrustRegistry.operator":
+		panic(fmt.Errorf("field operator of message verana.tr.v1.MsgArchiveTrustRegistry is not mutable"))
 	case "verana.tr.v1.MsgArchiveTrustRegistry.id":
 		panic(fmt.Errorf("field id of message verana.tr.v1.MsgArchiveTrustRegistry is not mutable"))
 	case "verana.tr.v1.MsgArchiveTrustRegistry.archive":
@@ -5038,7 +5313,9 @@ func (x *fastReflection_MsgArchiveTrustRegistry) Mutable(fd protoreflect.FieldDe
 // For lists, maps, and messages, this returns a new, empty, mutable value.
 func (x *fastReflection_MsgArchiveTrustRegistry) NewField(fd protoreflect.FieldDescriptor) protoreflect.Value {
 	switch fd.FullName() {
-	case "verana.tr.v1.MsgArchiveTrustRegistry.creator":
+	case "verana.tr.v1.MsgArchiveTrustRegistry.authority":
+		return protoreflect.ValueOfString("")
+	case "verana.tr.v1.MsgArchiveTrustRegistry.operator":
 		return protoreflect.ValueOfString("")
 	case "verana.tr.v1.MsgArchiveTrustRegistry.id":
 		return protoreflect.ValueOfUint64(uint64(0))
@@ -5113,7 +5390,11 @@ func (x *fastReflection_MsgArchiveTrustRegistry) ProtoMethods() *protoiface.Meth
 		var n int
 		var l int
 		_ = l
-		l = len(x.Creator)
+		l = len(x.Authority)
+		if l > 0 {
+			n += 1 + l + runtime.Sov(uint64(l))
+		}
+		l = len(x.Operator)
 		if l > 0 {
 			n += 1 + l + runtime.Sov(uint64(l))
 		}
@@ -5160,17 +5441,24 @@ func (x *fastReflection_MsgArchiveTrustRegistry) ProtoMethods() *protoiface.Meth
 				dAtA[i] = 0
 			}
 			i--
-			dAtA[i] = 0x18
+			dAtA[i] = 0x20
 		}
 		if x.Id != 0 {
 			i = runtime.EncodeVarint(dAtA, i, uint64(x.Id))
 			i--
-			dAtA[i] = 0x10
+			dAtA[i] = 0x18
 		}
-		if len(x.Creator) > 0 {
-			i -= len(x.Creator)
-			copy(dAtA[i:], x.Creator)
-			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Creator)))
+		if len(x.Operator) > 0 {
+			i -= len(x.Operator)
+			copy(dAtA[i:], x.Operator)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Operator)))
+			i--
+			dAtA[i] = 0x12
+		}
+		if len(x.Authority) > 0 {
+			i -= len(x.Authority)
+			copy(dAtA[i:], x.Authority)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Authority)))
 			i--
 			dAtA[i] = 0xa
 		}
@@ -5225,7 +5513,7 @@ func (x *fastReflection_MsgArchiveTrustRegistry) ProtoMethods() *protoiface.Meth
 			switch fieldNum {
 			case 1:
 				if wireType != 2 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Creator", wireType)
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Authority", wireType)
 				}
 				var stringLen uint64
 				for shift := uint(0); ; shift += 7 {
@@ -5253,9 +5541,41 @@ func (x *fastReflection_MsgArchiveTrustRegistry) ProtoMethods() *protoiface.Meth
 				if postIndex > l {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
 				}
-				x.Creator = string(dAtA[iNdEx:postIndex])
+				x.Authority = string(dAtA[iNdEx:postIndex])
 				iNdEx = postIndex
 			case 2:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Operator", wireType)
+				}
+				var stringLen uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					stringLen |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				intStringLen := int(stringLen)
+				if intStringLen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + intStringLen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				x.Operator = string(dAtA[iNdEx:postIndex])
+				iNdEx = postIndex
+			case 3:
 				if wireType != 0 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Id", wireType)
 				}
@@ -5274,7 +5594,7 @@ func (x *fastReflection_MsgArchiveTrustRegistry) ProtoMethods() *protoiface.Meth
 						break
 					}
 				}
-			case 3:
+			case 4:
 				if wireType != 0 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Archive", wireType)
 				}
@@ -5775,17 +6095,26 @@ func (*MsgUpdateParamsResponse) Descriptor() ([]byte, []int) {
 }
 
 // MsgCreateTrustRegistry defines the Msg/CreateTrustRegistry request type.
+// [MOD-TR-MSG-1] Create New Trust Registry
 type MsgCreateTrustRegistry struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Creator      string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
-	Did          string `protobuf:"bytes,2,opt,name=did,proto3" json:"did,omitempty"`
-	Aka          string `protobuf:"bytes,3,opt,name=aka,proto3" json:"aka,omitempty"`
-	Language     string `protobuf:"bytes,4,opt,name=language,proto3" json:"language,omitempty"`
-	DocUrl       string `protobuf:"bytes,5,opt,name=doc_url,json=docUrl,proto3" json:"doc_url,omitempty"`
-	DocDigestSri string `protobuf:"bytes,6,opt,name=doc_digest_sri,json=docDigestSri,proto3" json:"doc_digest_sri,omitempty"`
+	// authority is the group account on whose behalf this message is executed
+	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
+	// operator is the account authorized by the authority to run this Msg
+	Operator string `protobuf:"bytes,2,opt,name=operator,proto3" json:"operator,omitempty"`
+	// did is the DID of the ecosystem creating this trust registry (mandatory)
+	Did string `protobuf:"bytes,3,opt,name=did,proto3" json:"did,omitempty"`
+	// aka is an optional additional URI of this trust registry
+	Aka string `protobuf:"bytes,4,opt,name=aka,proto3" json:"aka,omitempty"`
+	// language is the primary language tag (RFC1766) of this trust registry (mandatory)
+	Language string `protobuf:"bytes,5,opt,name=language,proto3" json:"language,omitempty"`
+	// doc_url is the URL where the governance framework document is published (mandatory)
+	DocUrl string `protobuf:"bytes,6,opt,name=doc_url,json=docUrl,proto3" json:"doc_url,omitempty"`
+	// doc_digest_sri is the SRI digest of the governance framework document (mandatory)
+	DocDigestSri string `protobuf:"bytes,7,opt,name=doc_digest_sri,json=docDigestSri,proto3" json:"doc_digest_sri,omitempty"`
 }
 
 func (x *MsgCreateTrustRegistry) Reset() {
@@ -5808,9 +6137,16 @@ func (*MsgCreateTrustRegistry) Descriptor() ([]byte, []int) {
 	return file_verana_tr_v1_tx_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *MsgCreateTrustRegistry) GetCreator() string {
+func (x *MsgCreateTrustRegistry) GetAuthority() string {
 	if x != nil {
-		return x.Creator
+		return x.Authority
+	}
+	return ""
+}
+
+func (x *MsgCreateTrustRegistry) GetOperator() string {
+	if x != nil {
+		return x.Operator
 	}
 	return ""
 }
@@ -5878,17 +6214,26 @@ func (*MsgCreateTrustRegistryResponse) Descriptor() ([]byte, []int) {
 }
 
 // MsgAddGovernanceFrameworkDocument defines the Msg/AddGovernanceFrameworkDocument request type.
+// [MOD-TR-MSG-2] Add Governance Framework Document
 type MsgAddGovernanceFrameworkDocument struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Creator      string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
-	Id           uint64 `protobuf:"varint,2,opt,name=id,proto3" json:"id,omitempty"`
-	DocLanguage  string `protobuf:"bytes,3,opt,name=doc_language,json=docLanguage,proto3" json:"doc_language,omitempty"`
-	DocUrl       string `protobuf:"bytes,4,opt,name=doc_url,json=docUrl,proto3" json:"doc_url,omitempty"`
-	DocDigestSri string `protobuf:"bytes,5,opt,name=doc_digest_sri,json=docDigestSri,proto3" json:"doc_digest_sri,omitempty"`
-	Version      int32  `protobuf:"varint,6,opt,name=version,proto3" json:"version,omitempty"`
+	// authority is the group account on whose behalf this message is executed
+	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
+	// operator is the account authorized by the authority to run this Msg
+	Operator string `protobuf:"bytes,2,opt,name=operator,proto3" json:"operator,omitempty"`
+	// id is the trust registry id (mandatory)
+	Id uint64 `protobuf:"varint,3,opt,name=id,proto3" json:"id,omitempty"`
+	// doc_language is the language tag (RFC1766) of the document (mandatory)
+	DocLanguage string `protobuf:"bytes,4,opt,name=doc_language,json=docLanguage,proto3" json:"doc_language,omitempty"`
+	// doc_url is the URL where the document is published (mandatory)
+	DocUrl string `protobuf:"bytes,5,opt,name=doc_url,json=docUrl,proto3" json:"doc_url,omitempty"`
+	// doc_digest_sri is the digest SRI of the document (mandatory)
+	DocDigestSri string `protobuf:"bytes,6,opt,name=doc_digest_sri,json=docDigestSri,proto3" json:"doc_digest_sri,omitempty"`
+	// version is the targeted version (mandatory)
+	Version int32 `protobuf:"varint,7,opt,name=version,proto3" json:"version,omitempty"`
 }
 
 func (x *MsgAddGovernanceFrameworkDocument) Reset() {
@@ -5911,9 +6256,16 @@ func (*MsgAddGovernanceFrameworkDocument) Descriptor() ([]byte, []int) {
 	return file_verana_tr_v1_tx_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *MsgAddGovernanceFrameworkDocument) GetCreator() string {
+func (x *MsgAddGovernanceFrameworkDocument) GetAuthority() string {
 	if x != nil {
-		return x.Creator
+		return x.Authority
+	}
+	return ""
+}
+
+func (x *MsgAddGovernanceFrameworkDocument) GetOperator() string {
+	if x != nil {
+		return x.Operator
 	}
 	return ""
 }
@@ -5981,13 +6333,18 @@ func (*MsgAddGovernanceFrameworkDocumentResponse) Descriptor() ([]byte, []int) {
 }
 
 // MsgIncreaseActiveGovernanceFrameworkVersion defines the Msg/IncreaseActiveGovernanceFrameworkVersion request type.
+// [MOD-TR-MSG-3] Increase Active Governance Framework Version
 type MsgIncreaseActiveGovernanceFrameworkVersion struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Creator string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
-	Id      uint64 `protobuf:"varint,2,opt,name=id,proto3" json:"id,omitempty"` // Changed from tr_id to id
+	// authority is the group account on whose behalf this message is executed
+	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
+	// operator is the account authorized by the authority to run this Msg
+	Operator string `protobuf:"bytes,2,opt,name=operator,proto3" json:"operator,omitempty"`
+	// id is the trust registry id (mandatory)
+	Id uint64 `protobuf:"varint,3,opt,name=id,proto3" json:"id,omitempty"`
 }
 
 func (x *MsgIncreaseActiveGovernanceFrameworkVersion) Reset() {
@@ -6010,9 +6367,16 @@ func (*MsgIncreaseActiveGovernanceFrameworkVersion) Descriptor() ([]byte, []int)
 	return file_verana_tr_v1_tx_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *MsgIncreaseActiveGovernanceFrameworkVersion) GetCreator() string {
+func (x *MsgIncreaseActiveGovernanceFrameworkVersion) GetAuthority() string {
 	if x != nil {
-		return x.Creator
+		return x.Authority
+	}
+	return ""
+}
+
+func (x *MsgIncreaseActiveGovernanceFrameworkVersion) GetOperator() string {
+	if x != nil {
+		return x.Operator
 	}
 	return ""
 }
@@ -6052,15 +6416,22 @@ func (*MsgIncreaseActiveGovernanceFrameworkVersionResponse) Descriptor() ([]byte
 }
 
 // MsgUpdateTrustRegistry defines the Msg/UpdateTrustRegistry request type.
+// [MOD-TR-MSG-4] Update Trust Registry
 type MsgUpdateTrustRegistry struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Creator string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
-	Id      uint64 `protobuf:"varint,2,opt,name=id,proto3" json:"id,omitempty"`
-	Did     string `protobuf:"bytes,3,opt,name=did,proto3" json:"did,omitempty"`
-	Aka     string `protobuf:"bytes,4,opt,name=aka,proto3" json:"aka,omitempty"`
+	// authority is the group account on whose behalf this message is executed
+	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
+	// operator is the account authorized by the authority to run this Msg
+	Operator string `protobuf:"bytes,2,opt,name=operator,proto3" json:"operator,omitempty"`
+	// id is the trust registry id (mandatory)
+	Id uint64 `protobuf:"varint,3,opt,name=id,proto3" json:"id,omitempty"`
+	// did is the DID of the trust registry (mandatory)
+	Did string `protobuf:"bytes,4,opt,name=did,proto3" json:"did,omitempty"`
+	// aka is an optional additional URI of this trust registry
+	Aka string `protobuf:"bytes,5,opt,name=aka,proto3" json:"aka,omitempty"`
 }
 
 func (x *MsgUpdateTrustRegistry) Reset() {
@@ -6083,9 +6454,16 @@ func (*MsgUpdateTrustRegistry) Descriptor() ([]byte, []int) {
 	return file_verana_tr_v1_tx_proto_rawDescGZIP(), []int{8}
 }
 
-func (x *MsgUpdateTrustRegistry) GetCreator() string {
+func (x *MsgUpdateTrustRegistry) GetAuthority() string {
 	if x != nil {
-		return x.Creator
+		return x.Authority
+	}
+	return ""
+}
+
+func (x *MsgUpdateTrustRegistry) GetOperator() string {
+	if x != nil {
+		return x.Operator
 	}
 	return ""
 }
@@ -6139,14 +6517,20 @@ func (*MsgUpdateTrustRegistryResponse) Descriptor() ([]byte, []int) {
 }
 
 // MsgArchiveTrustRegistry defines the Msg/ArchiveTrustRegistry request type.
+// [MOD-TR-MSG-5] Archive Trust Registry
 type MsgArchiveTrustRegistry struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Creator string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
-	Id      uint64 `protobuf:"varint,2,opt,name=id,proto3" json:"id,omitempty"`
-	Archive bool   `protobuf:"varint,3,opt,name=archive,proto3" json:"archive,omitempty"`
+	// authority is the group account on whose behalf this message is executed
+	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
+	// operator is the account authorized by the authority to run this Msg
+	Operator string `protobuf:"bytes,2,opt,name=operator,proto3" json:"operator,omitempty"`
+	// id is the trust registry id (mandatory)
+	Id uint64 `protobuf:"varint,3,opt,name=id,proto3" json:"id,omitempty"`
+	// archive is true to archive, false to unarchive (mandatory)
+	Archive bool `protobuf:"varint,4,opt,name=archive,proto3" json:"archive,omitempty"`
 }
 
 func (x *MsgArchiveTrustRegistry) Reset() {
@@ -6169,9 +6553,16 @@ func (*MsgArchiveTrustRegistry) Descriptor() ([]byte, []int) {
 	return file_verana_tr_v1_tx_proto_rawDescGZIP(), []int{10}
 }
 
-func (x *MsgArchiveTrustRegistry) GetCreator() string {
+func (x *MsgArchiveTrustRegistry) GetAuthority() string {
 	if x != nil {
-		return x.Creator
+		return x.Authority
+	}
+	return ""
+}
+
+func (x *MsgArchiveTrustRegistry) GetOperator() string {
+	if x != nil {
+		return x.Operator
 	}
 	return ""
 }
@@ -6242,132 +6633,151 @@ var file_verana_tr_v1_tx_proto_rawDesc = []byte{
 	0x74, 0x79, 0x8a, 0xe7, 0xb0, 0x2a, 0x1b, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2f, 0x78, 0x2f,
 	0x74, 0x72, 0x2f, 0x4d, 0x73, 0x67, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x50, 0x61, 0x72, 0x61,
 	0x6d, 0x73, 0x22, 0x19, 0x0a, 0x17, 0x4d, 0x73, 0x67, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x50,
-	0x61, 0x72, 0x61, 0x6d, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0xdf, 0x01,
+	0x61, 0x72, 0x61, 0x6d, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x9a, 0x02,
 	0x0a, 0x16, 0x4d, 0x73, 0x67, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x54, 0x72, 0x75, 0x73, 0x74,
-	0x52, 0x65, 0x67, 0x69, 0x73, 0x74, 0x72, 0x79, 0x12, 0x32, 0x0a, 0x07, 0x63, 0x72, 0x65, 0x61,
-	0x74, 0x6f, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63,
-	0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72,
-	0x69, 0x6e, 0x67, 0x52, 0x07, 0x63, 0x72, 0x65, 0x61, 0x74, 0x6f, 0x72, 0x12, 0x10, 0x0a, 0x03,
-	0x64, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x64, 0x69, 0x64, 0x12, 0x16,
-	0x0a, 0x03, 0x61, 0x6b, 0x61, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x42, 0x04, 0xc8, 0xde, 0x1f,
-	0x01, 0x52, 0x03, 0x61, 0x6b, 0x61, 0x12, 0x1a, 0x0a, 0x08, 0x6c, 0x61, 0x6e, 0x67, 0x75, 0x61,
-	0x67, 0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x6c, 0x61, 0x6e, 0x67, 0x75, 0x61,
-	0x67, 0x65, 0x12, 0x17, 0x0a, 0x07, 0x64, 0x6f, 0x63, 0x5f, 0x75, 0x72, 0x6c, 0x18, 0x05, 0x20,
-	0x01, 0x28, 0x09, 0x52, 0x06, 0x64, 0x6f, 0x63, 0x55, 0x72, 0x6c, 0x12, 0x24, 0x0a, 0x0e, 0x64,
-	0x6f, 0x63, 0x5f, 0x64, 0x69, 0x67, 0x65, 0x73, 0x74, 0x5f, 0x73, 0x72, 0x69, 0x18, 0x06, 0x20,
-	0x01, 0x28, 0x09, 0x52, 0x0c, 0x64, 0x6f, 0x63, 0x44, 0x69, 0x67, 0x65, 0x73, 0x74, 0x53, 0x72,
-	0x69, 0x3a, 0x0c, 0x82, 0xe7, 0xb0, 0x2a, 0x07, 0x63, 0x72, 0x65, 0x61, 0x74, 0x6f, 0x72, 0x22,
-	0x20, 0x0a, 0x1e, 0x4d, 0x73, 0x67, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x54, 0x72, 0x75, 0x73,
-	0x74, 0x52, 0x65, 0x67, 0x69, 0x73, 0x74, 0x72, 0x79, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
-	0x65, 0x22, 0xf1, 0x01, 0x0a, 0x21, 0x4d, 0x73, 0x67, 0x41, 0x64, 0x64, 0x47, 0x6f, 0x76, 0x65,
-	0x72, 0x6e, 0x61, 0x6e, 0x63, 0x65, 0x46, 0x72, 0x61, 0x6d, 0x65, 0x77, 0x6f, 0x72, 0x6b, 0x44,
-	0x6f, 0x63, 0x75, 0x6d, 0x65, 0x6e, 0x74, 0x12, 0x32, 0x0a, 0x07, 0x63, 0x72, 0x65, 0x61, 0x74,
-	0x6f, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f,
-	0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69,
-	0x6e, 0x67, 0x52, 0x07, 0x63, 0x72, 0x65, 0x61, 0x74, 0x6f, 0x72, 0x12, 0x0e, 0x0a, 0x02, 0x69,
-	0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x04, 0x52, 0x02, 0x69, 0x64, 0x12, 0x21, 0x0a, 0x0c, 0x64,
-	0x6f, 0x63, 0x5f, 0x6c, 0x61, 0x6e, 0x67, 0x75, 0x61, 0x67, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28,
-	0x09, 0x52, 0x0b, 0x64, 0x6f, 0x63, 0x4c, 0x61, 0x6e, 0x67, 0x75, 0x61, 0x67, 0x65, 0x12, 0x17,
-	0x0a, 0x07, 0x64, 0x6f, 0x63, 0x5f, 0x75, 0x72, 0x6c, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52,
-	0x06, 0x64, 0x6f, 0x63, 0x55, 0x72, 0x6c, 0x12, 0x24, 0x0a, 0x0e, 0x64, 0x6f, 0x63, 0x5f, 0x64,
-	0x69, 0x67, 0x65, 0x73, 0x74, 0x5f, 0x73, 0x72, 0x69, 0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x52,
-	0x0c, 0x64, 0x6f, 0x63, 0x44, 0x69, 0x67, 0x65, 0x73, 0x74, 0x53, 0x72, 0x69, 0x12, 0x18, 0x0a,
-	0x07, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x18, 0x06, 0x20, 0x01, 0x28, 0x05, 0x52, 0x07,
-	0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x3a, 0x0c, 0x82, 0xe7, 0xb0, 0x2a, 0x07, 0x63, 0x72,
-	0x65, 0x61, 0x74, 0x6f, 0x72, 0x22, 0x2b, 0x0a, 0x29, 0x4d, 0x73, 0x67, 0x41, 0x64, 0x64, 0x47,
-	0x6f, 0x76, 0x65, 0x72, 0x6e, 0x61, 0x6e, 0x63, 0x65, 0x46, 0x72, 0x61, 0x6d, 0x65, 0x77, 0x6f,
-	0x72, 0x6b, 0x44, 0x6f, 0x63, 0x75, 0x6d, 0x65, 0x6e, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
-	0x73, 0x65, 0x22, 0x7f, 0x0a, 0x2b, 0x4d, 0x73, 0x67, 0x49, 0x6e, 0x63, 0x72, 0x65, 0x61, 0x73,
-	0x65, 0x41, 0x63, 0x74, 0x69, 0x76, 0x65, 0x47, 0x6f, 0x76, 0x65, 0x72, 0x6e, 0x61, 0x6e, 0x63,
-	0x65, 0x46, 0x72, 0x61, 0x6d, 0x65, 0x77, 0x6f, 0x72, 0x6b, 0x56, 0x65, 0x72, 0x73, 0x69, 0x6f,
-	0x6e, 0x12, 0x32, 0x0a, 0x07, 0x63, 0x72, 0x65, 0x61, 0x74, 0x6f, 0x72, 0x18, 0x01, 0x20, 0x01,
+	0x52, 0x65, 0x67, 0x69, 0x73, 0x74, 0x72, 0x79, 0x12, 0x36, 0x0a, 0x09, 0x61, 0x75, 0x74, 0x68,
+	0x6f, 0x72, 0x69, 0x74, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d,
+	0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53,
+	0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x09, 0x61, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x74, 0x79,
+	0x12, 0x34, 0x0a, 0x08, 0x6f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x18, 0x02, 0x20, 0x01,
 	0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41,
-	0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x07, 0x63, 0x72,
-	0x65, 0x61, 0x74, 0x6f, 0x72, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28,
-	0x04, 0x52, 0x02, 0x69, 0x64, 0x3a, 0x0c, 0x82, 0xe7, 0xb0, 0x2a, 0x07, 0x63, 0x72, 0x65, 0x61,
-	0x74, 0x6f, 0x72, 0x22, 0x35, 0x0a, 0x33, 0x4d, 0x73, 0x67, 0x49, 0x6e, 0x63, 0x72, 0x65, 0x61,
-	0x73, 0x65, 0x41, 0x63, 0x74, 0x69, 0x76, 0x65, 0x47, 0x6f, 0x76, 0x65, 0x72, 0x6e, 0x61, 0x6e,
-	0x63, 0x65, 0x46, 0x72, 0x61, 0x6d, 0x65, 0x77, 0x6f, 0x72, 0x6b, 0x56, 0x65, 0x72, 0x73, 0x69,
-	0x6f, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x94, 0x01, 0x0a, 0x16, 0x4d,
-	0x73, 0x67, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x54, 0x72, 0x75, 0x73, 0x74, 0x52, 0x65, 0x67,
-	0x69, 0x73, 0x74, 0x72, 0x79, 0x12, 0x32, 0x0a, 0x07, 0x63, 0x72, 0x65, 0x61, 0x74, 0x6f, 0x72,
-	0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d,
+	0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x08, 0x6f, 0x70,
+	0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x12, 0x10, 0x0a, 0x03, 0x64, 0x69, 0x64, 0x18, 0x03, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x03, 0x64, 0x69, 0x64, 0x12, 0x16, 0x0a, 0x03, 0x61, 0x6b, 0x61, 0x18,
+	0x04, 0x20, 0x01, 0x28, 0x09, 0x42, 0x04, 0xc8, 0xde, 0x1f, 0x01, 0x52, 0x03, 0x61, 0x6b, 0x61,
+	0x12, 0x1a, 0x0a, 0x08, 0x6c, 0x61, 0x6e, 0x67, 0x75, 0x61, 0x67, 0x65, 0x18, 0x05, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x08, 0x6c, 0x61, 0x6e, 0x67, 0x75, 0x61, 0x67, 0x65, 0x12, 0x17, 0x0a, 0x07,
+	0x64, 0x6f, 0x63, 0x5f, 0x75, 0x72, 0x6c, 0x18, 0x06, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x64,
+	0x6f, 0x63, 0x55, 0x72, 0x6c, 0x12, 0x24, 0x0a, 0x0e, 0x64, 0x6f, 0x63, 0x5f, 0x64, 0x69, 0x67,
+	0x65, 0x73, 0x74, 0x5f, 0x73, 0x72, 0x69, 0x18, 0x07, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0c, 0x64,
+	0x6f, 0x63, 0x44, 0x69, 0x67, 0x65, 0x73, 0x74, 0x53, 0x72, 0x69, 0x3a, 0x0d, 0x82, 0xe7, 0xb0,
+	0x2a, 0x08, 0x6f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x22, 0x20, 0x0a, 0x1e, 0x4d, 0x73,
+	0x67, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x54, 0x72, 0x75, 0x73, 0x74, 0x52, 0x65, 0x67, 0x69,
+	0x73, 0x74, 0x72, 0x79, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0xac, 0x02, 0x0a,
+	0x21, 0x4d, 0x73, 0x67, 0x41, 0x64, 0x64, 0x47, 0x6f, 0x76, 0x65, 0x72, 0x6e, 0x61, 0x6e, 0x63,
+	0x65, 0x46, 0x72, 0x61, 0x6d, 0x65, 0x77, 0x6f, 0x72, 0x6b, 0x44, 0x6f, 0x63, 0x75, 0x6d, 0x65,
+	0x6e, 0x74, 0x12, 0x36, 0x0a, 0x09, 0x61, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x74, 0x79, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f,
+	0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x52,
+	0x09, 0x61, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x74, 0x79, 0x12, 0x34, 0x0a, 0x08, 0x6f, 0x70,
+	0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4,
+	0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73,
+	0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x08, 0x6f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72,
+	0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28, 0x04, 0x52, 0x02, 0x69, 0x64,
+	0x12, 0x21, 0x0a, 0x0c, 0x64, 0x6f, 0x63, 0x5f, 0x6c, 0x61, 0x6e, 0x67, 0x75, 0x61, 0x67, 0x65,
+	0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x64, 0x6f, 0x63, 0x4c, 0x61, 0x6e, 0x67, 0x75,
+	0x61, 0x67, 0x65, 0x12, 0x17, 0x0a, 0x07, 0x64, 0x6f, 0x63, 0x5f, 0x75, 0x72, 0x6c, 0x18, 0x05,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x64, 0x6f, 0x63, 0x55, 0x72, 0x6c, 0x12, 0x24, 0x0a, 0x0e,
+	0x64, 0x6f, 0x63, 0x5f, 0x64, 0x69, 0x67, 0x65, 0x73, 0x74, 0x5f, 0x73, 0x72, 0x69, 0x18, 0x06,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x0c, 0x64, 0x6f, 0x63, 0x44, 0x69, 0x67, 0x65, 0x73, 0x74, 0x53,
+	0x72, 0x69, 0x12, 0x18, 0x0a, 0x07, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x18, 0x07, 0x20,
+	0x01, 0x28, 0x05, 0x52, 0x07, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x3a, 0x0d, 0x82, 0xe7,
+	0xb0, 0x2a, 0x08, 0x6f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x22, 0x2b, 0x0a, 0x29, 0x4d,
+	0x73, 0x67, 0x41, 0x64, 0x64, 0x47, 0x6f, 0x76, 0x65, 0x72, 0x6e, 0x61, 0x6e, 0x63, 0x65, 0x46,
+	0x72, 0x61, 0x6d, 0x65, 0x77, 0x6f, 0x72, 0x6b, 0x44, 0x6f, 0x63, 0x75, 0x6d, 0x65, 0x6e, 0x74,
+	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0xba, 0x01, 0x0a, 0x2b, 0x4d, 0x73, 0x67,
+	0x49, 0x6e, 0x63, 0x72, 0x65, 0x61, 0x73, 0x65, 0x41, 0x63, 0x74, 0x69, 0x76, 0x65, 0x47, 0x6f,
+	0x76, 0x65, 0x72, 0x6e, 0x61, 0x6e, 0x63, 0x65, 0x46, 0x72, 0x61, 0x6d, 0x65, 0x77, 0x6f, 0x72,
+	0x6b, 0x56, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x12, 0x36, 0x0a, 0x09, 0x61, 0x75, 0x74, 0x68,
+	0x6f, 0x72, 0x69, 0x74, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d,
+	0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53,
+	0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x09, 0x61, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x74, 0x79,
+	0x12, 0x34, 0x0a, 0x08, 0x6f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x18, 0x02, 0x20, 0x01,
+	0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41,
+	0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x08, 0x6f, 0x70,
+	0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x03, 0x20, 0x01,
+	0x28, 0x04, 0x52, 0x02, 0x69, 0x64, 0x3a, 0x0d, 0x82, 0xe7, 0xb0, 0x2a, 0x08, 0x6f, 0x70, 0x65,
+	0x72, 0x61, 0x74, 0x6f, 0x72, 0x22, 0x35, 0x0a, 0x33, 0x4d, 0x73, 0x67, 0x49, 0x6e, 0x63, 0x72,
+	0x65, 0x61, 0x73, 0x65, 0x41, 0x63, 0x74, 0x69, 0x76, 0x65, 0x47, 0x6f, 0x76, 0x65, 0x72, 0x6e,
+	0x61, 0x6e, 0x63, 0x65, 0x46, 0x72, 0x61, 0x6d, 0x65, 0x77, 0x6f, 0x72, 0x6b, 0x56, 0x65, 0x72,
+	0x73, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0xcf, 0x01, 0x0a,
+	0x16, 0x4d, 0x73, 0x67, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x54, 0x72, 0x75, 0x73, 0x74, 0x52,
+	0x65, 0x67, 0x69, 0x73, 0x74, 0x72, 0x79, 0x12, 0x36, 0x0a, 0x09, 0x61, 0x75, 0x74, 0x68, 0x6f,
+	0x72, 0x69, 0x74, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14,
+	0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74,
+	0x72, 0x69, 0x6e, 0x67, 0x52, 0x09, 0x61, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x74, 0x79, 0x12,
+	0x34, 0x0a, 0x08, 0x6f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x18, 0x02, 0x20, 0x01, 0x28,
+	0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64,
+	0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x08, 0x6f, 0x70, 0x65,
+	0x72, 0x61, 0x74, 0x6f, 0x72, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28,
+	0x04, 0x52, 0x02, 0x69, 0x64, 0x12, 0x10, 0x0a, 0x03, 0x64, 0x69, 0x64, 0x18, 0x04, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x03, 0x64, 0x69, 0x64, 0x12, 0x16, 0x0a, 0x03, 0x61, 0x6b, 0x61, 0x18, 0x05,
+	0x20, 0x01, 0x28, 0x09, 0x42, 0x04, 0xc8, 0xde, 0x1f, 0x01, 0x52, 0x03, 0x61, 0x6b, 0x61, 0x3a,
+	0x0d, 0x82, 0xe7, 0xb0, 0x2a, 0x08, 0x6f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x22, 0x20,
+	0x0a, 0x1e, 0x4d, 0x73, 0x67, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x54, 0x72, 0x75, 0x73, 0x74,
+	0x52, 0x65, 0x67, 0x69, 0x73, 0x74, 0x72, 0x79, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
+	0x22, 0xc0, 0x01, 0x0a, 0x17, 0x4d, 0x73, 0x67, 0x41, 0x72, 0x63, 0x68, 0x69, 0x76, 0x65, 0x54,
+	0x72, 0x75, 0x73, 0x74, 0x52, 0x65, 0x67, 0x69, 0x73, 0x74, 0x72, 0x79, 0x12, 0x36, 0x0a, 0x09,
+	0x61, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x74, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x42,
+	0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72,
+	0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x09, 0x61, 0x75, 0x74, 0x68, 0x6f,
+	0x72, 0x69, 0x74, 0x79, 0x12, 0x34, 0x0a, 0x08, 0x6f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72,
+	0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d,
 	0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67,
-	0x52, 0x07, 0x63, 0x72, 0x65, 0x61, 0x74, 0x6f, 0x72, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18,
-	0x02, 0x20, 0x01, 0x28, 0x04, 0x52, 0x02, 0x69, 0x64, 0x12, 0x10, 0x0a, 0x03, 0x64, 0x69, 0x64,
-	0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x64, 0x69, 0x64, 0x12, 0x16, 0x0a, 0x03, 0x61,
-	0x6b, 0x61, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x42, 0x04, 0xc8, 0xde, 0x1f, 0x01, 0x52, 0x03,
-	0x61, 0x6b, 0x61, 0x3a, 0x0c, 0x82, 0xe7, 0xb0, 0x2a, 0x07, 0x63, 0x72, 0x65, 0x61, 0x74, 0x6f,
-	0x72, 0x22, 0x20, 0x0a, 0x1e, 0x4d, 0x73, 0x67, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x54, 0x72,
-	0x75, 0x73, 0x74, 0x52, 0x65, 0x67, 0x69, 0x73, 0x74, 0x72, 0x79, 0x52, 0x65, 0x73, 0x70, 0x6f,
-	0x6e, 0x73, 0x65, 0x22, 0x85, 0x01, 0x0a, 0x17, 0x4d, 0x73, 0x67, 0x41, 0x72, 0x63, 0x68, 0x69,
-	0x76, 0x65, 0x54, 0x72, 0x75, 0x73, 0x74, 0x52, 0x65, 0x67, 0x69, 0x73, 0x74, 0x72, 0x79, 0x12,
-	0x32, 0x0a, 0x07, 0x63, 0x72, 0x65, 0x61, 0x74, 0x6f, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09,
-	0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64,
-	0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x07, 0x63, 0x72, 0x65, 0x61,
-	0x74, 0x6f, 0x72, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x04, 0x52,
-	0x02, 0x69, 0x64, 0x12, 0x18, 0x0a, 0x07, 0x61, 0x72, 0x63, 0x68, 0x69, 0x76, 0x65, 0x18, 0x03,
-	0x20, 0x01, 0x28, 0x08, 0x52, 0x07, 0x61, 0x72, 0x63, 0x68, 0x69, 0x76, 0x65, 0x3a, 0x0c, 0x82,
-	0xe7, 0xb0, 0x2a, 0x07, 0x63, 0x72, 0x65, 0x61, 0x74, 0x6f, 0x72, 0x22, 0x21, 0x0a, 0x1f, 0x4d,
-	0x73, 0x67, 0x41, 0x72, 0x63, 0x68, 0x69, 0x76, 0x65, 0x54, 0x72, 0x75, 0x73, 0x74, 0x52, 0x65,
-	0x67, 0x69, 0x73, 0x74, 0x72, 0x79, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x32, 0xde,
-	0x05, 0x0a, 0x03, 0x4d, 0x73, 0x67, 0x12, 0x54, 0x0a, 0x0c, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65,
-	0x50, 0x61, 0x72, 0x61, 0x6d, 0x73, 0x12, 0x1d, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e,
-	0x74, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x4d, 0x73, 0x67, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x50,
-	0x61, 0x72, 0x61, 0x6d, 0x73, 0x1a, 0x25, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x74,
-	0x72, 0x2e, 0x76, 0x31, 0x2e, 0x4d, 0x73, 0x67, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x50, 0x61,
-	0x72, 0x61, 0x6d, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x69, 0x0a, 0x13,
-	0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x54, 0x72, 0x75, 0x73, 0x74, 0x52, 0x65, 0x67, 0x69, 0x73,
-	0x74, 0x72, 0x79, 0x12, 0x24, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x74, 0x72, 0x2e,
-	0x76, 0x31, 0x2e, 0x4d, 0x73, 0x67, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x54, 0x72, 0x75, 0x73,
-	0x74, 0x52, 0x65, 0x67, 0x69, 0x73, 0x74, 0x72, 0x79, 0x1a, 0x2c, 0x2e, 0x76, 0x65, 0x72, 0x61,
-	0x6e, 0x61, 0x2e, 0x74, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x4d, 0x73, 0x67, 0x43, 0x72, 0x65, 0x61,
-	0x74, 0x65, 0x54, 0x72, 0x75, 0x73, 0x74, 0x52, 0x65, 0x67, 0x69, 0x73, 0x74, 0x72, 0x79, 0x52,
-	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x8a, 0x01, 0x0a, 0x1e, 0x41, 0x64, 0x64, 0x47,
+	0x52, 0x08, 0x6f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64,
+	0x18, 0x03, 0x20, 0x01, 0x28, 0x04, 0x52, 0x02, 0x69, 0x64, 0x12, 0x18, 0x0a, 0x07, 0x61, 0x72,
+	0x63, 0x68, 0x69, 0x76, 0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x08, 0x52, 0x07, 0x61, 0x72, 0x63,
+	0x68, 0x69, 0x76, 0x65, 0x3a, 0x0d, 0x82, 0xe7, 0xb0, 0x2a, 0x08, 0x6f, 0x70, 0x65, 0x72, 0x61,
+	0x74, 0x6f, 0x72, 0x22, 0x21, 0x0a, 0x1f, 0x4d, 0x73, 0x67, 0x41, 0x72, 0x63, 0x68, 0x69, 0x76,
+	0x65, 0x54, 0x72, 0x75, 0x73, 0x74, 0x52, 0x65, 0x67, 0x69, 0x73, 0x74, 0x72, 0x79, 0x52, 0x65,
+	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x32, 0xde, 0x05, 0x0a, 0x03, 0x4d, 0x73, 0x67, 0x12, 0x54,
+	0x0a, 0x0c, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x50, 0x61, 0x72, 0x61, 0x6d, 0x73, 0x12, 0x1d,
+	0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x74, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x4d, 0x73,
+	0x67, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x50, 0x61, 0x72, 0x61, 0x6d, 0x73, 0x1a, 0x25, 0x2e,
+	0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x74, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x4d, 0x73, 0x67,
+	0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x50, 0x61, 0x72, 0x61, 0x6d, 0x73, 0x52, 0x65, 0x73, 0x70,
+	0x6f, 0x6e, 0x73, 0x65, 0x12, 0x69, 0x0a, 0x13, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x54, 0x72,
+	0x75, 0x73, 0x74, 0x52, 0x65, 0x67, 0x69, 0x73, 0x74, 0x72, 0x79, 0x12, 0x24, 0x2e, 0x76, 0x65,
+	0x72, 0x61, 0x6e, 0x61, 0x2e, 0x74, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x4d, 0x73, 0x67, 0x43, 0x72,
+	0x65, 0x61, 0x74, 0x65, 0x54, 0x72, 0x75, 0x73, 0x74, 0x52, 0x65, 0x67, 0x69, 0x73, 0x74, 0x72,
+	0x79, 0x1a, 0x2c, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x74, 0x72, 0x2e, 0x76, 0x31,
+	0x2e, 0x4d, 0x73, 0x67, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x54, 0x72, 0x75, 0x73, 0x74, 0x52,
+	0x65, 0x67, 0x69, 0x73, 0x74, 0x72, 0x79, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12,
+	0x8a, 0x01, 0x0a, 0x1e, 0x41, 0x64, 0x64, 0x47, 0x6f, 0x76, 0x65, 0x72, 0x6e, 0x61, 0x6e, 0x63,
+	0x65, 0x46, 0x72, 0x61, 0x6d, 0x65, 0x77, 0x6f, 0x72, 0x6b, 0x44, 0x6f, 0x63, 0x75, 0x6d, 0x65,
+	0x6e, 0x74, 0x12, 0x2f, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x74, 0x72, 0x2e, 0x76,
+	0x31, 0x2e, 0x4d, 0x73, 0x67, 0x41, 0x64, 0x64, 0x47, 0x6f, 0x76, 0x65, 0x72, 0x6e, 0x61, 0x6e,
+	0x63, 0x65, 0x46, 0x72, 0x61, 0x6d, 0x65, 0x77, 0x6f, 0x72, 0x6b, 0x44, 0x6f, 0x63, 0x75, 0x6d,
+	0x65, 0x6e, 0x74, 0x1a, 0x37, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x74, 0x72, 0x2e,
+	0x76, 0x31, 0x2e, 0x4d, 0x73, 0x67, 0x41, 0x64, 0x64, 0x47, 0x6f, 0x76, 0x65, 0x72, 0x6e, 0x61,
+	0x6e, 0x63, 0x65, 0x46, 0x72, 0x61, 0x6d, 0x65, 0x77, 0x6f, 0x72, 0x6b, 0x44, 0x6f, 0x63, 0x75,
+	0x6d, 0x65, 0x6e, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0xa8, 0x01, 0x0a,
+	0x28, 0x49, 0x6e, 0x63, 0x72, 0x65, 0x61, 0x73, 0x65, 0x41, 0x63, 0x74, 0x69, 0x76, 0x65, 0x47,
 	0x6f, 0x76, 0x65, 0x72, 0x6e, 0x61, 0x6e, 0x63, 0x65, 0x46, 0x72, 0x61, 0x6d, 0x65, 0x77, 0x6f,
-	0x72, 0x6b, 0x44, 0x6f, 0x63, 0x75, 0x6d, 0x65, 0x6e, 0x74, 0x12, 0x2f, 0x2e, 0x76, 0x65, 0x72,
-	0x61, 0x6e, 0x61, 0x2e, 0x74, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x4d, 0x73, 0x67, 0x41, 0x64, 0x64,
-	0x47, 0x6f, 0x76, 0x65, 0x72, 0x6e, 0x61, 0x6e, 0x63, 0x65, 0x46, 0x72, 0x61, 0x6d, 0x65, 0x77,
-	0x6f, 0x72, 0x6b, 0x44, 0x6f, 0x63, 0x75, 0x6d, 0x65, 0x6e, 0x74, 0x1a, 0x37, 0x2e, 0x76, 0x65,
-	0x72, 0x61, 0x6e, 0x61, 0x2e, 0x74, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x4d, 0x73, 0x67, 0x41, 0x64,
-	0x64, 0x47, 0x6f, 0x76, 0x65, 0x72, 0x6e, 0x61, 0x6e, 0x63, 0x65, 0x46, 0x72, 0x61, 0x6d, 0x65,
-	0x77, 0x6f, 0x72, 0x6b, 0x44, 0x6f, 0x63, 0x75, 0x6d, 0x65, 0x6e, 0x74, 0x52, 0x65, 0x73, 0x70,
-	0x6f, 0x6e, 0x73, 0x65, 0x12, 0xa8, 0x01, 0x0a, 0x28, 0x49, 0x6e, 0x63, 0x72, 0x65, 0x61, 0x73,
-	0x65, 0x41, 0x63, 0x74, 0x69, 0x76, 0x65, 0x47, 0x6f, 0x76, 0x65, 0x72, 0x6e, 0x61, 0x6e, 0x63,
-	0x65, 0x46, 0x72, 0x61, 0x6d, 0x65, 0x77, 0x6f, 0x72, 0x6b, 0x56, 0x65, 0x72, 0x73, 0x69, 0x6f,
-	0x6e, 0x12, 0x39, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x74, 0x72, 0x2e, 0x76, 0x31,
-	0x2e, 0x4d, 0x73, 0x67, 0x49, 0x6e, 0x63, 0x72, 0x65, 0x61, 0x73, 0x65, 0x41, 0x63, 0x74, 0x69,
-	0x76, 0x65, 0x47, 0x6f, 0x76, 0x65, 0x72, 0x6e, 0x61, 0x6e, 0x63, 0x65, 0x46, 0x72, 0x61, 0x6d,
-	0x65, 0x77, 0x6f, 0x72, 0x6b, 0x56, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x1a, 0x41, 0x2e, 0x76,
-	0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x74, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x4d, 0x73, 0x67, 0x49,
-	0x6e, 0x63, 0x72, 0x65, 0x61, 0x73, 0x65, 0x41, 0x63, 0x74, 0x69, 0x76, 0x65, 0x47, 0x6f, 0x76,
-	0x65, 0x72, 0x6e, 0x61, 0x6e, 0x63, 0x65, 0x46, 0x72, 0x61, 0x6d, 0x65, 0x77, 0x6f, 0x72, 0x6b,
-	0x56, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12,
-	0x69, 0x0a, 0x13, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x54, 0x72, 0x75, 0x73, 0x74, 0x52, 0x65,
-	0x67, 0x69, 0x73, 0x74, 0x72, 0x79, 0x12, 0x24, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e,
-	0x74, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x4d, 0x73, 0x67, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x54,
-	0x72, 0x75, 0x73, 0x74, 0x52, 0x65, 0x67, 0x69, 0x73, 0x74, 0x72, 0x79, 0x1a, 0x2c, 0x2e, 0x76,
-	0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x74, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x4d, 0x73, 0x67, 0x55,
-	0x70, 0x64, 0x61, 0x74, 0x65, 0x54, 0x72, 0x75, 0x73, 0x74, 0x52, 0x65, 0x67, 0x69, 0x73, 0x74,
-	0x72, 0x79, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x6c, 0x0a, 0x14, 0x41, 0x72,
-	0x63, 0x68, 0x69, 0x76, 0x65, 0x54, 0x72, 0x75, 0x73, 0x74, 0x52, 0x65, 0x67, 0x69, 0x73, 0x74,
-	0x72, 0x79, 0x12, 0x25, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x74, 0x72, 0x2e, 0x76,
-	0x31, 0x2e, 0x4d, 0x73, 0x67, 0x41, 0x72, 0x63, 0x68, 0x69, 0x76, 0x65, 0x54, 0x72, 0x75, 0x73,
-	0x74, 0x52, 0x65, 0x67, 0x69, 0x73, 0x74, 0x72, 0x79, 0x1a, 0x2d, 0x2e, 0x76, 0x65, 0x72, 0x61,
-	0x6e, 0x61, 0x2e, 0x74, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x4d, 0x73, 0x67, 0x41, 0x72, 0x63, 0x68,
-	0x69, 0x76, 0x65, 0x54, 0x72, 0x75, 0x73, 0x74, 0x52, 0x65, 0x67, 0x69, 0x73, 0x74, 0x72, 0x79,
-	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x1a, 0x05, 0x80, 0xe7, 0xb0, 0x2a, 0x01, 0x42,
-	0xa2, 0x01, 0x0a, 0x10, 0x63, 0x6f, 0x6d, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x74,
-	0x72, 0x2e, 0x76, 0x31, 0x42, 0x07, 0x54, 0x78, 0x50, 0x72, 0x6f, 0x74, 0x6f, 0x50, 0x01, 0x5a,
-	0x33, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x76, 0x65, 0x72, 0x61,
-	0x6e, 0x61, 0x2d, 0x6c, 0x61, 0x62, 0x73, 0x2f, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2f, 0x61,
-	0x70, 0x69, 0x2f, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2f, 0x74, 0x72, 0x2f, 0x76, 0x31, 0x3b,
-	0x74, 0x72, 0x76, 0x31, 0xa2, 0x02, 0x03, 0x56, 0x54, 0x58, 0xaa, 0x02, 0x0c, 0x56, 0x65, 0x72,
-	0x61, 0x6e, 0x61, 0x2e, 0x54, 0x72, 0x2e, 0x56, 0x31, 0xca, 0x02, 0x0c, 0x56, 0x65, 0x72, 0x61,
-	0x6e, 0x61, 0x5c, 0x54, 0x72, 0x5c, 0x56, 0x31, 0xe2, 0x02, 0x18, 0x56, 0x65, 0x72, 0x61, 0x6e,
-	0x61, 0x5c, 0x54, 0x72, 0x5c, 0x56, 0x31, 0x5c, 0x47, 0x50, 0x42, 0x4d, 0x65, 0x74, 0x61, 0x64,
-	0x61, 0x74, 0x61, 0xea, 0x02, 0x0e, 0x56, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x3a, 0x3a, 0x54, 0x72,
-	0x3a, 0x3a, 0x56, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x72, 0x6b, 0x56, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x12, 0x39, 0x2e, 0x76, 0x65, 0x72, 0x61,
+	0x6e, 0x61, 0x2e, 0x74, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x4d, 0x73, 0x67, 0x49, 0x6e, 0x63, 0x72,
+	0x65, 0x61, 0x73, 0x65, 0x41, 0x63, 0x74, 0x69, 0x76, 0x65, 0x47, 0x6f, 0x76, 0x65, 0x72, 0x6e,
+	0x61, 0x6e, 0x63, 0x65, 0x46, 0x72, 0x61, 0x6d, 0x65, 0x77, 0x6f, 0x72, 0x6b, 0x56, 0x65, 0x72,
+	0x73, 0x69, 0x6f, 0x6e, 0x1a, 0x41, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x74, 0x72,
+	0x2e, 0x76, 0x31, 0x2e, 0x4d, 0x73, 0x67, 0x49, 0x6e, 0x63, 0x72, 0x65, 0x61, 0x73, 0x65, 0x41,
+	0x63, 0x74, 0x69, 0x76, 0x65, 0x47, 0x6f, 0x76, 0x65, 0x72, 0x6e, 0x61, 0x6e, 0x63, 0x65, 0x46,
+	0x72, 0x61, 0x6d, 0x65, 0x77, 0x6f, 0x72, 0x6b, 0x56, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x52,
+	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x69, 0x0a, 0x13, 0x55, 0x70, 0x64, 0x61, 0x74,
+	0x65, 0x54, 0x72, 0x75, 0x73, 0x74, 0x52, 0x65, 0x67, 0x69, 0x73, 0x74, 0x72, 0x79, 0x12, 0x24,
+	0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x74, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x4d, 0x73,
+	0x67, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x54, 0x72, 0x75, 0x73, 0x74, 0x52, 0x65, 0x67, 0x69,
+	0x73, 0x74, 0x72, 0x79, 0x1a, 0x2c, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x74, 0x72,
+	0x2e, 0x76, 0x31, 0x2e, 0x4d, 0x73, 0x67, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x54, 0x72, 0x75,
+	0x73, 0x74, 0x52, 0x65, 0x67, 0x69, 0x73, 0x74, 0x72, 0x79, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
+	0x73, 0x65, 0x12, 0x6c, 0x0a, 0x14, 0x41, 0x72, 0x63, 0x68, 0x69, 0x76, 0x65, 0x54, 0x72, 0x75,
+	0x73, 0x74, 0x52, 0x65, 0x67, 0x69, 0x73, 0x74, 0x72, 0x79, 0x12, 0x25, 0x2e, 0x76, 0x65, 0x72,
+	0x61, 0x6e, 0x61, 0x2e, 0x74, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x4d, 0x73, 0x67, 0x41, 0x72, 0x63,
+	0x68, 0x69, 0x76, 0x65, 0x54, 0x72, 0x75, 0x73, 0x74, 0x52, 0x65, 0x67, 0x69, 0x73, 0x74, 0x72,
+	0x79, 0x1a, 0x2d, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x74, 0x72, 0x2e, 0x76, 0x31,
+	0x2e, 0x4d, 0x73, 0x67, 0x41, 0x72, 0x63, 0x68, 0x69, 0x76, 0x65, 0x54, 0x72, 0x75, 0x73, 0x74,
+	0x52, 0x65, 0x67, 0x69, 0x73, 0x74, 0x72, 0x79, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
+	0x1a, 0x05, 0x80, 0xe7, 0xb0, 0x2a, 0x01, 0x42, 0xa2, 0x01, 0x0a, 0x10, 0x63, 0x6f, 0x6d, 0x2e,
+	0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x74, 0x72, 0x2e, 0x76, 0x31, 0x42, 0x07, 0x54, 0x78,
+	0x50, 0x72, 0x6f, 0x74, 0x6f, 0x50, 0x01, 0x5a, 0x33, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e,
+	0x63, 0x6f, 0x6d, 0x2f, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2d, 0x6c, 0x61, 0x62, 0x73, 0x2f,
+	0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x76, 0x65, 0x72, 0x61, 0x6e,
+	0x61, 0x2f, 0x74, 0x72, 0x2f, 0x76, 0x31, 0x3b, 0x74, 0x72, 0x76, 0x31, 0xa2, 0x02, 0x03, 0x56,
+	0x54, 0x58, 0xaa, 0x02, 0x0c, 0x56, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x54, 0x72, 0x2e, 0x56,
+	0x31, 0xca, 0x02, 0x0c, 0x56, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x5c, 0x54, 0x72, 0x5c, 0x56, 0x31,
+	0xe2, 0x02, 0x18, 0x56, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x5c, 0x54, 0x72, 0x5c, 0x56, 0x31, 0x5c,
+	0x47, 0x50, 0x42, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0xea, 0x02, 0x0e, 0x56, 0x65,
+	0x72, 0x61, 0x6e, 0x61, 0x3a, 0x3a, 0x54, 0x72, 0x3a, 0x3a, 0x56, 0x31, 0x62, 0x06, 0x70, 0x72,
+	0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (

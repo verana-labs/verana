@@ -20,6 +20,5 @@ const (
 	AttributeKeyGFDocumentID    = "gf_document_id"
 	AttributeKeyDocURL          = "doc_url"
 	AttributeKeyDigestSri       = "digest_sri"
-	AttributeKeyDeposit         = "deposit"
 	AttributeKeyArchiveStatus   = "archive_status"
 )

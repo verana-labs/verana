@@ -3,7 +3,7 @@ name: Tests & Code Coverage
 on:
   pull_request:
     branches:
-      - "*" # Trigger on pull requests to any branch
+      - "**" # Trigger on pull requests to any branch
   workflow_dispatch:
 
 jobs:

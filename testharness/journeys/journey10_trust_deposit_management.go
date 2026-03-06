@@ -3,10 +3,11 @@ package journeys
 import (
 	"context"
 	"fmt"
-	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
-	_ "github.com/verana-labs/verana/x/perm/types"
 	"strconv"
+
+	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
 	"github.com/verana-labs/verana/testharness/lib"
+	_ "github.com/verana-labs/verana/x/perm/types"
 )
 
 // RunTrustDepositManagementJourney implements Journey 10: Trust Deposit Management Journey

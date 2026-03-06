@@ -2,9 +2,11 @@ package v6
 
 import (
 	"context"
+	"fmt"
+	"strconv"
+
 	"cosmossdk.io/math"
 	upgradetypes "cosmossdk.io/x/upgrade/types"
-	"fmt"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/verana-labs/verana/app/upgrades/types"
@@ -13,7 +15,6 @@ import (
 	permissiontypes "github.com/verana-labs/verana/x/perm/types"
 	trustdeposittypes "github.com/verana-labs/verana/x/td/types"
 	trustregistrytypes "github.com/verana-labs/verana/x/tr/types"
-	"strconv"
 )
 
 func CreateUpgradeHandler(
@@ -237,14 +238,12 @@ func restoreCredentialSchemaData(ctx sdk.Context, keepers types.AppKeepers, data
 	for _, cs := range data.CredentialSchemas {
 		id, _ := strconv.ParseUint(cs.ID, 10, 64)
 		trID, _ := strconv.ParseUint(cs.TRID, 10, 64)
-		deposit, _ := math.NewIntFromString(cs.Deposit)
 		csUpdated := credentialschematypes.CredentialSchema{
 			Id:                                      id,
 			TrId:                                    trID,
 			Created:                                 cs.Created,
 			Modified:                                cs.Modified,
 			Archived:                                nil,
-			Deposit:                                 deposit.Uint64(),
 			JsonSchema:                              cs.JSONSchema,
 			IssuerGrantorValidationValidityPeriod:   cs.IssuerGrantorValidationValidityPeriod,
 			VerifierGrantorValidationValidityPeriod: cs.VerifierGrantorValidationValidityPeriod,

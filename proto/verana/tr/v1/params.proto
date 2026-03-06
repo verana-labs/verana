@@ -11,6 +11,6 @@ message Params {
   option (amino.name) = "verana/x/tr/Params";
   option (gogoproto.equal) = true;
 
-  uint64 trust_registry_trust_deposit = 1;
+  reserved 1; // trust_registry_trust_deposit removed per spec (no trust deposit for TR operations)
   uint64 trust_unit_price = 2;
 }

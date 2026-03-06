@@ -78,10 +78,11 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 			RpcCommandOptions: []*autocliv1.RpcCommandOptions{
 				{
 					RpcMethod: "CreateTrustRegistry",
-					Use:       "create-trust-registry [did] [language] [doc-url] [doc-digest-sri]",
+					Use:       "create-trust-registry [authority] [did] [language] [doc-url] [doc-digest-sri]",
 					Short:     "Create a new trust registry",
-					Long:      "Create a new trust registry with the specified DID, language, and initial governance framework document",
+					Long:      "Create a new trust registry on behalf of an authority (group account). The operator (transaction signer) must be authorized by the authority.",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
+						{ProtoField: "authority"},
 						{ProtoField: "did"},
 						{ProtoField: "language"},
 						{ProtoField: "doc_url"},
@@ -91,16 +92,17 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 						"aka": {
 							Name:         "aka",
 							DefaultValue: "",
-							Usage:        "aka uri",
+							Usage:        "optional additional URI of this trust registry",
 						},
 					},
 				},
 				{
 					RpcMethod: "AddGovernanceFrameworkDocument",
-					Use:       "add-governance-framework-document [id] [doc-language] [url] [doc-digest-sri] [version]",
+					Use:       "add-governance-framework-document [authority] [id] [doc-language] [doc-url] [doc-digest-sri] [version]",
 					Short:     "Add a governance framework document",
-					Long:      "Add a new governance framework document to a trust registry",
+					Long:      "Add a new governance framework document to a trust registry. The operator (transaction signer) must be authorized by the authority.",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
+						{ProtoField: "authority"},
 						{ProtoField: "id"},
 						{ProtoField: "doc_language"},
 						{ProtoField: "doc_url"},
@@ -110,19 +112,21 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 				},
 				{
 					RpcMethod: "IncreaseActiveGovernanceFrameworkVersion",
-					Use:       "increase-active-gf-version [id]",
+					Use:       "increase-active-gf-version [authority] [id]",
 					Short:     "Increase the active governance framework version",
-					Long:      "Increase the active governance framework version for a trust registry. This can only be done by the controller of the trust registry and requires a document in the trust registry's default language for the new version.",
+					Long:      "Increase the active governance framework version for a trust registry. The operator (transaction signer) must be authorized by the authority. Requires a document in the trust registry's default language for the new version.",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
+						{ProtoField: "authority"},
 						{ProtoField: "id"},
 					},
 				},
 				{
 					RpcMethod: "UpdateTrustRegistry",
-					Use:       "update-trust-registry [id] [did]",
+					Use:       "update-trust-registry [authority] [id] [did]",
 					Short:     "Update a trust registry",
-					Long:      "Update a trust registry's DID and AKA URI. Only the controller can update a trust registry.",
+					Long:      "Update a trust registry's DID and AKA URI. The operator (transaction signer) must be authorized by the authority.",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
+						{ProtoField: "authority"},
 						{ProtoField: "id"},
 						{ProtoField: "did"},
 					},
@@ -136,10 +140,11 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 				},
 				{
 					RpcMethod: "ArchiveTrustRegistry",
-					Use:       "archive-trust-registry [id] [archive]",
+					Use:       "archive-trust-registry [authority] [id] [archive]",
 					Short:     "Archive or unarchive a trust registry",
-					Long:      "Set the archive status of a trust registry. Use true to archive, false to unarchive. Only the controller can archive/unarchive.",
+					Long:      "Set the archive status of a trust registry. The operator (transaction signer) must be authorized by the authority. Use true to archive, false to unarchive.",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
+						{ProtoField: "authority"},
 						{ProtoField: "id"},
 						{ProtoField: "archive"},
 					},

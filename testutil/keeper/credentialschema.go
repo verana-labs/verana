@@ -30,42 +30,34 @@ type MockBankKeeper struct {
 }
 
 func (k *MockBankKeeper) SendCoins(ctx context.Context, from, to sdk.AccAddress, amt sdk.Coins) error {
-	// For testing purposes, just return nil (success)
 	return nil
 }
 
 func (k *MockBankKeeper) HasBalance(ctx context.Context, addr sdk.AccAddress, amt sdk.Coin) bool {
-	// For testing purposes, just return nil (success)
 	return true
 }
 
 func (k *MockBankKeeper) BurnCoins(ctx context.Context, name string, amt sdk.Coins) error {
-	// For testing purposes, just return nil (success)
 	return nil
 }
 
 func (k *MockBankKeeper) SendCoinsFromModuleToAccount(ctx context.Context, senderModule string, recipientAddr sdk.AccAddress, amt sdk.Coins) error {
-	// For testing purposes, just return nil (success)
 	return nil
 }
 
 func (k *MockBankKeeper) SendCoinsFromModuleToModule(ctx context.Context, senderModule, recipientModule string, amt sdk.Coins) error {
-	// For testing purposes, just return nil (success)
 	return nil
 }
 
 func (k *MockBankKeeper) SpendableCoins(ctx context.Context, address sdk.AccAddress) sdk.Coins {
-	// For testing purposes, return empty coins
 	return sdk.Coins{}
 }
 
 func (k *MockBankKeeper) GetBalance(ctx context.Context, addr sdk.AccAddress, denom string) sdk.Coin {
-	// For testing purposes, return zero coin
 	return sdk.NewCoin(denom, math.ZeroInt())
 }
 
 func (k *MockBankKeeper) GetAllBalances(ctx context.Context, addr sdk.AccAddress) sdk.Coins {
-	// For testing purposes, return empty coins
 	return sdk.Coins{}
 }
 
@@ -75,7 +67,6 @@ func NewMockBankKeeper() *MockBankKeeper {
 	}
 }
 
-// Implement required methods from types.BankKeeper interface
 func (k *MockBankKeeper) SendCoinsFromAccountToModule(ctx context.Context, senderAddr sdk.AccAddress, recipientModule string, amt sdk.Coins) error {
 	return nil
 }
@@ -85,14 +76,14 @@ type MockTrustRegistryKeeper struct {
 	trustRegistries map[uint64]trtypes.TrustRegistry
 }
 
-func (k *MockTrustRegistryKeeper) GetTrustUnitPrice(ctx sdk.Context) uint64 {
-	return 1
-}
-
 func NewMockTrustRegistryKeeper() *MockTrustRegistryKeeper {
 	return &MockTrustRegistryKeeper{
 		trustRegistries: make(map[uint64]trtypes.TrustRegistry),
 	}
+}
+
+func (k *MockTrustRegistryKeeper) GetTrustUnitPrice(ctx sdk.Context) uint64 {
+	return 1
 }
 
 func (k *MockTrustRegistryKeeper) GetTrustRegistry(ctx sdk.Context, id uint64) (trtypes.TrustRegistry, error) {
@@ -102,19 +93,19 @@ func (k *MockTrustRegistryKeeper) GetTrustRegistry(ctx sdk.Context, id uint64) (
 	return trtypes.TrustRegistry{}, trtypes.ErrTrustRegistryNotFound
 }
 
-func (k *MockTrustRegistryKeeper) CreateMockTrustRegistry(creator string, did string) uint64 {
+func (k *MockTrustRegistryKeeper) CreateMockTrustRegistry(controller string, did string) uint64 {
 	id := uint64(len(k.trustRegistries) + 1)
 	k.trustRegistries[id] = trtypes.TrustRegistry{
 		Id:            id,
 		Did:           did,
-		Controller:    creator,
+		Controller:    controller,
 		ActiveVersion: 1,
 		Language:      "en",
 	}
 	return id
 }
 
-func CredentialschemaKeeper(t testing.TB) (keeper.Keeper, *MockTrustRegistryKeeper, sdk.Context) { // Changed return types
+func CredentialschemaKeeper(t testing.TB) (keeper.Keeper, *MockTrustRegistryKeeper, sdk.Context) {
 	storeKey := storetypes.NewKVStoreKey(types.StoreKey)
 
 	db := dbm.NewMemDB()
@@ -129,7 +120,7 @@ func CredentialschemaKeeper(t testing.TB) (keeper.Keeper, *MockTrustRegistryKeep
 	// Create mock keepers
 	bankKeeper := NewMockBankKeeper()
 	trustRegistryKeeper := NewMockTrustRegistryKeeper()
-	mockTrustDepositKeeper := &MockTrustDepositKeeper{}
+	mockDelegationKeeper := &MockDelegationKeeper{}
 	k := keeper.NewKeeper(
 		cdc,
 		runtime.NewKVStoreService(storeKey),
@@ -137,7 +128,7 @@ func CredentialschemaKeeper(t testing.TB) (keeper.Keeper, *MockTrustRegistryKeep
 		authority.String(),
 		bankKeeper,
 		trustRegistryKeeper,
-		mockTrustDepositKeeper,
+		mockDelegationKeeper,
 	)
 
 	ctx := sdk.NewContext(stateStore, cmtproto.Header{}, false, log.NewNopLogger())
@@ -147,5 +138,5 @@ func CredentialschemaKeeper(t testing.TB) (keeper.Keeper, *MockTrustRegistryKeep
 		panic(err)
 	}
 
-	return k, trustRegistryKeeper, ctx // Return the mock keeper
+	return k, trustRegistryKeeper, ctx
 }
