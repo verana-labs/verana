@@ -27,7 +27,7 @@ env:
 
 jobs:
   resolve-version:
-    uses: 2060-io/organization/.github/workflows/resolve-version-call.yml@main
+    uses: 2060-io/organization/.github/workflows/resolve-version-call.yml@v0.4.0
     with:
       bump-minor-pre-major: false
 
