@@ -8,26 +8,34 @@ import { Secp256k1HdWallet } from "@cosmjs/amino";
 import { SigningStargateClient, StargateClient, GasPrice, calculateFee, AminoTypes, DeliverTxResponse } from "@cosmjs/stargate";
 import { stringToPath } from "@cosmjs/crypto";
 import { createVeranaRegistry } from "./registry";
+// TR module
 import {
-  // TR module
   MsgCreateTrustRegistryAminoConverter,
   MsgUpdateTrustRegistryAminoConverter,
   MsgArchiveTrustRegistryAminoConverter,
   MsgAddGovernanceFrameworkDocumentAminoConverter,
   MsgIncreaseActiveGovernanceFrameworkVersionAminoConverter,
-  // DD module
+} from "../../../src/amino-converter/tr";
+// DD module
+import {
   MsgAddDIDAminoConverter,
   MsgRenewDIDAminoConverter,
   MsgTouchDIDAminoConverter,
   MsgRemoveDIDAminoConverter,
-  // CS module
+} from "../../../src/amino-converter/dd";
+// CS module
+import {
   MsgCreateCredentialSchemaAminoConverter,
   MsgUpdateCredentialSchemaAminoConverter,
   MsgArchiveCredentialSchemaAminoConverter,
-  // TD module
+} from "../../../src/amino-converter/cs";
+// TD module
+import {
   MsgReclaimTrustDepositAminoConverter,
   MsgReclaimTrustDepositYieldAminoConverter,
-  // PERM module
+} from "../../../src/amino-converter/td";
+// PERM module
+import {
   MsgCreateRootPermissionAminoConverter,
   MsgCreatePermissionAminoConverter,
   MsgExtendPermissionAminoConverter,
@@ -37,10 +45,7 @@ import {
   MsgSetPermissionVPToValidatedAminoConverter,
   MsgCancelPermissionVPLastRequestAminoConverter,
   MsgCreateOrUpdatePermissionSessionAminoConverter,
-  // DE module
-  MsgGrantOperatorAuthorizationAminoConverter,
-  MsgRevokeOperatorAuthorizationAminoConverter,
-} from "../../../src/helpers/aminoConverters";
+} from "../../../src/amino-converter/perm";
 
 // Default configuration - can be overridden via environment variables
 // Matches frontend configuration from veranaChain.sign.client.ts
@@ -175,9 +180,6 @@ export function createVeranaAminoTypes(): AminoTypes {
     '/verana.perm.v1.MsgSetPermissionVPToValidated': MsgSetPermissionVPToValidatedAminoConverter,
     '/verana.perm.v1.MsgCancelPermissionVPLastRequest': MsgCancelPermissionVPLastRequestAminoConverter,
     '/verana.perm.v1.MsgCreateOrUpdatePermissionSession': MsgCreateOrUpdatePermissionSessionAminoConverter,
-    // Delegation Engine (de) module
-    '/verana.de.v1.MsgGrantOperatorAuthorization': MsgGrantOperatorAuthorizationAminoConverter,
-    '/verana.de.v1.MsgRevokeOperatorAuthorization': MsgRevokeOperatorAuthorizationAminoConverter,
   });
 }
 

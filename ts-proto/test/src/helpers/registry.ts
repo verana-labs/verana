@@ -53,11 +53,6 @@ import {
   MsgRepaySlashedTrustDeposit,
 } from "../../../src/codec/verana/td/v1/tx";
 
-// Delegation Engine (de) module messages
-import {
-  MsgGrantOperatorAuthorization,
-  MsgRevokeOperatorAuthorization,
-} from "../../../src/codec/verana/de/v1/tx";
 
 // Type URLs for all Verana messages
 export const typeUrls = {
@@ -98,9 +93,6 @@ export const typeUrls = {
   MsgSlashTrustDeposit: "/verana.td.v1.MsgSlashTrustDeposit",
   MsgRepaySlashedTrustDeposit: "/verana.td.v1.MsgRepaySlashedTrustDeposit",
 
-  // Delegation Engine
-  MsgGrantOperatorAuthorization: "/verana.de.v1.MsgGrantOperatorAuthorization",
-  MsgRevokeOperatorAuthorization: "/verana.de.v1.MsgRevokeOperatorAuthorization",
 } as const;
 
 /**
@@ -145,10 +137,6 @@ export function createVeranaRegistry(): Registry {
   registry.register(typeUrls.MsgReclaimTrustDepositYield, MsgReclaimTrustDepositYield as GeneratedType);
   registry.register(typeUrls.MsgSlashTrustDeposit, MsgSlashTrustDeposit as GeneratedType);
   registry.register(typeUrls.MsgRepaySlashedTrustDeposit, MsgRepaySlashedTrustDeposit as GeneratedType);
-
-  // Delegation Engine messages
-  registry.register(typeUrls.MsgGrantOperatorAuthorization, MsgGrantOperatorAuthorization as GeneratedType);
-  registry.register(typeUrls.MsgRevokeOperatorAuthorization, MsgRevokeOperatorAuthorization as GeneratedType);
 
   return registry;
 }

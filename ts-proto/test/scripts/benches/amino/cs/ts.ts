@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 import Long from "long";
 import { MsgCreateCredentialSchema, OptionalUInt32 } from "../../../../../src/codec/verana/cs/v1/tx";
 import { CredentialSchemaPermManagementMode } from "../../../../../src/codec/verana/cs/v1/types";
-import { MsgCreateCredentialSchemaAminoConverter } from "../../../../../src/helpers/aminoConverters";
+import { MsgCreateCredentialSchemaAminoConverter } from "../../../../../src/amino-converter/cs";
 
 type AminoMsg = {
   type: string;

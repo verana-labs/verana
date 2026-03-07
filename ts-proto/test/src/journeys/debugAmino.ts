@@ -2,9 +2,8 @@
  * Debug: Compare TS amino encoding with Go aminojson output
  */
 import {
-  MsgGrantOperatorAuthorizationAminoConverter,
   MsgCreateTrustRegistryAminoConverter,
-} from "../../../src/helpers/aminoConverters";
+} from "../../../src/amino-converter/tr";
 import { MsgGrantOperatorAuthorization } from "../../../src/codec/verana/de/v1/tx";
 import { MsgCreateTrustRegistry } from "../../../src/codec/verana/tr/v1/tx";
 
