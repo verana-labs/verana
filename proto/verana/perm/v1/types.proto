@@ -92,17 +92,19 @@ message Permission {
 
 message PermissionSession {
   string id = 1;
-  string controller = 2;
-  uint64 agent_perm_id = 3;
-  repeated SessionAuthz authz = 4;
-  google.protobuf.Timestamp created = 5 [(gogoproto.stdtime) = true];
-  google.protobuf.Timestamp modified = 6 [(gogoproto.stdtime) = true];
+  string authority = 2; // group account that owns this session
+  string vs_operator = 3; // the VS operator account
+  uint64 agent_perm_id = 4;
+  repeated PermissionSessionRecord session_records = 5;
+  google.protobuf.Timestamp created = 6 [(gogoproto.stdtime) = true];
+  google.protobuf.Timestamp modified = 7 [(gogoproto.stdtime) = true];
 }
 
-message SessionAuthz {
-  uint64 executor_perm_id = 1;
-  uint64 beneficiary_perm_id = 2;
-  uint64 wallet_agent_perm_id = 3;
+message PermissionSessionRecord {
+  google.protobuf.Timestamp created = 1 [(gogoproto.stdtime) = true];
+  uint64 issuer_perm_id = 2;
+  uint64 verifier_perm_id = 3;
+  uint64 wallet_agent_perm_id = 4;
 }
 
 // OptionalUInt64 is a wrapper for optional uint64 values

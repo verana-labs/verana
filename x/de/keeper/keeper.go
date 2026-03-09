@@ -101,6 +101,27 @@ func (k Keeper) GrantVSOperatorAuthorization(
 	return nil
 }
 
+// CheckVSOperatorAuthorization checks if a VS operator is authorized to act on behalf of the authority.
+// [AUTHZ-CHECK-3] A VSOperatorAuthorization entry must exist where authority and vs_operator match.
+func (k Keeper) CheckVSOperatorAuthorization(
+	ctx context.Context,
+	authority string,
+	vsOperator string,
+) error {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	vsKey := collections.Join(authority, vsOperator)
+	has, err := k.VSOperatorAuthorizations.Has(sdkCtx, vsKey)
+	if err != nil {
+		return fmt.Errorf("failed to check VS operator authorization: %w", err)
+	}
+	if !has {
+		return fmt.Errorf("VS operator %s is not authorized for authority %s", vsOperator, authority)
+	}
+
+	return nil
+}
+
 // RevokeVSOperatorAuthorization removes a VS operator's authorization for a given permission.
 func (k Keeper) RevokeVSOperatorAuthorization(
 	ctx context.Context,

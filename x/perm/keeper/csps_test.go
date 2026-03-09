@@ -440,18 +440,20 @@ func TestAgentRewardsDistribution(t *testing.T) {
 
 	// Create ISSUER permission (the executor)
 	issuerPerm := types.Permission{
-		SchemaId:        1,
-		Type:            types.PermissionType_ISSUER,
-		Authority:         issuer,
-		Created:         &now,
-		CreatedBy:       grantor,
-		Adjusted:        &now,
-		AdjustedBy:      grantor,
-		Modified:        &now,
-		Country:         "US",
-		ValidatorPermId: grantorPermID,
-		VpState:         types.ValidationState_VALIDATED,
-		EffectiveFrom:   &pastTime,
+		SchemaId:               1,
+		Type:                   types.PermissionType_ISSUER,
+		Authority:              creator,
+		Created:                &now,
+		CreatedBy:              grantor,
+		Adjusted:               &now,
+		AdjustedBy:             grantor,
+		Modified:               &now,
+		Country:                "US",
+		ValidatorPermId:        grantorPermID,
+		VpState:                types.ValidationState_VALIDATED,
+		EffectiveFrom:          &pastTime,
+		VsOperator:             creator,
+		VsOperatorAuthzEnabled: true,
 	}
 	issuerPermID, err := k.CreatePermission(sdkCtx, issuerPerm)
 	require.NoError(t, err)
@@ -494,7 +496,8 @@ func TestAgentRewardsDistribution(t *testing.T) {
 
 	// ==================== Execute CreateOrUpdatePermissionSession ====================
 	msg := &types.MsgCreateOrUpdatePermissionSession{
-		Creator:           creator,
+		Authority:         creator,
+		Operator:          creator,
 		Id:                uuid.New().String(),
 		IssuerPermId:      issuerPermID,
 		VerifierPermId:    0,
@@ -661,13 +664,13 @@ func TestAgentRewardsWithZeroFees(t *testing.T) {
 
 	creatorAddr := sdk.AccAddress([]byte("creator_address_____"))
 	ecosystemAddr := sdk.AccAddress([]byte("ecosystem_address___"))
-	issuerAddr := sdk.AccAddress([]byte("issuer_address______"))
 	agentAddr := sdk.AccAddress([]byte("agent_address_______"))
+	walletAgentAddr := sdk.AccAddress([]byte("wallet_agent_addr___"))
 
 	creator := creatorAddr.String()
 	ecosystem := ecosystemAddr.String()
-	issuerAcc := issuerAddr.String()
 	agent := agentAddr.String()
+	walletAgent := walletAgentAddr.String()
 
 	validDid := "did:example:123456789abcdefghi"
 
@@ -705,18 +708,20 @@ func TestAgentRewardsWithZeroFees(t *testing.T) {
 	require.NoError(t, err)
 
 	issuerPerm := types.Permission{
-		SchemaId:        1,
-		Type:            types.PermissionType_ISSUER,
-		Authority:         issuerAcc,
-		Created:         &now,
-		CreatedBy:       ecosystem,
-		Adjusted:        &now,
-		AdjustedBy:      ecosystem,
-		Modified:        &now,
-		Country:         "US",
-		ValidatorPermId: ecosystemPermID,
-		VpState:         types.ValidationState_VALIDATED,
-		EffectiveFrom:   &pastTime,
+		SchemaId:               1,
+		Type:                   types.PermissionType_ISSUER,
+		Authority:              creator,
+		Created:                &now,
+		CreatedBy:              ecosystem,
+		Adjusted:               &now,
+		AdjustedBy:             ecosystem,
+		Modified:               &now,
+		Country:                "US",
+		ValidatorPermId:        ecosystemPermID,
+		VpState:                types.ValidationState_VALIDATED,
+		EffectiveFrom:          &pastTime,
+		VsOperator:             creator,
+		VsOperatorAuthzEnabled: true,
 	}
 	issuerPermID, err := k.CreatePermission(sdkCtx, issuerPerm)
 	require.NoError(t, err)
@@ -726,9 +731,9 @@ func TestAgentRewardsWithZeroFees(t *testing.T) {
 		Type:            types.PermissionType_ISSUER,
 		Authority:         agent,
 		Created:         &now,
-		CreatedBy:       issuerAcc,
+		CreatedBy:       creator,
 		Adjusted:        &now,
-		AdjustedBy:      issuerAcc,
+		AdjustedBy:      creator,
 		Modified:        &now,
 		Country:         "US",
 		ValidatorPermId: issuerPermID,
@@ -739,13 +744,32 @@ func TestAgentRewardsWithZeroFees(t *testing.T) {
 
 	require.NoError(t, err)
 
+	// Create wallet agent permission
+	walletAgentPerm := types.Permission{
+		SchemaId:        1,
+		Type:            types.PermissionType_ISSUER,
+		Authority:       walletAgent,
+		Created:         &now,
+		CreatedBy:       creator,
+		Adjusted:        &now,
+		AdjustedBy:      creator,
+		Modified:        &now,
+		Country:         "US",
+		ValidatorPermId: issuerPermID,
+		VpState:         types.ValidationState_VALIDATED,
+		EffectiveFrom:   &pastTime,
+	}
+	walletAgentPermID, err := k.CreatePermission(sdkCtx, walletAgentPerm)
+	require.NoError(t, err)
+
 	msg := &types.MsgCreateOrUpdatePermissionSession{
-		Creator:           creator,
+		Authority:         creator,
+		Operator:          creator,
 		Id:                uuid.New().String(),
 		IssuerPermId:      issuerPermID,
 		VerifierPermId:    0,
 		AgentPermId:       agentPermID,
-		WalletAgentPermId: 0, // No wallet agent
+		WalletAgentPermId: walletAgentPermID,
 	}
 
 	resp, err := ms.CreateOrUpdatePermissionSession(ctx, msg)
@@ -770,13 +794,13 @@ func TestAgentRewardsWithDiscount(t *testing.T) {
 
 	creatorAddr := sdk.AccAddress([]byte("creator_address_____"))
 	ecosystemAddr := sdk.AccAddress([]byte("ecosystem_address___"))
-	issuerAddr := sdk.AccAddress([]byte("issuer_address______"))
 	agentAddr := sdk.AccAddress([]byte("agent_address_______"))
+	walletAgentAddr := sdk.AccAddress([]byte("wallet_agent_addr___"))
 
 	creator := creatorAddr.String()
 	ecosystem := ecosystemAddr.String()
-	issuerAcc := issuerAddr.String()
 	agent := agentAddr.String()
+	walletAgent := walletAgentAddr.String()
 
 	validDid := "did:example:123456789abcdefghi"
 
@@ -815,19 +839,21 @@ func TestAgentRewardsWithDiscount(t *testing.T) {
 
 	// Create issuer permission with 50% discount (per Issue #94: use discount instead of exemption)
 	issuerPerm := types.Permission{
-		SchemaId:            1,
-		Type:                types.PermissionType_ISSUER,
-		Authority:             issuerAcc,
-		Created:             &now,
-		CreatedBy:           ecosystem,
-		Adjusted:            &now,
-		AdjustedBy:          ecosystem,
-		Modified:            &now,
-		Country:             "US",
-		ValidatorPermId:     ecosystemPermID,
-		VpState:             types.ValidationState_VALIDATED,
-		IssuanceFeeDiscount: 5000, // 50% discount (per Issue #94)
-		EffectiveFrom:       &pastTime,
+		SchemaId:               1,
+		Type:                   types.PermissionType_ISSUER,
+		Authority:              creator,
+		Created:                &now,
+		CreatedBy:              ecosystem,
+		Adjusted:               &now,
+		AdjustedBy:             ecosystem,
+		Modified:               &now,
+		Country:                "US",
+		ValidatorPermId:        ecosystemPermID,
+		VpState:                types.ValidationState_VALIDATED,
+		IssuanceFeeDiscount:    5000, // 50% discount (per Issue #94)
+		EffectiveFrom:          &pastTime,
+		VsOperator:             creator,
+		VsOperatorAuthzEnabled: true,
 	}
 	issuerPermID, err := k.CreatePermission(sdkCtx, issuerPerm)
 	require.NoError(t, err)
@@ -837,9 +863,9 @@ func TestAgentRewardsWithDiscount(t *testing.T) {
 		Type:            types.PermissionType_ISSUER,
 		Authority:         agent,
 		Created:         &now,
-		CreatedBy:       issuerAcc,
+		CreatedBy:       creator,
 		Adjusted:        &now,
-		AdjustedBy:      issuerAcc,
+		AdjustedBy:      creator,
 		Modified:        &now,
 		Country:         "US",
 		ValidatorPermId: issuerPermID,
@@ -850,13 +876,32 @@ func TestAgentRewardsWithDiscount(t *testing.T) {
 
 	require.NoError(t, err)
 
+	// Create wallet agent permission
+	walletAgentPerm := types.Permission{
+		SchemaId:        1,
+		Type:            types.PermissionType_ISSUER,
+		Authority:       walletAgent,
+		Created:         &now,
+		CreatedBy:       creator,
+		Adjusted:        &now,
+		AdjustedBy:      creator,
+		Modified:        &now,
+		Country:         "US",
+		ValidatorPermId: issuerPermID,
+		VpState:         types.ValidationState_VALIDATED,
+		EffectiveFrom:   &pastTime,
+	}
+	walletAgentPermID, err := k.CreatePermission(sdkCtx, walletAgentPerm)
+	require.NoError(t, err)
+
 	msg := &types.MsgCreateOrUpdatePermissionSession{
-		Creator:           creator,
+		Authority:         creator,
+		Operator:          creator,
 		Id:                uuid.New().String(),
 		IssuerPermId:      issuerPermID,
 		VerifierPermId:    0,
 		AgentPermId:       agentPermID,
-		WalletAgentPermId: 0,
+		WalletAgentPermId: walletAgentPermID,
 	}
 
 	resp, err := ms.CreateOrUpdatePermissionSession(ctx, msg)

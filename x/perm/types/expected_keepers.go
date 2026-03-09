@@ -56,6 +56,9 @@ type TrustDepositKeeper interface {
 // Used to perform [AUTHZ-CHECK] for (authority, operator) pairs.
 type DelegationKeeper interface {
 	CheckOperatorAuthorization(ctx context.Context, authority string, operator string, msgTypeURL string, now time.Time) error
+	// CheckVSOperatorAuthorization checks if a VS operator is authorized to act on behalf of the authority.
+	// [AUTHZ-CHECK-3] A VSOperatorAuthorization entry must exist where authority and vs_operator match.
+	CheckVSOperatorAuthorization(ctx context.Context, authority string, vsOperator string) error
 	// GrantVSOperatorAuthorization grants a VS operator the authorization to call
 	// CreateOrUpdatePermissionSession on behalf of the authority for a given permission.
 	GrantVSOperatorAuthorization(ctx context.Context, authority string, vsOperator string, permissionID uint64, spendLimit sdk.Coins, withFeegrant bool, feeSpendLimit sdk.Coins, spendPeriod *time.Duration) error

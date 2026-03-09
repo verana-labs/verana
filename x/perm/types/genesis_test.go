@@ -45,14 +45,15 @@ func TestGenesisState_Validate(t *testing.T) {
 
 	validSession := types.PermissionSession{
 		Id:          "test-session-id",
-		Controller:  creatorAddr,
+		Authority:   creatorAddr,
+		VsOperator:  creatorAddr,
 		AgentPermId: 2,
 		Created:     &nowTime,
 		Modified:    &nowTime,
-		Authz: []*types.SessionAuthz{
+		SessionRecords: []*types.PermissionSessionRecord{
 			{
-				ExecutorPermId:    1,
-				BeneficiaryPermId: 2,
+				IssuerPermId: 1,
+				Created:      &nowTime,
 			},
 		},
 	}
@@ -160,7 +161,8 @@ func TestGenesisState_Validate(t *testing.T) {
 				PermissionSessions: []types.PermissionSession{
 					{
 						Id:          "test-session-id",
-						Controller:  creatorAddr,
+						Authority:   creatorAddr,
+						VsOperator:  creatorAddr,
 						AgentPermId: 999, // Non-existent perm
 						Created:     &nowTime,
 						Modified:    &nowTime,

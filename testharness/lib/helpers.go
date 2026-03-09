@@ -1231,25 +1231,27 @@ func CreatePermission(client cosmosclient.Client, ctx context.Context, actor cos
 	return "success"
 }
 
-// CreatePermissionSession creates a new permission session
+// CreatePermissionSession creates a new permission session using authority/operator pattern
 func CreatePermissionSession(
 	client cosmosclient.Client,
 	ctx context.Context,
-	creator cosmosaccount.Account,
+	operatorAccount cosmosaccount.Account,
+	authorityAddr string,
 	sessionID string,
 	issuerPermID uint64,
 	verifierPermID uint64,
 	agentPermID uint64,
 	walletAgentPermID uint64,
-) {
-	creatorAddr, err := creator.Address(addressPrefix)
+) error {
+	operatorAddr, err := operatorAccount.Address(addressPrefix)
 	if err != nil {
-		panic(fmt.Sprintf("Failed to get creator address: %v", err))
+		return fmt.Errorf("failed to get operator address: %w", err)
 	}
 
 	// Create the session creation message
 	msg := &permtypes.MsgCreateOrUpdatePermissionSession{
-		Creator:           creatorAddr,
+		Authority:         authorityAddr,
+		Operator:          operatorAddr,
 		Id:                sessionID,
 		IssuerPermId:      issuerPermID,
 		VerifierPermId:    verifierPermID,
@@ -1258,18 +1260,25 @@ func CreatePermissionSession(
 	}
 
 	// Broadcast the transaction
-	txResp, err := client.BroadcastTx(ctx, creator, msg)
+	txResp, err := client.BroadcastTx(ctx, operatorAccount, msg)
 	if err != nil {
-		panic(fmt.Sprintf("Failed to create permission session: %v", err))
+		return fmt.Errorf("failed to create permission session: %w", err)
 	}
 
 	fmt.Print("CreatePermissionSession:\n\n")
 	fmt.Println(txResp)
+
+	if txResp.TxResponse.Code != 0 {
+		return fmt.Errorf("CreateOrUpdatePermissionSession failed with code %d: %s",
+			txResp.TxResponse.Code, txResp.TxResponse.RawLog)
+	}
+
+	return nil
 }
 
 // VerifyPermissionSession verifies a permission session was created correctly with expected values
 func VerifyPermissionSession(client cosmosclient.Client, ctx context.Context, sessionID string,
-	expectedController string, expectedAgentPermID uint64, expectedIssuerPermID, expectedVerifierPermID uint64) bool {
+	expectedAuthority string, expectedAgentPermID uint64, expectedIssuerPermID, expectedVerifierPermID uint64) bool {
 
 	// Query the permission session
 	permClient := permtypes.NewQueryClient(client.Context())
@@ -1288,10 +1297,10 @@ func VerifyPermissionSession(client cosmosclient.Client, ctx context.Context, se
 		return false
 	}
 
-	// Verify controller matches expectation if provided
-	if expectedController != "" && resp.GetSession().Controller != expectedController {
-		fmt.Printf("❌ Permission session verification failed: Expected controller %s, got %s\n",
-			expectedController, resp.GetSession().Controller)
+	// Verify authority matches expectation if provided
+	if expectedAuthority != "" && resp.GetSession().Authority != expectedAuthority {
+		fmt.Printf("❌ Permission session verification failed: Expected authority %s, got %s\n",
+			expectedAuthority, resp.GetSession().Authority)
 		return false
 	}
 
@@ -1302,36 +1311,36 @@ func VerifyPermissionSession(client cosmosclient.Client, ctx context.Context, se
 		return false
 	}
 
-	// Check authorizations array for expected permissions
+	// Check session records for expected permissions
 	issuerFound := false
 	verifierFound := false
-	for _, authz := range resp.GetSession().Authz {
+	for _, record := range resp.GetSession().SessionRecords {
 		// Check for issuer permission ID if expected
-		if expectedIssuerPermID > 0 && authz.GetExecutorPermId() == expectedIssuerPermID {
+		if expectedIssuerPermID > 0 && record.GetIssuerPermId() == expectedIssuerPermID {
 			issuerFound = true
 		}
 
 		// Check for verifier permission ID if expected
-		if expectedVerifierPermID > 0 && authz.GetBeneficiaryPermId() == expectedVerifierPermID {
+		if expectedVerifierPermID > 0 && record.GetVerifierPermId() == expectedVerifierPermID {
 			verifierFound = true
 		}
 	}
 
 	// Verify issuer permission if expected
 	if expectedIssuerPermID > 0 && !issuerFound {
-		fmt.Printf("❌ Permission session verification failed: Expected issuer permission ID %d not found in authorizations\n",
+		fmt.Printf("❌ Permission session verification failed: Expected issuer permission ID %d not found in session records\n",
 			expectedIssuerPermID)
 		return false
 	}
 
 	// Verify verifier permission if expected
 	if expectedVerifierPermID > 0 && !verifierFound {
-		fmt.Printf("❌ Permission session verification failed: Expected verifier permission ID %d not found in authorizations\n",
+		fmt.Printf("❌ Permission session verification failed: Expected verifier permission ID %d not found in session records\n",
 			expectedVerifierPermID)
 		return false
 	}
 
-	fmt.Printf("✅ Verified permission session ID %s with correct controller, agent permission ID %d",
+	fmt.Printf("✅ Verified permission session ID %s with correct authority, agent permission ID %d",
 		sessionID, expectedAgentPermID)
 
 	if expectedIssuerPermID > 0 {

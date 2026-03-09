@@ -583,21 +583,25 @@ export const MsgCancelPermissionVPLastRequestAminoConverter: AminoConverter = {
 export const MsgCreateOrUpdatePermissionSessionAminoConverter: AminoConverter = {
   aminoType: '/verana.perm.v1.MsgCreateOrUpdatePermissionSession',
   toAmino: (m: MsgCreateOrUpdatePermissionSession) => clean({
-    creator: m.creator ?? '',
+    authority: m.authority ?? '',
+    operator: m.operator ?? '',
     id: m.id ?? '',
     issuer_perm_id: u64ToStr(m.issuerPermId),
     verifier_perm_id: u64ToStr(m.verifierPermId),
     agent_perm_id: u64ToStr(m.agentPermId),
     wallet_agent_perm_id: u64ToStr(m.walletAgentPermId),
+    digest: m.digest ?? undefined,
   }),
   fromAmino: (a: any): MsgCreateOrUpdatePermissionSession =>
     MsgCreateOrUpdatePermissionSession.fromPartial({
-      creator: a.creator ?? '',
+      authority: a.authority ?? '',
+      operator: a.operator ?? '',
       id: a.id ?? '',
       issuerPermId: strToU64(a.issuer_perm_id) != null ? Number(strToU64(a.issuer_perm_id)!.toString()) : 0,
       verifierPermId: strToU64(a.verifier_perm_id) != null ? Number(strToU64(a.verifier_perm_id)!.toString()) : 0,
       agentPermId: strToU64(a.agent_perm_id) != null ? Number(strToU64(a.agent_perm_id)!.toString()) : 0,
       walletAgentPermId: strToU64(a.wallet_agent_perm_id) != null ? Number(strToU64(a.wallet_agent_perm_id)!.toString()) : 0,
+      digest: a.digest ?? '',
     }),
 };
 

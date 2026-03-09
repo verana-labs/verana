@@ -81,28 +81,30 @@ func TestDeterministicGenesis(t *testing.T) {
 	// Create test sessions in random order
 	session2 := types.PermissionSession{
 		Id:          "test-session-id-2",
-		Controller:  creatorAddr,
+		Authority:   creatorAddr,
+		VsOperator:  creatorAddr,
 		AgentPermId: 2,
 		Created:     &nowTime,
 		Modified:    &nowTime,
-		Authz: []*types.SessionAuthz{
+		SessionRecords: []*types.PermissionSessionRecord{
 			{
-				ExecutorPermId:    1,
-				BeneficiaryPermId: 2,
+				IssuerPermId: 1,
+				Created:      &nowTime,
 			},
 		},
 	}
 
 	session1 := types.PermissionSession{
 		Id:          "test-session-id-1",
-		Controller:  creatorAddr,
+		Authority:   creatorAddr,
+		VsOperator:  creatorAddr,
 		AgentPermId: 1,
 		Created:     &nowTime,
 		Modified:    &nowTime,
-		Authz: []*types.SessionAuthz{
+		SessionRecords: []*types.PermissionSessionRecord{
 			{
-				ExecutorPermId:    1,
-				BeneficiaryPermId: 2,
+				IssuerPermId: 1,
+				Created:      &nowTime,
 			},
 		},
 	}
@@ -220,29 +222,31 @@ func TestGenesisImportExport(t *testing.T) {
 	// Create test perm sessions
 	session1 := types.PermissionSession{
 		Id:          "test-session-id-1",
-		Controller:  creatorAddr,
+		Authority:   creatorAddr,
+		VsOperator:  creatorAddr,
 		AgentPermId: 2,
 		Created:     &nowTime,
 		Modified:    &nowTime,
-		Authz: []*types.SessionAuthz{
+		SessionRecords: []*types.PermissionSessionRecord{
 			{
-				ExecutorPermId:    1,
-				BeneficiaryPermId: 2,
+				IssuerPermId: 1,
+				Created:      &nowTime,
 			},
 		},
 	}
 
 	session2 := types.PermissionSession{
 		Id:          "test-session-id-2",
-		Controller:  creatorAddr,
+		Authority:   creatorAddr,
+		VsOperator:  creatorAddr,
 		AgentPermId: 3,
 		Created:     &nowTime,
 		Modified:    &nowTime,
-		Authz: []*types.SessionAuthz{
+		SessionRecords: []*types.PermissionSessionRecord{
 			{
-				ExecutorPermId:    1,
-				BeneficiaryPermId: 3,
+				IssuerPermId:      1,
 				WalletAgentPermId: 2,
+				Created:           &nowTime,
 			},
 		},
 	}
@@ -293,7 +297,7 @@ func TestGenesisImportExport(t *testing.T) {
 	session2Get, err := k2.PermissionSession.Get(ctx2, "test-session-id-2")
 	require.NoError(t, err)
 	require.Equal(t, session2.Id, session2Get.Id)
-	require.Equal(t, session2.Authz[0].WalletAgentPermId, session2Get.Authz[0].WalletAgentPermId)
+	require.Equal(t, session2.SessionRecords[0].WalletAgentPermId, session2Get.SessionRecords[0].WalletAgentPermId)
 
 	// Export from the new keeper and verify it matches the original export
 	exportedState2 := permission.ExportGenesis(ctx2, k2)

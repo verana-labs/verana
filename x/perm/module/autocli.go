@@ -377,6 +377,10 @@ Parameters:
 						},
 					},
 					FlagOptions: map[string]*autocliv1.FlagOptions{
+						"authority": {
+							DefaultValue: "",
+							Usage:        "The group policy address (authority) on whose behalf this message is executed",
+						},
 						"issuer_perm_id": {
 							Name:         "issuer-perm-id",
 							Usage:        "ID of the issuer permission",
@@ -386,6 +390,11 @@ Parameters:
 							Name:         "verifier-perm-id",
 							Usage:        "ID of the verifier permission",
 							DefaultValue: "0",
+						},
+						"digest": {
+							Name:         "digest",
+							Usage:        "Optional digest derived from an issued or verified credential",
+							DefaultValue: "",
 						},
 					},
 				},

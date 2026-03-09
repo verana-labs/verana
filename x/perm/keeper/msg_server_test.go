@@ -3335,7 +3335,7 @@ func TestRevokePermission(t *testing.T) {
 }
 
 func TestCreateOrUpdatePermissionSession(t *testing.T) {
-	k, ms, csKeeper, _, ctx := setupMsgServer(t)
+	k, ms, csKeeper, _, ctx, delKeeper := setupMsgServerWithDelegation(t)
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
 	// Set specific block time for consistent testing
@@ -3343,7 +3343,10 @@ func TestCreateOrUpdatePermissionSession(t *testing.T) {
 	sdkCtx = sdkCtx.WithBlockTime(blockTime)
 	ctx = sdk.WrapSDKContext(sdkCtx)
 
-	creator := sdk.AccAddress([]byte("test_creator")).String()
+	authority := sdk.AccAddress([]byte("test_authority")).String()
+	operator := sdk.AccAddress([]byte("test_operator")).String()
+	otherAuthority := sdk.AccAddress([]byte("other_authority")).String()
+	otherOperator := sdk.AccAddress([]byte("other_operator")).String()
 	sessionUUID := uuid.New().String()
 
 	// Create mock credential schema
@@ -3351,134 +3354,177 @@ func TestCreateOrUpdatePermissionSession(t *testing.T) {
 		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
 		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
 
-	// Note: We're not calling the setter methods since they don't exist
-	// Instead, we'll rely on whatever default values the mock implementations return
-	// If you want to test with specific values, you'll need to implement Option 1
-
 	now := sdkCtx.BlockTime()
 	pastTime := now.Add(-1 * time.Hour) // Set effective_from to past to make it ACTIVE
 
-	// Create trust registry / validator perm
+	// Create trust registry / ecosystem perm
 	trustPerm := types.Permission{
 		SchemaId:         1,
 		Type:             types.PermissionType_ECOSYSTEM,
-		Authority:          creator,
+		Authority:        authority,
 		Created:          &now,
-		CreatedBy:        creator,
+		CreatedBy:        operator,
 		Adjusted:         &now,
-		AdjustedBy:       creator,
+		AdjustedBy:       operator,
 		Modified:         &now,
 		Country:          "US",
 		VpState:          types.ValidationState_VALIDATED,
 		ValidationFees:   10,
 		IssuanceFees:     5,
 		VerificationFees: 3,
-		EffectiveFrom:    &pastTime, // Required for ACTIVE state
+		EffectiveFrom:    &pastTime,
 	}
 	trustPermID, err := k.CreatePermission(sdkCtx, trustPerm)
 	require.NoError(t, err)
 
-	// Create issuer perm
+	// Create issuer perm with VsOperator and VsOperatorAuthzEnabled
 	issuerPerm := types.Permission{
-		SchemaId:        1,
-		Type:            types.PermissionType_ISSUER,
-		Authority:         creator,
-		Created:         &now,
-		CreatedBy:       creator,
-		Adjusted:        &now,
-		AdjustedBy:      creator,
-		Modified:        &now,
-		Country:         "US",
-		ValidatorPermId: trustPermID,
-		VpState:         types.ValidationState_VALIDATED,
-		EffectiveFrom:   &pastTime, // Required for ACTIVE state
+		SchemaId:               1,
+		Type:                   types.PermissionType_ISSUER,
+		Authority:              authority,
+		VsOperator:             operator,
+		VsOperatorAuthzEnabled: true,
+		Created:                &now,
+		CreatedBy:              operator,
+		Adjusted:               &now,
+		AdjustedBy:             operator,
+		Modified:               &now,
+		Country:                "US",
+		ValidatorPermId:        trustPermID,
+		VpState:                types.ValidationState_VALIDATED,
+		EffectiveFrom:          &pastTime,
 	}
 	issuerPermID, err := k.CreatePermission(sdkCtx, issuerPerm)
 	require.NoError(t, err)
 
-	// Create verifier perm
-	//verifierPerm := types.Permission{
-	//	SchemaId:        1,
-	//	Type:            types.PermissionType_PERMISSION_TYPE_VERIFIER,
-	//	Authority:         creator,
-	//	Created:         &now,
-	//	CreatedBy:       creator,
-	//	Adjusted:        &now,
-	//	AdjustedBy:      creator,
-	//	Modified:        &now,
-	//	Country:         "US",
-	//	ValidatorPermId: trustPermID,
-	//	VpState:         types.ValidationState_VALIDATION_STATE_VALIDATED,
-	//}
-	//verifierPermID, err := k.CreatePermission(sdkCtx, verifierPerm)
-	//require.NoError(t, err)
+	// Create issuer perm with VsOperatorAuthzEnabled = false
+	issuerPermNoAuthz := types.Permission{
+		SchemaId:               1,
+		Type:                   types.PermissionType_ISSUER,
+		Authority:              authority,
+		VsOperator:             operator,
+		VsOperatorAuthzEnabled: false,
+		Created:                &now,
+		CreatedBy:              operator,
+		Adjusted:               &now,
+		AdjustedBy:             operator,
+		Modified:               &now,
+		Country:                "US",
+		ValidatorPermId:        trustPermID,
+		VpState:                types.ValidationState_VALIDATED,
+		EffectiveFrom:          &pastTime,
+	}
+	issuerPermNoAuthzID, err := k.CreatePermission(sdkCtx, issuerPermNoAuthz)
+	require.NoError(t, err)
 
-	// Create agent perm (HOLDER type)
+	// Create issuer perm with different vs_operator
+	issuerPermDiffOp := types.Permission{
+		SchemaId:               1,
+		Type:                   types.PermissionType_ISSUER,
+		Authority:              authority,
+		VsOperator:             otherOperator,
+		VsOperatorAuthzEnabled: true,
+		Created:                &now,
+		CreatedBy:              otherOperator,
+		Adjusted:               &now,
+		AdjustedBy:             otherOperator,
+		Modified:               &now,
+		Country:                "US",
+		ValidatorPermId:        trustPermID,
+		VpState:                types.ValidationState_VALIDATED,
+		EffectiveFrom:          &pastTime,
+	}
+	issuerPermDiffOpID, err := k.CreatePermission(sdkCtx, issuerPermDiffOp)
+	require.NoError(t, err)
+
+	// Create issuer perm with different authority
+	issuerPermDiffAuth := types.Permission{
+		SchemaId:               1,
+		Type:                   types.PermissionType_ISSUER,
+		Authority:              otherAuthority,
+		VsOperator:             operator,
+		VsOperatorAuthzEnabled: true,
+		Created:                &now,
+		CreatedBy:              operator,
+		Adjusted:               &now,
+		AdjustedBy:             operator,
+		Modified:               &now,
+		Country:                "US",
+		ValidatorPermId:        trustPermID,
+		VpState:                types.ValidationState_VALIDATED,
+		EffectiveFrom:          &pastTime,
+	}
+	issuerPermDiffAuthID, err := k.CreatePermission(sdkCtx, issuerPermDiffAuth)
+	require.NoError(t, err)
+
+	// Create verifier perm
+	verifierPerm := types.Permission{
+		SchemaId:               1,
+		Type:                   types.PermissionType_VERIFIER,
+		Authority:              authority,
+		VsOperator:             operator,
+		VsOperatorAuthzEnabled: true,
+		Created:                &now,
+		CreatedBy:              operator,
+		Adjusted:               &now,
+		AdjustedBy:             operator,
+		Modified:               &now,
+		Country:                "US",
+		ValidatorPermId:        trustPermID,
+		VpState:                types.ValidationState_VALIDATED,
+		EffectiveFrom:          &pastTime,
+	}
+	verifierPermID, err := k.CreatePermission(sdkCtx, verifierPerm)
+	require.NoError(t, err)
+
+	// Create agent perm
 	agentPerm := types.Permission{
 		SchemaId:        1,
 		Type:            types.PermissionType_ISSUER,
-		Authority:         creator,
+		Authority:       authority,
 		Created:         &now,
-		CreatedBy:       creator,
+		CreatedBy:       operator,
 		Adjusted:        &now,
-		AdjustedBy:      creator,
+		AdjustedBy:      operator,
 		Modified:        &now,
 		Country:         "US",
-		ValidatorPermId: issuerPermID, // Issued by the issuer
+		ValidatorPermId: issuerPermID,
 		VpState:         types.ValidationState_VALIDATED,
-		EffectiveFrom:   &pastTime, // Required for ACTIVE state
+		EffectiveFrom:   &pastTime,
 	}
 	agentPermID, err := k.CreatePermission(sdkCtx, agentPerm)
 	require.NoError(t, err)
 
-	// Create wallet agent perm (HOLDER type)
+	// Create wallet agent perm
 	walletAgentPerm := types.Permission{
 		SchemaId:        1,
 		Type:            types.PermissionType_ISSUER,
-		Authority:         creator,
+		Authority:       authority,
 		Created:         &now,
-		CreatedBy:       creator,
+		CreatedBy:       operator,
 		Adjusted:        &now,
-		AdjustedBy:      creator,
+		AdjustedBy:      operator,
 		Modified:        &now,
 		Country:         "US",
-		ValidatorPermId: issuerPermID, // Issued by the issuer
+		ValidatorPermId: issuerPermID,
 		VpState:         types.ValidationState_VALIDATED,
-		EffectiveFrom:   &pastTime, // Required for ACTIVE state
+		EffectiveFrom:   &pastTime,
 	}
-
 	walletAgentPermID, err := k.CreatePermission(sdkCtx, walletAgentPerm)
 	require.NoError(t, err)
 
-	// Create revoked perm
-	//revokedPerm := types.Permission{
-	//	SchemaId:        1,
-	//	Type:            types.PermissionType_PERMISSION_TYPE_ISSUER,
-	//	Authority:         creator,
-	//	Created:         &now,
-	//	CreatedBy:       creator,
-	//	Adjusted:        &now,
-	//	AdjustedBy:      creator,
-	//	Modified:        &now,
-	//	Country:         "US",
-	//	ValidatorPermId: trustPermID,
-	//	VpState:         types.ValidationState_VALIDATION_STATE_VALIDATED,
-	//	Revoked:         &now,
-	//	RevokedBy:       creator,
-	//}
-	//revokedPermID, err := k.CreatePermission(sdkCtx, revokedPerm)
-	//require.NoError(t, err)
-
 	testCases := []struct {
-		name       string
-		msg        *types.MsgCreateOrUpdatePermissionSession
-		expectErr  bool
-		errMessage string
+		name           string
+		msg            *types.MsgCreateOrUpdatePermissionSession
+		setupErr       error // set on delKeeper.ErrToReturn before test
+		expectErr      bool
+		errMessage     string
 	}{
 		{
-			name: "Valid create session with issuer",
+			name: "Happy path with issuer",
 			msg: &types.MsgCreateOrUpdatePermissionSession{
-				Creator:           creator,
+				Authority:         authority,
+				Operator:          operator,
 				Id:                sessionUUID,
 				IssuerPermId:      issuerPermID,
 				VerifierPermId:    0,
@@ -3487,46 +3533,54 @@ func TestCreateOrUpdatePermissionSession(t *testing.T) {
 			},
 			expectErr: false,
 		},
-		//{
-		//	name: "Valid create session with verifier",
-		//	msg: &types.MsgCreateOrUpdatePermissionSession{
-		//		Creator:           creator,
-		//		Id:                uuid.New().String(),
-		//		IssuerPermId:      0,
-		//		VerifierPermId:    verifierPermID,
-		//		AgentPermId:       agentPermID,
-		//		WalletAgentPermId: walletAgentPermID,
-		//	},
-		//	expectErr: false,
-		//},
-		//{
-		//	name: "Valid create session with both issuer and verifier",
-		//	msg: &types.MsgCreateOrUpdatePermissionSession{
-		//		Creator:           creator,
-		//		Id:                uuid.New().String(),
-		//		IssuerPermId:      issuerPermID,
-		//		VerifierPermId:    verifierPermID,
-		//		AgentPermId:       agentPermID,
-		//		WalletAgentPermId: walletAgentPermID,
-		//	},
-		//	expectErr: false,
-		//},
-		//{
-		//	name: "Valid update existing session",
-		//	msg: &types.MsgCreateOrUpdatePermissionSession{
-		//		Creator:           creator,
-		//		Id:                sessionUUID,
-		//		IssuerPermId:      0,
-		//		VerifierPermId:    verifierPermID,
-		//		AgentPermId:       agentPermID,
-		//		WalletAgentPermId: walletAgentPermID,
-		//	},
-		//	expectErr: false,
-		//},
 		{
-			name: "Invalid - issuer perm not found",
+			name: "Happy path with verifier",
 			msg: &types.MsgCreateOrUpdatePermissionSession{
-				Creator:           creator,
+				Authority:         authority,
+				Operator:          operator,
+				Id:                uuid.New().String(),
+				IssuerPermId:      0,
+				VerifierPermId:    verifierPermID,
+				AgentPermId:       agentPermID,
+				WalletAgentPermId: walletAgentPermID,
+			},
+			expectErr: false,
+		},
+		{
+			name: "AUTHZ check failure",
+			msg: &types.MsgCreateOrUpdatePermissionSession{
+				Authority:         authority,
+				Operator:          operator,
+				Id:                uuid.New().String(),
+				IssuerPermId:      issuerPermID,
+				VerifierPermId:    0,
+				AgentPermId:       agentPermID,
+				WalletAgentPermId: walletAgentPermID,
+			},
+			setupErr:   fmt.Errorf("operator not authorized"),
+			expectErr:  true,
+			errMessage: "VS operator authorization check failed",
+		},
+		// Note: Invalid UUID is caught by ValidateBasic at SDK level, not in the handler
+		{
+			name: "Both perms missing",
+			msg: &types.MsgCreateOrUpdatePermissionSession{
+				Authority:         authority,
+				Operator:          operator,
+				Id:                uuid.New().String(),
+				IssuerPermId:      0,
+				VerifierPermId:    0,
+				AgentPermId:       agentPermID,
+				WalletAgentPermId: walletAgentPermID,
+			},
+			expectErr:  true,
+			errMessage: "at least one of issuer_perm_id or verifier_perm_id must be provided",
+		},
+		{
+			name: "Issuer perm not found",
+			msg: &types.MsgCreateOrUpdatePermissionSession{
+				Authority:         authority,
+				Operator:          operator,
 				Id:                uuid.New().String(),
 				IssuerPermId:      9999,
 				VerifierPermId:    0,
@@ -3537,11 +3591,12 @@ func TestCreateOrUpdatePermissionSession(t *testing.T) {
 			errMessage: "issuer permission not found",
 		},
 		{
-			name: "Invalid - invalid issuer type",
+			name: "Issuer wrong type",
 			msg: &types.MsgCreateOrUpdatePermissionSession{
-				Creator:           creator,
+				Authority:         authority,
+				Operator:          operator,
 				Id:                uuid.New().String(),
-				IssuerPermId:      trustPermID, // Not ISSUER type
+				IssuerPermId:      trustPermID, // ECOSYSTEM type, not ISSUER
 				VerifierPermId:    0,
 				AgentPermId:       agentPermID,
 				WalletAgentPermId: walletAgentPermID,
@@ -3549,23 +3604,53 @@ func TestCreateOrUpdatePermissionSession(t *testing.T) {
 			expectErr:  true,
 			errMessage: "issuer permission must be ISSUER type",
 		},
-		//{
-		//	name: "Invalid - revoked issuer",
-		//	msg: &types.MsgCreateOrUpdatePermissionSession{
-		//		Creator:           creator,
-		//		Id:                uuid.New().String(),
-		//		IssuerPermId:      revokedPermID,
-		//		VerifierPermId:    0,
-		//		AgentPermId:       agentPermID,
-		//		WalletAgentPermId: walletAgentPermID,
-		//	},
-		//	expectErr:  true,
-		//	errMessage: "issuer perm is revoked or terminated",
-		//},
 		{
-			name: "Invalid - agent perm not found",
+			name: "Issuer vs_operator mismatch",
 			msg: &types.MsgCreateOrUpdatePermissionSession{
-				Creator:           creator,
+				Authority:         authority,
+				Operator:          operator, // does not match issuerPermDiffOp.VsOperator
+				Id:                uuid.New().String(),
+				IssuerPermId:      issuerPermDiffOpID,
+				VerifierPermId:    0,
+				AgentPermId:       agentPermID,
+				WalletAgentPermId: walletAgentPermID,
+			},
+			expectErr:  true,
+			errMessage: "issuer permission vs_operator does not match operator",
+		},
+		{
+			name: "Issuer authority mismatch",
+			msg: &types.MsgCreateOrUpdatePermissionSession{
+				Authority:         authority, // does not match issuerPermDiffAuth.Authority
+				Operator:          operator,
+				Id:                uuid.New().String(),
+				IssuerPermId:      issuerPermDiffAuthID,
+				VerifierPermId:    0,
+				AgentPermId:       agentPermID,
+				WalletAgentPermId: walletAgentPermID,
+			},
+			expectErr:  true,
+			errMessage: "issuer permission authority does not match authority",
+		},
+		{
+			name: "VS operator authz not enabled",
+			msg: &types.MsgCreateOrUpdatePermissionSession{
+				Authority:         authority,
+				Operator:          operator,
+				Id:                uuid.New().String(),
+				IssuerPermId:      issuerPermNoAuthzID,
+				VerifierPermId:    0,
+				AgentPermId:       agentPermID,
+				WalletAgentPermId: walletAgentPermID,
+			},
+			expectErr:  true,
+			errMessage: "VS operator authorization is not enabled for permission",
+		},
+		{
+			name: "Agent perm not found",
+			msg: &types.MsgCreateOrUpdatePermissionSession{
+				Authority:         authority,
+				Operator:          operator,
 				Id:                uuid.New().String(),
 				IssuerPermId:      issuerPermID,
 				VerifierPermId:    0,
@@ -3575,23 +3660,55 @@ func TestCreateOrUpdatePermissionSession(t *testing.T) {
 			expectErr:  true,
 			errMessage: "agent permission not found",
 		},
-		//{
-		//	name: "Invalid - agent not HOLDER type",
-		//	msg: &types.MsgCreateOrUpdatePermissionSession{
-		//		Creator:           creator,
-		//		Id:                uuid.New().String(),
-		//		IssuerPermId:      issuerPermID,
-		//		VerifierPermId:    0,
-		//		AgentPermId:       issuerPermID, // Not HOLDER type
-		//		WalletAgentPermId: walletAgentPermID,
-		//	},
-		//	expectErr:  true,
-		//	errMessage: "agent permission must be HOLDER type",
-		//},
+		{
+			name: "Wallet agent perm not found",
+			msg: &types.MsgCreateOrUpdatePermissionSession{
+				Authority:         authority,
+				Operator:          operator,
+				Id:                uuid.New().String(),
+				IssuerPermId:      issuerPermID,
+				VerifierPermId:    0,
+				AgentPermId:       agentPermID,
+				WalletAgentPermId: 9999,
+			},
+			expectErr:  true,
+			errMessage: "wallet agent permission not found",
+		},
+		{
+			name: "Session update - authority mismatch",
+			msg: &types.MsgCreateOrUpdatePermissionSession{
+				Authority:         otherAuthority, // different from session creator
+				Operator:          operator,
+				Id:                sessionUUID, // same ID as first test case (already created)
+				IssuerPermId:      issuerPermDiffAuthID,
+				VerifierPermId:    0,
+				AgentPermId:       agentPermID,
+				WalletAgentPermId: walletAgentPermID,
+			},
+			expectErr:  true,
+			errMessage: "session authority does not match",
+		},
+		{
+			name: "Valid update of existing session",
+			msg: &types.MsgCreateOrUpdatePermissionSession{
+				Authority:         authority,
+				Operator:          operator,
+				Id:                sessionUUID, // same ID as first test case (already created)
+				IssuerPermId:      issuerPermID,
+				VerifierPermId:    0,
+				AgentPermId:       agentPermID,
+				WalletAgentPermId: walletAgentPermID,
+			},
+			expectErr: false,
+		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
+			// Configure delegation keeper error for this test case
+			delKeeper.ErrToReturn = tc.setupErr
+			defer func() { delKeeper.ErrToReturn = nil }()
+
 			resp, err := ms.CreateOrUpdatePermissionSession(ctx, tc.msg)
 
 			if tc.expectErr {
@@ -3607,19 +3724,20 @@ func TestCreateOrUpdatePermissionSession(t *testing.T) {
 				session, err := k.PermissionSession.Get(sdkCtx, tc.msg.Id)
 				require.NoError(t, err)
 				require.Equal(t, tc.msg.AgentPermId, session.AgentPermId)
-				require.Equal(t, tc.msg.Creator, session.Controller)
+				require.Equal(t, tc.msg.Authority, session.Authority)
+				require.Equal(t, tc.msg.Operator, session.VsOperator)
 
-				// Check that the session contains appropriate authorization
-				foundAuthz := false
-				for _, authz := range session.Authz {
-					if authz.ExecutorPermId == tc.msg.IssuerPermId &&
-						authz.BeneficiaryPermId == tc.msg.VerifierPermId &&
-						authz.WalletAgentPermId == tc.msg.WalletAgentPermId {
-						foundAuthz = true
+				// Check that the session contains an appropriate session record
+				foundRecord := false
+				for _, rec := range session.SessionRecords {
+					if rec.IssuerPermId == tc.msg.IssuerPermId &&
+						rec.VerifierPermId == tc.msg.VerifierPermId &&
+						rec.WalletAgentPermId == tc.msg.WalletAgentPermId {
+						foundRecord = true
 						break
 					}
 				}
-				require.True(t, foundAuthz, "Session doesn't contain the expected authorization")
+				require.True(t, foundRecord, "Session doesn't contain the expected session record")
 			}
 		})
 	}
@@ -3627,7 +3745,7 @@ func TestCreateOrUpdatePermissionSession(t *testing.T) {
 
 // TestDiscountApplicationInFeeCalculation tests that discounts are correctly applied when calculating fees
 func TestDiscountApplicationInFeeCalculation(t *testing.T) {
-	k, ms, csKeeper, _, ctx := setupMsgServer(t)
+	k, ms, csKeeper, _, ctx, _ := setupMsgServerWithDelegation(t)
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
 	// Set specific block time for consistent testing
@@ -3635,7 +3753,8 @@ func TestDiscountApplicationInFeeCalculation(t *testing.T) {
 	sdkCtx = sdkCtx.WithBlockTime(blockTime)
 	ctx = sdk.WrapSDKContext(sdkCtx)
 
-	creator := sdk.AccAddress([]byte("test_creator")).String()
+	authority := sdk.AccAddress([]byte("test_authority")).String()
+	operator := sdk.AccAddress([]byte("test_operator")).String()
 
 	// Create mock credential schema
 	csKeeper.CreateMockCredentialSchema(1,
@@ -3650,11 +3769,11 @@ func TestDiscountApplicationInFeeCalculation(t *testing.T) {
 	validatorPerm := types.Permission{
 		SchemaId:      1,
 		Type:          types.PermissionType_ISSUER_GRANTOR,
-		Authority:       creator,
+		Authority:     authority,
 		Created:       &now,
-		CreatedBy:     creator,
+		CreatedBy:     operator,
 		Adjusted:      &now,
-		AdjustedBy:    creator,
+		AdjustedBy:    operator,
 		Modified:      &now,
 		Country:       "US",
 		VpState:       types.ValidationState_VALIDATED,
@@ -3666,32 +3785,34 @@ func TestDiscountApplicationInFeeCalculation(t *testing.T) {
 
 	// Create ISSUER perm with discount set (per Issue #94: use discount instead of exemption)
 	issuerPerm := types.Permission{
-		SchemaId:            1,
-		Type:                types.PermissionType_ISSUER,
-		Authority:             creator,
-		Created:             &now,
-		CreatedBy:           creator,
-		Adjusted:            &now,
-		AdjustedBy:          creator,
-		Modified:            &now,
-		Country:             "US",
-		ValidatorPermId:     validatorPermID,
-		VpState:             types.ValidationState_VALIDATED,
-		IssuanceFeeDiscount: 5000, // 50% discount
-		EffectiveFrom:       &pastTime,
+		SchemaId:               1,
+		Type:                   types.PermissionType_ISSUER,
+		Authority:              authority,
+		VsOperator:             operator,
+		VsOperatorAuthzEnabled: true,
+		Created:                &now,
+		CreatedBy:              operator,
+		Adjusted:               &now,
+		AdjustedBy:             operator,
+		Modified:               &now,
+		Country:                "US",
+		ValidatorPermId:        validatorPermID,
+		VpState:                types.ValidationState_VALIDATED,
+		IssuanceFeeDiscount:    5000, // 50% discount
+		EffectiveFrom:          &pastTime,
 	}
 	issuerPermID, err := k.CreatePermission(sdkCtx, issuerPerm)
 	require.NoError(t, err)
 
-	// Create agent perm (HOLDER type)
+	// Create agent perm
 	agentPerm := types.Permission{
 		SchemaId:        1,
 		Type:            types.PermissionType_ISSUER,
-		Authority:         creator,
+		Authority:       authority,
 		Created:         &now,
-		CreatedBy:       creator,
+		CreatedBy:       operator,
 		Adjusted:        &now,
-		AdjustedBy:      creator,
+		AdjustedBy:      operator,
 		Modified:        &now,
 		Country:         "US",
 		ValidatorPermId: issuerPermID,
@@ -3710,7 +3831,8 @@ func TestDiscountApplicationInFeeCalculation(t *testing.T) {
 		// Expected: beneficiary_fees = 50
 
 		msg := &types.MsgCreateOrUpdatePermissionSession{
-			Creator:           creator,
+			Authority:         authority,
+			Operator:          operator,
 			Id:                uuid.New().String(),
 			IssuerPermId:      issuerPermID,
 			VerifierPermId:    0,
@@ -3727,26 +3849,29 @@ func TestDiscountApplicationInFeeCalculation(t *testing.T) {
 	t.Run("Discount applied in execution", func(t *testing.T) {
 		// Create another issuer perm with different discount
 		issuerPerm2 := types.Permission{
-			SchemaId:            1,
-			Type:                types.PermissionType_ISSUER,
-			Authority:             creator,
-			Created:             &now,
-			CreatedBy:           creator,
-			Adjusted:            &now,
-			AdjustedBy:          creator,
-			Modified:            &now,
-			Country:             "US",
-			ValidatorPermId:     validatorPermID,
-			VpState:             types.ValidationState_VALIDATED,
-			IssuanceFeeDiscount: 3000, // 30% discount
-			EffectiveFrom:       &pastTime,
+			SchemaId:               1,
+			Type:                   types.PermissionType_ISSUER,
+			Authority:              authority,
+			VsOperator:             operator,
+			VsOperatorAuthzEnabled: true,
+			Created:                &now,
+			CreatedBy:              operator,
+			Adjusted:               &now,
+			AdjustedBy:             operator,
+			Modified:               &now,
+			Country:                "US",
+			ValidatorPermId:        validatorPermID,
+			VpState:                types.ValidationState_VALIDATED,
+			IssuanceFeeDiscount:    3000, // 30% discount
+			EffectiveFrom:          &pastTime,
 		}
 		issuerPerm2ID, err := k.CreatePermission(sdkCtx, issuerPerm2)
 		require.NoError(t, err)
 
 		// Expected: fees from validatorPerm (100) * (1 - 0.3) = 70
 		msg := &types.MsgCreateOrUpdatePermissionSession{
-			Creator:           creator,
+			Authority:         authority,
+			Operator:          operator,
 			Id:                uuid.New().String(),
 			IssuerPermId:      issuerPerm2ID,
 			VerifierPermId:    0,
@@ -3764,11 +3889,11 @@ func TestDiscountApplicationInFeeCalculation(t *testing.T) {
 		validatorWithDiscount := types.Permission{
 			SchemaId:            1,
 			Type:                types.PermissionType_ISSUER_GRANTOR,
-			Authority:             creator,
+			Authority:           authority,
 			Created:             &now,
-			CreatedBy:           creator,
+			CreatedBy:           operator,
 			Adjusted:            &now,
-			AdjustedBy:          creator,
+			AdjustedBy:          operator,
 			Modified:            &now,
 			Country:             "US",
 			VpState:             types.ValidationState_VALIDATED,
@@ -3781,19 +3906,21 @@ func TestDiscountApplicationInFeeCalculation(t *testing.T) {
 
 		// Create issuer with discount (per Issue #94: use discount instead of exemption)
 		issuerWithDiscount := types.Permission{
-			SchemaId:            1,
-			Type:                types.PermissionType_ISSUER,
-			Authority:             creator,
-			Created:             &now,
-			CreatedBy:           creator,
-			Adjusted:            &now,
-			AdjustedBy:          creator,
-			Modified:            &now,
-			Country:             "US",
-			ValidatorPermId:     validatorWithDiscountID,
-			VpState:             types.ValidationState_VALIDATED,
-			IssuanceFeeDiscount: 3000, // 30% discount
-			EffectiveFrom:       &pastTime,
+			SchemaId:               1,
+			Type:                   types.PermissionType_ISSUER,
+			Authority:              authority,
+			VsOperator:             operator,
+			VsOperatorAuthzEnabled: true,
+			Created:                &now,
+			CreatedBy:              operator,
+			Adjusted:               &now,
+			AdjustedBy:             operator,
+			Modified:               &now,
+			Country:                "US",
+			ValidatorPermId:        validatorWithDiscountID,
+			VpState:                types.ValidationState_VALIDATED,
+			IssuanceFeeDiscount:    3000, // 30% discount
+			EffectiveFrom:          &pastTime,
 		}
 		issuerWithDiscountID, err := k.CreatePermission(sdkCtx, issuerWithDiscount)
 		require.NoError(t, err)
@@ -3805,7 +3932,8 @@ func TestDiscountApplicationInFeeCalculation(t *testing.T) {
 		// Final beneficiary_fees = 140
 
 		msg := &types.MsgCreateOrUpdatePermissionSession{
-			Creator:           creator,
+			Authority:         authority,
+			Operator:          operator,
 			Id:                uuid.New().String(),
 			IssuerPermId:      issuerWithDiscountID,
 			VerifierPermId:    0,
@@ -3992,14 +4120,15 @@ func TestQueryPermissions(t *testing.T) {
 	sessionID := uuid.New().String()
 	session := types.PermissionSession{
 		Id:          sessionID,
-		Controller:  creator,
+		Authority:   creator,
+		VsOperator:  creator,
 		AgentPermId: issuerPermID, // Using issuer as agent for simplicity in test
 		Created:     &now,
 		Modified:    &now,
-		Authz: []*types.SessionAuthz{
+		SessionRecords: []*types.PermissionSessionRecord{
 			{
-				ExecutorPermId:    issuerPermID,
-				BeneficiaryPermId: verifierPermID,
+				IssuerPermId:   issuerPermID,
+				VerifierPermId: verifierPermID,
 			},
 		},
 	}
@@ -4033,7 +4162,7 @@ func TestQueryPermissions(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, getSessionResp)
 	require.Equal(t, sessionID, getSessionResp.Session.Id)
-	require.Equal(t, creator, getSessionResp.Session.Controller)
+	require.Equal(t, creator, getSessionResp.Session.Authority)
 
 	// Test ListPermissionSessions query
 	listSessionsReq := &types.QueryListPermissionSessionsRequest{

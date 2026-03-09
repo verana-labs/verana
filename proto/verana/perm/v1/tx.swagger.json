@@ -492,28 +492,41 @@
     "verana.perm.v1.MsgCreateOrUpdatePermissionSession": {
       "type": "object",
       "properties": {
-        "creator": {
-          "type": "string"
+        "authority": {
+          "type": "string",
+          "title": "authority is the group account on whose behalf this message is executed"
+        },
+        "operator": {
+          "type": "string",
+          "title": "operator is the account authorized by the authority to run this Msg (vs_operator)"
         },
         "id": {
           "type": "string",
-          "title": "UUID"
+          "title": "UUID (mandatory)"
         },
         "issuer_perm_id": {
           "type": "string",
-          "format": "uint64"
+          "format": "uint64",
+          "title": "optional: issuer permission id"
         },
         "verifier_perm_id": {
           "type": "string",
-          "format": "uint64"
+          "format": "uint64",
+          "title": "optional: verifier permission id"
         },
         "agent_perm_id": {
           "type": "string",
-          "format": "uint64"
+          "format": "uint64",
+          "title": "mandatory: agent credential issuer permission id"
         },
         "wallet_agent_perm_id": {
           "type": "string",
-          "format": "uint64"
+          "format": "uint64",
+          "title": "mandatory: wallet credential issuer permission id"
+        },
+        "digest": {
+          "type": "string",
+          "title": "optional: digest derived from an issued or verified credential"
         }
       }
     },

@@ -151,13 +151,22 @@ export interface MsgRevokePermissionResponse {
 }
 
 export interface MsgCreateOrUpdatePermissionSession {
-  creator: string;
-  /** UUID */
+  /** authority is the group account on whose behalf this message is executed */
+  authority: string;
+  /** operator is the account authorized by the authority to run this Msg (vs_operator) */
+  operator: string;
+  /** UUID (mandatory) */
   id: string;
+  /** optional: issuer permission id */
   issuerPermId: number;
+  /** optional: verifier permission id */
   verifierPermId: number;
+  /** mandatory: agent credential issuer permission id */
   agentPermId: number;
+  /** mandatory: wallet credential issuer permission id */
   walletAgentPermId: number;
+  /** optional: digest derived from an issued or verified credential */
+  digest: string;
 }
 
 export interface MsgCreateOrUpdatePermissionSessionResponse {
@@ -1717,28 +1726,43 @@ export const MsgRevokePermissionResponse = {
 };
 
 function createBaseMsgCreateOrUpdatePermissionSession(): MsgCreateOrUpdatePermissionSession {
-  return { creator: "", id: "", issuerPermId: 0, verifierPermId: 0, agentPermId: 0, walletAgentPermId: 0 };
+  return {
+    authority: "",
+    operator: "",
+    id: "",
+    issuerPermId: 0,
+    verifierPermId: 0,
+    agentPermId: 0,
+    walletAgentPermId: 0,
+    digest: "",
+  };
 }
 
 export const MsgCreateOrUpdatePermissionSession = {
   encode(message: MsgCreateOrUpdatePermissionSession, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.creator !== "") {
-      writer.uint32(10).string(message.creator);
+    if (message.authority !== "") {
+      writer.uint32(10).string(message.authority);
+    }
+    if (message.operator !== "") {
+      writer.uint32(18).string(message.operator);
     }
     if (message.id !== "") {
-      writer.uint32(18).string(message.id);
+      writer.uint32(26).string(message.id);
     }
     if (message.issuerPermId !== 0) {
-      writer.uint32(24).uint64(message.issuerPermId);
+      writer.uint32(32).uint64(message.issuerPermId);
     }
     if (message.verifierPermId !== 0) {
-      writer.uint32(32).uint64(message.verifierPermId);
+      writer.uint32(40).uint64(message.verifierPermId);
     }
     if (message.agentPermId !== 0) {
-      writer.uint32(40).uint64(message.agentPermId);
+      writer.uint32(48).uint64(message.agentPermId);
     }
     if (message.walletAgentPermId !== 0) {
-      writer.uint32(48).uint64(message.walletAgentPermId);
+      writer.uint32(56).uint64(message.walletAgentPermId);
+    }
+    if (message.digest !== "") {
+      writer.uint32(66).string(message.digest);
     }
     return writer;
   },
@@ -1755,42 +1779,56 @@ export const MsgCreateOrUpdatePermissionSession = {
             break;
           }
 
-          message.creator = reader.string();
+          message.authority = reader.string();
           continue;
         case 2:
           if (tag !== 18) {
             break;
           }
 
-          message.id = reader.string();
+          message.operator = reader.string();
           continue;
         case 3:
-          if (tag !== 24) {
+          if (tag !== 26) {
             break;
           }
 
-          message.issuerPermId = longToNumber(reader.uint64() as Long);
+          message.id = reader.string();
           continue;
         case 4:
           if (tag !== 32) {
             break;
           }
 
-          message.verifierPermId = longToNumber(reader.uint64() as Long);
+          message.issuerPermId = longToNumber(reader.uint64() as Long);
           continue;
         case 5:
           if (tag !== 40) {
             break;
           }
 
-          message.agentPermId = longToNumber(reader.uint64() as Long);
+          message.verifierPermId = longToNumber(reader.uint64() as Long);
           continue;
         case 6:
           if (tag !== 48) {
             break;
           }
 
+          message.agentPermId = longToNumber(reader.uint64() as Long);
+          continue;
+        case 7:
+          if (tag !== 56) {
+            break;
+          }
+
           message.walletAgentPermId = longToNumber(reader.uint64() as Long);
+          continue;
+        case 8:
+          if (tag !== 66) {
+            break;
+          }
+
+          message.digest = reader.string();
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -1803,19 +1841,24 @@ export const MsgCreateOrUpdatePermissionSession = {
 
   fromJSON(object: any): MsgCreateOrUpdatePermissionSession {
     return {
-      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
+      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
       id: isSet(object.id) ? globalThis.String(object.id) : "",
       issuerPermId: isSet(object.issuerPermId) ? globalThis.Number(object.issuerPermId) : 0,
       verifierPermId: isSet(object.verifierPermId) ? globalThis.Number(object.verifierPermId) : 0,
       agentPermId: isSet(object.agentPermId) ? globalThis.Number(object.agentPermId) : 0,
       walletAgentPermId: isSet(object.walletAgentPermId) ? globalThis.Number(object.walletAgentPermId) : 0,
+      digest: isSet(object.digest) ? globalThis.String(object.digest) : "",
     };
   },
 
   toJSON(message: MsgCreateOrUpdatePermissionSession): unknown {
     const obj: any = {};
-    if (message.creator !== "") {
-      obj.creator = message.creator;
+    if (message.authority !== "") {
+      obj.authority = message.authority;
+    }
+    if (message.operator !== "") {
+      obj.operator = message.operator;
     }
     if (message.id !== "") {
       obj.id = message.id;
@@ -1832,6 +1875,9 @@ export const MsgCreateOrUpdatePermissionSession = {
     if (message.walletAgentPermId !== 0) {
       obj.walletAgentPermId = Math.round(message.walletAgentPermId);
     }
+    if (message.digest !== "") {
+      obj.digest = message.digest;
+    }
     return obj;
   },
 
@@ -1844,12 +1890,14 @@ export const MsgCreateOrUpdatePermissionSession = {
     object: I,
   ): MsgCreateOrUpdatePermissionSession {
     const message = createBaseMsgCreateOrUpdatePermissionSession();
-    message.creator = object.creator ?? "";
+    message.authority = object.authority ?? "";
+    message.operator = object.operator ?? "";
     message.id = object.id ?? "";
     message.issuerPermId = object.issuerPermId ?? 0;
     message.verifierPermId = object.verifierPermId ?? 0;
     message.agentPermId = object.agentPermId ?? 0;
     message.walletAgentPermId = object.walletAgentPermId ?? 0;
+    message.digest = object.digest ?? "";
     return message;
   },
 };

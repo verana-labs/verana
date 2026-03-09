@@ -238,8 +238,14 @@ func (msg *MsgRevokePermission) ValidateBasic() error {
 }
 
 func (msg *MsgCreateOrUpdatePermissionSession) ValidateBasic() error {
-	if _, err := sdk.AccAddressFromBech32(msg.Creator); err != nil {
-		return sdkerrors.ErrInvalidAddress.Wrapf("invalid creator address: %s", err)
+	// [MOD-PERM-MSG-10-2] authority (group): signature must be verified
+	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
+		return fmt.Errorf("invalid authority address: %w", err)
+	}
+
+	// [MOD-PERM-MSG-10-2] operator (account): signature must be verified
+	if _, err := sdk.AccAddressFromBech32(msg.Operator); err != nil {
+		return fmt.Errorf("invalid operator address: %w", err)
 	}
 
 	// Validate UUID format
@@ -260,6 +266,11 @@ func (msg *MsgCreateOrUpdatePermissionSession) ValidateBasic() error {
 	// wallet_agent_perm_id is mandatory
 	if msg.WalletAgentPermId == 0 {
 		return sdkerrors.ErrInvalidRequest.Wrap("wallet_agent_perm_id is mandatory")
+	}
+
+	// Validate digest SRI format if provided
+	if msg.Digest != "" && !isValidDigestSRI(msg.Digest) {
+		return sdkerrors.ErrInvalidRequest.Wrap("invalid digest format")
 	}
 
 	return nil

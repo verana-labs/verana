@@ -189,16 +189,20 @@ export interface Permission {
 
 export interface PermissionSession {
   id: string;
-  controller: string;
+  /** group account that owns this session */
+  authority: string;
+  /** the VS operator account */
+  vsOperator: string;
   agentPermId: number;
-  authz: SessionAuthz[];
+  sessionRecords: PermissionSessionRecord[];
   created: Date | undefined;
   modified: Date | undefined;
 }
 
-export interface SessionAuthz {
-  executorPermId: number;
-  beneficiaryPermId: number;
+export interface PermissionSessionRecord {
+  created: Date | undefined;
+  issuerPermId: number;
+  verifierPermId: number;
   walletAgentPermId: number;
 }
 
@@ -940,7 +944,15 @@ export const Permission = {
 };
 
 function createBasePermissionSession(): PermissionSession {
-  return { id: "", controller: "", agentPermId: 0, authz: [], created: undefined, modified: undefined };
+  return {
+    id: "",
+    authority: "",
+    vsOperator: "",
+    agentPermId: 0,
+    sessionRecords: [],
+    created: undefined,
+    modified: undefined,
+  };
 }
 
 export const PermissionSession = {
@@ -948,20 +960,23 @@ export const PermissionSession = {
     if (message.id !== "") {
       writer.uint32(10).string(message.id);
     }
-    if (message.controller !== "") {
-      writer.uint32(18).string(message.controller);
+    if (message.authority !== "") {
+      writer.uint32(18).string(message.authority);
+    }
+    if (message.vsOperator !== "") {
+      writer.uint32(26).string(message.vsOperator);
     }
     if (message.agentPermId !== 0) {
-      writer.uint32(24).uint64(message.agentPermId);
+      writer.uint32(32).uint64(message.agentPermId);
     }
-    for (const v of message.authz) {
-      SessionAuthz.encode(v!, writer.uint32(34).fork()).ldelim();
+    for (const v of message.sessionRecords) {
+      PermissionSessionRecord.encode(v!, writer.uint32(42).fork()).ldelim();
     }
     if (message.created !== undefined) {
-      Timestamp.encode(toTimestamp(message.created), writer.uint32(42).fork()).ldelim();
+      Timestamp.encode(toTimestamp(message.created), writer.uint32(50).fork()).ldelim();
     }
     if (message.modified !== undefined) {
-      Timestamp.encode(toTimestamp(message.modified), writer.uint32(50).fork()).ldelim();
+      Timestamp.encode(toTimestamp(message.modified), writer.uint32(58).fork()).ldelim();
     }
     return writer;
   },
@@ -985,31 +1000,38 @@ export const PermissionSession = {
             break;
           }
 
-          message.controller = reader.string();
+          message.authority = reader.string();
           continue;
         case 3:
-          if (tag !== 24) {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.vsOperator = reader.string();
+          continue;
+        case 4:
+          if (tag !== 32) {
             break;
           }
 
           message.agentPermId = longToNumber(reader.uint64() as Long);
-          continue;
-        case 4:
-          if (tag !== 34) {
-            break;
-          }
-
-          message.authz.push(SessionAuthz.decode(reader, reader.uint32()));
           continue;
         case 5:
           if (tag !== 42) {
             break;
           }
 
-          message.created = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
+          message.sessionRecords.push(PermissionSessionRecord.decode(reader, reader.uint32()));
           continue;
         case 6:
           if (tag !== 50) {
+            break;
+          }
+
+          message.created = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
+          continue;
+        case 7:
+          if (tag !== 58) {
             break;
           }
 
@@ -1027,9 +1049,12 @@ export const PermissionSession = {
   fromJSON(object: any): PermissionSession {
     return {
       id: isSet(object.id) ? globalThis.String(object.id) : "",
-      controller: isSet(object.controller) ? globalThis.String(object.controller) : "",
+      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      vsOperator: isSet(object.vsOperator) ? globalThis.String(object.vsOperator) : "",
       agentPermId: isSet(object.agentPermId) ? globalThis.Number(object.agentPermId) : 0,
-      authz: globalThis.Array.isArray(object?.authz) ? object.authz.map((e: any) => SessionAuthz.fromJSON(e)) : [],
+      sessionRecords: globalThis.Array.isArray(object?.sessionRecords)
+        ? object.sessionRecords.map((e: any) => PermissionSessionRecord.fromJSON(e))
+        : [],
       created: isSet(object.created) ? fromJsonTimestamp(object.created) : undefined,
       modified: isSet(object.modified) ? fromJsonTimestamp(object.modified) : undefined,
     };
@@ -1040,14 +1065,17 @@ export const PermissionSession = {
     if (message.id !== "") {
       obj.id = message.id;
     }
-    if (message.controller !== "") {
-      obj.controller = message.controller;
+    if (message.authority !== "") {
+      obj.authority = message.authority;
+    }
+    if (message.vsOperator !== "") {
+      obj.vsOperator = message.vsOperator;
     }
     if (message.agentPermId !== 0) {
       obj.agentPermId = Math.round(message.agentPermId);
     }
-    if (message.authz?.length) {
-      obj.authz = message.authz.map((e) => SessionAuthz.toJSON(e));
+    if (message.sessionRecords?.length) {
+      obj.sessionRecords = message.sessionRecords.map((e) => PermissionSessionRecord.toJSON(e));
     }
     if (message.created !== undefined) {
       obj.created = message.created.toISOString();
@@ -1064,56 +1092,67 @@ export const PermissionSession = {
   fromPartial<I extends Exact<DeepPartial<PermissionSession>, I>>(object: I): PermissionSession {
     const message = createBasePermissionSession();
     message.id = object.id ?? "";
-    message.controller = object.controller ?? "";
+    message.authority = object.authority ?? "";
+    message.vsOperator = object.vsOperator ?? "";
     message.agentPermId = object.agentPermId ?? 0;
-    message.authz = object.authz?.map((e) => SessionAuthz.fromPartial(e)) || [];
+    message.sessionRecords = object.sessionRecords?.map((e) => PermissionSessionRecord.fromPartial(e)) || [];
     message.created = object.created ?? undefined;
     message.modified = object.modified ?? undefined;
     return message;
   },
 };
 
-function createBaseSessionAuthz(): SessionAuthz {
-  return { executorPermId: 0, beneficiaryPermId: 0, walletAgentPermId: 0 };
+function createBasePermissionSessionRecord(): PermissionSessionRecord {
+  return { created: undefined, issuerPermId: 0, verifierPermId: 0, walletAgentPermId: 0 };
 }
 
-export const SessionAuthz = {
-  encode(message: SessionAuthz, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.executorPermId !== 0) {
-      writer.uint32(8).uint64(message.executorPermId);
+export const PermissionSessionRecord = {
+  encode(message: PermissionSessionRecord, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.created !== undefined) {
+      Timestamp.encode(toTimestamp(message.created), writer.uint32(10).fork()).ldelim();
     }
-    if (message.beneficiaryPermId !== 0) {
-      writer.uint32(16).uint64(message.beneficiaryPermId);
+    if (message.issuerPermId !== 0) {
+      writer.uint32(16).uint64(message.issuerPermId);
+    }
+    if (message.verifierPermId !== 0) {
+      writer.uint32(24).uint64(message.verifierPermId);
     }
     if (message.walletAgentPermId !== 0) {
-      writer.uint32(24).uint64(message.walletAgentPermId);
+      writer.uint32(32).uint64(message.walletAgentPermId);
     }
     return writer;
   },
 
-  decode(input: _m0.Reader | Uint8Array, length?: number): SessionAuthz {
+  decode(input: _m0.Reader | Uint8Array, length?: number): PermissionSessionRecord {
     const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseSessionAuthz();
+    const message = createBasePermissionSessionRecord();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          if (tag !== 8) {
+          if (tag !== 10) {
             break;
           }
 
-          message.executorPermId = longToNumber(reader.uint64() as Long);
+          message.created = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
           continue;
         case 2:
           if (tag !== 16) {
             break;
           }
 
-          message.beneficiaryPermId = longToNumber(reader.uint64() as Long);
+          message.issuerPermId = longToNumber(reader.uint64() as Long);
           continue;
         case 3:
           if (tag !== 24) {
+            break;
+          }
+
+          message.verifierPermId = longToNumber(reader.uint64() as Long);
+          continue;
+        case 4:
+          if (tag !== 32) {
             break;
           }
 
@@ -1128,21 +1167,25 @@ export const SessionAuthz = {
     return message;
   },
 
-  fromJSON(object: any): SessionAuthz {
+  fromJSON(object: any): PermissionSessionRecord {
     return {
-      executorPermId: isSet(object.executorPermId) ? globalThis.Number(object.executorPermId) : 0,
-      beneficiaryPermId: isSet(object.beneficiaryPermId) ? globalThis.Number(object.beneficiaryPermId) : 0,
+      created: isSet(object.created) ? fromJsonTimestamp(object.created) : undefined,
+      issuerPermId: isSet(object.issuerPermId) ? globalThis.Number(object.issuerPermId) : 0,
+      verifierPermId: isSet(object.verifierPermId) ? globalThis.Number(object.verifierPermId) : 0,
       walletAgentPermId: isSet(object.walletAgentPermId) ? globalThis.Number(object.walletAgentPermId) : 0,
     };
   },
 
-  toJSON(message: SessionAuthz): unknown {
+  toJSON(message: PermissionSessionRecord): unknown {
     const obj: any = {};
-    if (message.executorPermId !== 0) {
-      obj.executorPermId = Math.round(message.executorPermId);
+    if (message.created !== undefined) {
+      obj.created = message.created.toISOString();
     }
-    if (message.beneficiaryPermId !== 0) {
-      obj.beneficiaryPermId = Math.round(message.beneficiaryPermId);
+    if (message.issuerPermId !== 0) {
+      obj.issuerPermId = Math.round(message.issuerPermId);
+    }
+    if (message.verifierPermId !== 0) {
+      obj.verifierPermId = Math.round(message.verifierPermId);
     }
     if (message.walletAgentPermId !== 0) {
       obj.walletAgentPermId = Math.round(message.walletAgentPermId);
@@ -1150,13 +1193,14 @@ export const SessionAuthz = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<SessionAuthz>, I>>(base?: I): SessionAuthz {
-    return SessionAuthz.fromPartial(base ?? ({} as any));
+  create<I extends Exact<DeepPartial<PermissionSessionRecord>, I>>(base?: I): PermissionSessionRecord {
+    return PermissionSessionRecord.fromPartial(base ?? ({} as any));
   },
-  fromPartial<I extends Exact<DeepPartial<SessionAuthz>, I>>(object: I): SessionAuthz {
-    const message = createBaseSessionAuthz();
-    message.executorPermId = object.executorPermId ?? 0;
-    message.beneficiaryPermId = object.beneficiaryPermId ?? 0;
+  fromPartial<I extends Exact<DeepPartial<PermissionSessionRecord>, I>>(object: I): PermissionSessionRecord {
+    const message = createBasePermissionSessionRecord();
+    message.created = object.created ?? undefined;
+    message.issuerPermId = object.issuerPermId ?? 0;
+    message.verifierPermId = object.verifierPermId ?? 0;
     message.walletAgentPermId = object.walletAgentPermId ?? 0;
     return message;
   },
