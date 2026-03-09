@@ -1199,36 +1199,40 @@ func RepayPermissionSlashedTrustDeposit(client cosmosclient.Client, ctx context.
 }
 
 // CreatePermission creates a permission directly
-func CreatePermission(client cosmosclient.Client, ctx context.Context, actor cosmosaccount.Account, msg permtypes.MsgCreatePermission) string {
+func CreatePermission(client cosmosclient.Client, ctx context.Context, actor cosmosaccount.Account, authority string, msg permtypes.MsgCreatePermission) (string, error) {
 	actorAddr, err := actor.Address(addressPrefix)
 	if err != nil {
-		panic(fmt.Sprintf("Failed to get actor address: %v", err))
+		return "", fmt.Errorf("failed to get actor address: %w", err)
 	}
 
-	msgWithCreator := permtypes.MsgCreatePermission{
-		Creator:          actorAddr,
-		SchemaId:         msg.SchemaId,
-		Type:             msg.Type,
-		Did:              msg.Did,
-		Country:          msg.Country,
-		EffectiveFrom:    msg.EffectiveFrom,
-		EffectiveUntil:   msg.EffectiveUntil,
-		VerificationFees: msg.VerificationFees,
+	fullMsg := &permtypes.MsgCreatePermission{
+		Authority:                    authority,
+		Operator:                     actorAddr,
+		Type:                         msg.Type,
+		ValidatorPermId:              msg.ValidatorPermId,
+		Did:                          msg.Did,
+		EffectiveFrom:                msg.EffectiveFrom,
+		EffectiveUntil:               msg.EffectiveUntil,
+		VerificationFees:             msg.VerificationFees,
+		ValidationFees:               msg.ValidationFees,
+		VsOperator:                   msg.VsOperator,
+		VsOperatorAuthzEnabled:       msg.VsOperatorAuthzEnabled,
+		VsOperatorAuthzSpendLimit:    msg.VsOperatorAuthzSpendLimit,
+		VsOperatorAuthzWithFeegrant:  msg.VsOperatorAuthzWithFeegrant,
+		VsOperatorAuthzFeeSpendLimit: msg.VsOperatorAuthzFeeSpendLimit,
+		VsOperatorAuthzSpendPeriod:   msg.VsOperatorAuthzSpendPeriod,
 	}
 
-	txResp, err := client.BroadcastTx(ctx, actor, &msgWithCreator)
+	txResp, err := client.BroadcastTx(ctx, actor, fullMsg)
 	if err != nil {
-		panic(fmt.Sprintf("Failed to broadcast create permission: %v", err))
+		return "", fmt.Errorf("failed to broadcast create permission: %w", err)
 	}
-
-	fmt.Print("CreatePermission:\n\n")
-	fmt.Println(txResp)
 
 	if txResp.TxResponse.Code != 0 {
-		panic(fmt.Sprintf("transaction failed with code %d: %s", txResp.TxResponse.Code, txResp.TxResponse.RawLog))
+		return "", fmt.Errorf("transaction failed with code %d: %s", txResp.TxResponse.Code, txResp.TxResponse.RawLog)
 	}
 
-	return "success"
+	return "success", nil
 }
 
 // CreatePermissionSession creates a new permission session using authority/operator pattern

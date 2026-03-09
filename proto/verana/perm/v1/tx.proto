@@ -233,13 +233,13 @@ message MsgRepayPermissionSlashedTrustDeposit {
 message MsgRepayPermissionSlashedTrustDepositResponse {}
 
 message MsgCreatePermission {
-  option (cosmos.msg.v1.signer) = "creator";
+  option (cosmos.msg.v1.signer) = "operator";
 
-  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  uint64 schema_id = 2;
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   PermissionType type = 3;
-  string did = 4;
-  string country = 5;
+  uint64 validator_perm_id = 4;
+  string did = 5;
   google.protobuf.Timestamp effective_from = 6 [
     (gogoproto.stdtime) = true,
     (gogoproto.nullable) = true
@@ -250,6 +250,21 @@ message MsgCreatePermission {
   ];
   uint64 verification_fees = 8;
   uint64 validation_fees = 9;
+  // vs_operator: the account of the Verifiable Service (optional)
+  string vs_operator = 10 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  bool vs_operator_authz_enabled = 11;
+  repeated cosmos.base.v1beta1.Coin vs_operator_authz_spend_limit = 12 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (amino.dont_omitempty) = true
+  ];
+  bool vs_operator_authz_with_feegrant = 13;
+  repeated cosmos.base.v1beta1.Coin vs_operator_authz_fee_spend_limit = 14 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (amino.dont_omitempty) = true
+  ];
+  google.protobuf.Duration vs_operator_authz_spend_period = 15 [(gogoproto.stdduration) = true];
 }
 
 message MsgCreatePermissionResponse {

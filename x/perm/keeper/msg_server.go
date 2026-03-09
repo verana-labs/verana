@@ -1333,192 +1333,203 @@ func (ms msgServer) CreatePermission(goCtx context.Context, msg *types.MsgCreate
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	now := ctx.BlockTime()
 
-	// [MOD-PERM-MSG-14-2-1] Create Permission basic checks
-	if err := ms.validateCreatePermissionBasicChecks(ctx, msg, now); err != nil {
+	// [AUTHZ-CHECK]
+	if ms.delegationKeeper != nil {
+		if err := ms.delegationKeeper.CheckOperatorAuthorization(ctx, msg.Authority, msg.Operator, "/verana.perm.v1.MsgCreatePermission", now); err != nil {
+			return nil, fmt.Errorf("authorization check failed: %w", err)
+		}
+	}
+
+	// [MOD-PERM-MSG-14-2-1] Load validator_perm from validator_perm_id
+	validatorPerm, err := ms.Keeper.GetPermissionByID(ctx, msg.ValidatorPermId)
+	if err != nil {
+		return nil, fmt.Errorf("validator permission not found: %w", err)
+	}
+
+	// validator_perm MUST be an ECOSYSTEM active permission or future permission
+	if validatorPerm.Type != types.PermissionType_ECOSYSTEM {
+		return nil, fmt.Errorf("validator_perm_id must reference an ECOSYSTEM permission")
+	}
+	// Check active or future: not revoked, not slashed, not repaid, not expired
+	if validatorPerm.Revoked != nil {
+		return nil, fmt.Errorf("validator permission is revoked")
+	}
+	if validatorPerm.Slashed != nil {
+		return nil, fmt.Errorf("validator permission is slashed")
+	}
+	if validatorPerm.Repaid != nil {
+		return nil, fmt.Errorf("validator permission is repaid")
+	}
+	if validatorPerm.EffectiveUntil != nil && !now.Before(*validatorPerm.EffectiveUntil) {
+		return nil, fmt.Errorf("validator permission is expired")
+	}
+
+	// [MOD-PERM-MSG-14-2-1] effective_from checks
+	if msg.EffectiveFrom != nil {
+		if !msg.EffectiveFrom.After(now) {
+			return nil, fmt.Errorf("effective_from must be in the future")
+		}
+		// MUST be >= validator_perm.effective_from
+		if validatorPerm.EffectiveFrom != nil && msg.EffectiveFrom.Before(*validatorPerm.EffectiveFrom) {
+			return nil, fmt.Errorf("effective_from must be >= validator_perm.effective_from")
+		}
+		// if validator_perm.effective_until is not null, MUST be < validator_perm.effective_until
+		if validatorPerm.EffectiveUntil != nil && !msg.EffectiveFrom.Before(*validatorPerm.EffectiveUntil) {
+			return nil, fmt.Errorf("effective_from must be < validator_perm.effective_until")
+		}
+	}
+
+	// [MOD-PERM-MSG-14-2-1] effective_until checks
+	if msg.EffectiveUntil == nil {
+		// if null, validator_perm.effective_until MUST be NULL
+		if validatorPerm.EffectiveUntil != nil {
+			return nil, fmt.Errorf("effective_until must be set when validator_perm has effective_until")
+		}
+	} else {
+		// must be greater than effective_from
+		if msg.EffectiveFrom != nil && !msg.EffectiveUntil.After(*msg.EffectiveFrom) {
+			return nil, fmt.Errorf("effective_until must be greater than effective_from")
+		}
+		// if validator_perm.effective_until is not null, MUST be <= validator_perm.effective_until
+		if validatorPerm.EffectiveUntil != nil && msg.EffectiveUntil.After(*validatorPerm.EffectiveUntil) {
+			return nil, fmt.Errorf("effective_until must be <= validator_perm.effective_until")
+		}
+	}
+
+	// verification_fees: If specified, MUST be >= 0 and MUST be a ISSUER permission
+	if msg.VerificationFees > 0 && msg.Type != types.PermissionType_ISSUER {
+		return nil, fmt.Errorf("verification_fees can only be specified for ISSUER permissions")
+	}
+	// validation_fees: If specified, MUST be >= 0 and MUST be a ISSUER permission
+	if msg.ValidationFees > 0 && msg.Type != types.PermissionType_ISSUER {
+		return nil, fmt.Errorf("validation_fees can only be specified for ISSUER permissions")
+	}
+
+	// [MOD-PERM-MSG-14-2-2] Permission checks
+	cs, err := ms.credentialSchemaKeeper.GetCredentialSchemaById(ctx, validatorPerm.SchemaId)
+	if err != nil {
+		return nil, fmt.Errorf("credential schema not found: %w", err)
+	}
+
+	if msg.Type == types.PermissionType_ISSUER {
+		if cs.IssuerPermManagementMode != credentialschematypes.CredentialSchemaPermManagementMode_OPEN {
+			return nil, fmt.Errorf("issuer permission management mode is not OPEN")
+		}
+	}
+	if msg.Type == types.PermissionType_VERIFIER {
+		if cs.VerifierPermManagementMode != credentialschematypes.CredentialSchemaPermManagementMode_OPEN {
+			return nil, fmt.Errorf("verifier permission management mode is not OPEN")
+		}
+		if msg.ValidationFees > 0 {
+			return nil, fmt.Errorf("validation_fees cannot be specified for VERIFIER permissions")
+		}
+		if msg.VerificationFees > 0 {
+			return nil, fmt.Errorf("verification_fees cannot be specified for VERIFIER permissions")
+		}
+	}
+
+	// [MOD-PERM-MSG-14-2-4] Overlap checks
+	if err := ms.checkCreatePermissionOverlap(ctx, validatorPerm.SchemaId, msg); err != nil {
 		return nil, err
 	}
 
-	// [MOD-PERM-MSG-14-2-2] Create Permission permission checks
-	if err := ms.validateCreatePermissionPermissionChecks(ctx, msg); err != nil {
-		return nil, err
+	// [MOD-PERM-MSG-14-3] Execution
+	perm := types.Permission{
+		ValidatorPermId:              msg.ValidatorPermId,
+		SchemaId:                     validatorPerm.SchemaId,
+		Modified:                     &now,
+		Type:                         msg.Type,
+		Did:                          msg.Did,
+		Authority:                    msg.Authority,
+		VsOperator:                   msg.VsOperator,
+		Created:                      &now,
+		CreatedBy:                    msg.Authority,
+		EffectiveFrom:                msg.EffectiveFrom,
+		EffectiveUntil:               msg.EffectiveUntil,
+		ValidationFees:               0,
+		IssuanceFees:                 0,
+		VerificationFees:             0,
+		Deposit:                      0,
+		VsOperatorAuthzEnabled:       msg.VsOperatorAuthzEnabled,
+		VsOperatorAuthzSpendLimit:    msg.VsOperatorAuthzSpendLimit,
+		VsOperatorAuthzWithFeegrant:  msg.VsOperatorAuthzWithFeegrant,
+		VsOperatorAuthzFeeSpendLimit: msg.VsOperatorAuthzFeeSpendLimit,
+		VsOperatorAuthzSpendPeriod:   msg.VsOperatorAuthzSpendPeriod,
 	}
 
-	// [MOD-PERM-MSG-14-2-3] Create Permission fee checks
-	// Account MUST have the required estimated transaction fees available
-	// (This is handled by the SDK automatically during transaction processing)
+	// Set fees only for ISSUER permissions as per spec
+	if msg.Type == types.PermissionType_ISSUER {
+		perm.ValidationFees = msg.ValidationFees
+		perm.VerificationFees = msg.VerificationFees
+	}
 
-	// [MOD-PERM-MSG-14-3] Create Permission execution
-	permissionId, err := ms.executeCreatePermission(ctx, msg, now)
+	id, err := ms.Keeper.CreatePermission(ctx, perm)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create permission: %w", err)
+	}
+
+	// Grant VS Operator Authorization if vs_operator_authz_enabled
+	if perm.VsOperatorAuthzEnabled {
+		perm.Id = id
+		if err := ms.grantVSOperatorAuthorization(ctx, perm); err != nil {
+			return nil, fmt.Errorf("failed to grant VS operator authorization: %w", err)
+		}
 	}
 
 	// Emit event
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeCreatePermission,
-			sdk.NewAttribute(types.AttributeKeyPermissionID, strconv.FormatUint(permissionId, 10)),
-			sdk.NewAttribute(types.AttributeKeySchemaID, strconv.FormatUint(msg.SchemaId, 10)),
-			sdk.NewAttribute(types.AttributeKeyCreator, msg.Creator),
+			sdk.NewAttribute(types.AttributeKeyPermissionID, strconv.FormatUint(id, 10)),
+			sdk.NewAttribute(types.AttributeKeySchemaID, strconv.FormatUint(validatorPerm.SchemaId, 10)),
+			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Authority),
+			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
 			sdk.NewAttribute(types.AttributeKeyType, msg.Type.String()),
-			sdk.NewAttribute(types.AttributeKeyCountry, msg.Country),
 			sdk.NewAttribute(types.AttributeKeyEffectiveFrom, formatTimePtr(msg.EffectiveFrom)),
 			sdk.NewAttribute(types.AttributeKeyEffectiveUntil, formatTimePtr(msg.EffectiveUntil)),
-			sdk.NewAttribute(types.AttributeKeyValidationFees, strconv.FormatUint(msg.ValidationFees, 10)),
-			sdk.NewAttribute(types.AttributeKeyVerificationFees, strconv.FormatUint(msg.VerificationFees, 10)),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
 		),
 	})
 
 	return &types.MsgCreatePermissionResponse{
-		Id: permissionId,
+		Id: id,
 	}, nil
 }
 
-// [MOD-PERM-MSG-14-2-1] Create Permission basic checks
-func (ms msgServer) validateCreatePermissionBasicChecks(ctx sdk.Context, msg *types.MsgCreatePermission, now time.Time) error {
-	// schema_id MUST be a valid uint64 and a credential schema entry with this id MUST exist
-	_, err := ms.credentialSchemaKeeper.GetCredentialSchemaById(ctx, msg.SchemaId)
-	if err != nil {
-		return fmt.Errorf("credential schema not found: %w", err)
-	}
-
-	// type (PermissionType) (mandatory): MUST be ISSUER or VERIFIER, else abort
-	// (already validated in ValidateBasic)
-
-	// did, if specified, MUST conform to the DID Syntax
-	// (already validated in ValidateBasic)
-
-	// effective_from must be in the future
-	if msg.EffectiveFrom != nil && !msg.EffectiveFrom.After(now) {
-		return fmt.Errorf("effective_from must be in the future")
-	}
-
-	// effective_until, if not null, must be greater than effective_from
-	if msg.EffectiveUntil != nil && msg.EffectiveFrom != nil {
-		if !msg.EffectiveUntil.After(*msg.EffectiveFrom) {
-			return fmt.Errorf("effective_until must be greater than effective_from")
-		}
-	}
-
-	// country if not null, MUST be a valid alpha-2 code (ISO 3166)
-	if msg.Country != "" && !isValidCountryCode(msg.Country) {
-		return fmt.Errorf("invalid country code format")
-	}
-
-	// verification_fees (number) (optional): If specified, MUST be >= 0 and MUST be a ISSUER permission
-	if msg.VerificationFees > 0 && msg.Type != types.PermissionType_ISSUER {
-		return fmt.Errorf("verification_fees can only be specified for ISSUER permissions")
-	}
-
-	// validation_fees (number) (optional): If specified, MUST be >= 0 and MUST be a ISSUER permission
-	if msg.ValidationFees > 0 && msg.Type != types.PermissionType_ISSUER {
-		return fmt.Errorf("validation_fees can only be specified for ISSUER permissions")
-	}
-
-	return nil
-}
-
-// [MOD-PERM-MSG-14-2-2] Create Permission permission checks
-func (ms msgServer) validateCreatePermissionPermissionChecks(ctx sdk.Context, msg *types.MsgCreatePermission) error {
-	// Load credential schema
-	cs, err := ms.credentialSchemaKeeper.GetCredentialSchemaById(ctx, msg.SchemaId)
-	if err != nil {
-		return fmt.Errorf("credential schema not found: %w", err)
-	}
-
-	// if type is equal to ISSUER: if cs.issuer_perm_management_mode is not equal to OPEN, MUST abort
-	if msg.Type == types.PermissionType_ISSUER {
-		if cs.IssuerPermManagementMode != credentialschematypes.CredentialSchemaPermManagementMode_OPEN {
-			return fmt.Errorf("issuer permission management mode is not OPEN")
-		}
-	}
-
-	// if type is equal to VERIFIER: if cs.verifier_perm_management_mode is not equal to OPEN, MUST abort
-	if msg.Type == types.PermissionType_VERIFIER {
-		if cs.VerifierPermManagementMode != credentialschematypes.CredentialSchemaPermManagementMode_OPEN {
-			return fmt.Errorf("verifier permission management mode is not OPEN")
-		}
-
-		// if type is equal to VERIFIER and validation_fees is specified and different than 0, MUST abort
-		if msg.ValidationFees > 0 {
-			return fmt.Errorf("validation_fees cannot be specified for VERIFIER permissions")
-		}
-
-		// if type is equal to VERIFIER and verification_fees is specified and different than 0, MUST abort
-		if msg.VerificationFees > 0 {
-			return fmt.Errorf("verification_fees cannot be specified for VERIFIER permissions")
-		}
-	}
-
-	return nil
-}
-
-// [MOD-PERM-MSG-14-3] Create Permission execution
-func (ms msgServer) executeCreatePermission(ctx sdk.Context, msg *types.MsgCreatePermission, now time.Time) (uint64, error) {
-	// load the root permission of the schema (the one of type ECOSYSTEM) to ecosystem_perm_id
-	ecosystemPerm, err := ms.findEcosystemPermission(ctx, msg.SchemaId)
-	if err != nil {
-		return 0, fmt.Errorf("failed to find ecosystem permission: %w", err)
-	}
-
-	// A new entry Permission perm MUST be created
-	perm := types.Permission{
-		// perm.id: auto-incremented uint64 (handled by CreatePermission)
-		SchemaId:         msg.SchemaId,       // perm.schema_id: schema_id
-		Modified:         &now,               // perm.modified: now
-		Type:             msg.Type,           // perm.type: type
-		Did:              msg.Did,            // perm.did: did
-		Authority:        msg.Creator,        // perm.authority: account executing the method
-		Created:          &now,               // perm.created: now
-		CreatedBy:        msg.Creator,        // perm.created_by: account executing the method
-		EffectiveFrom:    msg.EffectiveFrom,  // perm.effective_from: effective_from
-		EffectiveUntil:   msg.EffectiveUntil, // perm.effective_until: effective_until
-		Country:          msg.Country,        // perm.country: country
-		ValidationFees:   0,                  // perm.validation_fees: validation_fees if specified and type is ISSUER, else 0
-		IssuanceFees:     0,                  // perm.issuance_fees: 0
-		VerificationFees: 0,                  // perm.verification_fees: verification_fees if specified and type is ISSUER, else 0
-		Deposit:          0,                  // perm.deposit: 0
-		ValidatorPermId:  ecosystemPerm.Id,   // perm.validator_perm_id: ecosystem_perm_id
-	}
-
-	// Set fees only for ISSUER permissions as per spec
-	if msg.Type == types.PermissionType_ISSUER {
-		perm.ValidationFees = msg.ValidationFees     // validation_fees if specified and type is ISSUER, else 0
-		perm.VerificationFees = msg.VerificationFees // verification_fees if specified and type is ISSUER, else 0
-	}
-
-	// Store the permission
-	id, err := ms.Keeper.CreatePermission(ctx, perm)
-	if err != nil {
-		return 0, fmt.Errorf("failed to create permission: %w", err)
-	}
-
-	return id, nil
-}
-
-// findEcosystemPermission finds the ecosystem permission for a given schema
-func (ms msgServer) findEcosystemPermission(ctx sdk.Context, schemaId uint64) (types.Permission, error) {
-	var foundPerm types.Permission
-	var found bool
-
-	// Iterate through all permissions to find the ecosystem permission for this schema
-	err := ms.Permission.Walk(ctx, nil, func(id uint64, perm types.Permission) (stop bool, err error) {
-		if perm.SchemaId == schemaId && perm.Type == types.PermissionType_ECOSYSTEM {
-			foundPerm = perm
-			found = true
-			return true, nil
+// [MOD-PERM-MSG-14-2-4] Overlap checks for CreatePermission
+func (ms msgServer) checkCreatePermissionOverlap(ctx sdk.Context, schemaId uint64, msg *types.MsgCreatePermission) error {
+	// Find all active permissions (not revoked, not slashed, not repaid)
+	// for same cs.id, type, validator_perm_id, authority
+	var overlaps []types.Permission
+	err := ms.Permission.Walk(ctx, nil, func(id uint64, p types.Permission) (stop bool, err error) {
+		if p.SchemaId == schemaId &&
+			p.Type == msg.Type &&
+			p.ValidatorPermId == msg.ValidatorPermId &&
+			p.Authority == msg.Authority &&
+			p.Revoked == nil && p.Slashed == nil && p.Repaid == nil {
+			overlaps = append(overlaps, p)
 		}
 		return false, nil
 	})
-
 	if err != nil {
-		return types.Permission{}, fmt.Errorf("failed to iterate permissions: %w", err)
+		return fmt.Errorf("failed to check permission overlap: %w", err)
 	}
 
-	if !found {
-		return types.Permission{}, fmt.Errorf("ecosystem permission not found for schema %d", schemaId)
+	for _, p := range overlaps {
+		// if p.effective_until is NULL (never expire), abort
+		if p.EffectiveUntil == nil {
+			return fmt.Errorf("existing permission %d never expires; adjust it first", p.Id)
+		}
+		// if p.effective_until is greater than effective_from, abort
+		if msg.EffectiveFrom != nil && p.EffectiveUntil.After(*msg.EffectiveFrom) {
+			return fmt.Errorf("existing permission %d overlaps: its effective_until is after your effective_from", p.Id)
+		}
+		// if p.effective_from is lower than effective_until, abort
+		if msg.EffectiveUntil != nil && p.EffectiveFrom != nil && p.EffectiveFrom.Before(*msg.EffectiveUntil) {
+			return fmt.Errorf("existing permission %d overlaps: its effective_from is before your effective_until", p.Id)
+		}
 	}
 
-	return foundPerm, nil
+	return nil
 }
+

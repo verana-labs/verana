@@ -443,45 +443,24 @@ Parameters:
 				},
 				{
 					RpcMethod: "CreatePermission",
-					Use:       "create-perm [schema-id] [type] [did]",
-					Short:     "Create a new permission for open schemas",
-					Long:      "Create a new ISSUER or VERIFIER permission for schemas with OPEN management mode. This allows self-creation of permissions without validation process.",
+					Use:       "create-perm [type] [validator-perm-id] [did] --authority [authority]",
+					Short:     "Self-create a new permission for open schemas",
+					Long:      "Self-create a new ISSUER or VERIFIER permission for schemas with OPEN management mode.",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{
-							ProtoField: "schema_id",
+							ProtoField: "type",
 						},
 						{
-							ProtoField: "type",
+							ProtoField: "validator_perm_id",
 						},
 						{
 							ProtoField: "did",
 						},
 					},
 					FlagOptions: map[string]*autocliv1.FlagOptions{
-						"country": {
-							Name:         "country",
+						"authority": {
 							DefaultValue: "",
-							Usage:        "Optional country code (ISO 3166-1 alpha-2)",
-						},
-						"effective_from": {
-							Name:         "effective-from",
-							DefaultValue: "",
-							Usage:        "Optional timestamp (RFC3339) from when the permission is effective",
-						},
-						"effective_until": {
-							Name:         "effective-until",
-							DefaultValue: "",
-							Usage:        "Optional timestamp (RFC3339) until when the permission is effective",
-						},
-						"verification_fees": {
-							Name:         "verification-fees",
-							DefaultValue: "0",
-							Usage:        "Verification fees in trust units (ISSUER permissions only)",
-						},
-						"validation_fees": {
-							Name:         "validation-fees",
-							DefaultValue: "0",
-							Usage:        "Validation fees in trust units (ISSUER permissions only)",
+							Usage:        "The group policy address (authority) on whose behalf this message is executed",
 						},
 					},
 				},

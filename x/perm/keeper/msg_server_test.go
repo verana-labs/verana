@@ -4687,176 +4687,297 @@ func TestRepayPermissionSlashedTrustDeposit(t *testing.T) {
 }
 
 func TestCreatePermission(t *testing.T) {
-	k, ms, mockCsKeeper, trkKeeper, ctx := setupMsgServer(t)
+	k, ms, mockCsKeeper, trkKeeper, ctx, delKeeper := setupMsgServerWithDelegation(t)
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
-	creator := sdk.AccAddress([]byte("test_creator")).String()
+	blockTime := time.Date(2023, 1, 15, 0, 0, 0, 0, time.UTC)
+	sdkCtx = sdkCtx.WithBlockTime(blockTime)
+	ctx = sdk.WrapSDKContext(sdkCtx)
+
+	authority := sdk.AccAddress([]byte("test_authority_addr")).String()
+	operator := sdk.AccAddress([]byte("test_operator_addr")).String()
+	otherAuthority := sdk.AccAddress([]byte("other_authority_ad")).String()
 	validDid := "did:example:123456789abcdefghi"
+	now := sdkCtx.BlockTime()
 
-	// First create a trust registry and store its ID
-	trID := trkKeeper.CreateMockTrustRegistry(creator, validDid)
-
-	// Create mock credential schema with OPEN perm management modes
-	mockCsKeeper.UpdateMockCredentialSchema(1,
-		trID,
+	trID := trkKeeper.CreateMockTrustRegistry(authority, validDid)
+	mockCsKeeper.UpdateMockCredentialSchema(1, trID,
 		cstypes.CredentialSchemaPermManagementMode_OPEN,
 		cstypes.CredentialSchemaPermManagementMode_OPEN)
 
-	now := time.Now()
+	pastTime := now.Add(-1 * time.Hour)
 	futureTime := now.Add(24 * time.Hour)
+	farFuture := now.Add(360 * 24 * time.Hour)
 
-	// Create an ecosystem perm first (required for validation)
+	// Create ecosystem perm (active, with effective_until)
 	ecosystemPerm := types.Permission{
-		SchemaId:  1,
-		Type:      types.PermissionType_ECOSYSTEM,
-		Did:       validDid,
-		Authority:   creator,
-		Created:   &now,
-		CreatedBy: creator,
-		Modified:  &now,
-		Country:   "US",
-		VpState:   types.ValidationState_VALIDATED,
+		SchemaId:       1,
+		Type:           types.PermissionType_ECOSYSTEM,
+		Did:            validDid,
+		Authority:      authority,
+		Created:        &now,
+		CreatedBy:      authority,
+		Modified:       &now,
+		VpState:        types.ValidationState_VALIDATED,
+		EffectiveFrom:  &pastTime,
+		EffectiveUntil: &farFuture,
 	}
 	ecosystemPermID, err := k.CreatePermission(sdkCtx, ecosystemPerm)
 	require.NoError(t, err)
 
-	testCases := []struct {
-		name    string
-		msg     *types.MsgCreatePermission
-		isValid bool
-		errMsg  string
-	}{
-		{
-			name: "Valid Issuer Permission",
-			msg: &types.MsgCreatePermission{
-				Creator:          creator,
-				SchemaId:         1,
-				Type:             types.PermissionType_ISSUER,
-				Did:              validDid,
-				Country:          "US",
-				EffectiveFrom:    &now,
-				EffectiveUntil:   &futureTime,
-				VerificationFees: 100,
-			},
-			isValid: true,
-		},
-		//{
-		//	name: "Valid Verifier Permission",
-		//	msg: &types.MsgCreatePermission{
-		//		Creator:          creator,
-		//		SchemaId:         1,
-		//		Type:             types.PermissionType_VERIFIER,
-		//		Did:              validDid,
-		//		Country:          "US",
-		//		EffectiveFrom:    &now,
-		//		EffectiveUntil:   &futureTime,
-		//		VerificationFees: 100,
-		//	},
-		//	isValid: true,
-		//},
-		{
-			name: "Invalid Schema ID",
-			msg: &types.MsgCreatePermission{
-				Creator:          creator,
-				SchemaId:         999, // Non-existent schema
-				Type:             types.PermissionType_ISSUER,
-				Did:              validDid,
-				Country:          "US",
-				VerificationFees: 100,
-			},
-			isValid: false,
-			errMsg:  "credential schema not found",
-		},
-		//{
-		//	name: "Invalid Permission Type",
-		//	msg: &types.MsgCreatePermission{
-		//		Creator:          creator,
-		//		SchemaId:         1,
-		//		Type:             types.PermissionType_UNSPECIFIED,
-		//		Did:              validDid,
-		//		Country:          "US",
-		//		VerificationFees: 100,
-		//	},
-		//	isValid: false,
-		//	errMsg:  "type must be ISSUER or VERIFIER",
-		//},
-		{
-			name: "Invalid Country Code",
-			msg: &types.MsgCreatePermission{
-				Creator:          creator,
-				SchemaId:         1,
-				Type:             types.PermissionType_ISSUER,
-				Did:              validDid,
-				Country:          "INVALID",
-				VerificationFees: 100,
-			},
-			isValid: false,
-			errMsg:  "invalid country code format",
-		},
-		{
-			name: "Invalid Effective Dates",
-			msg: &types.MsgCreatePermission{
-				Creator:          creator,
-				SchemaId:         1,
-				Type:             types.PermissionType_ISSUER,
-				Did:              validDid,
-				Country:          "US",
-				EffectiveFrom:    &futureTime,
-				EffectiveUntil:   &now, // Before effective_from
-				VerificationFees: 100,
-			},
-			isValid: false,
-			errMsg:  "effective_until must be greater than effective_from",
-		},
+	// Create ecosystem perm without effective_until (never expires)
+	neverExpirePerm := types.Permission{
+		SchemaId:      1,
+		Type:          types.PermissionType_ECOSYSTEM,
+		Did:           validDid,
+		Authority:     authority,
+		Created:       &now,
+		CreatedBy:     authority,
+		Modified:      &now,
+		VpState:       types.ValidationState_VALIDATED,
+		EffectiveFrom: &pastTime,
 	}
+	neverExpirePermID, err := k.CreatePermission(sdkCtx, neverExpirePerm)
+	require.NoError(t, err)
 
-	var expectedID uint64 = 2 // Start from 2 since ecosystem perm is 1
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			resp, err := ms.CreatePermission(ctx, tc.msg)
-			if tc.isValid {
-				require.NoError(t, err)
-				require.NotNil(t, resp)
-
-				// Verify ID was auto-generated correctly
-				require.Equal(t, expectedID, resp.Id)
-
-				// Get the created perm
-				perm, err := k.GetPermissionByID(sdkCtx, resp.Id)
-				require.NoError(t, err)
-
-				// Verify all fields are set correctly
-				require.Equal(t, tc.msg.SchemaId, perm.SchemaId)
-				require.Equal(t, tc.msg.Type, perm.Type)
-				require.Equal(t, tc.msg.Did, perm.Did)
-				require.Equal(t, tc.msg.Creator, perm.Authority)
-				require.Equal(t, tc.msg.Country, perm.Country)
-				require.Equal(t, tc.msg.VerificationFees, perm.VerificationFees)
-				require.Equal(t, ecosystemPermID, perm.ValidatorPermId)
-				//require.Equal(t, types.ValidationState_VALIDATED, perm.VpState)
-
-				// Verify time fields if set
-				if tc.msg.EffectiveFrom != nil {
-					require.Equal(t, tc.msg.EffectiveFrom.Unix(), perm.EffectiveFrom.Unix())
-				}
-				if tc.msg.EffectiveUntil != nil {
-					require.Equal(t, tc.msg.EffectiveUntil.Unix(), perm.EffectiveUntil.Unix())
-				}
-
-				// Verify auto-populated fields
-				require.NotNil(t, perm.Created)
-				require.NotNil(t, perm.Modified)
-				require.Equal(t, tc.msg.Creator, perm.CreatedBy)
-
-				expectedID++ // Increment expected ID for next valid creation
-			} else {
-				require.Error(t, err)
-				require.Contains(t, err.Error(), tc.errMsg)
-				require.Nil(t, resp)
-			}
+	t.Run("AUTHZ check - operator authorization failure", func(t *testing.T) {
+		delKeeper.ErrToReturn = fmt.Errorf("operator authorization not found")
+		resp, err := ms.CreatePermission(ctx, &types.MsgCreatePermission{
+			Authority:       authority,
+			Operator:        operator,
+			Type:            types.PermissionType_ISSUER,
+			ValidatorPermId: ecosystemPermID,
+			Did:             validDid,
+			EffectiveFrom:   &futureTime,
+			EffectiveUntil:  &farFuture,
 		})
-	}
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "authorization check failed")
+		require.Nil(t, resp)
+		delKeeper.ErrToReturn = nil
+	})
+
+	t.Run("Valid ISSUER permission", func(t *testing.T) {
+		resp, err := ms.CreatePermission(ctx, &types.MsgCreatePermission{
+			Authority:        authority,
+			Operator:         operator,
+			Type:             types.PermissionType_ISSUER,
+			ValidatorPermId:  ecosystemPermID,
+			Did:              validDid,
+			EffectiveFrom:    &futureTime,
+			EffectiveUntil:   &farFuture,
+			VerificationFees: 100,
+			ValidationFees:   50,
+		})
+		require.NoError(t, err)
+		require.NotNil(t, resp)
+
+		perm, err := k.GetPermissionByID(sdkCtx, resp.Id)
+		require.NoError(t, err)
+		require.Equal(t, types.PermissionType_ISSUER, perm.Type)
+		require.Equal(t, authority, perm.Authority)
+		require.Equal(t, validDid, perm.Did)
+		require.Equal(t, ecosystemPermID, perm.ValidatorPermId)
+		require.Equal(t, uint64(1), perm.SchemaId) // inherited from validator_perm
+		require.Equal(t, uint64(100), perm.VerificationFees)
+		require.Equal(t, uint64(50), perm.ValidationFees)
+		require.Equal(t, uint64(0), perm.IssuanceFees)
+		require.Equal(t, uint64(0), perm.Deposit)
+		require.NotNil(t, perm.Created)
+		require.NotNil(t, perm.Modified)
+	})
+
+	t.Run("Valid VERIFIER permission", func(t *testing.T) {
+		futureTime2 := futureTime.Add(1 * time.Hour)
+		resp, err := ms.CreatePermission(ctx, &types.MsgCreatePermission{
+			Authority:       authority,
+			Operator:        operator,
+			Type:            types.PermissionType_VERIFIER,
+			ValidatorPermId: ecosystemPermID,
+			Did:             "did:example:verifier1",
+			EffectiveFrom:   &futureTime2,
+			EffectiveUntil:  &farFuture,
+		})
+		require.NoError(t, err)
+		require.NotNil(t, resp)
+
+		perm, err := k.GetPermissionByID(sdkCtx, resp.Id)
+		require.NoError(t, err)
+		require.Equal(t, types.PermissionType_VERIFIER, perm.Type)
+		require.Equal(t, uint64(0), perm.VerificationFees)
+		require.Equal(t, uint64(0), perm.ValidationFees)
+	})
+
+	t.Run("Invalid - validator perm not found", func(t *testing.T) {
+		resp, err := ms.CreatePermission(ctx, &types.MsgCreatePermission{
+			Authority:       authority,
+			Operator:        operator,
+			Type:            types.PermissionType_ISSUER,
+			ValidatorPermId: 9999,
+			Did:             validDid,
+			EffectiveFrom:   &futureTime,
+			EffectiveUntil:  &farFuture,
+		})
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "validator permission not found")
+		require.Nil(t, resp)
+	})
+
+	t.Run("Invalid - validator perm not ECOSYSTEM", func(t *testing.T) {
+		// Create a non-ecosystem perm
+		issuerPerm := types.Permission{
+			SchemaId:        1,
+			Type:            types.PermissionType_ISSUER,
+			Authority:       authority,
+			Created:         &now,
+			CreatedBy:       authority,
+			Modified:        &now,
+			ValidatorPermId: ecosystemPermID,
+			VpState:         types.ValidationState_VALIDATED,
+			EffectiveFrom:   &pastTime,
+		}
+		issuerPermID, err := k.CreatePermission(sdkCtx, issuerPerm)
+		require.NoError(t, err)
+
+		resp, err := ms.CreatePermission(ctx, &types.MsgCreatePermission{
+			Authority:       authority,
+			Operator:        operator,
+			Type:            types.PermissionType_ISSUER,
+			ValidatorPermId: issuerPermID,
+			Did:             validDid,
+			EffectiveFrom:   &futureTime,
+			EffectiveUntil:  &farFuture,
+		})
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "ECOSYSTEM permission")
+		require.Nil(t, resp)
+	})
+
+	t.Run("Invalid - effective_from not in future", func(t *testing.T) {
+		resp, err := ms.CreatePermission(ctx, &types.MsgCreatePermission{
+			Authority:       authority,
+			Operator:        operator,
+			Type:            types.PermissionType_ISSUER,
+			ValidatorPermId: ecosystemPermID,
+			Did:             validDid,
+			EffectiveFrom:   &pastTime,
+			EffectiveUntil:  &farFuture,
+		})
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "effective_from must be in the future")
+		require.Nil(t, resp)
+	})
+
+	t.Run("Invalid - effective_until before effective_from", func(t *testing.T) {
+		beforeFuture := futureTime.Add(-1 * time.Minute)
+		resp, err := ms.CreatePermission(ctx, &types.MsgCreatePermission{
+			Authority:       authority,
+			Operator:        operator,
+			Type:            types.PermissionType_ISSUER,
+			ValidatorPermId: ecosystemPermID,
+			Did:             validDid,
+			EffectiveFrom:   &futureTime,
+			EffectiveUntil:  &beforeFuture,
+		})
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "effective_until must be greater than effective_from")
+		require.Nil(t, resp)
+	})
+
+	t.Run("Invalid - effective_until exceeds validator_perm", func(t *testing.T) {
+		wayFuture := farFuture.Add(24 * time.Hour)
+		resp, err := ms.CreatePermission(ctx, &types.MsgCreatePermission{
+			Authority:       authority,
+			Operator:        operator,
+			Type:            types.PermissionType_ISSUER,
+			ValidatorPermId: ecosystemPermID,
+			Did:             validDid,
+			EffectiveFrom:   &futureTime,
+			EffectiveUntil:  &wayFuture,
+		})
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "effective_until must be <= validator_perm.effective_until")
+		require.Nil(t, resp)
+	})
+
+	t.Run("Invalid - effective_until null but validator_perm has effective_until", func(t *testing.T) {
+		resp, err := ms.CreatePermission(ctx, &types.MsgCreatePermission{
+			Authority:       authority,
+			Operator:        operator,
+			Type:            types.PermissionType_ISSUER,
+			ValidatorPermId: ecosystemPermID,
+			Did:             validDid,
+			EffectiveFrom:   &futureTime,
+			// EffectiveUntil nil
+		})
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "effective_until must be set when validator_perm has effective_until")
+		require.Nil(t, resp)
+	})
+
+	t.Run("Valid - both effective_until null when validator_perm never expires", func(t *testing.T) {
+		resp, err := ms.CreatePermission(ctx, &types.MsgCreatePermission{
+			Authority:       otherAuthority,
+			Operator:        operator,
+			Type:            types.PermissionType_ISSUER,
+			ValidatorPermId: neverExpirePermID,
+			Did:             "did:example:neverexpire",
+			EffectiveFrom:   &futureTime,
+			// EffectiveUntil nil - OK because validator_perm also has nil
+		})
+		require.NoError(t, err)
+		require.NotNil(t, resp)
+	})
+
+	t.Run("Invalid - VERIFIER with validation_fees", func(t *testing.T) {
+		resp, err := ms.CreatePermission(ctx, &types.MsgCreatePermission{
+			Authority:       authority,
+			Operator:        operator,
+			Type:            types.PermissionType_VERIFIER,
+			ValidatorPermId: ecosystemPermID,
+			Did:             "did:example:verifier2",
+			EffectiveFrom:   &futureTime,
+			EffectiveUntil:  &farFuture,
+			ValidationFees:  100,
+		})
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "validation_fees")
+		require.Nil(t, resp)
+	})
+
+	t.Run("Invalid - non-OPEN management mode", func(t *testing.T) {
+		mockCsKeeper.UpdateMockCredentialSchema(2, trID,
+			cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
+			cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
+
+		// Create ecosystem perm for schema 2
+		ecoPermS2 := types.Permission{
+			SchemaId:       2,
+			Type:           types.PermissionType_ECOSYSTEM,
+			Authority:      authority,
+			Created:        &now,
+			CreatedBy:      authority,
+			Modified:       &now,
+			VpState:        types.ValidationState_VALIDATED,
+			EffectiveFrom:  &pastTime,
+			EffectiveUntil: &farFuture,
+		}
+		ecoPermS2ID, err := k.CreatePermission(sdkCtx, ecoPermS2)
+		require.NoError(t, err)
+
+		resp, err := ms.CreatePermission(ctx, &types.MsgCreatePermission{
+			Authority:       authority,
+			Operator:        operator,
+			Type:            types.PermissionType_ISSUER,
+			ValidatorPermId: ecoPermS2ID,
+			Did:             validDid,
+			EffectiveFrom:   &futureTime,
+			EffectiveUntil:  &farFuture,
+		})
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "not OPEN")
+		require.Nil(t, resp)
+	})
 }
 
 // =============================================================================

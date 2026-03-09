@@ -195,15 +195,22 @@ export interface MsgRepayPermissionSlashedTrustDepositResponse {
 }
 
 export interface MsgCreatePermission {
-  creator: string;
-  schemaId: number;
+  authority: string;
+  operator: string;
   type: PermissionType;
+  validatorPermId: number;
   did: string;
-  country: string;
   effectiveFrom: Date | undefined;
   effectiveUntil: Date | undefined;
   verificationFees: number;
   validationFees: number;
+  /** vs_operator: the account of the Verifiable Service (optional) */
+  vsOperator: string;
+  vsOperatorAuthzEnabled: boolean;
+  vsOperatorAuthzSpendLimit: Coin[];
+  vsOperatorAuthzWithFeegrant: boolean;
+  vsOperatorAuthzFeeSpendLimit: Coin[];
+  vsOperatorAuthzSpendPeriod: Duration | undefined;
 }
 
 export interface MsgCreatePermissionResponse {
@@ -2262,34 +2269,40 @@ export const MsgRepayPermissionSlashedTrustDepositResponse = {
 
 function createBaseMsgCreatePermission(): MsgCreatePermission {
   return {
-    creator: "",
-    schemaId: 0,
+    authority: "",
+    operator: "",
     type: 0,
+    validatorPermId: 0,
     did: "",
-    country: "",
     effectiveFrom: undefined,
     effectiveUntil: undefined,
     verificationFees: 0,
     validationFees: 0,
+    vsOperator: "",
+    vsOperatorAuthzEnabled: false,
+    vsOperatorAuthzSpendLimit: [],
+    vsOperatorAuthzWithFeegrant: false,
+    vsOperatorAuthzFeeSpendLimit: [],
+    vsOperatorAuthzSpendPeriod: undefined,
   };
 }
 
 export const MsgCreatePermission = {
   encode(message: MsgCreatePermission, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.creator !== "") {
-      writer.uint32(10).string(message.creator);
+    if (message.authority !== "") {
+      writer.uint32(10).string(message.authority);
     }
-    if (message.schemaId !== 0) {
-      writer.uint32(16).uint64(message.schemaId);
+    if (message.operator !== "") {
+      writer.uint32(18).string(message.operator);
     }
     if (message.type !== 0) {
       writer.uint32(24).int32(message.type);
     }
-    if (message.did !== "") {
-      writer.uint32(34).string(message.did);
+    if (message.validatorPermId !== 0) {
+      writer.uint32(32).uint64(message.validatorPermId);
     }
-    if (message.country !== "") {
-      writer.uint32(42).string(message.country);
+    if (message.did !== "") {
+      writer.uint32(42).string(message.did);
     }
     if (message.effectiveFrom !== undefined) {
       Timestamp.encode(toTimestamp(message.effectiveFrom), writer.uint32(50).fork()).ldelim();
@@ -2302,6 +2315,24 @@ export const MsgCreatePermission = {
     }
     if (message.validationFees !== 0) {
       writer.uint32(72).uint64(message.validationFees);
+    }
+    if (message.vsOperator !== "") {
+      writer.uint32(82).string(message.vsOperator);
+    }
+    if (message.vsOperatorAuthzEnabled !== false) {
+      writer.uint32(88).bool(message.vsOperatorAuthzEnabled);
+    }
+    for (const v of message.vsOperatorAuthzSpendLimit) {
+      Coin.encode(v!, writer.uint32(98).fork()).ldelim();
+    }
+    if (message.vsOperatorAuthzWithFeegrant !== false) {
+      writer.uint32(104).bool(message.vsOperatorAuthzWithFeegrant);
+    }
+    for (const v of message.vsOperatorAuthzFeeSpendLimit) {
+      Coin.encode(v!, writer.uint32(114).fork()).ldelim();
+    }
+    if (message.vsOperatorAuthzSpendPeriod !== undefined) {
+      Duration.encode(message.vsOperatorAuthzSpendPeriod, writer.uint32(122).fork()).ldelim();
     }
     return writer;
   },
@@ -2318,14 +2349,14 @@ export const MsgCreatePermission = {
             break;
           }
 
-          message.creator = reader.string();
+          message.authority = reader.string();
           continue;
         case 2:
-          if (tag !== 16) {
+          if (tag !== 18) {
             break;
           }
 
-          message.schemaId = longToNumber(reader.uint64() as Long);
+          message.operator = reader.string();
           continue;
         case 3:
           if (tag !== 24) {
@@ -2335,18 +2366,18 @@ export const MsgCreatePermission = {
           message.type = reader.int32() as any;
           continue;
         case 4:
-          if (tag !== 34) {
+          if (tag !== 32) {
             break;
           }
 
-          message.did = reader.string();
+          message.validatorPermId = longToNumber(reader.uint64() as Long);
           continue;
         case 5:
           if (tag !== 42) {
             break;
           }
 
-          message.country = reader.string();
+          message.did = reader.string();
           continue;
         case 6:
           if (tag !== 50) {
@@ -2376,6 +2407,48 @@ export const MsgCreatePermission = {
 
           message.validationFees = longToNumber(reader.uint64() as Long);
           continue;
+        case 10:
+          if (tag !== 82) {
+            break;
+          }
+
+          message.vsOperator = reader.string();
+          continue;
+        case 11:
+          if (tag !== 88) {
+            break;
+          }
+
+          message.vsOperatorAuthzEnabled = reader.bool();
+          continue;
+        case 12:
+          if (tag !== 98) {
+            break;
+          }
+
+          message.vsOperatorAuthzSpendLimit.push(Coin.decode(reader, reader.uint32()));
+          continue;
+        case 13:
+          if (tag !== 104) {
+            break;
+          }
+
+          message.vsOperatorAuthzWithFeegrant = reader.bool();
+          continue;
+        case 14:
+          if (tag !== 114) {
+            break;
+          }
+
+          message.vsOperatorAuthzFeeSpendLimit.push(Coin.decode(reader, reader.uint32()));
+          continue;
+        case 15:
+          if (tag !== 122) {
+            break;
+          }
+
+          message.vsOperatorAuthzSpendPeriod = Duration.decode(reader, reader.uint32());
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -2387,34 +2460,50 @@ export const MsgCreatePermission = {
 
   fromJSON(object: any): MsgCreatePermission {
     return {
-      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
-      schemaId: isSet(object.schemaId) ? globalThis.Number(object.schemaId) : 0,
+      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
       type: isSet(object.type) ? permissionTypeFromJSON(object.type) : 0,
+      validatorPermId: isSet(object.validatorPermId) ? globalThis.Number(object.validatorPermId) : 0,
       did: isSet(object.did) ? globalThis.String(object.did) : "",
-      country: isSet(object.country) ? globalThis.String(object.country) : "",
       effectiveFrom: isSet(object.effectiveFrom) ? fromJsonTimestamp(object.effectiveFrom) : undefined,
       effectiveUntil: isSet(object.effectiveUntil) ? fromJsonTimestamp(object.effectiveUntil) : undefined,
       verificationFees: isSet(object.verificationFees) ? globalThis.Number(object.verificationFees) : 0,
       validationFees: isSet(object.validationFees) ? globalThis.Number(object.validationFees) : 0,
+      vsOperator: isSet(object.vsOperator) ? globalThis.String(object.vsOperator) : "",
+      vsOperatorAuthzEnabled: isSet(object.vsOperatorAuthzEnabled)
+        ? globalThis.Boolean(object.vsOperatorAuthzEnabled)
+        : false,
+      vsOperatorAuthzSpendLimit: globalThis.Array.isArray(object?.vsOperatorAuthzSpendLimit)
+        ? object.vsOperatorAuthzSpendLimit.map((e: any) => Coin.fromJSON(e))
+        : [],
+      vsOperatorAuthzWithFeegrant: isSet(object.vsOperatorAuthzWithFeegrant)
+        ? globalThis.Boolean(object.vsOperatorAuthzWithFeegrant)
+        : false,
+      vsOperatorAuthzFeeSpendLimit: globalThis.Array.isArray(object?.vsOperatorAuthzFeeSpendLimit)
+        ? object.vsOperatorAuthzFeeSpendLimit.map((e: any) => Coin.fromJSON(e))
+        : [],
+      vsOperatorAuthzSpendPeriod: isSet(object.vsOperatorAuthzSpendPeriod)
+        ? Duration.fromJSON(object.vsOperatorAuthzSpendPeriod)
+        : undefined,
     };
   },
 
   toJSON(message: MsgCreatePermission): unknown {
     const obj: any = {};
-    if (message.creator !== "") {
-      obj.creator = message.creator;
+    if (message.authority !== "") {
+      obj.authority = message.authority;
     }
-    if (message.schemaId !== 0) {
-      obj.schemaId = Math.round(message.schemaId);
+    if (message.operator !== "") {
+      obj.operator = message.operator;
     }
     if (message.type !== 0) {
       obj.type = permissionTypeToJSON(message.type);
     }
+    if (message.validatorPermId !== 0) {
+      obj.validatorPermId = Math.round(message.validatorPermId);
+    }
     if (message.did !== "") {
       obj.did = message.did;
-    }
-    if (message.country !== "") {
-      obj.country = message.country;
     }
     if (message.effectiveFrom !== undefined) {
       obj.effectiveFrom = message.effectiveFrom.toISOString();
@@ -2428,6 +2517,24 @@ export const MsgCreatePermission = {
     if (message.validationFees !== 0) {
       obj.validationFees = Math.round(message.validationFees);
     }
+    if (message.vsOperator !== "") {
+      obj.vsOperator = message.vsOperator;
+    }
+    if (message.vsOperatorAuthzEnabled !== false) {
+      obj.vsOperatorAuthzEnabled = message.vsOperatorAuthzEnabled;
+    }
+    if (message.vsOperatorAuthzSpendLimit?.length) {
+      obj.vsOperatorAuthzSpendLimit = message.vsOperatorAuthzSpendLimit.map((e) => Coin.toJSON(e));
+    }
+    if (message.vsOperatorAuthzWithFeegrant !== false) {
+      obj.vsOperatorAuthzWithFeegrant = message.vsOperatorAuthzWithFeegrant;
+    }
+    if (message.vsOperatorAuthzFeeSpendLimit?.length) {
+      obj.vsOperatorAuthzFeeSpendLimit = message.vsOperatorAuthzFeeSpendLimit.map((e) => Coin.toJSON(e));
+    }
+    if (message.vsOperatorAuthzSpendPeriod !== undefined) {
+      obj.vsOperatorAuthzSpendPeriod = Duration.toJSON(message.vsOperatorAuthzSpendPeriod);
+    }
     return obj;
   },
 
@@ -2436,15 +2543,24 @@ export const MsgCreatePermission = {
   },
   fromPartial<I extends Exact<DeepPartial<MsgCreatePermission>, I>>(object: I): MsgCreatePermission {
     const message = createBaseMsgCreatePermission();
-    message.creator = object.creator ?? "";
-    message.schemaId = object.schemaId ?? 0;
+    message.authority = object.authority ?? "";
+    message.operator = object.operator ?? "";
     message.type = object.type ?? 0;
+    message.validatorPermId = object.validatorPermId ?? 0;
     message.did = object.did ?? "";
-    message.country = object.country ?? "";
     message.effectiveFrom = object.effectiveFrom ?? undefined;
     message.effectiveUntil = object.effectiveUntil ?? undefined;
     message.verificationFees = object.verificationFees ?? 0;
     message.validationFees = object.validationFees ?? 0;
+    message.vsOperator = object.vsOperator ?? "";
+    message.vsOperatorAuthzEnabled = object.vsOperatorAuthzEnabled ?? false;
+    message.vsOperatorAuthzSpendLimit = object.vsOperatorAuthzSpendLimit?.map((e) => Coin.fromPartial(e)) || [];
+    message.vsOperatorAuthzWithFeegrant = object.vsOperatorAuthzWithFeegrant ?? false;
+    message.vsOperatorAuthzFeeSpendLimit = object.vsOperatorAuthzFeeSpendLimit?.map((e) => Coin.fromPartial(e)) || [];
+    message.vsOperatorAuthzSpendPeriod =
+      (object.vsOperatorAuthzSpendPeriod !== undefined && object.vsOperatorAuthzSpendPeriod !== null)
+        ? Duration.fromPartial(object.vsOperatorAuthzSpendPeriod)
+        : undefined;
     return message;
   },
 };

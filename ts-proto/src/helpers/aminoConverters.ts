@@ -45,6 +45,7 @@ import {
   MsgCreateOrUpdatePermissionSession,
   MsgSlashPermissionTrustDeposit,
   MsgRepayPermissionSlashedTrustDeposit,
+  MsgCreatePermission,
 } from "../codec/verana/perm/v1/tx";
 import { PermissionType } from "../codec/verana/perm/v1/types";
 
@@ -636,6 +637,39 @@ export const MsgRepayPermissionSlashedTrustDepositAminoConverter: AminoConverter
       authority: a.authority ?? '',
       operator: a.operator ?? '',
       id: strToU64(a.id) != null ? Number(strToU64(a.id)!.toString()) : 0,
+    }),
+};
+
+export const MsgCreatePermissionAminoConverter: AminoConverter = {
+  aminoType: '/verana.perm.v1.MsgCreatePermission',
+  toAmino: (m: MsgCreatePermission) => clean({
+    authority: m.authority ?? '',
+    operator: m.operator ?? '',
+    type: m.type ?? 0,
+    validator_perm_id: u64ToStr(m.validatorPermId),
+    did: m.did ?? '',
+    effective_from: m.effectiveFrom ?? undefined,
+    effective_until: m.effectiveUntil ?? undefined,
+    verification_fees: u64ToStrIfNonZero(m.verificationFees),
+    validation_fees: u64ToStrIfNonZero(m.validationFees),
+    vs_operator: m.vsOperator ?? undefined,
+    vs_operator_authz_enabled: m.vsOperatorAuthzEnabled ?? false,
+    vs_operator_authz_with_feegrant: m.vsOperatorAuthzWithFeegrant ?? false,
+  }),
+  fromAmino: (a: any): MsgCreatePermission =>
+    MsgCreatePermission.fromPartial({
+      authority: a.authority ?? '',
+      operator: a.operator ?? '',
+      type: a.type ?? 0,
+      validatorPermId: strToU64(a.validator_perm_id) != null ? Number(strToU64(a.validator_perm_id)!.toString()) : 0,
+      did: a.did ?? '',
+      effectiveFrom: a.effective_from ?? undefined,
+      effectiveUntil: a.effective_until ?? undefined,
+      verificationFees: strToU64(a.verification_fees) != null ? Number(strToU64(a.verification_fees)!.toString()) : 0,
+      validationFees: strToU64(a.validation_fees) != null ? Number(strToU64(a.validation_fees)!.toString()) : 0,
+      vsOperator: a.vs_operator ?? '',
+      vsOperatorAuthzEnabled: a.vs_operator_authz_enabled ?? false,
+      vsOperatorAuthzWithFeegrant: a.vs_operator_authz_with_feegrant ?? false,
     }),
 };
 

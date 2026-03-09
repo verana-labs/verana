@@ -541,20 +541,20 @@
     "verana.perm.v1.MsgCreatePermission": {
       "type": "object",
       "properties": {
-        "creator": {
+        "authority": {
           "type": "string"
         },
-        "schema_id": {
-          "type": "string",
-          "format": "uint64"
+        "operator": {
+          "type": "string"
         },
         "type": {
           "$ref": "#/definitions/verana.perm.v1.PermissionType"
         },
-        "did": {
-          "type": "string"
+        "validator_perm_id": {
+          "type": "string",
+          "format": "uint64"
         },
-        "country": {
+        "did": {
           "type": "string"
         },
         "effective_from": {
@@ -572,6 +572,33 @@
         "validation_fees": {
           "type": "string",
           "format": "uint64"
+        },
+        "vs_operator": {
+          "type": "string",
+          "title": "vs_operator: the account of the Verifiable Service (optional)"
+        },
+        "vs_operator_authz_enabled": {
+          "type": "boolean"
+        },
+        "vs_operator_authz_spend_limit": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
+          }
+        },
+        "vs_operator_authz_with_feegrant": {
+          "type": "boolean"
+        },
+        "vs_operator_authz_fee_spend_limit": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
+          }
+        },
+        "vs_operator_authz_spend_period": {
+          "type": "string"
         }
       }
     },

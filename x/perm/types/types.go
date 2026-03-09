@@ -318,19 +318,24 @@ func (msg *MsgRepayPermissionSlashedTrustDeposit) ValidateBasic() error {
 }
 
 func (msg *MsgCreatePermission) ValidateBasic() error {
-	if _, err := sdk.AccAddressFromBech32(msg.Creator); err != nil {
-		return sdkerrors.ErrInvalidAddress.Wrapf("invalid creator address: %s", err)
+	// [MOD-PERM-MSG-14-2-1] authority (group): signature must be verified
+	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
+		return fmt.Errorf("invalid authority address: %w", err)
 	}
 
-	// if a mandatory parameter is not present, transaction MUST abort
-	// schema_id MUST be a valid uint64
-	if msg.SchemaId == 0 {
-		return sdkerrors.ErrInvalidRequest.Wrap("schema_id must be a valid uint64")
+	// [MOD-PERM-MSG-14-2-1] operator (account): signature must be verified
+	if _, err := sdk.AccAddressFromBech32(msg.Operator); err != nil {
+		return fmt.Errorf("invalid operator address: %w", err)
 	}
 
 	// type (PermissionType) (mandatory): MUST be ISSUER or VERIFIER, else abort
 	if msg.Type != PermissionType_ISSUER && msg.Type != PermissionType_VERIFIER {
 		return sdkerrors.ErrInvalidRequest.Wrap("type must be ISSUER or VERIFIER")
+	}
+
+	// validator_perm_id (mandatory)
+	if msg.ValidatorPermId == 0 {
+		return sdkerrors.ErrInvalidRequest.Wrap("validator_perm_id is mandatory")
 	}
 
 	// did MUST conform to DID Syntax
@@ -341,8 +346,27 @@ func (msg *MsgCreatePermission) ValidateBasic() error {
 		return sdkerrors.ErrInvalidRequest.Wrap("invalid DID syntax")
 	}
 
-	// Note: Time-based validations are moved to the main function
-	// to use blockchain time instead of system time
+	// vs_operator_authz_enabled: if true, vs_operator MUST NOT be null
+	if msg.VsOperatorAuthzEnabled && msg.VsOperator == "" {
+		return fmt.Errorf("vs_operator is required when vs_operator_authz_enabled is true")
+	}
+
+	// vs_operator_authz_with_feegrant: if true, vs_operator MUST NOT be null
+	if msg.VsOperatorAuthzWithFeegrant && msg.VsOperator == "" {
+		return fmt.Errorf("vs_operator is required when vs_operator_authz_with_feegrant is true")
+	}
+
+	// vs_operator_authz_spend_period: if not null, vs_operator MUST NOT be null
+	if msg.VsOperatorAuthzSpendPeriod != nil && msg.VsOperator == "" {
+		return fmt.Errorf("vs_operator is required when vs_operator_authz_spend_period is set")
+	}
+
+	// Validate vs_operator address if provided
+	if msg.VsOperator != "" {
+		if _, err := sdk.AccAddressFromBech32(msg.VsOperator); err != nil {
+			return fmt.Errorf("invalid vs_operator address: %w", err)
+		}
+	}
 
 	return nil
 }
