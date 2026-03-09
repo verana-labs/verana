@@ -223,10 +223,11 @@ message MsgSlashPermissionTrustDeposit {
 message MsgSlashPermissionTrustDepositResponse {}
 
 message MsgRepayPermissionSlashedTrustDeposit {
-  option (cosmos.msg.v1.signer) = "creator";
+  option (cosmos.msg.v1.signer) = "operator";
 
-  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  uint64 id = 2;
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  uint64 id = 3;
 }
 
 message MsgRepayPermissionSlashedTrustDepositResponse {}

@@ -186,7 +186,8 @@ export interface MsgSlashPermissionTrustDepositResponse {
 }
 
 export interface MsgRepayPermissionSlashedTrustDeposit {
-  creator: string;
+  authority: string;
+  operator: string;
   id: number;
 }
 
@@ -2120,16 +2121,19 @@ export const MsgSlashPermissionTrustDepositResponse = {
 };
 
 function createBaseMsgRepayPermissionSlashedTrustDeposit(): MsgRepayPermissionSlashedTrustDeposit {
-  return { creator: "", id: 0 };
+  return { authority: "", operator: "", id: 0 };
 }
 
 export const MsgRepayPermissionSlashedTrustDeposit = {
   encode(message: MsgRepayPermissionSlashedTrustDeposit, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.creator !== "") {
-      writer.uint32(10).string(message.creator);
+    if (message.authority !== "") {
+      writer.uint32(10).string(message.authority);
+    }
+    if (message.operator !== "") {
+      writer.uint32(18).string(message.operator);
     }
     if (message.id !== 0) {
-      writer.uint32(16).uint64(message.id);
+      writer.uint32(24).uint64(message.id);
     }
     return writer;
   },
@@ -2146,10 +2150,17 @@ export const MsgRepayPermissionSlashedTrustDeposit = {
             break;
           }
 
-          message.creator = reader.string();
+          message.authority = reader.string();
           continue;
         case 2:
-          if (tag !== 16) {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.operator = reader.string();
+          continue;
+        case 3:
+          if (tag !== 24) {
             break;
           }
 
@@ -2166,15 +2177,19 @@ export const MsgRepayPermissionSlashedTrustDeposit = {
 
   fromJSON(object: any): MsgRepayPermissionSlashedTrustDeposit {
     return {
-      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
+      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
       id: isSet(object.id) ? globalThis.Number(object.id) : 0,
     };
   },
 
   toJSON(message: MsgRepayPermissionSlashedTrustDeposit): unknown {
     const obj: any = {};
-    if (message.creator !== "") {
-      obj.creator = message.creator;
+    if (message.authority !== "") {
+      obj.authority = message.authority;
+    }
+    if (message.operator !== "") {
+      obj.operator = message.operator;
     }
     if (message.id !== 0) {
       obj.id = Math.round(message.id);
@@ -2191,7 +2206,8 @@ export const MsgRepayPermissionSlashedTrustDeposit = {
     object: I,
   ): MsgRepayPermissionSlashedTrustDeposit {
     const message = createBaseMsgRepayPermissionSlashedTrustDeposit();
-    message.creator = object.creator ?? "";
+    message.authority = object.authority ?? "";
+    message.operator = object.operator ?? "";
     message.id = object.id ?? 0;
     return message;
   },

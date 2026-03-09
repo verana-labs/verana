@@ -300,10 +300,17 @@ func (msg *MsgSlashPermissionTrustDeposit) ValidateBasic() error {
 }
 
 func (msg *MsgRepayPermissionSlashedTrustDeposit) ValidateBasic() error {
-	if _, err := sdk.AccAddressFromBech32(msg.Creator); err != nil {
-		return sdkerrors.ErrInvalidAddress.Wrapf("invalid creator address: %s", err)
+	// [MOD-PERM-MSG-13-2-1] authority (group): signature must be verified
+	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
+		return fmt.Errorf("invalid authority address: %w", err)
 	}
-	// [MOD-PERM-MSG-13-2-1] Repay Permission Slashed Trust Deposit basic checks
+
+	// [MOD-PERM-MSG-13-2-1] operator (account): signature must be verified
+	if _, err := sdk.AccAddressFromBech32(msg.Operator); err != nil {
+		return fmt.Errorf("invalid operator address: %w", err)
+	}
+
+	// [MOD-PERM-MSG-13-2-1] id MUST be a valid uint64
 	if msg.Id == 0 {
 		return sdkerrors.ErrInvalidRequest.Wrap("id must be a valid uint64")
 	}

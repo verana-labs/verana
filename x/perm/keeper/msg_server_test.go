@@ -4490,7 +4490,7 @@ func TestSlashPermissionTrustDeposit(t *testing.T) {
 }
 
 func TestRepayPermissionSlashedTrustDeposit(t *testing.T) {
-	k, ms, csKeeper, _, ctx := setupMsgServer(t)
+	k, ms, csKeeper, _, ctx, delKeeper := setupMsgServerWithDelegation(t)
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
 	// Set specific block time for consistent testing
@@ -4498,9 +4498,10 @@ func TestRepayPermissionSlashedTrustDeposit(t *testing.T) {
 	sdkCtx = sdkCtx.WithBlockTime(blockTime)
 	ctx = sdk.WrapSDKContext(sdkCtx)
 
-	creator := sdk.AccAddress([]byte("test_creator")).String()
+	authority := sdk.AccAddress([]byte("test_authority_addr")).String()
+	operator := sdk.AccAddress([]byte("test_operator_addr")).String()
 	validatorAddr := sdk.AccAddress([]byte("test_validator")).String()
-	ecosystemAddr := sdk.AccAddress([]byte("test_ecosystem")).String()
+	otherAuthority := sdk.AccAddress([]byte("other_authority_ad")).String()
 
 	// Create mock credential schema
 	csKeeper.CreateMockCredentialSchema(1,
@@ -4508,20 +4509,16 @@ func TestRepayPermissionSlashedTrustDeposit(t *testing.T) {
 		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
 
 	now := sdkCtx.BlockTime()
-
-	pastTime := now.Add(-1 * time.Hour) // Set effective_from to past relative to block time to make it ACTIVE
+	pastTime := now.Add(-1 * time.Hour)
 
 	// Create ecosystem perm
 	ecosystemPerm := types.Permission{
 		SchemaId:      1,
 		Type:          types.PermissionType_ECOSYSTEM,
-		Authority:       ecosystemAddr,
+		Authority:     authority,
 		Created:       &now,
-		CreatedBy:     ecosystemAddr,
-		Adjusted:      &now,
-		AdjustedBy:    ecosystemAddr,
+		CreatedBy:     authority,
 		Modified:      &now,
-		Country:       "US",
 		VpState:       types.ValidationState_VALIDATED,
 		EffectiveFrom: &pastTime,
 	}
@@ -4532,112 +4529,161 @@ func TestRepayPermissionSlashedTrustDeposit(t *testing.T) {
 	validatorPerm := types.Permission{
 		SchemaId:      1,
 		Type:          types.PermissionType_ISSUER_GRANTOR,
-		Authority:       validatorAddr,
+		Authority:     validatorAddr,
 		Created:       &now,
 		CreatedBy:     validatorAddr,
-		Adjusted:      &now,
-		AdjustedBy:    validatorAddr,
 		Modified:      &now,
-		Country:       "US",
 		VpState:       types.ValidationState_VALIDATED,
 		EffectiveFrom: &pastTime,
 	}
 	validatorPermID, err := k.CreatePermission(sdkCtx, validatorPerm)
 	require.NoError(t, err)
 
-	// Create applicant perm with initial deposit
+	// Create applicant perm owned by authority with initial deposit
 	applicantPerm := types.Permission{
 		SchemaId:        1,
 		Type:            types.PermissionType_ISSUER,
-		Authority:         creator,
+		Authority:       authority,
 		Created:         &now,
-		CreatedBy:       creator,
-		Adjusted:        &now,
-		AdjustedBy:      creator,
+		CreatedBy:       authority,
 		Modified:        &now,
-		Country:         "US",
 		ValidatorPermId: validatorPermID,
 		VpState:         types.ValidationState_VALIDATED,
-		Deposit:         1000, // Initial deposit
+		Deposit:         1000,
 		EffectiveFrom:   &pastTime,
 	}
 	applicantPermID, err := k.CreatePermission(sdkCtx, applicantPerm)
-
 	require.NoError(t, err)
 
-	// First slash the perm
+	// Create unslashed perm (for negative test)
+	unslashedPerm := types.Permission{
+		SchemaId:        1,
+		Type:            types.PermissionType_ISSUER,
+		Authority:       authority,
+		Created:         &now,
+		CreatedBy:       authority,
+		Modified:        &now,
+		ValidatorPermId: validatorPermID,
+		VpState:         types.ValidationState_VALIDATED,
+		Deposit:         500,
+		EffectiveFrom:   &pastTime,
+	}
+	unslashedPermID, err := k.CreatePermission(sdkCtx, unslashedPerm)
+	require.NoError(t, err)
+
+	// Slash the applicant perm first
 	slashMsg := &types.MsgSlashPermissionTrustDeposit{
 		Authority: validatorAddr,
 		Operator:  validatorAddr,
 		Id:        applicantPermID,
-		Amount:    500, // Slash half of the deposit
+		Amount:    500,
 	}
 	_, err = ms.SlashPermissionTrustDeposit(ctx, slashMsg)
 	require.NoError(t, err)
 
-	testCases := []struct {
-		name       string
-		msg        *types.MsgRepayPermissionSlashedTrustDeposit
-		expectErr  bool
-		errMessage string
-	}{
-		//{
-		//	name: "Valid repayment",
-		//	msg: &types.MsgRepayPermissionSlashedTrustDeposit{
-		//		Creator: creator,
-		//		Id:      applicantPermID,
-		//	},
-		//	expectErr: false,
-		//},
-		{
-			name: "Invalid - perm not found",
-			msg: &types.MsgRepayPermissionSlashedTrustDeposit{
-				Creator: creator,
-				Id:      9999,
-			},
-			expectErr:  true,
-			errMessage: "perm not found",
-		},
-		{
-			name: "Invalid - no slashed deposit to repay",
-			msg: &types.MsgRepayPermissionSlashedTrustDeposit{
-				Creator: creator,
-				Id:      validatorPermID, // No slashed deposit
-			},
-			expectErr:  true,
-			errMessage: "no slashed deposit to repay",
-		},
-		//{
-		//	name: "Invalid - already fully repaid",
-		//	msg: &types.MsgRepayPermissionSlashedTrustDeposit{
-		//		Creator: creator,
-		//		Id:      applicantPermID,
-		//	},
-		//	expectErr:  true,
-		//	errMessage: "slashed deposit already fully repaid",
-		//},
-	}
+	// Verify slashed state
+	slashedPerm, err := k.GetPermissionByID(sdkCtx, applicantPermID)
+	require.NoError(t, err)
+	require.Equal(t, uint64(500), slashedPerm.SlashedDeposit)
 
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			resp, err := ms.RepayPermissionSlashedTrustDeposit(ctx, tc.msg)
-
-			if tc.expectErr {
-				require.Error(t, err)
-				require.Contains(t, err.Error(), tc.errMessage)
-				require.Nil(t, resp)
-			} else {
-				require.NoError(t, err)
-				require.NotNil(t, resp)
-
-				// Verify perm was updated correctly
-				perm, err := k.GetPermissionByID(sdkCtx, tc.msg.Id)
-				require.NoError(t, err)
-				require.Equal(t, uint64(0), perm.SlashedDeposit) // Slashed deposit should be 0 after repayment
-				require.Equal(t, uint64(1000), perm.Deposit)     // Original deposit should be restored
-			}
+	t.Run("AUTHZ check - operator authorization failure", func(t *testing.T) {
+		delKeeper.ErrToReturn = fmt.Errorf("operator authorization not found")
+		resp, err := ms.RepayPermissionSlashedTrustDeposit(ctx, &types.MsgRepayPermissionSlashedTrustDeposit{
+			Authority: authority,
+			Operator:  operator,
+			Id:        applicantPermID,
 		})
-	}
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "authorization check failed")
+		require.Nil(t, resp)
+		delKeeper.ErrToReturn = nil
+	})
+
+	t.Run("Valid repayment by owner authority", func(t *testing.T) {
+		resp, err := ms.RepayPermissionSlashedTrustDeposit(ctx, &types.MsgRepayPermissionSlashedTrustDeposit{
+			Authority: authority,
+			Operator:  operator,
+			Id:        applicantPermID,
+		})
+		require.NoError(t, err)
+		require.NotNil(t, resp)
+
+		// Verify perm was updated correctly
+		perm, err := k.GetPermissionByID(sdkCtx, applicantPermID)
+		require.NoError(t, err)
+		require.NotNil(t, perm.Repaid)
+		require.NotNil(t, perm.Modified)
+		require.Equal(t, uint64(500), perm.RepaidDeposit)
+	})
+
+	t.Run("Invalid - already fully repaid", func(t *testing.T) {
+		resp, err := ms.RepayPermissionSlashedTrustDeposit(ctx, &types.MsgRepayPermissionSlashedTrustDeposit{
+			Authority: authority,
+			Operator:  operator,
+			Id:        applicantPermID,
+		})
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "slashed deposit already fully repaid")
+		require.Nil(t, resp)
+	})
+
+	t.Run("Invalid - perm not found", func(t *testing.T) {
+		resp, err := ms.RepayPermissionSlashedTrustDeposit(ctx, &types.MsgRepayPermissionSlashedTrustDeposit{
+			Authority: authority,
+			Operator:  operator,
+			Id:        9999,
+		})
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "perm not found")
+		require.Nil(t, resp)
+	})
+
+	t.Run("Invalid - wrong authority (not owner)", func(t *testing.T) {
+		// Slash a new perm for this test
+		newPerm := types.Permission{
+			SchemaId:        1,
+			Type:            types.PermissionType_ISSUER,
+			Authority:       otherAuthority,
+			Created:         &now,
+			CreatedBy:       otherAuthority,
+			Modified:        &now,
+			ValidatorPermId: validatorPermID,
+			VpState:         types.ValidationState_VALIDATED,
+			Deposit:         300,
+			EffectiveFrom:   &pastTime,
+		}
+		otherPermID, err := k.CreatePermission(sdkCtx, newPerm)
+		require.NoError(t, err)
+		// Slash it
+		_, err = ms.SlashPermissionTrustDeposit(ctx, &types.MsgSlashPermissionTrustDeposit{
+			Authority: validatorAddr,
+			Operator:  validatorAddr,
+			Id:        otherPermID,
+			Amount:    100,
+		})
+		require.NoError(t, err)
+
+		// Try to repay with wrong authority
+		resp, err := ms.RepayPermissionSlashedTrustDeposit(ctx, &types.MsgRepayPermissionSlashedTrustDeposit{
+			Authority: authority, // wrong - perm belongs to otherAuthority
+			Operator:  operator,
+			Id:        otherPermID,
+		})
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "authority is not the owner of this permission")
+		require.Nil(t, resp)
+	})
+
+	t.Run("Invalid - no slashed deposit to repay", func(t *testing.T) {
+		resp, err := ms.RepayPermissionSlashedTrustDeposit(ctx, &types.MsgRepayPermissionSlashedTrustDeposit{
+			Authority: authority,
+			Operator:  operator,
+			Id:        unslashedPermID,
+		})
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "no slashed deposit to repay")
+		require.Nil(t, resp)
+	})
 }
 
 func TestCreatePermission(t *testing.T) {

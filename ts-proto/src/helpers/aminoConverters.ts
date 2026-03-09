@@ -44,6 +44,7 @@ import {
   MsgCancelPermissionVPLastRequest,
   MsgCreateOrUpdatePermissionSession,
   MsgSlashPermissionTrustDeposit,
+  MsgRepayPermissionSlashedTrustDeposit,
 } from "../codec/verana/perm/v1/tx";
 import { PermissionType } from "../codec/verana/perm/v1/types";
 
@@ -620,6 +621,21 @@ export const MsgSlashPermissionTrustDepositAminoConverter: AminoConverter = {
       operator: a.operator ?? '',
       id: strToU64(a.id) != null ? Number(strToU64(a.id)!.toString()) : 0,
       amount: strToU64(a.amount) != null ? Number(strToU64(a.amount)!.toString()) : 0,
+    }),
+};
+
+export const MsgRepayPermissionSlashedTrustDepositAminoConverter: AminoConverter = {
+  aminoType: '/verana.perm.v1.MsgRepayPermissionSlashedTrustDeposit',
+  toAmino: (m: MsgRepayPermissionSlashedTrustDeposit) => clean({
+    authority: m.authority ?? '',
+    operator: m.operator ?? '',
+    id: u64ToStr(m.id),
+  }),
+  fromAmino: (a: any): MsgRepayPermissionSlashedTrustDeposit =>
+    MsgRepayPermissionSlashedTrustDeposit.fromPartial({
+      authority: a.authority ?? '',
+      operator: a.operator ?? '',
+      id: strToU64(a.id) != null ? Number(strToU64(a.id)!.toString()) : 0,
     }),
 };
 

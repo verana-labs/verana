@@ -420,17 +420,24 @@ Parameters:
 				},
 				{
 					RpcMethod: "RepayPermissionSlashedTrustDeposit",
-					Use:       "repay-perm-slashed-td [id]",
+					Use:       "repay-perm-slashed-td [id] --authority [authority]",
 					Short:     "Repay a slashed perm's trust deposit",
-					Long: `Repay the slashed trust deposit of a perm. Can be executed by anyone willing to pay.
+					Long: `Repay the slashed trust deposit of a perm. Can only be called by the authority that owns the permission.
 This will repay the full remaining slashed amount and credit it to the perm authority's trust deposit.
 Note: This does not make the slashed perm reusable - a new perm must be requested.
 
 Parameters:
-- id: ID of the perm with slashed deposit to repay`,
+- id: ID of the perm with slashed deposit to repay
+- authority: The group policy address (authority) that owns the permission`,
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{
 							ProtoField: "id",
+						},
+					},
+					FlagOptions: map[string]*autocliv1.FlagOptions{
+						"authority": {
+							DefaultValue: "",
+							Usage:        "The group policy address (authority) on whose behalf this message is executed",
 						},
 					},
 				},

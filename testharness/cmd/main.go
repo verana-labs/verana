@@ -78,6 +78,9 @@ func runJourney(ctx context.Context, client cosmosclient.Client, journeyID int) 
 	case 308:
 		// Permission Slash Trust Deposit with Operator Authorization
 		return journeys.RunPermissionSlashTDJourney(ctx, client)
+	case 309:
+		// Permission Repay Slashed Trust Deposit with Operator Authorization
+		return journeys.RunPermissionRepaySlashedTDJourney(ctx, client)
 	default:
 		return fmt.Errorf("unknown journey ID: %d", journeyID)
 	}
@@ -101,4 +104,5 @@ func printUsage() {
 	fmt.Println("  306 - Perm Revoke Permission with Operator Authorization")
 	fmt.Println("  307 - Perm CreateOrUpdatePermissionSession with VS Operator Authorization")
 	fmt.Println("  308 - Perm Slash Permission Trust Deposit with Operator Authorization")
+	fmt.Println("  309 - Perm Repay Slashed Trust Deposit with Operator Authorization")
 }

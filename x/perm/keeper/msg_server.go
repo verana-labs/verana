@@ -7,7 +7,7 @@ import (
 	"time"
 
 	credentialschematypes "github.com/verana-labs/verana/x/cs/types"
-	trustdeposittypes "github.com/verana-labs/verana/x/td/types"
+
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/verana-labs/verana/x/perm/types"
@@ -1258,11 +1258,24 @@ func (ms msgServer) executeSlashPermissionTrustDeposit(ctx sdk.Context, applican
 // RepayPermissionSlashedTrustDeposit handles the MsgRepayPermissionSlashedTrustDeposit message
 func (ms msgServer) RepayPermissionSlashedTrustDeposit(goCtx context.Context, msg *types.MsgRepayPermissionSlashedTrustDeposit) (*types.MsgRepayPermissionSlashedTrustDepositResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
+	now := ctx.BlockTime()
 
-	// Load Permission entry applicant_perm from id
+	// [AUTHZ-CHECK]
+	if ms.delegationKeeper != nil {
+		if err := ms.delegationKeeper.CheckOperatorAuthorization(ctx, msg.Authority, msg.Operator, "/verana.perm.v1.MsgRepayPermissionSlashedTrustDeposit", now); err != nil {
+			return nil, fmt.Errorf("authorization check failed: %w", err)
+		}
+	}
+
+	// [MOD-PERM-MSG-13-2-1] Load Permission entry applicant_perm from id
 	applicantPerm, err := ms.Keeper.GetPermissionByID(ctx, msg.Id)
 	if err != nil {
 		return nil, fmt.Errorf("perm not found: %w", err)
+	}
+
+	// [MOD-PERM-MSG-13-2-1] if applicant_perm.authority is not equal to authority, abort
+	if applicantPerm.Authority != msg.Authority {
+		return nil, fmt.Errorf("authority is not the owner of this permission")
 	}
 
 	// Check if perm has been slashed
@@ -1275,25 +1288,29 @@ func (ms msgServer) RepayPermissionSlashedTrustDeposit(goCtx context.Context, ms
 		return nil, fmt.Errorf("slashed deposit already fully repaid")
 	}
 
-	// Calculate amount to repay (remaining slashed amount)
-	amountToRepay := applicantPerm.SlashedDeposit - applicantPerm.RepaidDeposit
-
-	// [MOD-PERM-MSG-13-2-3] Repay Permission Slashed Trust Deposit fee checks
-	// Account must have transaction fees + slashed_deposit amount
-	senderAddr, err := sdk.AccAddressFromBech32(msg.Creator)
+	// [MOD-PERM-MSG-13-2-2] authority MUST have at least applicant_perm.slashed_deposit in its account balance
+	authorityAddr, err := sdk.AccAddressFromBech32(msg.Authority)
 	if err != nil {
-		return nil, fmt.Errorf("invalid creator address: %w", err)
+		return nil, fmt.Errorf("invalid authority address: %w", err)
+	}
+	requiredAmount := sdk.NewInt64Coin(types.BondDenom, int64(applicantPerm.SlashedDeposit))
+	if !ms.bankKeeper.HasBalance(ctx, authorityAddr, requiredAmount) {
+		return nil, fmt.Errorf("insufficient funds to repay slashed deposit: required %d", applicantPerm.SlashedDeposit)
 	}
 
-	// Check if sender has sufficient balance for repayment
-	requiredAmount := sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, int64(amountToRepay)))
-	if !ms.bankKeeper.HasBalance(ctx, senderAddr, requiredAmount[0]) {
-		return nil, fmt.Errorf("insufficient funds to repay slashed deposit: required %d", amountToRepay)
+	// [MOD-PERM-MSG-13-3] Execution
+	// Use AdjustTrustDeposit to transfer applicant_perm.slashed_deposit to trust deposit of applicant_perm.authority
+	if err := ms.trustDeposit.AdjustTrustDeposit(ctx, applicantPerm.Authority, int64(applicantPerm.SlashedDeposit)); err != nil {
+		return nil, fmt.Errorf("failed to adjust trust deposit: %w", err)
 	}
 
-	// [MOD-PERM-MSG-13-3] Repay Permission Slashed Trust Deposit execution
-	if err := ms.executeRepayPermissionSlashedTrustDeposit(ctx, applicantPerm, amountToRepay, msg.Creator); err != nil {
-		return nil, fmt.Errorf("failed to repay perm slashed trust deposit: %w", err)
+	// Update Permission entry
+	applicantPerm.Repaid = &now
+	applicantPerm.Modified = &now
+	applicantPerm.RepaidDeposit = applicantPerm.SlashedDeposit
+
+	if err := ms.Keeper.UpdatePermission(ctx, applicantPerm); err != nil {
+		return nil, fmt.Errorf("failed to update perm: %w", err)
 	}
 
 	// Emit event
@@ -1301,52 +1318,14 @@ func (ms msgServer) RepayPermissionSlashedTrustDeposit(goCtx context.Context, ms
 		sdk.NewEvent(
 			types.EventTypeRepayPermissionSlashedTrustDeposit,
 			sdk.NewAttribute(types.AttributeKeyPermissionID, strconv.FormatUint(msg.Id, 10)),
-			sdk.NewAttribute(types.AttributeKeyRepaidAmount, strconv.FormatUint(amountToRepay, 10)),
-			sdk.NewAttribute(types.AttributeKeyRepaidBy, msg.Creator),
+			sdk.NewAttribute(types.AttributeKeyRepaidAmount, strconv.FormatUint(applicantPerm.SlashedDeposit, 10)),
+			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Authority),
+			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
 		),
 	})
 
 	return &types.MsgRepayPermissionSlashedTrustDepositResponse{}, nil
-}
-
-// executeRepayPermissionSlashedTrustDeposit performs the actual repayment execution
-func (ms msgServer) executeRepayPermissionSlashedTrustDeposit(ctx sdk.Context, applicantPerm types.Permission, amount uint64, repaidBy string) error {
-	now := ctx.BlockTime()
-
-	// Transfer repayment amount from repayer to trust deposit module
-	senderAddr, err := sdk.AccAddressFromBech32(repaidBy)
-	if err != nil {
-		return fmt.Errorf("invalid repaid_by address: %w", err)
-	}
-
-	// Transfer tokens from repayer to trust deposit module
-	if err := ms.bankKeeper.SendCoinsFromAccountToModule(
-		ctx,
-		senderAddr,
-		trustdeposittypes.ModuleName, //to the trust deposit module
-		sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, int64(amount))),
-	); err != nil {
-		return fmt.Errorf("failed to transfer repayment: %w", err)
-	}
-
-	// Update Permission entry applicant_perm
-	applicantPerm.Repaid = &now
-	applicantPerm.Modified = &now
-	applicantPerm.RepaidDeposit = amount
-	applicantPerm.RepaidBy = repaidBy
-
-	// Use AdjustTrustDeposit to transfer amount to trust deposit of applicant_perm.grantee
-	if err := ms.trustDeposit.AdjustTrustDeposit(ctx, applicantPerm.Authority, int64(amount)); err != nil {
-		return fmt.Errorf("failed to adjust trust deposit: %w", err)
-	}
-
-	// Update perm
-	if err := ms.Keeper.UpdatePermission(ctx, applicantPerm); err != nil {
-		return fmt.Errorf("failed to update perm: %w", err)
-	}
-
-	return nil
 }
 
 // CreatePermission handles the MsgCreatePermission message
