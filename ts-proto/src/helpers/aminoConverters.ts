@@ -45,7 +45,6 @@ import {
   MsgCreateOrUpdatePermissionSession,
   MsgSlashPermissionTrustDeposit,
   MsgRepayPermissionSlashedTrustDeposit,
-  MsgCreatePermission,
 } from "../codec/verana/perm/v1/tx";
 import { PermissionType } from "../codec/verana/perm/v1/types";
 
@@ -437,33 +436,6 @@ export const MsgCreateRootPermissionAminoConverter: AminoConverter = {
       validationFees: strToU64(a.validation_fees) != null ? Number(strToU64(a.validation_fees)!.toString()) : 0,
       issuanceFees: strToU64(a.issuance_fees) != null ? Number(strToU64(a.issuance_fees)!.toString()) : 0,
       verificationFees: strToU64(a.verification_fees) != null ? Number(strToU64(a.verification_fees)!.toString()) : 0,
-    }),
-};
-
-export const MsgCreatePermissionAminoConverter: AminoConverter = {
-  aminoType: '/verana.perm.v1.MsgCreatePermission',
-  toAmino: (m: MsgCreatePermission) => clean({
-    creator: m.creator ?? '',
-    schema_id: u64ToStr(m.schemaId),
-    type: m.type ?? PermissionType.UNSPECIFIED,
-    did: m.did ?? '',
-    country: m.country ?? '',
-    effective_from: dateToAmino(m.effectiveFrom),
-    effective_until: dateToAmino(m.effectiveUntil),
-    verification_fees: u64ToStrIfNonZero(m.verificationFees),
-    validation_fees: u64ToStrIfNonZero(m.validationFees),
-  }),
-  fromAmino: (a: any): MsgCreatePermission =>
-    MsgCreatePermission.fromPartial({
-      creator: a.creator ?? '',
-      schemaId: strToU64(a.schema_id) != null ? Number(strToU64(a.schema_id)!.toString()) : 0,
-      type: a.type ?? PermissionType.UNSPECIFIED,
-      did: a.did ?? '',
-      country: a.country ?? '',
-      effectiveFrom: dateFromAmino(a.effective_from),
-      effectiveUntil: dateFromAmino(a.effective_until),
-      verificationFees: strToU64(a.verification_fees) != null ? Number(strToU64(a.verification_fees)!.toString()) : 0,
-      validationFees: strToU64(a.validation_fees) != null ? Number(strToU64(a.validation_fees)!.toString()) : 0,
     }),
 };
 
