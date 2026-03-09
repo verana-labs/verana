@@ -343,15 +343,21 @@ jobs:
             kubectl -n "$NAMESPACE" logs "pod/$POD_NAME" --all-containers --tail=200 || true
             exit 1
           fi
+          POD_IP="$(kubectl -n "$NAMESPACE" get "pod/$POD_NAME" -o jsonpath='{.status.podIP}')"
+          if [ -z "$POD_IP" ]; then
+            echo "Pod $POD_NAME does not have an assigned pod IP." >&2
+            kubectl -n "$NAMESPACE" get pods -o wide || true
+            exit 1
+          fi
           for i in {1..120}; do
-            if kubectl -n "$NAMESPACE" exec "$POD_NAME" -- curl -s http://127.0.0.1:26657/status >/dev/null 2>&1; then
-              echo "RPC is ready inside pod"
+            if kubectl -n "$NAMESPACE" exec "$POD_NAME" -- /bin/bash -lc "curl -fsS http://127.0.0.1:26657/status >/dev/null && curl -fsS http://${POD_IP}:26657/status >/dev/null && curl -fsS http://${POD_IP}:1317/cosmos/base/tendermint/v1beta1/node_info >/dev/null"; then
+              echo "RPC and API are reachable on the pod IP"
               break
             fi
             sleep 2
           done
-          if ! kubectl -n "$NAMESPACE" exec "$POD_NAME" -- curl -s http://127.0.0.1:26657/status >/dev/null 2>&1; then
-            echo "RPC did not become ready inside pod." >&2
+          if ! kubectl -n "$NAMESPACE" exec "$POD_NAME" -- /bin/bash -lc "curl -fsS http://127.0.0.1:26657/status >/dev/null && curl -fsS http://${POD_IP}:26657/status >/dev/null && curl -fsS http://${POD_IP}:1317/cosmos/base/tendermint/v1beta1/node_info >/dev/null"; then
+            echo "RPC/API did not become reachable on the pod IP." >&2
             kubectl -n "$NAMESPACE" get pods -o wide || true
             kubectl -n "$NAMESPACE" describe pod -l app=verana-testharness || true
             kubectl -n "$NAMESPACE" logs -l app=verana-testharness --all-containers --tail=200 || true
