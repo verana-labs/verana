@@ -28,6 +28,7 @@ jobs:
       HARNESS_MODE: k8s
       KUBECONFIG: ${{ secrets.OVH_KUBECONFIG }}
       K8S_INGRESS_DOMAIN: testnet.verana.network
+      TESTHARNESS_CLEANUP_MAIN_ENV: ${{ vars.TESTHARNESS_CLEANUP_MAIN_ENV }}
       DH_USERNAME: ${{ secrets.DOCKER_HUB_LOGIN }}
       DH_TOKEN: ${{ secrets.DOCKER_HUB_PWD }}
       IMAGE_REPO: ${{ secrets.DOCKER_HUB_LOGIN }}/verana-node
@@ -84,6 +85,12 @@ jobs:
             echo "NAMESPACE=vna-devnet-${BRANCH_TAG}-pr-${PR_NUMBER}" >> $GITHUB_ENV
           elif [ "${BRANCH_TAG}" = "main" ]; then
             echo "NAMESPACE=vna-devnet-main" >> $GITHUB_ENV
+            if [ "${TESTHARNESS_CLEANUP_MAIN_ENV:-}" = "true" ]; then
+              echo "Main namespace cleanup is enabled via TESTHARNESS_CLEANUP_MAIN_ENV=true." >> $GITHUB_STEP_SUMMARY
+            else
+              echo "Main namespace will remain deployed after test harness completion." >> $GITHUB_STEP_SUMMARY
+              echo "Set TESTHARNESS_CLEANUP_MAIN_ENV=true in GitHub Actions variables to clean it up after successful main runs." >> $GITHUB_STEP_SUMMARY
+            fi
           else
             echo "NAMESPACE=vna-devnet-${BRANCH_TAG}" >> $GITHUB_ENV
           fi
@@ -407,7 +414,7 @@ jobs:
         run: echo "Test harness execution completed successfully."
 
       - name: Cleanup K8s namespace after successful K8s run
-        if: success() && env.HARNESS_MODE_EFFECTIVE == 'k8s' && (github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch')
+        if: success() && env.HARNESS_MODE_EFFECTIVE == 'k8s' && (github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref_name == 'main' && env.TESTHARNESS_CLEANUP_MAIN_ENV == 'true'))
         run: |
           export KUBECONFIG=$KUBECONFIG
           echo "Cleaning up namespace $NAMESPACE"
