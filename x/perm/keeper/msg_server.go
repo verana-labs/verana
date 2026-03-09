@@ -1123,6 +1123,19 @@ func (ms msgServer) SlashPermissionTrustDeposit(goCtx context.Context, msg *type
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	now := ctx.BlockTime()
 
+	// [MOD-PERM-MSG-12-2-1] [AUTHZ-CHECK] Verify operator authorization
+	if ms.delegationKeeper != nil {
+		if err := ms.delegationKeeper.CheckOperatorAuthorization(
+			ctx,
+			msg.Authority,
+			msg.Operator,
+			"/verana.perm.v1.MsgSlashPermissionTrustDeposit",
+			now,
+		); err != nil {
+			return nil, fmt.Errorf("authorization check failed: %w", err)
+		}
+	}
+
 	// [MOD-PERM-MSG-12-2-1] Slash Permission Trust Deposit basic checks
 	applicantPerm, err := ms.validateSlashPermissionBasicChecks(ctx, msg)
 	if err != nil {
@@ -1139,8 +1152,16 @@ func (ms msgServer) SlashPermissionTrustDeposit(goCtx context.Context, msg *type
 	// (This is handled by the SDK automatically during transaction processing)
 
 	// [MOD-PERM-MSG-12-3] Slash Permission Trust Deposit execution
-	if err := ms.executeSlashPermissionTrustDeposit(ctx, applicantPerm, msg.Amount, msg.Creator, now); err != nil {
+	if err := ms.executeSlashPermissionTrustDeposit(ctx, applicantPerm, msg.Amount, msg.Authority, now); err != nil {
 		return nil, fmt.Errorf("failed to slash permission trust deposit: %w", err)
+	}
+
+	// [MOD-PERM-MSG-12-3] If applicant_perm.type is ISSUER or VERIFIER:
+	// Delete authorization for applicant_perm.vs_operator
+	if applicantPerm.Type == types.PermissionType_ISSUER || applicantPerm.Type == types.PermissionType_VERIFIER {
+		if err := ms.revokeVSOperatorAuthorization(ctx, applicantPerm); err != nil {
+			return nil, fmt.Errorf("failed to revoke VS operator authorization: %w", err)
+		}
 	}
 
 	// Emit event
@@ -1149,7 +1170,9 @@ func (ms msgServer) SlashPermissionTrustDeposit(goCtx context.Context, msg *type
 			types.EventTypeSlashPermissionTrustDeposit,
 			sdk.NewAttribute(types.AttributeKeyPermissionID, strconv.FormatUint(msg.Id, 10)),
 			sdk.NewAttribute(types.AttributeKeySlashedAmount, strconv.FormatUint(msg.Amount, 10)),
-			sdk.NewAttribute(types.AttributeKeySlashedBy, msg.Creator),
+			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Authority),
+			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
+			sdk.NewAttribute(types.AttributeKeySlashedBy, msg.Authority),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
 		),
 	})
@@ -1170,10 +1193,12 @@ func (ms msgServer) validateSlashPermissionBasicChecks(ctx sdk.Context, msg *typ
 	}
 	applicantPerm = perm
 
-	// amount MUST be lower or equal to applicant_perm.deposit else MUST abort
+	// [MOD-PERM-MSG-12-2-1] amount MUST be lower or equal to applicant_perm.deposit else MUST abort
 	if msg.Amount > applicantPerm.Deposit {
 		return applicantPerm, fmt.Errorf("amount exceeds available deposit: %d > %d", msg.Amount, applicantPerm.Deposit)
 	}
+
+	// Note: Even if the permission has expired or is revoked, it is still possible to slash it.
 
 	return applicantPerm, nil
 }
@@ -1183,29 +1208,26 @@ func (ms msgServer) validateSlashPermissionValidatorPerms(ctx sdk.Context, msg *
 	// Either Option #1, or #2 MUST return true, else abort
 
 	// Option #1: executed by a validator ancestor
-	if ms.checkValidatorAncestorOption(ctx, msg.Creator, applicantPerm, now) {
+	if ms.checkValidatorAncestorOption(ctx, msg.Authority, applicantPerm, now) {
 		return nil
 	}
 
 	// Option #2: executed by TrustRegistry controller
-	if ms.checkTrustRegistryControllerOption(ctx, msg.Creator, applicantPerm) {
+	if ms.checkTrustRegistryControllerOption(ctx, msg.Authority, applicantPerm) {
 		return nil
 	}
 
-	return fmt.Errorf("creator does not have authority to slash this permission")
+	return fmt.Errorf("authority is not authorized to slash this permission")
 }
 
 // [MOD-PERM-MSG-12-3] Slash Permission Trust Deposit execution
-func (ms msgServer) executeSlashPermissionTrustDeposit(ctx sdk.Context, applicantPerm types.Permission, amount uint64, creator string, now time.Time) error {
-	// Load Permission entry applicant_perm from id (already loaded)
-
+func (ms msgServer) executeSlashPermissionTrustDeposit(ctx sdk.Context, applicantPerm types.Permission, amount uint64, authority string, now time.Time) error {
 	// Load Permission entry validator_perm from applicant_perm.validator_perm_id
 	if applicantPerm.ValidatorPermId != 0 {
 		_, err := ms.Keeper.GetPermissionByID(ctx, applicantPerm.ValidatorPermId)
 		if err != nil {
 			return fmt.Errorf("validator permission not found: %w", err)
 		}
-		// Note: validator_perm is loaded but not used per spec
 	}
 
 	// set applicant_perm.slashed to now
@@ -1217,10 +1239,10 @@ func (ms msgServer) executeSlashPermissionTrustDeposit(ctx sdk.Context, applican
 	// set applicant_perm.slashed_deposit to applicant_perm.slashed_deposit + amount
 	applicantPerm.SlashedDeposit = applicantPerm.SlashedDeposit + amount
 
-	// set applicant_perm.slashed_by to account executing the method
-	applicantPerm.SlashedBy = creator
+	// set applicant_perm.slashed_by to authority executing the method
+	applicantPerm.SlashedBy = authority
 
-	// use MOD-TD-MSG-7 to burn the slashed amount from the trust deposit of applicant_perm.grantee
+	// use MOD-TD-MSG-7 to burn the slashed amount from the trust deposit of applicant_perm.authority
 	if err := ms.trustDeposit.BurnEcosystemSlashedTrustDeposit(ctx, applicantPerm.Authority, amount); err != nil {
 		return fmt.Errorf("failed to burn trust deposit: %w", err)
 	}

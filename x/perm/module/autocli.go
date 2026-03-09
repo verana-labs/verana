@@ -411,6 +411,12 @@ Parameters:
 							ProtoField: "amount",
 						},
 					},
+					FlagOptions: map[string]*autocliv1.FlagOptions{
+						"authority": {
+							DefaultValue: "",
+							Usage:        "The group policy address (authority) on whose behalf this message is executed",
+						},
+					},
 				},
 				{
 					RpcMethod: "RepayPermissionSlashedTrustDeposit",

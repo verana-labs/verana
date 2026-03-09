@@ -1144,31 +1144,33 @@ func CancelPermissionVPLastRequest(client cosmosclient.Client, ctx context.Conte
 }
 
 // SlashPermissionTrustDeposit slashes a permission's trust deposit
-func SlashPermissionTrustDeposit(client cosmosclient.Client, ctx context.Context, actor cosmosaccount.Account, msg permtypes.MsgSlashPermissionTrustDeposit) string {
+func SlashPermissionTrustDeposit(client cosmosclient.Client, ctx context.Context, actor cosmosaccount.Account, authority string, id uint64, amount uint64) error {
 	actorAddr, err := actor.Address(addressPrefix)
 	if err != nil {
-		panic(fmt.Sprintf("Failed to get actor address: %v", err))
+		return fmt.Errorf("failed to get actor address: %w", err)
 	}
 
-	msgWithCreator := permtypes.MsgSlashPermissionTrustDeposit{
-		Creator: actorAddr,
-		Id:      msg.Id,
-		Amount:  msg.Amount,
+	msg := &permtypes.MsgSlashPermissionTrustDeposit{
+		Authority: authority,
+		Operator:  actorAddr,
+		Id:        id,
+		Amount:    amount,
 	}
 
-	txResp, err := client.BroadcastTx(ctx, actor, &msgWithCreator)
+	txResp, err := client.BroadcastTx(ctx, actor, msg)
 	if err != nil {
-		panic(fmt.Sprintf("Failed to broadcast slash permission trust deposit: %v", err))
+		return fmt.Errorf("failed to broadcast slash permission trust deposit: %w", err)
 	}
 
 	fmt.Print("SlashPermissionTrustDeposit:\n\n")
 	fmt.Println(txResp)
 
 	if txResp.TxResponse.Code != 0 {
-		panic(fmt.Sprintf("transaction failed with code %d: %s", txResp.TxResponse.Code, txResp.TxResponse.RawLog))
+		return fmt.Errorf("SlashPermissionTrustDeposit failed with code %d: %s",
+			txResp.TxResponse.Code, txResp.TxResponse.RawLog)
 	}
 
-	return "success"
+	return nil
 }
 
 // RepayPermissionSlashedTrustDeposit repays a slashed permission's trust deposit

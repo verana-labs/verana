@@ -75,6 +75,9 @@ func runJourney(ctx context.Context, client cosmosclient.Client, journeyID int) 
 	case 307:
 		// Permission CreateOrUpdatePermissionSession with VS Operator Authorization
 		return journeys.RunPermissionCSPSJourney(ctx, client)
+	case 308:
+		// Permission Slash Trust Deposit with Operator Authorization
+		return journeys.RunPermissionSlashTDJourney(ctx, client)
 	default:
 		return fmt.Errorf("unknown journey ID: %d", journeyID)
 	}
@@ -97,4 +100,5 @@ func printUsage() {
 	fmt.Println("  305 - Perm Adjust Permission with Operator Authorization")
 	fmt.Println("  306 - Perm Revoke Permission with Operator Authorization")
 	fmt.Println("  307 - Perm CreateOrUpdatePermissionSession with VS Operator Authorization")
+	fmt.Println("  308 - Perm Slash Permission Trust Deposit with Operator Authorization")
 }

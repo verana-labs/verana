@@ -277,8 +277,14 @@ func (msg *MsgCreateOrUpdatePermissionSession) ValidateBasic() error {
 }
 
 func (msg *MsgSlashPermissionTrustDeposit) ValidateBasic() error {
-	if _, err := sdk.AccAddressFromBech32(msg.Creator); err != nil {
-		return sdkerrors.ErrInvalidAddress.Wrapf("invalid creator address: %s", err)
+	// [MOD-PERM-MSG-12-2-1] authority (group): signature must be verified
+	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
+		return fmt.Errorf("invalid authority address: %w", err)
+	}
+
+	// [MOD-PERM-MSG-12-2-1] operator (account): signature must be verified
+	if _, err := sdk.AccAddressFromBech32(msg.Operator); err != nil {
+		return fmt.Errorf("invalid operator address: %w", err)
 	}
 
 	// if a mandatory parameter is not present, transaction MUST abort

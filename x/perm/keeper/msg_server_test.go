@@ -4208,7 +4208,7 @@ func TestQueryPermissions(t *testing.T) {
 }
 
 func TestSlashPermissionTrustDeposit(t *testing.T) {
-	k, ms, csKeeper, _, ctx := setupMsgServer(t)
+	k, ms, csKeeper, trkKeeper, ctx, delKeeper := setupMsgServerWithDelegation(t)
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
 	// Set specific block time for consistent testing
@@ -4216,151 +4216,277 @@ func TestSlashPermissionTrustDeposit(t *testing.T) {
 	sdkCtx = sdkCtx.WithBlockTime(blockTime)
 	ctx = sdk.WrapSDKContext(sdkCtx)
 
-	creator := sdk.AccAddress([]byte("test_creator")).String()
-	validatorAddr := sdk.AccAddress([]byte("test_validator")).String()
-	ecosystemAddr := sdk.AccAddress([]byte("test_ecosystem")).String()
+	authority := sdk.AccAddress([]byte("test_authority__")).String()
+	operator := sdk.AccAddress([]byte("test_operator___")).String()
+	validatorAddr := sdk.AccAddress([]byte("test_validator__")).String()
+	trControllerAddr := sdk.AccAddress([]byte("test_tr_ctrl____")).String()
+	applicantAuthority := sdk.AccAddress([]byte("test_applicant__")).String()
+	unauthorizedAddr := sdk.AccAddress([]byte("unauthorized_____")).String()
 
-	// Create mock credential schema
-	csKeeper.CreateMockCredentialSchema(1,
+	// Create trust registry with trControllerAddr as controller
+	validDid := "did:example:123456789abcdefghi"
+	trID := trkKeeper.CreateMockTrustRegistry(trControllerAddr, validDid)
+
+	// Create mock credential schema linked to the TR
+	csKeeper.UpdateMockCredentialSchema(1, trID,
 		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
 		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
 
 	now := sdkCtx.BlockTime()
+	pastTime := now.Add(-1 * time.Hour)
 
-	pastTime := now.Add(-1 * time.Hour) // Set effective_from to past relative to block time to make it ACTIVE
-
-	// Create ecosystem perm
-	ecosystemPerm := types.Permission{
-		SchemaId:      1,
-		Type:          types.PermissionType_ECOSYSTEM,
-		Authority:       ecosystemAddr,
-		Created:       &now,
-		CreatedBy:     ecosystemAddr,
-		Adjusted:      &now,
-		AdjustedBy:    ecosystemAddr,
-		Modified:      &now,
-		Country:       "US",
-		VpState:       types.ValidationState_VALIDATED,
-		EffectiveFrom: &pastTime,
-	}
-	_, err := k.CreatePermission(sdkCtx, ecosystemPerm)
-	require.NoError(t, err)
-
-	// Create validator perm
+	// Create validator perm (ISSUER_GRANTOR) owned by validatorAddr
 	validatorPerm := types.Permission{
 		SchemaId:      1,
 		Type:          types.PermissionType_ISSUER_GRANTOR,
-		Authority:       validatorAddr,
+		Authority:     validatorAddr,
 		Created:       &now,
 		CreatedBy:     validatorAddr,
-		Adjusted:      &now,
-		AdjustedBy:    validatorAddr,
 		Modified:      &now,
-		Country:       "US",
 		VpState:       types.ValidationState_VALIDATED,
 		EffectiveFrom: &pastTime,
 	}
 	validatorPermID, err := k.CreatePermission(sdkCtx, validatorPerm)
 	require.NoError(t, err)
 
-	// Create applicant perm with deposit
+	// Create applicant perm (ISSUER) with deposit, vs_operator set
 	applicantPerm := types.Permission{
-		SchemaId:        1,
-		Type:            types.PermissionType_ISSUER,
-		Authority:         creator,
-		Created:         &now,
-		CreatedBy:       creator,
-		Adjusted:        &now,
-		AdjustedBy:      creator,
-		Modified:        &now,
-		Country:         "US",
-		ValidatorPermId: validatorPermID,
-		VpState:         types.ValidationState_VALIDATED,
-		Deposit:         1000, // Set initial deposit
-		EffectiveFrom:   &pastTime,
+		SchemaId:               1,
+		Type:                   types.PermissionType_ISSUER,
+		Authority:              applicantAuthority,
+		Created:                &now,
+		CreatedBy:              applicantAuthority,
+		Modified:               &now,
+		ValidatorPermId:        validatorPermID,
+		VpState:                types.ValidationState_VALIDATED,
+		Deposit:                1000,
+		EffectiveFrom:          &pastTime,
+		VsOperator:             operator,
+		VsOperatorAuthzEnabled: true,
 	}
 	applicantPermID, err := k.CreatePermission(sdkCtx, applicantPerm)
-
 	require.NoError(t, err)
 
-	testCases := []struct {
-		name       string
-		msg        *types.MsgSlashPermissionTrustDeposit
-		expectErr  bool
-		errMessage string
-	}{
-		//{
-		//	name: "Valid slash by validator",
-		//	msg: &types.MsgSlashPermissionTrustDeposit{
-		//		Creator: validatorAddr,
-		//		Id:      applicantPermID,
-		//		Amount:  500,
-		//	},
-		//	expectErr: false,
-		//},
-		//{
-		//	name: "Valid slash by ecosystem controller",
-		//	msg: &types.MsgSlashPermissionTrustDeposit{
-		//		Creator: ecosystemAddr,
-		//		Id:      applicantPermID,
-		//		Amount:  300,
-		//	},
-		//	expectErr: false,
-		//},
-		{
-			name: "Invalid - perm not found",
-			msg: &types.MsgSlashPermissionTrustDeposit{
-				Creator: validatorAddr,
-				Id:      9999,
-				Amount:  100,
-			},
-			expectErr:  true,
-			errMessage: "permission not found",
-		},
-		{
-			name: "Invalid - amount exceeds deposit",
-			msg: &types.MsgSlashPermissionTrustDeposit{
-				Creator: validatorAddr,
-				Id:      applicantPermID,
-				Amount:  2000, // More than available deposit
-			},
-			expectErr:  true,
-			errMessage: "amount exceeds available deposit",
-		},
-		{
-			name: "Invalid - unauthorized slasher",
-			msg: &types.MsgSlashPermissionTrustDeposit{
-				Creator: sdk.AccAddress([]byte("unauthorized")).String(),
-				Id:      applicantPermID,
-				Amount:  100,
-			},
-			expectErr:  true,
-			errMessage: "creator does not have authority to slash this perm",
-		},
+	// Create a VERIFIER perm to test VS operator revocation
+	verifierPerm := types.Permission{
+		SchemaId:               1,
+		Type:                   types.PermissionType_VERIFIER,
+		Authority:              applicantAuthority,
+		Created:                &now,
+		CreatedBy:              applicantAuthority,
+		Modified:               &now,
+		ValidatorPermId:        validatorPermID,
+		VpState:                types.ValidationState_VALIDATED,
+		Deposit:                500,
+		EffectiveFrom:          &pastTime,
+		VsOperator:             operator,
+		VsOperatorAuthzEnabled: true,
 	}
+	verifierPermID, err := k.CreatePermission(sdkCtx, verifierPerm)
+	require.NoError(t, err)
 
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			resp, err := ms.SlashPermissionTrustDeposit(ctx, tc.msg)
+	// Create an ECOSYSTEM perm (no VS operator revocation for non-ISSUER/VERIFIER)
+	ecosystemPerm := types.Permission{
+		SchemaId:      1,
+		Type:          types.PermissionType_ECOSYSTEM,
+		Authority:     applicantAuthority,
+		Created:       &now,
+		CreatedBy:     applicantAuthority,
+		Modified:      &now,
+		VpState:       types.ValidationState_VALIDATED,
+		Deposit:       300,
+		EffectiveFrom: &pastTime,
+	}
+	ecosystemPermID, err := k.CreatePermission(sdkCtx, ecosystemPerm)
+	require.NoError(t, err)
 
-			if tc.expectErr {
-				require.Error(t, err)
-				require.Contains(t, err.Error(), tc.errMessage)
-				require.Nil(t, resp)
-			} else {
-				require.NoError(t, err)
-				require.NotNil(t, resp)
+	// Create expired perm (still slashable per spec)
+	expiredTime := now.Add(-2 * time.Hour)
+	expiredUntil := now.Add(-1 * time.Hour)
+	expiredPerm := types.Permission{
+		SchemaId:        1,
+		Type:            types.PermissionType_ISSUER,
+		Authority:       applicantAuthority,
+		Created:         &expiredTime,
+		CreatedBy:       applicantAuthority,
+		Modified:        &expiredTime,
+		ValidatorPermId: validatorPermID,
+		VpState:         types.ValidationState_VALIDATED,
+		Deposit:         200,
+		EffectiveFrom:   &expiredTime,
+		EffectiveUntil:  &expiredUntil,
+	}
+	expiredPermID, err := k.CreatePermission(sdkCtx, expiredPerm)
+	require.NoError(t, err)
 
-				// Verify perm was updated correctly
-				perm, err := k.GetPermissionByID(sdkCtx, tc.msg.Id)
-				require.NoError(t, err)
-				require.NotNil(t, perm.Slashed)
-				require.Equal(t, tc.msg.Creator, perm.SlashedBy)
-				require.Equal(t, tc.msg.Amount, perm.SlashedDeposit)
-				require.Equal(t, applicantPerm.Deposit-tc.msg.Amount, perm.Deposit)
-			}
+	// Create revoked perm (still slashable per spec)
+	revokedPerm := types.Permission{
+		SchemaId:        1,
+		Type:            types.PermissionType_ISSUER,
+		Authority:       applicantAuthority,
+		Created:         &now,
+		CreatedBy:       applicantAuthority,
+		Modified:        &now,
+		ValidatorPermId: validatorPermID,
+		VpState:         types.ValidationState_VALIDATED,
+		Deposit:         200,
+		EffectiveFrom:   &pastTime,
+		Revoked:         &now,
+		RevokedBy:       validatorAddr,
+	}
+	revokedPermID, err := k.CreatePermission(sdkCtx, revokedPerm)
+	require.NoError(t, err)
+
+	t.Run("AUTHZ check - operator authorization failure", func(t *testing.T) {
+		delKeeper.ErrToReturn = fmt.Errorf("operator authorization not found")
+		resp, err := ms.SlashPermissionTrustDeposit(ctx, &types.MsgSlashPermissionTrustDeposit{
+			Authority: validatorAddr,
+			Operator:  operator,
+			Id:        applicantPermID,
+			Amount:    100,
 		})
-	}
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "authorization check failed")
+		require.Nil(t, resp)
+		delKeeper.ErrToReturn = nil // Reset
+	})
+
+	t.Run("Valid slash by validator ancestor", func(t *testing.T) {
+		resp, err := ms.SlashPermissionTrustDeposit(ctx, &types.MsgSlashPermissionTrustDeposit{
+			Authority: validatorAddr,
+			Operator:  operator,
+			Id:        applicantPermID,
+			Amount:    100,
+		})
+		require.NoError(t, err)
+		require.NotNil(t, resp)
+
+		perm, err := k.GetPermissionByID(sdkCtx, applicantPermID)
+		require.NoError(t, err)
+		require.NotNil(t, perm.Slashed)
+		require.Equal(t, validatorAddr, perm.SlashedBy)
+		require.Equal(t, uint64(100), perm.SlashedDeposit)
+	})
+
+	t.Run("Valid slash by TR controller", func(t *testing.T) {
+		resp, err := ms.SlashPermissionTrustDeposit(ctx, &types.MsgSlashPermissionTrustDeposit{
+			Authority: trControllerAddr,
+			Operator:  operator,
+			Id:        applicantPermID,
+			Amount:    100,
+		})
+		require.NoError(t, err)
+		require.NotNil(t, resp)
+
+		perm, err := k.GetPermissionByID(sdkCtx, applicantPermID)
+		require.NoError(t, err)
+		require.Equal(t, trControllerAddr, perm.SlashedBy)
+		require.Equal(t, uint64(200), perm.SlashedDeposit) // cumulative: 100 + 100
+	})
+
+	t.Run("Valid slash on expired perm (still slashable per spec)", func(t *testing.T) {
+		resp, err := ms.SlashPermissionTrustDeposit(ctx, &types.MsgSlashPermissionTrustDeposit{
+			Authority: validatorAddr,
+			Operator:  operator,
+			Id:        expiredPermID,
+			Amount:    50,
+		})
+		require.NoError(t, err)
+		require.NotNil(t, resp)
+
+		perm, err := k.GetPermissionByID(sdkCtx, expiredPermID)
+		require.NoError(t, err)
+		require.NotNil(t, perm.Slashed)
+		require.Equal(t, uint64(50), perm.SlashedDeposit)
+	})
+
+	t.Run("Valid slash on revoked perm (still slashable per spec)", func(t *testing.T) {
+		resp, err := ms.SlashPermissionTrustDeposit(ctx, &types.MsgSlashPermissionTrustDeposit{
+			Authority: validatorAddr,
+			Operator:  operator,
+			Id:        revokedPermID,
+			Amount:    50,
+		})
+		require.NoError(t, err)
+		require.NotNil(t, resp)
+
+		perm, err := k.GetPermissionByID(sdkCtx, revokedPermID)
+		require.NoError(t, err)
+		require.NotNil(t, perm.Slashed)
+	})
+
+	t.Run("VS operator revocation on VERIFIER perm", func(t *testing.T) {
+		resp, err := ms.SlashPermissionTrustDeposit(ctx, &types.MsgSlashPermissionTrustDeposit{
+			Authority: validatorAddr,
+			Operator:  operator,
+			Id:        verifierPermID,
+			Amount:    50,
+		})
+		require.NoError(t, err)
+		require.NotNil(t, resp)
+	})
+
+	t.Run("No VS operator revocation on ECOSYSTEM perm", func(t *testing.T) {
+		resp, err := ms.SlashPermissionTrustDeposit(ctx, &types.MsgSlashPermissionTrustDeposit{
+			Authority: trControllerAddr,
+			Operator:  operator,
+			Id:        ecosystemPermID,
+			Amount:    50,
+		})
+		require.NoError(t, err)
+		require.NotNil(t, resp)
+	})
+
+	t.Run("Permission not found", func(t *testing.T) {
+		resp, err := ms.SlashPermissionTrustDeposit(ctx, &types.MsgSlashPermissionTrustDeposit{
+			Authority: validatorAddr,
+			Operator:  operator,
+			Id:        9999,
+			Amount:    100,
+		})
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "permission not found")
+		require.Nil(t, resp)
+	})
+
+	t.Run("Amount exceeds deposit", func(t *testing.T) {
+		resp, err := ms.SlashPermissionTrustDeposit(ctx, &types.MsgSlashPermissionTrustDeposit{
+			Authority: validatorAddr,
+			Operator:  operator,
+			Id:        applicantPermID,
+			Amount:    999999,
+		})
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "amount exceeds available deposit")
+		require.Nil(t, resp)
+	})
+
+	t.Run("Unauthorized authority - not validator ancestor, not TR controller", func(t *testing.T) {
+		resp, err := ms.SlashPermissionTrustDeposit(ctx, &types.MsgSlashPermissionTrustDeposit{
+			Authority: unauthorizedAddr,
+			Operator:  operator,
+			Id:        applicantPermID,
+			Amount:    10,
+		})
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "authority is not authorized to slash this permission")
+		require.Nil(t, resp)
+	})
+
+	t.Run("Wrong authority - applicant own authority cannot slash", func(t *testing.T) {
+		// Unlike revoke, slash does NOT have Option #3 (self-authority)
+		resp, err := ms.SlashPermissionTrustDeposit(ctx, &types.MsgSlashPermissionTrustDeposit{
+			Authority: applicantAuthority,
+			Operator:  operator,
+			Id:        applicantPermID,
+			Amount:    10,
+		})
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "authority is not authorized to slash this permission")
+		require.Nil(t, resp)
+	})
+
+	_ = authority // suppress unused
 }
 
 func TestRepayPermissionSlashedTrustDeposit(t *testing.T) {
@@ -4441,9 +4567,10 @@ func TestRepayPermissionSlashedTrustDeposit(t *testing.T) {
 
 	// First slash the perm
 	slashMsg := &types.MsgSlashPermissionTrustDeposit{
-		Creator: validatorAddr,
-		Id:      applicantPermID,
-		Amount:  500, // Slash half of the deposit
+		Authority: validatorAddr,
+		Operator:  validatorAddr,
+		Id:        applicantPermID,
+		Amount:    500, // Slash half of the deposit
 	}
 	_, err = ms.SlashPermissionTrustDeposit(ctx, slashMsg)
 	require.NoError(t, err)
