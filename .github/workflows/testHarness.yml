@@ -28,6 +28,13 @@ jobs:
       HARNESS_MODE: k8s
       KUBECONFIG: ${{ secrets.OVH_KUBECONFIG }}
       K8S_INGRESS_DOMAIN: testnet.verana.network
+      K8S_TESTHARNESS_CPU_REQUEST: "250m"
+      K8S_TESTHARNESS_CPU_LIMIT: "1"
+      K8S_TESTHARNESS_MEMORY_REQUEST: "768Mi"
+      K8S_TESTHARNESS_MEMORY_LIMIT: "1536Mi"
+      K8S_TESTHARNESS_INGRESS_CLASS: nginx
+      K8S_TESTHARNESS_TLS_CLUSTER_ISSUER: letsencrypt-prod
+      K8S_TESTHARNESS_MAIN_TLS_SECRET: vna-devnet-main.testnet.verana.network-cert
       TESTHARNESS_CLEANUP_MAIN_ENV: ${{ vars.TESTHARNESS_CLEANUP_MAIN_ENV }}
       DH_USERNAME: ${{ secrets.DOCKER_HUB_LOGIN }}
       DH_TOKEN: ${{ secrets.DOCKER_HUB_PWD }}
@@ -178,6 +185,9 @@ jobs:
             name: verana-testharness-node
           spec:
             replicas: 1
+            revisionHistoryLimit: 2
+            strategy:
+              type: Recreate
             selector:
               matchLabels:
                 app: verana-testharness
@@ -208,6 +218,13 @@ jobs:
                       name: api
                     - containerPort: 9090
                       name: grpc
+                  resources:
+                    requests:
+                      cpu: ${K8S_TESTHARNESS_CPU_REQUEST}
+                      memory: ${K8S_TESTHARNESS_MEMORY_REQUEST}
+                    limits:
+                      cpu: ${K8S_TESTHARNESS_CPU_LIMIT}
+                      memory: ${K8S_TESTHARNESS_MEMORY_LIMIT}
                   volumeMounts:
                     - name: scripts
                       mountPath: /scripts
@@ -234,12 +251,21 @@ jobs:
                 targetPort: 1317
           EOF
 
-          cat > /tmp/verana-testharness-ingress.yaml <<EOF
+          if [ "$NAMESPACE" = "vna-devnet-main" ]; then
+            cat > /tmp/verana-testharness-ingress.yaml <<EOF
           apiVersion: networking.k8s.io/v1
           kind: Ingress
           metadata:
             name: verana-testharness
+            annotations:
+              cert-manager.io/cluster-issuer: ${K8S_TESTHARNESS_TLS_CLUSTER_ISSUER}
           spec:
+            ingressClassName: ${K8S_TESTHARNESS_INGRESS_CLASS}
+            tls:
+              - hosts:
+                  - rpc-${NAMESPACE}.${K8S_INGRESS_DOMAIN}
+                  - api-${NAMESPACE}.${K8S_INGRESS_DOMAIN}
+                secretName: ${K8S_TESTHARNESS_MAIN_TLS_SECRET}
             rules:
               - host: rpc-${NAMESPACE}.${K8S_INGRESS_DOMAIN}
                 http:
@@ -262,6 +288,37 @@ jobs:
                           port:
                             number: 1317
           EOF
+          else
+            cat > /tmp/verana-testharness-ingress.yaml <<EOF
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            name: verana-testharness
+          spec:
+            ingressClassName: ${K8S_TESTHARNESS_INGRESS_CLASS}
+            rules:
+              - host: rpc-${NAMESPACE}.${K8S_INGRESS_DOMAIN}
+                http:
+                  paths:
+                    - path: /
+                      pathType: Prefix
+                      backend:
+                        service:
+                          name: verana-testharness
+                          port:
+                            number: 26657
+              - host: api-${NAMESPACE}.${K8S_INGRESS_DOMAIN}
+                http:
+                  paths:
+                    - path: /
+                      pathType: Prefix
+                      backend:
+                        service:
+                          name: verana-testharness
+                          port:
+                            number: 1317
+          EOF
+          fi
 
           kubectl apply -n "$NAMESPACE" -f /tmp/verana-testharness-deploy.yaml
           kubectl apply -n "$NAMESPACE" -f /tmp/verana-testharness-svc.yaml
