@@ -195,6 +195,24 @@ jobs:
           # Upload manifest.json to S3
           s3cmd put manifest.json s3://$BUCKET_NAME/binaries/manifest.json --acl-public --force
 
+      - name: Verify release assets exist
+        if: env.VERSION != 'dev' && github.event_name == 'release'
+        run: |
+          set -euo pipefail
+          for path in \
+            "binaries/${{env.BINARY_NAME}}-linux-amd64" \
+            "binaries/${{env.BINARY_NAME}}-linux-arm64" \
+            "binaries/${{env.BINARY_NAME}}-darwin-amd64" \
+            "binaries/${{env.BINARY_NAME}}-darwin-arm64" \
+            "binaries/checksums/md5sums.txt" \
+            "ts-proto/${PKG_TGZ}"
+          do
+            if [ ! -f "$path" ]; then
+              echo "Missing release asset: $path" >&2
+              exit 1
+            fi
+          done
+
       - name: Create GitHub Release and Upload Assets
         if: env.RELEASE_TYPE == 'stable'
         uses: softprops/action-gh-release@v1
@@ -203,6 +221,56 @@ jobs:
           name: Release ${{ env.VERSION }} # Name the release 
           files: |
             binaries/${{env.BINARY_NAME}}-linux-amd64
+            binaries/${{env.BINARY_NAME}}-linux-arm64
+            binaries/${{env.BINARY_NAME}}-darwin-amd64
+            binaries/${{env.BINARY_NAME}}-darwin-arm64
+            binaries/checksums/md5sums.txt
+            ts-proto/${{ env.PKG_TGZ }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify GitHub release assets
+        if: env.VERSION != 'dev' && github.event_name == 'release'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const expected = [
+              `${process.env.BINARY_NAME}-linux-amd64`,
+              `${process.env.BINARY_NAME}-linux-arm64`,
+              `${process.env.BINARY_NAME}-darwin-amd64`,
+              `${process.env.BINARY_NAME}-darwin-arm64`,
+              'md5sums.txt',
+              process.env.PKG_TGZ,
+            ];
+            const { owner, repo } = context.repo;
+            const tag = process.env.VERSION;
+            const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+            let assetNames = [];
+            for (let attempt = 1; attempt <= 6; attempt += 1) {
+              const release = await github.rest.repos.getReleaseByTag({
+                owner,
+                repo,
+                tag,
+              });
+              assetNames = release.data.assets.map((asset) => asset.name);
+              const missing = expected.filter((name) => !assetNames.includes(name));
+
+              if (missing.length === 0) {
+                return;
+              }
+
+              if (attempt < 6) {
+                core.info(
+                  `Release assets still propagating for ${tag}. Missing: ${missing.join(', ')}. Retrying...`
+                );
+                await delay(5000);
+              } else {
+                core.setFailed(
+                  `Missing release assets for ${tag}: ${missing.join(', ')}. Found: ${assetNames.join(', ')}`
+                );
+              }
+            }
   build-canonical-image:
     runs-on: ubuntu-latest
     needs: build-binaries-s3

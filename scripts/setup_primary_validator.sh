@@ -81,6 +81,8 @@ $SED_CMD 's/^minimum-gas-prices = ""/minimum-gas-prices = "0.25uvna"/' "$APP_TOM
 $SED_CMD "s/:1317/:$API_PORT/" "$APP_TOML_PATH"
 $SED_CMD "s/:9090/:$GRPC_PORT/" "$APP_TOML_PATH"
 $SED_CMD "s/:9091/:$GRPC_WEB_PORT/" "$APP_TOML_PATH"
+$SED_CMD 's|^address = "tcp://localhost:|address = "tcp://0.0.0.0:|' "$APP_TOML_PATH"
+$SED_CMD 's|^address = "localhost:|address = "0.0.0.0:|' "$APP_TOML_PATH"
 
 # Replace all occurrences of "stake" with "uvna" in genesis.json
 log "Replacing 'stake' with 'uvna' in genesis.json..."
@@ -99,6 +101,7 @@ fi
 # Configure ports in config.toml
 $SED_CMD "s/:26656/:$P2P_PORT/" "$CONFIG_TOML_PATH"
 $SED_CMD "s/:26657/:$RPC_PORT/" "$CONFIG_TOML_PATH"
+$SED_CMD 's|^laddr = "tcp://127.0.0.1:|laddr = "tcp://0.0.0.0:|' "$CONFIG_TOML_PATH"
 
 # Enable API and CORS
 log "Updating API and CORS settings..."
