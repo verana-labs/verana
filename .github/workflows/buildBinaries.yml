@@ -7,7 +7,6 @@ on:
 permissions:
   id-token: write   # Required for npm trusted publishing (OIDC)
   contents: write   # Required for release asset uploads via action-gh-release
-  issues: write     # Required by release-please
   pull-requests: write  # Required by release-please
 
 env:
@@ -27,9 +26,12 @@ env:
 
 jobs:
   resolve-version:
-    uses: 2060-io/organization/.github/workflows/resolve-version-call.yml@v0.4.0
+    uses: 2060-io/organization/.github/workflows/resolve-version-call.yml@v0.4.1
     with:
       bump-minor-pre-major: false
+      create-pre-release: true
+      generate-notes: true
+      release-title: Release
 
   build-binaries-s3:
     runs-on: ubuntu-latest
@@ -196,7 +198,7 @@ jobs:
           s3cmd put manifest.json s3://$BUCKET_NAME/binaries/manifest.json --acl-public --force
 
       - name: Verify release assets exist
-        if: env.VERSION != 'dev' && github.event_name == 'release'
+        if: env.RELEASE_TYPE == 'stable'
         run: |
           set -euo pipefail
           for path in \
@@ -230,7 +232,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Verify GitHub release assets
-        if: env.VERSION != 'dev' && github.event_name == 'release'
+        if: env.RELEASE_TYPE == 'stable'
         uses: actions/github-script@v7
         with:
           script: |
