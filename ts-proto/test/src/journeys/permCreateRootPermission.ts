@@ -76,7 +76,7 @@ async function main() {
     console.log(`  DID: ${did}`);
     console.log(`  Effective From: ${effectiveFrom.toISOString()}`);
 
-    savePermRootSetup(trId, schemaId, rootPermId, did);
+    savePermRootSetup(trId, schemaId, rootPermId, did, effectiveFrom);
     console.log("  Saved perm-root-setup");
   } catch (error: any) {
     console.log("ERROR!");

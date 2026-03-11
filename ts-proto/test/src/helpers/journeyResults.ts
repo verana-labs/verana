@@ -364,19 +364,20 @@ export function getPermAuthzSetup(): { authorityAddress: string; operatorAddress
 /**
  * Saves the PERM root setup (TR, CS, root permission, DID)
  */
-export function savePermRootSetup(trId: number, schemaId: number, rootPermId: number, did: string): void {
+export function savePermRootSetup(trId: number, schemaId: number, rootPermId: number, did: string, effectiveFrom?: Date): void {
   saveJourneyResult("perm-root-setup", {
     trustRegistryId: trId.toString(),
     schemaId: schemaId.toString(),
     rootPermissionId: rootPermId.toString(),
     did,
+    effectiveFrom: effectiveFrom?.toISOString(),
   });
 }
 
 /**
  * Gets the PERM root setup
  */
-export function getPermRootSetup(): { trId: number; schemaId: number; rootPermId: number; did: string } | null {
+export function getPermRootSetup(): { trId: number; schemaId: number; rootPermId: number; did: string; effectiveFrom?: Date } | null {
   const result = loadJourneyResult("perm-root-setup");
   if (result?.trustRegistryId && result?.schemaId && result?.rootPermissionId && result?.did) {
     return {
@@ -384,6 +385,7 @@ export function getPermRootSetup(): { trId: number; schemaId: number; rootPermId
       schemaId: parseInt(result.schemaId, 10),
       rootPermId: parseInt(result.rootPermissionId, 10),
       did: result.did,
+      effectiveFrom: result.effectiveFrom ? new Date(result.effectiveFrom) : undefined,
     };
   }
   return null;

@@ -14,7 +14,7 @@
  */
 
 import {
-  createAccountFromMnemonic,
+  createDirectAccountFromMnemonic,
   createSigningClient,
   getAccountInfo,
   calculateFeeWithSimulation,
@@ -60,7 +60,7 @@ async function main() {
 
   // Step 2: Connect operator
   console.log("Step 2: Setting up operator wallet...");
-  const wallet = await createAccountFromMnemonic(COOLUSER_MNEMONIC, OPERATOR_INDEX);
+  const wallet = await createDirectAccountFromMnemonic(COOLUSER_MNEMONIC, OPERATOR_INDEX);
   const account = await getAccountInfo(wallet);
   const client = await createSigningClient(wallet);
   console.log(`  Connected as ${account.address}`);
@@ -148,7 +148,7 @@ async function main() {
 
     // Step 7: Create Permission Session
     console.log("Step 7: Creating permission session (MsgCreateOrUpdatePermissionSession)...");
-    const sessionId = `session-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
+    const sessionId = crypto.randomUUID();
 
     const cspsMsg = {
       typeUrl: typeUrls.MsgCreateOrUpdatePermissionSession,

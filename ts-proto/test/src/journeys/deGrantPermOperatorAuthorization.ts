@@ -173,9 +173,17 @@ async function main() {
       process.exit(1);
     }
   } catch (error: any) {
-    console.log("ERROR!");
-    console.error(error);
-    process.exit(1);
+    const errorMsg = error?.message || String(error);
+    // If authorization already exists (from a previous run on same chain), save setup and continue
+    if (errorMsg.includes("already exists") || errorMsg.includes("mutual exclusivity")) {
+      console.log("  Authorization already exists on chain (from previous run). Saving setup and continuing.");
+      savePermAuthzSetup(authorityAddress, operatorAccount.address);
+      console.log("  Saved perm-authz-setup");
+    } else {
+      console.log("ERROR!");
+      console.error(error);
+      process.exit(1);
+    }
   } finally {
     client.disconnect();
   }

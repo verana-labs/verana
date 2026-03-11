@@ -11,7 +11,7 @@
  */
 
 import {
-  createAccountFromMnemonic,
+  createDirectAccountFromMnemonic,
   createSigningClient,
   getAccountInfo,
   calculateFeeWithSimulation,
@@ -52,9 +52,9 @@ async function main() {
 
   // Step 2: Connect operator
   console.log("Step 2: Setting up operator wallet...");
-  const wallet = await createAccountFromMnemonic(COOLUSER_MNEMONIC, OPERATOR_INDEX);
+  const wallet = await createDirectAccountFromMnemonic(COOLUSER_MNEMONIC, OPERATOR_INDEX);
   const account = await getAccountInfo(wallet);
-  let client = await createSigningClient(wallet);
+  const client = await createSigningClient(wallet);
   console.log(`  Connected as ${account.address}`);
   console.log();
 
@@ -83,15 +83,6 @@ async function main() {
     console.log();
 
     // Step 5: Create child ISSUER permission
-    // Disconnect old client and create fresh one with Direct signing
-    // to avoid any Amino encoding issues with Date fields
-    client.disconnect();
-    const { DirectSecp256k1HdWallet } = await import("@cosmjs/proto-signing");
-    const directWallet = await DirectSecp256k1HdWallet.fromMnemonic(COOLUSER_MNEMONIC, {
-      prefix: config.addressPrefix,
-      hdPaths: [(await import("@cosmjs/crypto")).stringToPath(`m/44'/118'/0'/0/${OPERATOR_INDEX}`)],
-    });
-    client = await createSigningClient(directWallet as any);
     console.log("Step 5: Creating child ISSUER permission (MsgCreatePermission)...");
     const childEffectiveFrom = new Date(Date.now() + 30000); // 30s in future
     // Must be <= validator_perm.effective_until (root uses effectiveFrom + 360 days)

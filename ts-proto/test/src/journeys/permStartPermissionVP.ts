@@ -11,7 +11,7 @@
  */
 
 import {
-  createAccountFromMnemonic,
+  createDirectAccountFromMnemonic,
   createSigningClient,
   getAccountInfo,
   calculateFeeWithSimulation,
@@ -54,26 +54,24 @@ async function main() {
 
   // Step 2: Connect operator
   console.log("Step 2: Setting up operator wallet...");
-  const wallet = await createAccountFromMnemonic(COOLUSER_MNEMONIC, OPERATOR_INDEX);
+  const wallet = await createDirectAccountFromMnemonic(COOLUSER_MNEMONIC, OPERATOR_INDEX);
   const account = await getAccountInfo(wallet);
   const client = await createSigningClient(wallet);
   console.log(`  Connected as ${account.address}`);
   console.log();
 
   try {
-    // Step 3: Ensure root permission is effective
-    console.log("Step 3: Ensuring root permission is effective...");
-    const queryClient = await createQueryClient();
-    try {
-      // Root perm was created in a prior journey; it should be effective by now
-      const checkTime = new Date(Date.now() - 5000);
-      await waitForPermissionToBecomeEffective(queryClient, checkTime, 30000);
-    } catch {
-      console.log("  Warning: Could not confirm effectiveness, proceeding...");
-    } finally {
-      queryClient.disconnect();
+    // Step 3: Wait for root permission to become effective
+    console.log("Step 3: Waiting for root permission to become effective...");
+    if (rootSetup.effectiveFrom) {
+      const queryClient = await createQueryClient();
+      try {
+        await waitForPermissionToBecomeEffective(queryClient, rootSetup.effectiveFrom, 60000);
+      } finally {
+        queryClient.disconnect();
+      }
     }
-    console.log("  Root permission should be effective");
+    console.log("  Root permission is now effective");
     console.log();
 
     // Step 4: Start VP for ISSUER type
