@@ -333,3 +333,107 @@ export function getCsActiveTR(): { trustRegistryId: number } | null {
   return null;
 }
 
+// ============================================================
+// PERM Module Journey Results
+// ============================================================
+
+/**
+ * Saves the PERM authz setup (authority + operator addresses)
+ */
+export function savePermAuthzSetup(authorityAddress: string, operatorAddress: string): void {
+  saveJourneyResult("perm-authz-setup", {
+    authorityAddress,
+    operatorAddress,
+  });
+}
+
+/**
+ * Gets the PERM authz setup
+ */
+export function getPermAuthzSetup(): { authorityAddress: string; operatorAddress: string } | null {
+  const result = loadJourneyResult("perm-authz-setup");
+  if (result?.authorityAddress && result?.operatorAddress) {
+    return {
+      authorityAddress: result.authorityAddress,
+      operatorAddress: result.operatorAddress,
+    };
+  }
+  return null;
+}
+
+/**
+ * Saves the PERM root setup (TR, CS, root permission, DID)
+ */
+export function savePermRootSetup(trId: number, schemaId: number, rootPermId: number, did: string): void {
+  saveJourneyResult("perm-root-setup", {
+    trustRegistryId: trId.toString(),
+    schemaId: schemaId.toString(),
+    rootPermissionId: rootPermId.toString(),
+    did,
+  });
+}
+
+/**
+ * Gets the PERM root setup
+ */
+export function getPermRootSetup(): { trId: number; schemaId: number; rootPermId: number; did: string } | null {
+  const result = loadJourneyResult("perm-root-setup");
+  if (result?.trustRegistryId && result?.schemaId && result?.rootPermissionId && result?.did) {
+    return {
+      trId: parseInt(result.trustRegistryId, 10),
+      schemaId: parseInt(result.schemaId, 10),
+      rootPermId: parseInt(result.rootPermissionId, 10),
+      did: result.did,
+    };
+  }
+  return null;
+}
+
+/**
+ * Saves the PERM VP setup (permission in VP lifecycle)
+ */
+export function savePermVPSetup(vpPermId: number, schemaId: number): void {
+  saveJourneyResult("perm-vp-setup", {
+    permissionId: vpPermId.toString(),
+    schemaId: schemaId.toString(),
+  });
+}
+
+/**
+ * Gets the PERM VP setup
+ */
+export function getPermVPSetup(): { vpPermId: number; schemaId: number } | null {
+  const result = loadJourneyResult("perm-vp-setup");
+  if (result?.permissionId && result?.schemaId) {
+    return {
+      vpPermId: parseInt(result.permissionId, 10),
+      schemaId: parseInt(result.schemaId, 10),
+    };
+  }
+  return null;
+}
+
+/**
+ * Saves the PERM slash setup
+ */
+export function savePermSlashSetup(slashedPermId: number, schemaId: number): void {
+  saveJourneyResult("perm-slash-setup", {
+    permissionId: slashedPermId.toString(),
+    schemaId: schemaId.toString(),
+  });
+}
+
+/**
+ * Gets the PERM slash setup
+ */
+export function getPermSlashSetup(): { slashedPermId: number; schemaId: number } | null {
+  const result = loadJourneyResult("perm-slash-setup");
+  if (result?.permissionId && result?.schemaId) {
+    return {
+      slashedPermId: parseInt(result.permissionId, 10),
+      schemaId: parseInt(result.schemaId, 10),
+    };
+  }
+  return null;
+}
+

@@ -7,7 +7,13 @@ This document defines the transaction sequences, prerequisites, and account stra
 **Strategy**: Use the `cooluser` master account for all transactions. Each journey tests a single transaction type (or a small set of related transactions) to validate that the TypeScript protobuf types align with the blockchain.
 
 **Master Account**: `cooluser` (mnemonic: "pink glory help gown abstract eight nice crazy forward ketchup skill cheese")
-- Used for: DE authorization grants, TR operations, CS operations
+- Used for: DE authorization grants, TR operations, CS operations, PERM operations
+
+**Account Derivation Indices**:
+- Index 10: Authority (shared across TR, CS, PERM)
+- Index 11: TR Operator
+- Index 13: CS Operator
+- Index 15: PERM Operator
 
 **State Sharing**: Journeys share state via `journey_results/*.json` files. Earlier journeys save IDs (trust registry, schema, etc.) that later journeys load.
 
@@ -103,9 +109,85 @@ All CS journeys use operator-signed transactions via the delegation engine.
 
 ---
 
+### Permission (PERM) Module
+
+All PERM journeys use operator-signed transactions (authority=index 10, operator=index 15).
+
+#### DE: Grant PERM Operator Authorization
+- **Script**: `test:de-grant-perm-auth`
+- **File**: `deGrantPermOperatorAuthorization.ts`
+- **Prerequisites**: DE TR authorization (from DE Grant TR Operator Authorization)
+- **Transactions**: Grant operator auth for all PERM + TR + CS message types
+
+#### PERM: Create Root Permission
+- **Script**: `test:perm-create-root`
+- **File**: `permCreateRootPermission.ts`
+- **Prerequisites**: PERM authorization
+- **Transactions**: Create TR, CS (GRANTOR_VALIDATION), Root Permission (MOD-PERM-MSG-7)
+- **Outputs**: perm-root-setup
+
+#### PERM: Create Permission (Self-Create)
+- **Script**: `test:perm-create`
+- **File**: `permCreatePermission.ts`
+- **Prerequisites**: PERM authorization
+- **Transactions**: Create OPEN CS + Root, then MsgCreatePermission (MOD-PERM-MSG-14)
+
+#### PERM: Adjust Permission
+- **Script**: `test:perm-adjust`
+- **File**: `permAdjustPermission.ts`
+- **Prerequisites**: Root permission (effective)
+- **Transactions**: MsgAdjustPermission (MOD-PERM-MSG-8)
+
+#### PERM: Revoke Permission
+- **Script**: `test:perm-revoke`
+- **File**: `permRevokePermission.ts`
+- **Prerequisites**: PERM authorization (creates fresh)
+- **Transactions**: Fresh root + MsgRevokePermission (MOD-PERM-MSG-9)
+
+#### PERM: Start Permission VP
+- **Script**: `test:perm-start-vp`
+- **File**: `permStartPermissionVP.ts`
+- **Prerequisites**: Root permission (effective)
+- **Transactions**: MsgStartPermissionVP (MOD-PERM-MSG-1)
+- **Outputs**: perm-vp-setup
+
+#### PERM: Set Permission VP To Validated
+- **Script**: `test:perm-validate-vp`
+- **File**: `permSetPermissionVPToValidated.ts`
+- **Prerequisites**: VP from Start VP
+- **Transactions**: MsgSetPermissionVPToValidated (MOD-PERM-MSG-2)
+- **Outputs**: perm-validated-setup
+
+#### PERM: Renew + Cancel Permission VP
+- **Script**: `test:perm-cancel-vp`
+- **File**: `permCancelPermissionVPLastRequest.ts`
+- **Prerequisites**: Validated VP
+- **Transactions**: MsgRenewPermissionVP (MOD-PERM-MSG-3) + MsgCancelPermissionVPLastRequest (MOD-PERM-MSG-6)
+
+#### PERM: Create/Update Permission Session
+- **Script**: `test:perm-csps`
+- **File**: `permCreateOrUpdatePermissionSession.ts`
+- **Prerequisites**: PERM authorization (creates fresh chain)
+- **Transactions**: Full VP chain + MsgCreateOrUpdatePermissionSession (MOD-PERM-MSG-10) x2
+
+#### PERM: Slash Permission Trust Deposit
+- **Script**: `test:perm-slash`
+- **File**: `permSlashPermissionTrustDeposit.ts`
+- **Prerequisites**: PERM authorization (creates fresh chain)
+- **Transactions**: Full VP chain + MsgSlashPermissionTrustDeposit (MOD-PERM-MSG-11)
+- **Outputs**: perm-slash-setup
+
+#### PERM: Repay Slashed Trust Deposit
+- **Script**: `test:perm-repay`
+- **File**: `permRepayPermissionSlashedTrustDeposit.ts`
+- **Prerequisites**: Slashed permission from Slash journey
+- **Transactions**: MsgRepayPermissionSlashedTrustDeposit (MOD-PERM-MSG-12)
+
+---
+
 ## Execution Order
 
-The `runAll.ts` script runs all 10 tests sequentially:
+The `runAll.ts` script runs all 21 tests sequentially:
 
 1. DE: Grant TR Operator Authorization
 2. TR: Create Trust Registry
@@ -117,6 +199,17 @@ The `runAll.ts` script runs all 10 tests sequentially:
 8. CS: Create Credential Schema
 9. CS: Update Credential Schema
 10. CS: Archive Credential Schema
+11. DE: Grant PERM Operator Authorization
+12. PERM: Create Root Permission
+13. PERM: Create Permission (Self-Create)
+14. PERM: Adjust Permission
+15. PERM: Revoke Permission
+16. PERM: Start Permission VP
+17. PERM: Set Permission VP To Validated
+18. PERM: Renew + Cancel Permission VP
+19. PERM: Create/Update Permission Session
+20. PERM: Slash Permission Trust Deposit
+21. PERM: Repay Slashed Trust Deposit
 
 ## Resource Reuse Strategy
 
@@ -126,11 +219,13 @@ The `runAll.ts` script runs all 10 tests sequentially:
 - `journey_results/` is gitignored
 
 ### Transaction Count
-- Each journey executes 1 transaction
-- Total: 10 transactions across all journeys
+- TR/CS journeys: ~10 transactions
+- PERM journeys: ~30+ transactions (including prerequisites)
+- Total: ~40+ transactions across all journeys
 
 ## References
 
 - [Verana VPR Specification](https://verana-labs.github.io/verifiable-trust-vpr-spec/)
 - MOD-TR-MSG-1 through MOD-TR-MSG-5: Trust Registry messages
 - MOD-CS-MSG-1 through MOD-CS-MSG-3: Credential Schema messages
+- MOD-PERM-MSG-1 through MOD-PERM-MSG-14: Permission messages
