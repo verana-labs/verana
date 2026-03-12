@@ -154,9 +154,12 @@ sed_inplace "s/^minimum-gas-prices = \".*\"/minimum-gas-prices = \"0.25uvna\"/" 
 sed_inplace "s/:1317/:${SECONDARY_API_PORT}/" "$APP_TOML_PATH"
 sed_inplace "s/:9090/:${SECONDARY_GRPC_PORT}/" "$APP_TOML_PATH"
 sed_inplace "s/:9091/:${SECONDARY_GRPC_WEB_PORT}/" "$APP_TOML_PATH"
+sed_inplace 's|^address = "tcp://localhost:|address = "tcp://0.0.0.0:|' "$APP_TOML_PATH"
+sed_inplace 's|^address = "localhost:|address = "0.0.0.0:|' "$APP_TOML_PATH"
 
 sed_inplace "s/:26656/:${SECONDARY_P2P_PORT}/" "$CONFIG_TOML_PATH"
 sed_inplace "s/:26657/:${SECONDARY_RPC_PORT}/" "$CONFIG_TOML_PATH"
+sed_inplace 's|^laddr = "tcp://127.0.0.1:|laddr = "tcp://0.0.0.0:|' "$CONFIG_TOML_PATH"
 sed_inplace "s|^persistent_peers = \".*\"|persistent_peers = \"${PRIMARY_NODE_ID}@127.0.0.1:26656\"|" "$CONFIG_TOML_PATH"
 
 sed_inplace 's/enable = false/enable = true/' "$APP_TOML_PATH"
