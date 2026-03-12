@@ -3,10 +3,10 @@
 echo "Cleaning up Verana development environment..."
 
 # Stop and remove containers
-docker stop val1 val2 val3 2>/dev/null || true
-docker rm val1 val2 val3 2>/dev/null || true
+docker stop validator1 validator2 validator3 validator4 validator5 2>/dev/null || true
+docker rm validator1 validator2 validator3 validator4 validator5 2>/dev/null || true
 
 # Remove data directories
-rm -rf val1 val2 val3
+rm -rf validator1 validator2 validator3 validator4 validator5
 
 echo "✅ Cleanup complete!"
