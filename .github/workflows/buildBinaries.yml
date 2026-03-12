@@ -230,7 +230,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Verify GitHub release assets
-        if: env.RELEASE_TYPE == 'stable'
         uses: actions/github-script@v7
         with:
           script: |
