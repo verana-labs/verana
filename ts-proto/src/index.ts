@@ -7,3 +7,4 @@ export * from "./amino-converter/perm";
 export * from "./amino-converter/td";
 export * from "./amino-converter/tr";
 export * from "./amino-converter/util/helpers";
+export * from "./signing";

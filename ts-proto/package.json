@@ -9,8 +9,31 @@
     "dist"
   ],
   "exports": {
-    "./codec/*": "./dist/codec/*",
-    ".": "./dist/index.js"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./signing": {
+      "types": "./dist/signing.d.ts",
+      "require": "./dist/signing.js",
+      "default": "./dist/signing.js"
+    },
+    "./codec/*": {
+      "types": "./dist/codec/*.d.ts",
+      "require": "./dist/codec/*.js",
+      "default": "./dist/codec/*.js"
+    },
+    "./amino-converter/*": {
+      "types": "./dist/amino-converter/*.d.ts",
+      "require": "./dist/amino-converter/*.js",
+      "default": "./dist/amino-converter/*.js"
+    },
+    "./helpers/*": {
+      "types": "./dist/helpers/*.d.ts",
+      "require": "./dist/helpers/*.js",
+      "default": "./dist/helpers/*.js"
+    }
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
@@ -27,7 +50,8 @@
     "typescript": "5.7.3"
   },
   "peerDependencies": {
-    "@cosmjs/stargate": "0.32.3"
+    "@cosmjs/proto-signing": "^0.32.3",
+    "@cosmjs/stargate": "^0.32.3"
   },
   "repository": {
     "type": "git",

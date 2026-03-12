@@ -19,6 +19,13 @@ export const clean = <T extends Record<string, any>>(o: T): T => {
 export const u64ToStr = (v?: Long | string | number | null) =>
   v != null ? Long.fromValue(v).toString() : undefined;
 
+/** Normalizes a 64-bit value into its string representation, omitting zero. */
+export const u64ToStrIfNonZero = (v?: Long | string | number | null) => {
+  if (v == null) return undefined;
+  const value = Long.fromValue(v);
+  return value.isZero() ? undefined : value.toString();
+};
+
 /** Parses a string into a 64-bit Long value (or undefined). */
 export const strToU64 = (s?: string | null) =>
   s != null ? Long.fromString(s) : undefined;

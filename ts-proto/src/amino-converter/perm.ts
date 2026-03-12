@@ -14,7 +14,7 @@ import {
   MsgCreatePermission,
 } from '../codec/verana/perm/v1/tx';
 
-import { strToU64, u64ToStr, dateToIsoAmino, isoToDate } from './util/helpers';
+import { clean, strToU64, u64ToStr, u64ToStrIfNonZero, dateToIsoAmino, isoToDate } from './util/helpers';
 
 /**
  * Amino converter for MsgStartPermissionVP
@@ -59,7 +59,7 @@ export const MsgRenewPermissionVPAminoConverter = {
  */
 export const MsgSetPermissionVPToValidatedAminoConverter = {
   aminoType: '/verana.perm.v1.MsgSetPermissionVPToValidated',
-  toAmino: (msg: MsgSetPermissionVPToValidated) => ({
+  toAmino: (msg: MsgSetPermissionVPToValidated) => clean({
     creator: msg.creator,
     id: u64ToStr(msg.id), // uint64 -> string
     effective_until: dateToIsoAmino(msg.effectiveUntil), // Date -> ISO string (optional)
@@ -68,6 +68,8 @@ export const MsgSetPermissionVPToValidatedAminoConverter = {
     verification_fees: u64ToStr(msg.verificationFees), // uint64 -> string
     country: msg.country,
     vp_summary_digest_sri: msg.vpSummaryDigestSri,
+    issuance_fee_discount: u64ToStrIfNonZero(msg.issuanceFeeDiscount), // uint64 -> string, omit if zero
+    verification_fee_discount: u64ToStrIfNonZero(msg.verificationFeeDiscount), // uint64 -> string, omit if zero
   }),
   fromAmino: (value: any) =>
     MsgSetPermissionVPToValidated.fromPartial({
@@ -79,6 +81,8 @@ export const MsgSetPermissionVPToValidatedAminoConverter = {
       verificationFees: strToU64(value.verification_fees), // string -> Long (uint64)
       country: value.country,
       vpSummaryDigestSri: value.vp_summary_digest_sri,
+      issuanceFeeDiscount: strToU64(value.issuance_fee_discount), // string -> Long (uint64)
+      verificationFeeDiscount: strToU64(value.verification_fee_discount), // string -> Long (uint64)
     }),
 };
 
@@ -225,7 +229,7 @@ export const MsgRepayPermissionSlashedTrustDepositAminoConverter = {
  */
 export const MsgCreatePermissionAminoConverter = {
   aminoType: '/verana.perm.v1.MsgCreatePermission',
-  toAmino: (msg: MsgCreatePermission) => ({
+  toAmino: (msg: MsgCreatePermission) => clean({
     creator: msg.creator,
     schema_id: u64ToStr(msg.schemaId), // uint64 -> string
     type: msg.type,
@@ -233,8 +237,8 @@ export const MsgCreatePermissionAminoConverter = {
     country: msg.country,
     effective_from: dateToIsoAmino(msg.effectiveFrom), // Date -> ISO string (optional)
     effective_until: dateToIsoAmino(msg.effectiveUntil), // Date -> ISO string (optional)
-    verification_fees: u64ToStr(msg.verificationFees), // uint64 -> string
-    validation_fees: u64ToStr(msg.validationFees), // uint64 -> string
+    verification_fees: u64ToStrIfNonZero(msg.verificationFees), // uint64 -> string, omit if zero
+    validation_fees: u64ToStrIfNonZero(msg.validationFees), // uint64 -> string, omit if zero
   }),
   fromAmino: (value: any) =>
     MsgCreatePermission.fromPartial({
