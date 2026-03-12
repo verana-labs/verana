@@ -28,6 +28,14 @@ jobs:
       HARNESS_MODE: k8s
       KUBECONFIG: ${{ secrets.OVH_KUBECONFIG }}
       K8S_INGRESS_DOMAIN: testnet.verana.network
+      K8S_TESTHARNESS_CPU_REQUEST: "250m"
+      K8S_TESTHARNESS_CPU_LIMIT: "1"
+      K8S_TESTHARNESS_MEMORY_REQUEST: "768Mi"
+      K8S_TESTHARNESS_MEMORY_LIMIT: "1536Mi"
+      K8S_TESTHARNESS_INGRESS_CLASS: nginx
+      K8S_TESTHARNESS_TLS_CLUSTER_ISSUER: letsencrypt-prod
+      K8S_TESTHARNESS_MAIN_TLS_SECRET: vna-devnet-main.testnet.verana.network-cert
+      TESTHARNESS_CLEANUP_MAIN_ENV: ${{ vars.TESTHARNESS_CLEANUP_MAIN_ENV }}
       DH_USERNAME: ${{ secrets.DOCKER_HUB_LOGIN }}
       DH_TOKEN: ${{ secrets.DOCKER_HUB_PWD }}
       IMAGE_REPO: ${{ secrets.DOCKER_HUB_LOGIN }}/verana-node
@@ -84,6 +92,12 @@ jobs:
             echo "NAMESPACE=vna-devnet-${BRANCH_TAG}-pr-${PR_NUMBER}" >> $GITHUB_ENV
           elif [ "${BRANCH_TAG}" = "main" ]; then
             echo "NAMESPACE=vna-devnet-main" >> $GITHUB_ENV
+            if [ "${TESTHARNESS_CLEANUP_MAIN_ENV:-}" = "true" ]; then
+              echo "Main namespace cleanup is enabled via TESTHARNESS_CLEANUP_MAIN_ENV=true." >> $GITHUB_STEP_SUMMARY
+            else
+              echo "Main namespace will remain deployed after test harness completion." >> $GITHUB_STEP_SUMMARY
+              echo "Set TESTHARNESS_CLEANUP_MAIN_ENV=true in GitHub Actions variables to clean it up after successful main runs." >> $GITHUB_STEP_SUMMARY
+            fi
           else
             echo "NAMESPACE=vna-devnet-${BRANCH_TAG}" >> $GITHUB_ENV
           fi
@@ -171,6 +185,9 @@ jobs:
             name: verana-testharness-node
           spec:
             replicas: 1
+            revisionHistoryLimit: 2
+            strategy:
+              type: Recreate
             selector:
               matchLabels:
                 app: verana-testharness
@@ -201,6 +218,13 @@ jobs:
                       name: api
                     - containerPort: 9090
                       name: grpc
+                  resources:
+                    requests:
+                      cpu: ${K8S_TESTHARNESS_CPU_REQUEST}
+                      memory: ${K8S_TESTHARNESS_MEMORY_REQUEST}
+                    limits:
+                      cpu: ${K8S_TESTHARNESS_CPU_LIMIT}
+                      memory: ${K8S_TESTHARNESS_MEMORY_LIMIT}
                   volumeMounts:
                     - name: scripts
                       mountPath: /scripts
@@ -227,12 +251,21 @@ jobs:
                 targetPort: 1317
           EOF
 
-          cat > /tmp/verana-testharness-ingress.yaml <<EOF
+          if [ "$NAMESPACE" = "vna-devnet-main" ]; then
+            cat > /tmp/verana-testharness-ingress.yaml <<EOF
           apiVersion: networking.k8s.io/v1
           kind: Ingress
           metadata:
             name: verana-testharness
+            annotations:
+              cert-manager.io/cluster-issuer: ${K8S_TESTHARNESS_TLS_CLUSTER_ISSUER}
           spec:
+            ingressClassName: ${K8S_TESTHARNESS_INGRESS_CLASS}
+            tls:
+              - hosts:
+                  - rpc-${NAMESPACE}.${K8S_INGRESS_DOMAIN}
+                  - api-${NAMESPACE}.${K8S_INGRESS_DOMAIN}
+                secretName: ${K8S_TESTHARNESS_MAIN_TLS_SECRET}
             rules:
               - host: rpc-${NAMESPACE}.${K8S_INGRESS_DOMAIN}
                 http:
@@ -255,6 +288,37 @@ jobs:
                           port:
                             number: 1317
           EOF
+          else
+            cat > /tmp/verana-testharness-ingress.yaml <<EOF
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            name: verana-testharness
+          spec:
+            ingressClassName: ${K8S_TESTHARNESS_INGRESS_CLASS}
+            rules:
+              - host: rpc-${NAMESPACE}.${K8S_INGRESS_DOMAIN}
+                http:
+                  paths:
+                    - path: /
+                      pathType: Prefix
+                      backend:
+                        service:
+                          name: verana-testharness
+                          port:
+                            number: 26657
+              - host: api-${NAMESPACE}.${K8S_INGRESS_DOMAIN}
+                http:
+                  paths:
+                    - path: /
+                      pathType: Prefix
+                      backend:
+                        service:
+                          name: verana-testharness
+                          port:
+                            number: 1317
+          EOF
+          fi
 
           kubectl apply -n "$NAMESPACE" -f /tmp/verana-testharness-deploy.yaml
           kubectl apply -n "$NAMESPACE" -f /tmp/verana-testharness-svc.yaml
@@ -279,15 +343,21 @@ jobs:
             kubectl -n "$NAMESPACE" logs "pod/$POD_NAME" --all-containers --tail=200 || true
             exit 1
           fi
+          POD_IP="$(kubectl -n "$NAMESPACE" get "pod/$POD_NAME" -o jsonpath='{.status.podIP}')"
+          if [ -z "$POD_IP" ]; then
+            echo "Pod $POD_NAME does not have an assigned pod IP." >&2
+            kubectl -n "$NAMESPACE" get pods -o wide || true
+            exit 1
+          fi
           for i in {1..120}; do
-            if kubectl -n "$NAMESPACE" exec "$POD_NAME" -- curl -s http://127.0.0.1:26657/status >/dev/null 2>&1; then
-              echo "RPC is ready inside pod"
+            if kubectl -n "$NAMESPACE" exec "$POD_NAME" -- /bin/bash -lc "curl -fsS http://127.0.0.1:26657/status >/dev/null && curl -fsS http://${POD_IP}:26657/status >/dev/null && curl -fsS http://${POD_IP}:1317/cosmos/base/tendermint/v1beta1/node_info >/dev/null"; then
+              echo "RPC and API are reachable on the pod IP"
               break
             fi
             sleep 2
           done
-          if ! kubectl -n "$NAMESPACE" exec "$POD_NAME" -- curl -s http://127.0.0.1:26657/status >/dev/null 2>&1; then
-            echo "RPC did not become ready inside pod." >&2
+          if ! kubectl -n "$NAMESPACE" exec "$POD_NAME" -- /bin/bash -lc "curl -fsS http://127.0.0.1:26657/status >/dev/null && curl -fsS http://${POD_IP}:26657/status >/dev/null && curl -fsS http://${POD_IP}:1317/cosmos/base/tendermint/v1beta1/node_info >/dev/null"; then
+            echo "RPC/API did not become reachable on the pod IP." >&2
             kubectl -n "$NAMESPACE" get pods -o wide || true
             kubectl -n "$NAMESPACE" describe pod -l app=verana-testharness || true
             kubectl -n "$NAMESPACE" logs -l app=verana-testharness --all-containers --tail=200 || true
@@ -410,7 +480,7 @@ jobs:
         run: echo "Test harness execution completed successfully."
 
       - name: Cleanup K8s namespace after successful K8s run
-        if: success() && env.HARNESS_MODE_EFFECTIVE == 'k8s' && (github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch')
+        if: success() && env.HARNESS_MODE_EFFECTIVE == 'k8s' && (github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref_name == 'main' && env.TESTHARNESS_CLEANUP_MAIN_ENV == 'true'))
         run: |
           export KUBECONFIG=$KUBECONFIG
           echo "Cleaning up namespace $NAMESPACE"
