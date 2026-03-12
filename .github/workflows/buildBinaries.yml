@@ -198,7 +198,6 @@ jobs:
           s3cmd put manifest.json s3://$BUCKET_NAME/binaries/manifest.json --acl-public --force
 
       - name: Verify release assets exist
-        if: env.RELEASE_TYPE == 'stable'
         run: |
           set -euo pipefail
           for path in \
