@@ -21,7 +21,7 @@ import { clean, strToU64, u64ToStr, u64ToStrIfNonZero, dateToIsoAmino, isoToDate
  */
 export const MsgStartPermissionVPAminoConverter = {
   aminoType: '/verana.perm.v1.MsgStartPermissionVP',
-  toAmino: (msg: MsgStartPermissionVP) => ({
+  toAmino: (msg: MsgStartPermissionVP) => clean({
     creator: msg.creator,
     type: msg.type,
     validator_perm_id: u64ToStr(msg.validatorPermId), // uint64 -> string
@@ -107,7 +107,7 @@ export const MsgCancelPermissionVPLastRequestAminoConverter = {
  */
 export const MsgCreateRootPermissionAminoConverter = {
   aminoType: '/verana.perm.v1.MsgCreateRootPermission',
-  toAmino: (msg: MsgCreateRootPermission) => ({
+  toAmino: (msg: MsgCreateRootPermission) => clean({
     creator: msg.creator,
     schema_id: u64ToStr(msg.schemaId), // uint64 -> string
     did: msg.did,
@@ -137,7 +137,7 @@ export const MsgCreateRootPermissionAminoConverter = {
  */
 export const MsgExtendPermissionAminoConverter = {
   aminoType: '/verana.perm.v1.MsgExtendPermission',
-  toAmino: (msg: MsgExtendPermission) => ({
+  toAmino: (msg: MsgExtendPermission) => clean({
     creator: msg.creator,
     id: u64ToStr(msg.id), // uint64 -> string
     effective_until: dateToIsoAmino(msg.effectiveUntil), // Date -> ISO string (optional)
@@ -171,7 +171,7 @@ export const MsgRevokePermissionAminoConverter = {
  */
 export const MsgCreateOrUpdatePermissionSessionAminoConverter = {
   aminoType: '/verana.perm.v1.MsgCreateOrUpdatePermissionSession',
-  toAmino: (msg: MsgCreateOrUpdatePermissionSession) => ({
+  toAmino: (msg: MsgCreateOrUpdatePermissionSession) => clean({
     creator: msg.creator,
     id: msg.id, // UUID string
     issuer_perm_id: u64ToStr(msg.issuerPermId), // uint64 -> string

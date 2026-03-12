@@ -68,10 +68,17 @@ export const fromOptU32Amino = (x: any): OptionalUInt32 | undefined => {
   return { value: u };
 };
 
-/** Formats a Date into an ISO string commonly used in Amino JSON payloads. */
+/**
+ * Formats a Date into the legacy Amino JSON timestamp form used by the chain.
+ * Go trims trailing zeros in fractional seconds, so `2028-03-01T23:39:39.300Z`
+ * must become `2028-03-01T23:39:39.3Z` to keep sign bytes aligned.
+ */
 export const dateToIsoAmino = (d?: Date) => {
   if (!d) return undefined;
-  return d.toISOString().replace(".000Z", "Z");
+  return d
+    .toISOString()
+    .replace(/\.000Z$/, "Z")
+    .replace(/(\.\d*?[1-9])0+Z$/, "$1Z");
 };
 
 /** Parses an ISO date string into a Date instance (or undefined). */
