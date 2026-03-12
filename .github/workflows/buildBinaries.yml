@@ -215,7 +215,6 @@ jobs:
           done
 
       - name: Create GitHub Release and Upload Assets
-        if: env.RELEASE_TYPE == 'stable'
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ env.VERSION }} # Explicitly specify the tag
