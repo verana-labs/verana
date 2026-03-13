@@ -46,6 +46,7 @@ type TrustRegistryKeeper interface {
 // TrustDepositKeeper defines the expected interface for the Trust Deposit module.
 type TrustDepositKeeper interface {
 	AdjustTrustDeposit(ctx sdk.Context, account string, augend int64) error
+	AdjustTrustDepositOnBehalf(ctx sdk.Context, account string, funder sdk.AccAddress, amount int64) error
 	GetTrustDepositRate(ctx sdk.Context) math.LegacyDec
 	GetUserAgentRewardRate(ctx sdk.Context) math.LegacyDec
 	GetWalletUserAgentRewardRate(ctx sdk.Context) math.LegacyDec

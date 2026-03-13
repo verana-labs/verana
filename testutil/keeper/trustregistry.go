@@ -66,6 +66,10 @@ func (m *MockTrustDepositKeeper) AdjustTrustDeposit(_ sdk.Context, _ string, _ i
 	return nil
 }
 
+func (m *MockTrustDepositKeeper) AdjustTrustDepositOnBehalf(_ sdk.Context, _ string, _ sdk.AccAddress, _ int64) error {
+	return nil
+}
+
 func (m *MockTrustDepositKeeper) GetTrustDepositRate(_ sdk.Context) math.LegacyDec {
 	v, _ := math.LegacyNewDecFromStr("0")
 	return v

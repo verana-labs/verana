@@ -180,9 +180,11 @@ func (k *TrackingBankKeeper) GetTotalReceived(addr string) sdk.Coins {
 type TrackingTrustDepositKeeper struct {
 	TrustDeposits       map[string]int64
 	AdjustmentLog       []TrustDepositAdjustment
+	OnBehalfLog         []TrustDepositOnBehalfAdjustment
 	UserAgentRewardRate math.LegacyDec
 	WalletUARewardRate  math.LegacyDec
 	TrustDepositRate    math.LegacyDec
+	bankKeeper          *TrackingBankKeeper // reference for on-behalf coin tracking
 }
 
 type TrustDepositAdjustment struct {
@@ -190,16 +192,24 @@ type TrustDepositAdjustment struct {
 	Amount  int64
 }
 
-func NewTrackingTrustDepositKeeper(uaRate, wuaRate, tdRate string) *TrackingTrustDepositKeeper {
+type TrustDepositOnBehalfAdjustment struct {
+	Account string
+	Funder  sdk.AccAddress
+	Amount  int64
+}
+
+func NewTrackingTrustDepositKeeper(uaRate, wuaRate, tdRate string, bankKeeper *TrackingBankKeeper) *TrackingTrustDepositKeeper {
 	ua, _ := math.LegacyNewDecFromStr(uaRate)
 	wua, _ := math.LegacyNewDecFromStr(wuaRate)
 	td, _ := math.LegacyNewDecFromStr(tdRate)
 	return &TrackingTrustDepositKeeper{
 		TrustDeposits:       make(map[string]int64),
 		AdjustmentLog:       make([]TrustDepositAdjustment, 0),
+		OnBehalfLog:         make([]TrustDepositOnBehalfAdjustment, 0),
 		UserAgentRewardRate: ua,
 		WalletUARewardRate:  wua,
 		TrustDepositRate:    td,
+		bankKeeper:          bankKeeper,
 	}
 }
 
@@ -225,9 +235,38 @@ func (m *TrackingTrustDepositKeeper) AdjustTrustDeposit(ctx sdk.Context, account
 	return nil
 }
 
+func (m *TrackingTrustDepositKeeper) AdjustTrustDepositOnBehalf(ctx sdk.Context, account string, funder sdk.AccAddress, amount int64) error {
+	// Mirror real implementation: deduct from funder via SendCoinsFromAccountToModule
+	if m.bankKeeper != nil {
+		err := m.bankKeeper.SendCoinsFromAccountToModule(ctx, funder, "td", sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, amount)))
+		if err != nil {
+			return err
+		}
+	}
+	m.TrustDeposits[account] += amount
+	m.OnBehalfLog = append(m.OnBehalfLog, TrustDepositOnBehalfAdjustment{Account: account, Funder: funder, Amount: amount})
+	return nil
+}
+
 func (m *TrackingTrustDepositKeeper) GetTotalAdjustment(account string) int64 {
 	total := int64(0)
 	for _, adj := range m.AdjustmentLog {
+		if adj.Account == account {
+			total += adj.Amount
+		}
+	}
+	for _, adj := range m.OnBehalfLog {
+		if adj.Account == account {
+			total += adj.Amount
+		}
+	}
+	return total
+}
+
+// GetTotalOnBehalfFunded returns the total amount funded on behalf of an account (by third parties)
+func (m *TrackingTrustDepositKeeper) GetTotalOnBehalfFunded(account string) int64 {
+	total := int64(0)
+	for _, adj := range m.OnBehalfLog {
 		if adj.Account == account {
 			total += adj.Amount
 		}
@@ -323,7 +362,7 @@ func setupTrackingMsgServer(t testing.TB, uaRate, wuaRate, tdRate string, trustU
 	csKeeper := NewTrackingCredentialSchemaKeeper()
 	trkKeeper := NewTrackingTrustRegistryKeeper(trustUnitPrice)
 	bankKeeper := NewTrackingBankKeeper()
-	tdKeeper := NewTrackingTrustDepositKeeper(uaRate, wuaRate, tdRate)
+	tdKeeper := NewTrackingTrustDepositKeeper(uaRate, wuaRate, tdRate, bankKeeper)
 
 	k := keeper.NewKeeper(
 		cdc,
@@ -548,27 +587,27 @@ func TestAgentRewardsDistribution(t *testing.T) {
 	wuaToAccount := totalWalletAgentReward.TruncateInt64() - wuaToTD // 7 - 1 = 6
 
 	t.Run("Verify beneficiary balance updates", func(t *testing.T) {
-		// Ecosystem should receive 80 directly
+		// Ecosystem should receive only direct fees (TD funded via AdjustTrustDepositOnBehalf)
 		ecosystemReceived := bankKeeper.GetTotalReceived(ecosystem)
 		require.Equal(t, int64(ecosystemToAccount), ecosystemReceived.AmountOf(types.BondDenom).Int64(),
-			"Ecosystem should receive direct fees")
+			"Ecosystem should receive only direct fees")
 
-		// Grantor should receive 40 directly
+		// Grantor should receive only direct fees
 		grantorReceived := bankKeeper.GetTotalReceived(grantor)
 		require.Equal(t, int64(grantorToAccount), grantorReceived.AmountOf(types.BondDenom).Int64(),
-			"Grantor should receive direct fees")
+			"Grantor should receive only direct fees")
 	})
 
 	t.Run("Verify agent balance updates", func(t *testing.T) {
-		// User agent should receive 12 directly
+		// User agent should receive only direct reward (TD funded via AdjustTrustDepositOnBehalf)
 		agentReceived := bankKeeper.GetTotalReceived(agent)
 		require.Equal(t, uaToAccount, agentReceived.AmountOf(types.BondDenom).Int64(),
-			"User agent should receive direct reward")
+			"User agent should receive only direct reward")
 
-		// Wallet agent should receive 6 directly
+		// Wallet agent should receive only direct reward
 		walletAgentReceived := bankKeeper.GetTotalReceived(walletAgent)
 		require.Equal(t, wuaToAccount, walletAgentReceived.AmountOf(types.BondDenom).Int64(),
-			"Wallet agent should receive direct reward")
+			"Wallet agent should receive only direct reward")
 	})
 
 	t.Run("Verify trust deposit updates", func(t *testing.T) {
@@ -602,14 +641,14 @@ func TestAgentRewardsDistribution(t *testing.T) {
 	t.Run("Verify total deducted equals total distributed", func(t *testing.T) {
 		totalDeducted := bankKeeper.GetTotalDeducted(creator)
 
-		// Total distributed to accounts (direct transfers)
+		// Direct transfers to accounts (fees only)
 		directToEcosystem := int64(ecosystemToAccount)
 		directToGrantor := int64(grantorToAccount)
 		directToAgent := uaToAccount
 		directToWalletAgent := wuaToAccount
 		totalDirectTransfers := directToEcosystem + directToGrantor + directToAgent + directToWalletAgent
 
-		// Total to module (trust deposits)
+		// Total to module (payer's own TD + on-behalf TD via SendCoinsFromAccountToModule)
 		var totalToModule int64
 		for _, record := range bankKeeper.ModuleTransferLog {
 			totalToModule += record.Amount.AmountOf(types.BondDenom).Int64()
@@ -622,10 +661,10 @@ func TestAgentRewardsDistribution(t *testing.T) {
 
 		t.Logf("=== Fee Distribution Summary ===")
 		t.Logf("Beneficiary fees: %d trust units", beneficiaryFees)
-		t.Logf("Direct to ecosystem: %d", directToEcosystem)
-		t.Logf("Direct to grantor: %d", directToGrantor)
-		t.Logf("Direct to user agent: %d", directToAgent)
-		t.Logf("Direct to wallet agent: %d", directToWalletAgent)
+		t.Logf("To ecosystem (fees): %d", directToEcosystem)
+		t.Logf("To grantor (fees): %d", directToGrantor)
+		t.Logf("To user agent (fees): %d", directToAgent)
+		t.Logf("To wallet agent (fees): %d", directToWalletAgent)
 		t.Logf("Total to trust deposits (module): %d", totalToModule)
 		t.Logf("Total deducted from creator: %d", totalDeducted.AmountOf(types.BondDenom).Int64())
 		t.Logf("Total distributed: %d", totalDistributed)
@@ -918,13 +957,15 @@ func TestAgentRewardsWithDiscount(t *testing.T) {
 	// ua_to_account = 5 - 1 = 4
 
 	t.Run("Verify discount applied correctly", func(t *testing.T) {
+		// Ecosystem receives only direct fees (TD funded via AdjustTrustDepositOnBehalf)
 		ecosystemReceived := bankKeeper.GetTotalReceived(ecosystem)
 		require.Equal(t, int64(40), ecosystemReceived.AmountOf(types.BondDenom).Int64(),
-			"Ecosystem should receive 40 (after 50% discount)")
+			"Ecosystem should receive 40 direct fees (after 50% discount)")
 
+		// Agent receives only direct reward (TD funded via AdjustTrustDepositOnBehalf)
 		agentReceived := bankKeeper.GetTotalReceived(agent)
 		require.Equal(t, int64(4), agentReceived.AmountOf(types.BondDenom).Int64(),
-			"Agent should receive 4")
+			"Agent should receive 4 direct reward")
 
 		ecosystemTD := tdKeeper.GetTotalAdjustment(ecosystem)
 		require.Equal(t, int64(10), ecosystemTD,

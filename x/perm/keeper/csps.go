@@ -309,19 +309,8 @@ func (ms msgServer) executeCreateOrUpdatePermissionSession(ctx sdk.Context, msg 
 
 			// Increase trust deposit of perm.authority (payee) and perm.deposit
 			if payerTrustDeposit > 0 {
-				// Transfer to module account first
-				err = ms.bankKeeper.SendCoinsFromAccountToModule(
-					ctx,
-					authorityAddr,
-					types.ModuleName,
-					sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, int64(payerTrustDeposit))),
-				)
-				if err != nil {
-					return fmt.Errorf("failed to transfer trust deposit to module: %w", err)
-				}
-
-				// Increase trust deposit of perm.authority (payee)
-				err = ms.trustDeposit.AdjustTrustDeposit(ctx, perm.Authority, int64(payerTrustDeposit))
+				// Increase beneficiary's TD funded by payer (transfers from payer to TD module directly)
+				err = ms.trustDeposit.AdjustTrustDepositOnBehalf(ctx, perm.Authority, authorityAddr, int64(payerTrustDeposit))
 				if err != nil {
 					return fmt.Errorf("failed to adjust grantee trust deposit: %w", err)
 				}
@@ -332,7 +321,7 @@ func (ms msgServer) executeCreateOrUpdatePermissionSession(ctx sdk.Context, msg 
 					return fmt.Errorf("failed to update grantee permission deposit: %w", err)
 				}
 
-				// Increase trust deposit of authority (payer) and payer_perm.deposit
+				// Increase payer's own TD (standard self-funded adjustment)
 				err = ms.trustDeposit.AdjustTrustDeposit(ctx, msg.Authority, int64(payerTrustDeposit))
 				if err != nil {
 					return fmt.Errorf("failed to adjust payer trust deposit: %w", err)
@@ -377,17 +366,8 @@ func (ms msgServer) executeCreateOrUpdatePermissionSession(ctx sdk.Context, msg 
 
 		// Increase trust deposit of agent_perm.authority and agent_perm.deposit
 		if agentTrustDeposit > 0 {
-			err = ms.bankKeeper.SendCoinsFromAccountToModule(
-				ctx,
-				authorityAddr,
-				types.ModuleName,
-				sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, int64(agentTrustDeposit))),
-			)
-			if err != nil {
-				return fmt.Errorf("failed to transfer user agent trust deposit to module: %w", err)
-			}
-
-			err = ms.trustDeposit.AdjustTrustDeposit(ctx, agentPerm.Authority, int64(agentTrustDeposit))
+			// Increase agent's TD funded by payer (transfers from payer to TD module directly)
+			err = ms.trustDeposit.AdjustTrustDepositOnBehalf(ctx, agentPerm.Authority, authorityAddr, int64(agentTrustDeposit))
 			if err != nil {
 				return fmt.Errorf("failed to adjust agent trust deposit: %w", err)
 			}
@@ -429,17 +409,8 @@ func (ms msgServer) executeCreateOrUpdatePermissionSession(ctx sdk.Context, msg 
 
 		// Increase trust deposit of wallet_agent_perm.authority and wallet_agent_perm.deposit
 		if walletAgentTrustDeposit > 0 {
-			err = ms.bankKeeper.SendCoinsFromAccountToModule(
-				ctx,
-				authorityAddr,
-				types.ModuleName,
-				sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, int64(walletAgentTrustDeposit))),
-			)
-			if err != nil {
-				return fmt.Errorf("failed to transfer wallet user agent trust deposit to module: %w", err)
-			}
-
-			err = ms.trustDeposit.AdjustTrustDeposit(ctx, walletAgentPerm.Authority, int64(walletAgentTrustDeposit))
+			// Increase wallet agent's TD funded by payer (transfers from payer to TD module directly)
+			err = ms.trustDeposit.AdjustTrustDepositOnBehalf(ctx, walletAgentPerm.Authority, authorityAddr, int64(walletAgentTrustDeposit))
 			if err != nil {
 				return fmt.Errorf("failed to adjust wallet agent trust deposit: %w", err)
 			}
