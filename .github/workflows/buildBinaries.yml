@@ -3,6 +3,10 @@ name: 1.Build Binaries
 on:
   push:
     branches: [main, 'release/**']
+  release:
+    # We only build on prerelease creation to avoid duplicate runs when the same
+    # tag is later promoted from prerelease to full release.
+    types: [prereleased]
 
 permissions:
   id-token: write   # Required for npm trusted publishing (OIDC)
