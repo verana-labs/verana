@@ -70,6 +70,20 @@ jobs:
         with:
           github_token: ${{ github.token }}
 
+      - name: Resolve effective release context
+        run: |
+          if [ "${GITHUB_EVENT_NAME}" = "release" ]; then
+            VERSION="${{ github.event.release.tag_name }}"
+            RELEASE_TYPE="dev"
+          else
+            VERSION="${{ needs.resolve-version.outputs.release-version }}"
+            RELEASE_TYPE="${{ needs.resolve-version.outputs.release-type }}"
+          fi
+          echo "VERSION=${VERSION}"
+          echo "RELEASE_TYPE=${RELEASE_TYPE}"
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "RELEASE_TYPE=${RELEASE_TYPE}" >> $GITHUB_ENV
+
       - name: Set LDFLAGS environment variable
         run: |
           NPM_VERSION="${VERSION#v}"
