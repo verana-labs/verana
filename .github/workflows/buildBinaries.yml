@@ -132,7 +132,7 @@ jobs:
         if: env.VERSION != 'dev' && github.event_name == 'release'
         working-directory: ts-proto
         continue-on-error: true        
-        run: npm publish --provenance # Required for npm OIDC trusted publishing
+        run: npm publish --provenance --tag next # Prereleases should not move the npm latest dist-tag
 
       - name: Build binary for Linux AMD64
         run: |
