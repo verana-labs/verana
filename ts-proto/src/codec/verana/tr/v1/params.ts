@@ -5,27 +5,27 @@
 // source: verana/tr/v1/params.proto
 
 /* eslint-disable */
-import * as _m0 from "protobufjs/minimal";
-import Long = require("long");
+import Long from "long";
+import _m0 from "protobufjs/minimal";
 
 export const protobufPackage = "verana.tr.v1";
 
 /** Params defines the parameters for the module. */
 export interface Params {
-  trustRegistryTrustDeposit: number;
-  trustUnitPrice: number;
+  trustRegistryTrustDeposit: Long;
+  trustUnitPrice: Long;
 }
 
 function createBaseParams(): Params {
-  return { trustRegistryTrustDeposit: 0, trustUnitPrice: 0 };
+  return { trustRegistryTrustDeposit: Long.UZERO, trustUnitPrice: Long.UZERO };
 }
 
 export const Params = {
   encode(message: Params, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.trustRegistryTrustDeposit !== 0) {
+    if (!message.trustRegistryTrustDeposit.equals(Long.UZERO)) {
       writer.uint32(8).uint64(message.trustRegistryTrustDeposit);
     }
-    if (message.trustUnitPrice !== 0) {
+    if (!message.trustUnitPrice.equals(Long.UZERO)) {
       writer.uint32(16).uint64(message.trustUnitPrice);
     }
     return writer;
@@ -43,14 +43,14 @@ export const Params = {
             break;
           }
 
-          message.trustRegistryTrustDeposit = longToNumber(reader.uint64() as Long);
+          message.trustRegistryTrustDeposit = reader.uint64() as Long;
           continue;
         case 2:
           if (tag !== 16) {
             break;
           }
 
-          message.trustUnitPrice = longToNumber(reader.uint64() as Long);
+          message.trustUnitPrice = reader.uint64() as Long;
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -64,19 +64,19 @@ export const Params = {
   fromJSON(object: any): Params {
     return {
       trustRegistryTrustDeposit: isSet(object.trustRegistryTrustDeposit)
-        ? globalThis.Number(object.trustRegistryTrustDeposit)
-        : 0,
-      trustUnitPrice: isSet(object.trustUnitPrice) ? globalThis.Number(object.trustUnitPrice) : 0,
+        ? Long.fromValue(object.trustRegistryTrustDeposit)
+        : Long.UZERO,
+      trustUnitPrice: isSet(object.trustUnitPrice) ? Long.fromValue(object.trustUnitPrice) : Long.UZERO,
     };
   },
 
   toJSON(message: Params): unknown {
     const obj: any = {};
-    if (message.trustRegistryTrustDeposit !== 0) {
-      obj.trustRegistryTrustDeposit = Math.round(message.trustRegistryTrustDeposit);
+    if (!message.trustRegistryTrustDeposit.equals(Long.UZERO)) {
+      obj.trustRegistryTrustDeposit = (message.trustRegistryTrustDeposit || Long.UZERO).toString();
     }
-    if (message.trustUnitPrice !== 0) {
-      obj.trustUnitPrice = Math.round(message.trustUnitPrice);
+    if (!message.trustUnitPrice.equals(Long.UZERO)) {
+      obj.trustUnitPrice = (message.trustUnitPrice || Long.UZERO).toString();
     }
     return obj;
   },
@@ -86,8 +86,13 @@ export const Params = {
   },
   fromPartial<I extends Exact<DeepPartial<Params>, I>>(object: I): Params {
     const message = createBaseParams();
-    message.trustRegistryTrustDeposit = object.trustRegistryTrustDeposit ?? 0;
-    message.trustUnitPrice = object.trustUnitPrice ?? 0;
+    message.trustRegistryTrustDeposit =
+      (object.trustRegistryTrustDeposit !== undefined && object.trustRegistryTrustDeposit !== null)
+        ? Long.fromValue(object.trustRegistryTrustDeposit)
+        : Long.UZERO;
+    message.trustUnitPrice = (object.trustUnitPrice !== undefined && object.trustUnitPrice !== null)
+      ? Long.fromValue(object.trustUnitPrice)
+      : Long.UZERO;
     return message;
   },
 };
@@ -95,7 +100,7 @@ export const Params = {
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 
 export type DeepPartial<T> = T extends Builtin ? T
-  : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>>
+  : T extends Long ? string | number | Long : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>>
   : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
   : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
@@ -103,16 +108,6 @@ export type DeepPartial<T> = T extends Builtin ? T
 type KeysOfUnion<T> = T extends T ? keyof T : never;
 export type Exact<P, I extends P> = P extends Builtin ? P
   : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
-
-function longToNumber(long: Long): number {
-  if (long.gt(globalThis.Number.MAX_SAFE_INTEGER)) {
-    throw new globalThis.Error("Value is larger than Number.MAX_SAFE_INTEGER");
-  }
-  if (long.lt(globalThis.Number.MIN_SAFE_INTEGER)) {
-    throw new globalThis.Error("Value is smaller than Number.MIN_SAFE_INTEGER");
-  }
-  return long.toNumber();
-}
 
 if (_m0.util.Long !== Long) {
   _m0.util.Long = Long as any;

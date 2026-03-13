@@ -5,15 +5,15 @@
 // source: verana/cs/v1/params.proto
 
 /* eslint-disable */
-import * as _m0 from "protobufjs/minimal";
-import Long = require("long");
+import Long from "long";
+import _m0 from "protobufjs/minimal";
 
 export const protobufPackage = "verana.cs.v1";
 
 /** Params defines the parameters for the module. */
 export interface Params {
-  credentialSchemaTrustDeposit: number;
-  credentialSchemaSchemaMaxSize: number;
+  credentialSchemaTrustDeposit: Long;
+  credentialSchemaSchemaMaxSize: Long;
   credentialSchemaIssuerGrantorValidationValidityPeriodMaxDays: number;
   credentialSchemaVerifierGrantorValidationValidityPeriodMaxDays: number;
   credentialSchemaIssuerValidationValidityPeriodMaxDays: number;
@@ -23,8 +23,8 @@ export interface Params {
 
 function createBaseParams(): Params {
   return {
-    credentialSchemaTrustDeposit: 0,
-    credentialSchemaSchemaMaxSize: 0,
+    credentialSchemaTrustDeposit: Long.UZERO,
+    credentialSchemaSchemaMaxSize: Long.UZERO,
     credentialSchemaIssuerGrantorValidationValidityPeriodMaxDays: 0,
     credentialSchemaVerifierGrantorValidationValidityPeriodMaxDays: 0,
     credentialSchemaIssuerValidationValidityPeriodMaxDays: 0,
@@ -35,10 +35,10 @@ function createBaseParams(): Params {
 
 export const Params = {
   encode(message: Params, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.credentialSchemaTrustDeposit !== 0) {
+    if (!message.credentialSchemaTrustDeposit.equals(Long.UZERO)) {
       writer.uint32(8).uint64(message.credentialSchemaTrustDeposit);
     }
-    if (message.credentialSchemaSchemaMaxSize !== 0) {
+    if (!message.credentialSchemaSchemaMaxSize.equals(Long.UZERO)) {
       writer.uint32(16).uint64(message.credentialSchemaSchemaMaxSize);
     }
     if (message.credentialSchemaIssuerGrantorValidationValidityPeriodMaxDays !== 0) {
@@ -71,14 +71,14 @@ export const Params = {
             break;
           }
 
-          message.credentialSchemaTrustDeposit = longToNumber(reader.uint64() as Long);
+          message.credentialSchemaTrustDeposit = reader.uint64() as Long;
           continue;
         case 2:
           if (tag !== 16) {
             break;
           }
 
-          message.credentialSchemaSchemaMaxSize = longToNumber(reader.uint64() as Long);
+          message.credentialSchemaSchemaMaxSize = reader.uint64() as Long;
           continue;
         case 3:
           if (tag !== 24) {
@@ -127,11 +127,11 @@ export const Params = {
   fromJSON(object: any): Params {
     return {
       credentialSchemaTrustDeposit: isSet(object.credentialSchemaTrustDeposit)
-        ? globalThis.Number(object.credentialSchemaTrustDeposit)
-        : 0,
+        ? Long.fromValue(object.credentialSchemaTrustDeposit)
+        : Long.UZERO,
       credentialSchemaSchemaMaxSize: isSet(object.credentialSchemaSchemaMaxSize)
-        ? globalThis.Number(object.credentialSchemaSchemaMaxSize)
-        : 0,
+        ? Long.fromValue(object.credentialSchemaSchemaMaxSize)
+        : Long.UZERO,
       credentialSchemaIssuerGrantorValidationValidityPeriodMaxDays:
         isSet(object.credentialSchemaIssuerGrantorValidationValidityPeriodMaxDays)
           ? globalThis.Number(object.credentialSchemaIssuerGrantorValidationValidityPeriodMaxDays)
@@ -157,11 +157,11 @@ export const Params = {
 
   toJSON(message: Params): unknown {
     const obj: any = {};
-    if (message.credentialSchemaTrustDeposit !== 0) {
-      obj.credentialSchemaTrustDeposit = Math.round(message.credentialSchemaTrustDeposit);
+    if (!message.credentialSchemaTrustDeposit.equals(Long.UZERO)) {
+      obj.credentialSchemaTrustDeposit = (message.credentialSchemaTrustDeposit || Long.UZERO).toString();
     }
-    if (message.credentialSchemaSchemaMaxSize !== 0) {
-      obj.credentialSchemaSchemaMaxSize = Math.round(message.credentialSchemaSchemaMaxSize);
+    if (!message.credentialSchemaSchemaMaxSize.equals(Long.UZERO)) {
+      obj.credentialSchemaSchemaMaxSize = (message.credentialSchemaSchemaMaxSize || Long.UZERO).toString();
     }
     if (message.credentialSchemaIssuerGrantorValidationValidityPeriodMaxDays !== 0) {
       obj.credentialSchemaIssuerGrantorValidationValidityPeriodMaxDays = Math.round(
@@ -196,8 +196,14 @@ export const Params = {
   },
   fromPartial<I extends Exact<DeepPartial<Params>, I>>(object: I): Params {
     const message = createBaseParams();
-    message.credentialSchemaTrustDeposit = object.credentialSchemaTrustDeposit ?? 0;
-    message.credentialSchemaSchemaMaxSize = object.credentialSchemaSchemaMaxSize ?? 0;
+    message.credentialSchemaTrustDeposit =
+      (object.credentialSchemaTrustDeposit !== undefined && object.credentialSchemaTrustDeposit !== null)
+        ? Long.fromValue(object.credentialSchemaTrustDeposit)
+        : Long.UZERO;
+    message.credentialSchemaSchemaMaxSize =
+      (object.credentialSchemaSchemaMaxSize !== undefined && object.credentialSchemaSchemaMaxSize !== null)
+        ? Long.fromValue(object.credentialSchemaSchemaMaxSize)
+        : Long.UZERO;
     message.credentialSchemaIssuerGrantorValidationValidityPeriodMaxDays =
       object.credentialSchemaIssuerGrantorValidationValidityPeriodMaxDays ?? 0;
     message.credentialSchemaVerifierGrantorValidationValidityPeriodMaxDays =
@@ -215,7 +221,7 @@ export const Params = {
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 
 export type DeepPartial<T> = T extends Builtin ? T
-  : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>>
+  : T extends Long ? string | number | Long : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>>
   : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
   : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
@@ -223,16 +229,6 @@ export type DeepPartial<T> = T extends Builtin ? T
 type KeysOfUnion<T> = T extends T ? keyof T : never;
 export type Exact<P, I extends P> = P extends Builtin ? P
   : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
-
-function longToNumber(long: Long): number {
-  if (long.gt(globalThis.Number.MAX_SAFE_INTEGER)) {
-    throw new globalThis.Error("Value is larger than Number.MAX_SAFE_INTEGER");
-  }
-  if (long.lt(globalThis.Number.MIN_SAFE_INTEGER)) {
-    throw new globalThis.Error("Value is smaller than Number.MIN_SAFE_INTEGER");
-  }
-  return long.toNumber();
-}
 
 if (_m0.util.Long !== Long) {
   _m0.util.Long = Long as any;

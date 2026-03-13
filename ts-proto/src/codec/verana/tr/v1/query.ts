@@ -5,11 +5,11 @@
 // source: verana/tr/v1/query.proto
 
 /* eslint-disable */
-import * as _m0 from "protobufjs/minimal";
+import Long from "long";
+import _m0 from "protobufjs/minimal";
 import { Timestamp } from "../../../google/protobuf/timestamp";
 import { Params } from "./params";
 import { TrustRegistryWithVersions } from "./types";
-import Long = require("long");
 
 export const protobufPackage = "verana.tr.v1";
 
@@ -20,27 +20,27 @@ export interface QueryParamsRequest {
 /** QueryParamsResponse is response type for the Query/Params RPC method. */
 export interface QueryParamsResponse {
   /** params holds all the parameters of this module. */
-  params: Params | undefined;
+  params?: Params | undefined;
 }
 
 /** QueryGetTrustRegistryRequest is the request type for the Query/GetTrustRegistry RPC method. */
 export interface QueryGetTrustRegistryRequest {
   /** Changed from string did to uint64 tr_id */
-  trId: number;
+  trId: Long;
   activeGfOnly: boolean;
   preferredLanguage: string;
 }
 
 /** QueryGetTrustRegistryResponse is the response type for the Query/GetTrustRegistry RPC method. */
 export interface QueryGetTrustRegistryResponse {
-  trustRegistry: TrustRegistryWithVersions | undefined;
+  trustRegistry?: TrustRegistryWithVersions | undefined;
 }
 
 /** QueryListTrustRegistriesRequest is the request type for the Query/ListTrustRegistries RPC method. */
 export interface QueryListTrustRegistriesRequest {
   /** Added controller field */
   controller: string;
-  modifiedAfter: Date | undefined;
+  modifiedAfter?: Date | undefined;
   activeGfOnly: boolean;
   preferredLanguage: string;
   responseMaxSize: number;
@@ -154,12 +154,12 @@ export const QueryParamsResponse = {
 };
 
 function createBaseQueryGetTrustRegistryRequest(): QueryGetTrustRegistryRequest {
-  return { trId: 0, activeGfOnly: false, preferredLanguage: "" };
+  return { trId: Long.UZERO, activeGfOnly: false, preferredLanguage: "" };
 }
 
 export const QueryGetTrustRegistryRequest = {
   encode(message: QueryGetTrustRegistryRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.trId !== 0) {
+    if (!message.trId.equals(Long.UZERO)) {
       writer.uint32(8).uint64(message.trId);
     }
     if (message.activeGfOnly !== false) {
@@ -183,7 +183,7 @@ export const QueryGetTrustRegistryRequest = {
             break;
           }
 
-          message.trId = longToNumber(reader.uint64() as Long);
+          message.trId = reader.uint64() as Long;
           continue;
         case 2:
           if (tag !== 16) {
@@ -210,7 +210,7 @@ export const QueryGetTrustRegistryRequest = {
 
   fromJSON(object: any): QueryGetTrustRegistryRequest {
     return {
-      trId: isSet(object.trId) ? globalThis.Number(object.trId) : 0,
+      trId: isSet(object.trId) ? Long.fromValue(object.trId) : Long.UZERO,
       activeGfOnly: isSet(object.activeGfOnly) ? globalThis.Boolean(object.activeGfOnly) : false,
       preferredLanguage: isSet(object.preferredLanguage) ? globalThis.String(object.preferredLanguage) : "",
     };
@@ -218,8 +218,8 @@ export const QueryGetTrustRegistryRequest = {
 
   toJSON(message: QueryGetTrustRegistryRequest): unknown {
     const obj: any = {};
-    if (message.trId !== 0) {
-      obj.trId = Math.round(message.trId);
+    if (!message.trId.equals(Long.UZERO)) {
+      obj.trId = (message.trId || Long.UZERO).toString();
     }
     if (message.activeGfOnly !== false) {
       obj.activeGfOnly = message.activeGfOnly;
@@ -235,7 +235,7 @@ export const QueryGetTrustRegistryRequest = {
   },
   fromPartial<I extends Exact<DeepPartial<QueryGetTrustRegistryRequest>, I>>(object: I): QueryGetTrustRegistryRequest {
     const message = createBaseQueryGetTrustRegistryRequest();
-    message.trId = object.trId ?? 0;
+    message.trId = (object.trId !== undefined && object.trId !== null) ? Long.fromValue(object.trId) : Long.UZERO;
     message.activeGfOnly = object.activeGfOnly ?? false;
     message.preferredLanguage = object.preferredLanguage ?? "";
     return message;
@@ -538,7 +538,7 @@ interface Rpc {
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 
 export type DeepPartial<T> = T extends Builtin ? T
-  : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>>
+  : T extends Long ? string | number | Long : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>>
   : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
   : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
@@ -548,13 +548,13 @@ export type Exact<P, I extends P> = P extends Builtin ? P
   : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
 
 function toTimestamp(date: Date): Timestamp {
-  const seconds = Math.trunc(date.getTime() / 1_000);
+  const seconds = numberToLong(Math.trunc(date.getTime() / 1_000));
   const nanos = (date.getTime() % 1_000) * 1_000_000;
   return { seconds, nanos };
 }
 
 function fromTimestamp(t: Timestamp): Date {
-  let millis = (t.seconds || 0) * 1_000;
+  let millis = (t.seconds.toNumber() || 0) * 1_000;
   millis += (t.nanos || 0) / 1_000_000;
   return new globalThis.Date(millis);
 }
@@ -569,14 +569,8 @@ function fromJsonTimestamp(o: any): Date {
   }
 }
 
-function longToNumber(long: Long): number {
-  if (long.gt(globalThis.Number.MAX_SAFE_INTEGER)) {
-    throw new globalThis.Error("Value is larger than Number.MAX_SAFE_INTEGER");
-  }
-  if (long.lt(globalThis.Number.MIN_SAFE_INTEGER)) {
-    throw new globalThis.Error("Value is smaller than Number.MIN_SAFE_INTEGER");
-  }
-  return long.toNumber();
+function numberToLong(number: number) {
+  return Long.fromNumber(number);
 }
 
 if (_m0.util.Long !== Long) {

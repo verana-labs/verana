@@ -5,9 +5,9 @@
 // source: verana/td/v1/tx.proto
 
 /* eslint-disable */
-import * as _m0 from "protobufjs/minimal";
+import Long from "long";
+import _m0 from "protobufjs/minimal";
 import { Params } from "./params";
-import Long = require("long");
 
 export const protobufPackage = "verana.td.v1";
 
@@ -20,7 +20,7 @@ export interface MsgUpdateParams {
    *
    * NOTE: All parameters must be supplied.
    */
-  params: Params | undefined;
+  params?: Params | undefined;
 }
 
 /**
@@ -37,20 +37,20 @@ export interface MsgReclaimTrustDepositYield {
 
 /** MsgReclaimTrustDepositYieldResponse defines the response type */
 export interface MsgReclaimTrustDepositYieldResponse {
-  claimedAmount: number;
+  claimedAmount: Long;
 }
 
 export interface MsgReclaimTrustDeposit {
   creator: string;
   /** Amount to reclaim in denom */
-  claimed: number;
+  claimed: Long;
 }
 
 export interface MsgReclaimTrustDepositResponse {
   /** Amount burned */
-  burnedAmount: number;
+  burnedAmount: Long;
   /** Amount transferred to account */
-  claimedAmount: number;
+  claimedAmount: Long;
 }
 
 /**
@@ -73,7 +73,7 @@ export interface MsgSlashTrustDepositResponse {
 export interface MsgRepaySlashedTrustDeposit {
   creator: string;
   account: string;
-  amount: number;
+  amount: Long;
 }
 
 export interface MsgRepaySlashedTrustDepositResponse {
@@ -256,12 +256,12 @@ export const MsgReclaimTrustDepositYield = {
 };
 
 function createBaseMsgReclaimTrustDepositYieldResponse(): MsgReclaimTrustDepositYieldResponse {
-  return { claimedAmount: 0 };
+  return { claimedAmount: Long.UZERO };
 }
 
 export const MsgReclaimTrustDepositYieldResponse = {
   encode(message: MsgReclaimTrustDepositYieldResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.claimedAmount !== 0) {
+    if (!message.claimedAmount.equals(Long.UZERO)) {
       writer.uint32(8).uint64(message.claimedAmount);
     }
     return writer;
@@ -279,7 +279,7 @@ export const MsgReclaimTrustDepositYieldResponse = {
             break;
           }
 
-          message.claimedAmount = longToNumber(reader.uint64() as Long);
+          message.claimedAmount = reader.uint64() as Long;
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -291,13 +291,13 @@ export const MsgReclaimTrustDepositYieldResponse = {
   },
 
   fromJSON(object: any): MsgReclaimTrustDepositYieldResponse {
-    return { claimedAmount: isSet(object.claimedAmount) ? globalThis.Number(object.claimedAmount) : 0 };
+    return { claimedAmount: isSet(object.claimedAmount) ? Long.fromValue(object.claimedAmount) : Long.UZERO };
   },
 
   toJSON(message: MsgReclaimTrustDepositYieldResponse): unknown {
     const obj: any = {};
-    if (message.claimedAmount !== 0) {
-      obj.claimedAmount = Math.round(message.claimedAmount);
+    if (!message.claimedAmount.equals(Long.UZERO)) {
+      obj.claimedAmount = (message.claimedAmount || Long.UZERO).toString();
     }
     return obj;
   },
@@ -311,13 +311,15 @@ export const MsgReclaimTrustDepositYieldResponse = {
     object: I,
   ): MsgReclaimTrustDepositYieldResponse {
     const message = createBaseMsgReclaimTrustDepositYieldResponse();
-    message.claimedAmount = object.claimedAmount ?? 0;
+    message.claimedAmount = (object.claimedAmount !== undefined && object.claimedAmount !== null)
+      ? Long.fromValue(object.claimedAmount)
+      : Long.UZERO;
     return message;
   },
 };
 
 function createBaseMsgReclaimTrustDeposit(): MsgReclaimTrustDeposit {
-  return { creator: "", claimed: 0 };
+  return { creator: "", claimed: Long.UZERO };
 }
 
 export const MsgReclaimTrustDeposit = {
@@ -325,7 +327,7 @@ export const MsgReclaimTrustDeposit = {
     if (message.creator !== "") {
       writer.uint32(10).string(message.creator);
     }
-    if (message.claimed !== 0) {
+    if (!message.claimed.equals(Long.UZERO)) {
       writer.uint32(16).uint64(message.claimed);
     }
     return writer;
@@ -350,7 +352,7 @@ export const MsgReclaimTrustDeposit = {
             break;
           }
 
-          message.claimed = longToNumber(reader.uint64() as Long);
+          message.claimed = reader.uint64() as Long;
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -364,7 +366,7 @@ export const MsgReclaimTrustDeposit = {
   fromJSON(object: any): MsgReclaimTrustDeposit {
     return {
       creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
-      claimed: isSet(object.claimed) ? globalThis.Number(object.claimed) : 0,
+      claimed: isSet(object.claimed) ? Long.fromValue(object.claimed) : Long.UZERO,
     };
   },
 
@@ -373,8 +375,8 @@ export const MsgReclaimTrustDeposit = {
     if (message.creator !== "") {
       obj.creator = message.creator;
     }
-    if (message.claimed !== 0) {
-      obj.claimed = Math.round(message.claimed);
+    if (!message.claimed.equals(Long.UZERO)) {
+      obj.claimed = (message.claimed || Long.UZERO).toString();
     }
     return obj;
   },
@@ -385,21 +387,23 @@ export const MsgReclaimTrustDeposit = {
   fromPartial<I extends Exact<DeepPartial<MsgReclaimTrustDeposit>, I>>(object: I): MsgReclaimTrustDeposit {
     const message = createBaseMsgReclaimTrustDeposit();
     message.creator = object.creator ?? "";
-    message.claimed = object.claimed ?? 0;
+    message.claimed = (object.claimed !== undefined && object.claimed !== null)
+      ? Long.fromValue(object.claimed)
+      : Long.UZERO;
     return message;
   },
 };
 
 function createBaseMsgReclaimTrustDepositResponse(): MsgReclaimTrustDepositResponse {
-  return { burnedAmount: 0, claimedAmount: 0 };
+  return { burnedAmount: Long.UZERO, claimedAmount: Long.UZERO };
 }
 
 export const MsgReclaimTrustDepositResponse = {
   encode(message: MsgReclaimTrustDepositResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.burnedAmount !== 0) {
+    if (!message.burnedAmount.equals(Long.UZERO)) {
       writer.uint32(8).uint64(message.burnedAmount);
     }
-    if (message.claimedAmount !== 0) {
+    if (!message.claimedAmount.equals(Long.UZERO)) {
       writer.uint32(16).uint64(message.claimedAmount);
     }
     return writer;
@@ -417,14 +421,14 @@ export const MsgReclaimTrustDepositResponse = {
             break;
           }
 
-          message.burnedAmount = longToNumber(reader.uint64() as Long);
+          message.burnedAmount = reader.uint64() as Long;
           continue;
         case 2:
           if (tag !== 16) {
             break;
           }
 
-          message.claimedAmount = longToNumber(reader.uint64() as Long);
+          message.claimedAmount = reader.uint64() as Long;
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -437,18 +441,18 @@ export const MsgReclaimTrustDepositResponse = {
 
   fromJSON(object: any): MsgReclaimTrustDepositResponse {
     return {
-      burnedAmount: isSet(object.burnedAmount) ? globalThis.Number(object.burnedAmount) : 0,
-      claimedAmount: isSet(object.claimedAmount) ? globalThis.Number(object.claimedAmount) : 0,
+      burnedAmount: isSet(object.burnedAmount) ? Long.fromValue(object.burnedAmount) : Long.UZERO,
+      claimedAmount: isSet(object.claimedAmount) ? Long.fromValue(object.claimedAmount) : Long.UZERO,
     };
   },
 
   toJSON(message: MsgReclaimTrustDepositResponse): unknown {
     const obj: any = {};
-    if (message.burnedAmount !== 0) {
-      obj.burnedAmount = Math.round(message.burnedAmount);
+    if (!message.burnedAmount.equals(Long.UZERO)) {
+      obj.burnedAmount = (message.burnedAmount || Long.UZERO).toString();
     }
-    if (message.claimedAmount !== 0) {
-      obj.claimedAmount = Math.round(message.claimedAmount);
+    if (!message.claimedAmount.equals(Long.UZERO)) {
+      obj.claimedAmount = (message.claimedAmount || Long.UZERO).toString();
     }
     return obj;
   },
@@ -460,8 +464,12 @@ export const MsgReclaimTrustDepositResponse = {
     object: I,
   ): MsgReclaimTrustDepositResponse {
     const message = createBaseMsgReclaimTrustDepositResponse();
-    message.burnedAmount = object.burnedAmount ?? 0;
-    message.claimedAmount = object.claimedAmount ?? 0;
+    message.burnedAmount = (object.burnedAmount !== undefined && object.burnedAmount !== null)
+      ? Long.fromValue(object.burnedAmount)
+      : Long.UZERO;
+    message.claimedAmount = (object.claimedAmount !== undefined && object.claimedAmount !== null)
+      ? Long.fromValue(object.claimedAmount)
+      : Long.UZERO;
     return message;
   },
 };
@@ -599,7 +607,7 @@ export const MsgSlashTrustDepositResponse = {
 };
 
 function createBaseMsgRepaySlashedTrustDeposit(): MsgRepaySlashedTrustDeposit {
-  return { creator: "", account: "", amount: 0 };
+  return { creator: "", account: "", amount: Long.UZERO };
 }
 
 export const MsgRepaySlashedTrustDeposit = {
@@ -610,7 +618,7 @@ export const MsgRepaySlashedTrustDeposit = {
     if (message.account !== "") {
       writer.uint32(18).string(message.account);
     }
-    if (message.amount !== 0) {
+    if (!message.amount.equals(Long.UZERO)) {
       writer.uint32(24).uint64(message.amount);
     }
     return writer;
@@ -642,7 +650,7 @@ export const MsgRepaySlashedTrustDeposit = {
             break;
           }
 
-          message.amount = longToNumber(reader.uint64() as Long);
+          message.amount = reader.uint64() as Long;
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -657,7 +665,7 @@ export const MsgRepaySlashedTrustDeposit = {
     return {
       creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
       account: isSet(object.account) ? globalThis.String(object.account) : "",
-      amount: isSet(object.amount) ? globalThis.Number(object.amount) : 0,
+      amount: isSet(object.amount) ? Long.fromValue(object.amount) : Long.UZERO,
     };
   },
 
@@ -669,8 +677,8 @@ export const MsgRepaySlashedTrustDeposit = {
     if (message.account !== "") {
       obj.account = message.account;
     }
-    if (message.amount !== 0) {
-      obj.amount = Math.round(message.amount);
+    if (!message.amount.equals(Long.UZERO)) {
+      obj.amount = (message.amount || Long.UZERO).toString();
     }
     return obj;
   },
@@ -682,7 +690,9 @@ export const MsgRepaySlashedTrustDeposit = {
     const message = createBaseMsgRepaySlashedTrustDeposit();
     message.creator = object.creator ?? "";
     message.account = object.account ?? "";
-    message.amount = object.amount ?? 0;
+    message.amount = (object.amount !== undefined && object.amount !== null)
+      ? Long.fromValue(object.amount)
+      : Long.UZERO;
     return message;
   },
 };
@@ -799,7 +809,7 @@ interface Rpc {
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 
 export type DeepPartial<T> = T extends Builtin ? T
-  : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>>
+  : T extends Long ? string | number | Long : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>>
   : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
   : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
@@ -807,16 +817,6 @@ export type DeepPartial<T> = T extends Builtin ? T
 type KeysOfUnion<T> = T extends T ? keyof T : never;
 export type Exact<P, I extends P> = P extends Builtin ? P
   : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
-
-function longToNumber(long: Long): number {
-  if (long.gt(globalThis.Number.MAX_SAFE_INTEGER)) {
-    throw new globalThis.Error("Value is larger than Number.MAX_SAFE_INTEGER");
-  }
-  if (long.lt(globalThis.Number.MIN_SAFE_INTEGER)) {
-    throw new globalThis.Error("Value is smaller than Number.MIN_SAFE_INTEGER");
-  }
-  return long.toNumber();
-}
 
 if (_m0.util.Long !== Long) {
   _m0.util.Long = Long as any;

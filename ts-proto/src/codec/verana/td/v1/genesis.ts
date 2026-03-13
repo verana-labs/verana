@@ -5,16 +5,16 @@
 // source: verana/td/v1/genesis.proto
 
 /* eslint-disable */
-import * as _m0 from "protobufjs/minimal";
+import Long from "long";
+import _m0 from "protobufjs/minimal";
 import { Params } from "./params";
-import Long = require("long");
 
 export const protobufPackage = "verana.td.v1";
 
 /** GenesisState defines the trustdeposit module's genesis state. */
 export interface GenesisState {
   /** params defines all the parameters of the module. */
-  params: Params | undefined;
+  params?: Params | undefined;
   trustDeposits: TrustDepositRecord[];
 }
 
@@ -22,8 +22,8 @@ export interface GenesisState {
 export interface TrustDepositRecord {
   account: string;
   share: string;
-  amount: number;
-  claimable: number;
+  amount: Long;
+  claimable: Long;
 }
 
 function createBaseGenesisState(): GenesisState {
@@ -105,7 +105,7 @@ export const GenesisState = {
 };
 
 function createBaseTrustDepositRecord(): TrustDepositRecord {
-  return { account: "", share: "", amount: 0, claimable: 0 };
+  return { account: "", share: "", amount: Long.UZERO, claimable: Long.UZERO };
 }
 
 export const TrustDepositRecord = {
@@ -116,10 +116,10 @@ export const TrustDepositRecord = {
     if (message.share !== "") {
       writer.uint32(18).string(message.share);
     }
-    if (message.amount !== 0) {
+    if (!message.amount.equals(Long.UZERO)) {
       writer.uint32(24).uint64(message.amount);
     }
-    if (message.claimable !== 0) {
+    if (!message.claimable.equals(Long.UZERO)) {
       writer.uint32(32).uint64(message.claimable);
     }
     return writer;
@@ -151,14 +151,14 @@ export const TrustDepositRecord = {
             break;
           }
 
-          message.amount = longToNumber(reader.uint64() as Long);
+          message.amount = reader.uint64() as Long;
           continue;
         case 4:
           if (tag !== 32) {
             break;
           }
 
-          message.claimable = longToNumber(reader.uint64() as Long);
+          message.claimable = reader.uint64() as Long;
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -173,8 +173,8 @@ export const TrustDepositRecord = {
     return {
       account: isSet(object.account) ? globalThis.String(object.account) : "",
       share: isSet(object.share) ? globalThis.String(object.share) : "",
-      amount: isSet(object.amount) ? globalThis.Number(object.amount) : 0,
-      claimable: isSet(object.claimable) ? globalThis.Number(object.claimable) : 0,
+      amount: isSet(object.amount) ? Long.fromValue(object.amount) : Long.UZERO,
+      claimable: isSet(object.claimable) ? Long.fromValue(object.claimable) : Long.UZERO,
     };
   },
 
@@ -186,11 +186,11 @@ export const TrustDepositRecord = {
     if (message.share !== "") {
       obj.share = message.share;
     }
-    if (message.amount !== 0) {
-      obj.amount = Math.round(message.amount);
+    if (!message.amount.equals(Long.UZERO)) {
+      obj.amount = (message.amount || Long.UZERO).toString();
     }
-    if (message.claimable !== 0) {
-      obj.claimable = Math.round(message.claimable);
+    if (!message.claimable.equals(Long.UZERO)) {
+      obj.claimable = (message.claimable || Long.UZERO).toString();
     }
     return obj;
   },
@@ -202,8 +202,12 @@ export const TrustDepositRecord = {
     const message = createBaseTrustDepositRecord();
     message.account = object.account ?? "";
     message.share = object.share ?? "";
-    message.amount = object.amount ?? 0;
-    message.claimable = object.claimable ?? 0;
+    message.amount = (object.amount !== undefined && object.amount !== null)
+      ? Long.fromValue(object.amount)
+      : Long.UZERO;
+    message.claimable = (object.claimable !== undefined && object.claimable !== null)
+      ? Long.fromValue(object.claimable)
+      : Long.UZERO;
     return message;
   },
 };
@@ -211,7 +215,7 @@ export const TrustDepositRecord = {
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 
 export type DeepPartial<T> = T extends Builtin ? T
-  : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>>
+  : T extends Long ? string | number | Long : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>>
   : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
   : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
@@ -219,16 +223,6 @@ export type DeepPartial<T> = T extends Builtin ? T
 type KeysOfUnion<T> = T extends T ? keyof T : never;
 export type Exact<P, I extends P> = P extends Builtin ? P
   : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
-
-function longToNumber(long: Long): number {
-  if (long.gt(globalThis.Number.MAX_SAFE_INTEGER)) {
-    throw new globalThis.Error("Value is larger than Number.MAX_SAFE_INTEGER");
-  }
-  if (long.lt(globalThis.Number.MIN_SAFE_INTEGER)) {
-    throw new globalThis.Error("Value is smaller than Number.MIN_SAFE_INTEGER");
-  }
-  return long.toNumber();
-}
 
 if (_m0.util.Long !== Long) {
   _m0.util.Long = Long as any;

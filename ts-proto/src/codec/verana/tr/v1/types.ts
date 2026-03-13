@@ -5,21 +5,21 @@
 // source: verana/tr/v1/types.proto
 
 /* eslint-disable */
-import * as _m0 from "protobufjs/minimal";
+import Long from "long";
+import _m0 from "protobufjs/minimal";
 import { Timestamp } from "../../../google/protobuf/timestamp";
-import Long = require("long");
 
 export const protobufPackage = "verana.tr.v1";
 
 export interface TrustRegistry {
   /** Added id field */
-  id: number;
+  id: Long;
   did: string;
   controller: string;
-  created: Date | undefined;
-  modified: Date | undefined;
-  archived: Date | undefined;
-  deposit: number;
+  created?: Date | undefined;
+  modified?: Date | undefined;
+  archived?: Date | undefined;
+  deposit: Long;
   aka: string;
   activeVersion: number;
   language: string;
@@ -27,20 +27,20 @@ export interface TrustRegistry {
 
 export interface GovernanceFrameworkVersion {
   /** Changed from string to uint64 */
-  id: number;
+  id: Long;
   /** Changed from tr_did to tr_id */
-  trId: number;
-  created: Date | undefined;
+  trId: Long;
+  created?: Date | undefined;
   version: number;
-  activeSince: Date | undefined;
+  activeSince?: Date | undefined;
 }
 
 export interface GovernanceFrameworkDocument {
   /** Changed from string to uint64 */
-  id: number;
+  id: Long;
   /** Changed from string to uint64 */
-  gfvId: number;
-  created: Date | undefined;
+  gfvId: Long;
+  created?: Date | undefined;
   language: string;
   url: string;
   digestSri: string;
@@ -48,23 +48,23 @@ export interface GovernanceFrameworkDocument {
 
 /** GovernanceFrameworkVersionWithDocs extends GovernanceFrameworkVersion to include its documents */
 export interface GovernanceFrameworkVersionWithDocs {
-  id: number;
-  trId: number;
-  created: Date | undefined;
+  id: Long;
+  trId: Long;
+  created?: Date | undefined;
   version: number;
-  activeSince: Date | undefined;
+  activeSince?: Date | undefined;
   documents: GovernanceFrameworkDocument[];
 }
 
 /** TrustRegistryWithVersions extends TrustRegistry to include its versions with nested documents */
 export interface TrustRegistryWithVersions {
-  id: number;
+  id: Long;
   did: string;
   controller: string;
-  created: Date | undefined;
-  modified: Date | undefined;
-  archived: Date | undefined;
-  deposit: number;
+  created?: Date | undefined;
+  modified?: Date | undefined;
+  archived?: Date | undefined;
+  deposit: Long;
   aka: string;
   activeVersion: number;
   language: string;
@@ -73,13 +73,13 @@ export interface TrustRegistryWithVersions {
 
 function createBaseTrustRegistry(): TrustRegistry {
   return {
-    id: 0,
+    id: Long.UZERO,
     did: "",
     controller: "",
     created: undefined,
     modified: undefined,
     archived: undefined,
-    deposit: 0,
+    deposit: Long.ZERO,
     aka: "",
     activeVersion: 0,
     language: "",
@@ -88,7 +88,7 @@ function createBaseTrustRegistry(): TrustRegistry {
 
 export const TrustRegistry = {
   encode(message: TrustRegistry, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.id !== 0) {
+    if (!message.id.equals(Long.UZERO)) {
       writer.uint32(8).uint64(message.id);
     }
     if (message.did !== "") {
@@ -106,7 +106,7 @@ export const TrustRegistry = {
     if (message.archived !== undefined) {
       Timestamp.encode(toTimestamp(message.archived), writer.uint32(50).fork()).ldelim();
     }
-    if (message.deposit !== 0) {
+    if (!message.deposit.equals(Long.ZERO)) {
       writer.uint32(56).int64(message.deposit);
     }
     if (message.aka !== "") {
@@ -133,7 +133,7 @@ export const TrustRegistry = {
             break;
           }
 
-          message.id = longToNumber(reader.uint64() as Long);
+          message.id = reader.uint64() as Long;
           continue;
         case 2:
           if (tag !== 18) {
@@ -175,7 +175,7 @@ export const TrustRegistry = {
             break;
           }
 
-          message.deposit = longToNumber(reader.int64() as Long);
+          message.deposit = reader.int64() as Long;
           continue;
         case 8:
           if (tag !== 66) {
@@ -209,13 +209,13 @@ export const TrustRegistry = {
 
   fromJSON(object: any): TrustRegistry {
     return {
-      id: isSet(object.id) ? globalThis.Number(object.id) : 0,
+      id: isSet(object.id) ? Long.fromValue(object.id) : Long.UZERO,
       did: isSet(object.did) ? globalThis.String(object.did) : "",
       controller: isSet(object.controller) ? globalThis.String(object.controller) : "",
       created: isSet(object.created) ? fromJsonTimestamp(object.created) : undefined,
       modified: isSet(object.modified) ? fromJsonTimestamp(object.modified) : undefined,
       archived: isSet(object.archived) ? fromJsonTimestamp(object.archived) : undefined,
-      deposit: isSet(object.deposit) ? globalThis.Number(object.deposit) : 0,
+      deposit: isSet(object.deposit) ? Long.fromValue(object.deposit) : Long.ZERO,
       aka: isSet(object.aka) ? globalThis.String(object.aka) : "",
       activeVersion: isSet(object.activeVersion) ? globalThis.Number(object.activeVersion) : 0,
       language: isSet(object.language) ? globalThis.String(object.language) : "",
@@ -224,8 +224,8 @@ export const TrustRegistry = {
 
   toJSON(message: TrustRegistry): unknown {
     const obj: any = {};
-    if (message.id !== 0) {
-      obj.id = Math.round(message.id);
+    if (!message.id.equals(Long.UZERO)) {
+      obj.id = (message.id || Long.UZERO).toString();
     }
     if (message.did !== "") {
       obj.did = message.did;
@@ -242,8 +242,8 @@ export const TrustRegistry = {
     if (message.archived !== undefined) {
       obj.archived = message.archived.toISOString();
     }
-    if (message.deposit !== 0) {
-      obj.deposit = Math.round(message.deposit);
+    if (!message.deposit.equals(Long.ZERO)) {
+      obj.deposit = (message.deposit || Long.ZERO).toString();
     }
     if (message.aka !== "") {
       obj.aka = message.aka;
@@ -262,13 +262,15 @@ export const TrustRegistry = {
   },
   fromPartial<I extends Exact<DeepPartial<TrustRegistry>, I>>(object: I): TrustRegistry {
     const message = createBaseTrustRegistry();
-    message.id = object.id ?? 0;
+    message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
     message.did = object.did ?? "";
     message.controller = object.controller ?? "";
     message.created = object.created ?? undefined;
     message.modified = object.modified ?? undefined;
     message.archived = object.archived ?? undefined;
-    message.deposit = object.deposit ?? 0;
+    message.deposit = (object.deposit !== undefined && object.deposit !== null)
+      ? Long.fromValue(object.deposit)
+      : Long.ZERO;
     message.aka = object.aka ?? "";
     message.activeVersion = object.activeVersion ?? 0;
     message.language = object.language ?? "";
@@ -277,15 +279,15 @@ export const TrustRegistry = {
 };
 
 function createBaseGovernanceFrameworkVersion(): GovernanceFrameworkVersion {
-  return { id: 0, trId: 0, created: undefined, version: 0, activeSince: undefined };
+  return { id: Long.UZERO, trId: Long.UZERO, created: undefined, version: 0, activeSince: undefined };
 }
 
 export const GovernanceFrameworkVersion = {
   encode(message: GovernanceFrameworkVersion, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.id !== 0) {
+    if (!message.id.equals(Long.UZERO)) {
       writer.uint32(8).uint64(message.id);
     }
-    if (message.trId !== 0) {
+    if (!message.trId.equals(Long.UZERO)) {
       writer.uint32(16).uint64(message.trId);
     }
     if (message.created !== undefined) {
@@ -312,14 +314,14 @@ export const GovernanceFrameworkVersion = {
             break;
           }
 
-          message.id = longToNumber(reader.uint64() as Long);
+          message.id = reader.uint64() as Long;
           continue;
         case 2:
           if (tag !== 16) {
             break;
           }
 
-          message.trId = longToNumber(reader.uint64() as Long);
+          message.trId = reader.uint64() as Long;
           continue;
         case 3:
           if (tag !== 26) {
@@ -353,8 +355,8 @@ export const GovernanceFrameworkVersion = {
 
   fromJSON(object: any): GovernanceFrameworkVersion {
     return {
-      id: isSet(object.id) ? globalThis.Number(object.id) : 0,
-      trId: isSet(object.trId) ? globalThis.Number(object.trId) : 0,
+      id: isSet(object.id) ? Long.fromValue(object.id) : Long.UZERO,
+      trId: isSet(object.trId) ? Long.fromValue(object.trId) : Long.UZERO,
       created: isSet(object.created) ? fromJsonTimestamp(object.created) : undefined,
       version: isSet(object.version) ? globalThis.Number(object.version) : 0,
       activeSince: isSet(object.activeSince) ? fromJsonTimestamp(object.activeSince) : undefined,
@@ -363,11 +365,11 @@ export const GovernanceFrameworkVersion = {
 
   toJSON(message: GovernanceFrameworkVersion): unknown {
     const obj: any = {};
-    if (message.id !== 0) {
-      obj.id = Math.round(message.id);
+    if (!message.id.equals(Long.UZERO)) {
+      obj.id = (message.id || Long.UZERO).toString();
     }
-    if (message.trId !== 0) {
-      obj.trId = Math.round(message.trId);
+    if (!message.trId.equals(Long.UZERO)) {
+      obj.trId = (message.trId || Long.UZERO).toString();
     }
     if (message.created !== undefined) {
       obj.created = message.created.toISOString();
@@ -386,8 +388,8 @@ export const GovernanceFrameworkVersion = {
   },
   fromPartial<I extends Exact<DeepPartial<GovernanceFrameworkVersion>, I>>(object: I): GovernanceFrameworkVersion {
     const message = createBaseGovernanceFrameworkVersion();
-    message.id = object.id ?? 0;
-    message.trId = object.trId ?? 0;
+    message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
+    message.trId = (object.trId !== undefined && object.trId !== null) ? Long.fromValue(object.trId) : Long.UZERO;
     message.created = object.created ?? undefined;
     message.version = object.version ?? 0;
     message.activeSince = object.activeSince ?? undefined;
@@ -396,15 +398,15 @@ export const GovernanceFrameworkVersion = {
 };
 
 function createBaseGovernanceFrameworkDocument(): GovernanceFrameworkDocument {
-  return { id: 0, gfvId: 0, created: undefined, language: "", url: "", digestSri: "" };
+  return { id: Long.UZERO, gfvId: Long.UZERO, created: undefined, language: "", url: "", digestSri: "" };
 }
 
 export const GovernanceFrameworkDocument = {
   encode(message: GovernanceFrameworkDocument, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.id !== 0) {
+    if (!message.id.equals(Long.UZERO)) {
       writer.uint32(8).uint64(message.id);
     }
-    if (message.gfvId !== 0) {
+    if (!message.gfvId.equals(Long.UZERO)) {
       writer.uint32(16).uint64(message.gfvId);
     }
     if (message.created !== undefined) {
@@ -434,14 +436,14 @@ export const GovernanceFrameworkDocument = {
             break;
           }
 
-          message.id = longToNumber(reader.uint64() as Long);
+          message.id = reader.uint64() as Long;
           continue;
         case 2:
           if (tag !== 16) {
             break;
           }
 
-          message.gfvId = longToNumber(reader.uint64() as Long);
+          message.gfvId = reader.uint64() as Long;
           continue;
         case 3:
           if (tag !== 26) {
@@ -482,8 +484,8 @@ export const GovernanceFrameworkDocument = {
 
   fromJSON(object: any): GovernanceFrameworkDocument {
     return {
-      id: isSet(object.id) ? globalThis.Number(object.id) : 0,
-      gfvId: isSet(object.gfvId) ? globalThis.Number(object.gfvId) : 0,
+      id: isSet(object.id) ? Long.fromValue(object.id) : Long.UZERO,
+      gfvId: isSet(object.gfvId) ? Long.fromValue(object.gfvId) : Long.UZERO,
       created: isSet(object.created) ? fromJsonTimestamp(object.created) : undefined,
       language: isSet(object.language) ? globalThis.String(object.language) : "",
       url: isSet(object.url) ? globalThis.String(object.url) : "",
@@ -493,11 +495,11 @@ export const GovernanceFrameworkDocument = {
 
   toJSON(message: GovernanceFrameworkDocument): unknown {
     const obj: any = {};
-    if (message.id !== 0) {
-      obj.id = Math.round(message.id);
+    if (!message.id.equals(Long.UZERO)) {
+      obj.id = (message.id || Long.UZERO).toString();
     }
-    if (message.gfvId !== 0) {
-      obj.gfvId = Math.round(message.gfvId);
+    if (!message.gfvId.equals(Long.UZERO)) {
+      obj.gfvId = (message.gfvId || Long.UZERO).toString();
     }
     if (message.created !== undefined) {
       obj.created = message.created.toISOString();
@@ -519,8 +521,8 @@ export const GovernanceFrameworkDocument = {
   },
   fromPartial<I extends Exact<DeepPartial<GovernanceFrameworkDocument>, I>>(object: I): GovernanceFrameworkDocument {
     const message = createBaseGovernanceFrameworkDocument();
-    message.id = object.id ?? 0;
-    message.gfvId = object.gfvId ?? 0;
+    message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
+    message.gfvId = (object.gfvId !== undefined && object.gfvId !== null) ? Long.fromValue(object.gfvId) : Long.UZERO;
     message.created = object.created ?? undefined;
     message.language = object.language ?? "";
     message.url = object.url ?? "";
@@ -530,15 +532,15 @@ export const GovernanceFrameworkDocument = {
 };
 
 function createBaseGovernanceFrameworkVersionWithDocs(): GovernanceFrameworkVersionWithDocs {
-  return { id: 0, trId: 0, created: undefined, version: 0, activeSince: undefined, documents: [] };
+  return { id: Long.UZERO, trId: Long.UZERO, created: undefined, version: 0, activeSince: undefined, documents: [] };
 }
 
 export const GovernanceFrameworkVersionWithDocs = {
   encode(message: GovernanceFrameworkVersionWithDocs, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.id !== 0) {
+    if (!message.id.equals(Long.UZERO)) {
       writer.uint32(8).uint64(message.id);
     }
-    if (message.trId !== 0) {
+    if (!message.trId.equals(Long.UZERO)) {
       writer.uint32(16).uint64(message.trId);
     }
     if (message.created !== undefined) {
@@ -568,14 +570,14 @@ export const GovernanceFrameworkVersionWithDocs = {
             break;
           }
 
-          message.id = longToNumber(reader.uint64() as Long);
+          message.id = reader.uint64() as Long;
           continue;
         case 2:
           if (tag !== 16) {
             break;
           }
 
-          message.trId = longToNumber(reader.uint64() as Long);
+          message.trId = reader.uint64() as Long;
           continue;
         case 3:
           if (tag !== 26) {
@@ -616,8 +618,8 @@ export const GovernanceFrameworkVersionWithDocs = {
 
   fromJSON(object: any): GovernanceFrameworkVersionWithDocs {
     return {
-      id: isSet(object.id) ? globalThis.Number(object.id) : 0,
-      trId: isSet(object.trId) ? globalThis.Number(object.trId) : 0,
+      id: isSet(object.id) ? Long.fromValue(object.id) : Long.UZERO,
+      trId: isSet(object.trId) ? Long.fromValue(object.trId) : Long.UZERO,
       created: isSet(object.created) ? fromJsonTimestamp(object.created) : undefined,
       version: isSet(object.version) ? globalThis.Number(object.version) : 0,
       activeSince: isSet(object.activeSince) ? fromJsonTimestamp(object.activeSince) : undefined,
@@ -629,11 +631,11 @@ export const GovernanceFrameworkVersionWithDocs = {
 
   toJSON(message: GovernanceFrameworkVersionWithDocs): unknown {
     const obj: any = {};
-    if (message.id !== 0) {
-      obj.id = Math.round(message.id);
+    if (!message.id.equals(Long.UZERO)) {
+      obj.id = (message.id || Long.UZERO).toString();
     }
-    if (message.trId !== 0) {
-      obj.trId = Math.round(message.trId);
+    if (!message.trId.equals(Long.UZERO)) {
+      obj.trId = (message.trId || Long.UZERO).toString();
     }
     if (message.created !== undefined) {
       obj.created = message.created.toISOString();
@@ -659,8 +661,8 @@ export const GovernanceFrameworkVersionWithDocs = {
     object: I,
   ): GovernanceFrameworkVersionWithDocs {
     const message = createBaseGovernanceFrameworkVersionWithDocs();
-    message.id = object.id ?? 0;
-    message.trId = object.trId ?? 0;
+    message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
+    message.trId = (object.trId !== undefined && object.trId !== null) ? Long.fromValue(object.trId) : Long.UZERO;
     message.created = object.created ?? undefined;
     message.version = object.version ?? 0;
     message.activeSince = object.activeSince ?? undefined;
@@ -671,13 +673,13 @@ export const GovernanceFrameworkVersionWithDocs = {
 
 function createBaseTrustRegistryWithVersions(): TrustRegistryWithVersions {
   return {
-    id: 0,
+    id: Long.UZERO,
     did: "",
     controller: "",
     created: undefined,
     modified: undefined,
     archived: undefined,
-    deposit: 0,
+    deposit: Long.ZERO,
     aka: "",
     activeVersion: 0,
     language: "",
@@ -687,7 +689,7 @@ function createBaseTrustRegistryWithVersions(): TrustRegistryWithVersions {
 
 export const TrustRegistryWithVersions = {
   encode(message: TrustRegistryWithVersions, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.id !== 0) {
+    if (!message.id.equals(Long.UZERO)) {
       writer.uint32(8).uint64(message.id);
     }
     if (message.did !== "") {
@@ -705,7 +707,7 @@ export const TrustRegistryWithVersions = {
     if (message.archived !== undefined) {
       Timestamp.encode(toTimestamp(message.archived), writer.uint32(50).fork()).ldelim();
     }
-    if (message.deposit !== 0) {
+    if (!message.deposit.equals(Long.ZERO)) {
       writer.uint32(56).int64(message.deposit);
     }
     if (message.aka !== "") {
@@ -735,7 +737,7 @@ export const TrustRegistryWithVersions = {
             break;
           }
 
-          message.id = longToNumber(reader.uint64() as Long);
+          message.id = reader.uint64() as Long;
           continue;
         case 2:
           if (tag !== 18) {
@@ -777,7 +779,7 @@ export const TrustRegistryWithVersions = {
             break;
           }
 
-          message.deposit = longToNumber(reader.int64() as Long);
+          message.deposit = reader.int64() as Long;
           continue;
         case 8:
           if (tag !== 66) {
@@ -818,13 +820,13 @@ export const TrustRegistryWithVersions = {
 
   fromJSON(object: any): TrustRegistryWithVersions {
     return {
-      id: isSet(object.id) ? globalThis.Number(object.id) : 0,
+      id: isSet(object.id) ? Long.fromValue(object.id) : Long.UZERO,
       did: isSet(object.did) ? globalThis.String(object.did) : "",
       controller: isSet(object.controller) ? globalThis.String(object.controller) : "",
       created: isSet(object.created) ? fromJsonTimestamp(object.created) : undefined,
       modified: isSet(object.modified) ? fromJsonTimestamp(object.modified) : undefined,
       archived: isSet(object.archived) ? fromJsonTimestamp(object.archived) : undefined,
-      deposit: isSet(object.deposit) ? globalThis.Number(object.deposit) : 0,
+      deposit: isSet(object.deposit) ? Long.fromValue(object.deposit) : Long.ZERO,
       aka: isSet(object.aka) ? globalThis.String(object.aka) : "",
       activeVersion: isSet(object.activeVersion) ? globalThis.Number(object.activeVersion) : 0,
       language: isSet(object.language) ? globalThis.String(object.language) : "",
@@ -836,8 +838,8 @@ export const TrustRegistryWithVersions = {
 
   toJSON(message: TrustRegistryWithVersions): unknown {
     const obj: any = {};
-    if (message.id !== 0) {
-      obj.id = Math.round(message.id);
+    if (!message.id.equals(Long.UZERO)) {
+      obj.id = (message.id || Long.UZERO).toString();
     }
     if (message.did !== "") {
       obj.did = message.did;
@@ -854,8 +856,8 @@ export const TrustRegistryWithVersions = {
     if (message.archived !== undefined) {
       obj.archived = message.archived.toISOString();
     }
-    if (message.deposit !== 0) {
-      obj.deposit = Math.round(message.deposit);
+    if (!message.deposit.equals(Long.ZERO)) {
+      obj.deposit = (message.deposit || Long.ZERO).toString();
     }
     if (message.aka !== "") {
       obj.aka = message.aka;
@@ -877,13 +879,15 @@ export const TrustRegistryWithVersions = {
   },
   fromPartial<I extends Exact<DeepPartial<TrustRegistryWithVersions>, I>>(object: I): TrustRegistryWithVersions {
     const message = createBaseTrustRegistryWithVersions();
-    message.id = object.id ?? 0;
+    message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
     message.did = object.did ?? "";
     message.controller = object.controller ?? "";
     message.created = object.created ?? undefined;
     message.modified = object.modified ?? undefined;
     message.archived = object.archived ?? undefined;
-    message.deposit = object.deposit ?? 0;
+    message.deposit = (object.deposit !== undefined && object.deposit !== null)
+      ? Long.fromValue(object.deposit)
+      : Long.ZERO;
     message.aka = object.aka ?? "";
     message.activeVersion = object.activeVersion ?? 0;
     message.language = object.language ?? "";
@@ -895,7 +899,7 @@ export const TrustRegistryWithVersions = {
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 
 export type DeepPartial<T> = T extends Builtin ? T
-  : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>>
+  : T extends Long ? string | number | Long : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>>
   : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
   : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
@@ -905,13 +909,13 @@ export type Exact<P, I extends P> = P extends Builtin ? P
   : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
 
 function toTimestamp(date: Date): Timestamp {
-  const seconds = Math.trunc(date.getTime() / 1_000);
+  const seconds = numberToLong(Math.trunc(date.getTime() / 1_000));
   const nanos = (date.getTime() % 1_000) * 1_000_000;
   return { seconds, nanos };
 }
 
 function fromTimestamp(t: Timestamp): Date {
-  let millis = (t.seconds || 0) * 1_000;
+  let millis = (t.seconds.toNumber() || 0) * 1_000;
   millis += (t.nanos || 0) / 1_000_000;
   return new globalThis.Date(millis);
 }
@@ -926,14 +930,8 @@ function fromJsonTimestamp(o: any): Date {
   }
 }
 
-function longToNumber(long: Long): number {
-  if (long.gt(globalThis.Number.MAX_SAFE_INTEGER)) {
-    throw new globalThis.Error("Value is larger than Number.MAX_SAFE_INTEGER");
-  }
-  if (long.lt(globalThis.Number.MIN_SAFE_INTEGER)) {
-    throw new globalThis.Error("Value is smaller than Number.MIN_SAFE_INTEGER");
-  }
-  return long.toNumber();
+function numberToLong(number: number) {
+  return Long.fromNumber(number);
 }
 
 if (_m0.util.Long !== Long) {

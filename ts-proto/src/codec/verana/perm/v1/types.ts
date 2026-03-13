@@ -5,9 +5,9 @@
 // source: verana/perm/v1/types.proto
 
 /* eslint-disable */
-import * as _m0 from "protobufjs/minimal";
+import Long from "long";
+import _m0 from "protobufjs/minimal";
 import { Timestamp } from "../../../google/protobuf/timestamp";
-import Long = require("long");
 
 export const protobufPackage = "verana.perm.v1";
 
@@ -129,79 +129,79 @@ export function validationStateToJSON(object: ValidationState): string {
 }
 
 export interface Permission {
-  id: number;
-  schemaId: number;
+  id: Long;
+  schemaId: Long;
   type: PermissionType;
   did: string;
   grantee: string;
-  created: Date | undefined;
+  created?: Date | undefined;
   createdBy: string;
-  extended: Date | undefined;
+  extended?: Date | undefined;
   extendedBy: string;
   /** NEW: Slashing related fields */
-  slashed: Date | undefined;
+  slashed?: Date | undefined;
   slashedBy: string;
-  repaid: Date | undefined;
+  repaid?: Date | undefined;
   repaidBy: string;
   /** END NEW */
-  effectiveFrom: Date | undefined;
-  effectiveUntil: Date | undefined;
-  modified: Date | undefined;
-  validationFees: number;
-  issuanceFees: number;
-  verificationFees: number;
-  deposit: number;
+  effectiveFrom?: Date | undefined;
+  effectiveUntil?: Date | undefined;
+  modified?: Date | undefined;
+  validationFees: Long;
+  issuanceFees: Long;
+  verificationFees: Long;
+  deposit: Long;
   /** NEW: Slashing deposit fields */
-  slashedDeposit: number;
-  repaidDeposit: number;
+  slashedDeposit: Long;
+  repaidDeposit: Long;
   /** END NEW */
-  revoked: Date | undefined;
+  revoked?: Date | undefined;
   revokedBy: string;
   country: string;
-  validatorPermId: number;
+  validatorPermId: Long;
   vpState: ValidationState;
-  vpExp: Date | undefined;
-  vpLastStateChange: Date | undefined;
-  vpValidatorDeposit: number;
-  vpCurrentFees: number;
-  vpCurrentDeposit: number;
+  vpExp?: Date | undefined;
+  vpLastStateChange?: Date | undefined;
+  vpValidatorDeposit: Long;
+  vpCurrentFees: Long;
+  vpCurrentDeposit: Long;
   vpSummaryDigestSri: string;
-  vpTermRequested:
+  vpTermRequested?:
     | Date
     | undefined;
   /**
    * Fee discount fields (scaled: 0 = 0.0, 10000 = 1.0, range 0-10000)
    * Per Issue #94: spec merged exemption and discount into single *_fee_discount field
    */
-  issuanceFeeDiscount: number;
+  issuanceFeeDiscount: Long;
   /** Verification fee discount (0-10000, where 10000 = 100% discount) */
-  verificationFeeDiscount: number;
+  verificationFeeDiscount: Long;
 }
 
 export interface PermissionSession {
   id: string;
   controller: string;
-  agentPermId: number;
+  agentPermId: Long;
   authz: SessionAuthz[];
-  created: Date | undefined;
-  modified: Date | undefined;
+  created?: Date | undefined;
+  modified?: Date | undefined;
 }
 
 export interface SessionAuthz {
-  executorPermId: number;
-  beneficiaryPermId: number;
-  walletAgentPermId: number;
+  executorPermId: Long;
+  beneficiaryPermId: Long;
+  walletAgentPermId: Long;
 }
 
 /** OptionalUInt64 is a wrapper for optional uint64 values */
 export interface OptionalUInt64 {
-  value: number;
+  value: Long;
 }
 
 function createBasePermission(): Permission {
   return {
-    id: 0,
-    schemaId: 0,
+    id: Long.UZERO,
+    schemaId: Long.UZERO,
     type: 0,
     did: "",
     grantee: "",
@@ -216,35 +216,35 @@ function createBasePermission(): Permission {
     effectiveFrom: undefined,
     effectiveUntil: undefined,
     modified: undefined,
-    validationFees: 0,
-    issuanceFees: 0,
-    verificationFees: 0,
-    deposit: 0,
-    slashedDeposit: 0,
-    repaidDeposit: 0,
+    validationFees: Long.UZERO,
+    issuanceFees: Long.UZERO,
+    verificationFees: Long.UZERO,
+    deposit: Long.UZERO,
+    slashedDeposit: Long.UZERO,
+    repaidDeposit: Long.UZERO,
     revoked: undefined,
     revokedBy: "",
     country: "",
-    validatorPermId: 0,
+    validatorPermId: Long.UZERO,
     vpState: 0,
     vpExp: undefined,
     vpLastStateChange: undefined,
-    vpValidatorDeposit: 0,
-    vpCurrentFees: 0,
-    vpCurrentDeposit: 0,
+    vpValidatorDeposit: Long.UZERO,
+    vpCurrentFees: Long.UZERO,
+    vpCurrentDeposit: Long.UZERO,
     vpSummaryDigestSri: "",
     vpTermRequested: undefined,
-    issuanceFeeDiscount: 0,
-    verificationFeeDiscount: 0,
+    issuanceFeeDiscount: Long.UZERO,
+    verificationFeeDiscount: Long.UZERO,
   };
 }
 
 export const Permission = {
   encode(message: Permission, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.id !== 0) {
+    if (!message.id.equals(Long.UZERO)) {
       writer.uint32(8).uint64(message.id);
     }
-    if (message.schemaId !== 0) {
+    if (!message.schemaId.equals(Long.UZERO)) {
       writer.uint32(16).uint64(message.schemaId);
     }
     if (message.type !== 0) {
@@ -289,22 +289,22 @@ export const Permission = {
     if (message.modified !== undefined) {
       Timestamp.encode(toTimestamp(message.modified), writer.uint32(130).fork()).ldelim();
     }
-    if (message.validationFees !== 0) {
+    if (!message.validationFees.equals(Long.UZERO)) {
       writer.uint32(136).uint64(message.validationFees);
     }
-    if (message.issuanceFees !== 0) {
+    if (!message.issuanceFees.equals(Long.UZERO)) {
       writer.uint32(144).uint64(message.issuanceFees);
     }
-    if (message.verificationFees !== 0) {
+    if (!message.verificationFees.equals(Long.UZERO)) {
       writer.uint32(152).uint64(message.verificationFees);
     }
-    if (message.deposit !== 0) {
+    if (!message.deposit.equals(Long.UZERO)) {
       writer.uint32(160).uint64(message.deposit);
     }
-    if (message.slashedDeposit !== 0) {
+    if (!message.slashedDeposit.equals(Long.UZERO)) {
       writer.uint32(168).uint64(message.slashedDeposit);
     }
-    if (message.repaidDeposit !== 0) {
+    if (!message.repaidDeposit.equals(Long.UZERO)) {
       writer.uint32(176).uint64(message.repaidDeposit);
     }
     if (message.revoked !== undefined) {
@@ -316,7 +316,7 @@ export const Permission = {
     if (message.country !== "") {
       writer.uint32(202).string(message.country);
     }
-    if (message.validatorPermId !== 0) {
+    if (!message.validatorPermId.equals(Long.UZERO)) {
       writer.uint32(208).uint64(message.validatorPermId);
     }
     if (message.vpState !== 0) {
@@ -328,13 +328,13 @@ export const Permission = {
     if (message.vpLastStateChange !== undefined) {
       Timestamp.encode(toTimestamp(message.vpLastStateChange), writer.uint32(234).fork()).ldelim();
     }
-    if (message.vpValidatorDeposit !== 0) {
+    if (!message.vpValidatorDeposit.equals(Long.UZERO)) {
       writer.uint32(240).uint64(message.vpValidatorDeposit);
     }
-    if (message.vpCurrentFees !== 0) {
+    if (!message.vpCurrentFees.equals(Long.UZERO)) {
       writer.uint32(248).uint64(message.vpCurrentFees);
     }
-    if (message.vpCurrentDeposit !== 0) {
+    if (!message.vpCurrentDeposit.equals(Long.UZERO)) {
       writer.uint32(256).uint64(message.vpCurrentDeposit);
     }
     if (message.vpSummaryDigestSri !== "") {
@@ -343,10 +343,10 @@ export const Permission = {
     if (message.vpTermRequested !== undefined) {
       Timestamp.encode(toTimestamp(message.vpTermRequested), writer.uint32(274).fork()).ldelim();
     }
-    if (message.issuanceFeeDiscount !== 0) {
+    if (!message.issuanceFeeDiscount.equals(Long.UZERO)) {
       writer.uint32(280).uint64(message.issuanceFeeDiscount);
     }
-    if (message.verificationFeeDiscount !== 0) {
+    if (!message.verificationFeeDiscount.equals(Long.UZERO)) {
       writer.uint32(288).uint64(message.verificationFeeDiscount);
     }
     return writer;
@@ -364,14 +364,14 @@ export const Permission = {
             break;
           }
 
-          message.id = longToNumber(reader.uint64() as Long);
+          message.id = reader.uint64() as Long;
           continue;
         case 2:
           if (tag !== 16) {
             break;
           }
 
-          message.schemaId = longToNumber(reader.uint64() as Long);
+          message.schemaId = reader.uint64() as Long;
           continue;
         case 3:
           if (tag !== 24) {
@@ -476,42 +476,42 @@ export const Permission = {
             break;
           }
 
-          message.validationFees = longToNumber(reader.uint64() as Long);
+          message.validationFees = reader.uint64() as Long;
           continue;
         case 18:
           if (tag !== 144) {
             break;
           }
 
-          message.issuanceFees = longToNumber(reader.uint64() as Long);
+          message.issuanceFees = reader.uint64() as Long;
           continue;
         case 19:
           if (tag !== 152) {
             break;
           }
 
-          message.verificationFees = longToNumber(reader.uint64() as Long);
+          message.verificationFees = reader.uint64() as Long;
           continue;
         case 20:
           if (tag !== 160) {
             break;
           }
 
-          message.deposit = longToNumber(reader.uint64() as Long);
+          message.deposit = reader.uint64() as Long;
           continue;
         case 21:
           if (tag !== 168) {
             break;
           }
 
-          message.slashedDeposit = longToNumber(reader.uint64() as Long);
+          message.slashedDeposit = reader.uint64() as Long;
           continue;
         case 22:
           if (tag !== 176) {
             break;
           }
 
-          message.repaidDeposit = longToNumber(reader.uint64() as Long);
+          message.repaidDeposit = reader.uint64() as Long;
           continue;
         case 23:
           if (tag !== 186) {
@@ -539,7 +539,7 @@ export const Permission = {
             break;
           }
 
-          message.validatorPermId = longToNumber(reader.uint64() as Long);
+          message.validatorPermId = reader.uint64() as Long;
           continue;
         case 27:
           if (tag !== 216) {
@@ -567,21 +567,21 @@ export const Permission = {
             break;
           }
 
-          message.vpValidatorDeposit = longToNumber(reader.uint64() as Long);
+          message.vpValidatorDeposit = reader.uint64() as Long;
           continue;
         case 31:
           if (tag !== 248) {
             break;
           }
 
-          message.vpCurrentFees = longToNumber(reader.uint64() as Long);
+          message.vpCurrentFees = reader.uint64() as Long;
           continue;
         case 32:
           if (tag !== 256) {
             break;
           }
 
-          message.vpCurrentDeposit = longToNumber(reader.uint64() as Long);
+          message.vpCurrentDeposit = reader.uint64() as Long;
           continue;
         case 33:
           if (tag !== 266) {
@@ -602,14 +602,14 @@ export const Permission = {
             break;
           }
 
-          message.issuanceFeeDiscount = longToNumber(reader.uint64() as Long);
+          message.issuanceFeeDiscount = reader.uint64() as Long;
           continue;
         case 36:
           if (tag !== 288) {
             break;
           }
 
-          message.verificationFeeDiscount = longToNumber(reader.uint64() as Long);
+          message.verificationFeeDiscount = reader.uint64() as Long;
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -622,8 +622,8 @@ export const Permission = {
 
   fromJSON(object: any): Permission {
     return {
-      id: isSet(object.id) ? globalThis.Number(object.id) : 0,
-      schemaId: isSet(object.schemaId) ? globalThis.Number(object.schemaId) : 0,
+      id: isSet(object.id) ? Long.fromValue(object.id) : Long.UZERO,
+      schemaId: isSet(object.schemaId) ? Long.fromValue(object.schemaId) : Long.UZERO,
       type: isSet(object.type) ? permissionTypeFromJSON(object.type) : 0,
       did: isSet(object.did) ? globalThis.String(object.did) : "",
       grantee: isSet(object.grantee) ? globalThis.String(object.grantee) : "",
@@ -638,38 +638,38 @@ export const Permission = {
       effectiveFrom: isSet(object.effectiveFrom) ? fromJsonTimestamp(object.effectiveFrom) : undefined,
       effectiveUntil: isSet(object.effectiveUntil) ? fromJsonTimestamp(object.effectiveUntil) : undefined,
       modified: isSet(object.modified) ? fromJsonTimestamp(object.modified) : undefined,
-      validationFees: isSet(object.validationFees) ? globalThis.Number(object.validationFees) : 0,
-      issuanceFees: isSet(object.issuanceFees) ? globalThis.Number(object.issuanceFees) : 0,
-      verificationFees: isSet(object.verificationFees) ? globalThis.Number(object.verificationFees) : 0,
-      deposit: isSet(object.deposit) ? globalThis.Number(object.deposit) : 0,
-      slashedDeposit: isSet(object.slashedDeposit) ? globalThis.Number(object.slashedDeposit) : 0,
-      repaidDeposit: isSet(object.repaidDeposit) ? globalThis.Number(object.repaidDeposit) : 0,
+      validationFees: isSet(object.validationFees) ? Long.fromValue(object.validationFees) : Long.UZERO,
+      issuanceFees: isSet(object.issuanceFees) ? Long.fromValue(object.issuanceFees) : Long.UZERO,
+      verificationFees: isSet(object.verificationFees) ? Long.fromValue(object.verificationFees) : Long.UZERO,
+      deposit: isSet(object.deposit) ? Long.fromValue(object.deposit) : Long.UZERO,
+      slashedDeposit: isSet(object.slashedDeposit) ? Long.fromValue(object.slashedDeposit) : Long.UZERO,
+      repaidDeposit: isSet(object.repaidDeposit) ? Long.fromValue(object.repaidDeposit) : Long.UZERO,
       revoked: isSet(object.revoked) ? fromJsonTimestamp(object.revoked) : undefined,
       revokedBy: isSet(object.revokedBy) ? globalThis.String(object.revokedBy) : "",
       country: isSet(object.country) ? globalThis.String(object.country) : "",
-      validatorPermId: isSet(object.validatorPermId) ? globalThis.Number(object.validatorPermId) : 0,
+      validatorPermId: isSet(object.validatorPermId) ? Long.fromValue(object.validatorPermId) : Long.UZERO,
       vpState: isSet(object.vpState) ? validationStateFromJSON(object.vpState) : 0,
       vpExp: isSet(object.vpExp) ? fromJsonTimestamp(object.vpExp) : undefined,
       vpLastStateChange: isSet(object.vpLastStateChange) ? fromJsonTimestamp(object.vpLastStateChange) : undefined,
-      vpValidatorDeposit: isSet(object.vpValidatorDeposit) ? globalThis.Number(object.vpValidatorDeposit) : 0,
-      vpCurrentFees: isSet(object.vpCurrentFees) ? globalThis.Number(object.vpCurrentFees) : 0,
-      vpCurrentDeposit: isSet(object.vpCurrentDeposit) ? globalThis.Number(object.vpCurrentDeposit) : 0,
+      vpValidatorDeposit: isSet(object.vpValidatorDeposit) ? Long.fromValue(object.vpValidatorDeposit) : Long.UZERO,
+      vpCurrentFees: isSet(object.vpCurrentFees) ? Long.fromValue(object.vpCurrentFees) : Long.UZERO,
+      vpCurrentDeposit: isSet(object.vpCurrentDeposit) ? Long.fromValue(object.vpCurrentDeposit) : Long.UZERO,
       vpSummaryDigestSri: isSet(object.vpSummaryDigestSri) ? globalThis.String(object.vpSummaryDigestSri) : "",
       vpTermRequested: isSet(object.vpTermRequested) ? fromJsonTimestamp(object.vpTermRequested) : undefined,
-      issuanceFeeDiscount: isSet(object.issuanceFeeDiscount) ? globalThis.Number(object.issuanceFeeDiscount) : 0,
+      issuanceFeeDiscount: isSet(object.issuanceFeeDiscount) ? Long.fromValue(object.issuanceFeeDiscount) : Long.UZERO,
       verificationFeeDiscount: isSet(object.verificationFeeDiscount)
-        ? globalThis.Number(object.verificationFeeDiscount)
-        : 0,
+        ? Long.fromValue(object.verificationFeeDiscount)
+        : Long.UZERO,
     };
   },
 
   toJSON(message: Permission): unknown {
     const obj: any = {};
-    if (message.id !== 0) {
-      obj.id = Math.round(message.id);
+    if (!message.id.equals(Long.UZERO)) {
+      obj.id = (message.id || Long.UZERO).toString();
     }
-    if (message.schemaId !== 0) {
-      obj.schemaId = Math.round(message.schemaId);
+    if (!message.schemaId.equals(Long.UZERO)) {
+      obj.schemaId = (message.schemaId || Long.UZERO).toString();
     }
     if (message.type !== 0) {
       obj.type = permissionTypeToJSON(message.type);
@@ -713,23 +713,23 @@ export const Permission = {
     if (message.modified !== undefined) {
       obj.modified = message.modified.toISOString();
     }
-    if (message.validationFees !== 0) {
-      obj.validationFees = Math.round(message.validationFees);
+    if (!message.validationFees.equals(Long.UZERO)) {
+      obj.validationFees = (message.validationFees || Long.UZERO).toString();
     }
-    if (message.issuanceFees !== 0) {
-      obj.issuanceFees = Math.round(message.issuanceFees);
+    if (!message.issuanceFees.equals(Long.UZERO)) {
+      obj.issuanceFees = (message.issuanceFees || Long.UZERO).toString();
     }
-    if (message.verificationFees !== 0) {
-      obj.verificationFees = Math.round(message.verificationFees);
+    if (!message.verificationFees.equals(Long.UZERO)) {
+      obj.verificationFees = (message.verificationFees || Long.UZERO).toString();
     }
-    if (message.deposit !== 0) {
-      obj.deposit = Math.round(message.deposit);
+    if (!message.deposit.equals(Long.UZERO)) {
+      obj.deposit = (message.deposit || Long.UZERO).toString();
     }
-    if (message.slashedDeposit !== 0) {
-      obj.slashedDeposit = Math.round(message.slashedDeposit);
+    if (!message.slashedDeposit.equals(Long.UZERO)) {
+      obj.slashedDeposit = (message.slashedDeposit || Long.UZERO).toString();
     }
-    if (message.repaidDeposit !== 0) {
-      obj.repaidDeposit = Math.round(message.repaidDeposit);
+    if (!message.repaidDeposit.equals(Long.UZERO)) {
+      obj.repaidDeposit = (message.repaidDeposit || Long.UZERO).toString();
     }
     if (message.revoked !== undefined) {
       obj.revoked = message.revoked.toISOString();
@@ -740,8 +740,8 @@ export const Permission = {
     if (message.country !== "") {
       obj.country = message.country;
     }
-    if (message.validatorPermId !== 0) {
-      obj.validatorPermId = Math.round(message.validatorPermId);
+    if (!message.validatorPermId.equals(Long.UZERO)) {
+      obj.validatorPermId = (message.validatorPermId || Long.UZERO).toString();
     }
     if (message.vpState !== 0) {
       obj.vpState = validationStateToJSON(message.vpState);
@@ -752,14 +752,14 @@ export const Permission = {
     if (message.vpLastStateChange !== undefined) {
       obj.vpLastStateChange = message.vpLastStateChange.toISOString();
     }
-    if (message.vpValidatorDeposit !== 0) {
-      obj.vpValidatorDeposit = Math.round(message.vpValidatorDeposit);
+    if (!message.vpValidatorDeposit.equals(Long.UZERO)) {
+      obj.vpValidatorDeposit = (message.vpValidatorDeposit || Long.UZERO).toString();
     }
-    if (message.vpCurrentFees !== 0) {
-      obj.vpCurrentFees = Math.round(message.vpCurrentFees);
+    if (!message.vpCurrentFees.equals(Long.UZERO)) {
+      obj.vpCurrentFees = (message.vpCurrentFees || Long.UZERO).toString();
     }
-    if (message.vpCurrentDeposit !== 0) {
-      obj.vpCurrentDeposit = Math.round(message.vpCurrentDeposit);
+    if (!message.vpCurrentDeposit.equals(Long.UZERO)) {
+      obj.vpCurrentDeposit = (message.vpCurrentDeposit || Long.UZERO).toString();
     }
     if (message.vpSummaryDigestSri !== "") {
       obj.vpSummaryDigestSri = message.vpSummaryDigestSri;
@@ -767,11 +767,11 @@ export const Permission = {
     if (message.vpTermRequested !== undefined) {
       obj.vpTermRequested = message.vpTermRequested.toISOString();
     }
-    if (message.issuanceFeeDiscount !== 0) {
-      obj.issuanceFeeDiscount = Math.round(message.issuanceFeeDiscount);
+    if (!message.issuanceFeeDiscount.equals(Long.UZERO)) {
+      obj.issuanceFeeDiscount = (message.issuanceFeeDiscount || Long.UZERO).toString();
     }
-    if (message.verificationFeeDiscount !== 0) {
-      obj.verificationFeeDiscount = Math.round(message.verificationFeeDiscount);
+    if (!message.verificationFeeDiscount.equals(Long.UZERO)) {
+      obj.verificationFeeDiscount = (message.verificationFeeDiscount || Long.UZERO).toString();
     }
     return obj;
   },
@@ -781,8 +781,10 @@ export const Permission = {
   },
   fromPartial<I extends Exact<DeepPartial<Permission>, I>>(object: I): Permission {
     const message = createBasePermission();
-    message.id = object.id ?? 0;
-    message.schemaId = object.schemaId ?? 0;
+    message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
+    message.schemaId = (object.schemaId !== undefined && object.schemaId !== null)
+      ? Long.fromValue(object.schemaId)
+      : Long.UZERO;
     message.type = object.type ?? 0;
     message.did = object.did ?? "";
     message.grantee = object.grantee ?? "";
@@ -797,32 +799,57 @@ export const Permission = {
     message.effectiveFrom = object.effectiveFrom ?? undefined;
     message.effectiveUntil = object.effectiveUntil ?? undefined;
     message.modified = object.modified ?? undefined;
-    message.validationFees = object.validationFees ?? 0;
-    message.issuanceFees = object.issuanceFees ?? 0;
-    message.verificationFees = object.verificationFees ?? 0;
-    message.deposit = object.deposit ?? 0;
-    message.slashedDeposit = object.slashedDeposit ?? 0;
-    message.repaidDeposit = object.repaidDeposit ?? 0;
+    message.validationFees = (object.validationFees !== undefined && object.validationFees !== null)
+      ? Long.fromValue(object.validationFees)
+      : Long.UZERO;
+    message.issuanceFees = (object.issuanceFees !== undefined && object.issuanceFees !== null)
+      ? Long.fromValue(object.issuanceFees)
+      : Long.UZERO;
+    message.verificationFees = (object.verificationFees !== undefined && object.verificationFees !== null)
+      ? Long.fromValue(object.verificationFees)
+      : Long.UZERO;
+    message.deposit = (object.deposit !== undefined && object.deposit !== null)
+      ? Long.fromValue(object.deposit)
+      : Long.UZERO;
+    message.slashedDeposit = (object.slashedDeposit !== undefined && object.slashedDeposit !== null)
+      ? Long.fromValue(object.slashedDeposit)
+      : Long.UZERO;
+    message.repaidDeposit = (object.repaidDeposit !== undefined && object.repaidDeposit !== null)
+      ? Long.fromValue(object.repaidDeposit)
+      : Long.UZERO;
     message.revoked = object.revoked ?? undefined;
     message.revokedBy = object.revokedBy ?? "";
     message.country = object.country ?? "";
-    message.validatorPermId = object.validatorPermId ?? 0;
+    message.validatorPermId = (object.validatorPermId !== undefined && object.validatorPermId !== null)
+      ? Long.fromValue(object.validatorPermId)
+      : Long.UZERO;
     message.vpState = object.vpState ?? 0;
     message.vpExp = object.vpExp ?? undefined;
     message.vpLastStateChange = object.vpLastStateChange ?? undefined;
-    message.vpValidatorDeposit = object.vpValidatorDeposit ?? 0;
-    message.vpCurrentFees = object.vpCurrentFees ?? 0;
-    message.vpCurrentDeposit = object.vpCurrentDeposit ?? 0;
+    message.vpValidatorDeposit = (object.vpValidatorDeposit !== undefined && object.vpValidatorDeposit !== null)
+      ? Long.fromValue(object.vpValidatorDeposit)
+      : Long.UZERO;
+    message.vpCurrentFees = (object.vpCurrentFees !== undefined && object.vpCurrentFees !== null)
+      ? Long.fromValue(object.vpCurrentFees)
+      : Long.UZERO;
+    message.vpCurrentDeposit = (object.vpCurrentDeposit !== undefined && object.vpCurrentDeposit !== null)
+      ? Long.fromValue(object.vpCurrentDeposit)
+      : Long.UZERO;
     message.vpSummaryDigestSri = object.vpSummaryDigestSri ?? "";
     message.vpTermRequested = object.vpTermRequested ?? undefined;
-    message.issuanceFeeDiscount = object.issuanceFeeDiscount ?? 0;
-    message.verificationFeeDiscount = object.verificationFeeDiscount ?? 0;
+    message.issuanceFeeDiscount = (object.issuanceFeeDiscount !== undefined && object.issuanceFeeDiscount !== null)
+      ? Long.fromValue(object.issuanceFeeDiscount)
+      : Long.UZERO;
+    message.verificationFeeDiscount =
+      (object.verificationFeeDiscount !== undefined && object.verificationFeeDiscount !== null)
+        ? Long.fromValue(object.verificationFeeDiscount)
+        : Long.UZERO;
     return message;
   },
 };
 
 function createBasePermissionSession(): PermissionSession {
-  return { id: "", controller: "", agentPermId: 0, authz: [], created: undefined, modified: undefined };
+  return { id: "", controller: "", agentPermId: Long.UZERO, authz: [], created: undefined, modified: undefined };
 }
 
 export const PermissionSession = {
@@ -833,7 +860,7 @@ export const PermissionSession = {
     if (message.controller !== "") {
       writer.uint32(18).string(message.controller);
     }
-    if (message.agentPermId !== 0) {
+    if (!message.agentPermId.equals(Long.UZERO)) {
       writer.uint32(24).uint64(message.agentPermId);
     }
     for (const v of message.authz) {
@@ -874,7 +901,7 @@ export const PermissionSession = {
             break;
           }
 
-          message.agentPermId = longToNumber(reader.uint64() as Long);
+          message.agentPermId = reader.uint64() as Long;
           continue;
         case 4:
           if (tag !== 34) {
@@ -910,7 +937,7 @@ export const PermissionSession = {
     return {
       id: isSet(object.id) ? globalThis.String(object.id) : "",
       controller: isSet(object.controller) ? globalThis.String(object.controller) : "",
-      agentPermId: isSet(object.agentPermId) ? globalThis.Number(object.agentPermId) : 0,
+      agentPermId: isSet(object.agentPermId) ? Long.fromValue(object.agentPermId) : Long.UZERO,
       authz: globalThis.Array.isArray(object?.authz) ? object.authz.map((e: any) => SessionAuthz.fromJSON(e)) : [],
       created: isSet(object.created) ? fromJsonTimestamp(object.created) : undefined,
       modified: isSet(object.modified) ? fromJsonTimestamp(object.modified) : undefined,
@@ -925,8 +952,8 @@ export const PermissionSession = {
     if (message.controller !== "") {
       obj.controller = message.controller;
     }
-    if (message.agentPermId !== 0) {
-      obj.agentPermId = Math.round(message.agentPermId);
+    if (!message.agentPermId.equals(Long.UZERO)) {
+      obj.agentPermId = (message.agentPermId || Long.UZERO).toString();
     }
     if (message.authz?.length) {
       obj.authz = message.authz.map((e) => SessionAuthz.toJSON(e));
@@ -947,7 +974,9 @@ export const PermissionSession = {
     const message = createBasePermissionSession();
     message.id = object.id ?? "";
     message.controller = object.controller ?? "";
-    message.agentPermId = object.agentPermId ?? 0;
+    message.agentPermId = (object.agentPermId !== undefined && object.agentPermId !== null)
+      ? Long.fromValue(object.agentPermId)
+      : Long.UZERO;
     message.authz = object.authz?.map((e) => SessionAuthz.fromPartial(e)) || [];
     message.created = object.created ?? undefined;
     message.modified = object.modified ?? undefined;
@@ -956,18 +985,18 @@ export const PermissionSession = {
 };
 
 function createBaseSessionAuthz(): SessionAuthz {
-  return { executorPermId: 0, beneficiaryPermId: 0, walletAgentPermId: 0 };
+  return { executorPermId: Long.UZERO, beneficiaryPermId: Long.UZERO, walletAgentPermId: Long.UZERO };
 }
 
 export const SessionAuthz = {
   encode(message: SessionAuthz, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.executorPermId !== 0) {
+    if (!message.executorPermId.equals(Long.UZERO)) {
       writer.uint32(8).uint64(message.executorPermId);
     }
-    if (message.beneficiaryPermId !== 0) {
+    if (!message.beneficiaryPermId.equals(Long.UZERO)) {
       writer.uint32(16).uint64(message.beneficiaryPermId);
     }
-    if (message.walletAgentPermId !== 0) {
+    if (!message.walletAgentPermId.equals(Long.UZERO)) {
       writer.uint32(24).uint64(message.walletAgentPermId);
     }
     return writer;
@@ -985,21 +1014,21 @@ export const SessionAuthz = {
             break;
           }
 
-          message.executorPermId = longToNumber(reader.uint64() as Long);
+          message.executorPermId = reader.uint64() as Long;
           continue;
         case 2:
           if (tag !== 16) {
             break;
           }
 
-          message.beneficiaryPermId = longToNumber(reader.uint64() as Long);
+          message.beneficiaryPermId = reader.uint64() as Long;
           continue;
         case 3:
           if (tag !== 24) {
             break;
           }
 
-          message.walletAgentPermId = longToNumber(reader.uint64() as Long);
+          message.walletAgentPermId = reader.uint64() as Long;
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -1012,22 +1041,22 @@ export const SessionAuthz = {
 
   fromJSON(object: any): SessionAuthz {
     return {
-      executorPermId: isSet(object.executorPermId) ? globalThis.Number(object.executorPermId) : 0,
-      beneficiaryPermId: isSet(object.beneficiaryPermId) ? globalThis.Number(object.beneficiaryPermId) : 0,
-      walletAgentPermId: isSet(object.walletAgentPermId) ? globalThis.Number(object.walletAgentPermId) : 0,
+      executorPermId: isSet(object.executorPermId) ? Long.fromValue(object.executorPermId) : Long.UZERO,
+      beneficiaryPermId: isSet(object.beneficiaryPermId) ? Long.fromValue(object.beneficiaryPermId) : Long.UZERO,
+      walletAgentPermId: isSet(object.walletAgentPermId) ? Long.fromValue(object.walletAgentPermId) : Long.UZERO,
     };
   },
 
   toJSON(message: SessionAuthz): unknown {
     const obj: any = {};
-    if (message.executorPermId !== 0) {
-      obj.executorPermId = Math.round(message.executorPermId);
+    if (!message.executorPermId.equals(Long.UZERO)) {
+      obj.executorPermId = (message.executorPermId || Long.UZERO).toString();
     }
-    if (message.beneficiaryPermId !== 0) {
-      obj.beneficiaryPermId = Math.round(message.beneficiaryPermId);
+    if (!message.beneficiaryPermId.equals(Long.UZERO)) {
+      obj.beneficiaryPermId = (message.beneficiaryPermId || Long.UZERO).toString();
     }
-    if (message.walletAgentPermId !== 0) {
-      obj.walletAgentPermId = Math.round(message.walletAgentPermId);
+    if (!message.walletAgentPermId.equals(Long.UZERO)) {
+      obj.walletAgentPermId = (message.walletAgentPermId || Long.UZERO).toString();
     }
     return obj;
   },
@@ -1037,20 +1066,26 @@ export const SessionAuthz = {
   },
   fromPartial<I extends Exact<DeepPartial<SessionAuthz>, I>>(object: I): SessionAuthz {
     const message = createBaseSessionAuthz();
-    message.executorPermId = object.executorPermId ?? 0;
-    message.beneficiaryPermId = object.beneficiaryPermId ?? 0;
-    message.walletAgentPermId = object.walletAgentPermId ?? 0;
+    message.executorPermId = (object.executorPermId !== undefined && object.executorPermId !== null)
+      ? Long.fromValue(object.executorPermId)
+      : Long.UZERO;
+    message.beneficiaryPermId = (object.beneficiaryPermId !== undefined && object.beneficiaryPermId !== null)
+      ? Long.fromValue(object.beneficiaryPermId)
+      : Long.UZERO;
+    message.walletAgentPermId = (object.walletAgentPermId !== undefined && object.walletAgentPermId !== null)
+      ? Long.fromValue(object.walletAgentPermId)
+      : Long.UZERO;
     return message;
   },
 };
 
 function createBaseOptionalUInt64(): OptionalUInt64 {
-  return { value: 0 };
+  return { value: Long.UZERO };
 }
 
 export const OptionalUInt64 = {
   encode(message: OptionalUInt64, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.value !== 0) {
+    if (!message.value.equals(Long.UZERO)) {
       writer.uint32(8).uint64(message.value);
     }
     return writer;
@@ -1068,7 +1103,7 @@ export const OptionalUInt64 = {
             break;
           }
 
-          message.value = longToNumber(reader.uint64() as Long);
+          message.value = reader.uint64() as Long;
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -1080,13 +1115,13 @@ export const OptionalUInt64 = {
   },
 
   fromJSON(object: any): OptionalUInt64 {
-    return { value: isSet(object.value) ? globalThis.Number(object.value) : 0 };
+    return { value: isSet(object.value) ? Long.fromValue(object.value) : Long.UZERO };
   },
 
   toJSON(message: OptionalUInt64): unknown {
     const obj: any = {};
-    if (message.value !== 0) {
-      obj.value = Math.round(message.value);
+    if (!message.value.equals(Long.UZERO)) {
+      obj.value = (message.value || Long.UZERO).toString();
     }
     return obj;
   },
@@ -1096,7 +1131,7 @@ export const OptionalUInt64 = {
   },
   fromPartial<I extends Exact<DeepPartial<OptionalUInt64>, I>>(object: I): OptionalUInt64 {
     const message = createBaseOptionalUInt64();
-    message.value = object.value ?? 0;
+    message.value = (object.value !== undefined && object.value !== null) ? Long.fromValue(object.value) : Long.UZERO;
     return message;
   },
 };
@@ -1104,7 +1139,7 @@ export const OptionalUInt64 = {
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 
 export type DeepPartial<T> = T extends Builtin ? T
-  : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>>
+  : T extends Long ? string | number | Long : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>>
   : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
   : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
@@ -1114,13 +1149,13 @@ export type Exact<P, I extends P> = P extends Builtin ? P
   : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
 
 function toTimestamp(date: Date): Timestamp {
-  const seconds = Math.trunc(date.getTime() / 1_000);
+  const seconds = numberToLong(Math.trunc(date.getTime() / 1_000));
   const nanos = (date.getTime() % 1_000) * 1_000_000;
   return { seconds, nanos };
 }
 
 function fromTimestamp(t: Timestamp): Date {
-  let millis = (t.seconds || 0) * 1_000;
+  let millis = (t.seconds.toNumber() || 0) * 1_000;
   millis += (t.nanos || 0) / 1_000_000;
   return new globalThis.Date(millis);
 }
@@ -1135,14 +1170,8 @@ function fromJsonTimestamp(o: any): Date {
   }
 }
 
-function longToNumber(long: Long): number {
-  if (long.gt(globalThis.Number.MAX_SAFE_INTEGER)) {
-    throw new globalThis.Error("Value is larger than Number.MAX_SAFE_INTEGER");
-  }
-  if (long.lt(globalThis.Number.MIN_SAFE_INTEGER)) {
-    throw new globalThis.Error("Value is smaller than Number.MIN_SAFE_INTEGER");
-  }
-  return long.toNumber();
+function numberToLong(number: number) {
+  return Long.fromNumber(number);
 }
 
 if (_m0.util.Long !== Long) {

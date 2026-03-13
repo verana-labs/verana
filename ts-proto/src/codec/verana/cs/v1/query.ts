@@ -5,11 +5,11 @@
 // source: verana/cs/v1/query.proto
 
 /* eslint-disable */
-import * as _m0 from "protobufjs/minimal";
+import Long from "long";
+import _m0 from "protobufjs/minimal";
 import { Timestamp } from "../../../google/protobuf/timestamp";
 import { Params } from "./params";
 import { CredentialSchema } from "./types";
-import Long = require("long");
 
 export const protobufPackage = "verana.cs.v1";
 
@@ -20,13 +20,13 @@ export interface QueryParamsRequest {
 /** QueryParamsResponse is response type for the Query/Params RPC method. */
 export interface QueryParamsResponse {
   /** params holds all the parameters of this module. */
-  params: Params | undefined;
+  params?: Params | undefined;
 }
 
 export interface QueryListCredentialSchemasRequest {
   /** optional */
-  trId: number;
-  modifiedAfter: Date | undefined;
+  trId: Long;
+  modifiedAfter?: Date | undefined;
   responseMaxSize: number;
 }
 
@@ -35,15 +35,15 @@ export interface QueryListCredentialSchemasResponse {
 }
 
 export interface QueryGetCredentialSchemaRequest {
-  id: number;
+  id: Long;
 }
 
 export interface QueryGetCredentialSchemaResponse {
-  schema: CredentialSchema | undefined;
+  schema?: CredentialSchema | undefined;
 }
 
 export interface QueryRenderJsonSchemaRequest {
-  id: number;
+  id: Long;
 }
 
 export interface QueryRenderJsonSchemaResponse {
@@ -153,12 +153,12 @@ export const QueryParamsResponse = {
 };
 
 function createBaseQueryListCredentialSchemasRequest(): QueryListCredentialSchemasRequest {
-  return { trId: 0, modifiedAfter: undefined, responseMaxSize: 0 };
+  return { trId: Long.UZERO, modifiedAfter: undefined, responseMaxSize: 0 };
 }
 
 export const QueryListCredentialSchemasRequest = {
   encode(message: QueryListCredentialSchemasRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.trId !== 0) {
+    if (!message.trId.equals(Long.UZERO)) {
       writer.uint32(8).uint64(message.trId);
     }
     if (message.modifiedAfter !== undefined) {
@@ -182,7 +182,7 @@ export const QueryListCredentialSchemasRequest = {
             break;
           }
 
-          message.trId = longToNumber(reader.uint64() as Long);
+          message.trId = reader.uint64() as Long;
           continue;
         case 2:
           if (tag !== 18) {
@@ -209,7 +209,7 @@ export const QueryListCredentialSchemasRequest = {
 
   fromJSON(object: any): QueryListCredentialSchemasRequest {
     return {
-      trId: isSet(object.trId) ? globalThis.Number(object.trId) : 0,
+      trId: isSet(object.trId) ? Long.fromValue(object.trId) : Long.UZERO,
       modifiedAfter: isSet(object.modifiedAfter) ? fromJsonTimestamp(object.modifiedAfter) : undefined,
       responseMaxSize: isSet(object.responseMaxSize) ? globalThis.Number(object.responseMaxSize) : 0,
     };
@@ -217,8 +217,8 @@ export const QueryListCredentialSchemasRequest = {
 
   toJSON(message: QueryListCredentialSchemasRequest): unknown {
     const obj: any = {};
-    if (message.trId !== 0) {
-      obj.trId = Math.round(message.trId);
+    if (!message.trId.equals(Long.UZERO)) {
+      obj.trId = (message.trId || Long.UZERO).toString();
     }
     if (message.modifiedAfter !== undefined) {
       obj.modifiedAfter = message.modifiedAfter.toISOString();
@@ -238,7 +238,7 @@ export const QueryListCredentialSchemasRequest = {
     object: I,
   ): QueryListCredentialSchemasRequest {
     const message = createBaseQueryListCredentialSchemasRequest();
-    message.trId = object.trId ?? 0;
+    message.trId = (object.trId !== undefined && object.trId !== null) ? Long.fromValue(object.trId) : Long.UZERO;
     message.modifiedAfter = object.modifiedAfter ?? undefined;
     message.responseMaxSize = object.responseMaxSize ?? 0;
     return message;
@@ -311,12 +311,12 @@ export const QueryListCredentialSchemasResponse = {
 };
 
 function createBaseQueryGetCredentialSchemaRequest(): QueryGetCredentialSchemaRequest {
-  return { id: 0 };
+  return { id: Long.UZERO };
 }
 
 export const QueryGetCredentialSchemaRequest = {
   encode(message: QueryGetCredentialSchemaRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.id !== 0) {
+    if (!message.id.equals(Long.UZERO)) {
       writer.uint32(8).uint64(message.id);
     }
     return writer;
@@ -334,7 +334,7 @@ export const QueryGetCredentialSchemaRequest = {
             break;
           }
 
-          message.id = longToNumber(reader.uint64() as Long);
+          message.id = reader.uint64() as Long;
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -346,13 +346,13 @@ export const QueryGetCredentialSchemaRequest = {
   },
 
   fromJSON(object: any): QueryGetCredentialSchemaRequest {
-    return { id: isSet(object.id) ? globalThis.Number(object.id) : 0 };
+    return { id: isSet(object.id) ? Long.fromValue(object.id) : Long.UZERO };
   },
 
   toJSON(message: QueryGetCredentialSchemaRequest): unknown {
     const obj: any = {};
-    if (message.id !== 0) {
-      obj.id = Math.round(message.id);
+    if (!message.id.equals(Long.UZERO)) {
+      obj.id = (message.id || Long.UZERO).toString();
     }
     return obj;
   },
@@ -364,7 +364,7 @@ export const QueryGetCredentialSchemaRequest = {
     object: I,
   ): QueryGetCredentialSchemaRequest {
     const message = createBaseQueryGetCredentialSchemaRequest();
-    message.id = object.id ?? 0;
+    message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
     return message;
   },
 };
@@ -433,12 +433,12 @@ export const QueryGetCredentialSchemaResponse = {
 };
 
 function createBaseQueryRenderJsonSchemaRequest(): QueryRenderJsonSchemaRequest {
-  return { id: 0 };
+  return { id: Long.UZERO };
 }
 
 export const QueryRenderJsonSchemaRequest = {
   encode(message: QueryRenderJsonSchemaRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.id !== 0) {
+    if (!message.id.equals(Long.UZERO)) {
       writer.uint32(8).uint64(message.id);
     }
     return writer;
@@ -456,7 +456,7 @@ export const QueryRenderJsonSchemaRequest = {
             break;
           }
 
-          message.id = longToNumber(reader.uint64() as Long);
+          message.id = reader.uint64() as Long;
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -468,13 +468,13 @@ export const QueryRenderJsonSchemaRequest = {
   },
 
   fromJSON(object: any): QueryRenderJsonSchemaRequest {
-    return { id: isSet(object.id) ? globalThis.Number(object.id) : 0 };
+    return { id: isSet(object.id) ? Long.fromValue(object.id) : Long.UZERO };
   },
 
   toJSON(message: QueryRenderJsonSchemaRequest): unknown {
     const obj: any = {};
-    if (message.id !== 0) {
-      obj.id = Math.round(message.id);
+    if (!message.id.equals(Long.UZERO)) {
+      obj.id = (message.id || Long.UZERO).toString();
     }
     return obj;
   },
@@ -484,7 +484,7 @@ export const QueryRenderJsonSchemaRequest = {
   },
   fromPartial<I extends Exact<DeepPartial<QueryRenderJsonSchemaRequest>, I>>(object: I): QueryRenderJsonSchemaRequest {
     const message = createBaseQueryRenderJsonSchemaRequest();
-    message.id = object.id ?? 0;
+    message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
     return message;
   },
 };
@@ -604,7 +604,7 @@ interface Rpc {
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 
 export type DeepPartial<T> = T extends Builtin ? T
-  : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>>
+  : T extends Long ? string | number | Long : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>>
   : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
   : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
@@ -614,13 +614,13 @@ export type Exact<P, I extends P> = P extends Builtin ? P
   : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
 
 function toTimestamp(date: Date): Timestamp {
-  const seconds = Math.trunc(date.getTime() / 1_000);
+  const seconds = numberToLong(Math.trunc(date.getTime() / 1_000));
   const nanos = (date.getTime() % 1_000) * 1_000_000;
   return { seconds, nanos };
 }
 
 function fromTimestamp(t: Timestamp): Date {
-  let millis = (t.seconds || 0) * 1_000;
+  let millis = (t.seconds.toNumber() || 0) * 1_000;
   millis += (t.nanos || 0) / 1_000_000;
   return new globalThis.Date(millis);
 }
@@ -635,14 +635,8 @@ function fromJsonTimestamp(o: any): Date {
   }
 }
 
-function longToNumber(long: Long): number {
-  if (long.gt(globalThis.Number.MAX_SAFE_INTEGER)) {
-    throw new globalThis.Error("Value is larger than Number.MAX_SAFE_INTEGER");
-  }
-  if (long.lt(globalThis.Number.MIN_SAFE_INTEGER)) {
-    throw new globalThis.Error("Value is smaller than Number.MIN_SAFE_INTEGER");
-  }
-  return long.toNumber();
+function numberToLong(number: number) {
+  return Long.fromNumber(number);
 }
 
 if (_m0.util.Long !== Long) {

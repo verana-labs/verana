@@ -5,11 +5,11 @@
 // source: verana/perm/v1/tx.proto
 
 /* eslint-disable */
-import * as _m0 from "protobufjs/minimal";
+import Long from "long";
+import _m0 from "protobufjs/minimal";
 import { Timestamp } from "../../../google/protobuf/timestamp";
 import { Params } from "./params";
 import { OptionalUInt64, PermissionType, permissionTypeFromJSON, permissionTypeToJSON } from "./types";
-import Long = require("long");
 
 export const protobufPackage = "verana.perm.v1";
 
@@ -22,7 +22,7 @@ export interface MsgUpdateParams {
    *
    * NOTE: All parameters must be supplied.
    */
-  params: Params | undefined;
+  params?: Params | undefined;
 }
 
 /**
@@ -36,17 +36,17 @@ export interface MsgUpdateParamsResponse {
 export interface MsgStartPermissionVP {
   creator: string;
   type: PermissionType;
-  validatorPermId: number;
+  validatorPermId: Long;
   /** optional: Requested validation_fees for this permission (can be modified by validator) */
-  validationFees:
+  validationFees?:
     | OptionalUInt64
     | undefined;
   /** optional: Requested issuance_fees for this permission (can be modified by validator) */
-  issuanceFees:
+  issuanceFees?:
     | OptionalUInt64
     | undefined;
   /** optional: Requested verification_fees for this permission (can be modified by validator) */
-  verificationFees: OptionalUInt64 | undefined;
+  verificationFees?: OptionalUInt64 | undefined;
   country: string;
   /** optional */
   did: string;
@@ -54,14 +54,14 @@ export interface MsgStartPermissionVP {
 
 /** MsgStartPermissionVPResponse defines the Msg/StartPermissionVP response type */
 export interface MsgStartPermissionVPResponse {
-  permissionId: number;
+  permissionId: Long;
 }
 
 /** MsgRenewPermissionVP represents a message to renew a permission validation process */
 export interface MsgRenewPermissionVP {
   creator: string;
   /** ID of the permission to renew */
-  id: number;
+  id: Long;
 }
 
 /** MsgRenewPermissionVPResponse defines the Msg/RenewPermissionVP response type */
@@ -71,20 +71,20 @@ export interface MsgRenewPermissionVPResponse {
 /** MsgSetPermissionVPToValidated represents a message to set a permission validation process to validated state */
 export interface MsgSetPermissionVPToValidated {
   creator: string;
-  id: number;
-  effectiveUntil: Date | undefined;
-  validationFees: number;
-  issuanceFees: number;
-  verificationFees: number;
+  id: Long;
+  effectiveUntil?: Date | undefined;
+  validationFees: Long;
+  issuanceFees: Long;
+  verificationFees: Long;
   country: string;
   vpSummaryDigestSri: string;
   /**
    * Fee discount fields (scaled: 0 = 0.0, 10000 = 1.0, range 0-10000)
    * Default to 0 (no discount), maximum 10000 (100% discount)
    */
-  issuanceFeeDiscount: number;
+  issuanceFeeDiscount: Long;
   /** Verification fee discount (mandatory, default 0) */
-  verificationFeeDiscount: number;
+  verificationFeeDiscount: Long;
 }
 
 /** MsgSetPermissionVPToValidatedResponse defines the Msg/SetPermissionVPToValidated response type */
@@ -94,7 +94,7 @@ export interface MsgSetPermissionVPToValidatedResponse {
 export interface MsgCancelPermissionVPLastRequest {
   creator: string;
   /** Permission ID */
-  id: number;
+  id: Long;
 }
 
 export interface MsgCancelPermissionVPLastRequestResponse {
@@ -102,26 +102,26 @@ export interface MsgCancelPermissionVPLastRequestResponse {
 
 export interface MsgCreateRootPermission {
   creator: string;
-  schemaId: number;
+  schemaId: Long;
   did: string;
   country: string;
-  effectiveFrom: Date | undefined;
-  effectiveUntil: Date | undefined;
-  validationFees: number;
-  issuanceFees: number;
-  verificationFees: number;
+  effectiveFrom?: Date | undefined;
+  effectiveUntil?: Date | undefined;
+  validationFees: Long;
+  issuanceFees: Long;
+  verificationFees: Long;
 }
 
 export interface MsgCreateRootPermissionResponse {
   /** ID of the created permission */
-  id: number;
+  id: Long;
 }
 
 export interface MsgExtendPermission {
   creator: string;
   /** Permission ID */
-  id: number;
-  effectiveUntil: Date | undefined;
+  id: Long;
+  effectiveUntil?: Date | undefined;
 }
 
 export interface MsgExtendPermissionResponse {
@@ -130,7 +130,7 @@ export interface MsgExtendPermissionResponse {
 export interface MsgRevokePermission {
   creator: string;
   /** Permission ID */
-  id: number;
+  id: Long;
 }
 
 export interface MsgRevokePermissionResponse {
@@ -140,10 +140,10 @@ export interface MsgCreateOrUpdatePermissionSession {
   creator: string;
   /** UUID */
   id: string;
-  issuerPermId: number;
-  verifierPermId: number;
-  agentPermId: number;
-  walletAgentPermId: number;
+  issuerPermId: Long;
+  verifierPermId: Long;
+  agentPermId: Long;
+  walletAgentPermId: Long;
 }
 
 export interface MsgCreateOrUpdatePermissionSessionResponse {
@@ -152,8 +152,8 @@ export interface MsgCreateOrUpdatePermissionSessionResponse {
 
 export interface MsgSlashPermissionTrustDeposit {
   creator: string;
-  id: number;
-  amount: number;
+  id: Long;
+  amount: Long;
 }
 
 export interface MsgSlashPermissionTrustDepositResponse {
@@ -161,7 +161,7 @@ export interface MsgSlashPermissionTrustDepositResponse {
 
 export interface MsgRepayPermissionSlashedTrustDeposit {
   creator: string;
-  id: number;
+  id: Long;
 }
 
 export interface MsgRepayPermissionSlashedTrustDepositResponse {
@@ -169,18 +169,18 @@ export interface MsgRepayPermissionSlashedTrustDepositResponse {
 
 export interface MsgCreatePermission {
   creator: string;
-  schemaId: number;
+  schemaId: Long;
   type: PermissionType;
   did: string;
   country: string;
-  effectiveFrom: Date | undefined;
-  effectiveUntil: Date | undefined;
-  verificationFees: number;
-  validationFees: number;
+  effectiveFrom?: Date | undefined;
+  effectiveUntil?: Date | undefined;
+  verificationFees: Long;
+  validationFees: Long;
 }
 
 export interface MsgCreatePermissionResponse {
-  id: number;
+  id: Long;
 }
 
 function createBaseMsgUpdateParams(): MsgUpdateParams {
@@ -306,7 +306,7 @@ function createBaseMsgStartPermissionVP(): MsgStartPermissionVP {
   return {
     creator: "",
     type: 0,
-    validatorPermId: 0,
+    validatorPermId: Long.UZERO,
     validationFees: undefined,
     issuanceFees: undefined,
     verificationFees: undefined,
@@ -323,7 +323,7 @@ export const MsgStartPermissionVP = {
     if (message.type !== 0) {
       writer.uint32(16).int32(message.type);
     }
-    if (message.validatorPermId !== 0) {
+    if (!message.validatorPermId.equals(Long.UZERO)) {
       writer.uint32(24).uint64(message.validatorPermId);
     }
     if (message.validationFees !== undefined) {
@@ -370,7 +370,7 @@ export const MsgStartPermissionVP = {
             break;
           }
 
-          message.validatorPermId = longToNumber(reader.uint64() as Long);
+          message.validatorPermId = reader.uint64() as Long;
           continue;
         case 6:
           if (tag !== 50) {
@@ -420,7 +420,7 @@ export const MsgStartPermissionVP = {
     return {
       creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
       type: isSet(object.type) ? permissionTypeFromJSON(object.type) : 0,
-      validatorPermId: isSet(object.validatorPermId) ? globalThis.Number(object.validatorPermId) : 0,
+      validatorPermId: isSet(object.validatorPermId) ? Long.fromValue(object.validatorPermId) : Long.UZERO,
       validationFees: isSet(object.validationFees) ? OptionalUInt64.fromJSON(object.validationFees) : undefined,
       issuanceFees: isSet(object.issuanceFees) ? OptionalUInt64.fromJSON(object.issuanceFees) : undefined,
       verificationFees: isSet(object.verificationFees) ? OptionalUInt64.fromJSON(object.verificationFees) : undefined,
@@ -437,8 +437,8 @@ export const MsgStartPermissionVP = {
     if (message.type !== 0) {
       obj.type = permissionTypeToJSON(message.type);
     }
-    if (message.validatorPermId !== 0) {
-      obj.validatorPermId = Math.round(message.validatorPermId);
+    if (!message.validatorPermId.equals(Long.UZERO)) {
+      obj.validatorPermId = (message.validatorPermId || Long.UZERO).toString();
     }
     if (message.validationFees !== undefined) {
       obj.validationFees = OptionalUInt64.toJSON(message.validationFees);
@@ -465,7 +465,9 @@ export const MsgStartPermissionVP = {
     const message = createBaseMsgStartPermissionVP();
     message.creator = object.creator ?? "";
     message.type = object.type ?? 0;
-    message.validatorPermId = object.validatorPermId ?? 0;
+    message.validatorPermId = (object.validatorPermId !== undefined && object.validatorPermId !== null)
+      ? Long.fromValue(object.validatorPermId)
+      : Long.UZERO;
     message.validationFees = (object.validationFees !== undefined && object.validationFees !== null)
       ? OptionalUInt64.fromPartial(object.validationFees)
       : undefined;
@@ -482,12 +484,12 @@ export const MsgStartPermissionVP = {
 };
 
 function createBaseMsgStartPermissionVPResponse(): MsgStartPermissionVPResponse {
-  return { permissionId: 0 };
+  return { permissionId: Long.UZERO };
 }
 
 export const MsgStartPermissionVPResponse = {
   encode(message: MsgStartPermissionVPResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.permissionId !== 0) {
+    if (!message.permissionId.equals(Long.UZERO)) {
       writer.uint32(8).uint64(message.permissionId);
     }
     return writer;
@@ -505,7 +507,7 @@ export const MsgStartPermissionVPResponse = {
             break;
           }
 
-          message.permissionId = longToNumber(reader.uint64() as Long);
+          message.permissionId = reader.uint64() as Long;
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -517,13 +519,13 @@ export const MsgStartPermissionVPResponse = {
   },
 
   fromJSON(object: any): MsgStartPermissionVPResponse {
-    return { permissionId: isSet(object.permissionId) ? globalThis.Number(object.permissionId) : 0 };
+    return { permissionId: isSet(object.permissionId) ? Long.fromValue(object.permissionId) : Long.UZERO };
   },
 
   toJSON(message: MsgStartPermissionVPResponse): unknown {
     const obj: any = {};
-    if (message.permissionId !== 0) {
-      obj.permissionId = Math.round(message.permissionId);
+    if (!message.permissionId.equals(Long.UZERO)) {
+      obj.permissionId = (message.permissionId || Long.UZERO).toString();
     }
     return obj;
   },
@@ -533,13 +535,15 @@ export const MsgStartPermissionVPResponse = {
   },
   fromPartial<I extends Exact<DeepPartial<MsgStartPermissionVPResponse>, I>>(object: I): MsgStartPermissionVPResponse {
     const message = createBaseMsgStartPermissionVPResponse();
-    message.permissionId = object.permissionId ?? 0;
+    message.permissionId = (object.permissionId !== undefined && object.permissionId !== null)
+      ? Long.fromValue(object.permissionId)
+      : Long.UZERO;
     return message;
   },
 };
 
 function createBaseMsgRenewPermissionVP(): MsgRenewPermissionVP {
-  return { creator: "", id: 0 };
+  return { creator: "", id: Long.UZERO };
 }
 
 export const MsgRenewPermissionVP = {
@@ -547,7 +551,7 @@ export const MsgRenewPermissionVP = {
     if (message.creator !== "") {
       writer.uint32(10).string(message.creator);
     }
-    if (message.id !== 0) {
+    if (!message.id.equals(Long.UZERO)) {
       writer.uint32(16).uint64(message.id);
     }
     return writer;
@@ -572,7 +576,7 @@ export const MsgRenewPermissionVP = {
             break;
           }
 
-          message.id = longToNumber(reader.uint64() as Long);
+          message.id = reader.uint64() as Long;
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -586,7 +590,7 @@ export const MsgRenewPermissionVP = {
   fromJSON(object: any): MsgRenewPermissionVP {
     return {
       creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
-      id: isSet(object.id) ? globalThis.Number(object.id) : 0,
+      id: isSet(object.id) ? Long.fromValue(object.id) : Long.UZERO,
     };
   },
 
@@ -595,8 +599,8 @@ export const MsgRenewPermissionVP = {
     if (message.creator !== "") {
       obj.creator = message.creator;
     }
-    if (message.id !== 0) {
-      obj.id = Math.round(message.id);
+    if (!message.id.equals(Long.UZERO)) {
+      obj.id = (message.id || Long.UZERO).toString();
     }
     return obj;
   },
@@ -607,7 +611,7 @@ export const MsgRenewPermissionVP = {
   fromPartial<I extends Exact<DeepPartial<MsgRenewPermissionVP>, I>>(object: I): MsgRenewPermissionVP {
     const message = createBaseMsgRenewPermissionVP();
     message.creator = object.creator ?? "";
-    message.id = object.id ?? 0;
+    message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
     return message;
   },
 };
@@ -658,15 +662,15 @@ export const MsgRenewPermissionVPResponse = {
 function createBaseMsgSetPermissionVPToValidated(): MsgSetPermissionVPToValidated {
   return {
     creator: "",
-    id: 0,
+    id: Long.UZERO,
     effectiveUntil: undefined,
-    validationFees: 0,
-    issuanceFees: 0,
-    verificationFees: 0,
+    validationFees: Long.UZERO,
+    issuanceFees: Long.UZERO,
+    verificationFees: Long.UZERO,
     country: "",
     vpSummaryDigestSri: "",
-    issuanceFeeDiscount: 0,
-    verificationFeeDiscount: 0,
+    issuanceFeeDiscount: Long.UZERO,
+    verificationFeeDiscount: Long.UZERO,
   };
 }
 
@@ -675,19 +679,19 @@ export const MsgSetPermissionVPToValidated = {
     if (message.creator !== "") {
       writer.uint32(10).string(message.creator);
     }
-    if (message.id !== 0) {
+    if (!message.id.equals(Long.UZERO)) {
       writer.uint32(16).uint64(message.id);
     }
     if (message.effectiveUntil !== undefined) {
       Timestamp.encode(toTimestamp(message.effectiveUntil), writer.uint32(26).fork()).ldelim();
     }
-    if (message.validationFees !== 0) {
+    if (!message.validationFees.equals(Long.UZERO)) {
       writer.uint32(32).uint64(message.validationFees);
     }
-    if (message.issuanceFees !== 0) {
+    if (!message.issuanceFees.equals(Long.UZERO)) {
       writer.uint32(40).uint64(message.issuanceFees);
     }
-    if (message.verificationFees !== 0) {
+    if (!message.verificationFees.equals(Long.UZERO)) {
       writer.uint32(48).uint64(message.verificationFees);
     }
     if (message.country !== "") {
@@ -696,10 +700,10 @@ export const MsgSetPermissionVPToValidated = {
     if (message.vpSummaryDigestSri !== "") {
       writer.uint32(66).string(message.vpSummaryDigestSri);
     }
-    if (message.issuanceFeeDiscount !== 0) {
+    if (!message.issuanceFeeDiscount.equals(Long.UZERO)) {
       writer.uint32(72).uint64(message.issuanceFeeDiscount);
     }
-    if (message.verificationFeeDiscount !== 0) {
+    if (!message.verificationFeeDiscount.equals(Long.UZERO)) {
       writer.uint32(80).uint64(message.verificationFeeDiscount);
     }
     return writer;
@@ -724,7 +728,7 @@ export const MsgSetPermissionVPToValidated = {
             break;
           }
 
-          message.id = longToNumber(reader.uint64() as Long);
+          message.id = reader.uint64() as Long;
           continue;
         case 3:
           if (tag !== 26) {
@@ -738,21 +742,21 @@ export const MsgSetPermissionVPToValidated = {
             break;
           }
 
-          message.validationFees = longToNumber(reader.uint64() as Long);
+          message.validationFees = reader.uint64() as Long;
           continue;
         case 5:
           if (tag !== 40) {
             break;
           }
 
-          message.issuanceFees = longToNumber(reader.uint64() as Long);
+          message.issuanceFees = reader.uint64() as Long;
           continue;
         case 6:
           if (tag !== 48) {
             break;
           }
 
-          message.verificationFees = longToNumber(reader.uint64() as Long);
+          message.verificationFees = reader.uint64() as Long;
           continue;
         case 7:
           if (tag !== 58) {
@@ -773,14 +777,14 @@ export const MsgSetPermissionVPToValidated = {
             break;
           }
 
-          message.issuanceFeeDiscount = longToNumber(reader.uint64() as Long);
+          message.issuanceFeeDiscount = reader.uint64() as Long;
           continue;
         case 10:
           if (tag !== 80) {
             break;
           }
 
-          message.verificationFeeDiscount = longToNumber(reader.uint64() as Long);
+          message.verificationFeeDiscount = reader.uint64() as Long;
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -794,17 +798,17 @@ export const MsgSetPermissionVPToValidated = {
   fromJSON(object: any): MsgSetPermissionVPToValidated {
     return {
       creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
-      id: isSet(object.id) ? globalThis.Number(object.id) : 0,
+      id: isSet(object.id) ? Long.fromValue(object.id) : Long.UZERO,
       effectiveUntil: isSet(object.effectiveUntil) ? fromJsonTimestamp(object.effectiveUntil) : undefined,
-      validationFees: isSet(object.validationFees) ? globalThis.Number(object.validationFees) : 0,
-      issuanceFees: isSet(object.issuanceFees) ? globalThis.Number(object.issuanceFees) : 0,
-      verificationFees: isSet(object.verificationFees) ? globalThis.Number(object.verificationFees) : 0,
+      validationFees: isSet(object.validationFees) ? Long.fromValue(object.validationFees) : Long.UZERO,
+      issuanceFees: isSet(object.issuanceFees) ? Long.fromValue(object.issuanceFees) : Long.UZERO,
+      verificationFees: isSet(object.verificationFees) ? Long.fromValue(object.verificationFees) : Long.UZERO,
       country: isSet(object.country) ? globalThis.String(object.country) : "",
       vpSummaryDigestSri: isSet(object.vpSummaryDigestSri) ? globalThis.String(object.vpSummaryDigestSri) : "",
-      issuanceFeeDiscount: isSet(object.issuanceFeeDiscount) ? globalThis.Number(object.issuanceFeeDiscount) : 0,
+      issuanceFeeDiscount: isSet(object.issuanceFeeDiscount) ? Long.fromValue(object.issuanceFeeDiscount) : Long.UZERO,
       verificationFeeDiscount: isSet(object.verificationFeeDiscount)
-        ? globalThis.Number(object.verificationFeeDiscount)
-        : 0,
+        ? Long.fromValue(object.verificationFeeDiscount)
+        : Long.UZERO,
     };
   },
 
@@ -813,20 +817,20 @@ export const MsgSetPermissionVPToValidated = {
     if (message.creator !== "") {
       obj.creator = message.creator;
     }
-    if (message.id !== 0) {
-      obj.id = Math.round(message.id);
+    if (!message.id.equals(Long.UZERO)) {
+      obj.id = (message.id || Long.UZERO).toString();
     }
     if (message.effectiveUntil !== undefined) {
       obj.effectiveUntil = message.effectiveUntil.toISOString();
     }
-    if (message.validationFees !== 0) {
-      obj.validationFees = Math.round(message.validationFees);
+    if (!message.validationFees.equals(Long.UZERO)) {
+      obj.validationFees = (message.validationFees || Long.UZERO).toString();
     }
-    if (message.issuanceFees !== 0) {
-      obj.issuanceFees = Math.round(message.issuanceFees);
+    if (!message.issuanceFees.equals(Long.UZERO)) {
+      obj.issuanceFees = (message.issuanceFees || Long.UZERO).toString();
     }
-    if (message.verificationFees !== 0) {
-      obj.verificationFees = Math.round(message.verificationFees);
+    if (!message.verificationFees.equals(Long.UZERO)) {
+      obj.verificationFees = (message.verificationFees || Long.UZERO).toString();
     }
     if (message.country !== "") {
       obj.country = message.country;
@@ -834,11 +838,11 @@ export const MsgSetPermissionVPToValidated = {
     if (message.vpSummaryDigestSri !== "") {
       obj.vpSummaryDigestSri = message.vpSummaryDigestSri;
     }
-    if (message.issuanceFeeDiscount !== 0) {
-      obj.issuanceFeeDiscount = Math.round(message.issuanceFeeDiscount);
+    if (!message.issuanceFeeDiscount.equals(Long.UZERO)) {
+      obj.issuanceFeeDiscount = (message.issuanceFeeDiscount || Long.UZERO).toString();
     }
-    if (message.verificationFeeDiscount !== 0) {
-      obj.verificationFeeDiscount = Math.round(message.verificationFeeDiscount);
+    if (!message.verificationFeeDiscount.equals(Long.UZERO)) {
+      obj.verificationFeeDiscount = (message.verificationFeeDiscount || Long.UZERO).toString();
     }
     return obj;
   },
@@ -851,15 +855,26 @@ export const MsgSetPermissionVPToValidated = {
   ): MsgSetPermissionVPToValidated {
     const message = createBaseMsgSetPermissionVPToValidated();
     message.creator = object.creator ?? "";
-    message.id = object.id ?? 0;
+    message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
     message.effectiveUntil = object.effectiveUntil ?? undefined;
-    message.validationFees = object.validationFees ?? 0;
-    message.issuanceFees = object.issuanceFees ?? 0;
-    message.verificationFees = object.verificationFees ?? 0;
+    message.validationFees = (object.validationFees !== undefined && object.validationFees !== null)
+      ? Long.fromValue(object.validationFees)
+      : Long.UZERO;
+    message.issuanceFees = (object.issuanceFees !== undefined && object.issuanceFees !== null)
+      ? Long.fromValue(object.issuanceFees)
+      : Long.UZERO;
+    message.verificationFees = (object.verificationFees !== undefined && object.verificationFees !== null)
+      ? Long.fromValue(object.verificationFees)
+      : Long.UZERO;
     message.country = object.country ?? "";
     message.vpSummaryDigestSri = object.vpSummaryDigestSri ?? "";
-    message.issuanceFeeDiscount = object.issuanceFeeDiscount ?? 0;
-    message.verificationFeeDiscount = object.verificationFeeDiscount ?? 0;
+    message.issuanceFeeDiscount = (object.issuanceFeeDiscount !== undefined && object.issuanceFeeDiscount !== null)
+      ? Long.fromValue(object.issuanceFeeDiscount)
+      : Long.UZERO;
+    message.verificationFeeDiscount =
+      (object.verificationFeeDiscount !== undefined && object.verificationFeeDiscount !== null)
+        ? Long.fromValue(object.verificationFeeDiscount)
+        : Long.UZERO;
     return message;
   },
 };
@@ -912,7 +927,7 @@ export const MsgSetPermissionVPToValidatedResponse = {
 };
 
 function createBaseMsgCancelPermissionVPLastRequest(): MsgCancelPermissionVPLastRequest {
-  return { creator: "", id: 0 };
+  return { creator: "", id: Long.UZERO };
 }
 
 export const MsgCancelPermissionVPLastRequest = {
@@ -920,7 +935,7 @@ export const MsgCancelPermissionVPLastRequest = {
     if (message.creator !== "") {
       writer.uint32(10).string(message.creator);
     }
-    if (message.id !== 0) {
+    if (!message.id.equals(Long.UZERO)) {
       writer.uint32(16).uint64(message.id);
     }
     return writer;
@@ -945,7 +960,7 @@ export const MsgCancelPermissionVPLastRequest = {
             break;
           }
 
-          message.id = longToNumber(reader.uint64() as Long);
+          message.id = reader.uint64() as Long;
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -959,7 +974,7 @@ export const MsgCancelPermissionVPLastRequest = {
   fromJSON(object: any): MsgCancelPermissionVPLastRequest {
     return {
       creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
-      id: isSet(object.id) ? globalThis.Number(object.id) : 0,
+      id: isSet(object.id) ? Long.fromValue(object.id) : Long.UZERO,
     };
   },
 
@@ -968,8 +983,8 @@ export const MsgCancelPermissionVPLastRequest = {
     if (message.creator !== "") {
       obj.creator = message.creator;
     }
-    if (message.id !== 0) {
-      obj.id = Math.round(message.id);
+    if (!message.id.equals(Long.UZERO)) {
+      obj.id = (message.id || Long.UZERO).toString();
     }
     return obj;
   },
@@ -984,7 +999,7 @@ export const MsgCancelPermissionVPLastRequest = {
   ): MsgCancelPermissionVPLastRequest {
     const message = createBaseMsgCancelPermissionVPLastRequest();
     message.creator = object.creator ?? "";
-    message.id = object.id ?? 0;
+    message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
     return message;
   },
 };
@@ -1039,14 +1054,14 @@ export const MsgCancelPermissionVPLastRequestResponse = {
 function createBaseMsgCreateRootPermission(): MsgCreateRootPermission {
   return {
     creator: "",
-    schemaId: 0,
+    schemaId: Long.UZERO,
     did: "",
     country: "",
     effectiveFrom: undefined,
     effectiveUntil: undefined,
-    validationFees: 0,
-    issuanceFees: 0,
-    verificationFees: 0,
+    validationFees: Long.UZERO,
+    issuanceFees: Long.UZERO,
+    verificationFees: Long.UZERO,
   };
 }
 
@@ -1055,7 +1070,7 @@ export const MsgCreateRootPermission = {
     if (message.creator !== "") {
       writer.uint32(10).string(message.creator);
     }
-    if (message.schemaId !== 0) {
+    if (!message.schemaId.equals(Long.UZERO)) {
       writer.uint32(16).uint64(message.schemaId);
     }
     if (message.did !== "") {
@@ -1070,13 +1085,13 @@ export const MsgCreateRootPermission = {
     if (message.effectiveUntil !== undefined) {
       Timestamp.encode(toTimestamp(message.effectiveUntil), writer.uint32(50).fork()).ldelim();
     }
-    if (message.validationFees !== 0) {
+    if (!message.validationFees.equals(Long.UZERO)) {
       writer.uint32(56).uint64(message.validationFees);
     }
-    if (message.issuanceFees !== 0) {
+    if (!message.issuanceFees.equals(Long.UZERO)) {
       writer.uint32(64).uint64(message.issuanceFees);
     }
-    if (message.verificationFees !== 0) {
+    if (!message.verificationFees.equals(Long.UZERO)) {
       writer.uint32(72).uint64(message.verificationFees);
     }
     return writer;
@@ -1101,7 +1116,7 @@ export const MsgCreateRootPermission = {
             break;
           }
 
-          message.schemaId = longToNumber(reader.uint64() as Long);
+          message.schemaId = reader.uint64() as Long;
           continue;
         case 3:
           if (tag !== 26) {
@@ -1136,21 +1151,21 @@ export const MsgCreateRootPermission = {
             break;
           }
 
-          message.validationFees = longToNumber(reader.uint64() as Long);
+          message.validationFees = reader.uint64() as Long;
           continue;
         case 8:
           if (tag !== 64) {
             break;
           }
 
-          message.issuanceFees = longToNumber(reader.uint64() as Long);
+          message.issuanceFees = reader.uint64() as Long;
           continue;
         case 9:
           if (tag !== 72) {
             break;
           }
 
-          message.verificationFees = longToNumber(reader.uint64() as Long);
+          message.verificationFees = reader.uint64() as Long;
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -1164,14 +1179,14 @@ export const MsgCreateRootPermission = {
   fromJSON(object: any): MsgCreateRootPermission {
     return {
       creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
-      schemaId: isSet(object.schemaId) ? globalThis.Number(object.schemaId) : 0,
+      schemaId: isSet(object.schemaId) ? Long.fromValue(object.schemaId) : Long.UZERO,
       did: isSet(object.did) ? globalThis.String(object.did) : "",
       country: isSet(object.country) ? globalThis.String(object.country) : "",
       effectiveFrom: isSet(object.effectiveFrom) ? fromJsonTimestamp(object.effectiveFrom) : undefined,
       effectiveUntil: isSet(object.effectiveUntil) ? fromJsonTimestamp(object.effectiveUntil) : undefined,
-      validationFees: isSet(object.validationFees) ? globalThis.Number(object.validationFees) : 0,
-      issuanceFees: isSet(object.issuanceFees) ? globalThis.Number(object.issuanceFees) : 0,
-      verificationFees: isSet(object.verificationFees) ? globalThis.Number(object.verificationFees) : 0,
+      validationFees: isSet(object.validationFees) ? Long.fromValue(object.validationFees) : Long.UZERO,
+      issuanceFees: isSet(object.issuanceFees) ? Long.fromValue(object.issuanceFees) : Long.UZERO,
+      verificationFees: isSet(object.verificationFees) ? Long.fromValue(object.verificationFees) : Long.UZERO,
     };
   },
 
@@ -1180,8 +1195,8 @@ export const MsgCreateRootPermission = {
     if (message.creator !== "") {
       obj.creator = message.creator;
     }
-    if (message.schemaId !== 0) {
-      obj.schemaId = Math.round(message.schemaId);
+    if (!message.schemaId.equals(Long.UZERO)) {
+      obj.schemaId = (message.schemaId || Long.UZERO).toString();
     }
     if (message.did !== "") {
       obj.did = message.did;
@@ -1195,14 +1210,14 @@ export const MsgCreateRootPermission = {
     if (message.effectiveUntil !== undefined) {
       obj.effectiveUntil = message.effectiveUntil.toISOString();
     }
-    if (message.validationFees !== 0) {
-      obj.validationFees = Math.round(message.validationFees);
+    if (!message.validationFees.equals(Long.UZERO)) {
+      obj.validationFees = (message.validationFees || Long.UZERO).toString();
     }
-    if (message.issuanceFees !== 0) {
-      obj.issuanceFees = Math.round(message.issuanceFees);
+    if (!message.issuanceFees.equals(Long.UZERO)) {
+      obj.issuanceFees = (message.issuanceFees || Long.UZERO).toString();
     }
-    if (message.verificationFees !== 0) {
-      obj.verificationFees = Math.round(message.verificationFees);
+    if (!message.verificationFees.equals(Long.UZERO)) {
+      obj.verificationFees = (message.verificationFees || Long.UZERO).toString();
     }
     return obj;
   },
@@ -1213,25 +1228,33 @@ export const MsgCreateRootPermission = {
   fromPartial<I extends Exact<DeepPartial<MsgCreateRootPermission>, I>>(object: I): MsgCreateRootPermission {
     const message = createBaseMsgCreateRootPermission();
     message.creator = object.creator ?? "";
-    message.schemaId = object.schemaId ?? 0;
+    message.schemaId = (object.schemaId !== undefined && object.schemaId !== null)
+      ? Long.fromValue(object.schemaId)
+      : Long.UZERO;
     message.did = object.did ?? "";
     message.country = object.country ?? "";
     message.effectiveFrom = object.effectiveFrom ?? undefined;
     message.effectiveUntil = object.effectiveUntil ?? undefined;
-    message.validationFees = object.validationFees ?? 0;
-    message.issuanceFees = object.issuanceFees ?? 0;
-    message.verificationFees = object.verificationFees ?? 0;
+    message.validationFees = (object.validationFees !== undefined && object.validationFees !== null)
+      ? Long.fromValue(object.validationFees)
+      : Long.UZERO;
+    message.issuanceFees = (object.issuanceFees !== undefined && object.issuanceFees !== null)
+      ? Long.fromValue(object.issuanceFees)
+      : Long.UZERO;
+    message.verificationFees = (object.verificationFees !== undefined && object.verificationFees !== null)
+      ? Long.fromValue(object.verificationFees)
+      : Long.UZERO;
     return message;
   },
 };
 
 function createBaseMsgCreateRootPermissionResponse(): MsgCreateRootPermissionResponse {
-  return { id: 0 };
+  return { id: Long.UZERO };
 }
 
 export const MsgCreateRootPermissionResponse = {
   encode(message: MsgCreateRootPermissionResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.id !== 0) {
+    if (!message.id.equals(Long.UZERO)) {
       writer.uint32(8).uint64(message.id);
     }
     return writer;
@@ -1249,7 +1272,7 @@ export const MsgCreateRootPermissionResponse = {
             break;
           }
 
-          message.id = longToNumber(reader.uint64() as Long);
+          message.id = reader.uint64() as Long;
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -1261,13 +1284,13 @@ export const MsgCreateRootPermissionResponse = {
   },
 
   fromJSON(object: any): MsgCreateRootPermissionResponse {
-    return { id: isSet(object.id) ? globalThis.Number(object.id) : 0 };
+    return { id: isSet(object.id) ? Long.fromValue(object.id) : Long.UZERO };
   },
 
   toJSON(message: MsgCreateRootPermissionResponse): unknown {
     const obj: any = {};
-    if (message.id !== 0) {
-      obj.id = Math.round(message.id);
+    if (!message.id.equals(Long.UZERO)) {
+      obj.id = (message.id || Long.UZERO).toString();
     }
     return obj;
   },
@@ -1279,13 +1302,13 @@ export const MsgCreateRootPermissionResponse = {
     object: I,
   ): MsgCreateRootPermissionResponse {
     const message = createBaseMsgCreateRootPermissionResponse();
-    message.id = object.id ?? 0;
+    message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
     return message;
   },
 };
 
 function createBaseMsgExtendPermission(): MsgExtendPermission {
-  return { creator: "", id: 0, effectiveUntil: undefined };
+  return { creator: "", id: Long.UZERO, effectiveUntil: undefined };
 }
 
 export const MsgExtendPermission = {
@@ -1293,7 +1316,7 @@ export const MsgExtendPermission = {
     if (message.creator !== "") {
       writer.uint32(10).string(message.creator);
     }
-    if (message.id !== 0) {
+    if (!message.id.equals(Long.UZERO)) {
       writer.uint32(16).uint64(message.id);
     }
     if (message.effectiveUntil !== undefined) {
@@ -1321,7 +1344,7 @@ export const MsgExtendPermission = {
             break;
           }
 
-          message.id = longToNumber(reader.uint64() as Long);
+          message.id = reader.uint64() as Long;
           continue;
         case 3:
           if (tag !== 26) {
@@ -1342,7 +1365,7 @@ export const MsgExtendPermission = {
   fromJSON(object: any): MsgExtendPermission {
     return {
       creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
-      id: isSet(object.id) ? globalThis.Number(object.id) : 0,
+      id: isSet(object.id) ? Long.fromValue(object.id) : Long.UZERO,
       effectiveUntil: isSet(object.effectiveUntil) ? fromJsonTimestamp(object.effectiveUntil) : undefined,
     };
   },
@@ -1352,8 +1375,8 @@ export const MsgExtendPermission = {
     if (message.creator !== "") {
       obj.creator = message.creator;
     }
-    if (message.id !== 0) {
-      obj.id = Math.round(message.id);
+    if (!message.id.equals(Long.UZERO)) {
+      obj.id = (message.id || Long.UZERO).toString();
     }
     if (message.effectiveUntil !== undefined) {
       obj.effectiveUntil = message.effectiveUntil.toISOString();
@@ -1367,7 +1390,7 @@ export const MsgExtendPermission = {
   fromPartial<I extends Exact<DeepPartial<MsgExtendPermission>, I>>(object: I): MsgExtendPermission {
     const message = createBaseMsgExtendPermission();
     message.creator = object.creator ?? "";
-    message.id = object.id ?? 0;
+    message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
     message.effectiveUntil = object.effectiveUntil ?? undefined;
     return message;
   },
@@ -1417,7 +1440,7 @@ export const MsgExtendPermissionResponse = {
 };
 
 function createBaseMsgRevokePermission(): MsgRevokePermission {
-  return { creator: "", id: 0 };
+  return { creator: "", id: Long.UZERO };
 }
 
 export const MsgRevokePermission = {
@@ -1425,7 +1448,7 @@ export const MsgRevokePermission = {
     if (message.creator !== "") {
       writer.uint32(10).string(message.creator);
     }
-    if (message.id !== 0) {
+    if (!message.id.equals(Long.UZERO)) {
       writer.uint32(16).uint64(message.id);
     }
     return writer;
@@ -1450,7 +1473,7 @@ export const MsgRevokePermission = {
             break;
           }
 
-          message.id = longToNumber(reader.uint64() as Long);
+          message.id = reader.uint64() as Long;
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -1464,7 +1487,7 @@ export const MsgRevokePermission = {
   fromJSON(object: any): MsgRevokePermission {
     return {
       creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
-      id: isSet(object.id) ? globalThis.Number(object.id) : 0,
+      id: isSet(object.id) ? Long.fromValue(object.id) : Long.UZERO,
     };
   },
 
@@ -1473,8 +1496,8 @@ export const MsgRevokePermission = {
     if (message.creator !== "") {
       obj.creator = message.creator;
     }
-    if (message.id !== 0) {
-      obj.id = Math.round(message.id);
+    if (!message.id.equals(Long.UZERO)) {
+      obj.id = (message.id || Long.UZERO).toString();
     }
     return obj;
   },
@@ -1485,7 +1508,7 @@ export const MsgRevokePermission = {
   fromPartial<I extends Exact<DeepPartial<MsgRevokePermission>, I>>(object: I): MsgRevokePermission {
     const message = createBaseMsgRevokePermission();
     message.creator = object.creator ?? "";
-    message.id = object.id ?? 0;
+    message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
     return message;
   },
 };
@@ -1534,7 +1557,14 @@ export const MsgRevokePermissionResponse = {
 };
 
 function createBaseMsgCreateOrUpdatePermissionSession(): MsgCreateOrUpdatePermissionSession {
-  return { creator: "", id: "", issuerPermId: 0, verifierPermId: 0, agentPermId: 0, walletAgentPermId: 0 };
+  return {
+    creator: "",
+    id: "",
+    issuerPermId: Long.UZERO,
+    verifierPermId: Long.UZERO,
+    agentPermId: Long.UZERO,
+    walletAgentPermId: Long.UZERO,
+  };
 }
 
 export const MsgCreateOrUpdatePermissionSession = {
@@ -1545,16 +1575,16 @@ export const MsgCreateOrUpdatePermissionSession = {
     if (message.id !== "") {
       writer.uint32(18).string(message.id);
     }
-    if (message.issuerPermId !== 0) {
+    if (!message.issuerPermId.equals(Long.UZERO)) {
       writer.uint32(24).uint64(message.issuerPermId);
     }
-    if (message.verifierPermId !== 0) {
+    if (!message.verifierPermId.equals(Long.UZERO)) {
       writer.uint32(32).uint64(message.verifierPermId);
     }
-    if (message.agentPermId !== 0) {
+    if (!message.agentPermId.equals(Long.UZERO)) {
       writer.uint32(40).uint64(message.agentPermId);
     }
-    if (message.walletAgentPermId !== 0) {
+    if (!message.walletAgentPermId.equals(Long.UZERO)) {
       writer.uint32(48).uint64(message.walletAgentPermId);
     }
     return writer;
@@ -1586,28 +1616,28 @@ export const MsgCreateOrUpdatePermissionSession = {
             break;
           }
 
-          message.issuerPermId = longToNumber(reader.uint64() as Long);
+          message.issuerPermId = reader.uint64() as Long;
           continue;
         case 4:
           if (tag !== 32) {
             break;
           }
 
-          message.verifierPermId = longToNumber(reader.uint64() as Long);
+          message.verifierPermId = reader.uint64() as Long;
           continue;
         case 5:
           if (tag !== 40) {
             break;
           }
 
-          message.agentPermId = longToNumber(reader.uint64() as Long);
+          message.agentPermId = reader.uint64() as Long;
           continue;
         case 6:
           if (tag !== 48) {
             break;
           }
 
-          message.walletAgentPermId = longToNumber(reader.uint64() as Long);
+          message.walletAgentPermId = reader.uint64() as Long;
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -1622,10 +1652,10 @@ export const MsgCreateOrUpdatePermissionSession = {
     return {
       creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
       id: isSet(object.id) ? globalThis.String(object.id) : "",
-      issuerPermId: isSet(object.issuerPermId) ? globalThis.Number(object.issuerPermId) : 0,
-      verifierPermId: isSet(object.verifierPermId) ? globalThis.Number(object.verifierPermId) : 0,
-      agentPermId: isSet(object.agentPermId) ? globalThis.Number(object.agentPermId) : 0,
-      walletAgentPermId: isSet(object.walletAgentPermId) ? globalThis.Number(object.walletAgentPermId) : 0,
+      issuerPermId: isSet(object.issuerPermId) ? Long.fromValue(object.issuerPermId) : Long.UZERO,
+      verifierPermId: isSet(object.verifierPermId) ? Long.fromValue(object.verifierPermId) : Long.UZERO,
+      agentPermId: isSet(object.agentPermId) ? Long.fromValue(object.agentPermId) : Long.UZERO,
+      walletAgentPermId: isSet(object.walletAgentPermId) ? Long.fromValue(object.walletAgentPermId) : Long.UZERO,
     };
   },
 
@@ -1637,17 +1667,17 @@ export const MsgCreateOrUpdatePermissionSession = {
     if (message.id !== "") {
       obj.id = message.id;
     }
-    if (message.issuerPermId !== 0) {
-      obj.issuerPermId = Math.round(message.issuerPermId);
+    if (!message.issuerPermId.equals(Long.UZERO)) {
+      obj.issuerPermId = (message.issuerPermId || Long.UZERO).toString();
     }
-    if (message.verifierPermId !== 0) {
-      obj.verifierPermId = Math.round(message.verifierPermId);
+    if (!message.verifierPermId.equals(Long.UZERO)) {
+      obj.verifierPermId = (message.verifierPermId || Long.UZERO).toString();
     }
-    if (message.agentPermId !== 0) {
-      obj.agentPermId = Math.round(message.agentPermId);
+    if (!message.agentPermId.equals(Long.UZERO)) {
+      obj.agentPermId = (message.agentPermId || Long.UZERO).toString();
     }
-    if (message.walletAgentPermId !== 0) {
-      obj.walletAgentPermId = Math.round(message.walletAgentPermId);
+    if (!message.walletAgentPermId.equals(Long.UZERO)) {
+      obj.walletAgentPermId = (message.walletAgentPermId || Long.UZERO).toString();
     }
     return obj;
   },
@@ -1663,10 +1693,18 @@ export const MsgCreateOrUpdatePermissionSession = {
     const message = createBaseMsgCreateOrUpdatePermissionSession();
     message.creator = object.creator ?? "";
     message.id = object.id ?? "";
-    message.issuerPermId = object.issuerPermId ?? 0;
-    message.verifierPermId = object.verifierPermId ?? 0;
-    message.agentPermId = object.agentPermId ?? 0;
-    message.walletAgentPermId = object.walletAgentPermId ?? 0;
+    message.issuerPermId = (object.issuerPermId !== undefined && object.issuerPermId !== null)
+      ? Long.fromValue(object.issuerPermId)
+      : Long.UZERO;
+    message.verifierPermId = (object.verifierPermId !== undefined && object.verifierPermId !== null)
+      ? Long.fromValue(object.verifierPermId)
+      : Long.UZERO;
+    message.agentPermId = (object.agentPermId !== undefined && object.agentPermId !== null)
+      ? Long.fromValue(object.agentPermId)
+      : Long.UZERO;
+    message.walletAgentPermId = (object.walletAgentPermId !== undefined && object.walletAgentPermId !== null)
+      ? Long.fromValue(object.walletAgentPermId)
+      : Long.UZERO;
     return message;
   },
 };
@@ -1733,7 +1771,7 @@ export const MsgCreateOrUpdatePermissionSessionResponse = {
 };
 
 function createBaseMsgSlashPermissionTrustDeposit(): MsgSlashPermissionTrustDeposit {
-  return { creator: "", id: 0, amount: 0 };
+  return { creator: "", id: Long.UZERO, amount: Long.UZERO };
 }
 
 export const MsgSlashPermissionTrustDeposit = {
@@ -1741,10 +1779,10 @@ export const MsgSlashPermissionTrustDeposit = {
     if (message.creator !== "") {
       writer.uint32(10).string(message.creator);
     }
-    if (message.id !== 0) {
+    if (!message.id.equals(Long.UZERO)) {
       writer.uint32(16).uint64(message.id);
     }
-    if (message.amount !== 0) {
+    if (!message.amount.equals(Long.UZERO)) {
       writer.uint32(24).uint64(message.amount);
     }
     return writer;
@@ -1769,14 +1807,14 @@ export const MsgSlashPermissionTrustDeposit = {
             break;
           }
 
-          message.id = longToNumber(reader.uint64() as Long);
+          message.id = reader.uint64() as Long;
           continue;
         case 3:
           if (tag !== 24) {
             break;
           }
 
-          message.amount = longToNumber(reader.uint64() as Long);
+          message.amount = reader.uint64() as Long;
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -1790,8 +1828,8 @@ export const MsgSlashPermissionTrustDeposit = {
   fromJSON(object: any): MsgSlashPermissionTrustDeposit {
     return {
       creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
-      id: isSet(object.id) ? globalThis.Number(object.id) : 0,
-      amount: isSet(object.amount) ? globalThis.Number(object.amount) : 0,
+      id: isSet(object.id) ? Long.fromValue(object.id) : Long.UZERO,
+      amount: isSet(object.amount) ? Long.fromValue(object.amount) : Long.UZERO,
     };
   },
 
@@ -1800,11 +1838,11 @@ export const MsgSlashPermissionTrustDeposit = {
     if (message.creator !== "") {
       obj.creator = message.creator;
     }
-    if (message.id !== 0) {
-      obj.id = Math.round(message.id);
+    if (!message.id.equals(Long.UZERO)) {
+      obj.id = (message.id || Long.UZERO).toString();
     }
-    if (message.amount !== 0) {
-      obj.amount = Math.round(message.amount);
+    if (!message.amount.equals(Long.UZERO)) {
+      obj.amount = (message.amount || Long.UZERO).toString();
     }
     return obj;
   },
@@ -1817,8 +1855,10 @@ export const MsgSlashPermissionTrustDeposit = {
   ): MsgSlashPermissionTrustDeposit {
     const message = createBaseMsgSlashPermissionTrustDeposit();
     message.creator = object.creator ?? "";
-    message.id = object.id ?? 0;
-    message.amount = object.amount ?? 0;
+    message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
+    message.amount = (object.amount !== undefined && object.amount !== null)
+      ? Long.fromValue(object.amount)
+      : Long.UZERO;
     return message;
   },
 };
@@ -1871,7 +1911,7 @@ export const MsgSlashPermissionTrustDepositResponse = {
 };
 
 function createBaseMsgRepayPermissionSlashedTrustDeposit(): MsgRepayPermissionSlashedTrustDeposit {
-  return { creator: "", id: 0 };
+  return { creator: "", id: Long.UZERO };
 }
 
 export const MsgRepayPermissionSlashedTrustDeposit = {
@@ -1879,7 +1919,7 @@ export const MsgRepayPermissionSlashedTrustDeposit = {
     if (message.creator !== "") {
       writer.uint32(10).string(message.creator);
     }
-    if (message.id !== 0) {
+    if (!message.id.equals(Long.UZERO)) {
       writer.uint32(16).uint64(message.id);
     }
     return writer;
@@ -1904,7 +1944,7 @@ export const MsgRepayPermissionSlashedTrustDeposit = {
             break;
           }
 
-          message.id = longToNumber(reader.uint64() as Long);
+          message.id = reader.uint64() as Long;
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -1918,7 +1958,7 @@ export const MsgRepayPermissionSlashedTrustDeposit = {
   fromJSON(object: any): MsgRepayPermissionSlashedTrustDeposit {
     return {
       creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
-      id: isSet(object.id) ? globalThis.Number(object.id) : 0,
+      id: isSet(object.id) ? Long.fromValue(object.id) : Long.UZERO,
     };
   },
 
@@ -1927,8 +1967,8 @@ export const MsgRepayPermissionSlashedTrustDeposit = {
     if (message.creator !== "") {
       obj.creator = message.creator;
     }
-    if (message.id !== 0) {
-      obj.id = Math.round(message.id);
+    if (!message.id.equals(Long.UZERO)) {
+      obj.id = (message.id || Long.UZERO).toString();
     }
     return obj;
   },
@@ -1943,7 +1983,7 @@ export const MsgRepayPermissionSlashedTrustDeposit = {
   ): MsgRepayPermissionSlashedTrustDeposit {
     const message = createBaseMsgRepayPermissionSlashedTrustDeposit();
     message.creator = object.creator ?? "";
-    message.id = object.id ?? 0;
+    message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
     return message;
   },
 };
@@ -1998,14 +2038,14 @@ export const MsgRepayPermissionSlashedTrustDepositResponse = {
 function createBaseMsgCreatePermission(): MsgCreatePermission {
   return {
     creator: "",
-    schemaId: 0,
+    schemaId: Long.UZERO,
     type: 0,
     did: "",
     country: "",
     effectiveFrom: undefined,
     effectiveUntil: undefined,
-    verificationFees: 0,
-    validationFees: 0,
+    verificationFees: Long.UZERO,
+    validationFees: Long.UZERO,
   };
 }
 
@@ -2014,7 +2054,7 @@ export const MsgCreatePermission = {
     if (message.creator !== "") {
       writer.uint32(10).string(message.creator);
     }
-    if (message.schemaId !== 0) {
+    if (!message.schemaId.equals(Long.UZERO)) {
       writer.uint32(16).uint64(message.schemaId);
     }
     if (message.type !== 0) {
@@ -2032,10 +2072,10 @@ export const MsgCreatePermission = {
     if (message.effectiveUntil !== undefined) {
       Timestamp.encode(toTimestamp(message.effectiveUntil), writer.uint32(58).fork()).ldelim();
     }
-    if (message.verificationFees !== 0) {
+    if (!message.verificationFees.equals(Long.UZERO)) {
       writer.uint32(64).uint64(message.verificationFees);
     }
-    if (message.validationFees !== 0) {
+    if (!message.validationFees.equals(Long.UZERO)) {
       writer.uint32(72).uint64(message.validationFees);
     }
     return writer;
@@ -2060,7 +2100,7 @@ export const MsgCreatePermission = {
             break;
           }
 
-          message.schemaId = longToNumber(reader.uint64() as Long);
+          message.schemaId = reader.uint64() as Long;
           continue;
         case 3:
           if (tag !== 24) {
@@ -2102,14 +2142,14 @@ export const MsgCreatePermission = {
             break;
           }
 
-          message.verificationFees = longToNumber(reader.uint64() as Long);
+          message.verificationFees = reader.uint64() as Long;
           continue;
         case 9:
           if (tag !== 72) {
             break;
           }
 
-          message.validationFees = longToNumber(reader.uint64() as Long);
+          message.validationFees = reader.uint64() as Long;
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -2123,14 +2163,14 @@ export const MsgCreatePermission = {
   fromJSON(object: any): MsgCreatePermission {
     return {
       creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
-      schemaId: isSet(object.schemaId) ? globalThis.Number(object.schemaId) : 0,
+      schemaId: isSet(object.schemaId) ? Long.fromValue(object.schemaId) : Long.UZERO,
       type: isSet(object.type) ? permissionTypeFromJSON(object.type) : 0,
       did: isSet(object.did) ? globalThis.String(object.did) : "",
       country: isSet(object.country) ? globalThis.String(object.country) : "",
       effectiveFrom: isSet(object.effectiveFrom) ? fromJsonTimestamp(object.effectiveFrom) : undefined,
       effectiveUntil: isSet(object.effectiveUntil) ? fromJsonTimestamp(object.effectiveUntil) : undefined,
-      verificationFees: isSet(object.verificationFees) ? globalThis.Number(object.verificationFees) : 0,
-      validationFees: isSet(object.validationFees) ? globalThis.Number(object.validationFees) : 0,
+      verificationFees: isSet(object.verificationFees) ? Long.fromValue(object.verificationFees) : Long.UZERO,
+      validationFees: isSet(object.validationFees) ? Long.fromValue(object.validationFees) : Long.UZERO,
     };
   },
 
@@ -2139,8 +2179,8 @@ export const MsgCreatePermission = {
     if (message.creator !== "") {
       obj.creator = message.creator;
     }
-    if (message.schemaId !== 0) {
-      obj.schemaId = Math.round(message.schemaId);
+    if (!message.schemaId.equals(Long.UZERO)) {
+      obj.schemaId = (message.schemaId || Long.UZERO).toString();
     }
     if (message.type !== 0) {
       obj.type = permissionTypeToJSON(message.type);
@@ -2157,11 +2197,11 @@ export const MsgCreatePermission = {
     if (message.effectiveUntil !== undefined) {
       obj.effectiveUntil = message.effectiveUntil.toISOString();
     }
-    if (message.verificationFees !== 0) {
-      obj.verificationFees = Math.round(message.verificationFees);
+    if (!message.verificationFees.equals(Long.UZERO)) {
+      obj.verificationFees = (message.verificationFees || Long.UZERO).toString();
     }
-    if (message.validationFees !== 0) {
-      obj.validationFees = Math.round(message.validationFees);
+    if (!message.validationFees.equals(Long.UZERO)) {
+      obj.validationFees = (message.validationFees || Long.UZERO).toString();
     }
     return obj;
   },
@@ -2172,25 +2212,31 @@ export const MsgCreatePermission = {
   fromPartial<I extends Exact<DeepPartial<MsgCreatePermission>, I>>(object: I): MsgCreatePermission {
     const message = createBaseMsgCreatePermission();
     message.creator = object.creator ?? "";
-    message.schemaId = object.schemaId ?? 0;
+    message.schemaId = (object.schemaId !== undefined && object.schemaId !== null)
+      ? Long.fromValue(object.schemaId)
+      : Long.UZERO;
     message.type = object.type ?? 0;
     message.did = object.did ?? "";
     message.country = object.country ?? "";
     message.effectiveFrom = object.effectiveFrom ?? undefined;
     message.effectiveUntil = object.effectiveUntil ?? undefined;
-    message.verificationFees = object.verificationFees ?? 0;
-    message.validationFees = object.validationFees ?? 0;
+    message.verificationFees = (object.verificationFees !== undefined && object.verificationFees !== null)
+      ? Long.fromValue(object.verificationFees)
+      : Long.UZERO;
+    message.validationFees = (object.validationFees !== undefined && object.validationFees !== null)
+      ? Long.fromValue(object.validationFees)
+      : Long.UZERO;
     return message;
   },
 };
 
 function createBaseMsgCreatePermissionResponse(): MsgCreatePermissionResponse {
-  return { id: 0 };
+  return { id: Long.UZERO };
 }
 
 export const MsgCreatePermissionResponse = {
   encode(message: MsgCreatePermissionResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.id !== 0) {
+    if (!message.id.equals(Long.UZERO)) {
       writer.uint32(8).uint64(message.id);
     }
     return writer;
@@ -2208,7 +2254,7 @@ export const MsgCreatePermissionResponse = {
             break;
           }
 
-          message.id = longToNumber(reader.uint64() as Long);
+          message.id = reader.uint64() as Long;
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -2220,13 +2266,13 @@ export const MsgCreatePermissionResponse = {
   },
 
   fromJSON(object: any): MsgCreatePermissionResponse {
-    return { id: isSet(object.id) ? globalThis.Number(object.id) : 0 };
+    return { id: isSet(object.id) ? Long.fromValue(object.id) : Long.UZERO };
   },
 
   toJSON(message: MsgCreatePermissionResponse): unknown {
     const obj: any = {};
-    if (message.id !== 0) {
-      obj.id = Math.round(message.id);
+    if (!message.id.equals(Long.UZERO)) {
+      obj.id = (message.id || Long.UZERO).toString();
     }
     return obj;
   },
@@ -2236,7 +2282,7 @@ export const MsgCreatePermissionResponse = {
   },
   fromPartial<I extends Exact<DeepPartial<MsgCreatePermissionResponse>, I>>(object: I): MsgCreatePermissionResponse {
     const message = createBaseMsgCreatePermissionResponse();
-    message.id = object.id ?? 0;
+    message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
     return message;
   },
 };
@@ -2379,7 +2425,7 @@ interface Rpc {
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 
 export type DeepPartial<T> = T extends Builtin ? T
-  : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>>
+  : T extends Long ? string | number | Long : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>>
   : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
   : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
@@ -2389,13 +2435,13 @@ export type Exact<P, I extends P> = P extends Builtin ? P
   : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
 
 function toTimestamp(date: Date): Timestamp {
-  const seconds = Math.trunc(date.getTime() / 1_000);
+  const seconds = numberToLong(Math.trunc(date.getTime() / 1_000));
   const nanos = (date.getTime() % 1_000) * 1_000_000;
   return { seconds, nanos };
 }
 
 function fromTimestamp(t: Timestamp): Date {
-  let millis = (t.seconds || 0) * 1_000;
+  let millis = (t.seconds.toNumber() || 0) * 1_000;
   millis += (t.nanos || 0) / 1_000_000;
   return new globalThis.Date(millis);
 }
@@ -2410,14 +2456,8 @@ function fromJsonTimestamp(o: any): Date {
   }
 }
 
-function longToNumber(long: Long): number {
-  if (long.gt(globalThis.Number.MAX_SAFE_INTEGER)) {
-    throw new globalThis.Error("Value is larger than Number.MAX_SAFE_INTEGER");
-  }
-  if (long.lt(globalThis.Number.MIN_SAFE_INTEGER)) {
-    throw new globalThis.Error("Value is smaller than Number.MIN_SAFE_INTEGER");
-  }
-  return long.toNumber();
+function numberToLong(number: number) {
+  return Long.fromNumber(number);
 }
 
 if (_m0.util.Long !== Long) {
