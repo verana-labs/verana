@@ -26,6 +26,7 @@ env:
 
 jobs:
   resolve-version:
+    if: github.event_name != 'release'
     uses: 2060-io/organization/.github/workflows/resolve-version-call.yml@v0.4.1
     with:
       bump-minor-pre-major: false
@@ -36,10 +37,7 @@ jobs:
   build-binaries-s3:
     runs-on: ubuntu-latest
     needs: [resolve-version]
-    if: needs.resolve-version.outputs.new-release-published == 'true'
-    env:
-      VERSION: ${{ needs.resolve-version.outputs.release-version }}
-      RELEASE_TYPE: ${{ needs.resolve-version.outputs.release-type }}
+    if: always() && (github.event_name == 'release' || needs.resolve-version.outputs.new-release-published == 'true')
     outputs:
       version: ${{ steps.set-outputs.outputs.version }}
       commit: ${{ steps.set-outputs.outputs.commit }}
