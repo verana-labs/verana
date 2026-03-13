@@ -108,6 +108,11 @@ jobs:
           cd "$GITHUB_WORKSPACE/proto"
           buf generate --template buf.gen.ts.yaml
           cd "$GITHUB_WORKSPACE/ts-proto"
+          PKG_SOURCE_VERSION=$(node -p "require('./package.json').version")
+          echo "Checked-in ts-proto package version: ${PKG_SOURCE_VERSION}"
+          if [ "${GITHUB_EVENT_NAME}" = "release" ] && [ "${PKG_SOURCE_VERSION}" != "${NPM_VERSION}" ]; then
+            echo "::warning:: ts-proto/package.json version (${PKG_SOURCE_VERSION}) differs from release tag version (${NPM_VERSION}). The release workflow will override it before packing."
+          fi
           if [ -f package-lock.json ]; then
             npm ci
           else

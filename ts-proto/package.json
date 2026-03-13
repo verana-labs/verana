@@ -1,6 +1,6 @@
 {
   "name": "@verana-labs/verana-types",
-  "version": "0.9.1",
+  "version": "0.9.4",
   "description": "Generated TypeScript protobuf codecs for the Verana blockchain.",
   "license": "AGPL-3.0-only",
   "main": "dist/index.js",
