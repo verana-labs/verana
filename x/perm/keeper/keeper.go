@@ -33,6 +33,7 @@ type (
 		trustRegistryKeeper    types.TrustRegistryKeeper
 		trustDeposit           types.TrustDepositKeeper
 		bankKeeper             types.BankKeeper
+		delegationKeeper       types.DelegationKeeper
 	}
 )
 
@@ -45,6 +46,7 @@ func NewKeeper(
 	trustRegistryKeeper types.TrustRegistryKeeper,
 	trustDeposit types.TrustDepositKeeper,
 	bankKeeper types.BankKeeper,
+	delegationKeeper types.DelegationKeeper,
 ) Keeper {
 	sb := collections.NewSchemaBuilder(storeService)
 
@@ -64,6 +66,7 @@ func NewKeeper(
 		trustRegistryKeeper:    trustRegistryKeeper,
 		trustDeposit:           trustDeposit,
 		bankKeeper:             bankKeeper,
+		delegationKeeper:       delegationKeeper,
 	}
 }
 
@@ -125,8 +128,8 @@ func (k Keeper) UpdatePermission(ctx sdk.Context, perm types.Permission) error {
 // According to the spec, if validator permission is INACTIVE (not valid), it must abort.
 // INACTIVE means: effective_from is null OR effective_from equals now() exactly (not before).
 func IsValidPermission(perm types.Permission, country string, checkTime time.Time) error {
-	// Check country compatibility
-	if perm.Country != "" && perm.Country != country {
+	// Check country compatibility (skip check if no country was requested)
+	if country != "" && perm.Country != "" && perm.Country != country {
 		return fmt.Errorf("perm country mismatch: perm has %s, requested %s",
 			perm.Country, country)
 	}

@@ -90,8 +90,8 @@ func validatePermission(perm Permission, allPerms []Permission) error {
 		return fmt.Errorf("perm type cannot be 0 for perm ID %d", perm.Id)
 	}
 
-	if perm.Grantee == "" {
-		return fmt.Errorf("grantee cannot be empty for perm ID %d", perm.Id)
+	if perm.Authority == "" {
+		return fmt.Errorf("authority cannot be empty for perm ID %d", perm.Id)
 	}
 
 	// Validate validator perm reference
@@ -134,10 +134,10 @@ func validatePermissionTimestamps(perm Permission) error {
 		}
 	}
 
-	// If extended time exists, it should be after created time
-	if perm.Extended != nil && perm.Created != nil {
-		if !perm.Created.Before(*perm.Extended) {
-			return fmt.Errorf("extended timestamp must be after created timestamp for perm ID %d", perm.Id)
+	// If adjusted time exists, it should be after created time
+	if perm.Adjusted != nil && perm.Created != nil {
+		if !perm.Created.Before(*perm.Adjusted) {
+			return fmt.Errorf("adjusted timestamp must be after created timestamp for perm ID %d", perm.Id)
 		}
 	}
 
@@ -164,30 +164,30 @@ func validatePermissionSession(session PermissionSession, permissionIds map[uint
 		return fmt.Errorf("modified timestamp is required for session ID %s", session.Id)
 	}
 
-	// Validate each authorization entry
-	for i, authz := range session.Authz {
-		// At least one of executor or beneficiary must be set
-		if authz.ExecutorPermId == 0 && authz.BeneficiaryPermId == 0 {
-			return fmt.Errorf("at least one of executor_perm_id or beneficiary_perm_id must be set for session ID %s, authz index %d",
+	// Validate each session record
+	for i, record := range session.SessionRecords {
+		// At least one of issuer or verifier must be set
+		if record.IssuerPermId == 0 && record.VerifierPermId == 0 {
+			return fmt.Errorf("at least one of issuer_perm_id or verifier_perm_id must be set for session ID %s, record index %d",
 				session.Id, i)
 		}
 
-		// Check that executor perm exists if set
-		if authz.ExecutorPermId != 0 && !permissionIds[authz.ExecutorPermId] {
-			return fmt.Errorf("executor perm ID %d not found for session ID %s, authz index %d",
-				authz.ExecutorPermId, session.Id, i)
+		// Check that issuer perm exists if set
+		if record.IssuerPermId != 0 && !permissionIds[record.IssuerPermId] {
+			return fmt.Errorf("issuer perm ID %d not found for session ID %s, record index %d",
+				record.IssuerPermId, session.Id, i)
 		}
 
-		// Check that beneficiary perm exists if set
-		if authz.BeneficiaryPermId != 0 && !permissionIds[authz.BeneficiaryPermId] {
-			return fmt.Errorf("beneficiary perm ID %d not found for session ID %s, authz index %d",
-				authz.BeneficiaryPermId, session.Id, i)
+		// Check that verifier perm exists if set
+		if record.VerifierPermId != 0 && !permissionIds[record.VerifierPermId] {
+			return fmt.Errorf("verifier perm ID %d not found for session ID %s, record index %d",
+				record.VerifierPermId, session.Id, i)
 		}
 
 		// Check that wallet agent perm exists if set
-		if authz.WalletAgentPermId != 0 && !permissionIds[authz.WalletAgentPermId] {
-			return fmt.Errorf("wallet agent perm ID %d not found for session ID %s, authz index %d",
-				authz.WalletAgentPermId, session.Id, i)
+		if record.WalletAgentPermId != 0 && !permissionIds[record.WalletAgentPermId] {
+			return fmt.Errorf("wallet agent perm ID %d not found for session ID %s, record index %d",
+				record.WalletAgentPermId, session.Id, i)
 		}
 	}
 

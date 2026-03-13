@@ -129,11 +129,12 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 				},
 				{
 					RpcMethod: "StartPermissionVP",
-					Use:       "start-perm-vp [type] [validator-perm-id]",
+					Use:       "start-perm-vp [type] [validator-perm-id] [did]",
 					Short:     "Start a new perm validation process",
 					Long: `Start a new perm validation process with the specified parameters:
 - type: Permission type (issuer, verifier, issuer-grantor, verifier-grantor, ecosystem, holder)
-- validator-perm-id: ID of the validator perm`,
+- validator-perm-id: ID of the validator perm
+- did: DID for this perm (mandatory, must conform to DID syntax)`,
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{
 							ProtoField: "type",
@@ -141,17 +142,14 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 						{
 							ProtoField: "validator_perm_id",
 						},
+						{
+							ProtoField: "did",
+						},
 					},
 					FlagOptions: map[string]*autocliv1.FlagOptions{
-						"country": {
-							Name:         "country",
-							Usage:        "Optional ISO 3166-1 alpha-2 country code",
-							DefaultValue: "",
-						},
-						"did": {
-							Name:         "did",
-							Usage:        "Optional DID for this perm",
-							DefaultValue: "",
+						"authority": {
+							Name:  "authority",
+							Usage: "Group account (authority) on whose behalf this message is executed",
 						},
 						"validation_fees": {
 							Name:         "validation-fees",
@@ -168,6 +166,21 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 							Usage:        "Optional requested verification fees (can be modified by validator)",
 							DefaultValue: "0",
 						},
+						"vs_operator": {
+							Name:         "vs-operator",
+							Usage:        "Optional Verifiable Service operator account address",
+							DefaultValue: "",
+						},
+						"vs_operator_authz_enabled": {
+							Name:         "vs-operator-authz-enabled",
+							Usage:        "Enable authz grant for vs_operator",
+							DefaultValue: "false",
+						},
+						"vs_operator_authz_with_feegrant": {
+							Name:         "vs-operator-authz-with-feegrant",
+							Usage:        "Enable fee grant for vs_operator",
+							DefaultValue: "false",
+						},
 					},
 				},
 				{
@@ -181,18 +194,28 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 							ProtoField: "id",
 						},
 					},
+					FlagOptions: map[string]*autocliv1.FlagOptions{
+						"authority": {
+							Name:  "authority",
+							Usage: "Group account (authority) on whose behalf this message is executed",
+						},
+					},
 				},
 				{
 					RpcMethod: "SetPermissionVPToValidated",
 					Use:       "set-perm-vp-validated [id]",
 					Short:     "Set perm validation process to validated state",
-					Long: `Set a perm validation process to validated state with optional parameters:
+					Long: `Set a perm validation process to validated state.
+
+Requires authority/operator authorization. The authority must be the validator perm's authority.
+
+Parameters:
 - id: ID of the perm to validate
+- authority: Group account (authority) on whose behalf this message is executed
 - effective-until: Optional timestamp until when this perm is effective (RFC3339 format)
-- validation-fees: Optional validation fees
-- issuance-fees: Optional issuance fees
-- verification-fees: Optional verification fees
-- country: Optional country code (ISO 3166-1 alpha-2)
+- validation-fees: Validation fees (mandatory, 0 for no fees)
+- issuance-fees: Issuance fees (mandatory, 0 for no fees)
+- verification-fees: Verification fees (mandatory, 0 for no fees)
 - vp-summary-digest-sri: Optional digest SRI of validation information
 - issuance-fee-discount: Issuance fee discount (0-10000, where 10000 = 100% discount, default 0)
 - verification-fee-discount: Verification fee discount (0-10000, where 10000 = 100% discount, default 0)`,
@@ -202,6 +225,10 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 						},
 					},
 					FlagOptions: map[string]*autocliv1.FlagOptions{
+						"authority": {
+							Name:  "authority",
+							Usage: "Group account (authority) on whose behalf this message is executed",
+						},
 						"effective_until": {
 							Name:         "effective-until",
 							Usage:        "Timestamp until when this perm is effective (RFC3339)",
@@ -221,11 +248,6 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 							Name:         "verification-fees",
 							Usage:        "Verification fees",
 							DefaultValue: "0",
-						},
-						"country": {
-							Name:         "country",
-							Usage:        "Country code (ISO 3166-1 alpha-2)",
-							DefaultValue: "",
 						},
 						"vp_summary_digest_sri": {
 							Name:         "vp-summary-digest-sri",
@@ -249,10 +271,16 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					RpcMethod: "CancelPermissionVPLastRequest",
 					Use:       "cancel-perm-vp-request [id]",
 					Short:     "Cancel a pending perm VP request",
-					Long:      "Cancel a pending perm VP request. Can only be executed by the perm grantee and only when the perm is in PENDING state.",
+					Long:      "Cancel a pending perm VP request. Can only be executed by the perm authority and only when the perm is in PENDING state.",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{
 							ProtoField: "id",
+						},
+					},
+					FlagOptions: map[string]*autocliv1.FlagOptions{
+						"authority": {
+							Name:  "authority",
+							Usage: "Group account (authority) on whose behalf this message is executed",
 						},
 					},
 				},
@@ -279,15 +307,14 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 						},
 					},
 					FlagOptions: map[string]*autocliv1.FlagOptions{
-						"country": {
-							Name:         "country",
-							DefaultValue: "",
-							Usage:        "Optional country code (ISO 3166-1 alpha-2)",
+						"authority": {
+							Name:  "authority",
+							Usage: "Group account (authority) on whose behalf this message is executed",
 						},
 						"effective_from": {
 							Name:         "effective-from",
 							DefaultValue: "",
-							Usage:        "Optional timestamp (RFC3339) from when the perm is effective",
+							Usage:        "Timestamp (RFC3339) from when the perm is effective (mandatory, must be in the future)",
 						},
 						"effective_until": {
 							Name:         "effective-until",
@@ -297,10 +324,10 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					},
 				},
 				{
-					RpcMethod: "ExtendPermission",
-					Use:       "extend-perm [id] [effective-until]",
-					Short:     "Extend a permission's effective duration",
-					Long:      "Extend a permission's effective duration. Can be executed by the grantee (for ECOSYSTEM or self-created permissions) or by the validator (for VP managed permissions).",
+					RpcMethod: "AdjustPermission",
+					Use:       "adjust-perm [id] [effective-until]",
+					Short:     "Adjust a permission's effective duration",
+					Long:      "Adjust a permission's effective duration. Can be executed by the authority (for ECOSYSTEM or self-created permissions) or by the validator (for VP managed permissions).",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{
 							ProtoField: "id",
@@ -309,15 +336,27 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 							ProtoField: "effective_until",
 						},
 					},
+					FlagOptions: map[string]*autocliv1.FlagOptions{
+						"authority": {
+							DefaultValue: "",
+							Usage:        "The group policy address (authority) on whose behalf this message is executed",
+						},
+					},
 				},
 				{
 					RpcMethod: "RevokePermission",
 					Use:       "revoke-perm [id]",
 					Short:     "Revoke a permission",
-					Long:      "Revoke a permission. Can be executed by the permission grantee, a validator ancestor, or the trust registry controller.",
+					Long:      "Revoke a permission. Can be executed by the permission authority, a validator ancestor, or the trust registry controller.",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{
 							ProtoField: "id",
+						},
+					},
+					FlagOptions: map[string]*autocliv1.FlagOptions{
+						"authority": {
+							DefaultValue: "",
+							Usage:        "The group policy address (authority) on whose behalf this message is executed",
 						},
 					},
 				},
@@ -338,6 +377,10 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 						},
 					},
 					FlagOptions: map[string]*autocliv1.FlagOptions{
+						"authority": {
+							DefaultValue: "",
+							Usage:        "The group policy address (authority) on whose behalf this message is executed",
+						},
 						"issuer_perm_id": {
 							Name:         "issuer-perm-id",
 							Usage:        "ID of the issuer permission",
@@ -347,6 +390,11 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 							Name:         "verifier-perm-id",
 							Usage:        "ID of the verifier permission",
 							DefaultValue: "0",
+						},
+						"digest": {
+							Name:         "digest",
+							Usage:        "Optional digest derived from an issued or verified credential",
+							DefaultValue: "",
 						},
 					},
 				},
@@ -363,64 +411,56 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 							ProtoField: "amount",
 						},
 					},
+					FlagOptions: map[string]*autocliv1.FlagOptions{
+						"authority": {
+							DefaultValue: "",
+							Usage:        "The group policy address (authority) on whose behalf this message is executed",
+						},
+					},
 				},
 				{
 					RpcMethod: "RepayPermissionSlashedTrustDeposit",
-					Use:       "repay-perm-slashed-td [id]",
+					Use:       "repay-perm-slashed-td [id] --authority [authority]",
 					Short:     "Repay a slashed perm's trust deposit",
-					Long: `Repay the slashed trust deposit of a perm. Can be executed by anyone willing to pay.
-This will repay the full remaining slashed amount and credit it to the perm grantee's trust deposit.
+					Long: `Repay the slashed trust deposit of a perm. Can only be called by the authority that owns the permission.
+This will repay the full remaining slashed amount and credit it to the perm authority's trust deposit.
 Note: This does not make the slashed perm reusable - a new perm must be requested.
 
 Parameters:
-- id: ID of the perm with slashed deposit to repay`,
+- id: ID of the perm with slashed deposit to repay
+- authority: The group policy address (authority) that owns the permission`,
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{
 							ProtoField: "id",
 						},
 					},
+					FlagOptions: map[string]*autocliv1.FlagOptions{
+						"authority": {
+							DefaultValue: "",
+							Usage:        "The group policy address (authority) on whose behalf this message is executed",
+						},
+					},
 				},
 				{
 					RpcMethod: "CreatePermission",
-					Use:       "create-perm [schema-id] [type] [did]",
-					Short:     "Create a new permission for open schemas",
-					Long:      "Create a new ISSUER or VERIFIER permission for schemas with OPEN management mode. This allows self-creation of permissions without validation process.",
+					Use:       "create-perm [type] [validator-perm-id] [did] --authority [authority]",
+					Short:     "Self-create a new permission for open schemas",
+					Long:      "Self-create a new ISSUER or VERIFIER permission for schemas with OPEN management mode.",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{
-							ProtoField: "schema_id",
+							ProtoField: "type",
 						},
 						{
-							ProtoField: "type",
+							ProtoField: "validator_perm_id",
 						},
 						{
 							ProtoField: "did",
 						},
 					},
 					FlagOptions: map[string]*autocliv1.FlagOptions{
-						"country": {
-							Name:         "country",
+						"authority": {
 							DefaultValue: "",
-							Usage:        "Optional country code (ISO 3166-1 alpha-2)",
-						},
-						"effective_from": {
-							Name:         "effective-from",
-							DefaultValue: "",
-							Usage:        "Optional timestamp (RFC3339) from when the permission is effective",
-						},
-						"effective_until": {
-							Name:         "effective-until",
-							DefaultValue: "",
-							Usage:        "Optional timestamp (RFC3339) until when the permission is effective",
-						},
-						"verification_fees": {
-							Name:         "verification-fees",
-							DefaultValue: "0",
-							Usage:        "Verification fees in trust units (ISSUER permissions only)",
-						},
-						"validation_fees": {
-							Name:         "validation-fees",
-							DefaultValue: "0",
-							Usage:        "Validation fees in trust units (ISSUER permissions only)",
+							Usage:        "The group policy address (authority) on whose behalf this message is executed",
 						},
 					},
 				},

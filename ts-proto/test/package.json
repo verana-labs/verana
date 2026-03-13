@@ -15,6 +15,17 @@
     "test:cs-create": "npx tsx src/journeys/csCreateCredentialSchema.ts",
     "test:cs-update": "npx tsx src/journeys/csUpdateCredentialSchema.ts",
     "test:cs-archive": "npx tsx src/journeys/csArchiveCredentialSchema.ts",
+    "test:de-grant-perm-auth": "npx tsx src/journeys/deGrantPermOperatorAuthorization.ts",
+    "test:perm-create-root": "npx tsx src/journeys/permCreateRootPermission.ts",
+    "test:perm-create": "npx tsx src/journeys/permCreatePermission.ts",
+    "test:perm-adjust": "npx tsx src/journeys/permAdjustPermission.ts",
+    "test:perm-revoke": "npx tsx src/journeys/permRevokePermission.ts",
+    "test:perm-start-vp": "npx tsx src/journeys/permStartPermissionVP.ts",
+    "test:perm-validate-vp": "npx tsx src/journeys/permSetPermissionVPToValidated.ts",
+    "test:perm-cancel-vp": "npx tsx src/journeys/permCancelPermissionVPLastRequest.ts",
+    "test:perm-csps": "npx tsx src/journeys/permCreateOrUpdatePermissionSession.ts",
+    "test:perm-slash": "npx tsx src/journeys/permSlashPermissionTrustDeposit.ts",
+    "test:perm-repay": "npx tsx src/journeys/permRepayPermissionSlashedTrustDeposit.ts",
     "test:all": "npx tsx src/journeys/runAll.ts"
   },
   "dependencies": {

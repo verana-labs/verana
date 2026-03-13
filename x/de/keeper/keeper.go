@@ -1,12 +1,15 @@
 package keeper
 
 import (
+	"context"
 	"fmt"
+	"time"
 
 	"cosmossdk.io/collections"
 	"cosmossdk.io/core/address"
 	corestore "cosmossdk.io/core/store"
 	"github.com/cosmos/cosmos-sdk/codec"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/verana-labs/verana/x/de/types"
 )
@@ -68,4 +71,83 @@ func NewKeeper(
 // GetAuthority returns the module's authority.
 func (k Keeper) GetAuthority() []byte {
 	return k.authority
+}
+
+// GrantVSOperatorAuthorization grants a VS operator the authorization to call
+// CreateOrUpdatePermissionSession on behalf of the authority for a given permission.
+// TODO(MOD-DE-MSG-5): Implement full VS operator authorization logic.
+func (k Keeper) GrantVSOperatorAuthorization(
+	ctx context.Context,
+	authority string,
+	vsOperator string,
+	permissionID uint64,
+	spendLimit sdk.Coins,
+	withFeegrant bool,
+	feeSpendLimit sdk.Coins,
+	spendPeriod *time.Duration,
+) error {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	// Store the VS operator authorization
+	vsKey := collections.Join(authority, vsOperator)
+	vsAuth := types.VSOperatorAuthorization{
+		Authority:  authority,
+		VsOperator: vsOperator,
+	}
+	if err := k.VSOperatorAuthorizations.Set(sdkCtx, vsKey, vsAuth); err != nil {
+		return fmt.Errorf("failed to store VS operator authorization: %w", err)
+	}
+
+	return nil
+}
+
+// CheckVSOperatorAuthorization checks if a VS operator is authorized to act on behalf of the authority.
+// [AUTHZ-CHECK-3] A VSOperatorAuthorization entry must exist where authority and vs_operator match.
+func (k Keeper) CheckVSOperatorAuthorization(
+	ctx context.Context,
+	authority string,
+	vsOperator string,
+) error {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	vsKey := collections.Join(authority, vsOperator)
+	has, err := k.VSOperatorAuthorizations.Has(sdkCtx, vsKey)
+	if err != nil {
+		return fmt.Errorf("failed to check VS operator authorization: %w", err)
+	}
+	if !has {
+		return fmt.Errorf("VS operator %s is not authorized for authority %s", vsOperator, authority)
+	}
+
+	return nil
+}
+
+// RevokeVSOperatorAuthorization removes a VS operator's authorization for a given permission.
+func (k Keeper) RevokeVSOperatorAuthorization(
+	ctx context.Context,
+	authority string,
+	vsOperator string,
+	permissionID uint64,
+) error {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	// Remove the VS operator authorization
+	vsKey := collections.Join(authority, vsOperator)
+	has, err := k.VSOperatorAuthorizations.Has(sdkCtx, vsKey)
+	if err != nil {
+		return fmt.Errorf("failed to check VS operator authorization: %w", err)
+	}
+	if !has {
+		return nil // Already revoked or never existed
+	}
+	if err := k.VSOperatorAuthorizations.Remove(sdkCtx, vsKey); err != nil {
+		return fmt.Errorf("failed to remove VS operator authorization: %w", err)
+	}
+
+	// Revoke associated fee allowance if any
+	if err := k.RevokeFeeAllowance(sdkCtx, authority, vsOperator); err != nil {
+		return fmt.Errorf("failed to revoke fee allowance: %w", err)
+	}
+
+	return nil
 }

@@ -382,6 +382,9 @@ jobs:
                 rm -f /tmp/go.tgz
               fi
               export PATH="/usr/local/go/bin:$PATH"
+              echo "Rebuilding veranad from workspace source to ensure proto consistency..."
+              go install ./cmd/veranad
+              export PATH="$(go env GOPATH)/bin:$PATH"
               echo ./scripts/setup_primary_validator.sh....
               ./scripts/setup_primary_validator.sh &
               PID=$!

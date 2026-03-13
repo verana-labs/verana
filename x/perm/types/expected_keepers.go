@@ -2,6 +2,7 @@ package types
 
 import (
 	"context"
+	"time"
 
 	"cosmossdk.io/math"
 
@@ -45,8 +46,23 @@ type TrustRegistryKeeper interface {
 // TrustDepositKeeper defines the expected interface for the Trust Deposit module.
 type TrustDepositKeeper interface {
 	AdjustTrustDeposit(ctx sdk.Context, account string, augend int64) error
+	AdjustTrustDepositOnBehalf(ctx sdk.Context, account string, funder sdk.AccAddress, amount int64) error
 	GetTrustDepositRate(ctx sdk.Context) math.LegacyDec
 	GetUserAgentRewardRate(ctx sdk.Context) math.LegacyDec
 	GetWalletUserAgentRewardRate(ctx sdk.Context) math.LegacyDec
 	BurnEcosystemSlashedTrustDeposit(ctx sdk.Context, account string, amount uint64) error
+}
+
+// DelegationKeeper defines the expected interface for the Delegation Engine (DE) module.
+// Used to perform [AUTHZ-CHECK] for (authority, operator) pairs.
+type DelegationKeeper interface {
+	CheckOperatorAuthorization(ctx context.Context, authority string, operator string, msgTypeURL string, now time.Time) error
+	// CheckVSOperatorAuthorization checks if a VS operator is authorized to act on behalf of the authority.
+	// [AUTHZ-CHECK-3] A VSOperatorAuthorization entry must exist where authority and vs_operator match.
+	CheckVSOperatorAuthorization(ctx context.Context, authority string, vsOperator string) error
+	// GrantVSOperatorAuthorization grants a VS operator the authorization to call
+	// CreateOrUpdatePermissionSession on behalf of the authority for a given permission.
+	GrantVSOperatorAuthorization(ctx context.Context, authority string, vsOperator string, permissionID uint64, spendLimit sdk.Coins, withFeegrant bool, feeSpendLimit sdk.Coins, spendPeriod *time.Duration) error
+	// RevokeVSOperatorAuthorization revokes a VS operator's authorization for a given permission.
+	RevokeVSOperatorAuthorization(ctx context.Context, authority string, vsOperator string, permissionID uint64) error
 }

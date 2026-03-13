@@ -3,6 +3,7 @@ package permv1
 
 import (
 	_ "cosmossdk.io/api/amino"
+	v1beta1 "cosmossdk.io/api/cosmos/base/v1beta1"
 	fmt "fmt"
 	_ "github.com/cosmos/cosmos-proto"
 	runtime "github.com/cosmos/cosmos-proto/runtime"
@@ -10,50 +11,159 @@ import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoiface "google.golang.org/protobuf/runtime/protoiface"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	durationpb "google.golang.org/protobuf/types/known/durationpb"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	io "io"
 	reflect "reflect"
 	sync "sync"
 )
 
+var _ protoreflect.List = (*_Permission_39_list)(nil)
+
+type _Permission_39_list struct {
+	list *[]*v1beta1.Coin
+}
+
+func (x *_Permission_39_list) Len() int {
+	if x.list == nil {
+		return 0
+	}
+	return len(*x.list)
+}
+
+func (x *_Permission_39_list) Get(i int) protoreflect.Value {
+	return protoreflect.ValueOfMessage((*x.list)[i].ProtoReflect())
+}
+
+func (x *_Permission_39_list) Set(i int, value protoreflect.Value) {
+	valueUnwrapped := value.Message()
+	concreteValue := valueUnwrapped.Interface().(*v1beta1.Coin)
+	(*x.list)[i] = concreteValue
+}
+
+func (x *_Permission_39_list) Append(value protoreflect.Value) {
+	valueUnwrapped := value.Message()
+	concreteValue := valueUnwrapped.Interface().(*v1beta1.Coin)
+	*x.list = append(*x.list, concreteValue)
+}
+
+func (x *_Permission_39_list) AppendMutable() protoreflect.Value {
+	v := new(v1beta1.Coin)
+	*x.list = append(*x.list, v)
+	return protoreflect.ValueOfMessage(v.ProtoReflect())
+}
+
+func (x *_Permission_39_list) Truncate(n int) {
+	for i := n; i < len(*x.list); i++ {
+		(*x.list)[i] = nil
+	}
+	*x.list = (*x.list)[:n]
+}
+
+func (x *_Permission_39_list) NewElement() protoreflect.Value {
+	v := new(v1beta1.Coin)
+	return protoreflect.ValueOfMessage(v.ProtoReflect())
+}
+
+func (x *_Permission_39_list) IsValid() bool {
+	return x.list != nil
+}
+
+var _ protoreflect.List = (*_Permission_41_list)(nil)
+
+type _Permission_41_list struct {
+	list *[]*v1beta1.Coin
+}
+
+func (x *_Permission_41_list) Len() int {
+	if x.list == nil {
+		return 0
+	}
+	return len(*x.list)
+}
+
+func (x *_Permission_41_list) Get(i int) protoreflect.Value {
+	return protoreflect.ValueOfMessage((*x.list)[i].ProtoReflect())
+}
+
+func (x *_Permission_41_list) Set(i int, value protoreflect.Value) {
+	valueUnwrapped := value.Message()
+	concreteValue := valueUnwrapped.Interface().(*v1beta1.Coin)
+	(*x.list)[i] = concreteValue
+}
+
+func (x *_Permission_41_list) Append(value protoreflect.Value) {
+	valueUnwrapped := value.Message()
+	concreteValue := valueUnwrapped.Interface().(*v1beta1.Coin)
+	*x.list = append(*x.list, concreteValue)
+}
+
+func (x *_Permission_41_list) AppendMutable() protoreflect.Value {
+	v := new(v1beta1.Coin)
+	*x.list = append(*x.list, v)
+	return protoreflect.ValueOfMessage(v.ProtoReflect())
+}
+
+func (x *_Permission_41_list) Truncate(n int) {
+	for i := n; i < len(*x.list); i++ {
+		(*x.list)[i] = nil
+	}
+	*x.list = (*x.list)[:n]
+}
+
+func (x *_Permission_41_list) NewElement() protoreflect.Value {
+	v := new(v1beta1.Coin)
+	return protoreflect.ValueOfMessage(v.ProtoReflect())
+}
+
+func (x *_Permission_41_list) IsValid() bool {
+	return x.list != nil
+}
+
 var (
-	md_Permission                           protoreflect.MessageDescriptor
-	fd_Permission_id                        protoreflect.FieldDescriptor
-	fd_Permission_schema_id                 protoreflect.FieldDescriptor
-	fd_Permission_type                      protoreflect.FieldDescriptor
-	fd_Permission_did                       protoreflect.FieldDescriptor
-	fd_Permission_grantee                   protoreflect.FieldDescriptor
-	fd_Permission_created                   protoreflect.FieldDescriptor
-	fd_Permission_created_by                protoreflect.FieldDescriptor
-	fd_Permission_extended                  protoreflect.FieldDescriptor
-	fd_Permission_extended_by               protoreflect.FieldDescriptor
-	fd_Permission_slashed                   protoreflect.FieldDescriptor
-	fd_Permission_slashed_by                protoreflect.FieldDescriptor
-	fd_Permission_repaid                    protoreflect.FieldDescriptor
-	fd_Permission_repaid_by                 protoreflect.FieldDescriptor
-	fd_Permission_effective_from            protoreflect.FieldDescriptor
-	fd_Permission_effective_until           protoreflect.FieldDescriptor
-	fd_Permission_modified                  protoreflect.FieldDescriptor
-	fd_Permission_validation_fees           protoreflect.FieldDescriptor
-	fd_Permission_issuance_fees             protoreflect.FieldDescriptor
-	fd_Permission_verification_fees         protoreflect.FieldDescriptor
-	fd_Permission_deposit                   protoreflect.FieldDescriptor
-	fd_Permission_slashed_deposit           protoreflect.FieldDescriptor
-	fd_Permission_repaid_deposit            protoreflect.FieldDescriptor
-	fd_Permission_revoked                   protoreflect.FieldDescriptor
-	fd_Permission_revoked_by                protoreflect.FieldDescriptor
-	fd_Permission_country                   protoreflect.FieldDescriptor
-	fd_Permission_validator_perm_id         protoreflect.FieldDescriptor
-	fd_Permission_vp_state                  protoreflect.FieldDescriptor
-	fd_Permission_vp_exp                    protoreflect.FieldDescriptor
-	fd_Permission_vp_last_state_change      protoreflect.FieldDescriptor
-	fd_Permission_vp_validator_deposit      protoreflect.FieldDescriptor
-	fd_Permission_vp_current_fees           protoreflect.FieldDescriptor
-	fd_Permission_vp_current_deposit        protoreflect.FieldDescriptor
-	fd_Permission_vp_summary_digest_sri     protoreflect.FieldDescriptor
-	fd_Permission_vp_term_requested         protoreflect.FieldDescriptor
-	fd_Permission_issuance_fee_discount     protoreflect.FieldDescriptor
-	fd_Permission_verification_fee_discount protoreflect.FieldDescriptor
+	md_Permission                                   protoreflect.MessageDescriptor
+	fd_Permission_id                                protoreflect.FieldDescriptor
+	fd_Permission_schema_id                         protoreflect.FieldDescriptor
+	fd_Permission_type                              protoreflect.FieldDescriptor
+	fd_Permission_did                               protoreflect.FieldDescriptor
+	fd_Permission_authority                         protoreflect.FieldDescriptor
+	fd_Permission_created                           protoreflect.FieldDescriptor
+	fd_Permission_created_by                        protoreflect.FieldDescriptor
+	fd_Permission_adjusted                          protoreflect.FieldDescriptor
+	fd_Permission_adjusted_by                       protoreflect.FieldDescriptor
+	fd_Permission_slashed                           protoreflect.FieldDescriptor
+	fd_Permission_slashed_by                        protoreflect.FieldDescriptor
+	fd_Permission_repaid                            protoreflect.FieldDescriptor
+	fd_Permission_repaid_by                         protoreflect.FieldDescriptor
+	fd_Permission_effective_from                    protoreflect.FieldDescriptor
+	fd_Permission_effective_until                   protoreflect.FieldDescriptor
+	fd_Permission_modified                          protoreflect.FieldDescriptor
+	fd_Permission_validation_fees                   protoreflect.FieldDescriptor
+	fd_Permission_issuance_fees                     protoreflect.FieldDescriptor
+	fd_Permission_verification_fees                 protoreflect.FieldDescriptor
+	fd_Permission_deposit                           protoreflect.FieldDescriptor
+	fd_Permission_slashed_deposit                   protoreflect.FieldDescriptor
+	fd_Permission_repaid_deposit                    protoreflect.FieldDescriptor
+	fd_Permission_revoked                           protoreflect.FieldDescriptor
+	fd_Permission_revoked_by                        protoreflect.FieldDescriptor
+	fd_Permission_country                           protoreflect.FieldDescriptor
+	fd_Permission_validator_perm_id                 protoreflect.FieldDescriptor
+	fd_Permission_vp_state                          protoreflect.FieldDescriptor
+	fd_Permission_vp_exp                            protoreflect.FieldDescriptor
+	fd_Permission_vp_last_state_change              protoreflect.FieldDescriptor
+	fd_Permission_vp_validator_deposit              protoreflect.FieldDescriptor
+	fd_Permission_vp_current_fees                   protoreflect.FieldDescriptor
+	fd_Permission_vp_current_deposit                protoreflect.FieldDescriptor
+	fd_Permission_vp_summary_digest_sri             protoreflect.FieldDescriptor
+	fd_Permission_vp_term_requested                 protoreflect.FieldDescriptor
+	fd_Permission_issuance_fee_discount             protoreflect.FieldDescriptor
+	fd_Permission_verification_fee_discount         protoreflect.FieldDescriptor
+	fd_Permission_vs_operator                       protoreflect.FieldDescriptor
+	fd_Permission_vs_operator_authz_enabled         protoreflect.FieldDescriptor
+	fd_Permission_vs_operator_authz_spend_limit     protoreflect.FieldDescriptor
+	fd_Permission_vs_operator_authz_with_feegrant   protoreflect.FieldDescriptor
+	fd_Permission_vs_operator_authz_fee_spend_limit protoreflect.FieldDescriptor
+	fd_Permission_vs_operator_authz_spend_period    protoreflect.FieldDescriptor
 )
 
 func init() {
@@ -63,11 +173,11 @@ func init() {
 	fd_Permission_schema_id = md_Permission.Fields().ByName("schema_id")
 	fd_Permission_type = md_Permission.Fields().ByName("type")
 	fd_Permission_did = md_Permission.Fields().ByName("did")
-	fd_Permission_grantee = md_Permission.Fields().ByName("grantee")
+	fd_Permission_authority = md_Permission.Fields().ByName("authority")
 	fd_Permission_created = md_Permission.Fields().ByName("created")
 	fd_Permission_created_by = md_Permission.Fields().ByName("created_by")
-	fd_Permission_extended = md_Permission.Fields().ByName("extended")
-	fd_Permission_extended_by = md_Permission.Fields().ByName("extended_by")
+	fd_Permission_adjusted = md_Permission.Fields().ByName("adjusted")
+	fd_Permission_adjusted_by = md_Permission.Fields().ByName("adjusted_by")
 	fd_Permission_slashed = md_Permission.Fields().ByName("slashed")
 	fd_Permission_slashed_by = md_Permission.Fields().ByName("slashed_by")
 	fd_Permission_repaid = md_Permission.Fields().ByName("repaid")
@@ -95,6 +205,12 @@ func init() {
 	fd_Permission_vp_term_requested = md_Permission.Fields().ByName("vp_term_requested")
 	fd_Permission_issuance_fee_discount = md_Permission.Fields().ByName("issuance_fee_discount")
 	fd_Permission_verification_fee_discount = md_Permission.Fields().ByName("verification_fee_discount")
+	fd_Permission_vs_operator = md_Permission.Fields().ByName("vs_operator")
+	fd_Permission_vs_operator_authz_enabled = md_Permission.Fields().ByName("vs_operator_authz_enabled")
+	fd_Permission_vs_operator_authz_spend_limit = md_Permission.Fields().ByName("vs_operator_authz_spend_limit")
+	fd_Permission_vs_operator_authz_with_feegrant = md_Permission.Fields().ByName("vs_operator_authz_with_feegrant")
+	fd_Permission_vs_operator_authz_fee_spend_limit = md_Permission.Fields().ByName("vs_operator_authz_fee_spend_limit")
+	fd_Permission_vs_operator_authz_spend_period = md_Permission.Fields().ByName("vs_operator_authz_spend_period")
 }
 
 var _ protoreflect.Message = (*fastReflection_Permission)(nil)
@@ -186,9 +302,9 @@ func (x *fastReflection_Permission) Range(f func(protoreflect.FieldDescriptor, p
 			return
 		}
 	}
-	if x.Grantee != "" {
-		value := protoreflect.ValueOfString(x.Grantee)
-		if !f(fd_Permission_grantee, value) {
+	if x.Authority != "" {
+		value := protoreflect.ValueOfString(x.Authority)
+		if !f(fd_Permission_authority, value) {
 			return
 		}
 	}
@@ -204,15 +320,15 @@ func (x *fastReflection_Permission) Range(f func(protoreflect.FieldDescriptor, p
 			return
 		}
 	}
-	if x.Extended != nil {
-		value := protoreflect.ValueOfMessage(x.Extended.ProtoReflect())
-		if !f(fd_Permission_extended, value) {
+	if x.Adjusted != nil {
+		value := protoreflect.ValueOfMessage(x.Adjusted.ProtoReflect())
+		if !f(fd_Permission_adjusted, value) {
 			return
 		}
 	}
-	if x.ExtendedBy != "" {
-		value := protoreflect.ValueOfString(x.ExtendedBy)
-		if !f(fd_Permission_extended_by, value) {
+	if x.AdjustedBy != "" {
+		value := protoreflect.ValueOfString(x.AdjustedBy)
+		if !f(fd_Permission_adjusted_by, value) {
 			return
 		}
 	}
@@ -378,6 +494,42 @@ func (x *fastReflection_Permission) Range(f func(protoreflect.FieldDescriptor, p
 			return
 		}
 	}
+	if x.VsOperator != "" {
+		value := protoreflect.ValueOfString(x.VsOperator)
+		if !f(fd_Permission_vs_operator, value) {
+			return
+		}
+	}
+	if x.VsOperatorAuthzEnabled != false {
+		value := protoreflect.ValueOfBool(x.VsOperatorAuthzEnabled)
+		if !f(fd_Permission_vs_operator_authz_enabled, value) {
+			return
+		}
+	}
+	if len(x.VsOperatorAuthzSpendLimit) != 0 {
+		value := protoreflect.ValueOfList(&_Permission_39_list{list: &x.VsOperatorAuthzSpendLimit})
+		if !f(fd_Permission_vs_operator_authz_spend_limit, value) {
+			return
+		}
+	}
+	if x.VsOperatorAuthzWithFeegrant != false {
+		value := protoreflect.ValueOfBool(x.VsOperatorAuthzWithFeegrant)
+		if !f(fd_Permission_vs_operator_authz_with_feegrant, value) {
+			return
+		}
+	}
+	if len(x.VsOperatorAuthzFeeSpendLimit) != 0 {
+		value := protoreflect.ValueOfList(&_Permission_41_list{list: &x.VsOperatorAuthzFeeSpendLimit})
+		if !f(fd_Permission_vs_operator_authz_fee_spend_limit, value) {
+			return
+		}
+	}
+	if x.VsOperatorAuthzSpendPeriod != nil {
+		value := protoreflect.ValueOfMessage(x.VsOperatorAuthzSpendPeriod.ProtoReflect())
+		if !f(fd_Permission_vs_operator_authz_spend_period, value) {
+			return
+		}
+	}
 }
 
 // Has reports whether a field is populated.
@@ -401,16 +553,16 @@ func (x *fastReflection_Permission) Has(fd protoreflect.FieldDescriptor) bool {
 		return x.Type_ != 0
 	case "verana.perm.v1.Permission.did":
 		return x.Did != ""
-	case "verana.perm.v1.Permission.grantee":
-		return x.Grantee != ""
+	case "verana.perm.v1.Permission.authority":
+		return x.Authority != ""
 	case "verana.perm.v1.Permission.created":
 		return x.Created != nil
 	case "verana.perm.v1.Permission.created_by":
 		return x.CreatedBy != ""
-	case "verana.perm.v1.Permission.extended":
-		return x.Extended != nil
-	case "verana.perm.v1.Permission.extended_by":
-		return x.ExtendedBy != ""
+	case "verana.perm.v1.Permission.adjusted":
+		return x.Adjusted != nil
+	case "verana.perm.v1.Permission.adjusted_by":
+		return x.AdjustedBy != ""
 	case "verana.perm.v1.Permission.slashed":
 		return x.Slashed != nil
 	case "verana.perm.v1.Permission.slashed_by":
@@ -465,6 +617,18 @@ func (x *fastReflection_Permission) Has(fd protoreflect.FieldDescriptor) bool {
 		return x.IssuanceFeeDiscount != uint64(0)
 	case "verana.perm.v1.Permission.verification_fee_discount":
 		return x.VerificationFeeDiscount != uint64(0)
+	case "verana.perm.v1.Permission.vs_operator":
+		return x.VsOperator != ""
+	case "verana.perm.v1.Permission.vs_operator_authz_enabled":
+		return x.VsOperatorAuthzEnabled != false
+	case "verana.perm.v1.Permission.vs_operator_authz_spend_limit":
+		return len(x.VsOperatorAuthzSpendLimit) != 0
+	case "verana.perm.v1.Permission.vs_operator_authz_with_feegrant":
+		return x.VsOperatorAuthzWithFeegrant != false
+	case "verana.perm.v1.Permission.vs_operator_authz_fee_spend_limit":
+		return len(x.VsOperatorAuthzFeeSpendLimit) != 0
+	case "verana.perm.v1.Permission.vs_operator_authz_spend_period":
+		return x.VsOperatorAuthzSpendPeriod != nil
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.perm.v1.Permission"))
@@ -489,16 +653,16 @@ func (x *fastReflection_Permission) Clear(fd protoreflect.FieldDescriptor) {
 		x.Type_ = 0
 	case "verana.perm.v1.Permission.did":
 		x.Did = ""
-	case "verana.perm.v1.Permission.grantee":
-		x.Grantee = ""
+	case "verana.perm.v1.Permission.authority":
+		x.Authority = ""
 	case "verana.perm.v1.Permission.created":
 		x.Created = nil
 	case "verana.perm.v1.Permission.created_by":
 		x.CreatedBy = ""
-	case "verana.perm.v1.Permission.extended":
-		x.Extended = nil
-	case "verana.perm.v1.Permission.extended_by":
-		x.ExtendedBy = ""
+	case "verana.perm.v1.Permission.adjusted":
+		x.Adjusted = nil
+	case "verana.perm.v1.Permission.adjusted_by":
+		x.AdjustedBy = ""
 	case "verana.perm.v1.Permission.slashed":
 		x.Slashed = nil
 	case "verana.perm.v1.Permission.slashed_by":
@@ -553,6 +717,18 @@ func (x *fastReflection_Permission) Clear(fd protoreflect.FieldDescriptor) {
 		x.IssuanceFeeDiscount = uint64(0)
 	case "verana.perm.v1.Permission.verification_fee_discount":
 		x.VerificationFeeDiscount = uint64(0)
+	case "verana.perm.v1.Permission.vs_operator":
+		x.VsOperator = ""
+	case "verana.perm.v1.Permission.vs_operator_authz_enabled":
+		x.VsOperatorAuthzEnabled = false
+	case "verana.perm.v1.Permission.vs_operator_authz_spend_limit":
+		x.VsOperatorAuthzSpendLimit = nil
+	case "verana.perm.v1.Permission.vs_operator_authz_with_feegrant":
+		x.VsOperatorAuthzWithFeegrant = false
+	case "verana.perm.v1.Permission.vs_operator_authz_fee_spend_limit":
+		x.VsOperatorAuthzFeeSpendLimit = nil
+	case "verana.perm.v1.Permission.vs_operator_authz_spend_period":
+		x.VsOperatorAuthzSpendPeriod = nil
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.perm.v1.Permission"))
@@ -581,8 +757,8 @@ func (x *fastReflection_Permission) Get(descriptor protoreflect.FieldDescriptor)
 	case "verana.perm.v1.Permission.did":
 		value := x.Did
 		return protoreflect.ValueOfString(value)
-	case "verana.perm.v1.Permission.grantee":
-		value := x.Grantee
+	case "verana.perm.v1.Permission.authority":
+		value := x.Authority
 		return protoreflect.ValueOfString(value)
 	case "verana.perm.v1.Permission.created":
 		value := x.Created
@@ -590,11 +766,11 @@ func (x *fastReflection_Permission) Get(descriptor protoreflect.FieldDescriptor)
 	case "verana.perm.v1.Permission.created_by":
 		value := x.CreatedBy
 		return protoreflect.ValueOfString(value)
-	case "verana.perm.v1.Permission.extended":
-		value := x.Extended
+	case "verana.perm.v1.Permission.adjusted":
+		value := x.Adjusted
 		return protoreflect.ValueOfMessage(value.ProtoReflect())
-	case "verana.perm.v1.Permission.extended_by":
-		value := x.ExtendedBy
+	case "verana.perm.v1.Permission.adjusted_by":
+		value := x.AdjustedBy
 		return protoreflect.ValueOfString(value)
 	case "verana.perm.v1.Permission.slashed":
 		value := x.Slashed
@@ -677,6 +853,30 @@ func (x *fastReflection_Permission) Get(descriptor protoreflect.FieldDescriptor)
 	case "verana.perm.v1.Permission.verification_fee_discount":
 		value := x.VerificationFeeDiscount
 		return protoreflect.ValueOfUint64(value)
+	case "verana.perm.v1.Permission.vs_operator":
+		value := x.VsOperator
+		return protoreflect.ValueOfString(value)
+	case "verana.perm.v1.Permission.vs_operator_authz_enabled":
+		value := x.VsOperatorAuthzEnabled
+		return protoreflect.ValueOfBool(value)
+	case "verana.perm.v1.Permission.vs_operator_authz_spend_limit":
+		if len(x.VsOperatorAuthzSpendLimit) == 0 {
+			return protoreflect.ValueOfList(&_Permission_39_list{})
+		}
+		listValue := &_Permission_39_list{list: &x.VsOperatorAuthzSpendLimit}
+		return protoreflect.ValueOfList(listValue)
+	case "verana.perm.v1.Permission.vs_operator_authz_with_feegrant":
+		value := x.VsOperatorAuthzWithFeegrant
+		return protoreflect.ValueOfBool(value)
+	case "verana.perm.v1.Permission.vs_operator_authz_fee_spend_limit":
+		if len(x.VsOperatorAuthzFeeSpendLimit) == 0 {
+			return protoreflect.ValueOfList(&_Permission_41_list{})
+		}
+		listValue := &_Permission_41_list{list: &x.VsOperatorAuthzFeeSpendLimit}
+		return protoreflect.ValueOfList(listValue)
+	case "verana.perm.v1.Permission.vs_operator_authz_spend_period":
+		value := x.VsOperatorAuthzSpendPeriod
+		return protoreflect.ValueOfMessage(value.ProtoReflect())
 	default:
 		if descriptor.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.perm.v1.Permission"))
@@ -705,16 +905,16 @@ func (x *fastReflection_Permission) Set(fd protoreflect.FieldDescriptor, value p
 		x.Type_ = (PermissionType)(value.Enum())
 	case "verana.perm.v1.Permission.did":
 		x.Did = value.Interface().(string)
-	case "verana.perm.v1.Permission.grantee":
-		x.Grantee = value.Interface().(string)
+	case "verana.perm.v1.Permission.authority":
+		x.Authority = value.Interface().(string)
 	case "verana.perm.v1.Permission.created":
 		x.Created = value.Message().Interface().(*timestamppb.Timestamp)
 	case "verana.perm.v1.Permission.created_by":
 		x.CreatedBy = value.Interface().(string)
-	case "verana.perm.v1.Permission.extended":
-		x.Extended = value.Message().Interface().(*timestamppb.Timestamp)
-	case "verana.perm.v1.Permission.extended_by":
-		x.ExtendedBy = value.Interface().(string)
+	case "verana.perm.v1.Permission.adjusted":
+		x.Adjusted = value.Message().Interface().(*timestamppb.Timestamp)
+	case "verana.perm.v1.Permission.adjusted_by":
+		x.AdjustedBy = value.Interface().(string)
 	case "verana.perm.v1.Permission.slashed":
 		x.Slashed = value.Message().Interface().(*timestamppb.Timestamp)
 	case "verana.perm.v1.Permission.slashed_by":
@@ -769,6 +969,22 @@ func (x *fastReflection_Permission) Set(fd protoreflect.FieldDescriptor, value p
 		x.IssuanceFeeDiscount = value.Uint()
 	case "verana.perm.v1.Permission.verification_fee_discount":
 		x.VerificationFeeDiscount = value.Uint()
+	case "verana.perm.v1.Permission.vs_operator":
+		x.VsOperator = value.Interface().(string)
+	case "verana.perm.v1.Permission.vs_operator_authz_enabled":
+		x.VsOperatorAuthzEnabled = value.Bool()
+	case "verana.perm.v1.Permission.vs_operator_authz_spend_limit":
+		lv := value.List()
+		clv := lv.(*_Permission_39_list)
+		x.VsOperatorAuthzSpendLimit = *clv.list
+	case "verana.perm.v1.Permission.vs_operator_authz_with_feegrant":
+		x.VsOperatorAuthzWithFeegrant = value.Bool()
+	case "verana.perm.v1.Permission.vs_operator_authz_fee_spend_limit":
+		lv := value.List()
+		clv := lv.(*_Permission_41_list)
+		x.VsOperatorAuthzFeeSpendLimit = *clv.list
+	case "verana.perm.v1.Permission.vs_operator_authz_spend_period":
+		x.VsOperatorAuthzSpendPeriod = value.Message().Interface().(*durationpb.Duration)
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.perm.v1.Permission"))
@@ -794,11 +1010,11 @@ func (x *fastReflection_Permission) Mutable(fd protoreflect.FieldDescriptor) pro
 			x.Created = new(timestamppb.Timestamp)
 		}
 		return protoreflect.ValueOfMessage(x.Created.ProtoReflect())
-	case "verana.perm.v1.Permission.extended":
-		if x.Extended == nil {
-			x.Extended = new(timestamppb.Timestamp)
+	case "verana.perm.v1.Permission.adjusted":
+		if x.Adjusted == nil {
+			x.Adjusted = new(timestamppb.Timestamp)
 		}
-		return protoreflect.ValueOfMessage(x.Extended.ProtoReflect())
+		return protoreflect.ValueOfMessage(x.Adjusted.ProtoReflect())
 	case "verana.perm.v1.Permission.slashed":
 		if x.Slashed == nil {
 			x.Slashed = new(timestamppb.Timestamp)
@@ -844,6 +1060,23 @@ func (x *fastReflection_Permission) Mutable(fd protoreflect.FieldDescriptor) pro
 			x.VpTermRequested = new(timestamppb.Timestamp)
 		}
 		return protoreflect.ValueOfMessage(x.VpTermRequested.ProtoReflect())
+	case "verana.perm.v1.Permission.vs_operator_authz_spend_limit":
+		if x.VsOperatorAuthzSpendLimit == nil {
+			x.VsOperatorAuthzSpendLimit = []*v1beta1.Coin{}
+		}
+		value := &_Permission_39_list{list: &x.VsOperatorAuthzSpendLimit}
+		return protoreflect.ValueOfList(value)
+	case "verana.perm.v1.Permission.vs_operator_authz_fee_spend_limit":
+		if x.VsOperatorAuthzFeeSpendLimit == nil {
+			x.VsOperatorAuthzFeeSpendLimit = []*v1beta1.Coin{}
+		}
+		value := &_Permission_41_list{list: &x.VsOperatorAuthzFeeSpendLimit}
+		return protoreflect.ValueOfList(value)
+	case "verana.perm.v1.Permission.vs_operator_authz_spend_period":
+		if x.VsOperatorAuthzSpendPeriod == nil {
+			x.VsOperatorAuthzSpendPeriod = new(durationpb.Duration)
+		}
+		return protoreflect.ValueOfMessage(x.VsOperatorAuthzSpendPeriod.ProtoReflect())
 	case "verana.perm.v1.Permission.id":
 		panic(fmt.Errorf("field id of message verana.perm.v1.Permission is not mutable"))
 	case "verana.perm.v1.Permission.schema_id":
@@ -852,12 +1085,12 @@ func (x *fastReflection_Permission) Mutable(fd protoreflect.FieldDescriptor) pro
 		panic(fmt.Errorf("field type of message verana.perm.v1.Permission is not mutable"))
 	case "verana.perm.v1.Permission.did":
 		panic(fmt.Errorf("field did of message verana.perm.v1.Permission is not mutable"))
-	case "verana.perm.v1.Permission.grantee":
-		panic(fmt.Errorf("field grantee of message verana.perm.v1.Permission is not mutable"))
+	case "verana.perm.v1.Permission.authority":
+		panic(fmt.Errorf("field authority of message verana.perm.v1.Permission is not mutable"))
 	case "verana.perm.v1.Permission.created_by":
 		panic(fmt.Errorf("field created_by of message verana.perm.v1.Permission is not mutable"))
-	case "verana.perm.v1.Permission.extended_by":
-		panic(fmt.Errorf("field extended_by of message verana.perm.v1.Permission is not mutable"))
+	case "verana.perm.v1.Permission.adjusted_by":
+		panic(fmt.Errorf("field adjusted_by of message verana.perm.v1.Permission is not mutable"))
 	case "verana.perm.v1.Permission.slashed_by":
 		panic(fmt.Errorf("field slashed_by of message verana.perm.v1.Permission is not mutable"))
 	case "verana.perm.v1.Permission.repaid_by":
@@ -894,6 +1127,12 @@ func (x *fastReflection_Permission) Mutable(fd protoreflect.FieldDescriptor) pro
 		panic(fmt.Errorf("field issuance_fee_discount of message verana.perm.v1.Permission is not mutable"))
 	case "verana.perm.v1.Permission.verification_fee_discount":
 		panic(fmt.Errorf("field verification_fee_discount of message verana.perm.v1.Permission is not mutable"))
+	case "verana.perm.v1.Permission.vs_operator":
+		panic(fmt.Errorf("field vs_operator of message verana.perm.v1.Permission is not mutable"))
+	case "verana.perm.v1.Permission.vs_operator_authz_enabled":
+		panic(fmt.Errorf("field vs_operator_authz_enabled of message verana.perm.v1.Permission is not mutable"))
+	case "verana.perm.v1.Permission.vs_operator_authz_with_feegrant":
+		panic(fmt.Errorf("field vs_operator_authz_with_feegrant of message verana.perm.v1.Permission is not mutable"))
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.perm.v1.Permission"))
@@ -915,17 +1154,17 @@ func (x *fastReflection_Permission) NewField(fd protoreflect.FieldDescriptor) pr
 		return protoreflect.ValueOfEnum(0)
 	case "verana.perm.v1.Permission.did":
 		return protoreflect.ValueOfString("")
-	case "verana.perm.v1.Permission.grantee":
+	case "verana.perm.v1.Permission.authority":
 		return protoreflect.ValueOfString("")
 	case "verana.perm.v1.Permission.created":
 		m := new(timestamppb.Timestamp)
 		return protoreflect.ValueOfMessage(m.ProtoReflect())
 	case "verana.perm.v1.Permission.created_by":
 		return protoreflect.ValueOfString("")
-	case "verana.perm.v1.Permission.extended":
+	case "verana.perm.v1.Permission.adjusted":
 		m := new(timestamppb.Timestamp)
 		return protoreflect.ValueOfMessage(m.ProtoReflect())
-	case "verana.perm.v1.Permission.extended_by":
+	case "verana.perm.v1.Permission.adjusted_by":
 		return protoreflect.ValueOfString("")
 	case "verana.perm.v1.Permission.slashed":
 		m := new(timestamppb.Timestamp)
@@ -990,6 +1229,21 @@ func (x *fastReflection_Permission) NewField(fd protoreflect.FieldDescriptor) pr
 		return protoreflect.ValueOfUint64(uint64(0))
 	case "verana.perm.v1.Permission.verification_fee_discount":
 		return protoreflect.ValueOfUint64(uint64(0))
+	case "verana.perm.v1.Permission.vs_operator":
+		return protoreflect.ValueOfString("")
+	case "verana.perm.v1.Permission.vs_operator_authz_enabled":
+		return protoreflect.ValueOfBool(false)
+	case "verana.perm.v1.Permission.vs_operator_authz_spend_limit":
+		list := []*v1beta1.Coin{}
+		return protoreflect.ValueOfList(&_Permission_39_list{list: &list})
+	case "verana.perm.v1.Permission.vs_operator_authz_with_feegrant":
+		return protoreflect.ValueOfBool(false)
+	case "verana.perm.v1.Permission.vs_operator_authz_fee_spend_limit":
+		list := []*v1beta1.Coin{}
+		return protoreflect.ValueOfList(&_Permission_41_list{list: &list})
+	case "verana.perm.v1.Permission.vs_operator_authz_spend_period":
+		m := new(durationpb.Duration)
+		return protoreflect.ValueOfMessage(m.ProtoReflect())
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.perm.v1.Permission"))
@@ -1072,7 +1326,7 @@ func (x *fastReflection_Permission) ProtoMethods() *protoiface.Methods {
 		if l > 0 {
 			n += 1 + l + runtime.Sov(uint64(l))
 		}
-		l = len(x.Grantee)
+		l = len(x.Authority)
 		if l > 0 {
 			n += 1 + l + runtime.Sov(uint64(l))
 		}
@@ -1084,11 +1338,11 @@ func (x *fastReflection_Permission) ProtoMethods() *protoiface.Methods {
 		if l > 0 {
 			n += 1 + l + runtime.Sov(uint64(l))
 		}
-		if x.Extended != nil {
-			l = options.Size(x.Extended)
+		if x.Adjusted != nil {
+			l = options.Size(x.Adjusted)
 			n += 1 + l + runtime.Sov(uint64(l))
 		}
-		l = len(x.ExtendedBy)
+		l = len(x.AdjustedBy)
 		if l > 0 {
 			n += 1 + l + runtime.Sov(uint64(l))
 		}
@@ -1187,6 +1441,32 @@ func (x *fastReflection_Permission) ProtoMethods() *protoiface.Methods {
 		if x.VerificationFeeDiscount != 0 {
 			n += 2 + runtime.Sov(uint64(x.VerificationFeeDiscount))
 		}
+		l = len(x.VsOperator)
+		if l > 0 {
+			n += 2 + l + runtime.Sov(uint64(l))
+		}
+		if x.VsOperatorAuthzEnabled {
+			n += 3
+		}
+		if len(x.VsOperatorAuthzSpendLimit) > 0 {
+			for _, e := range x.VsOperatorAuthzSpendLimit {
+				l = options.Size(e)
+				n += 2 + l + runtime.Sov(uint64(l))
+			}
+		}
+		if x.VsOperatorAuthzWithFeegrant {
+			n += 3
+		}
+		if len(x.VsOperatorAuthzFeeSpendLimit) > 0 {
+			for _, e := range x.VsOperatorAuthzFeeSpendLimit {
+				l = options.Size(e)
+				n += 2 + l + runtime.Sov(uint64(l))
+			}
+		}
+		if x.VsOperatorAuthzSpendPeriod != nil {
+			l = options.Size(x.VsOperatorAuthzSpendPeriod)
+			n += 2 + l + runtime.Sov(uint64(l))
+		}
 		if x.unknownFields != nil {
 			n += len(x.unknownFields)
 		}
@@ -1215,6 +1495,91 @@ func (x *fastReflection_Permission) ProtoMethods() *protoiface.Methods {
 		if x.unknownFields != nil {
 			i -= len(x.unknownFields)
 			copy(dAtA[i:], x.unknownFields)
+		}
+		if x.VsOperatorAuthzSpendPeriod != nil {
+			encoded, err := options.Marshal(x.VsOperatorAuthzSpendPeriod)
+			if err != nil {
+				return protoiface.MarshalOutput{
+					NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+					Buf:               input.Buf,
+				}, err
+			}
+			i -= len(encoded)
+			copy(dAtA[i:], encoded)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(encoded)))
+			i--
+			dAtA[i] = 0x2
+			i--
+			dAtA[i] = 0xd2
+		}
+		if len(x.VsOperatorAuthzFeeSpendLimit) > 0 {
+			for iNdEx := len(x.VsOperatorAuthzFeeSpendLimit) - 1; iNdEx >= 0; iNdEx-- {
+				encoded, err := options.Marshal(x.VsOperatorAuthzFeeSpendLimit[iNdEx])
+				if err != nil {
+					return protoiface.MarshalOutput{
+						NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+						Buf:               input.Buf,
+					}, err
+				}
+				i -= len(encoded)
+				copy(dAtA[i:], encoded)
+				i = runtime.EncodeVarint(dAtA, i, uint64(len(encoded)))
+				i--
+				dAtA[i] = 0x2
+				i--
+				dAtA[i] = 0xca
+			}
+		}
+		if x.VsOperatorAuthzWithFeegrant {
+			i--
+			if x.VsOperatorAuthzWithFeegrant {
+				dAtA[i] = 1
+			} else {
+				dAtA[i] = 0
+			}
+			i--
+			dAtA[i] = 0x2
+			i--
+			dAtA[i] = 0xc0
+		}
+		if len(x.VsOperatorAuthzSpendLimit) > 0 {
+			for iNdEx := len(x.VsOperatorAuthzSpendLimit) - 1; iNdEx >= 0; iNdEx-- {
+				encoded, err := options.Marshal(x.VsOperatorAuthzSpendLimit[iNdEx])
+				if err != nil {
+					return protoiface.MarshalOutput{
+						NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+						Buf:               input.Buf,
+					}, err
+				}
+				i -= len(encoded)
+				copy(dAtA[i:], encoded)
+				i = runtime.EncodeVarint(dAtA, i, uint64(len(encoded)))
+				i--
+				dAtA[i] = 0x2
+				i--
+				dAtA[i] = 0xba
+			}
+		}
+		if x.VsOperatorAuthzEnabled {
+			i--
+			if x.VsOperatorAuthzEnabled {
+				dAtA[i] = 1
+			} else {
+				dAtA[i] = 0
+			}
+			i--
+			dAtA[i] = 0x2
+			i--
+			dAtA[i] = 0xb0
+		}
+		if len(x.VsOperator) > 0 {
+			i -= len(x.VsOperator)
+			copy(dAtA[i:], x.VsOperator)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.VsOperator)))
+			i--
+			dAtA[i] = 0x2
+			i--
+			dAtA[i] = 0xaa
 		}
 		if x.VerificationFeeDiscount != 0 {
 			i = runtime.EncodeVarint(dAtA, i, uint64(x.VerificationFeeDiscount))
@@ -1484,15 +1849,15 @@ func (x *fastReflection_Permission) ProtoMethods() *protoiface.Methods {
 			i--
 			dAtA[i] = 0x52
 		}
-		if len(x.ExtendedBy) > 0 {
-			i -= len(x.ExtendedBy)
-			copy(dAtA[i:], x.ExtendedBy)
-			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.ExtendedBy)))
+		if len(x.AdjustedBy) > 0 {
+			i -= len(x.AdjustedBy)
+			copy(dAtA[i:], x.AdjustedBy)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.AdjustedBy)))
 			i--
 			dAtA[i] = 0x4a
 		}
-		if x.Extended != nil {
-			encoded, err := options.Marshal(x.Extended)
+		if x.Adjusted != nil {
+			encoded, err := options.Marshal(x.Adjusted)
 			if err != nil {
 				return protoiface.MarshalOutput{
 					NoUnkeyedLiterals: input.NoUnkeyedLiterals,
@@ -1526,10 +1891,10 @@ func (x *fastReflection_Permission) ProtoMethods() *protoiface.Methods {
 			i--
 			dAtA[i] = 0x32
 		}
-		if len(x.Grantee) > 0 {
-			i -= len(x.Grantee)
-			copy(dAtA[i:], x.Grantee)
-			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Grantee)))
+		if len(x.Authority) > 0 {
+			i -= len(x.Authority)
+			copy(dAtA[i:], x.Authority)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Authority)))
 			i--
 			dAtA[i] = 0x2a
 		}
@@ -1695,7 +2060,7 @@ func (x *fastReflection_Permission) ProtoMethods() *protoiface.Methods {
 				iNdEx = postIndex
 			case 5:
 				if wireType != 2 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Grantee", wireType)
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Authority", wireType)
 				}
 				var stringLen uint64
 				for shift := uint(0); ; shift += 7 {
@@ -1723,7 +2088,7 @@ func (x *fastReflection_Permission) ProtoMethods() *protoiface.Methods {
 				if postIndex > l {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
 				}
-				x.Grantee = string(dAtA[iNdEx:postIndex])
+				x.Authority = string(dAtA[iNdEx:postIndex])
 				iNdEx = postIndex
 			case 6:
 				if wireType != 2 {
@@ -1795,7 +2160,7 @@ func (x *fastReflection_Permission) ProtoMethods() *protoiface.Methods {
 				iNdEx = postIndex
 			case 8:
 				if wireType != 2 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Extended", wireType)
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Adjusted", wireType)
 				}
 				var msglen int
 				for shift := uint(0); ; shift += 7 {
@@ -1822,16 +2187,16 @@ func (x *fastReflection_Permission) ProtoMethods() *protoiface.Methods {
 				if postIndex > l {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
 				}
-				if x.Extended == nil {
-					x.Extended = &timestamppb.Timestamp{}
+				if x.Adjusted == nil {
+					x.Adjusted = &timestamppb.Timestamp{}
 				}
-				if err := options.Unmarshal(dAtA[iNdEx:postIndex], x.Extended); err != nil {
+				if err := options.Unmarshal(dAtA[iNdEx:postIndex], x.Adjusted); err != nil {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, err
 				}
 				iNdEx = postIndex
 			case 9:
 				if wireType != 2 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field ExtendedBy", wireType)
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field AdjustedBy", wireType)
 				}
 				var stringLen uint64
 				for shift := uint(0); ; shift += 7 {
@@ -1859,7 +2224,7 @@ func (x *fastReflection_Permission) ProtoMethods() *protoiface.Methods {
 				if postIndex > l {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
 				}
-				x.ExtendedBy = string(dAtA[iNdEx:postIndex])
+				x.AdjustedBy = string(dAtA[iNdEx:postIndex])
 				iNdEx = postIndex
 			case 10:
 				if wireType != 2 {
@@ -2592,6 +2957,182 @@ func (x *fastReflection_Permission) ProtoMethods() *protoiface.Methods {
 						break
 					}
 				}
+			case 37:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field VsOperator", wireType)
+				}
+				var stringLen uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					stringLen |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				intStringLen := int(stringLen)
+				if intStringLen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + intStringLen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				x.VsOperator = string(dAtA[iNdEx:postIndex])
+				iNdEx = postIndex
+			case 38:
+				if wireType != 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field VsOperatorAuthzEnabled", wireType)
+				}
+				var v int
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					v |= int(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				x.VsOperatorAuthzEnabled = bool(v != 0)
+			case 39:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field VsOperatorAuthzSpendLimit", wireType)
+				}
+				var msglen int
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					msglen |= int(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				if msglen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + msglen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				x.VsOperatorAuthzSpendLimit = append(x.VsOperatorAuthzSpendLimit, &v1beta1.Coin{})
+				if err := options.Unmarshal(dAtA[iNdEx:postIndex], x.VsOperatorAuthzSpendLimit[len(x.VsOperatorAuthzSpendLimit)-1]); err != nil {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, err
+				}
+				iNdEx = postIndex
+			case 40:
+				if wireType != 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field VsOperatorAuthzWithFeegrant", wireType)
+				}
+				var v int
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					v |= int(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				x.VsOperatorAuthzWithFeegrant = bool(v != 0)
+			case 41:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field VsOperatorAuthzFeeSpendLimit", wireType)
+				}
+				var msglen int
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					msglen |= int(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				if msglen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + msglen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				x.VsOperatorAuthzFeeSpendLimit = append(x.VsOperatorAuthzFeeSpendLimit, &v1beta1.Coin{})
+				if err := options.Unmarshal(dAtA[iNdEx:postIndex], x.VsOperatorAuthzFeeSpendLimit[len(x.VsOperatorAuthzFeeSpendLimit)-1]); err != nil {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, err
+				}
+				iNdEx = postIndex
+			case 42:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field VsOperatorAuthzSpendPeriod", wireType)
+				}
+				var msglen int
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					msglen |= int(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				if msglen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + msglen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				if x.VsOperatorAuthzSpendPeriod == nil {
+					x.VsOperatorAuthzSpendPeriod = &durationpb.Duration{}
+				}
+				if err := options.Unmarshal(dAtA[iNdEx:postIndex], x.VsOperatorAuthzSpendPeriod); err != nil {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, err
+				}
+				iNdEx = postIndex
 			default:
 				iNdEx = preIndex
 				skippy, err := runtime.Skip(dAtA[iNdEx:])
@@ -2627,74 +3168,76 @@ func (x *fastReflection_Permission) ProtoMethods() *protoiface.Methods {
 	}
 }
 
-var _ protoreflect.List = (*_PermissionSession_4_list)(nil)
+var _ protoreflect.List = (*_PermissionSession_5_list)(nil)
 
-type _PermissionSession_4_list struct {
-	list *[]*SessionAuthz
+type _PermissionSession_5_list struct {
+	list *[]*PermissionSessionRecord
 }
 
-func (x *_PermissionSession_4_list) Len() int {
+func (x *_PermissionSession_5_list) Len() int {
 	if x.list == nil {
 		return 0
 	}
 	return len(*x.list)
 }
 
-func (x *_PermissionSession_4_list) Get(i int) protoreflect.Value {
+func (x *_PermissionSession_5_list) Get(i int) protoreflect.Value {
 	return protoreflect.ValueOfMessage((*x.list)[i].ProtoReflect())
 }
 
-func (x *_PermissionSession_4_list) Set(i int, value protoreflect.Value) {
+func (x *_PermissionSession_5_list) Set(i int, value protoreflect.Value) {
 	valueUnwrapped := value.Message()
-	concreteValue := valueUnwrapped.Interface().(*SessionAuthz)
+	concreteValue := valueUnwrapped.Interface().(*PermissionSessionRecord)
 	(*x.list)[i] = concreteValue
 }
 
-func (x *_PermissionSession_4_list) Append(value protoreflect.Value) {
+func (x *_PermissionSession_5_list) Append(value protoreflect.Value) {
 	valueUnwrapped := value.Message()
-	concreteValue := valueUnwrapped.Interface().(*SessionAuthz)
+	concreteValue := valueUnwrapped.Interface().(*PermissionSessionRecord)
 	*x.list = append(*x.list, concreteValue)
 }
 
-func (x *_PermissionSession_4_list) AppendMutable() protoreflect.Value {
-	v := new(SessionAuthz)
+func (x *_PermissionSession_5_list) AppendMutable() protoreflect.Value {
+	v := new(PermissionSessionRecord)
 	*x.list = append(*x.list, v)
 	return protoreflect.ValueOfMessage(v.ProtoReflect())
 }
 
-func (x *_PermissionSession_4_list) Truncate(n int) {
+func (x *_PermissionSession_5_list) Truncate(n int) {
 	for i := n; i < len(*x.list); i++ {
 		(*x.list)[i] = nil
 	}
 	*x.list = (*x.list)[:n]
 }
 
-func (x *_PermissionSession_4_list) NewElement() protoreflect.Value {
-	v := new(SessionAuthz)
+func (x *_PermissionSession_5_list) NewElement() protoreflect.Value {
+	v := new(PermissionSessionRecord)
 	return protoreflect.ValueOfMessage(v.ProtoReflect())
 }
 
-func (x *_PermissionSession_4_list) IsValid() bool {
+func (x *_PermissionSession_5_list) IsValid() bool {
 	return x.list != nil
 }
 
 var (
-	md_PermissionSession               protoreflect.MessageDescriptor
-	fd_PermissionSession_id            protoreflect.FieldDescriptor
-	fd_PermissionSession_controller    protoreflect.FieldDescriptor
-	fd_PermissionSession_agent_perm_id protoreflect.FieldDescriptor
-	fd_PermissionSession_authz         protoreflect.FieldDescriptor
-	fd_PermissionSession_created       protoreflect.FieldDescriptor
-	fd_PermissionSession_modified      protoreflect.FieldDescriptor
+	md_PermissionSession                 protoreflect.MessageDescriptor
+	fd_PermissionSession_id              protoreflect.FieldDescriptor
+	fd_PermissionSession_authority       protoreflect.FieldDescriptor
+	fd_PermissionSession_vs_operator     protoreflect.FieldDescriptor
+	fd_PermissionSession_agent_perm_id   protoreflect.FieldDescriptor
+	fd_PermissionSession_session_records protoreflect.FieldDescriptor
+	fd_PermissionSession_created         protoreflect.FieldDescriptor
+	fd_PermissionSession_modified        protoreflect.FieldDescriptor
 )
 
 func init() {
 	file_verana_perm_v1_types_proto_init()
 	md_PermissionSession = File_verana_perm_v1_types_proto.Messages().ByName("PermissionSession")
 	fd_PermissionSession_id = md_PermissionSession.Fields().ByName("id")
-	fd_PermissionSession_controller = md_PermissionSession.Fields().ByName("controller")
+	fd_PermissionSession_authority = md_PermissionSession.Fields().ByName("authority")
+	fd_PermissionSession_vs_operator = md_PermissionSession.Fields().ByName("vs_operator")
 	fd_PermissionSession_agent_perm_id = md_PermissionSession.Fields().ByName("agent_perm_id")
-	fd_PermissionSession_authz = md_PermissionSession.Fields().ByName("authz")
+	fd_PermissionSession_session_records = md_PermissionSession.Fields().ByName("session_records")
 	fd_PermissionSession_created = md_PermissionSession.Fields().ByName("created")
 	fd_PermissionSession_modified = md_PermissionSession.Fields().ByName("modified")
 }
@@ -2770,9 +3313,15 @@ func (x *fastReflection_PermissionSession) Range(f func(protoreflect.FieldDescri
 			return
 		}
 	}
-	if x.Controller != "" {
-		value := protoreflect.ValueOfString(x.Controller)
-		if !f(fd_PermissionSession_controller, value) {
+	if x.Authority != "" {
+		value := protoreflect.ValueOfString(x.Authority)
+		if !f(fd_PermissionSession_authority, value) {
+			return
+		}
+	}
+	if x.VsOperator != "" {
+		value := protoreflect.ValueOfString(x.VsOperator)
+		if !f(fd_PermissionSession_vs_operator, value) {
 			return
 		}
 	}
@@ -2782,9 +3331,9 @@ func (x *fastReflection_PermissionSession) Range(f func(protoreflect.FieldDescri
 			return
 		}
 	}
-	if len(x.Authz) != 0 {
-		value := protoreflect.ValueOfList(&_PermissionSession_4_list{list: &x.Authz})
-		if !f(fd_PermissionSession_authz, value) {
+	if len(x.SessionRecords) != 0 {
+		value := protoreflect.ValueOfList(&_PermissionSession_5_list{list: &x.SessionRecords})
+		if !f(fd_PermissionSession_session_records, value) {
 			return
 		}
 	}
@@ -2817,12 +3366,14 @@ func (x *fastReflection_PermissionSession) Has(fd protoreflect.FieldDescriptor) 
 	switch fd.FullName() {
 	case "verana.perm.v1.PermissionSession.id":
 		return x.Id != ""
-	case "verana.perm.v1.PermissionSession.controller":
-		return x.Controller != ""
+	case "verana.perm.v1.PermissionSession.authority":
+		return x.Authority != ""
+	case "verana.perm.v1.PermissionSession.vs_operator":
+		return x.VsOperator != ""
 	case "verana.perm.v1.PermissionSession.agent_perm_id":
 		return x.AgentPermId != uint64(0)
-	case "verana.perm.v1.PermissionSession.authz":
-		return len(x.Authz) != 0
+	case "verana.perm.v1.PermissionSession.session_records":
+		return len(x.SessionRecords) != 0
 	case "verana.perm.v1.PermissionSession.created":
 		return x.Created != nil
 	case "verana.perm.v1.PermissionSession.modified":
@@ -2845,12 +3396,14 @@ func (x *fastReflection_PermissionSession) Clear(fd protoreflect.FieldDescriptor
 	switch fd.FullName() {
 	case "verana.perm.v1.PermissionSession.id":
 		x.Id = ""
-	case "verana.perm.v1.PermissionSession.controller":
-		x.Controller = ""
+	case "verana.perm.v1.PermissionSession.authority":
+		x.Authority = ""
+	case "verana.perm.v1.PermissionSession.vs_operator":
+		x.VsOperator = ""
 	case "verana.perm.v1.PermissionSession.agent_perm_id":
 		x.AgentPermId = uint64(0)
-	case "verana.perm.v1.PermissionSession.authz":
-		x.Authz = nil
+	case "verana.perm.v1.PermissionSession.session_records":
+		x.SessionRecords = nil
 	case "verana.perm.v1.PermissionSession.created":
 		x.Created = nil
 	case "verana.perm.v1.PermissionSession.modified":
@@ -2874,17 +3427,20 @@ func (x *fastReflection_PermissionSession) Get(descriptor protoreflect.FieldDesc
 	case "verana.perm.v1.PermissionSession.id":
 		value := x.Id
 		return protoreflect.ValueOfString(value)
-	case "verana.perm.v1.PermissionSession.controller":
-		value := x.Controller
+	case "verana.perm.v1.PermissionSession.authority":
+		value := x.Authority
+		return protoreflect.ValueOfString(value)
+	case "verana.perm.v1.PermissionSession.vs_operator":
+		value := x.VsOperator
 		return protoreflect.ValueOfString(value)
 	case "verana.perm.v1.PermissionSession.agent_perm_id":
 		value := x.AgentPermId
 		return protoreflect.ValueOfUint64(value)
-	case "verana.perm.v1.PermissionSession.authz":
-		if len(x.Authz) == 0 {
-			return protoreflect.ValueOfList(&_PermissionSession_4_list{})
+	case "verana.perm.v1.PermissionSession.session_records":
+		if len(x.SessionRecords) == 0 {
+			return protoreflect.ValueOfList(&_PermissionSession_5_list{})
 		}
-		listValue := &_PermissionSession_4_list{list: &x.Authz}
+		listValue := &_PermissionSession_5_list{list: &x.SessionRecords}
 		return protoreflect.ValueOfList(listValue)
 	case "verana.perm.v1.PermissionSession.created":
 		value := x.Created
@@ -2914,14 +3470,16 @@ func (x *fastReflection_PermissionSession) Set(fd protoreflect.FieldDescriptor, 
 	switch fd.FullName() {
 	case "verana.perm.v1.PermissionSession.id":
 		x.Id = value.Interface().(string)
-	case "verana.perm.v1.PermissionSession.controller":
-		x.Controller = value.Interface().(string)
+	case "verana.perm.v1.PermissionSession.authority":
+		x.Authority = value.Interface().(string)
+	case "verana.perm.v1.PermissionSession.vs_operator":
+		x.VsOperator = value.Interface().(string)
 	case "verana.perm.v1.PermissionSession.agent_perm_id":
 		x.AgentPermId = value.Uint()
-	case "verana.perm.v1.PermissionSession.authz":
+	case "verana.perm.v1.PermissionSession.session_records":
 		lv := value.List()
-		clv := lv.(*_PermissionSession_4_list)
-		x.Authz = *clv.list
+		clv := lv.(*_PermissionSession_5_list)
+		x.SessionRecords = *clv.list
 	case "verana.perm.v1.PermissionSession.created":
 		x.Created = value.Message().Interface().(*timestamppb.Timestamp)
 	case "verana.perm.v1.PermissionSession.modified":
@@ -2946,11 +3504,11 @@ func (x *fastReflection_PermissionSession) Set(fd protoreflect.FieldDescriptor, 
 // Mutable is a mutating operation and unsafe for concurrent use.
 func (x *fastReflection_PermissionSession) Mutable(fd protoreflect.FieldDescriptor) protoreflect.Value {
 	switch fd.FullName() {
-	case "verana.perm.v1.PermissionSession.authz":
-		if x.Authz == nil {
-			x.Authz = []*SessionAuthz{}
+	case "verana.perm.v1.PermissionSession.session_records":
+		if x.SessionRecords == nil {
+			x.SessionRecords = []*PermissionSessionRecord{}
 		}
-		value := &_PermissionSession_4_list{list: &x.Authz}
+		value := &_PermissionSession_5_list{list: &x.SessionRecords}
 		return protoreflect.ValueOfList(value)
 	case "verana.perm.v1.PermissionSession.created":
 		if x.Created == nil {
@@ -2964,8 +3522,10 @@ func (x *fastReflection_PermissionSession) Mutable(fd protoreflect.FieldDescript
 		return protoreflect.ValueOfMessage(x.Modified.ProtoReflect())
 	case "verana.perm.v1.PermissionSession.id":
 		panic(fmt.Errorf("field id of message verana.perm.v1.PermissionSession is not mutable"))
-	case "verana.perm.v1.PermissionSession.controller":
-		panic(fmt.Errorf("field controller of message verana.perm.v1.PermissionSession is not mutable"))
+	case "verana.perm.v1.PermissionSession.authority":
+		panic(fmt.Errorf("field authority of message verana.perm.v1.PermissionSession is not mutable"))
+	case "verana.perm.v1.PermissionSession.vs_operator":
+		panic(fmt.Errorf("field vs_operator of message verana.perm.v1.PermissionSession is not mutable"))
 	case "verana.perm.v1.PermissionSession.agent_perm_id":
 		panic(fmt.Errorf("field agent_perm_id of message verana.perm.v1.PermissionSession is not mutable"))
 	default:
@@ -2983,13 +3543,15 @@ func (x *fastReflection_PermissionSession) NewField(fd protoreflect.FieldDescrip
 	switch fd.FullName() {
 	case "verana.perm.v1.PermissionSession.id":
 		return protoreflect.ValueOfString("")
-	case "verana.perm.v1.PermissionSession.controller":
+	case "verana.perm.v1.PermissionSession.authority":
+		return protoreflect.ValueOfString("")
+	case "verana.perm.v1.PermissionSession.vs_operator":
 		return protoreflect.ValueOfString("")
 	case "verana.perm.v1.PermissionSession.agent_perm_id":
 		return protoreflect.ValueOfUint64(uint64(0))
-	case "verana.perm.v1.PermissionSession.authz":
-		list := []*SessionAuthz{}
-		return protoreflect.ValueOfList(&_PermissionSession_4_list{list: &list})
+	case "verana.perm.v1.PermissionSession.session_records":
+		list := []*PermissionSessionRecord{}
+		return protoreflect.ValueOfList(&_PermissionSession_5_list{list: &list})
 	case "verana.perm.v1.PermissionSession.created":
 		m := new(timestamppb.Timestamp)
 		return protoreflect.ValueOfMessage(m.ProtoReflect())
@@ -3069,15 +3631,19 @@ func (x *fastReflection_PermissionSession) ProtoMethods() *protoiface.Methods {
 		if l > 0 {
 			n += 1 + l + runtime.Sov(uint64(l))
 		}
-		l = len(x.Controller)
+		l = len(x.Authority)
+		if l > 0 {
+			n += 1 + l + runtime.Sov(uint64(l))
+		}
+		l = len(x.VsOperator)
 		if l > 0 {
 			n += 1 + l + runtime.Sov(uint64(l))
 		}
 		if x.AgentPermId != 0 {
 			n += 1 + runtime.Sov(uint64(x.AgentPermId))
 		}
-		if len(x.Authz) > 0 {
-			for _, e := range x.Authz {
+		if len(x.SessionRecords) > 0 {
+			for _, e := range x.SessionRecords {
 				l = options.Size(e)
 				n += 1 + l + runtime.Sov(uint64(l))
 			}
@@ -3131,7 +3697,7 @@ func (x *fastReflection_PermissionSession) ProtoMethods() *protoiface.Methods {
 			copy(dAtA[i:], encoded)
 			i = runtime.EncodeVarint(dAtA, i, uint64(len(encoded)))
 			i--
-			dAtA[i] = 0x32
+			dAtA[i] = 0x3a
 		}
 		if x.Created != nil {
 			encoded, err := options.Marshal(x.Created)
@@ -3145,11 +3711,11 @@ func (x *fastReflection_PermissionSession) ProtoMethods() *protoiface.Methods {
 			copy(dAtA[i:], encoded)
 			i = runtime.EncodeVarint(dAtA, i, uint64(len(encoded)))
 			i--
-			dAtA[i] = 0x2a
+			dAtA[i] = 0x32
 		}
-		if len(x.Authz) > 0 {
-			for iNdEx := len(x.Authz) - 1; iNdEx >= 0; iNdEx-- {
-				encoded, err := options.Marshal(x.Authz[iNdEx])
+		if len(x.SessionRecords) > 0 {
+			for iNdEx := len(x.SessionRecords) - 1; iNdEx >= 0; iNdEx-- {
+				encoded, err := options.Marshal(x.SessionRecords[iNdEx])
 				if err != nil {
 					return protoiface.MarshalOutput{
 						NoUnkeyedLiterals: input.NoUnkeyedLiterals,
@@ -3160,18 +3726,25 @@ func (x *fastReflection_PermissionSession) ProtoMethods() *protoiface.Methods {
 				copy(dAtA[i:], encoded)
 				i = runtime.EncodeVarint(dAtA, i, uint64(len(encoded)))
 				i--
-				dAtA[i] = 0x22
+				dAtA[i] = 0x2a
 			}
 		}
 		if x.AgentPermId != 0 {
 			i = runtime.EncodeVarint(dAtA, i, uint64(x.AgentPermId))
 			i--
-			dAtA[i] = 0x18
+			dAtA[i] = 0x20
 		}
-		if len(x.Controller) > 0 {
-			i -= len(x.Controller)
-			copy(dAtA[i:], x.Controller)
-			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Controller)))
+		if len(x.VsOperator) > 0 {
+			i -= len(x.VsOperator)
+			copy(dAtA[i:], x.VsOperator)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.VsOperator)))
+			i--
+			dAtA[i] = 0x1a
+		}
+		if len(x.Authority) > 0 {
+			i -= len(x.Authority)
+			copy(dAtA[i:], x.Authority)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Authority)))
 			i--
 			dAtA[i] = 0x12
 		}
@@ -3265,7 +3838,7 @@ func (x *fastReflection_PermissionSession) ProtoMethods() *protoiface.Methods {
 				iNdEx = postIndex
 			case 2:
 				if wireType != 2 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Controller", wireType)
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Authority", wireType)
 				}
 				var stringLen uint64
 				for shift := uint(0); ; shift += 7 {
@@ -3293,9 +3866,41 @@ func (x *fastReflection_PermissionSession) ProtoMethods() *protoiface.Methods {
 				if postIndex > l {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
 				}
-				x.Controller = string(dAtA[iNdEx:postIndex])
+				x.Authority = string(dAtA[iNdEx:postIndex])
 				iNdEx = postIndex
 			case 3:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field VsOperator", wireType)
+				}
+				var stringLen uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					stringLen |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				intStringLen := int(stringLen)
+				if intStringLen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + intStringLen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				x.VsOperator = string(dAtA[iNdEx:postIndex])
+				iNdEx = postIndex
+			case 4:
 				if wireType != 0 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field AgentPermId", wireType)
 				}
@@ -3314,9 +3919,9 @@ func (x *fastReflection_PermissionSession) ProtoMethods() *protoiface.Methods {
 						break
 					}
 				}
-			case 4:
+			case 5:
 				if wireType != 2 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Authz", wireType)
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field SessionRecords", wireType)
 				}
 				var msglen int
 				for shift := uint(0); ; shift += 7 {
@@ -3343,12 +3948,12 @@ func (x *fastReflection_PermissionSession) ProtoMethods() *protoiface.Methods {
 				if postIndex > l {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
 				}
-				x.Authz = append(x.Authz, &SessionAuthz{})
-				if err := options.Unmarshal(dAtA[iNdEx:postIndex], x.Authz[len(x.Authz)-1]); err != nil {
+				x.SessionRecords = append(x.SessionRecords, &PermissionSessionRecord{})
+				if err := options.Unmarshal(dAtA[iNdEx:postIndex], x.SessionRecords[len(x.SessionRecords)-1]); err != nil {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, err
 				}
 				iNdEx = postIndex
-			case 5:
+			case 6:
 				if wireType != 2 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Created", wireType)
 				}
@@ -3384,7 +3989,7 @@ func (x *fastReflection_PermissionSession) ProtoMethods() *protoiface.Methods {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, err
 				}
 				iNdEx = postIndex
-			case 6:
+			case 7:
 				if wireType != 2 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Modified", wireType)
 				}
@@ -3456,29 +4061,31 @@ func (x *fastReflection_PermissionSession) ProtoMethods() *protoiface.Methods {
 }
 
 var (
-	md_SessionAuthz                      protoreflect.MessageDescriptor
-	fd_SessionAuthz_executor_perm_id     protoreflect.FieldDescriptor
-	fd_SessionAuthz_beneficiary_perm_id  protoreflect.FieldDescriptor
-	fd_SessionAuthz_wallet_agent_perm_id protoreflect.FieldDescriptor
+	md_PermissionSessionRecord                      protoreflect.MessageDescriptor
+	fd_PermissionSessionRecord_created              protoreflect.FieldDescriptor
+	fd_PermissionSessionRecord_issuer_perm_id       protoreflect.FieldDescriptor
+	fd_PermissionSessionRecord_verifier_perm_id     protoreflect.FieldDescriptor
+	fd_PermissionSessionRecord_wallet_agent_perm_id protoreflect.FieldDescriptor
 )
 
 func init() {
 	file_verana_perm_v1_types_proto_init()
-	md_SessionAuthz = File_verana_perm_v1_types_proto.Messages().ByName("SessionAuthz")
-	fd_SessionAuthz_executor_perm_id = md_SessionAuthz.Fields().ByName("executor_perm_id")
-	fd_SessionAuthz_beneficiary_perm_id = md_SessionAuthz.Fields().ByName("beneficiary_perm_id")
-	fd_SessionAuthz_wallet_agent_perm_id = md_SessionAuthz.Fields().ByName("wallet_agent_perm_id")
+	md_PermissionSessionRecord = File_verana_perm_v1_types_proto.Messages().ByName("PermissionSessionRecord")
+	fd_PermissionSessionRecord_created = md_PermissionSessionRecord.Fields().ByName("created")
+	fd_PermissionSessionRecord_issuer_perm_id = md_PermissionSessionRecord.Fields().ByName("issuer_perm_id")
+	fd_PermissionSessionRecord_verifier_perm_id = md_PermissionSessionRecord.Fields().ByName("verifier_perm_id")
+	fd_PermissionSessionRecord_wallet_agent_perm_id = md_PermissionSessionRecord.Fields().ByName("wallet_agent_perm_id")
 }
 
-var _ protoreflect.Message = (*fastReflection_SessionAuthz)(nil)
+var _ protoreflect.Message = (*fastReflection_PermissionSessionRecord)(nil)
 
-type fastReflection_SessionAuthz SessionAuthz
+type fastReflection_PermissionSessionRecord PermissionSessionRecord
 
-func (x *SessionAuthz) ProtoReflect() protoreflect.Message {
-	return (*fastReflection_SessionAuthz)(x)
+func (x *PermissionSessionRecord) ProtoReflect() protoreflect.Message {
+	return (*fastReflection_PermissionSessionRecord)(x)
 }
 
-func (x *SessionAuthz) slowProtoReflect() protoreflect.Message {
+func (x *PermissionSessionRecord) slowProtoReflect() protoreflect.Message {
 	mi := &file_verana_perm_v1_types_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -3490,43 +4097,43 @@ func (x *SessionAuthz) slowProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-var _fastReflection_SessionAuthz_messageType fastReflection_SessionAuthz_messageType
-var _ protoreflect.MessageType = fastReflection_SessionAuthz_messageType{}
+var _fastReflection_PermissionSessionRecord_messageType fastReflection_PermissionSessionRecord_messageType
+var _ protoreflect.MessageType = fastReflection_PermissionSessionRecord_messageType{}
 
-type fastReflection_SessionAuthz_messageType struct{}
+type fastReflection_PermissionSessionRecord_messageType struct{}
 
-func (x fastReflection_SessionAuthz_messageType) Zero() protoreflect.Message {
-	return (*fastReflection_SessionAuthz)(nil)
+func (x fastReflection_PermissionSessionRecord_messageType) Zero() protoreflect.Message {
+	return (*fastReflection_PermissionSessionRecord)(nil)
 }
-func (x fastReflection_SessionAuthz_messageType) New() protoreflect.Message {
-	return new(fastReflection_SessionAuthz)
+func (x fastReflection_PermissionSessionRecord_messageType) New() protoreflect.Message {
+	return new(fastReflection_PermissionSessionRecord)
 }
-func (x fastReflection_SessionAuthz_messageType) Descriptor() protoreflect.MessageDescriptor {
-	return md_SessionAuthz
+func (x fastReflection_PermissionSessionRecord_messageType) Descriptor() protoreflect.MessageDescriptor {
+	return md_PermissionSessionRecord
 }
 
 // Descriptor returns message descriptor, which contains only the protobuf
 // type information for the message.
-func (x *fastReflection_SessionAuthz) Descriptor() protoreflect.MessageDescriptor {
-	return md_SessionAuthz
+func (x *fastReflection_PermissionSessionRecord) Descriptor() protoreflect.MessageDescriptor {
+	return md_PermissionSessionRecord
 }
 
 // Type returns the message type, which encapsulates both Go and protobuf
 // type information. If the Go type information is not needed,
 // it is recommended that the message descriptor be used instead.
-func (x *fastReflection_SessionAuthz) Type() protoreflect.MessageType {
-	return _fastReflection_SessionAuthz_messageType
+func (x *fastReflection_PermissionSessionRecord) Type() protoreflect.MessageType {
+	return _fastReflection_PermissionSessionRecord_messageType
 }
 
 // New returns a newly allocated and mutable empty message.
-func (x *fastReflection_SessionAuthz) New() protoreflect.Message {
-	return new(fastReflection_SessionAuthz)
+func (x *fastReflection_PermissionSessionRecord) New() protoreflect.Message {
+	return new(fastReflection_PermissionSessionRecord)
 }
 
 // Interface unwraps the message reflection interface and
 // returns the underlying ProtoMessage interface.
-func (x *fastReflection_SessionAuthz) Interface() protoreflect.ProtoMessage {
-	return (*SessionAuthz)(x)
+func (x *fastReflection_PermissionSessionRecord) Interface() protoreflect.ProtoMessage {
+	return (*PermissionSessionRecord)(x)
 }
 
 // Range iterates over every populated field in an undefined order,
@@ -3534,22 +4141,28 @@ func (x *fastReflection_SessionAuthz) Interface() protoreflect.ProtoMessage {
 // Range returns immediately if f returns false.
 // While iterating, mutating operations may only be performed
 // on the current field descriptor.
-func (x *fastReflection_SessionAuthz) Range(f func(protoreflect.FieldDescriptor, protoreflect.Value) bool) {
-	if x.ExecutorPermId != uint64(0) {
-		value := protoreflect.ValueOfUint64(x.ExecutorPermId)
-		if !f(fd_SessionAuthz_executor_perm_id, value) {
+func (x *fastReflection_PermissionSessionRecord) Range(f func(protoreflect.FieldDescriptor, protoreflect.Value) bool) {
+	if x.Created != nil {
+		value := protoreflect.ValueOfMessage(x.Created.ProtoReflect())
+		if !f(fd_PermissionSessionRecord_created, value) {
 			return
 		}
 	}
-	if x.BeneficiaryPermId != uint64(0) {
-		value := protoreflect.ValueOfUint64(x.BeneficiaryPermId)
-		if !f(fd_SessionAuthz_beneficiary_perm_id, value) {
+	if x.IssuerPermId != uint64(0) {
+		value := protoreflect.ValueOfUint64(x.IssuerPermId)
+		if !f(fd_PermissionSessionRecord_issuer_perm_id, value) {
+			return
+		}
+	}
+	if x.VerifierPermId != uint64(0) {
+		value := protoreflect.ValueOfUint64(x.VerifierPermId)
+		if !f(fd_PermissionSessionRecord_verifier_perm_id, value) {
 			return
 		}
 	}
 	if x.WalletAgentPermId != uint64(0) {
 		value := protoreflect.ValueOfUint64(x.WalletAgentPermId)
-		if !f(fd_SessionAuthz_wallet_agent_perm_id, value) {
+		if !f(fd_PermissionSessionRecord_wallet_agent_perm_id, value) {
 			return
 		}
 	}
@@ -3566,19 +4179,21 @@ func (x *fastReflection_SessionAuthz) Range(f func(protoreflect.FieldDescriptor,
 // In other cases (aside from the nullable cases above),
 // a proto3 scalar field is populated if it contains a non-zero value, and
 // a repeated field is populated if it is non-empty.
-func (x *fastReflection_SessionAuthz) Has(fd protoreflect.FieldDescriptor) bool {
+func (x *fastReflection_PermissionSessionRecord) Has(fd protoreflect.FieldDescriptor) bool {
 	switch fd.FullName() {
-	case "verana.perm.v1.SessionAuthz.executor_perm_id":
-		return x.ExecutorPermId != uint64(0)
-	case "verana.perm.v1.SessionAuthz.beneficiary_perm_id":
-		return x.BeneficiaryPermId != uint64(0)
-	case "verana.perm.v1.SessionAuthz.wallet_agent_perm_id":
+	case "verana.perm.v1.PermissionSessionRecord.created":
+		return x.Created != nil
+	case "verana.perm.v1.PermissionSessionRecord.issuer_perm_id":
+		return x.IssuerPermId != uint64(0)
+	case "verana.perm.v1.PermissionSessionRecord.verifier_perm_id":
+		return x.VerifierPermId != uint64(0)
+	case "verana.perm.v1.PermissionSessionRecord.wallet_agent_perm_id":
 		return x.WalletAgentPermId != uint64(0)
 	default:
 		if fd.IsExtension() {
-			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.perm.v1.SessionAuthz"))
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.perm.v1.PermissionSessionRecord"))
 		}
-		panic(fmt.Errorf("message verana.perm.v1.SessionAuthz does not contain field %s", fd.FullName()))
+		panic(fmt.Errorf("message verana.perm.v1.PermissionSessionRecord does not contain field %s", fd.FullName()))
 	}
 }
 
@@ -3588,19 +4203,21 @@ func (x *fastReflection_SessionAuthz) Has(fd protoreflect.FieldDescriptor) bool 
 // associated with the given field number.
 //
 // Clear is a mutating operation and unsafe for concurrent use.
-func (x *fastReflection_SessionAuthz) Clear(fd protoreflect.FieldDescriptor) {
+func (x *fastReflection_PermissionSessionRecord) Clear(fd protoreflect.FieldDescriptor) {
 	switch fd.FullName() {
-	case "verana.perm.v1.SessionAuthz.executor_perm_id":
-		x.ExecutorPermId = uint64(0)
-	case "verana.perm.v1.SessionAuthz.beneficiary_perm_id":
-		x.BeneficiaryPermId = uint64(0)
-	case "verana.perm.v1.SessionAuthz.wallet_agent_perm_id":
+	case "verana.perm.v1.PermissionSessionRecord.created":
+		x.Created = nil
+	case "verana.perm.v1.PermissionSessionRecord.issuer_perm_id":
+		x.IssuerPermId = uint64(0)
+	case "verana.perm.v1.PermissionSessionRecord.verifier_perm_id":
+		x.VerifierPermId = uint64(0)
+	case "verana.perm.v1.PermissionSessionRecord.wallet_agent_perm_id":
 		x.WalletAgentPermId = uint64(0)
 	default:
 		if fd.IsExtension() {
-			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.perm.v1.SessionAuthz"))
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.perm.v1.PermissionSessionRecord"))
 		}
-		panic(fmt.Errorf("message verana.perm.v1.SessionAuthz does not contain field %s", fd.FullName()))
+		panic(fmt.Errorf("message verana.perm.v1.PermissionSessionRecord does not contain field %s", fd.FullName()))
 	}
 }
 
@@ -3610,22 +4227,25 @@ func (x *fastReflection_SessionAuthz) Clear(fd protoreflect.FieldDescriptor) {
 // the default value of a bytes scalar is guaranteed to be a copy.
 // For unpopulated composite types, it returns an empty, read-only view
 // of the value; to obtain a mutable reference, use Mutable.
-func (x *fastReflection_SessionAuthz) Get(descriptor protoreflect.FieldDescriptor) protoreflect.Value {
+func (x *fastReflection_PermissionSessionRecord) Get(descriptor protoreflect.FieldDescriptor) protoreflect.Value {
 	switch descriptor.FullName() {
-	case "verana.perm.v1.SessionAuthz.executor_perm_id":
-		value := x.ExecutorPermId
+	case "verana.perm.v1.PermissionSessionRecord.created":
+		value := x.Created
+		return protoreflect.ValueOfMessage(value.ProtoReflect())
+	case "verana.perm.v1.PermissionSessionRecord.issuer_perm_id":
+		value := x.IssuerPermId
 		return protoreflect.ValueOfUint64(value)
-	case "verana.perm.v1.SessionAuthz.beneficiary_perm_id":
-		value := x.BeneficiaryPermId
+	case "verana.perm.v1.PermissionSessionRecord.verifier_perm_id":
+		value := x.VerifierPermId
 		return protoreflect.ValueOfUint64(value)
-	case "verana.perm.v1.SessionAuthz.wallet_agent_perm_id":
+	case "verana.perm.v1.PermissionSessionRecord.wallet_agent_perm_id":
 		value := x.WalletAgentPermId
 		return protoreflect.ValueOfUint64(value)
 	default:
 		if descriptor.IsExtension() {
-			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.perm.v1.SessionAuthz"))
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.perm.v1.PermissionSessionRecord"))
 		}
-		panic(fmt.Errorf("message verana.perm.v1.SessionAuthz does not contain field %s", descriptor.FullName()))
+		panic(fmt.Errorf("message verana.perm.v1.PermissionSessionRecord does not contain field %s", descriptor.FullName()))
 	}
 }
 
@@ -3639,19 +4259,21 @@ func (x *fastReflection_SessionAuthz) Get(descriptor protoreflect.FieldDescripto
 // empty, read-only value, then it panics.
 //
 // Set is a mutating operation and unsafe for concurrent use.
-func (x *fastReflection_SessionAuthz) Set(fd protoreflect.FieldDescriptor, value protoreflect.Value) {
+func (x *fastReflection_PermissionSessionRecord) Set(fd protoreflect.FieldDescriptor, value protoreflect.Value) {
 	switch fd.FullName() {
-	case "verana.perm.v1.SessionAuthz.executor_perm_id":
-		x.ExecutorPermId = value.Uint()
-	case "verana.perm.v1.SessionAuthz.beneficiary_perm_id":
-		x.BeneficiaryPermId = value.Uint()
-	case "verana.perm.v1.SessionAuthz.wallet_agent_perm_id":
+	case "verana.perm.v1.PermissionSessionRecord.created":
+		x.Created = value.Message().Interface().(*timestamppb.Timestamp)
+	case "verana.perm.v1.PermissionSessionRecord.issuer_perm_id":
+		x.IssuerPermId = value.Uint()
+	case "verana.perm.v1.PermissionSessionRecord.verifier_perm_id":
+		x.VerifierPermId = value.Uint()
+	case "verana.perm.v1.PermissionSessionRecord.wallet_agent_perm_id":
 		x.WalletAgentPermId = value.Uint()
 	default:
 		if fd.IsExtension() {
-			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.perm.v1.SessionAuthz"))
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.perm.v1.PermissionSessionRecord"))
 		}
-		panic(fmt.Errorf("message verana.perm.v1.SessionAuthz does not contain field %s", fd.FullName()))
+		panic(fmt.Errorf("message verana.perm.v1.PermissionSessionRecord does not contain field %s", fd.FullName()))
 	}
 }
 
@@ -3665,48 +4287,56 @@ func (x *fastReflection_SessionAuthz) Set(fd protoreflect.FieldDescriptor, value
 // It panics if the field does not contain a composite type.
 //
 // Mutable is a mutating operation and unsafe for concurrent use.
-func (x *fastReflection_SessionAuthz) Mutable(fd protoreflect.FieldDescriptor) protoreflect.Value {
+func (x *fastReflection_PermissionSessionRecord) Mutable(fd protoreflect.FieldDescriptor) protoreflect.Value {
 	switch fd.FullName() {
-	case "verana.perm.v1.SessionAuthz.executor_perm_id":
-		panic(fmt.Errorf("field executor_perm_id of message verana.perm.v1.SessionAuthz is not mutable"))
-	case "verana.perm.v1.SessionAuthz.beneficiary_perm_id":
-		panic(fmt.Errorf("field beneficiary_perm_id of message verana.perm.v1.SessionAuthz is not mutable"))
-	case "verana.perm.v1.SessionAuthz.wallet_agent_perm_id":
-		panic(fmt.Errorf("field wallet_agent_perm_id of message verana.perm.v1.SessionAuthz is not mutable"))
+	case "verana.perm.v1.PermissionSessionRecord.created":
+		if x.Created == nil {
+			x.Created = new(timestamppb.Timestamp)
+		}
+		return protoreflect.ValueOfMessage(x.Created.ProtoReflect())
+	case "verana.perm.v1.PermissionSessionRecord.issuer_perm_id":
+		panic(fmt.Errorf("field issuer_perm_id of message verana.perm.v1.PermissionSessionRecord is not mutable"))
+	case "verana.perm.v1.PermissionSessionRecord.verifier_perm_id":
+		panic(fmt.Errorf("field verifier_perm_id of message verana.perm.v1.PermissionSessionRecord is not mutable"))
+	case "verana.perm.v1.PermissionSessionRecord.wallet_agent_perm_id":
+		panic(fmt.Errorf("field wallet_agent_perm_id of message verana.perm.v1.PermissionSessionRecord is not mutable"))
 	default:
 		if fd.IsExtension() {
-			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.perm.v1.SessionAuthz"))
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.perm.v1.PermissionSessionRecord"))
 		}
-		panic(fmt.Errorf("message verana.perm.v1.SessionAuthz does not contain field %s", fd.FullName()))
+		panic(fmt.Errorf("message verana.perm.v1.PermissionSessionRecord does not contain field %s", fd.FullName()))
 	}
 }
 
 // NewField returns a new value that is assignable to the field
 // for the given descriptor. For scalars, this returns the default value.
 // For lists, maps, and messages, this returns a new, empty, mutable value.
-func (x *fastReflection_SessionAuthz) NewField(fd protoreflect.FieldDescriptor) protoreflect.Value {
+func (x *fastReflection_PermissionSessionRecord) NewField(fd protoreflect.FieldDescriptor) protoreflect.Value {
 	switch fd.FullName() {
-	case "verana.perm.v1.SessionAuthz.executor_perm_id":
+	case "verana.perm.v1.PermissionSessionRecord.created":
+		m := new(timestamppb.Timestamp)
+		return protoreflect.ValueOfMessage(m.ProtoReflect())
+	case "verana.perm.v1.PermissionSessionRecord.issuer_perm_id":
 		return protoreflect.ValueOfUint64(uint64(0))
-	case "verana.perm.v1.SessionAuthz.beneficiary_perm_id":
+	case "verana.perm.v1.PermissionSessionRecord.verifier_perm_id":
 		return protoreflect.ValueOfUint64(uint64(0))
-	case "verana.perm.v1.SessionAuthz.wallet_agent_perm_id":
+	case "verana.perm.v1.PermissionSessionRecord.wallet_agent_perm_id":
 		return protoreflect.ValueOfUint64(uint64(0))
 	default:
 		if fd.IsExtension() {
-			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.perm.v1.SessionAuthz"))
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.perm.v1.PermissionSessionRecord"))
 		}
-		panic(fmt.Errorf("message verana.perm.v1.SessionAuthz does not contain field %s", fd.FullName()))
+		panic(fmt.Errorf("message verana.perm.v1.PermissionSessionRecord does not contain field %s", fd.FullName()))
 	}
 }
 
 // WhichOneof reports which field within the oneof is populated,
 // returning nil if none are populated.
 // It panics if the oneof descriptor does not belong to this message.
-func (x *fastReflection_SessionAuthz) WhichOneof(d protoreflect.OneofDescriptor) protoreflect.FieldDescriptor {
+func (x *fastReflection_PermissionSessionRecord) WhichOneof(d protoreflect.OneofDescriptor) protoreflect.FieldDescriptor {
 	switch d.FullName() {
 	default:
-		panic(fmt.Errorf("%s is not a oneof field in verana.perm.v1.SessionAuthz", d.FullName()))
+		panic(fmt.Errorf("%s is not a oneof field in verana.perm.v1.PermissionSessionRecord", d.FullName()))
 	}
 	panic("unreachable")
 }
@@ -3714,7 +4344,7 @@ func (x *fastReflection_SessionAuthz) WhichOneof(d protoreflect.OneofDescriptor)
 // GetUnknown retrieves the entire list of unknown fields.
 // The caller may only mutate the contents of the RawFields
 // if the mutated bytes are stored back into the message with SetUnknown.
-func (x *fastReflection_SessionAuthz) GetUnknown() protoreflect.RawFields {
+func (x *fastReflection_PermissionSessionRecord) GetUnknown() protoreflect.RawFields {
 	return x.unknownFields
 }
 
@@ -3725,7 +4355,7 @@ func (x *fastReflection_SessionAuthz) GetUnknown() protoreflect.RawFields {
 // An empty RawFields may be passed to clear the fields.
 //
 // SetUnknown is a mutating operation and unsafe for concurrent use.
-func (x *fastReflection_SessionAuthz) SetUnknown(fields protoreflect.RawFields) {
+func (x *fastReflection_PermissionSessionRecord) SetUnknown(fields protoreflect.RawFields) {
 	x.unknownFields = fields
 }
 
@@ -3737,7 +4367,7 @@ func (x *fastReflection_SessionAuthz) SetUnknown(fields protoreflect.RawFields) 
 // message type, but the details are implementation dependent.
 // Validity is not part of the protobuf data model, and may not
 // be preserved in marshaling or other operations.
-func (x *fastReflection_SessionAuthz) IsValid() bool {
+func (x *fastReflection_PermissionSessionRecord) IsValid() bool {
 	return x != nil
 }
 
@@ -3747,9 +4377,9 @@ func (x *fastReflection_SessionAuthz) IsValid() bool {
 // The returned methods type is identical to
 // "google.golang.org/protobuf/runtime/protoiface".Methods.
 // Consult the protoiface package documentation for details.
-func (x *fastReflection_SessionAuthz) ProtoMethods() *protoiface.Methods {
+func (x *fastReflection_PermissionSessionRecord) ProtoMethods() *protoiface.Methods {
 	size := func(input protoiface.SizeInput) protoiface.SizeOutput {
-		x := input.Message.Interface().(*SessionAuthz)
+		x := input.Message.Interface().(*PermissionSessionRecord)
 		if x == nil {
 			return protoiface.SizeOutput{
 				NoUnkeyedLiterals: input.NoUnkeyedLiterals,
@@ -3761,11 +4391,15 @@ func (x *fastReflection_SessionAuthz) ProtoMethods() *protoiface.Methods {
 		var n int
 		var l int
 		_ = l
-		if x.ExecutorPermId != 0 {
-			n += 1 + runtime.Sov(uint64(x.ExecutorPermId))
+		if x.Created != nil {
+			l = options.Size(x.Created)
+			n += 1 + l + runtime.Sov(uint64(l))
 		}
-		if x.BeneficiaryPermId != 0 {
-			n += 1 + runtime.Sov(uint64(x.BeneficiaryPermId))
+		if x.IssuerPermId != 0 {
+			n += 1 + runtime.Sov(uint64(x.IssuerPermId))
+		}
+		if x.VerifierPermId != 0 {
+			n += 1 + runtime.Sov(uint64(x.VerifierPermId))
 		}
 		if x.WalletAgentPermId != 0 {
 			n += 1 + runtime.Sov(uint64(x.WalletAgentPermId))
@@ -3780,7 +4414,7 @@ func (x *fastReflection_SessionAuthz) ProtoMethods() *protoiface.Methods {
 	}
 
 	marshal := func(input protoiface.MarshalInput) (protoiface.MarshalOutput, error) {
-		x := input.Message.Interface().(*SessionAuthz)
+		x := input.Message.Interface().(*PermissionSessionRecord)
 		if x == nil {
 			return protoiface.MarshalOutput{
 				NoUnkeyedLiterals: input.NoUnkeyedLiterals,
@@ -3802,17 +4436,31 @@ func (x *fastReflection_SessionAuthz) ProtoMethods() *protoiface.Methods {
 		if x.WalletAgentPermId != 0 {
 			i = runtime.EncodeVarint(dAtA, i, uint64(x.WalletAgentPermId))
 			i--
+			dAtA[i] = 0x20
+		}
+		if x.VerifierPermId != 0 {
+			i = runtime.EncodeVarint(dAtA, i, uint64(x.VerifierPermId))
+			i--
 			dAtA[i] = 0x18
 		}
-		if x.BeneficiaryPermId != 0 {
-			i = runtime.EncodeVarint(dAtA, i, uint64(x.BeneficiaryPermId))
+		if x.IssuerPermId != 0 {
+			i = runtime.EncodeVarint(dAtA, i, uint64(x.IssuerPermId))
 			i--
 			dAtA[i] = 0x10
 		}
-		if x.ExecutorPermId != 0 {
-			i = runtime.EncodeVarint(dAtA, i, uint64(x.ExecutorPermId))
+		if x.Created != nil {
+			encoded, err := options.Marshal(x.Created)
+			if err != nil {
+				return protoiface.MarshalOutput{
+					NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+					Buf:               input.Buf,
+				}, err
+			}
+			i -= len(encoded)
+			copy(dAtA[i:], encoded)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(encoded)))
 			i--
-			dAtA[i] = 0x8
+			dAtA[i] = 0xa
 		}
 		if input.Buf != nil {
 			input.Buf = append(input.Buf, dAtA...)
@@ -3825,7 +4473,7 @@ func (x *fastReflection_SessionAuthz) ProtoMethods() *protoiface.Methods {
 		}, nil
 	}
 	unmarshal := func(input protoiface.UnmarshalInput) (protoiface.UnmarshalOutput, error) {
-		x := input.Message.Interface().(*SessionAuthz)
+		x := input.Message.Interface().(*PermissionSessionRecord)
 		if x == nil {
 			return protoiface.UnmarshalOutput{
 				NoUnkeyedLiterals: input.NoUnkeyedLiterals,
@@ -3857,17 +4505,17 @@ func (x *fastReflection_SessionAuthz) ProtoMethods() *protoiface.Methods {
 			fieldNum := int32(wire >> 3)
 			wireType := int(wire & 0x7)
 			if wireType == 4 {
-				return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: SessionAuthz: wiretype end group for non-group")
+				return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: PermissionSessionRecord: wiretype end group for non-group")
 			}
 			if fieldNum <= 0 {
-				return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: SessionAuthz: illegal tag %d (wire type %d)", fieldNum, wire)
+				return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: PermissionSessionRecord: illegal tag %d (wire type %d)", fieldNum, wire)
 			}
 			switch fieldNum {
 			case 1:
-				if wireType != 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field ExecutorPermId", wireType)
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Created", wireType)
 				}
-				x.ExecutorPermId = 0
+				var msglen int
 				for shift := uint(0); ; shift += 7 {
 					if shift >= 64 {
 						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
@@ -3877,16 +4525,33 @@ func (x *fastReflection_SessionAuthz) ProtoMethods() *protoiface.Methods {
 					}
 					b := dAtA[iNdEx]
 					iNdEx++
-					x.ExecutorPermId |= uint64(b&0x7F) << shift
+					msglen |= int(b&0x7F) << shift
 					if b < 0x80 {
 						break
 					}
 				}
+				if msglen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + msglen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				if x.Created == nil {
+					x.Created = &timestamppb.Timestamp{}
+				}
+				if err := options.Unmarshal(dAtA[iNdEx:postIndex], x.Created); err != nil {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, err
+				}
+				iNdEx = postIndex
 			case 2:
 				if wireType != 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field BeneficiaryPermId", wireType)
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field IssuerPermId", wireType)
 				}
-				x.BeneficiaryPermId = 0
+				x.IssuerPermId = 0
 				for shift := uint(0); ; shift += 7 {
 					if shift >= 64 {
 						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
@@ -3896,12 +4561,31 @@ func (x *fastReflection_SessionAuthz) ProtoMethods() *protoiface.Methods {
 					}
 					b := dAtA[iNdEx]
 					iNdEx++
-					x.BeneficiaryPermId |= uint64(b&0x7F) << shift
+					x.IssuerPermId |= uint64(b&0x7F) << shift
 					if b < 0x80 {
 						break
 					}
 				}
 			case 3:
+				if wireType != 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field VerifierPermId", wireType)
+				}
+				x.VerifierPermId = 0
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					x.VerifierPermId |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+			case 4:
 				if wireType != 0 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field WalletAgentPermId", wireType)
 				}
@@ -4499,11 +5183,11 @@ type Permission struct {
 	SchemaId   uint64                 `protobuf:"varint,2,opt,name=schema_id,json=schemaId,proto3" json:"schema_id,omitempty"`
 	Type_      PermissionType         `protobuf:"varint,3,opt,name=type,proto3,enum=verana.perm.v1.PermissionType" json:"type,omitempty"`
 	Did        string                 `protobuf:"bytes,4,opt,name=did,proto3" json:"did,omitempty"`
-	Grantee    string                 `protobuf:"bytes,5,opt,name=grantee,proto3" json:"grantee,omitempty"`
+	Authority  string                 `protobuf:"bytes,5,opt,name=authority,proto3" json:"authority,omitempty"`
 	Created    *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=created,proto3" json:"created,omitempty"`
 	CreatedBy  string                 `protobuf:"bytes,7,opt,name=created_by,json=createdBy,proto3" json:"created_by,omitempty"`
-	Extended   *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=extended,proto3" json:"extended,omitempty"`
-	ExtendedBy string                 `protobuf:"bytes,9,opt,name=extended_by,json=extendedBy,proto3" json:"extended_by,omitempty"`
+	Adjusted   *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=adjusted,proto3" json:"adjusted,omitempty"`
+	AdjustedBy string                 `protobuf:"bytes,9,opt,name=adjusted_by,json=adjustedBy,proto3" json:"adjusted_by,omitempty"`
 	// NEW: Slashing related fields
 	Slashed   *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=slashed,proto3" json:"slashed,omitempty"`
 	SlashedBy string                 `protobuf:"bytes,11,opt,name=slashed_by,json=slashedBy,proto3" json:"slashed_by,omitempty"`
@@ -4537,6 +5221,13 @@ type Permission struct {
 	// Per Issue #94: spec merged exemption and discount into single *_fee_discount field
 	IssuanceFeeDiscount     uint64 `protobuf:"varint,35,opt,name=issuance_fee_discount,json=issuanceFeeDiscount,proto3" json:"issuance_fee_discount,omitempty"`             // Issuance fee discount (0-10000, where 10000 = 100% discount)
 	VerificationFeeDiscount uint64 `protobuf:"varint,36,opt,name=verification_fee_discount,json=verificationFeeDiscount,proto3" json:"verification_fee_discount,omitempty"` // Verification fee discount (0-10000, where 10000 = 100% discount)
+	// VS Operator fields (spec v4)
+	VsOperator                   string               `protobuf:"bytes,37,opt,name=vs_operator,json=vsOperator,proto3" json:"vs_operator,omitempty"`
+	VsOperatorAuthzEnabled       bool                 `protobuf:"varint,38,opt,name=vs_operator_authz_enabled,json=vsOperatorAuthzEnabled,proto3" json:"vs_operator_authz_enabled,omitempty"`
+	VsOperatorAuthzSpendLimit    []*v1beta1.Coin      `protobuf:"bytes,39,rep,name=vs_operator_authz_spend_limit,json=vsOperatorAuthzSpendLimit,proto3" json:"vs_operator_authz_spend_limit,omitempty"`
+	VsOperatorAuthzWithFeegrant  bool                 `protobuf:"varint,40,opt,name=vs_operator_authz_with_feegrant,json=vsOperatorAuthzWithFeegrant,proto3" json:"vs_operator_authz_with_feegrant,omitempty"`
+	VsOperatorAuthzFeeSpendLimit []*v1beta1.Coin      `protobuf:"bytes,41,rep,name=vs_operator_authz_fee_spend_limit,json=vsOperatorAuthzFeeSpendLimit,proto3" json:"vs_operator_authz_fee_spend_limit,omitempty"`
+	VsOperatorAuthzSpendPeriod   *durationpb.Duration `protobuf:"bytes,42,opt,name=vs_operator_authz_spend_period,json=vsOperatorAuthzSpendPeriod,proto3" json:"vs_operator_authz_spend_period,omitempty"`
 }
 
 func (x *Permission) Reset() {
@@ -4587,9 +5278,9 @@ func (x *Permission) GetDid() string {
 	return ""
 }
 
-func (x *Permission) GetGrantee() string {
+func (x *Permission) GetAuthority() string {
 	if x != nil {
-		return x.Grantee
+		return x.Authority
 	}
 	return ""
 }
@@ -4608,16 +5299,16 @@ func (x *Permission) GetCreatedBy() string {
 	return ""
 }
 
-func (x *Permission) GetExtended() *timestamppb.Timestamp {
+func (x *Permission) GetAdjusted() *timestamppb.Timestamp {
 	if x != nil {
-		return x.Extended
+		return x.Adjusted
 	}
 	return nil
 }
 
-func (x *Permission) GetExtendedBy() string {
+func (x *Permission) GetAdjustedBy() string {
 	if x != nil {
-		return x.ExtendedBy
+		return x.AdjustedBy
 	}
 	return ""
 }
@@ -4811,17 +5502,60 @@ func (x *Permission) GetVerificationFeeDiscount() uint64 {
 	return 0
 }
 
+func (x *Permission) GetVsOperator() string {
+	if x != nil {
+		return x.VsOperator
+	}
+	return ""
+}
+
+func (x *Permission) GetVsOperatorAuthzEnabled() bool {
+	if x != nil {
+		return x.VsOperatorAuthzEnabled
+	}
+	return false
+}
+
+func (x *Permission) GetVsOperatorAuthzSpendLimit() []*v1beta1.Coin {
+	if x != nil {
+		return x.VsOperatorAuthzSpendLimit
+	}
+	return nil
+}
+
+func (x *Permission) GetVsOperatorAuthzWithFeegrant() bool {
+	if x != nil {
+		return x.VsOperatorAuthzWithFeegrant
+	}
+	return false
+}
+
+func (x *Permission) GetVsOperatorAuthzFeeSpendLimit() []*v1beta1.Coin {
+	if x != nil {
+		return x.VsOperatorAuthzFeeSpendLimit
+	}
+	return nil
+}
+
+func (x *Permission) GetVsOperatorAuthzSpendPeriod() *durationpb.Duration {
+	if x != nil {
+		return x.VsOperatorAuthzSpendPeriod
+	}
+	return nil
+}
+
 type PermissionSession struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id          string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Controller  string                 `protobuf:"bytes,2,opt,name=controller,proto3" json:"controller,omitempty"`
-	AgentPermId uint64                 `protobuf:"varint,3,opt,name=agent_perm_id,json=agentPermId,proto3" json:"agent_perm_id,omitempty"`
-	Authz       []*SessionAuthz        `protobuf:"bytes,4,rep,name=authz,proto3" json:"authz,omitempty"`
-	Created     *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=created,proto3" json:"created,omitempty"`
-	Modified    *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=modified,proto3" json:"modified,omitempty"`
+	Id             string                     `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Authority      string                     `protobuf:"bytes,2,opt,name=authority,proto3" json:"authority,omitempty"`                     // group account that owns this session
+	VsOperator     string                     `protobuf:"bytes,3,opt,name=vs_operator,json=vsOperator,proto3" json:"vs_operator,omitempty"` // the VS operator account
+	AgentPermId    uint64                     `protobuf:"varint,4,opt,name=agent_perm_id,json=agentPermId,proto3" json:"agent_perm_id,omitempty"`
+	SessionRecords []*PermissionSessionRecord `protobuf:"bytes,5,rep,name=session_records,json=sessionRecords,proto3" json:"session_records,omitempty"`
+	Created        *timestamppb.Timestamp     `protobuf:"bytes,6,opt,name=created,proto3" json:"created,omitempty"`
+	Modified       *timestamppb.Timestamp     `protobuf:"bytes,7,opt,name=modified,proto3" json:"modified,omitempty"`
 }
 
 func (x *PermissionSession) Reset() {
@@ -4851,9 +5585,16 @@ func (x *PermissionSession) GetId() string {
 	return ""
 }
 
-func (x *PermissionSession) GetController() string {
+func (x *PermissionSession) GetAuthority() string {
 	if x != nil {
-		return x.Controller
+		return x.Authority
+	}
+	return ""
+}
+
+func (x *PermissionSession) GetVsOperator() string {
+	if x != nil {
+		return x.VsOperator
 	}
 	return ""
 }
@@ -4865,9 +5606,9 @@ func (x *PermissionSession) GetAgentPermId() uint64 {
 	return 0
 }
 
-func (x *PermissionSession) GetAuthz() []*SessionAuthz {
+func (x *PermissionSession) GetSessionRecords() []*PermissionSessionRecord {
 	if x != nil {
-		return x.Authz
+		return x.SessionRecords
 	}
 	return nil
 }
@@ -4886,18 +5627,19 @@ func (x *PermissionSession) GetModified() *timestamppb.Timestamp {
 	return nil
 }
 
-type SessionAuthz struct {
+type PermissionSessionRecord struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ExecutorPermId    uint64 `protobuf:"varint,1,opt,name=executor_perm_id,json=executorPermId,proto3" json:"executor_perm_id,omitempty"`
-	BeneficiaryPermId uint64 `protobuf:"varint,2,opt,name=beneficiary_perm_id,json=beneficiaryPermId,proto3" json:"beneficiary_perm_id,omitempty"`
-	WalletAgentPermId uint64 `protobuf:"varint,3,opt,name=wallet_agent_perm_id,json=walletAgentPermId,proto3" json:"wallet_agent_perm_id,omitempty"`
+	Created           *timestamppb.Timestamp `protobuf:"bytes,1,opt,name=created,proto3" json:"created,omitempty"`
+	IssuerPermId      uint64                 `protobuf:"varint,2,opt,name=issuer_perm_id,json=issuerPermId,proto3" json:"issuer_perm_id,omitempty"`
+	VerifierPermId    uint64                 `protobuf:"varint,3,opt,name=verifier_perm_id,json=verifierPermId,proto3" json:"verifier_perm_id,omitempty"`
+	WalletAgentPermId uint64                 `protobuf:"varint,4,opt,name=wallet_agent_perm_id,json=walletAgentPermId,proto3" json:"wallet_agent_perm_id,omitempty"`
 }
 
-func (x *SessionAuthz) Reset() {
-	*x = SessionAuthz{}
+func (x *PermissionSessionRecord) Reset() {
+	*x = PermissionSessionRecord{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_verana_perm_v1_types_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -4905,32 +5647,39 @@ func (x *SessionAuthz) Reset() {
 	}
 }
 
-func (x *SessionAuthz) String() string {
+func (x *PermissionSessionRecord) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*SessionAuthz) ProtoMessage() {}
+func (*PermissionSessionRecord) ProtoMessage() {}
 
-// Deprecated: Use SessionAuthz.ProtoReflect.Descriptor instead.
-func (*SessionAuthz) Descriptor() ([]byte, []int) {
+// Deprecated: Use PermissionSessionRecord.ProtoReflect.Descriptor instead.
+func (*PermissionSessionRecord) Descriptor() ([]byte, []int) {
 	return file_verana_perm_v1_types_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *SessionAuthz) GetExecutorPermId() uint64 {
+func (x *PermissionSessionRecord) GetCreated() *timestamppb.Timestamp {
 	if x != nil {
-		return x.ExecutorPermId
+		return x.Created
+	}
+	return nil
+}
+
+func (x *PermissionSessionRecord) GetIssuerPermId() uint64 {
+	if x != nil {
+		return x.IssuerPermId
 	}
 	return 0
 }
 
-func (x *SessionAuthz) GetBeneficiaryPermId() uint64 {
+func (x *PermissionSessionRecord) GetVerifierPermId() uint64 {
 	if x != nil {
-		return x.BeneficiaryPermId
+		return x.VerifierPermId
 	}
 	return 0
 }
 
-func (x *SessionAuthz) GetWalletAgentPermId() uint64 {
+func (x *PermissionSessionRecord) GetWalletAgentPermId() uint64 {
 	if x != nil {
 		return x.WalletAgentPermId
 	}
@@ -4980,12 +5729,16 @@ var file_verana_perm_v1_types_proto_rawDesc = []byte{
 	0x2f, 0x74, 0x79, 0x70, 0x65, 0x73, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x0e, 0x76, 0x65,
 	0x72, 0x61, 0x6e, 0x61, 0x2e, 0x70, 0x65, 0x72, 0x6d, 0x2e, 0x76, 0x31, 0x1a, 0x11, 0x61, 0x6d,
 	0x69, 0x6e, 0x6f, 0x2f, 0x61, 0x6d, 0x69, 0x6e, 0x6f, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x1a,
+	0x1e, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2f, 0x62, 0x61, 0x73, 0x65, 0x2f, 0x76, 0x31, 0x62,
+	0x65, 0x74, 0x61, 0x31, 0x2f, 0x63, 0x6f, 0x69, 0x6e, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x1a,
 	0x19, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x5f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x63, 0x6f,
 	0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x1a, 0x14, 0x67, 0x6f, 0x67, 0x6f,
 	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x67, 0x6f, 0x67, 0x6f, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f,
+	0x1a, 0x1e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75,
+	0x66, 0x2f, 0x64, 0x75, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f,
 	0x1a, 0x1f, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75,
 	0x66, 0x2f, 0x74, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x2e, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x22, 0xba, 0x0e, 0x0a, 0x0a, 0x50, 0x65, 0x72, 0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e,
+	0x6f, 0x22, 0x90, 0x13, 0x0a, 0x0a, 0x50, 0x65, 0x72, 0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e,
 	0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04, 0x52, 0x02, 0x69, 0x64,
 	0x12, 0x1b, 0x0a, 0x09, 0x73, 0x63, 0x68, 0x65, 0x6d, 0x61, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20,
 	0x01, 0x28, 0x04, 0x52, 0x08, 0x73, 0x63, 0x68, 0x65, 0x6d, 0x61, 0x49, 0x64, 0x12, 0x32, 0x0a,
@@ -4993,140 +5746,185 @@ var file_verana_perm_v1_types_proto_rawDesc = []byte{
 	0x72, 0x61, 0x6e, 0x61, 0x2e, 0x70, 0x65, 0x72, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x50, 0x65, 0x72,
 	0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x54, 0x79, 0x70, 0x65, 0x52, 0x04, 0x74, 0x79, 0x70,
 	0x65, 0x12, 0x10, 0x0a, 0x03, 0x64, 0x69, 0x64, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03,
-	0x64, 0x69, 0x64, 0x12, 0x32, 0x0a, 0x07, 0x67, 0x72, 0x61, 0x6e, 0x74, 0x65, 0x65, 0x18, 0x05,
-	0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73,
-	0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x07,
-	0x67, 0x72, 0x61, 0x6e, 0x74, 0x65, 0x65, 0x12, 0x3a, 0x0a, 0x07, 0x63, 0x72, 0x65, 0x61, 0x74,
-	0x65, 0x64, 0x18, 0x06, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c,
-	0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73,
-	0x74, 0x61, 0x6d, 0x70, 0x42, 0x04, 0x90, 0xdf, 0x1f, 0x01, 0x52, 0x07, 0x63, 0x72, 0x65, 0x61,
-	0x74, 0x65, 0x64, 0x12, 0x37, 0x0a, 0x0a, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x5f, 0x62,
-	0x79, 0x18, 0x07, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73,
-	0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e,
-	0x67, 0x52, 0x09, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x42, 0x79, 0x12, 0x3c, 0x0a, 0x08,
-	0x65, 0x78, 0x74, 0x65, 0x6e, 0x64, 0x65, 0x64, 0x18, 0x08, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a,
+	0x64, 0x69, 0x64, 0x12, 0x36, 0x0a, 0x09, 0x61, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x74, 0x79,
+	0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d,
+	0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67,
+	0x52, 0x09, 0x61, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x74, 0x79, 0x12, 0x3a, 0x0a, 0x07, 0x63,
+	0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x18, 0x06, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67,
+	0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54,
+	0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x42, 0x04, 0x90, 0xdf, 0x1f, 0x01, 0x52, 0x07,
+	0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x12, 0x37, 0x0a, 0x0a, 0x63, 0x72, 0x65, 0x61, 0x74,
+	0x65, 0x64, 0x5f, 0x62, 0x79, 0x18, 0x07, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d,
+	0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53,
+	0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x09, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x42, 0x79,
+	0x12, 0x3c, 0x0a, 0x08, 0x61, 0x64, 0x6a, 0x75, 0x73, 0x74, 0x65, 0x64, 0x18, 0x08, 0x20, 0x01,
+	0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74,
+	0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x42, 0x04,
+	0x90, 0xdf, 0x1f, 0x01, 0x52, 0x08, 0x61, 0x64, 0x6a, 0x75, 0x73, 0x74, 0x65, 0x64, 0x12, 0x39,
+	0x0a, 0x0b, 0x61, 0x64, 0x6a, 0x75, 0x73, 0x74, 0x65, 0x64, 0x5f, 0x62, 0x79, 0x18, 0x09, 0x20,
+	0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e,
+	0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x0a, 0x61,
+	0x64, 0x6a, 0x75, 0x73, 0x74, 0x65, 0x64, 0x42, 0x79, 0x12, 0x3a, 0x0a, 0x07, 0x73, 0x6c, 0x61,
+	0x73, 0x68, 0x65, 0x64, 0x18, 0x0a, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f,
+	0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d,
+	0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x42, 0x04, 0x90, 0xdf, 0x1f, 0x01, 0x52, 0x07, 0x73, 0x6c,
+	0x61, 0x73, 0x68, 0x65, 0x64, 0x12, 0x37, 0x0a, 0x0a, 0x73, 0x6c, 0x61, 0x73, 0x68, 0x65, 0x64,
+	0x5f, 0x62, 0x79, 0x18, 0x0b, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63,
+	0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72,
+	0x69, 0x6e, 0x67, 0x52, 0x09, 0x73, 0x6c, 0x61, 0x73, 0x68, 0x65, 0x64, 0x42, 0x79, 0x12, 0x38,
+	0x0a, 0x06, 0x72, 0x65, 0x70, 0x61, 0x69, 0x64, 0x18, 0x0c, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a,
 	0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66,
 	0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x42, 0x04, 0x90, 0xdf, 0x1f, 0x01,
-	0x52, 0x08, 0x65, 0x78, 0x74, 0x65, 0x6e, 0x64, 0x65, 0x64, 0x12, 0x39, 0x0a, 0x0b, 0x65, 0x78,
-	0x74, 0x65, 0x6e, 0x64, 0x65, 0x64, 0x5f, 0x62, 0x79, 0x18, 0x09, 0x20, 0x01, 0x28, 0x09, 0x42,
-	0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72,
-	0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x0a, 0x65, 0x78, 0x74, 0x65, 0x6e,
-	0x64, 0x65, 0x64, 0x42, 0x79, 0x12, 0x3a, 0x0a, 0x07, 0x73, 0x6c, 0x61, 0x73, 0x68, 0x65, 0x64,
-	0x18, 0x0a, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e,
-	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61,
-	0x6d, 0x70, 0x42, 0x04, 0x90, 0xdf, 0x1f, 0x01, 0x52, 0x07, 0x73, 0x6c, 0x61, 0x73, 0x68, 0x65,
-	0x64, 0x12, 0x37, 0x0a, 0x0a, 0x73, 0x6c, 0x61, 0x73, 0x68, 0x65, 0x64, 0x5f, 0x62, 0x79, 0x18,
-	0x0b, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f,
-	0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x52,
-	0x09, 0x73, 0x6c, 0x61, 0x73, 0x68, 0x65, 0x64, 0x42, 0x79, 0x12, 0x38, 0x0a, 0x06, 0x72, 0x65,
-	0x70, 0x61, 0x69, 0x64, 0x18, 0x0c, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f,
-	0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d,
-	0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x42, 0x04, 0x90, 0xdf, 0x1f, 0x01, 0x52, 0x06, 0x72, 0x65,
-	0x70, 0x61, 0x69, 0x64, 0x12, 0x35, 0x0a, 0x09, 0x72, 0x65, 0x70, 0x61, 0x69, 0x64, 0x5f, 0x62,
-	0x79, 0x18, 0x0d, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73,
-	0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e,
-	0x67, 0x52, 0x08, 0x72, 0x65, 0x70, 0x61, 0x69, 0x64, 0x42, 0x79, 0x12, 0x47, 0x0a, 0x0e, 0x65,
-	0x66, 0x66, 0x65, 0x63, 0x74, 0x69, 0x76, 0x65, 0x5f, 0x66, 0x72, 0x6f, 0x6d, 0x18, 0x0e, 0x20,
-	0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f,
-	0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x42,
-	0x04, 0x90, 0xdf, 0x1f, 0x01, 0x52, 0x0d, 0x65, 0x66, 0x66, 0x65, 0x63, 0x74, 0x69, 0x76, 0x65,
-	0x46, 0x72, 0x6f, 0x6d, 0x12, 0x49, 0x0a, 0x0f, 0x65, 0x66, 0x66, 0x65, 0x63, 0x74, 0x69, 0x76,
-	0x65, 0x5f, 0x75, 0x6e, 0x74, 0x69, 0x6c, 0x18, 0x0f, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e,
-	0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e,
-	0x54, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x42, 0x04, 0x90, 0xdf, 0x1f, 0x01, 0x52,
-	0x0e, 0x65, 0x66, 0x66, 0x65, 0x63, 0x74, 0x69, 0x76, 0x65, 0x55, 0x6e, 0x74, 0x69, 0x6c, 0x12,
-	0x3c, 0x0a, 0x08, 0x6d, 0x6f, 0x64, 0x69, 0x66, 0x69, 0x65, 0x64, 0x18, 0x10, 0x20, 0x01, 0x28,
+	0x52, 0x06, 0x72, 0x65, 0x70, 0x61, 0x69, 0x64, 0x12, 0x35, 0x0a, 0x09, 0x72, 0x65, 0x70, 0x61,
+	0x69, 0x64, 0x5f, 0x62, 0x79, 0x18, 0x0d, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d,
+	0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53,
+	0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x08, 0x72, 0x65, 0x70, 0x61, 0x69, 0x64, 0x42, 0x79, 0x12,
+	0x47, 0x0a, 0x0e, 0x65, 0x66, 0x66, 0x65, 0x63, 0x74, 0x69, 0x76, 0x65, 0x5f, 0x66, 0x72, 0x6f,
+	0x6d, 0x18, 0x0e, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65,
+	0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74,
+	0x61, 0x6d, 0x70, 0x42, 0x04, 0x90, 0xdf, 0x1f, 0x01, 0x52, 0x0d, 0x65, 0x66, 0x66, 0x65, 0x63,
+	0x74, 0x69, 0x76, 0x65, 0x46, 0x72, 0x6f, 0x6d, 0x12, 0x49, 0x0a, 0x0f, 0x65, 0x66, 0x66, 0x65,
+	0x63, 0x74, 0x69, 0x76, 0x65, 0x5f, 0x75, 0x6e, 0x74, 0x69, 0x6c, 0x18, 0x0f, 0x20, 0x01, 0x28,
 	0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f,
 	0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x42, 0x04, 0x90,
-	0xdf, 0x1f, 0x01, 0x52, 0x08, 0x6d, 0x6f, 0x64, 0x69, 0x66, 0x69, 0x65, 0x64, 0x12, 0x27, 0x0a,
-	0x0f, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x66, 0x65, 0x65, 0x73,
-	0x18, 0x11, 0x20, 0x01, 0x28, 0x04, 0x52, 0x0e, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x69,
-	0x6f, 0x6e, 0x46, 0x65, 0x65, 0x73, 0x12, 0x23, 0x0a, 0x0d, 0x69, 0x73, 0x73, 0x75, 0x61, 0x6e,
-	0x63, 0x65, 0x5f, 0x66, 0x65, 0x65, 0x73, 0x18, 0x12, 0x20, 0x01, 0x28, 0x04, 0x52, 0x0c, 0x69,
-	0x73, 0x73, 0x75, 0x61, 0x6e, 0x63, 0x65, 0x46, 0x65, 0x65, 0x73, 0x12, 0x2b, 0x0a, 0x11, 0x76,
-	0x65, 0x72, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x66, 0x65, 0x65, 0x73,
-	0x18, 0x13, 0x20, 0x01, 0x28, 0x04, 0x52, 0x10, 0x76, 0x65, 0x72, 0x69, 0x66, 0x69, 0x63, 0x61,
-	0x74, 0x69, 0x6f, 0x6e, 0x46, 0x65, 0x65, 0x73, 0x12, 0x18, 0x0a, 0x07, 0x64, 0x65, 0x70, 0x6f,
-	0x73, 0x69, 0x74, 0x18, 0x14, 0x20, 0x01, 0x28, 0x04, 0x52, 0x07, 0x64, 0x65, 0x70, 0x6f, 0x73,
-	0x69, 0x74, 0x12, 0x27, 0x0a, 0x0f, 0x73, 0x6c, 0x61, 0x73, 0x68, 0x65, 0x64, 0x5f, 0x64, 0x65,
-	0x70, 0x6f, 0x73, 0x69, 0x74, 0x18, 0x15, 0x20, 0x01, 0x28, 0x04, 0x52, 0x0e, 0x73, 0x6c, 0x61,
-	0x73, 0x68, 0x65, 0x64, 0x44, 0x65, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x12, 0x25, 0x0a, 0x0e, 0x72,
-	0x65, 0x70, 0x61, 0x69, 0x64, 0x5f, 0x64, 0x65, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x18, 0x16, 0x20,
-	0x01, 0x28, 0x04, 0x52, 0x0d, 0x72, 0x65, 0x70, 0x61, 0x69, 0x64, 0x44, 0x65, 0x70, 0x6f, 0x73,
-	0x69, 0x74, 0x12, 0x3a, 0x0a, 0x07, 0x72, 0x65, 0x76, 0x6f, 0x6b, 0x65, 0x64, 0x18, 0x17, 0x20,
-	0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f,
-	0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x42,
-	0x04, 0x90, 0xdf, 0x1f, 0x01, 0x52, 0x07, 0x72, 0x65, 0x76, 0x6f, 0x6b, 0x65, 0x64, 0x12, 0x37,
-	0x0a, 0x0a, 0x72, 0x65, 0x76, 0x6f, 0x6b, 0x65, 0x64, 0x5f, 0x62, 0x79, 0x18, 0x18, 0x20, 0x01,
-	0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41,
-	0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x09, 0x72, 0x65,
-	0x76, 0x6f, 0x6b, 0x65, 0x64, 0x42, 0x79, 0x12, 0x18, 0x0a, 0x07, 0x63, 0x6f, 0x75, 0x6e, 0x74,
-	0x72, 0x79, 0x18, 0x19, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x72,
-	0x79, 0x12, 0x2a, 0x0a, 0x11, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x6f, 0x72, 0x5f, 0x70,
-	0x65, 0x72, 0x6d, 0x5f, 0x69, 0x64, 0x18, 0x1a, 0x20, 0x01, 0x28, 0x04, 0x52, 0x0f, 0x76, 0x61,
-	0x6c, 0x69, 0x64, 0x61, 0x74, 0x6f, 0x72, 0x50, 0x65, 0x72, 0x6d, 0x49, 0x64, 0x12, 0x3a, 0x0a,
-	0x08, 0x76, 0x70, 0x5f, 0x73, 0x74, 0x61, 0x74, 0x65, 0x18, 0x1b, 0x20, 0x01, 0x28, 0x0e, 0x32,
-	0x1f, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x70, 0x65, 0x72, 0x6d, 0x2e, 0x76, 0x31,
-	0x2e, 0x56, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x53, 0x74, 0x61, 0x74, 0x65,
-	0x52, 0x07, 0x76, 0x70, 0x53, 0x74, 0x61, 0x74, 0x65, 0x12, 0x37, 0x0a, 0x06, 0x76, 0x70, 0x5f,
-	0x65, 0x78, 0x70, 0x18, 0x1c, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67,
-	0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d, 0x65,
-	0x73, 0x74, 0x61, 0x6d, 0x70, 0x42, 0x04, 0x90, 0xdf, 0x1f, 0x01, 0x52, 0x05, 0x76, 0x70, 0x45,
-	0x78, 0x70, 0x12, 0x51, 0x0a, 0x14, 0x76, 0x70, 0x5f, 0x6c, 0x61, 0x73, 0x74, 0x5f, 0x73, 0x74,
-	0x61, 0x74, 0x65, 0x5f, 0x63, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x18, 0x1d, 0x20, 0x01, 0x28, 0x0b,
-	0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62,
-	0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x42, 0x04, 0x90, 0xdf,
-	0x1f, 0x01, 0x52, 0x11, 0x76, 0x70, 0x4c, 0x61, 0x73, 0x74, 0x53, 0x74, 0x61, 0x74, 0x65, 0x43,
-	0x68, 0x61, 0x6e, 0x67, 0x65, 0x12, 0x30, 0x0a, 0x14, 0x76, 0x70, 0x5f, 0x76, 0x61, 0x6c, 0x69,
-	0x64, 0x61, 0x74, 0x6f, 0x72, 0x5f, 0x64, 0x65, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x18, 0x1e, 0x20,
-	0x01, 0x28, 0x04, 0x52, 0x12, 0x76, 0x70, 0x56, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x6f, 0x72,
-	0x44, 0x65, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x12, 0x26, 0x0a, 0x0f, 0x76, 0x70, 0x5f, 0x63, 0x75,
-	0x72, 0x72, 0x65, 0x6e, 0x74, 0x5f, 0x66, 0x65, 0x65, 0x73, 0x18, 0x1f, 0x20, 0x01, 0x28, 0x04,
-	0x52, 0x0d, 0x76, 0x70, 0x43, 0x75, 0x72, 0x72, 0x65, 0x6e, 0x74, 0x46, 0x65, 0x65, 0x73, 0x12,
-	0x2c, 0x0a, 0x12, 0x76, 0x70, 0x5f, 0x63, 0x75, 0x72, 0x72, 0x65, 0x6e, 0x74, 0x5f, 0x64, 0x65,
-	0x70, 0x6f, 0x73, 0x69, 0x74, 0x18, 0x20, 0x20, 0x01, 0x28, 0x04, 0x52, 0x10, 0x76, 0x70, 0x43,
-	0x75, 0x72, 0x72, 0x65, 0x6e, 0x74, 0x44, 0x65, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x12, 0x31, 0x0a,
-	0x15, 0x76, 0x70, 0x5f, 0x73, 0x75, 0x6d, 0x6d, 0x61, 0x72, 0x79, 0x5f, 0x64, 0x69, 0x67, 0x65,
-	0x73, 0x74, 0x5f, 0x73, 0x72, 0x69, 0x18, 0x21, 0x20, 0x01, 0x28, 0x09, 0x52, 0x12, 0x76, 0x70,
-	0x53, 0x75, 0x6d, 0x6d, 0x61, 0x72, 0x79, 0x44, 0x69, 0x67, 0x65, 0x73, 0x74, 0x53, 0x72, 0x69,
-	0x12, 0x4c, 0x0a, 0x11, 0x76, 0x70, 0x5f, 0x74, 0x65, 0x72, 0x6d, 0x5f, 0x72, 0x65, 0x71, 0x75,
-	0x65, 0x73, 0x74, 0x65, 0x64, 0x18, 0x22, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f,
-	0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54, 0x69,
-	0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x42, 0x04, 0x90, 0xdf, 0x1f, 0x01, 0x52, 0x0f, 0x76,
-	0x70, 0x54, 0x65, 0x72, 0x6d, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x65, 0x64, 0x12, 0x32,
-	0x0a, 0x15, 0x69, 0x73, 0x73, 0x75, 0x61, 0x6e, 0x63, 0x65, 0x5f, 0x66, 0x65, 0x65, 0x5f, 0x64,
-	0x69, 0x73, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x18, 0x23, 0x20, 0x01, 0x28, 0x04, 0x52, 0x13, 0x69,
-	0x73, 0x73, 0x75, 0x61, 0x6e, 0x63, 0x65, 0x46, 0x65, 0x65, 0x44, 0x69, 0x73, 0x63, 0x6f, 0x75,
-	0x6e, 0x74, 0x12, 0x3a, 0x0a, 0x19, 0x76, 0x65, 0x72, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x69,
-	0x6f, 0x6e, 0x5f, 0x66, 0x65, 0x65, 0x5f, 0x64, 0x69, 0x73, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x18,
-	0x24, 0x20, 0x01, 0x28, 0x04, 0x52, 0x17, 0x76, 0x65, 0x72, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74,
-	0x69, 0x6f, 0x6e, 0x46, 0x65, 0x65, 0x44, 0x69, 0x73, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x22, 0x95,
-	0x02, 0x0a, 0x11, 0x50, 0x65, 0x72, 0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x53, 0x65, 0x73,
-	0x73, 0x69, 0x6f, 0x6e, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09,
-	0x52, 0x02, 0x69, 0x64, 0x12, 0x1e, 0x0a, 0x0a, 0x63, 0x6f, 0x6e, 0x74, 0x72, 0x6f, 0x6c, 0x6c,
-	0x65, 0x72, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0a, 0x63, 0x6f, 0x6e, 0x74, 0x72, 0x6f,
-	0x6c, 0x6c, 0x65, 0x72, 0x12, 0x22, 0x0a, 0x0d, 0x61, 0x67, 0x65, 0x6e, 0x74, 0x5f, 0x70, 0x65,
-	0x72, 0x6d, 0x5f, 0x69, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28, 0x04, 0x52, 0x0b, 0x61, 0x67, 0x65,
-	0x6e, 0x74, 0x50, 0x65, 0x72, 0x6d, 0x49, 0x64, 0x12, 0x32, 0x0a, 0x05, 0x61, 0x75, 0x74, 0x68,
-	0x7a, 0x18, 0x04, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x1c, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61,
-	0x2e, 0x70, 0x65, 0x72, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x53, 0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e,
-	0x41, 0x75, 0x74, 0x68, 0x7a, 0x52, 0x05, 0x61, 0x75, 0x74, 0x68, 0x7a, 0x12, 0x3a, 0x0a, 0x07,
-	0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x18, 0x05, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e,
+	0xdf, 0x1f, 0x01, 0x52, 0x0e, 0x65, 0x66, 0x66, 0x65, 0x63, 0x74, 0x69, 0x76, 0x65, 0x55, 0x6e,
+	0x74, 0x69, 0x6c, 0x12, 0x3c, 0x0a, 0x08, 0x6d, 0x6f, 0x64, 0x69, 0x66, 0x69, 0x65, 0x64, 0x18,
+	0x10, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70,
+	0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d,
+	0x70, 0x42, 0x04, 0x90, 0xdf, 0x1f, 0x01, 0x52, 0x08, 0x6d, 0x6f, 0x64, 0x69, 0x66, 0x69, 0x65,
+	0x64, 0x12, 0x27, 0x0a, 0x0f, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5f,
+	0x66, 0x65, 0x65, 0x73, 0x18, 0x11, 0x20, 0x01, 0x28, 0x04, 0x52, 0x0e, 0x76, 0x61, 0x6c, 0x69,
+	0x64, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x46, 0x65, 0x65, 0x73, 0x12, 0x23, 0x0a, 0x0d, 0x69, 0x73,
+	0x73, 0x75, 0x61, 0x6e, 0x63, 0x65, 0x5f, 0x66, 0x65, 0x65, 0x73, 0x18, 0x12, 0x20, 0x01, 0x28,
+	0x04, 0x52, 0x0c, 0x69, 0x73, 0x73, 0x75, 0x61, 0x6e, 0x63, 0x65, 0x46, 0x65, 0x65, 0x73, 0x12,
+	0x2b, 0x0a, 0x11, 0x76, 0x65, 0x72, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5f,
+	0x66, 0x65, 0x65, 0x73, 0x18, 0x13, 0x20, 0x01, 0x28, 0x04, 0x52, 0x10, 0x76, 0x65, 0x72, 0x69,
+	0x66, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x46, 0x65, 0x65, 0x73, 0x12, 0x18, 0x0a, 0x07,
+	0x64, 0x65, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x18, 0x14, 0x20, 0x01, 0x28, 0x04, 0x52, 0x07, 0x64,
+	0x65, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x12, 0x27, 0x0a, 0x0f, 0x73, 0x6c, 0x61, 0x73, 0x68, 0x65,
+	0x64, 0x5f, 0x64, 0x65, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x18, 0x15, 0x20, 0x01, 0x28, 0x04, 0x52,
+	0x0e, 0x73, 0x6c, 0x61, 0x73, 0x68, 0x65, 0x64, 0x44, 0x65, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x12,
+	0x25, 0x0a, 0x0e, 0x72, 0x65, 0x70, 0x61, 0x69, 0x64, 0x5f, 0x64, 0x65, 0x70, 0x6f, 0x73, 0x69,
+	0x74, 0x18, 0x16, 0x20, 0x01, 0x28, 0x04, 0x52, 0x0d, 0x72, 0x65, 0x70, 0x61, 0x69, 0x64, 0x44,
+	0x65, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x12, 0x3a, 0x0a, 0x07, 0x72, 0x65, 0x76, 0x6f, 0x6b, 0x65,
+	0x64, 0x18, 0x17, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65,
+	0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74,
+	0x61, 0x6d, 0x70, 0x42, 0x04, 0x90, 0xdf, 0x1f, 0x01, 0x52, 0x07, 0x72, 0x65, 0x76, 0x6f, 0x6b,
+	0x65, 0x64, 0x12, 0x37, 0x0a, 0x0a, 0x72, 0x65, 0x76, 0x6f, 0x6b, 0x65, 0x64, 0x5f, 0x62, 0x79,
+	0x18, 0x18, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d,
+	0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67,
+	0x52, 0x09, 0x72, 0x65, 0x76, 0x6f, 0x6b, 0x65, 0x64, 0x42, 0x79, 0x12, 0x18, 0x0a, 0x07, 0x63,
+	0x6f, 0x75, 0x6e, 0x74, 0x72, 0x79, 0x18, 0x19, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x63, 0x6f,
+	0x75, 0x6e, 0x74, 0x72, 0x79, 0x12, 0x2a, 0x0a, 0x11, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74,
+	0x6f, 0x72, 0x5f, 0x70, 0x65, 0x72, 0x6d, 0x5f, 0x69, 0x64, 0x18, 0x1a, 0x20, 0x01, 0x28, 0x04,
+	0x52, 0x0f, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x6f, 0x72, 0x50, 0x65, 0x72, 0x6d, 0x49,
+	0x64, 0x12, 0x3a, 0x0a, 0x08, 0x76, 0x70, 0x5f, 0x73, 0x74, 0x61, 0x74, 0x65, 0x18, 0x1b, 0x20,
+	0x01, 0x28, 0x0e, 0x32, 0x1f, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x70, 0x65, 0x72,
+	0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x56, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x53,
+	0x74, 0x61, 0x74, 0x65, 0x52, 0x07, 0x76, 0x70, 0x53, 0x74, 0x61, 0x74, 0x65, 0x12, 0x37, 0x0a,
+	0x06, 0x76, 0x70, 0x5f, 0x65, 0x78, 0x70, 0x18, 0x1c, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e,
 	0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e,
 	0x54, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x42, 0x04, 0x90, 0xdf, 0x1f, 0x01, 0x52,
-	0x07, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x12, 0x3c, 0x0a, 0x08, 0x6d, 0x6f, 0x64, 0x69,
-	0x66, 0x69, 0x65, 0x64, 0x18, 0x06, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f,
-	0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d,
-	0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x42, 0x04, 0x90, 0xdf, 0x1f, 0x01, 0x52, 0x08, 0x6d, 0x6f,
-	0x64, 0x69, 0x66, 0x69, 0x65, 0x64, 0x22, 0x99, 0x01, 0x0a, 0x0c, 0x53, 0x65, 0x73, 0x73, 0x69,
-	0x6f, 0x6e, 0x41, 0x75, 0x74, 0x68, 0x7a, 0x12, 0x28, 0x0a, 0x10, 0x65, 0x78, 0x65, 0x63, 0x75,
-	0x74, 0x6f, 0x72, 0x5f, 0x70, 0x65, 0x72, 0x6d, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28,
-	0x04, 0x52, 0x0e, 0x65, 0x78, 0x65, 0x63, 0x75, 0x74, 0x6f, 0x72, 0x50, 0x65, 0x72, 0x6d, 0x49,
-	0x64, 0x12, 0x2e, 0x0a, 0x13, 0x62, 0x65, 0x6e, 0x65, 0x66, 0x69, 0x63, 0x69, 0x61, 0x72, 0x79,
-	0x5f, 0x70, 0x65, 0x72, 0x6d, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x04, 0x52, 0x11,
-	0x62, 0x65, 0x6e, 0x65, 0x66, 0x69, 0x63, 0x69, 0x61, 0x72, 0x79, 0x50, 0x65, 0x72, 0x6d, 0x49,
+	0x05, 0x76, 0x70, 0x45, 0x78, 0x70, 0x12, 0x51, 0x0a, 0x14, 0x76, 0x70, 0x5f, 0x6c, 0x61, 0x73,
+	0x74, 0x5f, 0x73, 0x74, 0x61, 0x74, 0x65, 0x5f, 0x63, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x18, 0x1d,
+	0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72,
+	0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70,
+	0x42, 0x04, 0x90, 0xdf, 0x1f, 0x01, 0x52, 0x11, 0x76, 0x70, 0x4c, 0x61, 0x73, 0x74, 0x53, 0x74,
+	0x61, 0x74, 0x65, 0x43, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x12, 0x30, 0x0a, 0x14, 0x76, 0x70, 0x5f,
+	0x76, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x6f, 0x72, 0x5f, 0x64, 0x65, 0x70, 0x6f, 0x73, 0x69,
+	0x74, 0x18, 0x1e, 0x20, 0x01, 0x28, 0x04, 0x52, 0x12, 0x76, 0x70, 0x56, 0x61, 0x6c, 0x69, 0x64,
+	0x61, 0x74, 0x6f, 0x72, 0x44, 0x65, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x12, 0x26, 0x0a, 0x0f, 0x76,
+	0x70, 0x5f, 0x63, 0x75, 0x72, 0x72, 0x65, 0x6e, 0x74, 0x5f, 0x66, 0x65, 0x65, 0x73, 0x18, 0x1f,
+	0x20, 0x01, 0x28, 0x04, 0x52, 0x0d, 0x76, 0x70, 0x43, 0x75, 0x72, 0x72, 0x65, 0x6e, 0x74, 0x46,
+	0x65, 0x65, 0x73, 0x12, 0x2c, 0x0a, 0x12, 0x76, 0x70, 0x5f, 0x63, 0x75, 0x72, 0x72, 0x65, 0x6e,
+	0x74, 0x5f, 0x64, 0x65, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x18, 0x20, 0x20, 0x01, 0x28, 0x04, 0x52,
+	0x10, 0x76, 0x70, 0x43, 0x75, 0x72, 0x72, 0x65, 0x6e, 0x74, 0x44, 0x65, 0x70, 0x6f, 0x73, 0x69,
+	0x74, 0x12, 0x31, 0x0a, 0x15, 0x76, 0x70, 0x5f, 0x73, 0x75, 0x6d, 0x6d, 0x61, 0x72, 0x79, 0x5f,
+	0x64, 0x69, 0x67, 0x65, 0x73, 0x74, 0x5f, 0x73, 0x72, 0x69, 0x18, 0x21, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x12, 0x76, 0x70, 0x53, 0x75, 0x6d, 0x6d, 0x61, 0x72, 0x79, 0x44, 0x69, 0x67, 0x65, 0x73,
+	0x74, 0x53, 0x72, 0x69, 0x12, 0x4c, 0x0a, 0x11, 0x76, 0x70, 0x5f, 0x74, 0x65, 0x72, 0x6d, 0x5f,
+	0x72, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x65, 0x64, 0x18, 0x22, 0x20, 0x01, 0x28, 0x0b, 0x32,
+	0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75,
+	0x66, 0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x42, 0x04, 0x90, 0xdf, 0x1f,
+	0x01, 0x52, 0x0f, 0x76, 0x70, 0x54, 0x65, 0x72, 0x6d, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x65, 0x64, 0x12, 0x32, 0x0a, 0x15, 0x69, 0x73, 0x73, 0x75, 0x61, 0x6e, 0x63, 0x65, 0x5f, 0x66,
+	0x65, 0x65, 0x5f, 0x64, 0x69, 0x73, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x18, 0x23, 0x20, 0x01, 0x28,
+	0x04, 0x52, 0x13, 0x69, 0x73, 0x73, 0x75, 0x61, 0x6e, 0x63, 0x65, 0x46, 0x65, 0x65, 0x44, 0x69,
+	0x73, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x12, 0x3a, 0x0a, 0x19, 0x76, 0x65, 0x72, 0x69, 0x66, 0x69,
+	0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x66, 0x65, 0x65, 0x5f, 0x64, 0x69, 0x73, 0x63, 0x6f,
+	0x75, 0x6e, 0x74, 0x18, 0x24, 0x20, 0x01, 0x28, 0x04, 0x52, 0x17, 0x76, 0x65, 0x72, 0x69, 0x66,
+	0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x46, 0x65, 0x65, 0x44, 0x69, 0x73, 0x63, 0x6f, 0x75,
+	0x6e, 0x74, 0x12, 0x39, 0x0a, 0x0b, 0x76, 0x73, 0x5f, 0x6f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f,
+	0x72, 0x18, 0x25, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73,
+	0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e,
+	0x67, 0x52, 0x0a, 0x76, 0x73, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x12, 0x39, 0x0a,
+	0x19, 0x76, 0x73, 0x5f, 0x6f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x5f, 0x61, 0x75, 0x74,
+	0x68, 0x7a, 0x5f, 0x65, 0x6e, 0x61, 0x62, 0x6c, 0x65, 0x64, 0x18, 0x26, 0x20, 0x01, 0x28, 0x08,
+	0x52, 0x16, 0x76, 0x73, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x41, 0x75, 0x74, 0x68,
+	0x7a, 0x45, 0x6e, 0x61, 0x62, 0x6c, 0x65, 0x64, 0x12, 0x92, 0x01, 0x0a, 0x1d, 0x76, 0x73, 0x5f,
+	0x6f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x5f, 0x61, 0x75, 0x74, 0x68, 0x7a, 0x5f, 0x73,
+	0x70, 0x65, 0x6e, 0x64, 0x5f, 0x6c, 0x69, 0x6d, 0x69, 0x74, 0x18, 0x27, 0x20, 0x03, 0x28, 0x0b,
+	0x32, 0x19, 0x2e, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x62, 0x61, 0x73, 0x65, 0x2e, 0x76,
+	0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x2e, 0x43, 0x6f, 0x69, 0x6e, 0x42, 0x35, 0xc8, 0xde, 0x1f,
+	0x00, 0xaa, 0xdf, 0x1f, 0x28, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f,
+	0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2f, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2d, 0x73, 0x64,
+	0x6b, 0x2f, 0x74, 0x79, 0x70, 0x65, 0x73, 0x2e, 0x43, 0x6f, 0x69, 0x6e, 0x73, 0xa8, 0xe7, 0xb0,
+	0x2a, 0x01, 0x52, 0x19, 0x76, 0x73, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x41, 0x75,
+	0x74, 0x68, 0x7a, 0x53, 0x70, 0x65, 0x6e, 0x64, 0x4c, 0x69, 0x6d, 0x69, 0x74, 0x12, 0x44, 0x0a,
+	0x1f, 0x76, 0x73, 0x5f, 0x6f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x5f, 0x61, 0x75, 0x74,
+	0x68, 0x7a, 0x5f, 0x77, 0x69, 0x74, 0x68, 0x5f, 0x66, 0x65, 0x65, 0x67, 0x72, 0x61, 0x6e, 0x74,
+	0x18, 0x28, 0x20, 0x01, 0x28, 0x08, 0x52, 0x1b, 0x76, 0x73, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74,
+	0x6f, 0x72, 0x41, 0x75, 0x74, 0x68, 0x7a, 0x57, 0x69, 0x74, 0x68, 0x46, 0x65, 0x65, 0x67, 0x72,
+	0x61, 0x6e, 0x74, 0x12, 0x99, 0x01, 0x0a, 0x21, 0x76, 0x73, 0x5f, 0x6f, 0x70, 0x65, 0x72, 0x61,
+	0x74, 0x6f, 0x72, 0x5f, 0x61, 0x75, 0x74, 0x68, 0x7a, 0x5f, 0x66, 0x65, 0x65, 0x5f, 0x73, 0x70,
+	0x65, 0x6e, 0x64, 0x5f, 0x6c, 0x69, 0x6d, 0x69, 0x74, 0x18, 0x29, 0x20, 0x03, 0x28, 0x0b, 0x32,
+	0x19, 0x2e, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x62, 0x61, 0x73, 0x65, 0x2e, 0x76, 0x31,
+	0x62, 0x65, 0x74, 0x61, 0x31, 0x2e, 0x43, 0x6f, 0x69, 0x6e, 0x42, 0x35, 0xc8, 0xde, 0x1f, 0x00,
+	0xaa, 0xdf, 0x1f, 0x28, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x63,
+	0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2f, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2d, 0x73, 0x64, 0x6b,
+	0x2f, 0x74, 0x79, 0x70, 0x65, 0x73, 0x2e, 0x43, 0x6f, 0x69, 0x6e, 0x73, 0xa8, 0xe7, 0xb0, 0x2a,
+	0x01, 0x52, 0x1c, 0x76, 0x73, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x41, 0x75, 0x74,
+	0x68, 0x7a, 0x46, 0x65, 0x65, 0x53, 0x70, 0x65, 0x6e, 0x64, 0x4c, 0x69, 0x6d, 0x69, 0x74, 0x12,
+	0x63, 0x0a, 0x1e, 0x76, 0x73, 0x5f, 0x6f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x5f, 0x61,
+	0x75, 0x74, 0x68, 0x7a, 0x5f, 0x73, 0x70, 0x65, 0x6e, 0x64, 0x5f, 0x70, 0x65, 0x72, 0x69, 0x6f,
+	0x64, 0x18, 0x2a, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x19, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65,
+	0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x44, 0x75, 0x72, 0x61, 0x74, 0x69,
+	0x6f, 0x6e, 0x42, 0x04, 0x98, 0xdf, 0x1f, 0x01, 0x52, 0x1a, 0x76, 0x73, 0x4f, 0x70, 0x65, 0x72,
+	0x61, 0x74, 0x6f, 0x72, 0x41, 0x75, 0x74, 0x68, 0x7a, 0x53, 0x70, 0x65, 0x6e, 0x64, 0x50, 0x65,
+	0x72, 0x69, 0x6f, 0x64, 0x22, 0xd2, 0x02, 0x0a, 0x11, 0x50, 0x65, 0x72, 0x6d, 0x69, 0x73, 0x73,
+	0x69, 0x6f, 0x6e, 0x53, 0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x12, 0x1c, 0x0a, 0x09, 0x61, 0x75,
+	0x74, 0x68, 0x6f, 0x72, 0x69, 0x74, 0x79, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x61,
+	0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x74, 0x79, 0x12, 0x1f, 0x0a, 0x0b, 0x76, 0x73, 0x5f, 0x6f,
+	0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0a, 0x76,
+	0x73, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x12, 0x22, 0x0a, 0x0d, 0x61, 0x67, 0x65,
+	0x6e, 0x74, 0x5f, 0x70, 0x65, 0x72, 0x6d, 0x5f, 0x69, 0x64, 0x18, 0x04, 0x20, 0x01, 0x28, 0x04,
+	0x52, 0x0b, 0x61, 0x67, 0x65, 0x6e, 0x74, 0x50, 0x65, 0x72, 0x6d, 0x49, 0x64, 0x12, 0x50, 0x0a,
+	0x0f, 0x73, 0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x5f, 0x72, 0x65, 0x63, 0x6f, 0x72, 0x64, 0x73,
+	0x18, 0x05, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x27, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e,
+	0x70, 0x65, 0x72, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x50, 0x65, 0x72, 0x6d, 0x69, 0x73, 0x73, 0x69,
+	0x6f, 0x6e, 0x53, 0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x63, 0x6f, 0x72, 0x64, 0x52,
+	0x0e, 0x73, 0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x63, 0x6f, 0x72, 0x64, 0x73, 0x12,
+	0x3a, 0x0a, 0x07, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x18, 0x06, 0x20, 0x01, 0x28, 0x0b,
+	0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62,
+	0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x42, 0x04, 0x90, 0xdf,
+	0x1f, 0x01, 0x52, 0x07, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x12, 0x3c, 0x0a, 0x08, 0x6d,
+	0x6f, 0x64, 0x69, 0x66, 0x69, 0x65, 0x64, 0x18, 0x07, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e,
+	0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e,
+	0x54, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x42, 0x04, 0x90, 0xdf, 0x1f, 0x01, 0x52,
+	0x08, 0x6d, 0x6f, 0x64, 0x69, 0x66, 0x69, 0x65, 0x64, 0x22, 0xd6, 0x01, 0x0a, 0x17, 0x50, 0x65,
+	0x72, 0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x53, 0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x52,
+	0x65, 0x63, 0x6f, 0x72, 0x64, 0x12, 0x3a, 0x0a, 0x07, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e,
+	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61,
+	0x6d, 0x70, 0x42, 0x04, 0x90, 0xdf, 0x1f, 0x01, 0x52, 0x07, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65,
+	0x64, 0x12, 0x24, 0x0a, 0x0e, 0x69, 0x73, 0x73, 0x75, 0x65, 0x72, 0x5f, 0x70, 0x65, 0x72, 0x6d,
+	0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x04, 0x52, 0x0c, 0x69, 0x73, 0x73, 0x75, 0x65,
+	0x72, 0x50, 0x65, 0x72, 0x6d, 0x49, 0x64, 0x12, 0x28, 0x0a, 0x10, 0x76, 0x65, 0x72, 0x69, 0x66,
+	0x69, 0x65, 0x72, 0x5f, 0x70, 0x65, 0x72, 0x6d, 0x5f, 0x69, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28,
+	0x04, 0x52, 0x0e, 0x76, 0x65, 0x72, 0x69, 0x66, 0x69, 0x65, 0x72, 0x50, 0x65, 0x72, 0x6d, 0x49,
 	0x64, 0x12, 0x2f, 0x0a, 0x14, 0x77, 0x61, 0x6c, 0x6c, 0x65, 0x74, 0x5f, 0x61, 0x67, 0x65, 0x6e,
-	0x74, 0x5f, 0x70, 0x65, 0x72, 0x6d, 0x5f, 0x69, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28, 0x04, 0x52,
+	0x74, 0x5f, 0x70, 0x65, 0x72, 0x6d, 0x5f, 0x69, 0x64, 0x18, 0x04, 0x20, 0x01, 0x28, 0x04, 0x52,
 	0x11, 0x77, 0x61, 0x6c, 0x6c, 0x65, 0x74, 0x41, 0x67, 0x65, 0x6e, 0x74, 0x50, 0x65, 0x72, 0x6d,
 	0x49, 0x64, 0x22, 0x26, 0x0a, 0x0e, 0x4f, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x61, 0x6c, 0x55, 0x49,
 	0x6e, 0x74, 0x36, 0x34, 0x12, 0x14, 0x0a, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x01, 0x20,
@@ -5176,18 +5974,20 @@ func file_verana_perm_v1_types_proto_rawDescGZIP() []byte {
 var file_verana_perm_v1_types_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
 var file_verana_perm_v1_types_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_verana_perm_v1_types_proto_goTypes = []interface{}{
-	(PermissionType)(0),           // 0: verana.perm.v1.PermissionType
-	(ValidationState)(0),          // 1: verana.perm.v1.ValidationState
-	(*Permission)(nil),            // 2: verana.perm.v1.Permission
-	(*PermissionSession)(nil),     // 3: verana.perm.v1.PermissionSession
-	(*SessionAuthz)(nil),          // 4: verana.perm.v1.SessionAuthz
-	(*OptionalUInt64)(nil),        // 5: verana.perm.v1.OptionalUInt64
-	(*timestamppb.Timestamp)(nil), // 6: google.protobuf.Timestamp
+	(PermissionType)(0),             // 0: verana.perm.v1.PermissionType
+	(ValidationState)(0),            // 1: verana.perm.v1.ValidationState
+	(*Permission)(nil),              // 2: verana.perm.v1.Permission
+	(*PermissionSession)(nil),       // 3: verana.perm.v1.PermissionSession
+	(*PermissionSessionRecord)(nil), // 4: verana.perm.v1.PermissionSessionRecord
+	(*OptionalUInt64)(nil),          // 5: verana.perm.v1.OptionalUInt64
+	(*timestamppb.Timestamp)(nil),   // 6: google.protobuf.Timestamp
+	(*v1beta1.Coin)(nil),            // 7: cosmos.base.v1beta1.Coin
+	(*durationpb.Duration)(nil),     // 8: google.protobuf.Duration
 }
 var file_verana_perm_v1_types_proto_depIdxs = []int32{
 	0,  // 0: verana.perm.v1.Permission.type:type_name -> verana.perm.v1.PermissionType
 	6,  // 1: verana.perm.v1.Permission.created:type_name -> google.protobuf.Timestamp
-	6,  // 2: verana.perm.v1.Permission.extended:type_name -> google.protobuf.Timestamp
+	6,  // 2: verana.perm.v1.Permission.adjusted:type_name -> google.protobuf.Timestamp
 	6,  // 3: verana.perm.v1.Permission.slashed:type_name -> google.protobuf.Timestamp
 	6,  // 4: verana.perm.v1.Permission.repaid:type_name -> google.protobuf.Timestamp
 	6,  // 5: verana.perm.v1.Permission.effective_from:type_name -> google.protobuf.Timestamp
@@ -5198,14 +5998,18 @@ var file_verana_perm_v1_types_proto_depIdxs = []int32{
 	6,  // 10: verana.perm.v1.Permission.vp_exp:type_name -> google.protobuf.Timestamp
 	6,  // 11: verana.perm.v1.Permission.vp_last_state_change:type_name -> google.protobuf.Timestamp
 	6,  // 12: verana.perm.v1.Permission.vp_term_requested:type_name -> google.protobuf.Timestamp
-	4,  // 13: verana.perm.v1.PermissionSession.authz:type_name -> verana.perm.v1.SessionAuthz
-	6,  // 14: verana.perm.v1.PermissionSession.created:type_name -> google.protobuf.Timestamp
-	6,  // 15: verana.perm.v1.PermissionSession.modified:type_name -> google.protobuf.Timestamp
-	16, // [16:16] is the sub-list for method output_type
-	16, // [16:16] is the sub-list for method input_type
-	16, // [16:16] is the sub-list for extension type_name
-	16, // [16:16] is the sub-list for extension extendee
-	0,  // [0:16] is the sub-list for field type_name
+	7,  // 13: verana.perm.v1.Permission.vs_operator_authz_spend_limit:type_name -> cosmos.base.v1beta1.Coin
+	7,  // 14: verana.perm.v1.Permission.vs_operator_authz_fee_spend_limit:type_name -> cosmos.base.v1beta1.Coin
+	8,  // 15: verana.perm.v1.Permission.vs_operator_authz_spend_period:type_name -> google.protobuf.Duration
+	4,  // 16: verana.perm.v1.PermissionSession.session_records:type_name -> verana.perm.v1.PermissionSessionRecord
+	6,  // 17: verana.perm.v1.PermissionSession.created:type_name -> google.protobuf.Timestamp
+	6,  // 18: verana.perm.v1.PermissionSession.modified:type_name -> google.protobuf.Timestamp
+	6,  // 19: verana.perm.v1.PermissionSessionRecord.created:type_name -> google.protobuf.Timestamp
+	20, // [20:20] is the sub-list for method output_type
+	20, // [20:20] is the sub-list for method input_type
+	20, // [20:20] is the sub-list for extension type_name
+	20, // [20:20] is the sub-list for extension extendee
+	0,  // [0:20] is the sub-list for field type_name
 }
 
 func init() { file_verana_perm_v1_types_proto_init() }
@@ -5239,7 +6043,7 @@ func file_verana_perm_v1_types_proto_init() {
 			}
 		}
 		file_verana_perm_v1_types_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SessionAuthz); i {
+			switch v := v.(*PermissionSessionRecord); i {
 			case 0:
 				return &v.state
 			case 1:

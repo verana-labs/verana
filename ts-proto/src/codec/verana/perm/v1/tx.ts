@@ -6,6 +6,8 @@
 
 /* eslint-disable */
 import * as _m0 from "protobufjs/minimal";
+import { Coin } from "../../../cosmos/base/v1beta1/coin";
+import { Duration } from "../../../google/protobuf/duration";
 import { Timestamp } from "../../../google/protobuf/timestamp";
 import { Params } from "./params";
 import { OptionalUInt64, PermissionType, permissionTypeFromJSON, permissionTypeToJSON } from "./types";
@@ -34,22 +36,26 @@ export interface MsgUpdateParamsResponse {
 
 /** MsgStartPermissionVP represents a message to start a permission validation process */
 export interface MsgStartPermissionVP {
-  creator: string;
+  /** authority is the group account on whose behalf this message is executed */
+  authority: string;
+  /** operator is the account authorized by the authority to run this Msg */
+  operator: string;
   type: PermissionType;
   validatorPermId: number;
-  /** optional: Requested validation_fees for this permission (can be modified by validator) */
-  validationFees:
-    | OptionalUInt64
-    | undefined;
-  /** optional: Requested issuance_fees for this permission (can be modified by validator) */
-  issuanceFees:
-    | OptionalUInt64
-    | undefined;
-  /** optional: Requested verification_fees for this permission (can be modified by validator) */
-  verificationFees: OptionalUInt64 | undefined;
-  country: string;
-  /** optional */
+  /** mandatory: MUST conform to DID Syntax */
   did: string;
+  validationFees: OptionalUInt64 | undefined;
+  issuanceFees: OptionalUInt64 | undefined;
+  verificationFees:
+    | OptionalUInt64
+    | undefined;
+  /** vs_operator: the account of the Verifiable Service (optional) */
+  vsOperator: string;
+  vsOperatorAuthzEnabled: boolean;
+  vsOperatorAuthzSpendLimit: Coin[];
+  vsOperatorAuthzWithFeegrant: boolean;
+  vsOperatorAuthzFeeSpendLimit: Coin[];
+  vsOperatorAuthzSpendPeriod: Duration | undefined;
 }
 
 /** MsgStartPermissionVPResponse defines the Msg/StartPermissionVP response type */
@@ -59,7 +65,8 @@ export interface MsgStartPermissionVPResponse {
 
 /** MsgRenewPermissionVP represents a message to renew a permission validation process */
 export interface MsgRenewPermissionVP {
-  creator: string;
+  authority: string;
+  operator: string;
   /** ID of the permission to renew */
   id: number;
 }
@@ -70,13 +77,15 @@ export interface MsgRenewPermissionVPResponse {
 
 /** MsgSetPermissionVPToValidated represents a message to set a permission validation process to validated state */
 export interface MsgSetPermissionVPToValidated {
-  creator: string;
+  /** authority is the group account on whose behalf this message is executed */
+  authority: string;
+  /** operator is the account authorized by the authority to run this Msg */
+  operator: string;
   id: number;
   effectiveUntil: Date | undefined;
   validationFees: number;
   issuanceFees: number;
   verificationFees: number;
-  country: string;
   vpSummaryDigestSri: string;
   /**
    * Fee discount fields (scaled: 0 = 0.0, 10000 = 1.0, range 0-10000)
@@ -92,7 +101,10 @@ export interface MsgSetPermissionVPToValidatedResponse {
 }
 
 export interface MsgCancelPermissionVPLastRequest {
-  creator: string;
+  /** authority is the group account on whose behalf this message is executed */
+  authority: string;
+  /** operator is the account authorized by the authority to run this Msg */
+  operator: string;
   /** Permission ID */
   id: number;
 }
@@ -101,10 +113,10 @@ export interface MsgCancelPermissionVPLastRequestResponse {
 }
 
 export interface MsgCreateRootPermission {
-  creator: string;
+  authority: string;
+  operator: string;
   schemaId: number;
   did: string;
-  country: string;
   effectiveFrom: Date | undefined;
   effectiveUntil: Date | undefined;
   validationFees: number;
@@ -117,18 +129,20 @@ export interface MsgCreateRootPermissionResponse {
   id: number;
 }
 
-export interface MsgExtendPermission {
-  creator: string;
+export interface MsgAdjustPermission {
+  authority: string;
+  operator: string;
   /** Permission ID */
   id: number;
   effectiveUntil: Date | undefined;
 }
 
-export interface MsgExtendPermissionResponse {
+export interface MsgAdjustPermissionResponse {
 }
 
 export interface MsgRevokePermission {
-  creator: string;
+  authority: string;
+  operator: string;
   /** Permission ID */
   id: number;
 }
@@ -137,13 +151,22 @@ export interface MsgRevokePermissionResponse {
 }
 
 export interface MsgCreateOrUpdatePermissionSession {
-  creator: string;
-  /** UUID */
+  /** authority is the group account on whose behalf this message is executed */
+  authority: string;
+  /** operator is the account authorized by the authority to run this Msg (vs_operator) */
+  operator: string;
+  /** UUID (mandatory) */
   id: string;
+  /** optional: issuer permission id */
   issuerPermId: number;
+  /** optional: verifier permission id */
   verifierPermId: number;
+  /** mandatory: agent credential issuer permission id */
   agentPermId: number;
+  /** mandatory: wallet credential issuer permission id */
   walletAgentPermId: number;
+  /** optional: digest derived from an issued or verified credential */
+  digest: string;
 }
 
 export interface MsgCreateOrUpdatePermissionSessionResponse {
@@ -151,7 +174,10 @@ export interface MsgCreateOrUpdatePermissionSessionResponse {
 }
 
 export interface MsgSlashPermissionTrustDeposit {
-  creator: string;
+  /** authority is the group account on whose behalf this message is executed */
+  authority: string;
+  /** operator is the account authorized by the authority to run this Msg */
+  operator: string;
   id: number;
   amount: number;
 }
@@ -160,7 +186,8 @@ export interface MsgSlashPermissionTrustDepositResponse {
 }
 
 export interface MsgRepayPermissionSlashedTrustDeposit {
-  creator: string;
+  authority: string;
+  operator: string;
   id: number;
 }
 
@@ -168,15 +195,22 @@ export interface MsgRepayPermissionSlashedTrustDepositResponse {
 }
 
 export interface MsgCreatePermission {
-  creator: string;
-  schemaId: number;
+  authority: string;
+  operator: string;
   type: PermissionType;
+  validatorPermId: number;
   did: string;
-  country: string;
   effectiveFrom: Date | undefined;
   effectiveUntil: Date | undefined;
   verificationFees: number;
   validationFees: number;
+  /** vs_operator: the account of the Verifiable Service (optional) */
+  vsOperator: string;
+  vsOperatorAuthzEnabled: boolean;
+  vsOperatorAuthzSpendLimit: Coin[];
+  vsOperatorAuthzWithFeegrant: boolean;
+  vsOperatorAuthzFeeSpendLimit: Coin[];
+  vsOperatorAuthzSpendPeriod: Duration | undefined;
 }
 
 export interface MsgCreatePermissionResponse {
@@ -304,27 +338,39 @@ export const MsgUpdateParamsResponse = {
 
 function createBaseMsgStartPermissionVP(): MsgStartPermissionVP {
   return {
-    creator: "",
+    authority: "",
+    operator: "",
     type: 0,
     validatorPermId: 0,
+    did: "",
     validationFees: undefined,
     issuanceFees: undefined,
     verificationFees: undefined,
-    country: "",
-    did: "",
+    vsOperator: "",
+    vsOperatorAuthzEnabled: false,
+    vsOperatorAuthzSpendLimit: [],
+    vsOperatorAuthzWithFeegrant: false,
+    vsOperatorAuthzFeeSpendLimit: [],
+    vsOperatorAuthzSpendPeriod: undefined,
   };
 }
 
 export const MsgStartPermissionVP = {
   encode(message: MsgStartPermissionVP, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.creator !== "") {
-      writer.uint32(10).string(message.creator);
+    if (message.authority !== "") {
+      writer.uint32(10).string(message.authority);
+    }
+    if (message.operator !== "") {
+      writer.uint32(18).string(message.operator);
     }
     if (message.type !== 0) {
-      writer.uint32(16).int32(message.type);
+      writer.uint32(24).int32(message.type);
     }
     if (message.validatorPermId !== 0) {
-      writer.uint32(24).uint64(message.validatorPermId);
+      writer.uint32(32).uint64(message.validatorPermId);
+    }
+    if (message.did !== "") {
+      writer.uint32(42).string(message.did);
     }
     if (message.validationFees !== undefined) {
       OptionalUInt64.encode(message.validationFees, writer.uint32(50).fork()).ldelim();
@@ -335,11 +381,23 @@ export const MsgStartPermissionVP = {
     if (message.verificationFees !== undefined) {
       OptionalUInt64.encode(message.verificationFees, writer.uint32(66).fork()).ldelim();
     }
-    if (message.country !== "") {
-      writer.uint32(34).string(message.country);
+    if (message.vsOperator !== "") {
+      writer.uint32(74).string(message.vsOperator);
     }
-    if (message.did !== "") {
-      writer.uint32(42).string(message.did);
+    if (message.vsOperatorAuthzEnabled !== false) {
+      writer.uint32(80).bool(message.vsOperatorAuthzEnabled);
+    }
+    for (const v of message.vsOperatorAuthzSpendLimit) {
+      Coin.encode(v!, writer.uint32(90).fork()).ldelim();
+    }
+    if (message.vsOperatorAuthzWithFeegrant !== false) {
+      writer.uint32(96).bool(message.vsOperatorAuthzWithFeegrant);
+    }
+    for (const v of message.vsOperatorAuthzFeeSpendLimit) {
+      Coin.encode(v!, writer.uint32(106).fork()).ldelim();
+    }
+    if (message.vsOperatorAuthzSpendPeriod !== undefined) {
+      Duration.encode(message.vsOperatorAuthzSpendPeriod, writer.uint32(114).fork()).ldelim();
     }
     return writer;
   },
@@ -356,21 +414,35 @@ export const MsgStartPermissionVP = {
             break;
           }
 
-          message.creator = reader.string();
+          message.authority = reader.string();
           continue;
         case 2:
-          if (tag !== 16) {
+          if (tag !== 18) {
             break;
           }
 
-          message.type = reader.int32() as any;
+          message.operator = reader.string();
           continue;
         case 3:
           if (tag !== 24) {
             break;
           }
 
+          message.type = reader.int32() as any;
+          continue;
+        case 4:
+          if (tag !== 32) {
+            break;
+          }
+
           message.validatorPermId = longToNumber(reader.uint64() as Long);
+          continue;
+        case 5:
+          if (tag !== 42) {
+            break;
+          }
+
+          message.did = reader.string();
           continue;
         case 6:
           if (tag !== 50) {
@@ -393,19 +465,47 @@ export const MsgStartPermissionVP = {
 
           message.verificationFees = OptionalUInt64.decode(reader, reader.uint32());
           continue;
-        case 4:
-          if (tag !== 34) {
+        case 9:
+          if (tag !== 74) {
             break;
           }
 
-          message.country = reader.string();
+          message.vsOperator = reader.string();
           continue;
-        case 5:
-          if (tag !== 42) {
+        case 10:
+          if (tag !== 80) {
             break;
           }
 
-          message.did = reader.string();
+          message.vsOperatorAuthzEnabled = reader.bool();
+          continue;
+        case 11:
+          if (tag !== 90) {
+            break;
+          }
+
+          message.vsOperatorAuthzSpendLimit.push(Coin.decode(reader, reader.uint32()));
+          continue;
+        case 12:
+          if (tag !== 96) {
+            break;
+          }
+
+          message.vsOperatorAuthzWithFeegrant = reader.bool();
+          continue;
+        case 13:
+          if (tag !== 106) {
+            break;
+          }
+
+          message.vsOperatorAuthzFeeSpendLimit.push(Coin.decode(reader, reader.uint32()));
+          continue;
+        case 14:
+          if (tag !== 114) {
+            break;
+          }
+
+          message.vsOperatorAuthzSpendPeriod = Duration.decode(reader, reader.uint32());
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -418,27 +518,49 @@ export const MsgStartPermissionVP = {
 
   fromJSON(object: any): MsgStartPermissionVP {
     return {
-      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
+      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
       type: isSet(object.type) ? permissionTypeFromJSON(object.type) : 0,
       validatorPermId: isSet(object.validatorPermId) ? globalThis.Number(object.validatorPermId) : 0,
+      did: isSet(object.did) ? globalThis.String(object.did) : "",
       validationFees: isSet(object.validationFees) ? OptionalUInt64.fromJSON(object.validationFees) : undefined,
       issuanceFees: isSet(object.issuanceFees) ? OptionalUInt64.fromJSON(object.issuanceFees) : undefined,
       verificationFees: isSet(object.verificationFees) ? OptionalUInt64.fromJSON(object.verificationFees) : undefined,
-      country: isSet(object.country) ? globalThis.String(object.country) : "",
-      did: isSet(object.did) ? globalThis.String(object.did) : "",
+      vsOperator: isSet(object.vsOperator) ? globalThis.String(object.vsOperator) : "",
+      vsOperatorAuthzEnabled: isSet(object.vsOperatorAuthzEnabled)
+        ? globalThis.Boolean(object.vsOperatorAuthzEnabled)
+        : false,
+      vsOperatorAuthzSpendLimit: globalThis.Array.isArray(object?.vsOperatorAuthzSpendLimit)
+        ? object.vsOperatorAuthzSpendLimit.map((e: any) => Coin.fromJSON(e))
+        : [],
+      vsOperatorAuthzWithFeegrant: isSet(object.vsOperatorAuthzWithFeegrant)
+        ? globalThis.Boolean(object.vsOperatorAuthzWithFeegrant)
+        : false,
+      vsOperatorAuthzFeeSpendLimit: globalThis.Array.isArray(object?.vsOperatorAuthzFeeSpendLimit)
+        ? object.vsOperatorAuthzFeeSpendLimit.map((e: any) => Coin.fromJSON(e))
+        : [],
+      vsOperatorAuthzSpendPeriod: isSet(object.vsOperatorAuthzSpendPeriod)
+        ? Duration.fromJSON(object.vsOperatorAuthzSpendPeriod)
+        : undefined,
     };
   },
 
   toJSON(message: MsgStartPermissionVP): unknown {
     const obj: any = {};
-    if (message.creator !== "") {
-      obj.creator = message.creator;
+    if (message.authority !== "") {
+      obj.authority = message.authority;
+    }
+    if (message.operator !== "") {
+      obj.operator = message.operator;
     }
     if (message.type !== 0) {
       obj.type = permissionTypeToJSON(message.type);
     }
     if (message.validatorPermId !== 0) {
       obj.validatorPermId = Math.round(message.validatorPermId);
+    }
+    if (message.did !== "") {
+      obj.did = message.did;
     }
     if (message.validationFees !== undefined) {
       obj.validationFees = OptionalUInt64.toJSON(message.validationFees);
@@ -449,11 +571,23 @@ export const MsgStartPermissionVP = {
     if (message.verificationFees !== undefined) {
       obj.verificationFees = OptionalUInt64.toJSON(message.verificationFees);
     }
-    if (message.country !== "") {
-      obj.country = message.country;
+    if (message.vsOperator !== "") {
+      obj.vsOperator = message.vsOperator;
     }
-    if (message.did !== "") {
-      obj.did = message.did;
+    if (message.vsOperatorAuthzEnabled !== false) {
+      obj.vsOperatorAuthzEnabled = message.vsOperatorAuthzEnabled;
+    }
+    if (message.vsOperatorAuthzSpendLimit?.length) {
+      obj.vsOperatorAuthzSpendLimit = message.vsOperatorAuthzSpendLimit.map((e) => Coin.toJSON(e));
+    }
+    if (message.vsOperatorAuthzWithFeegrant !== false) {
+      obj.vsOperatorAuthzWithFeegrant = message.vsOperatorAuthzWithFeegrant;
+    }
+    if (message.vsOperatorAuthzFeeSpendLimit?.length) {
+      obj.vsOperatorAuthzFeeSpendLimit = message.vsOperatorAuthzFeeSpendLimit.map((e) => Coin.toJSON(e));
+    }
+    if (message.vsOperatorAuthzSpendPeriod !== undefined) {
+      obj.vsOperatorAuthzSpendPeriod = Duration.toJSON(message.vsOperatorAuthzSpendPeriod);
     }
     return obj;
   },
@@ -463,9 +597,11 @@ export const MsgStartPermissionVP = {
   },
   fromPartial<I extends Exact<DeepPartial<MsgStartPermissionVP>, I>>(object: I): MsgStartPermissionVP {
     const message = createBaseMsgStartPermissionVP();
-    message.creator = object.creator ?? "";
+    message.authority = object.authority ?? "";
+    message.operator = object.operator ?? "";
     message.type = object.type ?? 0;
     message.validatorPermId = object.validatorPermId ?? 0;
+    message.did = object.did ?? "";
     message.validationFees = (object.validationFees !== undefined && object.validationFees !== null)
       ? OptionalUInt64.fromPartial(object.validationFees)
       : undefined;
@@ -475,8 +611,15 @@ export const MsgStartPermissionVP = {
     message.verificationFees = (object.verificationFees !== undefined && object.verificationFees !== null)
       ? OptionalUInt64.fromPartial(object.verificationFees)
       : undefined;
-    message.country = object.country ?? "";
-    message.did = object.did ?? "";
+    message.vsOperator = object.vsOperator ?? "";
+    message.vsOperatorAuthzEnabled = object.vsOperatorAuthzEnabled ?? false;
+    message.vsOperatorAuthzSpendLimit = object.vsOperatorAuthzSpendLimit?.map((e) => Coin.fromPartial(e)) || [];
+    message.vsOperatorAuthzWithFeegrant = object.vsOperatorAuthzWithFeegrant ?? false;
+    message.vsOperatorAuthzFeeSpendLimit = object.vsOperatorAuthzFeeSpendLimit?.map((e) => Coin.fromPartial(e)) || [];
+    message.vsOperatorAuthzSpendPeriod =
+      (object.vsOperatorAuthzSpendPeriod !== undefined && object.vsOperatorAuthzSpendPeriod !== null)
+        ? Duration.fromPartial(object.vsOperatorAuthzSpendPeriod)
+        : undefined;
     return message;
   },
 };
@@ -539,16 +682,19 @@ export const MsgStartPermissionVPResponse = {
 };
 
 function createBaseMsgRenewPermissionVP(): MsgRenewPermissionVP {
-  return { creator: "", id: 0 };
+  return { authority: "", operator: "", id: 0 };
 }
 
 export const MsgRenewPermissionVP = {
   encode(message: MsgRenewPermissionVP, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.creator !== "") {
-      writer.uint32(10).string(message.creator);
+    if (message.authority !== "") {
+      writer.uint32(10).string(message.authority);
+    }
+    if (message.operator !== "") {
+      writer.uint32(18).string(message.operator);
     }
     if (message.id !== 0) {
-      writer.uint32(16).uint64(message.id);
+      writer.uint32(24).uint64(message.id);
     }
     return writer;
   },
@@ -565,10 +711,17 @@ export const MsgRenewPermissionVP = {
             break;
           }
 
-          message.creator = reader.string();
+          message.authority = reader.string();
           continue;
         case 2:
-          if (tag !== 16) {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.operator = reader.string();
+          continue;
+        case 3:
+          if (tag !== 24) {
             break;
           }
 
@@ -585,15 +738,19 @@ export const MsgRenewPermissionVP = {
 
   fromJSON(object: any): MsgRenewPermissionVP {
     return {
-      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
+      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
       id: isSet(object.id) ? globalThis.Number(object.id) : 0,
     };
   },
 
   toJSON(message: MsgRenewPermissionVP): unknown {
     const obj: any = {};
-    if (message.creator !== "") {
-      obj.creator = message.creator;
+    if (message.authority !== "") {
+      obj.authority = message.authority;
+    }
+    if (message.operator !== "") {
+      obj.operator = message.operator;
     }
     if (message.id !== 0) {
       obj.id = Math.round(message.id);
@@ -606,7 +763,8 @@ export const MsgRenewPermissionVP = {
   },
   fromPartial<I extends Exact<DeepPartial<MsgRenewPermissionVP>, I>>(object: I): MsgRenewPermissionVP {
     const message = createBaseMsgRenewPermissionVP();
-    message.creator = object.creator ?? "";
+    message.authority = object.authority ?? "";
+    message.operator = object.operator ?? "";
     message.id = object.id ?? 0;
     return message;
   },
@@ -657,13 +815,13 @@ export const MsgRenewPermissionVPResponse = {
 
 function createBaseMsgSetPermissionVPToValidated(): MsgSetPermissionVPToValidated {
   return {
-    creator: "",
+    authority: "",
+    operator: "",
     id: 0,
     effectiveUntil: undefined,
     validationFees: 0,
     issuanceFees: 0,
     verificationFees: 0,
-    country: "",
     vpSummaryDigestSri: "",
     issuanceFeeDiscount: 0,
     verificationFeeDiscount: 0,
@@ -672,26 +830,26 @@ function createBaseMsgSetPermissionVPToValidated(): MsgSetPermissionVPToValidate
 
 export const MsgSetPermissionVPToValidated = {
   encode(message: MsgSetPermissionVPToValidated, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.creator !== "") {
-      writer.uint32(10).string(message.creator);
+    if (message.authority !== "") {
+      writer.uint32(10).string(message.authority);
+    }
+    if (message.operator !== "") {
+      writer.uint32(18).string(message.operator);
     }
     if (message.id !== 0) {
-      writer.uint32(16).uint64(message.id);
+      writer.uint32(24).uint64(message.id);
     }
     if (message.effectiveUntil !== undefined) {
-      Timestamp.encode(toTimestamp(message.effectiveUntil), writer.uint32(26).fork()).ldelim();
+      Timestamp.encode(toTimestamp(message.effectiveUntil), writer.uint32(34).fork()).ldelim();
     }
     if (message.validationFees !== 0) {
-      writer.uint32(32).uint64(message.validationFees);
+      writer.uint32(40).uint64(message.validationFees);
     }
     if (message.issuanceFees !== 0) {
-      writer.uint32(40).uint64(message.issuanceFees);
+      writer.uint32(48).uint64(message.issuanceFees);
     }
     if (message.verificationFees !== 0) {
-      writer.uint32(48).uint64(message.verificationFees);
-    }
-    if (message.country !== "") {
-      writer.uint32(58).string(message.country);
+      writer.uint32(56).uint64(message.verificationFees);
     }
     if (message.vpSummaryDigestSri !== "") {
       writer.uint32(66).string(message.vpSummaryDigestSri);
@@ -717,49 +875,49 @@ export const MsgSetPermissionVPToValidated = {
             break;
           }
 
-          message.creator = reader.string();
+          message.authority = reader.string();
           continue;
         case 2:
-          if (tag !== 16) {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.operator = reader.string();
+          continue;
+        case 3:
+          if (tag !== 24) {
             break;
           }
 
           message.id = longToNumber(reader.uint64() as Long);
           continue;
-        case 3:
-          if (tag !== 26) {
+        case 4:
+          if (tag !== 34) {
             break;
           }
 
           message.effectiveUntil = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
-          continue;
-        case 4:
-          if (tag !== 32) {
-            break;
-          }
-
-          message.validationFees = longToNumber(reader.uint64() as Long);
           continue;
         case 5:
           if (tag !== 40) {
             break;
           }
 
-          message.issuanceFees = longToNumber(reader.uint64() as Long);
+          message.validationFees = longToNumber(reader.uint64() as Long);
           continue;
         case 6:
           if (tag !== 48) {
             break;
           }
 
-          message.verificationFees = longToNumber(reader.uint64() as Long);
+          message.issuanceFees = longToNumber(reader.uint64() as Long);
           continue;
         case 7:
-          if (tag !== 58) {
+          if (tag !== 56) {
             break;
           }
 
-          message.country = reader.string();
+          message.verificationFees = longToNumber(reader.uint64() as Long);
           continue;
         case 8:
           if (tag !== 66) {
@@ -793,13 +951,13 @@ export const MsgSetPermissionVPToValidated = {
 
   fromJSON(object: any): MsgSetPermissionVPToValidated {
     return {
-      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
+      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
       id: isSet(object.id) ? globalThis.Number(object.id) : 0,
       effectiveUntil: isSet(object.effectiveUntil) ? fromJsonTimestamp(object.effectiveUntil) : undefined,
       validationFees: isSet(object.validationFees) ? globalThis.Number(object.validationFees) : 0,
       issuanceFees: isSet(object.issuanceFees) ? globalThis.Number(object.issuanceFees) : 0,
       verificationFees: isSet(object.verificationFees) ? globalThis.Number(object.verificationFees) : 0,
-      country: isSet(object.country) ? globalThis.String(object.country) : "",
       vpSummaryDigestSri: isSet(object.vpSummaryDigestSri) ? globalThis.String(object.vpSummaryDigestSri) : "",
       issuanceFeeDiscount: isSet(object.issuanceFeeDiscount) ? globalThis.Number(object.issuanceFeeDiscount) : 0,
       verificationFeeDiscount: isSet(object.verificationFeeDiscount)
@@ -810,8 +968,11 @@ export const MsgSetPermissionVPToValidated = {
 
   toJSON(message: MsgSetPermissionVPToValidated): unknown {
     const obj: any = {};
-    if (message.creator !== "") {
-      obj.creator = message.creator;
+    if (message.authority !== "") {
+      obj.authority = message.authority;
+    }
+    if (message.operator !== "") {
+      obj.operator = message.operator;
     }
     if (message.id !== 0) {
       obj.id = Math.round(message.id);
@@ -827,9 +988,6 @@ export const MsgSetPermissionVPToValidated = {
     }
     if (message.verificationFees !== 0) {
       obj.verificationFees = Math.round(message.verificationFees);
-    }
-    if (message.country !== "") {
-      obj.country = message.country;
     }
     if (message.vpSummaryDigestSri !== "") {
       obj.vpSummaryDigestSri = message.vpSummaryDigestSri;
@@ -850,13 +1008,13 @@ export const MsgSetPermissionVPToValidated = {
     object: I,
   ): MsgSetPermissionVPToValidated {
     const message = createBaseMsgSetPermissionVPToValidated();
-    message.creator = object.creator ?? "";
+    message.authority = object.authority ?? "";
+    message.operator = object.operator ?? "";
     message.id = object.id ?? 0;
     message.effectiveUntil = object.effectiveUntil ?? undefined;
     message.validationFees = object.validationFees ?? 0;
     message.issuanceFees = object.issuanceFees ?? 0;
     message.verificationFees = object.verificationFees ?? 0;
-    message.country = object.country ?? "";
     message.vpSummaryDigestSri = object.vpSummaryDigestSri ?? "";
     message.issuanceFeeDiscount = object.issuanceFeeDiscount ?? 0;
     message.verificationFeeDiscount = object.verificationFeeDiscount ?? 0;
@@ -912,16 +1070,19 @@ export const MsgSetPermissionVPToValidatedResponse = {
 };
 
 function createBaseMsgCancelPermissionVPLastRequest(): MsgCancelPermissionVPLastRequest {
-  return { creator: "", id: 0 };
+  return { authority: "", operator: "", id: 0 };
 }
 
 export const MsgCancelPermissionVPLastRequest = {
   encode(message: MsgCancelPermissionVPLastRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.creator !== "") {
-      writer.uint32(10).string(message.creator);
+    if (message.authority !== "") {
+      writer.uint32(10).string(message.authority);
+    }
+    if (message.operator !== "") {
+      writer.uint32(18).string(message.operator);
     }
     if (message.id !== 0) {
-      writer.uint32(16).uint64(message.id);
+      writer.uint32(24).uint64(message.id);
     }
     return writer;
   },
@@ -938,10 +1099,17 @@ export const MsgCancelPermissionVPLastRequest = {
             break;
           }
 
-          message.creator = reader.string();
+          message.authority = reader.string();
           continue;
         case 2:
-          if (tag !== 16) {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.operator = reader.string();
+          continue;
+        case 3:
+          if (tag !== 24) {
             break;
           }
 
@@ -958,15 +1126,19 @@ export const MsgCancelPermissionVPLastRequest = {
 
   fromJSON(object: any): MsgCancelPermissionVPLastRequest {
     return {
-      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
+      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
       id: isSet(object.id) ? globalThis.Number(object.id) : 0,
     };
   },
 
   toJSON(message: MsgCancelPermissionVPLastRequest): unknown {
     const obj: any = {};
-    if (message.creator !== "") {
-      obj.creator = message.creator;
+    if (message.authority !== "") {
+      obj.authority = message.authority;
+    }
+    if (message.operator !== "") {
+      obj.operator = message.operator;
     }
     if (message.id !== 0) {
       obj.id = Math.round(message.id);
@@ -983,7 +1155,8 @@ export const MsgCancelPermissionVPLastRequest = {
     object: I,
   ): MsgCancelPermissionVPLastRequest {
     const message = createBaseMsgCancelPermissionVPLastRequest();
-    message.creator = object.creator ?? "";
+    message.authority = object.authority ?? "";
+    message.operator = object.operator ?? "";
     message.id = object.id ?? 0;
     return message;
   },
@@ -1038,10 +1211,10 @@ export const MsgCancelPermissionVPLastRequestResponse = {
 
 function createBaseMsgCreateRootPermission(): MsgCreateRootPermission {
   return {
-    creator: "",
+    authority: "",
+    operator: "",
     schemaId: 0,
     did: "",
-    country: "",
     effectiveFrom: undefined,
     effectiveUntil: undefined,
     validationFees: 0,
@@ -1052,17 +1225,17 @@ function createBaseMsgCreateRootPermission(): MsgCreateRootPermission {
 
 export const MsgCreateRootPermission = {
   encode(message: MsgCreateRootPermission, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.creator !== "") {
-      writer.uint32(10).string(message.creator);
+    if (message.authority !== "") {
+      writer.uint32(10).string(message.authority);
+    }
+    if (message.operator !== "") {
+      writer.uint32(18).string(message.operator);
     }
     if (message.schemaId !== 0) {
-      writer.uint32(16).uint64(message.schemaId);
+      writer.uint32(24).uint64(message.schemaId);
     }
     if (message.did !== "") {
-      writer.uint32(26).string(message.did);
-    }
-    if (message.country !== "") {
-      writer.uint32(34).string(message.country);
+      writer.uint32(34).string(message.did);
     }
     if (message.effectiveFrom !== undefined) {
       Timestamp.encode(toTimestamp(message.effectiveFrom), writer.uint32(42).fork()).ldelim();
@@ -1094,28 +1267,28 @@ export const MsgCreateRootPermission = {
             break;
           }
 
-          message.creator = reader.string();
+          message.authority = reader.string();
           continue;
         case 2:
-          if (tag !== 16) {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.operator = reader.string();
+          continue;
+        case 3:
+          if (tag !== 24) {
             break;
           }
 
           message.schemaId = longToNumber(reader.uint64() as Long);
-          continue;
-        case 3:
-          if (tag !== 26) {
-            break;
-          }
-
-          message.did = reader.string();
           continue;
         case 4:
           if (tag !== 34) {
             break;
           }
 
-          message.country = reader.string();
+          message.did = reader.string();
           continue;
         case 5:
           if (tag !== 42) {
@@ -1163,10 +1336,10 @@ export const MsgCreateRootPermission = {
 
   fromJSON(object: any): MsgCreateRootPermission {
     return {
-      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
+      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
       schemaId: isSet(object.schemaId) ? globalThis.Number(object.schemaId) : 0,
       did: isSet(object.did) ? globalThis.String(object.did) : "",
-      country: isSet(object.country) ? globalThis.String(object.country) : "",
       effectiveFrom: isSet(object.effectiveFrom) ? fromJsonTimestamp(object.effectiveFrom) : undefined,
       effectiveUntil: isSet(object.effectiveUntil) ? fromJsonTimestamp(object.effectiveUntil) : undefined,
       validationFees: isSet(object.validationFees) ? globalThis.Number(object.validationFees) : 0,
@@ -1177,17 +1350,17 @@ export const MsgCreateRootPermission = {
 
   toJSON(message: MsgCreateRootPermission): unknown {
     const obj: any = {};
-    if (message.creator !== "") {
-      obj.creator = message.creator;
+    if (message.authority !== "") {
+      obj.authority = message.authority;
+    }
+    if (message.operator !== "") {
+      obj.operator = message.operator;
     }
     if (message.schemaId !== 0) {
       obj.schemaId = Math.round(message.schemaId);
     }
     if (message.did !== "") {
       obj.did = message.did;
-    }
-    if (message.country !== "") {
-      obj.country = message.country;
     }
     if (message.effectiveFrom !== undefined) {
       obj.effectiveFrom = message.effectiveFrom.toISOString();
@@ -1212,10 +1385,10 @@ export const MsgCreateRootPermission = {
   },
   fromPartial<I extends Exact<DeepPartial<MsgCreateRootPermission>, I>>(object: I): MsgCreateRootPermission {
     const message = createBaseMsgCreateRootPermission();
-    message.creator = object.creator ?? "";
+    message.authority = object.authority ?? "";
+    message.operator = object.operator ?? "";
     message.schemaId = object.schemaId ?? 0;
     message.did = object.did ?? "";
-    message.country = object.country ?? "";
     message.effectiveFrom = object.effectiveFrom ?? undefined;
     message.effectiveUntil = object.effectiveUntil ?? undefined;
     message.validationFees = object.validationFees ?? 0;
@@ -1284,28 +1457,31 @@ export const MsgCreateRootPermissionResponse = {
   },
 };
 
-function createBaseMsgExtendPermission(): MsgExtendPermission {
-  return { creator: "", id: 0, effectiveUntil: undefined };
+function createBaseMsgAdjustPermission(): MsgAdjustPermission {
+  return { authority: "", operator: "", id: 0, effectiveUntil: undefined };
 }
 
-export const MsgExtendPermission = {
-  encode(message: MsgExtendPermission, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.creator !== "") {
-      writer.uint32(10).string(message.creator);
+export const MsgAdjustPermission = {
+  encode(message: MsgAdjustPermission, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.authority !== "") {
+      writer.uint32(10).string(message.authority);
+    }
+    if (message.operator !== "") {
+      writer.uint32(18).string(message.operator);
     }
     if (message.id !== 0) {
-      writer.uint32(16).uint64(message.id);
+      writer.uint32(24).uint64(message.id);
     }
     if (message.effectiveUntil !== undefined) {
-      Timestamp.encode(toTimestamp(message.effectiveUntil), writer.uint32(26).fork()).ldelim();
+      Timestamp.encode(toTimestamp(message.effectiveUntil), writer.uint32(34).fork()).ldelim();
     }
     return writer;
   },
 
-  decode(input: _m0.Reader | Uint8Array, length?: number): MsgExtendPermission {
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgAdjustPermission {
     const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseMsgExtendPermission();
+    const message = createBaseMsgAdjustPermission();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -1314,17 +1490,24 @@ export const MsgExtendPermission = {
             break;
           }
 
-          message.creator = reader.string();
+          message.authority = reader.string();
           continue;
         case 2:
-          if (tag !== 16) {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.operator = reader.string();
+          continue;
+        case 3:
+          if (tag !== 24) {
             break;
           }
 
           message.id = longToNumber(reader.uint64() as Long);
           continue;
-        case 3:
-          if (tag !== 26) {
+        case 4:
+          if (tag !== 34) {
             break;
           }
 
@@ -1339,18 +1522,22 @@ export const MsgExtendPermission = {
     return message;
   },
 
-  fromJSON(object: any): MsgExtendPermission {
+  fromJSON(object: any): MsgAdjustPermission {
     return {
-      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
+      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
       id: isSet(object.id) ? globalThis.Number(object.id) : 0,
       effectiveUntil: isSet(object.effectiveUntil) ? fromJsonTimestamp(object.effectiveUntil) : undefined,
     };
   },
 
-  toJSON(message: MsgExtendPermission): unknown {
+  toJSON(message: MsgAdjustPermission): unknown {
     const obj: any = {};
-    if (message.creator !== "") {
-      obj.creator = message.creator;
+    if (message.authority !== "") {
+      obj.authority = message.authority;
+    }
+    if (message.operator !== "") {
+      obj.operator = message.operator;
     }
     if (message.id !== 0) {
       obj.id = Math.round(message.id);
@@ -1361,31 +1548,32 @@ export const MsgExtendPermission = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<MsgExtendPermission>, I>>(base?: I): MsgExtendPermission {
-    return MsgExtendPermission.fromPartial(base ?? ({} as any));
+  create<I extends Exact<DeepPartial<MsgAdjustPermission>, I>>(base?: I): MsgAdjustPermission {
+    return MsgAdjustPermission.fromPartial(base ?? ({} as any));
   },
-  fromPartial<I extends Exact<DeepPartial<MsgExtendPermission>, I>>(object: I): MsgExtendPermission {
-    const message = createBaseMsgExtendPermission();
-    message.creator = object.creator ?? "";
+  fromPartial<I extends Exact<DeepPartial<MsgAdjustPermission>, I>>(object: I): MsgAdjustPermission {
+    const message = createBaseMsgAdjustPermission();
+    message.authority = object.authority ?? "";
+    message.operator = object.operator ?? "";
     message.id = object.id ?? 0;
     message.effectiveUntil = object.effectiveUntil ?? undefined;
     return message;
   },
 };
 
-function createBaseMsgExtendPermissionResponse(): MsgExtendPermissionResponse {
+function createBaseMsgAdjustPermissionResponse(): MsgAdjustPermissionResponse {
   return {};
 }
 
-export const MsgExtendPermissionResponse = {
-  encode(_: MsgExtendPermissionResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+export const MsgAdjustPermissionResponse = {
+  encode(_: MsgAdjustPermissionResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     return writer;
   },
 
-  decode(input: _m0.Reader | Uint8Array, length?: number): MsgExtendPermissionResponse {
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgAdjustPermissionResponse {
     const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseMsgExtendPermissionResponse();
+    const message = createBaseMsgAdjustPermissionResponse();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -1398,35 +1586,38 @@ export const MsgExtendPermissionResponse = {
     return message;
   },
 
-  fromJSON(_: any): MsgExtendPermissionResponse {
+  fromJSON(_: any): MsgAdjustPermissionResponse {
     return {};
   },
 
-  toJSON(_: MsgExtendPermissionResponse): unknown {
+  toJSON(_: MsgAdjustPermissionResponse): unknown {
     const obj: any = {};
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<MsgExtendPermissionResponse>, I>>(base?: I): MsgExtendPermissionResponse {
-    return MsgExtendPermissionResponse.fromPartial(base ?? ({} as any));
+  create<I extends Exact<DeepPartial<MsgAdjustPermissionResponse>, I>>(base?: I): MsgAdjustPermissionResponse {
+    return MsgAdjustPermissionResponse.fromPartial(base ?? ({} as any));
   },
-  fromPartial<I extends Exact<DeepPartial<MsgExtendPermissionResponse>, I>>(_: I): MsgExtendPermissionResponse {
-    const message = createBaseMsgExtendPermissionResponse();
+  fromPartial<I extends Exact<DeepPartial<MsgAdjustPermissionResponse>, I>>(_: I): MsgAdjustPermissionResponse {
+    const message = createBaseMsgAdjustPermissionResponse();
     return message;
   },
 };
 
 function createBaseMsgRevokePermission(): MsgRevokePermission {
-  return { creator: "", id: 0 };
+  return { authority: "", operator: "", id: 0 };
 }
 
 export const MsgRevokePermission = {
   encode(message: MsgRevokePermission, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.creator !== "") {
-      writer.uint32(10).string(message.creator);
+    if (message.authority !== "") {
+      writer.uint32(10).string(message.authority);
+    }
+    if (message.operator !== "") {
+      writer.uint32(18).string(message.operator);
     }
     if (message.id !== 0) {
-      writer.uint32(16).uint64(message.id);
+      writer.uint32(24).uint64(message.id);
     }
     return writer;
   },
@@ -1443,10 +1634,17 @@ export const MsgRevokePermission = {
             break;
           }
 
-          message.creator = reader.string();
+          message.authority = reader.string();
           continue;
         case 2:
-          if (tag !== 16) {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.operator = reader.string();
+          continue;
+        case 3:
+          if (tag !== 24) {
             break;
           }
 
@@ -1463,15 +1661,19 @@ export const MsgRevokePermission = {
 
   fromJSON(object: any): MsgRevokePermission {
     return {
-      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
+      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
       id: isSet(object.id) ? globalThis.Number(object.id) : 0,
     };
   },
 
   toJSON(message: MsgRevokePermission): unknown {
     const obj: any = {};
-    if (message.creator !== "") {
-      obj.creator = message.creator;
+    if (message.authority !== "") {
+      obj.authority = message.authority;
+    }
+    if (message.operator !== "") {
+      obj.operator = message.operator;
     }
     if (message.id !== 0) {
       obj.id = Math.round(message.id);
@@ -1484,7 +1686,8 @@ export const MsgRevokePermission = {
   },
   fromPartial<I extends Exact<DeepPartial<MsgRevokePermission>, I>>(object: I): MsgRevokePermission {
     const message = createBaseMsgRevokePermission();
-    message.creator = object.creator ?? "";
+    message.authority = object.authority ?? "";
+    message.operator = object.operator ?? "";
     message.id = object.id ?? 0;
     return message;
   },
@@ -1534,28 +1737,43 @@ export const MsgRevokePermissionResponse = {
 };
 
 function createBaseMsgCreateOrUpdatePermissionSession(): MsgCreateOrUpdatePermissionSession {
-  return { creator: "", id: "", issuerPermId: 0, verifierPermId: 0, agentPermId: 0, walletAgentPermId: 0 };
+  return {
+    authority: "",
+    operator: "",
+    id: "",
+    issuerPermId: 0,
+    verifierPermId: 0,
+    agentPermId: 0,
+    walletAgentPermId: 0,
+    digest: "",
+  };
 }
 
 export const MsgCreateOrUpdatePermissionSession = {
   encode(message: MsgCreateOrUpdatePermissionSession, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.creator !== "") {
-      writer.uint32(10).string(message.creator);
+    if (message.authority !== "") {
+      writer.uint32(10).string(message.authority);
+    }
+    if (message.operator !== "") {
+      writer.uint32(18).string(message.operator);
     }
     if (message.id !== "") {
-      writer.uint32(18).string(message.id);
+      writer.uint32(26).string(message.id);
     }
     if (message.issuerPermId !== 0) {
-      writer.uint32(24).uint64(message.issuerPermId);
+      writer.uint32(32).uint64(message.issuerPermId);
     }
     if (message.verifierPermId !== 0) {
-      writer.uint32(32).uint64(message.verifierPermId);
+      writer.uint32(40).uint64(message.verifierPermId);
     }
     if (message.agentPermId !== 0) {
-      writer.uint32(40).uint64(message.agentPermId);
+      writer.uint32(48).uint64(message.agentPermId);
     }
     if (message.walletAgentPermId !== 0) {
-      writer.uint32(48).uint64(message.walletAgentPermId);
+      writer.uint32(56).uint64(message.walletAgentPermId);
+    }
+    if (message.digest !== "") {
+      writer.uint32(66).string(message.digest);
     }
     return writer;
   },
@@ -1572,42 +1790,56 @@ export const MsgCreateOrUpdatePermissionSession = {
             break;
           }
 
-          message.creator = reader.string();
+          message.authority = reader.string();
           continue;
         case 2:
           if (tag !== 18) {
             break;
           }
 
-          message.id = reader.string();
+          message.operator = reader.string();
           continue;
         case 3:
-          if (tag !== 24) {
+          if (tag !== 26) {
             break;
           }
 
-          message.issuerPermId = longToNumber(reader.uint64() as Long);
+          message.id = reader.string();
           continue;
         case 4:
           if (tag !== 32) {
             break;
           }
 
-          message.verifierPermId = longToNumber(reader.uint64() as Long);
+          message.issuerPermId = longToNumber(reader.uint64() as Long);
           continue;
         case 5:
           if (tag !== 40) {
             break;
           }
 
-          message.agentPermId = longToNumber(reader.uint64() as Long);
+          message.verifierPermId = longToNumber(reader.uint64() as Long);
           continue;
         case 6:
           if (tag !== 48) {
             break;
           }
 
+          message.agentPermId = longToNumber(reader.uint64() as Long);
+          continue;
+        case 7:
+          if (tag !== 56) {
+            break;
+          }
+
           message.walletAgentPermId = longToNumber(reader.uint64() as Long);
+          continue;
+        case 8:
+          if (tag !== 66) {
+            break;
+          }
+
+          message.digest = reader.string();
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -1620,19 +1852,24 @@ export const MsgCreateOrUpdatePermissionSession = {
 
   fromJSON(object: any): MsgCreateOrUpdatePermissionSession {
     return {
-      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
+      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
       id: isSet(object.id) ? globalThis.String(object.id) : "",
       issuerPermId: isSet(object.issuerPermId) ? globalThis.Number(object.issuerPermId) : 0,
       verifierPermId: isSet(object.verifierPermId) ? globalThis.Number(object.verifierPermId) : 0,
       agentPermId: isSet(object.agentPermId) ? globalThis.Number(object.agentPermId) : 0,
       walletAgentPermId: isSet(object.walletAgentPermId) ? globalThis.Number(object.walletAgentPermId) : 0,
+      digest: isSet(object.digest) ? globalThis.String(object.digest) : "",
     };
   },
 
   toJSON(message: MsgCreateOrUpdatePermissionSession): unknown {
     const obj: any = {};
-    if (message.creator !== "") {
-      obj.creator = message.creator;
+    if (message.authority !== "") {
+      obj.authority = message.authority;
+    }
+    if (message.operator !== "") {
+      obj.operator = message.operator;
     }
     if (message.id !== "") {
       obj.id = message.id;
@@ -1649,6 +1886,9 @@ export const MsgCreateOrUpdatePermissionSession = {
     if (message.walletAgentPermId !== 0) {
       obj.walletAgentPermId = Math.round(message.walletAgentPermId);
     }
+    if (message.digest !== "") {
+      obj.digest = message.digest;
+    }
     return obj;
   },
 
@@ -1661,12 +1901,14 @@ export const MsgCreateOrUpdatePermissionSession = {
     object: I,
   ): MsgCreateOrUpdatePermissionSession {
     const message = createBaseMsgCreateOrUpdatePermissionSession();
-    message.creator = object.creator ?? "";
+    message.authority = object.authority ?? "";
+    message.operator = object.operator ?? "";
     message.id = object.id ?? "";
     message.issuerPermId = object.issuerPermId ?? 0;
     message.verifierPermId = object.verifierPermId ?? 0;
     message.agentPermId = object.agentPermId ?? 0;
     message.walletAgentPermId = object.walletAgentPermId ?? 0;
+    message.digest = object.digest ?? "";
     return message;
   },
 };
@@ -1733,19 +1975,22 @@ export const MsgCreateOrUpdatePermissionSessionResponse = {
 };
 
 function createBaseMsgSlashPermissionTrustDeposit(): MsgSlashPermissionTrustDeposit {
-  return { creator: "", id: 0, amount: 0 };
+  return { authority: "", operator: "", id: 0, amount: 0 };
 }
 
 export const MsgSlashPermissionTrustDeposit = {
   encode(message: MsgSlashPermissionTrustDeposit, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.creator !== "") {
-      writer.uint32(10).string(message.creator);
+    if (message.authority !== "") {
+      writer.uint32(10).string(message.authority);
+    }
+    if (message.operator !== "") {
+      writer.uint32(18).string(message.operator);
     }
     if (message.id !== 0) {
-      writer.uint32(16).uint64(message.id);
+      writer.uint32(24).uint64(message.id);
     }
     if (message.amount !== 0) {
-      writer.uint32(24).uint64(message.amount);
+      writer.uint32(32).uint64(message.amount);
     }
     return writer;
   },
@@ -1762,17 +2007,24 @@ export const MsgSlashPermissionTrustDeposit = {
             break;
           }
 
-          message.creator = reader.string();
+          message.authority = reader.string();
           continue;
         case 2:
-          if (tag !== 16) {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.operator = reader.string();
+          continue;
+        case 3:
+          if (tag !== 24) {
             break;
           }
 
           message.id = longToNumber(reader.uint64() as Long);
           continue;
-        case 3:
-          if (tag !== 24) {
+        case 4:
+          if (tag !== 32) {
             break;
           }
 
@@ -1789,7 +2041,8 @@ export const MsgSlashPermissionTrustDeposit = {
 
   fromJSON(object: any): MsgSlashPermissionTrustDeposit {
     return {
-      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
+      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
       id: isSet(object.id) ? globalThis.Number(object.id) : 0,
       amount: isSet(object.amount) ? globalThis.Number(object.amount) : 0,
     };
@@ -1797,8 +2050,11 @@ export const MsgSlashPermissionTrustDeposit = {
 
   toJSON(message: MsgSlashPermissionTrustDeposit): unknown {
     const obj: any = {};
-    if (message.creator !== "") {
-      obj.creator = message.creator;
+    if (message.authority !== "") {
+      obj.authority = message.authority;
+    }
+    if (message.operator !== "") {
+      obj.operator = message.operator;
     }
     if (message.id !== 0) {
       obj.id = Math.round(message.id);
@@ -1816,7 +2072,8 @@ export const MsgSlashPermissionTrustDeposit = {
     object: I,
   ): MsgSlashPermissionTrustDeposit {
     const message = createBaseMsgSlashPermissionTrustDeposit();
-    message.creator = object.creator ?? "";
+    message.authority = object.authority ?? "";
+    message.operator = object.operator ?? "";
     message.id = object.id ?? 0;
     message.amount = object.amount ?? 0;
     return message;
@@ -1871,16 +2128,19 @@ export const MsgSlashPermissionTrustDepositResponse = {
 };
 
 function createBaseMsgRepayPermissionSlashedTrustDeposit(): MsgRepayPermissionSlashedTrustDeposit {
-  return { creator: "", id: 0 };
+  return { authority: "", operator: "", id: 0 };
 }
 
 export const MsgRepayPermissionSlashedTrustDeposit = {
   encode(message: MsgRepayPermissionSlashedTrustDeposit, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.creator !== "") {
-      writer.uint32(10).string(message.creator);
+    if (message.authority !== "") {
+      writer.uint32(10).string(message.authority);
+    }
+    if (message.operator !== "") {
+      writer.uint32(18).string(message.operator);
     }
     if (message.id !== 0) {
-      writer.uint32(16).uint64(message.id);
+      writer.uint32(24).uint64(message.id);
     }
     return writer;
   },
@@ -1897,10 +2157,17 @@ export const MsgRepayPermissionSlashedTrustDeposit = {
             break;
           }
 
-          message.creator = reader.string();
+          message.authority = reader.string();
           continue;
         case 2:
-          if (tag !== 16) {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.operator = reader.string();
+          continue;
+        case 3:
+          if (tag !== 24) {
             break;
           }
 
@@ -1917,15 +2184,19 @@ export const MsgRepayPermissionSlashedTrustDeposit = {
 
   fromJSON(object: any): MsgRepayPermissionSlashedTrustDeposit {
     return {
-      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
+      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
       id: isSet(object.id) ? globalThis.Number(object.id) : 0,
     };
   },
 
   toJSON(message: MsgRepayPermissionSlashedTrustDeposit): unknown {
     const obj: any = {};
-    if (message.creator !== "") {
-      obj.creator = message.creator;
+    if (message.authority !== "") {
+      obj.authority = message.authority;
+    }
+    if (message.operator !== "") {
+      obj.operator = message.operator;
     }
     if (message.id !== 0) {
       obj.id = Math.round(message.id);
@@ -1942,7 +2213,8 @@ export const MsgRepayPermissionSlashedTrustDeposit = {
     object: I,
   ): MsgRepayPermissionSlashedTrustDeposit {
     const message = createBaseMsgRepayPermissionSlashedTrustDeposit();
-    message.creator = object.creator ?? "";
+    message.authority = object.authority ?? "";
+    message.operator = object.operator ?? "";
     message.id = object.id ?? 0;
     return message;
   },
@@ -1997,34 +2269,40 @@ export const MsgRepayPermissionSlashedTrustDepositResponse = {
 
 function createBaseMsgCreatePermission(): MsgCreatePermission {
   return {
-    creator: "",
-    schemaId: 0,
+    authority: "",
+    operator: "",
     type: 0,
+    validatorPermId: 0,
     did: "",
-    country: "",
     effectiveFrom: undefined,
     effectiveUntil: undefined,
     verificationFees: 0,
     validationFees: 0,
+    vsOperator: "",
+    vsOperatorAuthzEnabled: false,
+    vsOperatorAuthzSpendLimit: [],
+    vsOperatorAuthzWithFeegrant: false,
+    vsOperatorAuthzFeeSpendLimit: [],
+    vsOperatorAuthzSpendPeriod: undefined,
   };
 }
 
 export const MsgCreatePermission = {
   encode(message: MsgCreatePermission, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.creator !== "") {
-      writer.uint32(10).string(message.creator);
+    if (message.authority !== "") {
+      writer.uint32(10).string(message.authority);
     }
-    if (message.schemaId !== 0) {
-      writer.uint32(16).uint64(message.schemaId);
+    if (message.operator !== "") {
+      writer.uint32(18).string(message.operator);
     }
     if (message.type !== 0) {
       writer.uint32(24).int32(message.type);
     }
-    if (message.did !== "") {
-      writer.uint32(34).string(message.did);
+    if (message.validatorPermId !== 0) {
+      writer.uint32(32).uint64(message.validatorPermId);
     }
-    if (message.country !== "") {
-      writer.uint32(42).string(message.country);
+    if (message.did !== "") {
+      writer.uint32(42).string(message.did);
     }
     if (message.effectiveFrom !== undefined) {
       Timestamp.encode(toTimestamp(message.effectiveFrom), writer.uint32(50).fork()).ldelim();
@@ -2037,6 +2315,24 @@ export const MsgCreatePermission = {
     }
     if (message.validationFees !== 0) {
       writer.uint32(72).uint64(message.validationFees);
+    }
+    if (message.vsOperator !== "") {
+      writer.uint32(82).string(message.vsOperator);
+    }
+    if (message.vsOperatorAuthzEnabled !== false) {
+      writer.uint32(88).bool(message.vsOperatorAuthzEnabled);
+    }
+    for (const v of message.vsOperatorAuthzSpendLimit) {
+      Coin.encode(v!, writer.uint32(98).fork()).ldelim();
+    }
+    if (message.vsOperatorAuthzWithFeegrant !== false) {
+      writer.uint32(104).bool(message.vsOperatorAuthzWithFeegrant);
+    }
+    for (const v of message.vsOperatorAuthzFeeSpendLimit) {
+      Coin.encode(v!, writer.uint32(114).fork()).ldelim();
+    }
+    if (message.vsOperatorAuthzSpendPeriod !== undefined) {
+      Duration.encode(message.vsOperatorAuthzSpendPeriod, writer.uint32(122).fork()).ldelim();
     }
     return writer;
   },
@@ -2053,14 +2349,14 @@ export const MsgCreatePermission = {
             break;
           }
 
-          message.creator = reader.string();
+          message.authority = reader.string();
           continue;
         case 2:
-          if (tag !== 16) {
+          if (tag !== 18) {
             break;
           }
 
-          message.schemaId = longToNumber(reader.uint64() as Long);
+          message.operator = reader.string();
           continue;
         case 3:
           if (tag !== 24) {
@@ -2070,18 +2366,18 @@ export const MsgCreatePermission = {
           message.type = reader.int32() as any;
           continue;
         case 4:
-          if (tag !== 34) {
+          if (tag !== 32) {
             break;
           }
 
-          message.did = reader.string();
+          message.validatorPermId = longToNumber(reader.uint64() as Long);
           continue;
         case 5:
           if (tag !== 42) {
             break;
           }
 
-          message.country = reader.string();
+          message.did = reader.string();
           continue;
         case 6:
           if (tag !== 50) {
@@ -2111,6 +2407,48 @@ export const MsgCreatePermission = {
 
           message.validationFees = longToNumber(reader.uint64() as Long);
           continue;
+        case 10:
+          if (tag !== 82) {
+            break;
+          }
+
+          message.vsOperator = reader.string();
+          continue;
+        case 11:
+          if (tag !== 88) {
+            break;
+          }
+
+          message.vsOperatorAuthzEnabled = reader.bool();
+          continue;
+        case 12:
+          if (tag !== 98) {
+            break;
+          }
+
+          message.vsOperatorAuthzSpendLimit.push(Coin.decode(reader, reader.uint32()));
+          continue;
+        case 13:
+          if (tag !== 104) {
+            break;
+          }
+
+          message.vsOperatorAuthzWithFeegrant = reader.bool();
+          continue;
+        case 14:
+          if (tag !== 114) {
+            break;
+          }
+
+          message.vsOperatorAuthzFeeSpendLimit.push(Coin.decode(reader, reader.uint32()));
+          continue;
+        case 15:
+          if (tag !== 122) {
+            break;
+          }
+
+          message.vsOperatorAuthzSpendPeriod = Duration.decode(reader, reader.uint32());
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -2122,34 +2460,50 @@ export const MsgCreatePermission = {
 
   fromJSON(object: any): MsgCreatePermission {
     return {
-      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
-      schemaId: isSet(object.schemaId) ? globalThis.Number(object.schemaId) : 0,
+      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
       type: isSet(object.type) ? permissionTypeFromJSON(object.type) : 0,
+      validatorPermId: isSet(object.validatorPermId) ? globalThis.Number(object.validatorPermId) : 0,
       did: isSet(object.did) ? globalThis.String(object.did) : "",
-      country: isSet(object.country) ? globalThis.String(object.country) : "",
       effectiveFrom: isSet(object.effectiveFrom) ? fromJsonTimestamp(object.effectiveFrom) : undefined,
       effectiveUntil: isSet(object.effectiveUntil) ? fromJsonTimestamp(object.effectiveUntil) : undefined,
       verificationFees: isSet(object.verificationFees) ? globalThis.Number(object.verificationFees) : 0,
       validationFees: isSet(object.validationFees) ? globalThis.Number(object.validationFees) : 0,
+      vsOperator: isSet(object.vsOperator) ? globalThis.String(object.vsOperator) : "",
+      vsOperatorAuthzEnabled: isSet(object.vsOperatorAuthzEnabled)
+        ? globalThis.Boolean(object.vsOperatorAuthzEnabled)
+        : false,
+      vsOperatorAuthzSpendLimit: globalThis.Array.isArray(object?.vsOperatorAuthzSpendLimit)
+        ? object.vsOperatorAuthzSpendLimit.map((e: any) => Coin.fromJSON(e))
+        : [],
+      vsOperatorAuthzWithFeegrant: isSet(object.vsOperatorAuthzWithFeegrant)
+        ? globalThis.Boolean(object.vsOperatorAuthzWithFeegrant)
+        : false,
+      vsOperatorAuthzFeeSpendLimit: globalThis.Array.isArray(object?.vsOperatorAuthzFeeSpendLimit)
+        ? object.vsOperatorAuthzFeeSpendLimit.map((e: any) => Coin.fromJSON(e))
+        : [],
+      vsOperatorAuthzSpendPeriod: isSet(object.vsOperatorAuthzSpendPeriod)
+        ? Duration.fromJSON(object.vsOperatorAuthzSpendPeriod)
+        : undefined,
     };
   },
 
   toJSON(message: MsgCreatePermission): unknown {
     const obj: any = {};
-    if (message.creator !== "") {
-      obj.creator = message.creator;
+    if (message.authority !== "") {
+      obj.authority = message.authority;
     }
-    if (message.schemaId !== 0) {
-      obj.schemaId = Math.round(message.schemaId);
+    if (message.operator !== "") {
+      obj.operator = message.operator;
     }
     if (message.type !== 0) {
       obj.type = permissionTypeToJSON(message.type);
     }
+    if (message.validatorPermId !== 0) {
+      obj.validatorPermId = Math.round(message.validatorPermId);
+    }
     if (message.did !== "") {
       obj.did = message.did;
-    }
-    if (message.country !== "") {
-      obj.country = message.country;
     }
     if (message.effectiveFrom !== undefined) {
       obj.effectiveFrom = message.effectiveFrom.toISOString();
@@ -2163,6 +2517,24 @@ export const MsgCreatePermission = {
     if (message.validationFees !== 0) {
       obj.validationFees = Math.round(message.validationFees);
     }
+    if (message.vsOperator !== "") {
+      obj.vsOperator = message.vsOperator;
+    }
+    if (message.vsOperatorAuthzEnabled !== false) {
+      obj.vsOperatorAuthzEnabled = message.vsOperatorAuthzEnabled;
+    }
+    if (message.vsOperatorAuthzSpendLimit?.length) {
+      obj.vsOperatorAuthzSpendLimit = message.vsOperatorAuthzSpendLimit.map((e) => Coin.toJSON(e));
+    }
+    if (message.vsOperatorAuthzWithFeegrant !== false) {
+      obj.vsOperatorAuthzWithFeegrant = message.vsOperatorAuthzWithFeegrant;
+    }
+    if (message.vsOperatorAuthzFeeSpendLimit?.length) {
+      obj.vsOperatorAuthzFeeSpendLimit = message.vsOperatorAuthzFeeSpendLimit.map((e) => Coin.toJSON(e));
+    }
+    if (message.vsOperatorAuthzSpendPeriod !== undefined) {
+      obj.vsOperatorAuthzSpendPeriod = Duration.toJSON(message.vsOperatorAuthzSpendPeriod);
+    }
     return obj;
   },
 
@@ -2171,15 +2543,24 @@ export const MsgCreatePermission = {
   },
   fromPartial<I extends Exact<DeepPartial<MsgCreatePermission>, I>>(object: I): MsgCreatePermission {
     const message = createBaseMsgCreatePermission();
-    message.creator = object.creator ?? "";
-    message.schemaId = object.schemaId ?? 0;
+    message.authority = object.authority ?? "";
+    message.operator = object.operator ?? "";
     message.type = object.type ?? 0;
+    message.validatorPermId = object.validatorPermId ?? 0;
     message.did = object.did ?? "";
-    message.country = object.country ?? "";
     message.effectiveFrom = object.effectiveFrom ?? undefined;
     message.effectiveUntil = object.effectiveUntil ?? undefined;
     message.verificationFees = object.verificationFees ?? 0;
     message.validationFees = object.validationFees ?? 0;
+    message.vsOperator = object.vsOperator ?? "";
+    message.vsOperatorAuthzEnabled = object.vsOperatorAuthzEnabled ?? false;
+    message.vsOperatorAuthzSpendLimit = object.vsOperatorAuthzSpendLimit?.map((e) => Coin.fromPartial(e)) || [];
+    message.vsOperatorAuthzWithFeegrant = object.vsOperatorAuthzWithFeegrant ?? false;
+    message.vsOperatorAuthzFeeSpendLimit = object.vsOperatorAuthzFeeSpendLimit?.map((e) => Coin.fromPartial(e)) || [];
+    message.vsOperatorAuthzSpendPeriod =
+      (object.vsOperatorAuthzSpendPeriod !== undefined && object.vsOperatorAuthzSpendPeriod !== null)
+        ? Duration.fromPartial(object.vsOperatorAuthzSpendPeriod)
+        : undefined;
     return message;
   },
 };
@@ -2259,7 +2640,7 @@ export interface Msg {
     request: MsgCancelPermissionVPLastRequest,
   ): Promise<MsgCancelPermissionVPLastRequestResponse>;
   CreateRootPermission(request: MsgCreateRootPermission): Promise<MsgCreateRootPermissionResponse>;
-  ExtendPermission(request: MsgExtendPermission): Promise<MsgExtendPermissionResponse>;
+  AdjustPermission(request: MsgAdjustPermission): Promise<MsgAdjustPermissionResponse>;
   RevokePermission(request: MsgRevokePermission): Promise<MsgRevokePermissionResponse>;
   CreateOrUpdatePermissionSession(
     request: MsgCreateOrUpdatePermissionSession,
@@ -2284,7 +2665,7 @@ export class MsgClientImpl implements Msg {
     this.SetPermissionVPToValidated = this.SetPermissionVPToValidated.bind(this);
     this.CancelPermissionVPLastRequest = this.CancelPermissionVPLastRequest.bind(this);
     this.CreateRootPermission = this.CreateRootPermission.bind(this);
-    this.ExtendPermission = this.ExtendPermission.bind(this);
+    this.AdjustPermission = this.AdjustPermission.bind(this);
     this.RevokePermission = this.RevokePermission.bind(this);
     this.CreateOrUpdatePermissionSession = this.CreateOrUpdatePermissionSession.bind(this);
     this.SlashPermissionTrustDeposit = this.SlashPermissionTrustDeposit.bind(this);
@@ -2329,10 +2710,10 @@ export class MsgClientImpl implements Msg {
     return promise.then((data) => MsgCreateRootPermissionResponse.decode(_m0.Reader.create(data)));
   }
 
-  ExtendPermission(request: MsgExtendPermission): Promise<MsgExtendPermissionResponse> {
-    const data = MsgExtendPermission.encode(request).finish();
-    const promise = this.rpc.request(this.service, "ExtendPermission", data);
-    return promise.then((data) => MsgExtendPermissionResponse.decode(_m0.Reader.create(data)));
+  AdjustPermission(request: MsgAdjustPermission): Promise<MsgAdjustPermissionResponse> {
+    const data = MsgAdjustPermission.encode(request).finish();
+    const promise = this.rpc.request(this.service, "AdjustPermission", data);
+    return promise.then((data) => MsgAdjustPermissionResponse.decode(_m0.Reader.create(data)));
   }
 
   RevokePermission(request: MsgRevokePermission): Promise<MsgRevokePermissionResponse> {

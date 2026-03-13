@@ -47,8 +47,6 @@ func (k Keeper) executeBurnEcosystemSlashedTrustDeposit(ctx sdk.Context, account
 		return fmt.Errorf("trust deposit share value cannot be zero")
 	}
 
-	now := ctx.BlockTime()
-
 	// Update existing TrustDeposit entry
 	td.Amount = td.Amount - amount
 
@@ -62,10 +60,9 @@ func (k Keeper) executeBurnEcosystemSlashedTrustDeposit(ctx sdk.Context, account
 	}
 	td.Share = td.Share.Sub(shareReduction) // Use Sub method
 
-	// Update v2 slashing fields
-	td.SlashedDeposit += amount
-	td.LastSlashed = &now
-	td.SlashCount += 1
+	// Note: td.SlashedDeposit/LastSlashed/SlashCount are NOT updated here.
+	// Those fields are for network governance slashes (MOD-TD-MSG-5) only.
+	// Ecosystem slashes track slashing at the permission level (perm.slashed_deposit).
 
 	// Burn amount from TrustDeposit module account
 	burnCoins := sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, int64(amount)))

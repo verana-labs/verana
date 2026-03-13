@@ -15,7 +15,7 @@ func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 	legacy.RegisterAminoMsg(cdc, &MsgSetPermissionVPToValidated{}, "/perm/v1/set-perm-vp-validated")
 	legacy.RegisterAminoMsg(cdc, &MsgCancelPermissionVPLastRequest{}, "/perm/v1/cancel-perm-vp-request")
 	legacy.RegisterAminoMsg(cdc, &MsgCreateRootPermission{}, "/perm/v1/create-root-perm")
-	legacy.RegisterAminoMsg(cdc, &MsgExtendPermission{}, "/perm/v1/extend-perm")
+	legacy.RegisterAminoMsg(cdc, &MsgAdjustPermission{}, "/perm/v1/adjust-perm")
 	legacy.RegisterAminoMsg(cdc, &MsgRevokePermission{}, "/perm/v1/revoke-perm")
 	legacy.RegisterAminoMsg(cdc, &MsgCreateOrUpdatePermissionSession{}, "/perm/v1/create-or-update-perm-session")
 	legacy.RegisterAminoMsg(cdc, &MsgSlashPermissionTrustDeposit{}, "/perm/v1/slash-perm-td")
@@ -33,7 +33,7 @@ func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
 		&MsgSetPermissionVPToValidated{},
 		&MsgCancelPermissionVPLastRequest{},
 		&MsgCreateRootPermission{},
-		&MsgExtendPermission{},
+		&MsgAdjustPermission{},
 		&MsgRevokePermission{},
 		&MsgCreateOrUpdatePermissionSession{},
 		&MsgSlashPermissionTrustDeposit{},

@@ -93,7 +93,7 @@ func (k Keeper) AdjustTrustDeposit(ctx sdk.Context, account string, augend int64
 	}
 
 	// Trust deposit exists - check slashing status
-	if td.SlashedDeposit > 0 && td.SlashedDeposit < td.RepaidDeposit {
+	if td.SlashedDeposit > 0 && td.RepaidDeposit < td.SlashedDeposit {
 		return fmt.Errorf("trust deposit has been slashed and not fully repaid")
 	}
 
@@ -198,6 +198,76 @@ func (k Keeper) AdjustTrustDeposit(ctx sdk.Context, account string, augend int64
 			sdk.NewAttribute(types.AttributeKeyNewAmount, strconv.FormatUint(td.Amount, 10)),
 			sdk.NewAttribute(types.AttributeKeyNewShare, td.Share.String()),
 			sdk.NewAttribute(types.AttributeKeyNewClaimable, strconv.FormatUint(td.Claimable, 10)),
+			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
+		),
+	})
+
+	return nil
+}
+
+// AdjustTrustDepositOnBehalf increases the trust deposit of `account` using funds from `funder`.
+// Unlike AdjustTrustDeposit, this transfers coins directly from the funder to the TD module,
+// bypassing the claimable recycling logic. This is used when a third party (e.g., a fee payer)
+// funds another account's trust deposit increase during CSPS fee distribution.
+//
+// Only positive amounts are supported (increase only).
+func (k Keeper) AdjustTrustDepositOnBehalf(ctx sdk.Context, account string, funder sdk.AccAddress, amount int64) error {
+	if amount <= 0 {
+		return fmt.Errorf("amount must be positive, got %d", amount)
+	}
+	if account == "" {
+		return fmt.Errorf("account cannot be empty")
+	}
+
+	// Check if account has an existing TD with unrepaid slash
+	td, err := k.TrustDeposit.Get(ctx, account)
+	exists := err == nil
+	if exists && td.SlashedDeposit > 0 && td.RepaidDeposit < td.SlashedDeposit {
+		return fmt.Errorf("trust deposit has been slashed and not repaid")
+	}
+
+	// Get global share value parameter
+	params := k.GetParams(ctx)
+	shareValue := params.TrustDepositShareValue
+
+	// Transfer from funder to TD module
+	err = k.bankKeeper.SendCoinsFromAccountToModule(
+		ctx,
+		funder,
+		types.ModuleName,
+		sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, amount)),
+	)
+	if err != nil {
+		return fmt.Errorf("failed to transfer tokens from funder: %w", err)
+	}
+
+	augendShare := k.AmountToShare(uint64(amount), shareValue)
+
+	// Load or create trust deposit for account
+	if !exists {
+		td = types.TrustDeposit{
+			Account:   account,
+			Amount:    uint64(amount),
+			Share:     augendShare,
+			Claimable: 0,
+		}
+	} else {
+		td.Amount += uint64(amount)
+		td.Share = td.Share.Add(augendShare)
+	}
+
+	if err := k.TrustDeposit.Set(ctx, account, td); err != nil {
+		return fmt.Errorf("failed to save trust deposit: %w", err)
+	}
+
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			types.EventTypeAdjustTrustDeposit,
+			sdk.NewAttribute(types.AttributeKeyAccount, account),
+			sdk.NewAttribute(types.AttributeKeyAugend, strconv.FormatInt(amount, 10)),
+			sdk.NewAttribute(types.AttributeKeyAdjustmentType, "increase_on_behalf"),
+			sdk.NewAttribute(types.AttributeKeyNewAmount, strconv.FormatUint(td.Amount, 10)),
+			sdk.NewAttribute(types.AttributeKeyNewShare, td.Share.String()),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
 		),
 	})
