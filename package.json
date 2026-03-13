@@ -1,0 +1,9 @@
+{
+  "name": "verana",
+  "version": "0.10.0",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/verana-labs/verana"
+  }
+}
