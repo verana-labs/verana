@@ -14,12 +14,8 @@ log() {
     echo "$(date '+%Y-%m-%d %H:%M:%S') - $1"
 }
 
-# Detect if running on macOS or Linux
-if [[ "$OSTYPE" == "darwin"* ]]; then
-  SED_CMD="sed -i ''"
-else
-  SED_CMD="sed -i"
-fi
+# Use sed -i.bak for portable in-place editing (works on both macOS and Linux)
+sedi() { sed -i.bak "$@" && rm -f "${@: -1}.bak"; }
 
 # Variables
 CHAIN_ID="vna-testnet-1"
@@ -92,22 +88,22 @@ fi
 
 # Set minimum-gas-prices to 0uvna (allows 0 fees for accurate balance tracking)
 log "Setting minimum gas prices to 0uvna (allows 0 fees for simulations)..."
-$SED_CMD 's/^minimum-gas-prices = .*/minimum-gas-prices = "0uvna"/' "$APP_TOML_PATH"
+sedi 's/^minimum-gas-prices = .*/minimum-gas-prices = "0uvna"/' "$APP_TOML_PATH"
 
 # Configure ports in app.toml
-$SED_CMD "s/:1317/:$API_PORT/" "$APP_TOML_PATH"
-$SED_CMD "s/:9090/:$GRPC_PORT/" "$APP_TOML_PATH"
-$SED_CMD "s/:9091/:$GRPC_WEB_PORT/" "$APP_TOML_PATH"
+sedi "s/:1317/:$API_PORT/" "$APP_TOML_PATH"
+sedi "s/:9090/:$GRPC_PORT/" "$APP_TOML_PATH"
+sedi "s/:9091/:$GRPC_WEB_PORT/" "$APP_TOML_PATH"
 
 # Replace all occurrences of "stake" with "uvna" in genesis.json
 log "Replacing 'stake' with 'uvna' in genesis.json..."
-$SED_CMD 's/stake/uvna/g' "$GENESIS_JSON_PATH"
+sedi 's/stake/uvna/g' "$GENESIS_JSON_PATH"
 
 # Update governance params in genesis.json (fast periods for simulations)
 log "Updating governance parameters in genesis.json..."
-$SED_CMD 's/"max_deposit_period": ".*"/"max_deposit_period": "100s"/' "$GENESIS_JSON_PATH"
-$SED_CMD 's/"voting_period": ".*"/"voting_period": "30s"/' "$GENESIS_JSON_PATH"
-$SED_CMD 's/"expedited_voting_period": ".*"/"expedited_voting_period": "20s"/' "$GENESIS_JSON_PATH"
+sedi 's/"max_deposit_period": ".*"/"max_deposit_period": "100s"/' "$GENESIS_JSON_PATH"
+sedi 's/"voting_period": ".*"/"voting_period": "30s"/' "$GENESIS_JSON_PATH"
+sedi 's/"expedited_voting_period": ".*"/"expedited_voting_period": "20s"/' "$GENESIS_JSON_PATH"
 
 if [ $? -ne 0 ]; then
     log "Error: Failed to update governance parameters in genesis.json."
@@ -124,7 +120,7 @@ if command -v jq &> /dev/null; then
 else
     # Fallback to sed if jq not available
     log "⚠️  jq not found, using sed (less reliable)"
-    $SED_CMD "s/\"blocks_per_year\": \"[0-9]*\"/\"blocks_per_year\": \"$BLOCKS_PER_YEAR\"/" "$GENESIS_JSON_PATH"
+    sedi "s/\"blocks_per_year\": \"[0-9]*\"/\"blocks_per_year\": \"$BLOCKS_PER_YEAR\"/" "$GENESIS_JSON_PATH"
     log "✅ Updated blocks_per_year using sed"
 fi
 
@@ -135,15 +131,15 @@ if command -v jq &> /dev/null; then
 fi
 
 # Configure ports in config.toml
-$SED_CMD "s/:26656/:$P2P_PORT/" "$CONFIG_TOML_PATH"
-$SED_CMD "s/:26657/:$RPC_PORT/" "$CONFIG_TOML_PATH"
+sedi "s/:26656/:$P2P_PORT/" "$CONFIG_TOML_PATH"
+sedi "s/:26657/:$RPC_PORT/" "$CONFIG_TOML_PATH"
 
 # Enable API and CORS
 log "Updating API and CORS settings..."
-$SED_CMD 's/enable = false/enable = true/' "$APP_TOML_PATH"
-$SED_CMD 's/swagger = false/swagger = true/' "$APP_TOML_PATH"
-$SED_CMD 's/enabled-unsafe-cors = false/enabled-unsafe-cors = true/' "$APP_TOML_PATH"
-$SED_CMD 's/cors_allowed_origins = \[\]/cors_allowed_origins = \["*"\]/' "$CONFIG_TOML_PATH"
+sedi 's/enable = false/enable = true/' "$APP_TOML_PATH"
+sedi 's/swagger = false/swagger = true/' "$APP_TOML_PATH"
+sedi 's/enabled-unsafe-cors = false/enabled-unsafe-cors = true/' "$APP_TOML_PATH"
+sedi 's/cors_allowed_origins = \[\]/cors_allowed_origins = \["*"\]/' "$CONFIG_TOML_PATH"
 
 # Initialize YieldIntermediatePool module account with 1 uvna to prevent invariant violations
 # This addresses the issue where empty module accounts break invariants when receiving funds

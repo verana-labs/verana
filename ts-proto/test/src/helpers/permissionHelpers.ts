@@ -5,13 +5,18 @@
 
 import { SigningStargateClient } from "@cosmjs/stargate";
 import { typeUrls } from "./registry";
-import { MsgCreateRootPermission, MsgCreatePermission } from "../../../src/codec/verana/perm/v1/tx";
+import {
+  MsgCreateRootPermission,
+  MsgCreatePermission,
+  MsgStartPermissionVP,
+  MsgSetPermissionVPToValidated,
+} from "../../../src/codec/verana/perm/v1/tx";
 import { MsgCreateTrustRegistry } from "../../../src/codec/verana/tr/v1/tx";
 import { MsgCreateCredentialSchema, OptionalUInt32 } from "../../../src/codec/verana/cs/v1/tx";
-import { CredentialSchemaPermManagementMode } from "../../../src/codec/verana/cs/v1/types";
-import { PermissionType } from "../../../src/codec/verana/perm/v1/types";
+import { CredentialSchemaPermManagementMode, PricingAssetType } from "../../../src/codec/verana/cs/v1/types";
+import { PermissionType, OptionalUInt64 } from "../../../src/codec/verana/perm/v1/types";
 // Note: We use Date objects directly, not Timestamp objects
-import { calculateFeeWithSimulation, generateUniqueDID, signAndBroadcastWithRetry } from "./client";
+import { calculateFeeWithSimulation, generateUniqueDID, signAndBroadcastWithRetry, waitForPermissionToBecomeEffective, createQueryClient } from "./client";
 
 // Note: The generated protobuf code expects Date objects directly, not Timestamp objects.
 // The toTimestamp conversion happens automatically during encoding in the generated code.
@@ -36,10 +41,10 @@ export async function createRootPermissionForTest(
   const msg = {
     typeUrl: typeUrls.MsgCreateRootPermission,
     value: MsgCreateRootPermission.fromPartial({
-      creator: address,
+      authority: address,
+      operator: "",
       schemaId: schemaId,
       did: did,
-      country: "US",
       effectiveFrom: effectiveFrom,
       effectiveUntil: effectiveUntil,
       validationFees: 5,
@@ -177,11 +182,11 @@ export async function createPermissionForTest(
   const msg = {
     typeUrl: typeUrls.MsgCreatePermission,
     value: MsgCreatePermission.fromPartial({
-      creator: address,
-      schemaId: schemaId,
+      authority: address,
+      operator: "",
       type: type,
+      validatorPermId: 0,
       did: did,
-      country: "US",
       effectiveFrom: effectiveFrom,
       effectiveUntil: effectiveUntil,
       verificationFees: verificationFees,
@@ -300,7 +305,8 @@ export async function createSchemaForTest(
   const createTrMsg = {
     typeUrl: typeUrls.MsgCreateTrustRegistry,
     value: MsgCreateTrustRegistry.fromPartial({
-      creator: address,
+      authority: address,
+      operator: "",
       did: did,
       aka: "http://example-trust-registry.com",
       language: "en",
@@ -375,7 +381,8 @@ export async function createSchemaForTest(
   const createCsMsg = {
     typeUrl: typeUrls.MsgCreateCredentialSchema,
     value: MsgCreateCredentialSchema.fromPartial({
-      creator: address,
+      authority: address,
+      operator: "",
       trId: trId,
       jsonSchema: generateSimpleSchema(trId.toString()),
       issuerGrantorValidationValidityPeriod: { value: 0 } as OptionalUInt32,
@@ -458,4 +465,303 @@ export async function createSchemaForTest(
   saveActiveCS(schemaId, trId, did);
 
   return { schemaId, did, trustRegistryId: trId };
+}
+
+// ============================================================
+// Operator-signed helpers for PERM journey tests
+// ============================================================
+
+/**
+ * Extracts a numeric ID from transaction events.
+ * Searches for the specified event type and attribute key.
+ */
+export function extractIdFromEvents(
+  events: readonly { type: string; attributes: readonly { key: string; value: string }[] }[],
+  eventType: string,
+  attrKeys: string[],
+): number | undefined {
+  for (const event of events) {
+    if (event.type === eventType || event.type.includes(eventType)) {
+      for (const attr of event.attributes) {
+        if (attrKeys.includes(attr.key)) {
+          const id = parseInt(attr.value, 10);
+          if (!isNaN(id)) return id;
+        }
+      }
+    }
+  }
+  return undefined;
+}
+
+/**
+ * Waits for a transaction to be confirmed and sequence to advance.
+ */
+async function waitForTxConfirmation(
+  client: SigningStargateClient,
+  txHash: string,
+  address: string,
+  sequenceBefore: number,
+): Promise<void> {
+  const queryClient = await createQueryClient();
+  try {
+    for (let i = 0; i < 15; i++) {
+      try {
+        const tx = await queryClient.getTx(txHash);
+        if (tx) break;
+      } catch {}
+      await new Promise((r) => setTimeout(r, 1000));
+    }
+    for (let i = 0; i < 15; i++) {
+      await new Promise((r) => setTimeout(r, 500));
+      const seq = await client.getSequence(address);
+      if (seq.sequence > sequenceBefore) break;
+    }
+  } finally {
+    queryClient.disconnect();
+  }
+  await client.getSequence(address);
+}
+
+/**
+ * Creates a Trust Registry using operator-signed pattern.
+ * Returns the TR ID and DID.
+ */
+export async function createTRWithOperator(
+  client: SigningStargateClient,
+  authority: string,
+  operator: string,
+): Promise<{ trId: number; did: string }> {
+  const did = generateUniqueDID();
+  const msg = {
+    typeUrl: typeUrls.MsgCreateTrustRegistry,
+    value: MsgCreateTrustRegistry.fromPartial({
+      authority,
+      operator,
+      did,
+      aka: "http://perm-test-trust-registry.com",
+      language: "en",
+      docUrl: "https://example.com/perm-governance-framework.pdf",
+      docDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+    }),
+  };
+
+  const seqBefore = (await client.getSequence(operator)).sequence;
+  const fee = await calculateFeeWithSimulation(client, operator, [msg], "Creating TR for perm test");
+  const result = await signAndBroadcastWithRetry(client, operator, [msg], fee, "Creating TR for perm test");
+
+  if (result.code !== 0) {
+    throw new Error(`Failed to create TR: ${result.rawLog}`);
+  }
+
+  const trId = extractIdFromEvents(result.events || [], "create_trust_registry", ["trust_registry_id", "id", "tr_id"]);
+  if (!trId) throw new Error("Could not extract TR ID from events");
+
+  await waitForTxConfirmation(client, result.transactionHash, operator, seqBefore);
+  return { trId, did };
+}
+
+/**
+ * Creates a Credential Schema using operator-signed pattern.
+ * Returns the schema ID.
+ */
+export async function createCSWithOperator(
+  client: SigningStargateClient,
+  authority: string,
+  operator: string,
+  trId: number,
+  mode: CredentialSchemaPermManagementMode,
+): Promise<number> {
+  const jsonSchema = JSON.stringify({
+    $id: "vpr:verana:VPR_CHAIN_ID/cs/v1/js/VPR_CREDENTIAL_SCHEMA_ID",
+    $schema: "https://json-schema.org/draft/2020-12/schema",
+    title: "PermTestCredential",
+    description: "Credential schema for permission tests",
+    type: "object",
+    properties: {
+      credentialSubject: {
+        type: "object",
+        properties: {
+          id: { type: "string", format: "uri" },
+          name: { type: "string", minLength: 1, maxLength: 256 },
+        },
+      },
+    },
+  });
+
+  const msg = {
+    typeUrl: typeUrls.MsgCreateCredentialSchema,
+    value: MsgCreateCredentialSchema.fromPartial({
+      authority,
+      operator,
+      trId,
+      jsonSchema,
+      issuerGrantorValidationValidityPeriod: OptionalUInt32.fromPartial({ value: 0 }),
+      verifierGrantorValidationValidityPeriod: OptionalUInt32.fromPartial({ value: 0 }),
+      issuerValidationValidityPeriod: OptionalUInt32.fromPartial({ value: 0 }),
+      verifierValidationValidityPeriod: OptionalUInt32.fromPartial({ value: 0 }),
+      holderValidationValidityPeriod: OptionalUInt32.fromPartial({ value: 0 }),
+      issuerPermManagementMode: mode,
+      verifierPermManagementMode: CredentialSchemaPermManagementMode.OPEN,
+      pricingAssetType: PricingAssetType.TU,
+      pricingAsset: "tu",
+      digestAlgorithm: "sha256",
+    }),
+  };
+
+  const seqBefore = (await client.getSequence(operator)).sequence;
+  const fee = await calculateFeeWithSimulation(client, operator, [msg], "Creating CS for perm test");
+  const result = await signAndBroadcastWithRetry(client, operator, [msg], fee, "Creating CS for perm test");
+
+  if (result.code !== 0) {
+    throw new Error(`Failed to create CS: ${result.rawLog}`);
+  }
+
+  const csId = extractIdFromEvents(result.events || [], "create_credential_schema", ["credential_schema_id", "id", "cs_id"]);
+  if (!csId) throw new Error("Could not extract CS ID from events");
+
+  await waitForTxConfirmation(client, result.transactionHash, operator, seqBefore);
+  return csId;
+}
+
+/**
+ * Creates a root (ECOSYSTEM) permission using operator-signed pattern.
+ * Returns the root permission ID.
+ */
+export async function createRootPermWithOperator(
+  client: SigningStargateClient,
+  authority: string,
+  operator: string,
+  schemaId: number,
+  did: string,
+  opts?: { validationFees?: number; issuanceFees?: number; verificationFees?: number },
+): Promise<{ rootPermId: number; effectiveFrom: Date }> {
+  const effectiveFrom = new Date(Date.now() + 10000); // 10s in future
+  const effectiveUntil = new Date(effectiveFrom.getTime() + 360 * 24 * 60 * 60 * 1000); // 360 days
+
+  const msg = {
+    typeUrl: typeUrls.MsgCreateRootPermission,
+    value: MsgCreateRootPermission.fromPartial({
+      authority,
+      operator,
+      schemaId,
+      did,
+      effectiveFrom,
+      effectiveUntil,
+      validationFees: opts?.validationFees ?? 5,
+      issuanceFees: opts?.issuanceFees ?? 5,
+      verificationFees: opts?.verificationFees ?? 5,
+    }),
+  };
+
+  const seqBefore = (await client.getSequence(operator)).sequence;
+  const fee = await calculateFeeWithSimulation(client, operator, [msg], "Creating root permission");
+  const result = await signAndBroadcastWithRetry(client, operator, [msg], fee, "Creating root permission");
+
+  if (result.code !== 0) {
+    throw new Error(`Failed to create root permission: ${result.rawLog}`);
+  }
+
+  const rootPermId = extractIdFromEvents(result.events || [], "create_root_permission", ["root_permission_id", "permission_id", "id"]);
+  if (!rootPermId) throw new Error("Could not extract root permission ID from events");
+
+  await waitForTxConfirmation(client, result.transactionHash, operator, seqBefore);
+  return { rootPermId, effectiveFrom };
+}
+
+/**
+ * Creates a full prerequisite chain: TR → CS → Root Permission.
+ * Used by multiple perm journey tests.
+ */
+export async function createPermPrerequisites(
+  client: SigningStargateClient,
+  authority: string,
+  operator: string,
+  mode: CredentialSchemaPermManagementMode = CredentialSchemaPermManagementMode.ECOSYSTEM,
+): Promise<{ trId: number; schemaId: number; rootPermId: number; did: string; effectiveFrom: Date }> {
+  console.log("  Creating TR...");
+  const { trId, did } = await createTRWithOperator(client, authority, operator);
+  console.log(`  ✓ TR created (ID: ${trId})`);
+
+  console.log("  Creating CS...");
+  const schemaId = await createCSWithOperator(client, authority, operator, trId, mode);
+  console.log(`  ✓ CS created (ID: ${schemaId}, mode: ${mode === CredentialSchemaPermManagementMode.OPEN ? "OPEN" : mode === CredentialSchemaPermManagementMode.ECOSYSTEM ? "ECOSYSTEM" : "GRANTOR_VALIDATION"})`);
+
+  console.log("  Creating root permission...");
+  const { rootPermId, effectiveFrom } = await createRootPermWithOperator(client, authority, operator, schemaId, did);
+  console.log(`  ✓ Root permission created (ID: ${rootPermId})`);
+
+  return { trId, schemaId, rootPermId, did, effectiveFrom };
+}
+
+/**
+ * Starts a VP and validates it, creating a child permission.
+ * Returns the child permission ID.
+ */
+export async function createValidatedPermission(
+  client: SigningStargateClient,
+  authority: string,
+  operator: string,
+  schemaId: number,
+  rootPermId: number,
+  did: string,
+): Promise<number> {
+  // Start VP
+  const startMsg = {
+    typeUrl: typeUrls.MsgStartPermissionVP,
+    value: MsgStartPermissionVP.fromPartial({
+      authority,
+      operator,
+      type: PermissionType.ISSUER,
+      validatorPermId: rootPermId,
+      did,
+      validationFees: OptionalUInt64.fromPartial({ value: 5 }),
+      issuanceFees: OptionalUInt64.fromPartial({ value: 5 }),
+      verificationFees: OptionalUInt64.fromPartial({ value: 5 }),
+      vsOperator: "",
+      vsOperatorAuthzEnabled: false,
+    }),
+  };
+
+  const seqBefore1 = (await client.getSequence(operator)).sequence;
+  const startFee = await calculateFeeWithSimulation(client, operator, [startMsg], "Starting VP");
+  const startResult = await signAndBroadcastWithRetry(client, operator, [startMsg], startFee, "Starting VP");
+
+  if (startResult.code !== 0) {
+    throw new Error(`Failed to start VP: ${startResult.rawLog}`);
+  }
+
+  const vpPermId = extractIdFromEvents(startResult.events || [], "start_permission_vp", ["permission_id", "id"]);
+  if (!vpPermId) throw new Error("Could not extract VP permission ID from events");
+
+  await waitForTxConfirmation(client, startResult.transactionHash, operator, seqBefore1);
+
+  // Validate VP
+  // Must be <= validator_perm.effective_until (root uses effectiveFrom + 360 days)
+  const effectiveUntil = new Date(Date.now() + 300 * 24 * 60 * 60 * 1000); // 300 days
+  const validateMsg = {
+    typeUrl: typeUrls.MsgSetPermissionVPToValidated,
+    value: MsgSetPermissionVPToValidated.fromPartial({
+      authority,
+      operator,
+      id: vpPermId,
+      effectiveUntil,
+      validationFees: 5,
+      issuanceFees: 5,
+      verificationFees: 5,
+      vpSummaryDigestSri: "sha384-validationSummaryDigest123",
+      issuanceFeeDiscount: 0,
+      verificationFeeDiscount: 0,
+    }),
+  };
+
+  const seqBefore2 = (await client.getSequence(operator)).sequence;
+  const validateFee = await calculateFeeWithSimulation(client, operator, [validateMsg], "Validating VP");
+  const validateResult = await signAndBroadcastWithRetry(client, operator, [validateMsg], validateFee, "Validating VP");
+
+  if (validateResult.code !== 0) {
+    throw new Error(`Failed to validate VP: ${validateResult.rawLog}`);
+  }
+
+  await waitForTxConfirmation(client, validateResult.transactionHash, operator, seqBefore2);
+  return vpPermId;
 }

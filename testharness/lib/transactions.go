@@ -295,7 +295,8 @@ func CreateRootPermission(client cosmosclient.Client, ctx context.Context, creat
 
 	// Start with an empty struct and set only the defined attributes from override
 	msg := &permtypes.MsgCreateRootPermission{
-		Creator:          creatorAddr,
+		Authority:        creatorAddr,
+		Operator:         creatorAddr,
 		SchemaId:         override.SchemaId,
 		Did:              override.Did,
 		EffectiveFrom:    override.EffectiveFrom,
@@ -307,9 +308,6 @@ func CreateRootPermission(client cosmosclient.Client, ctx context.Context, creat
 
 	if override.Did != "" {
 		msg.Did = override.Did
-	}
-	if override.Country != "" {
-		msg.Country = override.Country
 	}
 	if override.ValidationFees != 0 {
 		msg.ValidationFees = override.ValidationFees
@@ -362,21 +360,27 @@ func StartPermissionVP(client cosmosclient.Client, ctx context.Context, creator 
 
 	// Start with an empty struct and set only the defined attributes from override
 	msg := &permtypes.MsgStartPermissionVP{
-		Creator:          creatorAddr,
-		Type:             override.Type,
-		Did:              override.Did,
-		ValidatorPermId:  override.ValidatorPermId,
-		Country:          override.Country,
-		ValidationFees:   override.ValidationFees,
-		IssuanceFees:     override.IssuanceFees,
-		VerificationFees: override.VerificationFees,
+		Authority:                    override.Authority,
+		Operator:                     creatorAddr,
+		Type:                         override.Type,
+		Did:                          override.Did,
+		ValidatorPermId:              override.ValidatorPermId,
+		ValidationFees:               override.ValidationFees,
+		IssuanceFees:                 override.IssuanceFees,
+		VerificationFees:             override.VerificationFees,
+		VsOperator:                   override.VsOperator,
+		VsOperatorAuthzEnabled:       override.VsOperatorAuthzEnabled,
+		VsOperatorAuthzSpendLimit:    override.VsOperatorAuthzSpendLimit,
+		VsOperatorAuthzWithFeegrant:  override.VsOperatorAuthzWithFeegrant,
+		VsOperatorAuthzFeeSpendLimit: override.VsOperatorAuthzFeeSpendLimit,
+		VsOperatorAuthzSpendPeriod:   override.VsOperatorAuthzSpendPeriod,
+	}
+	if msg.Authority == "" {
+		msg.Authority = creatorAddr
 	}
 
 	if override.Did != "" {
 		msg.Did = override.Did
-	}
-	if override.Country != "" {
-		msg.Country = override.Country
 	}
 	// Optional fee fields are already set from override
 
@@ -419,17 +423,20 @@ func SetPermissionVPToValidated(client cosmosclient.Client, ctx context.Context,
 		log.Fatal(err)
 	}
 
-	// Create the message with proper creator address
+	// Create the message with authority/operator pattern
 	msg := &permtypes.MsgSetPermissionVPToValidated{
-		Creator:                 creatorAddr,
+		Authority:               override.Authority,
+		Operator:                creatorAddr,
 		Id:                      override.Id,
 		ValidationFees:          override.ValidationFees,
 		IssuanceFees:            override.IssuanceFees,
 		VerificationFees:        override.VerificationFees,
-		Country:                 override.Country,
 		VpSummaryDigestSri:      override.VpSummaryDigestSri,
 		IssuanceFeeDiscount:     override.IssuanceFeeDiscount,
 		VerificationFeeDiscount: override.VerificationFeeDiscount,
+	}
+	if msg.Authority == "" {
+		msg.Authority = creatorAddr
 	}
 
 	// Only set EffectiveUntil if it's explicitly provided

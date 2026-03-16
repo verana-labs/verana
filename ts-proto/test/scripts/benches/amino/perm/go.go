@@ -36,11 +36,11 @@ func main() {
 
 	address := "verana16mzeyu9l6kua2cdg9x0jk5g6e7h0kk8q6uadu4"
 	msg := &permtypes.MsgCreatePermission{
-		Creator:          address,
-		SchemaId:         1,
+		Authority:        address,
+		Operator:         address,
 		Type:             permtypes.PermissionType_VERIFIER,
+		ValidatorPermId:  1,
 		Did:              "did:verana:test:bench",
-		Country:          "US",
 		EffectiveFrom:    &effectiveFrom,
 		EffectiveUntil:   &effectiveUntil,
 		VerificationFees: 0,

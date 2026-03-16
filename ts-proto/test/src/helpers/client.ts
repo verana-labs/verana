@@ -30,7 +30,7 @@ import {
   // PERM module
   MsgCreateRootPermissionAminoConverter,
   MsgCreatePermissionAminoConverter,
-  MsgExtendPermissionAminoConverter,
+  MsgAdjustPermissionAminoConverter,
   MsgRevokePermissionAminoConverter,
   MsgStartPermissionVPAminoConverter,
   MsgRenewPermissionVPAminoConverter,
@@ -168,7 +168,7 @@ export function createVeranaAminoTypes(): AminoTypes {
     // Permission (perm) module
     '/verana.perm.v1.MsgCreateRootPermission': MsgCreateRootPermissionAminoConverter,
     '/verana.perm.v1.MsgCreatePermission': MsgCreatePermissionAminoConverter,
-    '/verana.perm.v1.MsgExtendPermission': MsgExtendPermissionAminoConverter,
+    '/verana.perm.v1.MsgAdjustPermission': MsgAdjustPermissionAminoConverter,
     '/verana.perm.v1.MsgRevokePermission': MsgRevokePermissionAminoConverter,
     '/verana.perm.v1.MsgStartPermissionVP': MsgStartPermissionVPAminoConverter,
     '/verana.perm.v1.MsgRenewPermissionVP': MsgRenewPermissionVPAminoConverter,

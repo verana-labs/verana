@@ -275,6 +275,18 @@
     }
   },
   "definitions": {
+    "cosmos.base.v1beta1.Coin": {
+      "type": "object",
+      "properties": {
+        "denom": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "string"
+        }
+      },
+      "description": "Coin defines a token with a denomination and an amount.\n\nNOTE: The amount field is an Int which implements the custom method\nsignatures required by gogoproto."
+    },
     "google.protobuf.Any": {
       "type": "object",
       "properties": {
@@ -330,7 +342,7 @@
         "did": {
           "type": "string"
         },
-        "grantee": {
+        "authority": {
           "type": "string"
         },
         "created": {
@@ -340,11 +352,11 @@
         "created_by": {
           "type": "string"
         },
-        "extended": {
+        "adjusted": {
           "type": "string",
           "format": "date-time"
         },
-        "extended_by": {
+        "adjusted_by": {
           "type": "string"
         },
         "slashed": {
@@ -455,6 +467,33 @@
           "type": "string",
           "format": "uint64",
           "title": "Verification fee discount (0-10000, where 10000 = 100% discount)"
+        },
+        "vs_operator": {
+          "type": "string",
+          "title": "VS Operator fields (spec v4)"
+        },
+        "vs_operator_authz_enabled": {
+          "type": "boolean"
+        },
+        "vs_operator_authz_spend_limit": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
+          }
+        },
+        "vs_operator_authz_with_feegrant": {
+          "type": "boolean"
+        },
+        "vs_operator_authz_fee_spend_limit": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
+          }
+        },
+        "vs_operator_authz_spend_period": {
+          "type": "string"
         }
       }
     },
@@ -464,18 +503,23 @@
         "id": {
           "type": "string"
         },
-        "controller": {
-          "type": "string"
+        "authority": {
+          "type": "string",
+          "title": "group account that owns this session"
+        },
+        "vs_operator": {
+          "type": "string",
+          "title": "the VS operator account"
         },
         "agent_perm_id": {
           "type": "string",
           "format": "uint64"
         },
-        "authz": {
+        "session_records": {
           "type": "array",
           "items": {
             "type": "object",
-            "$ref": "#/definitions/verana.perm.v1.SessionAuthz"
+            "$ref": "#/definitions/verana.perm.v1.PermissionSessionRecord"
           }
         },
         "created": {
@@ -485,6 +529,27 @@
         "modified": {
           "type": "string",
           "format": "date-time"
+        }
+      }
+    },
+    "verana.perm.v1.PermissionSessionRecord": {
+      "type": "object",
+      "properties": {
+        "created": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "issuer_perm_id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "verifier_perm_id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "wallet_agent_perm_id": {
+          "type": "string",
+          "format": "uint64"
         }
       }
     },
@@ -576,23 +641,6 @@
         }
       },
       "description": "QueryParamsResponse is response type for the Query/Params RPC method."
-    },
-    "verana.perm.v1.SessionAuthz": {
-      "type": "object",
-      "properties": {
-        "executor_perm_id": {
-          "type": "string",
-          "format": "uint64"
-        },
-        "beneficiary_perm_id": {
-          "type": "string",
-          "format": "uint64"
-        },
-        "wallet_agent_perm_id": {
-          "type": "string",
-          "format": "uint64"
-        }
-      }
     },
     "verana.perm.v1.ValidationState": {
       "type": "string",

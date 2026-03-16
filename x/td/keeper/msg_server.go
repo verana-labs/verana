@@ -33,7 +33,7 @@ func (ms msgServer) ReclaimTrustDepositYield(goCtx context.Context, msg *types.M
 	}
 
 	// [MOD-TD-MSG-2-2-1] Check slashing condition - CRITICAL MISSING CHECK
-	if td.SlashedDeposit > 0 && td.SlashedDeposit < td.RepaidDeposit {
+	if td.SlashedDeposit > 0 && td.RepaidDeposit < td.SlashedDeposit {
 		return nil, fmt.Errorf("deposit has been slashed and not repaid")
 	}
 

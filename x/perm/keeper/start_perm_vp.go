@@ -16,21 +16,19 @@ func (ms msgServer) validatePermissionChecks(ctx sdk.Context, msg *types.MsgStar
 		return types.Permission{}, fmt.Errorf("validator perm not found: %w", err)
 	}
 
-	// [MOD-PERM-MSG-1-2-2] Check if validator perm is valid AND country compatibility
-	// Spec: "It MUST be a valid permission AND (validator_perm.country MUST be equal to country, or validator_perm.country MUST be null)"
-	// Spec: "When starting a Permission VP, if parent (validator) is INACTIVE (not valid) then MUST abort."
-	// IsValidPermission already checks both: validity (ACTIVE state, time, revoked, slashed, repaid) AND country compatibility
-	if err := IsValidPermission(validatorPerm, msg.Country, ctx.BlockTime()); err != nil {
+	// [MOD-PERM-MSG-1-2-2] Load Permission entry validator_perm from validator_perm_id.
+	// It MUST be an active permission else transaction MUST abort.
+	if err := IsValidPermission(validatorPerm, "", ctx.BlockTime()); err != nil {
 		return types.Permission{}, fmt.Errorf("validator perm is not valid (must be ACTIVE): %w", err)
 	}
 
-	// Load credential schema
+	// Load credential schema from validator_perm.schema_id. It MUST exist.
 	cs, err := ms.credentialSchemaKeeper.GetCredentialSchemaById(ctx, validatorPerm.SchemaId)
 	if err != nil {
 		return types.Permission{}, fmt.Errorf("credential schema not found: %w", err)
 	}
 
-	// Validate perm type combinations
+	// Validate perm type combinations per spec v4
 	if err := validatePermissionTypeCombination(types.PermissionType(msg.Type), validatorPerm.Type, cs); err != nil {
 		return types.Permission{}, err
 	}
@@ -38,7 +36,7 @@ func (ms msgServer) validatePermissionChecks(ctx sdk.Context, msg *types.MsgStar
 	return validatorPerm, nil
 }
 
-func (ms msgServer) validateAndCalculateFees(ctx sdk.Context, _ string, validatorPerm types.Permission) (uint64, uint64, error) {
+func (ms msgServer) validateAndCalculateFees(ctx sdk.Context, validatorPerm types.Permission) (uint64, uint64, error) {
 	// Get global variables
 	trustUnitPrice := ms.trustRegistryKeeper.GetTrustUnitPrice(ctx)
 	trustDepositRate := ms.trustDeposit.GetTrustDepositRate(ctx)
@@ -55,30 +53,53 @@ func (k Keeper) validationTrustDepositInDenomAmount(validationFeesInDenom uint64
 	return validationTrustDepositInDenom.TruncateInt().Uint64()
 }
 
+// [MOD-PERM-MSG-1-2-4] Overlap checks
+// Find all permissions for (schema_id, type, validator_perm_id, authority) with vp_state = VALIDATED or PENDING.
+// If any found, abort — cannot have 2 active VPs in the same context.
+func (ms msgServer) checkOverlap(ctx sdk.Context, schemaId uint64, permType types.PermissionType, validatorPermId uint64, authority string) error {
+	var found bool
+	err := ms.Permission.Walk(ctx, nil, func(key uint64, perm types.Permission) (bool, error) {
+		if perm.SchemaId == schemaId &&
+			perm.Type == permType &&
+			perm.ValidatorPermId == validatorPermId &&
+			perm.Authority == authority &&
+			(perm.VpState == types.ValidationState_PENDING || perm.VpState == types.ValidationState_VALIDATED) {
+			found = true
+			return true, nil // stop walking
+		}
+		return false, nil
+	})
+	if err != nil {
+		return fmt.Errorf("failed to check overlap: %w", err)
+	}
+	if found {
+		return fmt.Errorf("an active validation process already exists for this (schema_id, type, validator_perm_id, authority) context")
+	}
+	return nil
+}
+
 func (ms msgServer) executeStartPermissionVP(ctx sdk.Context, msg *types.MsgStartPermissionVP, validatorPerm types.Permission, fees, deposit uint64) (uint64, error) {
-	// Calculate fees and deposits as per spec
 	validationFeesInDenom := fees
 	validationTrustDepositInDenom := deposit
 
-	// Increment trust deposit if deposit is greater than 0
+	// [MOD-PERM-MSG-1-3] Use [MOD-TD-MSG-1] to increase trust deposit
 	if validationTrustDepositInDenom > 0 {
-		if err := ms.trustDeposit.AdjustTrustDeposit(ctx, msg.Creator, int64(validationTrustDepositInDenom)); err != nil {
+		if err := ms.trustDeposit.AdjustTrustDeposit(ctx, msg.Authority, int64(validationTrustDepositInDenom)); err != nil {
 			return 0, fmt.Errorf("failed to increase trust deposit: %w", err)
 		}
 	}
 
 	// Send validation fees to escrow account if greater than 0
 	if validationFeesInDenom > 0 {
-		senderAddr, err := sdk.AccAddressFromBech32(msg.Creator)
+		senderAddr, err := sdk.AccAddressFromBech32(msg.Authority)
 		if err != nil {
-			return 0, fmt.Errorf("invalid creator address: %w", err)
+			return 0, fmt.Errorf("invalid authority address: %w", err)
 		}
 
-		// Transfer fees to validation escrow account
 		err = ms.bankKeeper.SendCoinsFromAccountToModule(
 			ctx,
 			senderAddr,
-			types.ModuleName, // Validation escrow account
+			types.ModuleName,
 			sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, int64(validationFeesInDenom))),
 		)
 		if err != nil {
@@ -86,7 +107,6 @@ func (ms msgServer) executeStartPermissionVP(ctx sdk.Context, msg *types.MsgStar
 		}
 	}
 
-	// Create new perm entry as specified in spec
 	now := ctx.BlockTime()
 
 	// Extract requested fees from optional fields
@@ -104,30 +124,35 @@ func (ms msgServer) executeStartPermissionVP(ctx sdk.Context, msg *types.MsgStar
 		requestedVerificationFees = msg.VerificationFees.Value
 	}
 
+	// [MOD-PERM-MSG-1-3] Create and persist new permission entry
 	applicantPerm := types.Permission{
-		Grantee:            msg.Creator,                    // applicant_perm.grantee: applicant's account
-		Type:               types.PermissionType(msg.Type), // applicant_perm.type: type
-		SchemaId:           validatorPerm.SchemaId,
-		Did:                msg.Did,
-		Created:            &now, // applicant_perm.created: now
-		CreatedBy:          msg.Creator,
-		Modified:           &now,                          // applicant_perm.modified: now
-		Deposit:            validationTrustDepositInDenom, // applicant_perm.deposit: validation_trust_deposit_in_denom
-		ValidationFees:     requestedValidationFees,       // applicant_perm.validation_fees: validation_fees (from request)
-		IssuanceFees:       requestedIssuanceFees,         // applicant_perm.issuance_fees: issuance_fees (from request)
-		VerificationFees:   requestedVerificationFees,     // applicant_perm.verification_fees: verification_fees (from request)
-		Country:            msg.Country,
-		ValidatorPermId:    msg.ValidatorPermId,           // applicant_perm.validator_perm_id: validator_perm_id
-		VpLastStateChange:  &now,                          // applicant_perm.vp_last_state_change: now
-		VpState:            types.ValidationState_PENDING, // applicant_perm.vp_state: PENDING
-		VpCurrentFees:      validationFeesInDenom,         // applicant_perm.vp_current_fees: validation_fees_in_denom
-		VpCurrentDeposit:   validationTrustDepositInDenom, // applicant_perm.vp_current_deposit: validation_trust_deposit_in_denom
-		VpSummaryDigestSri: "",                            // applicant_perm.vp_summary_digest_sri: null
-		VpTermRequested:    nil,                           // applicant_perm.vp_term_requested: null
-		VpValidatorDeposit: 0,                             // applicant_perm.vp_validator_deposit: 0
+		Authority:                    msg.Authority,                  // applicant_perm.authority
+		Type:                         types.PermissionType(msg.Type), // applicant_perm.type
+		SchemaId:                     validatorPerm.SchemaId,         // applicant_perm.schema_id = validator_perm.schema_id
+		Did:                          msg.Did,
+		VsOperator:                   msg.VsOperator,                        // applicant_perm.vs_operator
+		Created:                      &now,                                  // applicant_perm.created: now
+		CreatedBy:                    msg.Operator,                          // created_by: operator who signed the tx
+		Modified:                     &now,                                  // applicant_perm.modified: now
+		Deposit:                      validationTrustDepositInDenom,         // applicant_perm.deposit
+		ValidationFees:               requestedValidationFees,               // applicant_perm.validation_fees
+		IssuanceFees:                 requestedIssuanceFees,                 // applicant_perm.issuance_fees
+		VerificationFees:             requestedVerificationFees,             // applicant_perm.verification_fees
+		ValidatorPermId:              msg.ValidatorPermId,                   // applicant_perm.validator_perm_id
+		VpLastStateChange:            &now,                                  // applicant_perm.vp_last_state_change: now
+		VpState:                      types.ValidationState_PENDING,         // applicant_perm.vp_state: PENDING
+		VpCurrentFees:                validationFeesInDenom,                 // applicant_perm.vp_current_fees
+		VpCurrentDeposit:             validationTrustDepositInDenom,         // applicant_perm.vp_current_deposit
+		VpSummaryDigestSri:           "",                                    // applicant_perm.vp_summary_digest: null
+		VpTermRequested:              nil,                                   // not set
+		VpValidatorDeposit:           0,                                     // applicant_perm.vp_validator_deposit: 0
+		VsOperatorAuthzEnabled:       msg.VsOperatorAuthzEnabled,            // applicant_perm.vs_operator_authz_enabled
+		VsOperatorAuthzSpendLimit:    msg.VsOperatorAuthzSpendLimit,         // applicant_perm.vs_operator_authz_spend_limit
+		VsOperatorAuthzWithFeegrant:  msg.VsOperatorAuthzWithFeegrant,       // applicant_perm.vs_operator_authz_with_feegrant
+		VsOperatorAuthzFeeSpendLimit: msg.VsOperatorAuthzFeeSpendLimit,      // applicant_perm.vs_operator_authz_fee_spend_limit
+		VsOperatorAuthzSpendPeriod:   msg.VsOperatorAuthzSpendPeriod,        // applicant_perm.vs_operator_authz_spend_period
 	}
 
-	// Store the perm
 	id, err := ms.Keeper.CreatePermission(ctx, applicantPerm)
 	if err != nil {
 		return 0, fmt.Errorf("failed to create perm: %w", err)
@@ -136,79 +161,72 @@ func (ms msgServer) executeStartPermissionVP(ctx sdk.Context, msg *types.MsgStar
 	return id, nil
 }
 
+// validatePermissionTypeCombination validates permission type combinations per spec v4 [MOD-PERM-MSG-1-2-2]
 func validatePermissionTypeCombination(requestedType, validatorType types.PermissionType, cs credentialschematypes.CredentialSchema) error {
 	switch requestedType {
 	case types.PermissionType_ISSUER:
+		// if cs.issuer_perm_management_mode == GRANTOR: validator_perm.type MUST be ISSUER_GRANTOR
 		if cs.IssuerPermManagementMode == credentialschematypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION {
 			if validatorType != types.PermissionType_ISSUER_GRANTOR {
-				return fmt.Errorf("issuer perm requires ISSUER_GRANTOR validator")
+				return fmt.Errorf("issuer perm requires ISSUER_GRANTOR validator when mode is GRANTOR_VALIDATION")
 			}
 		} else if cs.IssuerPermManagementMode == credentialschematypes.CredentialSchemaPermManagementMode_ECOSYSTEM {
+			// if cs.issuer_perm_management_mode == ECOSYSTEM: validator_perm.type MUST be ECOSYSTEM
 			if validatorType != types.PermissionType_ECOSYSTEM {
-				return fmt.Errorf("issuer perm requires ECOSYSTEM validator")
-			}
-		} else if cs.IssuerPermManagementMode == credentialschematypes.CredentialSchemaPermManagementMode_OPEN {
-			// Mode is OPEN which means anyone can issue credential of this schema
-			// But formal perm creation is still needed when payment is required
-			// Check if validator has the correct type for fee collection
-			if validatorType != types.PermissionType_ECOSYSTEM {
-				return fmt.Errorf("open issuance still requires ECOSYSTEM validator for fee collection")
+				return fmt.Errorf("issuer perm requires ECOSYSTEM validator when mode is ECOSYSTEM")
 			}
 		} else {
-			return fmt.Errorf("issuer perm not supported with current schema settings")
+			// else MUST abort
+			return fmt.Errorf("issuer perm not supported with current schema issuer_perm_management_mode")
 		}
 
 	case types.PermissionType_ISSUER_GRANTOR:
+		// if cs.issuer_perm_management_mode == GRANTOR: validator_perm.type MUST be ECOSYSTEM
 		if cs.IssuerPermManagementMode == credentialschematypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION {
 			if validatorType != types.PermissionType_ECOSYSTEM {
 				return fmt.Errorf("issuer grantor perm requires ECOSYSTEM validator")
 			}
 		} else {
+			// else abort
 			return fmt.Errorf("issuer grantor perm not supported with current schema settings")
 		}
 
 	case types.PermissionType_VERIFIER:
+		// if cs.verifier_perm_management_mode == GRANTOR: validator_perm.type MUST be VERIFIER_GRANTOR
 		if cs.VerifierPermManagementMode == credentialschematypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION {
 			if validatorType != types.PermissionType_VERIFIER_GRANTOR {
-				return fmt.Errorf("verifier perm requires VERIFIER_GRANTOR validator")
+				return fmt.Errorf("verifier perm requires VERIFIER_GRANTOR validator when mode is GRANTOR_VALIDATION")
 			}
 		} else if cs.VerifierPermManagementMode == credentialschematypes.CredentialSchemaPermManagementMode_ECOSYSTEM {
+			// if cs.verifier_perm_management_mode == ECOSYSTEM: validator_perm.type MUST be ECOSYSTEM
 			if validatorType != types.PermissionType_ECOSYSTEM {
-				return fmt.Errorf("verifier perm requires ECOSYSTEM validator")
-			}
-		} else if cs.VerifierPermManagementMode == credentialschematypes.CredentialSchemaPermManagementMode_OPEN {
-			// Mode is OPEN which means anyone can verify credentials of this schema
-			// This doesn't imply no payment is necessary - formal perm might be
-			// required when payment is needed
-			// Check if validator has the correct type for fee collection
-			if validatorType != types.PermissionType_ECOSYSTEM {
-				return fmt.Errorf("open verification still requires ECOSYSTEM validator for fee collection")
+				return fmt.Errorf("verifier perm requires ECOSYSTEM validator when mode is ECOSYSTEM")
 			}
 		} else {
-			return fmt.Errorf("verifier perm not supported with current schema settings")
+			// else abort
+			return fmt.Errorf("verifier perm not supported with current schema verifier_perm_management_mode")
 		}
 
 	case types.PermissionType_VERIFIER_GRANTOR:
+		// if cs.verifier_perm_management_mode == GRANTOR: validator_perm.type MUST be ECOSYSTEM
 		if cs.VerifierPermManagementMode == credentialschematypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION {
 			if validatorType != types.PermissionType_ECOSYSTEM {
 				return fmt.Errorf("verifier grantor perm requires ECOSYSTEM validator")
 			}
 		} else {
+			// else abort
 			return fmt.Errorf("verifier grantor perm not supported with current schema settings")
 		}
 
 	case types.PermissionType_HOLDER:
+		// if cs.verifier_perm_management_mode == GRANTOR or ECOSYSTEM: validator_perm.type MUST be ISSUER
 		if cs.VerifierPermManagementMode == credentialschematypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION ||
 			cs.VerifierPermManagementMode == credentialschematypes.CredentialSchemaPermManagementMode_ECOSYSTEM {
 			if validatorType != types.PermissionType_ISSUER {
 				return fmt.Errorf("holder perm requires ISSUER validator")
 			}
-		} else if cs.VerifierPermManagementMode == credentialschematypes.CredentialSchemaPermManagementMode_OPEN {
-			// Even in OPEN mode, holder permissions might require validation from an ISSUER
-			if validatorType != types.PermissionType_ISSUER {
-				return fmt.Errorf("holder perm requires ISSUER validator even in OPEN verification mode")
-			}
 		} else {
+			// else abort (spec v4: no OPEN mode fallback for HOLDER)
 			return fmt.Errorf("holder perm not supported with current schema settings")
 		}
 	}

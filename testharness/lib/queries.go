@@ -53,6 +53,18 @@ func QueryPermission(client cosmosclient.Client, ctx context.Context, permID uin
 	return permQueryClient.GetPermission(ctx, &permtypes.QueryGetPermissionRequest{Id: permID})
 }
 
+// ListPermissions lists all permissions
+func ListPermissions(client cosmosclient.Client, ctx context.Context) ([]permtypes.Permission, error) {
+	permQueryClient := permtypes.NewQueryClient(client.Context())
+	resp, err := permQueryClient.ListPermissions(ctx, &permtypes.QueryListPermissionsRequest{
+		ResponseMaxSize: 1024,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return resp.Permissions, nil
+}
+
 // QueryDID queries for a DID by ID
 func QueryDID(client cosmosclient.Client, ctx context.Context, did string) (*didtypes.QueryGetDIDResponse, error) {
 	didQueryClient := didtypes.NewQueryClient(client.Context())

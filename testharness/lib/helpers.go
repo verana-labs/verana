@@ -271,7 +271,6 @@ func ValidatePermissionWithDiscounts(client cosmosclient.Client, ctx context.Con
 		ValidationFees:          validationFees,
 		IssuanceFees:            issuanceFees,
 		VerificationFees:        verificationFees,
-		Country:                 country,
 		IssuanceFeeDiscount:     issuanceFeeDiscount,
 		VerificationFeeDiscount: verificationFeeDiscount,
 	}
@@ -392,19 +391,20 @@ func GetPermission(client cosmosclient.Client, ctx context.Context, permID uint6
 }
 
 // RenewPermissionVP initiates the renewal of a permission validation process
-func RenewPermissionVP(client cosmosclient.Client, ctx context.Context, creator cosmosaccount.Account, msg permtypes.MsgRenewPermissionVP) (string, error) {
-	creatorAddr, err := creator.Address(addressPrefix)
+func RenewPermissionVP(client cosmosclient.Client, ctx context.Context, account cosmosaccount.Account, msg permtypes.MsgRenewPermissionVP) (string, error) {
+	accountAddr, err := account.Address(addressPrefix)
 	if err != nil {
-		return "", fmt.Errorf("failed to get creator address: %v", err)
+		return "", fmt.Errorf("failed to get account address: %v", err)
 	}
 
-	// Ensure creator is set correctly
-	msgWithCreator := permtypes.MsgRenewPermissionVP{
-		Creator: creatorAddr,
-		Id:      msg.Id,
+	// Set authority and operator to the account address
+	msgToSend := permtypes.MsgRenewPermissionVP{
+		Authority: accountAddr,
+		Operator:  accountAddr,
+		Id:        msg.Id,
 	}
 
-	txResp, err := client.BroadcastTx(ctx, creator, &msgWithCreator)
+	txResp, err := client.BroadcastTx(ctx, account, &msgToSend)
 	if err != nil {
 		return "", fmt.Errorf("failed to broadcast renewal transaction: %v", err)
 	}
@@ -954,20 +954,20 @@ func RemoveDID(client cosmosclient.Client, ctx context.Context, creator cosmosac
 	return "success", nil
 }
 
-// RevokePermission revokes a permission
-func RevokePermission(client cosmosclient.Client, ctx context.Context, validator cosmosaccount.Account, msg permtypes.MsgRevokePermission) (string, error) {
-	validatorAddr, err := validator.Address(addressPrefix)
+// RevokePermission revokes a permission (v4: authority/operator pattern)
+func RevokePermission(client cosmosclient.Client, ctx context.Context, operator cosmosaccount.Account, authority string, id uint64) (string, error) {
+	operatorAddr, err := operator.Address(addressPrefix)
 	if err != nil {
-		return "", fmt.Errorf("failed to get validator address: %w", err)
+		return "", fmt.Errorf("failed to get operator address: %w", err)
 	}
 
-	// Make sure creator is set correctly
-	msgWithCreator := permtypes.MsgRevokePermission{
-		Creator: validatorAddr,
-		Id:      msg.Id,
+	msg := permtypes.MsgRevokePermission{
+		Authority: authority,
+		Operator:  operatorAddr,
+		Id:        id,
 	}
 
-	txResp, err := client.BroadcastTx(ctx, validator, &msgWithCreator)
+	txResp, err := client.BroadcastTx(ctx, operator, &msg)
 	if err != nil {
 		return "", fmt.Errorf("failed to broadcast transaction: %w", err)
 	}
@@ -985,30 +985,28 @@ func RevokePermission(client cosmosclient.Client, ctx context.Context, validator
 	return "success", nil
 }
 
-// ExtendPermission extends the validity period of a permission
-func ExtendPermission(client cosmosclient.Client, ctx context.Context, validator cosmosaccount.Account, msg permtypes.MsgExtendPermission) (string, error) {
-	validatorAddr, err := validator.Address(addressPrefix)
+// AdjustPermission adjusts the validity period of a permission
+func AdjustPermission(client cosmosclient.Client, ctx context.Context, operator cosmosaccount.Account, authority string, id uint64, effectiveUntil *time.Time) (string, error) {
+	operatorAddr, err := operator.Address(addressPrefix)
 	if err != nil {
-		return "", fmt.Errorf("failed to get validator address: %w", err)
+		return "", fmt.Errorf("failed to get operator address: %w", err)
 	}
 
-	// Make sure creator is set correctly
-	msgWithCreator := permtypes.MsgExtendPermission{
-		Creator:        validatorAddr,
-		Id:             msg.Id,
-		EffectiveUntil: msg.EffectiveUntil,
+	msg := permtypes.MsgAdjustPermission{
+		Authority:      authority,
+		Operator:       operatorAddr,
+		Id:             id,
+		EffectiveUntil: effectiveUntil,
 	}
 
-	txResp, err := client.BroadcastTx(ctx, validator, &msgWithCreator)
+	txResp, err := client.BroadcastTx(ctx, operator, &msg)
 	if err != nil {
 		return "", fmt.Errorf("failed to broadcast transaction: %w", err)
 	}
 
-	// Print response from broadcasting a transaction
-	fmt.Print("ExtendPermission:\n\n")
+	fmt.Print("AdjustPermission:\n\n")
 	fmt.Println(txResp)
 
-	// Check if the transaction was successful
 	if txResp.TxResponse.Code != 0 {
 		return "", fmt.Errorf("transaction failed with code %d: %s",
 			txResp.TxResponse.Code, txResp.TxResponse.RawLog)
@@ -1120,13 +1118,14 @@ func CancelPermissionVPLastRequest(client cosmosclient.Client, ctx context.Conte
 		return "", fmt.Errorf("failed to get applicant address: %w", err)
 	}
 
-	// Create complete message with creator address
-	msgWithCreator := permtypes.MsgCancelPermissionVPLastRequest{
-		Creator: applicantAddr,
-		Id:      msg.Id,
+	// Create complete message with authority/operator addresses
+	msgComplete := permtypes.MsgCancelPermissionVPLastRequest{
+		Authority: applicantAddr,
+		Operator:  applicantAddr,
+		Id:        msg.Id,
 	}
 
-	txResp, err := client.BroadcastTx(ctx, applicant, &msgWithCreator)
+	txResp, err := client.BroadcastTx(ctx, applicant, &msgComplete)
 	if err != nil {
 		return "", fmt.Errorf("failed to broadcast transaction: %w", err)
 	}
@@ -1145,112 +1144,118 @@ func CancelPermissionVPLastRequest(client cosmosclient.Client, ctx context.Conte
 }
 
 // SlashPermissionTrustDeposit slashes a permission's trust deposit
-func SlashPermissionTrustDeposit(client cosmosclient.Client, ctx context.Context, actor cosmosaccount.Account, msg permtypes.MsgSlashPermissionTrustDeposit) string {
+func SlashPermissionTrustDeposit(client cosmosclient.Client, ctx context.Context, actor cosmosaccount.Account, authority string, id uint64, amount uint64) error {
 	actorAddr, err := actor.Address(addressPrefix)
 	if err != nil {
-		panic(fmt.Sprintf("Failed to get actor address: %v", err))
+		return fmt.Errorf("failed to get actor address: %w", err)
 	}
 
-	msgWithCreator := permtypes.MsgSlashPermissionTrustDeposit{
-		Creator: actorAddr,
-		Id:      msg.Id,
-		Amount:  msg.Amount,
+	msg := &permtypes.MsgSlashPermissionTrustDeposit{
+		Authority: authority,
+		Operator:  actorAddr,
+		Id:        id,
+		Amount:    amount,
 	}
 
-	txResp, err := client.BroadcastTx(ctx, actor, &msgWithCreator)
+	txResp, err := client.BroadcastTx(ctx, actor, msg)
 	if err != nil {
-		panic(fmt.Sprintf("Failed to broadcast slash permission trust deposit: %v", err))
+		return fmt.Errorf("failed to broadcast slash permission trust deposit: %w", err)
 	}
 
 	fmt.Print("SlashPermissionTrustDeposit:\n\n")
 	fmt.Println(txResp)
 
 	if txResp.TxResponse.Code != 0 {
-		panic(fmt.Sprintf("transaction failed with code %d: %s", txResp.TxResponse.Code, txResp.TxResponse.RawLog))
+		return fmt.Errorf("SlashPermissionTrustDeposit failed with code %d: %s",
+			txResp.TxResponse.Code, txResp.TxResponse.RawLog)
 	}
 
-	return "success"
+	return nil
 }
 
 // RepayPermissionSlashedTrustDeposit repays a slashed permission's trust deposit
-func RepayPermissionSlashedTrustDeposit(client cosmosclient.Client, ctx context.Context, actor cosmosaccount.Account, msg permtypes.MsgRepayPermissionSlashedTrustDeposit) string {
+func RepayPermissionSlashedTrustDeposit(client cosmosclient.Client, ctx context.Context, actor cosmosaccount.Account, authority string, id uint64) error {
 	actorAddr, err := actor.Address(addressPrefix)
 	if err != nil {
-		panic(fmt.Sprintf("Failed to get actor address: %v", err))
+		return fmt.Errorf("failed to get actor address: %w", err)
 	}
 
-	msgWithCreator := permtypes.MsgRepayPermissionSlashedTrustDeposit{
-		Creator: actorAddr,
-		Id:      msg.Id,
+	msg := &permtypes.MsgRepayPermissionSlashedTrustDeposit{
+		Authority: authority,
+		Operator:  actorAddr,
+		Id:        id,
 	}
 
-	txResp, err := client.BroadcastTx(ctx, actor, &msgWithCreator)
+	txResp, err := client.BroadcastTx(ctx, actor, msg)
 	if err != nil {
-		panic(fmt.Sprintf("Failed to broadcast repay permission slashed trust deposit: %v", err))
+		return fmt.Errorf("failed to broadcast repay permission slashed trust deposit: %w", err)
 	}
-
-	fmt.Print("RepayPermissionSlashedTrustDeposit:\n\n")
-	fmt.Println(txResp)
 
 	if txResp.TxResponse.Code != 0 {
-		panic(fmt.Sprintf("transaction failed with code %d: %s", txResp.TxResponse.Code, txResp.TxResponse.RawLog))
+		return fmt.Errorf("transaction failed with code %d: %s", txResp.TxResponse.Code, txResp.TxResponse.RawLog)
 	}
 
-	return "success"
+	return nil
 }
 
 // CreatePermission creates a permission directly
-func CreatePermission(client cosmosclient.Client, ctx context.Context, actor cosmosaccount.Account, msg permtypes.MsgCreatePermission) string {
+func CreatePermission(client cosmosclient.Client, ctx context.Context, actor cosmosaccount.Account, authority string, msg permtypes.MsgCreatePermission) (string, error) {
 	actorAddr, err := actor.Address(addressPrefix)
 	if err != nil {
-		panic(fmt.Sprintf("Failed to get actor address: %v", err))
+		return "", fmt.Errorf("failed to get actor address: %w", err)
 	}
 
-	msgWithCreator := permtypes.MsgCreatePermission{
-		Creator:          actorAddr,
-		SchemaId:         msg.SchemaId,
-		Type:             msg.Type,
-		Did:              msg.Did,
-		Country:          msg.Country,
-		EffectiveFrom:    msg.EffectiveFrom,
-		EffectiveUntil:   msg.EffectiveUntil,
-		VerificationFees: msg.VerificationFees,
+	fullMsg := &permtypes.MsgCreatePermission{
+		Authority:                    authority,
+		Operator:                     actorAddr,
+		Type:                         msg.Type,
+		ValidatorPermId:              msg.ValidatorPermId,
+		Did:                          msg.Did,
+		EffectiveFrom:                msg.EffectiveFrom,
+		EffectiveUntil:               msg.EffectiveUntil,
+		VerificationFees:             msg.VerificationFees,
+		ValidationFees:               msg.ValidationFees,
+		VsOperator:                   msg.VsOperator,
+		VsOperatorAuthzEnabled:       msg.VsOperatorAuthzEnabled,
+		VsOperatorAuthzSpendLimit:    msg.VsOperatorAuthzSpendLimit,
+		VsOperatorAuthzWithFeegrant:  msg.VsOperatorAuthzWithFeegrant,
+		VsOperatorAuthzFeeSpendLimit: msg.VsOperatorAuthzFeeSpendLimit,
+		VsOperatorAuthzSpendPeriod:   msg.VsOperatorAuthzSpendPeriod,
 	}
 
-	txResp, err := client.BroadcastTx(ctx, actor, &msgWithCreator)
+	txResp, err := client.BroadcastTx(ctx, actor, fullMsg)
 	if err != nil {
-		panic(fmt.Sprintf("Failed to broadcast create permission: %v", err))
+		return "", fmt.Errorf("failed to broadcast create permission: %w", err)
 	}
-
-	fmt.Print("CreatePermission:\n\n")
-	fmt.Println(txResp)
 
 	if txResp.TxResponse.Code != 0 {
-		panic(fmt.Sprintf("transaction failed with code %d: %s", txResp.TxResponse.Code, txResp.TxResponse.RawLog))
+		return "", fmt.Errorf("transaction failed with code %d: %s", txResp.TxResponse.Code, txResp.TxResponse.RawLog)
 	}
 
-	return "success"
+	return "success", nil
 }
 
-// CreatePermissionSession creates a new permission session
+// CreatePermissionSession creates a new permission session using authority/operator pattern
 func CreatePermissionSession(
 	client cosmosclient.Client,
 	ctx context.Context,
-	creator cosmosaccount.Account,
+	operatorAccount cosmosaccount.Account,
+	authorityAddr string,
 	sessionID string,
 	issuerPermID uint64,
 	verifierPermID uint64,
 	agentPermID uint64,
 	walletAgentPermID uint64,
-) {
-	creatorAddr, err := creator.Address(addressPrefix)
+) error {
+	operatorAddr, err := operatorAccount.Address(addressPrefix)
 	if err != nil {
-		panic(fmt.Sprintf("Failed to get creator address: %v", err))
+		return fmt.Errorf("failed to get operator address: %w", err)
 	}
 
 	// Create the session creation message
 	msg := &permtypes.MsgCreateOrUpdatePermissionSession{
-		Creator:           creatorAddr,
+		Authority:         authorityAddr,
+		Operator:          operatorAddr,
 		Id:                sessionID,
 		IssuerPermId:      issuerPermID,
 		VerifierPermId:    verifierPermID,
@@ -1259,18 +1264,25 @@ func CreatePermissionSession(
 	}
 
 	// Broadcast the transaction
-	txResp, err := client.BroadcastTx(ctx, creator, msg)
+	txResp, err := client.BroadcastTx(ctx, operatorAccount, msg)
 	if err != nil {
-		panic(fmt.Sprintf("Failed to create permission session: %v", err))
+		return fmt.Errorf("failed to create permission session: %w", err)
 	}
 
 	fmt.Print("CreatePermissionSession:\n\n")
 	fmt.Println(txResp)
+
+	if txResp.TxResponse.Code != 0 {
+		return fmt.Errorf("CreateOrUpdatePermissionSession failed with code %d: %s",
+			txResp.TxResponse.Code, txResp.TxResponse.RawLog)
+	}
+
+	return nil
 }
 
 // VerifyPermissionSession verifies a permission session was created correctly with expected values
 func VerifyPermissionSession(client cosmosclient.Client, ctx context.Context, sessionID string,
-	expectedController string, expectedAgentPermID uint64, expectedIssuerPermID, expectedVerifierPermID uint64) bool {
+	expectedAuthority string, expectedAgentPermID uint64, expectedIssuerPermID, expectedVerifierPermID uint64) bool {
 
 	// Query the permission session
 	permClient := permtypes.NewQueryClient(client.Context())
@@ -1289,10 +1301,10 @@ func VerifyPermissionSession(client cosmosclient.Client, ctx context.Context, se
 		return false
 	}
 
-	// Verify controller matches expectation if provided
-	if expectedController != "" && resp.GetSession().Controller != expectedController {
-		fmt.Printf("❌ Permission session verification failed: Expected controller %s, got %s\n",
-			expectedController, resp.GetSession().Controller)
+	// Verify authority matches expectation if provided
+	if expectedAuthority != "" && resp.GetSession().Authority != expectedAuthority {
+		fmt.Printf("❌ Permission session verification failed: Expected authority %s, got %s\n",
+			expectedAuthority, resp.GetSession().Authority)
 		return false
 	}
 
@@ -1303,36 +1315,36 @@ func VerifyPermissionSession(client cosmosclient.Client, ctx context.Context, se
 		return false
 	}
 
-	// Check authorizations array for expected permissions
+	// Check session records for expected permissions
 	issuerFound := false
 	verifierFound := false
-	for _, authz := range resp.GetSession().Authz {
+	for _, record := range resp.GetSession().SessionRecords {
 		// Check for issuer permission ID if expected
-		if expectedIssuerPermID > 0 && authz.GetExecutorPermId() == expectedIssuerPermID {
+		if expectedIssuerPermID > 0 && record.GetIssuerPermId() == expectedIssuerPermID {
 			issuerFound = true
 		}
 
 		// Check for verifier permission ID if expected
-		if expectedVerifierPermID > 0 && authz.GetBeneficiaryPermId() == expectedVerifierPermID {
+		if expectedVerifierPermID > 0 && record.GetVerifierPermId() == expectedVerifierPermID {
 			verifierFound = true
 		}
 	}
 
 	// Verify issuer permission if expected
 	if expectedIssuerPermID > 0 && !issuerFound {
-		fmt.Printf("❌ Permission session verification failed: Expected issuer permission ID %d not found in authorizations\n",
+		fmt.Printf("❌ Permission session verification failed: Expected issuer permission ID %d not found in session records\n",
 			expectedIssuerPermID)
 		return false
 	}
 
 	// Verify verifier permission if expected
 	if expectedVerifierPermID > 0 && !verifierFound {
-		fmt.Printf("❌ Permission session verification failed: Expected verifier permission ID %d not found in authorizations\n",
+		fmt.Printf("❌ Permission session verification failed: Expected verifier permission ID %d not found in session records\n",
 			expectedVerifierPermID)
 		return false
 	}
 
-	fmt.Printf("✅ Verified permission session ID %s with correct controller, agent permission ID %d",
+	fmt.Printf("✅ Verified permission session ID %s with correct authority, agent permission ID %d",
 		sessionID, expectedAgentPermID)
 
 	if expectedIssuerPermID > 0 {
@@ -1944,7 +1956,8 @@ func CreateRootPermissionWithError(client cosmosclient.Client, ctx context.Conte
 
 	// Create the message
 	fullMsg := &permtypes.MsgCreateRootPermission{
-		Creator:          creatorAddr,
+		Authority:        creatorAddr,
+		Operator:         creatorAddr,
 		SchemaId:         msg.SchemaId,
 		Did:              msg.Did,
 		EffectiveFrom:    msg.EffectiveFrom,
@@ -1952,7 +1965,6 @@ func CreateRootPermissionWithError(client cosmosclient.Client, ctx context.Conte
 		ValidationFees:   msg.ValidationFees,
 		VerificationFees: msg.VerificationFees,
 		IssuanceFees:     msg.IssuanceFees,
-		Country:          msg.Country,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, creator, fullMsg)
@@ -1981,7 +1993,8 @@ func CreateRootPermissionAndGetID(client cosmosclient.Client, ctx context.Contex
 
 	// Create the message
 	fullMsg := &permtypes.MsgCreateRootPermission{
-		Creator:          creatorAddr,
+		Authority:        creatorAddr,
+		Operator:         creatorAddr,
 		SchemaId:         msg.SchemaId,
 		Did:              msg.Did,
 		EffectiveFrom:    msg.EffectiveFrom,
@@ -1989,7 +2002,6 @@ func CreateRootPermissionAndGetID(client cosmosclient.Client, ctx context.Contex
 		ValidationFees:   msg.ValidationFees,
 		VerificationFees: msg.VerificationFees,
 		IssuanceFees:     msg.IssuanceFees,
-		Country:          msg.Country,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, creator, fullMsg)
@@ -2043,14 +2055,17 @@ func StartPermissionVPWithError(client cosmosclient.Client, ctx context.Context,
 
 	// Create the message
 	fullMsg := &permtypes.MsgStartPermissionVP{
-		Creator:          creatorAddr,
+		Authority:        msg.Authority,
+		Operator:         creatorAddr,
 		Type:             msg.Type,
 		Did:              msg.Did,
 		ValidatorPermId:  msg.ValidatorPermId,
-		Country:          msg.Country,
 		ValidationFees:   msg.ValidationFees,
 		IssuanceFees:     msg.IssuanceFees,
 		VerificationFees: msg.VerificationFees,
+	}
+	if fullMsg.Authority == "" {
+		fullMsg.Authority = creatorAddr
 	}
 
 	txResp, err := client.BroadcastTx(ctx, creator, fullMsg)
@@ -2070,25 +2085,24 @@ func StartPermissionVPWithError(client cosmosclient.Client, ctx context.Context,
 // RevokePermissionWithError revokes a permission and returns any error
 // instead of calling log.Fatal. This is useful for testing error scenarios.
 func RevokePermissionWithError(client cosmosclient.Client, ctx context.Context,
-	creator cosmosaccount.Account, msg permtypes.MsgRevokePermission) error {
+	operator cosmosaccount.Account, authority string, id uint64) error {
 
-	creatorAddr, err := creator.Address(addressPrefix)
+	operatorAddr, err := operator.Address(addressPrefix)
 	if err != nil {
-		return fmt.Errorf("failed to get creator address: %v", err)
+		return fmt.Errorf("failed to get operator address: %v", err)
 	}
 
-	// Create the message
 	fullMsg := &permtypes.MsgRevokePermission{
-		Creator: creatorAddr,
-		Id:      msg.Id,
+		Authority: authority,
+		Operator:  operatorAddr,
+		Id:        id,
 	}
 
-	txResp, err := client.BroadcastTx(ctx, creator, fullMsg)
+	txResp, err := client.BroadcastTx(ctx, operator, fullMsg)
 	if err != nil {
 		return fmt.Errorf("broadcast error: %v", err)
 	}
 
-	// Check transaction code - non-zero means error
 	if txResp.TxResponse.Code != 0 {
 		return fmt.Errorf("transaction failed (code %d): %s",
 			txResp.TxResponse.Code, txResp.TxResponse.RawLog)
@@ -2120,7 +2134,8 @@ func CreateInactiveValidatorPermission(client cosmosclient.Client, ctx context.C
 	// Create an ECOSYSTEM (root) permission with future effective_from
 	// This will be in FUTURE state (not ACTIVE)
 	msg := &permtypes.MsgCreateRootPermission{
-		Creator:        creatorAddr,
+		Authority:      creatorAddr,
+		Operator:       creatorAddr,
 		SchemaId:       schemaID,
 		Did:            did,
 		EffectiveFrom:  &futureTime, // Future = not yet active
@@ -2479,6 +2494,41 @@ func GrantOperatorAuthorizationViaGroup(
 	time.Sleep(3 * time.Second)
 
 	fmt.Printf("✅ Granted operator authorization for %s via group proposal\n", granteeAddr)
+	return nil
+}
+
+// GrantSelfDelegation grants an operator self-delegation so they can execute messages
+// with authority=operator (same address). MsgGrantOperatorAuthorization has signer="authority",
+// and operator="" bypasses the AUTHZ-CHECK.
+func GrantSelfDelegation(
+	client cosmosclient.Client,
+	ctx context.Context,
+	account cosmosaccount.Account,
+	msgTypes []string,
+) error {
+	addr, err := account.Address(addressPrefix)
+	if err != nil {
+		return fmt.Errorf("failed to get account address: %w", err)
+	}
+
+	msg := &detypes.MsgGrantOperatorAuthorization{
+		Authority: addr,
+		Operator:  "",
+		Grantee:   addr,
+		MsgTypes:  msgTypes,
+	}
+
+	txResp, err := client.BroadcastTx(ctx, account, msg)
+	if err != nil {
+		return fmt.Errorf("failed to broadcast self-delegation: %w", err)
+	}
+
+	if txResp.TxResponse.Code != 0 {
+		return fmt.Errorf("self-delegation failed with code %d: %s",
+			txResp.TxResponse.Code, txResp.TxResponse.RawLog)
+	}
+
+	fmt.Printf("✅ Granted self-delegation for %s\n", addr)
 	return nil
 }
 
@@ -2842,6 +2892,204 @@ func ArchiveCredentialSchemaWithAuthority(
 
 	if txResp.TxResponse.Code != 0 {
 		return fmt.Errorf("ArchiveCredentialSchema failed with code %d: %s",
+			txResp.TxResponse.Code, txResp.TxResponse.RawLog)
+	}
+
+	return nil
+}
+
+// StartPermissionVPWithAuthority starts a permission VP where authority and operator are different.
+func StartPermissionVPWithAuthority(
+	client cosmosclient.Client,
+	ctx context.Context,
+	operatorAccount cosmosaccount.Account,
+	authority string,
+	permType permtypes.PermissionType,
+	validatorPermId uint64,
+	did string,
+) (string, error) {
+	operatorAddr, err := operatorAccount.Address(addressPrefix)
+	if err != nil {
+		return "", fmt.Errorf("failed to get operator address: %w", err)
+	}
+
+	msg := &permtypes.MsgStartPermissionVP{
+		Authority:       authority,
+		Operator:        operatorAddr,
+		Type:            permType,
+		ValidatorPermId: validatorPermId,
+		Did:             did,
+	}
+
+	txResp, err := client.BroadcastTx(ctx, operatorAccount, msg)
+	if err != nil {
+		return "", fmt.Errorf("failed to broadcast StartPermissionVP: %w", err)
+	}
+
+	fmt.Print("StartPermissionVPWithAuthority:\n\n")
+	fmt.Println(txResp)
+
+	if txResp.TxResponse.Code != 0 {
+		return "", fmt.Errorf("StartPermissionVP failed with code %d: %s",
+			txResp.TxResponse.Code, txResp.TxResponse.RawLog)
+	}
+
+	var txResponse sdk.TxResponse
+	txResponseBytes, err := client.Context().Codec.MarshalJSON(txResp.TxResponse)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal tx response: %w", err)
+	}
+	err = client.Context().Codec.UnmarshalJSON(txResponseBytes, &txResponse)
+	if err != nil {
+		return "", fmt.Errorf("failed to unmarshal tx response: %w", err)
+	}
+
+	for _, event := range txResponse.Events {
+		if event.Type == "start_permission_vp" {
+			for _, attr := range event.Attributes {
+				if attr.Key == "permission_id" {
+					return attr.Value, nil
+				}
+			}
+		}
+	}
+	return "", fmt.Errorf("permission_id not found in events")
+}
+
+// RenewPermissionVPWithAuthority renews a permission VP where authority and operator are different.
+func RenewPermissionVPWithAuthority(
+	client cosmosclient.Client,
+	ctx context.Context,
+	operatorAccount cosmosaccount.Account,
+	authority string,
+	permID uint64,
+) error {
+	operatorAddr, err := operatorAccount.Address(addressPrefix)
+	if err != nil {
+		return fmt.Errorf("failed to get operator address: %w", err)
+	}
+
+	msg := &permtypes.MsgRenewPermissionVP{
+		Authority: authority,
+		Operator:  operatorAddr,
+		Id:        permID,
+	}
+
+	txResp, err := client.BroadcastTx(ctx, operatorAccount, msg)
+	if err != nil {
+		return fmt.Errorf("failed to broadcast RenewPermissionVP: %w", err)
+	}
+
+	fmt.Print("RenewPermissionVPWithAuthority:\n\n")
+	fmt.Println(txResp)
+
+	if txResp.TxResponse.Code != 0 {
+		return fmt.Errorf("RenewPermissionVP failed with code %d: %s",
+			txResp.TxResponse.Code, txResp.TxResponse.RawLog)
+	}
+
+	return nil
+}
+
+func CreateRootPermissionWithAuthority(
+	client cosmosclient.Client,
+	ctx context.Context,
+	operatorAccount cosmosaccount.Account,
+	authority string,
+	schemaID uint64,
+	did string,
+	effectiveFrom *time.Time,
+	effectiveUntil *time.Time,
+	validationFees uint64,
+	issuanceFees uint64,
+	verificationFees uint64,
+) (uint64, error) {
+	operatorAddr, err := operatorAccount.Address(addressPrefix)
+	if err != nil {
+		return 0, fmt.Errorf("failed to get operator address: %w", err)
+	}
+
+	msg := &permtypes.MsgCreateRootPermission{
+		Authority:        authority,
+		Operator:         operatorAddr,
+		SchemaId:         schemaID,
+		Did:              did,
+		EffectiveFrom:    effectiveFrom,
+		EffectiveUntil:   effectiveUntil,
+		ValidationFees:   validationFees,
+		IssuanceFees:     issuanceFees,
+		VerificationFees: verificationFees,
+	}
+
+	txResp, err := client.BroadcastTx(ctx, operatorAccount, msg)
+	if err != nil {
+		return 0, fmt.Errorf("failed to broadcast CreateRootPermission: %w", err)
+	}
+
+	fmt.Print("CreateRootPermissionWithAuthority:\n\n")
+	fmt.Println(txResp)
+
+	if txResp.TxResponse.Code != 0 {
+		return 0, fmt.Errorf("CreateRootPermission failed with code %d: %s",
+			txResp.TxResponse.Code, txResp.TxResponse.RawLog)
+	}
+
+	// Extract permission ID from events
+	var txResponse sdk.TxResponse
+	txResponseBytes, err := client.Context().Codec.MarshalJSON(txResp.TxResponse)
+	if err != nil {
+		return 0, fmt.Errorf("failed to marshal tx response: %v", err)
+	}
+	err = client.Context().Codec.UnmarshalJSON(txResponseBytes, &txResponse)
+	if err != nil {
+		return 0, fmt.Errorf("failed to unmarshal tx response: %v", err)
+	}
+
+	for _, event := range txResponse.Events {
+		if event.Type == "create_root_permission" {
+			for _, attribute := range event.Attributes {
+				if attribute.Key == "root_permission_id" {
+					permID, parseErr := strconv.ParseUint(attribute.Value, 10, 64)
+					if parseErr != nil {
+						return 0, fmt.Errorf("failed to parse permission ID: %v", parseErr)
+					}
+					return permID, nil
+				}
+			}
+		}
+	}
+
+	return 0, fmt.Errorf("permission ID not found in events")
+}
+
+func CancelPermissionVPLastRequestWithAuthority(
+	client cosmosclient.Client,
+	ctx context.Context,
+	operatorAccount cosmosaccount.Account,
+	authority string,
+	permID uint64,
+) error {
+	operatorAddr, err := operatorAccount.Address(addressPrefix)
+	if err != nil {
+		return fmt.Errorf("failed to get operator address: %w", err)
+	}
+
+	msg := &permtypes.MsgCancelPermissionVPLastRequest{
+		Authority: authority,
+		Operator:  operatorAddr,
+		Id:        permID,
+	}
+
+	txResp, err := client.BroadcastTx(ctx, operatorAccount, msg)
+	if err != nil {
+		return fmt.Errorf("failed to broadcast CancelPermissionVPLastRequest: %w", err)
+	}
+
+	fmt.Print("CancelPermissionVPLastRequestWithAuthority:\n\n")
+	fmt.Println(txResp)
+
+	if txResp.TxResponse.Code != 0 {
+		return fmt.Errorf("CancelPermissionVPLastRequest failed with code %d: %s",
 			txResp.TxResponse.Code, txResp.TxResponse.RawLog)
 	}
 

@@ -12,9 +12,9 @@ We use these TypeScript client tests as an **early warning system** to catch pro
 
 1. **Go Test Harness** (Comprehensive Logic Testing)
    - Tests all blockchain logic and business rules
-   - Validates end-to-end workflows (19+ journeys)
+   - Validates end-to-end workflows (10 operator-authorization journeys)
    - Ensures the blockchain behaves correctly
-   - Located in: `verana-test-harness` repository
+   - Located in: `testharness/` directory
 
 2. **TypeScript Client Tests** (Frontend Alignment Testing)
    - Tests transaction signing and proto alignment
@@ -251,16 +251,28 @@ This ensures compatibility with the frontend application and validates that the 
 
 ```
 test/
-├── package.json           # Dependencies and scripts
-├── tsconfig.json          # TypeScript configuration
-├── README.md              # This file
+├── package.json              # Dependencies and scripts
+├── tsconfig.json             # TypeScript configuration
+├── JOURNEY_FLOW.md           # Detailed journey flow documentation
+├── README.md                 # This file
 └── src/
     ├── helpers/
-    │   ├── client.ts      # CosmJS client setup utilities (matches frontend)
-    │   ├── registry.ts    # Custom type registry for Verana messages
-    │   └── index.ts       # Helper exports
+    │   ├── client.ts         # CosmJS client setup utilities (matches frontend)
+    │   ├── registry.ts       # Custom type registry for Verana messages
+    │   ├── aminoConverters.ts # Amino type converters
+    │   └── index.ts          # Helper exports
     └── journeys/
-        ├── createTrustRegistry.ts  # Create a trust registry
+        ├── runAll.ts                                # Run all tests sequentially
+        ├── deGrantOperatorAuthorization.ts           # DE: Grant TR operator auth
+        ├── deGrantCsOperatorAuthorization.ts         # DE: Grant CS operator auth
+        ├── trCreateTrustRegistry.ts                  # TR: Create trust registry
+        ├── trAddGovernanceFrameworkDocument.ts        # TR: Add GF document
+        ├── trIncreaseActiveGovernanceFrameworkVersion.ts # TR: Increase GF version
+        ├── trUpdateTrustRegistry.ts                  # TR: Update trust registry
+        ├── trArchiveTrustRegistry.ts                 # TR: Archive trust registry
+        ├── csCreateCredentialSchema.ts               # CS: Create credential schema
+        ├── csUpdateCredentialSchema.ts               # CS: Update credential schema
+        └── csArchiveCredentialSchema.ts              # CS: Archive credential schema
 ```
 
 Runtime artifacts:
@@ -384,20 +396,15 @@ To add a new transaction type test:
    - Add type URL
    - Register in `createVeranaRegistry()`
 
-## Priority Test Coverage
+## Test Coverage
 
-We focus on testing transaction types that:
-1. Are used frequently by the frontend
-2. Have complex message structures
-3. Have been problematic in the past
-4. Are critical for user workflows
+Currently tested transaction types:
 
-Our priority order:
-1. ✅ Trust Registry (create, update, archive)
-2. ⏳ Credential Schema (create, update, archive)
-3. ⏳ DID Directory (add, renew, remove, touch)
-4. ⏳ Permission (create, extend, revoke, VP operations)
-5. ⏳ Trust Deposit (reclaim, slash, repay)
+| Module | Operations | Status |
+|--------|-----------|--------|
+| Delegation Engine (DE) | Grant operator authorization (TR, CS) | Done |
+| Trust Registry (TR) | Create, Add GF Document, Increase GF Version, Update, Archive | Done |
+| Credential Schema (CS) | Create, Update, Archive | Done |
 
 ## Maintenance
 

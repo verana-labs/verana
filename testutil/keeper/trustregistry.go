@@ -66,6 +66,10 @@ func (m *MockTrustDepositKeeper) AdjustTrustDeposit(_ sdk.Context, _ string, _ i
 	return nil
 }
 
+func (m *MockTrustDepositKeeper) AdjustTrustDepositOnBehalf(_ sdk.Context, _ string, _ sdk.AccAddress, _ int64) error {
+	return nil
+}
+
 func (m *MockTrustDepositKeeper) GetTrustDepositRate(_ sdk.Context) math.LegacyDec {
 	v, _ := math.LegacyNewDecFromStr("0")
 	return v
@@ -86,9 +90,24 @@ func (m *MockTrustDepositKeeper) BurnEcosystemSlashedTrustDeposit(_ sdk.Context,
 }
 
 // MockDelegationKeeper is a mock implementation of the DelegationKeeper interface for testing.
-// By default it allows all operator authorizations (no-op check).
-type MockDelegationKeeper struct{}
+// By default it allows all operator authorizations (ErrToReturn is nil).
+// Set ErrToReturn to simulate authorization failures.
+type MockDelegationKeeper struct {
+	ErrToReturn error
+}
 
 func (m *MockDelegationKeeper) CheckOperatorAuthorization(_ context.Context, _, _, _ string, _ time.Time) error {
-	return nil
+	return m.ErrToReturn
+}
+
+func (m *MockDelegationKeeper) CheckVSOperatorAuthorization(_ context.Context, _, _ string) error {
+	return m.ErrToReturn
+}
+
+func (m *MockDelegationKeeper) GrantVSOperatorAuthorization(_ context.Context, _, _ string, _ uint64, _ sdk.Coins, _ bool, _ sdk.Coins, _ *time.Duration) error {
+	return m.ErrToReturn
+}
+
+func (m *MockDelegationKeeper) RevokeVSOperatorAuthorization(_ context.Context, _, _ string, _ uint64) error {
+	return m.ErrToReturn
 }

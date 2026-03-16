@@ -25,7 +25,7 @@ const (
 	Msg_SetPermissionVPToValidated_FullMethodName         = "/verana.perm.v1.Msg/SetPermissionVPToValidated"
 	Msg_CancelPermissionVPLastRequest_FullMethodName      = "/verana.perm.v1.Msg/CancelPermissionVPLastRequest"
 	Msg_CreateRootPermission_FullMethodName               = "/verana.perm.v1.Msg/CreateRootPermission"
-	Msg_ExtendPermission_FullMethodName                   = "/verana.perm.v1.Msg/ExtendPermission"
+	Msg_AdjustPermission_FullMethodName                   = "/verana.perm.v1.Msg/AdjustPermission"
 	Msg_RevokePermission_FullMethodName                   = "/verana.perm.v1.Msg/RevokePermission"
 	Msg_CreateOrUpdatePermissionSession_FullMethodName    = "/verana.perm.v1.Msg/CreateOrUpdatePermissionSession"
 	Msg_SlashPermissionTrustDeposit_FullMethodName        = "/verana.perm.v1.Msg/SlashPermissionTrustDeposit"
@@ -49,7 +49,7 @@ type MsgClient interface {
 	// rpc ConfirmPermissionVPTermination(MsgConfirmPermissionVPTermination) returns (MsgConfirmPermissionVPTerminationResponse);
 	CancelPermissionVPLastRequest(ctx context.Context, in *MsgCancelPermissionVPLastRequest, opts ...grpc.CallOption) (*MsgCancelPermissionVPLastRequestResponse, error)
 	CreateRootPermission(ctx context.Context, in *MsgCreateRootPermission, opts ...grpc.CallOption) (*MsgCreateRootPermissionResponse, error)
-	ExtendPermission(ctx context.Context, in *MsgExtendPermission, opts ...grpc.CallOption) (*MsgExtendPermissionResponse, error)
+	AdjustPermission(ctx context.Context, in *MsgAdjustPermission, opts ...grpc.CallOption) (*MsgAdjustPermissionResponse, error)
 	RevokePermission(ctx context.Context, in *MsgRevokePermission, opts ...grpc.CallOption) (*MsgRevokePermissionResponse, error)
 	CreateOrUpdatePermissionSession(ctx context.Context, in *MsgCreateOrUpdatePermissionSession, opts ...grpc.CallOption) (*MsgCreateOrUpdatePermissionSessionResponse, error)
 	SlashPermissionTrustDeposit(ctx context.Context, in *MsgSlashPermissionTrustDeposit, opts ...grpc.CallOption) (*MsgSlashPermissionTrustDepositResponse, error)
@@ -125,10 +125,10 @@ func (c *msgClient) CreateRootPermission(ctx context.Context, in *MsgCreateRootP
 	return out, nil
 }
 
-func (c *msgClient) ExtendPermission(ctx context.Context, in *MsgExtendPermission, opts ...grpc.CallOption) (*MsgExtendPermissionResponse, error) {
+func (c *msgClient) AdjustPermission(ctx context.Context, in *MsgAdjustPermission, opts ...grpc.CallOption) (*MsgAdjustPermissionResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(MsgExtendPermissionResponse)
-	err := c.cc.Invoke(ctx, Msg_ExtendPermission_FullMethodName, in, out, cOpts...)
+	out := new(MsgAdjustPermissionResponse)
+	err := c.cc.Invoke(ctx, Msg_AdjustPermission_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -201,7 +201,7 @@ type MsgServer interface {
 	// rpc ConfirmPermissionVPTermination(MsgConfirmPermissionVPTermination) returns (MsgConfirmPermissionVPTerminationResponse);
 	CancelPermissionVPLastRequest(context.Context, *MsgCancelPermissionVPLastRequest) (*MsgCancelPermissionVPLastRequestResponse, error)
 	CreateRootPermission(context.Context, *MsgCreateRootPermission) (*MsgCreateRootPermissionResponse, error)
-	ExtendPermission(context.Context, *MsgExtendPermission) (*MsgExtendPermissionResponse, error)
+	AdjustPermission(context.Context, *MsgAdjustPermission) (*MsgAdjustPermissionResponse, error)
 	RevokePermission(context.Context, *MsgRevokePermission) (*MsgRevokePermissionResponse, error)
 	CreateOrUpdatePermissionSession(context.Context, *MsgCreateOrUpdatePermissionSession) (*MsgCreateOrUpdatePermissionSessionResponse, error)
 	SlashPermissionTrustDeposit(context.Context, *MsgSlashPermissionTrustDeposit) (*MsgSlashPermissionTrustDepositResponse, error)
@@ -235,8 +235,8 @@ func (UnimplementedMsgServer) CancelPermissionVPLastRequest(context.Context, *Ms
 func (UnimplementedMsgServer) CreateRootPermission(context.Context, *MsgCreateRootPermission) (*MsgCreateRootPermissionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateRootPermission not implemented")
 }
-func (UnimplementedMsgServer) ExtendPermission(context.Context, *MsgExtendPermission) (*MsgExtendPermissionResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ExtendPermission not implemented")
+func (UnimplementedMsgServer) AdjustPermission(context.Context, *MsgAdjustPermission) (*MsgAdjustPermissionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AdjustPermission not implemented")
 }
 func (UnimplementedMsgServer) RevokePermission(context.Context, *MsgRevokePermission) (*MsgRevokePermissionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RevokePermission not implemented")
@@ -382,20 +382,20 @@ func _Msg_CreateRootPermission_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Msg_ExtendPermission_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(MsgExtendPermission)
+func _Msg_AdjustPermission_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgAdjustPermission)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MsgServer).ExtendPermission(ctx, in)
+		return srv.(MsgServer).AdjustPermission(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Msg_ExtendPermission_FullMethodName,
+		FullMethod: Msg_AdjustPermission_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MsgServer).ExtendPermission(ctx, req.(*MsgExtendPermission))
+		return srv.(MsgServer).AdjustPermission(ctx, req.(*MsgAdjustPermission))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -522,8 +522,8 @@ var Msg_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Msg_CreateRootPermission_Handler,
 		},
 		{
-			MethodName: "ExtendPermission",
-			Handler:    _Msg_ExtendPermission_Handler,
+			MethodName: "AdjustPermission",
+			Handler:    _Msg_AdjustPermission_Handler,
 		},
 		{
 			MethodName: "RevokePermission",

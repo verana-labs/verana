@@ -24,6 +24,7 @@ require (
 	cosmossdk.io/x/evidence v0.1.1
 	cosmossdk.io/x/feegrant v0.1.1
 	cosmossdk.io/x/nft v0.1.0
+	cosmossdk.io/x/tx v0.14.0
 	cosmossdk.io/x/upgrade v0.2.0
 	github.com/bufbuild/buf v1.34.0
 	github.com/cometbft/cometbft v0.38.17
@@ -32,7 +33,6 @@ require (
 	github.com/cosmos/cosmos-sdk v0.53.4
 	github.com/cosmos/gogoproto v1.7.0
 	github.com/cosmos/ibc-go/modules/capability v1.0.1
-	github.com/cosmos/ibc-go/v10 v10.5.0
 	github.com/cosmos/ibc-go/v8 v8.7.0
 	github.com/golang/protobuf v1.5.4
 	github.com/google/uuid v1.6.0
@@ -69,7 +69,6 @@ require (
 	connectrpc.com/connect v1.16.2 // indirect
 	connectrpc.com/otelconnect v0.7.0 // indirect
 	cosmossdk.io/schema v1.1.0 // indirect
-	cosmossdk.io/x/tx v0.14.0 // indirect
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/4meepo/tagalign v1.4.2 // indirect
 	github.com/99designs/go-keychain v0.0.0-20191008050251-8e49817e8af4 // indirect
@@ -303,6 +302,7 @@ require (
 	github.com/oasisprotocol/curve25519-voi v0.0.0-20230904125328-1f23a7beb09a // indirect
 	github.com/oklog/run v1.1.0 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
+	github.com/onsi/ginkgo v1.16.5 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect

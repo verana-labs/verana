@@ -42,6 +42,18 @@ const tests: TestConfig[] = [
   { name: "CS: Create Credential Schema", script: "test:cs-create" },
   { name: "CS: Update Credential Schema", script: "test:cs-update" },
   { name: "CS: Archive Credential Schema", script: "test:cs-archive" },
+  // Permission (PERM) module: Grant + all 11 message types
+  { name: "DE: Grant PERM Operator Authorization", script: "test:de-grant-perm-auth" },
+  { name: "PERM: Create Root Permission", script: "test:perm-create-root" },
+  { name: "PERM: Create Permission (Self-Create)", script: "test:perm-create" },
+  { name: "PERM: Adjust Permission", script: "test:perm-adjust" },
+  { name: "PERM: Revoke Permission", script: "test:perm-revoke" },
+  { name: "PERM: Start Permission VP", script: "test:perm-start-vp" },
+  { name: "PERM: Set Permission VP To Validated", script: "test:perm-validate-vp" },
+  { name: "PERM: Renew + Cancel Permission VP", script: "test:perm-cancel-vp" },
+  { name: "PERM: Create/Update Permission Session", script: "test:perm-csps" },
+  { name: "PERM: Slash Permission Trust Deposit", script: "test:perm-slash" },
+  { name: "PERM: Repay Slashed Trust Deposit", script: "test:perm-repay" },
 ];
 
 /**

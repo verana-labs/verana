@@ -48,7 +48,7 @@ npm run build                               # Build the package (emits dist/)
 ### What Gets Generated
 
 The generator creates TypeScript files for:
-- **Verana modules**: `tr`, `cs`, `dd`, `perm`, `td` (Trust Registry, Credential Schema, DID Directory, Permission, Trust Deposit)
+- **Verana modules**: `tr`, `cs`, `dd`, `perm`, `td`, `de` (Trust Registry, Credential Schema, DID Directory, Permission, Trust Deposit, Delegation Engine)
 - **Cosmos SDK types**: Base types, queries, messages
 - **Google protobuf types**: Timestamps, durations, etc.
 
