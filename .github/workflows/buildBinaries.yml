@@ -133,7 +133,11 @@ jobs:
         working-directory: ts-proto
         continue-on-error: true        
         run: |
-          SANITIZED_TAG=$(echo "${{ github.ref_name }}" | sed 's/[^a-zA-Z0-9._-]/-/g')
+          SANITIZED_TAG=$(echo "${{ github.event.release.target_commitish }}" | sed 's/[^a-zA-Z0-9._-]/-/g')
+          if [ "${SANITIZED_TAG}" = "latest" ] || [ "${SANITIZED_TAG}" = "dev" ]; then
+            echo "Error: refusing to publish with reserved tag '${SANITIZED_TAG}'"
+            exit 1
+          fi
           npm publish --provenance --tag "${SANITIZED_TAG}"
 
       - name: Build binary for Linux AMD64
