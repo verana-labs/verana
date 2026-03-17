@@ -132,7 +132,9 @@ jobs:
         if: env.VERSION != 'dev' && github.event_name == 'release'
         working-directory: ts-proto
         continue-on-error: true        
-        run: npm publish --provenance --tag pr-${{ github.event.number }}
+        run: |
+          SANITIZED_TAG=$(echo "${{ github.ref_name }}" | sed 's/[^a-zA-Z0-9._-]/-/g')
+          npm publish --provenance --tag "${SANITIZED_TAG}"
 
       - name: Build binary for Linux AMD64
         run: |
