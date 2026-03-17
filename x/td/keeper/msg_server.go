@@ -3,6 +3,7 @@ package keeper
 import (
 	"context"
 	"fmt"
+	mathstd "math"
 	"strconv"
 
 	"cosmossdk.io/math"
@@ -87,6 +88,9 @@ func (ms msgServer) ReclaimTrustDepositYield(goCtx context.Context, msg *types.M
 	}
 
 	// [MOD-TD-MSG-2-3] Transfer yield from TrustDeposit account to authority account
+	if claimableYield > uint64(mathstd.MaxInt64) {
+		return nil, fmt.Errorf("claimable yield exceeds maximum coin amount: %d", claimableYield)
+	}
 	coins := sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, int64(claimableYield)))
 	if err := ms.Keeper.bankKeeper.SendCoinsFromModuleToAccount(
 		ctx,
@@ -108,7 +112,7 @@ func (ms msgServer) ReclaimTrustDepositYield(goCtx context.Context, msg *types.M
 	})
 
 	return &types.MsgReclaimTrustDepositYieldResponse{
-		ClaimedAmount: claimableYield, // Or rename to ClaimedYield
+		ClaimedAmount: claimableYield,
 	}, nil
 }
 
@@ -328,6 +332,9 @@ func (ms msgServer) RepaySlashedTrustDeposit(goCtx context.Context, msg *types.M
 	}
 
 	// [MOD-TD-MSG-6-2-1] amount MUST be exactly equal to td.slashed_deposit - td.repaid_deposit
+	if td.RepaidDeposit > td.SlashedDeposit {
+		return nil, fmt.Errorf("invalid trust deposit state: repaid_deposit (%d) exceeds slashed_deposit (%d)", td.RepaidDeposit, td.SlashedDeposit)
+	}
 	outstandingSlash := td.SlashedDeposit - td.RepaidDeposit
 	if msg.Amount != outstandingSlash {
 		return nil, fmt.Errorf("amount must exactly equal outstanding slashed amount: expected %d, got %d", outstandingSlash, msg.Amount)
@@ -361,6 +368,9 @@ func (ms msgServer) RepaySlashedTrustDeposit(goCtx context.Context, msg *types.M
 	}
 
 	// [MOD-TD-MSG-6-2-2] / [MOD-TD-MSG-6-3] Transfer amount from authority to TrustDeposit account
+	if msg.Amount > uint64(mathstd.MaxInt64) {
+		return nil, fmt.Errorf("repay amount exceeds maximum coin amount: %d", msg.Amount)
+	}
 	transferCoins := sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, int64(msg.Amount)))
 	if err := ms.Keeper.bankKeeper.SendCoinsFromAccountToModule(
 		ctx,

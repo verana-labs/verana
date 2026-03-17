@@ -10,6 +10,7 @@ import (
 )
 
 func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
+	legacy.RegisterAminoMsg(cdc, &MsgUpdateParams{}, "verana/x/td/MsgUpdateParams")
 	legacy.RegisterAminoMsg(cdc, &MsgReclaimTrustDepositYield{}, "/td/v1/reclaim-yield")
 	legacy.RegisterAminoMsg(cdc, &MsgReclaimTrustDeposit{}, "/td/v1/reclaim-deposit")
 	legacy.RegisterAminoMsg(cdc, &MsgSlashTrustDeposit{}, "/td/v1/slash-td")

@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"fmt"
+	"strconv"
 
 	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -73,6 +74,18 @@ func (k Keeper) executeBurnEcosystemSlashedTrustDeposit(ctx sdk.Context, account
 	if err := k.bankKeeper.BurnCoins(ctx, types.ModuleName, burnCoins); err != nil {
 		return fmt.Errorf("failed to burn coins from trust deposit module: %w", err)
 	}
+
+	// Emit event for observability
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeBurnEcosystemSlashedTrustDeposit,
+			sdk.NewAttribute(types.AttributeKeyAccount, account),
+			sdk.NewAttribute(types.AttributeKeyAmount, strconv.FormatUint(amount, 10)),
+			sdk.NewAttribute(types.AttributeKeyNewAmount, strconv.FormatUint(td.Amount, 10)),
+			sdk.NewAttribute(types.AttributeKeyNewShare, td.Share.String()),
+			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
+		),
+	)
 
 	return nil
 }

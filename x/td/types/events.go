@@ -6,7 +6,8 @@ const (
 	EventTypeReclaimTrustDepositYield = "reclaim_trust_deposit_yield"
 	EventTypeReclaimTrustDeposit      = "reclaim_trust_deposit"
 	EventTypeAdjustTrustDeposit       = "adjust_trust_deposit"
-	EventTypeYieldDistribution        = "yield_distribution"
+	EventTypeBurnEcosystemSlashedTrustDeposit = "burn_ecosystem_slashed_trust_deposit"
+	EventTypeYieldDistribution               = "yield_distribution"
 	EventTypeYieldTransfer            = "yield_transfer"
 )
 

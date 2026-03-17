@@ -32,6 +32,7 @@ import {
 import {
   MsgReclaimTrustDeposit,
   MsgReclaimTrustDepositYield,
+  MsgSlashTrustDeposit,
   MsgRepaySlashedTrustDeposit,
 } from "../codec/verana/td/v1/tx";
 import {
@@ -423,6 +424,21 @@ export const MsgRepaySlashedTrustDepositAminoConverter: AminoConverter = {
       authority: value.authority,
       operator: value.operator,
       amount: value.amount != null ? Number(value.amount) : 0,
+    }),
+};
+
+export const MsgSlashTrustDepositAminoConverter: AminoConverter = {
+  aminoType: '/verana.td.v1.MsgSlashTrustDeposit',
+  toAmino: ({ authority, account, amount }: MsgSlashTrustDeposit) => ({
+    authority,
+    account,
+    amount,
+  }),
+  fromAmino: (value: { authority: string; account: string; amount: string }) =>
+    MsgSlashTrustDeposit.fromPartial({
+      authority: value.authority,
+      account: value.account,
+      amount: value.amount,
     }),
 };
 

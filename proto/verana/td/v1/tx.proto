@@ -47,7 +47,7 @@ message MsgUpdateParamsResponse {}
 // MsgReclaimTrustDepositYield defines the request type
 // [MOD-TD-MSG-2] Reclaim Trust Deposit Yield
 message MsgReclaimTrustDepositYield {
-  option (cosmos.msg.v1.signer) = "authority";
+  option (cosmos.msg.v1.signer) = "operator";
   // authority is the group address that owns the trust deposit.
   string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   // operator is the account authorized by the authority to run this Msg.
@@ -93,7 +93,7 @@ message MsgSlashTrustDepositResponse {}
 // MsgRepaySlashedTrustDeposit defines the message for repaying a slashed trust deposit.
 // [MOD-TD-MSG-6] Any authorized operator CAN execute this on behalf of an authority.
 message MsgRepaySlashedTrustDeposit {
-  option (cosmos.msg.v1.signer) = "authority";
+  option (cosmos.msg.v1.signer) = "operator";
 
   // authority is the group address that owns the slashed trust deposit.
   string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
