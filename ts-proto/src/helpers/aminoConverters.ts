@@ -32,6 +32,7 @@ import {
 import {
   MsgReclaimTrustDeposit,
   MsgReclaimTrustDepositYield,
+  MsgRepaySlashedTrustDeposit,
 } from "../codec/verana/td/v1/tx";
 import {
   MsgCreateRootPermission,
@@ -399,12 +400,29 @@ export const MsgReclaimTrustDepositAminoConverter: AminoConverter = {
 
 export const MsgReclaimTrustDepositYieldAminoConverter: AminoConverter = {
   aminoType: '/verana.td.v1.MsgReclaimTrustDepositYield',
-  toAmino: ({ creator }: MsgReclaimTrustDepositYield) => ({
-    creator,
+  toAmino: ({ authority, operator }: MsgReclaimTrustDepositYield) => ({
+    authority,
+    operator,
   }),
-  fromAmino: (value: { creator: string }) =>
+  fromAmino: (value: { authority: string; operator: string }) =>
     MsgReclaimTrustDepositYield.fromPartial({
-      creator: value.creator,
+      authority: value.authority,
+      operator: value.operator,
+    }),
+};
+
+export const MsgRepaySlashedTrustDepositAminoConverter: AminoConverter = {
+  aminoType: '/verana.td.v1.MsgRepaySlashedTrustDeposit',
+  toAmino: ({ authority, operator, amount }: MsgRepaySlashedTrustDeposit) => ({
+    authority,
+    operator,
+    amount: amount != null ? amount.toString() : undefined,
+  }),
+  fromAmino: (value: { authority: string; operator: string; amount: number | string }) =>
+    MsgRepaySlashedTrustDeposit.fromPartial({
+      authority: value.authority,
+      operator: value.operator,
+      amount: value.amount != null ? Number(value.amount) : 0,
     }),
 };
 

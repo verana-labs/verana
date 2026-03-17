@@ -67,3 +67,39 @@ func TrustdepositKeeper(t testing.TB) (keeper.Keeper, sdk.Context) {
 
 	return k, ctx
 }
+
+// TrustdepositKeeperWithDelegation creates a keeper with a MockDelegationKeeper for AUTHZ testing.
+// The returned MockDelegationKeeper can be configured to return errors via ErrToReturn.
+func TrustdepositKeeperWithDelegation(t testing.TB) (keeper.Keeper, sdk.Context, *MockDelegationKeeper) {
+	storeKey := storetypes.NewKVStoreKey(types.StoreKey)
+
+	db := dbm.NewMemDB()
+	stateStore := store.NewCommitMultiStore(db, log.NewNopLogger(), metrics.NewNoOpMetrics())
+	stateStore.MountStoreWithDB(storeKey, storetypes.StoreTypeIAVL, db)
+	require.NoError(t, stateStore.LoadLatestVersion())
+
+	registry := codectypes.NewInterfaceRegistry()
+	cdc := codec.NewProtoCodec(registry)
+	authority := authtypes.NewModuleAddress(govtypes.ModuleName)
+	bankKeeper := NewMockBankKeeper()
+	mintKeeper := NewMockMintKeeper()
+	delegationKeeper := &MockDelegationKeeper{}
+
+	k := keeper.NewKeeper(
+		cdc,
+		runtime.NewKVStoreService(storeKey),
+		log.NewNopLogger(),
+		authority.String(),
+		bankKeeper,
+		mintKeeper,
+		delegationKeeper,
+	)
+
+	ctx := sdk.NewContext(stateStore, cmtproto.Header{}, false, log.NewNopLogger())
+
+	if err := k.SetParams(ctx, types.DefaultParams()); err != nil {
+		panic(err)
+	}
+
+	return k, ctx, delegationKeeper
+}
