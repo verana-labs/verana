@@ -52,14 +52,14 @@ func (msg *MsgSlashTrustDeposit) ValidateBasic() error {
 }
 
 func (msg *MsgRepaySlashedTrustDeposit) ValidateBasic() error {
-	_, err := sdk.AccAddressFromBech32(msg.Creator)
+	_, err := sdk.AccAddressFromBech32(msg.Authority)
 	if err != nil {
-		return errorsmod.Wrapf(sdkerrors.ErrInvalidAddress, "invalid creator address (%s)", err)
+		return errorsmod.Wrapf(sdkerrors.ErrInvalidAddress, "invalid authority address (%s)", err)
 	}
 
-	_, err = sdk.AccAddressFromBech32(msg.Account)
+	_, err = sdk.AccAddressFromBech32(msg.Operator)
 	if err != nil {
-		return errorsmod.Wrapf(sdkerrors.ErrInvalidAddress, "invalid account address (%s)", err)
+		return errorsmod.Wrapf(sdkerrors.ErrInvalidAddress, "invalid operator address (%s)", err)
 	}
 
 	if msg.Amount == 0 {

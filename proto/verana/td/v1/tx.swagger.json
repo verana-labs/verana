@@ -100,6 +100,7 @@
         "parameters": [
           {
             "name": "body",
+            "description": "MsgRepaySlashedTrustDeposit defines the message for repaying a slashed trust deposit.\n[MOD-TD-MSG-6] Any authorized operator CAN execute this on behalf of an authority.",
             "in": "body",
             "required": true,
             "schema": {
@@ -264,17 +265,21 @@
     "verana.td.v1.MsgRepaySlashedTrustDeposit": {
       "type": "object",
       "properties": {
-        "creator": {
-          "type": "string"
+        "authority": {
+          "type": "string",
+          "description": "authority is the group address that owns the slashed trust deposit."
         },
-        "account": {
-          "type": "string"
+        "operator": {
+          "type": "string",
+          "description": "operator is the account authorized by the authority to run this Msg."
         },
         "amount": {
           "type": "string",
-          "format": "uint64"
+          "format": "uint64",
+          "description": "amount is the repayment amount (must equal outstanding slashed amount)."
         }
-      }
+      },
+      "description": "MsgRepaySlashedTrustDeposit defines the message for repaying a slashed trust deposit.\n[MOD-TD-MSG-6] Any authorized operator CAN execute this on behalf of an authority."
     },
     "verana.td.v1.MsgRepaySlashedTrustDepositResponse": {
       "type": "object"

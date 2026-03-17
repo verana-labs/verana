@@ -306,34 +306,37 @@ func (ms msgServer) SlashTrustDeposit(goCtx context.Context, msg *types.MsgSlash
 
 func (ms msgServer) RepaySlashedTrustDeposit(goCtx context.Context, msg *types.MsgRepaySlashedTrustDeposit) (*types.MsgRepaySlashedTrustDepositResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
+	account := msg.Authority
 
-	// Load TrustDeposit entry (must exist)
-	td, err := ms.Keeper.TrustDeposit.Get(ctx, msg.Account)
-	if err != nil {
-		return nil, fmt.Errorf("trust deposit entry not found for account %s: %w", msg.Account, err)
+	// [MOD-TD-MSG-6-2-1] [AUTHZ-CHECK] Verify operator authorization
+	if ms.Keeper.delegationKeeper != nil {
+		if err := ms.Keeper.delegationKeeper.CheckOperatorAuthorization(
+			ctx,
+			msg.Authority,
+			msg.Operator,
+			"/verana.td.v1.MsgRepaySlashedTrustDeposit",
+			ctx.BlockTime(),
+		); err != nil {
+			return nil, fmt.Errorf("authorization check failed: %w", err)
+		}
 	}
 
-	// Check that amount exactly equals slashed_deposit - repaid_deposit
+	// [MOD-TD-MSG-6-2-1] Load TrustDeposit entry for authority (must exist)
+	td, err := ms.Keeper.TrustDeposit.Get(ctx, account)
+	if err != nil {
+		return nil, fmt.Errorf("trust deposit entry not found for account %s: %w", account, err)
+	}
+
+	// [MOD-TD-MSG-6-2-1] amount MUST be exactly equal to td.slashed_deposit - td.repaid_deposit
 	outstandingSlash := td.SlashedDeposit - td.RepaidDeposit
 	if msg.Amount != outstandingSlash {
 		return nil, fmt.Errorf("amount must exactly equal outstanding slashed amount: expected %d, got %d", outstandingSlash, msg.Amount)
 	}
 
-	// [MOD-TD-MSG-6-2-2] Fee checks validation
-	creatorAddr, err := sdk.AccAddressFromBech32(msg.Creator)
+	// Validate authority address for bank transfer
+	authorityAddr, err := sdk.AccAddressFromBech32(account)
 	if err != nil {
-		return nil, fmt.Errorf("invalid creator address: %w", err)
-	}
-
-	// Transfer amount from creator to trust deposit module
-	transferCoins := sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, int64(msg.Amount)))
-	if err := ms.Keeper.bankKeeper.SendCoinsFromAccountToModule(
-		ctx,
-		creatorAddr,
-		types.ModuleName,
-		transferCoins,
-	); err != nil {
-		return nil, fmt.Errorf("failed to transfer tokens: %w", err)
+		return nil, fmt.Errorf("invalid authority address: %w", err)
 	}
 
 	// [MOD-TD-MSG-6-3] Execution
@@ -343,27 +346,37 @@ func (ms msgServer) RepaySlashedTrustDeposit(goCtx context.Context, msg *types.M
 	// Update trust deposit fields
 	td.Amount += msg.Amount
 
-	// Calculate share increase using decimal math
+	// td.share = td.share + amount / GlobalVariables.trust_deposit_share_value
 	shareIncrease := ms.Keeper.AmountToShare(msg.Amount, params.TrustDepositShareValue)
-	td.Share = td.Share.Add(shareIncrease) // Use Add method
+	td.Share = td.Share.Add(shareIncrease)
 
-	// Update repayment tracking
+	// td.repaid_deposit = td.repaid_deposit + amount
 	td.RepaidDeposit += msg.Amount
+	// td.last_repaid = now
 	td.LastRepaid = &now
-	td.LastRepaidBy = msg.Creator
 
-	// Save updated trust deposit
-	if err := ms.Keeper.TrustDeposit.Set(ctx, msg.Account, td); err != nil {
+	// Save updated trust deposit BEFORE bank transfer to ensure atomicity
+	if err := ms.Keeper.TrustDeposit.Set(ctx, account, td); err != nil {
 		return nil, fmt.Errorf("failed to update trust deposit: %w", err)
+	}
+
+	// [MOD-TD-MSG-6-2-2] / [MOD-TD-MSG-6-3] Transfer amount from authority to TrustDeposit account
+	transferCoins := sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, int64(msg.Amount)))
+	if err := ms.Keeper.bankKeeper.SendCoinsFromAccountToModule(
+		ctx,
+		authorityAddr,
+		types.ModuleName,
+		transferCoins,
+	); err != nil {
+		return nil, fmt.Errorf("failed to transfer tokens: %w", err)
 	}
 
 	// Emit event
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeRepaySlashedTrustDeposit,
-			sdk.NewAttribute(types.AttributeKeyAccount, msg.Account),
+			sdk.NewAttribute(types.AttributeKeyAccount, account),
 			sdk.NewAttribute(types.AttributeKeyAmount, strconv.FormatUint(msg.Amount, 10)),
-			sdk.NewAttribute(types.AttributeKeyRepaidBy, msg.Creator),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
 		),
 	})
