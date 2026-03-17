@@ -44,7 +44,8 @@ func TestMsgReclaimTrustDepositYield(t *testing.T) {
 		{
 			name: "Trust deposit not found",
 			msg: &types.MsgReclaimTrustDepositYield{
-				Creator: testAccString,
+				Authority: testAccString,
+				Operator:  testAccString,
 			},
 			expErr:    true,
 			expErrMsg: "trust deposit not found",
@@ -74,7 +75,8 @@ func TestMsgReclaimTrustDepositYield(t *testing.T) {
 				require.NoError(t, err)
 			},
 			msg: &types.MsgReclaimTrustDepositYield{
-				Creator: testAccString,
+				Authority: testAccString,
+				Operator:  testAccString,
 			},
 			expErr:    true,
 			expErrMsg: "no claimable yield",
@@ -104,7 +106,8 @@ func TestMsgReclaimTrustDepositYield(t *testing.T) {
 				require.NoError(t, err)
 			},
 			msg: &types.MsgReclaimTrustDepositYield{
-				Creator: testAccString,
+				Authority: testAccString,
+				Operator:  testAccString,
 			},
 			expErr: false,
 			check: func(resp *types.MsgReclaimTrustDepositYieldResponse) {

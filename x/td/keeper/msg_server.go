@@ -24,7 +24,20 @@ var _ types.MsgServer = msgServer{}
 
 func (ms msgServer) ReclaimTrustDepositYield(goCtx context.Context, msg *types.MsgReclaimTrustDepositYield) (*types.MsgReclaimTrustDepositYieldResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	account := msg.Creator
+	account := msg.Authority
+
+	// [MOD-TD-MSG-2-2] [AUTHZ-CHECK] Verify operator authorization
+	if ms.Keeper.delegationKeeper != nil {
+		if err := ms.Keeper.delegationKeeper.CheckOperatorAuthorization(
+			ctx,
+			msg.Authority,
+			msg.Operator,
+			"/verana.td.v1.MsgReclaimTrustDepositYield",
+			ctx.BlockTime(),
+		); err != nil {
+			return nil, fmt.Errorf("authorization check failed: %w", err)
+		}
+	}
 
 	// [MOD-TD-MSG-2-2-1] Load TrustDeposit entry
 	td, err := ms.Keeper.TrustDeposit.Get(ctx, account)
@@ -42,21 +55,38 @@ func (ms msgServer) ReclaimTrustDepositYield(goCtx context.Context, msg *types.M
 
 	// [MOD-TD-MSG-2-2-1] Calculate claimable yield
 	// claimable_yield = td.share * GlobalVariables.trust_deposit_share_value - td.deposit
-	depositValue := ms.Keeper.ShareToAmount(td.Share, params.TrustDepositShareValue)
-	if depositValue <= td.Amount { // td.Amount maps to spec's td.deposit
-		return nil, fmt.Errorf("no claimable yield available") // Updated error message
+	// Use decimal math to avoid uint64 overflow on large share * shareValue products
+	depositValueDec := td.Share.Mul(params.TrustDepositShareValue)
+	depositAmountDec := math.LegacyNewDecFromInt(math.NewIntFromUint64(td.Amount))
+	claimableYieldDec := depositValueDec.Sub(depositAmountDec)
+
+	if !claimableYieldDec.IsPositive() {
+		return nil, fmt.Errorf("no claimable yield available")
 	}
 
-	claimableYield := depositValue - td.Amount
+	claimableYield := claimableYieldDec.TruncateInt().Uint64()
+	if claimableYield == 0 {
+		return nil, fmt.Errorf("no claimable yield available")
+	}
 
 	// [MOD-TD-MSG-2-3] Calculate shares to reduce
 	// td.share = td.share - claimable_yield / GlobalVariables.trust_deposit_share_value
 	sharesToReduce := ms.Keeper.AmountToShare(claimableYield, params.TrustDepositShareValue)
-	td.Share = td.Share.Sub(sharesToReduce) // Use Sub method
+	td.Share = td.Share.Sub(sharesToReduce)
 
-	addr, _ := sdk.AccAddressFromBech32(account)
+	// Validate authority address
+	addr, err := sdk.AccAddressFromBech32(account)
+	if err != nil {
+		return nil, fmt.Errorf("invalid authority address: %w", err)
+	}
 
-	// [MOD-TD-MSG-2-3] Transfer yield from TrustDeposit account to account
+	// Save updated trust deposit BEFORE bank transfer to ensure atomicity —
+	// if Set fails, no coins have been transferred yet.
+	if err := ms.Keeper.TrustDeposit.Set(ctx, account, td); err != nil {
+		return nil, fmt.Errorf("failed to update trust deposit: %w", err)
+	}
+
+	// [MOD-TD-MSG-2-3] Transfer yield from TrustDeposit account to authority account
 	coins := sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, int64(claimableYield)))
 	if err := ms.Keeper.bankKeeper.SendCoinsFromModuleToAccount(
 		ctx,
@@ -65,11 +95,6 @@ func (ms msgServer) ReclaimTrustDepositYield(goCtx context.Context, msg *types.M
 		coins,
 	); err != nil {
 		return nil, fmt.Errorf("failed to transfer yield: %w", err)
-	}
-
-	// Save updated trust deposit
-	if err := ms.Keeper.TrustDeposit.Set(ctx, account, td); err != nil {
-		return nil, fmt.Errorf("failed to update trust deposit: %w", err)
 	}
 
 	ctx.EventManager().EmitEvents(sdk.Events{
@@ -148,9 +173,19 @@ func (ms msgServer) ReclaimTrustDeposit(goCtx context.Context, msg *types.MsgRec
 	// Update trust deposit
 	td.Claimable -= msg.Claimed
 	td.Amount -= msg.Claimed
-	td.Share = td.Share.Sub(shareReduction) // Use Sub method
+	td.Share = td.Share.Sub(shareReduction)
 
-	addr, _ := sdk.AccAddressFromBech32(msg.Creator)
+	addr, err := sdk.AccAddressFromBech32(msg.Creator)
+	if err != nil {
+		return nil, fmt.Errorf("invalid creator address: %w", err)
+	}
+
+	// Save updated trust deposit BEFORE bank operations to ensure atomicity —
+	// if Set fails, no coins have been transferred or burned yet.
+	if err := ms.Keeper.TrustDeposit.Set(ctx, account, td); err != nil {
+		return nil, fmt.Errorf("failed to update trust deposit: %w", err)
+	}
+
 	// Transfer claimable amount minus burn to the account
 	if toTransfer > 0 {
 		transferCoins := sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, int64(toTransfer)))
@@ -174,11 +209,6 @@ func (ms msgServer) ReclaimTrustDeposit(goCtx context.Context, msg *types.MsgRec
 		); err != nil {
 			return nil, fmt.Errorf("failed to burn coins: %w", err)
 		}
-	}
-
-	// Save updated trust deposit
-	if err := ms.Keeper.TrustDeposit.Set(ctx, account, td); err != nil {
-		return nil, fmt.Errorf("failed to update trust deposit: %w", err)
 	}
 
 	ctx.EventManager().EmitEvents(sdk.Events{

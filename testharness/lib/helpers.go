@@ -513,7 +513,8 @@ func ReclaimTrustDepositYieldWithResponse(client cosmosclient.Client, ctx contex
 	}
 
 	msg := tdtypes.MsgReclaimTrustDepositYield{
-		Creator: creatorAddr,
+		Authority: creatorAddr,
+		Operator:  creatorAddr,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, creator, &msg)

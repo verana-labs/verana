@@ -53,9 +53,12 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 				},
 				{
 					RpcMethod: "ReclaimTrustDepositYield",
-					Use:       "reclaim-yield",
+					Use:       "reclaim-yield [operator]",
 					Short:     "Reclaim earned interest from trust deposits",
 					Long:      "Reclaim any available interest earned from trust deposits. The interest is calculated based on share value and current deposit amount.",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
+						{ProtoField: "operator"},
+					},
 				},
 				{
 					RpcMethod: "ReclaimTrustDeposit",

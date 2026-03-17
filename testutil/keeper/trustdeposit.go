@@ -55,6 +55,7 @@ func TrustdepositKeeper(t testing.TB) (keeper.Keeper, sdk.Context) {
 		authority.String(),
 		bankKeeper,
 		mintKeeper,
+		nil, // delegationKeeper - nil for tests
 	)
 
 	ctx := sdk.NewContext(stateStore, cmtproto.Header{}, false, log.NewNopLogger())

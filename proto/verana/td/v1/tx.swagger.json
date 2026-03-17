@@ -240,11 +240,16 @@
     "verana.td.v1.MsgReclaimTrustDepositYield": {
       "type": "object",
       "properties": {
-        "creator": {
-          "type": "string"
+        "authority": {
+          "type": "string",
+          "description": "authority is the group address that owns the trust deposit."
+        },
+        "operator": {
+          "type": "string",
+          "description": "operator is the account authorized by the authority to run this Msg."
         }
       },
-      "title": "MsgReclaimTrustDepositYield defines the request type"
+      "title": "MsgReclaimTrustDepositYield defines the request type\n[MOD-TD-MSG-2] Reclaim Trust Deposit Yield"
     },
     "verana.td.v1.MsgReclaimTrustDepositYieldResponse": {
       "type": "object",

@@ -30,9 +30,15 @@ export interface MsgUpdateParams {
 export interface MsgUpdateParamsResponse {
 }
 
-/** MsgReclaimTrustDepositYield defines the request type */
+/**
+ * MsgReclaimTrustDepositYield defines the request type
+ * [MOD-TD-MSG-2] Reclaim Trust Deposit Yield
+ */
 export interface MsgReclaimTrustDepositYield {
-  creator: string;
+  /** authority is the group address that owns the trust deposit. */
+  authority: string;
+  /** operator is the account authorized by the authority to run this Msg. */
+  operator: string;
 }
 
 /** MsgReclaimTrustDepositYieldResponse defines the response type */
@@ -199,13 +205,16 @@ export const MsgUpdateParamsResponse = {
 };
 
 function createBaseMsgReclaimTrustDepositYield(): MsgReclaimTrustDepositYield {
-  return { creator: "" };
+  return { authority: "", operator: "" };
 }
 
 export const MsgReclaimTrustDepositYield = {
   encode(message: MsgReclaimTrustDepositYield, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.creator !== "") {
-      writer.uint32(10).string(message.creator);
+    if (message.authority !== "") {
+      writer.uint32(10).string(message.authority);
+    }
+    if (message.operator !== "") {
+      writer.uint32(18).string(message.operator);
     }
     return writer;
   },
@@ -222,7 +231,14 @@ export const MsgReclaimTrustDepositYield = {
             break;
           }
 
-          message.creator = reader.string();
+          message.authority = reader.string();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.operator = reader.string();
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -234,13 +250,19 @@ export const MsgReclaimTrustDepositYield = {
   },
 
   fromJSON(object: any): MsgReclaimTrustDepositYield {
-    return { creator: isSet(object.creator) ? globalThis.String(object.creator) : "" };
+    return {
+      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
+    };
   },
 
   toJSON(message: MsgReclaimTrustDepositYield): unknown {
     const obj: any = {};
-    if (message.creator !== "") {
-      obj.creator = message.creator;
+    if (message.authority !== "") {
+      obj.authority = message.authority;
+    }
+    if (message.operator !== "") {
+      obj.operator = message.operator;
     }
     return obj;
   },
@@ -250,7 +272,8 @@ export const MsgReclaimTrustDepositYield = {
   },
   fromPartial<I extends Exact<DeepPartial<MsgReclaimTrustDepositYield>, I>>(object: I): MsgReclaimTrustDepositYield {
     const message = createBaseMsgReclaimTrustDepositYield();
-    message.creator = object.creator ?? "";
+    message.authority = object.authority ?? "";
+    message.operator = object.operator ?? "";
     return message;
   },
 };

@@ -23,12 +23,12 @@ import (
 // - error: If the operation fails
 func (k Keeper) AdjustTrustDeposit(ctx sdk.Context, account string, augend int64) error {
 	// Basic validation
+	if account == "" {
+		return fmt.Errorf("account cannot be empty")
+	}
 	senderAcc, err := sdk.AccAddressFromBech32(account)
 	if err != nil {
 		return fmt.Errorf("invalid account address: %w", err)
-	}
-	if account == "" {
-		return fmt.Errorf("account cannot be empty")
 	}
 	if augend == 0 {
 		return fmt.Errorf("augend must be non-zero")
