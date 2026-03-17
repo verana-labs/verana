@@ -271,23 +271,23 @@ func (ms msgServer) SlashTrustDeposit(goCtx context.Context, msg *types.MsgSlash
 	// Calculate share reduction
 	shareReduction := math.LegacyNewDecFromInt(msg.Amount).Quo(shareValue)
 
-	// Update TrustDeposit entry
+	// [MOD-TD-MSG-5-3] Update TrustDeposit entry
 	td.Amount = td.Amount - msg.Amount.Uint64()
-	td.Share = td.Share.Sub(shareReduction) // Use Sub method
+	td.Share = td.Share.Sub(shareReduction)
 	td.SlashedDeposit = td.SlashedDeposit + msg.Amount.Uint64()
 	td.LastSlashed = &now
-	td.LastRepaidBy = ""
 	td.SlashCount++
 
-	// Burn the slashed amount
+	// Save the updated TrustDeposit entry BEFORE burning coins to ensure atomicity —
+	// if Set fails, no coins have been burned yet.
+	if err := ms.Keeper.TrustDeposit.Set(ctx, msg.Account, td); err != nil {
+		return nil, fmt.Errorf("failed to save trust deposit: %w", err)
+	}
+
+	// Burn the slashed amount from TrustDeposit account
 	burnCoins := sdk.NewCoins(sdk.NewCoin(types.BondDenom, msg.Amount))
 	if err := ms.Keeper.bankKeeper.BurnCoins(ctx, types.ModuleName, burnCoins); err != nil {
 		return nil, fmt.Errorf("failed to burn coins: %w", err)
-	}
-
-	// Save the updated TrustDeposit entry
-	if err := ms.Keeper.TrustDeposit.Set(ctx, msg.Account, td); err != nil {
-		return nil, fmt.Errorf("failed to save trust deposit: %w", err)
 	}
 
 	// Emit event
