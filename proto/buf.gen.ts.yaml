@@ -10,7 +10,7 @@ plugins:
   - plugin: buf.build/community/stephenh-ts-proto:v1.181.2
     out: ../ts-proto/src/codec
     opt:
-      - ts_proto_opt=esModuleInterop=true
-      - ts_proto_opt=forceLong=long
-      - ts_proto_opt=useOptionals=messages
-      - ts_proto_opt=snakeToCamel=true
+      - esModuleInterop=true
+      - forceLong=long
+      - useOptionals=messages
+      - snakeToCamel=true

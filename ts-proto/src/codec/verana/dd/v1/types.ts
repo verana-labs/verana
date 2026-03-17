@@ -5,9 +5,9 @@
 // source: verana/dd/v1/types.proto
 
 /* eslint-disable */
-import * as _m0 from "protobufjs/minimal";
+import Long from "long";
+import _m0 from "protobufjs/minimal";
 import { Timestamp } from "../../../google/protobuf/timestamp";
-import Long = require("long");
 
 export const protobufPackage = "verana.dd.v1";
 
@@ -15,14 +15,14 @@ export const protobufPackage = "verana.dd.v1";
 export interface DIDDirectory {
   did: string;
   controller: string;
-  created: Date | undefined;
-  modified: Date | undefined;
-  exp: Date | undefined;
-  deposit: number;
+  created?: Date | undefined;
+  modified?: Date | undefined;
+  exp?: Date | undefined;
+  deposit: Long;
 }
 
 function createBaseDIDDirectory(): DIDDirectory {
-  return { did: "", controller: "", created: undefined, modified: undefined, exp: undefined, deposit: 0 };
+  return { did: "", controller: "", created: undefined, modified: undefined, exp: undefined, deposit: Long.ZERO };
 }
 
 export const DIDDirectory = {
@@ -42,7 +42,7 @@ export const DIDDirectory = {
     if (message.exp !== undefined) {
       Timestamp.encode(toTimestamp(message.exp), writer.uint32(42).fork()).ldelim();
     }
-    if (message.deposit !== 0) {
+    if (!message.deposit.equals(Long.ZERO)) {
       writer.uint32(48).int64(message.deposit);
     }
     return writer;
@@ -95,7 +95,7 @@ export const DIDDirectory = {
             break;
           }
 
-          message.deposit = longToNumber(reader.int64() as Long);
+          message.deposit = reader.int64() as Long;
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -113,7 +113,7 @@ export const DIDDirectory = {
       created: isSet(object.created) ? fromJsonTimestamp(object.created) : undefined,
       modified: isSet(object.modified) ? fromJsonTimestamp(object.modified) : undefined,
       exp: isSet(object.exp) ? fromJsonTimestamp(object.exp) : undefined,
-      deposit: isSet(object.deposit) ? globalThis.Number(object.deposit) : 0,
+      deposit: isSet(object.deposit) ? Long.fromValue(object.deposit) : Long.ZERO,
     };
   },
 
@@ -134,8 +134,8 @@ export const DIDDirectory = {
     if (message.exp !== undefined) {
       obj.exp = message.exp.toISOString();
     }
-    if (message.deposit !== 0) {
-      obj.deposit = Math.round(message.deposit);
+    if (!message.deposit.equals(Long.ZERO)) {
+      obj.deposit = (message.deposit || Long.ZERO).toString();
     }
     return obj;
   },
@@ -150,7 +150,9 @@ export const DIDDirectory = {
     message.created = object.created ?? undefined;
     message.modified = object.modified ?? undefined;
     message.exp = object.exp ?? undefined;
-    message.deposit = object.deposit ?? 0;
+    message.deposit = (object.deposit !== undefined && object.deposit !== null)
+      ? Long.fromValue(object.deposit)
+      : Long.ZERO;
     return message;
   },
 };
@@ -158,7 +160,7 @@ export const DIDDirectory = {
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 
 export type DeepPartial<T> = T extends Builtin ? T
-  : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>>
+  : T extends Long ? string | number | Long : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>>
   : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
   : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
@@ -168,13 +170,13 @@ export type Exact<P, I extends P> = P extends Builtin ? P
   : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
 
 function toTimestamp(date: Date): Timestamp {
-  const seconds = Math.trunc(date.getTime() / 1_000);
+  const seconds = numberToLong(Math.trunc(date.getTime() / 1_000));
   const nanos = (date.getTime() % 1_000) * 1_000_000;
   return { seconds, nanos };
 }
 
 function fromTimestamp(t: Timestamp): Date {
-  let millis = (t.seconds || 0) * 1_000;
+  let millis = (t.seconds.toNumber() || 0) * 1_000;
   millis += (t.nanos || 0) / 1_000_000;
   return new globalThis.Date(millis);
 }
@@ -189,14 +191,8 @@ function fromJsonTimestamp(o: any): Date {
   }
 }
 
-function longToNumber(long: Long): number {
-  if (long.gt(globalThis.Number.MAX_SAFE_INTEGER)) {
-    throw new globalThis.Error("Value is larger than Number.MAX_SAFE_INTEGER");
-  }
-  if (long.lt(globalThis.Number.MIN_SAFE_INTEGER)) {
-    throw new globalThis.Error("Value is smaller than Number.MIN_SAFE_INTEGER");
-  }
-  return long.toNumber();
+function numberToLong(number: number) {
+  return Long.fromNumber(number);
 }
 
 if (_m0.util.Long !== Long) {

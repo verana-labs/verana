@@ -5,27 +5,27 @@
 // source: verana/dd/v1/params.proto
 
 /* eslint-disable */
-import * as _m0 from "protobufjs/minimal";
-import Long = require("long");
+import Long from "long";
+import _m0 from "protobufjs/minimal";
 
 export const protobufPackage = "verana.dd.v1";
 
 /** Params defines the parameters for the module. */
 export interface Params {
-  didDirectoryTrustDeposit: number;
-  didDirectoryGracePeriod: number;
+  didDirectoryTrustDeposit: Long;
+  didDirectoryGracePeriod: Long;
 }
 
 function createBaseParams(): Params {
-  return { didDirectoryTrustDeposit: 0, didDirectoryGracePeriod: 0 };
+  return { didDirectoryTrustDeposit: Long.UZERO, didDirectoryGracePeriod: Long.UZERO };
 }
 
 export const Params = {
   encode(message: Params, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.didDirectoryTrustDeposit !== 0) {
+    if (!message.didDirectoryTrustDeposit.equals(Long.UZERO)) {
       writer.uint32(8).uint64(message.didDirectoryTrustDeposit);
     }
-    if (message.didDirectoryGracePeriod !== 0) {
+    if (!message.didDirectoryGracePeriod.equals(Long.UZERO)) {
       writer.uint32(16).uint64(message.didDirectoryGracePeriod);
     }
     return writer;
@@ -43,14 +43,14 @@ export const Params = {
             break;
           }
 
-          message.didDirectoryTrustDeposit = longToNumber(reader.uint64() as Long);
+          message.didDirectoryTrustDeposit = reader.uint64() as Long;
           continue;
         case 2:
           if (tag !== 16) {
             break;
           }
 
-          message.didDirectoryGracePeriod = longToNumber(reader.uint64() as Long);
+          message.didDirectoryGracePeriod = reader.uint64() as Long;
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -64,21 +64,21 @@ export const Params = {
   fromJSON(object: any): Params {
     return {
       didDirectoryTrustDeposit: isSet(object.didDirectoryTrustDeposit)
-        ? globalThis.Number(object.didDirectoryTrustDeposit)
-        : 0,
+        ? Long.fromValue(object.didDirectoryTrustDeposit)
+        : Long.UZERO,
       didDirectoryGracePeriod: isSet(object.didDirectoryGracePeriod)
-        ? globalThis.Number(object.didDirectoryGracePeriod)
-        : 0,
+        ? Long.fromValue(object.didDirectoryGracePeriod)
+        : Long.UZERO,
     };
   },
 
   toJSON(message: Params): unknown {
     const obj: any = {};
-    if (message.didDirectoryTrustDeposit !== 0) {
-      obj.didDirectoryTrustDeposit = Math.round(message.didDirectoryTrustDeposit);
+    if (!message.didDirectoryTrustDeposit.equals(Long.UZERO)) {
+      obj.didDirectoryTrustDeposit = (message.didDirectoryTrustDeposit || Long.UZERO).toString();
     }
-    if (message.didDirectoryGracePeriod !== 0) {
-      obj.didDirectoryGracePeriod = Math.round(message.didDirectoryGracePeriod);
+    if (!message.didDirectoryGracePeriod.equals(Long.UZERO)) {
+      obj.didDirectoryGracePeriod = (message.didDirectoryGracePeriod || Long.UZERO).toString();
     }
     return obj;
   },
@@ -88,8 +88,14 @@ export const Params = {
   },
   fromPartial<I extends Exact<DeepPartial<Params>, I>>(object: I): Params {
     const message = createBaseParams();
-    message.didDirectoryTrustDeposit = object.didDirectoryTrustDeposit ?? 0;
-    message.didDirectoryGracePeriod = object.didDirectoryGracePeriod ?? 0;
+    message.didDirectoryTrustDeposit =
+      (object.didDirectoryTrustDeposit !== undefined && object.didDirectoryTrustDeposit !== null)
+        ? Long.fromValue(object.didDirectoryTrustDeposit)
+        : Long.UZERO;
+    message.didDirectoryGracePeriod =
+      (object.didDirectoryGracePeriod !== undefined && object.didDirectoryGracePeriod !== null)
+        ? Long.fromValue(object.didDirectoryGracePeriod)
+        : Long.UZERO;
     return message;
   },
 };
@@ -97,7 +103,7 @@ export const Params = {
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 
 export type DeepPartial<T> = T extends Builtin ? T
-  : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>>
+  : T extends Long ? string | number | Long : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>>
   : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
   : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
@@ -105,16 +111,6 @@ export type DeepPartial<T> = T extends Builtin ? T
 type KeysOfUnion<T> = T extends T ? keyof T : never;
 export type Exact<P, I extends P> = P extends Builtin ? P
   : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
-
-function longToNumber(long: Long): number {
-  if (long.gt(globalThis.Number.MAX_SAFE_INTEGER)) {
-    throw new globalThis.Error("Value is larger than Number.MAX_SAFE_INTEGER");
-  }
-  if (long.lt(globalThis.Number.MIN_SAFE_INTEGER)) {
-    throw new globalThis.Error("Value is smaller than Number.MIN_SAFE_INTEGER");
-  }
-  return long.toNumber();
-}
 
 if (_m0.util.Long !== Long) {
   _m0.util.Long = Long as any;

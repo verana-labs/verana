@@ -108,6 +108,11 @@ jobs:
           cd "$GITHUB_WORKSPACE/proto"
           buf generate --template buf.gen.ts.yaml
           cd "$GITHUB_WORKSPACE/ts-proto"
+          PKG_SOURCE_VERSION=$(node -p "require('./package.json').version")
+          echo "Checked-in ts-proto package version: ${PKG_SOURCE_VERSION}"
+          if [ "${GITHUB_EVENT_NAME}" = "release" ] && [ "${PKG_SOURCE_VERSION}" != "${NPM_VERSION}" ]; then
+            echo "::warning:: ts-proto/package.json version (${PKG_SOURCE_VERSION}) differs from release tag version (${NPM_VERSION}). The release workflow will override it before packing."
+          fi
           if [ -f package-lock.json ]; then
             npm ci
           else
@@ -127,7 +132,13 @@ jobs:
         if: env.VERSION != 'dev' && github.event_name == 'release'
         working-directory: ts-proto
         continue-on-error: true        
-        run: npm publish --provenance # Required for npm OIDC trusted publishing
+        run: |
+          SANITIZED_TAG=$(echo "${{ github.event.release.target_commitish }}" | sed 's/[^a-zA-Z0-9._-]/-/g')
+          if [ "${SANITIZED_TAG}" = "latest" ] || [ "${SANITIZED_TAG}" = "dev" ]; then
+            echo "Error: refusing to publish with reserved tag '${SANITIZED_TAG}'"
+            exit 1
+          fi
+          npm publish --provenance --tag "${SANITIZED_TAG}"
 
       - name: Build binary for Linux AMD64
         run: |

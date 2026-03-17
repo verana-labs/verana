@@ -138,6 +138,7 @@ See `ts-proto/test/README.md` for complete examples.
 
 ## Publish
 1. Bump the version in `package.json` to match the chain tag you are releasing (e.g. `v0.7.0` -> `0.7.0`).
+   The release workflow stamps the published tarball version from the Git tag, but the checked-in `package.json` should still be kept aligned with the latest intended release version so local `npm pack` output and repo metadata stay honest.
 2. Regenerate and build as above.
 3. `npm publish` (or `npm pack` and upload the tarball to the GitHub release assets).
 
