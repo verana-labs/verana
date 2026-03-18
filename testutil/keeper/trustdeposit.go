@@ -47,6 +47,7 @@ func TrustdepositKeeper(t testing.TB) (keeper.Keeper, sdk.Context) {
 	authority := authtypes.NewModuleAddress(govtypes.ModuleName)
 	bankKeeper := NewMockBankKeeper()
 	mintKeeper := NewMockMintKeeper()
+	delegationKeeper := &MockDelegationKeeper{}
 
 	k := keeper.NewKeeper(
 		cdc,
@@ -55,7 +56,7 @@ func TrustdepositKeeper(t testing.TB) (keeper.Keeper, sdk.Context) {
 		authority.String(),
 		bankKeeper,
 		mintKeeper,
-		nil, // delegationKeeper - nil for tests
+		delegationKeeper,
 	)
 
 	ctx := sdk.NewContext(stateStore, cmtproto.Header{}, false, log.NewNopLogger())

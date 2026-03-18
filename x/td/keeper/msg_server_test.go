@@ -896,7 +896,7 @@ func TestMsgRepaySlashedTrustDeposit(t *testing.T) {
 			},
 		},
 		{
-			name: "AUTHZ nil keeper succeeds (skips check)",
+			name: "AUTHZ succeeds with authorized operator",
 			setup: func() {
 				err := k.SetParams(ctx, defaultTestParams())
 				require.NoError(t, err)
