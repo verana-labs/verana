@@ -513,7 +513,8 @@ func ReclaimTrustDepositYieldWithResponse(client cosmosclient.Client, ctx contex
 	}
 
 	msg := tdtypes.MsgReclaimTrustDepositYield{
-		Creator: creatorAddr,
+		Authority: creatorAddr,
+		Operator:  creatorAddr,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, creator, &msg)
@@ -554,6 +555,64 @@ func ReclaimTrustDepositYieldWithResponse(client cosmosclient.Client, ctx contex
 	}
 
 	return response, blockHeight, nil
+}
+
+// RepaySlashedTrustDeposit broadcasts MsgRepaySlashedTrustDeposit on behalf of authority via operator.
+func RepaySlashedTrustDeposit(client cosmosclient.Client, ctx context.Context, operatorAccount cosmosaccount.Account, authorityAddr string, amount uint64) (string, error) {
+	operatorAddr, err := operatorAccount.Address(addressPrefix)
+	if err != nil {
+		return "", fmt.Errorf("failed to get operator address: %v", err)
+	}
+
+	msg := tdtypes.MsgRepaySlashedTrustDeposit{
+		Authority: authorityAddr,
+		Operator:  operatorAddr,
+		Amount:    amount,
+	}
+
+	txResp, err := client.BroadcastTx(ctx, operatorAccount, &msg)
+	if err != nil {
+		return "", fmt.Errorf("failed to broadcast repay slashed trust deposit: %v", err)
+	}
+
+	fmt.Print("RepaySlashedTrustDeposit:\n\n")
+	fmt.Println(txResp)
+
+	if txResp.TxResponse.Code != 0 {
+		return "", fmt.Errorf("transaction failed with code %d: %s",
+			txResp.TxResponse.Code, txResp.TxResponse.RawLog)
+	}
+
+	return "success", nil
+}
+
+// ReclaimTrustDepositYieldWithAuthority broadcasts MsgReclaimTrustDepositYield with authority/operator pattern.
+func ReclaimTrustDepositYieldWithAuthority(client cosmosclient.Client, ctx context.Context, operatorAccount cosmosaccount.Account, authorityAddr string) (*tdtypes.MsgReclaimTrustDepositYieldResponse, error) {
+	operatorAddr, err := operatorAccount.Address(addressPrefix)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get operator address: %v", err)
+	}
+
+	msg := tdtypes.MsgReclaimTrustDepositYield{
+		Authority: authorityAddr,
+		Operator:  operatorAddr,
+	}
+
+	txResp, err := client.BroadcastTx(ctx, operatorAccount, &msg)
+	if err != nil {
+		return nil, fmt.Errorf("failed to broadcast reclaim trust deposit yield: %v", err)
+	}
+
+	fmt.Print("ReclaimTrustDepositYieldWithAuthority:\n\n")
+	fmt.Println(txResp)
+
+	if txResp.TxResponse.Code != 0 {
+		return nil, fmt.Errorf("transaction failed with code %d: %s",
+			txResp.TxResponse.Code, txResp.TxResponse.RawLog)
+	}
+
+	resp := &tdtypes.MsgReclaimTrustDepositYieldResponse{}
+	return resp, nil
 }
 
 // GetTrustDepositParams gets the trust deposit module parameters

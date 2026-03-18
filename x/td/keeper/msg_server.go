@@ -3,6 +3,7 @@ package keeper
 import (
 	"context"
 	"fmt"
+	mathstd "math"
 	"strconv"
 
 	"cosmossdk.io/math"
@@ -24,7 +25,21 @@ var _ types.MsgServer = msgServer{}
 
 func (ms msgServer) ReclaimTrustDepositYield(goCtx context.Context, msg *types.MsgReclaimTrustDepositYield) (*types.MsgReclaimTrustDepositYieldResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	account := msg.Creator
+	account := msg.Authority
+
+	// [MOD-TD-MSG-2-2] [AUTHZ-CHECK] Verify operator authorization
+	if ms.Keeper.delegationKeeper == nil {
+		return nil, fmt.Errorf("delegation keeper is required for operator authorization")
+	}
+	if err := ms.Keeper.delegationKeeper.CheckOperatorAuthorization(
+		ctx,
+		msg.Authority,
+		msg.Operator,
+		"/verana.td.v1.MsgReclaimTrustDepositYield",
+		ctx.BlockTime(),
+	); err != nil {
+		return nil, fmt.Errorf("authorization check failed: %w", err)
+	}
 
 	// [MOD-TD-MSG-2-2-1] Load TrustDeposit entry
 	td, err := ms.Keeper.TrustDeposit.Get(ctx, account)
@@ -42,21 +57,41 @@ func (ms msgServer) ReclaimTrustDepositYield(goCtx context.Context, msg *types.M
 
 	// [MOD-TD-MSG-2-2-1] Calculate claimable yield
 	// claimable_yield = td.share * GlobalVariables.trust_deposit_share_value - td.deposit
-	depositValue := ms.Keeper.ShareToAmount(td.Share, params.TrustDepositShareValue)
-	if depositValue <= td.Amount { // td.Amount maps to spec's td.deposit
-		return nil, fmt.Errorf("no claimable yield available") // Updated error message
+	// Use decimal math to avoid uint64 overflow on large share * shareValue products
+	depositValueDec := td.Share.Mul(params.TrustDepositShareValue)
+	depositAmountDec := math.LegacyNewDecFromInt(math.NewIntFromUint64(td.Amount))
+	claimableYieldDec := depositValueDec.Sub(depositAmountDec)
+
+	if !claimableYieldDec.IsPositive() {
+		return nil, fmt.Errorf("no claimable yield available")
 	}
 
-	claimableYield := depositValue - td.Amount
+	claimableYield := claimableYieldDec.TruncateInt().Uint64()
+	if claimableYield == 0 {
+		return nil, fmt.Errorf("no claimable yield available")
+	}
 
 	// [MOD-TD-MSG-2-3] Calculate shares to reduce
 	// td.share = td.share - claimable_yield / GlobalVariables.trust_deposit_share_value
 	sharesToReduce := ms.Keeper.AmountToShare(claimableYield, params.TrustDepositShareValue)
-	td.Share = td.Share.Sub(sharesToReduce) // Use Sub method
+	td.Share = td.Share.Sub(sharesToReduce)
 
-	addr, _ := sdk.AccAddressFromBech32(account)
+	// Validate authority address
+	addr, err := sdk.AccAddressFromBech32(account)
+	if err != nil {
+		return nil, fmt.Errorf("invalid authority address: %w", err)
+	}
 
-	// [MOD-TD-MSG-2-3] Transfer yield from TrustDeposit account to account
+	// Save updated trust deposit BEFORE bank transfer to ensure atomicity —
+	// if Set fails, no coins have been transferred yet.
+	if err := ms.Keeper.TrustDeposit.Set(ctx, account, td); err != nil {
+		return nil, fmt.Errorf("failed to update trust deposit: %w", err)
+	}
+
+	// [MOD-TD-MSG-2-3] Transfer yield from TrustDeposit account to authority account
+	if claimableYield > uint64(mathstd.MaxInt64) {
+		return nil, fmt.Errorf("claimable yield exceeds maximum coin amount: %d", claimableYield)
+	}
 	coins := sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, int64(claimableYield)))
 	if err := ms.Keeper.bankKeeper.SendCoinsFromModuleToAccount(
 		ctx,
@@ -65,11 +100,6 @@ func (ms msgServer) ReclaimTrustDepositYield(goCtx context.Context, msg *types.M
 		coins,
 	); err != nil {
 		return nil, fmt.Errorf("failed to transfer yield: %w", err)
-	}
-
-	// Save updated trust deposit
-	if err := ms.Keeper.TrustDeposit.Set(ctx, account, td); err != nil {
-		return nil, fmt.Errorf("failed to update trust deposit: %w", err)
 	}
 
 	ctx.EventManager().EmitEvents(sdk.Events{
@@ -83,7 +113,7 @@ func (ms msgServer) ReclaimTrustDepositYield(goCtx context.Context, msg *types.M
 	})
 
 	return &types.MsgReclaimTrustDepositYieldResponse{
-		ClaimedAmount: claimableYield, // Or rename to ClaimedYield
+		ClaimedAmount: claimableYield,
 	}, nil
 }
 
@@ -148,9 +178,19 @@ func (ms msgServer) ReclaimTrustDeposit(goCtx context.Context, msg *types.MsgRec
 	// Update trust deposit
 	td.Claimable -= msg.Claimed
 	td.Amount -= msg.Claimed
-	td.Share = td.Share.Sub(shareReduction) // Use Sub method
+	td.Share = td.Share.Sub(shareReduction)
 
-	addr, _ := sdk.AccAddressFromBech32(msg.Creator)
+	addr, err := sdk.AccAddressFromBech32(msg.Creator)
+	if err != nil {
+		return nil, fmt.Errorf("invalid creator address: %w", err)
+	}
+
+	// Save updated trust deposit BEFORE bank operations to ensure atomicity —
+	// if Set fails, no coins have been transferred or burned yet.
+	if err := ms.Keeper.TrustDeposit.Set(ctx, account, td); err != nil {
+		return nil, fmt.Errorf("failed to update trust deposit: %w", err)
+	}
+
 	// Transfer claimable amount minus burn to the account
 	if toTransfer > 0 {
 		transferCoins := sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, int64(toTransfer)))
@@ -174,11 +214,6 @@ func (ms msgServer) ReclaimTrustDeposit(goCtx context.Context, msg *types.MsgRec
 		); err != nil {
 			return nil, fmt.Errorf("failed to burn coins: %w", err)
 		}
-	}
-
-	// Save updated trust deposit
-	if err := ms.Keeper.TrustDeposit.Set(ctx, account, td); err != nil {
-		return nil, fmt.Errorf("failed to update trust deposit: %w", err)
 	}
 
 	ctx.EventManager().EmitEvents(sdk.Events{
@@ -241,23 +276,23 @@ func (ms msgServer) SlashTrustDeposit(goCtx context.Context, msg *types.MsgSlash
 	// Calculate share reduction
 	shareReduction := math.LegacyNewDecFromInt(msg.Amount).Quo(shareValue)
 
-	// Update TrustDeposit entry
+	// [MOD-TD-MSG-5-3] Update TrustDeposit entry
 	td.Amount = td.Amount - msg.Amount.Uint64()
-	td.Share = td.Share.Sub(shareReduction) // Use Sub method
+	td.Share = td.Share.Sub(shareReduction)
 	td.SlashedDeposit = td.SlashedDeposit + msg.Amount.Uint64()
 	td.LastSlashed = &now
-	td.LastRepaidBy = ""
 	td.SlashCount++
 
-	// Burn the slashed amount
+	// Save the updated TrustDeposit entry BEFORE burning coins to ensure atomicity —
+	// if Set fails, no coins have been burned yet.
+	if err := ms.Keeper.TrustDeposit.Set(ctx, msg.Account, td); err != nil {
+		return nil, fmt.Errorf("failed to save trust deposit: %w", err)
+	}
+
+	// Burn the slashed amount from TrustDeposit account
 	burnCoins := sdk.NewCoins(sdk.NewCoin(types.BondDenom, msg.Amount))
 	if err := ms.Keeper.bankKeeper.BurnCoins(ctx, types.ModuleName, burnCoins); err != nil {
 		return nil, fmt.Errorf("failed to burn coins: %w", err)
-	}
-
-	// Save the updated TrustDeposit entry
-	if err := ms.Keeper.TrustDeposit.Set(ctx, msg.Account, td); err != nil {
-		return nil, fmt.Errorf("failed to save trust deposit: %w", err)
 	}
 
 	// Emit event
@@ -276,34 +311,41 @@ func (ms msgServer) SlashTrustDeposit(goCtx context.Context, msg *types.MsgSlash
 
 func (ms msgServer) RepaySlashedTrustDeposit(goCtx context.Context, msg *types.MsgRepaySlashedTrustDeposit) (*types.MsgRepaySlashedTrustDepositResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
+	account := msg.Authority
 
-	// Load TrustDeposit entry (must exist)
-	td, err := ms.Keeper.TrustDeposit.Get(ctx, msg.Account)
-	if err != nil {
-		return nil, fmt.Errorf("trust deposit entry not found for account %s: %w", msg.Account, err)
+	// [MOD-TD-MSG-6-2-1] [AUTHZ-CHECK] Verify operator authorization
+	if ms.Keeper.delegationKeeper == nil {
+		return nil, fmt.Errorf("delegation keeper is required for operator authorization")
+	}
+	if err := ms.Keeper.delegationKeeper.CheckOperatorAuthorization(
+		ctx,
+		msg.Authority,
+		msg.Operator,
+		"/verana.td.v1.MsgRepaySlashedTrustDeposit",
+		ctx.BlockTime(),
+	); err != nil {
+		return nil, fmt.Errorf("authorization check failed: %w", err)
 	}
 
-	// Check that amount exactly equals slashed_deposit - repaid_deposit
+	// [MOD-TD-MSG-6-2-1] Load TrustDeposit entry for authority (must exist)
+	td, err := ms.Keeper.TrustDeposit.Get(ctx, account)
+	if err != nil {
+		return nil, fmt.Errorf("trust deposit entry not found for account %s: %w", account, err)
+	}
+
+	// [MOD-TD-MSG-6-2-1] amount MUST be exactly equal to td.slashed_deposit - td.repaid_deposit
+	if td.RepaidDeposit > td.SlashedDeposit {
+		return nil, fmt.Errorf("invalid trust deposit state: repaid_deposit (%d) exceeds slashed_deposit (%d)", td.RepaidDeposit, td.SlashedDeposit)
+	}
 	outstandingSlash := td.SlashedDeposit - td.RepaidDeposit
 	if msg.Amount != outstandingSlash {
 		return nil, fmt.Errorf("amount must exactly equal outstanding slashed amount: expected %d, got %d", outstandingSlash, msg.Amount)
 	}
 
-	// [MOD-TD-MSG-6-2-2] Fee checks validation
-	creatorAddr, err := sdk.AccAddressFromBech32(msg.Creator)
+	// Validate authority address for bank transfer
+	authorityAddr, err := sdk.AccAddressFromBech32(account)
 	if err != nil {
-		return nil, fmt.Errorf("invalid creator address: %w", err)
-	}
-
-	// Transfer amount from creator to trust deposit module
-	transferCoins := sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, int64(msg.Amount)))
-	if err := ms.Keeper.bankKeeper.SendCoinsFromAccountToModule(
-		ctx,
-		creatorAddr,
-		types.ModuleName,
-		transferCoins,
-	); err != nil {
-		return nil, fmt.Errorf("failed to transfer tokens: %w", err)
+		return nil, fmt.Errorf("invalid authority address: %w", err)
 	}
 
 	// [MOD-TD-MSG-6-3] Execution
@@ -313,27 +355,40 @@ func (ms msgServer) RepaySlashedTrustDeposit(goCtx context.Context, msg *types.M
 	// Update trust deposit fields
 	td.Amount += msg.Amount
 
-	// Calculate share increase using decimal math
+	// td.share = td.share + amount / GlobalVariables.trust_deposit_share_value
 	shareIncrease := ms.Keeper.AmountToShare(msg.Amount, params.TrustDepositShareValue)
-	td.Share = td.Share.Add(shareIncrease) // Use Add method
+	td.Share = td.Share.Add(shareIncrease)
 
-	// Update repayment tracking
+	// td.repaid_deposit = td.repaid_deposit + amount
 	td.RepaidDeposit += msg.Amount
+	// td.last_repaid = now
 	td.LastRepaid = &now
-	td.LastRepaidBy = msg.Creator
 
-	// Save updated trust deposit
-	if err := ms.Keeper.TrustDeposit.Set(ctx, msg.Account, td); err != nil {
+	// Save updated trust deposit BEFORE bank transfer to ensure atomicity
+	if err := ms.Keeper.TrustDeposit.Set(ctx, account, td); err != nil {
 		return nil, fmt.Errorf("failed to update trust deposit: %w", err)
+	}
+
+	// [MOD-TD-MSG-6-2-2] / [MOD-TD-MSG-6-3] Transfer amount from authority to TrustDeposit account
+	if msg.Amount > uint64(mathstd.MaxInt64) {
+		return nil, fmt.Errorf("repay amount exceeds maximum coin amount: %d", msg.Amount)
+	}
+	transferCoins := sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, int64(msg.Amount)))
+	if err := ms.Keeper.bankKeeper.SendCoinsFromAccountToModule(
+		ctx,
+		authorityAddr,
+		types.ModuleName,
+		transferCoins,
+	); err != nil {
+		return nil, fmt.Errorf("failed to transfer tokens: %w", err)
 	}
 
 	// Emit event
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeRepaySlashedTrustDeposit,
-			sdk.NewAttribute(types.AttributeKeyAccount, msg.Account),
+			sdk.NewAttribute(types.AttributeKeyAccount, account),
 			sdk.NewAttribute(types.AttributeKeyAmount, strconv.FormatUint(msg.Amount, 10)),
-			sdk.NewAttribute(types.AttributeKeyRepaidBy, msg.Creator),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
 		),
 	})

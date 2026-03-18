@@ -26,6 +26,8 @@
     "test:perm-csps": "npx tsx src/journeys/permCreateOrUpdatePermissionSession.ts",
     "test:perm-slash": "npx tsx src/journeys/permSlashPermissionTrustDeposit.ts",
     "test:perm-repay": "npx tsx src/journeys/permRepayPermissionSlashedTrustDeposit.ts",
+    "test:td-reclaim-yield": "npx tsx src/journeys/tdReclaimTrustDepositYield.ts",
+    "test:td-repay-slashed": "npx tsx src/journeys/tdRepaySlashedTrustDeposit.ts",
     "test:all": "npx tsx src/journeys/runAll.ts"
   },
   "dependencies": {

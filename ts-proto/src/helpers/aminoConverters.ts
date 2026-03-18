@@ -32,6 +32,8 @@ import {
 import {
   MsgReclaimTrustDeposit,
   MsgReclaimTrustDepositYield,
+  MsgSlashTrustDeposit,
+  MsgRepaySlashedTrustDeposit,
 } from "../codec/verana/td/v1/tx";
 import {
   MsgCreateRootPermission,
@@ -399,12 +401,44 @@ export const MsgReclaimTrustDepositAminoConverter: AminoConverter = {
 
 export const MsgReclaimTrustDepositYieldAminoConverter: AminoConverter = {
   aminoType: '/verana.td.v1.MsgReclaimTrustDepositYield',
-  toAmino: ({ creator }: MsgReclaimTrustDepositYield) => ({
-    creator,
+  toAmino: ({ authority, operator }: MsgReclaimTrustDepositYield) => ({
+    authority,
+    operator,
   }),
-  fromAmino: (value: { creator: string }) =>
+  fromAmino: (value: { authority: string; operator: string }) =>
     MsgReclaimTrustDepositYield.fromPartial({
-      creator: value.creator,
+      authority: value.authority,
+      operator: value.operator,
+    }),
+};
+
+export const MsgRepaySlashedTrustDepositAminoConverter: AminoConverter = {
+  aminoType: '/verana.td.v1.MsgRepaySlashedTrustDeposit',
+  toAmino: ({ authority, operator, amount }: MsgRepaySlashedTrustDeposit) => ({
+    authority,
+    operator,
+    amount: amount != null ? amount.toString() : undefined,
+  }),
+  fromAmino: (value: { authority: string; operator: string; amount: number | string }) =>
+    MsgRepaySlashedTrustDeposit.fromPartial({
+      authority: value.authority,
+      operator: value.operator,
+      amount: value.amount != null ? Number(value.amount) : 0,
+    }),
+};
+
+export const MsgSlashTrustDepositAminoConverter: AminoConverter = {
+  aminoType: '/verana.td.v1.MsgSlashTrustDeposit',
+  toAmino: ({ authority, account, amount }: MsgSlashTrustDeposit) => ({
+    authority,
+    account,
+    amount,
+  }),
+  fromAmino: (value: { authority: string; account: string; amount: string }) =>
+    MsgSlashTrustDeposit.fromPartial({
+      authority: value.authority,
+      account: value.account,
+      amount: value.amount,
     }),
 };
 

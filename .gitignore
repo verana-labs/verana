@@ -37,3 +37,6 @@ testharness/journey_results/*
 ts-proto/test/journey_results/*.json
 !ts-proto/test/journey_results/.gitkeep
 ts-proto/test/out/
+
+# Compiled binaries in ts-proto
+ts-proto/cmd

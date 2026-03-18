@@ -23,12 +23,12 @@ import (
 // - error: If the operation fails
 func (k Keeper) AdjustTrustDeposit(ctx sdk.Context, account string, augend int64) error {
 	// Basic validation
+	if account == "" {
+		return fmt.Errorf("account cannot be empty")
+	}
 	senderAcc, err := sdk.AccAddressFromBech32(account)
 	if err != nil {
 		return fmt.Errorf("invalid account address: %w", err)
-	}
-	if account == "" {
-		return fmt.Errorf("account cannot be empty")
 	}
 	if augend == 0 {
 		return fmt.Errorf("augend must be non-zero")
@@ -48,32 +48,29 @@ func (k Keeper) AdjustTrustDeposit(ctx sdk.Context, account string, augend int64
 		}
 
 		// Initialize new trust deposit - create entry for positive augend
-		// Transfer augend from account to TrustDeposit module
-		err := k.bankKeeper.SendCoinsFromAccountToModule(
-			ctx,
-			senderAcc,
-			types.ModuleName,
-			sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, augend)),
-		)
-		if err != nil {
-			return fmt.Errorf("failed to transfer tokens: %w", err)
-		}
-
-		// Calculate augend_share = amount / GlobalVariables.trust_deposit_share_value
 		augendShare := k.AmountToShare(uint64(augend), shareValue)
 
 		td = types.TrustDeposit{
 			Account:   account,
 			Amount:    uint64(augend),
-			Share:     augendShare, // Now LegacyDec
+			Share:     augendShare,
 			Claimable: 0,
-			// v2 fields auto-initialize to zero values
 		}
 
-		// Save new trust deposit
-		err = k.TrustDeposit.Set(ctx, account, td)
+		// Save new trust deposit BEFORE bank transfer
+		err := k.TrustDeposit.Set(ctx, account, td)
 		if err != nil {
 			return fmt.Errorf("failed to save trust deposit: %w", err)
+		}
+
+		// Transfer augend from account to TrustDeposit module
+		if err := k.bankKeeper.SendCoinsFromAccountToModule(
+			ctx,
+			senderAcc,
+			types.ModuleName,
+			sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, augend)),
+		); err != nil {
+			return fmt.Errorf("failed to transfer tokens: %w", err)
 		}
 
 		// Emit event for new entry
@@ -102,51 +99,36 @@ func (k Keeper) AdjustTrustDeposit(ctx sdk.Context, account string, augend int64
 	claimable := int64(td.Claimable)
 	// share stays as td.Share (math.LegacyDec)
 
+	// Track how much needs to be transferred from account to module
+	var transferAmount int64
+
 	if augend > 0 {
 		// Handle positive adjustment (increase)
 		if claimable > 0 {
 			if claimable >= augend {
-				// Can cover from claimable amount
+				// Can cover from claimable amount — no bank transfer needed
 				claimable -= augend
 			} else {
 				// Need to transfer additional funds
 				neededDeposit := augend - claimable
-
-				// Transfer tokens from account to module
-				err := k.bankKeeper.SendCoinsFromAccountToModule(
-					ctx,
-					senderAcc,
-					types.ModuleName,
-					sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, neededDeposit)),
-				)
-				if err != nil {
-					return fmt.Errorf("failed to transfer tokens: %w", err)
-				}
+				transferAmount = neededDeposit
 
 				// Calculate missing_augend_share = (augend - td.claimable) / GlobalVariables.trust_deposit_share_value
 				missingShare := k.AmountToShare(uint64(neededDeposit), shareValue)
 
 				amount += neededDeposit
-				td.Share = td.Share.Add(missingShare) // Use Add method
+				td.Share = td.Share.Add(missingShare)
 				claimable = 0
 			}
 		} else {
 			// No claimable amount, need to transfer full amount
-			err := k.bankKeeper.SendCoinsFromAccountToModule(
-				ctx,
-				senderAcc,
-				types.ModuleName,
-				sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, augend)),
-			)
-			if err != nil {
-				return fmt.Errorf("failed to transfer tokens: %w", err)
-			}
+			transferAmount = augend
 
 			// Calculate augend_share = augend / GlobalVariables.trust_deposit_share_value
 			augendShare := k.AmountToShare(uint64(augend), shareValue)
 
 			amount += augend
-			td.Share = td.Share.Add(augendShare) // Use Add method
+			td.Share = td.Share.Add(augendShare)
 		}
 	} else { // augend < 0
 		// Handle negative adjustment (decrease)
@@ -175,12 +157,23 @@ func (k Keeper) AdjustTrustDeposit(ctx sdk.Context, account string, augend int64
 
 	td.Amount = uint64(amount)
 	td.Claimable = uint64(claimable)
-	// td.Share is already LegacyDec, no conversion needed
 
-	// Save updated trust deposit
+	// Save updated trust deposit BEFORE bank transfer
 	err = k.TrustDeposit.Set(ctx, account, td)
 	if err != nil {
 		return fmt.Errorf("failed to save trust deposit: %w", err)
+	}
+
+	// Transfer tokens from account to module (if needed)
+	if transferAmount > 0 {
+		if err := k.bankKeeper.SendCoinsFromAccountToModule(
+			ctx,
+			senderAcc,
+			types.ModuleName,
+			sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, transferAmount)),
+		); err != nil {
+			return fmt.Errorf("failed to transfer tokens: %w", err)
+		}
 	}
 
 	// Emit event for adjustment
@@ -230,17 +223,6 @@ func (k Keeper) AdjustTrustDepositOnBehalf(ctx sdk.Context, account string, fund
 	params := k.GetParams(ctx)
 	shareValue := params.TrustDepositShareValue
 
-	// Transfer from funder to TD module
-	err = k.bankKeeper.SendCoinsFromAccountToModule(
-		ctx,
-		funder,
-		types.ModuleName,
-		sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, amount)),
-	)
-	if err != nil {
-		return fmt.Errorf("failed to transfer tokens from funder: %w", err)
-	}
-
 	augendShare := k.AmountToShare(uint64(amount), shareValue)
 
 	// Load or create trust deposit for account
@@ -256,8 +238,19 @@ func (k Keeper) AdjustTrustDepositOnBehalf(ctx sdk.Context, account string, fund
 		td.Share = td.Share.Add(augendShare)
 	}
 
+	// Save trust deposit BEFORE bank transfer
 	if err := k.TrustDeposit.Set(ctx, account, td); err != nil {
 		return fmt.Errorf("failed to save trust deposit: %w", err)
+	}
+
+	// Transfer from funder to TD module
+	if err := k.bankKeeper.SendCoinsFromAccountToModule(
+		ctx,
+		funder,
+		types.ModuleName,
+		sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, amount)),
+	); err != nil {
+		return fmt.Errorf("failed to transfer tokens from funder: %w", err)
 	}
 
 	ctx.EventManager().EmitEvents(sdk.Events{

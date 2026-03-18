@@ -27,8 +27,9 @@ type (
 		TrustDeposit collections.Map[string, types.TrustDeposit]
 		Dust         collections.Item[string] // Accumulated fractional yield (stored as string)
 		// external keeper
-		bankKeeper types.BankKeeper
-		mintKeeper types.MintKeeper
+		bankKeeper       types.BankKeeper
+		mintKeeper       types.MintKeeper
+		delegationKeeper types.DelegationKeeper
 	}
 )
 
@@ -39,6 +40,7 @@ func NewKeeper(
 	authority string,
 	bankKeeper types.BankKeeper,
 	mintKeeper types.MintKeeper,
+	delegationKeeper types.DelegationKeeper,
 ) Keeper {
 	sb := collections.NewSchemaBuilder(storeService)
 
@@ -47,14 +49,15 @@ func NewKeeper(
 	}
 
 	return Keeper{
-		cdc:          cdc,
-		storeService: storeService,
-		authority:    authority,
-		logger:       logger,
-		TrustDeposit: collections.NewMap(sb, types.TrustDepositKey, "trust_deposit", collections.StringKey, codec.CollValue[types.TrustDeposit](cdc)),
-		Dust:         collections.NewItem(sb, types.DustKey, "dust", collections.StringValue),
-		bankKeeper:   bankKeeper,
-		mintKeeper:   mintKeeper,
+		cdc:              cdc,
+		storeService:     storeService,
+		authority:        authority,
+		logger:           logger,
+		TrustDeposit:     collections.NewMap(sb, types.TrustDepositKey, "trust_deposit", collections.StringKey, codec.CollValue[types.TrustDeposit](cdc)),
+		Dust:             collections.NewItem(sb, types.DustKey, "dust", collections.StringValue),
+		bankKeeper:       bankKeeper,
+		mintKeeper:       mintKeeper,
+		delegationKeeper: delegationKeeper,
 	}
 }
 

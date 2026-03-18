@@ -27,6 +27,8 @@ import {
   // TD module
   MsgReclaimTrustDepositAminoConverter,
   MsgReclaimTrustDepositYieldAminoConverter,
+  MsgSlashTrustDepositAminoConverter,
+  MsgRepaySlashedTrustDepositAminoConverter,
   // PERM module
   MsgCreateRootPermissionAminoConverter,
   MsgCreatePermissionAminoConverter,
@@ -165,6 +167,8 @@ export function createVeranaAminoTypes(): AminoTypes {
     // Trust Deposit (td) module
     '/verana.td.v1.MsgReclaimTrustDeposit': MsgReclaimTrustDepositAminoConverter,
     '/verana.td.v1.MsgReclaimTrustDepositYield': MsgReclaimTrustDepositYieldAminoConverter,
+    '/verana.td.v1.MsgSlashTrustDeposit': MsgSlashTrustDepositAminoConverter,
+    '/verana.td.v1.MsgRepaySlashedTrustDeposit': MsgRepaySlashedTrustDepositAminoConverter,
     // Permission (perm) module
     '/verana.perm.v1.MsgCreateRootPermission': MsgCreateRootPermissionAminoConverter,
     '/verana.perm.v1.MsgCreatePermission': MsgCreatePermissionAminoConverter,
