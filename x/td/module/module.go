@@ -193,7 +193,7 @@ type ModuleInputs struct {
 	AccountKeeper    types.AccountKeeper
 	BankKeeper       types.BankKeeper
 	MintKeeper       mintkeeper.Keeper
-	DelegationKeeper types.DelegationKeeper `optional:"true"`
+	DelegationKeeper types.DelegationKeeper
 }
 
 type ModuleOutputs struct {

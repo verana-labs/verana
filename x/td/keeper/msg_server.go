@@ -28,16 +28,17 @@ func (ms msgServer) ReclaimTrustDepositYield(goCtx context.Context, msg *types.M
 	account := msg.Authority
 
 	// [MOD-TD-MSG-2-2] [AUTHZ-CHECK] Verify operator authorization
-	if ms.Keeper.delegationKeeper != nil {
-		if err := ms.Keeper.delegationKeeper.CheckOperatorAuthorization(
-			ctx,
-			msg.Authority,
-			msg.Operator,
-			"/verana.td.v1.MsgReclaimTrustDepositYield",
-			ctx.BlockTime(),
-		); err != nil {
-			return nil, fmt.Errorf("authorization check failed: %w", err)
-		}
+	if ms.Keeper.delegationKeeper == nil {
+		return nil, fmt.Errorf("delegation keeper is required for operator authorization")
+	}
+	if err := ms.Keeper.delegationKeeper.CheckOperatorAuthorization(
+		ctx,
+		msg.Authority,
+		msg.Operator,
+		"/verana.td.v1.MsgReclaimTrustDepositYield",
+		ctx.BlockTime(),
+	); err != nil {
+		return nil, fmt.Errorf("authorization check failed: %w", err)
 	}
 
 	// [MOD-TD-MSG-2-2-1] Load TrustDeposit entry
@@ -313,16 +314,17 @@ func (ms msgServer) RepaySlashedTrustDeposit(goCtx context.Context, msg *types.M
 	account := msg.Authority
 
 	// [MOD-TD-MSG-6-2-1] [AUTHZ-CHECK] Verify operator authorization
-	if ms.Keeper.delegationKeeper != nil {
-		if err := ms.Keeper.delegationKeeper.CheckOperatorAuthorization(
-			ctx,
-			msg.Authority,
-			msg.Operator,
-			"/verana.td.v1.MsgRepaySlashedTrustDeposit",
-			ctx.BlockTime(),
-		); err != nil {
-			return nil, fmt.Errorf("authorization check failed: %w", err)
-		}
+	if ms.Keeper.delegationKeeper == nil {
+		return nil, fmt.Errorf("delegation keeper is required for operator authorization")
+	}
+	if err := ms.Keeper.delegationKeeper.CheckOperatorAuthorization(
+		ctx,
+		msg.Authority,
+		msg.Operator,
+		"/verana.td.v1.MsgRepaySlashedTrustDeposit",
+		ctx.BlockTime(),
+	); err != nil {
+		return nil, fmt.Errorf("authorization check failed: %w", err)
 	}
 
 	// [MOD-TD-MSG-6-2-1] Load TrustDeposit entry for authority (must exist)
