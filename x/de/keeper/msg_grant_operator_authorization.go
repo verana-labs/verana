@@ -33,6 +33,11 @@ func (ms msgServer) GrantOperatorAuthorization(goCtx context.Context, msg *types
 		return nil, types.ErrExpirationInPast
 	}
 
+	// [MOD-DE-MSG-3-2] authz_spend_limit_period must be valid if authz_spend_limit is set
+	if len(msg.AuthzSpendLimit) > 0 && msg.AuthzSpendLimitPeriod != nil && *msg.AuthzSpendLimitPeriod <= 0 {
+		return nil, fmt.Errorf("authz_spend_limit_period must be a positive duration")
+	}
+
 	// Check mutual exclusivity: VSOperatorAuthorization must NOT exist for
 	// this authority/grantee pair.
 	// TODO(MOD-DE-MSG-5): The reverse check must also be enforced — when granting

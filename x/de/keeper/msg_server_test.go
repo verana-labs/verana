@@ -574,6 +574,100 @@ func TestMsgServerGrantOperatorAuthorization(t *testing.T) {
 			expectErr:   true,
 			errContains: "expiration must be in the future",
 		},
+		{
+			name: "Invalid: negative authz_spend_limit_period with authz_spend_limit set",
+			msg: func() *types.MsgGrantOperatorAuthorization {
+				negativePeriod := -time.Hour
+				return &types.MsgGrantOperatorAuthorization{
+					Authority:            authority,
+					Operator:             "",
+					Grantee:              grantee,
+					MsgTypes:             validMsgTypes,
+					AuthzSpendLimit:      sdk.NewCoins(sdk.NewInt64Coin("stake", 1000)),
+					AuthzSpendLimitPeriod: &negativePeriod,
+				}
+			}(),
+			expectErr:   true,
+			errContains: "authz_spend_limit_period must be a positive duration",
+		},
+		{
+			name: "Invalid: zero authz_spend_limit_period with authz_spend_limit set",
+			msg: func() *types.MsgGrantOperatorAuthorization{
+				zeroPeriod := time.Duration(0)
+				return &types.MsgGrantOperatorAuthorization{
+					Authority:            authority,
+					Operator:             "",
+					Grantee:              grantee,
+					MsgTypes:             validMsgTypes,
+					AuthzSpendLimit:      sdk.NewCoins(sdk.NewInt64Coin("stake", 1000)),
+					AuthzSpendLimitPeriod: &zeroPeriod,
+				}
+			}(),
+			expectErr:   true,
+			errContains: "authz_spend_limit_period must be a positive duration",
+		},
+		{
+			name: "Valid: authz_spend_limit_period ignored when authz_spend_limit not set",
+			msg: func() *types.MsgGrantOperatorAuthorization {
+				negativePeriod := -time.Hour
+				return &types.MsgGrantOperatorAuthorization{
+					Authority:            authority,
+					Operator:             "",
+					Grantee:              grantee,
+					MsgTypes:             validMsgTypes,
+					AuthzSpendLimitPeriod: &negativePeriod,
+				}
+			}(),
+			expectErr: false,
+		},
+		{
+			name: "Valid: positive authz_spend_limit_period with authz_spend_limit",
+			msg: func() *types.MsgGrantOperatorAuthorization {
+				validPeriod := time.Hour
+				return &types.MsgGrantOperatorAuthorization{
+					Authority:            authority,
+					Operator:             "",
+					Grantee:              grantee,
+					MsgTypes:             validMsgTypes,
+					AuthzSpendLimit:      sdk.NewCoins(sdk.NewInt64Coin("stake", 1000)),
+					AuthzSpendLimitPeriod: &validPeriod,
+				}
+			}(),
+			expectErr: false,
+		},
+		{
+			name: "Invalid: negative feegrant_spend_limit_period with feegrant enabled and spend limit set",
+			msg: func() *types.MsgGrantOperatorAuthorization {
+				negativePeriod := -time.Hour
+				return &types.MsgGrantOperatorAuthorization{
+					Authority:                authority,
+					Operator:                 "",
+					Grantee:                  grantee,
+					MsgTypes:                 validMsgTypes,
+					WithFeegrant:             true,
+					FeegrantSpendLimit:       sdk.NewCoins(sdk.NewInt64Coin("stake", 500)),
+					FeegrantSpendLimitPeriod: &negativePeriod,
+				}
+			}(),
+			expectErr:   true,
+			errContains: "period must be a positive duration",
+		},
+		{
+			name: "Valid: feegrant_spend_limit_period ignored when with_feegrant is false",
+			msg: func() *types.MsgGrantOperatorAuthorization {
+				negativePeriod := -time.Hour
+				return &types.MsgGrantOperatorAuthorization{
+					Authority:                authority,
+					Operator:                 "",
+					Grantee:                  grantee,
+					MsgTypes:                 validMsgTypes,
+					WithFeegrant:             false,
+					FeegrantSpendLimit:       sdk.NewCoins(sdk.NewInt64Coin("stake", 500)),
+					FeegrantSpendLimitPeriod: &negativePeriod,
+				}
+			}(),
+			expectErr: false,
+		},
 	}
 
 	for _, tc := range testCases {
