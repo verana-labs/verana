@@ -3,6 +3,7 @@ package keeper_test
 import (
 	"context"
 	"testing"
+	"time"
 
 	"cosmossdk.io/core/address"
 	storetypes "cosmossdk.io/store/types"
@@ -18,10 +19,31 @@ import (
 	"github.com/verana-labs/verana/x/de/types"
 )
 
+// MockPermKeeper implements types.PermKeeper for testing.
+type MockPermKeeper struct {
+	Permissions map[uint64]MockPermission
+}
+
+type MockPermission struct {
+	Authority   string
+	VsOperator  string
+	WithFeegrant bool
+	EffectiveUntil *time.Time
+}
+
+func (m *MockPermKeeper) GetPermissionForVSOA(ctx context.Context, permID uint64) (string, string, bool, *time.Time, error) {
+	p, ok := m.Permissions[permID]
+	if !ok {
+		return "", "", false, nil, types.ErrPermissionNotFound
+	}
+	return p.Authority, p.VsOperator, p.WithFeegrant, p.EffectiveUntil, nil
+}
+
 type fixture struct {
 	ctx          context.Context
 	keeper       keeper.Keeper
 	addressCodec address.Codec
+	mockPerm     *MockPermKeeper
 }
 
 func initFixture(t *testing.T) *fixture {
@@ -36,11 +58,16 @@ func initFixture(t *testing.T) *fixture {
 
 	authority := authtypes.NewModuleAddress(types.GovModuleName)
 
+	mockPerm := &MockPermKeeper{
+		Permissions: make(map[uint64]MockPermission),
+	}
+
 	k := keeper.NewKeeper(
 		storeService,
 		encCfg.Codec,
 		addressCodec,
 		authority,
+		mockPerm,
 	)
 
 	// Initialize params
@@ -52,5 +79,6 @@ func initFixture(t *testing.T) *fixture {
 		ctx:          ctx,
 		keeper:       k,
 		addressCodec: addressCodec,
+		mockPerm:     mockPerm,
 	}
 }

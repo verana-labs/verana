@@ -64,6 +64,7 @@ func setupIntegrationFixture(t *testing.T) *integrationFixture {
 		deEncCfg.Codec,
 		deAddressCodec,
 		deAuthority,
+		nil, // permKeeper not needed for TR integration tests
 	)
 
 	// TR module setup — uses the real DE keeper for AUTHZ-CHECK

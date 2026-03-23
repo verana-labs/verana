@@ -215,19 +215,10 @@ func (ms msgServer) grantVSOperatorAuthorization(ctx sdk.Context, perm types.Per
 		return nil // No VS operator configured
 	}
 
-	// Grant the VS operator authorization to call CreateOrUpdatePermissionSession
-	// via the delegation keeper
+	// [MOD-DE-MSG-5] Grant the VS operator authorization via the delegation keeper.
+	// The DE module loads the permission data itself via its PermKeeper.
 	if ms.delegationKeeper != nil {
-		if err := ms.delegationKeeper.GrantVSOperatorAuthorization(
-			ctx,
-			perm.Authority,
-			perm.VsOperator,
-			perm.Id,
-			perm.VsOperatorAuthzSpendLimit,
-			perm.VsOperatorAuthzWithFeegrant,
-			perm.VsOperatorAuthzFeeSpendLimit,
-			perm.VsOperatorAuthzSpendPeriod,
-		); err != nil {
+		if err := ms.delegationKeeper.GrantVSOperatorAuthorization(ctx, perm.Id); err != nil {
 			return fmt.Errorf("failed to grant VS operator authorization: %w", err)
 		}
 	}

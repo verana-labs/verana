@@ -6,9 +6,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// VPRDelegableMsgTypes is the set of VPR message types that can be delegated
-// via operator authorization. CreateOrUpdatePermissionSession is excluded
-// per the spec.
+// VPRDelegableMsgTypes is the set of VPR message types that can be used in
+// fee grants and VS operator authorizations.
 var VPRDelegableMsgTypes = map[string]bool{
 	// Trust Registry (TR)
 	"/verana.tr.v1.MsgCreateTrustRegistry":                       true,
@@ -20,7 +19,7 @@ var VPRDelegableMsgTypes = map[string]bool{
 	"/verana.cs.v1.MsgCreateCredentialSchema":                     true,
 	"/verana.cs.v1.MsgUpdateCredentialSchema":                     true,
 	"/verana.cs.v1.MsgArchiveCredentialSchema":                    true,
-	// Permission (PERM) - excluding CreateOrUpdatePermissionSession
+	// Permission (PERM)
 	"/verana.perm.v1.MsgStartPermissionVP":                       true,
 	"/verana.perm.v1.MsgRenewPermissionVP":                       true,
 	"/verana.perm.v1.MsgSetPermissionVPToValidated":               true,
@@ -31,6 +30,7 @@ var VPRDelegableMsgTypes = map[string]bool{
 	"/verana.perm.v1.MsgSlashPermissionTrustDeposit":              true,
 	"/verana.perm.v1.MsgRepayPermissionSlashedTrustDeposit":       true,
 	"/verana.perm.v1.MsgCreatePermission":                         true,
+	"/verana.perm.v1.MsgCreateOrUpdatePermissionSession":          true,
 	// Trust Deposit (TD)
 	"/verana.td.v1.MsgReclaimTrustDepositYield":                   true,
 	"/verana.td.v1.MsgReclaimTrustDeposit":                        true,
@@ -39,6 +39,10 @@ var VPRDelegableMsgTypes = map[string]bool{
 	"/verana.de.v1.MsgGrantOperatorAuthorization":                  true,
 	"/verana.de.v1.MsgRevokeOperatorAuthorization":                 true,
 }
+
+// MsgCreateOrUpdatePermissionSessionTypeURL is excluded from Operator Authorization
+// msg_types per [MOD-DE-MSG-3-2] but allowed in VS Operator fee grants [MOD-DE-MSG-5].
+const MsgCreateOrUpdatePermissionSessionTypeURL = "/verana.perm.v1.MsgCreateOrUpdatePermissionSession"
 
 // ValidateBasic performs stateless validation on MsgGrantOperatorAuthorization.
 func (msg *MsgGrantOperatorAuthorization) ValidateBasic() error {
@@ -59,13 +63,17 @@ func (msg *MsgGrantOperatorAuthorization) ValidateBasic() error {
 		return fmt.Errorf("invalid grantee address: %w", err)
 	}
 
-	// msg_types must not be empty and must be VPR delegable
+	// msg_types must not be empty and must be VPR delegable,
+	// excluding CreateOrUpdatePermissionSession per [MOD-DE-MSG-3-2]
 	if len(msg.MsgTypes) == 0 {
 		return fmt.Errorf("msg_types must not be empty")
 	}
 	for _, mt := range msg.MsgTypes {
 		if !VPRDelegableMsgTypes[mt] {
 			return fmt.Errorf("msg_type %s is not a VPR delegable message type", mt)
+		}
+		if mt == MsgCreateOrUpdatePermissionSessionTypeURL {
+			return fmt.Errorf("msg_type %s is not allowed in operator authorization", mt)
 		}
 	}
 

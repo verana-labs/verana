@@ -35,6 +35,7 @@ type ModuleInputs struct {
 
 	AuthKeeper types.AuthKeeper
 	BankKeeper types.BankKeeper
+	PermKeeper types.PermKeeper `optional:"true"`
 }
 
 type ModuleOutputs struct {
@@ -55,6 +56,7 @@ func ProvideModule(in ModuleInputs) ModuleOutputs {
 		in.Cdc,
 		in.AddressCodec,
 		authority,
+		in.PermKeeper,
 	)
 	m := NewAppModule(in.Cdc, k, in.AuthKeeper, in.BankKeeper)
 

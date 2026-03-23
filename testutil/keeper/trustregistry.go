@@ -104,10 +104,10 @@ func (m *MockDelegationKeeper) CheckVSOperatorAuthorization(_ context.Context, _
 	return m.ErrToReturn
 }
 
-func (m *MockDelegationKeeper) GrantVSOperatorAuthorization(_ context.Context, _, _ string, _ uint64, _ sdk.Coins, _ bool, _ sdk.Coins, _ *time.Duration) error {
+func (m *MockDelegationKeeper) GrantVSOperatorAuthorization(_ context.Context, _ uint64) error {
 	return m.ErrToReturn
 }
 
-func (m *MockDelegationKeeper) RevokeVSOperatorAuthorization(_ context.Context, _, _ string, _ uint64) error {
+func (m *MockDelegationKeeper) RevokeVSOperatorAuthorization(_ context.Context, _ uint64) error {
 	return m.ErrToReturn
 }

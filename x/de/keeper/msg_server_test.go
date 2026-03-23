@@ -191,12 +191,11 @@ func TestGrantFeeAllowance(t *testing.T) {
 			errContains: "expiration must be in the future",
 		},
 		{
-			name:        "Invalid: CreateOrUpdatePermissionSession excluded",
-			authority:   authority,
-			grantee:     grantee,
-			msgTypes:    []string{"/verana.perm.v1.MsgCreateOrUpdatePermissionSession"},
-			expectErr:   true,
-			errContains: "invalid or non-delegable message type",
+			name:      "Valid: CreateOrUpdatePermissionSession allowed in fee grants (used by VSOA)",
+			authority: authority,
+			grantee:   grantee,
+			msgTypes:  []string{"/verana.perm.v1.MsgCreateOrUpdatePermissionSession"},
+			expectErr: false,
 		},
 		{
 			name:        "Invalid: UpdateParams excluded",
@@ -1706,4 +1705,507 @@ func TestBootstrapFlow_GroupProposalOnboardsFirstOperator(t *testing.T) {
 	has, err = k.OperatorAuthorizations.Has(ctx, oaKey)
 	require.NoError(t, err)
 	require.True(t, has)
+}
+
+// ---------------------------------------------------------------------------
+// [MOD-DE-MSG-5] GrantVSOperatorAuthorization (internal keeper method)
+// ---------------------------------------------------------------------------
+
+func TestGrantVSOperatorAuthorization(t *testing.T) {
+	f := initFixture(t)
+	k := f.keeper
+	ctx := sdk.UnwrapSDKContext(f.ctx)
+
+	authority := sdk.AccAddress([]byte("test_authority______")).String()
+	vsOperator := sdk.AccAddress([]byte("test_vs_operator____")).String()
+	futureTime := ctx.BlockTime().Add(24 * time.Hour)
+
+	t.Run("Permission not found", func(t *testing.T) {
+		err := k.GrantVSOperatorAuthorization(ctx, 999)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "permission not found")
+	})
+
+	t.Run("Permission has empty authority", func(t *testing.T) {
+		f.mockPerm.Permissions[1] = MockPermission{
+			Authority:  "",
+			VsOperator: vsOperator,
+		}
+		err := k.GrantVSOperatorAuthorization(ctx, 1)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "must not be null")
+	})
+
+	t.Run("Permission has empty vs_operator", func(t *testing.T) {
+		f.mockPerm.Permissions[2] = MockPermission{
+			Authority:  authority,
+			VsOperator: "",
+		}
+		err := k.GrantVSOperatorAuthorization(ctx, 2)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "must not be null")
+	})
+
+	t.Run("Mutual exclusivity: OA exists for authority/vs_operator", func(t *testing.T) {
+		f.mockPerm.Permissions[3] = MockPermission{
+			Authority:  authority,
+			VsOperator: vsOperator,
+		}
+		// Create an OperatorAuthorization for the same pair
+		oaKey := collections.Join(authority, vsOperator)
+		err := k.OperatorAuthorizations.Set(ctx, oaKey, types.OperatorAuthorization{
+			Authority: authority,
+			Operator:  vsOperator,
+			MsgTypes:  []string{"/verana.tr.v1.MsgCreateTrustRegistry"},
+		})
+		require.NoError(t, err)
+
+		err = k.GrantVSOperatorAuthorization(ctx, 3)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "OperatorAuthorization already exists")
+
+		// Cleanup
+		_ = k.OperatorAuthorizations.Remove(ctx, oaKey)
+	})
+
+	t.Run("Successful grant without feegrant", func(t *testing.T) {
+		f.mockPerm.Permissions[10] = MockPermission{
+			Authority:    authority,
+			VsOperator:   vsOperator,
+			WithFeegrant: false,
+			EffectiveUntil: &futureTime,
+		}
+		err := k.GrantVSOperatorAuthorization(ctx, 10)
+		require.NoError(t, err)
+
+		// Verify VSOA created with perm_id
+		vsKey := collections.Join(authority, vsOperator)
+		vsoa, err := k.VSOperatorAuthorizations.Get(ctx, vsKey)
+		require.NoError(t, err)
+		require.Equal(t, authority, vsoa.Authority)
+		require.Equal(t, vsOperator, vsoa.VsOperator)
+		require.Contains(t, vsoa.Permissions, uint64(10))
+
+		// No fee grant should exist
+		fgKey := collections.Join(authority, vsOperator)
+		has, err := k.FeeGrants.Has(ctx, fgKey)
+		require.NoError(t, err)
+		require.False(t, has)
+
+		// Cleanup
+		_ = k.VSOperatorAuthorizations.Remove(ctx, vsKey)
+	})
+
+	t.Run("Successful grant with feegrant and expiration", func(t *testing.T) {
+		f.mockPerm.Permissions[20] = MockPermission{
+			Authority:      authority,
+			VsOperator:     vsOperator,
+			WithFeegrant:   true,
+			EffectiveUntil: &futureTime,
+		}
+		err := k.GrantVSOperatorAuthorization(ctx, 20)
+		require.NoError(t, err)
+
+		// Verify fee grant exists with expiration
+		fgKey := collections.Join(authority, vsOperator)
+		fg, err := k.FeeGrants.Get(ctx, fgKey)
+		require.NoError(t, err)
+		require.Equal(t, authority, fg.Grantor)
+		require.Equal(t, vsOperator, fg.Grantee)
+		require.NotNil(t, fg.Expiration)
+		require.Equal(t, futureTime, *fg.Expiration)
+
+		// Cleanup
+		vsKey := collections.Join(authority, vsOperator)
+		_ = k.VSOperatorAuthorizations.Remove(ctx, vsKey)
+		_ = k.FeeGrants.Remove(ctx, fgKey)
+	})
+
+	t.Run("Successful grant with feegrant and no expiration", func(t *testing.T) {
+		f.mockPerm.Permissions[30] = MockPermission{
+			Authority:      authority,
+			VsOperator:     vsOperator,
+			WithFeegrant:   true,
+			EffectiveUntil: nil, // no expiration
+		}
+		err := k.GrantVSOperatorAuthorization(ctx, 30)
+		require.NoError(t, err)
+
+		// Fee grant should have no expiration
+		fgKey := collections.Join(authority, vsOperator)
+		fg, err := k.FeeGrants.Get(ctx, fgKey)
+		require.NoError(t, err)
+		require.Nil(t, fg.Expiration)
+
+		// Cleanup
+		vsKey := collections.Join(authority, vsOperator)
+		_ = k.VSOperatorAuthorizations.Remove(ctx, vsKey)
+		_ = k.FeeGrants.Remove(ctx, fgKey)
+	})
+
+	t.Run("Adding second permission extends VSOA permissions list", func(t *testing.T) {
+		f.mockPerm.Permissions[40] = MockPermission{
+			Authority:      authority,
+			VsOperator:     vsOperator,
+			WithFeegrant:   false,
+			EffectiveUntil: &futureTime,
+		}
+		f.mockPerm.Permissions[41] = MockPermission{
+			Authority:      authority,
+			VsOperator:     vsOperator,
+			WithFeegrant:   false,
+			EffectiveUntil: &futureTime,
+		}
+
+		err := k.GrantVSOperatorAuthorization(ctx, 40)
+		require.NoError(t, err)
+		err = k.GrantVSOperatorAuthorization(ctx, 41)
+		require.NoError(t, err)
+
+		vsKey := collections.Join(authority, vsOperator)
+		vsoa, err := k.VSOperatorAuthorizations.Get(ctx, vsKey)
+		require.NoError(t, err)
+		require.Len(t, vsoa.Permissions, 2)
+		require.Contains(t, vsoa.Permissions, uint64(40))
+		require.Contains(t, vsoa.Permissions, uint64(41))
+
+		// Cleanup
+		_ = k.VSOperatorAuthorizations.Remove(ctx, vsKey)
+	})
+
+	t.Run("Duplicate perm_id not added twice", func(t *testing.T) {
+		f.mockPerm.Permissions[50] = MockPermission{
+			Authority:  authority,
+			VsOperator: vsOperator,
+		}
+		err := k.GrantVSOperatorAuthorization(ctx, 50)
+		require.NoError(t, err)
+		err = k.GrantVSOperatorAuthorization(ctx, 50)
+		require.NoError(t, err)
+
+		vsKey := collections.Join(authority, vsOperator)
+		vsoa, err := k.VSOperatorAuthorizations.Get(ctx, vsKey)
+		require.NoError(t, err)
+		require.Len(t, vsoa.Permissions, 1)
+
+		// Cleanup
+		_ = k.VSOperatorAuthorizations.Remove(ctx, vsKey)
+	})
+
+	t.Run("Feegrant uses farthest expiration across permissions", func(t *testing.T) {
+		nearFuture := ctx.BlockTime().Add(1 * time.Hour)
+		farFuture := ctx.BlockTime().Add(48 * time.Hour)
+
+		f.mockPerm.Permissions[60] = MockPermission{
+			Authority:      authority,
+			VsOperator:     vsOperator,
+			WithFeegrant:   true,
+			EffectiveUntil: &nearFuture,
+		}
+		f.mockPerm.Permissions[61] = MockPermission{
+			Authority:      authority,
+			VsOperator:     vsOperator,
+			WithFeegrant:   true,
+			EffectiveUntil: &farFuture,
+		}
+
+		err := k.GrantVSOperatorAuthorization(ctx, 60)
+		require.NoError(t, err)
+		err = k.GrantVSOperatorAuthorization(ctx, 61)
+		require.NoError(t, err)
+
+		// Fee grant expiration should be the farthest (farFuture)
+		fgKey := collections.Join(authority, vsOperator)
+		fg, err := k.FeeGrants.Get(ctx, fgKey)
+		require.NoError(t, err)
+		require.NotNil(t, fg.Expiration)
+		require.Equal(t, farFuture, *fg.Expiration)
+
+		// Cleanup
+		vsKey := collections.Join(authority, vsOperator)
+		_ = k.VSOperatorAuthorizations.Remove(ctx, vsKey)
+		_ = k.FeeGrants.Remove(ctx, fgKey)
+	})
+}
+
+// ---------------------------------------------------------------------------
+// [MOD-DE-MSG-6] RevokeVSOperatorAuthorization (internal keeper method)
+// ---------------------------------------------------------------------------
+
+func TestRevokeVSOperatorAuthorization(t *testing.T) {
+	f := initFixture(t)
+	k := f.keeper
+	ctx := sdk.UnwrapSDKContext(f.ctx)
+
+	authority := sdk.AccAddress([]byte("test_authority______")).String()
+	vsOperator := sdk.AccAddress([]byte("test_vs_operator____")).String()
+	futureTime := ctx.BlockTime().Add(24 * time.Hour)
+
+	t.Run("Permission not found", func(t *testing.T) {
+		err := k.RevokeVSOperatorAuthorization(ctx, 999)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "permission not found")
+	})
+
+	t.Run("VSOA does not exist - no-op", func(t *testing.T) {
+		f.mockPerm.Permissions[100] = MockPermission{
+			Authority:  authority,
+			VsOperator: vsOperator,
+		}
+		// No VSOA exists — should return nil
+		err := k.RevokeVSOperatorAuthorization(ctx, 100)
+		require.NoError(t, err)
+	})
+
+	t.Run("Revoke last permission removes VSOA and fee grant", func(t *testing.T) {
+		f.mockPerm.Permissions[110] = MockPermission{
+			Authority:      authority,
+			VsOperator:     vsOperator,
+			WithFeegrant:   true,
+			EffectiveUntil: &futureTime,
+		}
+
+		// Grant first
+		err := k.GrantVSOperatorAuthorization(ctx, 110)
+		require.NoError(t, err)
+
+		// Revoke
+		err = k.RevokeVSOperatorAuthorization(ctx, 110)
+		require.NoError(t, err)
+
+		// VSOA should be removed
+		vsKey := collections.Join(authority, vsOperator)
+		has, err := k.VSOperatorAuthorizations.Has(ctx, vsKey)
+		require.NoError(t, err)
+		require.False(t, has)
+
+		// Fee grant should be removed
+		fgKey := collections.Join(authority, vsOperator)
+		has, err = k.FeeGrants.Has(ctx, fgKey)
+		require.NoError(t, err)
+		require.False(t, has)
+	})
+
+	t.Run("Revoke one of multiple permissions keeps VSOA", func(t *testing.T) {
+		f.mockPerm.Permissions[120] = MockPermission{
+			Authority:  authority,
+			VsOperator: vsOperator,
+		}
+		f.mockPerm.Permissions[121] = MockPermission{
+			Authority:  authority,
+			VsOperator: vsOperator,
+		}
+
+		err := k.GrantVSOperatorAuthorization(ctx, 120)
+		require.NoError(t, err)
+		err = k.GrantVSOperatorAuthorization(ctx, 121)
+		require.NoError(t, err)
+
+		// Revoke one
+		err = k.RevokeVSOperatorAuthorization(ctx, 120)
+		require.NoError(t, err)
+
+		// VSOA should still exist with one permission
+		vsKey := collections.Join(authority, vsOperator)
+		vsoa, err := k.VSOperatorAuthorizations.Get(ctx, vsKey)
+		require.NoError(t, err)
+		require.Len(t, vsoa.Permissions, 1)
+		require.Equal(t, uint64(121), vsoa.Permissions[0])
+
+		// Cleanup
+		_ = k.VSOperatorAuthorizations.Remove(ctx, vsKey)
+	})
+
+	t.Run("Revoke with feegrant recalculates expiration", func(t *testing.T) {
+		nearFuture := ctx.BlockTime().Add(1 * time.Hour)
+		farFuture := ctx.BlockTime().Add(48 * time.Hour)
+
+		f.mockPerm.Permissions[130] = MockPermission{
+			Authority:      authority,
+			VsOperator:     vsOperator,
+			WithFeegrant:   true,
+			EffectiveUntil: &farFuture,
+		}
+		f.mockPerm.Permissions[131] = MockPermission{
+			Authority:      authority,
+			VsOperator:     vsOperator,
+			WithFeegrant:   true,
+			EffectiveUntil: &nearFuture,
+		}
+
+		err := k.GrantVSOperatorAuthorization(ctx, 130)
+		require.NoError(t, err)
+		err = k.GrantVSOperatorAuthorization(ctx, 131)
+		require.NoError(t, err)
+
+		// Revoke the one with farFuture expiration
+		err = k.RevokeVSOperatorAuthorization(ctx, 130)
+		require.NoError(t, err)
+
+		// Fee grant expiration should now be nearFuture
+		fgKey := collections.Join(authority, vsOperator)
+		fg, err := k.FeeGrants.Get(ctx, fgKey)
+		require.NoError(t, err)
+		require.NotNil(t, fg.Expiration)
+		require.Equal(t, nearFuture, *fg.Expiration)
+
+		// Cleanup
+		vsKey := collections.Join(authority, vsOperator)
+		_ = k.VSOperatorAuthorizations.Remove(ctx, vsKey)
+		_ = k.FeeGrants.Remove(ctx, fgKey)
+	})
+}
+
+// ---------------------------------------------------------------------------
+// [MOD-DE-QRY-1] ListOperatorAuthorizations
+// ---------------------------------------------------------------------------
+
+func TestQueryListOperatorAuthorizations(t *testing.T) {
+	f := initFixture(t)
+	k := f.keeper
+	ctx := sdk.UnwrapSDKContext(f.ctx)
+	qs := keeper.NewQueryServerImpl(k)
+
+	authority1 := sdk.AccAddress([]byte("test_authority1_____")).String()
+	authority2 := sdk.AccAddress([]byte("test_authority2_____")).String()
+	grantee1 := sdk.AccAddress([]byte("test_grantee1_______")).String()
+	grantee2 := sdk.AccAddress([]byte("test_grantee2_______")).String()
+
+	// Seed data
+	for _, pair := range [][2]string{{authority1, grantee1}, {authority1, grantee2}, {authority2, grantee1}} {
+		err := k.OperatorAuthorizations.Set(ctx, collections.Join(pair[0], pair[1]),
+			types.OperatorAuthorization{Authority: pair[0], Operator: pair[1], MsgTypes: []string{"/verana.tr.v1.MsgCreateTrustRegistry"}})
+		require.NoError(t, err)
+	}
+
+	t.Run("No filter returns all", func(t *testing.T) {
+		resp, err := qs.ListOperatorAuthorizations(ctx, &types.QueryListOperatorAuthorizationsRequest{})
+		require.NoError(t, err)
+		require.Len(t, resp.OperatorAuthorizations, 3)
+	})
+
+	t.Run("Filter by authority", func(t *testing.T) {
+		resp, err := qs.ListOperatorAuthorizations(ctx, &types.QueryListOperatorAuthorizationsRequest{
+			Authority: authority1,
+		})
+		require.NoError(t, err)
+		require.Len(t, resp.OperatorAuthorizations, 2)
+	})
+
+	t.Run("Filter by operator", func(t *testing.T) {
+		resp, err := qs.ListOperatorAuthorizations(ctx, &types.QueryListOperatorAuthorizationsRequest{
+			Operator: grantee1,
+		})
+		require.NoError(t, err)
+		require.Len(t, resp.OperatorAuthorizations, 2)
+	})
+
+	t.Run("Filter by both", func(t *testing.T) {
+		resp, err := qs.ListOperatorAuthorizations(ctx, &types.QueryListOperatorAuthorizationsRequest{
+			Authority: authority1,
+			Operator:  grantee1,
+		})
+		require.NoError(t, err)
+		require.Len(t, resp.OperatorAuthorizations, 1)
+	})
+
+	t.Run("Limit results", func(t *testing.T) {
+		resp, err := qs.ListOperatorAuthorizations(ctx, &types.QueryListOperatorAuthorizationsRequest{
+			ResponseMaxSize: 2,
+		})
+		require.NoError(t, err)
+		require.Len(t, resp.OperatorAuthorizations, 2)
+	})
+
+	t.Run("Default limit is 64", func(t *testing.T) {
+		resp, err := qs.ListOperatorAuthorizations(ctx, &types.QueryListOperatorAuthorizationsRequest{
+			ResponseMaxSize: 0, // should default to 64
+		})
+		require.NoError(t, err)
+		require.Len(t, resp.OperatorAuthorizations, 3) // less than 64
+	})
+
+	t.Run("Invalid limit", func(t *testing.T) {
+		_, err := qs.ListOperatorAuthorizations(ctx, &types.QueryListOperatorAuthorizationsRequest{
+			ResponseMaxSize: 2000,
+		})
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "response_max_size must be between 1 and 1,024")
+	})
+
+	t.Run("Nil request", func(t *testing.T) {
+		_, err := qs.ListOperatorAuthorizations(ctx, nil)
+		require.Error(t, err)
+	})
+}
+
+// ---------------------------------------------------------------------------
+// [MOD-DE-QRY-2] ListVSOperatorAuthorizations
+// ---------------------------------------------------------------------------
+
+func TestQueryListVSOperatorAuthorizations(t *testing.T) {
+	f := initFixture(t)
+	k := f.keeper
+	ctx := sdk.UnwrapSDKContext(f.ctx)
+	qs := keeper.NewQueryServerImpl(k)
+
+	authority1 := sdk.AccAddress([]byte("test_authority1_____")).String()
+	authority2 := sdk.AccAddress([]byte("test_authority2_____")).String()
+	vsOp1 := sdk.AccAddress([]byte("test_vs_op1_________")).String()
+	vsOp2 := sdk.AccAddress([]byte("test_vs_op2_________")).String()
+
+	// Seed data
+	for _, d := range []struct{ auth, vsOp string; perms []uint64 }{
+		{authority1, vsOp1, []uint64{1, 2}},
+		{authority1, vsOp2, []uint64{3}},
+		{authority2, vsOp1, []uint64{4}},
+	} {
+		err := k.VSOperatorAuthorizations.Set(ctx, collections.Join(d.auth, d.vsOp),
+			types.VSOperatorAuthorization{Authority: d.auth, VsOperator: d.vsOp, Permissions: d.perms})
+		require.NoError(t, err)
+	}
+
+	t.Run("No filter returns all", func(t *testing.T) {
+		resp, err := qs.ListVSOperatorAuthorizations(ctx, &types.QueryListVSOperatorAuthorizationsRequest{})
+		require.NoError(t, err)
+		require.Len(t, resp.VsOperatorAuthorizations, 3)
+	})
+
+	t.Run("Filter by authority", func(t *testing.T) {
+		resp, err := qs.ListVSOperatorAuthorizations(ctx, &types.QueryListVSOperatorAuthorizationsRequest{
+			Authority: authority1,
+		})
+		require.NoError(t, err)
+		require.Len(t, resp.VsOperatorAuthorizations, 2)
+	})
+
+	t.Run("Filter by vs_operator", func(t *testing.T) {
+		resp, err := qs.ListVSOperatorAuthorizations(ctx, &types.QueryListVSOperatorAuthorizationsRequest{
+			VsOperator: vsOp1,
+		})
+		require.NoError(t, err)
+		require.Len(t, resp.VsOperatorAuthorizations, 2)
+	})
+
+	t.Run("Filter by both", func(t *testing.T) {
+		resp, err := qs.ListVSOperatorAuthorizations(ctx, &types.QueryListVSOperatorAuthorizationsRequest{
+			Authority:  authority1,
+			VsOperator: vsOp1,
+		})
+		require.NoError(t, err)
+		require.Len(t, resp.VsOperatorAuthorizations, 1)
+		require.Equal(t, []uint64{1, 2}, resp.VsOperatorAuthorizations[0].Permissions)
+	})
+
+	t.Run("Invalid limit", func(t *testing.T) {
+		_, err := qs.ListVSOperatorAuthorizations(ctx, &types.QueryListVSOperatorAuthorizationsRequest{
+			ResponseMaxSize: 2000,
+		})
+		require.Error(t, err)
+	})
+
+	t.Run("Nil request", func(t *testing.T) {
+		_, err := qs.ListVSOperatorAuthorizations(ctx, nil)
+		require.Error(t, err)
+	})
 }

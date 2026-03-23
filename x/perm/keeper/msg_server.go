@@ -1064,13 +1064,10 @@ func (ms msgServer) revokeVSOperatorAuthorization(ctx sdk.Context, perm types.Pe
 		return nil // No VS operator configured
 	}
 
+	// [MOD-DE-MSG-6] Revoke the VS operator authorization via the delegation keeper.
+	// The DE module loads the permission data itself via its PermKeeper.
 	if ms.delegationKeeper != nil {
-		if err := ms.delegationKeeper.RevokeVSOperatorAuthorization(
-			ctx,
-			perm.Authority,
-			perm.VsOperator,
-			perm.Id,
-		); err != nil {
+		if err := ms.delegationKeeper.RevokeVSOperatorAuthorization(ctx, perm.Id); err != nil {
 			return fmt.Errorf("failed to revoke VS operator authorization: %w", err)
 		}
 	}
