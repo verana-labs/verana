@@ -1,7 +1,6 @@
 package keeper
 
 import (
-	"context"
 	"fmt"
 	"time"
 
@@ -85,16 +84,6 @@ func (k Keeper) GetPermissionByID(ctx sdk.Context, id uint64) (types.Permission,
 	return k.Permission.Get(ctx, id)
 }
 
-// GetPermissionForVSOA returns the fields needed by the DE module for VS operator
-// authorization management. Implements the DE module's PermKeeper interface.
-func (k Keeper) GetPermissionForVSOA(ctx context.Context, permID uint64) (authority string, vsOperator string, withFeegrant bool, effectiveUntil *time.Time, err error) {
-	sdkCtx := sdk.UnwrapSDKContext(ctx)
-	perm, err := k.Permission.Get(sdkCtx, permID)
-	if err != nil {
-		return "", "", false, nil, err
-	}
-	return perm.Authority, perm.VsOperator, perm.VsOperatorAuthzWithFeegrant, perm.EffectiveUntil, nil
-}
 
 // CreatePermission creates a new perm and returns its ID
 func (k Keeper) CreatePermission(ctx sdk.Context, perm types.Permission) (uint64, error) {

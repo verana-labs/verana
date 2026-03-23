@@ -360,7 +360,7 @@ func New(
 
 	// Wire cross-module keeper references that would cause cyclic depinject
 	// dependencies if declared in ModuleInputs (TR -> DE -> Perm -> TR).
-	app.DeKeeper.SetPermKeeper(&app.PermissionKeeper)
+	app.DeKeeper.SetPermKeeper(&permKeeperAdapter{pk: app.PermissionKeeper})
 
 	// add to default baseapp options
 	// enable optimistic execution
