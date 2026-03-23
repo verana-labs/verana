@@ -74,9 +74,21 @@ func (msg *MsgGrantOperatorAuthorization) ValidateBasic() error {
 		return fmt.Errorf("invalid authz_spend_limit")
 	}
 
+	// authz_spend_limit_period if specified must be a valid (positive) period;
+	// ignored if authz_spend_limit is not set [MOD-DE-MSG-3-2]
+	if len(msg.AuthzSpendLimit) > 0 && msg.AuthzSpendLimitPeriod != nil && *msg.AuthzSpendLimitPeriod <= 0 {
+		return fmt.Errorf("authz_spend_limit_period must be a positive duration")
+	}
+
 	// feegrant_spend_limit if specified must be valid (only relevant if with_feegrant)
 	if msg.WithFeegrant && len(msg.FeegrantSpendLimit) > 0 && !msg.FeegrantSpendLimit.IsValid() {
 		return fmt.Errorf("invalid feegrant_spend_limit")
+	}
+
+	// feegrant_spend_limit_period if specified must be a valid (positive) period;
+	// ignored if feegrant_spend_limit is not set or with_feegrant is false [MOD-DE-MSG-3-2]
+	if msg.WithFeegrant && len(msg.FeegrantSpendLimit) > 0 && msg.FeegrantSpendLimitPeriod != nil && *msg.FeegrantSpendLimitPeriod <= 0 {
+		return fmt.Errorf("feegrant_spend_limit_period must be a positive duration")
 	}
 
 	return nil
