@@ -35,7 +35,6 @@ func NewKeeper(
 	cdc codec.Codec,
 	addressCodec address.Codec,
 	authority []byte,
-	permKeeper types.PermKeeper,
 ) Keeper {
 	if _, err := addressCodec.BytesToString(authority); err != nil {
 		panic(fmt.Sprintf("invalid authority address %s: %s", authority, err))
@@ -50,7 +49,6 @@ func NewKeeper(
 		cdc:          cdc,
 		addressCodec: addressCodec,
 		authority:    authority,
-		permKeeper:   permKeeper,
 
 		Params: collections.NewItem(sb, types.ParamsKey, "params", codec.CollValue[types.Params](cdc)),
 		OperatorAuthorizations: collections.NewMap(sb, types.OperatorAuthorizationKey, "operator_authorization",
@@ -73,4 +71,11 @@ func NewKeeper(
 // GetAuthority returns the module's authority.
 func (k Keeper) GetAuthority() []byte {
 	return k.authority
+}
+
+// SetPermKeeper sets the permission keeper after initialization.
+// This is done post-depinject to avoid a cyclic dependency
+// (TR → DE → Perm → TR).
+func (k *Keeper) SetPermKeeper(pk types.PermKeeper) {
+	k.permKeeper = pk
 }

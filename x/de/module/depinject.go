@@ -35,7 +35,9 @@ type ModuleInputs struct {
 
 	AuthKeeper types.AuthKeeper
 	BankKeeper types.BankKeeper
-	PermKeeper types.PermKeeper `optional:"true"`
+	// NOTE: PermKeeper is NOT wired here to avoid a cyclic dependency
+	// (TR -> DE -> Perm -> TR). It is set after depinject via
+	// Keeper.SetPermKeeper() in app.go.
 }
 
 type ModuleOutputs struct {
@@ -56,7 +58,6 @@ func ProvideModule(in ModuleInputs) ModuleOutputs {
 		in.Cdc,
 		in.AddressCodec,
 		authority,
-		in.PermKeeper,
 	)
 	m := NewAppModule(in.Cdc, k, in.AuthKeeper, in.BankKeeper)
 

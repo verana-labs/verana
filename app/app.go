@@ -358,6 +358,10 @@ func New(
 		panic(err)
 	}
 
+	// Wire cross-module keeper references that would cause cyclic depinject
+	// dependencies if declared in ModuleInputs (TR -> DE -> Perm -> TR).
+	app.DeKeeper.SetPermKeeper(&app.PermissionKeeper)
+
 	// add to default baseapp options
 	// enable optimistic execution
 	baseAppOptions = append(baseAppOptions, baseapp.SetOptimisticExecution())
