@@ -36,7 +36,14 @@ func RunPermissionCSPSJourney(ctx context.Context, client cosmosclient.Client) e
 	operatorAccount := lib.GetAccount(client, permOperatorName)
 	operatorAddr := setup302.OperatorAddr
 
+	// Use a distinct account as VS operator to avoid mutual exclusivity
+	// conflict with the OperatorAuthorization (self-delegation) created below.
+	// OA and VSOA are mutually exclusive per [MOD-DE-MSG-5-2].
+	vsOperatorAccount := lib.GetAccount(client, "cooluser")
+	vsOperatorAddr, _ := vsOperatorAccount.Address("verana")
+
 	fmt.Printf("  Operator: %s\n", operatorAddr)
+	fmt.Printf("  VS Operator: %s\n", vsOperatorAddr)
 
 	trID, _ := strconv.ParseUint(setup302.TrustRegistryID, 10, 64)
 
@@ -115,14 +122,14 @@ func RunPermissionCSPSJourney(ctx context.Context, client cosmosclient.Client) e
 		Type:                   permtypes.PermissionType_ISSUER,
 		ValidatorPermId:        rootPermID,
 		Did:                    issuerDID,
-		VsOperator:             operatorAddr,
+		VsOperator:             vsOperatorAddr,
 		VsOperatorAuthzEnabled: true,
 	})
 	if err != nil {
 		return fmt.Errorf("prerequisite 4 failed: could not start issuer perm VP: %w", err)
 	}
 	issuerPermID, _ := strconv.ParseUint(issuerPermIDStr, 10, 64)
-	fmt.Printf("OK Prerequisite 4: ISSUER perm started with ID: %d (vs_operator=%s)\n", issuerPermID, operatorAddr)
+	fmt.Printf("OK Prerequisite 4: ISSUER perm started with ID: %d (vs_operator=%s)\n", issuerPermID, vsOperatorAddr)
 	waitForTx("issuer perm start")
 
 	// --- Prerequisite 5: Validate ISSUER perm (grants VS operator auth) ---
@@ -221,7 +228,7 @@ func RunPermissionCSPSJourney(ctx context.Context, client cosmosclient.Client) e
 	walletAgentPermID := agentPermID
 
 	fmt.Println("\n=== Prerequisites complete ===")
-	fmt.Printf("  Issuer perm ID:       %d (authority=%s, vs_operator=%s)\n", issuerPermID, operatorAddr, operatorAddr)
+	fmt.Printf("  Issuer perm ID:       %d (authority=%s, vs_operator=%s)\n", issuerPermID, operatorAddr, vsOperatorAddr)
 	fmt.Printf("  Agent perm ID:        %d (authority=%s)\n", agentPermID, operatorAddr)
 	fmt.Printf("  Wallet agent perm ID: %d (same as agent)\n", walletAgentPermID)
 

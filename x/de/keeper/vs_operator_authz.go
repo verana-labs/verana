@@ -25,12 +25,12 @@ func (k Keeper) GrantVSOperatorAuthorization(ctx context.Context, permID uint64)
 
 	// [MOD-DE-MSG-5-2] Basic checks
 
-	if k.permKeeper == nil {
+	if k.permKeeper == nil || *k.permKeeper == nil {
 		return types.ErrPermKeeperRequired
 	}
 
 	// Permission MUST exist
-	authority, vsOperator, withFeegrant, effectiveUntil, err := k.permKeeper.GetPermissionForVSOA(ctx, permID)
+	authority, vsOperator, withFeegrant, effectiveUntil, err := (*k.permKeeper).GetPermissionForVSOA(ctx, permID)
 	if err != nil {
 		return fmt.Errorf("%w: %d", types.ErrPermissionNotFound, permID)
 	}
@@ -95,7 +95,7 @@ func (k Keeper) GrantVSOperatorAuthorization(ctx context.Context, permID uint64)
 		} else {
 			// Iterate all permissions to find the farthest effective_until
 			for _, currentPermID := range vsoa.Permissions {
-				_, _, curWithFeegrant, curEffectiveUntil, err := k.permKeeper.GetPermissionForVSOA(ctx, currentPermID)
+				_, _, curWithFeegrant, curEffectiveUntil, err := (*k.permKeeper).GetPermissionForVSOA(ctx, currentPermID)
 				if err != nil {
 					continue // permission may have been deleted
 				}
@@ -172,12 +172,12 @@ func (k Keeper) RevokeVSOperatorAuthorization(ctx context.Context, permID uint64
 
 	// [MOD-DE-MSG-6-2] Basic checks
 
-	if k.permKeeper == nil {
+	if k.permKeeper == nil || *k.permKeeper == nil {
 		return types.ErrPermKeeperRequired
 	}
 
 	// Permission MUST exist
-	authority, vsOperator, permWithFeegrant, _, err := k.permKeeper.GetPermissionForVSOA(ctx, permID)
+	authority, vsOperator, permWithFeegrant, _, err := (*k.permKeeper).GetPermissionForVSOA(ctx, permID)
 	if err != nil {
 		return fmt.Errorf("%w: %d", types.ErrPermissionNotFound, permID)
 	}
@@ -216,7 +216,7 @@ func (k Keeper) RevokeVSOperatorAuthorization(ctx context.Context, permID uint64
 			// Recalculate max_expire from remaining permissions
 			var maxExpire *time.Time
 			for _, currentPermID := range vsoa.Permissions {
-				_, _, curWithFeegrant, curEffectiveUntil, err := k.permKeeper.GetPermissionForVSOA(ctx, currentPermID)
+				_, _, curWithFeegrant, curEffectiveUntil, err := (*k.permKeeper).GetPermissionForVSOA(ctx, currentPermID)
 				if err != nil {
 					continue
 				}

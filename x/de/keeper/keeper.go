@@ -21,7 +21,9 @@ type Keeper struct {
 
 	// permKeeper is used by [MOD-DE-MSG-5] and [MOD-DE-MSG-6] to load
 	// permission data for VS operator authorization management.
-	permKeeper types.PermKeeper
+	// This is a pointer-to-interface so that SetPermKeeper (called after
+	// depinject) propagates to all copies of the Keeper (value type).
+	permKeeper *types.PermKeeper
 
 	Schema                   collections.Schema
 	Params                   collections.Item[types.Params]
@@ -44,11 +46,18 @@ func NewKeeper(
 
 	pairKeyCodec := collections.PairKeyCodec(collections.StringKey, collections.StringKey)
 
+	// Allocate the permKeeper slot on the heap so all value-copies of
+	// this Keeper share the same pointer. SetPermKeeper writes into it
+	// after depinject completes, and every copy (including the one held
+	// by AppModule / msgServer) sees the update.
+	var pkSlot types.PermKeeper
+
 	k := Keeper{
 		storeService: storeService,
 		cdc:          cdc,
 		addressCodec: addressCodec,
 		authority:    authority,
+		permKeeper:   &pkSlot,
 
 		Params: collections.NewItem(sb, types.ParamsKey, "params", codec.CollValue[types.Params](cdc)),
 		OperatorAuthorizations: collections.NewMap(sb, types.OperatorAuthorizationKey, "operator_authorization",
@@ -75,7 +84,8 @@ func (k Keeper) GetAuthority() []byte {
 
 // SetPermKeeper sets the permission keeper after initialization.
 // This is done post-depinject to avoid a cyclic dependency
-// (TR → DE → Perm → TR).
+// (TR → DE → Perm → TR). The value is stored behind a pointer so
+// the mutation propagates to all value-copies of the Keeper.
 func (k *Keeper) SetPermKeeper(pk types.PermKeeper) {
-	k.permKeeper = pk
+	*k.permKeeper = pk
 }
