@@ -60,9 +60,12 @@ type DelegationKeeper interface {
 	// CheckVSOperatorAuthorization checks if a VS operator is authorized to act on behalf of the authority.
 	// [AUTHZ-CHECK-3] A VSOperatorAuthorization entry must exist where authority and vs_operator match.
 	CheckVSOperatorAuthorization(ctx context.Context, authority string, vsOperator string) error
-	// GrantVSOperatorAuthorization grants a VS operator the authorization to call
-	// CreateOrUpdatePermissionSession on behalf of the authority for a given permission.
-	GrantVSOperatorAuthorization(ctx context.Context, authority string, vsOperator string, permissionID uint64, spendLimit sdk.Coins, withFeegrant bool, feeSpendLimit sdk.Coins, spendPeriod *time.Duration) error
-	// RevokeVSOperatorAuthorization revokes a VS operator's authorization for a given permission.
-	RevokeVSOperatorAuthorization(ctx context.Context, authority string, vsOperator string, permissionID uint64) error
+	// VSOA CRUD methods (storage in DE, orchestration in Perm)
+	AddPermToVSOA(ctx context.Context, authority, vsOperator string, permID uint64) error
+	RemovePermFromVSOA(ctx context.Context, authority, vsOperator string, permID uint64) ([]uint64, error)
+	GetVSOAPermissions(ctx context.Context, authority, vsOperator string) ([]uint64, error)
+	HasOperatorAuthorization(ctx context.Context, authority, operator string) (bool, error)
+	// Fee grant methods
+	GrantFeeAllowance(ctx context.Context, authority string, grantee string, msgTypes []string, expiration *time.Time, spendLimit sdk.Coins, period *time.Duration) error
+	RevokeFeeAllowance(ctx context.Context, authority string, grantee string) error
 }

@@ -18,4 +18,6 @@ var (
 	ErrAuthzMsgTypeNotFound  = errors.Register(ModuleName, 1107, "operator authorization does not include requested message type")
 	ErrAuthzSpendLimitExceeded = errors.Register(ModuleName, 1108, "operator authorization spend limit exceeded")
 	ErrOperatorAuthzNotFound   = errors.Register(ModuleName, 1109, "operator authorization not found for this authority/grantee pair")
+	ErrOperatorAuthzExistsMutex = errors.Register(ModuleName, 1110, "OperatorAuthorization already exists for this authority/vs_operator pair; mutual exclusivity violated")
+	ErrInvalidResponseMaxSize   = errors.Register(ModuleName, 1111, "response_max_size must be between 1 and 1024")
 )

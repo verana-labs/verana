@@ -104,10 +104,26 @@ func (m *MockDelegationKeeper) CheckVSOperatorAuthorization(_ context.Context, _
 	return m.ErrToReturn
 }
 
-func (m *MockDelegationKeeper) GrantVSOperatorAuthorization(_ context.Context, _, _ string, _ uint64, _ sdk.Coins, _ bool, _ sdk.Coins, _ *time.Duration) error {
+func (m *MockDelegationKeeper) AddPermToVSOA(_ context.Context, _, _ string, _ uint64) error {
 	return m.ErrToReturn
 }
 
-func (m *MockDelegationKeeper) RevokeVSOperatorAuthorization(_ context.Context, _, _ string, _ uint64) error {
+func (m *MockDelegationKeeper) RemovePermFromVSOA(_ context.Context, _, _ string, _ uint64) ([]uint64, error) {
+	return nil, m.ErrToReturn
+}
+
+func (m *MockDelegationKeeper) GetVSOAPermissions(_ context.Context, _, _ string) ([]uint64, error) {
+	return nil, m.ErrToReturn
+}
+
+func (m *MockDelegationKeeper) HasOperatorAuthorization(_ context.Context, _, _ string) (bool, error) {
+	return false, m.ErrToReturn
+}
+
+func (m *MockDelegationKeeper) GrantFeeAllowance(_ context.Context, _ string, _ string, _ []string, _ *time.Time, _ sdk.Coins, _ *time.Duration) error {
+	return m.ErrToReturn
+}
+
+func (m *MockDelegationKeeper) RevokeFeeAllowance(_ context.Context, _, _ string) error {
 	return m.ErrToReturn
 }

@@ -208,27 +208,37 @@ func (ms msgServer) executeSetPermissionVPToValidated(
 	return &types.MsgSetPermissionVPToValidatedResponse{}, nil
 }
 
-// grantVSOperatorAuthorization grants VS operator authorization for ISSUER/VERIFIER permissions
-// This allows the Verifiable Service to call CreateOrUpdatePermissionSession
+// grantVSOperatorAuthorization implements [MOD-DE-MSG-5] orchestration.
+// Called by: SetPermissionVPToValidated, AdjustPermission, SelfCreatePermission.
+// VSOA storage is in DE module; this method handles the business logic.
 func (ms msgServer) grantVSOperatorAuthorization(ctx sdk.Context, perm types.Permission) error {
 	if perm.VsOperator == "" {
-		return nil // No VS operator configured
+		return nil
+	}
+	if ms.delegationKeeper == nil {
+		return fmt.Errorf("delegation keeper is required for VS operator authorization")
 	}
 
-	// Grant the VS operator authorization to call CreateOrUpdatePermissionSession
-	// via the delegation keeper
-	if ms.delegationKeeper != nil {
-		if err := ms.delegationKeeper.GrantVSOperatorAuthorization(
-			ctx,
-			perm.Authority,
-			perm.VsOperator,
-			perm.Id,
-			perm.VsOperatorAuthzSpendLimit,
-			perm.VsOperatorAuthzWithFeegrant,
-			perm.VsOperatorAuthzFeeSpendLimit,
-			perm.VsOperatorAuthzSpendPeriod,
-		); err != nil {
-			return fmt.Errorf("failed to grant VS operator authorization: %w", err)
+	// [MOD-DE-MSG-5-2] Basic checks: authority and vs_operator already validated by caller
+
+	// Add permission to VSOA (DE handles mutual exclusivity check internally)
+	if err := ms.delegationKeeper.AddPermToVSOA(ctx, perm.Authority, perm.VsOperator, perm.Id); err != nil {
+		return fmt.Errorf("failed to grant VS operator authorization: %w", err)
+	}
+
+	// [MOD-DE-MSG-5-4] Handle feegrant
+	if perm.VsOperatorAuthzWithFeegrant {
+		expiration, err := ms.computeVSOAFeegrantExpiration(ctx, perm.Authority, perm.VsOperator)
+		if err != nil {
+			return fmt.Errorf("failed to compute feegrant expiration: %w", err)
+		}
+
+		// Only grant if expiration is nil (no limit) or in the future
+		if expiration == nil || expiration.After(ctx.BlockTime()) {
+			msgTypes := []string{"/verana.perm.v1.MsgCreateOrUpdatePermissionSession"}
+			if err := ms.delegationKeeper.GrantFeeAllowance(ctx, perm.Authority, perm.VsOperator, msgTypes, expiration, nil, nil); err != nil {
+				return fmt.Errorf("failed to grant fee allowance: %w", err)
+			}
 		}
 	}
 

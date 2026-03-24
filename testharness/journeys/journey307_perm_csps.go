@@ -36,7 +36,11 @@ func RunPermissionCSPSJourney(ctx context.Context, client cosmosclient.Client) e
 	operatorAccount := lib.GetAccount(client, permOperatorName)
 	operatorAddr := setup302.OperatorAddr
 
+	vsOperatorAccount := lib.GetAccount(client, "cooluser")
+	vsOperatorAddr, _ := vsOperatorAccount.Address("verana")
+
 	fmt.Printf("  Operator: %s\n", operatorAddr)
+	fmt.Printf("  VS Operator: %s\n", vsOperatorAddr)
 
 	trID, _ := strconv.ParseUint(setup302.TrustRegistryID, 10, 64)
 
@@ -115,14 +119,14 @@ func RunPermissionCSPSJourney(ctx context.Context, client cosmosclient.Client) e
 		Type:                   permtypes.PermissionType_ISSUER,
 		ValidatorPermId:        rootPermID,
 		Did:                    issuerDID,
-		VsOperator:             operatorAddr,
+		VsOperator:             vsOperatorAddr,
 		VsOperatorAuthzEnabled: true,
 	})
 	if err != nil {
 		return fmt.Errorf("prerequisite 4 failed: could not start issuer perm VP: %w", err)
 	}
 	issuerPermID, _ := strconv.ParseUint(issuerPermIDStr, 10, 64)
-	fmt.Printf("OK Prerequisite 4: ISSUER perm started with ID: %d (vs_operator=%s)\n", issuerPermID, operatorAddr)
+	fmt.Printf("OK Prerequisite 4: ISSUER perm started with ID: %d (vs_operator=%s)\n", issuerPermID, vsOperatorAddr)
 	waitForTx("issuer perm start")
 
 	// --- Prerequisite 5: Validate ISSUER perm (grants VS operator auth) ---
@@ -221,7 +225,7 @@ func RunPermissionCSPSJourney(ctx context.Context, client cosmosclient.Client) e
 	walletAgentPermID := agentPermID
 
 	fmt.Println("\n=== Prerequisites complete ===")
-	fmt.Printf("  Issuer perm ID:       %d (authority=%s, vs_operator=%s)\n", issuerPermID, operatorAddr, operatorAddr)
+	fmt.Printf("  Issuer perm ID:       %d (authority=%s, vs_operator=%s)\n", issuerPermID, operatorAddr, vsOperatorAddr)
 	fmt.Printf("  Agent perm ID:        %d (authority=%s)\n", agentPermID, operatorAddr)
 	fmt.Printf("  Wallet agent perm ID: %d (same as agent)\n", walletAgentPermID)
 
@@ -233,11 +237,11 @@ func RunPermissionCSPSJourney(ctx context.Context, client cosmosclient.Client) e
 
 	sessionID := uuid.New().String()
 
-	// 1a: Unauthorized operator (cooluser) tries CSPS (expect failure)
+	// 1a: Unauthorized operator (controllerB) tries CSPS (expect failure)
 	fmt.Println("\n--- Step 1a: Unauthorized operator tries CSPS (expect failure) ---")
-	cooluser := lib.GetAccount(client, lib.COOLUSER_NAME)
+	controllerB := lib.GetAccount(client, "controllerB")
 	err = lib.CreatePermissionSession(
-		client, ctx, cooluser, operatorAddr,
+		client, ctx, controllerB, operatorAddr,
 		sessionID, issuerPermID, 0, agentPermID, walletAgentPermID,
 	)
 	if err := expectAuthorizationError("Step 1a", err); err != nil {
@@ -246,10 +250,10 @@ func RunPermissionCSPSJourney(ctx context.Context, client cosmosclient.Client) e
 	fmt.Println("OK Step 1a: Unauthorized operator correctly rejected")
 	waitForTx("CSPS rejection")
 
-	// 1b: Authorized operator tries CSPS (expect success — VS operator auth was granted during validation)
-	fmt.Println("\n--- Step 1b: Authorized operator creates permission session (expect success) ---")
+	// 1b: Authorized vs_operator tries CSPS (expect success — VS operator auth was granted during validation)
+	fmt.Println("\n--- Step 1b: Authorized vs_operator creates permission session (expect success) ---")
 	err = lib.CreatePermissionSession(
-		client, ctx, operatorAccount, operatorAddr,
+		client, ctx, vsOperatorAccount, operatorAddr,
 		sessionID, issuerPermID, 0, agentPermID, walletAgentPermID,
 	)
 	if err != nil {
@@ -276,7 +280,7 @@ func RunPermissionCSPSJourney(ctx context.Context, client cosmosclient.Client) e
 	// =========================================================================
 	fmt.Println("\n=== TEST 3: Update existing session ===")
 	err = lib.CreatePermissionSession(
-		client, ctx, operatorAccount, operatorAddr,
+		client, ctx, vsOperatorAccount, operatorAddr,
 		sessionID, issuerPermID, 0, agentPermID, walletAgentPermID,
 	)
 	if err != nil {
@@ -303,9 +307,8 @@ func RunPermissionCSPSJourney(ctx context.Context, client cosmosclient.Client) e
 	// 4a: Wrong authority
 	fmt.Println("\n--- Step 4a: Wrong authority (expect failure) ---")
 	wrongSessionID := uuid.New().String()
-	cooluserAddr, _ := cooluser.Address("verana")
 	err = lib.CreatePermissionSession(
-		client, ctx, operatorAccount, cooluserAddr,
+		client, ctx, vsOperatorAccount, vsOperatorAddr,
 		wrongSessionID, issuerPermID, 0, agentPermID, walletAgentPermID,
 	)
 	if err == nil {

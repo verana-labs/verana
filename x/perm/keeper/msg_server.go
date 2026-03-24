@@ -1058,20 +1058,43 @@ func (ms msgServer) executeRevokePermission(ctx sdk.Context, perm types.Permissi
 	return ms.Keeper.UpdatePermission(ctx, perm)
 }
 
-// revokeVSOperatorAuthorization revokes VS operator authorization for ISSUER/VERIFIER permissions
+// revokeVSOperatorAuthorization implements [MOD-DE-MSG-6] orchestration.
+// Called by: RevokePermission, SlashPermissionTrustDeposit.
+// VSOA storage is in DE module; this method handles the business logic.
 func (ms msgServer) revokeVSOperatorAuthorization(ctx sdk.Context, perm types.Permission) error {
 	if perm.VsOperator == "" {
-		return nil // No VS operator configured
+		return nil
+	}
+	if ms.delegationKeeper == nil {
+		return fmt.Errorf("delegation keeper is required for VS operator authorization")
 	}
 
-	if ms.delegationKeeper != nil {
-		if err := ms.delegationKeeper.RevokeVSOperatorAuthorization(
-			ctx,
-			perm.Authority,
-			perm.VsOperator,
-			perm.Id,
-		); err != nil {
-			return fmt.Errorf("failed to revoke VS operator authorization: %w", err)
+	// [MOD-DE-MSG-6-4] Remove permission from VSOA
+	remainingPerms, err := ms.delegationKeeper.RemovePermFromVSOA(ctx, perm.Authority, perm.VsOperator, perm.Id)
+	if err != nil {
+		return fmt.Errorf("failed to revoke VS operator authorization: %w", err)
+	}
+
+	// Handle feegrant recalculation
+	if perm.VsOperatorAuthzWithFeegrant {
+		if len(remainingPerms) == 0 {
+			// No more permissions — revoke fee allowance
+			if err := ms.delegationKeeper.RevokeFeeAllowance(ctx, perm.Authority, perm.VsOperator); err != nil {
+				return fmt.Errorf("failed to revoke fee allowance: %w", err)
+			}
+		} else {
+			// Recalculate feegrant expiration from remaining permissions
+			expiration, err := ms.computeVSOAFeegrantExpiration(ctx, perm.Authority, perm.VsOperator)
+			if err != nil {
+				return fmt.Errorf("failed to compute feegrant expiration: %w", err)
+			}
+
+			if expiration == nil || expiration.After(ctx.BlockTime()) {
+				msgTypes := []string{"/verana.perm.v1.MsgCreateOrUpdatePermissionSession"}
+				if err := ms.delegationKeeper.GrantFeeAllowance(ctx, perm.Authority, perm.VsOperator, msgTypes, expiration, nil, nil); err != nil {
+					return fmt.Errorf("failed to update fee allowance: %w", err)
+				}
+			}
 		}
 	}
 

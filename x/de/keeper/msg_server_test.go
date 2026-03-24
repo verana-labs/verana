@@ -191,12 +191,11 @@ func TestGrantFeeAllowance(t *testing.T) {
 			errContains: "expiration must be in the future",
 		},
 		{
-			name:        "Invalid: CreateOrUpdatePermissionSession excluded",
-			authority:   authority,
-			grantee:     grantee,
-			msgTypes:    []string{"/verana.perm.v1.MsgCreateOrUpdatePermissionSession"},
-			expectErr:   true,
-			errContains: "invalid or non-delegable message type",
+			name:      "Valid: CreateOrUpdatePermissionSession allowed for fee grants (VSOA)",
+			authority: authority,
+			grantee:   grantee,
+			msgTypes:  []string{"/verana.perm.v1.MsgCreateOrUpdatePermissionSession"},
+			expectErr: false,
 		},
 		{
 			name:        "Invalid: UpdateParams excluded",
@@ -1706,4 +1705,321 @@ func TestBootstrapFlow_GroupProposalOnboardsFirstOperator(t *testing.T) {
 	has, err = k.OperatorAuthorizations.Has(ctx, oaKey)
 	require.NoError(t, err)
 	require.True(t, has)
+}
+
+// ---------------------------------------------------------------------------
+// [MOD-DE-MSG-5] AddPermToVSOA
+// ---------------------------------------------------------------------------
+
+func TestAddPermToVSOA(t *testing.T) {
+	k, _, ctx := setupMsgServer(t)
+
+	authority := sdk.AccAddress([]byte("test_authority______")).String()
+	vsOperator := sdk.AccAddress([]byte("test_vs_operator____")).String()
+
+	t.Run("basic add creates new VSOA", func(t *testing.T) {
+		err := k.AddPermToVSOA(ctx, authority, vsOperator, 1)
+		require.NoError(t, err)
+
+		// Verify stored
+		vsKey := collections.Join(authority, vsOperator)
+		vsoa, err := k.VSOperatorAuthorizations.Get(ctx, vsKey)
+		require.NoError(t, err)
+		require.Equal(t, authority, vsoa.Authority)
+		require.Equal(t, vsOperator, vsoa.VsOperator)
+		require.Equal(t, []uint64{1}, vsoa.Permissions)
+
+		// Clean up
+		_ = k.VSOperatorAuthorizations.Remove(ctx, vsKey)
+	})
+
+	t.Run("add second permID appends", func(t *testing.T) {
+		err := k.AddPermToVSOA(ctx, authority, vsOperator, 10)
+		require.NoError(t, err)
+		err = k.AddPermToVSOA(ctx, authority, vsOperator, 20)
+		require.NoError(t, err)
+
+		vsKey := collections.Join(authority, vsOperator)
+		vsoa, err := k.VSOperatorAuthorizations.Get(ctx, vsKey)
+		require.NoError(t, err)
+		require.Equal(t, []uint64{10, 20}, vsoa.Permissions)
+
+		// Clean up
+		_ = k.VSOperatorAuthorizations.Remove(ctx, vsKey)
+	})
+
+	t.Run("duplicate permID is no-op", func(t *testing.T) {
+		err := k.AddPermToVSOA(ctx, authority, vsOperator, 5)
+		require.NoError(t, err)
+		err = k.AddPermToVSOA(ctx, authority, vsOperator, 5)
+		require.NoError(t, err)
+
+		vsKey := collections.Join(authority, vsOperator)
+		vsoa, err := k.VSOperatorAuthorizations.Get(ctx, vsKey)
+		require.NoError(t, err)
+		require.Equal(t, []uint64{5}, vsoa.Permissions)
+
+		// Clean up
+		_ = k.VSOperatorAuthorizations.Remove(ctx, vsKey)
+	})
+
+	t.Run("mutual exclusivity: OA exists for same pair", func(t *testing.T) {
+		// Create an OperatorAuthorization for the same (authority, vsOperator)
+		oaKey := collections.Join(authority, vsOperator)
+		err := k.OperatorAuthorizations.Set(ctx, oaKey, types.OperatorAuthorization{
+			Authority: authority,
+			Operator:  vsOperator,
+			MsgTypes:  []string{"/verana.tr.v1.MsgCreateTrustRegistry"},
+		})
+		require.NoError(t, err)
+
+		// AddPermToVSOA should fail
+		err = k.AddPermToVSOA(ctx, authority, vsOperator, 99)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "OperatorAuthorization already exists")
+
+		// Clean up
+		_ = k.OperatorAuthorizations.Remove(ctx, oaKey)
+	})
+}
+
+// ---------------------------------------------------------------------------
+// [MOD-DE-MSG-6] RemovePermFromVSOA
+// ---------------------------------------------------------------------------
+
+func TestRemovePermFromVSOA(t *testing.T) {
+	k, _, ctx := setupMsgServer(t)
+
+	authority := sdk.AccAddress([]byte("test_authority______")).String()
+	vsOperator := sdk.AccAddress([]byte("test_vs_operator____")).String()
+
+	t.Run("basic remove keeps remaining perms", func(t *testing.T) {
+		// Setup: VSOA with perms [1, 2, 3]
+		vsKey := collections.Join(authority, vsOperator)
+		err := k.VSOperatorAuthorizations.Set(ctx, vsKey, types.VSOperatorAuthorization{
+			Authority:   authority,
+			VsOperator:  vsOperator,
+			Permissions: []uint64{1, 2, 3},
+		})
+		require.NoError(t, err)
+
+		remaining, err := k.RemovePermFromVSOA(ctx, authority, vsOperator, 2)
+		require.NoError(t, err)
+		require.Equal(t, []uint64{1, 3}, remaining)
+
+		// Verify stored
+		vsoa, err := k.VSOperatorAuthorizations.Get(ctx, vsKey)
+		require.NoError(t, err)
+		require.Equal(t, []uint64{1, 3}, vsoa.Permissions)
+
+		// Clean up
+		_ = k.VSOperatorAuthorizations.Remove(ctx, vsKey)
+	})
+
+	t.Run("remove last perm deletes entry", func(t *testing.T) {
+		vsKey := collections.Join(authority, vsOperator)
+		err := k.VSOperatorAuthorizations.Set(ctx, vsKey, types.VSOperatorAuthorization{
+			Authority:   authority,
+			VsOperator:  vsOperator,
+			Permissions: []uint64{42},
+		})
+		require.NoError(t, err)
+
+		remaining, err := k.RemovePermFromVSOA(ctx, authority, vsOperator, 42)
+		require.NoError(t, err)
+		require.Empty(t, remaining)
+
+		// Verify entry was deleted
+		has, err := k.VSOperatorAuthorizations.Has(ctx, vsKey)
+		require.NoError(t, err)
+		require.False(t, has)
+	})
+
+	t.Run("remove from non-existent VSOA is no-op", func(t *testing.T) {
+		remaining, err := k.RemovePermFromVSOA(ctx, authority, vsOperator, 999)
+		require.NoError(t, err)
+		require.Nil(t, remaining)
+	})
+}
+
+// ---------------------------------------------------------------------------
+// [MOD-DE-QRY-2] ListVSOperatorAuthorizations
+// ---------------------------------------------------------------------------
+
+func TestQueryListVSOperatorAuthorizations(t *testing.T) {
+	f := initFixture(t)
+	ctx := sdk.UnwrapSDKContext(f.ctx)
+	k := f.keeper
+	qs := keeper.NewQueryServerImpl(k)
+
+	authority1 := sdk.AccAddress([]byte("test_authority1_____")).String()
+	authority2 := sdk.AccAddress([]byte("test_authority2_____")).String()
+	vsOp1 := sdk.AccAddress([]byte("test_vs_op1_________")).String()
+	vsOp2 := sdk.AccAddress([]byte("test_vs_op2_________")).String()
+
+	// Seed data
+	err := k.VSOperatorAuthorizations.Set(ctx, collections.Join(authority1, vsOp1), types.VSOperatorAuthorization{
+		Authority: authority1, VsOperator: vsOp1, Permissions: []uint64{1},
+	})
+	require.NoError(t, err)
+	err = k.VSOperatorAuthorizations.Set(ctx, collections.Join(authority1, vsOp2), types.VSOperatorAuthorization{
+		Authority: authority1, VsOperator: vsOp2, Permissions: []uint64{2, 3},
+	})
+	require.NoError(t, err)
+	err = k.VSOperatorAuthorizations.Set(ctx, collections.Join(authority2, vsOp1), types.VSOperatorAuthorization{
+		Authority: authority2, VsOperator: vsOp1, Permissions: []uint64{4},
+	})
+	require.NoError(t, err)
+
+	t.Run("no filter returns all", func(t *testing.T) {
+		res, err := qs.ListVSOperatorAuthorizations(ctx, &types.QueryListVSOperatorAuthorizationsRequest{})
+		require.NoError(t, err)
+		require.Len(t, res.VsOperatorAuthorizations, 3)
+	})
+
+	t.Run("filter by authority", func(t *testing.T) {
+		res, err := qs.ListVSOperatorAuthorizations(ctx, &types.QueryListVSOperatorAuthorizationsRequest{
+			Authority: authority1,
+		})
+		require.NoError(t, err)
+		require.Len(t, res.VsOperatorAuthorizations, 2)
+		for _, vsoa := range res.VsOperatorAuthorizations {
+			require.Equal(t, authority1, vsoa.Authority)
+		}
+	})
+
+	t.Run("filter by vs_operator", func(t *testing.T) {
+		res, err := qs.ListVSOperatorAuthorizations(ctx, &types.QueryListVSOperatorAuthorizationsRequest{
+			VsOperator: vsOp1,
+		})
+		require.NoError(t, err)
+		require.Len(t, res.VsOperatorAuthorizations, 2)
+		for _, vsoa := range res.VsOperatorAuthorizations {
+			require.Equal(t, vsOp1, vsoa.VsOperator)
+		}
+	})
+
+	t.Run("filter by both authority and vs_operator", func(t *testing.T) {
+		res, err := qs.ListVSOperatorAuthorizations(ctx, &types.QueryListVSOperatorAuthorizationsRequest{
+			Authority:  authority1,
+			VsOperator: vsOp2,
+		})
+		require.NoError(t, err)
+		require.Len(t, res.VsOperatorAuthorizations, 1)
+		require.Equal(t, authority1, res.VsOperatorAuthorizations[0].Authority)
+		require.Equal(t, vsOp2, res.VsOperatorAuthorizations[0].VsOperator)
+	})
+
+	t.Run("invalid limit", func(t *testing.T) {
+		_, err := qs.ListVSOperatorAuthorizations(ctx, &types.QueryListVSOperatorAuthorizationsRequest{
+			ResponseMaxSize: 2000,
+		})
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "response_max_size must be between 1 and 1,024")
+	})
+
+	t.Run("nil request", func(t *testing.T) {
+		_, err := qs.ListVSOperatorAuthorizations(ctx, nil)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "invalid request")
+	})
+
+	t.Run("response_max_size limits results", func(t *testing.T) {
+		res, err := qs.ListVSOperatorAuthorizations(ctx, &types.QueryListVSOperatorAuthorizationsRequest{
+			ResponseMaxSize: 1,
+		})
+		require.NoError(t, err)
+		require.Len(t, res.VsOperatorAuthorizations, 1)
+	})
+}
+
+// ---------------------------------------------------------------------------
+// [MOD-DE-QRY-1] ListOperatorAuthorizations (query handler tests)
+// ---------------------------------------------------------------------------
+
+func TestQueryListOperatorAuthorizations(t *testing.T) {
+	f := initFixture(t)
+	ctx := sdk.UnwrapSDKContext(f.ctx)
+	k := f.keeper
+	qs := keeper.NewQueryServerImpl(k)
+
+	authority1 := sdk.AccAddress([]byte("test_authority1_____")).String()
+	authority2 := sdk.AccAddress([]byte("test_authority2_____")).String()
+	op1 := sdk.AccAddress([]byte("test_operator1______")).String()
+	op2 := sdk.AccAddress([]byte("test_operator2______")).String()
+
+	// Seed data
+	err := k.OperatorAuthorizations.Set(ctx, collections.Join(authority1, op1), types.OperatorAuthorization{
+		Authority: authority1, Operator: op1, MsgTypes: []string{"/verana.tr.v1.MsgCreateTrustRegistry"},
+	})
+	require.NoError(t, err)
+	err = k.OperatorAuthorizations.Set(ctx, collections.Join(authority1, op2), types.OperatorAuthorization{
+		Authority: authority1, Operator: op2, MsgTypes: []string{"/verana.cs.v1.MsgCreateCredentialSchema"},
+	})
+	require.NoError(t, err)
+	err = k.OperatorAuthorizations.Set(ctx, collections.Join(authority2, op1), types.OperatorAuthorization{
+		Authority: authority2, Operator: op1, MsgTypes: []string{"/verana.tr.v1.MsgCreateTrustRegistry"},
+	})
+	require.NoError(t, err)
+
+	t.Run("no filter returns all", func(t *testing.T) {
+		res, err := qs.ListOperatorAuthorizations(ctx, &types.QueryListOperatorAuthorizationsRequest{})
+		require.NoError(t, err)
+		require.Len(t, res.OperatorAuthorizations, 3)
+	})
+
+	t.Run("filter by authority", func(t *testing.T) {
+		res, err := qs.ListOperatorAuthorizations(ctx, &types.QueryListOperatorAuthorizationsRequest{
+			Authority: authority1,
+		})
+		require.NoError(t, err)
+		require.Len(t, res.OperatorAuthorizations, 2)
+		for _, oa := range res.OperatorAuthorizations {
+			require.Equal(t, authority1, oa.Authority)
+		}
+	})
+
+	t.Run("filter by operator", func(t *testing.T) {
+		res, err := qs.ListOperatorAuthorizations(ctx, &types.QueryListOperatorAuthorizationsRequest{
+			Operator: op1,
+		})
+		require.NoError(t, err)
+		require.Len(t, res.OperatorAuthorizations, 2)
+		for _, oa := range res.OperatorAuthorizations {
+			require.Equal(t, op1, oa.Operator)
+		}
+	})
+
+	t.Run("filter by both authority and operator", func(t *testing.T) {
+		res, err := qs.ListOperatorAuthorizations(ctx, &types.QueryListOperatorAuthorizationsRequest{
+			Authority: authority1,
+			Operator:  op2,
+		})
+		require.NoError(t, err)
+		require.Len(t, res.OperatorAuthorizations, 1)
+		require.Equal(t, authority1, res.OperatorAuthorizations[0].Authority)
+		require.Equal(t, op2, res.OperatorAuthorizations[0].Operator)
+	})
+
+	t.Run("invalid limit", func(t *testing.T) {
+		_, err := qs.ListOperatorAuthorizations(ctx, &types.QueryListOperatorAuthorizationsRequest{
+			ResponseMaxSize: 2000,
+		})
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "response_max_size must be between 1 and 1,024")
+	})
+
+	t.Run("nil request", func(t *testing.T) {
+		_, err := qs.ListOperatorAuthorizations(ctx, nil)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "invalid request")
+	})
+
+	t.Run("response_max_size limits results", func(t *testing.T) {
+		res, err := qs.ListOperatorAuthorizations(ctx, &types.QueryListOperatorAuthorizationsRequest{
+			ResponseMaxSize: 1,
+		})
+		require.NoError(t, err)
+		require.Len(t, res.OperatorAuthorizations, 1)
+	})
 }
