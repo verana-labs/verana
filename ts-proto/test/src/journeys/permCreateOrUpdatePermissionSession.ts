@@ -22,6 +22,7 @@ import {
   waitForPermissionToBecomeEffective,
   createQueryClient,
   generateUniqueDID,
+  fundAccount,
   config,
 } from "../helpers/client";
 import { typeUrls } from "../helpers/registry";
@@ -151,6 +152,21 @@ async function main() {
     }
     console.log("  VP validated");
     console.log();
+
+    // Step 6b: Fund VS operator so it can sign transactions
+    console.log("  Funding VS operator...");
+    const fundVsResult = await client.sendTokens(
+      account.address,
+      vsOperatorAccount.address,
+      [{ denom: config.denom, amount: "50000000" }],
+      "auto",
+    );
+    if (fundVsResult.code !== 0) {
+      throw new Error(`Failed to fund VS operator: ${fundVsResult.rawLog}`);
+    }
+    console.log(`  ✓ VS operator funded`);
+    // Wait for funding to confirm
+    await new Promise(resolve => setTimeout(resolve, 5000));
 
     // Step 7: Create Permission Session (signed by vs_operator)
     console.log("Step 7: Creating permission session (MsgCreateOrUpdatePermissionSession)...");
