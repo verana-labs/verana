@@ -75,6 +75,35 @@ func (msg *MsgCreateExchangeRate) ValidateBasic() error {
 	return nil
 }
 
+// ValidateBasic performs stateless validation on MsgUpdateExchangeRate.
+func (msg *MsgUpdateExchangeRate) ValidateBasic() error {
+	// Validate authority address
+	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
+		return fmt.Errorf("invalid authority address: %w", err)
+	}
+
+	// Validate operator address
+	if _, err := sdk.AccAddressFromBech32(msg.Operator); err != nil {
+		return fmt.Errorf("invalid operator address: %w", err)
+	}
+
+	// id must be > 0
+	if msg.Id == 0 {
+		return fmt.Errorf("id must be greater than 0")
+	}
+
+	// rate MUST be a base-10 encoded unsigned integer string, strictly greater than "0"
+	rate, ok := math.NewIntFromString(msg.Rate)
+	if !ok {
+		return fmt.Errorf("invalid rate: must be a base-10 encoded unsigned integer string")
+	}
+	if !rate.IsPositive() {
+		return fmt.Errorf("invalid rate: must be strictly greater than 0")
+	}
+
+	return nil
+}
+
 func validateAssetType(at cstypes.PricingAssetType) error {
 	switch at {
 	case cstypes.PricingAssetType_TU,

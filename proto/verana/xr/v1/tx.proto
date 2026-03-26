@@ -37,6 +37,9 @@ service Msg {
 
   // CreateExchangeRate defines a governance operation for creating an exchange rate.
   rpc CreateExchangeRate(MsgCreateExchangeRate) returns (MsgCreateExchangeRateResponse);
+
+  // UpdateExchangeRate defines an operator operation for updating an exchange rate.
+  rpc UpdateExchangeRate(MsgUpdateExchangeRate) returns (MsgUpdateExchangeRateResponse);
 }
 
 // MsgCreateExchangeRate is the Msg/CreateExchangeRate request type.
@@ -60,6 +63,27 @@ message MsgCreateExchangeRate {
 message MsgCreateExchangeRateResponse {
   uint64 id = 1;
 }
+
+// MsgUpdateExchangeRate is the Msg/UpdateExchangeRate request type.
+message MsgUpdateExchangeRate {
+  option (cosmos.msg.v1.signer) = "operator";
+  option (amino.name) = "verana/x/xr/MsgUpdateExchangeRate";
+
+  // authority is the group address that controls the exchange rate.
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // operator is the authorized operator executing this message.
+  string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // id is the exchange rate entry to update.
+  uint64 id = 3;
+
+  // rate is the new exchange rate value.
+  string rate = 4;
+}
+
+// MsgUpdateExchangeRateResponse defines the response for MsgUpdateExchangeRate.
+message MsgUpdateExchangeRateResponse {}
 
 // MsgUpdateParams is the Msg/UpdateParams request type.
 message MsgUpdateParams {

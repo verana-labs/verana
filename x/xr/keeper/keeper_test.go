@@ -3,6 +3,7 @@ package keeper_test
 import (
 	"context"
 	"testing"
+	"time"
 
 	"cosmossdk.io/core/address"
 	storetypes "cosmossdk.io/store/types"
@@ -18,10 +19,20 @@ import (
 	"github.com/verana-labs/verana/x/xr/types"
 )
 
+// MockDelegationKeeper is a mock implementation of the DelegationKeeper interface for testing.
+type MockDelegationKeeper struct {
+	ErrToReturn error
+}
+
+func (m *MockDelegationKeeper) CheckOperatorAuthorization(_ context.Context, _, _, _ string, _ time.Time) error {
+	return m.ErrToReturn
+}
+
 type fixture struct {
-	ctx          context.Context
-	keeper       keeper.Keeper
-	addressCodec address.Codec
+	ctx              context.Context
+	keeper           keeper.Keeper
+	addressCodec     address.Codec
+	delegationKeeper *MockDelegationKeeper
 }
 
 func initFixture(t *testing.T) *fixture {
@@ -35,12 +46,14 @@ func initFixture(t *testing.T) *fixture {
 	ctx := testutil.DefaultContextWithDB(t, storeKey, storetypes.NewTransientStoreKey("transient_test")).Ctx
 
 	authority := authtypes.NewModuleAddress(types.GovModuleName)
+	mockDelegationKeeper := &MockDelegationKeeper{}
 
 	k := keeper.NewKeeper(
 		storeService,
 		encCfg.Codec,
 		addressCodec,
 		authority,
+		mockDelegationKeeper,
 	)
 
 	// Initialize params
@@ -49,8 +62,9 @@ func initFixture(t *testing.T) *fixture {
 	}
 
 	return &fixture{
-		ctx:          ctx,
-		keeper:       k,
-		addressCodec: addressCodec,
+		ctx:              ctx,
+		keeper:           k,
+		addressCodec:     addressCodec,
+		delegationKeeper: mockDelegationKeeper,
 	}
 }

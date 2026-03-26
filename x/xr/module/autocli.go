@@ -32,6 +32,16 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					RpcMethod: "CreateExchangeRate",
 					Skip:      true, // skipped because authority gated
 				},
+				{
+					RpcMethod: "UpdateExchangeRate",
+					Use:       "update-exchange-rate [authority] [id] [rate]",
+					Short:     "Update an existing exchange rate",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
+						{ProtoField: "authority"},
+						{ProtoField: "id"},
+						{ProtoField: "rate"},
+					},
+				},
 				// this line is used by ignite scaffolding # autocli/tx
 			},
 		},

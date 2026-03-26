@@ -10,6 +10,7 @@ func RegisterInterfaces(registrar codectypes.InterfaceRegistry) {
 	registrar.RegisterImplementations((*sdk.Msg)(nil),
 		&MsgUpdateParams{},
 		&MsgCreateExchangeRate{},
+		&MsgUpdateExchangeRate{},
 	)
 	msgservice.RegisterMsgServiceDesc(registrar, &_Msg_serviceDesc)
 }

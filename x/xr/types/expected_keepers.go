@@ -2,6 +2,7 @@ package types
 
 import (
 	"context"
+	"time"
 
 	"cosmossdk.io/core/address"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -18,6 +19,12 @@ type AuthKeeper interface {
 type BankKeeper interface {
 	SpendableCoins(context.Context, sdk.AccAddress) sdk.Coins
 	// Methods imported from bank should be defined here
+}
+
+// DelegationKeeper defines the expected interface for the Delegation (DE) module.
+// Used to perform [AUTHZ-CHECK] for (authority, operator) pairs.
+type DelegationKeeper interface {
+	CheckOperatorAuthorization(ctx context.Context, authority string, operator string, msgTypeURL string, now time.Time) error
 }
 
 // ParamSubspace defines the expected Subspace interface for parameters.

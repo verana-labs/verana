@@ -50,6 +50,40 @@
         ]
       }
     },
+    "/verana.xr.v1.Msg/UpdateExchangeRate": {
+      "post": {
+        "summary": "UpdateExchangeRate defines an operator operation for updating an exchange rate.",
+        "operationId": "Msg_UpdateExchangeRate",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.xr.v1.MsgUpdateExchangeRateResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "MsgUpdateExchangeRate is the Msg/UpdateExchangeRate request type.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.xr.v1.MsgUpdateExchangeRate"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
     "/verana.xr.v1.Msg/UpdateParams": {
       "post": {
         "summary": "UpdateParams defines a (governance) operation for updating the module\nparameters. The authority defaults to the x/gov module account.",
@@ -167,6 +201,33 @@
         }
       },
       "description": "MsgCreateExchangeRateResponse defines the response for MsgCreateExchangeRate."
+    },
+    "verana.xr.v1.MsgUpdateExchangeRate": {
+      "type": "object",
+      "properties": {
+        "authority": {
+          "type": "string",
+          "description": "authority is the group address that controls the exchange rate."
+        },
+        "operator": {
+          "type": "string",
+          "description": "operator is the authorized operator executing this message."
+        },
+        "id": {
+          "type": "string",
+          "format": "uint64",
+          "description": "id is the exchange rate entry to update."
+        },
+        "rate": {
+          "type": "string",
+          "description": "rate is the new exchange rate value."
+        }
+      },
+      "description": "MsgUpdateExchangeRate is the Msg/UpdateExchangeRate request type."
+    },
+    "verana.xr.v1.MsgUpdateExchangeRateResponse": {
+      "type": "object",
+      "description": "MsgUpdateExchangeRateResponse defines the response for MsgUpdateExchangeRate."
     },
     "verana.xr.v1.MsgUpdateParams": {
       "type": "object",
