@@ -62,6 +62,8 @@ import (
 	diddirectorymoduletypes "github.com/verana-labs/verana/x/dd/types"
 	_ "github.com/verana-labs/verana/x/de/module"
 	demoduletypes "github.com/verana-labs/verana/x/de/types"
+	_ "github.com/verana-labs/verana/x/di/module"
+	dimoduletypes "github.com/verana-labs/verana/x/di/types"
 	permissionmoduletypes "github.com/verana-labs/verana/x/perm/types"
 	trustdepositmoduletypes "github.com/verana-labs/verana/x/td/types"
 	trustregistrymoduletypes "github.com/verana-labs/verana/x/tr/types"
@@ -113,6 +115,7 @@ var (
 		permissionmoduletypes.ModuleName,
 		trustdepositmoduletypes.ModuleName,
 		demoduletypes.ModuleName,
+		dimoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/initGenesis
 	}
 
@@ -144,6 +147,7 @@ var (
 		permissionmoduletypes.ModuleName,
 		trustdepositmoduletypes.ModuleName,
 		demoduletypes.ModuleName,
+		dimoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/beginBlockers
 	}
 
@@ -169,6 +173,7 @@ var (
 		permissionmoduletypes.ModuleName,
 		trustdepositmoduletypes.ModuleName,
 		demoduletypes.ModuleName,
+		dimoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/endBlockers
 	}
 
@@ -358,6 +363,10 @@ var (
 			{
 				Name:   demoduletypes.ModuleName,
 				Config: appconfig.WrapAny(&demoduletypes.Module{}),
+			},
+			{
+				Name:   dimoduletypes.ModuleName,
+				Config: appconfig.WrapAny(&dimoduletypes.Module{}),
 			},
 			// this line is used by starport scaffolding # stargate/app/moduleConfig
 		},

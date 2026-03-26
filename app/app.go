@@ -7,6 +7,7 @@ import (
 	_ "github.com/verana-labs/verana/x/cs/module" // import for side-effects
 	_ "github.com/verana-labs/verana/x/dd/module" // import for side-effects
 	demodulekeeper "github.com/verana-labs/verana/x/de/keeper"
+	dimodulekeeper "github.com/verana-labs/verana/x/di/keeper"
 	_ "github.com/verana-labs/verana/x/perm/module" // import for side-effects
 	trustdepositmodule "github.com/verana-labs/verana/x/td/module"
 	_ "github.com/verana-labs/verana/x/tr/module" // import for side-effects
@@ -209,6 +210,7 @@ type App struct {
 	PermissionKeeper       permissionmodulekeeper.Keeper
 	TrustdepositKeeper     trustdepositmodulekeeper.Keeper
 	DeKeeper               demodulekeeper.Keeper
+	DiKeeper               dimodulekeeper.Keeper
 	// this line is used by starport scaffolding # stargate/app/keeperDeclaration
 
 	// simulation manager
@@ -352,6 +354,7 @@ func New(
 		&app.PermissionKeeper,
 		&app.TrustdepositKeeper,
 		&app.DeKeeper,
+		&app.DiKeeper,
 
 		// this line is used by starport scaffolding # stargate/app/keeperDefinition
 	); err != nil {
