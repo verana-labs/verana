@@ -17,6 +17,14 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					Use:       "params",
 					Short:     "Shows the parameters of the module",
 				},
+				{
+					RpcMethod: "GetDigest",
+					Use:       "get-digest [digest]",
+					Short:     "Look up a stored digest by its digest string",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
+						{ProtoField: "digest"},
+					},
+				},
 				// this line is used by ignite scaffolding # autocli/query
 			},
 		},

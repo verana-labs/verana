@@ -19,7 +19,8 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Query_Params_FullMethodName = "/verana.di.v1.Query/Params"
+	Query_Params_FullMethodName    = "/verana.di.v1.Query/Params"
+	Query_GetDigest_FullMethodName = "/verana.di.v1.Query/GetDigest"
 )
 
 // QueryClient is the client API for Query service.
@@ -30,6 +31,8 @@ const (
 type QueryClient interface {
 	// Parameters queries the parameters of the module.
 	Params(ctx context.Context, in *QueryParamsRequest, opts ...grpc.CallOption) (*QueryParamsResponse, error)
+	// [MOD-DI-QRY-1] GetDigest returns a stored digest by its digest string.
+	GetDigest(ctx context.Context, in *QueryGetDigestRequest, opts ...grpc.CallOption) (*QueryGetDigestResponse, error)
 }
 
 type queryClient struct {
@@ -50,6 +53,16 @@ func (c *queryClient) Params(ctx context.Context, in *QueryParamsRequest, opts .
 	return out, nil
 }
 
+func (c *queryClient) GetDigest(ctx context.Context, in *QueryGetDigestRequest, opts ...grpc.CallOption) (*QueryGetDigestResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(QueryGetDigestResponse)
+	err := c.cc.Invoke(ctx, Query_GetDigest_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // QueryServer is the server API for Query service.
 // All implementations must embed UnimplementedQueryServer
 // for forward compatibility.
@@ -58,6 +71,8 @@ func (c *queryClient) Params(ctx context.Context, in *QueryParamsRequest, opts .
 type QueryServer interface {
 	// Parameters queries the parameters of the module.
 	Params(context.Context, *QueryParamsRequest) (*QueryParamsResponse, error)
+	// [MOD-DI-QRY-1] GetDigest returns a stored digest by its digest string.
+	GetDigest(context.Context, *QueryGetDigestRequest) (*QueryGetDigestResponse, error)
 	mustEmbedUnimplementedQueryServer()
 }
 
@@ -70,6 +85,9 @@ type UnimplementedQueryServer struct{}
 
 func (UnimplementedQueryServer) Params(context.Context, *QueryParamsRequest) (*QueryParamsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Params not implemented")
+}
+func (UnimplementedQueryServer) GetDigest(context.Context, *QueryGetDigestRequest) (*QueryGetDigestResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetDigest not implemented")
 }
 func (UnimplementedQueryServer) mustEmbedUnimplementedQueryServer() {}
 func (UnimplementedQueryServer) testEmbeddedByValue()               {}
@@ -110,6 +128,24 @@ func _Query_Params_Handler(srv interface{}, ctx context.Context, dec func(interf
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Query_GetDigest_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryGetDigestRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).GetDigest(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Query_GetDigest_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).GetDigest(ctx, req.(*QueryGetDigestRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Query_ServiceDesc is the grpc.ServiceDesc for Query service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -120,6 +156,10 @@ var Query_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Params",
 			Handler:    _Query_Params_Handler,
+		},
+		{
+			MethodName: "GetDigest",
+			Handler:    _Query_GetDigest_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

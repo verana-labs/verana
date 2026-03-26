@@ -11,19 +11,23 @@ import (
 	_ "github.com/cosmos/gogoproto/gogoproto"
 	grpc1 "github.com/cosmos/gogoproto/grpc"
 	proto "github.com/cosmos/gogoproto/proto"
+	github_com_cosmos_gogoproto_types "github.com/cosmos/gogoproto/types"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	_ "google.golang.org/protobuf/types/known/timestamppb"
 	io "io"
 	math "math"
 	math_bits "math/bits"
+	time "time"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
 var _ = fmt.Errorf
 var _ = math.Inf
+var _ = time.Kitchen
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the proto package it is being compiled against.
@@ -114,35 +118,194 @@ func (m *QueryParamsResponse) GetParams() Params {
 	return Params{}
 }
 
+// QueryGetDigestRequest is the request type for the Query/GetDigest RPC method.
+type QueryGetDigestRequest struct {
+	// digest is the digest string to look up.
+	Digest string `protobuf:"bytes,1,opt,name=digest,proto3" json:"digest,omitempty"`
+}
+
+func (m *QueryGetDigestRequest) Reset()         { *m = QueryGetDigestRequest{} }
+func (m *QueryGetDigestRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryGetDigestRequest) ProtoMessage()    {}
+func (*QueryGetDigestRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_845a92635d323fb5, []int{2}
+}
+func (m *QueryGetDigestRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryGetDigestRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryGetDigestRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryGetDigestRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryGetDigestRequest.Merge(m, src)
+}
+func (m *QueryGetDigestRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryGetDigestRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryGetDigestRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryGetDigestRequest proto.InternalMessageInfo
+
+func (m *QueryGetDigestRequest) GetDigest() string {
+	if m != nil {
+		return m.Digest
+	}
+	return ""
+}
+
+// DigestInfo is the stored digest record returned by queries.
+type DigestInfo struct {
+	// digest is the digest string.
+	Digest string `protobuf:"bytes,1,opt,name=digest,proto3" json:"digest,omitempty"`
+	// created is the timestamp when the digest was stored.
+	Created time.Time `protobuf:"bytes,2,opt,name=created,proto3,stdtime" json:"created"`
+}
+
+func (m *DigestInfo) Reset()         { *m = DigestInfo{} }
+func (m *DigestInfo) String() string { return proto.CompactTextString(m) }
+func (*DigestInfo) ProtoMessage()    {}
+func (*DigestInfo) Descriptor() ([]byte, []int) {
+	return fileDescriptor_845a92635d323fb5, []int{3}
+}
+func (m *DigestInfo) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *DigestInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_DigestInfo.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *DigestInfo) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DigestInfo.Merge(m, src)
+}
+func (m *DigestInfo) XXX_Size() int {
+	return m.Size()
+}
+func (m *DigestInfo) XXX_DiscardUnknown() {
+	xxx_messageInfo_DigestInfo.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DigestInfo proto.InternalMessageInfo
+
+func (m *DigestInfo) GetDigest() string {
+	if m != nil {
+		return m.Digest
+	}
+	return ""
+}
+
+func (m *DigestInfo) GetCreated() time.Time {
+	if m != nil {
+		return m.Created
+	}
+	return time.Time{}
+}
+
+// QueryGetDigestResponse is the response type for the Query/GetDigest RPC method.
+type QueryGetDigestResponse struct {
+	// digest is the stored digest entry.
+	Digest *DigestInfo `protobuf:"bytes,1,opt,name=digest,proto3" json:"digest,omitempty"`
+}
+
+func (m *QueryGetDigestResponse) Reset()         { *m = QueryGetDigestResponse{} }
+func (m *QueryGetDigestResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryGetDigestResponse) ProtoMessage()    {}
+func (*QueryGetDigestResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_845a92635d323fb5, []int{4}
+}
+func (m *QueryGetDigestResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryGetDigestResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryGetDigestResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryGetDigestResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryGetDigestResponse.Merge(m, src)
+}
+func (m *QueryGetDigestResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryGetDigestResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryGetDigestResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryGetDigestResponse proto.InternalMessageInfo
+
+func (m *QueryGetDigestResponse) GetDigest() *DigestInfo {
+	if m != nil {
+		return m.Digest
+	}
+	return nil
+}
+
 func init() {
 	proto.RegisterType((*QueryParamsRequest)(nil), "verana.di.v1.QueryParamsRequest")
 	proto.RegisterType((*QueryParamsResponse)(nil), "verana.di.v1.QueryParamsResponse")
+	proto.RegisterType((*QueryGetDigestRequest)(nil), "verana.di.v1.QueryGetDigestRequest")
+	proto.RegisterType((*DigestInfo)(nil), "verana.di.v1.DigestInfo")
+	proto.RegisterType((*QueryGetDigestResponse)(nil), "verana.di.v1.QueryGetDigestResponse")
 }
 
 func init() { proto.RegisterFile("verana/di/v1/query.proto", fileDescriptor_845a92635d323fb5) }
 
 var fileDescriptor_845a92635d323fb5 = []byte{
-	// 318 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x7c, 0x90, 0xc1, 0x4a, 0xf3, 0x40,
-	0x14, 0x85, 0x33, 0x3f, 0xfc, 0x05, 0xa3, 0x1b, 0x63, 0x17, 0xb5, 0x48, 0xac, 0x59, 0x95, 0x82,
-	0xb9, 0xa4, 0x2e, 0xdc, 0xf7, 0x01, 0x44, 0xbb, 0x74, 0x77, 0xd3, 0x0e, 0x71, 0xa0, 0x99, 0x3b,
-	0xcd, 0x4c, 0xa3, 0xdd, 0x89, 0x4f, 0x20, 0xf8, 0x12, 0x2e, 0x7d, 0x8c, 0x2e, 0x0b, 0x6e, 0x5c,
-	0x89, 0xb4, 0x82, 0xaf, 0x21, 0x9d, 0xc9, 0xc2, 0x60, 0x71, 0x13, 0x2e, 0xf7, 0x7c, 0xe7, 0xe4,
-	0xdc, 0xf1, 0x5b, 0x25, 0x2f, 0x50, 0x22, 0x8c, 0x05, 0x94, 0x09, 0x4c, 0x67, 0xbc, 0x98, 0xc7,
-	0xaa, 0x20, 0x43, 0xc1, 0x9e, 0x53, 0xe2, 0xb1, 0x88, 0xcb, 0xa4, 0xbd, 0x8f, 0xb9, 0x90, 0x04,
-	0xf6, 0xeb, 0x80, 0x76, 0x6f, 0x44, 0x3a, 0x27, 0x0d, 0x29, 0x6a, 0xee, 0x9c, 0x50, 0x26, 0x29,
-	0x37, 0x98, 0x80, 0xc2, 0x4c, 0x48, 0x34, 0x82, 0x64, 0xc5, 0x36, 0x33, 0xca, 0xc8, 0x8e, 0xb0,
-	0x99, 0xaa, 0xed, 0x51, 0x46, 0x94, 0x4d, 0x38, 0xa0, 0x12, 0x80, 0x52, 0x92, 0xb1, 0x16, 0x5d,
-	0xa9, 0x87, 0xb5, 0x6a, 0x0a, 0x0b, 0xcc, 0x2b, 0x29, 0x6a, 0xfa, 0xc1, 0xd5, 0xe6, 0x87, 0x97,
-	0x76, 0x39, 0xe4, 0xd3, 0x19, 0xd7, 0x26, 0xba, 0xf0, 0x0f, 0x6a, 0x5b, 0xad, 0x48, 0x6a, 0x1e,
-	0x9c, 0xfb, 0x0d, 0x67, 0x6e, 0xb1, 0x0e, 0xeb, 0xee, 0xf6, 0x9b, 0xf1, 0xcf, 0xcb, 0x62, 0x47,
-	0x0f, 0x76, 0x16, 0xef, 0xc7, 0xde, 0xf3, 0xd7, 0x4b, 0x8f, 0x0d, 0x2b, 0xbc, 0x7f, 0xcf, 0xfc,
-	0xff, 0x36, 0x30, 0xb8, 0xf5, 0x1b, 0x0e, 0x0b, 0x3a, 0x75, 0xf3, 0xef, 0x16, 0xed, 0x93, 0x3f,
-	0x08, 0xd7, 0x28, 0xea, 0x3e, 0xbc, 0x7e, 0x3e, 0xfd, 0x8b, 0x82, 0x0e, 0x38, 0xf4, 0x74, 0x82,
-	0xa9, 0x86, 0x2d, 0xe7, 0x0e, 0x06, 0x8b, 0x55, 0xc8, 0x96, 0xab, 0x90, 0x7d, 0xac, 0x42, 0xf6,
-	0xb8, 0x0e, 0xbd, 0xe5, 0x3a, 0xf4, 0xde, 0xd6, 0xa1, 0x77, 0xdd, 0xcd, 0x84, 0xb9, 0x99, 0xa5,
-	0xf1, 0x88, 0xf2, 0x6d, 0x29, 0x77, 0x9b, 0x1c, 0x33, 0x57, 0x5c, 0xa7, 0x0d, 0xfb, 0x66, 0x67,
-	0xdf, 0x01, 0x00, 0x00, 0xff, 0xff, 0xa0, 0x2f, 0xf5, 0xfe, 0xeb, 0x01, 0x00, 0x00,
+	// 462 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x7c, 0x51, 0x31, 0x6f, 0x13, 0x31,
+	0x18, 0x8d, 0x2b, 0x11, 0x88, 0xcb, 0x82, 0x09, 0x55, 0x38, 0x55, 0x97, 0x60, 0x18, 0xa2, 0x4a,
+	0xd8, 0x24, 0x0c, 0x6c, 0x0c, 0x11, 0x12, 0x82, 0x01, 0x41, 0xc4, 0xc4, 0xe6, 0xcb, 0xb9, 0xc6,
+	0x52, 0xcf, 0xbe, 0x9e, 0x7d, 0x07, 0x05, 0xb1, 0xf0, 0x0b, 0x2a, 0xf1, 0x27, 0x18, 0xf9, 0x19,
+	0x1d, 0x2b, 0xb1, 0x30, 0x01, 0x4a, 0x90, 0xf8, 0x13, 0x0c, 0xe8, 0x6c, 0x1f, 0x70, 0x25, 0xcd,
+	0x62, 0xd9, 0xdf, 0xf7, 0xde, 0xf7, 0xbd, 0xf7, 0x0c, 0x07, 0x15, 0x2f, 0x98, 0x62, 0x34, 0x95,
+	0xb4, 0x9a, 0xd0, 0xc3, 0x92, 0x17, 0x47, 0x24, 0x2f, 0xb4, 0xd5, 0xe8, 0xb2, 0xef, 0x90, 0x54,
+	0x92, 0x6a, 0x12, 0x5d, 0x61, 0x99, 0x54, 0x9a, 0xba, 0xd3, 0x03, 0xa2, 0xbd, 0x85, 0x36, 0x99,
+	0x36, 0x34, 0x61, 0x86, 0x7b, 0x26, 0xad, 0x26, 0x09, 0xb7, 0x6c, 0x42, 0x73, 0x26, 0xa4, 0x62,
+	0x56, 0x6a, 0x15, 0xb0, 0x7d, 0xa1, 0x85, 0x76, 0x57, 0x5a, 0xdf, 0x42, 0x75, 0x57, 0x68, 0x2d,
+	0x0e, 0x38, 0x65, 0xb9, 0xa4, 0x4c, 0x29, 0x6d, 0x1d, 0xc5, 0x84, 0xee, 0x30, 0x74, 0xdd, 0x2b,
+	0x29, 0xf7, 0xa9, 0x95, 0x19, 0x37, 0x96, 0x65, 0x79, 0x00, 0x5c, 0x6f, 0x69, 0xcf, 0x59, 0xc1,
+	0xb2, 0xc0, 0xc5, 0x7d, 0x88, 0x9e, 0xd5, 0x8a, 0x9e, 0xba, 0xe2, 0x9c, 0x1f, 0x96, 0xdc, 0x58,
+	0xfc, 0x04, 0x5e, 0x6d, 0x55, 0x4d, 0xae, 0x95, 0xe1, 0xe8, 0x1e, 0xec, 0x7a, 0xf2, 0x00, 0x8c,
+	0xc0, 0x78, 0x7b, 0xda, 0x27, 0xff, 0x5a, 0x27, 0x1e, 0x3d, 0xeb, 0x9d, 0x7c, 0x1d, 0x76, 0x3e,
+	0xfe, 0xfc, 0xb4, 0x07, 0xe6, 0x01, 0x8e, 0x29, 0xbc, 0xe6, 0xe6, 0x3d, 0xe4, 0xf6, 0x81, 0x14,
+	0xdc, 0xd8, 0xb0, 0x08, 0xed, 0xc0, 0x6e, 0xea, 0x0a, 0x6e, 0x62, 0x6f, 0x1e, 0x5e, 0x38, 0x85,
+	0xd0, 0x03, 0x1f, 0xa9, 0x7d, 0x7d, 0x1e, 0x0a, 0xdd, 0x87, 0x17, 0x17, 0x05, 0x67, 0x96, 0xa7,
+	0x83, 0x2d, 0x27, 0x28, 0x22, 0x3e, 0x0a, 0xd2, 0x44, 0x41, 0x9e, 0x37, 0x51, 0xcc, 0x2e, 0xd5,
+	0xb2, 0x8e, 0xbf, 0x0d, 0xc1, 0xbc, 0x21, 0xe1, 0xc7, 0x70, 0xe7, 0xac, 0xac, 0xe0, 0xf4, 0x4e,
+	0x6b, 0xe3, 0xf6, 0x74, 0xd0, 0x76, 0xfa, 0x57, 0x5b, 0xa3, 0x65, 0xfa, 0x0b, 0xc0, 0x0b, 0x6e,
+	0x18, 0x7a, 0x05, 0xbb, 0x3e, 0x09, 0x34, 0x6a, 0xb3, 0xfe, 0x0f, 0x3a, 0xba, 0xb1, 0x01, 0xe1,
+	0xa5, 0xe0, 0xf1, 0xfb, 0xcf, 0x3f, 0x3e, 0x6c, 0x61, 0x34, 0xa2, 0x1e, 0x7a, 0xfb, 0x80, 0x25,
+	0x86, 0xae, 0xf9, 0x51, 0xf4, 0x06, 0xf6, 0xfe, 0x38, 0x41, 0x37, 0xd7, 0x4c, 0x3e, 0x1b, 0x7f,
+	0x74, 0x6b, 0x33, 0x28, 0x28, 0xc0, 0x4e, 0xc1, 0x2e, 0x8a, 0xda, 0x5b, 0x05, 0xb7, 0xf4, 0xad,
+	0x77, 0xff, 0x6e, 0x36, 0x3b, 0x59, 0xc6, 0xe0, 0x74, 0x19, 0x83, 0xef, 0xcb, 0x18, 0x1c, 0xaf,
+	0xe2, 0xce, 0xe9, 0x2a, 0xee, 0x7c, 0x59, 0xc5, 0x9d, 0x17, 0x63, 0x21, 0xed, 0xcb, 0x32, 0x21,
+	0x0b, 0x9d, 0xad, 0x73, 0xf0, 0xba, 0x9e, 0x66, 0x8f, 0x72, 0x6e, 0x92, 0xae, 0xfb, 0xb5, 0xbb,
+	0xbf, 0x03, 0x00, 0x00, 0xff, 0xff, 0xe4, 0xa6, 0xbd, 0x64, 0x6b, 0x03, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -159,6 +322,8 @@ const _ = grpc.SupportPackageIsVersion4
 type QueryClient interface {
 	// Parameters queries the parameters of the module.
 	Params(ctx context.Context, in *QueryParamsRequest, opts ...grpc.CallOption) (*QueryParamsResponse, error)
+	// [MOD-DI-QRY-1] GetDigest returns a stored digest by its digest string.
+	GetDigest(ctx context.Context, in *QueryGetDigestRequest, opts ...grpc.CallOption) (*QueryGetDigestResponse, error)
 }
 
 type queryClient struct {
@@ -178,10 +343,21 @@ func (c *queryClient) Params(ctx context.Context, in *QueryParamsRequest, opts .
 	return out, nil
 }
 
+func (c *queryClient) GetDigest(ctx context.Context, in *QueryGetDigestRequest, opts ...grpc.CallOption) (*QueryGetDigestResponse, error) {
+	out := new(QueryGetDigestResponse)
+	err := c.cc.Invoke(ctx, "/verana.di.v1.Query/GetDigest", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // QueryServer is the server API for Query service.
 type QueryServer interface {
 	// Parameters queries the parameters of the module.
 	Params(context.Context, *QueryParamsRequest) (*QueryParamsResponse, error)
+	// [MOD-DI-QRY-1] GetDigest returns a stored digest by its digest string.
+	GetDigest(context.Context, *QueryGetDigestRequest) (*QueryGetDigestResponse, error)
 }
 
 // UnimplementedQueryServer can be embedded to have forward compatible implementations.
@@ -190,6 +366,9 @@ type UnimplementedQueryServer struct {
 
 func (*UnimplementedQueryServer) Params(ctx context.Context, req *QueryParamsRequest) (*QueryParamsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Params not implemented")
+}
+func (*UnimplementedQueryServer) GetDigest(ctx context.Context, req *QueryGetDigestRequest) (*QueryGetDigestResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetDigest not implemented")
 }
 
 func RegisterQueryServer(s grpc1.Server, srv QueryServer) {
@@ -214,6 +393,24 @@ func _Query_Params_Handler(srv interface{}, ctx context.Context, dec func(interf
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Query_GetDigest_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryGetDigestRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).GetDigest(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/verana.di.v1.Query/GetDigest",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).GetDigest(ctx, req.(*QueryGetDigestRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var Query_serviceDesc = _Query_serviceDesc
 var _Query_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "verana.di.v1.Query",
@@ -222,6 +419,10 @@ var _Query_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Params",
 			Handler:    _Query_Params_Handler,
+		},
+		{
+			MethodName: "GetDigest",
+			Handler:    _Query_GetDigest_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -284,6 +485,109 @@ func (m *QueryParamsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
+func (m *QueryGetDigestRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryGetDigestRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryGetDigestRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Digest) > 0 {
+		i -= len(m.Digest)
+		copy(dAtA[i:], m.Digest)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Digest)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *DigestInfo) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *DigestInfo) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *DigestInfo) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	n2, err2 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(m.Created, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(m.Created):])
+	if err2 != nil {
+		return 0, err2
+	}
+	i -= n2
+	i = encodeVarintQuery(dAtA, i, uint64(n2))
+	i--
+	dAtA[i] = 0x12
+	if len(m.Digest) > 0 {
+		i -= len(m.Digest)
+		copy(dAtA[i:], m.Digest)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Digest)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryGetDigestResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryGetDigestResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryGetDigestResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Digest != nil {
+		{
+			size, err := m.Digest.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintQuery(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintQuery(dAtA []byte, offset int, v uint64) int {
 	offset -= sovQuery(v)
 	base := offset
@@ -312,6 +616,47 @@ func (m *QueryParamsResponse) Size() (n int) {
 	_ = l
 	l = m.Params.Size()
 	n += 1 + l + sovQuery(uint64(l))
+	return n
+}
+
+func (m *QueryGetDigestRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Digest)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *DigestInfo) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Digest)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	l = github_com_cosmos_gogoproto_types.SizeOfStdTime(m.Created)
+	n += 1 + l + sovQuery(uint64(l))
+	return n
+}
+
+func (m *QueryGetDigestResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Digest != nil {
+		l = m.Digest.Size()
+		n += 1 + l + sovQuery(uint64(l))
+	}
 	return n
 }
 
@@ -430,6 +775,289 @@ func (m *QueryParamsResponse) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			if err := m.Params.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryGetDigestRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryGetDigestRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryGetDigestRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Digest", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Digest = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *DigestInfo) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: DigestInfo: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: DigestInfo: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Digest", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Digest = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Created", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := github_com_cosmos_gogoproto_types.StdTimeUnmarshal(&m.Created, dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryGetDigestResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryGetDigestResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryGetDigestResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Digest", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Digest == nil {
+				m.Digest = &DigestInfo{}
+			}
+			if err := m.Digest.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex

@@ -38,6 +38,38 @@
           "Query"
         ]
       }
+    },
+    "/verana/di/v1/get/{digest}": {
+      "get": {
+        "summary": "[MOD-DI-QRY-1] GetDigest returns a stored digest by its digest string.",
+        "operationId": "Query_GetDigest",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.di.v1.QueryGetDigestResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "digest",
+            "description": "digest is the digest string to look up.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Query"
+        ]
+      }
     }
   },
   "definitions": {
@@ -69,9 +101,34 @@
         }
       }
     },
+    "verana.di.v1.DigestInfo": {
+      "type": "object",
+      "properties": {
+        "digest": {
+          "type": "string",
+          "description": "digest is the digest string."
+        },
+        "created": {
+          "type": "string",
+          "format": "date-time",
+          "description": "created is the timestamp when the digest was stored."
+        }
+      },
+      "description": "DigestInfo is the stored digest record returned by queries."
+    },
     "verana.di.v1.Params": {
       "type": "object",
       "description": "Params defines the parameters for the module."
+    },
+    "verana.di.v1.QueryGetDigestResponse": {
+      "type": "object",
+      "properties": {
+        "digest": {
+          "$ref": "#/definitions/verana.di.v1.DigestInfo",
+          "description": "digest is the stored digest entry."
+        }
+      },
+      "description": "QueryGetDigestResponse is the response type for the Query/GetDigest RPC method."
     },
     "verana.di.v1.QueryParamsResponse": {
       "type": "object",
