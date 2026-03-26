@@ -11,6 +11,7 @@ import (
 	_ "github.com/verana-labs/verana/x/perm/module" // import for side-effects
 	trustdepositmodule "github.com/verana-labs/verana/x/td/module"
 	_ "github.com/verana-labs/verana/x/tr/module" // import for side-effects
+	xrmodulekeeper "github.com/verana-labs/verana/x/xr/keeper"
 
 	upgradetypes "cosmossdk.io/x/upgrade/types"
 	"github.com/verana-labs/verana/app/upgrades"
@@ -211,6 +212,7 @@ type App struct {
 	TrustdepositKeeper     trustdepositmodulekeeper.Keeper
 	DeKeeper               demodulekeeper.Keeper
 	DiKeeper               dimodulekeeper.Keeper
+	XrKeeper               xrmodulekeeper.Keeper
 	// this line is used by starport scaffolding # stargate/app/keeperDeclaration
 
 	// simulation manager
@@ -355,6 +357,7 @@ func New(
 		&app.TrustdepositKeeper,
 		&app.DeKeeper,
 		&app.DiKeeper,
+		&app.XrKeeper,
 
 		// this line is used by starport scaffolding # stargate/app/keeperDefinition
 	); err != nil {

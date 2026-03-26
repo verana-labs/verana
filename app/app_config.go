@@ -67,6 +67,8 @@ import (
 	permissionmoduletypes "github.com/verana-labs/verana/x/perm/types"
 	trustdepositmoduletypes "github.com/verana-labs/verana/x/td/types"
 	trustregistrymoduletypes "github.com/verana-labs/verana/x/tr/types"
+	_ "github.com/verana-labs/verana/x/xr/module"
+	xrmoduletypes "github.com/verana-labs/verana/x/xr/types"
 
 	// this line is used by starport scaffolding # stargate/app/moduleImport
 	protocolpoolmodulev1 "cosmossdk.io/api/cosmos/protocolpool/module/v1" // import for side-effects
@@ -116,6 +118,7 @@ var (
 		trustdepositmoduletypes.ModuleName,
 		demoduletypes.ModuleName,
 		dimoduletypes.ModuleName,
+		xrmoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/initGenesis
 	}
 
@@ -148,6 +151,7 @@ var (
 		trustdepositmoduletypes.ModuleName,
 		demoduletypes.ModuleName,
 		dimoduletypes.ModuleName,
+		xrmoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/beginBlockers
 	}
 
@@ -174,6 +178,7 @@ var (
 		trustdepositmoduletypes.ModuleName,
 		demoduletypes.ModuleName,
 		dimoduletypes.ModuleName,
+		xrmoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/endBlockers
 	}
 
@@ -367,6 +372,10 @@ var (
 			{
 				Name:   dimoduletypes.ModuleName,
 				Config: appconfig.WrapAny(&dimoduletypes.Module{}),
+			},
+			{
+				Name:   xrmoduletypes.ModuleName,
+				Config: appconfig.WrapAny(&xrmoduletypes.Module{}),
 			},
 			// this line is used by starport scaffolding # stargate/app/moduleConfig
 		},
