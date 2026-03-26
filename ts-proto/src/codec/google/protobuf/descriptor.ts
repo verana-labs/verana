@@ -1422,7 +1422,14 @@ export interface FieldOptions_FeatureSupport {
    * this one, the last default assigned will be used, and proto files will
    * not be able to override it.
    */
-  editionRemoved?: Edition | undefined;
+  editionRemoved?:
+    | Edition
+    | undefined;
+  /**
+   * The removal error text if this feature is used after the edition it was
+   * removed in.
+   */
+  removalError?: string | undefined;
 }
 
 export interface OneofOptions {
@@ -5063,7 +5070,7 @@ export const FieldOptions_EditionDefault = {
 };
 
 function createBaseFieldOptions_FeatureSupport(): FieldOptions_FeatureSupport {
-  return { editionIntroduced: 0, editionDeprecated: 0, deprecationWarning: "", editionRemoved: 0 };
+  return { editionIntroduced: 0, editionDeprecated: 0, deprecationWarning: "", editionRemoved: 0, removalError: "" };
 }
 
 export const FieldOptions_FeatureSupport = {
@@ -5079,6 +5086,9 @@ export const FieldOptions_FeatureSupport = {
     }
     if (message.editionRemoved !== undefined && message.editionRemoved !== 0) {
       writer.uint32(32).int32(message.editionRemoved);
+    }
+    if (message.removalError !== undefined && message.removalError !== "") {
+      writer.uint32(42).string(message.removalError);
     }
     return writer;
   },
@@ -5118,6 +5128,13 @@ export const FieldOptions_FeatureSupport = {
 
           message.editionRemoved = reader.int32() as any;
           continue;
+        case 5:
+          if (tag !== 42) {
+            break;
+          }
+
+          message.removalError = reader.string();
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -5133,6 +5150,7 @@ export const FieldOptions_FeatureSupport = {
       editionDeprecated: isSet(object.editionDeprecated) ? editionFromJSON(object.editionDeprecated) : 0,
       deprecationWarning: isSet(object.deprecationWarning) ? globalThis.String(object.deprecationWarning) : "",
       editionRemoved: isSet(object.editionRemoved) ? editionFromJSON(object.editionRemoved) : 0,
+      removalError: isSet(object.removalError) ? globalThis.String(object.removalError) : "",
     };
   },
 
@@ -5150,6 +5168,9 @@ export const FieldOptions_FeatureSupport = {
     if (message.editionRemoved !== undefined && message.editionRemoved !== 0) {
       obj.editionRemoved = editionToJSON(message.editionRemoved);
     }
+    if (message.removalError !== undefined && message.removalError !== "") {
+      obj.removalError = message.removalError;
+    }
     return obj;
   },
 
@@ -5162,6 +5183,7 @@ export const FieldOptions_FeatureSupport = {
     message.editionDeprecated = object.editionDeprecated ?? 0;
     message.deprecationWarning = object.deprecationWarning ?? "";
     message.editionRemoved = object.editionRemoved ?? 0;
+    message.removalError = object.removalError ?? "";
     return message;
   },
 };

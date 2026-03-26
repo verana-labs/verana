@@ -8,7 +8,6 @@ import (
 
 	credentialschematypes "github.com/verana-labs/verana/x/cs/types"
 
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/verana-labs/verana/x/perm/types"
 )
@@ -1555,4 +1554,3 @@ func (ms msgServer) checkCreatePermissionOverlap(ctx sdk.Context, schemaId uint6
 
 	return nil
 }
-

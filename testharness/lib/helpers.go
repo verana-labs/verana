@@ -21,7 +21,6 @@ import (
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	protocolpooltypes "github.com/cosmos/cosmos-sdk/x/protocolpool/types"
 	detypes "github.com/verana-labs/verana/x/de/types"
-	didtypes "github.com/verana-labs/verana/x/dd/types"
 	tdtypes "github.com/verana-labs/verana/x/td/types"
 	trtypes "github.com/verana-labs/verana/x/tr/types"
 
@@ -170,14 +169,6 @@ func CreateRootPermissionWithDates(
 		panic(fmt.Sprintf("Failed to create root permission: %v", err))
 	}
 	return rpStrId
-}
-
-// RegisterDID adds a DID to the directory
-func RegisterDID(client cosmosclient.Client, ctx context.Context, account cosmosaccount.Account, did string, years uint32) {
-	err := AddDidToDirectory(client, ctx, account, did, years)
-	if err != nil {
-		panic(fmt.Sprintf("Failed to add DID to directory: %v", err))
-	}
 }
 
 // SaveJourneyResult saves a journey result for later use
@@ -905,112 +896,6 @@ func VerifyGovernanceFrameworkUpdate(
 
 	fmt.Printf("✅ Verified governance framework updated to version %d\n", expectedActiveVersion)
 	return true
-}
-
-// GetDID retrieves a DID entry from the DID Directory
-func GetDID(client cosmosclient.Client, ctx context.Context, did string) (*didtypes.DIDDirectory, error) {
-	didClient := didtypes.NewQueryClient(client.Context())
-	resp, err := didClient.GetDID(ctx, &didtypes.QueryGetDIDRequest{
-		Did: did,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("failed to query DID: %w", err)
-	}
-	return &resp.Did, nil
-}
-
-// RenewDID renews a DID in the DID Directory
-func RenewDID(client cosmosclient.Client, ctx context.Context, creator cosmosaccount.Account, msg didtypes.MsgRenewDID) (string, error) {
-	creatorAddr, err := creator.Address(addressPrefix)
-	if err != nil {
-		return "", fmt.Errorf("failed to get creator address: %w", err)
-	}
-
-	// Make sure creator is set correctly
-	msgWithCreator := didtypes.MsgRenewDID{
-		Creator: creatorAddr,
-		Did:     msg.Did,
-		Years:   msg.Years,
-	}
-
-	txResp, err := client.BroadcastTx(ctx, creator, &msgWithCreator)
-	if err != nil {
-		return "", fmt.Errorf("failed to broadcast transaction: %w", err)
-	}
-
-	// Print response from broadcasting a transaction
-	fmt.Print("RenewDID:\n\n")
-	fmt.Println(txResp)
-
-	// Check if the transaction was successful
-	if txResp.TxResponse.Code != 0 {
-		return "", fmt.Errorf("transaction failed with code %d: %s",
-			txResp.TxResponse.Code, txResp.TxResponse.RawLog)
-	}
-
-	return "success", nil
-}
-
-// TouchDID updates the indexing of a DID in the DID Directory
-func TouchDID(client cosmosclient.Client, ctx context.Context, creator cosmosaccount.Account, msg didtypes.MsgTouchDID) (string, error) {
-	creatorAddr, err := creator.Address(addressPrefix)
-	if err != nil {
-		return "", fmt.Errorf("failed to get creator address: %w", err)
-	}
-
-	// Make sure creator is set correctly
-	msgWithCreator := didtypes.MsgTouchDID{
-		Creator: creatorAddr,
-		Did:     msg.Did,
-	}
-
-	txResp, err := client.BroadcastTx(ctx, creator, &msgWithCreator)
-	if err != nil {
-		return "", fmt.Errorf("failed to broadcast transaction: %w", err)
-	}
-
-	// Print response from broadcasting a transaction
-	fmt.Print("TouchDID:\n\n")
-	fmt.Println(txResp)
-
-	// Check if the transaction was successful
-	if txResp.TxResponse.Code != 0 {
-		return "", fmt.Errorf("transaction failed with code %d: %s",
-			txResp.TxResponse.Code, txResp.TxResponse.RawLog)
-	}
-
-	return "success", nil
-}
-
-// RemoveDID removes a DID from the DID Directory
-func RemoveDID(client cosmosclient.Client, ctx context.Context, creator cosmosaccount.Account, msg didtypes.MsgRemoveDID) (string, error) {
-	creatorAddr, err := creator.Address(addressPrefix)
-	if err != nil {
-		return "", fmt.Errorf("failed to get creator address: %w", err)
-	}
-
-	// Make sure creator is set correctly
-	msgWithCreator := didtypes.MsgRemoveDID{
-		Creator: creatorAddr,
-		Did:     msg.Did,
-	}
-
-	txResp, err := client.BroadcastTx(ctx, creator, &msgWithCreator)
-	if err != nil {
-		return "", fmt.Errorf("failed to broadcast transaction: %w", err)
-	}
-
-	// Print response from broadcasting a transaction
-	fmt.Print("RemoveDID:\n\n")
-	fmt.Println(txResp)
-
-	// Check if the transaction was successful
-	if txResp.TxResponse.Code != 0 {
-		return "", fmt.Errorf("transaction failed with code %d: %s",
-			txResp.TxResponse.Code, txResp.TxResponse.RawLog)
-	}
-
-	return "success", nil
 }
 
 // RevokePermission revokes a permission (v4: authority/operator pattern)
@@ -2287,7 +2172,7 @@ func CreateGroupWithPolicy(
 		GroupMetadata:       "test group for TR authz",
 		GroupPolicyMetadata: "threshold policy",
 		GroupPolicyAsAdmin:  true,
-		DecisionPolicy:     decisionPolicyAny,
+		DecisionPolicy:      decisionPolicyAny,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, admin, msg)

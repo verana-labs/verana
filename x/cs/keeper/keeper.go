@@ -133,10 +133,10 @@ func (k Keeper) GetNextID(ctx sdk.Context, entityType string) (uint64, error) {
 
 func CreateMsgWithValidityPeriods(authority string, operator string, trID uint64, jsonSchema string, issuerGrantor, verifierGrantor, issuer, verifier, holder uint32, issuerMode, verifierMode uint32, pricingAssetType uint32, pricingAsset string, digestAlgorithm string) *types.MsgCreateCredentialSchema {
 	msg := &types.MsgCreateCredentialSchema{
-		Authority:                              authority,
-		Operator:                               operator,
-		TrId:                                   trID,
-		JsonSchema:                             jsonSchema,
+		Authority:                               authority,
+		Operator:                                operator,
+		TrId:                                    trID,
+		JsonSchema:                              jsonSchema,
 		IssuerGrantorValidationValidityPeriod:   &types.OptionalUInt32{Value: issuerGrantor},
 		VerifierGrantorValidationValidityPeriod: &types.OptionalUInt32{Value: verifierGrantor},
 		IssuerValidationValidityPeriod:          &types.OptionalUInt32{Value: issuer},

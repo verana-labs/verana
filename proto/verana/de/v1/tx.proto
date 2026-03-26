@@ -21,12 +21,10 @@ service Msg {
   rpc UpdateParams(MsgUpdateParams) returns (MsgUpdateParamsResponse);
 
   // [MOD-DE-MSG-3] Grant Operator Authorization
-  rpc GrantOperatorAuthorization(MsgGrantOperatorAuthorization)
-      returns (MsgGrantOperatorAuthorizationResponse);
+  rpc GrantOperatorAuthorization(MsgGrantOperatorAuthorization) returns (MsgGrantOperatorAuthorizationResponse);
 
   // [MOD-DE-MSG-4] Revoke Operator Authorization
-  rpc RevokeOperatorAuthorization(MsgRevokeOperatorAuthorization)
-      returns (MsgRevokeOperatorAuthorizationResponse);
+  rpc RevokeOperatorAuthorization(MsgRevokeOperatorAuthorization) returns (MsgRevokeOperatorAuthorizationResponse);
 }
 
 // MsgUpdateParams is the Msg/UpdateParams request type.
@@ -66,8 +64,10 @@ message MsgGrantOperatorAuthorization {
   // authorization is granted.
   repeated string msg_types = 4;
   // expiration is the optional timestamp after which the authorization expires.
-  google.protobuf.Timestamp expiration = 5
-      [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  google.protobuf.Timestamp expiration = 5 [
+    (gogoproto.stdtime) = true,
+    (gogoproto.nullable) = true
+  ];
   // authz_spend_limit is the optional maximum spendable amount.
   repeated cosmos.base.v1beta1.Coin authz_spend_limit = 6 [
     (gogoproto.nullable) = false,
@@ -75,8 +75,10 @@ message MsgGrantOperatorAuthorization {
   ];
   // authz_spend_limit_period is the optional reset period for
   // authz_spend_limit.
-  google.protobuf.Duration authz_spend_limit_period = 7
-      [(gogoproto.stdduration) = true, (gogoproto.nullable) = true];
+  google.protobuf.Duration authz_spend_limit_period = 7 [
+    (gogoproto.stdduration) = true,
+    (gogoproto.nullable) = true
+  ];
   // with_feegrant indicates whether to also grant a fee allowance.
   bool with_feegrant = 8;
   // feegrant_spend_limit is the optional maximum fee amount. Ignored if
@@ -87,8 +89,10 @@ message MsgGrantOperatorAuthorization {
   ];
   // feegrant_spend_limit_period is the optional reset period for
   // feegrant_spend_limit. Ignored if with_feegrant is false.
-  google.protobuf.Duration feegrant_spend_limit_period = 10
-      [(gogoproto.stdduration) = true, (gogoproto.nullable) = true];
+  google.protobuf.Duration feegrant_spend_limit_period = 10 [
+    (gogoproto.stdduration) = true,
+    (gogoproto.nullable) = true
+  ];
 }
 
 // MsgGrantOperatorAuthorizationResponse defines the response for

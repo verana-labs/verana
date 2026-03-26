@@ -15,7 +15,6 @@ import (
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
 
 	cschema "github.com/verana-labs/verana/x/cs/types"
-	didtypes "github.com/verana-labs/verana/x/dd/types"
 	permtypes "github.com/verana-labs/verana/x/perm/types"
 	"github.com/verana-labs/verana/x/tr/types"
 )
@@ -159,31 +158,6 @@ func VoteOnProposal(client cosmosclient.Client, ctx context.Context, voter cosmo
 	fmt.Print("VoteOnProposal:\n\n")
 	prettyJSON := PrettyJSON(client, txResp)
 	fmt.Println(prettyJSON)
-
-	return nil
-}
-
-// AddDidToDirectory adds a DID to the directory
-func AddDidToDirectory(client cosmosclient.Client, ctx context.Context, adder cosmosaccount.Account, did string, years uint32) error {
-	creatorAddr, err := adder.Address(addressPrefix)
-	if err != nil {
-		log.Fatal(err)
-	}
-	msg := &didtypes.MsgAddDID{
-		Creator: creatorAddr,
-		Did:     did,
-		Years:   uint32(years),
-	}
-
-	// Broadcast transaction to add DID
-	txResp, err := client.BroadcastTx(ctx, adder, msg)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Print response from broadcasting a transaction
-	fmt.Print("AddDidToDirectory:\n\n")
-	fmt.Println(txResp)
 
 	return nil
 }

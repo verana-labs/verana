@@ -129,10 +129,10 @@ func NewMsgCreateCredentialSchema(
 	digestAlgorithm string,
 ) *MsgCreateCredentialSchema {
 	msg := &MsgCreateCredentialSchema{
-		Authority:                              authority,
-		Operator:                               operator,
-		TrId:                                   trId,
-		JsonSchema:                             jsonSchema,
+		Authority:                               authority,
+		Operator:                                operator,
+		TrId:                                    trId,
+		JsonSchema:                              jsonSchema,
 		IssuerGrantorValidationValidityPeriod:   &OptionalUInt32{Value: issuerGrantorValidationValidityPeriod},
 		VerifierGrantorValidationValidityPeriod: &OptionalUInt32{Value: verifierGrantorValidationValidityPeriod},
 		IssuerValidationValidityPeriod:          &OptionalUInt32{Value: issuerValidationValidityPeriod},

@@ -5,7 +5,6 @@ import (
 	"io"
 
 	_ "github.com/verana-labs/verana/x/cs/module" // import for side-effects
-	_ "github.com/verana-labs/verana/x/dd/module" // import for side-effects
 	demodulekeeper "github.com/verana-labs/verana/x/de/keeper"
 	dimodulekeeper "github.com/verana-labs/verana/x/di/keeper"
 	_ "github.com/verana-labs/verana/x/perm/module" // import for side-effects
@@ -105,7 +104,6 @@ import (
 	ibctransferkeeper "github.com/cosmos/ibc-go/v8/modules/apps/transfer/keeper"
 	ibckeeper "github.com/cosmos/ibc-go/v8/modules/core/keeper"
 
-	diddirectorymodulekeeper "github.com/verana-labs/verana/x/dd/keeper"
 	trustregistrymodulekeeper "github.com/verana-labs/verana/x/tr/keeper"
 
 	credentialschemamodulekeeper "github.com/verana-labs/verana/x/cs/keeper"
@@ -206,7 +204,6 @@ type App struct {
 	ScopedKeepers             map[string]capabilitykeeper.ScopedKeeper
 
 	TrustregistryKeeper    trustregistrymodulekeeper.Keeper
-	DiddirectoryKeeper     diddirectorymodulekeeper.Keeper
 	CredentialschemaKeeper credentialschemamodulekeeper.Keeper
 	PermissionKeeper       permissionmodulekeeper.Keeper
 	TrustdepositKeeper     trustdepositmodulekeeper.Keeper
@@ -257,10 +254,6 @@ func AppConfig() depinject.Config {
 			},
 		),
 	)
-}
-
-func (app *App) GetDidDirectoryKeeper() diddirectorymodulekeeper.Keeper {
-	return app.DiddirectoryKeeper
 }
 
 func (app *App) GetCredentialSchemaKeeper() credentialschemamodulekeeper.Keeper {
@@ -351,7 +344,6 @@ func New(
 		&app.CircuitBreakerKeeper,
 		&app.ProtocolPoolKeeper,
 		&app.TrustregistryKeeper,
-		&app.DiddirectoryKeeper,
 		&app.CredentialschemaKeeper,
 		&app.PermissionKeeper,
 		&app.TrustdepositKeeper,

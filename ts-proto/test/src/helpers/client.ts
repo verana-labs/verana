@@ -15,11 +15,6 @@ import {
   MsgArchiveTrustRegistryAminoConverter,
   MsgAddGovernanceFrameworkDocumentAminoConverter,
   MsgIncreaseActiveGovernanceFrameworkVersionAminoConverter,
-  // DD module
-  MsgAddDIDAminoConverter,
-  MsgRenewDIDAminoConverter,
-  MsgTouchDIDAminoConverter,
-  MsgRemoveDIDAminoConverter,
   // CS module
   MsgCreateCredentialSchemaAminoConverter,
   MsgUpdateCredentialSchemaAminoConverter,
@@ -155,11 +150,6 @@ export function createVeranaAminoTypes(): AminoTypes {
     '/verana.tr.v1.MsgArchiveTrustRegistry': MsgArchiveTrustRegistryAminoConverter,
     '/verana.tr.v1.MsgAddGovernanceFrameworkDocument': MsgAddGovernanceFrameworkDocumentAminoConverter,
     '/verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion': MsgIncreaseActiveGovernanceFrameworkVersionAminoConverter,
-    // DID Directory (dd) module
-    '/verana.dd.v1.MsgAddDID': MsgAddDIDAminoConverter,
-    '/verana.dd.v1.MsgRenewDID': MsgRenewDIDAminoConverter,
-    '/verana.dd.v1.MsgTouchDID': MsgTouchDIDAminoConverter,
-    '/verana.dd.v1.MsgRemoveDID': MsgRemoveDIDAminoConverter,
     // Credential Schema (cs) module
     '/verana.cs.v1.MsgCreateCredentialSchema': MsgCreateCredentialSchemaAminoConverter,
     '/verana.cs.v1.MsgUpdateCredentialSchema': MsgUpdateCredentialSchemaAminoConverter,

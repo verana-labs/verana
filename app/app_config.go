@@ -54,12 +54,10 @@ import (
 	"google.golang.org/protobuf/types/known/durationpb"
 
 	credentialschemamodulev1 "github.com/verana-labs/verana/api/verana/cs/module"
-	diddirectorymodulev1 "github.com/verana-labs/verana/api/verana/dd/module"
 	permissionmodulev1 "github.com/verana-labs/verana/api/verana/perm/module"
 	trustdepositmodulev1 "github.com/verana-labs/verana/api/verana/td/module"
 	trustregistrymodulev1 "github.com/verana-labs/verana/api/verana/tr/module"
 	credentialschemamoduletypes "github.com/verana-labs/verana/x/cs/types"
-	diddirectorymoduletypes "github.com/verana-labs/verana/x/dd/types"
 	_ "github.com/verana-labs/verana/x/de/module"
 	demoduletypes "github.com/verana-labs/verana/x/de/types"
 	_ "github.com/verana-labs/verana/x/di/module"
@@ -112,7 +110,6 @@ var (
 		protocolpooltypes.ModuleName,
 		// chain modules
 		trustregistrymoduletypes.ModuleName,
-		diddirectorymoduletypes.ModuleName,
 		credentialschemamoduletypes.ModuleName,
 		permissionmoduletypes.ModuleName,
 		trustdepositmoduletypes.ModuleName,
@@ -145,7 +142,6 @@ var (
 		ibcfeetypes.ModuleName,
 		// chain modules
 		trustregistrymoduletypes.ModuleName,
-		diddirectorymoduletypes.ModuleName,
 		credentialschemamoduletypes.ModuleName,
 		permissionmoduletypes.ModuleName,
 		trustdepositmoduletypes.ModuleName,
@@ -172,7 +168,6 @@ var (
 		ibcfeetypes.ModuleName,
 		// chain modules
 		trustregistrymoduletypes.ModuleName,
-		diddirectorymoduletypes.ModuleName,
 		credentialschemamoduletypes.ModuleName,
 		permissionmoduletypes.ModuleName,
 		trustdepositmoduletypes.ModuleName,
@@ -348,10 +343,6 @@ var (
 			{
 				Name:   trustregistrymoduletypes.ModuleName,
 				Config: appconfig.WrapAny(&trustregistrymodulev1.Module{}),
-			},
-			{
-				Name:   diddirectorymoduletypes.ModuleName,
-				Config: appconfig.WrapAny(&diddirectorymodulev1.Module{}),
 			},
 			{
 				Name:   credentialschemamoduletypes.ModuleName,

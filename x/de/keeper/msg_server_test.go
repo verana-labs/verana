@@ -66,14 +66,14 @@ func TestGrantFeeAllowance(t *testing.T) {
 	nowExp := ctx.BlockTime()
 
 	testCases := []struct {
-		name       string
-		authority  string
-		grantee   string
-		msgTypes   []string
-		expiration *time.Time
-		spendLimit sdk.Coins
-		period     *time.Duration
-		expectErr  bool
+		name        string
+		authority   string
+		grantee     string
+		msgTypes    []string
+		expiration  *time.Time
+		spendLimit  sdk.Coins
+		period      *time.Duration
+		expectErr   bool
 		errContains string
 	}{
 		{
@@ -285,12 +285,12 @@ func TestRevokeFeeAllowance(t *testing.T) {
 	grantee := sdk.AccAddress([]byte("test_grantee________")).String()
 
 	testCases := []struct {
-		name      string
-		setupFunc func()
-		authority string
-		grantee   string
-		expectErr bool
-		errContains string
+		name          string
+		setupFunc     func()
+		authority     string
+		grantee       string
+		expectErr     bool
+		errContains   string
 		expectRemoved bool
 	}{
 		{
@@ -378,10 +378,10 @@ func TestMsgServerGrantOperatorAuthorization(t *testing.T) {
 	nowExp := ctx.BlockTime()
 
 	testCases := []struct {
-		name      string
-		setupFunc func()
-		msg       *types.MsgGrantOperatorAuthorization
-		expectErr bool
+		name        string
+		setupFunc   func()
+		msg         *types.MsgGrantOperatorAuthorization
+		expectErr   bool
 		errContains string
 	}{
 		{
@@ -419,11 +419,11 @@ func TestMsgServerGrantOperatorAuthorization(t *testing.T) {
 		{
 			name: "Valid: with feegrant and spend limits",
 			msg: &types.MsgGrantOperatorAuthorization{
-				Authority:         authority,
-				Operator:          "",
-				Grantee:           grantee,
-				MsgTypes:          validMsgTypes,
-				WithFeegrant:      true,
+				Authority:          authority,
+				Operator:           "",
+				Grantee:            grantee,
+				MsgTypes:           validMsgTypes,
+				WithFeegrant:       true,
 				FeegrantSpendLimit: sdk.NewCoins(sdk.NewInt64Coin("stake", 500)),
 			},
 			expectErr: false,
@@ -431,10 +431,10 @@ func TestMsgServerGrantOperatorAuthorization(t *testing.T) {
 		{
 			name: "Valid: with authz spend limit",
 			msg: &types.MsgGrantOperatorAuthorization{
-				Authority:      authority,
-				Operator:       "",
-				Grantee:        grantee,
-				MsgTypes:       validMsgTypes,
+				Authority:       authority,
+				Operator:        "",
+				Grantee:         grantee,
+				MsgTypes:        validMsgTypes,
 				AuthzSpendLimit: sdk.NewCoins(sdk.NewInt64Coin("stake", 1000)),
 			},
 			expectErr: false,
@@ -578,11 +578,11 @@ func TestMsgServerGrantOperatorAuthorization(t *testing.T) {
 			msg: func() *types.MsgGrantOperatorAuthorization {
 				negativePeriod := -time.Hour
 				return &types.MsgGrantOperatorAuthorization{
-					Authority:            authority,
-					Operator:             "",
-					Grantee:              grantee,
-					MsgTypes:             validMsgTypes,
-					AuthzSpendLimit:      sdk.NewCoins(sdk.NewInt64Coin("stake", 1000)),
+					Authority:             authority,
+					Operator:              "",
+					Grantee:               grantee,
+					MsgTypes:              validMsgTypes,
+					AuthzSpendLimit:       sdk.NewCoins(sdk.NewInt64Coin("stake", 1000)),
 					AuthzSpendLimitPeriod: &negativePeriod,
 				}
 			}(),
@@ -591,14 +591,14 @@ func TestMsgServerGrantOperatorAuthorization(t *testing.T) {
 		},
 		{
 			name: "Invalid: zero authz_spend_limit_period with authz_spend_limit set",
-			msg: func() *types.MsgGrantOperatorAuthorization{
+			msg: func() *types.MsgGrantOperatorAuthorization {
 				zeroPeriod := time.Duration(0)
 				return &types.MsgGrantOperatorAuthorization{
-					Authority:            authority,
-					Operator:             "",
-					Grantee:              grantee,
-					MsgTypes:             validMsgTypes,
-					AuthzSpendLimit:      sdk.NewCoins(sdk.NewInt64Coin("stake", 1000)),
+					Authority:             authority,
+					Operator:              "",
+					Grantee:               grantee,
+					MsgTypes:              validMsgTypes,
+					AuthzSpendLimit:       sdk.NewCoins(sdk.NewInt64Coin("stake", 1000)),
 					AuthzSpendLimitPeriod: &zeroPeriod,
 				}
 			}(),
@@ -610,10 +610,10 @@ func TestMsgServerGrantOperatorAuthorization(t *testing.T) {
 			msg: func() *types.MsgGrantOperatorAuthorization {
 				negativePeriod := -time.Hour
 				return &types.MsgGrantOperatorAuthorization{
-					Authority:            authority,
-					Operator:             "",
-					Grantee:              grantee,
-					MsgTypes:             validMsgTypes,
+					Authority:             authority,
+					Operator:              "",
+					Grantee:               grantee,
+					MsgTypes:              validMsgTypes,
 					AuthzSpendLimitPeriod: &negativePeriod,
 				}
 			}(),
@@ -624,11 +624,11 @@ func TestMsgServerGrantOperatorAuthorization(t *testing.T) {
 			msg: func() *types.MsgGrantOperatorAuthorization {
 				validPeriod := time.Hour
 				return &types.MsgGrantOperatorAuthorization{
-					Authority:            authority,
-					Operator:             "",
-					Grantee:              grantee,
-					MsgTypes:             validMsgTypes,
-					AuthzSpendLimit:      sdk.NewCoins(sdk.NewInt64Coin("stake", 1000)),
+					Authority:             authority,
+					Operator:              "",
+					Grantee:               grantee,
+					MsgTypes:              validMsgTypes,
+					AuthzSpendLimit:       sdk.NewCoins(sdk.NewInt64Coin("stake", 1000)),
 					AuthzSpendLimitPeriod: &validPeriod,
 				}
 			}(),

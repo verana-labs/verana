@@ -1260,7 +1260,7 @@ func TestAdjustTrustDepositOnBehalf(t *testing.T) {
 			check: func() {
 				td, err := k.TrustDeposit.Get(ctx, testAccString)
 				require.NoError(t, err)
-				require.Equal(t, uint64(1200), td.Amount)  // 1000 + 200
+				require.Equal(t, uint64(1200), td.Amount)   // 1000 + 200
 				require.Equal(t, uint64(100), td.Claimable) // unchanged
 				expectedShare := math.LegacyNewDec(1200)    // 1000 + 200/1.0
 				require.True(t, td.Share.Equal(expectedShare), "expected %s, got %s", expectedShare, td.Share)

@@ -67,7 +67,7 @@ func TestStartPermissionVP(t *testing.T) {
 	validatorPerm := types.Permission{
 		SchemaId:      1,
 		Type:          types.PermissionType_ISSUER_GRANTOR,
-		Authority:       creator,
+		Authority:     creator,
 		Created:       &now,
 		CreatedBy:     creator,
 		Adjusted:      &now,
@@ -85,7 +85,7 @@ func TestStartPermissionVP(t *testing.T) {
 	verifierGrantorPerm := types.Permission{
 		SchemaId:      1,
 		Type:          types.PermissionType_VERIFIER_GRANTOR,
-		Authority:       creator,
+		Authority:     creator,
 		Created:       &now,
 		CreatedBy:     creator,
 		Adjusted:      &now,
@@ -102,7 +102,7 @@ func TestStartPermissionVP(t *testing.T) {
 	validatorPermNoCountry := types.Permission{
 		SchemaId:      1,
 		Type:          types.PermissionType_ISSUER_GRANTOR,
-		Authority:       creator,
+		Authority:     creator,
 		Created:       &now,
 		CreatedBy:     creator,
 		Adjusted:      &now,
@@ -288,7 +288,7 @@ func TestRenewPermissionVP(t *testing.T) {
 	validatorPerm := types.Permission{
 		SchemaId:      1,
 		Type:          3, // ISSUER_GRANTOR
-		Authority:       creator,
+		Authority:     creator,
 		Created:       &now,
 		CreatedBy:     creator,
 		Adjusted:      &now,
@@ -307,7 +307,7 @@ func TestRenewPermissionVP(t *testing.T) {
 	applicantPerm := types.Permission{
 		SchemaId:        1,
 		Type:            1, // ISSUER
-		Authority:         creator,
+		Authority:       creator,
 		Created:         &now,
 		CreatedBy:       creator,
 		Adjusted:        &now,
@@ -482,15 +482,15 @@ func TestRenewPermissionVP_VpStatePrecondition(t *testing.T) {
 
 	t.Run("Renewing PENDING perm is blocked (prevents fee accounting loss)", func(t *testing.T) {
 		pendingPerm := types.Permission{
-			SchemaId:        1,
-			Type:            1,
-			Authority:       creator,
-			Created:         &now,
-			CreatedBy:       creator,
-			Modified:        &now,
-			ValidatorPermId: validatorPermID,
-			VpState:         types.ValidationState_PENDING,
-			VpCurrentFees:   1000, // funds already in escrow
+			SchemaId:         1,
+			Type:             1,
+			Authority:        creator,
+			Created:          &now,
+			CreatedBy:        creator,
+			Modified:         &now,
+			ValidatorPermId:  validatorPermID,
+			VpState:          types.ValidationState_PENDING,
+			VpCurrentFees:    1000, // funds already in escrow
 			VpCurrentDeposit: 500,
 		}
 		pendingPermID, err := k.CreatePermission(sdkCtx, pendingPerm)
@@ -971,7 +971,7 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 	validatorPerm := types.Permission{
 		SchemaId:      1,
 		Type:          types.PermissionType_ISSUER_GRANTOR,
-		Authority:       validatorAddr,
+		Authority:     validatorAddr,
 		Created:       &now,
 		CreatedBy:     validatorAddr,
 		Adjusted:      &now,
@@ -991,7 +991,7 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 		newPerm := types.Permission{
 			SchemaId:        1,
 			Type:            types.PermissionType_ISSUER,
-			Authority:         creator,
+			Authority:       creator,
 			Created:         &now,
 			CreatedBy:       creator,
 			Adjusted:        &now,
@@ -1124,7 +1124,7 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 		notPendingPerm := types.Permission{
 			SchemaId:        1,
 			Type:            types.PermissionType_ISSUER,
-			Authority:         creator,
+			Authority:       creator,
 			Created:         &now,
 			CreatedBy:       creator,
 			Adjusted:        &now,
@@ -1155,7 +1155,7 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 		pendingPerm := types.Permission{
 			SchemaId:        1,
 			Type:            types.PermissionType_ISSUER,
-			Authority:         creator,
+			Authority:       creator,
 			Created:         &now,
 			CreatedBy:       creator,
 			Adjusted:        &now,
@@ -1186,7 +1186,7 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 		holderPerm := types.Permission{
 			SchemaId:        1,
 			Type:            types.PermissionType_HOLDER,
-			Authority:         creator,
+			Authority:       creator,
 			Created:         &now,
 			CreatedBy:       creator,
 			Adjusted:        &now,
@@ -1223,7 +1223,7 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 		grantorPerm := types.Permission{
 			SchemaId:        1,
 			Type:            types.PermissionType_ISSUER_GRANTOR,
-			Authority:         creator,
+			Authority:       creator,
 			Created:         &now,
 			CreatedBy:       creator,
 			Adjusted:        &now,
@@ -1264,7 +1264,7 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 		validatorWithDiscount := types.Permission{
 			SchemaId:            1,
 			Type:                types.PermissionType_ISSUER_GRANTOR,
-			Authority:             validatorAddr,
+			Authority:           validatorAddr,
 			Created:             &now,
 			CreatedBy:           validatorAddr,
 			Adjusted:            &now,
@@ -1282,7 +1282,7 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 		issuerPerm := types.Permission{
 			SchemaId:        1,
 			Type:            types.PermissionType_ISSUER,
-			Authority:         creator,
+			Authority:       creator,
 			Created:         &now,
 			CreatedBy:       creator,
 			Adjusted:        &now,
@@ -1324,7 +1324,7 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 		validatorWithDiscount := types.Permission{
 			SchemaId:            1,
 			Type:                types.PermissionType_ISSUER_GRANTOR,
-			Authority:             validatorAddr,
+			Authority:           validatorAddr,
 			Created:             &now,
 			CreatedBy:           validatorAddr,
 			Adjusted:            &now,
@@ -1341,7 +1341,7 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 		issuerPerm := types.Permission{
 			SchemaId:        1,
 			Type:            types.PermissionType_ISSUER,
-			Authority:         creator,
+			Authority:       creator,
 			Created:         &now,
 			CreatedBy:       creator,
 			Adjusted:        &now,
@@ -1379,7 +1379,7 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 		grantorPerm := types.Permission{
 			SchemaId:        1,
 			Type:            types.PermissionType_ISSUER_GRANTOR,
-			Authority:         creator,
+			Authority:       creator,
 			Created:         &now,
 			CreatedBy:       creator,
 			Adjusted:        &now,
@@ -1417,7 +1417,7 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 		renewalPerm := types.Permission{
 			SchemaId:            1,
 			Type:                types.PermissionType_ISSUER_GRANTOR,
-			Authority:             otherAddr, // Use different authority to avoid overlap with test 7
+			Authority:           otherAddr, // Use different authority to avoid overlap with test 7
 			Created:             &now,
 			CreatedBy:           otherAddr,
 			Adjusted:            &now,
@@ -1476,7 +1476,7 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 		ecosystemValidator := types.Permission{
 			SchemaId:      2,
 			Type:          types.PermissionType_ECOSYSTEM,
-			Authority:       validatorAddr,
+			Authority:     validatorAddr,
 			Created:       &now,
 			CreatedBy:     validatorAddr,
 			Adjusted:      &now,
@@ -1493,7 +1493,7 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 		issuerPerm := types.Permission{
 			SchemaId:        2,
 			Type:            types.PermissionType_ISSUER,
-			Authority:         creator,
+			Authority:       creator,
 			Created:         &now,
 			CreatedBy:       creator,
 			Adjusted:        &now,
@@ -1569,10 +1569,10 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 	t.Run("effective_until must be lower or equal to vp_exp", func(t *testing.T) {
 		// Create schema with validity period so vpExp is calculated
 		csKeeper.CreateMockCredentialSchemaFull(cstypes.CredentialSchema{
-			Id:                              3,
-			IssuerPermManagementMode:        cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
-			VerifierPermManagementMode:      cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
-			IssuerValidationValidityPeriod:  30, // 30 days
+			Id:                             3,
+			IssuerPermManagementMode:       cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
+			VerifierPermManagementMode:     cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
+			IssuerValidationValidityPeriod: 30, // 30 days
 		})
 
 		// Create validator for schema 3
@@ -2068,8 +2068,8 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 
 		updatedPerm, err := k.GetPermissionByID(sdkCtx, permID)
 		require.NoError(t, err)
-		require.Equal(t, uint64(0), updatedPerm.VpCurrentFees)    // Reset to 0
-		require.Equal(t, uint64(0), updatedPerm.VpCurrentDeposit) // Reset to 0
+		require.Equal(t, uint64(0), updatedPerm.VpCurrentFees)       // Reset to 0
+		require.Equal(t, uint64(0), updatedPerm.VpCurrentDeposit)    // Reset to 0
 		require.Equal(t, uint64(50), updatedPerm.VpValidatorDeposit) // Accumulated
 	})
 
@@ -2077,9 +2077,9 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 	t.Run("VERIFIER_GRANTOR with verification_fee_discount", func(t *testing.T) {
 		// Create schema with GRANTOR_VALIDATION for verifier mode
 		csKeeper.CreateMockCredentialSchemaFull(cstypes.CredentialSchema{
-			Id:                              4,
-			IssuerPermManagementMode:        cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
-			VerifierPermManagementMode:      cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
+			Id:                         4,
+			IssuerPermManagementMode:   cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
+			VerifierPermManagementMode: cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
 		})
 
 		vgAddr := sdk.AccAddress([]byte("ver_grantor_vali")).String()
@@ -2141,17 +2141,17 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 		// Create validator with verification_fee_discount
 		vgAddr2 := sdk.AccAddress([]byte("vg_disc_validato")).String()
 		vgValidator2 := types.Permission{
-			SchemaId:                 4,
-			Type:                     types.PermissionType_VERIFIER_GRANTOR,
-			Authority:                vgAddr2,
-			Created:                  &now,
-			CreatedBy:                vgAddr2,
-			Adjusted:                 &now,
-			AdjustedBy:               vgAddr2,
-			Modified:                 &now,
-			VpState:                  types.ValidationState_VALIDATED,
-			VerificationFeeDiscount:  5000, // 50% discount
-			EffectiveFrom:            &pastTime,
+			SchemaId:                4,
+			Type:                    types.PermissionType_VERIFIER_GRANTOR,
+			Authority:               vgAddr2,
+			Created:                 &now,
+			CreatedBy:               vgAddr2,
+			Adjusted:                &now,
+			AdjustedBy:              vgAddr2,
+			Modified:                &now,
+			VpState:                 types.ValidationState_VALIDATED,
+			VerificationFeeDiscount: 5000, // 50% discount
+			EffectiveFrom:           &pastTime,
 		}
 		vgValidator2ID, err := k.CreatePermission(sdkCtx, vgValidator2)
 		require.NoError(t, err)
@@ -2208,7 +2208,7 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 			ValidatorPermId: validatorPermID,
 			VpState:         types.ValidationState_VALIDATED,
 			EffectiveFrom:   &pastTime,
-			EffectiveUntil:  nil,     // Never expires, but it's revoked
+			EffectiveUntil:  nil, // Never expires, but it's revoked
 			Revoked:         &revokedTime,
 		}
 		_, err := k.CreatePermission(sdkCtx, revokedPerm)
@@ -2251,14 +2251,14 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 	t.Run("Verification_fee_discount exceeds maximum", func(t *testing.T) {
 		vfdAddr := sdk.AccAddress([]byte("vfd_max_creator")).String()
 		grantorPerm := types.Permission{
-			SchemaId:        4,
-			Type:            types.PermissionType_VERIFIER_GRANTOR,
-			Authority:       vfdAddr,
-			Created:         &now,
-			CreatedBy:       vfdAddr,
-			Adjusted:        &now,
-			AdjustedBy:      vfdAddr,
-			Modified:        &now,
+			SchemaId:   4,
+			Type:       types.PermissionType_VERIFIER_GRANTOR,
+			Authority:  vfdAddr,
+			Created:    &now,
+			CreatedBy:  vfdAddr,
+			Adjusted:   &now,
+			AdjustedBy: vfdAddr,
+			Modified:   &now,
 			ValidatorPermId: func() uint64 {
 				// Reuse a schema 4 validator
 				vAddr := sdk.AccAddress([]byte("vfd_max_validato")).String()
@@ -2307,14 +2307,14 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 		effectiveFrom := now.Add(-90 * 24 * time.Hour)
 		currentEffUntil := now.Add(-1 * time.Hour)
 		renewalPerm := types.Permission{
-			SchemaId:                4,
-			Type:                    types.PermissionType_VERIFIER_GRANTOR,
-			Authority:               rvdAddr,
-			Created:                 &now,
-			CreatedBy:               rvdAddr,
-			Adjusted:                &now,
-			AdjustedBy:              rvdAddr,
-			Modified:                &now,
+			SchemaId:   4,
+			Type:       types.PermissionType_VERIFIER_GRANTOR,
+			Authority:  rvdAddr,
+			Created:    &now,
+			CreatedBy:  rvdAddr,
+			Adjusted:   &now,
+			AdjustedBy: rvdAddr,
+			Modified:   &now,
 			ValidatorPermId: func() uint64 {
 				vAddr := sdk.AccAddress([]byte("rvd_validator_ad")).String()
 				v := types.Permission{
@@ -3042,11 +3042,11 @@ func TestAdjustPermission(t *testing.T) {
 	reducePermID, err := k.CreatePermission(sdkCtx, reducePerm)
 	require.NoError(t, err)
 
-	newEffectiveUntil := now.Add(60 * 24 * time.Hour)      // 60 days in the future
-	pastEffectiveUntil := now.Add(-1 * 24 * time.Hour)     // 1 day in the past
-	tooFarEffectiveUntil := now.Add(500 * 24 * time.Hour)  // Past VP expiration
-	equalToNowEffectiveUntil := now                        // Equal to now (should fail)
-	reducedEffectiveUntil := now.Add(15 * 24 * time.Hour)  // 15 days — less than current 30 days
+	newEffectiveUntil := now.Add(60 * 24 * time.Hour)     // 60 days in the future
+	pastEffectiveUntil := now.Add(-1 * 24 * time.Hour)    // 1 day in the past
+	tooFarEffectiveUntil := now.Add(500 * 24 * time.Hour) // Past VP expiration
+	equalToNowEffectiveUntil := now                       // Equal to now (should fail)
+	reducedEffectiveUntil := now.Add(15 * 24 * time.Hour) // 15 days — less than current 30 days
 
 	testCases := []struct {
 		name       string
@@ -3514,11 +3514,11 @@ func TestCreateOrUpdatePermissionSession(t *testing.T) {
 	require.NoError(t, err)
 
 	testCases := []struct {
-		name           string
-		msg            *types.MsgCreateOrUpdatePermissionSession
-		setupErr       error // set on delKeeper.ErrToReturn before test
-		expectErr      bool
-		errMessage     string
+		name       string
+		msg        *types.MsgCreateOrUpdatePermissionSession
+		setupErr   error // set on delKeeper.ErrToReturn before test
+		expectErr  bool
+		errMessage string
 	}{
 		{
 			name: "Happy path with issuer",
@@ -3959,7 +3959,7 @@ func TestGetPermissionByID(t *testing.T) {
 	testPerm := types.Permission{
 		SchemaId:   1,
 		Type:       types.PermissionType_ISSUER,
-		Authority:    creator,
+		Authority:  creator,
 		Created:    &now,
 		CreatedBy:  creator,
 		Adjusted:   &now,
@@ -3997,7 +3997,7 @@ func TestCreateAndUpdatePermission(t *testing.T) {
 	testPerm := types.Permission{
 		SchemaId:   1,
 		Type:       types.PermissionType_ISSUER,
-		Authority:    creator,
+		Authority:  creator,
 		Created:    &now,
 		CreatedBy:  creator,
 		Adjusted:   &now,
@@ -4064,7 +4064,7 @@ func TestQueryPermissions(t *testing.T) {
 		SchemaId:      1,
 		Type:          types.PermissionType_ECOSYSTEM,
 		Did:           validDid,
-		Authority:       creator,
+		Authority:     creator,
 		Created:       &now,
 		CreatedBy:     creator,
 		Adjusted:      &now,
@@ -4082,7 +4082,7 @@ func TestQueryPermissions(t *testing.T) {
 		SchemaId:        1,
 		Type:            types.PermissionType_ISSUER,
 		Did:             validDid,
-		Authority:         creator,
+		Authority:       creator,
 		Created:         &now,
 		CreatedBy:       creator,
 		Adjusted:        &now,
@@ -4101,7 +4101,7 @@ func TestQueryPermissions(t *testing.T) {
 		SchemaId:        1,
 		Type:            types.PermissionType_VERIFIER,
 		Did:             validDid,
-		Authority:         creator,
+		Authority:       creator,
 		Created:         &now,
 		CreatedBy:       creator,
 		Adjusted:        &now,
@@ -5392,7 +5392,7 @@ func TestStartPermissionVP_ValidatorMustBeActive(t *testing.T) {
 	activeValidatorPerm := types.Permission{
 		SchemaId:      1,
 		Type:          types.PermissionType_ISSUER_GRANTOR,
-		Authority:       creator,
+		Authority:     creator,
 		Created:       &now,
 		CreatedBy:     creator,
 		Adjusted:      &now,
@@ -5409,7 +5409,7 @@ func TestStartPermissionVP_ValidatorMustBeActive(t *testing.T) {
 	inactiveValidatorPerm := types.Permission{
 		SchemaId:      1,
 		Type:          types.PermissionType_ISSUER_GRANTOR,
-		Authority:       creator,
+		Authority:     creator,
 		Created:       &now,
 		CreatedBy:     creator,
 		Adjusted:      &now,
@@ -5426,7 +5426,7 @@ func TestStartPermissionVP_ValidatorMustBeActive(t *testing.T) {
 	futureValidatorPerm := types.Permission{
 		SchemaId:      1,
 		Type:          types.PermissionType_ISSUER_GRANTOR,
-		Authority:       creator,
+		Authority:     creator,
 		Created:       &now,
 		CreatedBy:     creator,
 		Adjusted:      &now,
@@ -5443,7 +5443,7 @@ func TestStartPermissionVP_ValidatorMustBeActive(t *testing.T) {
 	expiredValidatorPerm := types.Permission{
 		SchemaId:       1,
 		Type:           types.PermissionType_ISSUER_GRANTOR,
-		Authority:        creator,
+		Authority:      creator,
 		Created:        &now,
 		CreatedBy:      creator,
 		Adjusted:       &now,
@@ -6611,9 +6611,9 @@ func TestVSOA_ComputeFeegrantExpirationReturnsMaxExpiry(t *testing.T) {
 
 	now := sdkCtx.BlockTime()
 	pastTime := now.Add(-1 * time.Hour)
-	futureTime1 := now.Add(100 * 24 * time.Hour)  // ~100 days
-	futureTime2 := now.Add(200 * 24 * time.Hour)  // ~200 days
-	futureTime3 := now.Add(500 * 24 * time.Hour)  // ~500 days (max)
+	futureTime1 := now.Add(100 * 24 * time.Hour) // ~100 days
+	futureTime2 := now.Add(200 * 24 * time.Hour) // ~200 days
+	futureTime3 := now.Add(500 * 24 * time.Hour) // ~500 days (max)
 	futureTimeRevoked := now.Add(365 * 24 * time.Hour)
 
 	// Perm #1: the one we will revoke
