@@ -16,6 +16,13 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 		panic(fmt.Sprintf("failed to set params: %s", err))
 	}
 
+	// Initialize dust
+	if genState.Dust != "" {
+		if err := k.Dust.Set(ctx, genState.Dust); err != nil {
+			panic(fmt.Sprintf("failed to set dust: %s", err))
+		}
+	}
+
 	// Initialize trust deposits
 	for _, td := range genState.TrustDeposits {
 		// Create trust deposit entry
@@ -54,6 +61,12 @@ func ExportGenesis(ctx sdk.Context, k keeper.Keeper) *types.GenesisState {
 	})
 
 	genesis.TrustDeposits = trustDeposits
+
+	// Export dust
+	dust, err := k.Dust.Get(ctx)
+	if err == nil {
+		genesis.Dust = dust
+	}
 
 	return genesis
 }
