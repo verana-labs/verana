@@ -6029,3 +6029,688 @@ func TestStartPermissionVP_VsOperatorAndFields(t *testing.T) {
 		require.Equal(t, types.PermissionType_ISSUER_GRANTOR, perm.Type)
 	})
 }
+
+// =============================================================================
+// VSOA Grant / Revoke Tests (MSG-5 / MSG-6)
+// =============================================================================
+
+// TestVSOA_GrantWithFeegrant verifies that when SetPermissionVPToValidated is
+// called for an ISSUER permission with VsOperatorAuthzEnabled=true and
+// VsOperatorAuthzWithFeegrant=true, both AddPermToVSOA and GrantFeeAllowance
+// are invoked on the delegation keeper.
+func TestVSOA_GrantWithFeegrant(t *testing.T) {
+	k, ms, csKeeper, _, ctx, delKeeper := setupMsgServerWithDelegation(t)
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	blockTime := time.Date(2024, 6, 1, 0, 0, 0, 0, time.UTC)
+	sdkCtx = sdkCtx.WithBlockTime(blockTime)
+	ctx = sdk.WrapSDKContext(sdkCtx)
+
+	validatorAddr := sdk.AccAddress([]byte("test_validator______")).String()
+	applicantAddr := sdk.AccAddress([]byte("test_applicant______")).String()
+	vsOperator := sdk.AccAddress([]byte("test_vs_operator____")).String()
+
+	csKeeper.CreateMockCredentialSchema(1,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
+
+	now := sdkCtx.BlockTime()
+	pastTime := now.Add(-1 * time.Hour)
+	futureTime := now.Add(365 * 24 * time.Hour)
+
+	// Create active ISSUER_GRANTOR validator perm
+	validatorPermID, err := k.CreatePermission(sdkCtx, types.Permission{
+		SchemaId:      1,
+		Type:          types.PermissionType_ISSUER_GRANTOR,
+		Authority:     validatorAddr,
+		Created:       &now,
+		CreatedBy:     validatorAddr,
+		Adjusted:      &now,
+		AdjustedBy:    validatorAddr,
+		Modified:      &now,
+		Country:       "US",
+		VpState:       types.ValidationState_VALIDATED,
+		EffectiveFrom: &pastTime,
+	})
+	require.NoError(t, err)
+
+	// Create PENDING ISSUER perm with VSOA fields
+	applicantPermID, err := k.CreatePermission(sdkCtx, types.Permission{
+		SchemaId:                    1,
+		Type:                        types.PermissionType_ISSUER,
+		Authority:                   applicantAddr,
+		Created:                     &now,
+		CreatedBy:                   applicantAddr,
+		Adjusted:                    &now,
+		AdjustedBy:                  applicantAddr,
+		Modified:                    &now,
+		Country:                     "US",
+		ValidatorPermId:             validatorPermID,
+		VpState:                     types.ValidationState_PENDING,
+		VsOperator:                  vsOperator,
+		VsOperatorAuthzEnabled:      true,
+		VsOperatorAuthzWithFeegrant: true,
+	})
+	require.NoError(t, err)
+
+	// Configure mock: GetVSOAPermissions returns the perm we just added
+	delKeeper.GetVSOAPermissionsResult = []uint64{applicantPermID}
+
+	delKeeper.Reset()
+
+	resp, err := ms.SetPermissionVPToValidated(ctx, &types.MsgSetPermissionVPToValidated{
+		Authority:          validatorAddr,
+		Operator:           validatorAddr,
+		Id:                 applicantPermID,
+		ValidationFees:     10,
+		IssuanceFees:       5,
+		VerificationFees:   3,
+		EffectiveUntil:     &futureTime,
+		VpSummaryDigestSri: "sha384-validDigest",
+	})
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+
+	// Verify AddPermToVSOA was called
+	require.Len(t, delKeeper.AddPermToVSOACalls, 1)
+	require.Equal(t, applicantAddr, delKeeper.AddPermToVSOACalls[0].Authority)
+	require.Equal(t, vsOperator, delKeeper.AddPermToVSOACalls[0].VsOperator)
+	require.Equal(t, applicantPermID, delKeeper.AddPermToVSOACalls[0].PermID)
+
+	// Verify GrantFeeAllowance was called (feegrant enabled)
+	require.Len(t, delKeeper.GrantFeeAllowanceCalls, 1)
+	require.Equal(t, applicantAddr, delKeeper.GrantFeeAllowanceCalls[0].Authority)
+	require.Equal(t, vsOperator, delKeeper.GrantFeeAllowanceCalls[0].Grantee)
+}
+
+// TestVSOA_GrantWithoutFeegrant verifies that when VsOperatorAuthzEnabled=true
+// but VsOperatorAuthzWithFeegrant=false, AddPermToVSOA is called but
+// GrantFeeAllowance is NOT called.
+func TestVSOA_GrantWithoutFeegrant(t *testing.T) {
+	k, ms, csKeeper, _, ctx, delKeeper := setupMsgServerWithDelegation(t)
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	blockTime := time.Date(2024, 6, 1, 0, 0, 0, 0, time.UTC)
+	sdkCtx = sdkCtx.WithBlockTime(blockTime)
+	ctx = sdk.WrapSDKContext(sdkCtx)
+
+	validatorAddr := sdk.AccAddress([]byte("test_validator______")).String()
+	applicantAddr := sdk.AccAddress([]byte("test_applicant______")).String()
+	vsOperator := sdk.AccAddress([]byte("test_vs_operator____")).String()
+
+	csKeeper.CreateMockCredentialSchema(1,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
+
+	now := sdkCtx.BlockTime()
+	pastTime := now.Add(-1 * time.Hour)
+	futureTime := now.Add(365 * 24 * time.Hour)
+
+	validatorPermID, err := k.CreatePermission(sdkCtx, types.Permission{
+		SchemaId:      1,
+		Type:          types.PermissionType_ISSUER_GRANTOR,
+		Authority:     validatorAddr,
+		Created:       &now,
+		CreatedBy:     validatorAddr,
+		Adjusted:      &now,
+		AdjustedBy:    validatorAddr,
+		Modified:      &now,
+		Country:       "US",
+		VpState:       types.ValidationState_VALIDATED,
+		EffectiveFrom: &pastTime,
+	})
+	require.NoError(t, err)
+
+	applicantPermID, err := k.CreatePermission(sdkCtx, types.Permission{
+		SchemaId:                    1,
+		Type:                        types.PermissionType_ISSUER,
+		Authority:                   applicantAddr,
+		Created:                     &now,
+		CreatedBy:                   applicantAddr,
+		Adjusted:                    &now,
+		AdjustedBy:                  applicantAddr,
+		Modified:                    &now,
+		Country:                     "US",
+		ValidatorPermId:             validatorPermID,
+		VpState:                     types.ValidationState_PENDING,
+		VsOperator:                  vsOperator,
+		VsOperatorAuthzEnabled:      true,
+		VsOperatorAuthzWithFeegrant: false, // feegrant disabled
+	})
+	require.NoError(t, err)
+
+	delKeeper.Reset()
+
+	resp, err := ms.SetPermissionVPToValidated(ctx, &types.MsgSetPermissionVPToValidated{
+		Authority:          validatorAddr,
+		Operator:           validatorAddr,
+		Id:                 applicantPermID,
+		ValidationFees:     10,
+		IssuanceFees:       5,
+		VerificationFees:   3,
+		EffectiveUntil:     &futureTime,
+		VpSummaryDigestSri: "sha384-validDigest",
+	})
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+
+	// AddPermToVSOA should be called
+	require.Len(t, delKeeper.AddPermToVSOACalls, 1)
+
+	// GrantFeeAllowance should NOT be called
+	require.Len(t, delKeeper.GrantFeeAllowanceCalls, 0)
+}
+
+// TestVSOA_GrantSkipsWhenVsOperatorEmpty verifies early return when
+// the permission has no VsOperator set.
+func TestVSOA_GrantSkipsWhenVsOperatorEmpty(t *testing.T) {
+	k, ms, csKeeper, _, ctx, delKeeper := setupMsgServerWithDelegation(t)
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	blockTime := time.Date(2024, 6, 1, 0, 0, 0, 0, time.UTC)
+	sdkCtx = sdkCtx.WithBlockTime(blockTime)
+	ctx = sdk.WrapSDKContext(sdkCtx)
+
+	validatorAddr := sdk.AccAddress([]byte("test_validator______")).String()
+	applicantAddr := sdk.AccAddress([]byte("test_applicant______")).String()
+
+	csKeeper.CreateMockCredentialSchema(1,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
+
+	now := sdkCtx.BlockTime()
+	pastTime := now.Add(-1 * time.Hour)
+	futureTime := now.Add(365 * 24 * time.Hour)
+
+	validatorPermID, err := k.CreatePermission(sdkCtx, types.Permission{
+		SchemaId:      1,
+		Type:          types.PermissionType_ISSUER_GRANTOR,
+		Authority:     validatorAddr,
+		Created:       &now,
+		CreatedBy:     validatorAddr,
+		Adjusted:      &now,
+		AdjustedBy:    validatorAddr,
+		Modified:      &now,
+		Country:       "US",
+		VpState:       types.ValidationState_VALIDATED,
+		EffectiveFrom: &pastTime,
+	})
+	require.NoError(t, err)
+
+	applicantPermID, err := k.CreatePermission(sdkCtx, types.Permission{
+		SchemaId:                    1,
+		Type:                        types.PermissionType_ISSUER,
+		Authority:                   applicantAddr,
+		Created:                     &now,
+		CreatedBy:                   applicantAddr,
+		Adjusted:                    &now,
+		AdjustedBy:                  applicantAddr,
+		Modified:                    &now,
+		Country:                     "US",
+		ValidatorPermId:             validatorPermID,
+		VpState:                     types.ValidationState_PENDING,
+		VsOperator:                  "", // empty — should skip
+		VsOperatorAuthzEnabled:      true,
+		VsOperatorAuthzWithFeegrant: true,
+	})
+	require.NoError(t, err)
+
+	delKeeper.Reset()
+
+	resp, err := ms.SetPermissionVPToValidated(ctx, &types.MsgSetPermissionVPToValidated{
+		Authority:          validatorAddr,
+		Operator:           validatorAddr,
+		Id:                 applicantPermID,
+		ValidationFees:     10,
+		IssuanceFees:       5,
+		VerificationFees:   3,
+		EffectiveUntil:     &futureTime,
+		VpSummaryDigestSri: "sha384-validDigest",
+	})
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+
+	// Neither AddPermToVSOA nor GrantFeeAllowance should be called
+	require.Len(t, delKeeper.AddPermToVSOACalls, 0)
+	require.Len(t, delKeeper.GrantFeeAllowanceCalls, 0)
+}
+
+// TestVSOA_GrantSkipsWhenNotEnabled verifies early return when
+// VsOperatorAuthzEnabled is false (even if VsOperator is set).
+func TestVSOA_GrantSkipsWhenNotEnabled(t *testing.T) {
+	k, ms, csKeeper, _, ctx, delKeeper := setupMsgServerWithDelegation(t)
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	blockTime := time.Date(2024, 6, 1, 0, 0, 0, 0, time.UTC)
+	sdkCtx = sdkCtx.WithBlockTime(blockTime)
+	ctx = sdk.WrapSDKContext(sdkCtx)
+
+	validatorAddr := sdk.AccAddress([]byte("test_validator______")).String()
+	applicantAddr := sdk.AccAddress([]byte("test_applicant______")).String()
+	vsOperator := sdk.AccAddress([]byte("test_vs_operator____")).String()
+
+	csKeeper.CreateMockCredentialSchema(1,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
+
+	now := sdkCtx.BlockTime()
+	pastTime := now.Add(-1 * time.Hour)
+	futureTime := now.Add(365 * 24 * time.Hour)
+
+	validatorPermID, err := k.CreatePermission(sdkCtx, types.Permission{
+		SchemaId:      1,
+		Type:          types.PermissionType_ISSUER_GRANTOR,
+		Authority:     validatorAddr,
+		Created:       &now,
+		CreatedBy:     validatorAddr,
+		Adjusted:      &now,
+		AdjustedBy:    validatorAddr,
+		Modified:      &now,
+		Country:       "US",
+		VpState:       types.ValidationState_VALIDATED,
+		EffectiveFrom: &pastTime,
+	})
+	require.NoError(t, err)
+
+	applicantPermID, err := k.CreatePermission(sdkCtx, types.Permission{
+		SchemaId:                    1,
+		Type:                        types.PermissionType_ISSUER,
+		Authority:                   applicantAddr,
+		Created:                     &now,
+		CreatedBy:                   applicantAddr,
+		Adjusted:                    &now,
+		AdjustedBy:                  applicantAddr,
+		Modified:                    &now,
+		Country:                     "US",
+		ValidatorPermId:             validatorPermID,
+		VpState:                     types.ValidationState_PENDING,
+		VsOperator:                  vsOperator,
+		VsOperatorAuthzEnabled:      false, // not enabled
+		VsOperatorAuthzWithFeegrant: true,
+	})
+	require.NoError(t, err)
+
+	delKeeper.Reset()
+
+	resp, err := ms.SetPermissionVPToValidated(ctx, &types.MsgSetPermissionVPToValidated{
+		Authority:          validatorAddr,
+		Operator:           validatorAddr,
+		Id:                 applicantPermID,
+		ValidationFees:     10,
+		IssuanceFees:       5,
+		VerificationFees:   3,
+		EffectiveUntil:     &futureTime,
+		VpSummaryDigestSri: "sha384-validDigest",
+	})
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+
+	// Grant path should be skipped entirely
+	require.Len(t, delKeeper.AddPermToVSOACalls, 0)
+	require.Len(t, delKeeper.GrantFeeAllowanceCalls, 0)
+}
+
+// TestVSOA_RevokeRemovesAndRevokesFeegrantWhenLastPerm verifies that when
+// RevokePermission is called on the last perm in a VSOA, RemovePermFromVSOA
+// is called and RevokeFeeAllowance is called (feegrant fully revoked).
+func TestVSOA_RevokeRemovesAndRevokesFeegrantWhenLastPerm(t *testing.T) {
+	k, ms, csKeeper, _, ctx, delKeeper := setupMsgServerWithDelegation(t)
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	blockTime := time.Date(2024, 6, 1, 0, 0, 0, 0, time.UTC)
+	sdkCtx = sdkCtx.WithBlockTime(blockTime)
+	ctx = sdk.WrapSDKContext(sdkCtx)
+
+	authority := sdk.AccAddress([]byte("test_authority______")).String()
+	vsOperator := sdk.AccAddress([]byte("test_vs_operator____")).String()
+
+	csKeeper.CreateMockCredentialSchema(1,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
+
+	now := sdkCtx.BlockTime()
+	pastTime := now.Add(-1 * time.Hour)
+	futureTime := now.Add(365 * 24 * time.Hour)
+
+	// Create an active ISSUER perm with VSOA fields
+	permID, err := k.CreatePermission(sdkCtx, types.Permission{
+		SchemaId:                    1,
+		Type:                        types.PermissionType_ISSUER,
+		Authority:                   authority,
+		Created:                     &now,
+		CreatedBy:                   authority,
+		Adjusted:                    &now,
+		AdjustedBy:                  authority,
+		Modified:                    &now,
+		Country:                     "US",
+		VpState:                     types.ValidationState_VALIDATED,
+		EffectiveFrom:               &pastTime,
+		EffectiveUntil:              &futureTime,
+		VsOperator:                  vsOperator,
+		VsOperatorAuthzEnabled:      true,
+		VsOperatorAuthzWithFeegrant: true,
+	})
+	require.NoError(t, err)
+
+	// Configure mock: RemovePermFromVSOA returns empty slice (no remaining perms)
+	delKeeper.RemovePermFromVSOARemainingPerms = []uint64{}
+
+	delKeeper.Reset()
+
+	_, err = ms.RevokePermission(ctx, &types.MsgRevokePermission{
+		Authority: authority,
+		Operator:  authority,
+		Id:        permID,
+	})
+	require.NoError(t, err)
+
+	// Verify RemovePermFromVSOA was called
+	require.Len(t, delKeeper.RemovePermFromVSOACalls, 1)
+	require.Equal(t, authority, delKeeper.RemovePermFromVSOACalls[0].Authority)
+	require.Equal(t, vsOperator, delKeeper.RemovePermFromVSOACalls[0].VsOperator)
+	require.Equal(t, permID, delKeeper.RemovePermFromVSOACalls[0].PermID)
+
+	// Verify RevokeFeeAllowance was called (last perm, so full revoke)
+	require.Len(t, delKeeper.RevokeFeeAllowanceCalls, 1)
+	require.Equal(t, authority, delKeeper.RevokeFeeAllowanceCalls[0].Authority)
+	require.Equal(t, vsOperator, delKeeper.RevokeFeeAllowanceCalls[0].Grantee)
+
+	// GrantFeeAllowance should NOT be called (we revoke, not recalculate)
+	require.Len(t, delKeeper.GrantFeeAllowanceCalls, 0)
+}
+
+// TestVSOA_RevokeRecalculatesFeegrantWhenOtherPermsRemain verifies that when
+// RevokePermission is called but other perms remain in the VSOA, the feegrant
+// is recalculated (GrantFeeAllowance called with new expiry) rather than revoked.
+func TestVSOA_RevokeRecalculatesFeegrantWhenOtherPermsRemain(t *testing.T) {
+	k, ms, csKeeper, _, ctx, delKeeper := setupMsgServerWithDelegation(t)
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	blockTime := time.Date(2024, 6, 1, 0, 0, 0, 0, time.UTC)
+	sdkCtx = sdkCtx.WithBlockTime(blockTime)
+	ctx = sdk.WrapSDKContext(sdkCtx)
+
+	authority := sdk.AccAddress([]byte("test_authority______")).String()
+	vsOperator := sdk.AccAddress([]byte("test_vs_operator____")).String()
+
+	csKeeper.CreateMockCredentialSchema(1,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
+
+	now := sdkCtx.BlockTime()
+	pastTime := now.Add(-1 * time.Hour)
+	futureTime1 := now.Add(365 * 24 * time.Hour)
+	futureTime2 := now.Add(730 * 24 * time.Hour) // 2 years out
+
+	// Create active ISSUER perm #1 (the one we will revoke)
+	permID1, err := k.CreatePermission(sdkCtx, types.Permission{
+		SchemaId:                    1,
+		Type:                        types.PermissionType_ISSUER,
+		Authority:                   authority,
+		Created:                     &now,
+		CreatedBy:                   authority,
+		Adjusted:                    &now,
+		AdjustedBy:                  authority,
+		Modified:                    &now,
+		Country:                     "US",
+		VpState:                     types.ValidationState_VALIDATED,
+		EffectiveFrom:               &pastTime,
+		EffectiveUntil:              &futureTime1,
+		VsOperator:                  vsOperator,
+		VsOperatorAuthzEnabled:      true,
+		VsOperatorAuthzWithFeegrant: true,
+	})
+	require.NoError(t, err)
+
+	// Create active ISSUER perm #2 (remains in VSOA after revoke)
+	permID2, err := k.CreatePermission(sdkCtx, types.Permission{
+		SchemaId:                    1,
+		Type:                        types.PermissionType_ISSUER,
+		Authority:                   authority,
+		Created:                     &now,
+		CreatedBy:                   authority,
+		Adjusted:                    &now,
+		AdjustedBy:                  authority,
+		Modified:                    &now,
+		Country:                     "US",
+		VpState:                     types.ValidationState_VALIDATED,
+		EffectiveFrom:               &pastTime,
+		EffectiveUntil:              &futureTime2,
+		VsOperator:                  vsOperator,
+		VsOperatorAuthzEnabled:      true,
+		VsOperatorAuthzWithFeegrant: true,
+	})
+	require.NoError(t, err)
+
+	// Configure mock: RemovePermFromVSOA returns remaining perm IDs
+	delKeeper.RemovePermFromVSOARemainingPerms = []uint64{permID2}
+	// GetVSOAPermissions also returns remaining perm IDs (used by computeVSOAFeegrantExpiration)
+	delKeeper.GetVSOAPermissionsResult = []uint64{permID2}
+
+	delKeeper.Reset()
+
+	_, err = ms.RevokePermission(ctx, &types.MsgRevokePermission{
+		Authority: authority,
+		Operator:  authority,
+		Id:        permID1,
+	})
+	require.NoError(t, err)
+
+	// RemovePermFromVSOA should be called
+	require.Len(t, delKeeper.RemovePermFromVSOACalls, 1)
+
+	// RevokeFeeAllowance should NOT be called (other perms remain)
+	require.Len(t, delKeeper.RevokeFeeAllowanceCalls, 0)
+
+	// GrantFeeAllowance should be called with recalculated expiration
+	require.Len(t, delKeeper.GrantFeeAllowanceCalls, 1)
+	require.Equal(t, authority, delKeeper.GrantFeeAllowanceCalls[0].Authority)
+	require.Equal(t, vsOperator, delKeeper.GrantFeeAllowanceCalls[0].Grantee)
+	// The expiration should be futureTime2 (the farthest remaining perm)
+	require.NotNil(t, delKeeper.GrantFeeAllowanceCalls[0].Expiration)
+	require.Equal(t, futureTime2.Unix(), delKeeper.GrantFeeAllowanceCalls[0].Expiration.Unix())
+}
+
+// TestVSOA_ComputeFeegrantExpirationReturnsNilForUnlimited verifies that when
+// any remaining perm has no effective_until (unlimited), the feegrant expiration
+// is nil (unlimited).
+func TestVSOA_ComputeFeegrantExpirationReturnsNilForUnlimited(t *testing.T) {
+	k, ms, csKeeper, _, ctx, delKeeper := setupMsgServerWithDelegation(t)
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	blockTime := time.Date(2024, 6, 1, 0, 0, 0, 0, time.UTC)
+	sdkCtx = sdkCtx.WithBlockTime(blockTime)
+	ctx = sdk.WrapSDKContext(sdkCtx)
+
+	authority := sdk.AccAddress([]byte("test_authority______")).String()
+	vsOperator := sdk.AccAddress([]byte("test_vs_operator____")).String()
+
+	csKeeper.CreateMockCredentialSchema(1,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
+
+	now := sdkCtx.BlockTime()
+	pastTime := now.Add(-1 * time.Hour)
+	futureTime := now.Add(365 * 24 * time.Hour)
+
+	// Perm #1: the one we will revoke (has expiry)
+	permID1, err := k.CreatePermission(sdkCtx, types.Permission{
+		SchemaId:                    1,
+		Type:                        types.PermissionType_ISSUER,
+		Authority:                   authority,
+		Created:                     &now,
+		CreatedBy:                   authority,
+		Adjusted:                    &now,
+		AdjustedBy:                  authority,
+		Modified:                    &now,
+		Country:                     "US",
+		VpState:                     types.ValidationState_VALIDATED,
+		EffectiveFrom:               &pastTime,
+		EffectiveUntil:              &futureTime,
+		VsOperator:                  vsOperator,
+		VsOperatorAuthzEnabled:      true,
+		VsOperatorAuthzWithFeegrant: true,
+	})
+	require.NoError(t, err)
+
+	// Perm #2: remaining perm with NO effective_until (unlimited)
+	permID2, err := k.CreatePermission(sdkCtx, types.Permission{
+		SchemaId:                    1,
+		Type:                        types.PermissionType_ISSUER,
+		Authority:                   authority,
+		Created:                     &now,
+		CreatedBy:                   authority,
+		Adjusted:                    &now,
+		AdjustedBy:                  authority,
+		Modified:                    &now,
+		Country:                     "US",
+		VpState:                     types.ValidationState_VALIDATED,
+		EffectiveFrom:               &pastTime,
+		EffectiveUntil:              nil, // unlimited
+		VsOperator:                  vsOperator,
+		VsOperatorAuthzEnabled:      true,
+		VsOperatorAuthzWithFeegrant: true,
+	})
+	require.NoError(t, err)
+
+	// Configure mock
+	delKeeper.RemovePermFromVSOARemainingPerms = []uint64{permID2}
+	delKeeper.GetVSOAPermissionsResult = []uint64{permID2}
+
+	delKeeper.Reset()
+
+	_, err = ms.RevokePermission(ctx, &types.MsgRevokePermission{
+		Authority: authority,
+		Operator:  authority,
+		Id:        permID1,
+	})
+	require.NoError(t, err)
+
+	// GrantFeeAllowance should be called with nil expiration (unlimited)
+	require.Len(t, delKeeper.GrantFeeAllowanceCalls, 1)
+	require.Nil(t, delKeeper.GrantFeeAllowanceCalls[0].Expiration)
+}
+
+// TestVSOA_ComputeFeegrantExpirationReturnsMaxExpiry verifies that when
+// multiple remaining perms have different effective_until values, the feegrant
+// expiration is set to the farthest (maximum) value.
+func TestVSOA_ComputeFeegrantExpirationReturnsMaxExpiry(t *testing.T) {
+	k, ms, csKeeper, _, ctx, delKeeper := setupMsgServerWithDelegation(t)
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	blockTime := time.Date(2024, 6, 1, 0, 0, 0, 0, time.UTC)
+	sdkCtx = sdkCtx.WithBlockTime(blockTime)
+	ctx = sdk.WrapSDKContext(sdkCtx)
+
+	authority := sdk.AccAddress([]byte("test_authority______")).String()
+	vsOperator := sdk.AccAddress([]byte("test_vs_operator____")).String()
+
+	csKeeper.CreateMockCredentialSchema(1,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
+		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
+
+	now := sdkCtx.BlockTime()
+	pastTime := now.Add(-1 * time.Hour)
+	futureTime1 := now.Add(100 * 24 * time.Hour)  // ~100 days
+	futureTime2 := now.Add(200 * 24 * time.Hour)  // ~200 days
+	futureTime3 := now.Add(500 * 24 * time.Hour)  // ~500 days (max)
+	futureTimeRevoked := now.Add(365 * 24 * time.Hour)
+
+	// Perm #1: the one we will revoke
+	permID1, err := k.CreatePermission(sdkCtx, types.Permission{
+		SchemaId:                    1,
+		Type:                        types.PermissionType_ISSUER,
+		Authority:                   authority,
+		Created:                     &now,
+		CreatedBy:                   authority,
+		Adjusted:                    &now,
+		AdjustedBy:                  authority,
+		Modified:                    &now,
+		Country:                     "US",
+		VpState:                     types.ValidationState_VALIDATED,
+		EffectiveFrom:               &pastTime,
+		EffectiveUntil:              &futureTimeRevoked,
+		VsOperator:                  vsOperator,
+		VsOperatorAuthzEnabled:      true,
+		VsOperatorAuthzWithFeegrant: true,
+	})
+	require.NoError(t, err)
+
+	// Perm #2: remaining, expires in 100 days
+	permID2, err := k.CreatePermission(sdkCtx, types.Permission{
+		SchemaId:                    1,
+		Type:                        types.PermissionType_ISSUER,
+		Authority:                   authority,
+		Created:                     &now,
+		CreatedBy:                   authority,
+		Adjusted:                    &now,
+		AdjustedBy:                  authority,
+		Modified:                    &now,
+		Country:                     "US",
+		VpState:                     types.ValidationState_VALIDATED,
+		EffectiveFrom:               &pastTime,
+		EffectiveUntil:              &futureTime1,
+		VsOperator:                  vsOperator,
+		VsOperatorAuthzEnabled:      true,
+		VsOperatorAuthzWithFeegrant: true,
+	})
+	require.NoError(t, err)
+
+	// Perm #3: remaining, expires in 200 days
+	permID3, err := k.CreatePermission(sdkCtx, types.Permission{
+		SchemaId:                    1,
+		Type:                        types.PermissionType_ISSUER,
+		Authority:                   authority,
+		Created:                     &now,
+		CreatedBy:                   authority,
+		Adjusted:                    &now,
+		AdjustedBy:                  authority,
+		Modified:                    &now,
+		Country:                     "US",
+		VpState:                     types.ValidationState_VALIDATED,
+		EffectiveFrom:               &pastTime,
+		EffectiveUntil:              &futureTime2,
+		VsOperator:                  vsOperator,
+		VsOperatorAuthzEnabled:      true,
+		VsOperatorAuthzWithFeegrant: true,
+	})
+	require.NoError(t, err)
+
+	// Perm #4: remaining, expires in 500 days (the max)
+	permID4, err := k.CreatePermission(sdkCtx, types.Permission{
+		SchemaId:                    1,
+		Type:                        types.PermissionType_ISSUER,
+		Authority:                   authority,
+		Created:                     &now,
+		CreatedBy:                   authority,
+		Adjusted:                    &now,
+		AdjustedBy:                  authority,
+		Modified:                    &now,
+		Country:                     "US",
+		VpState:                     types.ValidationState_VALIDATED,
+		EffectiveFrom:               &pastTime,
+		EffectiveUntil:              &futureTime3,
+		VsOperator:                  vsOperator,
+		VsOperatorAuthzEnabled:      true,
+		VsOperatorAuthzWithFeegrant: true,
+	})
+	require.NoError(t, err)
+
+	// Configure mock
+	delKeeper.RemovePermFromVSOARemainingPerms = []uint64{permID2, permID3, permID4}
+	delKeeper.GetVSOAPermissionsResult = []uint64{permID2, permID3, permID4}
+
+	delKeeper.Reset()
+
+	_, err = ms.RevokePermission(ctx, &types.MsgRevokePermission{
+		Authority: authority,
+		Operator:  authority,
+		Id:        permID1,
+	})
+	require.NoError(t, err)
+
+	// GrantFeeAllowance should be called with the maximum expiry (500 days)
+	require.Len(t, delKeeper.GrantFeeAllowanceCalls, 1)
+	require.NotNil(t, delKeeper.GrantFeeAllowanceCalls[0].Expiration)
+	require.Equal(t, futureTime3.Unix(), delKeeper.GrantFeeAllowanceCalls[0].Expiration.Unix())
+}
