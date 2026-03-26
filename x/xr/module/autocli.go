@@ -42,6 +42,10 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 						{ProtoField: "rate"},
 					},
 				},
+				{
+					RpcMethod: "ToggleExchangeRateState",
+					Skip:      true, // skipped because authority gated
+				},
 				// this line is used by ignite scaffolding # autocli/tx
 			},
 		},

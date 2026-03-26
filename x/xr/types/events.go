@@ -1,8 +1,9 @@
 package types
 
 const (
-	EventTypeCreateExchangeRate = "create_exchange_rate"
-	EventTypeUpdateExchangeRate = "update_exchange_rate"
+	EventTypeCreateExchangeRate         = "create_exchange_rate"
+	EventTypeUpdateExchangeRate         = "update_exchange_rate"
+	EventTypeToggleExchangeRateState    = "toggle_exchange_rate_state"
 
 	AttributeKeyID             = "id"
 	AttributeKeyBaseAssetType  = "base_asset_type"
@@ -12,4 +13,5 @@ const (
 	AttributeKeyAuthority      = "authority"
 	AttributeKeyOperator       = "operator"
 	AttributeKeyRate           = "rate"
+	AttributeKeyState          = "state"
 )

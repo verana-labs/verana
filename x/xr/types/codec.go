@@ -11,6 +11,7 @@ func RegisterInterfaces(registrar codectypes.InterfaceRegistry) {
 		&MsgUpdateParams{},
 		&MsgCreateExchangeRate{},
 		&MsgUpdateExchangeRate{},
+		&MsgToggleExchangeRateState{},
 	)
 	msgservice.RegisterMsgServiceDesc(registrar, &_Msg_serviceDesc)
 }

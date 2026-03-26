@@ -19,9 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Msg_UpdateParams_FullMethodName       = "/verana.xr.v1.Msg/UpdateParams"
-	Msg_CreateExchangeRate_FullMethodName = "/verana.xr.v1.Msg/CreateExchangeRate"
-	Msg_UpdateExchangeRate_FullMethodName = "/verana.xr.v1.Msg/UpdateExchangeRate"
+	Msg_UpdateParams_FullMethodName            = "/verana.xr.v1.Msg/UpdateParams"
+	Msg_CreateExchangeRate_FullMethodName      = "/verana.xr.v1.Msg/CreateExchangeRate"
+	Msg_UpdateExchangeRate_FullMethodName      = "/verana.xr.v1.Msg/UpdateExchangeRate"
+	Msg_ToggleExchangeRateState_FullMethodName = "/verana.xr.v1.Msg/ToggleExchangeRateState"
 )
 
 // MsgClient is the client API for Msg service.
@@ -37,6 +38,8 @@ type MsgClient interface {
 	CreateExchangeRate(ctx context.Context, in *MsgCreateExchangeRate, opts ...grpc.CallOption) (*MsgCreateExchangeRateResponse, error)
 	// UpdateExchangeRate defines an operator operation for updating an exchange rate.
 	UpdateExchangeRate(ctx context.Context, in *MsgUpdateExchangeRate, opts ...grpc.CallOption) (*MsgUpdateExchangeRateResponse, error)
+	// ToggleExchangeRateState defines a governance operation for enabling or disabling an exchange rate.
+	ToggleExchangeRateState(ctx context.Context, in *MsgToggleExchangeRateState, opts ...grpc.CallOption) (*MsgToggleExchangeRateStateResponse, error)
 }
 
 type msgClient struct {
@@ -77,6 +80,16 @@ func (c *msgClient) UpdateExchangeRate(ctx context.Context, in *MsgUpdateExchang
 	return out, nil
 }
 
+func (c *msgClient) ToggleExchangeRateState(ctx context.Context, in *MsgToggleExchangeRateState, opts ...grpc.CallOption) (*MsgToggleExchangeRateStateResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(MsgToggleExchangeRateStateResponse)
+	err := c.cc.Invoke(ctx, Msg_ToggleExchangeRateState_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MsgServer is the server API for Msg service.
 // All implementations must embed UnimplementedMsgServer
 // for forward compatibility.
@@ -90,6 +103,8 @@ type MsgServer interface {
 	CreateExchangeRate(context.Context, *MsgCreateExchangeRate) (*MsgCreateExchangeRateResponse, error)
 	// UpdateExchangeRate defines an operator operation for updating an exchange rate.
 	UpdateExchangeRate(context.Context, *MsgUpdateExchangeRate) (*MsgUpdateExchangeRateResponse, error)
+	// ToggleExchangeRateState defines a governance operation for enabling or disabling an exchange rate.
+	ToggleExchangeRateState(context.Context, *MsgToggleExchangeRateState) (*MsgToggleExchangeRateStateResponse, error)
 	mustEmbedUnimplementedMsgServer()
 }
 
@@ -108,6 +123,9 @@ func (UnimplementedMsgServer) CreateExchangeRate(context.Context, *MsgCreateExch
 }
 func (UnimplementedMsgServer) UpdateExchangeRate(context.Context, *MsgUpdateExchangeRate) (*MsgUpdateExchangeRateResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateExchangeRate not implemented")
+}
+func (UnimplementedMsgServer) ToggleExchangeRateState(context.Context, *MsgToggleExchangeRateState) (*MsgToggleExchangeRateStateResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ToggleExchangeRateState not implemented")
 }
 func (UnimplementedMsgServer) mustEmbedUnimplementedMsgServer() {}
 func (UnimplementedMsgServer) testEmbeddedByValue()             {}
@@ -184,6 +202,24 @@ func _Msg_UpdateExchangeRate_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Msg_ToggleExchangeRateState_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgToggleExchangeRateState)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).ToggleExchangeRateState(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Msg_ToggleExchangeRateState_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).ToggleExchangeRateState(ctx, req.(*MsgToggleExchangeRateState))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Msg_ServiceDesc is the grpc.ServiceDesc for Msg service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -202,6 +238,10 @@ var Msg_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateExchangeRate",
 			Handler:    _Msg_UpdateExchangeRate_Handler,
+		},
+		{
+			MethodName: "ToggleExchangeRateState",
+			Handler:    _Msg_ToggleExchangeRateState_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

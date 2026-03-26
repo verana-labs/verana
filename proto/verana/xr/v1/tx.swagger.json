@@ -50,6 +50,40 @@
         ]
       }
     },
+    "/verana.xr.v1.Msg/ToggleExchangeRateState": {
+      "post": {
+        "summary": "ToggleExchangeRateState defines a governance operation for enabling or disabling an exchange rate.",
+        "operationId": "Msg_ToggleExchangeRateState",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.xr.v1.MsgToggleExchangeRateStateResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "MsgToggleExchangeRateState is the Msg/ToggleExchangeRateState request type.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.xr.v1.MsgToggleExchangeRateState"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
     "/verana.xr.v1.Msg/UpdateExchangeRate": {
       "post": {
         "summary": "UpdateExchangeRate defines an operator operation for updating an exchange rate.",
@@ -201,6 +235,29 @@
         }
       },
       "description": "MsgCreateExchangeRateResponse defines the response for MsgCreateExchangeRate."
+    },
+    "verana.xr.v1.MsgToggleExchangeRateState": {
+      "type": "object",
+      "properties": {
+        "authority": {
+          "type": "string",
+          "description": "authority is the address that controls the module (defaults to x/gov unless overwritten)."
+        },
+        "id": {
+          "type": "string",
+          "format": "uint64",
+          "description": "id is the exchange rate entry to toggle."
+        },
+        "state": {
+          "type": "boolean",
+          "description": "state is the desired state: true for enabled, false for disabled."
+        }
+      },
+      "description": "MsgToggleExchangeRateState is the Msg/ToggleExchangeRateState request type."
+    },
+    "verana.xr.v1.MsgToggleExchangeRateStateResponse": {
+      "type": "object",
+      "description": "MsgToggleExchangeRateStateResponse defines the response for MsgToggleExchangeRateState."
     },
     "verana.xr.v1.MsgUpdateExchangeRate": {
       "type": "object",

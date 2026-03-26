@@ -104,6 +104,21 @@ func (msg *MsgUpdateExchangeRate) ValidateBasic() error {
 	return nil
 }
 
+// ValidateBasic performs stateless validation on MsgToggleExchangeRateState.
+func (msg *MsgToggleExchangeRateState) ValidateBasic() error {
+	// Validate authority address
+	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
+		return fmt.Errorf("invalid authority address: %w", err)
+	}
+
+	// id must be > 0
+	if msg.Id == 0 {
+		return fmt.Errorf("id must be greater than 0")
+	}
+
+	return nil
+}
+
 func validateAssetType(at cstypes.PricingAssetType) error {
 	switch at {
 	case cstypes.PricingAssetType_TU,
