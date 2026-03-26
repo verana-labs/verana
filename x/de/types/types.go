@@ -12,34 +12,36 @@ import (
 // excluded from operator authorization msg_types (see ValidateBasic).
 var VPRDelegableMsgTypes = map[string]bool{
 	// Trust Registry (TR)
-	"/verana.tr.v1.MsgCreateTrustRegistry":                       true,
-	"/verana.tr.v1.MsgAddGovernanceFrameworkDocument":             true,
-	"/verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion":   true,
-	"/verana.tr.v1.MsgUpdateTrustRegistry":                       true,
-	"/verana.tr.v1.MsgArchiveTrustRegistry":                      true,
+	"/verana.tr.v1.MsgCreateTrustRegistry":                      true,
+	"/verana.tr.v1.MsgAddGovernanceFrameworkDocument":           true,
+	"/verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion": true,
+	"/verana.tr.v1.MsgUpdateTrustRegistry":                      true,
+	"/verana.tr.v1.MsgArchiveTrustRegistry":                     true,
 	// Credential Schema (CS)
-	"/verana.cs.v1.MsgCreateCredentialSchema":                     true,
-	"/verana.cs.v1.MsgUpdateCredentialSchema":                     true,
-	"/verana.cs.v1.MsgArchiveCredentialSchema":                    true,
+	"/verana.cs.v1.MsgCreateCredentialSchema":  true,
+	"/verana.cs.v1.MsgUpdateCredentialSchema":  true,
+	"/verana.cs.v1.MsgArchiveCredentialSchema": true,
 	// Permission (PERM) - CreateOrUpdatePermissionSession included for VSOA fee grants
-	"/verana.perm.v1.MsgStartPermissionVP":                       true,
-	"/verana.perm.v1.MsgRenewPermissionVP":                       true,
-	"/verana.perm.v1.MsgSetPermissionVPToValidated":               true,
-	"/verana.perm.v1.MsgCancelPermissionVPLastRequest":            true,
-	"/verana.perm.v1.MsgCreateRootPermission":                     true,
-	"/verana.perm.v1.MsgAdjustPermission":                         true,
-	"/verana.perm.v1.MsgRevokePermission":                         true,
-	"/verana.perm.v1.MsgSlashPermissionTrustDeposit":              true,
-	"/verana.perm.v1.MsgRepayPermissionSlashedTrustDeposit":       true,
-	"/verana.perm.v1.MsgCreatePermission":                         true,
-	"/verana.perm.v1.MsgCreateOrUpdatePermissionSession":          true,
+	"/verana.perm.v1.MsgStartPermissionVP":                  true,
+	"/verana.perm.v1.MsgRenewPermissionVP":                  true,
+	"/verana.perm.v1.MsgSetPermissionVPToValidated":         true,
+	"/verana.perm.v1.MsgCancelPermissionVPLastRequest":      true,
+	"/verana.perm.v1.MsgCreateRootPermission":               true,
+	"/verana.perm.v1.MsgAdjustPermission":                   true,
+	"/verana.perm.v1.MsgRevokePermission":                   true,
+	"/verana.perm.v1.MsgSlashPermissionTrustDeposit":        true,
+	"/verana.perm.v1.MsgRepayPermissionSlashedTrustDeposit": true,
+	"/verana.perm.v1.MsgCreatePermission":                   true,
+	"/verana.perm.v1.MsgCreateOrUpdatePermissionSession":    true,
 	// Trust Deposit (TD)
-	"/verana.td.v1.MsgReclaimTrustDepositYield":                   true,
-	"/verana.td.v1.MsgReclaimTrustDeposit":                        true,
-	"/verana.td.v1.MsgRepaySlashedTrustDeposit":                   true,
+	"/verana.td.v1.MsgReclaimTrustDepositYield": true,
+	"/verana.td.v1.MsgReclaimTrustDeposit":      true,
+	"/verana.td.v1.MsgRepaySlashedTrustDeposit": true,
+	// Digest (DI)
+	"/verana.di.v1.MsgStoreDigest": true,
 	// Delegation (DE)
-	"/verana.de.v1.MsgGrantOperatorAuthorization":                  true,
-	"/verana.de.v1.MsgRevokeOperatorAuthorization":                 true,
+	"/verana.de.v1.MsgGrantOperatorAuthorization":  true,
+	"/verana.de.v1.MsgRevokeOperatorAuthorization": true,
 }
 
 // MsgCreateOrUpdatePermissionSessionTypeURL is the type URL for

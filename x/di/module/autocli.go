@@ -28,6 +28,16 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					RpcMethod: "UpdateParams",
 					Skip:      true, // skipped because authority gated
 				},
+				{
+					RpcMethod: "StoreDigest",
+					Use:       "store-digest [authority] [digest]",
+					Short:     "Store a digest on behalf of a corporation",
+					Long:      "[MOD-DI-MSG-1] Store Digest. The operator (--from) stores a digest on behalf of the authority (corporation).",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
+						{ProtoField: "authority"},
+						{ProtoField: "digest"},
+					},
+				},
 				// this line is used by ignite scaffolding # autocli/tx
 			},
 		},

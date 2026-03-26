@@ -19,8 +19,12 @@ type Keeper struct {
 	// Typically, this should be the x/gov module account.
 	authority []byte
 
-	Schema collections.Schema
-	Params collections.Item[types.Params]
+	// module references
+	delegationKeeper types.DelegationKeeper
+
+	Schema  collections.Schema
+	Params  collections.Item[types.Params]
+	Digests collections.Map[string, types.Digest]
 }
 
 func NewKeeper(
@@ -28,7 +32,7 @@ func NewKeeper(
 	cdc codec.Codec,
 	addressCodec address.Codec,
 	authority []byte,
-
+	delegationKeeper types.DelegationKeeper,
 ) Keeper {
 	if _, err := addressCodec.BytesToString(authority); err != nil {
 		panic(fmt.Sprintf("invalid authority address %s: %s", authority, err))
@@ -37,12 +41,14 @@ func NewKeeper(
 	sb := collections.NewSchemaBuilder(storeService)
 
 	k := Keeper{
-		storeService: storeService,
-		cdc:          cdc,
-		addressCodec: addressCodec,
-		authority:    authority,
+		storeService:     storeService,
+		cdc:              cdc,
+		addressCodec:     addressCodec,
+		authority:        authority,
+		delegationKeeper: delegationKeeper,
 
-		Params: collections.NewItem(sb, types.ParamsKey, "params", codec.CollValue[types.Params](cdc)),
+		Params:  collections.NewItem(sb, types.ParamsKey, "params", codec.CollValue[types.Params](cdc)),
+		Digests: collections.NewMap(sb, types.DigestsKey, "digests", collections.StringKey, codec.CollValue[types.Digest](cdc)),
 	}
 
 	schema, err := sb.Build()

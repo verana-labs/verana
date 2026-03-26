@@ -12,18 +12,22 @@ import (
 	_ "github.com/cosmos/gogoproto/gogoproto"
 	grpc1 "github.com/cosmos/gogoproto/grpc"
 	proto "github.com/cosmos/gogoproto/proto"
+	github_com_cosmos_gogoproto_types "github.com/cosmos/gogoproto/types"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	_ "google.golang.org/protobuf/types/known/timestamppb"
 	io "io"
 	math "math"
 	math_bits "math/bits"
+	time "time"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
 var _ = fmt.Errorf
 var _ = math.Inf
+var _ = time.Kitchen
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the proto package it is being compiled against.
@@ -126,37 +130,207 @@ func (m *MsgUpdateParamsResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgUpdateParamsResponse proto.InternalMessageInfo
 
+// [MOD-DI-MSG-1] MsgStoreDigest stores a digest on behalf of a corporation.
+type MsgStoreDigest struct {
+	// authority is the corporation (group account) on whose behalf this message
+	// is executed.
+	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
+	// operator is the account authorized by the corporation to run this Msg.
+	Operator string `protobuf:"bytes,2,opt,name=operator,proto3" json:"operator,omitempty"`
+	// digest is the digest string to store.
+	Digest string `protobuf:"bytes,3,opt,name=digest,proto3" json:"digest,omitempty"`
+}
+
+func (m *MsgStoreDigest) Reset()         { *m = MsgStoreDigest{} }
+func (m *MsgStoreDigest) String() string { return proto.CompactTextString(m) }
+func (*MsgStoreDigest) ProtoMessage()    {}
+func (*MsgStoreDigest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_86cf512d54e6d380, []int{2}
+}
+func (m *MsgStoreDigest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgStoreDigest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgStoreDigest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgStoreDigest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgStoreDigest.Merge(m, src)
+}
+func (m *MsgStoreDigest) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgStoreDigest) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgStoreDigest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgStoreDigest proto.InternalMessageInfo
+
+func (m *MsgStoreDigest) GetAuthority() string {
+	if m != nil {
+		return m.Authority
+	}
+	return ""
+}
+
+func (m *MsgStoreDigest) GetOperator() string {
+	if m != nil {
+		return m.Operator
+	}
+	return ""
+}
+
+func (m *MsgStoreDigest) GetDigest() string {
+	if m != nil {
+		return m.Digest
+	}
+	return ""
+}
+
+// MsgStoreDigestResponse defines the response for MsgStoreDigest.
+type MsgStoreDigestResponse struct {
+}
+
+func (m *MsgStoreDigestResponse) Reset()         { *m = MsgStoreDigestResponse{} }
+func (m *MsgStoreDigestResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgStoreDigestResponse) ProtoMessage()    {}
+func (*MsgStoreDigestResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_86cf512d54e6d380, []int{3}
+}
+func (m *MsgStoreDigestResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgStoreDigestResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgStoreDigestResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgStoreDigestResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgStoreDigestResponse.Merge(m, src)
+}
+func (m *MsgStoreDigestResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgStoreDigestResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgStoreDigestResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgStoreDigestResponse proto.InternalMessageInfo
+
+// Digest is the stored digest record.
+type Digest struct {
+	// digest is the digest string.
+	Digest string `protobuf:"bytes,1,opt,name=digest,proto3" json:"digest,omitempty"`
+	// created is the timestamp when the digest was stored.
+	Created time.Time `protobuf:"bytes,2,opt,name=created,proto3,stdtime" json:"created"`
+}
+
+func (m *Digest) Reset()         { *m = Digest{} }
+func (m *Digest) String() string { return proto.CompactTextString(m) }
+func (*Digest) ProtoMessage()    {}
+func (*Digest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_86cf512d54e6d380, []int{4}
+}
+func (m *Digest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *Digest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_Digest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *Digest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Digest.Merge(m, src)
+}
+func (m *Digest) XXX_Size() int {
+	return m.Size()
+}
+func (m *Digest) XXX_DiscardUnknown() {
+	xxx_messageInfo_Digest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Digest proto.InternalMessageInfo
+
+func (m *Digest) GetDigest() string {
+	if m != nil {
+		return m.Digest
+	}
+	return ""
+}
+
+func (m *Digest) GetCreated() time.Time {
+	if m != nil {
+		return m.Created
+	}
+	return time.Time{}
+}
+
 func init() {
 	proto.RegisterType((*MsgUpdateParams)(nil), "verana.di.v1.MsgUpdateParams")
 	proto.RegisterType((*MsgUpdateParamsResponse)(nil), "verana.di.v1.MsgUpdateParamsResponse")
+	proto.RegisterType((*MsgStoreDigest)(nil), "verana.di.v1.MsgStoreDigest")
+	proto.RegisterType((*MsgStoreDigestResponse)(nil), "verana.di.v1.MsgStoreDigestResponse")
+	proto.RegisterType((*Digest)(nil), "verana.di.v1.Digest")
 }
 
 func init() { proto.RegisterFile("verana/di/v1/tx.proto", fileDescriptor_86cf512d54e6d380) }
 
 var fileDescriptor_86cf512d54e6d380 = []byte{
-	// 341 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x12, 0x2d, 0x4b, 0x2d, 0x4a,
-	0xcc, 0x4b, 0xd4, 0x4f, 0xc9, 0xd4, 0x2f, 0x33, 0xd4, 0x2f, 0xa9, 0xd0, 0x2b, 0x28, 0xca, 0x2f,
-	0xc9, 0x17, 0xe2, 0x81, 0x08, 0xeb, 0xa5, 0x64, 0xea, 0x95, 0x19, 0x4a, 0x09, 0x26, 0xe6, 0x66,
-	0xe6, 0xe5, 0xeb, 0x83, 0x49, 0x88, 0x02, 0x29, 0xf1, 0xe4, 0xfc, 0xe2, 0xdc, 0xfc, 0x62, 0xfd,
-	0xdc, 0xe2, 0x74, 0x90, 0xc6, 0xdc, 0xe2, 0x74, 0xa8, 0x84, 0x24, 0x44, 0x22, 0x1e, 0xcc, 0xd3,
-	0x87, 0x70, 0xa0, 0x52, 0x22, 0xe9, 0xf9, 0xe9, 0xf9, 0x10, 0x71, 0x10, 0x0b, 0xa6, 0x01, 0xc5,
-	0x05, 0x05, 0x89, 0x45, 0x89, 0xb9, 0x50, 0x0d, 0x4a, 0x9b, 0x18, 0xb9, 0xf8, 0x7d, 0x8b, 0xd3,
-	0x43, 0x0b, 0x52, 0x12, 0x4b, 0x52, 0x03, 0xc0, 0x32, 0x42, 0x66, 0x5c, 0x9c, 0x89, 0xa5, 0x25,
-	0x19, 0xf9, 0x45, 0x99, 0x25, 0x95, 0x12, 0x8c, 0x0a, 0x8c, 0x1a, 0x9c, 0x4e, 0x12, 0x97, 0xb6,
-	0xe8, 0x8a, 0x40, 0x6d, 0x72, 0x4c, 0x49, 0x29, 0x4a, 0x2d, 0x2e, 0x0e, 0x2e, 0x29, 0xca, 0xcc,
-	0x4b, 0x0f, 0x42, 0x28, 0x15, 0x32, 0xe7, 0x62, 0x83, 0x98, 0x2d, 0xc1, 0xa4, 0xc0, 0xa8, 0xc1,
-	0x6d, 0x24, 0xa2, 0x87, 0xec, 0x45, 0x3d, 0x88, 0xe9, 0x4e, 0x9c, 0x27, 0xee, 0xc9, 0x33, 0xac,
-	0x78, 0xbe, 0x41, 0x8b, 0x31, 0x08, 0xaa, 0xdc, 0x4a, 0xaf, 0xe9, 0xf9, 0x06, 0x2d, 0x84, 0x41,
-	0x5d, 0xcf, 0x37, 0x68, 0x49, 0x43, 0x9d, 0x5c, 0x01, 0x72, 0x34, 0x9a, 0x03, 0x95, 0x24, 0xb9,
-	0xc4, 0xd1, 0x84, 0x82, 0x52, 0x8b, 0x0b, 0xf2, 0xf3, 0x8a, 0x53, 0x8d, 0x92, 0xb8, 0x98, 0x7d,
-	0x8b, 0xd3, 0x85, 0x42, 0xb8, 0x78, 0x50, 0xbc, 0x24, 0x8b, 0xea, 0x14, 0x34, 0xdd, 0x52, 0xaa,
-	0x78, 0xa5, 0x61, 0x86, 0x4b, 0xb1, 0x36, 0x80, 0x9c, 0xed, 0xe4, 0x74, 0xe2, 0x91, 0x1c, 0xe3,
-	0x85, 0x47, 0x72, 0x8c, 0x0f, 0x1e, 0xc9, 0x31, 0x4e, 0x78, 0x2c, 0xc7, 0x70, 0xe1, 0xb1, 0x1c,
-	0xc3, 0x8d, 0xc7, 0x72, 0x0c, 0x51, 0x1a, 0xe9, 0x99, 0x25, 0x19, 0xa5, 0x49, 0x7a, 0xc9, 0xf9,
-	0xb9, 0xfa, 0x10, 0x13, 0x75, 0x73, 0x12, 0x93, 0x8a, 0xf5, 0x91, 0x3d, 0x53, 0x52, 0x59, 0x90,
-	0x5a, 0x9c, 0xc4, 0x06, 0x0e, 0x7e, 0x63, 0x40, 0x00, 0x00, 0x00, 0xff, 0xff, 0x2a, 0x3b, 0xc7,
-	0x2f, 0x1d, 0x02, 0x00, 0x00,
+	// 499 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x52, 0x41, 0x6b, 0x13, 0x41,
+	0x14, 0xce, 0x58, 0x8c, 0xcd, 0xb4, 0x28, 0x2e, 0xb1, 0xdd, 0xae, 0xba, 0x29, 0x41, 0x21, 0x04,
+	0x3b, 0x43, 0xab, 0x28, 0xf4, 0x20, 0xb8, 0x78, 0x0d, 0xe8, 0xb6, 0x5e, 0xbc, 0xe8, 0x24, 0x3b,
+	0x4e, 0x17, 0xba, 0x99, 0x65, 0x66, 0x12, 0xda, 0x9b, 0x78, 0xf4, 0xd4, 0x9f, 0xe1, 0x31, 0x88,
+	0xfe, 0x03, 0x0f, 0x3d, 0x06, 0x4f, 0x9e, 0x54, 0x92, 0x43, 0xfe, 0x86, 0xcc, 0xce, 0x6c, 0xb2,
+	0x59, 0x21, 0x87, 0x5e, 0x96, 0x7d, 0xef, 0x7b, 0xef, 0x7b, 0xdf, 0x37, 0xef, 0xc1, 0x3b, 0x43,
+	0x2a, 0x48, 0x9f, 0xe0, 0x28, 0xc6, 0xc3, 0x7d, 0xac, 0xce, 0x50, 0x2a, 0xb8, 0xe2, 0xce, 0xa6,
+	0x49, 0xa3, 0x28, 0x46, 0xc3, 0x7d, 0xef, 0x36, 0x49, 0xe2, 0x3e, 0xc7, 0xd9, 0xd7, 0x14, 0x78,
+	0xdb, 0x3d, 0x2e, 0x13, 0x2e, 0x71, 0x22, 0x99, 0x6e, 0x4c, 0x24, 0xb3, 0xc0, 0x8e, 0x01, 0xde,
+	0x65, 0x11, 0x36, 0x81, 0x85, 0xea, 0x8c, 0x33, 0x6e, 0xf2, 0xfa, 0xcf, 0x66, 0x1b, 0x8c, 0x73,
+	0x76, 0x4a, 0x71, 0x16, 0x75, 0x07, 0x1f, 0xb0, 0x8a, 0x13, 0x2a, 0x15, 0x49, 0xd2, 0x9c, 0x71,
+	0x49, 0x62, 0x4a, 0x04, 0x49, 0x2c, 0x63, 0xf3, 0x2b, 0x80, 0xb7, 0x3a, 0x92, 0xbd, 0x49, 0x23,
+	0xa2, 0xe8, 0xab, 0x0c, 0x71, 0x9e, 0xc2, 0x1a, 0x19, 0xa8, 0x13, 0x2e, 0x62, 0x75, 0xee, 0x82,
+	0x5d, 0xd0, 0xaa, 0x05, 0xee, 0xcf, 0x6f, 0x7b, 0x75, 0x2b, 0xe5, 0x45, 0x14, 0x09, 0x2a, 0xe5,
+	0x91, 0x12, 0x71, 0x9f, 0x85, 0x8b, 0x52, 0xe7, 0x19, 0xac, 0x1a, 0x6e, 0xf7, 0xda, 0x2e, 0x68,
+	0x6d, 0x1c, 0xd4, 0x51, 0xf1, 0x0d, 0x90, 0x61, 0x0f, 0x6a, 0x97, 0xbf, 0x1b, 0x95, 0x2f, 0xb3,
+	0x51, 0x1b, 0x84, 0xb6, 0xfc, 0x10, 0x7d, 0x9a, 0x8d, 0xda, 0x0b, 0xa2, 0xcf, 0xb3, 0x51, 0xfb,
+	0xae, 0x95, 0x7c, 0xa6, 0x45, 0x97, 0x04, 0x36, 0x77, 0xe0, 0x76, 0x29, 0x15, 0x52, 0x99, 0xf2,
+	0xbe, 0xa4, 0xcd, 0x1f, 0x00, 0xde, 0xec, 0x48, 0x76, 0xa4, 0xb8, 0xa0, 0x2f, 0x63, 0x46, 0xa5,
+	0xba, 0xb2, 0x9d, 0x27, 0x70, 0x9d, 0xa7, 0x54, 0x10, 0xc5, 0x45, 0x66, 0x68, 0x55, 0xdb, 0xbc,
+	0xd2, 0xd9, 0x82, 0xd5, 0x28, 0x9b, 0xeb, 0xae, 0xe9, 0x9e, 0xd0, 0x46, 0x87, 0x8f, 0xb4, 0xc7,
+	0x79, 0x99, 0xb6, 0xe8, 0x95, 0x2c, 0x16, 0x34, 0x37, 0x5d, 0xb8, 0xb5, 0x9c, 0x99, 0x1b, 0x7c,
+	0x0f, 0xab, 0xd6, 0xd7, 0x62, 0x12, 0x28, 0x4e, 0x72, 0x9e, 0xc3, 0x1b, 0x3d, 0x41, 0x89, 0xa2,
+	0x91, 0xdd, 0x83, 0x87, 0xcc, 0x81, 0xa0, 0xfc, 0x40, 0xd0, 0x71, 0x7e, 0x20, 0xc1, 0xba, 0xde,
+	0xc6, 0xc5, 0x9f, 0x06, 0x08, 0xf3, 0xa6, 0x83, 0xef, 0x00, 0xae, 0x75, 0x24, 0x73, 0x8e, 0xe1,
+	0xe6, 0xd2, 0x59, 0xdc, 0x5f, 0x5e, 0x67, 0x69, 0x03, 0xde, 0xc3, 0x95, 0x70, 0xae, 0xdf, 0x79,
+	0x0d, 0x37, 0x8a, 0xcb, 0xb9, 0xf7, 0x5f, 0x57, 0x01, 0xf5, 0x1e, 0xac, 0x42, 0x73, 0x4a, 0xef,
+	0xfa, 0x47, 0x7d, 0x4d, 0x41, 0x70, 0x39, 0xf1, 0xc1, 0x78, 0xe2, 0x83, 0xbf, 0x13, 0x1f, 0x5c,
+	0x4c, 0xfd, 0xca, 0x78, 0xea, 0x57, 0x7e, 0x4d, 0xfd, 0xca, 0xdb, 0x16, 0x8b, 0xd5, 0xc9, 0xa0,
+	0x8b, 0x7a, 0x3c, 0xc1, 0x86, 0x70, 0xef, 0x94, 0x74, 0x25, 0x2e, 0x2e, 0x40, 0x9d, 0xa7, 0x54,
+	0x76, 0xab, 0xd9, 0x13, 0x3d, 0xfe, 0x17, 0x00, 0x00, 0xff, 0xff, 0x5e, 0xa7, 0xb2, 0x05, 0xd5,
+	0x03, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -174,6 +348,8 @@ type MsgClient interface {
 	// UpdateParams defines a (governance) operation for updating the module
 	// parameters. The authority defaults to the x/gov module account.
 	UpdateParams(ctx context.Context, in *MsgUpdateParams, opts ...grpc.CallOption) (*MsgUpdateParamsResponse, error)
+	// [MOD-DI-MSG-1] Store Digest
+	StoreDigest(ctx context.Context, in *MsgStoreDigest, opts ...grpc.CallOption) (*MsgStoreDigestResponse, error)
 }
 
 type msgClient struct {
@@ -193,11 +369,22 @@ func (c *msgClient) UpdateParams(ctx context.Context, in *MsgUpdateParams, opts 
 	return out, nil
 }
 
+func (c *msgClient) StoreDigest(ctx context.Context, in *MsgStoreDigest, opts ...grpc.CallOption) (*MsgStoreDigestResponse, error) {
+	out := new(MsgStoreDigestResponse)
+	err := c.cc.Invoke(ctx, "/verana.di.v1.Msg/StoreDigest", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MsgServer is the server API for Msg service.
 type MsgServer interface {
 	// UpdateParams defines a (governance) operation for updating the module
 	// parameters. The authority defaults to the x/gov module account.
 	UpdateParams(context.Context, *MsgUpdateParams) (*MsgUpdateParamsResponse, error)
+	// [MOD-DI-MSG-1] Store Digest
+	StoreDigest(context.Context, *MsgStoreDigest) (*MsgStoreDigestResponse, error)
 }
 
 // UnimplementedMsgServer can be embedded to have forward compatible implementations.
@@ -206,6 +393,9 @@ type UnimplementedMsgServer struct {
 
 func (*UnimplementedMsgServer) UpdateParams(ctx context.Context, req *MsgUpdateParams) (*MsgUpdateParamsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateParams not implemented")
+}
+func (*UnimplementedMsgServer) StoreDigest(ctx context.Context, req *MsgStoreDigest) (*MsgStoreDigestResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method StoreDigest not implemented")
 }
 
 func RegisterMsgServer(s grpc1.Server, srv MsgServer) {
@@ -230,6 +420,24 @@ func _Msg_UpdateParams_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Msg_StoreDigest_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgStoreDigest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).StoreDigest(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/verana.di.v1.Msg/StoreDigest",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).StoreDigest(ctx, req.(*MsgStoreDigest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var Msg_serviceDesc = _Msg_serviceDesc
 var _Msg_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "verana.di.v1.Msg",
@@ -238,6 +446,10 @@ var _Msg_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateParams",
 			Handler:    _Msg_UpdateParams_Handler,
+		},
+		{
+			MethodName: "StoreDigest",
+			Handler:    _Msg_StoreDigest_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -307,6 +519,111 @@ func (m *MsgUpdateParamsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error)
 	return len(dAtA) - i, nil
 }
 
+func (m *MsgStoreDigest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgStoreDigest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgStoreDigest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Digest) > 0 {
+		i -= len(m.Digest)
+		copy(dAtA[i:], m.Digest)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Digest)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.Operator) > 0 {
+		i -= len(m.Operator)
+		copy(dAtA[i:], m.Operator)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Operator)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Authority) > 0 {
+		i -= len(m.Authority)
+		copy(dAtA[i:], m.Authority)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Authority)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgStoreDigestResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgStoreDigestResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgStoreDigestResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
+func (m *Digest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *Digest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *Digest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	n2, err2 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(m.Created, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(m.Created):])
+	if err2 != nil {
+		return 0, err2
+	}
+	i -= n2
+	i = encodeVarintTx(dAtA, i, uint64(n2))
+	i--
+	dAtA[i] = 0x12
+	if len(m.Digest) > 0 {
+		i -= len(m.Digest)
+		copy(dAtA[i:], m.Digest)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Digest)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintTx(dAtA []byte, offset int, v uint64) int {
 	offset -= sovTx(v)
 	base := offset
@@ -339,6 +656,51 @@ func (m *MsgUpdateParamsResponse) Size() (n int) {
 	}
 	var l int
 	_ = l
+	return n
+}
+
+func (m *MsgStoreDigest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Authority)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.Operator)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.Digest)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	return n
+}
+
+func (m *MsgStoreDigestResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
+func (m *Digest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Digest)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = github_com_cosmos_gogoproto_types.SizeOfStdTime(m.Created)
+	n += 1 + l + sovTx(uint64(l))
 	return n
 }
 
@@ -492,6 +854,317 @@ func (m *MsgUpdateParamsResponse) Unmarshal(dAtA []byte) error {
 			return fmt.Errorf("proto: MsgUpdateParamsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgStoreDigest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgStoreDigest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgStoreDigest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Authority", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Authority = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Operator", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Operator = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Digest", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Digest = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgStoreDigestResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgStoreDigestResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgStoreDigestResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *Digest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: Digest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: Digest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Digest", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Digest = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Created", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := github_com_cosmos_gogoproto_types.StdTimeUnmarshal(&m.Created, dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipTx(dAtA[iNdEx:])

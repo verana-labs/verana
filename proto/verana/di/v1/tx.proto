@@ -5,6 +5,7 @@ import "amino/amino.proto";
 import "cosmos/msg/v1/msg.proto";
 import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
+import "google/protobuf/timestamp.proto";
 import "verana/di/v1/params.proto";
 
 option go_package = "github.com/verana-labs/verana/x/di/types";
@@ -16,6 +17,9 @@ service Msg {
   // UpdateParams defines a (governance) operation for updating the module
   // parameters. The authority defaults to the x/gov module account.
   rpc UpdateParams(MsgUpdateParams) returns (MsgUpdateParamsResponse);
+
+  // [MOD-DI-MSG-1] Store Digest
+  rpc StoreDigest(MsgStoreDigest) returns (MsgStoreDigestResponse);
 }
 
 // MsgUpdateParams is the Msg/UpdateParams request type.
@@ -38,3 +42,31 @@ message MsgUpdateParams {
 // MsgUpdateParamsResponse defines the response structure for executing a
 // MsgUpdateParams message.
 message MsgUpdateParamsResponse {}
+
+// [MOD-DI-MSG-1] MsgStoreDigest stores a digest on behalf of a corporation.
+message MsgStoreDigest {
+  option (cosmos.msg.v1.signer) = "operator";
+  option (amino.name) = "verana/x/di/MsgStoreDigest";
+
+  // authority is the corporation (group account) on whose behalf this message
+  // is executed.
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // operator is the account authorized by the corporation to run this Msg.
+  string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // digest is the digest string to store.
+  string digest = 3;
+}
+
+// MsgStoreDigestResponse defines the response for MsgStoreDigest.
+message MsgStoreDigestResponse {}
+
+// Digest is the stored digest record.
+message Digest {
+  // digest is the digest string.
+  string digest = 1;
+  // created is the timestamp when the digest was stored.
+  google.protobuf.Timestamp created = 2 [
+    (gogoproto.stdtime) = true,
+    (gogoproto.nullable) = false
+  ];
+}
