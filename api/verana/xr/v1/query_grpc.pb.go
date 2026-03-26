@@ -19,7 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Query_Params_FullMethodName = "/verana.xr.v1.Query/Params"
+	Query_Params_FullMethodName            = "/verana.xr.v1.Query/Params"
+	Query_GetExchangeRate_FullMethodName   = "/verana.xr.v1.Query/GetExchangeRate"
+	Query_ListExchangeRates_FullMethodName = "/verana.xr.v1.Query/ListExchangeRates"
+	Query_GetPrice_FullMethodName          = "/verana.xr.v1.Query/GetPrice"
 )
 
 // QueryClient is the client API for Query service.
@@ -30,6 +33,12 @@ const (
 type QueryClient interface {
 	// Parameters queries the parameters of the module.
 	Params(ctx context.Context, in *QueryParamsRequest, opts ...grpc.CallOption) (*QueryParamsResponse, error)
+	// GetExchangeRate queries an exchange rate by id or by asset pair.
+	GetExchangeRate(ctx context.Context, in *QueryGetExchangeRateRequest, opts ...grpc.CallOption) (*QueryGetExchangeRateResponse, error)
+	// ListExchangeRates queries exchange rates with optional filters.
+	ListExchangeRates(ctx context.Context, in *QueryListExchangeRatesRequest, opts ...grpc.CallOption) (*QueryListExchangeRatesResponse, error)
+	// GetPrice computes the price using an exchange rate.
+	GetPrice(ctx context.Context, in *QueryGetPriceRequest, opts ...grpc.CallOption) (*QueryGetPriceResponse, error)
 }
 
 type queryClient struct {
@@ -50,6 +59,36 @@ func (c *queryClient) Params(ctx context.Context, in *QueryParamsRequest, opts .
 	return out, nil
 }
 
+func (c *queryClient) GetExchangeRate(ctx context.Context, in *QueryGetExchangeRateRequest, opts ...grpc.CallOption) (*QueryGetExchangeRateResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(QueryGetExchangeRateResponse)
+	err := c.cc.Invoke(ctx, Query_GetExchangeRate_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) ListExchangeRates(ctx context.Context, in *QueryListExchangeRatesRequest, opts ...grpc.CallOption) (*QueryListExchangeRatesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(QueryListExchangeRatesResponse)
+	err := c.cc.Invoke(ctx, Query_ListExchangeRates_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) GetPrice(ctx context.Context, in *QueryGetPriceRequest, opts ...grpc.CallOption) (*QueryGetPriceResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(QueryGetPriceResponse)
+	err := c.cc.Invoke(ctx, Query_GetPrice_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // QueryServer is the server API for Query service.
 // All implementations must embed UnimplementedQueryServer
 // for forward compatibility.
@@ -58,6 +97,12 @@ func (c *queryClient) Params(ctx context.Context, in *QueryParamsRequest, opts .
 type QueryServer interface {
 	// Parameters queries the parameters of the module.
 	Params(context.Context, *QueryParamsRequest) (*QueryParamsResponse, error)
+	// GetExchangeRate queries an exchange rate by id or by asset pair.
+	GetExchangeRate(context.Context, *QueryGetExchangeRateRequest) (*QueryGetExchangeRateResponse, error)
+	// ListExchangeRates queries exchange rates with optional filters.
+	ListExchangeRates(context.Context, *QueryListExchangeRatesRequest) (*QueryListExchangeRatesResponse, error)
+	// GetPrice computes the price using an exchange rate.
+	GetPrice(context.Context, *QueryGetPriceRequest) (*QueryGetPriceResponse, error)
 	mustEmbedUnimplementedQueryServer()
 }
 
@@ -70,6 +115,15 @@ type UnimplementedQueryServer struct{}
 
 func (UnimplementedQueryServer) Params(context.Context, *QueryParamsRequest) (*QueryParamsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Params not implemented")
+}
+func (UnimplementedQueryServer) GetExchangeRate(context.Context, *QueryGetExchangeRateRequest) (*QueryGetExchangeRateResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetExchangeRate not implemented")
+}
+func (UnimplementedQueryServer) ListExchangeRates(context.Context, *QueryListExchangeRatesRequest) (*QueryListExchangeRatesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListExchangeRates not implemented")
+}
+func (UnimplementedQueryServer) GetPrice(context.Context, *QueryGetPriceRequest) (*QueryGetPriceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPrice not implemented")
 }
 func (UnimplementedQueryServer) mustEmbedUnimplementedQueryServer() {}
 func (UnimplementedQueryServer) testEmbeddedByValue()               {}
@@ -110,6 +164,60 @@ func _Query_Params_Handler(srv interface{}, ctx context.Context, dec func(interf
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Query_GetExchangeRate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryGetExchangeRateRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).GetExchangeRate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Query_GetExchangeRate_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).GetExchangeRate(ctx, req.(*QueryGetExchangeRateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_ListExchangeRates_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryListExchangeRatesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).ListExchangeRates(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Query_ListExchangeRates_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).ListExchangeRates(ctx, req.(*QueryListExchangeRatesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_GetPrice_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryGetPriceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).GetPrice(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Query_GetPrice_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).GetPrice(ctx, req.(*QueryGetPriceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Query_ServiceDesc is the grpc.ServiceDesc for Query service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -120,6 +228,18 @@ var Query_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Params",
 			Handler:    _Query_Params_Handler,
+		},
+		{
+			MethodName: "GetExchangeRate",
+			Handler:    _Query_GetExchangeRate_Handler,
+		},
+		{
+			MethodName: "ListExchangeRates",
+			Handler:    _Query_ListExchangeRates_Handler,
+		},
+		{
+			MethodName: "GetPrice",
+			Handler:    _Query_GetPrice_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
