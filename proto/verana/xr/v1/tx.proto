@@ -5,9 +5,27 @@ import "amino/amino.proto";
 import "cosmos/msg/v1/msg.proto";
 import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
 import "verana/xr/v1/params.proto";
+import "verana/cs/v1/types.proto";
 
 option go_package = "github.com/verana-labs/verana/x/xr/types";
+
+// ExchangeRate defines the storage type for an exchange rate entry.
+message ExchangeRate {
+  uint64 id = 1;
+  verana.cs.v1.PricingAssetType base_asset_type = 2;
+  string base_asset = 3;
+  verana.cs.v1.PricingAssetType quote_asset_type = 4;
+  string quote_asset = 5;
+  string rate = 6;
+  uint32 rate_scale = 7;
+  google.protobuf.Duration validity_duration = 8 [(gogoproto.nullable) = false, (gogoproto.stdduration) = true];
+  google.protobuf.Timestamp expires = 9 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+  bool state = 10;
+  google.protobuf.Timestamp updated = 11 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+}
 
 // Msg defines the Msg service.
 service Msg {
@@ -16,6 +34,31 @@ service Msg {
   // UpdateParams defines a (governance) operation for updating the module
   // parameters. The authority defaults to the x/gov module account.
   rpc UpdateParams(MsgUpdateParams) returns (MsgUpdateParamsResponse);
+
+  // CreateExchangeRate defines a governance operation for creating an exchange rate.
+  rpc CreateExchangeRate(MsgCreateExchangeRate) returns (MsgCreateExchangeRateResponse);
+}
+
+// MsgCreateExchangeRate is the Msg/CreateExchangeRate request type.
+message MsgCreateExchangeRate {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "verana/x/xr/MsgCreateExchangeRate";
+
+  // authority is the address that controls the module (defaults to x/gov unless overwritten).
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  verana.cs.v1.PricingAssetType base_asset_type = 2;
+  string base_asset = 3;
+  verana.cs.v1.PricingAssetType quote_asset_type = 4;
+  string quote_asset = 5;
+  string rate = 6;
+  uint32 rate_scale = 7;
+  google.protobuf.Duration validity_duration = 8 [(gogoproto.nullable) = false, (gogoproto.stdduration) = true];
+}
+
+// MsgCreateExchangeRateResponse defines the response for MsgCreateExchangeRate.
+message MsgCreateExchangeRateResponse {
+  uint64 id = 1;
 }
 
 // MsgUpdateParams is the Msg/UpdateParams request type.

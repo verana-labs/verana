@@ -12,24 +12,302 @@ import (
 	_ "github.com/cosmos/gogoproto/gogoproto"
 	grpc1 "github.com/cosmos/gogoproto/grpc"
 	proto "github.com/cosmos/gogoproto/proto"
+	github_com_cosmos_gogoproto_types "github.com/cosmos/gogoproto/types"
+	types "github.com/verana-labs/verana/x/cs/types"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	_ "google.golang.org/protobuf/types/known/durationpb"
+	_ "google.golang.org/protobuf/types/known/timestamppb"
 	io "io"
 	math "math"
 	math_bits "math/bits"
+	time "time"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
 var _ = fmt.Errorf
 var _ = math.Inf
+var _ = time.Kitchen
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the proto package it is being compiled against.
 // A compilation error at this line likely means your copy of the
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
+
+// ExchangeRate defines the storage type for an exchange rate entry.
+type ExchangeRate struct {
+	Id               uint64                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	BaseAssetType    types.PricingAssetType `protobuf:"varint,2,opt,name=base_asset_type,json=baseAssetType,proto3,enum=verana.cs.v1.PricingAssetType" json:"base_asset_type,omitempty"`
+	BaseAsset        string                 `protobuf:"bytes,3,opt,name=base_asset,json=baseAsset,proto3" json:"base_asset,omitempty"`
+	QuoteAssetType   types.PricingAssetType `protobuf:"varint,4,opt,name=quote_asset_type,json=quoteAssetType,proto3,enum=verana.cs.v1.PricingAssetType" json:"quote_asset_type,omitempty"`
+	QuoteAsset       string                 `protobuf:"bytes,5,opt,name=quote_asset,json=quoteAsset,proto3" json:"quote_asset,omitempty"`
+	Rate             string                 `protobuf:"bytes,6,opt,name=rate,proto3" json:"rate,omitempty"`
+	RateScale        uint32                 `protobuf:"varint,7,opt,name=rate_scale,json=rateScale,proto3" json:"rate_scale,omitempty"`
+	ValidityDuration time.Duration          `protobuf:"bytes,8,opt,name=validity_duration,json=validityDuration,proto3,stdduration" json:"validity_duration"`
+	Expires          time.Time              `protobuf:"bytes,9,opt,name=expires,proto3,stdtime" json:"expires"`
+	State            bool                   `protobuf:"varint,10,opt,name=state,proto3" json:"state,omitempty"`
+	Updated          time.Time              `protobuf:"bytes,11,opt,name=updated,proto3,stdtime" json:"updated"`
+}
+
+func (m *ExchangeRate) Reset()         { *m = ExchangeRate{} }
+func (m *ExchangeRate) String() string { return proto.CompactTextString(m) }
+func (*ExchangeRate) ProtoMessage()    {}
+func (*ExchangeRate) Descriptor() ([]byte, []int) {
+	return fileDescriptor_0e3efaf0ecb4b2bb, []int{0}
+}
+func (m *ExchangeRate) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ExchangeRate) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ExchangeRate.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ExchangeRate) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ExchangeRate.Merge(m, src)
+}
+func (m *ExchangeRate) XXX_Size() int {
+	return m.Size()
+}
+func (m *ExchangeRate) XXX_DiscardUnknown() {
+	xxx_messageInfo_ExchangeRate.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ExchangeRate proto.InternalMessageInfo
+
+func (m *ExchangeRate) GetId() uint64 {
+	if m != nil {
+		return m.Id
+	}
+	return 0
+}
+
+func (m *ExchangeRate) GetBaseAssetType() types.PricingAssetType {
+	if m != nil {
+		return m.BaseAssetType
+	}
+	return types.PricingAssetType_PRICING_ASSET_TYPE_UNSPECIFIED
+}
+
+func (m *ExchangeRate) GetBaseAsset() string {
+	if m != nil {
+		return m.BaseAsset
+	}
+	return ""
+}
+
+func (m *ExchangeRate) GetQuoteAssetType() types.PricingAssetType {
+	if m != nil {
+		return m.QuoteAssetType
+	}
+	return types.PricingAssetType_PRICING_ASSET_TYPE_UNSPECIFIED
+}
+
+func (m *ExchangeRate) GetQuoteAsset() string {
+	if m != nil {
+		return m.QuoteAsset
+	}
+	return ""
+}
+
+func (m *ExchangeRate) GetRate() string {
+	if m != nil {
+		return m.Rate
+	}
+	return ""
+}
+
+func (m *ExchangeRate) GetRateScale() uint32 {
+	if m != nil {
+		return m.RateScale
+	}
+	return 0
+}
+
+func (m *ExchangeRate) GetValidityDuration() time.Duration {
+	if m != nil {
+		return m.ValidityDuration
+	}
+	return 0
+}
+
+func (m *ExchangeRate) GetExpires() time.Time {
+	if m != nil {
+		return m.Expires
+	}
+	return time.Time{}
+}
+
+func (m *ExchangeRate) GetState() bool {
+	if m != nil {
+		return m.State
+	}
+	return false
+}
+
+func (m *ExchangeRate) GetUpdated() time.Time {
+	if m != nil {
+		return m.Updated
+	}
+	return time.Time{}
+}
+
+// MsgCreateExchangeRate is the Msg/CreateExchangeRate request type.
+type MsgCreateExchangeRate struct {
+	// authority is the address that controls the module (defaults to x/gov unless overwritten).
+	Authority        string                 `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
+	BaseAssetType    types.PricingAssetType `protobuf:"varint,2,opt,name=base_asset_type,json=baseAssetType,proto3,enum=verana.cs.v1.PricingAssetType" json:"base_asset_type,omitempty"`
+	BaseAsset        string                 `protobuf:"bytes,3,opt,name=base_asset,json=baseAsset,proto3" json:"base_asset,omitempty"`
+	QuoteAssetType   types.PricingAssetType `protobuf:"varint,4,opt,name=quote_asset_type,json=quoteAssetType,proto3,enum=verana.cs.v1.PricingAssetType" json:"quote_asset_type,omitempty"`
+	QuoteAsset       string                 `protobuf:"bytes,5,opt,name=quote_asset,json=quoteAsset,proto3" json:"quote_asset,omitempty"`
+	Rate             string                 `protobuf:"bytes,6,opt,name=rate,proto3" json:"rate,omitempty"`
+	RateScale        uint32                 `protobuf:"varint,7,opt,name=rate_scale,json=rateScale,proto3" json:"rate_scale,omitempty"`
+	ValidityDuration time.Duration          `protobuf:"bytes,8,opt,name=validity_duration,json=validityDuration,proto3,stdduration" json:"validity_duration"`
+}
+
+func (m *MsgCreateExchangeRate) Reset()         { *m = MsgCreateExchangeRate{} }
+func (m *MsgCreateExchangeRate) String() string { return proto.CompactTextString(m) }
+func (*MsgCreateExchangeRate) ProtoMessage()    {}
+func (*MsgCreateExchangeRate) Descriptor() ([]byte, []int) {
+	return fileDescriptor_0e3efaf0ecb4b2bb, []int{1}
+}
+func (m *MsgCreateExchangeRate) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgCreateExchangeRate) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgCreateExchangeRate.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgCreateExchangeRate) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgCreateExchangeRate.Merge(m, src)
+}
+func (m *MsgCreateExchangeRate) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgCreateExchangeRate) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgCreateExchangeRate.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgCreateExchangeRate proto.InternalMessageInfo
+
+func (m *MsgCreateExchangeRate) GetAuthority() string {
+	if m != nil {
+		return m.Authority
+	}
+	return ""
+}
+
+func (m *MsgCreateExchangeRate) GetBaseAssetType() types.PricingAssetType {
+	if m != nil {
+		return m.BaseAssetType
+	}
+	return types.PricingAssetType_PRICING_ASSET_TYPE_UNSPECIFIED
+}
+
+func (m *MsgCreateExchangeRate) GetBaseAsset() string {
+	if m != nil {
+		return m.BaseAsset
+	}
+	return ""
+}
+
+func (m *MsgCreateExchangeRate) GetQuoteAssetType() types.PricingAssetType {
+	if m != nil {
+		return m.QuoteAssetType
+	}
+	return types.PricingAssetType_PRICING_ASSET_TYPE_UNSPECIFIED
+}
+
+func (m *MsgCreateExchangeRate) GetQuoteAsset() string {
+	if m != nil {
+		return m.QuoteAsset
+	}
+	return ""
+}
+
+func (m *MsgCreateExchangeRate) GetRate() string {
+	if m != nil {
+		return m.Rate
+	}
+	return ""
+}
+
+func (m *MsgCreateExchangeRate) GetRateScale() uint32 {
+	if m != nil {
+		return m.RateScale
+	}
+	return 0
+}
+
+func (m *MsgCreateExchangeRate) GetValidityDuration() time.Duration {
+	if m != nil {
+		return m.ValidityDuration
+	}
+	return 0
+}
+
+// MsgCreateExchangeRateResponse defines the response for MsgCreateExchangeRate.
+type MsgCreateExchangeRateResponse struct {
+	Id uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+}
+
+func (m *MsgCreateExchangeRateResponse) Reset()         { *m = MsgCreateExchangeRateResponse{} }
+func (m *MsgCreateExchangeRateResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgCreateExchangeRateResponse) ProtoMessage()    {}
+func (*MsgCreateExchangeRateResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_0e3efaf0ecb4b2bb, []int{2}
+}
+func (m *MsgCreateExchangeRateResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgCreateExchangeRateResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgCreateExchangeRateResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgCreateExchangeRateResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgCreateExchangeRateResponse.Merge(m, src)
+}
+func (m *MsgCreateExchangeRateResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgCreateExchangeRateResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgCreateExchangeRateResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgCreateExchangeRateResponse proto.InternalMessageInfo
+
+func (m *MsgCreateExchangeRateResponse) GetId() uint64 {
+	if m != nil {
+		return m.Id
+	}
+	return 0
+}
 
 // MsgUpdateParams is the Msg/UpdateParams request type.
 type MsgUpdateParams struct {
@@ -45,7 +323,7 @@ func (m *MsgUpdateParams) Reset()         { *m = MsgUpdateParams{} }
 func (m *MsgUpdateParams) String() string { return proto.CompactTextString(m) }
 func (*MsgUpdateParams) ProtoMessage()    {}
 func (*MsgUpdateParams) Descriptor() ([]byte, []int) {
-	return fileDescriptor_0e3efaf0ecb4b2bb, []int{0}
+	return fileDescriptor_0e3efaf0ecb4b2bb, []int{3}
 }
 func (m *MsgUpdateParams) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -97,7 +375,7 @@ func (m *MsgUpdateParamsResponse) Reset()         { *m = MsgUpdateParamsResponse
 func (m *MsgUpdateParamsResponse) String() string { return proto.CompactTextString(m) }
 func (*MsgUpdateParamsResponse) ProtoMessage()    {}
 func (*MsgUpdateParamsResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_0e3efaf0ecb4b2bb, []int{1}
+	return fileDescriptor_0e3efaf0ecb4b2bb, []int{4}
 }
 func (m *MsgUpdateParamsResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -127,6 +405,9 @@ func (m *MsgUpdateParamsResponse) XXX_DiscardUnknown() {
 var xxx_messageInfo_MsgUpdateParamsResponse proto.InternalMessageInfo
 
 func init() {
+	proto.RegisterType((*ExchangeRate)(nil), "verana.xr.v1.ExchangeRate")
+	proto.RegisterType((*MsgCreateExchangeRate)(nil), "verana.xr.v1.MsgCreateExchangeRate")
+	proto.RegisterType((*MsgCreateExchangeRateResponse)(nil), "verana.xr.v1.MsgCreateExchangeRateResponse")
 	proto.RegisterType((*MsgUpdateParams)(nil), "verana.xr.v1.MsgUpdateParams")
 	proto.RegisterType((*MsgUpdateParamsResponse)(nil), "verana.xr.v1.MsgUpdateParamsResponse")
 }
@@ -134,29 +415,51 @@ func init() {
 func init() { proto.RegisterFile("verana/xr/v1/tx.proto", fileDescriptor_0e3efaf0ecb4b2bb) }
 
 var fileDescriptor_0e3efaf0ecb4b2bb = []byte{
-	// 340 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x12, 0x2d, 0x4b, 0x2d, 0x4a,
-	0xcc, 0x4b, 0xd4, 0xaf, 0x28, 0xd2, 0x2f, 0x33, 0xd4, 0x2f, 0xa9, 0xd0, 0x2b, 0x28, 0xca, 0x2f,
-	0xc9, 0x17, 0xe2, 0x81, 0x08, 0xeb, 0x55, 0x14, 0xe9, 0x95, 0x19, 0x4a, 0x09, 0x26, 0xe6, 0x66,
-	0xe6, 0xe5, 0xeb, 0x83, 0x49, 0x88, 0x02, 0x29, 0xf1, 0xe4, 0xfc, 0xe2, 0xdc, 0xfc, 0x62, 0xfd,
-	0xdc, 0xe2, 0x74, 0x90, 0xc6, 0xdc, 0xe2, 0x74, 0xa8, 0x84, 0x24, 0x44, 0x22, 0x1e, 0xcc, 0xd3,
-	0x87, 0x70, 0xa0, 0x52, 0x22, 0xe9, 0xf9, 0xe9, 0xf9, 0x10, 0x71, 0x10, 0x0b, 0xa6, 0x01, 0xc5,
-	0x05, 0x05, 0x89, 0x45, 0x89, 0xb9, 0x50, 0x0d, 0x4a, 0x9b, 0x18, 0xb9, 0xf8, 0x7d, 0x8b, 0xd3,
-	0x43, 0x0b, 0x52, 0x12, 0x4b, 0x52, 0x03, 0xc0, 0x32, 0x42, 0x66, 0x5c, 0x9c, 0x89, 0xa5, 0x25,
-	0x19, 0xf9, 0x45, 0x99, 0x25, 0x95, 0x12, 0x8c, 0x0a, 0x8c, 0x1a, 0x9c, 0x4e, 0x12, 0x97, 0xb6,
-	0xe8, 0x8a, 0x40, 0x6d, 0x72, 0x4c, 0x49, 0x29, 0x4a, 0x2d, 0x2e, 0x0e, 0x2e, 0x29, 0xca, 0xcc,
-	0x4b, 0x0f, 0x42, 0x28, 0x15, 0x32, 0xe7, 0x62, 0x83, 0x98, 0x2d, 0xc1, 0xa4, 0xc0, 0xa8, 0xc1,
-	0x6d, 0x24, 0xa2, 0x87, 0xec, 0x45, 0x3d, 0x88, 0xe9, 0x4e, 0x9c, 0x27, 0xee, 0xc9, 0x33, 0xac,
-	0x78, 0xbe, 0x41, 0x8b, 0x31, 0x08, 0xaa, 0xdc, 0x4a, 0xaf, 0xe9, 0xf9, 0x06, 0x2d, 0x84, 0x41,
-	0x5d, 0xcf, 0x37, 0x68, 0x49, 0xc3, 0x9c, 0x0c, 0x72, 0x34, 0x9a, 0x03, 0x95, 0x24, 0xb9, 0xc4,
-	0xd1, 0x84, 0x82, 0x52, 0x8b, 0x0b, 0xf2, 0xf3, 0x8a, 0x53, 0x8d, 0x92, 0xb8, 0x98, 0x7d, 0x8b,
-	0xd3, 0x85, 0x42, 0xb8, 0x78, 0x50, 0xbc, 0x24, 0x8b, 0xea, 0x14, 0x34, 0xdd, 0x52, 0xaa, 0x78,
-	0xa5, 0x61, 0x86, 0x4b, 0xb1, 0x36, 0x80, 0x9c, 0xed, 0xe4, 0x74, 0xe2, 0x91, 0x1c, 0xe3, 0x85,
-	0x47, 0x72, 0x8c, 0x0f, 0x1e, 0xc9, 0x31, 0x4e, 0x78, 0x2c, 0xc7, 0x70, 0xe1, 0xb1, 0x1c, 0xc3,
-	0x8d, 0xc7, 0x72, 0x0c, 0x51, 0x1a, 0xe9, 0x99, 0x25, 0x19, 0xa5, 0x49, 0x7a, 0xc9, 0xf9, 0xb9,
-	0xfa, 0x10, 0x13, 0x75, 0x73, 0x12, 0x93, 0x8a, 0xf5, 0x91, 0x3d, 0x53, 0x52, 0x59, 0x90, 0x5a,
-	0x9c, 0xc4, 0x06, 0x0e, 0x7e, 0x63, 0x40, 0x00, 0x00, 0x00, 0xff, 0xff, 0x34, 0x78, 0x20, 0x5f,
-	0x1d, 0x02, 0x00, 0x00,
+	// 695 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xec, 0x55, 0x4d, 0x6f, 0xd3, 0x4c,
+	0x10, 0xce, 0xb6, 0xe9, 0x87, 0x37, 0xfd, 0xb4, 0x52, 0xd5, 0xcd, 0xab, 0x3a, 0x79, 0x83, 0x90,
+	0xac, 0xa2, 0xda, 0x6a, 0x40, 0x20, 0xf5, 0x80, 0xd4, 0xf0, 0x21, 0x2e, 0x95, 0x2a, 0xb7, 0x5c,
+	0xb8, 0x44, 0x1b, 0x7b, 0xeb, 0xae, 0x14, 0x7b, 0xcd, 0xee, 0x26, 0x4a, 0x6e, 0x88, 0x23, 0x5c,
+	0x7a, 0xe4, 0x27, 0x70, 0xac, 0x10, 0x3f, 0xa2, 0xe2, 0x54, 0x71, 0xe2, 0x80, 0x00, 0xb5, 0x87,
+	0xfe, 0x0d, 0xb4, 0x6b, 0xbb, 0xf9, 0xaa, 0x50, 0x41, 0xe2, 0xc6, 0xa5, 0xf5, 0xcc, 0x33, 0xf3,
+	0xcc, 0xce, 0xcc, 0xb3, 0x1b, 0xb8, 0xd2, 0xc1, 0x0c, 0x45, 0xc8, 0xe9, 0x32, 0xa7, 0xb3, 0xe5,
+	0x88, 0xae, 0x1d, 0x33, 0x2a, 0xa8, 0x3e, 0x97, 0xb8, 0xed, 0x2e, 0xb3, 0x3b, 0x5b, 0xa5, 0x65,
+	0x14, 0x92, 0x88, 0x3a, 0xea, 0x6f, 0x12, 0x50, 0x5a, 0xf5, 0x28, 0x0f, 0x29, 0x77, 0x42, 0x1e,
+	0xc8, 0xc4, 0x90, 0x07, 0x29, 0xb0, 0x96, 0x00, 0x0d, 0x65, 0x39, 0x89, 0x91, 0x42, 0xc5, 0x80,
+	0x06, 0x34, 0xf1, 0xcb, 0xaf, 0xd4, 0x6b, 0x06, 0x94, 0x06, 0x2d, 0xec, 0x28, 0xab, 0xd9, 0x3e,
+	0x74, 0xfc, 0x36, 0x43, 0x82, 0xd0, 0x28, 0xc5, 0xcb, 0xa3, 0xb8, 0x20, 0x21, 0xe6, 0x02, 0x85,
+	0x71, 0x56, 0x71, 0xa8, 0x85, 0x18, 0x31, 0x14, 0x66, 0x15, 0x8d, 0x14, 0xf2, 0xb8, 0xea, 0xae,
+	0x17, 0xe3, 0x14, 0xa9, 0xbe, 0xcd, 0xc3, 0xb9, 0x27, 0x5d, 0xef, 0x08, 0x45, 0x01, 0x76, 0x91,
+	0xc0, 0xfa, 0x02, 0x9c, 0x20, 0xbe, 0x01, 0x2a, 0xc0, 0xca, 0xbb, 0x13, 0xc4, 0xd7, 0x9f, 0xc2,
+	0xc5, 0x26, 0xe2, 0xb8, 0x81, 0x38, 0xc7, 0xa2, 0x21, 0x53, 0x8d, 0x89, 0x0a, 0xb0, 0x16, 0x6a,
+	0xa6, 0x9d, 0xce, 0xc6, 0xe3, 0x76, 0x67, 0xcb, 0xde, 0x63, 0xc4, 0x23, 0x51, 0xb0, 0x23, 0xc3,
+	0x0e, 0x7a, 0x31, 0x76, 0xe7, 0x65, 0xda, 0x95, 0xa9, 0xaf, 0x43, 0xd8, 0xe7, 0x31, 0x26, 0x2b,
+	0xc0, 0xd2, 0x5c, 0xed, 0x2a, 0x44, 0x7f, 0x06, 0x97, 0x5e, 0xb6, 0xa9, 0x18, 0xaa, 0x93, 0xbf,
+	0x51, 0x9d, 0x05, 0x95, 0xd7, 0x2f, 0x54, 0x86, 0x85, 0x01, 0x26, 0x63, 0x4a, 0x55, 0x82, 0xfd,
+	0x20, 0x5d, 0x87, 0x79, 0x86, 0x04, 0x36, 0xa6, 0x15, 0xa2, 0xbe, 0xe5, 0xe9, 0xe4, 0xff, 0x06,
+	0xf7, 0x50, 0x0b, 0x1b, 0x33, 0x15, 0x60, 0xcd, 0xbb, 0x9a, 0xf4, 0xec, 0x4b, 0x87, 0xbe, 0x07,
+	0x97, 0x3b, 0xa8, 0x45, 0x7c, 0x22, 0x7a, 0x8d, 0x6c, 0x2d, 0xc6, 0x6c, 0x05, 0x58, 0x85, 0xda,
+	0x9a, 0x9d, 0xec, 0xc5, 0xce, 0xf6, 0x62, 0x3f, 0x4e, 0x03, 0xea, 0xb3, 0xa7, 0xdf, 0xca, 0xb9,
+	0x77, 0xdf, 0xcb, 0xc0, 0x5d, 0xca, 0xb2, 0x33, 0x4c, 0x7f, 0x08, 0x67, 0x70, 0x37, 0x26, 0x0c,
+	0x73, 0x43, 0x53, 0x3c, 0xa5, 0x31, 0x9e, 0x83, 0x6c, 0xbf, 0x09, 0xd1, 0xb1, 0x24, 0xca, 0x92,
+	0xf4, 0x22, 0x9c, 0xe2, 0x42, 0x76, 0x01, 0x2b, 0xc0, 0x9a, 0x75, 0x13, 0x43, 0xb2, 0xb6, 0x63,
+	0x1f, 0x09, 0xec, 0x1b, 0x85, 0xdf, 0x61, 0x4d, 0x93, 0xaa, 0x5f, 0x27, 0xe1, 0xca, 0x2e, 0x0f,
+	0x1e, 0x31, 0x8c, 0x04, 0x1e, 0x92, 0xc5, 0x7d, 0xa8, 0xa1, 0xb6, 0x38, 0xa2, 0x8c, 0x88, 0x9e,
+	0x52, 0x87, 0x56, 0x37, 0x3e, 0x7f, 0xdc, 0x2c, 0xa6, 0xc2, 0xde, 0xf1, 0x7d, 0x86, 0x39, 0xdf,
+	0x17, 0x8c, 0x44, 0x81, 0xdb, 0x0f, 0xfd, 0x27, 0x9f, 0xbf, 0x22, 0x9f, 0xed, 0x7b, 0xaf, 0x2f,
+	0x4f, 0x36, 0xfa, 0x63, 0x7e, 0x73, 0x79, 0xb2, 0xf1, 0x7f, 0x76, 0xfd, 0xe5, 0x03, 0x70, 0xed,
+	0x12, 0xab, 0x0e, 0x5c, 0xbf, 0x16, 0x70, 0x31, 0x8f, 0x69, 0xc4, 0xc7, 0x2e, 0x7f, 0xf5, 0x03,
+	0x80, 0x8b, 0xbb, 0x3c, 0x78, 0xae, 0xe4, 0xb1, 0xa7, 0x5e, 0x94, 0x3f, 0x56, 0xc2, 0x03, 0x38,
+	0x9d, 0xbc, 0x49, 0x4a, 0x00, 0x85, 0x5a, 0xd1, 0x1e, 0x7c, 0x5b, 0xed, 0x84, 0xbd, 0xae, 0xc9,
+	0xa6, 0xdf, 0x5f, 0x9e, 0x6c, 0x00, 0x37, 0x0d, 0xdf, 0xb6, 0xc7, 0x7b, 0xfd, 0x6f, 0xa4, 0xd7,
+	0xc1, 0x03, 0x56, 0xd7, 0xe0, 0xea, 0x88, 0x2b, 0xeb, 0xaf, 0xf6, 0x09, 0xc0, 0xc9, 0x5d, 0x1e,
+	0xe8, 0x07, 0x70, 0x6e, 0xa8, 0xa7, 0xf5, 0xe1, 0xb3, 0x8c, 0xa4, 0x97, 0x6e, 0xff, 0x12, 0xbe,
+	0x9a, 0xde, 0x21, 0xd4, 0xaf, 0xb9, 0x39, 0xb7, 0xc6, 0x92, 0xc7, 0x83, 0x4a, 0x77, 0x6e, 0x10,
+	0x94, 0xd5, 0x29, 0x4d, 0xbd, 0x92, 0xf3, 0xa9, 0xd7, 0x4f, 0xcf, 0x4d, 0x70, 0x76, 0x6e, 0x82,
+	0x1f, 0xe7, 0x26, 0x38, 0xbe, 0x30, 0x73, 0x67, 0x17, 0x66, 0xee, 0xcb, 0x85, 0x99, 0x7b, 0x61,
+	0x05, 0x44, 0x1c, 0xb5, 0x9b, 0xb6, 0x47, 0x43, 0x27, 0xe1, 0xdd, 0x6c, 0xa1, 0x26, 0x77, 0x06,
+	0xa7, 0xa6, 0x7e, 0x04, 0x9a, 0xd3, 0x4a, 0x76, 0x77, 0x7f, 0x06, 0x00, 0x00, 0xff, 0xff, 0x6b,
+	0xb5, 0x75, 0xf2, 0xff, 0x06, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -174,6 +477,8 @@ type MsgClient interface {
 	// UpdateParams defines a (governance) operation for updating the module
 	// parameters. The authority defaults to the x/gov module account.
 	UpdateParams(ctx context.Context, in *MsgUpdateParams, opts ...grpc.CallOption) (*MsgUpdateParamsResponse, error)
+	// CreateExchangeRate defines a governance operation for creating an exchange rate.
+	CreateExchangeRate(ctx context.Context, in *MsgCreateExchangeRate, opts ...grpc.CallOption) (*MsgCreateExchangeRateResponse, error)
 }
 
 type msgClient struct {
@@ -193,11 +498,22 @@ func (c *msgClient) UpdateParams(ctx context.Context, in *MsgUpdateParams, opts 
 	return out, nil
 }
 
+func (c *msgClient) CreateExchangeRate(ctx context.Context, in *MsgCreateExchangeRate, opts ...grpc.CallOption) (*MsgCreateExchangeRateResponse, error) {
+	out := new(MsgCreateExchangeRateResponse)
+	err := c.cc.Invoke(ctx, "/verana.xr.v1.Msg/CreateExchangeRate", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MsgServer is the server API for Msg service.
 type MsgServer interface {
 	// UpdateParams defines a (governance) operation for updating the module
 	// parameters. The authority defaults to the x/gov module account.
 	UpdateParams(context.Context, *MsgUpdateParams) (*MsgUpdateParamsResponse, error)
+	// CreateExchangeRate defines a governance operation for creating an exchange rate.
+	CreateExchangeRate(context.Context, *MsgCreateExchangeRate) (*MsgCreateExchangeRateResponse, error)
 }
 
 // UnimplementedMsgServer can be embedded to have forward compatible implementations.
@@ -206,6 +522,9 @@ type UnimplementedMsgServer struct {
 
 func (*UnimplementedMsgServer) UpdateParams(ctx context.Context, req *MsgUpdateParams) (*MsgUpdateParamsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateParams not implemented")
+}
+func (*UnimplementedMsgServer) CreateExchangeRate(ctx context.Context, req *MsgCreateExchangeRate) (*MsgCreateExchangeRateResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateExchangeRate not implemented")
 }
 
 func RegisterMsgServer(s grpc1.Server, srv MsgServer) {
@@ -230,6 +549,24 @@ func _Msg_UpdateParams_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Msg_CreateExchangeRate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgCreateExchangeRate)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).CreateExchangeRate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/verana.xr.v1.Msg/CreateExchangeRate",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).CreateExchangeRate(ctx, req.(*MsgCreateExchangeRate))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var Msg_serviceDesc = _Msg_serviceDesc
 var _Msg_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "verana.xr.v1.Msg",
@@ -239,9 +576,213 @@ var _Msg_serviceDesc = grpc.ServiceDesc{
 			MethodName: "UpdateParams",
 			Handler:    _Msg_UpdateParams_Handler,
 		},
+		{
+			MethodName: "CreateExchangeRate",
+			Handler:    _Msg_CreateExchangeRate_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "verana/xr/v1/tx.proto",
+}
+
+func (m *ExchangeRate) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ExchangeRate) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ExchangeRate) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	n1, err1 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(m.Updated, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(m.Updated):])
+	if err1 != nil {
+		return 0, err1
+	}
+	i -= n1
+	i = encodeVarintTx(dAtA, i, uint64(n1))
+	i--
+	dAtA[i] = 0x5a
+	if m.State {
+		i--
+		if m.State {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x50
+	}
+	n2, err2 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(m.Expires, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(m.Expires):])
+	if err2 != nil {
+		return 0, err2
+	}
+	i -= n2
+	i = encodeVarintTx(dAtA, i, uint64(n2))
+	i--
+	dAtA[i] = 0x4a
+	n3, err3 := github_com_cosmos_gogoproto_types.StdDurationMarshalTo(m.ValidityDuration, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdDuration(m.ValidityDuration):])
+	if err3 != nil {
+		return 0, err3
+	}
+	i -= n3
+	i = encodeVarintTx(dAtA, i, uint64(n3))
+	i--
+	dAtA[i] = 0x42
+	if m.RateScale != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.RateScale))
+		i--
+		dAtA[i] = 0x38
+	}
+	if len(m.Rate) > 0 {
+		i -= len(m.Rate)
+		copy(dAtA[i:], m.Rate)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Rate)))
+		i--
+		dAtA[i] = 0x32
+	}
+	if len(m.QuoteAsset) > 0 {
+		i -= len(m.QuoteAsset)
+		copy(dAtA[i:], m.QuoteAsset)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.QuoteAsset)))
+		i--
+		dAtA[i] = 0x2a
+	}
+	if m.QuoteAssetType != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.QuoteAssetType))
+		i--
+		dAtA[i] = 0x20
+	}
+	if len(m.BaseAsset) > 0 {
+		i -= len(m.BaseAsset)
+		copy(dAtA[i:], m.BaseAsset)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.BaseAsset)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if m.BaseAssetType != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.BaseAssetType))
+		i--
+		dAtA[i] = 0x10
+	}
+	if m.Id != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.Id))
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgCreateExchangeRate) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgCreateExchangeRate) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgCreateExchangeRate) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	n4, err4 := github_com_cosmos_gogoproto_types.StdDurationMarshalTo(m.ValidityDuration, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdDuration(m.ValidityDuration):])
+	if err4 != nil {
+		return 0, err4
+	}
+	i -= n4
+	i = encodeVarintTx(dAtA, i, uint64(n4))
+	i--
+	dAtA[i] = 0x42
+	if m.RateScale != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.RateScale))
+		i--
+		dAtA[i] = 0x38
+	}
+	if len(m.Rate) > 0 {
+		i -= len(m.Rate)
+		copy(dAtA[i:], m.Rate)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Rate)))
+		i--
+		dAtA[i] = 0x32
+	}
+	if len(m.QuoteAsset) > 0 {
+		i -= len(m.QuoteAsset)
+		copy(dAtA[i:], m.QuoteAsset)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.QuoteAsset)))
+		i--
+		dAtA[i] = 0x2a
+	}
+	if m.QuoteAssetType != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.QuoteAssetType))
+		i--
+		dAtA[i] = 0x20
+	}
+	if len(m.BaseAsset) > 0 {
+		i -= len(m.BaseAsset)
+		copy(dAtA[i:], m.BaseAsset)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.BaseAsset)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if m.BaseAssetType != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.BaseAssetType))
+		i--
+		dAtA[i] = 0x10
+	}
+	if len(m.Authority) > 0 {
+		i -= len(m.Authority)
+		copy(dAtA[i:], m.Authority)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Authority)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgCreateExchangeRateResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgCreateExchangeRateResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgCreateExchangeRateResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Id != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.Id))
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
 }
 
 func (m *MsgUpdateParams) Marshal() (dAtA []byte, err error) {
@@ -318,6 +859,96 @@ func encodeVarintTx(dAtA []byte, offset int, v uint64) int {
 	dAtA[offset] = uint8(v)
 	return base
 }
+func (m *ExchangeRate) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Id != 0 {
+		n += 1 + sovTx(uint64(m.Id))
+	}
+	if m.BaseAssetType != 0 {
+		n += 1 + sovTx(uint64(m.BaseAssetType))
+	}
+	l = len(m.BaseAsset)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	if m.QuoteAssetType != 0 {
+		n += 1 + sovTx(uint64(m.QuoteAssetType))
+	}
+	l = len(m.QuoteAsset)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.Rate)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	if m.RateScale != 0 {
+		n += 1 + sovTx(uint64(m.RateScale))
+	}
+	l = github_com_cosmos_gogoproto_types.SizeOfStdDuration(m.ValidityDuration)
+	n += 1 + l + sovTx(uint64(l))
+	l = github_com_cosmos_gogoproto_types.SizeOfStdTime(m.Expires)
+	n += 1 + l + sovTx(uint64(l))
+	if m.State {
+		n += 2
+	}
+	l = github_com_cosmos_gogoproto_types.SizeOfStdTime(m.Updated)
+	n += 1 + l + sovTx(uint64(l))
+	return n
+}
+
+func (m *MsgCreateExchangeRate) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Authority)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	if m.BaseAssetType != 0 {
+		n += 1 + sovTx(uint64(m.BaseAssetType))
+	}
+	l = len(m.BaseAsset)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	if m.QuoteAssetType != 0 {
+		n += 1 + sovTx(uint64(m.QuoteAssetType))
+	}
+	l = len(m.QuoteAsset)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.Rate)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	if m.RateScale != 0 {
+		n += 1 + sovTx(uint64(m.RateScale))
+	}
+	l = github_com_cosmos_gogoproto_types.SizeOfStdDuration(m.ValidityDuration)
+	n += 1 + l + sovTx(uint64(l))
+	return n
+}
+
+func (m *MsgCreateExchangeRateResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Id != 0 {
+		n += 1 + sovTx(uint64(m.Id))
+	}
+	return n
+}
+
 func (m *MsgUpdateParams) Size() (n int) {
 	if m == nil {
 		return 0
@@ -347,6 +978,684 @@ func sovTx(x uint64) (n int) {
 }
 func sozTx(x uint64) (n int) {
 	return sovTx(uint64((x << 1) ^ uint64((int64(x) >> 63))))
+}
+func (m *ExchangeRate) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ExchangeRate: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ExchangeRate: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Id", wireType)
+			}
+			m.Id = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Id |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field BaseAssetType", wireType)
+			}
+			m.BaseAssetType = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.BaseAssetType |= types.PricingAssetType(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field BaseAsset", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.BaseAsset = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field QuoteAssetType", wireType)
+			}
+			m.QuoteAssetType = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.QuoteAssetType |= types.PricingAssetType(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field QuoteAsset", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.QuoteAsset = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 6:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Rate", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Rate = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 7:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field RateScale", wireType)
+			}
+			m.RateScale = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.RateScale |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 8:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ValidityDuration", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := github_com_cosmos_gogoproto_types.StdDurationUnmarshal(&m.ValidityDuration, dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 9:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Expires", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := github_com_cosmos_gogoproto_types.StdTimeUnmarshal(&m.Expires, dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 10:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field State", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.State = bool(v != 0)
+		case 11:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Updated", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := github_com_cosmos_gogoproto_types.StdTimeUnmarshal(&m.Updated, dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgCreateExchangeRate) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgCreateExchangeRate: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgCreateExchangeRate: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Authority", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Authority = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field BaseAssetType", wireType)
+			}
+			m.BaseAssetType = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.BaseAssetType |= types.PricingAssetType(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field BaseAsset", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.BaseAsset = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field QuoteAssetType", wireType)
+			}
+			m.QuoteAssetType = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.QuoteAssetType |= types.PricingAssetType(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field QuoteAsset", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.QuoteAsset = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 6:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Rate", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Rate = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 7:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field RateScale", wireType)
+			}
+			m.RateScale = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.RateScale |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 8:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ValidityDuration", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := github_com_cosmos_gogoproto_types.StdDurationUnmarshal(&m.ValidityDuration, dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgCreateExchangeRateResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgCreateExchangeRateResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgCreateExchangeRateResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Id", wireType)
+			}
+			m.Id = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Id |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
 }
 func (m *MsgUpdateParams) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)

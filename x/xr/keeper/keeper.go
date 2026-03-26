@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"context"
 	"fmt"
 
 	"cosmossdk.io/collections"
@@ -19,8 +20,12 @@ type Keeper struct {
 	// Typically, this should be the x/gov module account.
 	authority []byte
 
-	Schema collections.Schema
-	Params collections.Item[types.Params]
+	Schema        collections.Schema
+	Params        collections.Item[types.Params]
+	ExchangeRates collections.Map[uint64, types.ExchangeRate]
+	Counter       collections.Map[string, uint64]
+	// PairIndex maps "baseType:baseAsset:quoteType:quoteAsset" -> exchange rate id for uniqueness checks
+	PairIndex collections.Map[string, uint64]
 }
 
 func NewKeeper(
@@ -43,6 +48,27 @@ func NewKeeper(
 		authority:    authority,
 
 		Params: collections.NewItem(sb, types.ParamsKey, "params", codec.CollValue[types.Params](cdc)),
+		ExchangeRates: collections.NewMap(
+			sb,
+			types.ExchangeRateKey,
+			"exchange_rate",
+			collections.Uint64Key,
+			codec.CollValue[types.ExchangeRate](cdc),
+		),
+		Counter: collections.NewMap(
+			sb,
+			types.CounterKey,
+			"counter",
+			collections.StringKey,
+			collections.Uint64Value,
+		),
+		PairIndex: collections.NewMap(
+			sb,
+			types.ExchangeRatePairIndexKey,
+			"exchange_rate_pair_index",
+			collections.StringKey,
+			collections.Uint64Value,
+		),
 	}
 
 	schema, err := sb.Build()
@@ -57,4 +83,19 @@ func NewKeeper(
 // GetAuthority returns the module's authority.
 func (k Keeper) GetAuthority() []byte {
 	return k.authority
+}
+
+// GetNextID returns the next auto-incremented ID for the given entity type.
+func (k Keeper) GetNextID(ctx context.Context, entityType string) (uint64, error) {
+	currentID, err := k.Counter.Get(ctx, entityType)
+	if err != nil {
+		currentID = 0
+	}
+
+	nextID := currentID + 1
+	if err := k.Counter.Set(ctx, entityType, nextID); err != nil {
+		return 0, fmt.Errorf("failed to set counter: %w", err)
+	}
+
+	return nextID, nil
 }
