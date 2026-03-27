@@ -22,6 +22,7 @@ import {
   waitForPermissionToBecomeEffective,
   createQueryClient,
   generateUniqueDID,
+  fundAccount,
   config,
 } from "../helpers/client";
 import { typeUrls } from "../helpers/registry";
@@ -90,7 +91,13 @@ async function main() {
     console.log();
 
     // Step 5: Start VP for ISSUER with vs_operator enabled
+    // Use a distinct vs_operator account (derivation index 16) to avoid mutual
+    // exclusivity conflict with the OperatorAuthorization for setup.operatorAddress.
     console.log("Step 5: Starting VP with vs_operator enabled...");
+    const vsOperatorWallet = await createDirectAccountFromMnemonic(COOLUSER_MNEMONIC, 16);
+    const vsOperatorAccount = await getAccountInfo(vsOperatorWallet);
+    console.log(`  VS Operator: ${vsOperatorAccount.address}`);
+
     const startMsg = {
       typeUrl: typeUrls.MsgStartPermissionVP,
       value: MsgStartPermissionVP.fromPartial({
@@ -102,7 +109,7 @@ async function main() {
         validationFees: OptionalUInt64.fromPartial({ value: 5 }),
         issuanceFees: OptionalUInt64.fromPartial({ value: 5 }),
         verificationFees: OptionalUInt64.fromPartial({ value: 5 }),
-        vsOperator: setup.operatorAddress,
+        vsOperator: vsOperatorAccount.address,
         vsOperatorAuthzEnabled: true,
       }),
     };
@@ -146,15 +153,31 @@ async function main() {
     console.log("  VP validated");
     console.log();
 
-    // Step 7: Create Permission Session
+    // Step 6b: Fund VS operator so it can sign transactions
+    console.log("  Funding VS operator...");
+    const fundVsResult = await client.sendTokens(
+      account.address,
+      vsOperatorAccount.address,
+      [{ denom: config.denom, amount: "50000000" }],
+      "auto",
+    );
+    if (fundVsResult.code !== 0) {
+      throw new Error(`Failed to fund VS operator: ${fundVsResult.rawLog}`);
+    }
+    console.log(`  ✓ VS operator funded`);
+    // Wait for funding to confirm
+    await new Promise(resolve => setTimeout(resolve, 5000));
+
+    // Step 7: Create Permission Session (signed by vs_operator)
     console.log("Step 7: Creating permission session (MsgCreateOrUpdatePermissionSession)...");
+    const vsClient = await createSigningClient(vsOperatorWallet);
     const sessionId = crypto.randomUUID();
 
     const cspsMsg = {
       typeUrl: typeUrls.MsgCreateOrUpdatePermissionSession,
       value: MsgCreateOrUpdatePermissionSession.fromPartial({
         authority: setup.authorityAddress,
-        operator: setup.operatorAddress,
+        operator: vsOperatorAccount.address,
         id: sessionId,
         issuerPermId: issuerPermId,
         verifierPermId: 0,
@@ -164,8 +187,8 @@ async function main() {
       }),
     };
 
-    const cspsFee = await calculateFeeWithSimulation(client, account.address, [cspsMsg], "Creating permission session");
-    const cspsResult = await signAndBroadcastWithRetry(client, account.address, [cspsMsg], cspsFee, "Creating permission session");
+    const cspsFee = await calculateFeeWithSimulation(vsClient, vsOperatorAccount.address, [cspsMsg], "Creating permission session");
+    const cspsResult = await signAndBroadcastWithRetry(vsClient, vsOperatorAccount.address, [cspsMsg], cspsFee, "Creating permission session");
 
     if (cspsResult.code !== 0) {
       throw new Error(`Failed to create permission session: ${cspsResult.rawLog}`);
@@ -185,7 +208,7 @@ async function main() {
       typeUrl: typeUrls.MsgCreateOrUpdatePermissionSession,
       value: MsgCreateOrUpdatePermissionSession.fromPartial({
         authority: setup.authorityAddress,
-        operator: setup.operatorAddress,
+        operator: vsOperatorAccount.address,
         id: sessionId,
         issuerPermId: issuerPermId,
         verifierPermId: 0,
@@ -195,8 +218,8 @@ async function main() {
       }),
     };
 
-    const updateFee = await calculateFeeWithSimulation(client, account.address, [updateMsg], "Updating permission session");
-    const updateResult = await signAndBroadcastWithRetry(client, account.address, [updateMsg], updateFee, "Updating permission session");
+    const updateFee = await calculateFeeWithSimulation(vsClient, vsOperatorAccount.address, [updateMsg], "Updating permission session");
+    const updateResult = await signAndBroadcastWithRetry(vsClient, vsOperatorAccount.address, [updateMsg], updateFee, "Updating permission session");
 
     if (updateResult.code !== 0) {
       throw new Error(`Failed to update permission session: ${updateResult.rawLog}`);
@@ -210,6 +233,7 @@ async function main() {
     process.exit(1);
   } finally {
     client.disconnect();
+    try { vsClient?.disconnect(); } catch (_) {}
   }
 
   console.log();

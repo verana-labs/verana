@@ -7,38 +7,49 @@ import (
 )
 
 // VPRDelegableMsgTypes is the set of VPR message types that can be delegated
-// via operator authorization. CreateOrUpdatePermissionSession is excluded
-// per the spec.
+// via operator authorization. Includes CreateOrUpdatePermissionSession for
+// VSOA fee grants. Note: CreateOrUpdatePermissionSession is explicitly
+// excluded from operator authorization msg_types (see ValidateBasic).
 var VPRDelegableMsgTypes = map[string]bool{
 	// Trust Registry (TR)
-	"/verana.tr.v1.MsgCreateTrustRegistry":                       true,
-	"/verana.tr.v1.MsgAddGovernanceFrameworkDocument":             true,
-	"/verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion":   true,
-	"/verana.tr.v1.MsgUpdateTrustRegistry":                       true,
-	"/verana.tr.v1.MsgArchiveTrustRegistry":                      true,
+	"/verana.tr.v1.MsgCreateTrustRegistry":                      true,
+	"/verana.tr.v1.MsgAddGovernanceFrameworkDocument":           true,
+	"/verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion": true,
+	"/verana.tr.v1.MsgUpdateTrustRegistry":                      true,
+	"/verana.tr.v1.MsgArchiveTrustRegistry":                     true,
 	// Credential Schema (CS)
-	"/verana.cs.v1.MsgCreateCredentialSchema":                     true,
-	"/verana.cs.v1.MsgUpdateCredentialSchema":                     true,
-	"/verana.cs.v1.MsgArchiveCredentialSchema":                    true,
-	// Permission (PERM) - excluding CreateOrUpdatePermissionSession
-	"/verana.perm.v1.MsgStartPermissionVP":                       true,
-	"/verana.perm.v1.MsgRenewPermissionVP":                       true,
-	"/verana.perm.v1.MsgSetPermissionVPToValidated":               true,
-	"/verana.perm.v1.MsgCancelPermissionVPLastRequest":            true,
-	"/verana.perm.v1.MsgCreateRootPermission":                     true,
-	"/verana.perm.v1.MsgAdjustPermission":                         true,
-	"/verana.perm.v1.MsgRevokePermission":                         true,
-	"/verana.perm.v1.MsgSlashPermissionTrustDeposit":              true,
-	"/verana.perm.v1.MsgRepayPermissionSlashedTrustDeposit":       true,
-	"/verana.perm.v1.MsgCreatePermission":                         true,
+	"/verana.cs.v1.MsgCreateCredentialSchema":  true,
+	"/verana.cs.v1.MsgUpdateCredentialSchema":  true,
+	"/verana.cs.v1.MsgArchiveCredentialSchema": true,
+	// Permission (PERM) - CreateOrUpdatePermissionSession included for VSOA fee grants
+	"/verana.perm.v1.MsgStartPermissionVP":                  true,
+	"/verana.perm.v1.MsgRenewPermissionVP":                  true,
+	"/verana.perm.v1.MsgSetPermissionVPToValidated":         true,
+	"/verana.perm.v1.MsgCancelPermissionVPLastRequest":      true,
+	"/verana.perm.v1.MsgCreateRootPermission":               true,
+	"/verana.perm.v1.MsgAdjustPermission":                   true,
+	"/verana.perm.v1.MsgRevokePermission":                   true,
+	"/verana.perm.v1.MsgSlashPermissionTrustDeposit":        true,
+	"/verana.perm.v1.MsgRepayPermissionSlashedTrustDeposit": true,
+	"/verana.perm.v1.MsgCreatePermission":                   true,
+	"/verana.perm.v1.MsgCreateOrUpdatePermissionSession":    true,
 	// Trust Deposit (TD)
-	"/verana.td.v1.MsgReclaimTrustDepositYield":                   true,
-	"/verana.td.v1.MsgReclaimTrustDeposit":                        true,
-	"/verana.td.v1.MsgRepaySlashedTrustDeposit":                   true,
+	"/verana.td.v1.MsgReclaimTrustDepositYield": true,
+	"/verana.td.v1.MsgReclaimTrustDeposit":      true,
+	"/verana.td.v1.MsgRepaySlashedTrustDeposit": true,
+	// Digest (DI)
+	"/verana.di.v1.MsgStoreDigest": true,
 	// Delegation (DE)
-	"/verana.de.v1.MsgGrantOperatorAuthorization":                  true,
-	"/verana.de.v1.MsgRevokeOperatorAuthorization":                 true,
+	"/verana.de.v1.MsgGrantOperatorAuthorization":  true,
+	"/verana.de.v1.MsgRevokeOperatorAuthorization": true,
+	// Exchange Rate (XR)
+	"/verana.xr.v1.MsgUpdateExchangeRate": true,
 }
+
+// MsgCreateOrUpdatePermissionSessionTypeURL is the type URL for
+// MsgCreateOrUpdatePermissionSession. Used to exclude it from operator
+// authorization msg_types while still allowing it in VSOA fee grants.
+const MsgCreateOrUpdatePermissionSessionTypeURL = "/verana.perm.v1.MsgCreateOrUpdatePermissionSession"
 
 // ValidateBasic performs stateless validation on MsgGrantOperatorAuthorization.
 func (msg *MsgGrantOperatorAuthorization) ValidateBasic() error {
@@ -67,6 +78,9 @@ func (msg *MsgGrantOperatorAuthorization) ValidateBasic() error {
 		if !VPRDelegableMsgTypes[mt] {
 			return fmt.Errorf("msg_type %s is not a VPR delegable message type", mt)
 		}
+		if mt == MsgCreateOrUpdatePermissionSessionTypeURL {
+			return fmt.Errorf("msg_type %s is not allowed in operator authorization", mt)
+		}
 	}
 
 	// authz_spend_limit if specified must be valid
@@ -74,9 +88,21 @@ func (msg *MsgGrantOperatorAuthorization) ValidateBasic() error {
 		return fmt.Errorf("invalid authz_spend_limit")
 	}
 
+	// authz_spend_limit_period if specified must be a valid (positive) period;
+	// ignored if authz_spend_limit is not set [MOD-DE-MSG-3-2]
+	if len(msg.AuthzSpendLimit) > 0 && msg.AuthzSpendLimitPeriod != nil && *msg.AuthzSpendLimitPeriod <= 0 {
+		return fmt.Errorf("authz_spend_limit_period must be a positive duration")
+	}
+
 	// feegrant_spend_limit if specified must be valid (only relevant if with_feegrant)
 	if msg.WithFeegrant && len(msg.FeegrantSpendLimit) > 0 && !msg.FeegrantSpendLimit.IsValid() {
 		return fmt.Errorf("invalid feegrant_spend_limit")
+	}
+
+	// feegrant_spend_limit_period if specified must be a valid (positive) period;
+	// ignored if feegrant_spend_limit is not set or with_feegrant is false [MOD-DE-MSG-3-2]
+	if msg.WithFeegrant && len(msg.FeegrantSpendLimit) > 0 && msg.FeegrantSpendLimitPeriod != nil && *msg.FeegrantSpendLimitPeriod <= 0 {
+		return fmt.Errorf("feegrant_spend_limit_period must be a positive duration")
 	}
 
 	return nil

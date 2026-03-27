@@ -32,12 +32,12 @@ import (
 // integrationFixture holds both DE and TR keepers wired together so that the
 // TR module's AUTHZ-CHECK calls the real DE module's CheckOperatorAuthorization.
 type integrationFixture struct {
-	deKeeper       dekeeper.Keeper
-	deMsgServer    detypes.MsgServer
-	trKeeper       trkeeper.Keeper
-	trMsgServer    trtypes.MsgServer
-	ctx            sdk.Context
-	addressCodec   address.Codec
+	deKeeper     dekeeper.Keeper
+	deMsgServer  detypes.MsgServer
+	trKeeper     trkeeper.Keeper
+	trMsgServer  trtypes.MsgServer
+	ctx          sdk.Context
+	addressCodec address.Codec
 }
 
 func setupIntegrationFixture(t *testing.T) *integrationFixture {

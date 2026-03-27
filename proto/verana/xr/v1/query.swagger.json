@@ -1,0 +1,429 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "verana/xr/v1/query.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "Query"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/verana-labs/verana/xr/v1/params": {
+      "get": {
+        "summary": "Parameters queries the parameters of the module.",
+        "operationId": "Query_Params",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.xr.v1.QueryParamsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "tags": [
+          "Query"
+        ]
+      }
+    },
+    "/verana/xr/v1/get": {
+      "get": {
+        "summary": "GetExchangeRate queries an exchange rate by id or by asset pair.",
+        "operationId": "Query_GetExchangeRate",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.xr.v1.QueryGetExchangeRateResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uint64"
+          },
+          {
+            "name": "base_asset_type",
+            "description": " - PRICING_ASSET_TYPE_UNSPECIFIED: Default to prevent accidental omission\n - TU: Trust Unit (non-transferable token for fee definitions)\n - COIN: Native blockchain token or IBC asset\n - FIAT: Fiat currency (off-chain settlement)",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "PRICING_ASSET_TYPE_UNSPECIFIED",
+              "TU",
+              "COIN",
+              "FIAT"
+            ],
+            "default": "PRICING_ASSET_TYPE_UNSPECIFIED"
+          },
+          {
+            "name": "base_asset",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "quote_asset_type",
+            "description": " - PRICING_ASSET_TYPE_UNSPECIFIED: Default to prevent accidental omission\n - TU: Trust Unit (non-transferable token for fee definitions)\n - COIN: Native blockchain token or IBC asset\n - FIAT: Fiat currency (off-chain settlement)",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "PRICING_ASSET_TYPE_UNSPECIFIED",
+              "TU",
+              "COIN",
+              "FIAT"
+            ],
+            "default": "PRICING_ASSET_TYPE_UNSPECIFIED"
+          },
+          {
+            "name": "quote_asset",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "STATE_FILTER_UNSPECIFIED",
+              "STATE_FILTER_ACTIVE",
+              "STATE_FILTER_INACTIVE"
+            ],
+            "default": "STATE_FILTER_UNSPECIFIED"
+          },
+          {
+            "name": "expire_ts",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          }
+        ],
+        "tags": [
+          "Query"
+        ]
+      }
+    },
+    "/verana/xr/v1/list": {
+      "get": {
+        "summary": "ListExchangeRates queries exchange rates with optional filters.",
+        "operationId": "Query_ListExchangeRates",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.xr.v1.QueryListExchangeRatesResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "base_asset_type",
+            "description": " - PRICING_ASSET_TYPE_UNSPECIFIED: Default to prevent accidental omission\n - TU: Trust Unit (non-transferable token for fee definitions)\n - COIN: Native blockchain token or IBC asset\n - FIAT: Fiat currency (off-chain settlement)",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "PRICING_ASSET_TYPE_UNSPECIFIED",
+              "TU",
+              "COIN",
+              "FIAT"
+            ],
+            "default": "PRICING_ASSET_TYPE_UNSPECIFIED"
+          },
+          {
+            "name": "base_asset",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "quote_asset_type",
+            "description": " - PRICING_ASSET_TYPE_UNSPECIFIED: Default to prevent accidental omission\n - TU: Trust Unit (non-transferable token for fee definitions)\n - COIN: Native blockchain token or IBC asset\n - FIAT: Fiat currency (off-chain settlement)",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "PRICING_ASSET_TYPE_UNSPECIFIED",
+              "TU",
+              "COIN",
+              "FIAT"
+            ],
+            "default": "PRICING_ASSET_TYPE_UNSPECIFIED"
+          },
+          {
+            "name": "quote_asset",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "STATE_FILTER_UNSPECIFIED",
+              "STATE_FILTER_ACTIVE",
+              "STATE_FILTER_INACTIVE"
+            ],
+            "default": "STATE_FILTER_UNSPECIFIED"
+          },
+          {
+            "name": "expire",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          }
+        ],
+        "tags": [
+          "Query"
+        ]
+      }
+    },
+    "/verana/xr/v1/price": {
+      "get": {
+        "summary": "GetPrice computes the price using an exchange rate.",
+        "operationId": "Query_GetPrice",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.xr.v1.QueryGetPriceResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "base_asset_type",
+            "description": " - PRICING_ASSET_TYPE_UNSPECIFIED: Default to prevent accidental omission\n - TU: Trust Unit (non-transferable token for fee definitions)\n - COIN: Native blockchain token or IBC asset\n - FIAT: Fiat currency (off-chain settlement)",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "PRICING_ASSET_TYPE_UNSPECIFIED",
+              "TU",
+              "COIN",
+              "FIAT"
+            ],
+            "default": "PRICING_ASSET_TYPE_UNSPECIFIED"
+          },
+          {
+            "name": "base_asset",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "quote_asset_type",
+            "description": " - PRICING_ASSET_TYPE_UNSPECIFIED: Default to prevent accidental omission\n - TU: Trust Unit (non-transferable token for fee definitions)\n - COIN: Native blockchain token or IBC asset\n - FIAT: Fiat currency (off-chain settlement)",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "PRICING_ASSET_TYPE_UNSPECIFIED",
+              "TU",
+              "COIN",
+              "FIAT"
+            ],
+            "default": "PRICING_ASSET_TYPE_UNSPECIFIED"
+          },
+          {
+            "name": "quote_asset",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "amount",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Query"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "google.protobuf.Any": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "google.rpc.Status": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/google.protobuf.Any"
+          }
+        }
+      }
+    },
+    "verana.cs.v1.PricingAssetType": {
+      "type": "string",
+      "enum": [
+        "PRICING_ASSET_TYPE_UNSPECIFIED",
+        "TU",
+        "COIN",
+        "FIAT"
+      ],
+      "default": "PRICING_ASSET_TYPE_UNSPECIFIED",
+      "description": "- PRICING_ASSET_TYPE_UNSPECIFIED: Default to prevent accidental omission\n - TU: Trust Unit (non-transferable token for fee definitions)\n - COIN: Native blockchain token or IBC asset\n - FIAT: Fiat currency (off-chain settlement)",
+      "title": "PricingAssetType defines the type of asset used for paying business fees"
+    },
+    "verana.xr.v1.ExchangeRate": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "base_asset_type": {
+          "$ref": "#/definitions/verana.cs.v1.PricingAssetType"
+        },
+        "base_asset": {
+          "type": "string"
+        },
+        "quote_asset_type": {
+          "$ref": "#/definitions/verana.cs.v1.PricingAssetType"
+        },
+        "quote_asset": {
+          "type": "string"
+        },
+        "rate": {
+          "type": "string"
+        },
+        "rate_scale": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "validity_duration": {
+          "type": "string"
+        },
+        "expires": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "state": {
+          "type": "boolean"
+        },
+        "updated": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "description": "ExchangeRate defines the storage type for an exchange rate entry."
+    },
+    "verana.xr.v1.Params": {
+      "type": "object",
+      "description": "Params defines the parameters for the module."
+    },
+    "verana.xr.v1.QueryGetExchangeRateResponse": {
+      "type": "object",
+      "properties": {
+        "exchange_rate": {
+          "$ref": "#/definitions/verana.xr.v1.ExchangeRate"
+        }
+      },
+      "description": "QueryGetExchangeRateResponse is the response type for Query/GetExchangeRate."
+    },
+    "verana.xr.v1.QueryGetPriceResponse": {
+      "type": "object",
+      "properties": {
+        "price": {
+          "type": "string"
+        }
+      },
+      "description": "QueryGetPriceResponse is the response type for Query/GetPrice."
+    },
+    "verana.xr.v1.QueryListExchangeRatesResponse": {
+      "type": "object",
+      "properties": {
+        "exchange_rates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/verana.xr.v1.ExchangeRate"
+          }
+        }
+      },
+      "description": "QueryListExchangeRatesResponse is the response type for Query/ListExchangeRates."
+    },
+    "verana.xr.v1.QueryParamsResponse": {
+      "type": "object",
+      "properties": {
+        "params": {
+          "$ref": "#/definitions/verana.xr.v1.Params",
+          "description": "params holds all the parameters of this module."
+        }
+      },
+      "description": "QueryParamsResponse is response type for the Query/Params RPC method."
+    },
+    "verana.xr.v1.StateFilter": {
+      "type": "string",
+      "enum": [
+        "STATE_FILTER_UNSPECIFIED",
+        "STATE_FILTER_ACTIVE",
+        "STATE_FILTER_INACTIVE"
+      ],
+      "default": "STATE_FILTER_UNSPECIFIED",
+      "description": "StateFilter is used for optional bool filtering: 0=unset, 1=active, 2=inactive."
+    }
+  }
+}

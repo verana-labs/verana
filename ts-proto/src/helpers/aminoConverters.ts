@@ -19,12 +19,6 @@ import {
   MsgRevokeOperatorAuthorization,
 } from "../codec/verana/de/v1/tx";
 import {
-  MsgAddDID,
-  MsgRenewDID,
-  MsgTouchDID,
-  MsgRemoveDID,
-} from "../codec/verana/dd/v1/tx";
-import {
   MsgCreateCredentialSchema,
   MsgUpdateCredentialSchema,
   MsgArchiveCredentialSchema,
@@ -237,66 +231,6 @@ export const MsgIncreaseActiveGovernanceFrameworkVersionAminoConverter: AminoCon
       authority: value.authority,
       operator: value.operator,
       id: value.id != null ? Number(value.id) : 0,
-    }),
-};
-
-// ============================================================================
-// DID Directory (DD) Module Converters
-// ============================================================================
-
-export const MsgAddDIDAminoConverter: AminoConverter = {
-  aminoType: '/verana.dd.v1.MsgAddDID',
-  toAmino: ({ creator, did, years }: MsgAddDID) => ({
-    creator,
-    did,
-    years,
-  }),
-  fromAmino: (value: { creator: string; did: string; years: number }) =>
-    MsgAddDID.fromPartial({
-      creator: value.creator,
-      did: value.did,
-      years: value.years,
-    }),
-};
-
-export const MsgRenewDIDAminoConverter: AminoConverter = {
-  aminoType: '/verana.dd.v1.MsgRenewDID',
-  toAmino: ({ creator, did, years }: MsgRenewDID) => ({
-    creator,
-    did,
-    years,
-  }),
-  fromAmino: (value: { creator: string; did: string; years: number }) =>
-    MsgRenewDID.fromPartial({
-      creator: value.creator,
-      did: value.did,
-      years: value.years,
-    }),
-};
-
-export const MsgTouchDIDAminoConverter: AminoConverter = {
-  aminoType: '/verana.dd.v1.MsgTouchDID',
-  toAmino: ({ creator, did }: MsgTouchDID) => ({
-    creator,
-    did,
-  }),
-  fromAmino: (value: { creator: string; did: string }) =>
-    MsgTouchDID.fromPartial({
-      creator: value.creator,
-      did: value.did,
-    }),
-};
-
-export const MsgRemoveDIDAminoConverter: AminoConverter = {
-  aminoType: '/verana.dd.v1.MsgRemoveDID',
-  toAmino: ({ creator, did }: MsgRemoveDID) => ({
-    creator,
-    did,
-  }),
-  fromAmino: (value: { creator: string; did: string }) =>
-    MsgRemoveDID.fromPartial({
-      creator: value.creator,
-      did: value.did,
     }),
 };
 

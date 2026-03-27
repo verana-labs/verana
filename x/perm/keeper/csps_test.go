@@ -444,7 +444,7 @@ func TestAgentRewardsDistribution(t *testing.T) {
 	ecosystemPerm := types.Permission{
 		SchemaId:      1,
 		Type:          types.PermissionType_ECOSYSTEM,
-		Authority:       ecosystem,
+		Authority:     ecosystem,
 		Created:       &now,
 		CreatedBy:     ecosystem,
 		Adjusted:      &now,
@@ -462,7 +462,7 @@ func TestAgentRewardsDistribution(t *testing.T) {
 	grantorPerm := types.Permission{
 		SchemaId:        1,
 		Type:            types.PermissionType_ISSUER_GRANTOR,
-		Authority:         grantor,
+		Authority:       grantor,
 		Created:         &now,
 		CreatedBy:       ecosystem,
 		Adjusted:        &now,
@@ -501,7 +501,7 @@ func TestAgentRewardsDistribution(t *testing.T) {
 	agentPerm := types.Permission{
 		SchemaId:        1,
 		Type:            types.PermissionType_ISSUER,
-		Authority:         agent,
+		Authority:       agent,
 		Created:         &now,
 		CreatedBy:       issuer,
 		Adjusted:        &now,
@@ -519,7 +519,7 @@ func TestAgentRewardsDistribution(t *testing.T) {
 	walletAgentPerm := types.Permission{
 		SchemaId:        1,
 		Type:            types.PermissionType_ISSUER,
-		Authority:         walletAgent,
+		Authority:       walletAgent,
 		Created:         &now,
 		CreatedBy:       issuer,
 		Adjusted:        &now,
@@ -732,7 +732,7 @@ func TestAgentRewardsWithZeroFees(t *testing.T) {
 	ecosystemPerm := types.Permission{
 		SchemaId:      1,
 		Type:          types.PermissionType_ECOSYSTEM,
-		Authority:       ecosystem,
+		Authority:     ecosystem,
 		Created:       &now,
 		CreatedBy:     ecosystem,
 		Adjusted:      &now,
@@ -768,7 +768,7 @@ func TestAgentRewardsWithZeroFees(t *testing.T) {
 	agentPerm := types.Permission{
 		SchemaId:        1,
 		Type:            types.PermissionType_ISSUER,
-		Authority:         agent,
+		Authority:       agent,
 		Created:         &now,
 		CreatedBy:       creator,
 		Adjusted:        &now,
@@ -862,7 +862,7 @@ func TestAgentRewardsWithDiscount(t *testing.T) {
 	ecosystemPerm := types.Permission{
 		SchemaId:      1,
 		Type:          types.PermissionType_ECOSYSTEM,
-		Authority:       ecosystem,
+		Authority:     ecosystem,
 		Created:       &now,
 		CreatedBy:     ecosystem,
 		Adjusted:      &now,
@@ -900,7 +900,7 @@ func TestAgentRewardsWithDiscount(t *testing.T) {
 	agentPerm := types.Permission{
 		SchemaId:        1,
 		Type:            types.PermissionType_ISSUER,
-		Authority:         agent,
+		Authority:       agent,
 		Created:         &now,
 		CreatedBy:       creator,
 		Adjusted:        &now,

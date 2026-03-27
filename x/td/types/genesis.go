@@ -14,6 +14,7 @@ func DefaultGenesis() *GenesisState {
 	return &GenesisState{
 		Params:        DefaultParams(),
 		TrustDeposits: []TrustDepositRecord{},
+		Dust:          "",
 	}
 }
 

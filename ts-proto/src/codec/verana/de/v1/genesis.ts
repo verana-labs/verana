@@ -7,23 +7,41 @@
 /* eslint-disable */
 import * as _m0 from "protobufjs/minimal";
 import { Params } from "./params";
+import { FeeGrant, OperatorAuthorization, VSOperatorAuthorization } from "./types";
 
 export const protobufPackage = "verana.de.v1";
 
 /** GenesisState defines the de module's genesis state. */
 export interface GenesisState {
   /** params defines all the parameters of the module. */
-  params: Params | undefined;
+  params:
+    | Params
+    | undefined;
+  /** operator_authorizations is a list of all OperatorAuthorization objects */
+  operatorAuthorizations: OperatorAuthorization[];
+  /** fee_grants is a list of all FeeGrant objects */
+  feeGrants: FeeGrant[];
+  /** vs_operator_authorizations is a list of all VSOperatorAuthorization objects */
+  vsOperatorAuthorizations: VSOperatorAuthorization[];
 }
 
 function createBaseGenesisState(): GenesisState {
-  return { params: undefined };
+  return { params: undefined, operatorAuthorizations: [], feeGrants: [], vsOperatorAuthorizations: [] };
 }
 
 export const GenesisState = {
   encode(message: GenesisState, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.params !== undefined) {
       Params.encode(message.params, writer.uint32(10).fork()).ldelim();
+    }
+    for (const v of message.operatorAuthorizations) {
+      OperatorAuthorization.encode(v!, writer.uint32(18).fork()).ldelim();
+    }
+    for (const v of message.feeGrants) {
+      FeeGrant.encode(v!, writer.uint32(26).fork()).ldelim();
+    }
+    for (const v of message.vsOperatorAuthorizations) {
+      VSOperatorAuthorization.encode(v!, writer.uint32(34).fork()).ldelim();
     }
     return writer;
   },
@@ -42,6 +60,27 @@ export const GenesisState = {
 
           message.params = Params.decode(reader, reader.uint32());
           continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.operatorAuthorizations.push(OperatorAuthorization.decode(reader, reader.uint32()));
+          continue;
+        case 3:
+          if (tag !== 26) {
+            break;
+          }
+
+          message.feeGrants.push(FeeGrant.decode(reader, reader.uint32()));
+          continue;
+        case 4:
+          if (tag !== 34) {
+            break;
+          }
+
+          message.vsOperatorAuthorizations.push(VSOperatorAuthorization.decode(reader, reader.uint32()));
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -52,13 +91,33 @@ export const GenesisState = {
   },
 
   fromJSON(object: any): GenesisState {
-    return { params: isSet(object.params) ? Params.fromJSON(object.params) : undefined };
+    return {
+      params: isSet(object.params) ? Params.fromJSON(object.params) : undefined,
+      operatorAuthorizations: globalThis.Array.isArray(object?.operatorAuthorizations)
+        ? object.operatorAuthorizations.map((e: any) => OperatorAuthorization.fromJSON(e))
+        : [],
+      feeGrants: globalThis.Array.isArray(object?.feeGrants)
+        ? object.feeGrants.map((e: any) => FeeGrant.fromJSON(e))
+        : [],
+      vsOperatorAuthorizations: globalThis.Array.isArray(object?.vsOperatorAuthorizations)
+        ? object.vsOperatorAuthorizations.map((e: any) => VSOperatorAuthorization.fromJSON(e))
+        : [],
+    };
   },
 
   toJSON(message: GenesisState): unknown {
     const obj: any = {};
     if (message.params !== undefined) {
       obj.params = Params.toJSON(message.params);
+    }
+    if (message.operatorAuthorizations?.length) {
+      obj.operatorAuthorizations = message.operatorAuthorizations.map((e) => OperatorAuthorization.toJSON(e));
+    }
+    if (message.feeGrants?.length) {
+      obj.feeGrants = message.feeGrants.map((e) => FeeGrant.toJSON(e));
+    }
+    if (message.vsOperatorAuthorizations?.length) {
+      obj.vsOperatorAuthorizations = message.vsOperatorAuthorizations.map((e) => VSOperatorAuthorization.toJSON(e));
     }
     return obj;
   },
@@ -71,6 +130,11 @@ export const GenesisState = {
     message.params = (object.params !== undefined && object.params !== null)
       ? Params.fromPartial(object.params)
       : undefined;
+    message.operatorAuthorizations = object.operatorAuthorizations?.map((e) => OperatorAuthorization.fromPartial(e)) ||
+      [];
+    message.feeGrants = object.feeGrants?.map((e) => FeeGrant.fromPartial(e)) || [];
+    message.vsOperatorAuthorizations =
+      object.vsOperatorAuthorizations?.map((e) => VSOperatorAuthorization.fromPartial(e)) || [];
     return message;
   },
 };

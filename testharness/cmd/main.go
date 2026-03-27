@@ -87,6 +87,18 @@ func runJourney(ctx context.Context, client cosmosclient.Client, journeyID int) 
 	case 401:
 		// Trust Deposit ReclaimYield + RepaySlashed with Operator Authorization
 		return journeys.RunTDReclaimYieldJourney(ctx, client)
+	case 501:
+		// DI Store Digest with Operator Authorization
+		return journeys.RunDiStoreDigestJourney(ctx, client)
+	case 601:
+		// XR Create Exchange Rate via Governance
+		return journeys.RunXrCreateExchangeRateJourney(ctx, client)
+	case 602:
+		// XR Update Exchange Rate with Operator Authorization
+		return journeys.RunXrUpdateExchangeRateJourney(ctx, client)
+	case 603:
+		// XR Get Price Query
+		return journeys.RunXrGetPriceJourney(ctx, client)
 	default:
 		return fmt.Errorf("unknown journey ID: %d", journeyID)
 	}
@@ -114,4 +126,10 @@ func printUsage() {
 	fmt.Println("  310 - Perm CreatePermission (Self Create) with Operator Authorization")
 	fmt.Println("\n  Trust Deposit Authorization Journeys:")
 	fmt.Println("  401 - TD ReclaimYield + RepaySlashed with Operator Authorization")
+	fmt.Println("\n  Digest (DI) Journeys:")
+	fmt.Println("  501 - DI Store Digest with Operator Authorization")
+	fmt.Println("\n  Exchange Rate (XR) Journeys:")
+	fmt.Println("  601 - XR Create Exchange Rate via Governance")
+	fmt.Println("  602 - XR Update Exchange Rate with Operator Authorization")
+	fmt.Println("  603 - XR Get Price Query")
 }

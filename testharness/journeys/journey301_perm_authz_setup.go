@@ -65,7 +65,7 @@ func RunPermissionAuthzSetupJourney(ctx context.Context, client cosmosclient.Cli
 	memberAddresses := []string{adminAddr, member1Addr, member2Addr}
 	groupID, policyAddr, err := lib.CreateGroupWithPolicy(
 		client, ctx, adminAccount, memberAddresses,
-		"2",            // threshold
+		"2",             // threshold
 		300*time.Second, // voting period
 	)
 	if err != nil {

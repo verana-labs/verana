@@ -130,27 +130,27 @@ func (ms msgServer) executeStartPermissionVP(ctx sdk.Context, msg *types.MsgStar
 		Type:                         types.PermissionType(msg.Type), // applicant_perm.type
 		SchemaId:                     validatorPerm.SchemaId,         // applicant_perm.schema_id = validator_perm.schema_id
 		Did:                          msg.Did,
-		VsOperator:                   msg.VsOperator,                        // applicant_perm.vs_operator
-		Created:                      &now,                                  // applicant_perm.created: now
-		CreatedBy:                    msg.Operator,                          // created_by: operator who signed the tx
-		Modified:                     &now,                                  // applicant_perm.modified: now
-		Deposit:                      validationTrustDepositInDenom,         // applicant_perm.deposit
-		ValidationFees:               requestedValidationFees,               // applicant_perm.validation_fees
-		IssuanceFees:                 requestedIssuanceFees,                 // applicant_perm.issuance_fees
-		VerificationFees:             requestedVerificationFees,             // applicant_perm.verification_fees
-		ValidatorPermId:              msg.ValidatorPermId,                   // applicant_perm.validator_perm_id
-		VpLastStateChange:            &now,                                  // applicant_perm.vp_last_state_change: now
-		VpState:                      types.ValidationState_PENDING,         // applicant_perm.vp_state: PENDING
-		VpCurrentFees:                validationFeesInDenom,                 // applicant_perm.vp_current_fees
-		VpCurrentDeposit:             validationTrustDepositInDenom,         // applicant_perm.vp_current_deposit
-		VpSummaryDigestSri:           "",                                    // applicant_perm.vp_summary_digest: null
-		VpTermRequested:              nil,                                   // not set
-		VpValidatorDeposit:           0,                                     // applicant_perm.vp_validator_deposit: 0
-		VsOperatorAuthzEnabled:       msg.VsOperatorAuthzEnabled,            // applicant_perm.vs_operator_authz_enabled
-		VsOperatorAuthzSpendLimit:    msg.VsOperatorAuthzSpendLimit,         // applicant_perm.vs_operator_authz_spend_limit
-		VsOperatorAuthzWithFeegrant:  msg.VsOperatorAuthzWithFeegrant,       // applicant_perm.vs_operator_authz_with_feegrant
-		VsOperatorAuthzFeeSpendLimit: msg.VsOperatorAuthzFeeSpendLimit,      // applicant_perm.vs_operator_authz_fee_spend_limit
-		VsOperatorAuthzSpendPeriod:   msg.VsOperatorAuthzSpendPeriod,        // applicant_perm.vs_operator_authz_spend_period
+		VsOperator:                   msg.VsOperator,                   // applicant_perm.vs_operator
+		Created:                      &now,                             // applicant_perm.created: now
+		CreatedBy:                    msg.Operator,                     // created_by: operator who signed the tx
+		Modified:                     &now,                             // applicant_perm.modified: now
+		Deposit:                      validationTrustDepositInDenom,    // applicant_perm.deposit
+		ValidationFees:               requestedValidationFees,          // applicant_perm.validation_fees
+		IssuanceFees:                 requestedIssuanceFees,            // applicant_perm.issuance_fees
+		VerificationFees:             requestedVerificationFees,        // applicant_perm.verification_fees
+		ValidatorPermId:              msg.ValidatorPermId,              // applicant_perm.validator_perm_id
+		VpLastStateChange:            &now,                             // applicant_perm.vp_last_state_change: now
+		VpState:                      types.ValidationState_PENDING,    // applicant_perm.vp_state: PENDING
+		VpCurrentFees:                validationFeesInDenom,            // applicant_perm.vp_current_fees
+		VpCurrentDeposit:             validationTrustDepositInDenom,    // applicant_perm.vp_current_deposit
+		VpSummaryDigestSri:           "",                               // applicant_perm.vp_summary_digest: null
+		VpTermRequested:              nil,                              // not set
+		VpValidatorDeposit:           0,                                // applicant_perm.vp_validator_deposit: 0
+		VsOperatorAuthzEnabled:       msg.VsOperatorAuthzEnabled,       // applicant_perm.vs_operator_authz_enabled
+		VsOperatorAuthzSpendLimit:    msg.VsOperatorAuthzSpendLimit,    // applicant_perm.vs_operator_authz_spend_limit
+		VsOperatorAuthzWithFeegrant:  msg.VsOperatorAuthzWithFeegrant,  // applicant_perm.vs_operator_authz_with_feegrant
+		VsOperatorAuthzFeeSpendLimit: msg.VsOperatorAuthzFeeSpendLimit, // applicant_perm.vs_operator_authz_fee_spend_limit
+		VsOperatorAuthzSpendPeriod:   msg.VsOperatorAuthzSpendPeriod,   // applicant_perm.vs_operator_authz_spend_period
 	}
 
 	id, err := ms.Keeper.CreatePermission(ctx, applicantPerm)

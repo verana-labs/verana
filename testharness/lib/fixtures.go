@@ -104,10 +104,13 @@ type JourneyResult struct {
 	FailedPermissionID string
 
 	// Journey 101 fields (TR Operator Authorization)
-	GroupID          string
-	GroupPolicyAddr  string
-	OperatorAddr     string
-	AdminAddr        string
-	Member1Addr      string
-	Member2Addr      string
+	GroupID         string
+	GroupPolicyAddr string
+	OperatorAddr    string
+	AdminAddr       string
+	Member1Addr     string
+	Member2Addr     string
+
+	// Journey 601 fields (XR Exchange Rate)
+	ExchangeRateID string
 }

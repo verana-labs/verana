@@ -1,0 +1,312 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "verana/xr/v1/tx.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "Msg"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/verana.xr.v1.Msg/CreateExchangeRate": {
+      "post": {
+        "summary": "CreateExchangeRate defines a governance operation for creating an exchange rate.",
+        "operationId": "Msg_CreateExchangeRate",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.xr.v1.MsgCreateExchangeRateResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "MsgCreateExchangeRate is the Msg/CreateExchangeRate request type.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.xr.v1.MsgCreateExchangeRate"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.xr.v1.Msg/ToggleExchangeRateState": {
+      "post": {
+        "summary": "ToggleExchangeRateState defines a governance operation for enabling or disabling an exchange rate.",
+        "operationId": "Msg_ToggleExchangeRateState",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.xr.v1.MsgToggleExchangeRateStateResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "MsgToggleExchangeRateState is the Msg/ToggleExchangeRateState request type.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.xr.v1.MsgToggleExchangeRateState"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.xr.v1.Msg/UpdateExchangeRate": {
+      "post": {
+        "summary": "UpdateExchangeRate defines an operator operation for updating an exchange rate.",
+        "operationId": "Msg_UpdateExchangeRate",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.xr.v1.MsgUpdateExchangeRateResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "MsgUpdateExchangeRate is the Msg/UpdateExchangeRate request type.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.xr.v1.MsgUpdateExchangeRate"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.xr.v1.Msg/UpdateParams": {
+      "post": {
+        "summary": "UpdateParams defines a (governance) operation for updating the module\nparameters. The authority defaults to the x/gov module account.",
+        "operationId": "Msg_UpdateParams",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.xr.v1.MsgUpdateParamsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "MsgUpdateParams is the Msg/UpdateParams request type.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.xr.v1.MsgUpdateParams"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "google.protobuf.Any": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "google.rpc.Status": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/google.protobuf.Any"
+          }
+        }
+      }
+    },
+    "verana.cs.v1.PricingAssetType": {
+      "type": "string",
+      "enum": [
+        "PRICING_ASSET_TYPE_UNSPECIFIED",
+        "TU",
+        "COIN",
+        "FIAT"
+      ],
+      "default": "PRICING_ASSET_TYPE_UNSPECIFIED",
+      "description": "- PRICING_ASSET_TYPE_UNSPECIFIED: Default to prevent accidental omission\n - TU: Trust Unit (non-transferable token for fee definitions)\n - COIN: Native blockchain token or IBC asset\n - FIAT: Fiat currency (off-chain settlement)",
+      "title": "PricingAssetType defines the type of asset used for paying business fees"
+    },
+    "verana.xr.v1.MsgCreateExchangeRate": {
+      "type": "object",
+      "properties": {
+        "authority": {
+          "type": "string",
+          "description": "authority is the address that controls the module (defaults to x/gov unless overwritten)."
+        },
+        "base_asset_type": {
+          "$ref": "#/definitions/verana.cs.v1.PricingAssetType"
+        },
+        "base_asset": {
+          "type": "string"
+        },
+        "quote_asset_type": {
+          "$ref": "#/definitions/verana.cs.v1.PricingAssetType"
+        },
+        "quote_asset": {
+          "type": "string"
+        },
+        "rate": {
+          "type": "string"
+        },
+        "rate_scale": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "validity_duration": {
+          "type": "string"
+        }
+      },
+      "description": "MsgCreateExchangeRate is the Msg/CreateExchangeRate request type."
+    },
+    "verana.xr.v1.MsgCreateExchangeRateResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uint64"
+        }
+      },
+      "description": "MsgCreateExchangeRateResponse defines the response for MsgCreateExchangeRate."
+    },
+    "verana.xr.v1.MsgToggleExchangeRateState": {
+      "type": "object",
+      "properties": {
+        "authority": {
+          "type": "string",
+          "description": "authority is the address that controls the module (defaults to x/gov unless overwritten)."
+        },
+        "id": {
+          "type": "string",
+          "format": "uint64",
+          "description": "id is the exchange rate entry to toggle."
+        },
+        "state": {
+          "type": "boolean",
+          "description": "state is the desired state: true for enabled, false for disabled."
+        }
+      },
+      "description": "MsgToggleExchangeRateState is the Msg/ToggleExchangeRateState request type."
+    },
+    "verana.xr.v1.MsgToggleExchangeRateStateResponse": {
+      "type": "object",
+      "description": "MsgToggleExchangeRateStateResponse defines the response for MsgToggleExchangeRateState."
+    },
+    "verana.xr.v1.MsgUpdateExchangeRate": {
+      "type": "object",
+      "properties": {
+        "authority": {
+          "type": "string",
+          "description": "authority is the group address that controls the exchange rate."
+        },
+        "operator": {
+          "type": "string",
+          "description": "operator is the authorized operator executing this message."
+        },
+        "id": {
+          "type": "string",
+          "format": "uint64",
+          "description": "id is the exchange rate entry to update."
+        },
+        "rate": {
+          "type": "string",
+          "description": "rate is the new exchange rate value."
+        }
+      },
+      "description": "MsgUpdateExchangeRate is the Msg/UpdateExchangeRate request type."
+    },
+    "verana.xr.v1.MsgUpdateExchangeRateResponse": {
+      "type": "object",
+      "description": "MsgUpdateExchangeRateResponse defines the response for MsgUpdateExchangeRate."
+    },
+    "verana.xr.v1.MsgUpdateParams": {
+      "type": "object",
+      "properties": {
+        "authority": {
+          "type": "string",
+          "description": "authority is the address that controls the module (defaults to x/gov unless overwritten)."
+        },
+        "params": {
+          "$ref": "#/definitions/verana.xr.v1.Params",
+          "description": "params defines the module parameters to update.\n\nNOTE: All parameters must be supplied."
+        }
+      },
+      "description": "MsgUpdateParams is the Msg/UpdateParams request type."
+    },
+    "verana.xr.v1.MsgUpdateParamsResponse": {
+      "type": "object",
+      "description": "MsgUpdateParamsResponse defines the response structure for executing a\nMsgUpdateParams message."
+    },
+    "verana.xr.v1.Params": {
+      "type": "object",
+      "description": "Params defines the parameters for the module."
+    }
+  }
+}

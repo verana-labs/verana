@@ -4,6 +4,7 @@ package verana.de.v1;
 import "amino/amino.proto";
 import "gogoproto/gogo.proto";
 import "verana/de/v1/params.proto";
+import "verana/de/v1/types.proto";
 
 option go_package = "github.com/verana-labs/verana/x/de/types";
 
@@ -14,4 +15,13 @@ message GenesisState {
     (gogoproto.nullable) = false,
     (amino.dont_omitempty) = true
   ];
+
+  // operator_authorizations is a list of all OperatorAuthorization objects
+  repeated OperatorAuthorization operator_authorizations = 2 [(gogoproto.nullable) = false];
+
+  // fee_grants is a list of all FeeGrant objects
+  repeated FeeGrant fee_grants = 3 [(gogoproto.nullable) = false];
+
+  // vs_operator_authorizations is a list of all VSOperatorAuthorization objects
+  repeated VSOperatorAuthorization vs_operator_authorizations = 4 [(gogoproto.nullable) = false];
 }

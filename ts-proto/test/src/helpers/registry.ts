@@ -15,14 +15,6 @@ import {
   MsgIncreaseActiveGovernanceFrameworkVersion,
 } from "../../../src/codec/verana/tr/v1/tx";
 
-// DID Directory (dd) module messages
-import {
-  MsgAddDID,
-  MsgRenewDID,
-  MsgRemoveDID,
-  MsgTouchDID,
-} from "../../../src/codec/verana/dd/v1/tx";
-
 // Credential Schema (cs) module messages
 import {
   MsgCreateCredentialSchema,
@@ -68,12 +60,6 @@ export const typeUrls = {
   MsgAddGovernanceFrameworkDocument: "/verana.tr.v1.MsgAddGovernanceFrameworkDocument",
   MsgIncreaseActiveGovernanceFrameworkVersion: "/verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion",
 
-  // DID Directory
-  MsgAddDID: "/verana.dd.v1.MsgAddDID",
-  MsgRenewDID: "/verana.dd.v1.MsgRenewDID",
-  MsgRemoveDID: "/verana.dd.v1.MsgRemoveDID",
-  MsgTouchDID: "/verana.dd.v1.MsgTouchDID",
-
   // Credential Schema
   MsgCreateCredentialSchema: "/verana.cs.v1.MsgCreateCredentialSchema",
   MsgUpdateCredentialSchema: "/verana.cs.v1.MsgUpdateCredentialSchema",
@@ -115,12 +101,6 @@ export function createVeranaRegistry(): Registry {
   registry.register(typeUrls.MsgArchiveTrustRegistry, MsgArchiveTrustRegistry as GeneratedType);
   registry.register(typeUrls.MsgAddGovernanceFrameworkDocument, MsgAddGovernanceFrameworkDocument as GeneratedType);
   registry.register(typeUrls.MsgIncreaseActiveGovernanceFrameworkVersion, MsgIncreaseActiveGovernanceFrameworkVersion as GeneratedType);
-
-  // DID Directory messages
-  registry.register(typeUrls.MsgAddDID, MsgAddDID as GeneratedType);
-  registry.register(typeUrls.MsgRenewDID, MsgRenewDID as GeneratedType);
-  registry.register(typeUrls.MsgRemoveDID, MsgRemoveDID as GeneratedType);
-  registry.register(typeUrls.MsgTouchDID, MsgTouchDID as GeneratedType);
 
   // Credential Schema messages
   registry.register(typeUrls.MsgCreateCredentialSchema, MsgCreateCredentialSchema as GeneratedType);
