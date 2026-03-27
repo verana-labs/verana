@@ -2,8 +2,10 @@ package keeper
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
+	"cosmossdk.io/collections"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/verana-labs/verana/x/td/types"
 	"google.golang.org/grpc/codes"
@@ -27,8 +29,10 @@ func (k Keeper) GetTrustDeposit(goCtx context.Context, req *types.QueryGetTrustD
 	// [MOD-TD-QRY-1-3] Get trust deposit for account
 	trustDeposit, err := k.TrustDeposit.Get(ctx, req.Account)
 	if err != nil {
-		// Per spec: if not found, return not found error instead of zero values
-		return nil, status.Error(codes.NotFound, fmt.Sprintf("trust deposit not found for account %s", req.Account))
+		if errors.Is(err, collections.ErrNotFound) {
+			return nil, status.Error(codes.NotFound, fmt.Sprintf("trust deposit not found for account %s", req.Account))
+		}
+		return nil, status.Error(codes.Internal, fmt.Sprintf("failed to get trust deposit: %s", err))
 	}
 
 	return &types.QueryGetTrustDepositResponse{

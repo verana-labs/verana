@@ -15,14 +15,6 @@ import {
   MsgIncreaseActiveGovernanceFrameworkVersion,
 } from "../../../src/codec/verana/tr/v1/tx";
 
-// DID Directory (dd) module messages
-import {
-  MsgAddDID,
-  MsgRenewDID,
-  MsgRemoveDID,
-  MsgTouchDID,
-} from "../../../src/codec/verana/dd/v1/tx";
-
 // Credential Schema (cs) module messages
 import {
   MsgCreateCredentialSchema,
@@ -34,7 +26,7 @@ import {
 import {
   MsgCreatePermission,
   MsgCreateRootPermission,
-  MsgExtendPermission,
+  MsgAdjustPermission,
   MsgRevokePermission,
   MsgStartPermissionVP,
   MsgRenewPermissionVP,
@@ -68,12 +60,6 @@ export const typeUrls = {
   MsgAddGovernanceFrameworkDocument: "/verana.tr.v1.MsgAddGovernanceFrameworkDocument",
   MsgIncreaseActiveGovernanceFrameworkVersion: "/verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion",
 
-  // DID Directory
-  MsgAddDID: "/verana.dd.v1.MsgAddDID",
-  MsgRenewDID: "/verana.dd.v1.MsgRenewDID",
-  MsgRemoveDID: "/verana.dd.v1.MsgRemoveDID",
-  MsgTouchDID: "/verana.dd.v1.MsgTouchDID",
-
   // Credential Schema
   MsgCreateCredentialSchema: "/verana.cs.v1.MsgCreateCredentialSchema",
   MsgUpdateCredentialSchema: "/verana.cs.v1.MsgUpdateCredentialSchema",
@@ -82,7 +68,7 @@ export const typeUrls = {
   // Permission
   MsgCreatePermission: "/verana.perm.v1.MsgCreatePermission",
   MsgCreateRootPermission: "/verana.perm.v1.MsgCreateRootPermission",
-  MsgExtendPermission: "/verana.perm.v1.MsgExtendPermission",
+  MsgAdjustPermission: "/verana.perm.v1.MsgAdjustPermission",
   MsgRevokePermission: "/verana.perm.v1.MsgRevokePermission",
   MsgStartPermissionVP: "/verana.perm.v1.MsgStartPermissionVP",
   MsgRenewPermissionVP: "/verana.perm.v1.MsgRenewPermissionVP",
@@ -116,12 +102,6 @@ export function createVeranaRegistry(): Registry {
   registry.register(typeUrls.MsgAddGovernanceFrameworkDocument, MsgAddGovernanceFrameworkDocument as GeneratedType);
   registry.register(typeUrls.MsgIncreaseActiveGovernanceFrameworkVersion, MsgIncreaseActiveGovernanceFrameworkVersion as GeneratedType);
 
-  // DID Directory messages
-  registry.register(typeUrls.MsgAddDID, MsgAddDID as GeneratedType);
-  registry.register(typeUrls.MsgRenewDID, MsgRenewDID as GeneratedType);
-  registry.register(typeUrls.MsgRemoveDID, MsgRemoveDID as GeneratedType);
-  registry.register(typeUrls.MsgTouchDID, MsgTouchDID as GeneratedType);
-
   // Credential Schema messages
   registry.register(typeUrls.MsgCreateCredentialSchema, MsgCreateCredentialSchema as GeneratedType);
   registry.register(typeUrls.MsgUpdateCredentialSchema, MsgUpdateCredentialSchema as GeneratedType);
@@ -130,7 +110,7 @@ export function createVeranaRegistry(): Registry {
   // Permission messages
   registry.register(typeUrls.MsgCreatePermission, MsgCreatePermission as GeneratedType);
   registry.register(typeUrls.MsgCreateRootPermission, MsgCreateRootPermission as GeneratedType);
-  registry.register(typeUrls.MsgExtendPermission, MsgExtendPermission as GeneratedType);
+  registry.register(typeUrls.MsgAdjustPermission, MsgAdjustPermission as GeneratedType);
   registry.register(typeUrls.MsgRevokePermission, MsgRevokePermission as GeneratedType);
   registry.register(typeUrls.MsgStartPermissionVP, MsgStartPermissionVP as GeneratedType);
   registry.register(typeUrls.MsgRenewPermissionVP, MsgRenewPermissionVP as GeneratedType);

@@ -1,8 +1,6 @@
 package types
 
 import (
-	"fmt"
-
 	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -10,9 +8,13 @@ import (
 
 // ValidateBasic implements sdk.Msg
 func (msg *MsgReclaimTrustDepositYield) ValidateBasic() error {
-	_, err := sdk.AccAddressFromBech32(msg.Creator)
+	_, err := sdk.AccAddressFromBech32(msg.Authority)
 	if err != nil {
-		return fmt.Errorf("invalid creator address (%s)", err)
+		return errorsmod.Wrapf(sdkerrors.ErrInvalidAddress, "invalid authority address (%s)", err)
+	}
+	_, err = sdk.AccAddressFromBech32(msg.Operator)
+	if err != nil {
+		return errorsmod.Wrapf(sdkerrors.ErrInvalidAddress, "invalid operator address (%s)", err)
 	}
 	return nil
 }
@@ -20,10 +22,10 @@ func (msg *MsgReclaimTrustDepositYield) ValidateBasic() error {
 func (msg *MsgReclaimTrustDeposit) ValidateBasic() error {
 	_, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
-		return fmt.Errorf("invalid creator address (%s)", err)
+		return errorsmod.Wrapf(sdkerrors.ErrInvalidAddress, "invalid creator address (%s)", err)
 	}
 	if msg.Claimed == 0 {
-		return fmt.Errorf("claimed amount must be greater than 0")
+		return errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "claimed amount must be greater than 0")
 	}
 	return nil
 }
@@ -50,14 +52,14 @@ func (msg *MsgSlashTrustDeposit) ValidateBasic() error {
 }
 
 func (msg *MsgRepaySlashedTrustDeposit) ValidateBasic() error {
-	_, err := sdk.AccAddressFromBech32(msg.Creator)
+	_, err := sdk.AccAddressFromBech32(msg.Authority)
 	if err != nil {
-		return errorsmod.Wrapf(sdkerrors.ErrInvalidAddress, "invalid creator address (%s)", err)
+		return errorsmod.Wrapf(sdkerrors.ErrInvalidAddress, "invalid authority address (%s)", err)
 	}
 
-	_, err = sdk.AccAddressFromBech32(msg.Account)
+	_, err = sdk.AccAddressFromBech32(msg.Operator)
 	if err != nil {
-		return errorsmod.Wrapf(sdkerrors.ErrInvalidAddress, "invalid account address (%s)", err)
+		return errorsmod.Wrapf(sdkerrors.ErrInvalidAddress, "invalid operator address (%s)", err)
 	}
 
 	if msg.Amount == 0 {

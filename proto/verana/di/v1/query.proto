@@ -1,0 +1,59 @@
+syntax = "proto3";
+package verana.di.v1;
+
+import "amino/amino.proto";
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "verana/di/v1/params.proto";
+
+option go_package = "github.com/verana-labs/verana/x/di/types";
+
+// Query defines the gRPC querier service.
+service Query {
+  // Parameters queries the parameters of the module.
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+    option (google.api.http).get = "/verana-labs/verana/di/v1/params";
+  }
+
+  // [MOD-DI-QRY-1] GetDigest returns a stored digest by its digest string.
+  rpc GetDigest(QueryGetDigestRequest) returns (QueryGetDigestResponse) {
+    option (google.api.http).get = "/verana/di/v1/get/{digest}";
+  }
+}
+
+// QueryParamsRequest is request type for the Query/Params RPC method.
+message QueryParamsRequest {}
+
+// QueryParamsResponse is response type for the Query/Params RPC method.
+message QueryParamsResponse {
+  // params holds all the parameters of this module.
+  Params params = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+}
+
+// QueryGetDigestRequest is the request type for the Query/GetDigest RPC method.
+message QueryGetDigestRequest {
+  // digest is the digest string to look up.
+  string digest = 1;
+}
+
+// DigestInfo is the stored digest record returned by queries.
+message DigestInfo {
+  // digest is the digest string.
+  string digest = 1;
+  // created is the timestamp when the digest was stored.
+  google.protobuf.Timestamp created = 2 [
+    (gogoproto.stdtime) = true,
+    (gogoproto.nullable) = false
+  ];
+}
+
+// QueryGetDigestResponse is the response type for the Query/GetDigest RPC method.
+message QueryGetDigestResponse {
+  // digest is the stored digest entry.
+  DigestInfo digest = 1;
+}

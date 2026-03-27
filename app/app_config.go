@@ -54,17 +54,19 @@ import (
 	"google.golang.org/protobuf/types/known/durationpb"
 
 	credentialschemamodulev1 "github.com/verana-labs/verana/api/verana/cs/module"
-	diddirectorymodulev1 "github.com/verana-labs/verana/api/verana/dd/module"
 	permissionmodulev1 "github.com/verana-labs/verana/api/verana/perm/module"
 	trustdepositmodulev1 "github.com/verana-labs/verana/api/verana/td/module"
 	trustregistrymodulev1 "github.com/verana-labs/verana/api/verana/tr/module"
 	credentialschemamoduletypes "github.com/verana-labs/verana/x/cs/types"
-	diddirectorymoduletypes "github.com/verana-labs/verana/x/dd/types"
 	_ "github.com/verana-labs/verana/x/de/module"
 	demoduletypes "github.com/verana-labs/verana/x/de/types"
+	_ "github.com/verana-labs/verana/x/di/module"
+	dimoduletypes "github.com/verana-labs/verana/x/di/types"
 	permissionmoduletypes "github.com/verana-labs/verana/x/perm/types"
 	trustdepositmoduletypes "github.com/verana-labs/verana/x/td/types"
 	trustregistrymoduletypes "github.com/verana-labs/verana/x/tr/types"
+	_ "github.com/verana-labs/verana/x/xr/module"
+	xrmoduletypes "github.com/verana-labs/verana/x/xr/types"
 
 	// this line is used by starport scaffolding # stargate/app/moduleImport
 	protocolpoolmodulev1 "cosmossdk.io/api/cosmos/protocolpool/module/v1" // import for side-effects
@@ -108,11 +110,12 @@ var (
 		protocolpooltypes.ModuleName,
 		// chain modules
 		trustregistrymoduletypes.ModuleName,
-		diddirectorymoduletypes.ModuleName,
 		credentialschemamoduletypes.ModuleName,
 		permissionmoduletypes.ModuleName,
 		trustdepositmoduletypes.ModuleName,
 		demoduletypes.ModuleName,
+		dimoduletypes.ModuleName,
+		xrmoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/initGenesis
 	}
 
@@ -139,11 +142,12 @@ var (
 		ibcfeetypes.ModuleName,
 		// chain modules
 		trustregistrymoduletypes.ModuleName,
-		diddirectorymoduletypes.ModuleName,
 		credentialschemamoduletypes.ModuleName,
 		permissionmoduletypes.ModuleName,
 		trustdepositmoduletypes.ModuleName,
 		demoduletypes.ModuleName,
+		dimoduletypes.ModuleName,
+		xrmoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/beginBlockers
 	}
 
@@ -164,11 +168,12 @@ var (
 		ibcfeetypes.ModuleName,
 		// chain modules
 		trustregistrymoduletypes.ModuleName,
-		diddirectorymoduletypes.ModuleName,
 		credentialschemamoduletypes.ModuleName,
 		permissionmoduletypes.ModuleName,
 		trustdepositmoduletypes.ModuleName,
 		demoduletypes.ModuleName,
+		dimoduletypes.ModuleName,
+		xrmoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/endBlockers
 	}
 
@@ -340,10 +345,6 @@ var (
 				Config: appconfig.WrapAny(&trustregistrymodulev1.Module{}),
 			},
 			{
-				Name:   diddirectorymoduletypes.ModuleName,
-				Config: appconfig.WrapAny(&diddirectorymodulev1.Module{}),
-			},
-			{
 				Name:   credentialschemamoduletypes.ModuleName,
 				Config: appconfig.WrapAny(&credentialschemamodulev1.Module{}),
 			},
@@ -358,6 +359,14 @@ var (
 			{
 				Name:   demoduletypes.ModuleName,
 				Config: appconfig.WrapAny(&demoduletypes.Module{}),
+			},
+			{
+				Name:   dimoduletypes.ModuleName,
+				Config: appconfig.WrapAny(&dimoduletypes.Module{}),
+			},
+			{
+				Name:   xrmoduletypes.ModuleName,
+				Config: appconfig.WrapAny(&xrmoduletypes.Module{}),
 			},
 			// this line is used by starport scaffolding # stargate/app/moduleConfig
 		},

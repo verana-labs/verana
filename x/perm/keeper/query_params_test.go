@@ -10,7 +10,7 @@ import (
 )
 
 func TestParamsQuery(t *testing.T) {
-	keeper, _, _, ctx := keepertest.PermissionKeeper(t)
+	keeper, _, _, ctx, _ := keepertest.PermissionKeeper(t)
 	params := types.DefaultParams()
 	require.NoError(t, keeper.SetParams(ctx, params))
 

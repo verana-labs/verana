@@ -103,8 +103,8 @@ func RunTrustRegistryAuthzSetupJourney(ctx context.Context, client cosmosclient.
 	memberAddresses := []string{adminAddr, member1Addr, member2Addr}
 	groupID, policyAddr, err := lib.CreateGroupWithPolicy(
 		client, ctx, adminAccount, memberAddresses,
-		"2",            // threshold
-		60*time.Second, // voting period
+		"2",             // threshold
+		300*time.Second, // voting period
 	)
 	if err != nil {
 		return fmt.Errorf("step 2 failed: %w", err)

@@ -22,7 +22,7 @@ import (
 	"github.com/verana-labs/verana/x/perm/types"
 )
 
-func PermissionKeeper(t testing.TB) (keeper.Keeper, *MockCredentialSchemaKeeper, *MockTrustRegistryKeeper, sdk.Context) {
+func PermissionKeeper(t testing.TB) (keeper.Keeper, *MockCredentialSchemaKeeper, *MockTrustRegistryKeeper, sdk.Context, *MockDelegationKeeper) {
 	storeKey := storetypes.NewKVStoreKey(types.StoreKey)
 
 	db := dbm.NewMemDB()
@@ -39,6 +39,7 @@ func PermissionKeeper(t testing.TB) (keeper.Keeper, *MockCredentialSchemaKeeper,
 	trkKeeper := NewMockTrustRegistryKeeper()
 	bankKeeper := NewMockBankKeeper()
 	mockTrustDepositKeeper := &MockTrustDepositKeeper{}
+	mockDelegationKeeper := &MockDelegationKeeper{}
 	k := keeper.NewKeeper(
 		cdc,
 		runtime.NewKVStoreService(storeKey),
@@ -48,6 +49,7 @@ func PermissionKeeper(t testing.TB) (keeper.Keeper, *MockCredentialSchemaKeeper,
 		trkKeeper,
 		mockTrustDepositKeeper,
 		bankKeeper,
+		mockDelegationKeeper,
 	)
 
 	ctx := sdk.NewContext(stateStore, cmtproto.Header{}, false, log.NewNopLogger())
@@ -57,7 +59,7 @@ func PermissionKeeper(t testing.TB) (keeper.Keeper, *MockCredentialSchemaKeeper,
 		panic(err)
 	}
 
-	return k, csKeeper, trkKeeper, ctx
+	return k, csKeeper, trkKeeper, ctx, mockDelegationKeeper
 }
 
 type MockCredentialSchemaKeeper struct {
@@ -92,4 +94,8 @@ func (k *MockCredentialSchemaKeeper) CreateMockCredentialSchema(id uint64, issue
 		IssuerPermManagementMode:   issuerPermMode,
 		VerifierPermManagementMode: verifierPermMode,
 	}
+}
+
+func (k *MockCredentialSchemaKeeper) CreateMockCredentialSchemaFull(cs cstypes.CredentialSchema) {
+	k.credentialSchemas[cs.Id] = cs
 }

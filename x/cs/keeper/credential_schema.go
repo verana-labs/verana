@@ -94,13 +94,19 @@ func (ms msgServer) executeCreateCredentialSchema(ctx sdk.Context, schemaID uint
 		return fmt.Errorf("failed to process JSON schema: %w", err)
 	}
 
+	// Apply JCS canonicalization (RFC 8785) before storage
+	canonicalJsonSchema, err := types.CanonicalizeJCS(processedJsonSchema)
+	if err != nil {
+		return fmt.Errorf("failed to canonicalize JSON schema: %w", err)
+	}
+
 	// [MOD-CS-MSG-1-3] Create the credential schema
 	credentialSchema := types.CredentialSchema{
 		Id:                                      schemaID,
 		TrId:                                    msg.TrId,
 		Created:                                 ctx.BlockTime(),
 		Modified:                                ctx.BlockTime(),
-		JsonSchema:                              processedJsonSchema,
+		JsonSchema:                              canonicalJsonSchema,
 		IssuerGrantorValidationValidityPeriod:   msg.GetIssuerGrantorValidationValidityPeriod().GetValue(),
 		VerifierGrantorValidationValidityPeriod: msg.GetVerifierGrantorValidationValidityPeriod().GetValue(),
 		IssuerValidationValidityPeriod:          msg.GetIssuerValidationValidityPeriod().GetValue(),

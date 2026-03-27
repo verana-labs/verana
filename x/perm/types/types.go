@@ -10,25 +10,53 @@ import (
 )
 
 func (msg *MsgStartPermissionVP) ValidateBasic() error {
-	if _, err := sdk.AccAddressFromBech32(msg.Creator); err != nil {
-		return fmt.Errorf("invalid creator address: %w", err)
+	// [MOD-PERM-MSG-1-2-1] authority (group): signature must be verified
+	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
+		return fmt.Errorf("invalid authority address: %w", err)
+	}
+
+	// [MOD-PERM-MSG-1-2-1] operator (account): signature must be verified
+	if _, err := sdk.AccAddressFromBech32(msg.Operator); err != nil {
+		return fmt.Errorf("invalid operator address: %w", err)
 	}
 
 	if msg.ValidatorPermId == 0 {
 		return fmt.Errorf("validator perm ID cannot be 0")
 	}
 
+	// [MOD-PERM-MSG-1-2-1] type MUST be a valid PermissionType
 	if msg.Type == 0 || msg.Type > 6 {
 		return fmt.Errorf("perm type must be between 1 and 6")
 	}
 
-	// country is optional, but if provided must be valid
-	if msg.Country != "" && !isValidCountryCode(msg.Country) {
-		return fmt.Errorf("invalid country code format")
+	// [MOD-PERM-MSG-1-1] did is required and MUST conform to DID Syntax
+	if msg.Did == "" {
+		return fmt.Errorf("did is required")
+	}
+	if !isValidDID(msg.Did) {
+		return fmt.Errorf("invalid DID format")
 	}
 
-	if msg.Did != "" && !isValidDID(msg.Did) {
-		return fmt.Errorf("invalid DID format")
+	// [MOD-PERM-MSG-1-2-1] vs_operator_authz_enabled: if true, vs_operator MUST NOT be null
+	if msg.VsOperatorAuthzEnabled && msg.VsOperator == "" {
+		return fmt.Errorf("vs_operator is required when vs_operator_authz_enabled is true")
+	}
+
+	// [MOD-PERM-MSG-1-2-1] vs_operator_authz_with_feegrant: if true, vs_operator MUST NOT be null
+	if msg.VsOperatorAuthzWithFeegrant && msg.VsOperator == "" {
+		return fmt.Errorf("vs_operator is required when vs_operator_authz_with_feegrant is true")
+	}
+
+	// [MOD-PERM-MSG-1-2-1] vs_operator_authz_spend_period: if not null, vs_operator MUST NOT be null
+	if msg.VsOperatorAuthzSpendPeriod != nil && msg.VsOperator == "" {
+		return fmt.Errorf("vs_operator is required when vs_operator_authz_spend_period is set")
+	}
+
+	// Validate vs_operator address if provided
+	if msg.VsOperator != "" {
+		if _, err := sdk.AccAddressFromBech32(msg.VsOperator); err != nil {
+			return fmt.Errorf("invalid vs_operator address: %w", err)
+		}
 	}
 
 	return nil
@@ -49,9 +77,14 @@ func isValidDID(did string) bool {
 }
 
 func (msg *MsgRenewPermissionVP) ValidateBasic() error {
-	// Validate creator address
-	if _, err := sdk.AccAddressFromBech32(msg.Creator); err != nil {
-		return fmt.Errorf("invalid creator address: %w", err)
+	// [MOD-PERM-MSG-2-2-1] authority (group): signature must be verified
+	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
+		return fmt.Errorf("invalid authority address: %w", err)
+	}
+
+	// [MOD-PERM-MSG-2-2-1] operator (account): signature must be verified
+	if _, err := sdk.AccAddressFromBech32(msg.Operator); err != nil {
+		return fmt.Errorf("invalid operator address: %w", err)
 	}
 
 	// Validate perm ID
@@ -64,30 +97,19 @@ func (msg *MsgRenewPermissionVP) ValidateBasic() error {
 
 // ValidateBasic for MsgSetPermissionVPToValidated
 func (msg *MsgSetPermissionVPToValidated) ValidateBasic() error {
-	// Validate creator address
-	if _, err := sdk.AccAddressFromBech32(msg.Creator); err != nil {
-		return fmt.Errorf("invalid creator address: %w", err)
+	// [MOD-PERM-MSG-3-2-1] authority (group): signature must be verified
+	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
+		return fmt.Errorf("invalid authority address: %w", err)
+	}
+
+	// [MOD-PERM-MSG-3-2-1] operator (account): signature must be verified
+	if _, err := sdk.AccAddressFromBech32(msg.Operator); err != nil {
+		return fmt.Errorf("invalid operator address: %w", err)
 	}
 
 	// Validate perm ID
 	if msg.Id == 0 {
 		return fmt.Errorf("perm ID cannot be 0")
-	}
-
-	// Validate fees are non-negative
-	if msg.ValidationFees < 0 {
-		return fmt.Errorf("validation fees cannot be negative")
-	}
-	if msg.IssuanceFees < 0 {
-		return fmt.Errorf("issuance fees cannot be negative")
-	}
-	if msg.VerificationFees < 0 {
-		return fmt.Errorf("verification fees cannot be negative")
-	}
-
-	// Validate country code if provided
-	if msg.Country != "" && !isValidCountryCode(msg.Country) {
-		return fmt.Errorf("invalid country code format")
 	}
 
 	// Validate digest SRI format if provided (optional)
@@ -103,9 +125,6 @@ func (msg *MsgSetPermissionVPToValidated) ValidateBasic() error {
 	if msg.VerificationFeeDiscount > maxDiscount {
 		return fmt.Errorf("verification_fee_discount cannot exceed %d (100%% discount)", maxDiscount)
 	}
-
-	// NOTE: Do NOT validate effective_until against current time in stateless validation
-	// This will be done in stateful validation where we have access to block time
 
 	return nil
 }
@@ -125,9 +144,14 @@ func isValidDigestSRI(digestSRI string) bool {
 
 // ValidateBasic for MsgConfirmPermissionVPTermination
 func (msg *MsgCancelPermissionVPLastRequest) ValidateBasic() error {
-	// Validate creator address
-	if _, err := sdk.AccAddressFromBech32(msg.Creator); err != nil {
-		return fmt.Errorf("invalid creator address: %w", err)
+	// Validate authority address
+	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
+		return fmt.Errorf("invalid authority address: %w", err)
+	}
+
+	// Validate operator address
+	if _, err := sdk.AccAddressFromBech32(msg.Operator); err != nil {
+		return fmt.Errorf("invalid operator address: %w", err)
 	}
 
 	// Validate perm ID
@@ -139,9 +163,14 @@ func (msg *MsgCancelPermissionVPLastRequest) ValidateBasic() error {
 }
 
 func (msg *MsgCreateRootPermission) ValidateBasic() error {
-	// Validate creator address
-	if _, err := sdk.AccAddressFromBech32(msg.Creator); err != nil {
-		return fmt.Errorf("invalid creator address: %w", err)
+	// Validate authority address
+	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
+		return fmt.Errorf("invalid authority address: %w", err)
+	}
+
+	// Validate operator address
+	if _, err := sdk.AccAddressFromBech32(msg.Operator); err != nil {
+		return fmt.Errorf("invalid operator address: %w", err)
 	}
 
 	// if a mandatory parameter is not present, transaction MUST abort
@@ -158,36 +187,21 @@ func (msg *MsgCreateRootPermission) ValidateBasic() error {
 		return fmt.Errorf("invalid DID format")
 	}
 
-	// validation_fees MUST be >= 0
-	if msg.ValidationFees < 0 {
-		return fmt.Errorf("validation fees cannot be negative")
-	}
-
-	// issuance_fees MUST be >= 0
-	if msg.IssuanceFees < 0 {
-		return fmt.Errorf("issuance fees cannot be negative")
-	}
-
-	// verification_fees MUST be >= 0
-	if msg.VerificationFees < 0 {
-		return fmt.Errorf("verification fees cannot be negative")
-	}
-
-	// country if not null, MUST be a valid alpha-2 code (ISO 3166)
-	if msg.Country != "" && !isValidCountryCode(msg.Country) {
-		return fmt.Errorf("invalid country code format")
-	}
-
 	// Note: Time-based validations are moved to the main function
 	// to use blockchain time instead of system time
 
 	return nil
 }
 
-func (msg *MsgExtendPermission) ValidateBasic() error {
-	// Validate creator address
-	if _, err := sdk.AccAddressFromBech32(msg.Creator); err != nil {
-		return fmt.Errorf("invalid creator address: %w", err)
+func (msg *MsgAdjustPermission) ValidateBasic() error {
+	// Validate authority address
+	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
+		return fmt.Errorf("invalid authority address: %w", err)
+	}
+
+	// Validate operator address
+	if _, err := sdk.AccAddressFromBech32(msg.Operator); err != nil {
+		return fmt.Errorf("invalid operator address: %w", err)
 	}
 
 	// if a mandatory parameter is not present, transaction MUST abort
@@ -201,16 +215,18 @@ func (msg *MsgExtendPermission) ValidateBasic() error {
 		return fmt.Errorf("effective_until is required")
 	}
 
-	// Note: Time-based validations are moved to the main function
-	// to use blockchain time instead of system time
-
 	return nil
 }
 
 func (msg *MsgRevokePermission) ValidateBasic() error {
-	// Validate creator address
-	if _, err := sdk.AccAddressFromBech32(msg.Creator); err != nil {
-		return fmt.Errorf("invalid creator address: %w", err)
+	// Validate authority address
+	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
+		return fmt.Errorf("invalid authority address: %w", err)
+	}
+
+	// Validate operator address
+	if _, err := sdk.AccAddressFromBech32(msg.Operator); err != nil {
+		return fmt.Errorf("invalid operator address: %w", err)
 	}
 
 	// Validate perm ID
@@ -222,8 +238,14 @@ func (msg *MsgRevokePermission) ValidateBasic() error {
 }
 
 func (msg *MsgCreateOrUpdatePermissionSession) ValidateBasic() error {
-	if _, err := sdk.AccAddressFromBech32(msg.Creator); err != nil {
-		return sdkerrors.ErrInvalidAddress.Wrapf("invalid creator address: %s", err)
+	// [MOD-PERM-MSG-10-2] authority (group): signature must be verified
+	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
+		return fmt.Errorf("invalid authority address: %w", err)
+	}
+
+	// [MOD-PERM-MSG-10-2] operator (account): signature must be verified
+	if _, err := sdk.AccAddressFromBech32(msg.Operator); err != nil {
+		return fmt.Errorf("invalid operator address: %w", err)
 	}
 
 	// Validate UUID format
@@ -246,12 +268,23 @@ func (msg *MsgCreateOrUpdatePermissionSession) ValidateBasic() error {
 		return sdkerrors.ErrInvalidRequest.Wrap("wallet_agent_perm_id is mandatory")
 	}
 
+	// Validate digest SRI format if provided
+	if msg.Digest != "" && !isValidDigestSRI(msg.Digest) {
+		return sdkerrors.ErrInvalidRequest.Wrap("invalid digest format")
+	}
+
 	return nil
 }
 
 func (msg *MsgSlashPermissionTrustDeposit) ValidateBasic() error {
-	if _, err := sdk.AccAddressFromBech32(msg.Creator); err != nil {
-		return sdkerrors.ErrInvalidAddress.Wrapf("invalid creator address: %s", err)
+	// [MOD-PERM-MSG-12-2-1] authority (group): signature must be verified
+	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
+		return fmt.Errorf("invalid authority address: %w", err)
+	}
+
+	// [MOD-PERM-MSG-12-2-1] operator (account): signature must be verified
+	if _, err := sdk.AccAddressFromBech32(msg.Operator); err != nil {
+		return fmt.Errorf("invalid operator address: %w", err)
 	}
 
 	// if a mandatory parameter is not present, transaction MUST abort
@@ -267,10 +300,17 @@ func (msg *MsgSlashPermissionTrustDeposit) ValidateBasic() error {
 }
 
 func (msg *MsgRepayPermissionSlashedTrustDeposit) ValidateBasic() error {
-	if _, err := sdk.AccAddressFromBech32(msg.Creator); err != nil {
-		return sdkerrors.ErrInvalidAddress.Wrapf("invalid creator address: %s", err)
+	// [MOD-PERM-MSG-13-2-1] authority (group): signature must be verified
+	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
+		return fmt.Errorf("invalid authority address: %w", err)
 	}
-	// [MOD-PERM-MSG-13-2-1] Repay Permission Slashed Trust Deposit basic checks
+
+	// [MOD-PERM-MSG-13-2-1] operator (account): signature must be verified
+	if _, err := sdk.AccAddressFromBech32(msg.Operator); err != nil {
+		return fmt.Errorf("invalid operator address: %w", err)
+	}
+
+	// [MOD-PERM-MSG-13-2-1] id MUST be a valid uint64
 	if msg.Id == 0 {
 		return sdkerrors.ErrInvalidRequest.Wrap("id must be a valid uint64")
 	}
@@ -278,19 +318,24 @@ func (msg *MsgRepayPermissionSlashedTrustDeposit) ValidateBasic() error {
 }
 
 func (msg *MsgCreatePermission) ValidateBasic() error {
-	if _, err := sdk.AccAddressFromBech32(msg.Creator); err != nil {
-		return sdkerrors.ErrInvalidAddress.Wrapf("invalid creator address: %s", err)
+	// [MOD-PERM-MSG-14-2-1] authority (group): signature must be verified
+	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
+		return fmt.Errorf("invalid authority address: %w", err)
 	}
 
-	// if a mandatory parameter is not present, transaction MUST abort
-	// schema_id MUST be a valid uint64
-	if msg.SchemaId == 0 {
-		return sdkerrors.ErrInvalidRequest.Wrap("schema_id must be a valid uint64")
+	// [MOD-PERM-MSG-14-2-1] operator (account): signature must be verified
+	if _, err := sdk.AccAddressFromBech32(msg.Operator); err != nil {
+		return fmt.Errorf("invalid operator address: %w", err)
 	}
 
 	// type (PermissionType) (mandatory): MUST be ISSUER or VERIFIER, else abort
 	if msg.Type != PermissionType_ISSUER && msg.Type != PermissionType_VERIFIER {
 		return sdkerrors.ErrInvalidRequest.Wrap("type must be ISSUER or VERIFIER")
+	}
+
+	// validator_perm_id (mandatory)
+	if msg.ValidatorPermId == 0 {
+		return sdkerrors.ErrInvalidRequest.Wrap("validator_perm_id is mandatory")
 	}
 
 	// did MUST conform to DID Syntax
@@ -301,8 +346,27 @@ func (msg *MsgCreatePermission) ValidateBasic() error {
 		return sdkerrors.ErrInvalidRequest.Wrap("invalid DID syntax")
 	}
 
-	// Note: Time-based validations are moved to the main function
-	// to use blockchain time instead of system time
+	// vs_operator_authz_enabled: if true, vs_operator MUST NOT be null
+	if msg.VsOperatorAuthzEnabled && msg.VsOperator == "" {
+		return fmt.Errorf("vs_operator is required when vs_operator_authz_enabled is true")
+	}
+
+	// vs_operator_authz_with_feegrant: if true, vs_operator MUST NOT be null
+	if msg.VsOperatorAuthzWithFeegrant && msg.VsOperator == "" {
+		return fmt.Errorf("vs_operator is required when vs_operator_authz_with_feegrant is true")
+	}
+
+	// vs_operator_authz_spend_period: if not null, vs_operator MUST NOT be null
+	if msg.VsOperatorAuthzSpendPeriod != nil && msg.VsOperator == "" {
+		return fmt.Errorf("vs_operator is required when vs_operator_authz_spend_period is set")
+	}
+
+	// Validate vs_operator address if provided
+	if msg.VsOperator != "" {
+		if _, err := sdk.AccAddressFromBech32(msg.VsOperator); err != nil {
+			return fmt.Errorf("invalid vs_operator address: %w", err)
+		}
+	}
 
 	return nil
 }

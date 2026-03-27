@@ -129,10 +129,10 @@ func NewMsgCreateCredentialSchema(
 	digestAlgorithm string,
 ) *MsgCreateCredentialSchema {
 	msg := &MsgCreateCredentialSchema{
-		Authority:                              authority,
-		Operator:                               operator,
-		TrId:                                   trId,
-		JsonSchema:                             jsonSchema,
+		Authority:                               authority,
+		Operator:                                operator,
+		TrId:                                    trId,
+		JsonSchema:                              jsonSchema,
 		IssuerGrantorValidationValidityPeriod:   &OptionalUInt32{Value: issuerGrantorValidationValidityPeriod},
 		VerifierGrantorValidationValidityPeriod: &OptionalUInt32{Value: verifierGrantorValidationValidityPeriod},
 		IssuerValidationValidityPeriod:          &OptionalUInt32{Value: issuerValidationValidityPeriod},
@@ -263,49 +263,301 @@ func validateJSONSchema(schemaJSON string) error {
 	return nil
 }
 
-// InjectCanonicalID parses the JSON schema, removes any existing $id, and injects the canonical $id
+// InjectCanonicalID removes any existing $id from the JSON schema and injects the canonical $id
+// as the first property, preserving the original property ordering of all other fields.
 func InjectCanonicalID(schemaJSON string, chainID string, schemaID uint64) (string, error) {
-	// Parse JSON
-	var schemaDoc map[string]interface{}
-	if err := json.Unmarshal([]byte(schemaJSON), &schemaDoc); err != nil {
-		return "", fmt.Errorf("failed to parse JSON schema: %w", err)
-	}
-
-	// Remove any existing $id
-	delete(schemaDoc, "$id")
-
-	// Inject canonical $id
 	canonicalID := fmt.Sprintf("vpr:verana:%s/cs/v1/js/%d", chainID, schemaID)
-	schemaDoc["$id"] = canonicalID
-
-	// Serialize back to JSON with indentation for readability
-	updatedSchema, err := json.MarshalIndent(schemaDoc, "", "  ")
-	if err != nil {
-		return "", fmt.Errorf("failed to serialize JSON schema: %w", err)
-	}
-
-	return string(updatedSchema), nil
+	return injectOrReplaceID(schemaJSON, canonicalID)
 }
 
-// EnsureCanonicalID ensures the JSON schema has the canonical $id, updating it if needed
+// EnsureCanonicalID ensures the JSON schema has the canonical $id, updating it if needed.
+// Short-circuits if the $id is already correct. Preserves original property ordering.
 func EnsureCanonicalID(schemaJSON string, chainID string, schemaID uint64) (string, error) {
-	// Parse JSON
-	var schemaDoc map[string]interface{}
-	if err := json.Unmarshal([]byte(schemaJSON), &schemaDoc); err != nil {
-		return "", fmt.Errorf("failed to parse JSON schema: %w", err)
-	}
-
-	// Inject/update canonical $id
 	canonicalID := fmt.Sprintf("vpr:verana:%s/cs/v1/js/%d", chainID, schemaID)
-	schemaDoc["$id"] = canonicalID
 
-	// Serialize back to JSON with indentation for readability
-	updatedSchema, err := json.MarshalIndent(schemaDoc, "", "  ")
-	if err != nil {
-		return "", fmt.Errorf("failed to serialize JSON schema: %w", err)
+	// Short-circuit: if the $id is already correct, return as-is to avoid unnecessary work
+	// and prevent any formatting changes on the hot query path.
+	var doc map[string]interface{}
+	if err := json.Unmarshal([]byte(schemaJSON), &doc); err == nil {
+		if existingID, ok := doc["$id"].(string); ok && existingID == canonicalID {
+			return schemaJSON, nil
+		}
 	}
 
-	return string(updatedSchema), nil
+	return injectOrReplaceID(schemaJSON, canonicalID)
+}
+
+// injectOrReplaceID performs in-place string manipulation to inject or replace the "$id" field
+// in a JSON schema string without unmarshaling/remarshaling, preserving original property ordering.
+// The canonical $id is always placed as the first property in the JSON object.
+func injectOrReplaceID(schemaJSON string, canonicalID string) (string, error) {
+	// Validate it's valid JSON first
+	if !json.Valid([]byte(schemaJSON)) {
+		return "", fmt.Errorf("invalid JSON schema")
+	}
+
+	// JSON-escape the canonical ID value to prevent injection
+	escapedID, err := json.Marshal(canonicalID)
+	if err != nil {
+		return "", fmt.Errorf("failed to JSON-escape canonical ID: %w", err)
+	}
+
+	// Remove existing "$id" field if present
+	cleaned, err := removeJSONField(schemaJSON, "$id")
+	if err != nil {
+		return "", fmt.Errorf("failed to remove existing $id: %w", err)
+	}
+
+	// Find the opening brace of the JSON object
+	openBrace := -1
+	for i, c := range cleaned {
+		if c == '{' {
+			openBrace = i
+			break
+		}
+	}
+	if openBrace == -1 {
+		return "", fmt.Errorf("JSON schema is not an object")
+	}
+
+	// Build the $id entry to inject (using JSON-escaped value)
+	idEntry := fmt.Sprintf(`"$id": %s`, string(escapedID))
+
+	// Examine content after opening brace to determine formatting
+	rest := cleaned[openBrace+1:]
+	hasOtherProps := false
+	for _, c := range rest {
+		if c == '"' {
+			hasOtherProps = true
+			break
+		}
+		if c == '}' {
+			break
+		}
+	}
+
+	// Detect indentation style from existing content
+	indent := detectIndent(cleaned)
+
+	var result string
+	if hasOtherProps {
+		if indent != "" {
+			// Pretty-printed: inject with matching indentation.
+			// Ensure rest starts on its own line with proper indent.
+			restTrimmed := trimLeadingWhitespace(rest)
+			result = cleaned[:openBrace+1] + "\n" + indent + idEntry + ",\n" + indent + restTrimmed
+		} else {
+			// Compact: inject inline
+			result = cleaned[:openBrace+1] + idEntry + "," + rest
+		}
+	} else {
+		if indent != "" {
+			result = cleaned[:openBrace+1] + "\n" + indent + idEntry + rest
+		} else {
+			result = cleaned[:openBrace+1] + idEntry + rest
+		}
+	}
+
+	// Validate output is still valid JSON as a safety net
+	if !json.Valid([]byte(result)) {
+		return "", fmt.Errorf("internal error: produced invalid JSON after $id injection")
+	}
+
+	return result, nil
+}
+
+// removeJSONField removes a top-level field from a JSON object string by performing
+// character-level scanning, preserving all other content exactly as-is.
+func removeJSONField(jsonStr string, field string) (string, error) {
+	target := fmt.Sprintf(`"%s"`, field)
+	bytes := []byte(jsonStr)
+	n := len(bytes)
+
+	// Find the target key at the top level (depth == 1, i.e. inside the root object)
+	depth := 0
+	i := 0
+	for i < n {
+		c := bytes[i]
+
+		if c == '"' {
+			// Read the entire string (skip escaped chars)
+			start := i
+			i++
+			for i < n && bytes[i] != '"' {
+				if bytes[i] == '\\' {
+					i++ // skip escaped character
+				}
+				i++
+			}
+			i++ // skip closing quote
+
+			// Check if this is our target key at depth 1
+			if depth == 1 {
+				keyStr := string(bytes[start:i])
+				if keyStr == target {
+					// Found the key. Now find the colon and the value that follows.
+					keyStart := start
+
+					// Scan backwards to include any leading whitespace/newline
+					ws := keyStart
+					for ws > 0 && (bytes[ws-1] == ' ' || bytes[ws-1] == '\t' || bytes[ws-1] == '\n' || bytes[ws-1] == '\r') {
+						ws--
+					}
+
+					// Find colon after key
+					ci := i
+					for ci < n && bytes[ci] != ':' {
+						ci++
+					}
+					ci++ // skip colon
+
+					// Skip whitespace after colon
+					for ci < n && (bytes[ci] == ' ' || bytes[ci] == '\t' || bytes[ci] == '\n' || bytes[ci] == '\r') {
+						ci++
+					}
+
+					// Skip the value
+					valEnd, err := skipJSONValue(bytes, ci)
+					if err != nil {
+						return "", err
+					}
+
+					// Handle trailing comma: either remove a comma after the value, or before the key
+					end := valEnd
+					// Check for trailing comma
+					ti := end
+					for ti < n && (bytes[ti] == ' ' || bytes[ti] == '\t' || bytes[ti] == '\n' || bytes[ti] == '\r') {
+						ti++
+					}
+					if ti < n && bytes[ti] == ',' {
+						end = ti + 1
+						result := string(bytes[:ws]) + string(bytes[end:])
+						return result, nil
+					}
+
+					// No trailing comma — check for leading comma
+					lc := ws
+					for lc > 0 && (bytes[lc-1] == ' ' || bytes[lc-1] == '\t' || bytes[lc-1] == '\n' || bytes[lc-1] == '\r') {
+						lc--
+					}
+					if lc > 0 && bytes[lc-1] == ',' {
+						result := string(bytes[:lc-1]) + string(bytes[end:])
+						return result, nil
+					}
+
+					// No commas at all — just remove the field
+					result := string(bytes[:ws]) + string(bytes[end:])
+					return result, nil
+				}
+			}
+			continue
+		}
+
+		if c == '{' || c == '[' {
+			depth++
+		} else if c == '}' || c == ']' {
+			depth--
+		}
+		i++
+	}
+
+	// Field not found, return original
+	return jsonStr, nil
+}
+
+// skipJSONValue advances past a single JSON value starting at bytes[i] and returns the index after it.
+func skipJSONValue(bytes []byte, i int) (int, error) {
+	n := len(bytes)
+	if i >= n {
+		return 0, fmt.Errorf("unexpected end of JSON")
+	}
+
+	c := bytes[i]
+
+	switch c {
+	case '"':
+		// String
+		i++
+		for i < n && bytes[i] != '"' {
+			if bytes[i] == '\\' {
+				i++
+			}
+			i++
+		}
+		i++ // closing quote
+		return i, nil
+
+	case '{', '[':
+		// Object or array — track matching braces/brackets
+		closer := byte('}')
+		if c == '[' {
+			closer = ']'
+		}
+		depth := 1
+		i++
+		for i < n && depth > 0 {
+			if bytes[i] == '"' {
+				i++
+				for i < n && bytes[i] != '"' {
+					if bytes[i] == '\\' {
+						i++
+					}
+					i++
+				}
+			} else if bytes[i] == c {
+				depth++
+			} else if bytes[i] == closer {
+				depth--
+			}
+			i++
+		}
+		return i, nil
+
+	default:
+		// Number, bool, null — advance until delimiter
+		for i < n && bytes[i] != ',' && bytes[i] != '}' && bytes[i] != ']' && bytes[i] != ' ' && bytes[i] != '\t' && bytes[i] != '\n' && bytes[i] != '\r' {
+			i++
+		}
+		return i, nil
+	}
+}
+
+// detectIndent detects the indentation string used in a JSON document by looking
+// at the first indented line after the opening brace.
+func detectIndent(jsonStr string) string {
+	inObject := false
+	i := 0
+	for i < len(jsonStr) {
+		if jsonStr[i] == '{' {
+			inObject = true
+			i++
+			continue
+		}
+		if inObject && jsonStr[i] == '\n' {
+			i++
+			// Collect whitespace
+			start := i
+			for i < len(jsonStr) && (jsonStr[i] == ' ' || jsonStr[i] == '\t') {
+				i++
+			}
+			if i > start && i < len(jsonStr) && jsonStr[i] != '}' {
+				return jsonStr[start:i]
+			}
+			continue
+		}
+		i++
+	}
+	return ""
+}
+
+// trimLeadingWhitespace removes leading whitespace characters (spaces, tabs, newlines)
+// from a string.
+func trimLeadingWhitespace(s string) string {
+	i := 0
+	for i < len(s) && (s[i] == ' ' || s[i] == '\t' || s[i] == '\n' || s[i] == '\r') {
+		i++
+	}
+	return s[i:]
 }
 
 // CanonicalizeJCS serializes a JSON string using the JSON Canonicalization Scheme (JCS)

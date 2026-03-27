@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	didtypes "github.com/verana-labs/verana/x/dd/types"
 	permtypes "github.com/verana-labs/verana/x/perm/types"
 
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
@@ -53,12 +52,16 @@ func QueryPermission(client cosmosclient.Client, ctx context.Context, permID uin
 	return permQueryClient.GetPermission(ctx, &permtypes.QueryGetPermissionRequest{Id: permID})
 }
 
-// QueryDID queries for a DID by ID
-func QueryDID(client cosmosclient.Client, ctx context.Context, did string) (*didtypes.QueryGetDIDResponse, error) {
-	didQueryClient := didtypes.NewQueryClient(client.Context())
-	return didQueryClient.GetDID(ctx, &didtypes.QueryGetDIDRequest{
-		Did: did,
+// ListPermissions lists all permissions
+func ListPermissions(client cosmosclient.Client, ctx context.Context) ([]permtypes.Permission, error) {
+	permQueryClient := permtypes.NewQueryClient(client.Context())
+	resp, err := permQueryClient.ListPermissions(ctx, &permtypes.QueryListPermissionsRequest{
+		ResponseMaxSize: 1024,
 	})
+	if err != nil {
+		return nil, err
+	}
+	return resp.Permissions, nil
 }
 
 // VerifyTrustRegistry verifies a trust registry exists with expected properties
@@ -128,22 +131,3 @@ func VerifyPermission(client cosmosclient.Client, ctx context.Context, permID ui
 	return true
 }
 
-// VerifyDID verifies a DID exists with expected properties
-func VerifyDID(client cosmosclient.Client, ctx context.Context, did string, expectedController string) bool {
-	resp, err := QueryDID(client, ctx, did)
-	if err != nil {
-		fmt.Printf("❌ DID verification failed: %v\n", err)
-		return false
-	}
-
-	// Verify controller matches what we expect
-	if resp.Did.Controller != expectedController {
-		fmt.Printf("❌ DID verification failed: Expected controller %s, got %s\n",
-			expectedController, resp.Did.Controller)
-		return false
-	}
-
-	fmt.Printf("✅ Verified DID %s exists with expected controller %s\n",
-		did, resp.Did.Controller)
-	return true
-}

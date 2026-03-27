@@ -2,9 +2,11 @@ syntax = "proto3";
 package verana.perm.v1;
 
 import "amino/amino.proto";
+import "cosmos/base/v1beta1/coin.proto";
 import "cosmos/msg/v1/msg.proto";
 import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
+import "google/protobuf/duration.proto";
 import "google/protobuf/timestamp.proto";
 import "verana/perm/v1/params.proto";
 import "verana/perm/v1/types.proto";
@@ -25,7 +27,7 @@ service Msg {
   //  rpc ConfirmPermissionVPTermination(MsgConfirmPermissionVPTermination) returns (MsgConfirmPermissionVPTerminationResponse);
   rpc CancelPermissionVPLastRequest(MsgCancelPermissionVPLastRequest) returns (MsgCancelPermissionVPLastRequestResponse);
   rpc CreateRootPermission(MsgCreateRootPermission) returns (MsgCreateRootPermissionResponse);
-  rpc ExtendPermission(MsgExtendPermission) returns (MsgExtendPermissionResponse);
+  rpc AdjustPermission(MsgAdjustPermission) returns (MsgAdjustPermissionResponse);
   rpc RevokePermission(MsgRevokePermission) returns (MsgRevokePermissionResponse);
   rpc CreateOrUpdatePermissionSession(MsgCreateOrUpdatePermissionSession) returns (MsgCreateOrUpdatePermissionSessionResponse);
   rpc SlashPermissionTrustDeposit(MsgSlashPermissionTrustDeposit) returns (MsgSlashPermissionTrustDepositResponse);
@@ -56,16 +58,33 @@ message MsgUpdateParamsResponse {}
 
 // MsgStartPermissionVP represents a message to start a permission validation process
 message MsgStartPermissionVP {
-  option (cosmos.msg.v1.signer) = "creator";
+  option (cosmos.msg.v1.signer) = "operator";
 
-  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  PermissionType type = 2;
-  uint64 validator_perm_id = 3;
-  OptionalUInt64 validation_fees = 6 [(gogoproto.nullable) = true]; // optional: Requested validation_fees for this permission (can be modified by validator)
-  OptionalUInt64 issuance_fees = 7 [(gogoproto.nullable) = true]; // optional: Requested issuance_fees for this permission (can be modified by validator)
-  OptionalUInt64 verification_fees = 8 [(gogoproto.nullable) = true]; // optional: Requested verification_fees for this permission (can be modified by validator)
-  string country = 4;
-  string did = 5 [(gogoproto.nullable) = true]; // optional
+  // authority is the group account on whose behalf this message is executed
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // operator is the account authorized by the authority to run this Msg
+  string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  PermissionType type = 3;
+  uint64 validator_perm_id = 4;
+  string did = 5; // mandatory: MUST conform to DID Syntax
+  OptionalUInt64 validation_fees = 6 [(gogoproto.nullable) = true];
+  OptionalUInt64 issuance_fees = 7 [(gogoproto.nullable) = true];
+  OptionalUInt64 verification_fees = 8 [(gogoproto.nullable) = true];
+  // vs_operator: the account of the Verifiable Service (optional)
+  string vs_operator = 9 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  bool vs_operator_authz_enabled = 10;
+  repeated cosmos.base.v1beta1.Coin vs_operator_authz_spend_limit = 11 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (amino.dont_omitempty) = true
+  ];
+  bool vs_operator_authz_with_feegrant = 12;
+  repeated cosmos.base.v1beta1.Coin vs_operator_authz_fee_spend_limit = 13 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (amino.dont_omitempty) = true
+  ];
+  google.protobuf.Duration vs_operator_authz_spend_period = 14 [(gogoproto.stdduration) = true];
 }
 
 // MsgStartPermissionVPResponse defines the Msg/StartPermissionVP response type
@@ -75,10 +94,11 @@ message MsgStartPermissionVPResponse {
 
 // MsgRenewPermissionVP represents a message to renew a permission validation process
 message MsgRenewPermissionVP {
-  option (cosmos.msg.v1.signer) = "creator";
+  option (cosmos.msg.v1.signer) = "operator";
 
-  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  uint64 id = 2; // ID of the permission to renew
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  uint64 id = 3; // ID of the permission to renew
 }
 
 // MsgRenewPermissionVPResponse defines the Msg/RenewPermissionVP response type
@@ -86,18 +106,20 @@ message MsgRenewPermissionVPResponse {}
 
 // MsgSetPermissionVPToValidated represents a message to set a permission validation process to validated state
 message MsgSetPermissionVPToValidated {
-  option (cosmos.msg.v1.signer) = "creator";
+  option (cosmos.msg.v1.signer) = "operator";
 
-  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  uint64 id = 2;
-  google.protobuf.Timestamp effective_until = 3 [
+  // authority is the group account on whose behalf this message is executed
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // operator is the account authorized by the authority to run this Msg
+  string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  uint64 id = 3;
+  google.protobuf.Timestamp effective_until = 4 [
     (gogoproto.stdtime) = true,
     (gogoproto.nullable) = true
   ];
-  uint64 validation_fees = 4;
-  uint64 issuance_fees = 5;
-  uint64 verification_fees = 6;
-  string country = 7;
+  uint64 validation_fees = 5;
+  uint64 issuance_fees = 6;
+  uint64 verification_fees = 7;
   string vp_summary_digest_sri = 8;
   // Fee discount fields (scaled: 0 = 0.0, 10000 = 1.0, range 0-10000)
   // Default to 0 (no discount), maximum 10000 (100% discount)
@@ -109,21 +131,24 @@ message MsgSetPermissionVPToValidated {
 message MsgSetPermissionVPToValidatedResponse {}
 
 message MsgCancelPermissionVPLastRequest {
-  option (cosmos.msg.v1.signer) = "creator";
+  option (cosmos.msg.v1.signer) = "operator";
 
-  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  uint64 id = 2; // Permission ID
+  // authority is the group account on whose behalf this message is executed
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // operator is the account authorized by the authority to run this Msg
+  string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  uint64 id = 3; // Permission ID
 }
 
 message MsgCancelPermissionVPLastRequestResponse {}
 
 message MsgCreateRootPermission {
-  option (cosmos.msg.v1.signer) = "creator";
+  option (cosmos.msg.v1.signer) = "operator";
 
-  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  uint64 schema_id = 2;
-  string did = 3;
-  string country = 4;
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  uint64 schema_id = 3;
+  string did = 4;
   google.protobuf.Timestamp effective_from = 5 [
     (gogoproto.stdtime) = true,
     (gogoproto.nullable) = true
@@ -141,37 +166,43 @@ message MsgCreateRootPermissionResponse {
   uint64 id = 1; // ID of the created permission
 }
 
-message MsgExtendPermission {
-  option (cosmos.msg.v1.signer) = "creator";
+message MsgAdjustPermission {
+  option (cosmos.msg.v1.signer) = "operator";
 
-  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  uint64 id = 2; // Permission ID
-  google.protobuf.Timestamp effective_until = 3 [
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  uint64 id = 3; // Permission ID
+  google.protobuf.Timestamp effective_until = 4 [
     (gogoproto.stdtime) = true,
     (gogoproto.nullable) = true
   ];
 }
 
-message MsgExtendPermissionResponse {}
+message MsgAdjustPermissionResponse {}
 
 message MsgRevokePermission {
-  option (cosmos.msg.v1.signer) = "creator";
+  option (cosmos.msg.v1.signer) = "operator";
 
-  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  uint64 id = 2; // Permission ID
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  uint64 id = 3; // Permission ID
 }
 
 message MsgRevokePermissionResponse {}
 
 message MsgCreateOrUpdatePermissionSession {
-  option (cosmos.msg.v1.signer) = "creator";
+  option (cosmos.msg.v1.signer) = "operator";
 
-  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  string id = 2; // UUID
-  uint64 issuer_perm_id = 3;
-  uint64 verifier_perm_id = 4;
-  uint64 agent_perm_id = 5;
-  uint64 wallet_agent_perm_id = 6 [(gogoproto.nullable) = true];
+  // authority is the group account on whose behalf this message is executed
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // operator is the account authorized by the authority to run this Msg (vs_operator)
+  string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string id = 3; // UUID (mandatory)
+  uint64 issuer_perm_id = 4; // optional: issuer permission id
+  uint64 verifier_perm_id = 5; // optional: verifier permission id
+  uint64 agent_perm_id = 6; // mandatory: agent credential issuer permission id
+  uint64 wallet_agent_perm_id = 7; // mandatory: wallet credential issuer permission id
+  string digest = 8; // optional: digest derived from an issued or verified credential
 }
 
 message MsgCreateOrUpdatePermissionSessionResponse {
@@ -179,32 +210,36 @@ message MsgCreateOrUpdatePermissionSessionResponse {
 }
 
 message MsgSlashPermissionTrustDeposit {
-  option (cosmos.msg.v1.signer) = "creator";
+  option (cosmos.msg.v1.signer) = "operator";
 
-  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  uint64 id = 2;
-  uint64 amount = 3;
+  // authority is the group account on whose behalf this message is executed
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // operator is the account authorized by the authority to run this Msg
+  string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  uint64 id = 3;
+  uint64 amount = 4;
 }
 
 message MsgSlashPermissionTrustDepositResponse {}
 
 message MsgRepayPermissionSlashedTrustDeposit {
-  option (cosmos.msg.v1.signer) = "creator";
+  option (cosmos.msg.v1.signer) = "operator";
 
-  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  uint64 id = 2;
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  uint64 id = 3;
 }
 
 message MsgRepayPermissionSlashedTrustDepositResponse {}
 
 message MsgCreatePermission {
-  option (cosmos.msg.v1.signer) = "creator";
+  option (cosmos.msg.v1.signer) = "operator";
 
-  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  uint64 schema_id = 2;
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   PermissionType type = 3;
-  string did = 4;
-  string country = 5;
+  uint64 validator_perm_id = 4;
+  string did = 5;
   google.protobuf.Timestamp effective_from = 6 [
     (gogoproto.stdtime) = true,
     (gogoproto.nullable) = true
@@ -215,6 +250,21 @@ message MsgCreatePermission {
   ];
   uint64 verification_fees = 8;
   uint64 validation_fees = 9;
+  // vs_operator: the account of the Verifiable Service (optional)
+  string vs_operator = 10 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  bool vs_operator_authz_enabled = 11;
+  repeated cosmos.base.v1beta1.Coin vs_operator_authz_spend_limit = 12 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (amino.dont_omitempty) = true
+  ];
+  bool vs_operator_authz_with_feegrant = 13;
+  repeated cosmos.base.v1beta1.Coin vs_operator_authz_fee_spend_limit = 14 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (amino.dont_omitempty) = true
+  ];
+  google.protobuf.Duration vs_operator_authz_spend_period = 15 [(gogoproto.stdduration) = true];
 }
 
 message MsgCreatePermissionResponse {

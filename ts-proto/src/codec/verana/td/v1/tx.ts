@@ -30,9 +30,15 @@ export interface MsgUpdateParams {
 export interface MsgUpdateParamsResponse {
 }
 
-/** MsgReclaimTrustDepositYield defines the request type */
+/**
+ * MsgReclaimTrustDepositYield defines the request type
+ * [MOD-TD-MSG-2] Reclaim Trust Deposit Yield
+ */
 export interface MsgReclaimTrustDepositYield {
-  creator: string;
+  /** authority is the group address that owns the trust deposit. */
+  authority: string;
+  /** operator is the account authorized by the authority to run this Msg. */
+  operator: string;
 }
 
 /** MsgReclaimTrustDepositYieldResponse defines the response type */
@@ -70,9 +76,16 @@ export interface MsgSlashTrustDeposit {
 export interface MsgSlashTrustDepositResponse {
 }
 
+/**
+ * MsgRepaySlashedTrustDeposit defines the message for repaying a slashed trust deposit.
+ * [MOD-TD-MSG-6] Any authorized operator CAN execute this on behalf of an authority.
+ */
 export interface MsgRepaySlashedTrustDeposit {
-  creator: string;
-  account: string;
+  /** authority is the group address that owns the slashed trust deposit. */
+  authority: string;
+  /** operator is the account authorized by the authority to run this Msg. */
+  operator: string;
+  /** amount is the repayment amount (must equal outstanding slashed amount). */
   amount: number;
 }
 
@@ -199,13 +212,16 @@ export const MsgUpdateParamsResponse = {
 };
 
 function createBaseMsgReclaimTrustDepositYield(): MsgReclaimTrustDepositYield {
-  return { creator: "" };
+  return { authority: "", operator: "" };
 }
 
 export const MsgReclaimTrustDepositYield = {
   encode(message: MsgReclaimTrustDepositYield, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.creator !== "") {
-      writer.uint32(10).string(message.creator);
+    if (message.authority !== "") {
+      writer.uint32(10).string(message.authority);
+    }
+    if (message.operator !== "") {
+      writer.uint32(18).string(message.operator);
     }
     return writer;
   },
@@ -222,7 +238,14 @@ export const MsgReclaimTrustDepositYield = {
             break;
           }
 
-          message.creator = reader.string();
+          message.authority = reader.string();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.operator = reader.string();
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -234,13 +257,19 @@ export const MsgReclaimTrustDepositYield = {
   },
 
   fromJSON(object: any): MsgReclaimTrustDepositYield {
-    return { creator: isSet(object.creator) ? globalThis.String(object.creator) : "" };
+    return {
+      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
+    };
   },
 
   toJSON(message: MsgReclaimTrustDepositYield): unknown {
     const obj: any = {};
-    if (message.creator !== "") {
-      obj.creator = message.creator;
+    if (message.authority !== "") {
+      obj.authority = message.authority;
+    }
+    if (message.operator !== "") {
+      obj.operator = message.operator;
     }
     return obj;
   },
@@ -250,7 +279,8 @@ export const MsgReclaimTrustDepositYield = {
   },
   fromPartial<I extends Exact<DeepPartial<MsgReclaimTrustDepositYield>, I>>(object: I): MsgReclaimTrustDepositYield {
     const message = createBaseMsgReclaimTrustDepositYield();
-    message.creator = object.creator ?? "";
+    message.authority = object.authority ?? "";
+    message.operator = object.operator ?? "";
     return message;
   },
 };
@@ -599,16 +629,16 @@ export const MsgSlashTrustDepositResponse = {
 };
 
 function createBaseMsgRepaySlashedTrustDeposit(): MsgRepaySlashedTrustDeposit {
-  return { creator: "", account: "", amount: 0 };
+  return { authority: "", operator: "", amount: 0 };
 }
 
 export const MsgRepaySlashedTrustDeposit = {
   encode(message: MsgRepaySlashedTrustDeposit, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.creator !== "") {
-      writer.uint32(10).string(message.creator);
+    if (message.authority !== "") {
+      writer.uint32(10).string(message.authority);
     }
-    if (message.account !== "") {
-      writer.uint32(18).string(message.account);
+    if (message.operator !== "") {
+      writer.uint32(18).string(message.operator);
     }
     if (message.amount !== 0) {
       writer.uint32(24).uint64(message.amount);
@@ -628,14 +658,14 @@ export const MsgRepaySlashedTrustDeposit = {
             break;
           }
 
-          message.creator = reader.string();
+          message.authority = reader.string();
           continue;
         case 2:
           if (tag !== 18) {
             break;
           }
 
-          message.account = reader.string();
+          message.operator = reader.string();
           continue;
         case 3:
           if (tag !== 24) {
@@ -655,19 +685,19 @@ export const MsgRepaySlashedTrustDeposit = {
 
   fromJSON(object: any): MsgRepaySlashedTrustDeposit {
     return {
-      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
-      account: isSet(object.account) ? globalThis.String(object.account) : "",
+      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
       amount: isSet(object.amount) ? globalThis.Number(object.amount) : 0,
     };
   },
 
   toJSON(message: MsgRepaySlashedTrustDeposit): unknown {
     const obj: any = {};
-    if (message.creator !== "") {
-      obj.creator = message.creator;
+    if (message.authority !== "") {
+      obj.authority = message.authority;
     }
-    if (message.account !== "") {
-      obj.account = message.account;
+    if (message.operator !== "") {
+      obj.operator = message.operator;
     }
     if (message.amount !== 0) {
       obj.amount = Math.round(message.amount);
@@ -680,8 +710,8 @@ export const MsgRepaySlashedTrustDeposit = {
   },
   fromPartial<I extends Exact<DeepPartial<MsgRepaySlashedTrustDeposit>, I>>(object: I): MsgRepaySlashedTrustDeposit {
     const message = createBaseMsgRepaySlashedTrustDeposit();
-    message.creator = object.creator ?? "";
-    message.account = object.account ?? "";
+    message.authority = object.authority ?? "";
+    message.operator = object.operator ?? "";
     message.amount = object.amount ?? 0;
     return message;
   },

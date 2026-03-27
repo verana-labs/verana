@@ -1,0 +1,100 @@
+syntax = "proto3";
+package verana.xr.v1;
+
+import "amino/amino.proto";
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "verana/xr/v1/params.proto";
+import "verana/xr/v1/tx.proto";
+import "verana/cs/v1/types.proto";
+
+option go_package = "github.com/verana-labs/verana/x/xr/types";
+
+// Query defines the gRPC querier service.
+service Query {
+  // Parameters queries the parameters of the module.
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+    option (google.api.http).get = "/verana-labs/verana/xr/v1/params";
+  }
+
+  // GetExchangeRate queries an exchange rate by id or by asset pair.
+  rpc GetExchangeRate(QueryGetExchangeRateRequest) returns (QueryGetExchangeRateResponse) {
+    option (google.api.http).get = "/verana/xr/v1/get";
+  }
+
+  // ListExchangeRates queries exchange rates with optional filters.
+  rpc ListExchangeRates(QueryListExchangeRatesRequest) returns (QueryListExchangeRatesResponse) {
+    option (google.api.http).get = "/verana/xr/v1/list";
+  }
+
+  // GetPrice computes the price using an exchange rate.
+  rpc GetPrice(QueryGetPriceRequest) returns (QueryGetPriceResponse) {
+    option (google.api.http).get = "/verana/xr/v1/price";
+  }
+}
+
+// QueryParamsRequest is request type for the Query/Params RPC method.
+message QueryParamsRequest {}
+
+// QueryParamsResponse is response type for the Query/Params RPC method.
+message QueryParamsResponse {
+  // params holds all the parameters of this module.
+  Params params = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+}
+
+// StateFilter is used for optional bool filtering: 0=unset, 1=active, 2=inactive.
+enum StateFilter {
+  STATE_FILTER_UNSPECIFIED = 0;
+  STATE_FILTER_ACTIVE = 1;
+  STATE_FILTER_INACTIVE = 2;
+}
+
+// QueryGetExchangeRateRequest is the request type for Query/GetExchangeRate.
+message QueryGetExchangeRateRequest {
+  uint64 id = 1;
+  verana.cs.v1.PricingAssetType base_asset_type = 2;
+  string base_asset = 3;
+  verana.cs.v1.PricingAssetType quote_asset_type = 4;
+  string quote_asset = 5;
+  StateFilter state = 6;
+  google.protobuf.Timestamp expire_ts = 7 [(gogoproto.nullable) = true, (gogoproto.stdtime) = true];
+}
+
+// QueryGetExchangeRateResponse is the response type for Query/GetExchangeRate.
+message QueryGetExchangeRateResponse {
+  ExchangeRate exchange_rate = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryListExchangeRatesRequest is the request type for Query/ListExchangeRates.
+message QueryListExchangeRatesRequest {
+  verana.cs.v1.PricingAssetType base_asset_type = 1;
+  string base_asset = 2;
+  verana.cs.v1.PricingAssetType quote_asset_type = 3;
+  string quote_asset = 4;
+  StateFilter state = 5;
+  google.protobuf.Timestamp expire = 6 [(gogoproto.nullable) = true, (gogoproto.stdtime) = true];
+}
+
+// QueryListExchangeRatesResponse is the response type for Query/ListExchangeRates.
+message QueryListExchangeRatesResponse {
+  repeated ExchangeRate exchange_rates = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryGetPriceRequest is the request type for Query/GetPrice.
+message QueryGetPriceRequest {
+  verana.cs.v1.PricingAssetType base_asset_type = 1;
+  string base_asset = 2;
+  verana.cs.v1.PricingAssetType quote_asset_type = 3;
+  string quote_asset = 4;
+  string amount = 5;
+}
+
+// QueryGetPriceResponse is the response type for Query/GetPrice.
+message QueryGetPriceResponse {
+  string price = 1;
+}

@@ -18,7 +18,7 @@ func TestGenesisState_Validate(t *testing.T) {
 		Id:             1,
 		Type:           types.PermissionType_ECOSYSTEM,
 		Did:            "did:example:12345",
-		Grantee:        creatorAddr,
+		Authority:      creatorAddr,
 		Created:        &nowTime,
 		CreatedBy:      creatorAddr,
 		Modified:       &nowTime,
@@ -32,7 +32,7 @@ func TestGenesisState_Validate(t *testing.T) {
 		Id:              2,
 		Type:            types.PermissionType_ISSUER,
 		Did:             "did:example:67890",
-		Grantee:         creatorAddr,
+		Authority:       creatorAddr,
 		Created:         &nowTime,
 		CreatedBy:       creatorAddr,
 		Modified:        &nowTime,
@@ -45,14 +45,15 @@ func TestGenesisState_Validate(t *testing.T) {
 
 	validSession := types.PermissionSession{
 		Id:          "test-session-id",
-		Controller:  creatorAddr,
+		Authority:   creatorAddr,
+		VsOperator:  creatorAddr,
 		AgentPermId: 2,
 		Created:     &nowTime,
 		Modified:    &nowTime,
-		Authz: []*types.SessionAuthz{
+		SessionRecords: []*types.PermissionSessionRecord{
 			{
-				ExecutorPermId:    1,
-				BeneficiaryPermId: 2,
+				IssuerPermId: 1,
+				Created:      &nowTime,
 			},
 		},
 	}
@@ -108,11 +109,11 @@ func TestGenesisState_Validate(t *testing.T) {
 				Params: types.DefaultParams(),
 				Permissions: []types.Permission{
 					{
-						Id:       0, // Invalid ID
-						Type:     types.PermissionType_ISSUER,
-						Grantee:  creatorAddr,
-						Created:  &nowTime,
-						Modified: &nowTime,
+						Id:        0, // Invalid ID
+						Type:      types.PermissionType_ISSUER,
+						Authority: creatorAddr,
+						Created:   &nowTime,
+						Modified:  &nowTime,
 					},
 				},
 				PermissionSessions: []types.PermissionSession{},
@@ -129,7 +130,7 @@ func TestGenesisState_Validate(t *testing.T) {
 					{
 						Id:              1,
 						Type:            types.PermissionType_ISSUER,
-						Grantee:         creatorAddr,
+						Authority:       creatorAddr,
 						Created:         &nowTime,
 						Modified:        &nowTime,
 						ValidatorPermId: 999, // Non-existent validator
@@ -160,7 +161,8 @@ func TestGenesisState_Validate(t *testing.T) {
 				PermissionSessions: []types.PermissionSession{
 					{
 						Id:          "test-session-id",
-						Controller:  creatorAddr,
+						Authority:   creatorAddr,
+						VsOperator:  creatorAddr,
 						AgentPermId: 999, // Non-existent perm
 						Created:     &nowTime,
 						Modified:    &nowTime,

@@ -85,6 +85,53 @@
           "Query"
         ]
       }
+    },
+    "/verana/de/v1/vs-operator-authorizations": {
+      "get": {
+        "summary": "ListVSOperatorAuthorizations returns VS operator authorizations matching optional filters.",
+        "operationId": "Query_ListVSOperatorAuthorizations",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.de.v1.QueryListVSOperatorAuthorizationsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "authority",
+            "description": "authority filters by the authority group that granted the authorization.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "vs_operator",
+            "description": "vs_operator filters by the VS operator account.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "response_max_size",
+            "description": "response_max_size limits the number of results. Must be 1-1024, defaults to 64.",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "Query"
+        ]
+      }
     }
   },
   "definitions": {
@@ -190,6 +237,19 @@
       },
       "description": "QueryListOperatorAuthorizationsResponse is the response type for the\nQuery/ListOperatorAuthorizations RPC method."
     },
+    "verana.de.v1.QueryListVSOperatorAuthorizationsResponse": {
+      "type": "object",
+      "properties": {
+        "vs_operator_authorizations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/verana.de.v1.VSOperatorAuthorization"
+          }
+        }
+      },
+      "description": "QueryListVSOperatorAuthorizationsResponse is the response type for the\nQuery/ListVSOperatorAuthorizations RPC method."
+    },
     "verana.de.v1.QueryParamsResponse": {
       "type": "object",
       "properties": {
@@ -199,6 +259,27 @@
         }
       },
       "description": "QueryParamsResponse is response type for the Query/Params RPC method."
+    },
+    "verana.de.v1.VSOperatorAuthorization": {
+      "type": "object",
+      "properties": {
+        "authority": {
+          "type": "string",
+          "description": "authority is the group granting the authorization."
+        },
+        "vs_operator": {
+          "type": "string",
+          "description": "vs_operator is the operator account receiving the authorization."
+        },
+        "permissions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uint64"
+          },
+          "description": "permissions is the list of permission ids for which this authorization is\ngranted."
+        }
+      }
     }
   }
 }

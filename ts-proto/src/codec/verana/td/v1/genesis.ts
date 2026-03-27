@@ -16,6 +16,8 @@ export interface GenesisState {
   /** params defines all the parameters of the module. */
   params: Params | undefined;
   trustDeposits: TrustDepositRecord[];
+  /** dust is the accumulated fractional yield carried forward */
+  dust: string;
 }
 
 /** TrustDepositRecord defines a trust deposit entry for genesis state */
@@ -27,7 +29,7 @@ export interface TrustDepositRecord {
 }
 
 function createBaseGenesisState(): GenesisState {
-  return { params: undefined, trustDeposits: [] };
+  return { params: undefined, trustDeposits: [], dust: "" };
 }
 
 export const GenesisState = {
@@ -37,6 +39,9 @@ export const GenesisState = {
     }
     for (const v of message.trustDeposits) {
       TrustDepositRecord.encode(v!, writer.uint32(18).fork()).ldelim();
+    }
+    if (message.dust !== "") {
+      writer.uint32(26).string(message.dust);
     }
     return writer;
   },
@@ -62,6 +67,13 @@ export const GenesisState = {
 
           message.trustDeposits.push(TrustDepositRecord.decode(reader, reader.uint32()));
           continue;
+        case 3:
+          if (tag !== 26) {
+            break;
+          }
+
+          message.dust = reader.string();
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -77,6 +89,7 @@ export const GenesisState = {
       trustDeposits: globalThis.Array.isArray(object?.trustDeposits)
         ? object.trustDeposits.map((e: any) => TrustDepositRecord.fromJSON(e))
         : [],
+      dust: isSet(object.dust) ? globalThis.String(object.dust) : "",
     };
   },
 
@@ -87,6 +100,9 @@ export const GenesisState = {
     }
     if (message.trustDeposits?.length) {
       obj.trustDeposits = message.trustDeposits.map((e) => TrustDepositRecord.toJSON(e));
+    }
+    if (message.dust !== "") {
+      obj.dust = message.dust;
     }
     return obj;
   },
@@ -100,6 +116,7 @@ export const GenesisState = {
       ? Params.fromPartial(object.params)
       : undefined;
     message.trustDeposits = object.trustDeposits?.map((e) => TrustDepositRecord.fromPartial(e)) || [];
+    message.dust = object.dust ?? "";
     return message;
   },
 };

@@ -19,12 +19,6 @@ import {
   MsgRevokeOperatorAuthorization,
 } from "../codec/verana/de/v1/tx";
 import {
-  MsgAddDID,
-  MsgRenewDID,
-  MsgTouchDID,
-  MsgRemoveDID,
-} from "../codec/verana/dd/v1/tx";
-import {
   MsgCreateCredentialSchema,
   MsgUpdateCredentialSchema,
   MsgArchiveCredentialSchema,
@@ -32,17 +26,21 @@ import {
 import {
   MsgReclaimTrustDeposit,
   MsgReclaimTrustDepositYield,
+  MsgSlashTrustDeposit,
+  MsgRepaySlashedTrustDeposit,
 } from "../codec/verana/td/v1/tx";
 import {
   MsgCreateRootPermission,
   MsgCreatePermission,
-  MsgExtendPermission,
+  MsgAdjustPermission,
   MsgRevokePermission,
   MsgStartPermissionVP,
   MsgRenewPermissionVP,
   MsgSetPermissionVPToValidated,
   MsgCancelPermissionVPLastRequest,
   MsgCreateOrUpdatePermissionSession,
+  MsgSlashPermissionTrustDeposit,
+  MsgRepayPermissionSlashedTrustDeposit,
 } from "../codec/verana/perm/v1/tx";
 import { PermissionType } from "../codec/verana/perm/v1/types";
 
@@ -237,66 +235,6 @@ export const MsgIncreaseActiveGovernanceFrameworkVersionAminoConverter: AminoCon
 };
 
 // ============================================================================
-// DID Directory (DD) Module Converters
-// ============================================================================
-
-export const MsgAddDIDAminoConverter: AminoConverter = {
-  aminoType: '/verana.dd.v1.MsgAddDID',
-  toAmino: ({ creator, did, years }: MsgAddDID) => ({
-    creator,
-    did,
-    years,
-  }),
-  fromAmino: (value: { creator: string; did: string; years: number }) =>
-    MsgAddDID.fromPartial({
-      creator: value.creator,
-      did: value.did,
-      years: value.years,
-    }),
-};
-
-export const MsgRenewDIDAminoConverter: AminoConverter = {
-  aminoType: '/verana.dd.v1.MsgRenewDID',
-  toAmino: ({ creator, did, years }: MsgRenewDID) => ({
-    creator,
-    did,
-    years,
-  }),
-  fromAmino: (value: { creator: string; did: string; years: number }) =>
-    MsgRenewDID.fromPartial({
-      creator: value.creator,
-      did: value.did,
-      years: value.years,
-    }),
-};
-
-export const MsgTouchDIDAminoConverter: AminoConverter = {
-  aminoType: '/verana.dd.v1.MsgTouchDID',
-  toAmino: ({ creator, did }: MsgTouchDID) => ({
-    creator,
-    did,
-  }),
-  fromAmino: (value: { creator: string; did: string }) =>
-    MsgTouchDID.fromPartial({
-      creator: value.creator,
-      did: value.did,
-    }),
-};
-
-export const MsgRemoveDIDAminoConverter: AminoConverter = {
-  aminoType: '/verana.dd.v1.MsgRemoveDID',
-  toAmino: ({ creator, did }: MsgRemoveDID) => ({
-    creator,
-    did,
-  }),
-  fromAmino: (value: { creator: string; did: string }) =>
-    MsgRemoveDID.fromPartial({
-      creator: value.creator,
-      did: value.did,
-    }),
-};
-
-// ============================================================================
 // Credential Schema (CS) Module Converters
 // ============================================================================
 
@@ -397,12 +335,44 @@ export const MsgReclaimTrustDepositAminoConverter: AminoConverter = {
 
 export const MsgReclaimTrustDepositYieldAminoConverter: AminoConverter = {
   aminoType: '/verana.td.v1.MsgReclaimTrustDepositYield',
-  toAmino: ({ creator }: MsgReclaimTrustDepositYield) => ({
-    creator,
+  toAmino: ({ authority, operator }: MsgReclaimTrustDepositYield) => ({
+    authority,
+    operator,
   }),
-  fromAmino: (value: { creator: string }) =>
+  fromAmino: (value: { authority: string; operator: string }) =>
     MsgReclaimTrustDepositYield.fromPartial({
-      creator: value.creator,
+      authority: value.authority,
+      operator: value.operator,
+    }),
+};
+
+export const MsgRepaySlashedTrustDepositAminoConverter: AminoConverter = {
+  aminoType: '/verana.td.v1.MsgRepaySlashedTrustDeposit',
+  toAmino: ({ authority, operator, amount }: MsgRepaySlashedTrustDeposit) => ({
+    authority,
+    operator,
+    amount: amount != null ? amount.toString() : undefined,
+  }),
+  fromAmino: (value: { authority: string; operator: string; amount: number | string }) =>
+    MsgRepaySlashedTrustDeposit.fromPartial({
+      authority: value.authority,
+      operator: value.operator,
+      amount: value.amount != null ? Number(value.amount) : 0,
+    }),
+};
+
+export const MsgSlashTrustDepositAminoConverter: AminoConverter = {
+  aminoType: '/verana.td.v1.MsgSlashTrustDeposit',
+  toAmino: ({ authority, account, amount }: MsgSlashTrustDeposit) => ({
+    authority,
+    account,
+    amount,
+  }),
+  fromAmino: (value: { authority: string; account: string; amount: string }) =>
+    MsgSlashTrustDeposit.fromPartial({
+      authority: value.authority,
+      account: value.account,
+      amount: value.amount,
     }),
 };
 
@@ -413,10 +383,10 @@ export const MsgReclaimTrustDepositYieldAminoConverter: AminoConverter = {
 export const MsgCreateRootPermissionAminoConverter: AminoConverter = {
   aminoType: '/verana.perm.v1.MsgCreateRootPermission',
   toAmino: (m: MsgCreateRootPermission) => clean({
-    creator: m.creator ?? '',
+    authority: m.authority ?? '',
+    operator: m.operator ?? '',
     schema_id: u64ToStr(m.schemaId),
     did: m.did ?? '',
-    country: m.country ?? '',
     effective_from: dateToAmino(m.effectiveFrom),
     effective_until: dateToAmino(m.effectiveUntil),
     validation_fees: u64ToStr(m.validationFees),
@@ -425,10 +395,10 @@ export const MsgCreateRootPermissionAminoConverter: AminoConverter = {
   }),
   fromAmino: (a: any): MsgCreateRootPermission =>
     MsgCreateRootPermission.fromPartial({
-      creator: a.creator ?? '',
+      authority: a.authority ?? '',
+      operator: a.operator ?? '',
       schemaId: strToU64(a.schema_id) != null ? Number(strToU64(a.schema_id)!.toString()) : 0,
       did: a.did ?? '',
-      country: a.country ?? '',
       effectiveFrom: dateFromAmino(a.effective_from),
       effectiveUntil: dateFromAmino(a.effective_until),
       validationFees: strToU64(a.validation_fees) != null ? Number(strToU64(a.validation_fees)!.toString()) : 0,
@@ -437,43 +407,18 @@ export const MsgCreateRootPermissionAminoConverter: AminoConverter = {
     }),
 };
 
-export const MsgCreatePermissionAminoConverter: AminoConverter = {
-  aminoType: '/verana.perm.v1.MsgCreatePermission',
-  toAmino: (m: MsgCreatePermission) => clean({
-    creator: m.creator ?? '',
-    schema_id: u64ToStr(m.schemaId),
-    type: m.type ?? PermissionType.UNSPECIFIED,
-    did: m.did ?? '',
-    country: m.country ?? '',
-    effective_from: dateToAmino(m.effectiveFrom),
-    effective_until: dateToAmino(m.effectiveUntil),
-    verification_fees: u64ToStrIfNonZero(m.verificationFees),
-    validation_fees: u64ToStrIfNonZero(m.validationFees),
-  }),
-  fromAmino: (a: any): MsgCreatePermission =>
-    MsgCreatePermission.fromPartial({
-      creator: a.creator ?? '',
-      schemaId: strToU64(a.schema_id) != null ? Number(strToU64(a.schema_id)!.toString()) : 0,
-      type: a.type ?? PermissionType.UNSPECIFIED,
-      did: a.did ?? '',
-      country: a.country ?? '',
-      effectiveFrom: dateFromAmino(a.effective_from),
-      effectiveUntil: dateFromAmino(a.effective_until),
-      verificationFees: strToU64(a.verification_fees) != null ? Number(strToU64(a.verification_fees)!.toString()) : 0,
-      validationFees: strToU64(a.validation_fees) != null ? Number(strToU64(a.validation_fees)!.toString()) : 0,
-    }),
-};
-
-export const MsgExtendPermissionAminoConverter: AminoConverter = {
-  aminoType: '/verana.perm.v1.MsgExtendPermission',
-  toAmino: (m: MsgExtendPermission) => clean({
-    creator: m.creator ?? '',
+export const MsgAdjustPermissionAminoConverter: AminoConverter = {
+  aminoType: '/verana.perm.v1.MsgAdjustPermission',
+  toAmino: (m: MsgAdjustPermission) => clean({
+    authority: m.authority ?? '',
+    operator: m.operator ?? '',
     id: u64ToStr(m.id),
     effective_until: dateToAmino(m.effectiveUntil),
   }),
-  fromAmino: (a: any): MsgExtendPermission =>
-    MsgExtendPermission.fromPartial({
-      creator: a.creator ?? '',
+  fromAmino: (a: any): MsgAdjustPermission =>
+    MsgAdjustPermission.fromPartial({
+      authority: a.authority ?? '',
+      operator: a.operator ?? '',
       id: strToU64(a.id) != null ? Number(strToU64(a.id)!.toString()) : 0,
       effectiveUntil: dateFromAmino(a.effective_until),
     }),
@@ -482,12 +427,14 @@ export const MsgExtendPermissionAminoConverter: AminoConverter = {
 export const MsgRevokePermissionAminoConverter: AminoConverter = {
   aminoType: '/verana.perm.v1.MsgRevokePermission',
   toAmino: (m: MsgRevokePermission) => clean({
-    creator: m.creator ?? '',
+    authority: m.authority ?? '',
+    operator: m.operator ?? '',
     id: u64ToStr(m.id),
   }),
   fromAmino: (a: any): MsgRevokePermission =>
     MsgRevokePermission.fromPartial({
-      creator: a.creator ?? '',
+      authority: a.authority ?? '',
+      operator: a.operator ?? '',
       id: strToU64(a.id) != null ? Number(strToU64(a.id)!.toString()) : 0,
     }),
 };
@@ -495,31 +442,51 @@ export const MsgRevokePermissionAminoConverter: AminoConverter = {
 export const MsgStartPermissionVPAminoConverter: AminoConverter = {
   aminoType: '/verana.perm.v1.MsgStartPermissionVP',
   toAmino: (m: MsgStartPermissionVP) => clean({
-    creator: m.creator ?? '',
+    authority: m.authority ?? '',
+    operator: m.operator ?? '',
     type: m.type ?? PermissionType.UNSPECIFIED,
     validator_perm_id: u64ToStr(m.validatorPermId),
-    country: m.country ?? '',
     did: m.did ?? '',
+    validation_fees: m.validationFees ? { value: u64ToStr(m.validationFees.value) } : undefined,
+    issuance_fees: m.issuanceFees ? { value: u64ToStr(m.issuanceFees.value) } : undefined,
+    verification_fees: m.verificationFees ? { value: u64ToStr(m.verificationFees.value) } : undefined,
+    vs_operator: m.vsOperator || undefined,
+    vs_operator_authz_enabled: m.vsOperatorAuthzEnabled || undefined,
+    vs_operator_authz_spend_limit: m.vsOperatorAuthzSpendLimit ?? [],
+    vs_operator_authz_with_feegrant: m.vsOperatorAuthzWithFeegrant || undefined,
+    vs_operator_authz_fee_spend_limit: m.vsOperatorAuthzFeeSpendLimit ?? [],
+    vs_operator_authz_spend_period: m.vsOperatorAuthzSpendPeriod ?? undefined,
   }),
   fromAmino: (a: any): MsgStartPermissionVP =>
     MsgStartPermissionVP.fromPartial({
-      creator: a.creator ?? '',
+      authority: a.authority ?? '',
+      operator: a.operator ?? '',
       type: a.type ?? PermissionType.UNSPECIFIED,
       validatorPermId: strToU64(a.validator_perm_id) != null ? Number(strToU64(a.validator_perm_id)!.toString()) : 0,
-      country: a.country ?? '',
       did: a.did ?? '',
+      validationFees: a.validation_fees ? { value: Number(a.validation_fees.value) } : undefined,
+      issuanceFees: a.issuance_fees ? { value: Number(a.issuance_fees.value) } : undefined,
+      verificationFees: a.verification_fees ? { value: Number(a.verification_fees.value) } : undefined,
+      vsOperator: a.vs_operator ?? '',
+      vsOperatorAuthzEnabled: a.vs_operator_authz_enabled ?? false,
+      vsOperatorAuthzSpendLimit: a.vs_operator_authz_spend_limit ?? [],
+      vsOperatorAuthzWithFeegrant: a.vs_operator_authz_with_feegrant ?? false,
+      vsOperatorAuthzFeeSpendLimit: a.vs_operator_authz_fee_spend_limit ?? [],
+      vsOperatorAuthzSpendPeriod: a.vs_operator_authz_spend_period ?? undefined,
     }),
 };
 
 export const MsgRenewPermissionVPAminoConverter: AminoConverter = {
   aminoType: '/verana.perm.v1.MsgRenewPermissionVP',
   toAmino: (m: MsgRenewPermissionVP) => clean({
-    creator: m.creator ?? '',
+    authority: m.authority ?? '',
+    operator: m.operator ?? '',
     id: u64ToStr(m.id),
   }),
   fromAmino: (a: any): MsgRenewPermissionVP =>
     MsgRenewPermissionVP.fromPartial({
-      creator: a.creator ?? '',
+      authority: a.authority ?? '',
+      operator: a.operator ?? '',
       id: strToU64(a.id) != null ? Number(strToU64(a.id)!.toString()) : 0,
     }),
 };
@@ -527,37 +494,43 @@ export const MsgRenewPermissionVPAminoConverter: AminoConverter = {
 export const MsgSetPermissionVPToValidatedAminoConverter: AminoConverter = {
   aminoType: '/verana.perm.v1.MsgSetPermissionVPToValidated',
   toAmino: (m: MsgSetPermissionVPToValidated) => clean({
-    creator: m.creator ?? '',
+    authority: m.authority ?? '',
+    operator: m.operator ?? '',
     id: u64ToStr(m.id),
     effective_until: dateToAmino(m.effectiveUntil),
     validation_fees: u64ToStr(m.validationFees),
     issuance_fees: u64ToStr(m.issuanceFees),
     verification_fees: u64ToStr(m.verificationFees),
-    country: m.country ?? '',
     vp_summary_digest_sri: m.vpSummaryDigestSri ?? '',
+    issuance_fee_discount: u64ToStr(m.issuanceFeeDiscount),
+    verification_fee_discount: u64ToStr(m.verificationFeeDiscount),
   }),
   fromAmino: (a: any): MsgSetPermissionVPToValidated =>
     MsgSetPermissionVPToValidated.fromPartial({
-      creator: a.creator ?? '',
+      authority: a.authority ?? '',
+      operator: a.operator ?? '',
       id: strToU64(a.id) != null ? Number(strToU64(a.id)!.toString()) : 0,
       effectiveUntil: dateFromAmino(a.effective_until),
       validationFees: strToU64(a.validation_fees) != null ? Number(strToU64(a.validation_fees)!.toString()) : 0,
       issuanceFees: strToU64(a.issuance_fees) != null ? Number(strToU64(a.issuance_fees)!.toString()) : 0,
       verificationFees: strToU64(a.verification_fees) != null ? Number(strToU64(a.verification_fees)!.toString()) : 0,
-      country: a.country ?? '',
       vpSummaryDigestSri: a.vp_summary_digest_sri ?? '',
+      issuanceFeeDiscount: strToU64(a.issuance_fee_discount) != null ? Number(strToU64(a.issuance_fee_discount)!.toString()) : 0,
+      verificationFeeDiscount: strToU64(a.verification_fee_discount) != null ? Number(strToU64(a.verification_fee_discount)!.toString()) : 0,
     }),
 };
 
 export const MsgCancelPermissionVPLastRequestAminoConverter: AminoConverter = {
   aminoType: '/verana.perm.v1.MsgCancelPermissionVPLastRequest',
   toAmino: (m: MsgCancelPermissionVPLastRequest) => clean({
-    creator: m.creator ?? '',
+    authority: m.authority ?? '',
+    operator: m.operator ?? '',
     id: u64ToStr(m.id),
   }),
   fromAmino: (a: any): MsgCancelPermissionVPLastRequest =>
     MsgCancelPermissionVPLastRequest.fromPartial({
-      creator: a.creator ?? '',
+      authority: a.authority ?? '',
+      operator: a.operator ?? '',
       id: strToU64(a.id) != null ? Number(strToU64(a.id)!.toString()) : 0,
     }),
 };
@@ -565,21 +538,96 @@ export const MsgCancelPermissionVPLastRequestAminoConverter: AminoConverter = {
 export const MsgCreateOrUpdatePermissionSessionAminoConverter: AminoConverter = {
   aminoType: '/verana.perm.v1.MsgCreateOrUpdatePermissionSession',
   toAmino: (m: MsgCreateOrUpdatePermissionSession) => clean({
-    creator: m.creator ?? '',
+    authority: m.authority ?? '',
+    operator: m.operator ?? '',
     id: m.id ?? '',
     issuer_perm_id: u64ToStr(m.issuerPermId),
     verifier_perm_id: u64ToStr(m.verifierPermId),
     agent_perm_id: u64ToStr(m.agentPermId),
     wallet_agent_perm_id: u64ToStr(m.walletAgentPermId),
+    digest: m.digest ?? undefined,
   }),
   fromAmino: (a: any): MsgCreateOrUpdatePermissionSession =>
     MsgCreateOrUpdatePermissionSession.fromPartial({
-      creator: a.creator ?? '',
+      authority: a.authority ?? '',
+      operator: a.operator ?? '',
       id: a.id ?? '',
       issuerPermId: strToU64(a.issuer_perm_id) != null ? Number(strToU64(a.issuer_perm_id)!.toString()) : 0,
       verifierPermId: strToU64(a.verifier_perm_id) != null ? Number(strToU64(a.verifier_perm_id)!.toString()) : 0,
       agentPermId: strToU64(a.agent_perm_id) != null ? Number(strToU64(a.agent_perm_id)!.toString()) : 0,
       walletAgentPermId: strToU64(a.wallet_agent_perm_id) != null ? Number(strToU64(a.wallet_agent_perm_id)!.toString()) : 0,
+      digest: a.digest ?? '',
+    }),
+};
+
+export const MsgSlashPermissionTrustDepositAminoConverter: AminoConverter = {
+  aminoType: '/verana.perm.v1.MsgSlashPermissionTrustDeposit',
+  toAmino: (m: MsgSlashPermissionTrustDeposit) => clean({
+    authority: m.authority ?? '',
+    operator: m.operator ?? '',
+    id: u64ToStr(m.id),
+    amount: u64ToStr(m.amount),
+  }),
+  fromAmino: (a: any): MsgSlashPermissionTrustDeposit =>
+    MsgSlashPermissionTrustDeposit.fromPartial({
+      authority: a.authority ?? '',
+      operator: a.operator ?? '',
+      id: strToU64(a.id) != null ? Number(strToU64(a.id)!.toString()) : 0,
+      amount: strToU64(a.amount) != null ? Number(strToU64(a.amount)!.toString()) : 0,
+    }),
+};
+
+export const MsgRepayPermissionSlashedTrustDepositAminoConverter: AminoConverter = {
+  aminoType: '/verana.perm.v1.MsgRepayPermissionSlashedTrustDeposit',
+  toAmino: (m: MsgRepayPermissionSlashedTrustDeposit) => clean({
+    authority: m.authority ?? '',
+    operator: m.operator ?? '',
+    id: u64ToStr(m.id),
+  }),
+  fromAmino: (a: any): MsgRepayPermissionSlashedTrustDeposit =>
+    MsgRepayPermissionSlashedTrustDeposit.fromPartial({
+      authority: a.authority ?? '',
+      operator: a.operator ?? '',
+      id: strToU64(a.id) != null ? Number(strToU64(a.id)!.toString()) : 0,
+    }),
+};
+
+export const MsgCreatePermissionAminoConverter: AminoConverter = {
+  aminoType: '/verana.perm.v1.MsgCreatePermission',
+  toAmino: (m: MsgCreatePermission) => clean({
+    authority: m.authority ?? '',
+    operator: m.operator ?? '',
+    type: m.type ?? 0,
+    validator_perm_id: u64ToStr(m.validatorPermId),
+    did: m.did ?? '',
+    effective_from: dateToAmino(m.effectiveFrom),
+    effective_until: dateToAmino(m.effectiveUntil),
+    verification_fees: u64ToStrIfNonZero(m.verificationFees),
+    validation_fees: u64ToStrIfNonZero(m.validationFees),
+    vs_operator: m.vsOperator || undefined,
+    vs_operator_authz_enabled: m.vsOperatorAuthzEnabled || undefined,
+    vs_operator_authz_spend_limit: m.vsOperatorAuthzSpendLimit ?? [],
+    vs_operator_authz_with_feegrant: m.vsOperatorAuthzWithFeegrant || undefined,
+    vs_operator_authz_fee_spend_limit: m.vsOperatorAuthzFeeSpendLimit ?? [],
+    vs_operator_authz_spend_period: m.vsOperatorAuthzSpendPeriod ?? undefined,
+  }),
+  fromAmino: (a: any): MsgCreatePermission =>
+    MsgCreatePermission.fromPartial({
+      authority: a.authority ?? '',
+      operator: a.operator ?? '',
+      type: a.type ?? 0,
+      validatorPermId: strToU64(a.validator_perm_id) != null ? Number(strToU64(a.validator_perm_id)!.toString()) : 0,
+      did: a.did ?? '',
+      effectiveFrom: dateFromAmino(a.effective_from),
+      effectiveUntil: dateFromAmino(a.effective_until),
+      verificationFees: strToU64(a.verification_fees) != null ? Number(strToU64(a.verification_fees)!.toString()) : 0,
+      validationFees: strToU64(a.validation_fees) != null ? Number(strToU64(a.validation_fees)!.toString()) : 0,
+      vsOperator: a.vs_operator ?? '',
+      vsOperatorAuthzEnabled: a.vs_operator_authz_enabled ?? false,
+      vsOperatorAuthzSpendLimit: a.vs_operator_authz_spend_limit ?? [],
+      vsOperatorAuthzWithFeegrant: a.vs_operator_authz_with_feegrant ?? false,
+      vsOperatorAuthzFeeSpendLimit: a.vs_operator_authz_fee_spend_limit ?? [],
+      vsOperatorAuthzSpendPeriod: a.vs_operator_authz_spend_period ?? undefined,
     }),
 };
 

@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"fmt"
+	"strconv"
 
 	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -42,41 +43,49 @@ func (k Keeper) executeBurnEcosystemSlashedTrustDeposit(ctx sdk.Context, account
 	params := k.GetParams(ctx)
 	trustDepositShareValue := params.TrustDepositShareValue
 
-	// Check if share value is zero using LegacyDec method
 	if trustDepositShareValue.IsZero() {
 		return fmt.Errorf("trust deposit share value cannot be zero")
 	}
 
-	now := ctx.BlockTime()
-
-	// Update existing TrustDeposit entry
+	// [MOD-TD-MSG-7-3] td.deposit = td.deposit - amount
 	td.Amount = td.Amount - amount
 
-	// Calculate and reduce shares - convert types properly
-	amountInt := math.NewInt(int64(amount))
-	amountDec := math.LegacyNewDecFromInt(amountInt)
-	shareReduction := amountDec.Quo(trustDepositShareValue)
+	// [MOD-TD-MSG-7-3] td.share = td.share - amount / GlobalVariables.trust_deposit_share_value
+	shareReduction := math.LegacyNewDecFromInt(math.NewInt(int64(amount))).Quo(trustDepositShareValue)
+	td.Share = td.Share.Sub(shareReduction)
 
-	if shareReduction.GT(td.Share) {
-		return fmt.Errorf("share reduction exceeds available shares: %s > %s", shareReduction.String(), td.Share.String())
+	// Clamp share to zero if rounding pushes it slightly negative
+	if td.Share.IsNegative() {
+		td.Share = math.LegacyZeroDec()
 	}
-	td.Share = td.Share.Sub(shareReduction) // Use Sub method
 
-	// Update v2 slashing fields
-	td.SlashedDeposit += amount
-	td.LastSlashed = &now
-	td.SlashCount += 1
+	// Note: td.SlashedDeposit/LastSlashed/SlashCount are NOT updated here.
+	// Those fields are for network governance slashes (MOD-TD-MSG-5) only.
+	// Ecosystem slashes track slashing at the permission level (perm.slashed_deposit).
 
-	// Burn amount from TrustDeposit module account
+	// Save updated trust deposit entry BEFORE burning coins to ensure atomicity —
+	// if Set fails, no coins have been burned yet.
+	if err := k.TrustDeposit.Set(ctx, account, td); err != nil {
+		return fmt.Errorf("failed to update trust deposit entry: %w", err)
+	}
+
+	// [MOD-TD-MSG-7-3] Burn amount from TrustDeposit account
 	burnCoins := sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, int64(amount)))
 	if err := k.bankKeeper.BurnCoins(ctx, types.ModuleName, burnCoins); err != nil {
 		return fmt.Errorf("failed to burn coins from trust deposit module: %w", err)
 	}
 
-	// Save updated trust deposit entry
-	if err := k.TrustDeposit.Set(ctx, account, td); err != nil {
-		return fmt.Errorf("failed to update trust deposit entry: %w", err)
-	}
+	// Emit event for observability
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeBurnEcosystemSlashedTrustDeposit,
+			sdk.NewAttribute(types.AttributeKeyAccount, account),
+			sdk.NewAttribute(types.AttributeKeyAmount, strconv.FormatUint(amount, 10)),
+			sdk.NewAttribute(types.AttributeKeyNewAmount, strconv.FormatUint(td.Amount, 10)),
+			sdk.NewAttribute(types.AttributeKeyNewShare, td.Share.String()),
+			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
+		),
+	)
 
 	return nil
 }

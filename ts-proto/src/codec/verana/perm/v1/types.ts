@@ -6,6 +6,8 @@
 
 /* eslint-disable */
 import * as _m0 from "protobufjs/minimal";
+import { Coin } from "../../../cosmos/base/v1beta1/coin";
+import { Duration } from "../../../google/protobuf/duration";
 import { Timestamp } from "../../../google/protobuf/timestamp";
 import Long = require("long");
 
@@ -133,11 +135,11 @@ export interface Permission {
   schemaId: number;
   type: PermissionType;
   did: string;
-  grantee: string;
+  authority: string;
   created: Date | undefined;
   createdBy: string;
-  extended: Date | undefined;
-  extendedBy: string;
+  adjusted: Date | undefined;
+  adjustedBy: string;
   /** NEW: Slashing related fields */
   slashed: Date | undefined;
   slashedBy: string;
@@ -176,20 +178,31 @@ export interface Permission {
   issuanceFeeDiscount: number;
   /** Verification fee discount (0-10000, where 10000 = 100% discount) */
   verificationFeeDiscount: number;
+  /** VS Operator fields (spec v4) */
+  vsOperator: string;
+  vsOperatorAuthzEnabled: boolean;
+  vsOperatorAuthzSpendLimit: Coin[];
+  vsOperatorAuthzWithFeegrant: boolean;
+  vsOperatorAuthzFeeSpendLimit: Coin[];
+  vsOperatorAuthzSpendPeriod: Duration | undefined;
 }
 
 export interface PermissionSession {
   id: string;
-  controller: string;
+  /** group account that owns this session */
+  authority: string;
+  /** the VS operator account */
+  vsOperator: string;
   agentPermId: number;
-  authz: SessionAuthz[];
+  sessionRecords: PermissionSessionRecord[];
   created: Date | undefined;
   modified: Date | undefined;
 }
 
-export interface SessionAuthz {
-  executorPermId: number;
-  beneficiaryPermId: number;
+export interface PermissionSessionRecord {
+  created: Date | undefined;
+  issuerPermId: number;
+  verifierPermId: number;
   walletAgentPermId: number;
 }
 
@@ -204,11 +217,11 @@ function createBasePermission(): Permission {
     schemaId: 0,
     type: 0,
     did: "",
-    grantee: "",
+    authority: "",
     created: undefined,
     createdBy: "",
-    extended: undefined,
-    extendedBy: "",
+    adjusted: undefined,
+    adjustedBy: "",
     slashed: undefined,
     slashedBy: "",
     repaid: undefined,
@@ -236,6 +249,12 @@ function createBasePermission(): Permission {
     vpTermRequested: undefined,
     issuanceFeeDiscount: 0,
     verificationFeeDiscount: 0,
+    vsOperator: "",
+    vsOperatorAuthzEnabled: false,
+    vsOperatorAuthzSpendLimit: [],
+    vsOperatorAuthzWithFeegrant: false,
+    vsOperatorAuthzFeeSpendLimit: [],
+    vsOperatorAuthzSpendPeriod: undefined,
   };
 }
 
@@ -253,8 +272,8 @@ export const Permission = {
     if (message.did !== "") {
       writer.uint32(34).string(message.did);
     }
-    if (message.grantee !== "") {
-      writer.uint32(42).string(message.grantee);
+    if (message.authority !== "") {
+      writer.uint32(42).string(message.authority);
     }
     if (message.created !== undefined) {
       Timestamp.encode(toTimestamp(message.created), writer.uint32(50).fork()).ldelim();
@@ -262,11 +281,11 @@ export const Permission = {
     if (message.createdBy !== "") {
       writer.uint32(58).string(message.createdBy);
     }
-    if (message.extended !== undefined) {
-      Timestamp.encode(toTimestamp(message.extended), writer.uint32(66).fork()).ldelim();
+    if (message.adjusted !== undefined) {
+      Timestamp.encode(toTimestamp(message.adjusted), writer.uint32(66).fork()).ldelim();
     }
-    if (message.extendedBy !== "") {
-      writer.uint32(74).string(message.extendedBy);
+    if (message.adjustedBy !== "") {
+      writer.uint32(74).string(message.adjustedBy);
     }
     if (message.slashed !== undefined) {
       Timestamp.encode(toTimestamp(message.slashed), writer.uint32(82).fork()).ldelim();
@@ -349,6 +368,24 @@ export const Permission = {
     if (message.verificationFeeDiscount !== 0) {
       writer.uint32(288).uint64(message.verificationFeeDiscount);
     }
+    if (message.vsOperator !== "") {
+      writer.uint32(298).string(message.vsOperator);
+    }
+    if (message.vsOperatorAuthzEnabled !== false) {
+      writer.uint32(304).bool(message.vsOperatorAuthzEnabled);
+    }
+    for (const v of message.vsOperatorAuthzSpendLimit) {
+      Coin.encode(v!, writer.uint32(314).fork()).ldelim();
+    }
+    if (message.vsOperatorAuthzWithFeegrant !== false) {
+      writer.uint32(320).bool(message.vsOperatorAuthzWithFeegrant);
+    }
+    for (const v of message.vsOperatorAuthzFeeSpendLimit) {
+      Coin.encode(v!, writer.uint32(330).fork()).ldelim();
+    }
+    if (message.vsOperatorAuthzSpendPeriod !== undefined) {
+      Duration.encode(message.vsOperatorAuthzSpendPeriod, writer.uint32(338).fork()).ldelim();
+    }
     return writer;
   },
 
@@ -392,7 +429,7 @@ export const Permission = {
             break;
           }
 
-          message.grantee = reader.string();
+          message.authority = reader.string();
           continue;
         case 6:
           if (tag !== 50) {
@@ -413,14 +450,14 @@ export const Permission = {
             break;
           }
 
-          message.extended = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
+          message.adjusted = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
           continue;
         case 9:
           if (tag !== 74) {
             break;
           }
 
-          message.extendedBy = reader.string();
+          message.adjustedBy = reader.string();
           continue;
         case 10:
           if (tag !== 82) {
@@ -611,6 +648,48 @@ export const Permission = {
 
           message.verificationFeeDiscount = longToNumber(reader.uint64() as Long);
           continue;
+        case 37:
+          if (tag !== 298) {
+            break;
+          }
+
+          message.vsOperator = reader.string();
+          continue;
+        case 38:
+          if (tag !== 304) {
+            break;
+          }
+
+          message.vsOperatorAuthzEnabled = reader.bool();
+          continue;
+        case 39:
+          if (tag !== 314) {
+            break;
+          }
+
+          message.vsOperatorAuthzSpendLimit.push(Coin.decode(reader, reader.uint32()));
+          continue;
+        case 40:
+          if (tag !== 320) {
+            break;
+          }
+
+          message.vsOperatorAuthzWithFeegrant = reader.bool();
+          continue;
+        case 41:
+          if (tag !== 330) {
+            break;
+          }
+
+          message.vsOperatorAuthzFeeSpendLimit.push(Coin.decode(reader, reader.uint32()));
+          continue;
+        case 42:
+          if (tag !== 338) {
+            break;
+          }
+
+          message.vsOperatorAuthzSpendPeriod = Duration.decode(reader, reader.uint32());
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -626,11 +705,11 @@ export const Permission = {
       schemaId: isSet(object.schemaId) ? globalThis.Number(object.schemaId) : 0,
       type: isSet(object.type) ? permissionTypeFromJSON(object.type) : 0,
       did: isSet(object.did) ? globalThis.String(object.did) : "",
-      grantee: isSet(object.grantee) ? globalThis.String(object.grantee) : "",
+      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
       created: isSet(object.created) ? fromJsonTimestamp(object.created) : undefined,
       createdBy: isSet(object.createdBy) ? globalThis.String(object.createdBy) : "",
-      extended: isSet(object.extended) ? fromJsonTimestamp(object.extended) : undefined,
-      extendedBy: isSet(object.extendedBy) ? globalThis.String(object.extendedBy) : "",
+      adjusted: isSet(object.adjusted) ? fromJsonTimestamp(object.adjusted) : undefined,
+      adjustedBy: isSet(object.adjustedBy) ? globalThis.String(object.adjustedBy) : "",
       slashed: isSet(object.slashed) ? fromJsonTimestamp(object.slashed) : undefined,
       slashedBy: isSet(object.slashedBy) ? globalThis.String(object.slashedBy) : "",
       repaid: isSet(object.repaid) ? fromJsonTimestamp(object.repaid) : undefined,
@@ -660,6 +739,22 @@ export const Permission = {
       verificationFeeDiscount: isSet(object.verificationFeeDiscount)
         ? globalThis.Number(object.verificationFeeDiscount)
         : 0,
+      vsOperator: isSet(object.vsOperator) ? globalThis.String(object.vsOperator) : "",
+      vsOperatorAuthzEnabled: isSet(object.vsOperatorAuthzEnabled)
+        ? globalThis.Boolean(object.vsOperatorAuthzEnabled)
+        : false,
+      vsOperatorAuthzSpendLimit: globalThis.Array.isArray(object?.vsOperatorAuthzSpendLimit)
+        ? object.vsOperatorAuthzSpendLimit.map((e: any) => Coin.fromJSON(e))
+        : [],
+      vsOperatorAuthzWithFeegrant: isSet(object.vsOperatorAuthzWithFeegrant)
+        ? globalThis.Boolean(object.vsOperatorAuthzWithFeegrant)
+        : false,
+      vsOperatorAuthzFeeSpendLimit: globalThis.Array.isArray(object?.vsOperatorAuthzFeeSpendLimit)
+        ? object.vsOperatorAuthzFeeSpendLimit.map((e: any) => Coin.fromJSON(e))
+        : [],
+      vsOperatorAuthzSpendPeriod: isSet(object.vsOperatorAuthzSpendPeriod)
+        ? Duration.fromJSON(object.vsOperatorAuthzSpendPeriod)
+        : undefined,
     };
   },
 
@@ -677,8 +772,8 @@ export const Permission = {
     if (message.did !== "") {
       obj.did = message.did;
     }
-    if (message.grantee !== "") {
-      obj.grantee = message.grantee;
+    if (message.authority !== "") {
+      obj.authority = message.authority;
     }
     if (message.created !== undefined) {
       obj.created = message.created.toISOString();
@@ -686,11 +781,11 @@ export const Permission = {
     if (message.createdBy !== "") {
       obj.createdBy = message.createdBy;
     }
-    if (message.extended !== undefined) {
-      obj.extended = message.extended.toISOString();
+    if (message.adjusted !== undefined) {
+      obj.adjusted = message.adjusted.toISOString();
     }
-    if (message.extendedBy !== "") {
-      obj.extendedBy = message.extendedBy;
+    if (message.adjustedBy !== "") {
+      obj.adjustedBy = message.adjustedBy;
     }
     if (message.slashed !== undefined) {
       obj.slashed = message.slashed.toISOString();
@@ -773,6 +868,24 @@ export const Permission = {
     if (message.verificationFeeDiscount !== 0) {
       obj.verificationFeeDiscount = Math.round(message.verificationFeeDiscount);
     }
+    if (message.vsOperator !== "") {
+      obj.vsOperator = message.vsOperator;
+    }
+    if (message.vsOperatorAuthzEnabled !== false) {
+      obj.vsOperatorAuthzEnabled = message.vsOperatorAuthzEnabled;
+    }
+    if (message.vsOperatorAuthzSpendLimit?.length) {
+      obj.vsOperatorAuthzSpendLimit = message.vsOperatorAuthzSpendLimit.map((e) => Coin.toJSON(e));
+    }
+    if (message.vsOperatorAuthzWithFeegrant !== false) {
+      obj.vsOperatorAuthzWithFeegrant = message.vsOperatorAuthzWithFeegrant;
+    }
+    if (message.vsOperatorAuthzFeeSpendLimit?.length) {
+      obj.vsOperatorAuthzFeeSpendLimit = message.vsOperatorAuthzFeeSpendLimit.map((e) => Coin.toJSON(e));
+    }
+    if (message.vsOperatorAuthzSpendPeriod !== undefined) {
+      obj.vsOperatorAuthzSpendPeriod = Duration.toJSON(message.vsOperatorAuthzSpendPeriod);
+    }
     return obj;
   },
 
@@ -785,11 +898,11 @@ export const Permission = {
     message.schemaId = object.schemaId ?? 0;
     message.type = object.type ?? 0;
     message.did = object.did ?? "";
-    message.grantee = object.grantee ?? "";
+    message.authority = object.authority ?? "";
     message.created = object.created ?? undefined;
     message.createdBy = object.createdBy ?? "";
-    message.extended = object.extended ?? undefined;
-    message.extendedBy = object.extendedBy ?? "";
+    message.adjusted = object.adjusted ?? undefined;
+    message.adjustedBy = object.adjustedBy ?? "";
     message.slashed = object.slashed ?? undefined;
     message.slashedBy = object.slashedBy ?? "";
     message.repaid = object.repaid ?? undefined;
@@ -817,12 +930,29 @@ export const Permission = {
     message.vpTermRequested = object.vpTermRequested ?? undefined;
     message.issuanceFeeDiscount = object.issuanceFeeDiscount ?? 0;
     message.verificationFeeDiscount = object.verificationFeeDiscount ?? 0;
+    message.vsOperator = object.vsOperator ?? "";
+    message.vsOperatorAuthzEnabled = object.vsOperatorAuthzEnabled ?? false;
+    message.vsOperatorAuthzSpendLimit = object.vsOperatorAuthzSpendLimit?.map((e) => Coin.fromPartial(e)) || [];
+    message.vsOperatorAuthzWithFeegrant = object.vsOperatorAuthzWithFeegrant ?? false;
+    message.vsOperatorAuthzFeeSpendLimit = object.vsOperatorAuthzFeeSpendLimit?.map((e) => Coin.fromPartial(e)) || [];
+    message.vsOperatorAuthzSpendPeriod =
+      (object.vsOperatorAuthzSpendPeriod !== undefined && object.vsOperatorAuthzSpendPeriod !== null)
+        ? Duration.fromPartial(object.vsOperatorAuthzSpendPeriod)
+        : undefined;
     return message;
   },
 };
 
 function createBasePermissionSession(): PermissionSession {
-  return { id: "", controller: "", agentPermId: 0, authz: [], created: undefined, modified: undefined };
+  return {
+    id: "",
+    authority: "",
+    vsOperator: "",
+    agentPermId: 0,
+    sessionRecords: [],
+    created: undefined,
+    modified: undefined,
+  };
 }
 
 export const PermissionSession = {
@@ -830,20 +960,23 @@ export const PermissionSession = {
     if (message.id !== "") {
       writer.uint32(10).string(message.id);
     }
-    if (message.controller !== "") {
-      writer.uint32(18).string(message.controller);
+    if (message.authority !== "") {
+      writer.uint32(18).string(message.authority);
+    }
+    if (message.vsOperator !== "") {
+      writer.uint32(26).string(message.vsOperator);
     }
     if (message.agentPermId !== 0) {
-      writer.uint32(24).uint64(message.agentPermId);
+      writer.uint32(32).uint64(message.agentPermId);
     }
-    for (const v of message.authz) {
-      SessionAuthz.encode(v!, writer.uint32(34).fork()).ldelim();
+    for (const v of message.sessionRecords) {
+      PermissionSessionRecord.encode(v!, writer.uint32(42).fork()).ldelim();
     }
     if (message.created !== undefined) {
-      Timestamp.encode(toTimestamp(message.created), writer.uint32(42).fork()).ldelim();
+      Timestamp.encode(toTimestamp(message.created), writer.uint32(50).fork()).ldelim();
     }
     if (message.modified !== undefined) {
-      Timestamp.encode(toTimestamp(message.modified), writer.uint32(50).fork()).ldelim();
+      Timestamp.encode(toTimestamp(message.modified), writer.uint32(58).fork()).ldelim();
     }
     return writer;
   },
@@ -867,31 +1000,38 @@ export const PermissionSession = {
             break;
           }
 
-          message.controller = reader.string();
+          message.authority = reader.string();
           continue;
         case 3:
-          if (tag !== 24) {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.vsOperator = reader.string();
+          continue;
+        case 4:
+          if (tag !== 32) {
             break;
           }
 
           message.agentPermId = longToNumber(reader.uint64() as Long);
-          continue;
-        case 4:
-          if (tag !== 34) {
-            break;
-          }
-
-          message.authz.push(SessionAuthz.decode(reader, reader.uint32()));
           continue;
         case 5:
           if (tag !== 42) {
             break;
           }
 
-          message.created = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
+          message.sessionRecords.push(PermissionSessionRecord.decode(reader, reader.uint32()));
           continue;
         case 6:
           if (tag !== 50) {
+            break;
+          }
+
+          message.created = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
+          continue;
+        case 7:
+          if (tag !== 58) {
             break;
           }
 
@@ -909,9 +1049,12 @@ export const PermissionSession = {
   fromJSON(object: any): PermissionSession {
     return {
       id: isSet(object.id) ? globalThis.String(object.id) : "",
-      controller: isSet(object.controller) ? globalThis.String(object.controller) : "",
+      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      vsOperator: isSet(object.vsOperator) ? globalThis.String(object.vsOperator) : "",
       agentPermId: isSet(object.agentPermId) ? globalThis.Number(object.agentPermId) : 0,
-      authz: globalThis.Array.isArray(object?.authz) ? object.authz.map((e: any) => SessionAuthz.fromJSON(e)) : [],
+      sessionRecords: globalThis.Array.isArray(object?.sessionRecords)
+        ? object.sessionRecords.map((e: any) => PermissionSessionRecord.fromJSON(e))
+        : [],
       created: isSet(object.created) ? fromJsonTimestamp(object.created) : undefined,
       modified: isSet(object.modified) ? fromJsonTimestamp(object.modified) : undefined,
     };
@@ -922,14 +1065,17 @@ export const PermissionSession = {
     if (message.id !== "") {
       obj.id = message.id;
     }
-    if (message.controller !== "") {
-      obj.controller = message.controller;
+    if (message.authority !== "") {
+      obj.authority = message.authority;
+    }
+    if (message.vsOperator !== "") {
+      obj.vsOperator = message.vsOperator;
     }
     if (message.agentPermId !== 0) {
       obj.agentPermId = Math.round(message.agentPermId);
     }
-    if (message.authz?.length) {
-      obj.authz = message.authz.map((e) => SessionAuthz.toJSON(e));
+    if (message.sessionRecords?.length) {
+      obj.sessionRecords = message.sessionRecords.map((e) => PermissionSessionRecord.toJSON(e));
     }
     if (message.created !== undefined) {
       obj.created = message.created.toISOString();
@@ -946,56 +1092,67 @@ export const PermissionSession = {
   fromPartial<I extends Exact<DeepPartial<PermissionSession>, I>>(object: I): PermissionSession {
     const message = createBasePermissionSession();
     message.id = object.id ?? "";
-    message.controller = object.controller ?? "";
+    message.authority = object.authority ?? "";
+    message.vsOperator = object.vsOperator ?? "";
     message.agentPermId = object.agentPermId ?? 0;
-    message.authz = object.authz?.map((e) => SessionAuthz.fromPartial(e)) || [];
+    message.sessionRecords = object.sessionRecords?.map((e) => PermissionSessionRecord.fromPartial(e)) || [];
     message.created = object.created ?? undefined;
     message.modified = object.modified ?? undefined;
     return message;
   },
 };
 
-function createBaseSessionAuthz(): SessionAuthz {
-  return { executorPermId: 0, beneficiaryPermId: 0, walletAgentPermId: 0 };
+function createBasePermissionSessionRecord(): PermissionSessionRecord {
+  return { created: undefined, issuerPermId: 0, verifierPermId: 0, walletAgentPermId: 0 };
 }
 
-export const SessionAuthz = {
-  encode(message: SessionAuthz, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.executorPermId !== 0) {
-      writer.uint32(8).uint64(message.executorPermId);
+export const PermissionSessionRecord = {
+  encode(message: PermissionSessionRecord, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.created !== undefined) {
+      Timestamp.encode(toTimestamp(message.created), writer.uint32(10).fork()).ldelim();
     }
-    if (message.beneficiaryPermId !== 0) {
-      writer.uint32(16).uint64(message.beneficiaryPermId);
+    if (message.issuerPermId !== 0) {
+      writer.uint32(16).uint64(message.issuerPermId);
+    }
+    if (message.verifierPermId !== 0) {
+      writer.uint32(24).uint64(message.verifierPermId);
     }
     if (message.walletAgentPermId !== 0) {
-      writer.uint32(24).uint64(message.walletAgentPermId);
+      writer.uint32(32).uint64(message.walletAgentPermId);
     }
     return writer;
   },
 
-  decode(input: _m0.Reader | Uint8Array, length?: number): SessionAuthz {
+  decode(input: _m0.Reader | Uint8Array, length?: number): PermissionSessionRecord {
     const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseSessionAuthz();
+    const message = createBasePermissionSessionRecord();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          if (tag !== 8) {
+          if (tag !== 10) {
             break;
           }
 
-          message.executorPermId = longToNumber(reader.uint64() as Long);
+          message.created = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
           continue;
         case 2:
           if (tag !== 16) {
             break;
           }
 
-          message.beneficiaryPermId = longToNumber(reader.uint64() as Long);
+          message.issuerPermId = longToNumber(reader.uint64() as Long);
           continue;
         case 3:
           if (tag !== 24) {
+            break;
+          }
+
+          message.verifierPermId = longToNumber(reader.uint64() as Long);
+          continue;
+        case 4:
+          if (tag !== 32) {
             break;
           }
 
@@ -1010,21 +1167,25 @@ export const SessionAuthz = {
     return message;
   },
 
-  fromJSON(object: any): SessionAuthz {
+  fromJSON(object: any): PermissionSessionRecord {
     return {
-      executorPermId: isSet(object.executorPermId) ? globalThis.Number(object.executorPermId) : 0,
-      beneficiaryPermId: isSet(object.beneficiaryPermId) ? globalThis.Number(object.beneficiaryPermId) : 0,
+      created: isSet(object.created) ? fromJsonTimestamp(object.created) : undefined,
+      issuerPermId: isSet(object.issuerPermId) ? globalThis.Number(object.issuerPermId) : 0,
+      verifierPermId: isSet(object.verifierPermId) ? globalThis.Number(object.verifierPermId) : 0,
       walletAgentPermId: isSet(object.walletAgentPermId) ? globalThis.Number(object.walletAgentPermId) : 0,
     };
   },
 
-  toJSON(message: SessionAuthz): unknown {
+  toJSON(message: PermissionSessionRecord): unknown {
     const obj: any = {};
-    if (message.executorPermId !== 0) {
-      obj.executorPermId = Math.round(message.executorPermId);
+    if (message.created !== undefined) {
+      obj.created = message.created.toISOString();
     }
-    if (message.beneficiaryPermId !== 0) {
-      obj.beneficiaryPermId = Math.round(message.beneficiaryPermId);
+    if (message.issuerPermId !== 0) {
+      obj.issuerPermId = Math.round(message.issuerPermId);
+    }
+    if (message.verifierPermId !== 0) {
+      obj.verifierPermId = Math.round(message.verifierPermId);
     }
     if (message.walletAgentPermId !== 0) {
       obj.walletAgentPermId = Math.round(message.walletAgentPermId);
@@ -1032,13 +1193,14 @@ export const SessionAuthz = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<SessionAuthz>, I>>(base?: I): SessionAuthz {
-    return SessionAuthz.fromPartial(base ?? ({} as any));
+  create<I extends Exact<DeepPartial<PermissionSessionRecord>, I>>(base?: I): PermissionSessionRecord {
+    return PermissionSessionRecord.fromPartial(base ?? ({} as any));
   },
-  fromPartial<I extends Exact<DeepPartial<SessionAuthz>, I>>(object: I): SessionAuthz {
-    const message = createBaseSessionAuthz();
-    message.executorPermId = object.executorPermId ?? 0;
-    message.beneficiaryPermId = object.beneficiaryPermId ?? 0;
+  fromPartial<I extends Exact<DeepPartial<PermissionSessionRecord>, I>>(object: I): PermissionSessionRecord {
+    const message = createBasePermissionSessionRecord();
+    message.created = object.created ?? undefined;
+    message.issuerPermId = object.issuerPermId ?? 0;
+    message.verifierPermId = object.verifierPermId ?? 0;
     message.walletAgentPermId = object.walletAgentPermId ?? 0;
     return message;
   },

@@ -15,11 +15,6 @@ import {
   MsgArchiveTrustRegistryAminoConverter,
   MsgAddGovernanceFrameworkDocumentAminoConverter,
   MsgIncreaseActiveGovernanceFrameworkVersionAminoConverter,
-  // DD module
-  MsgAddDIDAminoConverter,
-  MsgRenewDIDAminoConverter,
-  MsgTouchDIDAminoConverter,
-  MsgRemoveDIDAminoConverter,
   // CS module
   MsgCreateCredentialSchemaAminoConverter,
   MsgUpdateCredentialSchemaAminoConverter,
@@ -27,10 +22,12 @@ import {
   // TD module
   MsgReclaimTrustDepositAminoConverter,
   MsgReclaimTrustDepositYieldAminoConverter,
+  MsgSlashTrustDepositAminoConverter,
+  MsgRepaySlashedTrustDepositAminoConverter,
   // PERM module
   MsgCreateRootPermissionAminoConverter,
   MsgCreatePermissionAminoConverter,
-  MsgExtendPermissionAminoConverter,
+  MsgAdjustPermissionAminoConverter,
   MsgRevokePermissionAminoConverter,
   MsgStartPermissionVPAminoConverter,
   MsgRenewPermissionVPAminoConverter,
@@ -153,11 +150,6 @@ export function createVeranaAminoTypes(): AminoTypes {
     '/verana.tr.v1.MsgArchiveTrustRegistry': MsgArchiveTrustRegistryAminoConverter,
     '/verana.tr.v1.MsgAddGovernanceFrameworkDocument': MsgAddGovernanceFrameworkDocumentAminoConverter,
     '/verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion': MsgIncreaseActiveGovernanceFrameworkVersionAminoConverter,
-    // DID Directory (dd) module
-    '/verana.dd.v1.MsgAddDID': MsgAddDIDAminoConverter,
-    '/verana.dd.v1.MsgRenewDID': MsgRenewDIDAminoConverter,
-    '/verana.dd.v1.MsgTouchDID': MsgTouchDIDAminoConverter,
-    '/verana.dd.v1.MsgRemoveDID': MsgRemoveDIDAminoConverter,
     // Credential Schema (cs) module
     '/verana.cs.v1.MsgCreateCredentialSchema': MsgCreateCredentialSchemaAminoConverter,
     '/verana.cs.v1.MsgUpdateCredentialSchema': MsgUpdateCredentialSchemaAminoConverter,
@@ -165,10 +157,12 @@ export function createVeranaAminoTypes(): AminoTypes {
     // Trust Deposit (td) module
     '/verana.td.v1.MsgReclaimTrustDeposit': MsgReclaimTrustDepositAminoConverter,
     '/verana.td.v1.MsgReclaimTrustDepositYield': MsgReclaimTrustDepositYieldAminoConverter,
+    '/verana.td.v1.MsgSlashTrustDeposit': MsgSlashTrustDepositAminoConverter,
+    '/verana.td.v1.MsgRepaySlashedTrustDeposit': MsgRepaySlashedTrustDepositAminoConverter,
     // Permission (perm) module
     '/verana.perm.v1.MsgCreateRootPermission': MsgCreateRootPermissionAminoConverter,
     '/verana.perm.v1.MsgCreatePermission': MsgCreatePermissionAminoConverter,
-    '/verana.perm.v1.MsgExtendPermission': MsgExtendPermissionAminoConverter,
+    '/verana.perm.v1.MsgAdjustPermission': MsgAdjustPermissionAminoConverter,
     '/verana.perm.v1.MsgRevokePermission': MsgRevokePermissionAminoConverter,
     '/verana.perm.v1.MsgStartPermissionVP': MsgStartPermissionVPAminoConverter,
     '/verana.perm.v1.MsgRenewPermissionVP': MsgRenewPermissionVPAminoConverter,

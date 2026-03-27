@@ -22,7 +22,7 @@ func TestGenesis(t *testing.T) {
 		NextPermissionId:   1,
 	}
 
-	k, _, _, ctx := keepertest.PermissionKeeper(t)
+	k, _, _, ctx, _ := keepertest.PermissionKeeper(t)
 	permission.InitGenesis(ctx, k, genesisState)
 	got := permission.ExportGenesis(ctx, k)
 	require.NotNil(t, got)
@@ -37,7 +37,7 @@ func TestGenesis(t *testing.T) {
 }
 
 func TestDeterministicGenesis(t *testing.T) {
-	k, _, _, ctx := keepertest.PermissionKeeper(t)
+	k, _, _, ctx, _ := keepertest.PermissionKeeper(t)
 
 	nowTime := time.Now()
 	futureTime := nowTime.Add(24 * time.Hour)
@@ -48,7 +48,7 @@ func TestDeterministicGenesis(t *testing.T) {
 		Id:              2,
 		Type:            types.PermissionType_ISSUER,
 		Did:             "did:example:67890",
-		Grantee:         creatorAddr,
+		Authority:       creatorAddr,
 		Created:         &nowTime,
 		CreatedBy:       creatorAddr,
 		Modified:        &nowTime,
@@ -63,7 +63,7 @@ func TestDeterministicGenesis(t *testing.T) {
 		Id:             1,
 		Type:           types.PermissionType_ECOSYSTEM,
 		Did:            "did:example:12345",
-		Grantee:        creatorAddr,
+		Authority:      creatorAddr,
 		Created:        &nowTime,
 		CreatedBy:      creatorAddr,
 		Modified:       &nowTime,
@@ -81,28 +81,30 @@ func TestDeterministicGenesis(t *testing.T) {
 	// Create test sessions in random order
 	session2 := types.PermissionSession{
 		Id:          "test-session-id-2",
-		Controller:  creatorAddr,
+		Authority:   creatorAddr,
+		VsOperator:  creatorAddr,
 		AgentPermId: 2,
 		Created:     &nowTime,
 		Modified:    &nowTime,
-		Authz: []*types.SessionAuthz{
+		SessionRecords: []*types.PermissionSessionRecord{
 			{
-				ExecutorPermId:    1,
-				BeneficiaryPermId: 2,
+				IssuerPermId: 1,
+				Created:      &nowTime,
 			},
 		},
 	}
 
 	session1 := types.PermissionSession{
 		Id:          "test-session-id-1",
-		Controller:  creatorAddr,
+		Authority:   creatorAddr,
+		VsOperator:  creatorAddr,
 		AgentPermId: 1,
 		Created:     &nowTime,
 		Modified:    &nowTime,
-		Authz: []*types.SessionAuthz{
+		SessionRecords: []*types.PermissionSessionRecord{
 			{
-				ExecutorPermId:    1,
-				BeneficiaryPermId: 2,
+				IssuerPermId: 1,
+				Created:      &nowTime,
 			},
 		},
 	}
@@ -127,7 +129,7 @@ func TestDeterministicGenesis(t *testing.T) {
 	require.Equal(t, "test-session-id-2", exportedGenesis1.PermissionSessions[1].Id)
 
 	// Create a new keeper instance for the second test
-	k2, _, _, ctx2 := keepertest.PermissionKeeper(t)
+	k2, _, _, ctx2, _ := keepertest.PermissionKeeper(t)
 
 	// Insert in opposite order for the second test
 	require.NoError(t, k2.Permission.Set(ctx2, perm1.Id, perm1))
@@ -160,7 +162,7 @@ func TestDeterministicGenesis(t *testing.T) {
 }
 
 func TestGenesisImportExport(t *testing.T) {
-	k, _, _, ctx := keepertest.PermissionKeeper(t)
+	k, _, _, ctx, _ := keepertest.PermissionKeeper(t)
 
 	// Create some test data
 	nowTime := time.Now()
@@ -172,7 +174,7 @@ func TestGenesisImportExport(t *testing.T) {
 		Id:             1,
 		Type:           types.PermissionType_ECOSYSTEM,
 		Did:            "did:example:12345",
-		Grantee:        creatorAddr,
+		Authority:      creatorAddr,
 		Created:        &nowTime,
 		CreatedBy:      creatorAddr,
 		Modified:       &nowTime,
@@ -186,7 +188,7 @@ func TestGenesisImportExport(t *testing.T) {
 		Id:              2,
 		Type:            types.PermissionType_ISSUER,
 		Did:             "did:example:67890",
-		Grantee:         creatorAddr,
+		Authority:       creatorAddr,
 		Created:         &nowTime,
 		CreatedBy:       creatorAddr,
 		Modified:        &nowTime,
@@ -201,7 +203,7 @@ func TestGenesisImportExport(t *testing.T) {
 		Id:              3,
 		Type:            types.PermissionType_VERIFIER,
 		Did:             "did:example:verifier",
-		Grantee:         creatorAddr,
+		Authority:       creatorAddr,
 		Created:         &nowTime,
 		CreatedBy:       creatorAddr,
 		Modified:        &nowTime,
@@ -220,29 +222,31 @@ func TestGenesisImportExport(t *testing.T) {
 	// Create test perm sessions
 	session1 := types.PermissionSession{
 		Id:          "test-session-id-1",
-		Controller:  creatorAddr,
+		Authority:   creatorAddr,
+		VsOperator:  creatorAddr,
 		AgentPermId: 2,
 		Created:     &nowTime,
 		Modified:    &nowTime,
-		Authz: []*types.SessionAuthz{
+		SessionRecords: []*types.PermissionSessionRecord{
 			{
-				ExecutorPermId:    1,
-				BeneficiaryPermId: 2,
+				IssuerPermId: 1,
+				Created:      &nowTime,
 			},
 		},
 	}
 
 	session2 := types.PermissionSession{
 		Id:          "test-session-id-2",
-		Controller:  creatorAddr,
+		Authority:   creatorAddr,
+		VsOperator:  creatorAddr,
 		AgentPermId: 3,
 		Created:     &nowTime,
 		Modified:    &nowTime,
-		Authz: []*types.SessionAuthz{
+		SessionRecords: []*types.PermissionSessionRecord{
 			{
-				ExecutorPermId:    1,
-				BeneficiaryPermId: 3,
+				IssuerPermId:      1,
 				WalletAgentPermId: 2,
+				Created:           &nowTime,
 			},
 		},
 	}
@@ -259,7 +263,7 @@ func TestGenesisImportExport(t *testing.T) {
 	require.Len(t, genesisState.PermissionSessions, 2)
 
 	// Create a new keeper instance
-	k2, _, _, ctx2 := keepertest.PermissionKeeper(t)
+	k2, _, _, ctx2, _ := keepertest.PermissionKeeper(t)
 
 	// Initialize with the exported genesis state
 	permission.InitGenesis(ctx2, k2, *genesisState)
@@ -293,7 +297,7 @@ func TestGenesisImportExport(t *testing.T) {
 	session2Get, err := k2.PermissionSession.Get(ctx2, "test-session-id-2")
 	require.NoError(t, err)
 	require.Equal(t, session2.Id, session2Get.Id)
-	require.Equal(t, session2.Authz[0].WalletAgentPermId, session2Get.Authz[0].WalletAgentPermId)
+	require.Equal(t, session2.SessionRecords[0].WalletAgentPermId, session2Get.SessionRecords[0].WalletAgentPermId)
 
 	// Export from the new keeper and verify it matches the original export
 	exportedState2 := permission.ExportGenesis(ctx2, k2)
@@ -319,18 +323,18 @@ func TestGenesisValidation(t *testing.T) {
 				Params: types.DefaultParams(),
 				Permissions: []types.Permission{
 					{
-						Id:       1,
-						Type:     types.PermissionType_ISSUER,
-						Grantee:  creatorAddr,
-						Created:  &nowTime,
-						Modified: &nowTime,
+						Id:        1,
+						Type:      types.PermissionType_ISSUER,
+						Authority: creatorAddr,
+						Created:   &nowTime,
+						Modified:  &nowTime,
 					},
 					{
-						Id:       1, // Duplicate ID
-						Type:     types.PermissionType_VERIFIER,
-						Grantee:  creatorAddr,
-						Created:  &nowTime,
-						Modified: &nowTime,
+						Id:        1, // Duplicate ID
+						Type:      types.PermissionType_VERIFIER,
+						Authority: creatorAddr,
+						Created:   &nowTime,
+						Modified:  &nowTime,
 					},
 				},
 				NextPermissionId: 2,
@@ -343,11 +347,11 @@ func TestGenesisValidation(t *testing.T) {
 				Params: types.DefaultParams(),
 				Permissions: []types.Permission{
 					{
-						Id:       5,
-						Type:     types.PermissionType_ISSUER,
-						Grantee:  creatorAddr,
-						Created:  &nowTime,
-						Modified: &nowTime,
+						Id:        5,
+						Type:      types.PermissionType_ISSUER,
+						Authority: creatorAddr,
+						Created:   &nowTime,
+						Modified:  &nowTime,
 					},
 				},
 				NextPermissionId: 3, // Should be > 5
@@ -362,14 +366,14 @@ func TestGenesisValidation(t *testing.T) {
 					{
 						Id:   1,
 						Type: types.PermissionType_ISSUER,
-						// Missing Grantee field
+						// Missing Authority field
 						Created:  &nowTime,
 						Modified: &nowTime,
 					},
 				},
 				NextPermissionId: 2,
 			},
-			expectedErr: "grantee cannot be empty for perm ID 1",
+			expectedErr: "authority cannot be empty for perm ID 1",
 		},
 		{
 			name: "invalid validator reference",
@@ -379,7 +383,7 @@ func TestGenesisValidation(t *testing.T) {
 					{
 						Id:              2,
 						Type:            types.PermissionType_ISSUER,
-						Grantee:         creatorAddr,
+						Authority:       creatorAddr,
 						Created:         &nowTime,
 						Modified:        &nowTime,
 						ValidatorPermId: 999, // Non-existent validator

@@ -16,6 +16,38 @@
     "application/json"
   ],
   "paths": {
+    "/verana.perm.v1.Msg/AdjustPermission": {
+      "post": {
+        "operationId": "Msg_AdjustPermission",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.perm.v1.MsgAdjustPermissionResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.perm.v1.MsgAdjustPermission"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
     "/verana.perm.v1.Msg/CancelPermissionVPLastRequest": {
       "post": {
         "summary": "rpc RequestPermissionVPTermination(MsgRequestPermissionVPTermination) returns (MsgRequestPermissionVPTerminationResponse);\n rpc ConfirmPermissionVPTermination(MsgConfirmPermissionVPTermination) returns (MsgConfirmPermissionVPTerminationResponse);",
@@ -137,38 +169,6 @@
             "required": true,
             "schema": {
               "$ref": "#/definitions/verana.perm.v1.MsgCreateRootPermission"
-            }
-          }
-        ],
-        "tags": [
-          "Msg"
-        ]
-      }
-    },
-    "/verana.perm.v1.Msg/ExtendPermission": {
-      "post": {
-        "operationId": "Msg_ExtendPermission",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/verana.perm.v1.MsgExtendPermissionResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/google.rpc.Status"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/verana.perm.v1.MsgExtendPermission"
             }
           }
         ],
@@ -405,6 +405,18 @@
     }
   },
   "definitions": {
+    "cosmos.base.v1beta1.Coin": {
+      "type": "object",
+      "properties": {
+        "denom": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "string"
+        }
+      },
+      "description": "Coin defines a token with a denomination and an amount.\n\nNOTE: The amount field is an Int which implements the custom method\nsignatures required by gogoproto."
+    },
     "google.protobuf.Any": {
       "type": "object",
       "properties": {
@@ -433,11 +445,39 @@
         }
       }
     },
+    "verana.perm.v1.MsgAdjustPermission": {
+      "type": "object",
+      "properties": {
+        "authority": {
+          "type": "string"
+        },
+        "operator": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string",
+          "format": "uint64",
+          "title": "Permission ID"
+        },
+        "effective_until": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "verana.perm.v1.MsgAdjustPermissionResponse": {
+      "type": "object"
+    },
     "verana.perm.v1.MsgCancelPermissionVPLastRequest": {
       "type": "object",
       "properties": {
-        "creator": {
-          "type": "string"
+        "authority": {
+          "type": "string",
+          "title": "authority is the group account on whose behalf this message is executed"
+        },
+        "operator": {
+          "type": "string",
+          "title": "operator is the account authorized by the authority to run this Msg"
         },
         "id": {
           "type": "string",
@@ -452,28 +492,41 @@
     "verana.perm.v1.MsgCreateOrUpdatePermissionSession": {
       "type": "object",
       "properties": {
-        "creator": {
-          "type": "string"
+        "authority": {
+          "type": "string",
+          "title": "authority is the group account on whose behalf this message is executed"
+        },
+        "operator": {
+          "type": "string",
+          "title": "operator is the account authorized by the authority to run this Msg (vs_operator)"
         },
         "id": {
           "type": "string",
-          "title": "UUID"
+          "title": "UUID (mandatory)"
         },
         "issuer_perm_id": {
           "type": "string",
-          "format": "uint64"
+          "format": "uint64",
+          "title": "optional: issuer permission id"
         },
         "verifier_perm_id": {
           "type": "string",
-          "format": "uint64"
+          "format": "uint64",
+          "title": "optional: verifier permission id"
         },
         "agent_perm_id": {
           "type": "string",
-          "format": "uint64"
+          "format": "uint64",
+          "title": "mandatory: agent credential issuer permission id"
         },
         "wallet_agent_perm_id": {
           "type": "string",
-          "format": "uint64"
+          "format": "uint64",
+          "title": "mandatory: wallet credential issuer permission id"
+        },
+        "digest": {
+          "type": "string",
+          "title": "optional: digest derived from an issued or verified credential"
         }
       }
     },
@@ -488,20 +541,20 @@
     "verana.perm.v1.MsgCreatePermission": {
       "type": "object",
       "properties": {
-        "creator": {
+        "authority": {
           "type": "string"
         },
-        "schema_id": {
-          "type": "string",
-          "format": "uint64"
+        "operator": {
+          "type": "string"
         },
         "type": {
           "$ref": "#/definitions/verana.perm.v1.PermissionType"
         },
-        "did": {
-          "type": "string"
+        "validator_perm_id": {
+          "type": "string",
+          "format": "uint64"
         },
-        "country": {
+        "did": {
           "type": "string"
         },
         "effective_from": {
@@ -519,6 +572,33 @@
         "validation_fees": {
           "type": "string",
           "format": "uint64"
+        },
+        "vs_operator": {
+          "type": "string",
+          "title": "vs_operator: the account of the Verifiable Service (optional)"
+        },
+        "vs_operator_authz_enabled": {
+          "type": "boolean"
+        },
+        "vs_operator_authz_spend_limit": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
+          }
+        },
+        "vs_operator_authz_with_feegrant": {
+          "type": "boolean"
+        },
+        "vs_operator_authz_fee_spend_limit": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
+          }
+        },
+        "vs_operator_authz_spend_period": {
+          "type": "string"
         }
       }
     },
@@ -534,7 +614,10 @@
     "verana.perm.v1.MsgCreateRootPermission": {
       "type": "object",
       "properties": {
-        "creator": {
+        "authority": {
+          "type": "string"
+        },
+        "operator": {
           "type": "string"
         },
         "schema_id": {
@@ -542,9 +625,6 @@
           "format": "uint64"
         },
         "did": {
-          "type": "string"
-        },
-        "country": {
           "type": "string"
         },
         "effective_from": {
@@ -579,30 +659,13 @@
         }
       }
     },
-    "verana.perm.v1.MsgExtendPermission": {
-      "type": "object",
-      "properties": {
-        "creator": {
-          "type": "string"
-        },
-        "id": {
-          "type": "string",
-          "format": "uint64",
-          "title": "Permission ID"
-        },
-        "effective_until": {
-          "type": "string",
-          "format": "date-time"
-        }
-      }
-    },
-    "verana.perm.v1.MsgExtendPermissionResponse": {
-      "type": "object"
-    },
     "verana.perm.v1.MsgRenewPermissionVP": {
       "type": "object",
       "properties": {
-        "creator": {
+        "authority": {
+          "type": "string"
+        },
+        "operator": {
           "type": "string"
         },
         "id": {
@@ -620,7 +683,10 @@
     "verana.perm.v1.MsgRepayPermissionSlashedTrustDeposit": {
       "type": "object",
       "properties": {
-        "creator": {
+        "authority": {
+          "type": "string"
+        },
+        "operator": {
           "type": "string"
         },
         "id": {
@@ -635,7 +701,10 @@
     "verana.perm.v1.MsgRevokePermission": {
       "type": "object",
       "properties": {
-        "creator": {
+        "authority": {
+          "type": "string"
+        },
+        "operator": {
           "type": "string"
         },
         "id": {
@@ -651,8 +720,13 @@
     "verana.perm.v1.MsgSetPermissionVPToValidated": {
       "type": "object",
       "properties": {
-        "creator": {
-          "type": "string"
+        "authority": {
+          "type": "string",
+          "title": "authority is the group account on whose behalf this message is executed"
+        },
+        "operator": {
+          "type": "string",
+          "title": "operator is the account authorized by the authority to run this Msg"
         },
         "id": {
           "type": "string",
@@ -673,9 +747,6 @@
         "verification_fees": {
           "type": "string",
           "format": "uint64"
-        },
-        "country": {
-          "type": "string"
         },
         "vp_summary_digest_sri": {
           "type": "string"
@@ -701,8 +772,13 @@
     "verana.perm.v1.MsgSlashPermissionTrustDeposit": {
       "type": "object",
       "properties": {
-        "creator": {
-          "type": "string"
+        "authority": {
+          "type": "string",
+          "title": "authority is the group account on whose behalf this message is executed"
+        },
+        "operator": {
+          "type": "string",
+          "title": "operator is the account authorized by the authority to run this Msg"
         },
         "id": {
           "type": "string",
@@ -720,8 +796,13 @@
     "verana.perm.v1.MsgStartPermissionVP": {
       "type": "object",
       "properties": {
-        "creator": {
-          "type": "string"
+        "authority": {
+          "type": "string",
+          "title": "authority is the group account on whose behalf this message is executed"
+        },
+        "operator": {
+          "type": "string",
+          "title": "operator is the account authorized by the authority to run this Msg"
         },
         "type": {
           "$ref": "#/definitions/verana.perm.v1.PermissionType"
@@ -730,24 +811,45 @@
           "type": "string",
           "format": "uint64"
         },
-        "validation_fees": {
-          "$ref": "#/definitions/verana.perm.v1.OptionalUInt64",
-          "title": "optional: Requested validation_fees for this permission (can be modified by validator)"
-        },
-        "issuance_fees": {
-          "$ref": "#/definitions/verana.perm.v1.OptionalUInt64",
-          "title": "optional: Requested issuance_fees for this permission (can be modified by validator)"
-        },
-        "verification_fees": {
-          "$ref": "#/definitions/verana.perm.v1.OptionalUInt64",
-          "title": "optional: Requested verification_fees for this permission (can be modified by validator)"
-        },
-        "country": {
-          "type": "string"
-        },
         "did": {
           "type": "string",
-          "title": "optional"
+          "title": "mandatory: MUST conform to DID Syntax"
+        },
+        "validation_fees": {
+          "$ref": "#/definitions/verana.perm.v1.OptionalUInt64"
+        },
+        "issuance_fees": {
+          "$ref": "#/definitions/verana.perm.v1.OptionalUInt64"
+        },
+        "verification_fees": {
+          "$ref": "#/definitions/verana.perm.v1.OptionalUInt64"
+        },
+        "vs_operator": {
+          "type": "string",
+          "title": "vs_operator: the account of the Verifiable Service (optional)"
+        },
+        "vs_operator_authz_enabled": {
+          "type": "boolean"
+        },
+        "vs_operator_authz_spend_limit": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
+          }
+        },
+        "vs_operator_authz_with_feegrant": {
+          "type": "boolean"
+        },
+        "vs_operator_authz_fee_spend_limit": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
+          }
+        },
+        "vs_operator_authz_spend_period": {
+          "type": "string"
         }
       },
       "title": "MsgStartPermissionVP represents a message to start a permission validation process"

@@ -16,6 +16,9 @@ message GenesisState {
   ];
 
   repeated TrustDepositRecord trust_deposits = 2 [(gogoproto.nullable) = false];
+
+  // dust is the accumulated fractional yield carried forward
+  string dust = 3;
 }
 
 // TrustDepositRecord defines a trust deposit entry for genesis state
