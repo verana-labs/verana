@@ -73,6 +73,11 @@ jobs:
           cd ${{ env.VERANA_BLOCKCHAIN_PATH }}
           make proto-ts
 
+      - name: Smoke test published ts-proto package surface
+        run: |
+          cd ${{ env.VERANA_BLOCKCHAIN_PATH }}/ts-proto
+          npm run smoke
+
       - name: Install test dependencies
         run: |
           cd ${{ env.VERANA_BLOCKCHAIN_PATH }}/ts-proto/test
@@ -144,6 +149,9 @@ jobs:
           npx --prefix ts-proto/test tsx ts-proto/test/scripts/benches/amino/cs/ts.ts
           go run ts-proto/test/scripts/benches/amino/cs/go.go
           node ts-proto/test/scripts/benches/amino/cs/compare.js
+
+          # Package-owned registry/amino coverage for current main surface
+          npx --prefix ts-proto/test tsx ts-proto/test/scripts/checkSigningSurface.ts
           
           echo "==================================================================="
           echo "Running TypeScript Client Tests"
