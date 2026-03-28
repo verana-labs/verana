@@ -5,39 +5,10 @@
 
 import { DirectSecp256k1HdWallet } from "@cosmjs/proto-signing";
 import { Secp256k1HdWallet } from "@cosmjs/amino";
-import { SigningStargateClient, StargateClient, GasPrice, calculateFee, AminoTypes, DeliverTxResponse } from "@cosmjs/stargate";
+import { SigningStargateClient, StargateClient, GasPrice, calculateFee, DeliverTxResponse } from "@cosmjs/stargate";
 import { stringToPath } from "@cosmjs/crypto";
 import { createVeranaRegistry } from "./registry";
-import {
-  // TR module
-  MsgCreateTrustRegistryAminoConverter,
-  MsgUpdateTrustRegistryAminoConverter,
-  MsgArchiveTrustRegistryAminoConverter,
-  MsgAddGovernanceFrameworkDocumentAminoConverter,
-  MsgIncreaseActiveGovernanceFrameworkVersionAminoConverter,
-  // CS module
-  MsgCreateCredentialSchemaAminoConverter,
-  MsgUpdateCredentialSchemaAminoConverter,
-  MsgArchiveCredentialSchemaAminoConverter,
-  // TD module
-  MsgReclaimTrustDepositAminoConverter,
-  MsgReclaimTrustDepositYieldAminoConverter,
-  MsgSlashTrustDepositAminoConverter,
-  MsgRepaySlashedTrustDepositAminoConverter,
-  // PERM module
-  MsgCreateRootPermissionAminoConverter,
-  MsgCreatePermissionAminoConverter,
-  MsgAdjustPermissionAminoConverter,
-  MsgRevokePermissionAminoConverter,
-  MsgStartPermissionVPAminoConverter,
-  MsgRenewPermissionVPAminoConverter,
-  MsgSetPermissionVPToValidatedAminoConverter,
-  MsgCancelPermissionVPLastRequestAminoConverter,
-  MsgCreateOrUpdatePermissionSessionAminoConverter,
-  // DE module
-  MsgGrantOperatorAuthorizationAminoConverter,
-  MsgRevokeOperatorAuthorizationAminoConverter,
-} from "../../../src/helpers/aminoConverters";
+import { createVeranaAminoTypes } from "../../../src/signing";
 
 // Default configuration - can be overridden via environment variables
 // Matches frontend configuration from veranaChain.sign.client.ts
@@ -135,43 +106,6 @@ export async function createDirectAccountFromMnemonic(
   return DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {
     prefix: config.addressPrefix,
     hdPaths: [hdPath],
-  });
-}
-
-/**
- * Creates Amino Types for Verana messages.
- * Matches frontend implementation in veranaChain.sign.client.ts
- */
-export function createVeranaAminoTypes(): AminoTypes {
-  return new AminoTypes({
-    // Trust Registry (tr) module
-    '/verana.tr.v1.MsgCreateTrustRegistry': MsgCreateTrustRegistryAminoConverter,
-    '/verana.tr.v1.MsgUpdateTrustRegistry': MsgUpdateTrustRegistryAminoConverter,
-    '/verana.tr.v1.MsgArchiveTrustRegistry': MsgArchiveTrustRegistryAminoConverter,
-    '/verana.tr.v1.MsgAddGovernanceFrameworkDocument': MsgAddGovernanceFrameworkDocumentAminoConverter,
-    '/verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion': MsgIncreaseActiveGovernanceFrameworkVersionAminoConverter,
-    // Credential Schema (cs) module
-    '/verana.cs.v1.MsgCreateCredentialSchema': MsgCreateCredentialSchemaAminoConverter,
-    '/verana.cs.v1.MsgUpdateCredentialSchema': MsgUpdateCredentialSchemaAminoConverter,
-    '/verana.cs.v1.MsgArchiveCredentialSchema': MsgArchiveCredentialSchemaAminoConverter,
-    // Trust Deposit (td) module
-    '/verana.td.v1.MsgReclaimTrustDeposit': MsgReclaimTrustDepositAminoConverter,
-    '/verana.td.v1.MsgReclaimTrustDepositYield': MsgReclaimTrustDepositYieldAminoConverter,
-    '/verana.td.v1.MsgSlashTrustDeposit': MsgSlashTrustDepositAminoConverter,
-    '/verana.td.v1.MsgRepaySlashedTrustDeposit': MsgRepaySlashedTrustDepositAminoConverter,
-    // Permission (perm) module
-    '/verana.perm.v1.MsgCreateRootPermission': MsgCreateRootPermissionAminoConverter,
-    '/verana.perm.v1.MsgCreatePermission': MsgCreatePermissionAminoConverter,
-    '/verana.perm.v1.MsgAdjustPermission': MsgAdjustPermissionAminoConverter,
-    '/verana.perm.v1.MsgRevokePermission': MsgRevokePermissionAminoConverter,
-    '/verana.perm.v1.MsgStartPermissionVP': MsgStartPermissionVPAminoConverter,
-    '/verana.perm.v1.MsgRenewPermissionVP': MsgRenewPermissionVPAminoConverter,
-    '/verana.perm.v1.MsgSetPermissionVPToValidated': MsgSetPermissionVPToValidatedAminoConverter,
-    '/verana.perm.v1.MsgCancelPermissionVPLastRequest': MsgCancelPermissionVPLastRequestAminoConverter,
-    '/verana.perm.v1.MsgCreateOrUpdatePermissionSession': MsgCreateOrUpdatePermissionSessionAminoConverter,
-    // Delegation Engine (de) module
-    '/verana.de.v1.MsgGrantOperatorAuthorization': MsgGrantOperatorAuthorizationAminoConverter,
-    '/verana.de.v1.MsgRevokeOperatorAuthorization': MsgRevokeOperatorAuthorizationAminoConverter,
   });
 }
 

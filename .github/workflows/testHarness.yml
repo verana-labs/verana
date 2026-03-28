@@ -88,8 +88,13 @@ jobs:
           fi
           BRANCH_REF="${BRANCH_REF:-${GITHUB_REF_NAME:-$GITHUB_REF}}"
           BRANCH_TAG="${BRANCH_REF//\//-}"
+          NAMESPACE_BRANCH_TAG="$(printf '%s' "${BRANCH_TAG}" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9-]+/-/g; s/^-+//; s/-+$//; s/-+/-/g')"
+          if [ -z "${NAMESPACE_BRANCH_TAG}" ]; then
+            NAMESPACE_BRANCH_TAG="branch"
+          fi
           if [ -n "${PR_NUMBER:-}" ]; then
-            echo "NAMESPACE=vna-devnet-${BRANCH_TAG}-pr-${PR_NUMBER}" >> $GITHUB_ENV
+            NAMESPACE_BRANCH_TAG="$(printf '%.45s' "${NAMESPACE_BRANCH_TAG}" | sed -E 's/-+$//')"
+            echo "NAMESPACE=vna-devnet-${NAMESPACE_BRANCH_TAG}-pr-${PR_NUMBER}" >> $GITHUB_ENV
           elif [ "${BRANCH_TAG}" = "main" ]; then
             echo "NAMESPACE=vna-devnet-main" >> $GITHUB_ENV
             if [ "${TESTHARNESS_CLEANUP_MAIN_ENV:-}" = "true" ]; then
@@ -99,7 +104,8 @@ jobs:
               echo "Set TESTHARNESS_CLEANUP_MAIN_ENV=true in GitHub Actions variables to clean it up after successful main runs." >> $GITHUB_STEP_SUMMARY
             fi
           else
-            echo "NAMESPACE=vna-devnet-${BRANCH_TAG}" >> $GITHUB_ENV
+            NAMESPACE_BRANCH_TAG="$(printf '%.51s' "${NAMESPACE_BRANCH_TAG}" | sed -E 's/-+$//')"
+            echo "NAMESPACE=vna-devnet-${NAMESPACE_BRANCH_TAG}" >> $GITHUB_ENV
           fi
 
       - name: Login to Docker Hub

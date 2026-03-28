@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "build": "tsc",
+    "test:signing-surface": "npx tsx scripts/checkSigningSurface.ts",
     "test:de-grant-auth": "npx tsx src/journeys/deGrantOperatorAuthorization.ts",
     "test:tr-create": "npx tsx src/journeys/trCreateTrustRegistry.ts",
     "test:tr-add-gfd": "npx tsx src/journeys/trAddGovernanceFrameworkDocument.ts",
@@ -46,4 +47,3 @@
     "typescript": "^5.7.3"
   }
 }
-
