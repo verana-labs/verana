@@ -182,6 +182,56 @@ func (e *Executor) CmdStatus(r Reporter) {
 	r(strings.Join(lines, "\n"))
 }
 
+func (e *Executor) CmdReviewPR(n int, r Reporter) bool {
+	return e.start(func(ctx context.Context, r Reporter) error {
+		pr, err := e.gh.GetPR(n)
+		if err != nil {
+			return err
+		}
+		diff, err := e.gh.GetPRDiff(n)
+		if err != nil {
+			return err
+		}
+		if diff == "" {
+			r("No diff found for PR.")
+			return nil
+		}
+		r(fmt.Sprintf("🔍 Reviewing PR #%d: **%s**…", n, pr.Title))
+		p := prompt.ReviewPR(e.cfg, n, pr.Title, diff)
+		out, err := e.runClaudeCapture(ctx, p)
+		if err != nil {
+			return err
+		}
+		r(fmt.Sprintf("**Review of PR #%d — %s:**\n\n%s", n, pr.Title, out))
+		return nil
+	}, r)
+}
+
+func (e *Executor) CmdCheckSpec(n int, r Reporter) bool {
+	return e.start(func(ctx context.Context, r Reporter) error {
+		pr, err := e.gh.GetPR(n)
+		if err != nil {
+			return err
+		}
+		diff, err := e.gh.GetPRDiff(n)
+		if err != nil {
+			return err
+		}
+		if diff == "" {
+			r("No diff found for PR.")
+			return nil
+		}
+		r(fmt.Sprintf("📋 Checking spec compliance for PR #%d: **%s**…", n, pr.Title))
+		p := prompt.CheckSpec(e.cfg, n, pr.Title, diff)
+		out, err := e.runClaudeCapture(ctx, p)
+		if err != nil {
+			return err
+		}
+		r(fmt.Sprintf("**Spec Check — PR #%d — %s:**\n\n%s", n, pr.Title, out))
+		return nil
+	}, r)
+}
+
 func (e *Executor) CmdDiff(n int, r Reporter) {
 	pr, err := e.gh.GetPR(n)
 	if err != nil {
@@ -379,6 +429,21 @@ func (e *Executor) runClaude(ctx context.Context, worktree, p, branch string) (s
 		return logPath, fmt.Errorf("claude: %w (log: %s)", err, logPath)
 	}
 	return logPath, nil
+}
+
+func (e *Executor) runClaudeCapture(ctx context.Context, p string) (string, error) {
+	args := []string{e.cfg.ClaudeCmd, "--print", "-p", p}
+	cmd := exec.CommandContext(ctx, args[0], args[1:]...)
+	cmd.Env = append(os.Environ(), "ANTHROPIC_API_KEY="+e.cfg.AnthropicAPIKey)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return "", fmt.Errorf("claude: %w\n%s", err, string(out))
+	}
+	result := string(out)
+	if len(result) > 3800 {
+		result = result[:3800] + "\n\n… (truncated)"
+	}
+	return result, nil
 }
 
 func (e *Executor) git(dir string, args ...string) (string, error) {

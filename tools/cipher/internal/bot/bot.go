@@ -144,6 +144,24 @@ func (b *Bot) onMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 			r("⏳ Task already running.")
 		}
 
+	case "review-pr":
+		if n := parseNum(rest); n > 0 {
+			if !b.exec.CmdReviewPR(n, r) {
+				r("⏳ Task already running.")
+			}
+		} else {
+			r("Usage: `!cipher review-pr #15`")
+		}
+
+	case "check-spec":
+		if n := parseNum(rest); n > 0 {
+			if !b.exec.CmdCheckSpec(n, r) {
+				r("⏳ Task already running.")
+			}
+		} else {
+			r("Usage: `!cipher check-spec #15`")
+		}
+
 	case "diff":
 		if n := parseNum(rest); n > 0 {
 			b.exec.CmdDiff(n, r)
@@ -200,6 +218,8 @@ const helpText = `**🔐 Cipher — Autonomous AI Developer for Verana**
 !cipher review #15                 address reviewer feedback on PR #15
 !cipher rebase #15                 rebase PR #15 onto main
 !cipher run "do X to codebase"     free-form Claude Code task → PR
+!cipher review-pr #15              AI code review of PR #15
+!cipher check-spec #15             check spec compliance of PR #15
 !cipher status                     open PRs + CI + attempt counts
 !cipher diff #15                   PR diff stat
 !cipher logs [branch]              tail of last task log

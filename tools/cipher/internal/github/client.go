@@ -452,6 +452,27 @@ func (c *Client) GetRecentCommits(branch string, n int) (string, error) {
 	return strings.Join(lines, "\n"), nil
 }
 
+func (c *Client) GetPRDiff(n int) (string, error) {
+	req, err := http.NewRequest("GET", fmt.Sprintf("https://api.github.com/repos/%s/pulls/%d", c.repo, n), nil)
+	if err != nil {
+		return "", err
+	}
+	req.Header.Set("Authorization", "Bearer "+c.cfg.GitHubToken)
+	req.Header.Set("Accept", "application/vnd.github.v3.diff")
+	req.Header.Set("X-GitHub-Api-Version", "2022-11-28")
+	resp, err := c.http.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+	data, _ := io.ReadAll(resp.Body)
+	diff := string(data)
+	if len(diff) > 30000 {
+		diff = diff[:30000] + "\n\n... (diff truncated at 30k chars)"
+	}
+	return diff, nil
+}
+
 func (c *Client) IsBranchBehind(branch, base string) bool {
 	data, _ := c.get(fmt.Sprintf("/repos/%s/compare/%s...%s", c.repo, base, branch))
 	if data == nil {

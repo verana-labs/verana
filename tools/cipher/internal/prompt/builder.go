@@ -54,6 +54,59 @@ func Freeform(cfg *config.Config, task, commits string) string {
 		preamble, ctx(cfg, "vpr_spec_summary.md"), ctx(cfg, "verana_modules.md"), commits, task)
 }
 
+func ReviewPR(cfg *config.Config, prNum int, title, diff string) string {
+	return fmt.Sprintf(`%s
+
+## VPR Spec
+%s
+
+## Module Patterns
+%s
+
+---
+
+## Task: Review PR #%d — %s
+
+Below is the full diff. Review it for:
+1. Correctness — does the logic match Cosmos SDK / VPR spec patterns?
+2. Security — any injection, overflow, or missing validation?
+3. Style — keeper keys, error handling, events, fee math (sdkmath.Int only)
+4. Proto — any hand-edited generated files?
+5. Tests — adequate coverage?
+
+Be concise. Use bullet points. Flag blocking issues vs nice-to-haves.
+
+`+"```diff\n%s\n```",
+		preamble, ctx(cfg, "vpr_spec_summary.md"), ctx(cfg, "verana_modules.md"),
+		prNum, title, diff)
+}
+
+func CheckSpec(cfg *config.Config, prNum int, title, diff string) string {
+	return fmt.Sprintf(`%s
+
+## VPR Spec (AUTHORITATIVE)
+%s
+
+---
+
+## Task: Spec Compliance Check for PR #%d — %s
+
+Compare the implementation in this diff against the VPR spec. For each message handler:
+1. Are all MUST/MUST NOT requirements met?
+2. Are precondition checks complete and in correct order?
+3. Is the (Signer) field validated?
+4. Are state transitions correct per spec?
+5. Are events emitted for every state change?
+6. Is fee distribution using exact integer math?
+
+List each spec violation with the spec reference (e.g. [MOD-XX-MSG-Y]) if identifiable.
+If compliant, say so explicitly.
+
+`+"```diff\n%s\n```",
+		preamble, ctx(cfg, "vpr_spec_summary.md"),
+		prNum, title, diff)
+}
+
 func Slugify(text string, max int) string {
 	text = strings.ToLower(text)
 	text = regexp.MustCompile(`[^a-z0-9\s-]`).ReplaceAllString(text, "")
