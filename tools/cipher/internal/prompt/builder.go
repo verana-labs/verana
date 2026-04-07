@@ -103,6 +103,8 @@ Review areas (adapt to PR type):
 
 Do NOT flag issues you are not confident about. Fewer accurate findings > many speculative ones.
 
+CRITICAL RULE: Never claim a spec violation unless you can cite the specific spec reference (e.g. [MOD-TR-MSG-1]) and quote what the spec requires. If the spec context above does not cover the requirement, say "spec unclear" — do NOT guess. The fee rules section is especially important: many operations only require network fees, not trust deposits.
+
 `+"```diff\n%s\n```",
 		preamble, ctx(cfg, "vpr_spec_summary.md"), ctx(cfg, "verana_modules.md"),
 		historySection, prNum, title, diff)
