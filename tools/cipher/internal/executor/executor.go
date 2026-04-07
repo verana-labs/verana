@@ -14,21 +14,24 @@ import (
 	"github.com/verana-labs/verana/tools/cipher/internal/config"
 	gh "github.com/verana-labs/verana/tools/cipher/internal/github"
 	"github.com/verana-labs/verana/tools/cipher/internal/prompt"
+	"github.com/verana-labs/verana/tools/cipher/internal/review"
 	"github.com/verana-labs/verana/tools/cipher/internal/state"
 )
 
 type Reporter func(string)
 
 type Executor struct {
-	cfg    *config.Config
-	gh     *gh.Client
-	state  *state.State
-	mu     sync.Mutex
-	cancel context.CancelFunc
+	cfg     *config.Config
+	gh      *gh.Client
+	state   *state.State
+	reviews *review.History
+	mu      sync.Mutex
+	cancel  context.CancelFunc
 }
 
 func New(cfg *config.Config, ghc *gh.Client, st *state.State) *Executor {
-	return &Executor{cfg: cfg, gh: ghc, state: st}
+	rh := review.NewHistory(filepath.Join(filepath.Dir(cfg.StateFile), "review_history.json"))
+	return &Executor{cfg: cfg, gh: ghc, state: st, reviews: rh}
 }
 
 func (e *Executor) Cancel() {
@@ -197,11 +200,13 @@ func (e *Executor) CmdReviewPR(n int, r Reporter) bool {
 			return nil
 		}
 		r(fmt.Sprintf("🔍 Reviewing PR #%d: **%s**…", n, pr.Title))
-		p := prompt.ReviewPR(e.cfg, n, pr.Title, diff)
+		history := e.reviews.LearningContext("review-pr", 5)
+		p := prompt.ReviewPR(e.cfg, n, pr.Title, diff, history)
 		out, err := e.runClaudeCapture(ctx, p)
 		if err != nil {
 			return err
 		}
+		e.reviews.Record(n, pr.Title, "review-pr", out)
 		r(fmt.Sprintf("**Review of PR #%d — %s:**\n\n%s", n, pr.Title, out))
 		return nil
 	}, r)
@@ -222,14 +227,28 @@ func (e *Executor) CmdCheckSpec(n int, r Reporter) bool {
 			return nil
 		}
 		r(fmt.Sprintf("📋 Checking spec compliance for PR #%d: **%s**…", n, pr.Title))
-		p := prompt.CheckSpec(e.cfg, n, pr.Title, diff)
+		history := e.reviews.LearningContext("check-spec", 5)
+		p := prompt.CheckSpec(e.cfg, n, pr.Title, diff, history)
 		out, err := e.runClaudeCapture(ctx, p)
 		if err != nil {
 			return err
 		}
+		e.reviews.Record(n, pr.Title, "check-spec", out)
 		r(fmt.Sprintf("**Spec Check — PR #%d — %s:**\n\n%s", n, pr.Title, out))
 		return nil
 	}, r)
+}
+
+func (e *Executor) CmdFeedback(pr int, feedback, notes string, r Reporter) {
+	if e.reviews.SetFeedback(pr, feedback, notes) {
+		r(fmt.Sprintf("✅ Feedback recorded for PR #%d: **%s**", pr, feedback))
+	} else {
+		r(fmt.Sprintf("❌ No review found for PR #%d.", pr))
+	}
+}
+
+func (e *Executor) CmdReviewHistory(r Reporter) {
+	r(e.reviews.RecentSummary(10))
 }
 
 func (e *Executor) CmdDiff(n int, r Reporter) {

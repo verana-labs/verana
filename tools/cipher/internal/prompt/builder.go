@@ -54,7 +54,11 @@ func Freeform(cfg *config.Config, task, commits string) string {
 		preamble, ctx(cfg, "vpr_spec_summary.md"), ctx(cfg, "verana_modules.md"), commits, task)
 }
 
-func ReviewPR(cfg *config.Config, prNum int, title, diff string) string {
+func ReviewPR(cfg *config.Config, prNum int, title, diff, history string) string {
+	historySection := ""
+	if history != "" {
+		historySection = fmt.Sprintf("\n## Past Review Patterns (learn from these)\n%s\n", history)
+	}
 	return fmt.Sprintf(`%s
 
 ## VPR Spec
@@ -62,49 +66,87 @@ func ReviewPR(cfg *config.Config, prNum int, title, diff string) string {
 
 ## Module Patterns
 %s
-
+%s
 ---
 
 ## Task: Review PR #%d — %s
 
-Below is the full diff. Review it for:
-1. Correctness — does the logic match Cosmos SDK / VPR spec patterns?
-2. Security — any injection, overflow, or missing validation?
-3. Style — keeper keys, error handling, events, fee math (sdkmath.Int only)
-4. Proto — any hand-edited generated files?
-5. Tests — adequate coverage?
+Below is the full diff. Your review MUST follow this process:
 
-Be concise. Use bullet points. Flag blocking issues vs nice-to-haves.
+### Phase 1 — Understand (do not write findings yet)
+- Read the entire diff to understand what changed and why
+- Identify the PR type: Go code, proto, CI/CD, docs, config, tests
+- Trace control flow: if value X is set in block A, verify your claim about X by checking all paths
+
+### Phase 2 — Analyze
+For each potential finding, BEFORE reporting it:
+- Verify the claim is true by re-reading the relevant diff lines
+- Check if a guard/condition elsewhere already handles the case
+- Confirm the issue can actually be triggered given the control flow
+
+### Phase 3 — Report
+For each finding, provide:
+- **Severity**: BLOCKING (must fix before merge) or NOTE (improvement suggestion)
+- **Evidence**: quote the exact diff line(s)
+- **Impact**: what specifically goes wrong if unfixed
+- **Confidence**: HIGH (verified in diff) / MEDIUM (likely but not 100%%) / LOW (possible but uncertain)
+
+Only mark as BLOCKING if: security vulnerability, data loss, crash, or correctness bug.
+Config mismatches and style issues are NOTE unless they cause runtime failure.
+
+Review areas (adapt to PR type):
+1. Correctness — logic matches intended behavior
+2. Security — injection, overflow, missing validation, supply chain
+3. Cosmos patterns — keeper keys, events, fee math, proto
+4. Tests — adequate coverage for changes
+5. CI/CD — workflow correctness, permissions, pinning
+
+Do NOT flag issues you are not confident about. Fewer accurate findings > many speculative ones.
 
 `+"```diff\n%s\n```",
 		preamble, ctx(cfg, "vpr_spec_summary.md"), ctx(cfg, "verana_modules.md"),
-		prNum, title, diff)
+		historySection, prNum, title, diff)
 }
 
-func CheckSpec(cfg *config.Config, prNum int, title, diff string) string {
+func CheckSpec(cfg *config.Config, prNum int, title, diff, history string) string {
+	historySection := ""
+	if history != "" {
+		historySection = fmt.Sprintf("\n## Past Spec Check Patterns (learn from these)\n%s\n", history)
+	}
 	return fmt.Sprintf(`%s
 
 ## VPR Spec (AUTHORITATIVE)
 %s
-
+%s
 ---
 
 ## Task: Spec Compliance Check for PR #%d — %s
 
-Compare the implementation in this diff against the VPR spec. For each message handler:
+### Phase 1 — Identify message handlers in the diff
+List every MsgXxx handler that appears in the diff. If none, state that this PR has no message handlers and focus on whatever is relevant (queries, genesis, params, etc.).
+
+### Phase 2 — Check each handler against spec
+For each message handler found:
 1. Are all MUST/MUST NOT requirements met?
 2. Are precondition checks complete and in correct order?
-3. Is the (Signer) field validated?
+3. Is the (Signer) field validated correctly?
 4. Are state transitions correct per spec?
 5. Are events emitted for every state change?
-6. Is fee distribution using exact integer math?
+6. Is fee distribution using exact integer math (sdkmath.Int)?
 
-List each spec violation with the spec reference (e.g. [MOD-XX-MSG-Y]) if identifiable.
-If compliant, say so explicitly.
+### Phase 3 — Report
+For each violation:
+- **Spec ref**: [MOD-XX-MSG-Y] if identifiable, or describe the spec requirement
+- **Evidence**: quote the exact code
+- **What spec requires vs what code does**
+- **Confidence**: HIGH / MEDIUM / LOW
+
+If fully compliant, say so explicitly with brief justification.
+If the PR doesn't touch spec-relevant code, say so.
 
 `+"```diff\n%s\n```",
 		preamble, ctx(cfg, "vpr_spec_summary.md"),
-		prNum, title, diff)
+		historySection, prNum, title, diff)
 }
 
 func Slugify(text string, max int) string {

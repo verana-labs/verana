@@ -162,6 +162,31 @@ func (b *Bot) onMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 			r("Usage: `!cipher check-spec #15`")
 		}
 
+	case "feedback":
+		fbParts := strings.Fields(rest)
+		if len(fbParts) < 2 {
+			r("Usage: `!cipher feedback #15 good/bad/mixed [optional notes]`")
+			return
+		}
+		n := parseNum(fbParts[0])
+		if n == 0 {
+			r("Usage: `!cipher feedback #15 good/bad/mixed [optional notes]`")
+			return
+		}
+		fb := strings.ToLower(fbParts[1])
+		if fb != "good" && fb != "bad" && fb != "mixed" {
+			r("Feedback must be `good`, `bad`, or `mixed`.")
+			return
+		}
+		notes := ""
+		if len(fbParts) > 2 {
+			notes = strings.Join(fbParts[2:], " ")
+		}
+		b.exec.CmdFeedback(n, fb, notes, r)
+
+	case "review-history":
+		b.exec.CmdReviewHistory(r)
+
 	case "diff":
 		if n := parseNum(rest); n > 0 {
 			b.exec.CmdDiff(n, r)
@@ -220,6 +245,8 @@ const helpText = `**🔐 Cipher — Autonomous AI Developer for Verana**
 !cipher run "do X to codebase"     free-form Claude Code task → PR
 !cipher review-pr #15              AI code review of PR #15
 !cipher check-spec #15             check spec compliance of PR #15
+!cipher feedback #15 good/bad      rate a review (good/bad/mixed)
+!cipher review-history             past reviews + feedback
 !cipher status                     open PRs + CI + attempt counts
 !cipher diff #15                   PR diff stat
 !cipher logs [branch]              tail of last task log
