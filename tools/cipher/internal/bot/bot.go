@@ -162,6 +162,21 @@ func (b *Bot) onMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 			r("Usage: `!cipher check-spec #15`")
 		}
 
+	case "check-impl":
+		args := strings.Fields(rest)
+		if len(args) == 0 {
+			r("Usage: `!cipher check-impl trustregistry [MsgCreateTrustRegistry]`")
+			return
+		}
+		module := args[0]
+		handler := ""
+		if len(args) > 1 {
+			handler = args[1]
+		}
+		if !b.exec.CmdCheckImpl(module, handler, r) {
+			r("⏳ Task already running.")
+		}
+
 	case "feedback":
 		fbParts := strings.Fields(rest)
 		if len(fbParts) < 2 {
@@ -245,6 +260,7 @@ const helpText = `**🔐 Cipher — Autonomous AI Developer for Verana**
 !cipher run "do X to codebase"     free-form Claude Code task → PR
 !cipher review-pr #15              AI code review of PR #15
 !cipher check-spec #15             check spec compliance of PR #15
+!cipher check-impl mod [Handler]   check module impl vs spec
 !cipher feedback #15 good/bad      rate a review (good/bad/mixed)
 !cipher review-history             past reviews + feedback
 !cipher status                     open PRs + CI + attempt counts

@@ -149,6 +149,55 @@ If the PR doesn't touch spec-relevant code, say so.
 		historySection, prNum, title, diff)
 }
 
+func CheckImpl(cfg *config.Config, module, handler string) string {
+	scope := fmt.Sprintf("module `%s`", module)
+	focus := "Check ALL message handlers and query handlers in this module."
+	if handler != "" {
+		scope = fmt.Sprintf("`%s` in module `%s`", handler, module)
+		focus = fmt.Sprintf("Focus specifically on the `%s` handler.", handler)
+	}
+	return fmt.Sprintf(`%s
+
+## VPR Spec (AUTHORITATIVE)
+%s
+
+## Module Patterns
+%s
+
+---
+
+## Task: Verify implementation of %s
+
+%s
+
+### Process:
+1. Read the handler code in x/%s/keeper/
+2. Read the corresponding proto message definition
+3. Read the types and error definitions
+4. Compare against the VPR spec requirements
+
+### For each handler, verify:
+1. **(Signer) validation** — is the signer field checked and does it match spec?
+2. **Precondition checks** — all MUST conditions checked, in correct order?
+3. **State transitions** — correct fields set, correct store operations?
+4. **Events** — emitted for every state change with correct attributes?
+5. **Fee handling** — uses sdkmath.Int, correct distribution formula?
+6. **Error codes** — appropriate sentinel errors used?
+7. **Genesis** — state exported/imported correctly?
+
+### Report format:
+For each finding:
+- **Handler**: MsgXxx or QueryXxx
+- **Spec requirement**: what the spec says (quote if possible)
+- **Implementation**: what the code does
+- **Verdict**: COMPLIANT / VIOLATION / PARTIAL
+- **Confidence**: HIGH / MEDIUM / LOW
+
+If fully compliant, state it explicitly.`,
+		preamble, ctx(cfg, "vpr_spec_summary.md"), ctx(cfg, "verana_modules.md"),
+		scope, focus, module)
+}
+
 func Slugify(text string, max int) string {
 	text = strings.ToLower(text)
 	text = regexp.MustCompile(`[^a-z0-9\s-]`).ReplaceAllString(text, "")

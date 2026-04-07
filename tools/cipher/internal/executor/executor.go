@@ -239,6 +239,24 @@ func (e *Executor) CmdCheckSpec(n int, r Reporter) bool {
 	}, r)
 }
 
+func (e *Executor) CmdCheckImpl(module, handler string, r Reporter) bool {
+	return e.start(func(ctx context.Context, r Reporter) error {
+		scope := fmt.Sprintf("module `%s`", module)
+		if handler != "" {
+			scope = fmt.Sprintf("`%s` in %s", handler, scope)
+		}
+		r(fmt.Sprintf("📋 Checking implementation of %s against spec…", scope))
+		p := prompt.CheckImpl(e.cfg, module, handler)
+		out, err := e.runClaudeInRepo(ctx, p)
+		if err != nil {
+			return err
+		}
+		e.reviews.Record(0, scope, "check-impl", out)
+		r(fmt.Sprintf("**Spec Compliance — %s:**\n\n%s", scope, out))
+		return nil
+	}, r)
+}
+
 func (e *Executor) CmdFeedback(pr int, feedback, notes string, r Reporter) {
 	if e.reviews.SetFeedback(pr, feedback, notes) {
 		r(fmt.Sprintf("✅ Feedback recorded for PR #%d: **%s**", pr, feedback))
@@ -448,6 +466,24 @@ func (e *Executor) runClaude(ctx context.Context, worktree, p, branch string) (s
 		return logPath, fmt.Errorf("claude: %w (log: %s)", err, logPath)
 	}
 	return logPath, nil
+}
+
+func (e *Executor) runClaudeInRepo(ctx context.Context, p string) (string, error) {
+	args := []string{e.cfg.ClaudeCmd, "--print",
+		"--allowedTools", "Read,Glob,Grep,LS",
+		"-p", p}
+	cmd := exec.CommandContext(ctx, args[0], args[1:]...)
+	cmd.Dir = e.cfg.RepoPath
+	cmd.Env = append(os.Environ(), "ANTHROPIC_API_KEY="+e.cfg.AnthropicAPIKey)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return "", fmt.Errorf("claude: %w\n%s", err, string(out))
+	}
+	result := string(out)
+	if len(result) > 3800 {
+		result = result[:3800] + "\n\n… (truncated)"
+	}
+	return result, nil
 }
 
 func (e *Executor) runClaudeCapture(ctx context.Context, p string) (string, error) {
