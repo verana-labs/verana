@@ -201,10 +201,9 @@ func RunTrustRegistryAuthzOperationsJourney(ctx context.Context, client cosmoscl
 
 	// 4a: Try WITHOUT authorization (expect failure)
 	fmt.Println("\n--- Step 4a: Operator tries UpdateTrustRegistry without auth (expect failure) ---")
-	newDID := lib.GenerateUniqueDID(client, ctx)
 	err = lib.UpdateTrustRegistryWithAuthority(
 		client, ctx, operatorAccount, policyAddr,
-		trID, newDID, "http://updated-aka.com",
+		trID, "", "http://updated-aka.com",
 	)
 	if err := expectAuthorizationError("Step 4a", err); err != nil {
 		return err
@@ -225,22 +224,22 @@ func RunTrustRegistryAuthzOperationsJourney(ctx context.Context, client cosmoscl
 	waitForTx("grant UpdateTR auth")
 
 	// 4c: Try WITH authorization (expect success)
+	// Spec v4: MsgUpdateTrustRegistry no longer mutates the DID — only aka / language.
 	fmt.Println("\n--- Step 4c: Operator updates trust registry with auth (expect success) ---")
-	newDID = lib.GenerateUniqueDID(client, ctx)
 	err = lib.UpdateTrustRegistryWithAuthority(
 		client, ctx, operatorAccount, policyAddr,
-		trID, newDID, "http://updated-aka.com",
+		trID, "", "http://updated-aka.com",
 	)
 	if err != nil {
 		return fmt.Errorf("step 4c failed: %w", err)
 	}
-	fmt.Printf("✅ Step 4c: Updated trust registry DID to: %s\n", newDID)
+	fmt.Printf("✅ Step 4c: Updated trust registry aka to: http://updated-aka.com\n")
 	waitForTx("UpdateTR success")
 
-	// Verify update
-	verified = lib.VerifyTrustRegistry(client, ctx, trID, newDID)
+	// Verify update: DID must remain the original value (spec v4: immutable).
+	verified = lib.VerifyTrustRegistry(client, ctx, trID, did)
 	if !verified {
-		return fmt.Errorf("step 4c verification failed: DID should be updated")
+		return fmt.Errorf("step 4c verification failed: TR should still exist with original DID")
 	}
 
 	// =========================================================================

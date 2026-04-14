@@ -31,11 +31,10 @@ var VPRDelegableMsgTypes = map[string]bool{
 	"/verana.perm.v1.MsgRevokePermission":                   true,
 	"/verana.perm.v1.MsgSlashPermissionTrustDeposit":        true,
 	"/verana.perm.v1.MsgRepayPermissionSlashedTrustDeposit": true,
-	"/verana.perm.v1.MsgCreatePermission":                   true,
+	"/verana.perm.v1.MsgSelfCreatePermission":               true,
 	"/verana.perm.v1.MsgCreateOrUpdatePermissionSession":    true,
 	// Trust Deposit (TD)
 	"/verana.td.v1.MsgReclaimTrustDepositYield": true,
-	"/verana.td.v1.MsgReclaimTrustDeposit":      true,
 	"/verana.td.v1.MsgRepaySlashedTrustDeposit": true,
 	// Digest (DI)
 	"/verana.di.v1.MsgStoreDigest": true,

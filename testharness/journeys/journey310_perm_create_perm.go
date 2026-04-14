@@ -146,7 +146,7 @@ func RunPermissionCreatePermJourney(ctx context.Context, client cosmosclient.Cli
 	err = lib.GrantOperatorAuthorizationViaGroup(
 		client, ctx, adminAccount, member1Account,
 		policyAddr, operatorAddr, operatorAddr,
-		[]string{"/verana.perm.v1.MsgCreatePermission"},
+		[]string{"/verana.perm.v1.MsgSelfCreatePermission"},
 	)
 	if err != nil {
 		return fmt.Errorf("step 1b failed: %w", err)
