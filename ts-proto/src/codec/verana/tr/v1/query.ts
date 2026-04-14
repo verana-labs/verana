@@ -38,8 +38,7 @@ export interface QueryGetTrustRegistryResponse {
 
 /** QueryListTrustRegistriesRequest is the request type for the Query/ListTrustRegistries RPC method. */
 export interface QueryListTrustRegistriesRequest {
-  /** Added controller field */
-  controller: string;
+  corporation: string;
   modifiedAfter: Date | undefined;
   activeGfOnly: boolean;
   preferredLanguage: string;
@@ -306,13 +305,13 @@ export const QueryGetTrustRegistryResponse = {
 };
 
 function createBaseQueryListTrustRegistriesRequest(): QueryListTrustRegistriesRequest {
-  return { controller: "", modifiedAfter: undefined, activeGfOnly: false, preferredLanguage: "", responseMaxSize: 0 };
+  return { corporation: "", modifiedAfter: undefined, activeGfOnly: false, preferredLanguage: "", responseMaxSize: 0 };
 }
 
 export const QueryListTrustRegistriesRequest = {
   encode(message: QueryListTrustRegistriesRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.controller !== "") {
-      writer.uint32(10).string(message.controller);
+    if (message.corporation !== "") {
+      writer.uint32(10).string(message.corporation);
     }
     if (message.modifiedAfter !== undefined) {
       Timestamp.encode(toTimestamp(message.modifiedAfter), writer.uint32(18).fork()).ldelim();
@@ -341,7 +340,7 @@ export const QueryListTrustRegistriesRequest = {
             break;
           }
 
-          message.controller = reader.string();
+          message.corporation = reader.string();
           continue;
         case 2:
           if (tag !== 18) {
@@ -382,7 +381,7 @@ export const QueryListTrustRegistriesRequest = {
 
   fromJSON(object: any): QueryListTrustRegistriesRequest {
     return {
-      controller: isSet(object.controller) ? globalThis.String(object.controller) : "",
+      corporation: isSet(object.corporation) ? globalThis.String(object.corporation) : "",
       modifiedAfter: isSet(object.modifiedAfter) ? fromJsonTimestamp(object.modifiedAfter) : undefined,
       activeGfOnly: isSet(object.activeGfOnly) ? globalThis.Boolean(object.activeGfOnly) : false,
       preferredLanguage: isSet(object.preferredLanguage) ? globalThis.String(object.preferredLanguage) : "",
@@ -392,8 +391,8 @@ export const QueryListTrustRegistriesRequest = {
 
   toJSON(message: QueryListTrustRegistriesRequest): unknown {
     const obj: any = {};
-    if (message.controller !== "") {
-      obj.controller = message.controller;
+    if (message.corporation !== "") {
+      obj.corporation = message.corporation;
     }
     if (message.modifiedAfter !== undefined) {
       obj.modifiedAfter = message.modifiedAfter.toISOString();
@@ -417,7 +416,7 @@ export const QueryListTrustRegistriesRequest = {
     object: I,
   ): QueryListTrustRegistriesRequest {
     const message = createBaseQueryListTrustRegistriesRequest();
-    message.controller = object.controller ?? "";
+    message.corporation = object.corporation ?? "";
     message.modifiedAfter = object.modifiedAfter ?? undefined;
     message.activeGfOnly = object.activeGfOnly ?? false;
     message.preferredLanguage = object.preferredLanguage ?? "";

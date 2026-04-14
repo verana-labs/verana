@@ -71,8 +71,8 @@ func RunPermissionCSPSJourney(ctx context.Context, client cosmosclient.Client) e
 	cs1IDStr, err := lib.CreateCredentialSchema(client, ctx, operatorAccount, cschema.MsgCreateCredentialSchema{
 		TrId:                                    trID,
 		JsonSchema:                              schemaData,
-		IssuerPermManagementMode:                uint32(cschema.CredentialSchemaPermManagementMode_ECOSYSTEM),
-		VerifierPermManagementMode:              uint32(cschema.CredentialSchemaPermManagementMode_ECOSYSTEM),
+		IssuerOnboardingMode:                uint32(cschema.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS),
+		VerifierOnboardingMode:              uint32(cschema.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS),
 		PricingAssetType:                        uint32(cschema.PricingAssetType_TU),
 		PricingAsset:                            "tu",
 		DigestAlgorithm:                         "sha256",
@@ -158,8 +158,8 @@ func RunPermissionCSPSJourney(ctx context.Context, client cosmosclient.Client) e
 	cs2IDStr, err := lib.CreateCredentialSchema(client, ctx, operatorAccount, cschema.MsgCreateCredentialSchema{
 		TrId:                                    trID,
 		JsonSchema:                              schemaData2,
-		IssuerPermManagementMode:                uint32(cschema.CredentialSchemaPermManagementMode_ECOSYSTEM),
-		VerifierPermManagementMode:              uint32(cschema.CredentialSchemaPermManagementMode_ECOSYSTEM),
+		IssuerOnboardingMode:                uint32(cschema.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS),
+		VerifierOnboardingMode:              uint32(cschema.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS),
 		PricingAssetType:                        uint32(cschema.PricingAssetType_TU),
 		PricingAsset:                            "tu",
 		DigestAlgorithm:                         "sha256",

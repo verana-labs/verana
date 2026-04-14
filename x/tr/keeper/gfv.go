@@ -10,13 +10,13 @@ import (
 
 func (ms msgServer) validateIncreaseActiveGovernanceFrameworkVersionParams(ctx sdk.Context, msg *types.MsgIncreaseActiveGovernanceFrameworkVersion) error {
 	// Direct lookup by ID
-	tr, err := ms.TrustRegistry.Get(ctx, msg.Id)
+	tr, err := ms.TrustRegistry.Get(ctx, msg.TrId)
 	if err != nil {
-		return fmt.Errorf("trust registry with ID %d does not exist: %w", msg.Id, err)
+		return fmt.Errorf("trust registry with ID %d does not exist: %w", msg.TrId, err)
 	}
 
-	if tr.Controller != msg.Authority {
-		return errors.New("authority is not the controller of the trust registry")
+	if tr.Corporation != msg.Corporation {
+		return errors.New("corporation is not the controller of the trust registry")
 	}
 
 	nextVersion := tr.ActiveVersion + 1
@@ -25,7 +25,7 @@ func (ms msgServer) validateIncreaseActiveGovernanceFrameworkVersionParams(ctx s
 	var gfv types.GovernanceFrameworkVersion
 	found := false
 	err = ms.GFVersion.Walk(ctx, nil, func(id uint64, v types.GovernanceFrameworkVersion) (bool, error) {
-		if v.TrId == msg.Id && v.Version == nextVersion {
+		if v.TrId == msg.TrId && v.Version == nextVersion {
 			gfv = v
 			found = true
 			return true, nil
@@ -60,7 +60,7 @@ func (ms msgServer) validateIncreaseActiveGovernanceFrameworkVersionParams(ctx s
 
 func (ms msgServer) executeIncreaseActiveGovernanceFrameworkVersion(ctx sdk.Context, msg *types.MsgIncreaseActiveGovernanceFrameworkVersion) error {
 	// Direct lookup of trust registry by ID
-	tr, err := ms.TrustRegistry.Get(ctx, msg.Id)
+	tr, err := ms.TrustRegistry.Get(ctx, msg.TrId)
 	if err != nil {
 		return fmt.Errorf("error finding trust registry: %w", err)
 	}
@@ -70,7 +70,7 @@ func (ms msgServer) executeIncreaseActiveGovernanceFrameworkVersion(ctx sdk.Cont
 	var found bool
 
 	err = ms.GFVersion.Walk(ctx, nil, func(key uint64, gfv types.GovernanceFrameworkVersion) (bool, error) {
-		if gfv.TrId == msg.Id && gfv.Version == nextVersion {
+		if gfv.TrId == msg.TrId && gfv.Version == nextVersion {
 			nextGfv = gfv
 			found = true
 			return true, nil

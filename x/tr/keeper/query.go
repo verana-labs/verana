@@ -103,11 +103,10 @@ func (qs queryServer) getTrustRegistryWithVersions(ctx context.Context, tr types
 	return &types.TrustRegistryWithVersions{
 		Id:            tr.Id,
 		Did:           tr.Did,
-		Controller:    tr.Controller,
+		Corporation:   tr.Corporation,
 		Created:       tr.Created,
 		Modified:      tr.Modified,
 		Archived:      tr.Archived,
-		Deposit:       tr.Deposit,
 		Aka:           tr.Aka,
 		ActiveVersion: tr.ActiveVersion,
 		Language:      tr.Language,
@@ -130,7 +129,7 @@ func (qs queryServer) ListTrustRegistries(ctx context.Context, req *types.QueryL
 	// Collect all matching trust registries with their nested versions and documents
 	err := qs.k.TrustRegistry.Walk(ctx, nil, func(key uint64, tr types.TrustRegistry) (bool, error) {
 		// Apply filters
-		if req.Controller != "" && tr.Controller != req.Controller {
+		if req.Corporation != "" && tr.Corporation != req.Corporation {
 			return false, nil
 		}
 		if req.ModifiedAfter != nil && !tr.Modified.After(*req.ModifiedAfter) {

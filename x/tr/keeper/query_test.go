@@ -21,12 +21,10 @@ func setupTestData(t *testing.T) (keeper.Keeper, types.QueryServer, context.Cont
 	authority := sdk.AccAddress([]byte("test_authority")).String()
 	operator := sdk.AccAddress([]byte("test_operator")).String()
 	createMsg := &types.MsgCreateTrustRegistry{
-		Authority:    authority,
-		Operator:     operator,
-		Did:          "did:example:123",
-		Language:     "en",
-		DocUrl:       "http://example.com/doc1",
-		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+		Corporation: authority,
+		Operator:    operator,
+		Did:         "did:example:123",
+		Language:    "en",
 	}
 	_, err := ms.CreateTrustRegistry(ctx, createMsg)
 	require.NoError(t, err)
@@ -37,19 +35,19 @@ func setupTestData(t *testing.T) (keeper.Keeper, types.QueryServer, context.Cont
 
 	// Add documents in different languages for version 2
 	addDocMsg := &types.MsgAddGovernanceFrameworkDocument{
-		Authority:    authority,
-		Operator:     operator,
-		Id:           trID,
-		DocLanguage:  "en",
-		DocUrl:       "http://example.com/doc2-en",
-		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
-		Version:      2,
+		Corporation: authority,
+		Operator:    operator,
+		TrId:        trID,
+		Language:    "en",
+		Url:         "http://example.com/doc2-en",
+		DigestSri:   "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+		Version:     2,
 	}
 	_, err = ms.AddGovernanceFrameworkDocument(ctx, addDocMsg)
 	require.NoError(t, err)
 
-	addDocMsg.DocLanguage = "es"
-	addDocMsg.DocUrl = "http://example.com/doc2-es"
+	addDocMsg.Language = "es"
+	addDocMsg.Url = "http://example.com/doc2-es"
 	_, err = ms.AddGovernanceFrameworkDocument(ctx, addDocMsg)
 	require.NoError(t, err)
 
@@ -149,12 +147,10 @@ func TestListTrustRegistries(t *testing.T) {
 	// Create additional trust registry for testing
 	ms := keeper.NewMsgServerImpl(k)
 	createMsg := &types.MsgCreateTrustRegistry{
-		Authority:    "another_authority",
-		Operator:     "another_operator",
-		Did:          "did:example:456",
-		Language:     "fr",
-		DocUrl:       "http://example.com/doc-fr",
-		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+		Corporation: "another_authority",
+		Operator:    "another_operator",
+		Did:         "did:example:456",
+		Language:    "fr",
 	}
 	_, err := ms.CreateTrustRegistry(ctx, createMsg)
 	require.NoError(t, err)
@@ -184,15 +180,15 @@ func TestListTrustRegistries(t *testing.T) {
 			},
 		},
 		{
-			name: "Filter by Controller",
+			name: "Filter by Corporation",
 			request: &types.QueryListTrustRegistriesRequest{
-				Controller:      "another_authority",
+				Corporation:     "another_authority",
 				ResponseMaxSize: 10,
 			},
 			expectedError: false,
 			check: func(t *testing.T, response *types.QueryListTrustRegistriesResponse) {
 				require.Len(t, response.TrustRegistries, 1)
-				require.Equal(t, "another_authority", response.TrustRegistries[0].Controller)
+				require.Equal(t, "another_authority", response.TrustRegistries[0].Corporation)
 
 				// Check nested structure
 				tr := response.TrustRegistries[0]

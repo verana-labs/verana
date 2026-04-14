@@ -45,15 +45,21 @@ func (k Keeper) ListCredentialSchemas(goCtx context.Context, req *types.QueryLis
 			return false, nil
 		}
 
-		// Filter by issuer_perm_management_mode if specified
-		if req.IssuerPermManagementMode != types.CredentialSchemaPermManagementMode_MODE_UNSPECIFIED &&
-			schema.IssuerPermManagementMode != req.IssuerPermManagementMode {
+		// Filter by issuer_onboarding_mode if specified
+		if req.IssuerOnboardingMode != types.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_UNSPECIFIED &&
+			schema.IssuerOnboardingMode != req.IssuerOnboardingMode {
 			return false, nil
 		}
 
-		// Filter by verifier_perm_management_mode if specified
-		if req.VerifierPermManagementMode != types.CredentialSchemaPermManagementMode_MODE_UNSPECIFIED &&
-			schema.VerifierPermManagementMode != req.VerifierPermManagementMode {
+		// Filter by verifier_onboarding_mode if specified
+		if req.VerifierOnboardingMode != types.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_UNSPECIFIED &&
+			schema.VerifierOnboardingMode != req.VerifierOnboardingMode {
+			return false, nil
+		}
+
+		// Filter by holder_onboarding_mode if specified
+		if req.HolderOnboardingMode != types.HolderOnboardingMode_HOLDER_ONBOARDING_MODE_UNSPECIFIED &&
+			schema.HolderOnboardingMode != req.HolderOnboardingMode {
 			return false, nil
 		}
 

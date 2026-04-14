@@ -11,21 +11,21 @@ import (
 
 func (ms msgServer) validateAddGovernanceFrameworkDocumentParams(ctx sdk.Context, msg *types.MsgAddGovernanceFrameworkDocument) error {
 	// Direct lookup of trust registry by ID
-	tr, err := ms.TrustRegistry.Get(ctx, msg.Id)
+	tr, err := ms.TrustRegistry.Get(ctx, msg.TrId)
 	if err != nil {
-		return fmt.Errorf("trust registry with ID %d does not exist: %w", msg.Id, err)
+		return fmt.Errorf("trust registry with ID %d does not exist: %w", msg.TrId, err)
 	}
 
-	// Check controller - authority must match the trust registry controller
-	if tr.Controller != msg.Authority {
-		return errors.New("authority is not the controller of the trust registry")
+	// Check corporation - corporation must match the trust registry corporation
+	if tr.Corporation != msg.Corporation {
+		return errors.New("corporation is not the controller of the trust registry")
 	}
 
 	// Check version validity
 	var maxVersion int32
 	var hasVersion bool
 	err = ms.GFVersion.Walk(ctx, nil, func(id uint64, gfv types.GovernanceFrameworkVersion) (bool, error) {
-		if gfv.TrId == msg.Id {
+		if gfv.TrId == msg.TrId {
 			if gfv.Version == msg.Version {
 				hasVersion = true
 			}
@@ -64,7 +64,7 @@ func (ms msgServer) validateAddGovernanceFrameworkDocumentParams(ctx sdk.Context
 	}
 
 	// Validate language tag
-	if !isValidLanguageTag(msg.DocLanguage) {
+	if !isValidLanguageTag(msg.Language) {
 		return errors.New("invalid language tag (must conform to rfc1766)")
 	}
 
@@ -76,7 +76,7 @@ func (ms msgServer) executeAddGovernanceFrameworkDocument(ctx sdk.Context, msg *
 	var gfv types.GovernanceFrameworkVersion
 	maxVersion := int32(0)
 	err := ms.GFVersion.Walk(ctx, nil, func(key uint64, version types.GovernanceFrameworkVersion) (bool, error) {
-		if version.TrId == msg.Id {
+		if version.TrId == msg.TrId {
 			if version.Version > maxVersion {
 				maxVersion = version.Version
 			}
@@ -98,7 +98,7 @@ func (ms msgServer) executeAddGovernanceFrameworkDocument(ctx sdk.Context, msg *
 		}
 		gfv = types.GovernanceFrameworkVersion{
 			Id:          nextGfvId,
-			TrId:        msg.Id,
+			TrId:        msg.TrId,
 			Created:     ctx.BlockTime(),
 			Version:     msg.Version,
 			ActiveSince: time.Time{}, // Zero time as per spec - not active yet
@@ -118,9 +118,9 @@ func (ms msgServer) executeAddGovernanceFrameworkDocument(ctx sdk.Context, msg *
 		Id:        nextGfdId,
 		GfvId:     gfv.Id,
 		Created:   ctx.BlockTime(),
-		Language:  msg.DocLanguage,
-		Url:       msg.DocUrl,
-		DigestSri: msg.DocDigestSri,
+		Language:  msg.Language,
+		Url:       msg.Url,
+		DigestSri: msg.DigestSri,
 	}
 
 	if err := ms.GFDocument.Set(ctx, gfd.Id, gfd); err != nil {

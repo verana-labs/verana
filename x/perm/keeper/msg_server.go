@@ -33,7 +33,7 @@ func (ms msgServer) StartPermissionVP(goCtx context.Context, msg *types.MsgStart
 	if ms.delegationKeeper != nil {
 		if err := ms.delegationKeeper.CheckOperatorAuthorization(
 			ctx,
-			msg.Authority,
+			msg.Corporation,
 			msg.Operator,
 			"/verana.perm.v1.MsgStartPermissionVP",
 			now,
@@ -49,7 +49,7 @@ func (ms msgServer) StartPermissionVP(goCtx context.Context, msg *types.MsgStart
 	}
 
 	// [MOD-PERM-MSG-1-2-4] Overlap checks
-	if err := ms.checkOverlap(ctx, validatorPerm.SchemaId, msg.Type, msg.ValidatorPermId, msg.Authority); err != nil {
+	if err := ms.checkOverlap(ctx, validatorPerm.SchemaId, msg.Type, msg.ValidatorPermId, msg.Corporation); err != nil {
 		return nil, fmt.Errorf("overlap check failed: %w", err)
 	}
 
@@ -69,7 +69,7 @@ func (ms msgServer) StartPermissionVP(goCtx context.Context, msg *types.MsgStart
 		sdk.NewEvent(
 			types.EventTypeStartPermissionVP,
 			sdk.NewAttribute(types.AttributeKeyPermissionID, strconv.FormatUint(permID, 10)),
-			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Authority),
+			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
 			sdk.NewAttribute(types.AttributeKeyValidatorPermID, strconv.FormatUint(msg.ValidatorPermId, 10)),
 			sdk.NewAttribute(types.AttributeKeyType, types.PermissionType(msg.Type).String()),
@@ -92,7 +92,7 @@ func (ms msgServer) RenewPermissionVP(goCtx context.Context, msg *types.MsgRenew
 	if ms.delegationKeeper != nil {
 		if err := ms.delegationKeeper.CheckOperatorAuthorization(
 			ctx,
-			msg.Authority,
+			msg.Corporation,
 			msg.Operator,
 			"/verana.perm.v1.MsgRenewPermissionVP",
 			now,
@@ -108,14 +108,13 @@ func (ms msgServer) RenewPermissionVP(goCtx context.Context, msg *types.MsgRenew
 	}
 
 	// [MOD-PERM-MSG-2-2-2] authority MUST be applicant_perm.authority
-	if applicantPerm.Authority != msg.Authority {
+	if applicantPerm.Corporation != msg.Corporation {
 		return nil, fmt.Errorf("authority is not the perm authority")
 	}
 
 	// [MOD-PERM-MSG-2-2-2] applicant_perm.vp_state MUST be VALIDATED to allow renewal.
 	// Renewing a PENDING perm would overwrite vp_current_fees/vp_current_deposit without
 	// refunding the escrowed funds, causing permanent fund loss.
-	// TERMINATED or TERMINATION_REQUESTED perms cannot be renewed either.
 	if applicantPerm.VpState != types.ValidationState_VALIDATED {
 		return nil, fmt.Errorf("perm vp_state must be VALIDATED to renew, current state: %s", applicantPerm.VpState.String())
 	}
@@ -126,7 +125,7 @@ func (ms msgServer) RenewPermissionVP(goCtx context.Context, msg *types.MsgRenew
 		return nil, fmt.Errorf("validator perm not found: %w", err)
 	}
 
-	if err := IsValidPermission(validatorPerm, applicantPerm.Country, ctx.BlockTime()); err != nil {
+	if err := IsValidPermission(validatorPerm, ctx.BlockTime()); err != nil {
 		return nil, fmt.Errorf("validator perm is not valid: %w", err)
 	}
 
@@ -145,7 +144,7 @@ func (ms msgServer) RenewPermissionVP(goCtx context.Context, msg *types.MsgRenew
 		sdk.NewEvent(
 			types.EventTypeRenewPermissionVP,
 			sdk.NewAttribute(types.AttributeKeyPermissionID, strconv.FormatUint(msg.Id, 10)),
-			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Authority),
+			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
 			sdk.NewAttribute(types.AttributeKeyValidatorPermID, strconv.FormatUint(applicantPerm.ValidatorPermId, 10)),
 			sdk.NewAttribute(types.AttributeKeyValidationFees, strconv.FormatUint(validationFees, 10)),
@@ -160,7 +159,7 @@ func (ms msgServer) RenewPermissionVP(goCtx context.Context, msg *types.MsgRenew
 func (ms msgServer) executeRenewPermissionVP(ctx sdk.Context, perm types.Permission, fees, deposit uint64) error {
 	// Increment trust deposit if deposit is greater than 0
 	if deposit > 0 {
-		if err := ms.trustDeposit.AdjustTrustDeposit(ctx, perm.Authority, int64(deposit)); err != nil {
+		if err := ms.trustDeposit.AdjustTrustDeposit(ctx, perm.Corporation, int64(deposit)); err != nil {
 			return fmt.Errorf("failed to increase trust deposit: %w", err)
 		}
 	}
@@ -168,7 +167,7 @@ func (ms msgServer) executeRenewPermissionVP(ctx sdk.Context, perm types.Permiss
 	// Send validation fees to escrow account if greater than 0
 	if fees > 0 {
 		// Get grantee address
-		granteeAddr, err := sdk.AccAddressFromBech32(perm.Authority)
+		granteeAddr, err := sdk.AccAddressFromBech32(perm.Corporation)
 		if err != nil {
 			return fmt.Errorf("invalid grantee address: %w", err)
 		}
@@ -207,7 +206,7 @@ func (ms msgServer) SetPermissionVPToValidated(goCtx context.Context, msg *types
 	if ms.delegationKeeper != nil {
 		if err := ms.delegationKeeper.CheckOperatorAuthorization(
 			ctx,
-			msg.Authority,
+			msg.Corporation,
 			msg.Operator,
 			"/verana.perm.v1.MsgSetPermissionVPToValidated",
 			now,
@@ -244,8 +243,8 @@ func (ms msgServer) SetPermissionVPToValidated(goCtx context.Context, msg *types
 	}
 
 	// vp_summary_digest_sri: MUST be null if validation.type is set to HOLDER
-	if applicantPerm.Type == types.PermissionType_HOLDER && msg.VpSummaryDigestSri != "" {
-		return nil, fmt.Errorf("vp_summary_digest_sri must be null for HOLDER type")
+	if applicantPerm.Type == types.PermissionType_HOLDER && msg.VpSummaryDigest != "" {
+		return nil, fmt.Errorf("vp_summary_digest must be null for HOLDER type")
 	}
 
 	// Load CredentialSchema cs from applicant_perm.schema_id.
@@ -280,7 +279,7 @@ func (ms msgServer) SetPermissionVPToValidated(goCtx context.Context, msg *types
 
 		// Only validate applicability if discount > 0 (0 is always allowed as default)
 		if msg.IssuanceFeeDiscount > 0 {
-			if cs.IssuerPermManagementMode == credentialschematypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION {
+			if cs.IssuerOnboardingMode == credentialschematypes.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS {
 				if applicantPerm.Type == types.PermissionType_ISSUER_GRANTOR {
 					// ISSUER_GRANTOR: can set 0-1 (100% discount)
 					// Already validated range above
@@ -295,7 +294,7 @@ func (ms msgServer) SetPermissionVPToValidated(goCtx context.Context, msg *types
 				} else {
 					return nil, fmt.Errorf("issuance_fee_discount can only be set on ISSUER_GRANTOR or ISSUER permissions in GRANTOR mode")
 				}
-			} else if cs.IssuerPermManagementMode == credentialschematypes.CredentialSchemaPermManagementMode_ECOSYSTEM {
+			} else if cs.IssuerOnboardingMode == credentialschematypes.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS {
 				if applicantPerm.Type == types.PermissionType_ISSUER {
 					// ISSUER in ECOSYSTEM mode: can set 0-1 (100% discount)
 					// Already validated range above
@@ -315,7 +314,7 @@ func (ms msgServer) SetPermissionVPToValidated(goCtx context.Context, msg *types
 
 		// Only validate applicability if discount > 0 (0 is always allowed as default)
 		if msg.VerificationFeeDiscount > 0 {
-			if cs.VerifierPermManagementMode == credentialschematypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION {
+			if cs.VerifierOnboardingMode == credentialschematypes.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS {
 				if applicantPerm.Type == types.PermissionType_VERIFIER_GRANTOR {
 					// VERIFIER_GRANTOR: can set 0-1 (100% discount)
 					// Already validated range above
@@ -330,7 +329,7 @@ func (ms msgServer) SetPermissionVPToValidated(goCtx context.Context, msg *types
 				} else {
 					return nil, fmt.Errorf("verification_fee_discount can only be set on VERIFIER_GRANTOR or VERIFIER permissions in GRANTOR mode")
 				}
-			} else if cs.VerifierPermManagementMode == credentialschematypes.CredentialSchemaPermManagementMode_ECOSYSTEM {
+			} else if cs.VerifierOnboardingMode == credentialschematypes.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS {
 				if applicantPerm.Type == types.PermissionType_VERIFIER {
 					// VERIFIER in ECOSYSTEM mode: can set 0-1 (100% discount)
 					// Already validated range above
@@ -384,12 +383,12 @@ func (ms msgServer) SetPermissionVPToValidated(goCtx context.Context, msg *types
 
 	// [MOD-PERM-MSG-3-2-2] Validator perms
 	// validator_perm MUST be an active permission
-	if err := IsValidPermission(validatorPerm, "", now); err != nil {
+	if err := IsValidPermission(validatorPerm, now); err != nil {
 		return nil, fmt.Errorf("validator perm is not valid: %w", err)
 	}
 
 	// authority running the method MUST be validator_perm.authority
-	if validatorPerm.Authority != msg.Authority {
+	if validatorPerm.Corporation != msg.Corporation {
 		return nil, fmt.Errorf("authority must be validator perm authority")
 	}
 
@@ -410,7 +409,7 @@ func (ms msgServer) CancelPermissionVPLastRequest(goCtx context.Context, msg *ty
 	if ms.delegationKeeper != nil {
 		if err := ms.delegationKeeper.CheckOperatorAuthorization(
 			ctx,
-			msg.Authority,
+			msg.Corporation,
 			msg.Operator,
 			"/verana.perm.v1.MsgCancelPermissionVPLastRequest",
 			now,
@@ -426,7 +425,7 @@ func (ms msgServer) CancelPermissionVPLastRequest(goCtx context.Context, msg *ty
 	}
 
 	// authority running the transaction MUST be applicant_perm.authority
-	if applicantPerm.Authority != msg.Authority {
+	if applicantPerm.Corporation != msg.Corporation {
 		return nil, fmt.Errorf("authority is not the perm authority")
 	}
 
@@ -449,7 +448,7 @@ func (ms msgServer) CancelPermissionVPLastRequest(goCtx context.Context, msg *ty
 		sdk.NewEvent(
 			types.EventTypeCancelPermissionVPLastRequest,
 			sdk.NewAttribute(types.AttributeKeyPermissionID, strconv.FormatUint(msg.Id, 10)),
-			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Authority),
+			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
 		),
@@ -465,17 +464,13 @@ func (ms msgServer) executeCancelPermissionVPLastRequest(ctx sdk.Context, perm t
 	perm.Modified = &now
 	perm.VpLastStateChange = &now
 
-	// Set state based on vp_exp
-	if perm.VpExp == nil {
-		perm.VpState = types.ValidationState_TERMINATED
-	} else {
-		perm.VpState = types.ValidationState_VALIDATED
-	}
+	// Spec v4: lifecycle is PENDING -> VALIDATED; revert to VALIDATED on cancellation.
+	perm.VpState = types.ValidationState_VALIDATED
 
 	// Handle current fees if any
 	if perm.VpCurrentFees > 0 {
 		// Transfer escrowed fees back to the applicant
-		granteeAddr, err := sdk.AccAddressFromBech32(perm.Authority)
+		granteeAddr, err := sdk.AccAddressFromBech32(perm.Corporation)
 		if err != nil {
 			return fmt.Errorf("invalid grantee address: %w", err)
 		}
@@ -500,7 +495,7 @@ func (ms msgServer) executeCancelPermissionVPLastRequest(ctx sdk.Context, perm t
 		// to move funds from deposit to claimable
 		if err := ms.trustDeposit.AdjustTrustDeposit(
 			ctx,
-			perm.Authority,
+			perm.Corporation,
 			-int64(perm.VpCurrentDeposit), // Negative value to reduce deposit and increase claimable
 		); err != nil {
 			return fmt.Errorf("failed to adjust trust deposit: %w", err)
@@ -521,7 +516,7 @@ func (ms msgServer) CreateRootPermission(goCtx context.Context, msg *types.MsgCr
 	if ms.delegationKeeper != nil {
 		if err := ms.delegationKeeper.CheckOperatorAuthorization(
 			ctx,
-			msg.Authority,
+			msg.Corporation,
 			msg.Operator,
 			"/verana.perm.v1.MsgCreateRootPermission",
 			now,
@@ -556,7 +551,7 @@ func (ms msgServer) CreateRootPermission(goCtx context.Context, msg *types.MsgCr
 			types.EventTypeCreateRootPermission,
 			sdk.NewAttribute(types.AttributeKeyRootPermissionID, strconv.FormatUint(id, 10)),
 			sdk.NewAttribute(types.AttributeKeySchemaID, strconv.FormatUint(msg.SchemaId, 10)),
-			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Authority),
+			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
 			sdk.NewAttribute(types.AttributeKeyEffectiveFrom, formatTimePtr(msg.EffectiveFrom)),
 			sdk.NewAttribute(types.AttributeKeyEffectiveUntil, formatTimePtr(msg.EffectiveUntil)),
@@ -612,9 +607,9 @@ func (ms msgServer) validateCreateRootPermissionAuthority(ctx sdk.Context, msg *
 		return fmt.Errorf("trust registry not found: %w", err)
 	}
 
-	// authority executing the method MUST be tr.authority (controller)
-	if tr.Controller != msg.Authority {
-		return fmt.Errorf("authority is not the trust registry controller")
+	// corporation executing the method MUST be the trust registry corporation
+	if tr.Corporation != msg.Corporation {
+		return fmt.Errorf("corporation does not match the trust registry corporation")
 	}
 
 	return nil
@@ -628,7 +623,7 @@ func (ms msgServer) checkCreateRootPermissionOverlap(ctx sdk.Context, msg *types
 		// Match on schema_id, ECOSYSTEM type, and authority
 		if perm.SchemaId != msg.SchemaId ||
 			perm.Type != types.PermissionType_ECOSYSTEM ||
-			perm.Authority != msg.Authority {
+			perm.Corporation != msg.Corporation {
 			return false, nil
 		}
 
@@ -666,7 +661,7 @@ func (ms msgServer) executeCreateRootPermission(ctx sdk.Context, msg *types.MsgC
 		Modified:         &now,
 		Type:             types.PermissionType_ECOSYSTEM,
 		Did:              msg.Did,
-		Authority:        msg.Authority,
+		Corporation:      msg.Corporation,
 		Created:          &now,
 		EffectiveFrom:    msg.EffectiveFrom,
 		EffectiveUntil:   msg.EffectiveUntil,
@@ -693,7 +688,7 @@ func (ms msgServer) AdjustPermission(goCtx context.Context, msg *types.MsgAdjust
 	if ms.delegationKeeper != nil {
 		if err := ms.delegationKeeper.CheckOperatorAuthorization(
 			ctx,
-			msg.Authority,
+			msg.Corporation,
 			msg.Operator,
 			"/verana.perm.v1.MsgAdjustPermission",
 			now,
@@ -719,7 +714,7 @@ func (ms msgServer) AdjustPermission(goCtx context.Context, msg *types.MsgAdjust
 	}
 
 	// [MOD-PERM-MSG-8-3] Adjust Permission execution
-	if err := ms.executeAdjustPermission(ctx, applicantPerm, msg.Authority, msg.EffectiveUntil, now); err != nil {
+	if err := ms.executeAdjustPermission(ctx, applicantPerm, msg.EffectiveUntil, now); err != nil {
 		return nil, fmt.Errorf("failed to adjust perm: %w", err)
 	}
 
@@ -736,9 +731,8 @@ func (ms msgServer) AdjustPermission(goCtx context.Context, msg *types.MsgAdjust
 		sdk.NewEvent(
 			types.EventTypeAdjustPermission,
 			sdk.NewAttribute(types.AttributeKeyPermissionID, strconv.FormatUint(msg.Id, 10)),
-			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Authority),
+			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
-			sdk.NewAttribute(types.AttributeKeyAdjustedBy, msg.Authority),
 			sdk.NewAttribute(types.AttributeKeyNewEffectiveUntil, msg.EffectiveUntil.String()),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
 		),
@@ -761,7 +755,7 @@ func (ms msgServer) validateAdjustPermissionBasicChecks(ctx sdk.Context, msg *ty
 	applicantPerm = perm
 
 	// applicant_perm MUST be a valid permission
-	if err := IsValidPermission(applicantPerm, applicantPerm.Country, now); err != nil {
+	if err := IsValidPermission(applicantPerm, now); err != nil {
 		return applicantPerm, fmt.Errorf("applicant permission is not valid: %w", err)
 	}
 
@@ -777,8 +771,8 @@ func (ms msgServer) validateAdjustPermissionBasicChecks(ctx sdk.Context, msg *ty
 func (ms msgServer) validateAdjustPermissionAdvancedChecks(ctx sdk.Context, msg *types.MsgAdjustPermission, applicantPerm types.Permission, now time.Time) error {
 	// 1. ECOSYSTEM permissions
 	if applicantPerm.ValidatorPermId == 0 && applicantPerm.Type == types.PermissionType_ECOSYSTEM {
-		// applicant_perm.authority MUST be msg.Authority else MUST abort
-		if applicantPerm.Authority != msg.Authority {
+		// applicant_perm.authority MUST be msg.Corporation else MUST abort
+		if applicantPerm.Corporation != msg.Corporation {
 			return fmt.Errorf("authority is not the permission authority")
 		}
 		return nil
@@ -793,14 +787,14 @@ func (ms msgServer) validateAdjustPermissionAdvancedChecks(ctx sdk.Context, msg 
 		}
 
 		// validator_perm MUST be a valid permission
-		if err := IsValidPermission(validatorPerm, validatorPerm.Country, now); err != nil {
+		if err := IsValidPermission(validatorPerm, now); err != nil {
 			return fmt.Errorf("validator permission is not valid: %w", err)
 		}
 
 		// 2. Self-created permissions (validator is ECOSYSTEM)
 		if validatorPerm.Type == types.PermissionType_ECOSYSTEM {
-			// applicant_perm.authority MUST be msg.Authority else MUST abort
-			if applicantPerm.Authority != msg.Authority {
+			// applicant_perm.authority MUST be msg.Corporation else MUST abort
+			if applicantPerm.Corporation != msg.Corporation {
 				return fmt.Errorf("authority is not the permission authority")
 			}
 			return nil
@@ -812,8 +806,8 @@ func (ms msgServer) validateAdjustPermissionAdvancedChecks(ctx sdk.Context, msg 
 			return fmt.Errorf("effective_until cannot be after validation expiration")
 		}
 
-		// validator_perm.authority MUST be msg.Authority else MUST abort
-		if validatorPerm.Authority != msg.Authority {
+		// validator_perm.authority MUST be msg.Corporation else MUST abort
+		if validatorPerm.Corporation != msg.Corporation {
 			return fmt.Errorf("authority is not the validator permission authority")
 		}
 		return nil
@@ -836,7 +830,7 @@ func (ms msgServer) checkAdjustPermissionOverlap(ctx sdk.Context, applicantPerm 
 		if perm.SchemaId != applicantPerm.SchemaId ||
 			perm.Type != applicantPerm.Type ||
 			perm.ValidatorPermId != applicantPerm.ValidatorPermId ||
-			perm.Authority != applicantPerm.Authority {
+			perm.Corporation != applicantPerm.Corporation {
 			return false, nil
 		}
 
@@ -874,7 +868,7 @@ func (ms msgServer) checkAdjustPermissionOverlap(ctx sdk.Context, applicantPerm 
 }
 
 // [MOD-PERM-MSG-8-3] Adjust Permission execution
-func (ms msgServer) executeAdjustPermission(ctx sdk.Context, perm types.Permission, authority string, effectiveUntil *time.Time, now time.Time) error {
+func (ms msgServer) executeAdjustPermission(ctx sdk.Context, perm types.Permission, effectiveUntil *time.Time, now time.Time) error {
 	// set applicant_perm.effective_until to effective_until
 	perm.EffectiveUntil = effectiveUntil
 
@@ -883,9 +877,6 @@ func (ms msgServer) executeAdjustPermission(ctx sdk.Context, perm types.Permissi
 
 	// set applicant_perm.modified to now
 	perm.Modified = &now
-
-	// set applicant_perm.adjusted_by to msg.authority
-	perm.AdjustedBy = authority
 
 	return ms.Keeper.UpdatePermission(ctx, perm)
 }
@@ -899,7 +890,7 @@ func (ms msgServer) RevokePermission(goCtx context.Context, msg *types.MsgRevoke
 	if ms.delegationKeeper != nil {
 		if err := ms.delegationKeeper.CheckOperatorAuthorization(
 			ctx,
-			msg.Authority,
+			msg.Corporation,
 			msg.Operator,
 			"/verana.perm.v1.MsgRevokePermission",
 			now,
@@ -924,7 +915,7 @@ func (ms msgServer) RevokePermission(goCtx context.Context, msg *types.MsgRevoke
 	// (This is handled by the SDK automatically during transaction processing)
 
 	// [MOD-PERM-MSG-9-3] Revoke Permission execution
-	if err := ms.executeRevokePermission(ctx, applicantPerm, msg.Authority, now); err != nil {
+	if err := ms.executeRevokePermission(ctx, applicantPerm, now); err != nil {
 		return nil, fmt.Errorf("failed to revoke permission: %w", err)
 	}
 
@@ -940,9 +931,8 @@ func (ms msgServer) RevokePermission(goCtx context.Context, msg *types.MsgRevoke
 		sdk.NewEvent(
 			types.EventTypeRevokePermission,
 			sdk.NewAttribute(types.AttributeKeyPermissionID, strconv.FormatUint(msg.Id, 10)),
-			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Authority),
+			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
-			sdk.NewAttribute(types.AttributeKeyRevokedBy, msg.Authority),
 			sdk.NewAttribute(types.AttributeKeyRevokedAt, now.String()),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
 		),
@@ -965,7 +955,7 @@ func (ms msgServer) validateRevokePermissionBasicChecks(ctx sdk.Context, msg *ty
 	applicantPerm = perm
 
 	// [MOD-PERM-MSG-9-2-1] applicant_perm MUST be a active permission
-	if err := IsValidPermission(applicantPerm, applicantPerm.Country, now); err != nil {
+	if err := IsValidPermission(applicantPerm, now); err != nil {
 		return applicantPerm, fmt.Errorf("applicant permission is not active: %w", err)
 	}
 
@@ -977,17 +967,17 @@ func (ms msgServer) validateRevokePermissionAdvancedChecks(ctx sdk.Context, msg 
 	// Either Option #1, #2 or #3 MUST return true, else abort
 
 	// Option #1: executed by a validator ancestor
-	if ms.checkValidatorAncestorOption(ctx, msg.Authority, applicantPerm, now) {
+	if ms.checkValidatorAncestorOption(ctx, msg.Corporation, applicantPerm, now) {
 		return nil
 	}
 
 	// Option #2: executed by TrustRegistry controller
-	if ms.checkTrustRegistryControllerOption(ctx, msg.Authority, applicantPerm) {
+	if ms.checkTrustRegistryControllerOption(ctx, msg.Corporation, applicantPerm) {
 		return nil
 	}
 
 	// Option #3: executed by applicant_perm.authority
-	if applicantPerm.Authority == msg.Authority {
+	if applicantPerm.Corporation == msg.Corporation {
 		return nil
 	}
 
@@ -1013,8 +1003,8 @@ func (ms msgServer) checkValidatorAncestorOption(ctx sdk.Context, authority stri
 		}
 
 		// if validator_perm is a active permission and validator_perm.authority is who is running the method
-		if IsValidPermission(validatorPerm, validatorPerm.Country, now) == nil &&
-			validatorPerm.Authority == authority {
+		if IsValidPermission(validatorPerm, now) == nil &&
+			validatorPerm.Corporation == authority {
 			return true
 		}
 
@@ -1039,20 +1029,17 @@ func (ms msgServer) checkTrustRegistryControllerOption(ctx sdk.Context, authorit
 		return false
 	}
 
-	// if authority running the method is tr.controller, return true
-	return tr.Controller == authority
+	// if the given address is the trust registry corporation, return true
+	return tr.Corporation == authority
 }
 
 // [MOD-PERM-MSG-9-3] Revoke Permission execution
-func (ms msgServer) executeRevokePermission(ctx sdk.Context, perm types.Permission, authority string, now time.Time) error {
+func (ms msgServer) executeRevokePermission(ctx sdk.Context, perm types.Permission, now time.Time) error {
 	// set applicant_perm.revoked to now
 	perm.Revoked = &now
 
 	// set applicant_perm.modified to now
 	perm.Modified = &now
-
-	// set applicant_perm.revoked_by to authority
-	perm.RevokedBy = authority
 
 	return ms.Keeper.UpdatePermission(ctx, perm)
 }
@@ -1069,7 +1056,7 @@ func (ms msgServer) revokeVSOperatorAuthorization(ctx sdk.Context, perm types.Pe
 	}
 
 	// [MOD-DE-MSG-6-4] Remove permission from VSOA
-	remainingPerms, err := ms.delegationKeeper.RemovePermFromVSOA(ctx, perm.Authority, perm.VsOperator, perm.Id)
+	remainingPerms, err := ms.delegationKeeper.RemovePermFromVSOA(ctx, perm.Corporation, perm.VsOperator, perm.Id)
 	if err != nil {
 		return fmt.Errorf("failed to revoke VS operator authorization: %w", err)
 	}
@@ -1078,19 +1065,19 @@ func (ms msgServer) revokeVSOperatorAuthorization(ctx sdk.Context, perm types.Pe
 	if perm.VsOperatorAuthzWithFeegrant {
 		if len(remainingPerms) == 0 {
 			// No more permissions — revoke fee allowance
-			if err := ms.delegationKeeper.RevokeFeeAllowance(ctx, perm.Authority, perm.VsOperator); err != nil {
+			if err := ms.delegationKeeper.RevokeFeeAllowance(ctx, perm.Corporation, perm.VsOperator); err != nil {
 				return fmt.Errorf("failed to revoke fee allowance: %w", err)
 			}
 		} else {
 			// Recalculate feegrant expiration from remaining permissions
-			expiration, err := ms.computeVSOAFeegrantExpiration(ctx, perm.Authority, perm.VsOperator)
+			expiration, err := ms.computeVSOAFeegrantExpiration(ctx, perm.Corporation, perm.VsOperator)
 			if err != nil {
 				return fmt.Errorf("failed to compute feegrant expiration: %w", err)
 			}
 
 			if expiration == nil || expiration.After(ctx.BlockTime()) {
 				msgTypes := []string{"/verana.perm.v1.MsgCreateOrUpdatePermissionSession"}
-				if err := ms.delegationKeeper.GrantFeeAllowance(ctx, perm.Authority, perm.VsOperator, msgTypes, expiration, nil, nil); err != nil {
+				if err := ms.delegationKeeper.GrantFeeAllowance(ctx, perm.Corporation, perm.VsOperator, msgTypes, expiration, nil, nil); err != nil {
 					return fmt.Errorf("failed to update fee allowance: %w", err)
 				}
 			}
@@ -1124,7 +1111,7 @@ func (ms msgServer) CreateOrUpdatePermissionSession(goCtx context.Context, msg *
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeCreateOrUpdatePermissionSession,
-			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Authority),
+			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
 			sdk.NewAttribute(types.AttributeKeySessionID, msg.Id),
 			sdk.NewAttribute(types.AttributeKeyIssuerPermID, strconv.FormatUint(msg.IssuerPermId, 10)),
@@ -1149,7 +1136,7 @@ func (ms msgServer) SlashPermissionTrustDeposit(goCtx context.Context, msg *type
 	if ms.delegationKeeper != nil {
 		if err := ms.delegationKeeper.CheckOperatorAuthorization(
 			ctx,
-			msg.Authority,
+			msg.Corporation,
 			msg.Operator,
 			"/verana.perm.v1.MsgSlashPermissionTrustDeposit",
 			now,
@@ -1174,7 +1161,7 @@ func (ms msgServer) SlashPermissionTrustDeposit(goCtx context.Context, msg *type
 	// (This is handled by the SDK automatically during transaction processing)
 
 	// [MOD-PERM-MSG-12-3] Slash Permission Trust Deposit execution
-	if err := ms.executeSlashPermissionTrustDeposit(ctx, applicantPerm, msg.Amount, msg.Authority, now); err != nil {
+	if err := ms.executeSlashPermissionTrustDeposit(ctx, applicantPerm, msg.Amount, now); err != nil {
 		return nil, fmt.Errorf("failed to slash permission trust deposit: %w", err)
 	}
 
@@ -1192,9 +1179,8 @@ func (ms msgServer) SlashPermissionTrustDeposit(goCtx context.Context, msg *type
 			types.EventTypeSlashPermissionTrustDeposit,
 			sdk.NewAttribute(types.AttributeKeyPermissionID, strconv.FormatUint(msg.Id, 10)),
 			sdk.NewAttribute(types.AttributeKeySlashedAmount, strconv.FormatUint(msg.Amount, 10)),
-			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Authority),
+			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
-			sdk.NewAttribute(types.AttributeKeySlashedBy, msg.Authority),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
 		),
 	})
@@ -1230,12 +1216,12 @@ func (ms msgServer) validateSlashPermissionValidatorPerms(ctx sdk.Context, msg *
 	// Either Option #1, or #2 MUST return true, else abort
 
 	// Option #1: executed by a validator ancestor
-	if ms.checkValidatorAncestorOption(ctx, msg.Authority, applicantPerm, now) {
+	if ms.checkValidatorAncestorOption(ctx, msg.Corporation, applicantPerm, now) {
 		return nil
 	}
 
 	// Option #2: executed by TrustRegistry controller
-	if ms.checkTrustRegistryControllerOption(ctx, msg.Authority, applicantPerm) {
+	if ms.checkTrustRegistryControllerOption(ctx, msg.Corporation, applicantPerm) {
 		return nil
 	}
 
@@ -1243,7 +1229,7 @@ func (ms msgServer) validateSlashPermissionValidatorPerms(ctx sdk.Context, msg *
 }
 
 // [MOD-PERM-MSG-12-3] Slash Permission Trust Deposit execution
-func (ms msgServer) executeSlashPermissionTrustDeposit(ctx sdk.Context, applicantPerm types.Permission, amount uint64, authority string, now time.Time) error {
+func (ms msgServer) executeSlashPermissionTrustDeposit(ctx sdk.Context, applicantPerm types.Permission, amount uint64, now time.Time) error {
 	// Load Permission entry validator_perm from applicant_perm.validator_perm_id
 	if applicantPerm.ValidatorPermId != 0 {
 		_, err := ms.Keeper.GetPermissionByID(ctx, applicantPerm.ValidatorPermId)
@@ -1261,11 +1247,8 @@ func (ms msgServer) executeSlashPermissionTrustDeposit(ctx sdk.Context, applican
 	// set applicant_perm.slashed_deposit to applicant_perm.slashed_deposit + amount
 	applicantPerm.SlashedDeposit = applicantPerm.SlashedDeposit + amount
 
-	// set applicant_perm.slashed_by to authority executing the method
-	applicantPerm.SlashedBy = authority
-
 	// use MOD-TD-MSG-7 to burn the slashed amount from the trust deposit of applicant_perm.authority
-	if err := ms.trustDeposit.BurnEcosystemSlashedTrustDeposit(ctx, applicantPerm.Authority, amount); err != nil {
+	if err := ms.trustDeposit.BurnEcosystemSlashedTrustDeposit(ctx, applicantPerm.Corporation, amount); err != nil {
 		return fmt.Errorf("failed to burn trust deposit: %w", err)
 	}
 
@@ -1284,7 +1267,7 @@ func (ms msgServer) RepayPermissionSlashedTrustDeposit(goCtx context.Context, ms
 
 	// [AUTHZ-CHECK]
 	if ms.delegationKeeper != nil {
-		if err := ms.delegationKeeper.CheckOperatorAuthorization(ctx, msg.Authority, msg.Operator, "/verana.perm.v1.MsgRepayPermissionSlashedTrustDeposit", now); err != nil {
+		if err := ms.delegationKeeper.CheckOperatorAuthorization(ctx, msg.Corporation, msg.Operator, "/verana.perm.v1.MsgRepayPermissionSlashedTrustDeposit", now); err != nil {
 			return nil, fmt.Errorf("authorization check failed: %w", err)
 		}
 	}
@@ -1296,7 +1279,7 @@ func (ms msgServer) RepayPermissionSlashedTrustDeposit(goCtx context.Context, ms
 	}
 
 	// [MOD-PERM-MSG-13-2-1] if applicant_perm.authority is not equal to authority, abort
-	if applicantPerm.Authority != msg.Authority {
+	if applicantPerm.Corporation != msg.Corporation {
 		return nil, fmt.Errorf("authority is not the owner of this permission")
 	}
 
@@ -1311,7 +1294,7 @@ func (ms msgServer) RepayPermissionSlashedTrustDeposit(goCtx context.Context, ms
 	}
 
 	// [MOD-PERM-MSG-13-2-2] authority MUST have at least applicant_perm.slashed_deposit in its account balance
-	authorityAddr, err := sdk.AccAddressFromBech32(msg.Authority)
+	authorityAddr, err := sdk.AccAddressFromBech32(msg.Corporation)
 	if err != nil {
 		return nil, fmt.Errorf("invalid authority address: %w", err)
 	}
@@ -1322,7 +1305,7 @@ func (ms msgServer) RepayPermissionSlashedTrustDeposit(goCtx context.Context, ms
 
 	// [MOD-PERM-MSG-13-3] Execution
 	// Use AdjustTrustDeposit to transfer applicant_perm.slashed_deposit to trust deposit of applicant_perm.authority
-	if err := ms.trustDeposit.AdjustTrustDeposit(ctx, applicantPerm.Authority, int64(applicantPerm.SlashedDeposit)); err != nil {
+	if err := ms.trustDeposit.AdjustTrustDeposit(ctx, applicantPerm.Corporation, int64(applicantPerm.SlashedDeposit)); err != nil {
 		return nil, fmt.Errorf("failed to adjust trust deposit: %w", err)
 	}
 
@@ -1341,7 +1324,7 @@ func (ms msgServer) RepayPermissionSlashedTrustDeposit(goCtx context.Context, ms
 			types.EventTypeRepayPermissionSlashedTrustDeposit,
 			sdk.NewAttribute(types.AttributeKeyPermissionID, strconv.FormatUint(msg.Id, 10)),
 			sdk.NewAttribute(types.AttributeKeyRepaidAmount, strconv.FormatUint(applicantPerm.SlashedDeposit, 10)),
-			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Authority),
+			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
 		),
@@ -1350,14 +1333,14 @@ func (ms msgServer) RepayPermissionSlashedTrustDeposit(goCtx context.Context, ms
 	return &types.MsgRepayPermissionSlashedTrustDepositResponse{}, nil
 }
 
-// CreatePermission handles the MsgCreatePermission message
-func (ms msgServer) CreatePermission(goCtx context.Context, msg *types.MsgCreatePermission) (*types.MsgCreatePermissionResponse, error) {
+// SelfCreatePermission handles the MsgSelfCreatePermission message
+func (ms msgServer) SelfCreatePermission(goCtx context.Context, msg *types.MsgSelfCreatePermission) (*types.MsgSelfCreatePermissionResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	now := ctx.BlockTime()
 
 	// [AUTHZ-CHECK]
 	if ms.delegationKeeper != nil {
-		if err := ms.delegationKeeper.CheckOperatorAuthorization(ctx, msg.Authority, msg.Operator, "/verana.perm.v1.MsgCreatePermission", now); err != nil {
+		if err := ms.delegationKeeper.CheckOperatorAuthorization(ctx, msg.Corporation, msg.Operator, "/verana.perm.v1.MsgSelfCreatePermission", now); err != nil {
 			return nil, fmt.Errorf("authorization check failed: %w", err)
 		}
 	}
@@ -1434,12 +1417,12 @@ func (ms msgServer) CreatePermission(goCtx context.Context, msg *types.MsgCreate
 	}
 
 	if msg.Type == types.PermissionType_ISSUER {
-		if cs.IssuerPermManagementMode != credentialschematypes.CredentialSchemaPermManagementMode_OPEN {
+		if cs.IssuerOnboardingMode != credentialschematypes.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_OPEN {
 			return nil, fmt.Errorf("issuer permission management mode is not OPEN")
 		}
 	}
 	if msg.Type == types.PermissionType_VERIFIER {
-		if cs.VerifierPermManagementMode != credentialschematypes.CredentialSchemaPermManagementMode_OPEN {
+		if cs.VerifierOnboardingMode != credentialschematypes.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_OPEN {
 			return nil, fmt.Errorf("verifier permission management mode is not OPEN")
 		}
 		if msg.ValidationFees > 0 {
@@ -1462,10 +1445,9 @@ func (ms msgServer) CreatePermission(goCtx context.Context, msg *types.MsgCreate
 		Modified:                     &now,
 		Type:                         msg.Type,
 		Did:                          msg.Did,
-		Authority:                    msg.Authority,
+		Corporation:                  msg.Corporation,
 		VsOperator:                   msg.VsOperator,
 		Created:                      &now,
-		CreatedBy:                    msg.Authority,
 		EffectiveFrom:                msg.EffectiveFrom,
 		EffectiveUntil:               msg.EffectiveUntil,
 		ValidationFees:               0,
@@ -1504,7 +1486,7 @@ func (ms msgServer) CreatePermission(goCtx context.Context, msg *types.MsgCreate
 			types.EventTypeCreatePermission,
 			sdk.NewAttribute(types.AttributeKeyPermissionID, strconv.FormatUint(id, 10)),
 			sdk.NewAttribute(types.AttributeKeySchemaID, strconv.FormatUint(validatorPerm.SchemaId, 10)),
-			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Authority),
+			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
 			sdk.NewAttribute(types.AttributeKeyType, msg.Type.String()),
 			sdk.NewAttribute(types.AttributeKeyEffectiveFrom, formatTimePtr(msg.EffectiveFrom)),
@@ -1513,13 +1495,13 @@ func (ms msgServer) CreatePermission(goCtx context.Context, msg *types.MsgCreate
 		),
 	})
 
-	return &types.MsgCreatePermissionResponse{
+	return &types.MsgSelfCreatePermissionResponse{
 		Id: id,
 	}, nil
 }
 
-// [MOD-PERM-MSG-14-2-4] Overlap checks for CreatePermission
-func (ms msgServer) checkCreatePermissionOverlap(ctx sdk.Context, schemaId uint64, msg *types.MsgCreatePermission) error {
+// [MOD-PERM-MSG-14-2-4] Overlap checks for SelfCreatePermission
+func (ms msgServer) checkCreatePermissionOverlap(ctx sdk.Context, schemaId uint64, msg *types.MsgSelfCreatePermission) error {
 	// Find all active permissions (not revoked, not slashed, not repaid)
 	// for same cs.id, type, validator_perm_id, authority
 	var overlaps []types.Permission
@@ -1527,7 +1509,7 @@ func (ms msgServer) checkCreatePermissionOverlap(ctx sdk.Context, schemaId uint6
 		if p.SchemaId == schemaId &&
 			p.Type == msg.Type &&
 			p.ValidatorPermId == msg.ValidatorPermId &&
-			p.Authority == msg.Authority &&
+			p.Corporation == msg.Corporation &&
 			p.Revoked == nil && p.Slashed == nil && p.Repaid == nil {
 			overlaps = append(overlaps, p)
 		}

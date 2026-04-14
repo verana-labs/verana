@@ -68,7 +68,7 @@ func (ms msgServer) checkValidatedOverlap(ctx sdk.Context, applicantPerm types.P
 		if perm.SchemaId != applicantPerm.SchemaId ||
 			perm.Type != applicantPerm.Type ||
 			perm.ValidatorPermId != applicantPerm.ValidatorPermId ||
-			perm.Authority != applicantPerm.Authority {
+			perm.Corporation != applicantPerm.Corporation {
 			return false, nil
 		}
 
@@ -119,7 +119,7 @@ func (ms msgServer) executeSetPermissionVPToValidated(
 	applicantPerm.Modified = &now
 	applicantPerm.VpState = types.ValidationState_VALIDATED
 	applicantPerm.VpLastStateChange = &now
-	applicantPerm.VpSummaryDigestSri = msg.VpSummaryDigestSri
+	applicantPerm.VpSummaryDigest = msg.VpSummaryDigest
 	applicantPerm.VpExp = vpExp
 	applicantPerm.EffectiveUntil = effectiveUntil
 
@@ -137,7 +137,7 @@ func (ms msgServer) executeSetPermissionVPToValidated(
 	// [MOD-PERM-MSG-3-3] Fees and Trust Deposits:
 	// transfer the full amount applicant_perm.vp_current_fees from escrow account to validator account
 	if applicantPerm.VpCurrentFees > 0 {
-		validatorAddr, err := sdk.AccAddressFromBech32(validatorPerm.Authority)
+		validatorAddr, err := sdk.AccAddressFromBech32(validatorPerm.Corporation)
 		if err != nil {
 			return nil, fmt.Errorf("invalid validator address: %w", err)
 		}
@@ -158,7 +158,7 @@ func (ms msgServer) executeSetPermissionVPToValidated(
 	if applicantPerm.VpCurrentDeposit > 0 {
 		err := ms.trustDeposit.AdjustTrustDeposit(
 			ctx,
-			validatorPerm.Authority,
+			validatorPerm.Corporation,
 			int64(applicantPerm.VpCurrentDeposit),
 		)
 		if err != nil {
@@ -192,10 +192,10 @@ func (ms msgServer) executeSetPermissionVPToValidated(
 		sdk.NewEvent(
 			types.EventTypeSetPermissionVPToValidated,
 			sdk.NewAttribute(types.AttributeKeyPermissionID, strconv.FormatUint(msg.Id, 10)),
-			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Authority),
+			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
 			sdk.NewAttribute(types.AttributeKeyValidatorPermID, strconv.FormatUint(applicantPerm.ValidatorPermId, 10)),
-			sdk.NewAttribute(types.AttributeKeyVpSummaryDigestSri, msg.VpSummaryDigestSri),
+			sdk.NewAttribute(types.AttributeKeyVpSummaryDigest, msg.VpSummaryDigest),
 			sdk.NewAttribute(types.AttributeKeyEffectiveUntil, formatTimePtr(msg.EffectiveUntil)),
 			sdk.NewAttribute(types.AttributeKeyValidationFees, strconv.FormatUint(msg.ValidationFees, 10)),
 			sdk.NewAttribute(types.AttributeKeyIssuanceFees, strconv.FormatUint(msg.IssuanceFees, 10)),
@@ -222,13 +222,13 @@ func (ms msgServer) grantVSOperatorAuthorization(ctx sdk.Context, perm types.Per
 	// [MOD-DE-MSG-5-2] Basic checks: authority and vs_operator already validated by caller
 
 	// Add permission to VSOA (DE handles mutual exclusivity check internally)
-	if err := ms.delegationKeeper.AddPermToVSOA(ctx, perm.Authority, perm.VsOperator, perm.Id); err != nil {
+	if err := ms.delegationKeeper.AddPermToVSOA(ctx, perm.Corporation, perm.VsOperator, perm.Id); err != nil {
 		return fmt.Errorf("failed to grant VS operator authorization: %w", err)
 	}
 
 	// [MOD-DE-MSG-5-4] Handle feegrant
 	if perm.VsOperatorAuthzWithFeegrant {
-		expiration, err := ms.computeVSOAFeegrantExpiration(ctx, perm.Authority, perm.VsOperator)
+		expiration, err := ms.computeVSOAFeegrantExpiration(ctx, perm.Corporation, perm.VsOperator)
 		if err != nil {
 			return fmt.Errorf("failed to compute feegrant expiration: %w", err)
 		}
@@ -236,7 +236,7 @@ func (ms msgServer) grantVSOperatorAuthorization(ctx sdk.Context, perm types.Per
 		// Only grant if expiration is nil (no limit) or in the future
 		if expiration == nil || expiration.After(ctx.BlockTime()) {
 			msgTypes := []string{"/verana.perm.v1.MsgCreateOrUpdatePermissionSession"}
-			if err := ms.delegationKeeper.GrantFeeAllowance(ctx, perm.Authority, perm.VsOperator, msgTypes, expiration, nil, nil); err != nil {
+			if err := ms.delegationKeeper.GrantFeeAllowance(ctx, perm.Corporation, perm.VsOperator, msgTypes, expiration, nil, nil); err != nil {
 				return fmt.Errorf("failed to grant fee allowance: %w", err)
 			}
 		}

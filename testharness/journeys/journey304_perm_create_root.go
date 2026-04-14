@@ -96,8 +96,8 @@ func RunPermissionCreateRootJourney(ctx context.Context, client cosmosclient.Cli
 	csIDStr, err := lib.CreateCredentialSchemaWithAuthority(
 		client, ctx, operatorAccount, policyAddr,
 		trID, schemaData,
-		cschema.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
-		cschema.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
+		cschema.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS,
+		cschema.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS,
 	)
 	if err != nil {
 		return fmt.Errorf("prerequisite 2b failed: %w", err)
@@ -168,8 +168,8 @@ func RunPermissionCreateRootJourney(ctx context.Context, client cosmosclient.Cli
 	if perm.SchemaId != csID {
 		return fmt.Errorf("step 1c verification failed: expected schema_id=%d, got %d", csID, perm.SchemaId)
 	}
-	if perm.Authority != policyAddr {
-		return fmt.Errorf("step 1c verification failed: expected authority=%s, got %s", policyAddr, perm.Authority)
+	if perm.Corporation != policyAddr {
+		return fmt.Errorf("step 1c verification failed: expected authority=%s, got %s", policyAddr, perm.Corporation)
 	}
 	if perm.Did != rootPermDID {
 		return fmt.Errorf("step 1c verification failed: expected did=%s, got %s", rootPermDID, perm.Did)

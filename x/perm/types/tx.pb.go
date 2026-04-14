@@ -135,9 +135,9 @@ var xxx_messageInfo_MsgUpdateParamsResponse proto.InternalMessageInfo
 
 // MsgStartPermissionVP represents a message to start a permission validation process
 type MsgStartPermissionVP struct {
-	// authority is the group account on whose behalf this message is executed
-	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
-	// operator is the account authorized by the authority to run this Msg
+	// corporation is the group account on whose behalf this message is executed
+	Corporation string `protobuf:"bytes,1,opt,name=corporation,proto3" json:"corporation,omitempty"`
+	// operator is the account authorized by the corporation to run this Msg
 	Operator         string          `protobuf:"bytes,2,opt,name=operator,proto3" json:"operator,omitempty"`
 	Type             PermissionType  `protobuf:"varint,3,opt,name=type,proto3,enum=verana.perm.v1.PermissionType" json:"type,omitempty"`
 	ValidatorPermId  uint64          `protobuf:"varint,4,opt,name=validator_perm_id,json=validatorPermId,proto3" json:"validator_perm_id,omitempty"`
@@ -187,9 +187,9 @@ func (m *MsgStartPermissionVP) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgStartPermissionVP proto.InternalMessageInfo
 
-func (m *MsgStartPermissionVP) GetAuthority() string {
+func (m *MsgStartPermissionVP) GetCorporation() string {
 	if m != nil {
-		return m.Authority
+		return m.Corporation
 	}
 	return ""
 }
@@ -332,9 +332,9 @@ func (m *MsgStartPermissionVPResponse) GetPermissionId() uint64 {
 
 // MsgRenewPermissionVP represents a message to renew a permission validation process
 type MsgRenewPermissionVP struct {
-	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
-	Operator  string `protobuf:"bytes,2,opt,name=operator,proto3" json:"operator,omitempty"`
-	Id        uint64 `protobuf:"varint,3,opt,name=id,proto3" json:"id,omitempty"`
+	Corporation string `protobuf:"bytes,1,opt,name=corporation,proto3" json:"corporation,omitempty"`
+	Operator    string `protobuf:"bytes,2,opt,name=operator,proto3" json:"operator,omitempty"`
+	Id          uint64 `protobuf:"varint,3,opt,name=id,proto3" json:"id,omitempty"`
 }
 
 func (m *MsgRenewPermissionVP) Reset()         { *m = MsgRenewPermissionVP{} }
@@ -370,9 +370,9 @@ func (m *MsgRenewPermissionVP) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgRenewPermissionVP proto.InternalMessageInfo
 
-func (m *MsgRenewPermissionVP) GetAuthority() string {
+func (m *MsgRenewPermissionVP) GetCorporation() string {
 	if m != nil {
-		return m.Authority
+		return m.Corporation
 	}
 	return ""
 }
@@ -430,16 +430,16 @@ var xxx_messageInfo_MsgRenewPermissionVPResponse proto.InternalMessageInfo
 
 // MsgSetPermissionVPToValidated represents a message to set a permission validation process to validated state
 type MsgSetPermissionVPToValidated struct {
-	// authority is the group account on whose behalf this message is executed
-	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
-	// operator is the account authorized by the authority to run this Msg
-	Operator           string     `protobuf:"bytes,2,opt,name=operator,proto3" json:"operator,omitempty"`
-	Id                 uint64     `protobuf:"varint,3,opt,name=id,proto3" json:"id,omitempty"`
-	EffectiveUntil     *time.Time `protobuf:"bytes,4,opt,name=effective_until,json=effectiveUntil,proto3,stdtime" json:"effective_until,omitempty"`
-	ValidationFees     uint64     `protobuf:"varint,5,opt,name=validation_fees,json=validationFees,proto3" json:"validation_fees,omitempty"`
-	IssuanceFees       uint64     `protobuf:"varint,6,opt,name=issuance_fees,json=issuanceFees,proto3" json:"issuance_fees,omitempty"`
-	VerificationFees   uint64     `protobuf:"varint,7,opt,name=verification_fees,json=verificationFees,proto3" json:"verification_fees,omitempty"`
-	VpSummaryDigestSri string     `protobuf:"bytes,8,opt,name=vp_summary_digest_sri,json=vpSummaryDigestSri,proto3" json:"vp_summary_digest_sri,omitempty"`
+	// corporation is the group account on whose behalf this message is executed
+	Corporation string `protobuf:"bytes,1,opt,name=corporation,proto3" json:"corporation,omitempty"`
+	// operator is the account authorized by the corporation to run this Msg
+	Operator         string     `protobuf:"bytes,2,opt,name=operator,proto3" json:"operator,omitempty"`
+	Id               uint64     `protobuf:"varint,3,opt,name=id,proto3" json:"id,omitempty"`
+	EffectiveUntil   *time.Time `protobuf:"bytes,4,opt,name=effective_until,json=effectiveUntil,proto3,stdtime" json:"effective_until,omitempty"`
+	ValidationFees   uint64     `protobuf:"varint,5,opt,name=validation_fees,json=validationFees,proto3" json:"validation_fees,omitempty"`
+	IssuanceFees     uint64     `protobuf:"varint,6,opt,name=issuance_fees,json=issuanceFees,proto3" json:"issuance_fees,omitempty"`
+	VerificationFees uint64     `protobuf:"varint,7,opt,name=verification_fees,json=verificationFees,proto3" json:"verification_fees,omitempty"`
+	VpSummaryDigest  string     `protobuf:"bytes,8,opt,name=vp_summary_digest,json=vpSummaryDigest,proto3" json:"vp_summary_digest,omitempty"`
 	// Fee discount fields (scaled: 0 = 0.0, 10000 = 1.0, range 0-10000)
 	// Default to 0 (no discount), maximum 10000 (100% discount)
 	IssuanceFeeDiscount     uint64 `protobuf:"varint,9,opt,name=issuance_fee_discount,json=issuanceFeeDiscount,proto3" json:"issuance_fee_discount,omitempty"`
@@ -479,9 +479,9 @@ func (m *MsgSetPermissionVPToValidated) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgSetPermissionVPToValidated proto.InternalMessageInfo
 
-func (m *MsgSetPermissionVPToValidated) GetAuthority() string {
+func (m *MsgSetPermissionVPToValidated) GetCorporation() string {
 	if m != nil {
-		return m.Authority
+		return m.Corporation
 	}
 	return ""
 }
@@ -528,9 +528,9 @@ func (m *MsgSetPermissionVPToValidated) GetVerificationFees() uint64 {
 	return 0
 }
 
-func (m *MsgSetPermissionVPToValidated) GetVpSummaryDigestSri() string {
+func (m *MsgSetPermissionVPToValidated) GetVpSummaryDigest() string {
 	if m != nil {
-		return m.VpSummaryDigestSri
+		return m.VpSummaryDigest
 	}
 	return ""
 }
@@ -587,9 +587,9 @@ func (m *MsgSetPermissionVPToValidatedResponse) XXX_DiscardUnknown() {
 var xxx_messageInfo_MsgSetPermissionVPToValidatedResponse proto.InternalMessageInfo
 
 type MsgCancelPermissionVPLastRequest struct {
-	// authority is the group account on whose behalf this message is executed
-	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
-	// operator is the account authorized by the authority to run this Msg
+	// corporation is the group account on whose behalf this message is executed
+	Corporation string `protobuf:"bytes,1,opt,name=corporation,proto3" json:"corporation,omitempty"`
+	// operator is the account authorized by the corporation to run this Msg
 	Operator string `protobuf:"bytes,2,opt,name=operator,proto3" json:"operator,omitempty"`
 	Id       uint64 `protobuf:"varint,3,opt,name=id,proto3" json:"id,omitempty"`
 }
@@ -627,9 +627,9 @@ func (m *MsgCancelPermissionVPLastRequest) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgCancelPermissionVPLastRequest proto.InternalMessageInfo
 
-func (m *MsgCancelPermissionVPLastRequest) GetAuthority() string {
+func (m *MsgCancelPermissionVPLastRequest) GetCorporation() string {
 	if m != nil {
-		return m.Authority
+		return m.Corporation
 	}
 	return ""
 }
@@ -687,7 +687,7 @@ func (m *MsgCancelPermissionVPLastRequestResponse) XXX_DiscardUnknown() {
 var xxx_messageInfo_MsgCancelPermissionVPLastRequestResponse proto.InternalMessageInfo
 
 type MsgCreateRootPermission struct {
-	Authority        string     `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
+	Corporation      string     `protobuf:"bytes,1,opt,name=corporation,proto3" json:"corporation,omitempty"`
 	Operator         string     `protobuf:"bytes,2,opt,name=operator,proto3" json:"operator,omitempty"`
 	SchemaId         uint64     `protobuf:"varint,3,opt,name=schema_id,json=schemaId,proto3" json:"schema_id,omitempty"`
 	Did              string     `protobuf:"bytes,4,opt,name=did,proto3" json:"did,omitempty"`
@@ -731,9 +731,9 @@ func (m *MsgCreateRootPermission) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgCreateRootPermission proto.InternalMessageInfo
 
-func (m *MsgCreateRootPermission) GetAuthority() string {
+func (m *MsgCreateRootPermission) GetCorporation() string {
 	if m != nil {
-		return m.Authority
+		return m.Corporation
 	}
 	return ""
 }
@@ -839,7 +839,7 @@ func (m *MsgCreateRootPermissionResponse) GetId() uint64 {
 }
 
 type MsgAdjustPermission struct {
-	Authority      string     `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
+	Corporation    string     `protobuf:"bytes,1,opt,name=corporation,proto3" json:"corporation,omitempty"`
 	Operator       string     `protobuf:"bytes,2,opt,name=operator,proto3" json:"operator,omitempty"`
 	Id             uint64     `protobuf:"varint,3,opt,name=id,proto3" json:"id,omitempty"`
 	EffectiveUntil *time.Time `protobuf:"bytes,4,opt,name=effective_until,json=effectiveUntil,proto3,stdtime" json:"effective_until,omitempty"`
@@ -878,9 +878,9 @@ func (m *MsgAdjustPermission) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgAdjustPermission proto.InternalMessageInfo
 
-func (m *MsgAdjustPermission) GetAuthority() string {
+func (m *MsgAdjustPermission) GetCorporation() string {
 	if m != nil {
-		return m.Authority
+		return m.Corporation
 	}
 	return ""
 }
@@ -943,9 +943,9 @@ func (m *MsgAdjustPermissionResponse) XXX_DiscardUnknown() {
 var xxx_messageInfo_MsgAdjustPermissionResponse proto.InternalMessageInfo
 
 type MsgRevokePermission struct {
-	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
-	Operator  string `protobuf:"bytes,2,opt,name=operator,proto3" json:"operator,omitempty"`
-	Id        uint64 `protobuf:"varint,3,opt,name=id,proto3" json:"id,omitempty"`
+	Corporation string `protobuf:"bytes,1,opt,name=corporation,proto3" json:"corporation,omitempty"`
+	Operator    string `protobuf:"bytes,2,opt,name=operator,proto3" json:"operator,omitempty"`
+	Id          uint64 `protobuf:"varint,3,opt,name=id,proto3" json:"id,omitempty"`
 }
 
 func (m *MsgRevokePermission) Reset()         { *m = MsgRevokePermission{} }
@@ -981,9 +981,9 @@ func (m *MsgRevokePermission) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgRevokePermission proto.InternalMessageInfo
 
-func (m *MsgRevokePermission) GetAuthority() string {
+func (m *MsgRevokePermission) GetCorporation() string {
 	if m != nil {
-		return m.Authority
+		return m.Corporation
 	}
 	return ""
 }
@@ -1039,9 +1039,9 @@ func (m *MsgRevokePermissionResponse) XXX_DiscardUnknown() {
 var xxx_messageInfo_MsgRevokePermissionResponse proto.InternalMessageInfo
 
 type MsgCreateOrUpdatePermissionSession struct {
-	// authority is the group account on whose behalf this message is executed
-	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
-	// operator is the account authorized by the authority to run this Msg (vs_operator)
+	// corporation is the group account on whose behalf this message is executed
+	Corporation string `protobuf:"bytes,1,opt,name=corporation,proto3" json:"corporation,omitempty"`
+	// operator is the account authorized by the corporation to run this Msg (vs_operator)
 	Operator          string `protobuf:"bytes,2,opt,name=operator,proto3" json:"operator,omitempty"`
 	Id                string `protobuf:"bytes,3,opt,name=id,proto3" json:"id,omitempty"`
 	IssuerPermId      uint64 `protobuf:"varint,4,opt,name=issuer_perm_id,json=issuerPermId,proto3" json:"issuer_perm_id,omitempty"`
@@ -1084,9 +1084,9 @@ func (m *MsgCreateOrUpdatePermissionSession) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgCreateOrUpdatePermissionSession proto.InternalMessageInfo
 
-func (m *MsgCreateOrUpdatePermissionSession) GetAuthority() string {
+func (m *MsgCreateOrUpdatePermissionSession) GetCorporation() string {
 	if m != nil {
-		return m.Authority
+		return m.Corporation
 	}
 	return ""
 }
@@ -1189,9 +1189,9 @@ func (m *MsgCreateOrUpdatePermissionSessionResponse) GetId() string {
 }
 
 type MsgSlashPermissionTrustDeposit struct {
-	// authority is the group account on whose behalf this message is executed
-	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
-	// operator is the account authorized by the authority to run this Msg
+	// corporation is the group account on whose behalf this message is executed
+	Corporation string `protobuf:"bytes,1,opt,name=corporation,proto3" json:"corporation,omitempty"`
+	// operator is the account authorized by the corporation to run this Msg
 	Operator string `protobuf:"bytes,2,opt,name=operator,proto3" json:"operator,omitempty"`
 	Id       uint64 `protobuf:"varint,3,opt,name=id,proto3" json:"id,omitempty"`
 	Amount   uint64 `protobuf:"varint,4,opt,name=amount,proto3" json:"amount,omitempty"`
@@ -1230,9 +1230,9 @@ func (m *MsgSlashPermissionTrustDeposit) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgSlashPermissionTrustDeposit proto.InternalMessageInfo
 
-func (m *MsgSlashPermissionTrustDeposit) GetAuthority() string {
+func (m *MsgSlashPermissionTrustDeposit) GetCorporation() string {
 	if m != nil {
-		return m.Authority
+		return m.Corporation
 	}
 	return ""
 }
@@ -1297,9 +1297,9 @@ func (m *MsgSlashPermissionTrustDepositResponse) XXX_DiscardUnknown() {
 var xxx_messageInfo_MsgSlashPermissionTrustDepositResponse proto.InternalMessageInfo
 
 type MsgRepayPermissionSlashedTrustDeposit struct {
-	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
-	Operator  string `protobuf:"bytes,2,opt,name=operator,proto3" json:"operator,omitempty"`
-	Id        uint64 `protobuf:"varint,3,opt,name=id,proto3" json:"id,omitempty"`
+	Corporation string `protobuf:"bytes,1,opt,name=corporation,proto3" json:"corporation,omitempty"`
+	Operator    string `protobuf:"bytes,2,opt,name=operator,proto3" json:"operator,omitempty"`
+	Id          uint64 `protobuf:"varint,3,opt,name=id,proto3" json:"id,omitempty"`
 }
 
 func (m *MsgRepayPermissionSlashedTrustDeposit) Reset()         { *m = MsgRepayPermissionSlashedTrustDeposit{} }
@@ -1335,9 +1335,9 @@ func (m *MsgRepayPermissionSlashedTrustDeposit) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgRepayPermissionSlashedTrustDeposit proto.InternalMessageInfo
 
-func (m *MsgRepayPermissionSlashedTrustDeposit) GetAuthority() string {
+func (m *MsgRepayPermissionSlashedTrustDeposit) GetCorporation() string {
 	if m != nil {
-		return m.Authority
+		return m.Corporation
 	}
 	return ""
 }
@@ -1396,8 +1396,8 @@ func (m *MsgRepayPermissionSlashedTrustDepositResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgRepayPermissionSlashedTrustDepositResponse proto.InternalMessageInfo
 
-type MsgCreatePermission struct {
-	Authority        string         `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
+type MsgSelfCreatePermission struct {
+	Corporation      string         `protobuf:"bytes,1,opt,name=corporation,proto3" json:"corporation,omitempty"`
 	Operator         string         `protobuf:"bytes,2,opt,name=operator,proto3" json:"operator,omitempty"`
 	Type             PermissionType `protobuf:"varint,3,opt,name=type,proto3,enum=verana.perm.v1.PermissionType" json:"type,omitempty"`
 	ValidatorPermId  uint64         `protobuf:"varint,4,opt,name=validator_perm_id,json=validatorPermId,proto3" json:"validator_perm_id,omitempty"`
@@ -1415,18 +1415,18 @@ type MsgCreatePermission struct {
 	VsOperatorAuthzSpendPeriod   *time.Duration                           `protobuf:"bytes,15,opt,name=vs_operator_authz_spend_period,json=vsOperatorAuthzSpendPeriod,proto3,stdduration" json:"vs_operator_authz_spend_period,omitempty"`
 }
 
-func (m *MsgCreatePermission) Reset()         { *m = MsgCreatePermission{} }
-func (m *MsgCreatePermission) String() string { return proto.CompactTextString(m) }
-func (*MsgCreatePermission) ProtoMessage()    {}
-func (*MsgCreatePermission) Descriptor() ([]byte, []int) {
+func (m *MsgSelfCreatePermission) Reset()         { *m = MsgSelfCreatePermission{} }
+func (m *MsgSelfCreatePermission) String() string { return proto.CompactTextString(m) }
+func (*MsgSelfCreatePermission) ProtoMessage()    {}
+func (*MsgSelfCreatePermission) Descriptor() ([]byte, []int) {
 	return fileDescriptor_f4739eb2b981c63a, []int{22}
 }
-func (m *MsgCreatePermission) XXX_Unmarshal(b []byte) error {
+func (m *MsgSelfCreatePermission) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *MsgCreatePermission) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *MsgSelfCreatePermission) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_MsgCreatePermission.Marshal(b, m, deterministic)
+		return xxx_messageInfo_MsgSelfCreatePermission.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -1436,139 +1436,139 @@ func (m *MsgCreatePermission) XXX_Marshal(b []byte, deterministic bool) ([]byte,
 		return b[:n], nil
 	}
 }
-func (m *MsgCreatePermission) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_MsgCreatePermission.Merge(m, src)
+func (m *MsgSelfCreatePermission) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgSelfCreatePermission.Merge(m, src)
 }
-func (m *MsgCreatePermission) XXX_Size() int {
+func (m *MsgSelfCreatePermission) XXX_Size() int {
 	return m.Size()
 }
-func (m *MsgCreatePermission) XXX_DiscardUnknown() {
-	xxx_messageInfo_MsgCreatePermission.DiscardUnknown(m)
+func (m *MsgSelfCreatePermission) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgSelfCreatePermission.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_MsgCreatePermission proto.InternalMessageInfo
+var xxx_messageInfo_MsgSelfCreatePermission proto.InternalMessageInfo
 
-func (m *MsgCreatePermission) GetAuthority() string {
+func (m *MsgSelfCreatePermission) GetCorporation() string {
 	if m != nil {
-		return m.Authority
+		return m.Corporation
 	}
 	return ""
 }
 
-func (m *MsgCreatePermission) GetOperator() string {
+func (m *MsgSelfCreatePermission) GetOperator() string {
 	if m != nil {
 		return m.Operator
 	}
 	return ""
 }
 
-func (m *MsgCreatePermission) GetType() PermissionType {
+func (m *MsgSelfCreatePermission) GetType() PermissionType {
 	if m != nil {
 		return m.Type
 	}
 	return PermissionType_UNSPECIFIED
 }
 
-func (m *MsgCreatePermission) GetValidatorPermId() uint64 {
+func (m *MsgSelfCreatePermission) GetValidatorPermId() uint64 {
 	if m != nil {
 		return m.ValidatorPermId
 	}
 	return 0
 }
 
-func (m *MsgCreatePermission) GetDid() string {
+func (m *MsgSelfCreatePermission) GetDid() string {
 	if m != nil {
 		return m.Did
 	}
 	return ""
 }
 
-func (m *MsgCreatePermission) GetEffectiveFrom() *time.Time {
+func (m *MsgSelfCreatePermission) GetEffectiveFrom() *time.Time {
 	if m != nil {
 		return m.EffectiveFrom
 	}
 	return nil
 }
 
-func (m *MsgCreatePermission) GetEffectiveUntil() *time.Time {
+func (m *MsgSelfCreatePermission) GetEffectiveUntil() *time.Time {
 	if m != nil {
 		return m.EffectiveUntil
 	}
 	return nil
 }
 
-func (m *MsgCreatePermission) GetVerificationFees() uint64 {
+func (m *MsgSelfCreatePermission) GetVerificationFees() uint64 {
 	if m != nil {
 		return m.VerificationFees
 	}
 	return 0
 }
 
-func (m *MsgCreatePermission) GetValidationFees() uint64 {
+func (m *MsgSelfCreatePermission) GetValidationFees() uint64 {
 	if m != nil {
 		return m.ValidationFees
 	}
 	return 0
 }
 
-func (m *MsgCreatePermission) GetVsOperator() string {
+func (m *MsgSelfCreatePermission) GetVsOperator() string {
 	if m != nil {
 		return m.VsOperator
 	}
 	return ""
 }
 
-func (m *MsgCreatePermission) GetVsOperatorAuthzEnabled() bool {
+func (m *MsgSelfCreatePermission) GetVsOperatorAuthzEnabled() bool {
 	if m != nil {
 		return m.VsOperatorAuthzEnabled
 	}
 	return false
 }
 
-func (m *MsgCreatePermission) GetVsOperatorAuthzSpendLimit() github_com_cosmos_cosmos_sdk_types.Coins {
+func (m *MsgSelfCreatePermission) GetVsOperatorAuthzSpendLimit() github_com_cosmos_cosmos_sdk_types.Coins {
 	if m != nil {
 		return m.VsOperatorAuthzSpendLimit
 	}
 	return nil
 }
 
-func (m *MsgCreatePermission) GetVsOperatorAuthzWithFeegrant() bool {
+func (m *MsgSelfCreatePermission) GetVsOperatorAuthzWithFeegrant() bool {
 	if m != nil {
 		return m.VsOperatorAuthzWithFeegrant
 	}
 	return false
 }
 
-func (m *MsgCreatePermission) GetVsOperatorAuthzFeeSpendLimit() github_com_cosmos_cosmos_sdk_types.Coins {
+func (m *MsgSelfCreatePermission) GetVsOperatorAuthzFeeSpendLimit() github_com_cosmos_cosmos_sdk_types.Coins {
 	if m != nil {
 		return m.VsOperatorAuthzFeeSpendLimit
 	}
 	return nil
 }
 
-func (m *MsgCreatePermission) GetVsOperatorAuthzSpendPeriod() *time.Duration {
+func (m *MsgSelfCreatePermission) GetVsOperatorAuthzSpendPeriod() *time.Duration {
 	if m != nil {
 		return m.VsOperatorAuthzSpendPeriod
 	}
 	return nil
 }
 
-type MsgCreatePermissionResponse struct {
+type MsgSelfCreatePermissionResponse struct {
 	Id uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 }
 
-func (m *MsgCreatePermissionResponse) Reset()         { *m = MsgCreatePermissionResponse{} }
-func (m *MsgCreatePermissionResponse) String() string { return proto.CompactTextString(m) }
-func (*MsgCreatePermissionResponse) ProtoMessage()    {}
-func (*MsgCreatePermissionResponse) Descriptor() ([]byte, []int) {
+func (m *MsgSelfCreatePermissionResponse) Reset()         { *m = MsgSelfCreatePermissionResponse{} }
+func (m *MsgSelfCreatePermissionResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgSelfCreatePermissionResponse) ProtoMessage()    {}
+func (*MsgSelfCreatePermissionResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor_f4739eb2b981c63a, []int{23}
 }
-func (m *MsgCreatePermissionResponse) XXX_Unmarshal(b []byte) error {
+func (m *MsgSelfCreatePermissionResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *MsgCreatePermissionResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *MsgSelfCreatePermissionResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_MsgCreatePermissionResponse.Marshal(b, m, deterministic)
+		return xxx_messageInfo_MsgSelfCreatePermissionResponse.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -1578,19 +1578,19 @@ func (m *MsgCreatePermissionResponse) XXX_Marshal(b []byte, deterministic bool) 
 		return b[:n], nil
 	}
 }
-func (m *MsgCreatePermissionResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_MsgCreatePermissionResponse.Merge(m, src)
+func (m *MsgSelfCreatePermissionResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgSelfCreatePermissionResponse.Merge(m, src)
 }
-func (m *MsgCreatePermissionResponse) XXX_Size() int {
+func (m *MsgSelfCreatePermissionResponse) XXX_Size() int {
 	return m.Size()
 }
-func (m *MsgCreatePermissionResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_MsgCreatePermissionResponse.DiscardUnknown(m)
+func (m *MsgSelfCreatePermissionResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgSelfCreatePermissionResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_MsgCreatePermissionResponse proto.InternalMessageInfo
+var xxx_messageInfo_MsgSelfCreatePermissionResponse proto.InternalMessageInfo
 
-func (m *MsgCreatePermissionResponse) GetId() uint64 {
+func (m *MsgSelfCreatePermissionResponse) GetId() uint64 {
 	if m != nil {
 		return m.Id
 	}
@@ -1620,117 +1620,117 @@ func init() {
 	proto.RegisterType((*MsgSlashPermissionTrustDepositResponse)(nil), "verana.perm.v1.MsgSlashPermissionTrustDepositResponse")
 	proto.RegisterType((*MsgRepayPermissionSlashedTrustDeposit)(nil), "verana.perm.v1.MsgRepayPermissionSlashedTrustDeposit")
 	proto.RegisterType((*MsgRepayPermissionSlashedTrustDepositResponse)(nil), "verana.perm.v1.MsgRepayPermissionSlashedTrustDepositResponse")
-	proto.RegisterType((*MsgCreatePermission)(nil), "verana.perm.v1.MsgCreatePermission")
-	proto.RegisterType((*MsgCreatePermissionResponse)(nil), "verana.perm.v1.MsgCreatePermissionResponse")
+	proto.RegisterType((*MsgSelfCreatePermission)(nil), "verana.perm.v1.MsgSelfCreatePermission")
+	proto.RegisterType((*MsgSelfCreatePermissionResponse)(nil), "verana.perm.v1.MsgSelfCreatePermissionResponse")
 }
 
 func init() { proto.RegisterFile("verana/perm/v1/tx.proto", fileDescriptor_f4739eb2b981c63a) }
 
 var fileDescriptor_f4739eb2b981c63a = []byte{
-	// 1634 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xcc, 0x59, 0xcf, 0x6f, 0x13, 0xc7,
-	0x17, 0xcf, 0x26, 0x26, 0xb1, 0x9f, 0x13, 0x43, 0x96, 0x40, 0x9c, 0x0d, 0xb1, 0xf3, 0x75, 0xf8,
-	0x16, 0x2b, 0x34, 0x36, 0x71, 0x01, 0x95, 0xa8, 0x3d, 0xe4, 0x47, 0x23, 0x45, 0x25, 0x22, 0xdd,
-	0x00, 0xad, 0x7a, 0x59, 0x6d, 0xbc, 0x93, 0xcd, 0x14, 0xef, 0x8f, 0xee, 0x8c, 0x0d, 0xe9, 0xa9,
-	0x42, 0xea, 0xa5, 0xbd, 0xd0, 0x9e, 0x4a, 0x8f, 0xed, 0x05, 0xf5, 0x52, 0x0e, 0xa8, 0x7f, 0x41,
-	0x2b, 0xe5, 0x88, 0x7a, 0xea, 0xa1, 0x82, 0x0a, 0x0e, 0xdc, 0x2a, 0xf5, 0x3f, 0xa8, 0x66, 0x76,
-	0xbd, 0x5e, 0xef, 0xae, 0x13, 0x07, 0x02, 0xc9, 0x05, 0xbc, 0xfb, 0x3e, 0x6f, 0xe6, 0xbd, 0x37,
-	0xef, 0x7d, 0xde, 0xbc, 0x0d, 0x8c, 0x36, 0x90, 0xa3, 0x9a, 0x6a, 0xd9, 0x46, 0x8e, 0x51, 0x6e,
-	0xcc, 0x96, 0xe9, 0x9d, 0x92, 0xed, 0x58, 0xd4, 0x12, 0x33, 0xae, 0xa0, 0xc4, 0x04, 0xa5, 0xc6,
-	0xac, 0x34, 0xac, 0x1a, 0xd8, 0xb4, 0xca, 0xfc, 0x5f, 0x17, 0x22, 0xe5, 0xaa, 0x16, 0x31, 0x2c,
-	0x52, 0xde, 0x50, 0x09, 0x2a, 0x37, 0x66, 0x37, 0x10, 0x55, 0x67, 0xcb, 0x55, 0x0b, 0x9b, 0x9e,
-	0x7c, 0xd4, 0x93, 0x1b, 0x44, 0x67, 0x4b, 0x1b, 0x44, 0xf7, 0x04, 0x63, 0xae, 0x40, 0xe1, 0x4f,
-	0x65, 0xf7, 0xc1, 0x13, 0x8d, 0xe8, 0x96, 0x6e, 0xb9, 0xef, 0xd9, 0xaf, 0xe6, 0x4e, 0xba, 0x65,
-	0xe9, 0x35, 0x54, 0xe6, 0x4f, 0x1b, 0xf5, 0xcd, 0xb2, 0x56, 0x77, 0x54, 0x8a, 0xad, 0xe6, 0x4e,
-	0xf9, 0xb0, 0x9c, 0x62, 0x03, 0x11, 0xaa, 0x1a, 0xb6, 0x07, 0x18, 0x0f, 0xb9, 0x69, 0xab, 0x8e,
-	0x6a, 0x34, 0xf7, 0x94, 0xc2, 0x31, 0xd8, 0xb6, 0x91, 0x27, 0x2b, 0xfc, 0x2a, 0xc0, 0xf1, 0x55,
-	0xa2, 0xdf, 0xb0, 0x35, 0x95, 0xa2, 0x35, 0xae, 0x25, 0x5e, 0x86, 0x94, 0x5a, 0xa7, 0x5b, 0x96,
-	0x83, 0xe9, 0x76, 0x56, 0x98, 0x14, 0x8a, 0xa9, 0x85, 0xec, 0x1f, 0x8f, 0x66, 0x46, 0x3c, 0x47,
-	0xe6, 0x35, 0xcd, 0x41, 0x84, 0xac, 0x53, 0x07, 0x9b, 0xba, 0xdc, 0x82, 0x8a, 0x57, 0xa0, 0xdf,
-	0xdd, 0x37, 0xdb, 0x3b, 0x29, 0x14, 0xd3, 0x95, 0xd3, 0xa5, 0xf6, 0x18, 0x97, 0xdc, 0xf5, 0x17,
-	0x52, 0x3b, 0x4f, 0xf2, 0x3d, 0x0f, 0x5e, 0x3c, 0x9c, 0x16, 0x64, 0x4f, 0x61, 0xee, 0xc2, 0xdd,
-	0x17, 0x0f, 0xa7, 0x5b, 0x4b, 0x7d, 0xfd, 0xe2, 0xe1, 0xf4, 0x84, 0x67, 0xf5, 0x1d, 0xd7, 0xee,
-	0x90, 0x91, 0x85, 0x31, 0x18, 0x0d, 0xbd, 0x92, 0x11, 0xb1, 0x2d, 0x93, 0xa0, 0xc2, 0x6f, 0x49,
-	0x18, 0x59, 0x25, 0xfa, 0x3a, 0x55, 0x1d, 0xba, 0x86, 0x1c, 0x03, 0x13, 0x82, 0x2d, 0xf3, 0xe6,
-	0xda, 0x4b, 0x3b, 0x76, 0x11, 0x92, 0x96, 0x8d, 0x1c, 0x95, 0x5a, 0x0e, 0x77, 0x6d, 0x37, 0x35,
-	0x1f, 0x29, 0x56, 0x20, 0xc1, 0x22, 0x9d, 0xed, 0x9b, 0x14, 0x8a, 0x99, 0x4a, 0x2e, 0x12, 0x0c,
-	0xdf, 0xb2, 0xeb, 0xdb, 0x36, 0x92, 0x39, 0x56, 0x9c, 0x86, 0xe1, 0x86, 0x5a, 0xc3, 0x1a, 0x5b,
-	0x40, 0x61, 0x48, 0x05, 0x6b, 0xd9, 0xc4, 0xa4, 0x50, 0x4c, 0xc8, 0xc7, 0x7d, 0x01, 0xd3, 0x5c,
-	0xd1, 0xc4, 0x13, 0xd0, 0xa7, 0x61, 0x2d, 0x7b, 0x8c, 0x19, 0x24, 0xb3, 0x9f, 0xe2, 0x2a, 0x34,
-	0x41, 0xd8, 0x32, 0x95, 0x4d, 0x84, 0x48, 0xb6, 0x9f, 0x9f, 0x44, 0x64, 0xf3, 0x6b, 0x36, 0x83,
-	0xa8, 0xb5, 0x1b, 0x2b, 0x26, 0xbd, 0x7c, 0x71, 0x21, 0xb1, 0xf3, 0x24, 0x2f, 0xc8, 0x99, 0x96,
-	0xf2, 0x32, 0x42, 0x44, 0x5c, 0x81, 0x21, 0x4c, 0x48, 0x5d, 0x35, 0xab, 0xc8, 0x5d, 0x6c, 0x60,
-	0x1f, 0x8b, 0x0d, 0x36, 0x55, 0xf9, 0x52, 0x1f, 0xc1, 0x70, 0x03, 0x39, 0x78, 0x13, 0x57, 0x03,
-	0xb6, 0x25, 0xf7, 0xb1, 0xdc, 0x89, 0xa0, 0x3a, 0x5f, 0xf2, 0x0a, 0xa4, 0x1b, 0x44, 0xf1, 0xcf,
-	0x25, 0xb5, 0xc7, 0xb9, 0x40, 0x83, 0x5c, 0x6b, 0x9e, 0xcc, 0x15, 0x18, 0x0b, 0xa8, 0x2a, 0xec,
-	0xa0, 0xbf, 0x50, 0x90, 0xa9, 0x6e, 0xd4, 0x90, 0x96, 0x85, 0x49, 0xa1, 0x98, 0x94, 0x4f, 0xb7,
-	0xe0, 0xf3, 0x4c, 0xfc, 0x81, 0x2b, 0x15, 0xbf, 0x13, 0x60, 0x22, 0xaa, 0x4b, 0x6c, 0x64, 0x6a,
-	0x4a, 0x0d, 0x1b, 0x98, 0x66, 0xd3, 0x93, 0x7d, 0xc5, 0x74, 0x65, 0xac, 0xe4, 0x59, 0xc1, 0xc8,
-	0xa3, 0xe4, 0x91, 0x47, 0x69, 0xd1, 0xc2, 0xe6, 0xc2, 0x25, 0x96, 0xfe, 0x3f, 0x3f, 0xcd, 0x17,
-	0x75, 0x4c, 0xb7, 0xea, 0x1b, 0xa5, 0xaa, 0x65, 0x78, 0x1c, 0xe1, 0xfd, 0x37, 0x43, 0xb4, 0x5b,
-	0x5e, 0x91, 0x32, 0x05, 0xe2, 0x96, 0xca, 0x58, 0xc8, 0xa2, 0x75, 0xb6, 0xe7, 0x55, 0xb6, 0xa5,
-	0xb8, 0x04, 0xf9, 0xa8, 0x4d, 0xb7, 0x31, 0xdd, 0x62, 0x71, 0xd6, 0x1d, 0xd5, 0xa4, 0xd9, 0x41,
-	0xee, 0xd5, 0x78, 0x68, 0x8d, 0x8f, 0x31, 0xdd, 0x5a, 0xf6, 0x20, 0xe2, 0x7d, 0x01, 0xfe, 0x17,
-	0x5d, 0x66, 0x13, 0xa1, 0x36, 0xf7, 0x86, 0x5e, 0x93, 0x7b, 0x67, 0x42, 0xa6, 0x2d, 0x23, 0x14,
-	0xf0, 0xb0, 0x0a, 0xb9, 0x4e, 0x51, 0xb7, 0x91, 0x83, 0x2d, 0x2d, 0x9b, 0xe1, 0xc9, 0x34, 0x56,
-	0x72, 0x99, 0xb2, 0xd4, 0x64, 0xca, 0xd2, 0x92, 0xc7, 0xa4, 0x0b, 0x89, 0xef, 0x9f, 0xe6, 0x05,
-	0x59, 0x8a, 0x8b, 0xe2, 0x1a, 0x5f, 0x62, 0x6e, 0x88, 0x91, 0x90, 0x5f, 0xbf, 0x85, 0x45, 0x38,
-	0x13, 0xc7, 0x22, 0x4d, 0x9a, 0x11, 0xa7, 0x60, 0xc8, 0xf6, 0xdf, 0xb3, 0x3a, 0x15, 0x78, 0x9d,
-	0x0e, 0xb6, 0x5e, 0xae, 0x68, 0x85, 0x9f, 0x04, 0xce, 0x45, 0x32, 0x32, 0xd1, 0xed, 0x43, 0xe4,
-	0xa2, 0x0c, 0xf4, 0x62, 0x8d, 0x33, 0x51, 0x42, 0xee, 0xc5, 0x11, 0x57, 0x73, 0xdc, 0xd5, 0x88,
-	0x91, 0x3e, 0xa3, 0xde, 0x4f, 0xc0, 0x04, 0x8b, 0x05, 0x6a, 0x8b, 0xc4, 0x75, 0xeb, 0xa6, 0x4b,
-	0x18, 0x48, 0x3b, 0x5c, 0x77, 0x18, 0xf1, 0xa1, 0xcd, 0x4d, 0x54, 0xa5, 0xb8, 0x81, 0x94, 0xba,
-	0x49, 0x71, 0x8d, 0x93, 0x66, 0xba, 0x22, 0x45, 0xf2, 0xe1, 0x7a, 0xb3, 0x73, 0x2e, 0x24, 0x19,
-	0xb1, 0xdc, 0x63, 0x49, 0x91, 0xf1, 0x95, 0x6f, 0x30, 0x5d, 0xf1, 0x5c, 0x94, 0x47, 0x8f, 0xf1,
-	0xbd, 0xc2, 0x0c, 0x39, 0x15, 0x66, 0xc8, 0x7e, 0x37, 0x05, 0xda, 0xb8, 0xef, 0x7c, 0x1c, 0xf7,
-	0x0d, 0x70, 0x60, 0x94, 0xd5, 0x66, 0xe1, 0x54, 0xc3, 0x56, 0x48, 0xdd, 0x30, 0x54, 0x67, 0x5b,
-	0xd1, 0xb0, 0x8e, 0x08, 0x55, 0x88, 0x83, 0x39, 0x59, 0xa6, 0x64, 0xb1, 0x61, 0xaf, 0xbb, 0xb2,
-	0x25, 0x2e, 0x5a, 0x77, 0xb0, 0x58, 0x81, 0x53, 0x41, 0x23, 0x14, 0x0d, 0x93, 0xaa, 0x55, 0x37,
-	0x29, 0xa7, 0xc4, 0x84, 0x7c, 0x32, 0x60, 0xcc, 0x92, 0x27, 0x12, 0xe7, 0x60, 0x2c, 0x6c, 0x53,
-	0x4b, 0x0f, 0xb8, 0xde, 0x68, 0xc8, 0xb6, 0xa6, 0x6e, 0x38, 0x77, 0xce, 0xc1, 0xff, 0x77, 0x4d,
-	0x0d, 0x3f, 0x89, 0x7e, 0x11, 0x60, 0x72, 0x95, 0xe8, 0x8b, 0xcc, 0x96, 0x5a, 0x10, 0x7c, 0x55,
-	0x25, 0x54, 0x46, 0x9f, 0xd7, 0x11, 0xa1, 0x47, 0xab, 0x2c, 0xa6, 0xa1, 0xb8, 0x97, 0xc1, 0xbe,
-	0x77, 0x7f, 0xf5, 0xf1, 0x0b, 0xc9, 0xa2, 0x83, 0x54, 0x8a, 0x64, 0xcb, 0x0a, 0x84, 0xe3, 0x0d,
-	0x3b, 0x35, 0x0e, 0x29, 0x52, 0xdd, 0x42, 0x86, 0xaa, 0xf8, 0xbe, 0x25, 0xdd, 0x17, 0xad, 0x4b,
-	0x43, 0xa2, 0x75, 0x69, 0xf8, 0x10, 0x5a, 0xe9, 0xaf, 0x6c, 0x3a, 0x96, 0xc1, 0x73, 0xbd, 0xdb,
-	0xd2, 0x19, 0xf2, 0x75, 0x97, 0x1d, 0xcb, 0x88, 0x2b, 0xc4, 0xfe, 0x83, 0x2d, 0xc4, 0x81, 0xee,
-	0x0a, 0x31, 0xd9, 0x6d, 0x21, 0xa6, 0xe2, 0x0b, 0x31, 0x9c, 0x0a, 0xb3, 0x90, 0xef, 0x70, 0xba,
-	0x7e, 0x3f, 0x70, 0x93, 0x49, 0x68, 0x26, 0x53, 0xe1, 0x5f, 0x01, 0x4e, 0xae, 0x12, 0x7d, 0x5e,
-	0xfb, 0xac, 0x4e, 0x0e, 0x2f, 0x1b, 0x5e, 0x2f, 0x55, 0x86, 0xc3, 0x34, 0x01, 0xe3, 0x31, 0x2e,
-	0xfb, 0x45, 0xf2, 0xa3, 0x1b, 0x12, 0x19, 0x35, 0xac, 0x5b, 0xe8, 0xa8, 0x84, 0x24, 0xde, 0x87,
-	0xb0, 0x8d, 0xbe, 0x0f, 0xff, 0xf4, 0x42, 0xc1, 0x4f, 0x85, 0x6b, 0x8e, 0x37, 0x81, 0xf8, 0xb8,
-	0x75, 0x74, 0xb8, 0x2e, 0xa5, 0xf8, 0x29, 0x9f, 0x85, 0x0c, 0x4b, 0x7d, 0x14, 0x1e, 0x22, 0x06,
-	0xdd, 0xb7, 0xde, 0x04, 0x51, 0x04, 0x2f, 0xef, 0x03, 0xb8, 0x66, 0xa3, 0xf3, 0xde, 0x7b, 0xc8,
-	0x02, 0x0c, 0xa9, 0x3a, 0x32, 0xa9, 0x0f, 0x73, 0x1b, 0x5d, 0x9a, 0xbf, 0xf4, 0x30, 0x65, 0x18,
-	0xb9, 0xad, 0xd6, 0x6a, 0x88, 0x2a, 0xed, 0x50, 0xb7, 0x62, 0x87, 0x5d, 0xd9, 0x7c, 0x40, 0xe1,
-	0x34, 0xf4, 0xbb, 0x0d, 0xce, 0x6b, 0x6e, 0xde, 0x53, 0xf8, 0x3c, 0xde, 0x83, 0xe9, 0xbd, 0xe3,
-	0x1d, 0x53, 0x85, 0x3c, 0x12, 0x85, 0xdf, 0x05, 0xc8, 0xb1, 0xfe, 0x54, 0x53, 0xc9, 0x56, 0x60,
-	0xe4, 0x72, 0xea, 0x84, 0x2e, 0x21, 0xdb, 0x22, 0xf8, 0x90, 0x7b, 0x0e, 0x8b, 0x82, 0x6a, 0xf0,
-	0xbe, 0xeb, 0x1e, 0x91, 0xf7, 0x14, 0x8e, 0x42, 0x11, 0xde, 0xda, 0xdd, 0x0d, 0x3f, 0x41, 0x1f,
-	0x09, 0xbc, 0x23, 0xcb, 0xc8, 0x56, 0xb7, 0x03, 0x71, 0x62, 0x9a, 0x48, 0x3b, 0x3a, 0x8e, 0x87,
-	0x1d, 0x2c, 0xc3, 0x4c, 0x57, 0x56, 0xfb, 0x7e, 0xee, 0x24, 0x39, 0x99, 0xb8, 0x89, 0x71, 0x68,
-	0x64, 0xf2, 0xe6, 0xa7, 0xfc, 0x68, 0xc3, 0xee, 0x3f, 0xd0, 0x86, 0x3d, 0xf0, 0x0a, 0x0d, 0xfb,
-	0x7c, 0xa7, 0x39, 0x3f, 0xee, 0xae, 0x1b, 0xd3, 0xdd, 0x53, 0xb1, 0xdd, 0x3d, 0x34, 0xea, 0xc3,
-	0x41, 0x8d, 0xfa, 0xe9, 0x57, 0x1c, 0xf5, 0x07, 0x8f, 0xe4, 0xa8, 0x3f, 0x74, 0x50, 0xa3, 0x7e,
-	0xe6, 0x88, 0x8e, 0xfa, 0xc7, 0x0f, 0x7c, 0xd4, 0x9f, 0xe1, 0x2d, 0x3f, 0xcc, 0x24, 0x9d, 0x6e,
-	0x76, 0x95, 0x07, 0x69, 0xe8, 0x5b, 0x25, 0xba, 0xf8, 0x09, 0x0c, 0xb6, 0x7d, 0x38, 0xcd, 0x87,
-	0xab, 0x3f, 0xf4, 0x85, 0x52, 0x3a, 0xb7, 0x07, 0xc0, 0xdf, 0x51, 0x87, 0xe1, 0xe8, 0xe7, 0xcb,
-	0xb3, 0x31, 0xda, 0x11, 0x94, 0xf4, 0x76, 0x37, 0xa8, 0xe0, 0x46, 0xd1, 0x6f, 0x13, 0x71, 0x1b,
-	0x45, 0x50, 0xb1, 0x1b, 0x75, 0xfc, 0x84, 0x20, 0xde, 0x15, 0x40, 0xda, 0xe5, 0xfb, 0xc1, 0x4c,
-	0x9c, 0xd5, 0x1d, 0xe1, 0xd2, 0xa5, 0x7d, 0xc1, 0x7d, 0x23, 0xbe, 0x11, 0x60, 0x62, 0xf7, 0xf9,
-	0xf3, 0x42, 0xcc, 0xc2, 0xbb, 0x6a, 0x48, 0xef, 0xee, 0x57, 0xc3, 0xb7, 0xc6, 0x86, 0x91, 0xd8,
-	0x71, 0x31, 0x2e, 0x4b, 0xe2, 0x80, 0x52, 0xb9, 0x4b, 0xa0, 0xbf, 0xa3, 0x06, 0x27, 0x22, 0xe3,
-	0xc8, 0x54, 0xcc, 0x22, 0x61, 0x90, 0x74, 0xbe, 0x0b, 0x50, 0x70, 0x97, 0xc8, 0x0d, 0x7f, 0x2a,
-	0x36, 0x59, 0xda, 0x41, 0xb1, 0xbb, 0x74, 0xba, 0x87, 0x8b, 0xdf, 0x0a, 0x90, 0xdf, 0xeb, 0x12,
-	0x5e, 0xe9, 0x18, 0xa0, 0x8e, 0x3a, 0xd2, 0xdc, 0xfe, 0x75, 0x7c, 0x9b, 0xbe, 0x12, 0x60, 0x7c,
-	0xb7, 0x9b, 0x66, 0x29, 0x2e, 0x6d, 0x3b, 0xe3, 0xa5, 0xcb, 0xfb, 0xc3, 0xfb, 0x76, 0xfc, 0x20,
-	0x40, 0xa1, 0x8b, 0xfb, 0xdf, 0xa5, 0xd8, 0x78, 0xef, 0xa5, 0x26, 0xbd, 0xff, 0x52, 0x6a, 0xc1,
-	0xf4, 0x88, 0xdc, 0xd9, 0xa6, 0x3a, 0x06, 0x7d, 0x8f, 0xf4, 0xe8, 0xc4, 0xd9, 0xd2, 0xb1, 0x2f,
-	0x59, 0xaf, 0x59, 0x58, 0xda, 0x79, 0x96, 0x13, 0x1e, 0x3f, 0xcb, 0x09, 0x7f, 0x3f, 0xcb, 0x09,
-	0xf7, 0x9e, 0xe7, 0x7a, 0x1e, 0x3f, 0xcf, 0xf5, 0xfc, 0xf9, 0x3c, 0xd7, 0xf3, 0xe9, 0x74, 0xa0,
-	0x69, 0xb9, 0xeb, 0xce, 0xd4, 0xd4, 0x0d, 0x52, 0x6e, 0xff, 0xb3, 0x13, 0x6f, 0x5e, 0x1b, 0xfd,
-	0xbc, 0xc7, 0xbc, 0xf3, 0x5f, 0x00, 0x00, 0x00, 0xff, 0xff, 0x0b, 0x7f, 0x86, 0xf7, 0x4e, 0x1c,
-	0x00, 0x00,
+	// 1640 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xcc, 0x59, 0xcf, 0x6f, 0x1b, 0xc5,
+	0x17, 0xcf, 0x26, 0x6e, 0x62, 0x3f, 0x27, 0x4e, 0xb3, 0xcd, 0xb7, 0x71, 0x36, 0x8d, 0x9d, 0xaf,
+	0x53, 0x88, 0x95, 0x12, 0xbb, 0x31, 0x6d, 0x45, 0x23, 0x38, 0xe4, 0x07, 0x91, 0x22, 0x1a, 0x35,
+	0x6c, 0xda, 0x82, 0xb8, 0x58, 0x1b, 0xef, 0x78, 0x33, 0xd4, 0xbb, 0xb3, 0xec, 0xac, 0xdd, 0x86,
+	0x13, 0xaa, 0xc4, 0x05, 0x2e, 0x85, 0x03, 0x02, 0xfe, 0x00, 0x40, 0x9c, 0x2a, 0x51, 0x21, 0xfe,
+	0x84, 0x70, 0xab, 0x38, 0x71, 0x6a, 0xab, 0xf6, 0xd0, 0x3b, 0x12, 0x77, 0x34, 0xb3, 0xeb, 0xf5,
+	0x7a, 0x77, 0xed, 0x38, 0x34, 0x25, 0xb9, 0xb4, 0xde, 0x99, 0xcf, 0x9b, 0xf7, 0x63, 0xdf, 0xfb,
+	0xbc, 0xd9, 0x17, 0x98, 0x68, 0x20, 0x4b, 0x31, 0x94, 0xa2, 0x89, 0x2c, 0xbd, 0xd8, 0x58, 0x2c,
+	0xda, 0x77, 0x0b, 0xa6, 0x45, 0x6c, 0x22, 0xa6, 0x9c, 0x8d, 0x02, 0xdb, 0x28, 0x34, 0x16, 0xa5,
+	0x31, 0x45, 0xc7, 0x06, 0x29, 0xf2, 0x7f, 0x1d, 0x88, 0x94, 0xa9, 0x10, 0xaa, 0x13, 0x5a, 0xdc,
+	0x51, 0x28, 0x2a, 0x36, 0x16, 0x77, 0x90, 0xad, 0x2c, 0x16, 0x2b, 0x04, 0x1b, 0xee, 0xfe, 0x84,
+	0xbb, 0xaf, 0x53, 0x8d, 0x1d, 0xad, 0x53, 0xcd, 0xdd, 0x98, 0x74, 0x36, 0xca, 0xfc, 0xa9, 0xe8,
+	0x3c, 0xb8, 0x5b, 0xe3, 0x1a, 0xd1, 0x88, 0xb3, 0xce, 0x7e, 0x35, 0x35, 0x69, 0x84, 0x68, 0x35,
+	0x54, 0xe4, 0x4f, 0x3b, 0xf5, 0x6a, 0x51, 0xad, 0x5b, 0x8a, 0x8d, 0x49, 0x53, 0x53, 0x36, 0xb8,
+	0x6f, 0x63, 0x1d, 0x51, 0x5b, 0xd1, 0x4d, 0x17, 0x30, 0x15, 0x70, 0xd3, 0x54, 0x2c, 0x45, 0x6f,
+	0xea, 0x94, 0x82, 0x31, 0xd8, 0x33, 0x91, 0xbb, 0x97, 0xfb, 0x55, 0x80, 0xd1, 0x4d, 0xaa, 0xdd,
+	0x34, 0x55, 0xc5, 0x46, 0x5b, 0x5c, 0x4a, 0xbc, 0x02, 0x09, 0xa5, 0x6e, 0xef, 0x12, 0x0b, 0xdb,
+	0x7b, 0x69, 0x61, 0x46, 0xc8, 0x27, 0x56, 0xd2, 0x7f, 0x3c, 0x5c, 0x18, 0x77, 0x1d, 0x59, 0x56,
+	0x55, 0x0b, 0x51, 0xba, 0x6d, 0x5b, 0xd8, 0xd0, 0xe4, 0x16, 0x54, 0xbc, 0x0a, 0x83, 0x8e, 0xde,
+	0x74, 0xff, 0x8c, 0x90, 0x4f, 0x96, 0xce, 0x16, 0xda, 0x63, 0x5c, 0x70, 0xce, 0x5f, 0x49, 0xec,
+	0x3f, 0xce, 0xf6, 0xfd, 0xf4, 0xe2, 0xc1, 0xbc, 0x20, 0xbb, 0x02, 0x4b, 0x17, 0xef, 0xbd, 0x78,
+	0x30, 0xdf, 0x3a, 0xea, 0x8b, 0x17, 0x0f, 0xe6, 0xa7, 0x5d, 0xab, 0xef, 0x3a, 0x76, 0x07, 0x8c,
+	0xcc, 0x4d, 0xc2, 0x44, 0x60, 0x49, 0x46, 0xd4, 0x24, 0x06, 0x45, 0xb9, 0xfd, 0x38, 0x8c, 0x6f,
+	0x52, 0x6d, 0xdb, 0x56, 0x2c, 0x7b, 0x0b, 0x59, 0x3a, 0xa6, 0x14, 0x13, 0xe3, 0xd6, 0x96, 0xb8,
+	0x04, 0xc9, 0x0a, 0xb1, 0x4c, 0xe2, 0xc4, 0xf6, 0x40, 0xd7, 0xfc, 0x60, 0xf1, 0x12, 0xc4, 0x89,
+	0x89, 0x2c, 0xc5, 0x26, 0x16, 0x77, 0xaf, 0x9b, 0xa0, 0x87, 0x14, 0x4b, 0x10, 0x63, 0xd1, 0x4e,
+	0x0f, 0xcc, 0x08, 0xf9, 0x54, 0x29, 0x13, 0x0a, 0x88, 0x67, 0xdd, 0x8d, 0x3d, 0x13, 0xc9, 0x1c,
+	0x2b, 0xce, 0xc3, 0x58, 0x43, 0xa9, 0x61, 0x95, 0x1d, 0x50, 0x66, 0xc8, 0x32, 0x56, 0xd3, 0xb1,
+	0x19, 0x21, 0x1f, 0x93, 0x47, 0xbd, 0x0d, 0x26, 0xb9, 0xa1, 0x8a, 0xa7, 0x61, 0x40, 0xc5, 0x6a,
+	0xfa, 0x14, 0x33, 0x48, 0x66, 0x3f, 0xc5, 0x4d, 0x68, 0x82, 0x30, 0x31, 0xca, 0x55, 0x84, 0x68,
+	0x7a, 0x90, 0xbf, 0x8d, 0x90, 0xf2, 0xeb, 0x26, 0x83, 0x28, 0xb5, 0x9b, 0x1b, 0x86, 0x7d, 0xe5,
+	0xd2, 0x4a, 0x6c, 0xff, 0x71, 0x56, 0x90, 0x53, 0x2d, 0xe1, 0x75, 0x84, 0xa8, 0xb8, 0x01, 0x23,
+	0x98, 0xd2, 0xba, 0x62, 0x54, 0x90, 0x73, 0xd8, 0xd0, 0x21, 0x0e, 0x1b, 0x6e, 0x8a, 0xf2, 0xa3,
+	0xde, 0x87, 0xb1, 0x06, 0xb2, 0x70, 0x15, 0x57, 0x7c, 0xb6, 0xc5, 0x0f, 0x71, 0xdc, 0x69, 0xbf,
+	0x38, 0x3f, 0xf2, 0x2a, 0x24, 0x1b, 0xb4, 0xec, 0xbd, 0x97, 0xc4, 0x01, 0xef, 0x05, 0x1a, 0xf4,
+	0x7a, 0xf3, 0xcd, 0x5c, 0x85, 0x49, 0x9f, 0x68, 0x99, 0xa5, 0xde, 0xa7, 0x65, 0x64, 0x28, 0x3b,
+	0x35, 0xa4, 0xa6, 0x61, 0x46, 0xc8, 0xc7, 0xe5, 0xb3, 0x2d, 0xf8, 0x32, 0xdb, 0x7e, 0xd7, 0xd9,
+	0x15, 0xbf, 0x16, 0x60, 0x3a, 0x2c, 0x4b, 0x4d, 0x64, 0xa8, 0xe5, 0x1a, 0xd6, 0xb1, 0x9d, 0x4e,
+	0xce, 0x0c, 0xe4, 0x93, 0xa5, 0xc9, 0x82, 0x6b, 0x05, 0x23, 0x90, 0x82, 0x4b, 0x20, 0x85, 0x55,
+	0x82, 0x8d, 0x95, 0xcb, 0xac, 0x04, 0x7e, 0x7e, 0x92, 0xcd, 0x6b, 0xd8, 0xde, 0xad, 0xef, 0x14,
+	0x2a, 0x44, 0x77, 0x79, 0xc2, 0xfd, 0x6f, 0x81, 0xaa, 0xb7, 0xdd, 0x42, 0x65, 0x02, 0xd4, 0x29,
+	0x97, 0xc9, 0x80, 0x45, 0xdb, 0x4c, 0xe7, 0x35, 0xa6, 0x52, 0x5c, 0x83, 0x6c, 0xd8, 0xa6, 0x3b,
+	0xd8, 0xde, 0x65, 0x71, 0xd6, 0x2c, 0xc5, 0xb0, 0xd3, 0xc3, 0xdc, 0xab, 0xa9, 0xc0, 0x19, 0x1f,
+	0x60, 0x7b, 0x77, 0xdd, 0x85, 0x88, 0xdf, 0x09, 0xf0, 0xff, 0xf0, 0x31, 0x55, 0x84, 0xda, 0xdc,
+	0x1b, 0x79, 0x45, 0xee, 0x9d, 0x0b, 0x98, 0xb6, 0x8e, 0x90, 0xcf, 0xc3, 0x0a, 0x64, 0x3a, 0x45,
+	0xdd, 0x44, 0x16, 0x26, 0x6a, 0x3a, 0xc5, 0x93, 0x69, 0xb2, 0xe0, 0xb0, 0x65, 0xa1, 0xc9, 0x96,
+	0x85, 0x35, 0x97, 0x4d, 0x57, 0x62, 0xdf, 0x3e, 0xc9, 0x0a, 0xb2, 0x14, 0x15, 0xc5, 0x2d, 0x7e,
+	0xc4, 0xd2, 0x08, 0x23, 0x22, 0xaf, 0x7e, 0x73, 0xab, 0x70, 0x2e, 0x8a, 0x49, 0x9a, 0x54, 0x23,
+	0xce, 0xc2, 0x88, 0xe9, 0xad, 0xb3, 0x3a, 0x15, 0x78, 0x9d, 0x0e, 0xb7, 0x16, 0x37, 0xd4, 0xdc,
+	0x8f, 0x02, 0xe7, 0x23, 0x19, 0x19, 0xe8, 0xce, 0x31, 0xf3, 0x51, 0x0a, 0xfa, 0xb1, 0xca, 0xd9,
+	0x28, 0x26, 0xf7, 0xe3, 0x90, 0xbb, 0x19, 0xee, 0x6e, 0xc8, 0x50, 0x8f, 0x59, 0xbf, 0x89, 0xc1,
+	0x34, 0x8b, 0x07, 0x6a, 0x8b, 0xc6, 0x0d, 0x72, 0xcb, 0x21, 0x0d, 0xa4, 0x1e, 0xbf, 0x4b, 0x8c,
+	0x00, 0x51, 0xb5, 0x8a, 0x2a, 0x36, 0x6e, 0xa0, 0x72, 0xdd, 0xb0, 0x71, 0x8d, 0x93, 0x67, 0xb2,
+	0x24, 0x85, 0xf2, 0xe2, 0x46, 0xb3, 0x8b, 0xae, 0xc4, 0x19, 0xc1, 0xdc, 0x67, 0xc9, 0x91, 0xf2,
+	0x84, 0x6f, 0x32, 0x59, 0x71, 0x2e, 0xcc, 0xa7, 0xa7, 0xb8, 0xae, 0x20, 0x53, 0xce, 0x06, 0x99,
+	0x72, 0xd0, 0x49, 0x85, 0x36, 0x0e, 0xbc, 0x10, 0xc5, 0x81, 0x43, 0x1c, 0x18, 0x66, 0x37, 0xd6,
+	0x08, 0xcc, 0x32, 0xad, 0xeb, 0xba, 0x62, 0xed, 0x95, 0x55, 0xac, 0x21, 0x6a, 0x73, 0xc2, 0x4c,
+	0xc8, 0xa3, 0x0d, 0x73, 0xdb, 0x59, 0x5f, 0xe3, 0xcb, 0x62, 0x09, 0xfe, 0xe7, 0xd7, 0x5e, 0x56,
+	0x31, 0xad, 0x90, 0xba, 0x61, 0x73, 0x4e, 0x8c, 0xc9, 0x67, 0x7c, 0x56, 0xac, 0xb9, 0x5b, 0xe2,
+	0x12, 0x4c, 0x06, 0x8d, 0x69, 0xc9, 0x01, 0x97, 0x9b, 0x08, 0x18, 0xd5, 0x94, 0x0d, 0x26, 0xce,
+	0x1c, 0xbc, 0xd6, 0x35, 0x2f, 0xbc, 0x0c, 0xfa, 0x45, 0x80, 0x99, 0x4d, 0xaa, 0xad, 0x32, 0x5b,
+	0x6a, 0x7e, 0xf0, 0x35, 0x85, 0xda, 0x32, 0xfa, 0xa4, 0xce, 0x9c, 0x39, 0x71, 0x75, 0x31, 0x0f,
+	0xf9, 0x83, 0x8c, 0xf6, 0x3c, 0x7c, 0x3a, 0xc0, 0x6f, 0x26, 0xab, 0x16, 0x52, 0x6c, 0x24, 0x13,
+	0xe2, 0x0b, 0xc9, 0x31, 0x38, 0x36, 0x05, 0x09, 0x5a, 0xd9, 0x45, 0xba, 0x52, 0xf6, 0xfc, 0x8b,
+	0x3b, 0x0b, 0xad, 0xdb, 0x43, 0xac, 0x75, 0x7b, 0x78, 0x0f, 0x5a, 0xf9, 0x5f, 0xae, 0x5a, 0x44,
+	0xe7, 0xc9, 0xde, 0x6b, 0xed, 0x8c, 0x78, 0xb2, 0xeb, 0x16, 0xd1, 0xa3, 0x2a, 0x71, 0xf0, 0x68,
+	0x2b, 0x71, 0xa8, 0xb7, 0x4a, 0x8c, 0xf7, 0x5a, 0x89, 0x89, 0xe8, 0x4a, 0x0c, 0xa6, 0xc3, 0x22,
+	0x64, 0x3b, 0xbc, 0x61, 0xaf, 0x31, 0x38, 0x09, 0x25, 0x34, 0x13, 0x2a, 0xf7, 0xb7, 0x00, 0x67,
+	0x36, 0xa9, 0xb6, 0xac, 0x7e, 0x5c, 0xa7, 0xc7, 0x9b, 0x11, 0xaf, 0x96, 0x2f, 0x83, 0xa1, 0x9a,
+	0x86, 0xa9, 0x08, 0xb7, 0xbd, 0x62, 0xf9, 0xc1, 0x09, 0x8b, 0x8c, 0x1a, 0xe4, 0x36, 0x3a, 0x49,
+	0x61, 0x89, 0xf6, 0x23, 0x68, 0xa7, 0xe7, 0xc7, 0x5f, 0xfd, 0x90, 0xf3, 0x52, 0xe2, 0xba, 0xe5,
+	0x7e, 0x96, 0x78, 0xb8, 0x6d, 0x74, 0xfc, 0x6e, 0x25, 0xf8, 0xdb, 0x3e, 0x0f, 0x29, 0x56, 0x06,
+	0x28, 0xf8, 0x65, 0x31, 0xec, 0xac, 0xba, 0x9f, 0x15, 0x79, 0x70, 0x6b, 0xc0, 0x87, 0x6b, 0x76,
+	0x3d, 0x77, 0xdd, 0x45, 0xe6, 0x60, 0x44, 0xd1, 0x90, 0x61, 0x7b, 0x30, 0xa7, 0xeb, 0x25, 0xf9,
+	0xa2, 0x8b, 0x29, 0xc2, 0xf8, 0x1d, 0xa5, 0x56, 0x43, 0x76, 0xb9, 0x1d, 0xea, 0x54, 0xef, 0x98,
+	0xb3, 0xb7, 0xec, 0x13, 0x38, 0x0b, 0x83, 0x6d, 0xdd, 0xce, 0x7d, 0x0a, 0xbe, 0x93, 0xb7, 0x61,
+	0xfe, 0xe0, 0x98, 0x47, 0x54, 0x24, 0x8f, 0x44, 0xee, 0x77, 0x01, 0x32, 0xac, 0x67, 0xd5, 0x14,
+	0xba, 0xeb, 0xfb, 0x0e, 0xb3, 0xea, 0xd4, 0x5e, 0x43, 0x26, 0xa1, 0xf8, 0x04, 0xf4, 0x21, 0x16,
+	0x09, 0x45, 0xe7, 0xfd, 0xd8, 0x79, 0x4d, 0xee, 0x53, 0x30, 0x12, 0x79, 0x78, 0xbd, 0xbb, 0x2b,
+	0x5e, 0xa2, 0xfe, 0x26, 0xf0, 0x4e, 0x2d, 0x23, 0x53, 0xd9, 0xf3, 0xc5, 0x8a, 0x49, 0x22, 0xf5,
+	0x64, 0x39, 0x1f, 0x74, 0xb2, 0x08, 0x0b, 0x3d, 0x59, 0xee, 0xf9, 0xfa, 0x28, 0xce, 0x3b, 0xf1,
+	0x36, 0xaa, 0x55, 0x9d, 0x24, 0x39, 0x56, 0x82, 0xf9, 0xef, 0x47, 0x01, 0xe1, 0x66, 0x3e, 0x78,
+	0xa4, 0xcd, 0x7c, 0xe8, 0x25, 0x9a, 0xf9, 0x85, 0x4e, 0xc3, 0x80, 0xa8, 0x8b, 0x70, 0x44, 0xe7,
+	0x4f, 0x44, 0x76, 0xfe, 0xc0, 0x3c, 0x00, 0x8e, 0x6a, 0x1e, 0x90, 0x7c, 0xc9, 0x79, 0xc0, 0xf0,
+	0x89, 0x9c, 0x07, 0x8c, 0x1c, 0xd5, 0x3c, 0x20, 0x75, 0x42, 0xe7, 0x01, 0xa3, 0x47, 0x3e, 0x0f,
+	0x70, 0x6e, 0x7e, 0x51, 0x8c, 0xd2, 0xe9, 0xe6, 0x57, 0x7a, 0x98, 0x84, 0x81, 0x4d, 0xaa, 0x89,
+	0x1f, 0xc2, 0x70, 0xdb, 0x94, 0x35, 0x1b, 0x64, 0x80, 0xc0, 0x38, 0x53, 0x9a, 0x3b, 0x00, 0xe0,
+	0x69, 0xd4, 0x60, 0x2c, 0x3c, 0xeb, 0x3c, 0x1f, 0x21, 0x1d, 0x42, 0x49, 0x6f, 0xf4, 0x82, 0xf2,
+	0x2b, 0x0a, 0x0f, 0x31, 0xa2, 0x14, 0x85, 0x50, 0x91, 0x8a, 0x3a, 0xce, 0x19, 0xc4, 0x7b, 0x02,
+	0x48, 0x5d, 0x86, 0x0c, 0x0b, 0x51, 0x56, 0x77, 0x84, 0x4b, 0x97, 0x0f, 0x05, 0xf7, 0x8c, 0xf8,
+	0x52, 0x80, 0xe9, 0xee, 0xdf, 0xa9, 0x17, 0x23, 0x0e, 0xee, 0x2a, 0x21, 0xbd, 0x75, 0x58, 0x09,
+	0xcf, 0x1a, 0x13, 0xc6, 0x23, 0x3f, 0x29, 0xa3, 0xb2, 0x24, 0x0a, 0x28, 0x15, 0x7b, 0x04, 0x7a,
+	0x1a, 0x55, 0x38, 0x1d, 0xfa, 0x5c, 0x99, 0x8d, 0x38, 0x24, 0x08, 0x92, 0x2e, 0xf4, 0x00, 0xf2,
+	0x6b, 0x09, 0xdd, 0xfe, 0x67, 0x23, 0x93, 0xa5, 0x1d, 0x14, 0xa9, 0xa5, 0xd3, 0xfd, 0x5c, 0xfc,
+	0x4a, 0x80, 0xec, 0x41, 0x97, 0xf3, 0x52, 0xc7, 0x00, 0x75, 0x94, 0x91, 0x96, 0x0e, 0x2f, 0xe3,
+	0xd9, 0xf4, 0xb9, 0x00, 0x53, 0xdd, 0x6e, 0x9f, 0x85, 0xa8, 0xb4, 0xed, 0x8c, 0x97, 0xae, 0x1c,
+	0x0e, 0xef, 0xd9, 0xf1, 0xbd, 0x00, 0xb9, 0x1e, 0xee, 0x83, 0x97, 0x23, 0xe3, 0x7d, 0x90, 0x98,
+	0xf4, 0xce, 0xbf, 0x12, 0xf3, 0xa7, 0x7d, 0xe4, 0xfd, 0x6d, 0x2e, 0xb2, 0xa6, 0xc3, 0xc0, 0xc8,
+	0xb4, 0xef, 0xc6, 0xdf, 0xd2, 0xa9, 0xcf, 0x58, 0xef, 0x59, 0x59, 0xdb, 0x7f, 0x96, 0x11, 0x1e,
+	0x3d, 0xcb, 0x08, 0x4f, 0x9f, 0x65, 0x84, 0xfb, 0xcf, 0x33, 0x7d, 0x8f, 0x9e, 0x67, 0xfa, 0xfe,
+	0x7c, 0x9e, 0xe9, 0xfb, 0x68, 0xde, 0xd7, 0xc4, 0x9c, 0xb3, 0x17, 0x6a, 0xca, 0x0e, 0x2d, 0xb6,
+	0xff, 0xbd, 0x8a, 0x37, 0xb3, 0x9d, 0x41, 0xde, 0x73, 0xde, 0xfc, 0x27, 0x00, 0x00, 0xff, 0xff,
+	0xa6, 0xe8, 0xfb, 0xd3, 0x87, 0x1c, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -1760,7 +1760,8 @@ type MsgClient interface {
 	CreateOrUpdatePermissionSession(ctx context.Context, in *MsgCreateOrUpdatePermissionSession, opts ...grpc.CallOption) (*MsgCreateOrUpdatePermissionSessionResponse, error)
 	SlashPermissionTrustDeposit(ctx context.Context, in *MsgSlashPermissionTrustDeposit, opts ...grpc.CallOption) (*MsgSlashPermissionTrustDepositResponse, error)
 	RepayPermissionSlashedTrustDeposit(ctx context.Context, in *MsgRepayPermissionSlashedTrustDeposit, opts ...grpc.CallOption) (*MsgRepayPermissionSlashedTrustDepositResponse, error)
-	CreatePermission(ctx context.Context, in *MsgCreatePermission, opts ...grpc.CallOption) (*MsgCreatePermissionResponse, error)
+	// [MOD-PERM-MSG-14] Self Create Permission (OPEN mode)
+	SelfCreatePermission(ctx context.Context, in *MsgSelfCreatePermission, opts ...grpc.CallOption) (*MsgSelfCreatePermissionResponse, error)
 }
 
 type msgClient struct {
@@ -1870,9 +1871,9 @@ func (c *msgClient) RepayPermissionSlashedTrustDeposit(ctx context.Context, in *
 	return out, nil
 }
 
-func (c *msgClient) CreatePermission(ctx context.Context, in *MsgCreatePermission, opts ...grpc.CallOption) (*MsgCreatePermissionResponse, error) {
-	out := new(MsgCreatePermissionResponse)
-	err := c.cc.Invoke(ctx, "/verana.perm.v1.Msg/CreatePermission", in, out, opts...)
+func (c *msgClient) SelfCreatePermission(ctx context.Context, in *MsgSelfCreatePermission, opts ...grpc.CallOption) (*MsgSelfCreatePermissionResponse, error) {
+	out := new(MsgSelfCreatePermissionResponse)
+	err := c.cc.Invoke(ctx, "/verana.perm.v1.Msg/SelfCreatePermission", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1896,7 +1897,8 @@ type MsgServer interface {
 	CreateOrUpdatePermissionSession(context.Context, *MsgCreateOrUpdatePermissionSession) (*MsgCreateOrUpdatePermissionSessionResponse, error)
 	SlashPermissionTrustDeposit(context.Context, *MsgSlashPermissionTrustDeposit) (*MsgSlashPermissionTrustDepositResponse, error)
 	RepayPermissionSlashedTrustDeposit(context.Context, *MsgRepayPermissionSlashedTrustDeposit) (*MsgRepayPermissionSlashedTrustDepositResponse, error)
-	CreatePermission(context.Context, *MsgCreatePermission) (*MsgCreatePermissionResponse, error)
+	// [MOD-PERM-MSG-14] Self Create Permission (OPEN mode)
+	SelfCreatePermission(context.Context, *MsgSelfCreatePermission) (*MsgSelfCreatePermissionResponse, error)
 }
 
 // UnimplementedMsgServer can be embedded to have forward compatible implementations.
@@ -1936,8 +1938,8 @@ func (*UnimplementedMsgServer) SlashPermissionTrustDeposit(ctx context.Context, 
 func (*UnimplementedMsgServer) RepayPermissionSlashedTrustDeposit(ctx context.Context, req *MsgRepayPermissionSlashedTrustDeposit) (*MsgRepayPermissionSlashedTrustDepositResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RepayPermissionSlashedTrustDeposit not implemented")
 }
-func (*UnimplementedMsgServer) CreatePermission(ctx context.Context, req *MsgCreatePermission) (*MsgCreatePermissionResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreatePermission not implemented")
+func (*UnimplementedMsgServer) SelfCreatePermission(ctx context.Context, req *MsgSelfCreatePermission) (*MsgSelfCreatePermissionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SelfCreatePermission not implemented")
 }
 
 func RegisterMsgServer(s grpc1.Server, srv MsgServer) {
@@ -2142,20 +2144,20 @@ func _Msg_RepayPermissionSlashedTrustDeposit_Handler(srv interface{}, ctx contex
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Msg_CreatePermission_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(MsgCreatePermission)
+func _Msg_SelfCreatePermission_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgSelfCreatePermission)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MsgServer).CreatePermission(ctx, in)
+		return srv.(MsgServer).SelfCreatePermission(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/verana.perm.v1.Msg/CreatePermission",
+		FullMethod: "/verana.perm.v1.Msg/SelfCreatePermission",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MsgServer).CreatePermission(ctx, req.(*MsgCreatePermission))
+		return srv.(MsgServer).SelfCreatePermission(ctx, req.(*MsgSelfCreatePermission))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -2210,8 +2212,8 @@ var _Msg_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Msg_RepayPermissionSlashedTrustDeposit_Handler,
 		},
 		{
-			MethodName: "CreatePermission",
-			Handler:    _Msg_CreatePermission_Handler,
+			MethodName: "SelfCreatePermission",
+			Handler:    _Msg_SelfCreatePermission_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -2426,10 +2428,10 @@ func (m *MsgStartPermissionVP) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x12
 	}
-	if len(m.Authority) > 0 {
-		i -= len(m.Authority)
-		copy(dAtA[i:], m.Authority)
-		i = encodeVarintTx(dAtA, i, uint64(len(m.Authority)))
+	if len(m.Corporation) > 0 {
+		i -= len(m.Corporation)
+		copy(dAtA[i:], m.Corporation)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Corporation)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -2496,10 +2498,10 @@ func (m *MsgRenewPermissionVP) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x12
 	}
-	if len(m.Authority) > 0 {
-		i -= len(m.Authority)
-		copy(dAtA[i:], m.Authority)
-		i = encodeVarintTx(dAtA, i, uint64(len(m.Authority)))
+	if len(m.Corporation) > 0 {
+		i -= len(m.Corporation)
+		copy(dAtA[i:], m.Corporation)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Corporation)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -2559,10 +2561,10 @@ func (m *MsgSetPermissionVPToValidated) MarshalToSizedBuffer(dAtA []byte) (int, 
 		i--
 		dAtA[i] = 0x48
 	}
-	if len(m.VpSummaryDigestSri) > 0 {
-		i -= len(m.VpSummaryDigestSri)
-		copy(dAtA[i:], m.VpSummaryDigestSri)
-		i = encodeVarintTx(dAtA, i, uint64(len(m.VpSummaryDigestSri)))
+	if len(m.VpSummaryDigest) > 0 {
+		i -= len(m.VpSummaryDigest)
+		copy(dAtA[i:], m.VpSummaryDigest)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.VpSummaryDigest)))
 		i--
 		dAtA[i] = 0x42
 	}
@@ -2603,10 +2605,10 @@ func (m *MsgSetPermissionVPToValidated) MarshalToSizedBuffer(dAtA []byte) (int, 
 		i--
 		dAtA[i] = 0x12
 	}
-	if len(m.Authority) > 0 {
-		i -= len(m.Authority)
-		copy(dAtA[i:], m.Authority)
-		i = encodeVarintTx(dAtA, i, uint64(len(m.Authority)))
+	if len(m.Corporation) > 0 {
+		i -= len(m.Corporation)
+		copy(dAtA[i:], m.Corporation)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Corporation)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -2668,10 +2670,10 @@ func (m *MsgCancelPermissionVPLastRequest) MarshalToSizedBuffer(dAtA []byte) (in
 		i--
 		dAtA[i] = 0x12
 	}
-	if len(m.Authority) > 0 {
-		i -= len(m.Authority)
-		copy(dAtA[i:], m.Authority)
-		i = encodeVarintTx(dAtA, i, uint64(len(m.Authority)))
+	if len(m.Corporation) > 0 {
+		i -= len(m.Corporation)
+		copy(dAtA[i:], m.Corporation)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Corporation)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -2775,10 +2777,10 @@ func (m *MsgCreateRootPermission) MarshalToSizedBuffer(dAtA []byte) (int, error)
 		i--
 		dAtA[i] = 0x12
 	}
-	if len(m.Authority) > 0 {
-		i -= len(m.Authority)
-		copy(dAtA[i:], m.Authority)
-		i = encodeVarintTx(dAtA, i, uint64(len(m.Authority)))
+	if len(m.Corporation) > 0 {
+		i -= len(m.Corporation)
+		copy(dAtA[i:], m.Corporation)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Corporation)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -2855,10 +2857,10 @@ func (m *MsgAdjustPermission) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x12
 	}
-	if len(m.Authority) > 0 {
-		i -= len(m.Authority)
-		copy(dAtA[i:], m.Authority)
-		i = encodeVarintTx(dAtA, i, uint64(len(m.Authority)))
+	if len(m.Corporation) > 0 {
+		i -= len(m.Corporation)
+		copy(dAtA[i:], m.Corporation)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Corporation)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -2920,10 +2922,10 @@ func (m *MsgRevokePermission) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x12
 	}
-	if len(m.Authority) > 0 {
-		i -= len(m.Authority)
-		copy(dAtA[i:], m.Authority)
-		i = encodeVarintTx(dAtA, i, uint64(len(m.Authority)))
+	if len(m.Corporation) > 0 {
+		i -= len(m.Corporation)
+		copy(dAtA[i:], m.Corporation)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Corporation)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -3014,10 +3016,10 @@ func (m *MsgCreateOrUpdatePermissionSession) MarshalToSizedBuffer(dAtA []byte) (
 		i--
 		dAtA[i] = 0x12
 	}
-	if len(m.Authority) > 0 {
-		i -= len(m.Authority)
-		copy(dAtA[i:], m.Authority)
-		i = encodeVarintTx(dAtA, i, uint64(len(m.Authority)))
+	if len(m.Corporation) > 0 {
+		i -= len(m.Corporation)
+		copy(dAtA[i:], m.Corporation)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Corporation)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -3091,10 +3093,10 @@ func (m *MsgSlashPermissionTrustDeposit) MarshalToSizedBuffer(dAtA []byte) (int,
 		i--
 		dAtA[i] = 0x12
 	}
-	if len(m.Authority) > 0 {
-		i -= len(m.Authority)
-		copy(dAtA[i:], m.Authority)
-		i = encodeVarintTx(dAtA, i, uint64(len(m.Authority)))
+	if len(m.Corporation) > 0 {
+		i -= len(m.Corporation)
+		copy(dAtA[i:], m.Corporation)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Corporation)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -3156,10 +3158,10 @@ func (m *MsgRepayPermissionSlashedTrustDeposit) MarshalToSizedBuffer(dAtA []byte
 		i--
 		dAtA[i] = 0x12
 	}
-	if len(m.Authority) > 0 {
-		i -= len(m.Authority)
-		copy(dAtA[i:], m.Authority)
-		i = encodeVarintTx(dAtA, i, uint64(len(m.Authority)))
+	if len(m.Corporation) > 0 {
+		i -= len(m.Corporation)
+		copy(dAtA[i:], m.Corporation)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Corporation)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -3189,7 +3191,7 @@ func (m *MsgRepayPermissionSlashedTrustDepositResponse) MarshalToSizedBuffer(dAt
 	return len(dAtA) - i, nil
 }
 
-func (m *MsgCreatePermission) Marshal() (dAtA []byte, err error) {
+func (m *MsgSelfCreatePermission) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -3199,12 +3201,12 @@ func (m *MsgCreatePermission) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *MsgCreatePermission) MarshalTo(dAtA []byte) (int, error) {
+func (m *MsgSelfCreatePermission) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *MsgCreatePermission) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *MsgSelfCreatePermission) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -3328,17 +3330,17 @@ func (m *MsgCreatePermission) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x12
 	}
-	if len(m.Authority) > 0 {
-		i -= len(m.Authority)
-		copy(dAtA[i:], m.Authority)
-		i = encodeVarintTx(dAtA, i, uint64(len(m.Authority)))
+	if len(m.Corporation) > 0 {
+		i -= len(m.Corporation)
+		copy(dAtA[i:], m.Corporation)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Corporation)))
 		i--
 		dAtA[i] = 0xa
 	}
 	return len(dAtA) - i, nil
 }
 
-func (m *MsgCreatePermissionResponse) Marshal() (dAtA []byte, err error) {
+func (m *MsgSelfCreatePermissionResponse) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -3348,12 +3350,12 @@ func (m *MsgCreatePermissionResponse) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *MsgCreatePermissionResponse) MarshalTo(dAtA []byte) (int, error) {
+func (m *MsgSelfCreatePermissionResponse) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *MsgCreatePermissionResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *MsgSelfCreatePermissionResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -3407,7 +3409,7 @@ func (m *MsgStartPermissionVP) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.Authority)
+	l = len(m.Corporation)
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
@@ -3484,7 +3486,7 @@ func (m *MsgRenewPermissionVP) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.Authority)
+	l = len(m.Corporation)
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
@@ -3513,7 +3515,7 @@ func (m *MsgSetPermissionVPToValidated) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.Authority)
+	l = len(m.Corporation)
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
@@ -3537,7 +3539,7 @@ func (m *MsgSetPermissionVPToValidated) Size() (n int) {
 	if m.VerificationFees != 0 {
 		n += 1 + sovTx(uint64(m.VerificationFees))
 	}
-	l = len(m.VpSummaryDigestSri)
+	l = len(m.VpSummaryDigest)
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
@@ -3565,7 +3567,7 @@ func (m *MsgCancelPermissionVPLastRequest) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.Authority)
+	l = len(m.Corporation)
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
@@ -3594,7 +3596,7 @@ func (m *MsgCreateRootPermission) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.Authority)
+	l = len(m.Corporation)
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
@@ -3647,7 +3649,7 @@ func (m *MsgAdjustPermission) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.Authority)
+	l = len(m.Corporation)
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
@@ -3680,7 +3682,7 @@ func (m *MsgRevokePermission) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.Authority)
+	l = len(m.Corporation)
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
@@ -3709,7 +3711,7 @@ func (m *MsgCreateOrUpdatePermissionSession) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.Authority)
+	l = len(m.Corporation)
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
@@ -3759,7 +3761,7 @@ func (m *MsgSlashPermissionTrustDeposit) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.Authority)
+	l = len(m.Corporation)
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
@@ -3791,7 +3793,7 @@ func (m *MsgRepayPermissionSlashedTrustDeposit) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.Authority)
+	l = len(m.Corporation)
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
@@ -3814,13 +3816,13 @@ func (m *MsgRepayPermissionSlashedTrustDepositResponse) Size() (n int) {
 	return n
 }
 
-func (m *MsgCreatePermission) Size() (n int) {
+func (m *MsgSelfCreatePermission) Size() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
-	l = len(m.Authority)
+	l = len(m.Corporation)
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
@@ -3881,7 +3883,7 @@ func (m *MsgCreatePermission) Size() (n int) {
 	return n
 }
 
-func (m *MsgCreatePermissionResponse) Size() (n int) {
+func (m *MsgSelfCreatePermissionResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -4095,7 +4097,7 @@ func (m *MsgStartPermissionVP) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Authority", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Corporation", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -4123,7 +4125,7 @@ func (m *MsgStartPermissionVP) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Authority = string(dAtA[iNdEx:postIndex])
+			m.Corporation = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
@@ -4632,7 +4634,7 @@ func (m *MsgRenewPermissionVP) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Authority", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Corporation", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -4660,7 +4662,7 @@ func (m *MsgRenewPermissionVP) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Authority = string(dAtA[iNdEx:postIndex])
+			m.Corporation = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
@@ -4815,7 +4817,7 @@ func (m *MsgSetPermissionVPToValidated) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Authority", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Corporation", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -4843,7 +4845,7 @@ func (m *MsgSetPermissionVPToValidated) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Authority = string(dAtA[iNdEx:postIndex])
+			m.Corporation = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
@@ -4991,7 +4993,7 @@ func (m *MsgSetPermissionVPToValidated) Unmarshal(dAtA []byte) error {
 			}
 		case 8:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field VpSummaryDigestSri", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field VpSummaryDigest", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -5019,7 +5021,7 @@ func (m *MsgSetPermissionVPToValidated) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.VpSummaryDigestSri = string(dAtA[iNdEx:postIndex])
+			m.VpSummaryDigest = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 9:
 			if wireType != 0 {
@@ -5161,7 +5163,7 @@ func (m *MsgCancelPermissionVPLastRequest) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Authority", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Corporation", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -5189,7 +5191,7 @@ func (m *MsgCancelPermissionVPLastRequest) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Authority = string(dAtA[iNdEx:postIndex])
+			m.Corporation = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
@@ -5344,7 +5346,7 @@ func (m *MsgCreateRootPermission) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Authority", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Corporation", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -5372,7 +5374,7 @@ func (m *MsgCreateRootPermission) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Authority = string(dAtA[iNdEx:postIndex])
+			m.Corporation = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
@@ -5707,7 +5709,7 @@ func (m *MsgAdjustPermission) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Authority", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Corporation", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -5735,7 +5737,7 @@ func (m *MsgAdjustPermission) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Authority = string(dAtA[iNdEx:postIndex])
+			m.Corporation = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
@@ -5926,7 +5928,7 @@ func (m *MsgRevokePermission) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Authority", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Corporation", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -5954,7 +5956,7 @@ func (m *MsgRevokePermission) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Authority = string(dAtA[iNdEx:postIndex])
+			m.Corporation = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
@@ -6109,7 +6111,7 @@ func (m *MsgCreateOrUpdatePermissionSession) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Authority", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Corporation", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -6137,7 +6139,7 @@ func (m *MsgCreateOrUpdatePermissionSession) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Authority = string(dAtA[iNdEx:postIndex])
+			m.Corporation = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
@@ -6445,7 +6447,7 @@ func (m *MsgSlashPermissionTrustDeposit) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Authority", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Corporation", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -6473,7 +6475,7 @@ func (m *MsgSlashPermissionTrustDeposit) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Authority = string(dAtA[iNdEx:postIndex])
+			m.Corporation = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
@@ -6647,7 +6649,7 @@ func (m *MsgRepayPermissionSlashedTrustDeposit) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Authority", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Corporation", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -6675,7 +6677,7 @@ func (m *MsgRepayPermissionSlashedTrustDeposit) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Authority = string(dAtA[iNdEx:postIndex])
+			m.Corporation = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
@@ -6799,7 +6801,7 @@ func (m *MsgRepayPermissionSlashedTrustDepositResponse) Unmarshal(dAtA []byte) e
 	}
 	return nil
 }
-func (m *MsgCreatePermission) Unmarshal(dAtA []byte) error {
+func (m *MsgSelfCreatePermission) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -6822,15 +6824,15 @@ func (m *MsgCreatePermission) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: MsgCreatePermission: wiretype end group for non-group")
+			return fmt.Errorf("proto: MsgSelfCreatePermission: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: MsgCreatePermission: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: MsgSelfCreatePermission: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Authority", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Corporation", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -6858,7 +6860,7 @@ func (m *MsgCreatePermission) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Authority = string(dAtA[iNdEx:postIndex])
+			m.Corporation = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
@@ -7269,7 +7271,7 @@ func (m *MsgCreatePermission) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *MsgCreatePermissionResponse) Unmarshal(dAtA []byte) error {
+func (m *MsgSelfCreatePermissionResponse) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -7292,10 +7294,10 @@ func (m *MsgCreatePermissionResponse) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: MsgCreatePermissionResponse: wiretype end group for non-group")
+			return fmt.Errorf("proto: MsgSelfCreatePermissionResponse: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: MsgCreatePermissionResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: MsgSelfCreatePermissionResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:

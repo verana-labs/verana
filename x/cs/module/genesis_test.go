@@ -71,8 +71,9 @@ func TestGenesisImportExport(t *testing.T) {
 		IssuerValidationValidityPeriod:          180,
 		VerifierValidationValidityPeriod:        180,
 		HolderValidationValidityPeriod:          180,
-		IssuerPermManagementMode:                types.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
-		VerifierPermManagementMode:              types.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
+		IssuerOnboardingMode:                types.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS,
+		VerifierOnboardingMode:              types.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS,
+		HolderOnboardingMode:                types.HolderOnboardingMode_HOLDER_ONBOARDING_MODE_UNSPECIFIED,
 		PricingAssetType:                        types.PricingAssetType_TU,
 		PricingAsset:                            "tu",
 		DigestAlgorithm:                         "sha256",
@@ -89,8 +90,9 @@ func TestGenesisImportExport(t *testing.T) {
 		IssuerValidationValidityPeriod:          90,
 		VerifierValidationValidityPeriod:        90,
 		HolderValidationValidityPeriod:          90,
-		IssuerPermManagementMode:                types.CredentialSchemaPermManagementMode_OPEN,
-		VerifierPermManagementMode:              types.CredentialSchemaPermManagementMode_ECOSYSTEM,
+		IssuerOnboardingMode:                types.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_OPEN,
+		VerifierOnboardingMode:              types.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS,
+		HolderOnboardingMode:                types.HolderOnboardingMode_HOLDER_ONBOARDING_MODE_UNSPECIFIED,
 		PricingAssetType:                        types.PricingAssetType_COIN,
 		PricingAsset:                            "uvna",
 		DigestAlgorithm:                         "sha384",
@@ -113,13 +115,13 @@ func TestGenesisImportExport(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, schemaA.Id, schemaFromState1.Id)
 	require.Equal(t, schemaA.TrId, schemaFromState1.TrId)
-	require.Equal(t, schemaA.IssuerPermManagementMode, schemaFromState1.IssuerPermManagementMode)
+	require.Equal(t, schemaA.IssuerOnboardingMode, schemaFromState1.IssuerOnboardingMode)
 
 	schemaFromState2, err := k.CredentialSchema.Get(ctx, 2)
 	require.NoError(t, err)
 	require.Equal(t, schemaB.Id, schemaFromState2.Id)
 	require.Equal(t, schemaB.TrId, schemaFromState2.TrId)
-	require.Equal(t, schemaB.IssuerPermManagementMode, schemaFromState2.IssuerPermManagementMode)
+	require.Equal(t, schemaB.IssuerOnboardingMode, schemaFromState2.IssuerOnboardingMode)
 
 	// Verify counter was set correctly (to highest ID)
 	counterId, err := k.Counter.Get(ctx, "cs")
@@ -205,8 +207,9 @@ func TestGenesisValidation(t *testing.T) {
 		IssuerValidationValidityPeriod:          180,
 		VerifierValidationValidityPeriod:        180,
 		HolderValidationValidityPeriod:          180,
-		IssuerPermManagementMode:                types.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
-		VerifierPermManagementMode:              types.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
+		IssuerOnboardingMode:                types.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS,
+		VerifierOnboardingMode:              types.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS,
+		HolderOnboardingMode:                types.HolderOnboardingMode_HOLDER_ONBOARDING_MODE_UNSPECIFIED,
 		PricingAssetType:                        types.PricingAssetType_TU,
 		PricingAsset:                            "tu",
 		DigestAlgorithm:                         "sha256",
@@ -243,8 +246,8 @@ func TestGenesisValidation(t *testing.T) {
 						Created:                    now.Add(-10 * time.Hour),
 						Modified:                   now.Add(-5 * time.Hour),
 						JsonSchema:                 validJsonSchema,
-						IssuerPermManagementMode:   types.CredentialSchemaPermManagementMode_OPEN,
-						VerifierPermManagementMode: types.CredentialSchemaPermManagementMode_ECOSYSTEM,
+						IssuerOnboardingMode:   types.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_OPEN,
+						VerifierOnboardingMode: types.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS,
 						PricingAssetType:           types.PricingAssetType_TU,
 						PricingAsset:               "tu",
 						DigestAlgorithm:            "sha256",
@@ -265,8 +268,8 @@ func TestGenesisValidation(t *testing.T) {
 						Created:                    now.Add(-10 * time.Hour),
 						Modified:                   now.Add(-5 * time.Hour),
 						JsonSchema:                 validJsonSchema,
-						IssuerPermManagementMode:   types.CredentialSchemaPermManagementMode_OPEN,
-						VerifierPermManagementMode: types.CredentialSchemaPermManagementMode_ECOSYSTEM,
+						IssuerOnboardingMode:   types.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_OPEN,
+						VerifierOnboardingMode: types.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS,
 						PricingAssetType:           types.PricingAssetType_TU,
 						PricingAsset:               "tu",
 						DigestAlgorithm:            "sha256",
@@ -287,8 +290,8 @@ func TestGenesisValidation(t *testing.T) {
 						Created:                    now.Add(-10 * time.Hour),
 						Modified:                   now.Add(-5 * time.Hour),
 						JsonSchema:                 validJsonSchema,
-						IssuerPermManagementMode:   types.CredentialSchemaPermManagementMode_OPEN,
-						VerifierPermManagementMode: types.CredentialSchemaPermManagementMode_ECOSYSTEM,
+						IssuerOnboardingMode:   types.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_OPEN,
+						VerifierOnboardingMode: types.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS,
 						PricingAssetType:           types.PricingAssetType_TU,
 						PricingAsset:               "tu",
 						DigestAlgorithm:            "sha256",
@@ -309,8 +312,8 @@ func TestGenesisValidation(t *testing.T) {
 						Created:                    now.Add(-10 * time.Hour),
 						Modified:                   now.Add(-5 * time.Hour),
 						JsonSchema:                 "", // Empty schema
-						IssuerPermManagementMode:   types.CredentialSchemaPermManagementMode_OPEN,
-						VerifierPermManagementMode: types.CredentialSchemaPermManagementMode_ECOSYSTEM,
+						IssuerOnboardingMode:   types.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_OPEN,
+						VerifierOnboardingMode: types.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS,
 						PricingAssetType:           types.PricingAssetType_TU,
 						PricingAsset:               "tu",
 						DigestAlgorithm:            "sha256",
@@ -331,8 +334,8 @@ func TestGenesisValidation(t *testing.T) {
 						Created:                    now.Add(-10 * time.Hour),
 						Modified:                   now.Add(-5 * time.Hour),
 						JsonSchema:                 validJsonSchema,
-						IssuerPermManagementMode:   types.CredentialSchemaPermManagementMode_MODE_UNSPECIFIED, // Invalid mode
-						VerifierPermManagementMode: types.CredentialSchemaPermManagementMode_ECOSYSTEM,
+						IssuerOnboardingMode:   types.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_UNSPECIFIED, // Invalid mode
+						VerifierOnboardingMode: types.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS,
 						PricingAssetType:           types.PricingAssetType_TU,
 						PricingAsset:               "tu",
 						DigestAlgorithm:            "sha256",
@@ -340,7 +343,7 @@ func TestGenesisValidation(t *testing.T) {
 				},
 			},
 			valid:    false,
-			errorMsg: "invalid issuer perm management mode",
+			errorMsg: "invalid issuer onboarding mode",
 		},
 		{
 			name: "zero creation time",
@@ -353,8 +356,8 @@ func TestGenesisValidation(t *testing.T) {
 						Created:                    time.Time{}, // Zero time
 						Modified:                   now.Add(-5 * time.Hour),
 						JsonSchema:                 validJsonSchema,
-						IssuerPermManagementMode:   types.CredentialSchemaPermManagementMode_OPEN,
-						VerifierPermManagementMode: types.CredentialSchemaPermManagementMode_ECOSYSTEM,
+						IssuerOnboardingMode:   types.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_OPEN,
+						VerifierOnboardingMode: types.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS,
 						PricingAssetType:           types.PricingAssetType_TU,
 						PricingAsset:               "tu",
 						DigestAlgorithm:            "sha256",
@@ -375,8 +378,8 @@ func TestGenesisValidation(t *testing.T) {
 						Created:                    now, // More recent than modified
 						Modified:                   now.Add(-5 * time.Hour),
 						JsonSchema:                 validJsonSchema,
-						IssuerPermManagementMode:   types.CredentialSchemaPermManagementMode_OPEN,
-						VerifierPermManagementMode: types.CredentialSchemaPermManagementMode_ECOSYSTEM,
+						IssuerOnboardingMode:   types.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_OPEN,
+						VerifierOnboardingMode: types.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS,
 						PricingAssetType:           types.PricingAssetType_TU,
 						PricingAsset:               "tu",
 						DigestAlgorithm:            "sha256",
@@ -402,8 +405,8 @@ func TestGenesisValidation(t *testing.T) {
 						IssuerValidationValidityPeriod:          180,
 						VerifierValidationValidityPeriod:        180,
 						HolderValidationValidityPeriod:          180,
-						IssuerPermManagementMode:                types.CredentialSchemaPermManagementMode_OPEN,
-						VerifierPermManagementMode:              types.CredentialSchemaPermManagementMode_ECOSYSTEM,
+						IssuerOnboardingMode:                types.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_OPEN,
+						VerifierOnboardingMode:              types.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS,
 						PricingAssetType:                        types.PricingAssetType_TU,
 						PricingAsset:                            "tu",
 						DigestAlgorithm:                         "sha256",

@@ -29,7 +29,7 @@ func (ms msgServer) CreateTrustRegistry(goCtx context.Context, msg *types.MsgCre
 	if ms.delegationKeeper != nil {
 		if err := ms.delegationKeeper.CheckOperatorAuthorization(
 			ctx,
-			msg.Authority,
+			msg.Corporation,
 			msg.Operator,
 			"/verana.tr.v1.MsgCreateTrustRegistry",
 			now,
@@ -39,13 +39,16 @@ func (ms msgServer) CreateTrustRegistry(goCtx context.Context, msg *types.MsgCre
 	}
 
 	// [MOD-TR-MSG-1-3] Create New Trust Registry execution
+	// Spec v4: MsgCreateTrustRegistry no longer bundles an initial governance
+	// framework document — callers must invoke MsgAddGovernanceFrameworkDocument
+	// separately if they need one.
 
-	tr, gfv, gfd, err := ms.createTrustRegistryEntries(ctx, msg, now)
+	tr, err := ms.createTrustRegistryEntries(ctx, msg, now)
 	if err != nil {
 		return nil, err
 	}
 
-	if err := ms.persistEntries(ctx, tr, gfv, gfd); err != nil {
+	if err := ms.persistEntries(ctx, tr); err != nil {
 		return nil, err
 	}
 
@@ -54,23 +57,10 @@ func (ms msgServer) CreateTrustRegistry(goCtx context.Context, msg *types.MsgCre
 			types.EventTypeCreateTrustRegistry,
 			sdk.NewAttribute(types.AttributeKeyTrustRegistryID, strconv.FormatUint(tr.Id, 10)),
 			sdk.NewAttribute(types.AttributeKeyDID, tr.Did),
-			sdk.NewAttribute(types.AttributeKeyController, tr.Controller),
+			sdk.NewAttribute(types.AttributeKeyController, tr.Corporation),
 			sdk.NewAttribute(types.AttributeKeyAka, tr.Aka),
 			sdk.NewAttribute(types.AttributeKeyLanguage, tr.Language),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
-		),
-		sdk.NewEvent(
-			types.EventTypeCreateGovernanceFrameworkVersion,
-			sdk.NewAttribute(types.AttributeKeyGFVersionID, strconv.FormatUint(gfv.Id, 10)),
-			sdk.NewAttribute(types.AttributeKeyTrustRegistryID, strconv.FormatUint(gfv.TrId, 10)),
-			sdk.NewAttribute(types.AttributeKeyVersion, strconv.FormatUint(uint64(gfv.Version), 10)),
-		),
-		sdk.NewEvent(
-			types.EventTypeCreateGovernanceFrameworkDocument,
-			sdk.NewAttribute(types.AttributeKeyGFDocumentID, strconv.FormatUint(gfd.Id, 10)),
-			sdk.NewAttribute(types.AttributeKeyGFVersionID, strconv.FormatUint(gfd.GfvId, 10)),
-			sdk.NewAttribute(types.AttributeKeyDocURL, gfd.Url),
-			sdk.NewAttribute(types.AttributeKeyDigestSri, gfd.DigestSri),
 		),
 	})
 
@@ -85,7 +75,7 @@ func (ms msgServer) AddGovernanceFrameworkDocument(goCtx context.Context, msg *t
 	if ms.delegationKeeper != nil {
 		if err := ms.delegationKeeper.CheckOperatorAuthorization(
 			ctx,
-			msg.Authority,
+			msg.Corporation,
 			msg.Operator,
 			"/verana.tr.v1.MsgAddGovernanceFrameworkDocument",
 			now,
@@ -105,12 +95,12 @@ func (ms msgServer) AddGovernanceFrameworkDocument(goCtx context.Context, msg *t
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeAddGovernanceFrameworkDocument,
-			sdk.NewAttribute(types.AttributeKeyGFVersionID, strconv.FormatUint(msg.Id, 10)),
+			sdk.NewAttribute(types.AttributeKeyGFVersionID, strconv.FormatUint(msg.TrId, 10)),
 			sdk.NewAttribute(types.AttributeKeyVersion, strconv.FormatInt(int64(msg.Version), 10)),
-			sdk.NewAttribute(types.AttributeKeyLanguage, msg.DocLanguage),
-			sdk.NewAttribute(types.AttributeKeyDocURL, msg.DocUrl),
-			sdk.NewAttribute(types.AttributeKeyDigestSri, msg.DocDigestSri),
-			sdk.NewAttribute(types.AttributeKeyController, msg.Authority),
+			sdk.NewAttribute(types.AttributeKeyLanguage, msg.Language),
+			sdk.NewAttribute(types.AttributeKeyDocURL, msg.Url),
+			sdk.NewAttribute(types.AttributeKeyDigestSri, msg.DigestSri),
+			sdk.NewAttribute(types.AttributeKeyController, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
 		),
 	})
@@ -126,7 +116,7 @@ func (ms msgServer) IncreaseActiveGovernanceFrameworkVersion(goCtx context.Conte
 	if ms.delegationKeeper != nil {
 		if err := ms.delegationKeeper.CheckOperatorAuthorization(
 			ctx,
-			msg.Authority,
+			msg.Corporation,
 			msg.Operator,
 			"/verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion",
 			now,
@@ -148,8 +138,8 @@ func (ms msgServer) IncreaseActiveGovernanceFrameworkVersion(goCtx context.Conte
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeIncreaseActiveGFVersion,
-			sdk.NewAttribute(types.AttributeKeyTrustRegistryID, strconv.FormatUint(msg.Id, 10)),
-			sdk.NewAttribute(types.AttributeKeyController, msg.Authority),
+			sdk.NewAttribute(types.AttributeKeyTrustRegistryID, strconv.FormatUint(msg.TrId, 10)),
+			sdk.NewAttribute(types.AttributeKeyController, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
 		),
 	})
@@ -165,7 +155,7 @@ func (ms msgServer) UpdateTrustRegistry(goCtx context.Context, msg *types.MsgUpd
 	if ms.delegationKeeper != nil {
 		if err := ms.delegationKeeper.CheckOperatorAuthorization(
 			ctx,
-			msg.Authority,
+			msg.Corporation,
 			msg.Operator,
 			"/verana.tr.v1.MsgUpdateTrustRegistry",
 			now,
@@ -175,32 +165,21 @@ func (ms msgServer) UpdateTrustRegistry(goCtx context.Context, msg *types.MsgUpd
 	}
 
 	// Get trust registry
-	tr, err := ms.TrustRegistry.Get(ctx, msg.Id)
+	tr, err := ms.TrustRegistry.Get(ctx, msg.TrId)
 	if err != nil {
 		return nil, fmt.Errorf("trust registry not found: %w", err)
 	}
 
-	// Check controller - authority must match the trust registry controller
-	if tr.Controller != msg.Authority {
-		return nil, fmt.Errorf("only trust registry controller can update trust registry")
+	// Check corporation - corporation must match the trust registry corporation
+	if tr.Corporation != msg.Corporation {
+		return nil, fmt.Errorf("only trust registry corporation can update trust registry")
 	}
 
-	// Update DID index if DID changed
-	oldDID := tr.Did
-	if msg.Did != oldDID {
-		// Remove old DID index entry
-		if err := ms.TrustRegistryDIDIndex.Remove(ctx, oldDID); err != nil {
-			return nil, fmt.Errorf("failed to remove old DID index: %w", err)
-		}
-		// Add new DID index entry
-		if err := ms.TrustRegistryDIDIndex.Set(ctx, msg.Did, tr.Id); err != nil {
-			return nil, fmt.Errorf("failed to set new DID index: %w", err)
-		}
-	}
-
-	// Update fields
-	tr.Did = msg.Did
+	// Spec v4: MsgUpdateTrustRegistry only updates aka/language; DID is immutable.
 	tr.Aka = msg.Aka
+	if msg.Language != "" {
+		tr.Language = msg.Language
+	}
 	tr.Modified = now
 
 	// Save updated trust registry
@@ -211,9 +190,8 @@ func (ms msgServer) UpdateTrustRegistry(goCtx context.Context, msg *types.MsgUpd
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeUpdateTrustRegistry,
-			sdk.NewAttribute(types.AttributeKeyTrustRegistryID, strconv.FormatUint(msg.Id, 10)),
-			sdk.NewAttribute(types.AttributeKeyController, msg.Authority),
-			sdk.NewAttribute(types.AttributeKeyDID, msg.Did),
+			sdk.NewAttribute(types.AttributeKeyTrustRegistryID, strconv.FormatUint(msg.TrId, 10)),
+			sdk.NewAttribute(types.AttributeKeyController, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyAka, msg.Aka),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
 		),
@@ -230,7 +208,7 @@ func (ms msgServer) ArchiveTrustRegistry(goCtx context.Context, msg *types.MsgAr
 	if ms.delegationKeeper != nil {
 		if err := ms.delegationKeeper.CheckOperatorAuthorization(
 			ctx,
-			msg.Authority,
+			msg.Corporation,
 			msg.Operator,
 			"/verana.tr.v1.MsgArchiveTrustRegistry",
 			now,
@@ -240,14 +218,14 @@ func (ms msgServer) ArchiveTrustRegistry(goCtx context.Context, msg *types.MsgAr
 	}
 
 	// Get trust registry
-	tr, err := ms.TrustRegistry.Get(ctx, msg.Id)
+	tr, err := ms.TrustRegistry.Get(ctx, msg.TrId)
 	if err != nil {
 		return nil, fmt.Errorf("trust registry not found: %w", err)
 	}
 
-	// Check controller
-	if tr.Controller != msg.Authority {
-		return nil, fmt.Errorf("only trust registry controller can archive trust registry")
+	// Check corporation
+	if tr.Corporation != msg.Corporation {
+		return nil, fmt.Errorf("only trust registry corporation can archive trust registry")
 	}
 
 	// Check archive state
@@ -280,8 +258,8 @@ func (ms msgServer) ArchiveTrustRegistry(goCtx context.Context, msg *types.MsgAr
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeArchiveTrustRegistry,
-			sdk.NewAttribute(types.AttributeKeyTrustRegistryID, strconv.FormatUint(msg.Id, 10)),
-			sdk.NewAttribute(types.AttributeKeyController, msg.Authority),
+			sdk.NewAttribute(types.AttributeKeyTrustRegistryID, strconv.FormatUint(msg.TrId, 10)),
+			sdk.NewAttribute(types.AttributeKeyController, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyArchiveStatus, archiveStatus),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
 		),

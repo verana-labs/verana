@@ -99,17 +99,17 @@ func MigrateStore(ctx sdk.Context, k Keeper) error {
 
 		// Create new TrustDeposit with LegacyDec Share using the actual types
 		// Note: LastSlashed and LastRepaid are already *time.Time, so we can use them directly
+		// Note: LastRepaidBy was removed in spec v4 draft 13; it is intentionally dropped here.
 		newTD = types.TrustDeposit{
-			Account:        oldTD.Account,
+			Corporation:    oldTD.Account,
 			Share:          newShare, // Now LegacyDec
-			Amount:         oldTD.Amount,
+			Deposit:        oldTD.Amount,
 			Claimable:      oldTD.Claimable,
 			SlashedDeposit: oldTD.SlashedDeposit,
 			RepaidDeposit:  oldTD.RepaidDeposit,
 			LastSlashed:    oldTD.LastSlashed,
 			LastRepaid:     oldTD.LastRepaid,
 			SlashCount:     oldTD.SlashCount,
-			LastRepaidBy:   oldTD.LastRepaidBy,
 		}
 
 		// Encode the new format data using valueCodec

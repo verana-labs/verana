@@ -122,14 +122,14 @@ func NewMsgCreateCredentialSchema(
 	issuerValidationValidityPeriod uint32,
 	verifierValidationValidityPeriod uint32,
 	holderValidationValidityPeriod uint32,
-	issuerPermManagementMode uint32,
-	verifierPermManagementMode uint32,
+	issuerOnboardingMode uint32,
+	verifierOnboardingMode uint32,
 	pricingAssetType uint32,
 	pricingAsset string,
 	digestAlgorithm string,
 ) *MsgCreateCredentialSchema {
 	msg := &MsgCreateCredentialSchema{
-		Authority:                               authority,
+		Corporation:                             authority,
 		Operator:                                operator,
 		TrId:                                    trId,
 		JsonSchema:                              jsonSchema,
@@ -138,8 +138,9 @@ func NewMsgCreateCredentialSchema(
 		IssuerValidationValidityPeriod:          &OptionalUInt32{Value: issuerValidationValidityPeriod},
 		VerifierValidationValidityPeriod:        &OptionalUInt32{Value: verifierValidationValidityPeriod},
 		HolderValidationValidityPeriod:          &OptionalUInt32{Value: holderValidationValidityPeriod},
-		IssuerPermManagementMode:                issuerPermManagementMode,
-		VerifierPermManagementMode:              verifierPermManagementMode,
+		IssuerOnboardingMode:                    issuerOnboardingMode,
+		VerifierOnboardingMode:                  verifierOnboardingMode,
+		HolderOnboardingMode:                    0,
 		PricingAssetType:                        pricingAssetType,
 		PricingAsset:                            pricingAsset,
 		DigestAlgorithm:                         digestAlgorithm,
@@ -169,10 +170,10 @@ func (msg *MsgCreateCredentialSchema) GetSigners() []sdk.AccAddress {
 
 // ValidateBasic implements sdk.Msg
 func (msg *MsgCreateCredentialSchema) ValidateBasic() error {
-	// Validate authority address
-	_, err := sdk.AccAddressFromBech32(msg.Authority)
+	// Validate corporation address
+	_, err := sdk.AccAddressFromBech32(msg.Corporation)
 	if err != nil {
-		return errors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid authority address (%s)", err)
+		return errors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid corporation address (%s)", err)
 	}
 
 	// Validate operator address
@@ -623,18 +624,18 @@ func validateValidityPeriods(msg *MsgCreateCredentialSchema) error {
 }
 
 func validatePermManagementModes(msg *MsgCreateCredentialSchema) error {
-	if msg.IssuerPermManagementMode == 0 {
-		return fmt.Errorf("issuer perm management mode must be specified")
+	if msg.IssuerOnboardingMode == 0 {
+		return fmt.Errorf("issuer onboarding mode must be specified")
 	}
-	if msg.IssuerPermManagementMode > 3 {
-		return fmt.Errorf("invalid issuer perm management mode: must be between 1 and 3")
+	if msg.IssuerOnboardingMode > 3 {
+		return fmt.Errorf("invalid issuer onboarding mode: must be between 1 and 3")
 	}
 
-	if msg.VerifierPermManagementMode == 0 {
-		return fmt.Errorf("verifier perm management mode must be specified")
+	if msg.VerifierOnboardingMode == 0 {
+		return fmt.Errorf("verifier onboarding mode must be specified")
 	}
-	if msg.VerifierPermManagementMode > 3 {
-		return fmt.Errorf("invalid verifier perm management mode: must be between 1 and 3")
+	if msg.VerifierOnboardingMode > 3 {
+		return fmt.Errorf("invalid verifier onboarding mode: must be between 1 and 3")
 	}
 
 	return nil
@@ -671,10 +672,10 @@ func validateDigestAlgorithm(algorithm string) error {
 }
 
 func (msg *MsgUpdateCredentialSchema) ValidateBasic() error {
-	// Validate authority address
-	_, err := sdk.AccAddressFromBech32(msg.Authority)
+	// Validate corporation address
+	_, err := sdk.AccAddressFromBech32(msg.Corporation)
 	if err != nil {
-		return errors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid authority address (%s)", err)
+		return errors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid corporation address (%s)", err)
 	}
 
 	// Validate operator address
@@ -707,10 +708,10 @@ func (msg *MsgUpdateCredentialSchema) ValidateBasic() error {
 }
 
 func (msg *MsgArchiveCredentialSchema) ValidateBasic() error {
-	// Validate authority address
-	_, err := sdk.AccAddressFromBech32(msg.Authority)
+	// Validate corporation address
+	_, err := sdk.AccAddressFromBech32(msg.Corporation)
 	if err != nil {
-		return errors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid authority address (%s)", err)
+		return errors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid corporation address (%s)", err)
 	}
 
 	// Validate operator address

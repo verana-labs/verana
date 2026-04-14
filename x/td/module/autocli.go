@@ -31,12 +31,12 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 				},
 				{
 					RpcMethod: "GetTrustDeposit",
-					Use:       "get-trust-deposit [account]",
-					Short:     "Query trust deposit for an account",
-					Long:      "Get the trust deposit information for a given account address",
+					Use:       "get-trust-deposit [corporation]",
+					Short:     "Query trust deposit for a corporation",
+					Long:      "Get the trust deposit information for a given corporation address",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{
-							ProtoField: "account",
+							ProtoField: "corporation",
 						},
 					},
 				},
@@ -53,32 +53,21 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 				},
 				{
 					RpcMethod: "ReclaimTrustDepositYield",
-					Use:       "reclaim-yield [authority]",
+					Use:       "reclaim-yield [corporation]",
 					Short:     "Reclaim earned interest from trust deposits",
 					Long:      "Reclaim any available interest earned from trust deposits. The interest is calculated based on share value and current deposit amount.",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
-						{ProtoField: "authority"},
-					},
-				},
-				{
-					RpcMethod: "ReclaimTrustDeposit",
-					Use:       "reclaim-deposit [amount]",
-					Short:     "Reclaim trust deposit",
-					Long:      "Reclaim a specified amount from your claimable trust deposit balance. Note that a portion will be burned according to the reclaim burn rate.",
-					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
-						{
-							ProtoField: "claimed",
-						},
+						{ProtoField: "corporation"},
 					},
 				},
 				{
 					RpcMethod: "RepaySlashedTrustDeposit",
-					Use:       "repay-slashed-td [authority] [amount]",
+					Use:       "repay-slashed-td [corporation] [deposit]",
 					Short:     "Repay slashed trust deposit",
-					Long:      "Repay the outstanding slashed trust deposit amount. The amount must exactly match the outstanding slashed amount.",
+					Long:      "Repay the outstanding slashed trust deposit. The deposit must exactly match the outstanding slashed amount.",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
-						{ProtoField: "authority"},
-						{ProtoField: "amount"},
+						{ProtoField: "corporation"},
+						{ProtoField: "deposit"},
 					},
 				},
 				// this line is used by ignite scaffolding # autocli/tx
@@ -89,8 +78,8 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 
 func CmdSlashTrustDepositProposal() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "slash-trust-deposit [account] [amount] [flags]",
-		Short: "Submit a governance proposal to slash an account's trust deposit",
+		Use:   "slash-trust-deposit [corporation] [deposit] [flags]",
+		Short: "Submit a governance proposal to slash a corporation's trust deposit",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientTxContext(cmd)
@@ -98,16 +87,16 @@ func CmdSlashTrustDepositProposal() *cobra.Command {
 				return err
 			}
 
-			// Parse account address
-			account := args[0]
-			if _, err := sdk.AccAddressFromBech32(account); err != nil {
+			// Parse corporation address
+			corporation := args[0]
+			if _, err := sdk.AccAddressFromBech32(corporation); err != nil {
 				return err
 			}
 
-			// Parse amount
-			amount, ok := math.NewIntFromString(args[1])
+			// Parse slash deposit amount
+			slashDeposit, ok := math.NewIntFromString(args[1])
 			if !ok {
-				return fmt.Errorf("invalid amount: %s", args[1])
+				return fmt.Errorf("invalid deposit: %s", args[1])
 			}
 
 			// Get proposal details from flags
@@ -134,7 +123,7 @@ func CmdSlashTrustDepositProposal() *cobra.Command {
 			from := clientCtx.GetFromAddress()
 
 			// Create the proposal content
-			content := types.NewSlashTrustDepositProposal(title, description, account, amount)
+			content := types.NewSlashTrustDepositProposal(title, description, corporation, slashDeposit)
 
 			// Create the governance proposal message
 			msg, err := govtypes.NewMsgSubmitProposal(content, deposit, from)

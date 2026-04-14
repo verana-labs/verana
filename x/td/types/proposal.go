@@ -18,12 +18,12 @@ func init() {
 	govtypes.RegisterProposalType(ProposalSlashTrustDeposit)
 }
 
-func NewSlashTrustDepositProposal(title, description, account string, amount math.Int) *SlashTrustDepositProposal {
+func NewSlashTrustDepositProposal(title, description, corporation string, deposit math.Int) *SlashTrustDepositProposal {
 	return &SlashTrustDepositProposal{
 		Title:       title,
 		Description: description,
-		Account:     account,
-		Amount:      amount,
+		Corporation: corporation,
+		Deposit:     deposit,
 	}
 }
 
@@ -39,19 +39,19 @@ func (p *SlashTrustDepositProposal) ValidateBasic() error {
 		return err
 	}
 
-	// Validate account address
-	if strings.TrimSpace(p.Account) == "" {
-		return sdkerrors.ErrInvalidRequest.Wrap("account cannot be empty")
+	// Validate corporation address
+	if strings.TrimSpace(p.Corporation) == "" {
+		return sdkerrors.ErrInvalidRequest.Wrap("corporation cannot be empty")
 	}
 
-	_, err = sdk.AccAddressFromBech32(p.Account)
+	_, err = sdk.AccAddressFromBech32(p.Corporation)
 	if err != nil {
-		return sdkerrors.ErrInvalidAddress.Wrapf("invalid account address: %v", err)
+		return sdkerrors.ErrInvalidAddress.Wrapf("invalid corporation address: %v", err)
 	}
 
-	// amount must be > 0
-	if p.Amount.IsNil() || !p.Amount.IsPositive() {
-		return sdkerrors.ErrInvalidRequest.Wrap("amount must be positive")
+	// deposit must be > 0
+	if p.Deposit.IsNil() || !p.Deposit.IsPositive() {
+		return sdkerrors.ErrInvalidRequest.Wrap("deposit must be positive")
 	}
 
 	return nil

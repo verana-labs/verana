@@ -36,15 +36,15 @@ func TestGenesisState_Validate(t *testing.T) {
 				Params: types.DefaultParams(),
 				TrustDeposits: []types.TrustDepositRecord{
 					{
-						Account:   validAddr1,
+						Corporation: validAddr1,
 						Share:     math.LegacyNewDec(100),
-						Amount:    1000,
+						Deposit:   1000,
 						Claimable: 500,
 					},
 					{
-						Account:   validAddr2,
+						Corporation: validAddr2,
 						Share:     math.LegacyNewDec(200),
-						Amount:    2000,
+						Deposit:   2000,
 						Claimable: 1000,
 					},
 				},
@@ -65,10 +65,10 @@ func TestGenesisState_Validate(t *testing.T) {
 				Params: types.DefaultParams(),
 				TrustDeposits: []types.TrustDepositRecord{
 					{
-						Account:   "invalid_address", // Invalid: not a valid bech32 address
-						Share:     math.LegacyNewDec(100),
-						Amount:    1000,
-						Claimable: 500,
+						Corporation: "invalid_address", // Invalid: not a valid bech32 address
+						Share:       math.LegacyNewDec(100),
+						Deposit:     1000,
+						Claimable:   500,
 					},
 				},
 			},
@@ -80,15 +80,15 @@ func TestGenesisState_Validate(t *testing.T) {
 				Params: types.DefaultParams(),
 				TrustDeposits: []types.TrustDepositRecord{
 					{
-						Account:   validAddr1,
+						Corporation: validAddr1,
 						Share:     math.LegacyNewDec(100),
-						Amount:    1000,
+						Deposit:   1000,
 						Claimable: 500,
 					},
 					{
-						Account:   validAddr1, // Duplicate account
+						Corporation: validAddr1, // Duplicate account
 						Share:     math.LegacyNewDec(200),
-						Amount:    2000,
+						Deposit:   2000,
 						Claimable: 1000,
 					},
 				},
@@ -101,10 +101,10 @@ func TestGenesisState_Validate(t *testing.T) {
 				Params: types.DefaultParams(),
 				TrustDeposits: []types.TrustDepositRecord{
 					{
-						Account:   validAddr1,
+						Corporation: validAddr1,
 						Share:     math.LegacyNewDec(100),
-						Amount:    1000,
-						Claimable: 1500, // Invalid: claimable > amount
+						Deposit:   1000,
+						Claimable: 1500, // Invalid: claimable > deposit
 					},
 				},
 			},

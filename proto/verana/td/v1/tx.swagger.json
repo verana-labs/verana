@@ -16,38 +16,6 @@
     "application/json"
   ],
   "paths": {
-    "/verana.td.v1.Msg/ReclaimTrustDeposit": {
-      "post": {
-        "operationId": "Msg_ReclaimTrustDeposit",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/verana.td.v1.MsgReclaimTrustDepositResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/google.rpc.Status"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/verana.td.v1.MsgReclaimTrustDeposit"
-            }
-          }
-        ],
-        "tags": [
-          "Msg"
-        ]
-      }
-    },
     "/verana.td.v1.Msg/ReclaimTrustDepositYield": {
       "post": {
         "operationId": "Msg_ReclaimTrustDepositYield",
@@ -100,7 +68,7 @@
         "parameters": [
           {
             "name": "body",
-            "description": "MsgRepaySlashedTrustDeposit defines the message for repaying a slashed trust deposit.\n[MOD-TD-MSG-6] Any authorized operator CAN execute this on behalf of an authority.",
+            "description": "MsgRepaySlashedTrustDeposit defines the message for repaying a slashed trust deposit.\n[MOD-TD-MSG-6] Any authorized operator CAN execute this on behalf of a corporation.",
             "in": "body",
             "required": true,
             "schema": {
@@ -115,7 +83,7 @@
     },
     "/verana.td.v1.Msg/SlashTrustDeposit": {
       "post": {
-        "summary": "SlashTrustDeposit defines a governance operation to slash an account's trust deposit",
+        "summary": "SlashTrustDeposit defines a governance operation to slash a corporation's trust deposit",
         "operationId": "Msg_SlashTrustDeposit",
         "responses": {
           "200": {
@@ -210,44 +178,16 @@
         }
       }
     },
-    "verana.td.v1.MsgReclaimTrustDeposit": {
-      "type": "object",
-      "properties": {
-        "creator": {
-          "type": "string"
-        },
-        "claimed": {
-          "type": "string",
-          "format": "uint64",
-          "title": "Amount to reclaim in denom"
-        }
-      }
-    },
-    "verana.td.v1.MsgReclaimTrustDepositResponse": {
-      "type": "object",
-      "properties": {
-        "burned_amount": {
-          "type": "string",
-          "format": "uint64",
-          "title": "Amount burned"
-        },
-        "claimed_amount": {
-          "type": "string",
-          "format": "uint64",
-          "title": "Amount transferred to account"
-        }
-      }
-    },
     "verana.td.v1.MsgReclaimTrustDepositYield": {
       "type": "object",
       "properties": {
-        "authority": {
+        "corporation": {
           "type": "string",
-          "description": "authority is the group address that owns the trust deposit."
+          "description": "corporation is the group address that owns the trust deposit."
         },
         "operator": {
           "type": "string",
-          "description": "operator is the account authorized by the authority to run this Msg."
+          "description": "operator is the account authorized by the corporation to run this Msg."
         }
       },
       "title": "MsgReclaimTrustDepositYield defines the request type\n[MOD-TD-MSG-2] Reclaim Trust Deposit Yield"
@@ -265,21 +205,21 @@
     "verana.td.v1.MsgRepaySlashedTrustDeposit": {
       "type": "object",
       "properties": {
-        "authority": {
+        "corporation": {
           "type": "string",
-          "description": "authority is the group address that owns the slashed trust deposit."
+          "description": "corporation is the group address that owns the slashed trust deposit."
         },
         "operator": {
           "type": "string",
-          "description": "operator is the account authorized by the authority to run this Msg."
+          "description": "operator is the account authorized by the corporation to run this Msg."
         },
-        "amount": {
+        "deposit": {
           "type": "string",
           "format": "uint64",
-          "description": "amount is the repayment amount (must equal outstanding slashed amount)."
+          "description": "deposit is the repayment amount (must equal outstanding slashed amount)."
         }
       },
-      "description": "MsgRepaySlashedTrustDeposit defines the message for repaying a slashed trust deposit.\n[MOD-TD-MSG-6] Any authorized operator CAN execute this on behalf of an authority."
+      "description": "MsgRepaySlashedTrustDeposit defines the message for repaying a slashed trust deposit.\n[MOD-TD-MSG-6] Any authorized operator CAN execute this on behalf of a corporation."
     },
     "verana.td.v1.MsgRepaySlashedTrustDepositResponse": {
       "type": "object"
@@ -291,16 +231,16 @@
           "type": "string",
           "description": "authority is the address that controls the module (defaults to x/gov unless overwritten)."
         },
-        "account": {
+        "corporation": {
           "type": "string",
-          "title": "account is the address of the account whose trust deposit will be slashed"
+          "title": "corporation is the address of the corporation whose trust deposit will be slashed"
         },
-        "amount": {
+        "deposit": {
           "type": "string",
-          "title": "amount is the amount to slash (in base denom)"
+          "title": "deposit is the deposit amount to slash (in base denom)"
         }
       },
-      "title": "MsgSlashTrustDeposit defines the message for slashing an account's trust deposit\nThis can only be executed by the governance module"
+      "title": "MsgSlashTrustDeposit defines the message for slashing a corporation's trust deposit\nThis can only be executed by the governance module"
     },
     "verana.td.v1.MsgSlashTrustDepositResponse": {
       "type": "object",

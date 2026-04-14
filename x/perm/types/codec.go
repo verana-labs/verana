@@ -20,7 +20,7 @@ func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 	legacy.RegisterAminoMsg(cdc, &MsgCreateOrUpdatePermissionSession{}, "/perm/v1/create-or-update-perm-session")
 	legacy.RegisterAminoMsg(cdc, &MsgSlashPermissionTrustDeposit{}, "/perm/v1/slash-perm-td")
 	legacy.RegisterAminoMsg(cdc, &MsgRepayPermissionSlashedTrustDeposit{}, "/perm/v1/repay-perm-slashed-td")
-	legacy.RegisterAminoMsg(cdc, &MsgCreatePermission{}, "/perm/v1/create-perm")
+	legacy.RegisterAminoMsg(cdc, &MsgSelfCreatePermission{}, "/perm/v1/self-create-perm")
 }
 
 func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
@@ -38,7 +38,7 @@ func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
 		&MsgCreateOrUpdatePermissionSession{},
 		&MsgSlashPermissionTrustDeposit{},
 		&MsgRepayPermissionSlashedTrustDeposit{},
-		&MsgCreatePermission{},
+		&MsgSelfCreatePermission{},
 	)
 	msgservice.RegisterMsgServiceDesc(registry, &_Msg_serviceDesc)
 }

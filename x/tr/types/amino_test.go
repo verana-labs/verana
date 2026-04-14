@@ -15,56 +15,53 @@ func TestAminoJSONEncoder(t *testing.T) {
 
 	// MsgCreateTrustRegistry
 	msg := &trv1.MsgCreateTrustRegistry{
-		Authority:    "verana1f06a8j6n02ash0vtkdge0a9pvvfa5ypghkyttt",
-		Operator:     "verana13627hsukut3p39l5lawa88er0az36227rkwt83",
-		Did:          "did:verana:test:1234567890:abc123",
-		Aka:          "http://ts-proto-test-trust-registry.com",
-		Language:     "en",
-		DocUrl:       "https://example.com/governance-framework.pdf",
-		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+		Corporation: "verana1f06a8j6n02ash0vtkdge0a9pvvfa5ypghkyttt",
+		Operator:    "verana13627hsukut3p39l5lawa88er0az36227rkwt83",
+		Did:         "did:verana:test:1234567890:abc123",
+		Aka:         "http://ts-proto-test-trust-registry.com",
+		Language:    "en",
 	}
 	bz, _ := enc.Marshal(msg)
 	fmt.Printf("MsgCreateTrustRegistry value:\n%s\n\n", string(bz))
 
-	// MsgUpdateTrustRegistry (has uint64 id)
+	// MsgUpdateTrustRegistry (has uint64 tr_id)
 	updateMsg := &trv1.MsgUpdateTrustRegistry{
-		Authority: "verana1f06a8j6n02ash0vtkdge0a9pvvfa5ypghkyttt",
-		Operator:  "verana13627hsukut3p39l5lawa88er0az36227rkwt83",
-		Id:        1,
-		Did:       "did:verana:test:updated:abc123",
-		Aka:       "http://updated-trust-registry.com",
+		Corporation: "verana1f06a8j6n02ash0vtkdge0a9pvvfa5ypghkyttt",
+		Operator:    "verana13627hsukut3p39l5lawa88er0az36227rkwt83",
+		TrId:        1,
+		Aka:         "http://updated-trust-registry.com",
 	}
 	bz2, _ := enc.Marshal(updateMsg)
 	fmt.Printf("MsgUpdateTrustRegistry value:\n%s\n\n", string(bz2))
 
 	// MsgArchiveTrustRegistry
 	archiveMsg := &trv1.MsgArchiveTrustRegistry{
-		Authority: "verana1f06a8j6n02ash0vtkdge0a9pvvfa5ypghkyttt",
-		Operator:  "verana13627hsukut3p39l5lawa88er0az36227rkwt83",
-		Id:        1,
-		Archive:   true,
+		Corporation: "verana1f06a8j6n02ash0vtkdge0a9pvvfa5ypghkyttt",
+		Operator:    "verana13627hsukut3p39l5lawa88er0az36227rkwt83",
+		TrId:        1,
+		Archive:     true,
 	}
 	bz3, _ := enc.Marshal(archiveMsg)
 	fmt.Printf("MsgArchiveTrustRegistry value:\n%s\n\n", string(bz3))
 
 	// MsgAddGovernanceFrameworkDocument
 	addGfdMsg := &trv1.MsgAddGovernanceFrameworkDocument{
-		Authority:    "verana1f06a8j6n02ash0vtkdge0a9pvvfa5ypghkyttt",
-		Operator:     "verana13627hsukut3p39l5lawa88er0az36227rkwt83",
-		Id:           1,
-		DocLanguage:  "en",
-		DocUrl:       "https://example.com/governance-framework-v2.pdf",
-		DocDigestSri: "sha384-TsProtoTestDocHash1234567890123456789012345678901234567890123456789012345678",
-		Version:      2,
+		Corporation: "verana1f06a8j6n02ash0vtkdge0a9pvvfa5ypghkyttt",
+		Operator:    "verana13627hsukut3p39l5lawa88er0az36227rkwt83",
+		TrId:        1,
+		Language:    "en",
+		Url:         "https://example.com/governance-framework-v2.pdf",
+		DigestSri:   "sha384-TsProtoTestDocHash1234567890123456789012345678901234567890123456789012345678",
+		Version:     2,
 	}
 	bz4, _ := enc.Marshal(addGfdMsg)
 	fmt.Printf("MsgAddGovernanceFrameworkDocument value:\n%s\n\n", string(bz4))
 
 	// MsgIncreaseActiveGovernanceFrameworkVersion
 	increaseMsg := &trv1.MsgIncreaseActiveGovernanceFrameworkVersion{
-		Authority: "verana1f06a8j6n02ash0vtkdge0a9pvvfa5ypghkyttt",
-		Operator:  "verana13627hsukut3p39l5lawa88er0az36227rkwt83",
-		Id:        1,
+		Corporation: "verana1f06a8j6n02ash0vtkdge0a9pvvfa5ypghkyttt",
+		Operator:    "verana13627hsukut3p39l5lawa88er0az36227rkwt83",
+		TrId:        1,
 	}
 	bz5, _ := enc.Marshal(increaseMsg)
 	fmt.Printf("MsgIncreaseActiveGovernanceFrameworkVersion value:\n%s\n\n", string(bz5))

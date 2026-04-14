@@ -42,8 +42,9 @@ func TestQueries(t *testing.T) {
 		IssuerValidationValidityPeriod:          180,
 		VerifierValidationValidityPeriod:        180,
 		HolderValidationValidityPeriod:          180,
-		IssuerPermManagementMode:                2,
-		VerifierPermManagementMode:              2,
+		IssuerOnboardingMode:                    types.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS,
+		VerifierOnboardingMode:                  types.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS,
+		HolderOnboardingMode:                    types.HolderOnboardingMode_HOLDER_ONBOARDING_MODE_UNSPECIFIED,
 	}
 
 	schema2 := types.CredentialSchema{
@@ -57,8 +58,9 @@ func TestQueries(t *testing.T) {
 		IssuerValidationValidityPeriod:          180,
 		VerifierValidationValidityPeriod:        180,
 		HolderValidationValidityPeriod:          180,
-		IssuerPermManagementMode:                2,
-		VerifierPermManagementMode:              2,
+		IssuerOnboardingMode:                    types.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS,
+		VerifierOnboardingMode:                  types.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS,
+		HolderOnboardingMode:                    types.HolderOnboardingMode_HOLDER_ONBOARDING_MODE_UNSPECIFIED,
 	}
 	modifiedAfterTime := schema1.Created.Add(time.Hour)
 	require.NoError(t, k.CredentialSchema.Set(ctx, schema1.Id, schema1))

@@ -200,9 +200,9 @@ func (k Keeper) FindPermissionsWithDID(goCtx context.Context, req *types.QueryFi
 	// Check if we need to handle the special OPEN mode case
 	isOpenMode := false
 	if (permType == types.PermissionType_ISSUER &&
-		cs.IssuerPermManagementMode == credentialschematypes.CredentialSchemaPermManagementMode_OPEN) ||
+		cs.IssuerOnboardingMode == credentialschematypes.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_OPEN) ||
 		(permType == types.PermissionType_VERIFIER &&
-			cs.VerifierPermManagementMode == credentialschematypes.CredentialSchemaPermManagementMode_OPEN) {
+			cs.VerifierOnboardingMode == credentialschematypes.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_OPEN) {
 		isOpenMode = true
 	}
 
@@ -218,10 +218,8 @@ func (k Keeper) FindPermissionsWithDID(goCtx context.Context, req *types.QueryFi
 			return false, nil
 		}
 
-		// Filter by country
-		if req.Country != "" && perm.Country != "" && perm.Country != req.Country {
-			return false, nil
-		}
+		// Country field removed from Permission in spec v4; req.Country is retained
+		// but no longer filters on per-permission country.
 
 		// If "when" is not specified, add all matching permissions
 		if req.When == nil {
@@ -251,14 +249,11 @@ func (k Keeper) FindPermissionsWithDID(goCtx context.Context, req *types.QueryFi
 		err = k.Permission.Walk(ctx, nil, func(id uint64, perm types.Permission) (bool, error) {
 			if perm.SchemaId == req.SchemaId &&
 				perm.Type == types.PermissionType_ECOSYSTEM {
-				// Check country compatibility
-				if req.Country == "" || perm.Country == "" || perm.Country == req.Country {
-					// Check time validity if "when" is specified
-					if req.When == nil || isPermissionValidAtTime(perm, *req.When) {
-						ecosystemPerm = perm
-						ecosystemPermFound = true
-						return true, nil // Stop iteration once found
-					}
+				// Check time validity if "when" is specified
+				if req.When == nil || isPermissionValidAtTime(perm, *req.When) {
+					ecosystemPerm = perm
+					ecosystemPermFound = true
+					return true, nil // Stop iteration once found
 				}
 			}
 			return false, nil
@@ -272,7 +267,7 @@ func (k Keeper) FindPermissionsWithDID(goCtx context.Context, req *types.QueryFi
 		// authorized even without an explicit perm record
 		if ecosystemPermFound {
 			// Include a note in the response that this is an implicit perm in OPEN mode
-			ecosystemPerm.VpSummaryDigestSri = "OPEN_MODE_IMPLICIT_PERMISSION"
+			ecosystemPerm.VpSummaryDigest = "OPEN_MODE_IMPLICIT_PERMISSION"
 			foundPerms = append(foundPerms, ecosystemPerm)
 		}
 	}
@@ -358,7 +353,7 @@ func (k Keeper) FindBeneficiaries(goCtx context.Context, req *types.QueryFindBen
 		}
 
 		// MUST be a valid permission
-		if err := IsValidPermission(perm, perm.Country, ctx.BlockTime()); err != nil {
+		if err := IsValidPermission(perm, ctx.BlockTime()); err != nil {
 			return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("issuer permission is not valid: %v", err))
 		}
 
@@ -373,7 +368,7 @@ func (k Keeper) FindBeneficiaries(goCtx context.Context, req *types.QueryFindBen
 		}
 
 		// MUST be a valid permission
-		if err := IsValidPermission(perm, perm.Country, ctx.BlockTime()); err != nil {
+		if err := IsValidPermission(perm, ctx.BlockTime()); err != nil {
 			return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("verifier permission is not valid: %v", err))
 		}
 

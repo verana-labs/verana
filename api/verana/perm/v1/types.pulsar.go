@@ -126,15 +126,11 @@ var (
 	fd_Permission_schema_id                         protoreflect.FieldDescriptor
 	fd_Permission_type                              protoreflect.FieldDescriptor
 	fd_Permission_did                               protoreflect.FieldDescriptor
-	fd_Permission_authority                         protoreflect.FieldDescriptor
+	fd_Permission_corporation                       protoreflect.FieldDescriptor
 	fd_Permission_created                           protoreflect.FieldDescriptor
-	fd_Permission_created_by                        protoreflect.FieldDescriptor
 	fd_Permission_adjusted                          protoreflect.FieldDescriptor
-	fd_Permission_adjusted_by                       protoreflect.FieldDescriptor
 	fd_Permission_slashed                           protoreflect.FieldDescriptor
-	fd_Permission_slashed_by                        protoreflect.FieldDescriptor
 	fd_Permission_repaid                            protoreflect.FieldDescriptor
-	fd_Permission_repaid_by                         protoreflect.FieldDescriptor
 	fd_Permission_effective_from                    protoreflect.FieldDescriptor
 	fd_Permission_effective_until                   protoreflect.FieldDescriptor
 	fd_Permission_modified                          protoreflect.FieldDescriptor
@@ -145,8 +141,6 @@ var (
 	fd_Permission_slashed_deposit                   protoreflect.FieldDescriptor
 	fd_Permission_repaid_deposit                    protoreflect.FieldDescriptor
 	fd_Permission_revoked                           protoreflect.FieldDescriptor
-	fd_Permission_revoked_by                        protoreflect.FieldDescriptor
-	fd_Permission_country                           protoreflect.FieldDescriptor
 	fd_Permission_validator_perm_id                 protoreflect.FieldDescriptor
 	fd_Permission_vp_state                          protoreflect.FieldDescriptor
 	fd_Permission_vp_exp                            protoreflect.FieldDescriptor
@@ -154,8 +148,7 @@ var (
 	fd_Permission_vp_validator_deposit              protoreflect.FieldDescriptor
 	fd_Permission_vp_current_fees                   protoreflect.FieldDescriptor
 	fd_Permission_vp_current_deposit                protoreflect.FieldDescriptor
-	fd_Permission_vp_summary_digest_sri             protoreflect.FieldDescriptor
-	fd_Permission_vp_term_requested                 protoreflect.FieldDescriptor
+	fd_Permission_vp_summary_digest                 protoreflect.FieldDescriptor
 	fd_Permission_issuance_fee_discount             protoreflect.FieldDescriptor
 	fd_Permission_verification_fee_discount         protoreflect.FieldDescriptor
 	fd_Permission_vs_operator                       protoreflect.FieldDescriptor
@@ -173,15 +166,11 @@ func init() {
 	fd_Permission_schema_id = md_Permission.Fields().ByName("schema_id")
 	fd_Permission_type = md_Permission.Fields().ByName("type")
 	fd_Permission_did = md_Permission.Fields().ByName("did")
-	fd_Permission_authority = md_Permission.Fields().ByName("authority")
+	fd_Permission_corporation = md_Permission.Fields().ByName("corporation")
 	fd_Permission_created = md_Permission.Fields().ByName("created")
-	fd_Permission_created_by = md_Permission.Fields().ByName("created_by")
 	fd_Permission_adjusted = md_Permission.Fields().ByName("adjusted")
-	fd_Permission_adjusted_by = md_Permission.Fields().ByName("adjusted_by")
 	fd_Permission_slashed = md_Permission.Fields().ByName("slashed")
-	fd_Permission_slashed_by = md_Permission.Fields().ByName("slashed_by")
 	fd_Permission_repaid = md_Permission.Fields().ByName("repaid")
-	fd_Permission_repaid_by = md_Permission.Fields().ByName("repaid_by")
 	fd_Permission_effective_from = md_Permission.Fields().ByName("effective_from")
 	fd_Permission_effective_until = md_Permission.Fields().ByName("effective_until")
 	fd_Permission_modified = md_Permission.Fields().ByName("modified")
@@ -192,8 +181,6 @@ func init() {
 	fd_Permission_slashed_deposit = md_Permission.Fields().ByName("slashed_deposit")
 	fd_Permission_repaid_deposit = md_Permission.Fields().ByName("repaid_deposit")
 	fd_Permission_revoked = md_Permission.Fields().ByName("revoked")
-	fd_Permission_revoked_by = md_Permission.Fields().ByName("revoked_by")
-	fd_Permission_country = md_Permission.Fields().ByName("country")
 	fd_Permission_validator_perm_id = md_Permission.Fields().ByName("validator_perm_id")
 	fd_Permission_vp_state = md_Permission.Fields().ByName("vp_state")
 	fd_Permission_vp_exp = md_Permission.Fields().ByName("vp_exp")
@@ -201,8 +188,7 @@ func init() {
 	fd_Permission_vp_validator_deposit = md_Permission.Fields().ByName("vp_validator_deposit")
 	fd_Permission_vp_current_fees = md_Permission.Fields().ByName("vp_current_fees")
 	fd_Permission_vp_current_deposit = md_Permission.Fields().ByName("vp_current_deposit")
-	fd_Permission_vp_summary_digest_sri = md_Permission.Fields().ByName("vp_summary_digest_sri")
-	fd_Permission_vp_term_requested = md_Permission.Fields().ByName("vp_term_requested")
+	fd_Permission_vp_summary_digest = md_Permission.Fields().ByName("vp_summary_digest")
 	fd_Permission_issuance_fee_discount = md_Permission.Fields().ByName("issuance_fee_discount")
 	fd_Permission_verification_fee_discount = md_Permission.Fields().ByName("verification_fee_discount")
 	fd_Permission_vs_operator = md_Permission.Fields().ByName("vs_operator")
@@ -302,9 +288,9 @@ func (x *fastReflection_Permission) Range(f func(protoreflect.FieldDescriptor, p
 			return
 		}
 	}
-	if x.Authority != "" {
-		value := protoreflect.ValueOfString(x.Authority)
-		if !f(fd_Permission_authority, value) {
+	if x.Corporation != "" {
+		value := protoreflect.ValueOfString(x.Corporation)
+		if !f(fd_Permission_corporation, value) {
 			return
 		}
 	}
@@ -314,21 +300,9 @@ func (x *fastReflection_Permission) Range(f func(protoreflect.FieldDescriptor, p
 			return
 		}
 	}
-	if x.CreatedBy != "" {
-		value := protoreflect.ValueOfString(x.CreatedBy)
-		if !f(fd_Permission_created_by, value) {
-			return
-		}
-	}
 	if x.Adjusted != nil {
 		value := protoreflect.ValueOfMessage(x.Adjusted.ProtoReflect())
 		if !f(fd_Permission_adjusted, value) {
-			return
-		}
-	}
-	if x.AdjustedBy != "" {
-		value := protoreflect.ValueOfString(x.AdjustedBy)
-		if !f(fd_Permission_adjusted_by, value) {
 			return
 		}
 	}
@@ -338,21 +312,9 @@ func (x *fastReflection_Permission) Range(f func(protoreflect.FieldDescriptor, p
 			return
 		}
 	}
-	if x.SlashedBy != "" {
-		value := protoreflect.ValueOfString(x.SlashedBy)
-		if !f(fd_Permission_slashed_by, value) {
-			return
-		}
-	}
 	if x.Repaid != nil {
 		value := protoreflect.ValueOfMessage(x.Repaid.ProtoReflect())
 		if !f(fd_Permission_repaid, value) {
-			return
-		}
-	}
-	if x.RepaidBy != "" {
-		value := protoreflect.ValueOfString(x.RepaidBy)
-		if !f(fd_Permission_repaid_by, value) {
 			return
 		}
 	}
@@ -416,18 +378,6 @@ func (x *fastReflection_Permission) Range(f func(protoreflect.FieldDescriptor, p
 			return
 		}
 	}
-	if x.RevokedBy != "" {
-		value := protoreflect.ValueOfString(x.RevokedBy)
-		if !f(fd_Permission_revoked_by, value) {
-			return
-		}
-	}
-	if x.Country != "" {
-		value := protoreflect.ValueOfString(x.Country)
-		if !f(fd_Permission_country, value) {
-			return
-		}
-	}
 	if x.ValidatorPermId != uint64(0) {
 		value := protoreflect.ValueOfUint64(x.ValidatorPermId)
 		if !f(fd_Permission_validator_perm_id, value) {
@@ -470,15 +420,9 @@ func (x *fastReflection_Permission) Range(f func(protoreflect.FieldDescriptor, p
 			return
 		}
 	}
-	if x.VpSummaryDigestSri != "" {
-		value := protoreflect.ValueOfString(x.VpSummaryDigestSri)
-		if !f(fd_Permission_vp_summary_digest_sri, value) {
-			return
-		}
-	}
-	if x.VpTermRequested != nil {
-		value := protoreflect.ValueOfMessage(x.VpTermRequested.ProtoReflect())
-		if !f(fd_Permission_vp_term_requested, value) {
+	if x.VpSummaryDigest != "" {
+		value := protoreflect.ValueOfString(x.VpSummaryDigest)
+		if !f(fd_Permission_vp_summary_digest, value) {
 			return
 		}
 	}
@@ -553,24 +497,16 @@ func (x *fastReflection_Permission) Has(fd protoreflect.FieldDescriptor) bool {
 		return x.Type_ != 0
 	case "verana.perm.v1.Permission.did":
 		return x.Did != ""
-	case "verana.perm.v1.Permission.authority":
-		return x.Authority != ""
+	case "verana.perm.v1.Permission.corporation":
+		return x.Corporation != ""
 	case "verana.perm.v1.Permission.created":
 		return x.Created != nil
-	case "verana.perm.v1.Permission.created_by":
-		return x.CreatedBy != ""
 	case "verana.perm.v1.Permission.adjusted":
 		return x.Adjusted != nil
-	case "verana.perm.v1.Permission.adjusted_by":
-		return x.AdjustedBy != ""
 	case "verana.perm.v1.Permission.slashed":
 		return x.Slashed != nil
-	case "verana.perm.v1.Permission.slashed_by":
-		return x.SlashedBy != ""
 	case "verana.perm.v1.Permission.repaid":
 		return x.Repaid != nil
-	case "verana.perm.v1.Permission.repaid_by":
-		return x.RepaidBy != ""
 	case "verana.perm.v1.Permission.effective_from":
 		return x.EffectiveFrom != nil
 	case "verana.perm.v1.Permission.effective_until":
@@ -591,10 +527,6 @@ func (x *fastReflection_Permission) Has(fd protoreflect.FieldDescriptor) bool {
 		return x.RepaidDeposit != uint64(0)
 	case "verana.perm.v1.Permission.revoked":
 		return x.Revoked != nil
-	case "verana.perm.v1.Permission.revoked_by":
-		return x.RevokedBy != ""
-	case "verana.perm.v1.Permission.country":
-		return x.Country != ""
 	case "verana.perm.v1.Permission.validator_perm_id":
 		return x.ValidatorPermId != uint64(0)
 	case "verana.perm.v1.Permission.vp_state":
@@ -609,10 +541,8 @@ func (x *fastReflection_Permission) Has(fd protoreflect.FieldDescriptor) bool {
 		return x.VpCurrentFees != uint64(0)
 	case "verana.perm.v1.Permission.vp_current_deposit":
 		return x.VpCurrentDeposit != uint64(0)
-	case "verana.perm.v1.Permission.vp_summary_digest_sri":
-		return x.VpSummaryDigestSri != ""
-	case "verana.perm.v1.Permission.vp_term_requested":
-		return x.VpTermRequested != nil
+	case "verana.perm.v1.Permission.vp_summary_digest":
+		return x.VpSummaryDigest != ""
 	case "verana.perm.v1.Permission.issuance_fee_discount":
 		return x.IssuanceFeeDiscount != uint64(0)
 	case "verana.perm.v1.Permission.verification_fee_discount":
@@ -653,24 +583,16 @@ func (x *fastReflection_Permission) Clear(fd protoreflect.FieldDescriptor) {
 		x.Type_ = 0
 	case "verana.perm.v1.Permission.did":
 		x.Did = ""
-	case "verana.perm.v1.Permission.authority":
-		x.Authority = ""
+	case "verana.perm.v1.Permission.corporation":
+		x.Corporation = ""
 	case "verana.perm.v1.Permission.created":
 		x.Created = nil
-	case "verana.perm.v1.Permission.created_by":
-		x.CreatedBy = ""
 	case "verana.perm.v1.Permission.adjusted":
 		x.Adjusted = nil
-	case "verana.perm.v1.Permission.adjusted_by":
-		x.AdjustedBy = ""
 	case "verana.perm.v1.Permission.slashed":
 		x.Slashed = nil
-	case "verana.perm.v1.Permission.slashed_by":
-		x.SlashedBy = ""
 	case "verana.perm.v1.Permission.repaid":
 		x.Repaid = nil
-	case "verana.perm.v1.Permission.repaid_by":
-		x.RepaidBy = ""
 	case "verana.perm.v1.Permission.effective_from":
 		x.EffectiveFrom = nil
 	case "verana.perm.v1.Permission.effective_until":
@@ -691,10 +613,6 @@ func (x *fastReflection_Permission) Clear(fd protoreflect.FieldDescriptor) {
 		x.RepaidDeposit = uint64(0)
 	case "verana.perm.v1.Permission.revoked":
 		x.Revoked = nil
-	case "verana.perm.v1.Permission.revoked_by":
-		x.RevokedBy = ""
-	case "verana.perm.v1.Permission.country":
-		x.Country = ""
 	case "verana.perm.v1.Permission.validator_perm_id":
 		x.ValidatorPermId = uint64(0)
 	case "verana.perm.v1.Permission.vp_state":
@@ -709,10 +627,8 @@ func (x *fastReflection_Permission) Clear(fd protoreflect.FieldDescriptor) {
 		x.VpCurrentFees = uint64(0)
 	case "verana.perm.v1.Permission.vp_current_deposit":
 		x.VpCurrentDeposit = uint64(0)
-	case "verana.perm.v1.Permission.vp_summary_digest_sri":
-		x.VpSummaryDigestSri = ""
-	case "verana.perm.v1.Permission.vp_term_requested":
-		x.VpTermRequested = nil
+	case "verana.perm.v1.Permission.vp_summary_digest":
+		x.VpSummaryDigest = ""
 	case "verana.perm.v1.Permission.issuance_fee_discount":
 		x.IssuanceFeeDiscount = uint64(0)
 	case "verana.perm.v1.Permission.verification_fee_discount":
@@ -757,33 +673,21 @@ func (x *fastReflection_Permission) Get(descriptor protoreflect.FieldDescriptor)
 	case "verana.perm.v1.Permission.did":
 		value := x.Did
 		return protoreflect.ValueOfString(value)
-	case "verana.perm.v1.Permission.authority":
-		value := x.Authority
+	case "verana.perm.v1.Permission.corporation":
+		value := x.Corporation
 		return protoreflect.ValueOfString(value)
 	case "verana.perm.v1.Permission.created":
 		value := x.Created
 		return protoreflect.ValueOfMessage(value.ProtoReflect())
-	case "verana.perm.v1.Permission.created_by":
-		value := x.CreatedBy
-		return protoreflect.ValueOfString(value)
 	case "verana.perm.v1.Permission.adjusted":
 		value := x.Adjusted
 		return protoreflect.ValueOfMessage(value.ProtoReflect())
-	case "verana.perm.v1.Permission.adjusted_by":
-		value := x.AdjustedBy
-		return protoreflect.ValueOfString(value)
 	case "verana.perm.v1.Permission.slashed":
 		value := x.Slashed
 		return protoreflect.ValueOfMessage(value.ProtoReflect())
-	case "verana.perm.v1.Permission.slashed_by":
-		value := x.SlashedBy
-		return protoreflect.ValueOfString(value)
 	case "verana.perm.v1.Permission.repaid":
 		value := x.Repaid
 		return protoreflect.ValueOfMessage(value.ProtoReflect())
-	case "verana.perm.v1.Permission.repaid_by":
-		value := x.RepaidBy
-		return protoreflect.ValueOfString(value)
 	case "verana.perm.v1.Permission.effective_from":
 		value := x.EffectiveFrom
 		return protoreflect.ValueOfMessage(value.ProtoReflect())
@@ -814,12 +718,6 @@ func (x *fastReflection_Permission) Get(descriptor protoreflect.FieldDescriptor)
 	case "verana.perm.v1.Permission.revoked":
 		value := x.Revoked
 		return protoreflect.ValueOfMessage(value.ProtoReflect())
-	case "verana.perm.v1.Permission.revoked_by":
-		value := x.RevokedBy
-		return protoreflect.ValueOfString(value)
-	case "verana.perm.v1.Permission.country":
-		value := x.Country
-		return protoreflect.ValueOfString(value)
 	case "verana.perm.v1.Permission.validator_perm_id":
 		value := x.ValidatorPermId
 		return protoreflect.ValueOfUint64(value)
@@ -841,12 +739,9 @@ func (x *fastReflection_Permission) Get(descriptor protoreflect.FieldDescriptor)
 	case "verana.perm.v1.Permission.vp_current_deposit":
 		value := x.VpCurrentDeposit
 		return protoreflect.ValueOfUint64(value)
-	case "verana.perm.v1.Permission.vp_summary_digest_sri":
-		value := x.VpSummaryDigestSri
+	case "verana.perm.v1.Permission.vp_summary_digest":
+		value := x.VpSummaryDigest
 		return protoreflect.ValueOfString(value)
-	case "verana.perm.v1.Permission.vp_term_requested":
-		value := x.VpTermRequested
-		return protoreflect.ValueOfMessage(value.ProtoReflect())
 	case "verana.perm.v1.Permission.issuance_fee_discount":
 		value := x.IssuanceFeeDiscount
 		return protoreflect.ValueOfUint64(value)
@@ -905,24 +800,16 @@ func (x *fastReflection_Permission) Set(fd protoreflect.FieldDescriptor, value p
 		x.Type_ = (PermissionType)(value.Enum())
 	case "verana.perm.v1.Permission.did":
 		x.Did = value.Interface().(string)
-	case "verana.perm.v1.Permission.authority":
-		x.Authority = value.Interface().(string)
+	case "verana.perm.v1.Permission.corporation":
+		x.Corporation = value.Interface().(string)
 	case "verana.perm.v1.Permission.created":
 		x.Created = value.Message().Interface().(*timestamppb.Timestamp)
-	case "verana.perm.v1.Permission.created_by":
-		x.CreatedBy = value.Interface().(string)
 	case "verana.perm.v1.Permission.adjusted":
 		x.Adjusted = value.Message().Interface().(*timestamppb.Timestamp)
-	case "verana.perm.v1.Permission.adjusted_by":
-		x.AdjustedBy = value.Interface().(string)
 	case "verana.perm.v1.Permission.slashed":
 		x.Slashed = value.Message().Interface().(*timestamppb.Timestamp)
-	case "verana.perm.v1.Permission.slashed_by":
-		x.SlashedBy = value.Interface().(string)
 	case "verana.perm.v1.Permission.repaid":
 		x.Repaid = value.Message().Interface().(*timestamppb.Timestamp)
-	case "verana.perm.v1.Permission.repaid_by":
-		x.RepaidBy = value.Interface().(string)
 	case "verana.perm.v1.Permission.effective_from":
 		x.EffectiveFrom = value.Message().Interface().(*timestamppb.Timestamp)
 	case "verana.perm.v1.Permission.effective_until":
@@ -943,10 +830,6 @@ func (x *fastReflection_Permission) Set(fd protoreflect.FieldDescriptor, value p
 		x.RepaidDeposit = value.Uint()
 	case "verana.perm.v1.Permission.revoked":
 		x.Revoked = value.Message().Interface().(*timestamppb.Timestamp)
-	case "verana.perm.v1.Permission.revoked_by":
-		x.RevokedBy = value.Interface().(string)
-	case "verana.perm.v1.Permission.country":
-		x.Country = value.Interface().(string)
 	case "verana.perm.v1.Permission.validator_perm_id":
 		x.ValidatorPermId = value.Uint()
 	case "verana.perm.v1.Permission.vp_state":
@@ -961,10 +844,8 @@ func (x *fastReflection_Permission) Set(fd protoreflect.FieldDescriptor, value p
 		x.VpCurrentFees = value.Uint()
 	case "verana.perm.v1.Permission.vp_current_deposit":
 		x.VpCurrentDeposit = value.Uint()
-	case "verana.perm.v1.Permission.vp_summary_digest_sri":
-		x.VpSummaryDigestSri = value.Interface().(string)
-	case "verana.perm.v1.Permission.vp_term_requested":
-		x.VpTermRequested = value.Message().Interface().(*timestamppb.Timestamp)
+	case "verana.perm.v1.Permission.vp_summary_digest":
+		x.VpSummaryDigest = value.Interface().(string)
 	case "verana.perm.v1.Permission.issuance_fee_discount":
 		x.IssuanceFeeDiscount = value.Uint()
 	case "verana.perm.v1.Permission.verification_fee_discount":
@@ -1055,11 +936,6 @@ func (x *fastReflection_Permission) Mutable(fd protoreflect.FieldDescriptor) pro
 			x.VpLastStateChange = new(timestamppb.Timestamp)
 		}
 		return protoreflect.ValueOfMessage(x.VpLastStateChange.ProtoReflect())
-	case "verana.perm.v1.Permission.vp_term_requested":
-		if x.VpTermRequested == nil {
-			x.VpTermRequested = new(timestamppb.Timestamp)
-		}
-		return protoreflect.ValueOfMessage(x.VpTermRequested.ProtoReflect())
 	case "verana.perm.v1.Permission.vs_operator_authz_spend_limit":
 		if x.VsOperatorAuthzSpendLimit == nil {
 			x.VsOperatorAuthzSpendLimit = []*v1beta1.Coin{}
@@ -1085,16 +961,8 @@ func (x *fastReflection_Permission) Mutable(fd protoreflect.FieldDescriptor) pro
 		panic(fmt.Errorf("field type of message verana.perm.v1.Permission is not mutable"))
 	case "verana.perm.v1.Permission.did":
 		panic(fmt.Errorf("field did of message verana.perm.v1.Permission is not mutable"))
-	case "verana.perm.v1.Permission.authority":
-		panic(fmt.Errorf("field authority of message verana.perm.v1.Permission is not mutable"))
-	case "verana.perm.v1.Permission.created_by":
-		panic(fmt.Errorf("field created_by of message verana.perm.v1.Permission is not mutable"))
-	case "verana.perm.v1.Permission.adjusted_by":
-		panic(fmt.Errorf("field adjusted_by of message verana.perm.v1.Permission is not mutable"))
-	case "verana.perm.v1.Permission.slashed_by":
-		panic(fmt.Errorf("field slashed_by of message verana.perm.v1.Permission is not mutable"))
-	case "verana.perm.v1.Permission.repaid_by":
-		panic(fmt.Errorf("field repaid_by of message verana.perm.v1.Permission is not mutable"))
+	case "verana.perm.v1.Permission.corporation":
+		panic(fmt.Errorf("field corporation of message verana.perm.v1.Permission is not mutable"))
 	case "verana.perm.v1.Permission.validation_fees":
 		panic(fmt.Errorf("field validation_fees of message verana.perm.v1.Permission is not mutable"))
 	case "verana.perm.v1.Permission.issuance_fees":
@@ -1107,10 +975,6 @@ func (x *fastReflection_Permission) Mutable(fd protoreflect.FieldDescriptor) pro
 		panic(fmt.Errorf("field slashed_deposit of message verana.perm.v1.Permission is not mutable"))
 	case "verana.perm.v1.Permission.repaid_deposit":
 		panic(fmt.Errorf("field repaid_deposit of message verana.perm.v1.Permission is not mutable"))
-	case "verana.perm.v1.Permission.revoked_by":
-		panic(fmt.Errorf("field revoked_by of message verana.perm.v1.Permission is not mutable"))
-	case "verana.perm.v1.Permission.country":
-		panic(fmt.Errorf("field country of message verana.perm.v1.Permission is not mutable"))
 	case "verana.perm.v1.Permission.validator_perm_id":
 		panic(fmt.Errorf("field validator_perm_id of message verana.perm.v1.Permission is not mutable"))
 	case "verana.perm.v1.Permission.vp_state":
@@ -1121,8 +985,8 @@ func (x *fastReflection_Permission) Mutable(fd protoreflect.FieldDescriptor) pro
 		panic(fmt.Errorf("field vp_current_fees of message verana.perm.v1.Permission is not mutable"))
 	case "verana.perm.v1.Permission.vp_current_deposit":
 		panic(fmt.Errorf("field vp_current_deposit of message verana.perm.v1.Permission is not mutable"))
-	case "verana.perm.v1.Permission.vp_summary_digest_sri":
-		panic(fmt.Errorf("field vp_summary_digest_sri of message verana.perm.v1.Permission is not mutable"))
+	case "verana.perm.v1.Permission.vp_summary_digest":
+		panic(fmt.Errorf("field vp_summary_digest of message verana.perm.v1.Permission is not mutable"))
 	case "verana.perm.v1.Permission.issuance_fee_discount":
 		panic(fmt.Errorf("field issuance_fee_discount of message verana.perm.v1.Permission is not mutable"))
 	case "verana.perm.v1.Permission.verification_fee_discount":
@@ -1154,28 +1018,20 @@ func (x *fastReflection_Permission) NewField(fd protoreflect.FieldDescriptor) pr
 		return protoreflect.ValueOfEnum(0)
 	case "verana.perm.v1.Permission.did":
 		return protoreflect.ValueOfString("")
-	case "verana.perm.v1.Permission.authority":
+	case "verana.perm.v1.Permission.corporation":
 		return protoreflect.ValueOfString("")
 	case "verana.perm.v1.Permission.created":
 		m := new(timestamppb.Timestamp)
 		return protoreflect.ValueOfMessage(m.ProtoReflect())
-	case "verana.perm.v1.Permission.created_by":
-		return protoreflect.ValueOfString("")
 	case "verana.perm.v1.Permission.adjusted":
 		m := new(timestamppb.Timestamp)
 		return protoreflect.ValueOfMessage(m.ProtoReflect())
-	case "verana.perm.v1.Permission.adjusted_by":
-		return protoreflect.ValueOfString("")
 	case "verana.perm.v1.Permission.slashed":
 		m := new(timestamppb.Timestamp)
 		return protoreflect.ValueOfMessage(m.ProtoReflect())
-	case "verana.perm.v1.Permission.slashed_by":
-		return protoreflect.ValueOfString("")
 	case "verana.perm.v1.Permission.repaid":
 		m := new(timestamppb.Timestamp)
 		return protoreflect.ValueOfMessage(m.ProtoReflect())
-	case "verana.perm.v1.Permission.repaid_by":
-		return protoreflect.ValueOfString("")
 	case "verana.perm.v1.Permission.effective_from":
 		m := new(timestamppb.Timestamp)
 		return protoreflect.ValueOfMessage(m.ProtoReflect())
@@ -1200,10 +1056,6 @@ func (x *fastReflection_Permission) NewField(fd protoreflect.FieldDescriptor) pr
 	case "verana.perm.v1.Permission.revoked":
 		m := new(timestamppb.Timestamp)
 		return protoreflect.ValueOfMessage(m.ProtoReflect())
-	case "verana.perm.v1.Permission.revoked_by":
-		return protoreflect.ValueOfString("")
-	case "verana.perm.v1.Permission.country":
-		return protoreflect.ValueOfString("")
 	case "verana.perm.v1.Permission.validator_perm_id":
 		return protoreflect.ValueOfUint64(uint64(0))
 	case "verana.perm.v1.Permission.vp_state":
@@ -1220,11 +1072,8 @@ func (x *fastReflection_Permission) NewField(fd protoreflect.FieldDescriptor) pr
 		return protoreflect.ValueOfUint64(uint64(0))
 	case "verana.perm.v1.Permission.vp_current_deposit":
 		return protoreflect.ValueOfUint64(uint64(0))
-	case "verana.perm.v1.Permission.vp_summary_digest_sri":
+	case "verana.perm.v1.Permission.vp_summary_digest":
 		return protoreflect.ValueOfString("")
-	case "verana.perm.v1.Permission.vp_term_requested":
-		m := new(timestamppb.Timestamp)
-		return protoreflect.ValueOfMessage(m.ProtoReflect())
 	case "verana.perm.v1.Permission.issuance_fee_discount":
 		return protoreflect.ValueOfUint64(uint64(0))
 	case "verana.perm.v1.Permission.verification_fee_discount":
@@ -1326,7 +1175,7 @@ func (x *fastReflection_Permission) ProtoMethods() *protoiface.Methods {
 		if l > 0 {
 			n += 1 + l + runtime.Sov(uint64(l))
 		}
-		l = len(x.Authority)
+		l = len(x.Corporation)
 		if l > 0 {
 			n += 1 + l + runtime.Sov(uint64(l))
 		}
@@ -1334,32 +1183,16 @@ func (x *fastReflection_Permission) ProtoMethods() *protoiface.Methods {
 			l = options.Size(x.Created)
 			n += 1 + l + runtime.Sov(uint64(l))
 		}
-		l = len(x.CreatedBy)
-		if l > 0 {
-			n += 1 + l + runtime.Sov(uint64(l))
-		}
 		if x.Adjusted != nil {
 			l = options.Size(x.Adjusted)
-			n += 1 + l + runtime.Sov(uint64(l))
-		}
-		l = len(x.AdjustedBy)
-		if l > 0 {
 			n += 1 + l + runtime.Sov(uint64(l))
 		}
 		if x.Slashed != nil {
 			l = options.Size(x.Slashed)
 			n += 1 + l + runtime.Sov(uint64(l))
 		}
-		l = len(x.SlashedBy)
-		if l > 0 {
-			n += 1 + l + runtime.Sov(uint64(l))
-		}
 		if x.Repaid != nil {
 			l = options.Size(x.Repaid)
-			n += 1 + l + runtime.Sov(uint64(l))
-		}
-		l = len(x.RepaidBy)
-		if l > 0 {
 			n += 1 + l + runtime.Sov(uint64(l))
 		}
 		if x.EffectiveFrom != nil {
@@ -1396,14 +1229,6 @@ func (x *fastReflection_Permission) ProtoMethods() *protoiface.Methods {
 			l = options.Size(x.Revoked)
 			n += 2 + l + runtime.Sov(uint64(l))
 		}
-		l = len(x.RevokedBy)
-		if l > 0 {
-			n += 2 + l + runtime.Sov(uint64(l))
-		}
-		l = len(x.Country)
-		if l > 0 {
-			n += 2 + l + runtime.Sov(uint64(l))
-		}
 		if x.ValidatorPermId != 0 {
 			n += 2 + runtime.Sov(uint64(x.ValidatorPermId))
 		}
@@ -1427,12 +1252,8 @@ func (x *fastReflection_Permission) ProtoMethods() *protoiface.Methods {
 		if x.VpCurrentDeposit != 0 {
 			n += 2 + runtime.Sov(uint64(x.VpCurrentDeposit))
 		}
-		l = len(x.VpSummaryDigestSri)
+		l = len(x.VpSummaryDigest)
 		if l > 0 {
-			n += 2 + l + runtime.Sov(uint64(l))
-		}
-		if x.VpTermRequested != nil {
-			l = options.Size(x.VpTermRequested)
 			n += 2 + l + runtime.Sov(uint64(l))
 		}
 		if x.IssuanceFeeDiscount != 0 {
@@ -1595,26 +1416,10 @@ func (x *fastReflection_Permission) ProtoMethods() *protoiface.Methods {
 			i--
 			dAtA[i] = 0x98
 		}
-		if x.VpTermRequested != nil {
-			encoded, err := options.Marshal(x.VpTermRequested)
-			if err != nil {
-				return protoiface.MarshalOutput{
-					NoUnkeyedLiterals: input.NoUnkeyedLiterals,
-					Buf:               input.Buf,
-				}, err
-			}
-			i -= len(encoded)
-			copy(dAtA[i:], encoded)
-			i = runtime.EncodeVarint(dAtA, i, uint64(len(encoded)))
-			i--
-			dAtA[i] = 0x2
-			i--
-			dAtA[i] = 0x92
-		}
-		if len(x.VpSummaryDigestSri) > 0 {
-			i -= len(x.VpSummaryDigestSri)
-			copy(dAtA[i:], x.VpSummaryDigestSri)
-			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.VpSummaryDigestSri)))
+		if len(x.VpSummaryDigest) > 0 {
+			i -= len(x.VpSummaryDigest)
+			copy(dAtA[i:], x.VpSummaryDigest)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.VpSummaryDigest)))
 			i--
 			dAtA[i] = 0x2
 			i--
@@ -1686,24 +1491,6 @@ func (x *fastReflection_Permission) ProtoMethods() *protoiface.Methods {
 			dAtA[i] = 0x1
 			i--
 			dAtA[i] = 0xd0
-		}
-		if len(x.Country) > 0 {
-			i -= len(x.Country)
-			copy(dAtA[i:], x.Country)
-			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Country)))
-			i--
-			dAtA[i] = 0x1
-			i--
-			dAtA[i] = 0xca
-		}
-		if len(x.RevokedBy) > 0 {
-			i -= len(x.RevokedBy)
-			copy(dAtA[i:], x.RevokedBy)
-			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.RevokedBy)))
-			i--
-			dAtA[i] = 0x1
-			i--
-			dAtA[i] = 0xc2
 		}
 		if x.Revoked != nil {
 			encoded, err := options.Marshal(x.Revoked)
@@ -1807,13 +1594,6 @@ func (x *fastReflection_Permission) ProtoMethods() *protoiface.Methods {
 			i--
 			dAtA[i] = 0x72
 		}
-		if len(x.RepaidBy) > 0 {
-			i -= len(x.RepaidBy)
-			copy(dAtA[i:], x.RepaidBy)
-			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.RepaidBy)))
-			i--
-			dAtA[i] = 0x6a
-		}
 		if x.Repaid != nil {
 			encoded, err := options.Marshal(x.Repaid)
 			if err != nil {
@@ -1827,13 +1607,6 @@ func (x *fastReflection_Permission) ProtoMethods() *protoiface.Methods {
 			i = runtime.EncodeVarint(dAtA, i, uint64(len(encoded)))
 			i--
 			dAtA[i] = 0x62
-		}
-		if len(x.SlashedBy) > 0 {
-			i -= len(x.SlashedBy)
-			copy(dAtA[i:], x.SlashedBy)
-			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.SlashedBy)))
-			i--
-			dAtA[i] = 0x5a
 		}
 		if x.Slashed != nil {
 			encoded, err := options.Marshal(x.Slashed)
@@ -1849,13 +1622,6 @@ func (x *fastReflection_Permission) ProtoMethods() *protoiface.Methods {
 			i--
 			dAtA[i] = 0x52
 		}
-		if len(x.AdjustedBy) > 0 {
-			i -= len(x.AdjustedBy)
-			copy(dAtA[i:], x.AdjustedBy)
-			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.AdjustedBy)))
-			i--
-			dAtA[i] = 0x4a
-		}
 		if x.Adjusted != nil {
 			encoded, err := options.Marshal(x.Adjusted)
 			if err != nil {
@@ -1869,13 +1635,6 @@ func (x *fastReflection_Permission) ProtoMethods() *protoiface.Methods {
 			i = runtime.EncodeVarint(dAtA, i, uint64(len(encoded)))
 			i--
 			dAtA[i] = 0x42
-		}
-		if len(x.CreatedBy) > 0 {
-			i -= len(x.CreatedBy)
-			copy(dAtA[i:], x.CreatedBy)
-			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.CreatedBy)))
-			i--
-			dAtA[i] = 0x3a
 		}
 		if x.Created != nil {
 			encoded, err := options.Marshal(x.Created)
@@ -1891,10 +1650,10 @@ func (x *fastReflection_Permission) ProtoMethods() *protoiface.Methods {
 			i--
 			dAtA[i] = 0x32
 		}
-		if len(x.Authority) > 0 {
-			i -= len(x.Authority)
-			copy(dAtA[i:], x.Authority)
-			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Authority)))
+		if len(x.Corporation) > 0 {
+			i -= len(x.Corporation)
+			copy(dAtA[i:], x.Corporation)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Corporation)))
 			i--
 			dAtA[i] = 0x2a
 		}
@@ -2060,7 +1819,7 @@ func (x *fastReflection_Permission) ProtoMethods() *protoiface.Methods {
 				iNdEx = postIndex
 			case 5:
 				if wireType != 2 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Authority", wireType)
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Corporation", wireType)
 				}
 				var stringLen uint64
 				for shift := uint(0); ; shift += 7 {
@@ -2088,7 +1847,7 @@ func (x *fastReflection_Permission) ProtoMethods() *protoiface.Methods {
 				if postIndex > l {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
 				}
-				x.Authority = string(dAtA[iNdEx:postIndex])
+				x.Corporation = string(dAtA[iNdEx:postIndex])
 				iNdEx = postIndex
 			case 6:
 				if wireType != 2 {
@@ -2126,38 +1885,6 @@ func (x *fastReflection_Permission) ProtoMethods() *protoiface.Methods {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, err
 				}
 				iNdEx = postIndex
-			case 7:
-				if wireType != 2 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field CreatedBy", wireType)
-				}
-				var stringLen uint64
-				for shift := uint(0); ; shift += 7 {
-					if shift >= 64 {
-						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
-					}
-					if iNdEx >= l {
-						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
-					}
-					b := dAtA[iNdEx]
-					iNdEx++
-					stringLen |= uint64(b&0x7F) << shift
-					if b < 0x80 {
-						break
-					}
-				}
-				intStringLen := int(stringLen)
-				if intStringLen < 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
-				}
-				postIndex := iNdEx + intStringLen
-				if postIndex < 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
-				}
-				if postIndex > l {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
-				}
-				x.CreatedBy = string(dAtA[iNdEx:postIndex])
-				iNdEx = postIndex
 			case 8:
 				if wireType != 2 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Adjusted", wireType)
@@ -2193,38 +1920,6 @@ func (x *fastReflection_Permission) ProtoMethods() *protoiface.Methods {
 				if err := options.Unmarshal(dAtA[iNdEx:postIndex], x.Adjusted); err != nil {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, err
 				}
-				iNdEx = postIndex
-			case 9:
-				if wireType != 2 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field AdjustedBy", wireType)
-				}
-				var stringLen uint64
-				for shift := uint(0); ; shift += 7 {
-					if shift >= 64 {
-						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
-					}
-					if iNdEx >= l {
-						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
-					}
-					b := dAtA[iNdEx]
-					iNdEx++
-					stringLen |= uint64(b&0x7F) << shift
-					if b < 0x80 {
-						break
-					}
-				}
-				intStringLen := int(stringLen)
-				if intStringLen < 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
-				}
-				postIndex := iNdEx + intStringLen
-				if postIndex < 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
-				}
-				if postIndex > l {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
-				}
-				x.AdjustedBy = string(dAtA[iNdEx:postIndex])
 				iNdEx = postIndex
 			case 10:
 				if wireType != 2 {
@@ -2262,38 +1957,6 @@ func (x *fastReflection_Permission) ProtoMethods() *protoiface.Methods {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, err
 				}
 				iNdEx = postIndex
-			case 11:
-				if wireType != 2 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field SlashedBy", wireType)
-				}
-				var stringLen uint64
-				for shift := uint(0); ; shift += 7 {
-					if shift >= 64 {
-						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
-					}
-					if iNdEx >= l {
-						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
-					}
-					b := dAtA[iNdEx]
-					iNdEx++
-					stringLen |= uint64(b&0x7F) << shift
-					if b < 0x80 {
-						break
-					}
-				}
-				intStringLen := int(stringLen)
-				if intStringLen < 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
-				}
-				postIndex := iNdEx + intStringLen
-				if postIndex < 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
-				}
-				if postIndex > l {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
-				}
-				x.SlashedBy = string(dAtA[iNdEx:postIndex])
-				iNdEx = postIndex
 			case 12:
 				if wireType != 2 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Repaid", wireType)
@@ -2329,38 +1992,6 @@ func (x *fastReflection_Permission) ProtoMethods() *protoiface.Methods {
 				if err := options.Unmarshal(dAtA[iNdEx:postIndex], x.Repaid); err != nil {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, err
 				}
-				iNdEx = postIndex
-			case 13:
-				if wireType != 2 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field RepaidBy", wireType)
-				}
-				var stringLen uint64
-				for shift := uint(0); ; shift += 7 {
-					if shift >= 64 {
-						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
-					}
-					if iNdEx >= l {
-						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
-					}
-					b := dAtA[iNdEx]
-					iNdEx++
-					stringLen |= uint64(b&0x7F) << shift
-					if b < 0x80 {
-						break
-					}
-				}
-				intStringLen := int(stringLen)
-				if intStringLen < 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
-				}
-				postIndex := iNdEx + intStringLen
-				if postIndex < 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
-				}
-				if postIndex > l {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
-				}
-				x.RepaidBy = string(dAtA[iNdEx:postIndex])
 				iNdEx = postIndex
 			case 14:
 				if wireType != 2 {
@@ -2620,70 +2251,6 @@ func (x *fastReflection_Permission) ProtoMethods() *protoiface.Methods {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, err
 				}
 				iNdEx = postIndex
-			case 24:
-				if wireType != 2 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field RevokedBy", wireType)
-				}
-				var stringLen uint64
-				for shift := uint(0); ; shift += 7 {
-					if shift >= 64 {
-						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
-					}
-					if iNdEx >= l {
-						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
-					}
-					b := dAtA[iNdEx]
-					iNdEx++
-					stringLen |= uint64(b&0x7F) << shift
-					if b < 0x80 {
-						break
-					}
-				}
-				intStringLen := int(stringLen)
-				if intStringLen < 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
-				}
-				postIndex := iNdEx + intStringLen
-				if postIndex < 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
-				}
-				if postIndex > l {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
-				}
-				x.RevokedBy = string(dAtA[iNdEx:postIndex])
-				iNdEx = postIndex
-			case 25:
-				if wireType != 2 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Country", wireType)
-				}
-				var stringLen uint64
-				for shift := uint(0); ; shift += 7 {
-					if shift >= 64 {
-						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
-					}
-					if iNdEx >= l {
-						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
-					}
-					b := dAtA[iNdEx]
-					iNdEx++
-					stringLen |= uint64(b&0x7F) << shift
-					if b < 0x80 {
-						break
-					}
-				}
-				intStringLen := int(stringLen)
-				if intStringLen < 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
-				}
-				postIndex := iNdEx + intStringLen
-				if postIndex < 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
-				}
-				if postIndex > l {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
-				}
-				x.Country = string(dAtA[iNdEx:postIndex])
-				iNdEx = postIndex
 			case 26:
 				if wireType != 0 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field ValidatorPermId", wireType)
@@ -2853,7 +2420,7 @@ func (x *fastReflection_Permission) ProtoMethods() *protoiface.Methods {
 				}
 			case 33:
 				if wireType != 2 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field VpSummaryDigestSri", wireType)
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field VpSummaryDigest", wireType)
 				}
 				var stringLen uint64
 				for shift := uint(0); ; shift += 7 {
@@ -2881,43 +2448,7 @@ func (x *fastReflection_Permission) ProtoMethods() *protoiface.Methods {
 				if postIndex > l {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
 				}
-				x.VpSummaryDigestSri = string(dAtA[iNdEx:postIndex])
-				iNdEx = postIndex
-			case 34:
-				if wireType != 2 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field VpTermRequested", wireType)
-				}
-				var msglen int
-				for shift := uint(0); ; shift += 7 {
-					if shift >= 64 {
-						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
-					}
-					if iNdEx >= l {
-						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
-					}
-					b := dAtA[iNdEx]
-					iNdEx++
-					msglen |= int(b&0x7F) << shift
-					if b < 0x80 {
-						break
-					}
-				}
-				if msglen < 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
-				}
-				postIndex := iNdEx + msglen
-				if postIndex < 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
-				}
-				if postIndex > l {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
-				}
-				if x.VpTermRequested == nil {
-					x.VpTermRequested = &timestamppb.Timestamp{}
-				}
-				if err := options.Unmarshal(dAtA[iNdEx:postIndex], x.VpTermRequested); err != nil {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, err
-				}
+				x.VpSummaryDigest = string(dAtA[iNdEx:postIndex])
 				iNdEx = postIndex
 			case 35:
 				if wireType != 0 {
@@ -3222,7 +2753,7 @@ func (x *_PermissionSession_5_list) IsValid() bool {
 var (
 	md_PermissionSession                 protoreflect.MessageDescriptor
 	fd_PermissionSession_id              protoreflect.FieldDescriptor
-	fd_PermissionSession_authority       protoreflect.FieldDescriptor
+	fd_PermissionSession_corporation     protoreflect.FieldDescriptor
 	fd_PermissionSession_vs_operator     protoreflect.FieldDescriptor
 	fd_PermissionSession_agent_perm_id   protoreflect.FieldDescriptor
 	fd_PermissionSession_session_records protoreflect.FieldDescriptor
@@ -3234,7 +2765,7 @@ func init() {
 	file_verana_perm_v1_types_proto_init()
 	md_PermissionSession = File_verana_perm_v1_types_proto.Messages().ByName("PermissionSession")
 	fd_PermissionSession_id = md_PermissionSession.Fields().ByName("id")
-	fd_PermissionSession_authority = md_PermissionSession.Fields().ByName("authority")
+	fd_PermissionSession_corporation = md_PermissionSession.Fields().ByName("corporation")
 	fd_PermissionSession_vs_operator = md_PermissionSession.Fields().ByName("vs_operator")
 	fd_PermissionSession_agent_perm_id = md_PermissionSession.Fields().ByName("agent_perm_id")
 	fd_PermissionSession_session_records = md_PermissionSession.Fields().ByName("session_records")
@@ -3313,9 +2844,9 @@ func (x *fastReflection_PermissionSession) Range(f func(protoreflect.FieldDescri
 			return
 		}
 	}
-	if x.Authority != "" {
-		value := protoreflect.ValueOfString(x.Authority)
-		if !f(fd_PermissionSession_authority, value) {
+	if x.Corporation != "" {
+		value := protoreflect.ValueOfString(x.Corporation)
+		if !f(fd_PermissionSession_corporation, value) {
 			return
 		}
 	}
@@ -3366,8 +2897,8 @@ func (x *fastReflection_PermissionSession) Has(fd protoreflect.FieldDescriptor) 
 	switch fd.FullName() {
 	case "verana.perm.v1.PermissionSession.id":
 		return x.Id != ""
-	case "verana.perm.v1.PermissionSession.authority":
-		return x.Authority != ""
+	case "verana.perm.v1.PermissionSession.corporation":
+		return x.Corporation != ""
 	case "verana.perm.v1.PermissionSession.vs_operator":
 		return x.VsOperator != ""
 	case "verana.perm.v1.PermissionSession.agent_perm_id":
@@ -3396,8 +2927,8 @@ func (x *fastReflection_PermissionSession) Clear(fd protoreflect.FieldDescriptor
 	switch fd.FullName() {
 	case "verana.perm.v1.PermissionSession.id":
 		x.Id = ""
-	case "verana.perm.v1.PermissionSession.authority":
-		x.Authority = ""
+	case "verana.perm.v1.PermissionSession.corporation":
+		x.Corporation = ""
 	case "verana.perm.v1.PermissionSession.vs_operator":
 		x.VsOperator = ""
 	case "verana.perm.v1.PermissionSession.agent_perm_id":
@@ -3427,8 +2958,8 @@ func (x *fastReflection_PermissionSession) Get(descriptor protoreflect.FieldDesc
 	case "verana.perm.v1.PermissionSession.id":
 		value := x.Id
 		return protoreflect.ValueOfString(value)
-	case "verana.perm.v1.PermissionSession.authority":
-		value := x.Authority
+	case "verana.perm.v1.PermissionSession.corporation":
+		value := x.Corporation
 		return protoreflect.ValueOfString(value)
 	case "verana.perm.v1.PermissionSession.vs_operator":
 		value := x.VsOperator
@@ -3470,8 +3001,8 @@ func (x *fastReflection_PermissionSession) Set(fd protoreflect.FieldDescriptor, 
 	switch fd.FullName() {
 	case "verana.perm.v1.PermissionSession.id":
 		x.Id = value.Interface().(string)
-	case "verana.perm.v1.PermissionSession.authority":
-		x.Authority = value.Interface().(string)
+	case "verana.perm.v1.PermissionSession.corporation":
+		x.Corporation = value.Interface().(string)
 	case "verana.perm.v1.PermissionSession.vs_operator":
 		x.VsOperator = value.Interface().(string)
 	case "verana.perm.v1.PermissionSession.agent_perm_id":
@@ -3522,8 +3053,8 @@ func (x *fastReflection_PermissionSession) Mutable(fd protoreflect.FieldDescript
 		return protoreflect.ValueOfMessage(x.Modified.ProtoReflect())
 	case "verana.perm.v1.PermissionSession.id":
 		panic(fmt.Errorf("field id of message verana.perm.v1.PermissionSession is not mutable"))
-	case "verana.perm.v1.PermissionSession.authority":
-		panic(fmt.Errorf("field authority of message verana.perm.v1.PermissionSession is not mutable"))
+	case "verana.perm.v1.PermissionSession.corporation":
+		panic(fmt.Errorf("field corporation of message verana.perm.v1.PermissionSession is not mutable"))
 	case "verana.perm.v1.PermissionSession.vs_operator":
 		panic(fmt.Errorf("field vs_operator of message verana.perm.v1.PermissionSession is not mutable"))
 	case "verana.perm.v1.PermissionSession.agent_perm_id":
@@ -3543,7 +3074,7 @@ func (x *fastReflection_PermissionSession) NewField(fd protoreflect.FieldDescrip
 	switch fd.FullName() {
 	case "verana.perm.v1.PermissionSession.id":
 		return protoreflect.ValueOfString("")
-	case "verana.perm.v1.PermissionSession.authority":
+	case "verana.perm.v1.PermissionSession.corporation":
 		return protoreflect.ValueOfString("")
 	case "verana.perm.v1.PermissionSession.vs_operator":
 		return protoreflect.ValueOfString("")
@@ -3631,7 +3162,7 @@ func (x *fastReflection_PermissionSession) ProtoMethods() *protoiface.Methods {
 		if l > 0 {
 			n += 1 + l + runtime.Sov(uint64(l))
 		}
-		l = len(x.Authority)
+		l = len(x.Corporation)
 		if l > 0 {
 			n += 1 + l + runtime.Sov(uint64(l))
 		}
@@ -3741,10 +3272,10 @@ func (x *fastReflection_PermissionSession) ProtoMethods() *protoiface.Methods {
 			i--
 			dAtA[i] = 0x1a
 		}
-		if len(x.Authority) > 0 {
-			i -= len(x.Authority)
-			copy(dAtA[i:], x.Authority)
-			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Authority)))
+		if len(x.Corporation) > 0 {
+			i -= len(x.Corporation)
+			copy(dAtA[i:], x.Corporation)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Corporation)))
 			i--
 			dAtA[i] = 0x12
 		}
@@ -3838,7 +3369,7 @@ func (x *fastReflection_PermissionSession) ProtoMethods() *protoiface.Methods {
 				iNdEx = postIndex
 			case 2:
 				if wireType != 2 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Authority", wireType)
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Corporation", wireType)
 				}
 				var stringLen uint64
 				for shift := uint(0); ; shift += 7 {
@@ -3866,7 +3397,7 @@ func (x *fastReflection_PermissionSession) ProtoMethods() *protoiface.Methods {
 				if postIndex > l {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
 				}
-				x.Authority = string(dAtA[iNdEx:postIndex])
+				x.Corporation = string(dAtA[iNdEx:postIndex])
 				iNdEx = postIndex
 			case 3:
 				if wireType != 2 {
@@ -5125,8 +4656,6 @@ const (
 	ValidationState_VALIDATION_STATE_UNSPECIFIED ValidationState = 0
 	ValidationState_PENDING                      ValidationState = 1
 	ValidationState_VALIDATED                    ValidationState = 2
-	ValidationState_TERMINATED                   ValidationState = 3
-	ValidationState_TERMINATION_REQUESTED        ValidationState = 4
 )
 
 // Enum value maps for ValidationState.
@@ -5135,15 +4664,11 @@ var (
 		0: "VALIDATION_STATE_UNSPECIFIED",
 		1: "PENDING",
 		2: "VALIDATED",
-		3: "TERMINATED",
-		4: "TERMINATION_REQUESTED",
 	}
 	ValidationState_value = map[string]int32{
 		"VALIDATION_STATE_UNSPECIFIED": 0,
 		"PENDING":                      1,
 		"VALIDATED":                    2,
-		"TERMINATED":                   3,
-		"TERMINATION_REQUESTED":        4,
 	}
 )
 
@@ -5179,35 +4704,25 @@ type Permission struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id         uint64                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	SchemaId   uint64                 `protobuf:"varint,2,opt,name=schema_id,json=schemaId,proto3" json:"schema_id,omitempty"`
-	Type_      PermissionType         `protobuf:"varint,3,opt,name=type,proto3,enum=verana.perm.v1.PermissionType" json:"type,omitempty"`
-	Did        string                 `protobuf:"bytes,4,opt,name=did,proto3" json:"did,omitempty"`
-	Authority  string                 `protobuf:"bytes,5,opt,name=authority,proto3" json:"authority,omitempty"`
-	Created    *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=created,proto3" json:"created,omitempty"`
-	CreatedBy  string                 `protobuf:"bytes,7,opt,name=created_by,json=createdBy,proto3" json:"created_by,omitempty"`
-	Adjusted   *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=adjusted,proto3" json:"adjusted,omitempty"`
-	AdjustedBy string                 `protobuf:"bytes,9,opt,name=adjusted_by,json=adjustedBy,proto3" json:"adjusted_by,omitempty"`
-	// NEW: Slashing related fields
-	Slashed   *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=slashed,proto3" json:"slashed,omitempty"`
-	SlashedBy string                 `protobuf:"bytes,11,opt,name=slashed_by,json=slashedBy,proto3" json:"slashed_by,omitempty"`
-	Repaid    *timestamppb.Timestamp `protobuf:"bytes,12,opt,name=repaid,proto3" json:"repaid,omitempty"`
-	RepaidBy  string                 `protobuf:"bytes,13,opt,name=repaid_by,json=repaidBy,proto3" json:"repaid_by,omitempty"`
-	// END NEW
-	EffectiveFrom    *timestamppb.Timestamp `protobuf:"bytes,14,opt,name=effective_from,json=effectiveFrom,proto3" json:"effective_from,omitempty"`
-	EffectiveUntil   *timestamppb.Timestamp `protobuf:"bytes,15,opt,name=effective_until,json=effectiveUntil,proto3" json:"effective_until,omitempty"`
-	Modified         *timestamppb.Timestamp `protobuf:"bytes,16,opt,name=modified,proto3" json:"modified,omitempty"`
-	ValidationFees   uint64                 `protobuf:"varint,17,opt,name=validation_fees,json=validationFees,proto3" json:"validation_fees,omitempty"`
-	IssuanceFees     uint64                 `protobuf:"varint,18,opt,name=issuance_fees,json=issuanceFees,proto3" json:"issuance_fees,omitempty"`
-	VerificationFees uint64                 `protobuf:"varint,19,opt,name=verification_fees,json=verificationFees,proto3" json:"verification_fees,omitempty"`
-	Deposit          uint64                 `protobuf:"varint,20,opt,name=deposit,proto3" json:"deposit,omitempty"`
-	// NEW: Slashing deposit fields
-	SlashedDeposit uint64 `protobuf:"varint,21,opt,name=slashed_deposit,json=slashedDeposit,proto3" json:"slashed_deposit,omitempty"`
-	RepaidDeposit  uint64 `protobuf:"varint,22,opt,name=repaid_deposit,json=repaidDeposit,proto3" json:"repaid_deposit,omitempty"`
-	// END NEW
+	Id                 uint64                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	SchemaId           uint64                 `protobuf:"varint,2,opt,name=schema_id,json=schemaId,proto3" json:"schema_id,omitempty"`
+	Type_              PermissionType         `protobuf:"varint,3,opt,name=type,proto3,enum=verana.perm.v1.PermissionType" json:"type,omitempty"`
+	Did                string                 `protobuf:"bytes,4,opt,name=did,proto3" json:"did,omitempty"`
+	Corporation        string                 `protobuf:"bytes,5,opt,name=corporation,proto3" json:"corporation,omitempty"`
+	Created            *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=created,proto3" json:"created,omitempty"`
+	Adjusted           *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=adjusted,proto3" json:"adjusted,omitempty"`
+	Slashed            *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=slashed,proto3" json:"slashed,omitempty"`
+	Repaid             *timestamppb.Timestamp `protobuf:"bytes,12,opt,name=repaid,proto3" json:"repaid,omitempty"`
+	EffectiveFrom      *timestamppb.Timestamp `protobuf:"bytes,14,opt,name=effective_from,json=effectiveFrom,proto3" json:"effective_from,omitempty"`
+	EffectiveUntil     *timestamppb.Timestamp `protobuf:"bytes,15,opt,name=effective_until,json=effectiveUntil,proto3" json:"effective_until,omitempty"`
+	Modified           *timestamppb.Timestamp `protobuf:"bytes,16,opt,name=modified,proto3" json:"modified,omitempty"`
+	ValidationFees     uint64                 `protobuf:"varint,17,opt,name=validation_fees,json=validationFees,proto3" json:"validation_fees,omitempty"`
+	IssuanceFees       uint64                 `protobuf:"varint,18,opt,name=issuance_fees,json=issuanceFees,proto3" json:"issuance_fees,omitempty"`
+	VerificationFees   uint64                 `protobuf:"varint,19,opt,name=verification_fees,json=verificationFees,proto3" json:"verification_fees,omitempty"`
+	Deposit            uint64                 `protobuf:"varint,20,opt,name=deposit,proto3" json:"deposit,omitempty"`
+	SlashedDeposit     uint64                 `protobuf:"varint,21,opt,name=slashed_deposit,json=slashedDeposit,proto3" json:"slashed_deposit,omitempty"`
+	RepaidDeposit      uint64                 `protobuf:"varint,22,opt,name=repaid_deposit,json=repaidDeposit,proto3" json:"repaid_deposit,omitempty"`
 	Revoked            *timestamppb.Timestamp `protobuf:"bytes,23,opt,name=revoked,proto3" json:"revoked,omitempty"`
-	RevokedBy          string                 `protobuf:"bytes,24,opt,name=revoked_by,json=revokedBy,proto3" json:"revoked_by,omitempty"`
-	Country            string                 `protobuf:"bytes,25,opt,name=country,proto3" json:"country,omitempty"`
 	ValidatorPermId    uint64                 `protobuf:"varint,26,opt,name=validator_perm_id,json=validatorPermId,proto3" json:"validator_perm_id,omitempty"`
 	VpState            ValidationState        `protobuf:"varint,27,opt,name=vp_state,json=vpState,proto3,enum=verana.perm.v1.ValidationState" json:"vp_state,omitempty"`
 	VpExp              *timestamppb.Timestamp `protobuf:"bytes,28,opt,name=vp_exp,json=vpExp,proto3" json:"vp_exp,omitempty"`
@@ -5215,12 +4730,11 @@ type Permission struct {
 	VpValidatorDeposit uint64                 `protobuf:"varint,30,opt,name=vp_validator_deposit,json=vpValidatorDeposit,proto3" json:"vp_validator_deposit,omitempty"`
 	VpCurrentFees      uint64                 `protobuf:"varint,31,opt,name=vp_current_fees,json=vpCurrentFees,proto3" json:"vp_current_fees,omitempty"`
 	VpCurrentDeposit   uint64                 `protobuf:"varint,32,opt,name=vp_current_deposit,json=vpCurrentDeposit,proto3" json:"vp_current_deposit,omitempty"`
-	VpSummaryDigestSri string                 `protobuf:"bytes,33,opt,name=vp_summary_digest_sri,json=vpSummaryDigestSri,proto3" json:"vp_summary_digest_sri,omitempty"`
-	VpTermRequested    *timestamppb.Timestamp `protobuf:"bytes,34,opt,name=vp_term_requested,json=vpTermRequested,proto3" json:"vp_term_requested,omitempty"`
-	// Fee discount fields (scaled: 0 = 0.0, 10000 = 1.0, range 0-10000)
-	// Per Issue #94: spec merged exemption and discount into single *_fee_discount field
-	IssuanceFeeDiscount     uint64 `protobuf:"varint,35,opt,name=issuance_fee_discount,json=issuanceFeeDiscount,proto3" json:"issuance_fee_discount,omitempty"`             // Issuance fee discount (0-10000, where 10000 = 100% discount)
-	VerificationFeeDiscount uint64 `protobuf:"varint,36,opt,name=verification_fee_discount,json=verificationFeeDiscount,proto3" json:"verification_fee_discount,omitempty"` // Verification fee discount (0-10000, where 10000 = 100% discount)
+	VpSummaryDigest    string                 `protobuf:"bytes,33,opt,name=vp_summary_digest,json=vpSummaryDigest,proto3" json:"vp_summary_digest,omitempty"`
+	// TODO(spec v4): Fee discount should be LegacyDec in [0, 1] per spec.
+	// Currently scaled 0..10000 for compatibility; full migration deferred.
+	IssuanceFeeDiscount     uint64 `protobuf:"varint,35,opt,name=issuance_fee_discount,json=issuanceFeeDiscount,proto3" json:"issuance_fee_discount,omitempty"`
+	VerificationFeeDiscount uint64 `protobuf:"varint,36,opt,name=verification_fee_discount,json=verificationFeeDiscount,proto3" json:"verification_fee_discount,omitempty"`
 	// VS Operator fields (spec v4)
 	VsOperator                   string               `protobuf:"bytes,37,opt,name=vs_operator,json=vsOperator,proto3" json:"vs_operator,omitempty"`
 	VsOperatorAuthzEnabled       bool                 `protobuf:"varint,38,opt,name=vs_operator_authz_enabled,json=vsOperatorAuthzEnabled,proto3" json:"vs_operator_authz_enabled,omitempty"`
@@ -5278,9 +4792,9 @@ func (x *Permission) GetDid() string {
 	return ""
 }
 
-func (x *Permission) GetAuthority() string {
+func (x *Permission) GetCorporation() string {
 	if x != nil {
-		return x.Authority
+		return x.Corporation
 	}
 	return ""
 }
@@ -5292,25 +4806,11 @@ func (x *Permission) GetCreated() *timestamppb.Timestamp {
 	return nil
 }
 
-func (x *Permission) GetCreatedBy() string {
-	if x != nil {
-		return x.CreatedBy
-	}
-	return ""
-}
-
 func (x *Permission) GetAdjusted() *timestamppb.Timestamp {
 	if x != nil {
 		return x.Adjusted
 	}
 	return nil
-}
-
-func (x *Permission) GetAdjustedBy() string {
-	if x != nil {
-		return x.AdjustedBy
-	}
-	return ""
 }
 
 func (x *Permission) GetSlashed() *timestamppb.Timestamp {
@@ -5320,25 +4820,11 @@ func (x *Permission) GetSlashed() *timestamppb.Timestamp {
 	return nil
 }
 
-func (x *Permission) GetSlashedBy() string {
-	if x != nil {
-		return x.SlashedBy
-	}
-	return ""
-}
-
 func (x *Permission) GetRepaid() *timestamppb.Timestamp {
 	if x != nil {
 		return x.Repaid
 	}
 	return nil
-}
-
-func (x *Permission) GetRepaidBy() string {
-	if x != nil {
-		return x.RepaidBy
-	}
-	return ""
 }
 
 func (x *Permission) GetEffectiveFrom() *timestamppb.Timestamp {
@@ -5411,20 +4897,6 @@ func (x *Permission) GetRevoked() *timestamppb.Timestamp {
 	return nil
 }
 
-func (x *Permission) GetRevokedBy() string {
-	if x != nil {
-		return x.RevokedBy
-	}
-	return ""
-}
-
-func (x *Permission) GetCountry() string {
-	if x != nil {
-		return x.Country
-	}
-	return ""
-}
-
 func (x *Permission) GetValidatorPermId() uint64 {
 	if x != nil {
 		return x.ValidatorPermId
@@ -5474,18 +4946,11 @@ func (x *Permission) GetVpCurrentDeposit() uint64 {
 	return 0
 }
 
-func (x *Permission) GetVpSummaryDigestSri() string {
+func (x *Permission) GetVpSummaryDigest() string {
 	if x != nil {
-		return x.VpSummaryDigestSri
+		return x.VpSummaryDigest
 	}
 	return ""
-}
-
-func (x *Permission) GetVpTermRequested() *timestamppb.Timestamp {
-	if x != nil {
-		return x.VpTermRequested
-	}
-	return nil
 }
 
 func (x *Permission) GetIssuanceFeeDiscount() uint64 {
@@ -5550,7 +5015,7 @@ type PermissionSession struct {
 	unknownFields protoimpl.UnknownFields
 
 	Id             string                     `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Authority      string                     `protobuf:"bytes,2,opt,name=authority,proto3" json:"authority,omitempty"`                     // group account that owns this session
+	Corporation    string                     `protobuf:"bytes,2,opt,name=corporation,proto3" json:"corporation,omitempty"`                 // group account that owns this session
 	VsOperator     string                     `protobuf:"bytes,3,opt,name=vs_operator,json=vsOperator,proto3" json:"vs_operator,omitempty"` // the VS operator account
 	AgentPermId    uint64                     `protobuf:"varint,4,opt,name=agent_perm_id,json=agentPermId,proto3" json:"agent_perm_id,omitempty"`
 	SessionRecords []*PermissionSessionRecord `protobuf:"bytes,5,rep,name=session_records,json=sessionRecords,proto3" json:"session_records,omitempty"`
@@ -5585,9 +5050,9 @@ func (x *PermissionSession) GetId() string {
 	return ""
 }
 
-func (x *PermissionSession) GetAuthority() string {
+func (x *PermissionSession) GetCorporation() string {
 	if x != nil {
-		return x.Authority
+		return x.Corporation
 	}
 	return ""
 }
@@ -5738,7 +5203,7 @@ var file_verana_perm_v1_types_proto_rawDesc = []byte{
 	0x66, 0x2f, 0x64, 0x75, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f,
 	0x1a, 0x1f, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75,
 	0x66, 0x2f, 0x74, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x2e, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x22, 0x90, 0x13, 0x0a, 0x0a, 0x50, 0x65, 0x72, 0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e,
+	0x6f, 0x22, 0x88, 0x10, 0x0a, 0x0a, 0x50, 0x65, 0x72, 0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e,
 	0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04, 0x52, 0x02, 0x69, 0x64,
 	0x12, 0x1b, 0x0a, 0x09, 0x73, 0x63, 0x68, 0x65, 0x6d, 0x61, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20,
 	0x01, 0x28, 0x04, 0x52, 0x08, 0x73, 0x63, 0x68, 0x65, 0x6d, 0x61, 0x49, 0x64, 0x12, 0x32, 0x0a,
@@ -5746,39 +5211,25 @@ var file_verana_perm_v1_types_proto_rawDesc = []byte{
 	0x72, 0x61, 0x6e, 0x61, 0x2e, 0x70, 0x65, 0x72, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x50, 0x65, 0x72,
 	0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x54, 0x79, 0x70, 0x65, 0x52, 0x04, 0x74, 0x79, 0x70,
 	0x65, 0x12, 0x10, 0x0a, 0x03, 0x64, 0x69, 0x64, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03,
-	0x64, 0x69, 0x64, 0x12, 0x36, 0x0a, 0x09, 0x61, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x74, 0x79,
-	0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d,
-	0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67,
-	0x52, 0x09, 0x61, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x74, 0x79, 0x12, 0x3a, 0x0a, 0x07, 0x63,
-	0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x18, 0x06, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67,
-	0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54,
-	0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x42, 0x04, 0x90, 0xdf, 0x1f, 0x01, 0x52, 0x07,
-	0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x12, 0x37, 0x0a, 0x0a, 0x63, 0x72, 0x65, 0x61, 0x74,
-	0x65, 0x64, 0x5f, 0x62, 0x79, 0x18, 0x07, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d,
-	0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53,
-	0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x09, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x42, 0x79,
-	0x12, 0x3c, 0x0a, 0x08, 0x61, 0x64, 0x6a, 0x75, 0x73, 0x74, 0x65, 0x64, 0x18, 0x08, 0x20, 0x01,
-	0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x42, 0x04,
-	0x90, 0xdf, 0x1f, 0x01, 0x52, 0x08, 0x61, 0x64, 0x6a, 0x75, 0x73, 0x74, 0x65, 0x64, 0x12, 0x39,
-	0x0a, 0x0b, 0x61, 0x64, 0x6a, 0x75, 0x73, 0x74, 0x65, 0x64, 0x5f, 0x62, 0x79, 0x18, 0x09, 0x20,
-	0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e,
-	0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x0a, 0x61,
-	0x64, 0x6a, 0x75, 0x73, 0x74, 0x65, 0x64, 0x42, 0x79, 0x12, 0x3a, 0x0a, 0x07, 0x73, 0x6c, 0x61,
+	0x64, 0x69, 0x64, 0x12, 0x3a, 0x0a, 0x0b, 0x63, 0x6f, 0x72, 0x70, 0x6f, 0x72, 0x61, 0x74, 0x69,
+	0x6f, 0x6e, 0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f,
+	0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69,
+	0x6e, 0x67, 0x52, 0x0b, 0x63, 0x6f, 0x72, 0x70, 0x6f, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12,
+	0x3a, 0x0a, 0x07, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x18, 0x06, 0x20, 0x01, 0x28, 0x0b,
+	0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62,
+	0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x42, 0x04, 0x90, 0xdf,
+	0x1f, 0x01, 0x52, 0x07, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x12, 0x3c, 0x0a, 0x08, 0x61,
+	0x64, 0x6a, 0x75, 0x73, 0x74, 0x65, 0x64, 0x18, 0x08, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e,
+	0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e,
+	0x54, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x42, 0x04, 0x90, 0xdf, 0x1f, 0x01, 0x52,
+	0x08, 0x61, 0x64, 0x6a, 0x75, 0x73, 0x74, 0x65, 0x64, 0x12, 0x3a, 0x0a, 0x07, 0x73, 0x6c, 0x61,
 	0x73, 0x68, 0x65, 0x64, 0x18, 0x0a, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f,
 	0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d,
 	0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x42, 0x04, 0x90, 0xdf, 0x1f, 0x01, 0x52, 0x07, 0x73, 0x6c,
-	0x61, 0x73, 0x68, 0x65, 0x64, 0x12, 0x37, 0x0a, 0x0a, 0x73, 0x6c, 0x61, 0x73, 0x68, 0x65, 0x64,
-	0x5f, 0x62, 0x79, 0x18, 0x0b, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63,
-	0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72,
-	0x69, 0x6e, 0x67, 0x52, 0x09, 0x73, 0x6c, 0x61, 0x73, 0x68, 0x65, 0x64, 0x42, 0x79, 0x12, 0x38,
-	0x0a, 0x06, 0x72, 0x65, 0x70, 0x61, 0x69, 0x64, 0x18, 0x0c, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a,
-	0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66,
-	0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x42, 0x04, 0x90, 0xdf, 0x1f, 0x01,
-	0x52, 0x06, 0x72, 0x65, 0x70, 0x61, 0x69, 0x64, 0x12, 0x35, 0x0a, 0x09, 0x72, 0x65, 0x70, 0x61,
-	0x69, 0x64, 0x5f, 0x62, 0x79, 0x18, 0x0d, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d,
-	0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53,
-	0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x08, 0x72, 0x65, 0x70, 0x61, 0x69, 0x64, 0x42, 0x79, 0x12,
+	0x61, 0x73, 0x68, 0x65, 0x64, 0x12, 0x38, 0x0a, 0x06, 0x72, 0x65, 0x70, 0x61, 0x69, 0x64, 0x18,
+	0x0c, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70,
+	0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d,
+	0x70, 0x42, 0x04, 0x90, 0xdf, 0x1f, 0x01, 0x52, 0x06, 0x72, 0x65, 0x70, 0x61, 0x69, 0x64, 0x12,
 	0x47, 0x0a, 0x0e, 0x65, 0x66, 0x66, 0x65, 0x63, 0x74, 0x69, 0x76, 0x65, 0x5f, 0x66, 0x72, 0x6f,
 	0x6d, 0x18, 0x0e, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65,
 	0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74,
@@ -5810,93 +5261,86 @@ var file_verana_perm_v1_types_proto_rawDesc = []byte{
 	0x64, 0x18, 0x17, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65,
 	0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74,
 	0x61, 0x6d, 0x70, 0x42, 0x04, 0x90, 0xdf, 0x1f, 0x01, 0x52, 0x07, 0x72, 0x65, 0x76, 0x6f, 0x6b,
-	0x65, 0x64, 0x12, 0x37, 0x0a, 0x0a, 0x72, 0x65, 0x76, 0x6f, 0x6b, 0x65, 0x64, 0x5f, 0x62, 0x79,
-	0x18, 0x18, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d,
-	0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67,
-	0x52, 0x09, 0x72, 0x65, 0x76, 0x6f, 0x6b, 0x65, 0x64, 0x42, 0x79, 0x12, 0x18, 0x0a, 0x07, 0x63,
-	0x6f, 0x75, 0x6e, 0x74, 0x72, 0x79, 0x18, 0x19, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x63, 0x6f,
-	0x75, 0x6e, 0x74, 0x72, 0x79, 0x12, 0x2a, 0x0a, 0x11, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74,
-	0x6f, 0x72, 0x5f, 0x70, 0x65, 0x72, 0x6d, 0x5f, 0x69, 0x64, 0x18, 0x1a, 0x20, 0x01, 0x28, 0x04,
-	0x52, 0x0f, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x6f, 0x72, 0x50, 0x65, 0x72, 0x6d, 0x49,
-	0x64, 0x12, 0x3a, 0x0a, 0x08, 0x76, 0x70, 0x5f, 0x73, 0x74, 0x61, 0x74, 0x65, 0x18, 0x1b, 0x20,
-	0x01, 0x28, 0x0e, 0x32, 0x1f, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x70, 0x65, 0x72,
-	0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x56, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x53,
-	0x74, 0x61, 0x74, 0x65, 0x52, 0x07, 0x76, 0x70, 0x53, 0x74, 0x61, 0x74, 0x65, 0x12, 0x37, 0x0a,
-	0x06, 0x76, 0x70, 0x5f, 0x65, 0x78, 0x70, 0x18, 0x1c, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e,
-	0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e,
-	0x54, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x42, 0x04, 0x90, 0xdf, 0x1f, 0x01, 0x52,
-	0x05, 0x76, 0x70, 0x45, 0x78, 0x70, 0x12, 0x51, 0x0a, 0x14, 0x76, 0x70, 0x5f, 0x6c, 0x61, 0x73,
-	0x74, 0x5f, 0x73, 0x74, 0x61, 0x74, 0x65, 0x5f, 0x63, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x18, 0x1d,
-	0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72,
-	0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70,
-	0x42, 0x04, 0x90, 0xdf, 0x1f, 0x01, 0x52, 0x11, 0x76, 0x70, 0x4c, 0x61, 0x73, 0x74, 0x53, 0x74,
-	0x61, 0x74, 0x65, 0x43, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x12, 0x30, 0x0a, 0x14, 0x76, 0x70, 0x5f,
-	0x76, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x6f, 0x72, 0x5f, 0x64, 0x65, 0x70, 0x6f, 0x73, 0x69,
-	0x74, 0x18, 0x1e, 0x20, 0x01, 0x28, 0x04, 0x52, 0x12, 0x76, 0x70, 0x56, 0x61, 0x6c, 0x69, 0x64,
-	0x61, 0x74, 0x6f, 0x72, 0x44, 0x65, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x12, 0x26, 0x0a, 0x0f, 0x76,
-	0x70, 0x5f, 0x63, 0x75, 0x72, 0x72, 0x65, 0x6e, 0x74, 0x5f, 0x66, 0x65, 0x65, 0x73, 0x18, 0x1f,
-	0x20, 0x01, 0x28, 0x04, 0x52, 0x0d, 0x76, 0x70, 0x43, 0x75, 0x72, 0x72, 0x65, 0x6e, 0x74, 0x46,
-	0x65, 0x65, 0x73, 0x12, 0x2c, 0x0a, 0x12, 0x76, 0x70, 0x5f, 0x63, 0x75, 0x72, 0x72, 0x65, 0x6e,
-	0x74, 0x5f, 0x64, 0x65, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x18, 0x20, 0x20, 0x01, 0x28, 0x04, 0x52,
-	0x10, 0x76, 0x70, 0x43, 0x75, 0x72, 0x72, 0x65, 0x6e, 0x74, 0x44, 0x65, 0x70, 0x6f, 0x73, 0x69,
-	0x74, 0x12, 0x31, 0x0a, 0x15, 0x76, 0x70, 0x5f, 0x73, 0x75, 0x6d, 0x6d, 0x61, 0x72, 0x79, 0x5f,
-	0x64, 0x69, 0x67, 0x65, 0x73, 0x74, 0x5f, 0x73, 0x72, 0x69, 0x18, 0x21, 0x20, 0x01, 0x28, 0x09,
-	0x52, 0x12, 0x76, 0x70, 0x53, 0x75, 0x6d, 0x6d, 0x61, 0x72, 0x79, 0x44, 0x69, 0x67, 0x65, 0x73,
-	0x74, 0x53, 0x72, 0x69, 0x12, 0x4c, 0x0a, 0x11, 0x76, 0x70, 0x5f, 0x74, 0x65, 0x72, 0x6d, 0x5f,
-	0x72, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x65, 0x64, 0x18, 0x22, 0x20, 0x01, 0x28, 0x0b, 0x32,
-	0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75,
-	0x66, 0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x42, 0x04, 0x90, 0xdf, 0x1f,
-	0x01, 0x52, 0x0f, 0x76, 0x70, 0x54, 0x65, 0x72, 0x6d, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
-	0x65, 0x64, 0x12, 0x32, 0x0a, 0x15, 0x69, 0x73, 0x73, 0x75, 0x61, 0x6e, 0x63, 0x65, 0x5f, 0x66,
-	0x65, 0x65, 0x5f, 0x64, 0x69, 0x73, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x18, 0x23, 0x20, 0x01, 0x28,
-	0x04, 0x52, 0x13, 0x69, 0x73, 0x73, 0x75, 0x61, 0x6e, 0x63, 0x65, 0x46, 0x65, 0x65, 0x44, 0x69,
-	0x73, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x12, 0x3a, 0x0a, 0x19, 0x76, 0x65, 0x72, 0x69, 0x66, 0x69,
-	0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x66, 0x65, 0x65, 0x5f, 0x64, 0x69, 0x73, 0x63, 0x6f,
-	0x75, 0x6e, 0x74, 0x18, 0x24, 0x20, 0x01, 0x28, 0x04, 0x52, 0x17, 0x76, 0x65, 0x72, 0x69, 0x66,
-	0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x46, 0x65, 0x65, 0x44, 0x69, 0x73, 0x63, 0x6f, 0x75,
-	0x6e, 0x74, 0x12, 0x39, 0x0a, 0x0b, 0x76, 0x73, 0x5f, 0x6f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f,
-	0x72, 0x18, 0x25, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73,
+	0x65, 0x64, 0x12, 0x2a, 0x0a, 0x11, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x6f, 0x72, 0x5f,
+	0x70, 0x65, 0x72, 0x6d, 0x5f, 0x69, 0x64, 0x18, 0x1a, 0x20, 0x01, 0x28, 0x04, 0x52, 0x0f, 0x76,
+	0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x6f, 0x72, 0x50, 0x65, 0x72, 0x6d, 0x49, 0x64, 0x12, 0x3a,
+	0x0a, 0x08, 0x76, 0x70, 0x5f, 0x73, 0x74, 0x61, 0x74, 0x65, 0x18, 0x1b, 0x20, 0x01, 0x28, 0x0e,
+	0x32, 0x1f, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x70, 0x65, 0x72, 0x6d, 0x2e, 0x76,
+	0x31, 0x2e, 0x56, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x53, 0x74, 0x61, 0x74,
+	0x65, 0x52, 0x07, 0x76, 0x70, 0x53, 0x74, 0x61, 0x74, 0x65, 0x12, 0x37, 0x0a, 0x06, 0x76, 0x70,
+	0x5f, 0x65, 0x78, 0x70, 0x18, 0x1c, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f,
+	0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d,
+	0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x42, 0x04, 0x90, 0xdf, 0x1f, 0x01, 0x52, 0x05, 0x76, 0x70,
+	0x45, 0x78, 0x70, 0x12, 0x51, 0x0a, 0x14, 0x76, 0x70, 0x5f, 0x6c, 0x61, 0x73, 0x74, 0x5f, 0x73,
+	0x74, 0x61, 0x74, 0x65, 0x5f, 0x63, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x18, 0x1d, 0x20, 0x01, 0x28,
+	0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f,
+	0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x42, 0x04, 0x90,
+	0xdf, 0x1f, 0x01, 0x52, 0x11, 0x76, 0x70, 0x4c, 0x61, 0x73, 0x74, 0x53, 0x74, 0x61, 0x74, 0x65,
+	0x43, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x12, 0x30, 0x0a, 0x14, 0x76, 0x70, 0x5f, 0x76, 0x61, 0x6c,
+	0x69, 0x64, 0x61, 0x74, 0x6f, 0x72, 0x5f, 0x64, 0x65, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x18, 0x1e,
+	0x20, 0x01, 0x28, 0x04, 0x52, 0x12, 0x76, 0x70, 0x56, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x6f,
+	0x72, 0x44, 0x65, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x12, 0x26, 0x0a, 0x0f, 0x76, 0x70, 0x5f, 0x63,
+	0x75, 0x72, 0x72, 0x65, 0x6e, 0x74, 0x5f, 0x66, 0x65, 0x65, 0x73, 0x18, 0x1f, 0x20, 0x01, 0x28,
+	0x04, 0x52, 0x0d, 0x76, 0x70, 0x43, 0x75, 0x72, 0x72, 0x65, 0x6e, 0x74, 0x46, 0x65, 0x65, 0x73,
+	0x12, 0x2c, 0x0a, 0x12, 0x76, 0x70, 0x5f, 0x63, 0x75, 0x72, 0x72, 0x65, 0x6e, 0x74, 0x5f, 0x64,
+	0x65, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x18, 0x20, 0x20, 0x01, 0x28, 0x04, 0x52, 0x10, 0x76, 0x70,
+	0x43, 0x75, 0x72, 0x72, 0x65, 0x6e, 0x74, 0x44, 0x65, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x12, 0x2a,
+	0x0a, 0x11, 0x76, 0x70, 0x5f, 0x73, 0x75, 0x6d, 0x6d, 0x61, 0x72, 0x79, 0x5f, 0x64, 0x69, 0x67,
+	0x65, 0x73, 0x74, 0x18, 0x21, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0f, 0x76, 0x70, 0x53, 0x75, 0x6d,
+	0x6d, 0x61, 0x72, 0x79, 0x44, 0x69, 0x67, 0x65, 0x73, 0x74, 0x12, 0x32, 0x0a, 0x15, 0x69, 0x73,
+	0x73, 0x75, 0x61, 0x6e, 0x63, 0x65, 0x5f, 0x66, 0x65, 0x65, 0x5f, 0x64, 0x69, 0x73, 0x63, 0x6f,
+	0x75, 0x6e, 0x74, 0x18, 0x23, 0x20, 0x01, 0x28, 0x04, 0x52, 0x13, 0x69, 0x73, 0x73, 0x75, 0x61,
+	0x6e, 0x63, 0x65, 0x46, 0x65, 0x65, 0x44, 0x69, 0x73, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x12, 0x3a,
+	0x0a, 0x19, 0x76, 0x65, 0x72, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x66,
+	0x65, 0x65, 0x5f, 0x64, 0x69, 0x73, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x18, 0x24, 0x20, 0x01, 0x28,
+	0x04, 0x52, 0x17, 0x76, 0x65, 0x72, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x46,
+	0x65, 0x65, 0x44, 0x69, 0x73, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x12, 0x39, 0x0a, 0x0b, 0x76, 0x73,
+	0x5f, 0x6f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x18, 0x25, 0x20, 0x01, 0x28, 0x09, 0x42,
+	0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72,
+	0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x0a, 0x76, 0x73, 0x4f, 0x70, 0x65,
+	0x72, 0x61, 0x74, 0x6f, 0x72, 0x12, 0x39, 0x0a, 0x19, 0x76, 0x73, 0x5f, 0x6f, 0x70, 0x65, 0x72,
+	0x61, 0x74, 0x6f, 0x72, 0x5f, 0x61, 0x75, 0x74, 0x68, 0x7a, 0x5f, 0x65, 0x6e, 0x61, 0x62, 0x6c,
+	0x65, 0x64, 0x18, 0x26, 0x20, 0x01, 0x28, 0x08, 0x52, 0x16, 0x76, 0x73, 0x4f, 0x70, 0x65, 0x72,
+	0x61, 0x74, 0x6f, 0x72, 0x41, 0x75, 0x74, 0x68, 0x7a, 0x45, 0x6e, 0x61, 0x62, 0x6c, 0x65, 0x64,
+	0x12, 0x92, 0x01, 0x0a, 0x1d, 0x76, 0x73, 0x5f, 0x6f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72,
+	0x5f, 0x61, 0x75, 0x74, 0x68, 0x7a, 0x5f, 0x73, 0x70, 0x65, 0x6e, 0x64, 0x5f, 0x6c, 0x69, 0x6d,
+	0x69, 0x74, 0x18, 0x27, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x19, 0x2e, 0x63, 0x6f, 0x73, 0x6d, 0x6f,
+	0x73, 0x2e, 0x62, 0x61, 0x73, 0x65, 0x2e, 0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x2e, 0x43,
+	0x6f, 0x69, 0x6e, 0x42, 0x35, 0xc8, 0xde, 0x1f, 0x00, 0xaa, 0xdf, 0x1f, 0x28, 0x67, 0x69, 0x74,
+	0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2f, 0x63,
+	0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2d, 0x73, 0x64, 0x6b, 0x2f, 0x74, 0x79, 0x70, 0x65, 0x73, 0x2e,
+	0x43, 0x6f, 0x69, 0x6e, 0x73, 0xa8, 0xe7, 0xb0, 0x2a, 0x01, 0x52, 0x19, 0x76, 0x73, 0x4f, 0x70,
+	0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x41, 0x75, 0x74, 0x68, 0x7a, 0x53, 0x70, 0x65, 0x6e, 0x64,
+	0x4c, 0x69, 0x6d, 0x69, 0x74, 0x12, 0x44, 0x0a, 0x1f, 0x76, 0x73, 0x5f, 0x6f, 0x70, 0x65, 0x72,
+	0x61, 0x74, 0x6f, 0x72, 0x5f, 0x61, 0x75, 0x74, 0x68, 0x7a, 0x5f, 0x77, 0x69, 0x74, 0x68, 0x5f,
+	0x66, 0x65, 0x65, 0x67, 0x72, 0x61, 0x6e, 0x74, 0x18, 0x28, 0x20, 0x01, 0x28, 0x08, 0x52, 0x1b,
+	0x76, 0x73, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x41, 0x75, 0x74, 0x68, 0x7a, 0x57,
+	0x69, 0x74, 0x68, 0x46, 0x65, 0x65, 0x67, 0x72, 0x61, 0x6e, 0x74, 0x12, 0x99, 0x01, 0x0a, 0x21,
+	0x76, 0x73, 0x5f, 0x6f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x5f, 0x61, 0x75, 0x74, 0x68,
+	0x7a, 0x5f, 0x66, 0x65, 0x65, 0x5f, 0x73, 0x70, 0x65, 0x6e, 0x64, 0x5f, 0x6c, 0x69, 0x6d, 0x69,
+	0x74, 0x18, 0x29, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x19, 0x2e, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73,
+	0x2e, 0x62, 0x61, 0x73, 0x65, 0x2e, 0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x2e, 0x43, 0x6f,
+	0x69, 0x6e, 0x42, 0x35, 0xc8, 0xde, 0x1f, 0x00, 0xaa, 0xdf, 0x1f, 0x28, 0x67, 0x69, 0x74, 0x68,
+	0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2f, 0x63, 0x6f,
+	0x73, 0x6d, 0x6f, 0x73, 0x2d, 0x73, 0x64, 0x6b, 0x2f, 0x74, 0x79, 0x70, 0x65, 0x73, 0x2e, 0x43,
+	0x6f, 0x69, 0x6e, 0x73, 0xa8, 0xe7, 0xb0, 0x2a, 0x01, 0x52, 0x1c, 0x76, 0x73, 0x4f, 0x70, 0x65,
+	0x72, 0x61, 0x74, 0x6f, 0x72, 0x41, 0x75, 0x74, 0x68, 0x7a, 0x46, 0x65, 0x65, 0x53, 0x70, 0x65,
+	0x6e, 0x64, 0x4c, 0x69, 0x6d, 0x69, 0x74, 0x12, 0x63, 0x0a, 0x1e, 0x76, 0x73, 0x5f, 0x6f, 0x70,
+	0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x5f, 0x61, 0x75, 0x74, 0x68, 0x7a, 0x5f, 0x73, 0x70, 0x65,
+	0x6e, 0x64, 0x5f, 0x70, 0x65, 0x72, 0x69, 0x6f, 0x64, 0x18, 0x2a, 0x20, 0x01, 0x28, 0x0b, 0x32,
+	0x19, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75,
+	0x66, 0x2e, 0x44, 0x75, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x42, 0x04, 0x98, 0xdf, 0x1f, 0x01,
+	0x52, 0x1a, 0x76, 0x73, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x41, 0x75, 0x74, 0x68,
+	0x7a, 0x53, 0x70, 0x65, 0x6e, 0x64, 0x50, 0x65, 0x72, 0x69, 0x6f, 0x64, 0x22, 0x8a, 0x03, 0x0a,
+	0x11, 0x50, 0x65, 0x72, 0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x53, 0x65, 0x73, 0x73, 0x69,
+	0x6f, 0x6e, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02,
+	0x69, 0x64, 0x12, 0x3a, 0x0a, 0x0b, 0x63, 0x6f, 0x72, 0x70, 0x6f, 0x72, 0x61, 0x74, 0x69, 0x6f,
+	0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73,
 	0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e,
-	0x67, 0x52, 0x0a, 0x76, 0x73, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x12, 0x39, 0x0a,
-	0x19, 0x76, 0x73, 0x5f, 0x6f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x5f, 0x61, 0x75, 0x74,
-	0x68, 0x7a, 0x5f, 0x65, 0x6e, 0x61, 0x62, 0x6c, 0x65, 0x64, 0x18, 0x26, 0x20, 0x01, 0x28, 0x08,
-	0x52, 0x16, 0x76, 0x73, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x41, 0x75, 0x74, 0x68,
-	0x7a, 0x45, 0x6e, 0x61, 0x62, 0x6c, 0x65, 0x64, 0x12, 0x92, 0x01, 0x0a, 0x1d, 0x76, 0x73, 0x5f,
-	0x6f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x5f, 0x61, 0x75, 0x74, 0x68, 0x7a, 0x5f, 0x73,
-	0x70, 0x65, 0x6e, 0x64, 0x5f, 0x6c, 0x69, 0x6d, 0x69, 0x74, 0x18, 0x27, 0x20, 0x03, 0x28, 0x0b,
-	0x32, 0x19, 0x2e, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x62, 0x61, 0x73, 0x65, 0x2e, 0x76,
-	0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x2e, 0x43, 0x6f, 0x69, 0x6e, 0x42, 0x35, 0xc8, 0xde, 0x1f,
-	0x00, 0xaa, 0xdf, 0x1f, 0x28, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f,
-	0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2f, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2d, 0x73, 0x64,
-	0x6b, 0x2f, 0x74, 0x79, 0x70, 0x65, 0x73, 0x2e, 0x43, 0x6f, 0x69, 0x6e, 0x73, 0xa8, 0xe7, 0xb0,
-	0x2a, 0x01, 0x52, 0x19, 0x76, 0x73, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x41, 0x75,
-	0x74, 0x68, 0x7a, 0x53, 0x70, 0x65, 0x6e, 0x64, 0x4c, 0x69, 0x6d, 0x69, 0x74, 0x12, 0x44, 0x0a,
-	0x1f, 0x76, 0x73, 0x5f, 0x6f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x5f, 0x61, 0x75, 0x74,
-	0x68, 0x7a, 0x5f, 0x77, 0x69, 0x74, 0x68, 0x5f, 0x66, 0x65, 0x65, 0x67, 0x72, 0x61, 0x6e, 0x74,
-	0x18, 0x28, 0x20, 0x01, 0x28, 0x08, 0x52, 0x1b, 0x76, 0x73, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74,
-	0x6f, 0x72, 0x41, 0x75, 0x74, 0x68, 0x7a, 0x57, 0x69, 0x74, 0x68, 0x46, 0x65, 0x65, 0x67, 0x72,
-	0x61, 0x6e, 0x74, 0x12, 0x99, 0x01, 0x0a, 0x21, 0x76, 0x73, 0x5f, 0x6f, 0x70, 0x65, 0x72, 0x61,
-	0x74, 0x6f, 0x72, 0x5f, 0x61, 0x75, 0x74, 0x68, 0x7a, 0x5f, 0x66, 0x65, 0x65, 0x5f, 0x73, 0x70,
-	0x65, 0x6e, 0x64, 0x5f, 0x6c, 0x69, 0x6d, 0x69, 0x74, 0x18, 0x29, 0x20, 0x03, 0x28, 0x0b, 0x32,
-	0x19, 0x2e, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x62, 0x61, 0x73, 0x65, 0x2e, 0x76, 0x31,
-	0x62, 0x65, 0x74, 0x61, 0x31, 0x2e, 0x43, 0x6f, 0x69, 0x6e, 0x42, 0x35, 0xc8, 0xde, 0x1f, 0x00,
-	0xaa, 0xdf, 0x1f, 0x28, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x63,
-	0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2f, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2d, 0x73, 0x64, 0x6b,
-	0x2f, 0x74, 0x79, 0x70, 0x65, 0x73, 0x2e, 0x43, 0x6f, 0x69, 0x6e, 0x73, 0xa8, 0xe7, 0xb0, 0x2a,
-	0x01, 0x52, 0x1c, 0x76, 0x73, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x41, 0x75, 0x74,
-	0x68, 0x7a, 0x46, 0x65, 0x65, 0x53, 0x70, 0x65, 0x6e, 0x64, 0x4c, 0x69, 0x6d, 0x69, 0x74, 0x12,
-	0x63, 0x0a, 0x1e, 0x76, 0x73, 0x5f, 0x6f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x5f, 0x61,
-	0x75, 0x74, 0x68, 0x7a, 0x5f, 0x73, 0x70, 0x65, 0x6e, 0x64, 0x5f, 0x70, 0x65, 0x72, 0x69, 0x6f,
-	0x64, 0x18, 0x2a, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x19, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65,
-	0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x44, 0x75, 0x72, 0x61, 0x74, 0x69,
-	0x6f, 0x6e, 0x42, 0x04, 0x98, 0xdf, 0x1f, 0x01, 0x52, 0x1a, 0x76, 0x73, 0x4f, 0x70, 0x65, 0x72,
-	0x61, 0x74, 0x6f, 0x72, 0x41, 0x75, 0x74, 0x68, 0x7a, 0x53, 0x70, 0x65, 0x6e, 0x64, 0x50, 0x65,
-	0x72, 0x69, 0x6f, 0x64, 0x22, 0xd2, 0x02, 0x0a, 0x11, 0x50, 0x65, 0x72, 0x6d, 0x69, 0x73, 0x73,
-	0x69, 0x6f, 0x6e, 0x53, 0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64,
-	0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x12, 0x1c, 0x0a, 0x09, 0x61, 0x75,
-	0x74, 0x68, 0x6f, 0x72, 0x69, 0x74, 0x79, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x61,
-	0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x74, 0x79, 0x12, 0x1f, 0x0a, 0x0b, 0x76, 0x73, 0x5f, 0x6f,
-	0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0a, 0x76,
+	0x67, 0x52, 0x0b, 0x63, 0x6f, 0x72, 0x70, 0x6f, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x39,
+	0x0a, 0x0b, 0x76, 0x73, 0x5f, 0x6f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x18, 0x03, 0x20,
+	0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e,
+	0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x0a, 0x76,
 	0x73, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x12, 0x22, 0x0a, 0x0d, 0x61, 0x67, 0x65,
 	0x6e, 0x74, 0x5f, 0x70, 0x65, 0x72, 0x6d, 0x5f, 0x69, 0x64, 0x18, 0x04, 0x20, 0x01, 0x28, 0x04,
 	0x52, 0x0b, 0x61, 0x67, 0x65, 0x6e, 0x74, 0x50, 0x65, 0x72, 0x6d, 0x49, 0x64, 0x12, 0x50, 0x0a,
@@ -5936,27 +5380,24 @@ var file_verana_perm_v1_types_proto_rawDesc = []byte{
 	0x45, 0x52, 0x5f, 0x47, 0x52, 0x41, 0x4e, 0x54, 0x4f, 0x52, 0x10, 0x03, 0x12, 0x14, 0x0a, 0x10,
 	0x56, 0x45, 0x52, 0x49, 0x46, 0x49, 0x45, 0x52, 0x5f, 0x47, 0x52, 0x41, 0x4e, 0x54, 0x4f, 0x52,
 	0x10, 0x04, 0x12, 0x0d, 0x0a, 0x09, 0x45, 0x43, 0x4f, 0x53, 0x59, 0x53, 0x54, 0x45, 0x4d, 0x10,
-	0x05, 0x12, 0x0a, 0x0a, 0x06, 0x48, 0x4f, 0x4c, 0x44, 0x45, 0x52, 0x10, 0x06, 0x2a, 0x7a, 0x0a,
+	0x05, 0x12, 0x0a, 0x0a, 0x06, 0x48, 0x4f, 0x4c, 0x44, 0x45, 0x52, 0x10, 0x06, 0x2a, 0x4f, 0x0a,
 	0x0f, 0x56, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x53, 0x74, 0x61, 0x74, 0x65,
 	0x12, 0x20, 0x0a, 0x1c, 0x56, 0x41, 0x4c, 0x49, 0x44, 0x41, 0x54, 0x49, 0x4f, 0x4e, 0x5f, 0x53,
 	0x54, 0x41, 0x54, 0x45, 0x5f, 0x55, 0x4e, 0x53, 0x50, 0x45, 0x43, 0x49, 0x46, 0x49, 0x45, 0x44,
 	0x10, 0x00, 0x12, 0x0b, 0x0a, 0x07, 0x50, 0x45, 0x4e, 0x44, 0x49, 0x4e, 0x47, 0x10, 0x01, 0x12,
-	0x0d, 0x0a, 0x09, 0x56, 0x41, 0x4c, 0x49, 0x44, 0x41, 0x54, 0x45, 0x44, 0x10, 0x02, 0x12, 0x0e,
-	0x0a, 0x0a, 0x54, 0x45, 0x52, 0x4d, 0x49, 0x4e, 0x41, 0x54, 0x45, 0x44, 0x10, 0x03, 0x12, 0x19,
-	0x0a, 0x15, 0x54, 0x45, 0x52, 0x4d, 0x49, 0x4e, 0x41, 0x54, 0x49, 0x4f, 0x4e, 0x5f, 0x52, 0x45,
-	0x51, 0x55, 0x45, 0x53, 0x54, 0x45, 0x44, 0x10, 0x04, 0x42, 0xb3, 0x01, 0x0a, 0x12, 0x63, 0x6f,
-	0x6d, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x70, 0x65, 0x72, 0x6d, 0x2e, 0x76, 0x31,
-	0x42, 0x0a, 0x54, 0x79, 0x70, 0x65, 0x73, 0x50, 0x72, 0x6f, 0x74, 0x6f, 0x50, 0x01, 0x5a, 0x37,
-	0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x76, 0x65, 0x72, 0x61, 0x6e,
-	0x61, 0x2d, 0x6c, 0x61, 0x62, 0x73, 0x2f, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2f, 0x61, 0x70,
-	0x69, 0x2f, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2f, 0x70, 0x65, 0x72, 0x6d, 0x2f, 0x76, 0x31,
-	0x3b, 0x70, 0x65, 0x72, 0x6d, 0x76, 0x31, 0xa2, 0x02, 0x03, 0x56, 0x50, 0x58, 0xaa, 0x02, 0x0e,
-	0x56, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x50, 0x65, 0x72, 0x6d, 0x2e, 0x56, 0x31, 0xca, 0x02,
-	0x0e, 0x56, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x5c, 0x50, 0x65, 0x72, 0x6d, 0x5c, 0x56, 0x31, 0xe2,
-	0x02, 0x1a, 0x56, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x5c, 0x50, 0x65, 0x72, 0x6d, 0x5c, 0x56, 0x31,
-	0x5c, 0x47, 0x50, 0x42, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0xea, 0x02, 0x10, 0x56,
-	0x65, 0x72, 0x61, 0x6e, 0x61, 0x3a, 0x3a, 0x50, 0x65, 0x72, 0x6d, 0x3a, 0x3a, 0x56, 0x31, 0x62,
-	0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x0d, 0x0a, 0x09, 0x56, 0x41, 0x4c, 0x49, 0x44, 0x41, 0x54, 0x45, 0x44, 0x10, 0x02, 0x42, 0xb3,
+	0x01, 0x0a, 0x12, 0x63, 0x6f, 0x6d, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x70, 0x65,
+	0x72, 0x6d, 0x2e, 0x76, 0x31, 0x42, 0x0a, 0x54, 0x79, 0x70, 0x65, 0x73, 0x50, 0x72, 0x6f, 0x74,
+	0x6f, 0x50, 0x01, 0x5a, 0x37, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f,
+	0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2d, 0x6c, 0x61, 0x62, 0x73, 0x2f, 0x76, 0x65, 0x72, 0x61,
+	0x6e, 0x61, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2f, 0x70, 0x65,
+	0x72, 0x6d, 0x2f, 0x76, 0x31, 0x3b, 0x70, 0x65, 0x72, 0x6d, 0x76, 0x31, 0xa2, 0x02, 0x03, 0x56,
+	0x50, 0x58, 0xaa, 0x02, 0x0e, 0x56, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x50, 0x65, 0x72, 0x6d,
+	0x2e, 0x56, 0x31, 0xca, 0x02, 0x0e, 0x56, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x5c, 0x50, 0x65, 0x72,
+	0x6d, 0x5c, 0x56, 0x31, 0xe2, 0x02, 0x1a, 0x56, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x5c, 0x50, 0x65,
+	0x72, 0x6d, 0x5c, 0x56, 0x31, 0x5c, 0x47, 0x50, 0x42, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74,
+	0x61, 0xea, 0x02, 0x10, 0x56, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x3a, 0x3a, 0x50, 0x65, 0x72, 0x6d,
+	0x3a, 0x3a, 0x56, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -5997,19 +5438,18 @@ var file_verana_perm_v1_types_proto_depIdxs = []int32{
 	1,  // 9: verana.perm.v1.Permission.vp_state:type_name -> verana.perm.v1.ValidationState
 	6,  // 10: verana.perm.v1.Permission.vp_exp:type_name -> google.protobuf.Timestamp
 	6,  // 11: verana.perm.v1.Permission.vp_last_state_change:type_name -> google.protobuf.Timestamp
-	6,  // 12: verana.perm.v1.Permission.vp_term_requested:type_name -> google.protobuf.Timestamp
-	7,  // 13: verana.perm.v1.Permission.vs_operator_authz_spend_limit:type_name -> cosmos.base.v1beta1.Coin
-	7,  // 14: verana.perm.v1.Permission.vs_operator_authz_fee_spend_limit:type_name -> cosmos.base.v1beta1.Coin
-	8,  // 15: verana.perm.v1.Permission.vs_operator_authz_spend_period:type_name -> google.protobuf.Duration
-	4,  // 16: verana.perm.v1.PermissionSession.session_records:type_name -> verana.perm.v1.PermissionSessionRecord
-	6,  // 17: verana.perm.v1.PermissionSession.created:type_name -> google.protobuf.Timestamp
-	6,  // 18: verana.perm.v1.PermissionSession.modified:type_name -> google.protobuf.Timestamp
-	6,  // 19: verana.perm.v1.PermissionSessionRecord.created:type_name -> google.protobuf.Timestamp
-	20, // [20:20] is the sub-list for method output_type
-	20, // [20:20] is the sub-list for method input_type
-	20, // [20:20] is the sub-list for extension type_name
-	20, // [20:20] is the sub-list for extension extendee
-	0,  // [0:20] is the sub-list for field type_name
+	7,  // 12: verana.perm.v1.Permission.vs_operator_authz_spend_limit:type_name -> cosmos.base.v1beta1.Coin
+	7,  // 13: verana.perm.v1.Permission.vs_operator_authz_fee_spend_limit:type_name -> cosmos.base.v1beta1.Coin
+	8,  // 14: verana.perm.v1.Permission.vs_operator_authz_spend_period:type_name -> google.protobuf.Duration
+	4,  // 15: verana.perm.v1.PermissionSession.session_records:type_name -> verana.perm.v1.PermissionSessionRecord
+	6,  // 16: verana.perm.v1.PermissionSession.created:type_name -> google.protobuf.Timestamp
+	6,  // 17: verana.perm.v1.PermissionSession.modified:type_name -> google.protobuf.Timestamp
+	6,  // 18: verana.perm.v1.PermissionSessionRecord.created:type_name -> google.protobuf.Timestamp
+	19, // [19:19] is the sub-list for method output_type
+	19, // [19:19] is the sub-list for method input_type
+	19, // [19:19] is the sub-list for extension type_name
+	19, // [19:19] is the sub-list for extension extendee
+	0,  // [0:19] is the sub-list for field type_name
 }
 
 func init() { file_verana_perm_v1_types_proto_init() }

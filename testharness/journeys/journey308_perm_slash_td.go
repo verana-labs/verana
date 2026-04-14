@@ -66,8 +66,8 @@ func RunPermissionSlashTDJourney(ctx context.Context, client cosmosclient.Client
 	csIDStr, err := lib.CreateCredentialSchemaWithAuthority(
 		client, ctx, operatorAccount, policyAddr,
 		trID, schemaData,
-		cschema.CredentialSchemaPermManagementMode_ECOSYSTEM,
-		cschema.CredentialSchemaPermManagementMode_ECOSYSTEM,
+		cschema.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS,
+		cschema.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS,
 	)
 	if err != nil {
 		return fmt.Errorf("prerequisite 2 failed: could not create CS: %w", err)
@@ -139,7 +139,7 @@ func RunPermissionSlashTDJourney(ctx context.Context, client cosmosclient.Client
 	fmt.Println("\n--- Prerequisite 6: Start ISSUER permission VP ---")
 	issuerDID := lib.GenerateUniqueDID(client, ctx)
 	issuerPermIDStr, err := lib.StartPermissionVP(client, ctx, operatorAccount, permtypes.MsgStartPermissionVP{
-		Authority:       policyAddr,
+		Corporation:       policyAddr,
 		Type:            permtypes.PermissionType_ISSUER,
 		ValidatorPermId: rootPermID,
 		Did:             issuerDID,
@@ -154,7 +154,7 @@ func RunPermissionSlashTDJourney(ctx context.Context, client cosmosclient.Client
 	// Validate the ISSUER perm
 	fmt.Println("\n--- Prerequisite 7: Validate ISSUER permission ---")
 	_, err = lib.SetPermissionVPToValidated(client, ctx, operatorAccount, permtypes.MsgSetPermissionVPToValidated{
-		Authority: policyAddr,
+		Corporation: policyAddr,
 		Id:        issuerPermID,
 	})
 	if err != nil {
@@ -168,7 +168,7 @@ func RunPermissionSlashTDJourney(ctx context.Context, client cosmosclient.Client
 	if err != nil {
 		return fmt.Errorf("prerequisite verification failed: could not load ISSUER perm: %w", err)
 	}
-	fmt.Printf("  ISSUER perm deposit: %d, authority: %s\n", issuerPerm.Deposit, issuerPerm.Authority)
+	fmt.Printf("  ISSUER perm deposit: %d, authority: %s\n", issuerPerm.Deposit, issuerPerm.Corporation)
 
 	// =========================================================================
 	// TEST 1: SlashPermissionTrustDeposit (fail without auth, grant auth, succeed)
@@ -224,9 +224,7 @@ func RunPermissionSlashTDJourney(ctx context.Context, client cosmosclient.Client
 	}
 
 	// Verify slashed_by is the authority (policy address)
-	if slashedPerm.SlashedBy != policyAddr {
-		return fmt.Errorf("step 2 failed: expected slashed_by=%s, got %s", policyAddr, slashedPerm.SlashedBy)
-	}
+	// spec v4: removed field assertion (adjusted_by/revoked_by/slashed_by no longer exist)
 
 	// Verify slashed_deposit is set
 	if slashedPerm.SlashedDeposit != slashAmount {
@@ -238,8 +236,7 @@ func RunPermissionSlashTDJourney(ctx context.Context, client cosmosclient.Client
 		return fmt.Errorf("step 2 failed: modified timestamp is nil")
 	}
 
-	fmt.Printf("OK Step 2: Verified slashed fields (slashed_by=%s, slashed_deposit=%d)\n",
-		slashedPerm.SlashedBy, slashedPerm.SlashedDeposit)
+	fmt.Printf("OK Step 2: Verified slashed fields (slashed_deposit=%d)\n", slashedPerm.SlashedDeposit)
 
 	// =========================================================================
 	// TEST 3: Unauthorized operator (negative test)

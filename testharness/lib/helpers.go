@@ -108,8 +108,8 @@ func CreateSimpleCredentialSchema(
 	account cosmosaccount.Account,
 	trustRegistryID string,
 	schemaData string,
-	issuerMode cschema.CredentialSchemaPermManagementMode,
-	verifierMode cschema.CredentialSchemaPermManagementMode,
+	issuerMode cschema.IssuerOnboardingMode,
+	verifierMode cschema.VerifierOnboardingMode,
 ) string {
 	trId, err := strconv.ParseUint(trustRegistryID, 10, 64)
 	if err != nil {
@@ -120,8 +120,8 @@ func CreateSimpleCredentialSchema(
 	csStrId, err := CreateCredentialSchema(client, ctx, account, cschema.MsgCreateCredentialSchema{
 		TrId:                       trId,
 		JsonSchema:                 schemaData,
-		IssuerPermManagementMode:   uint32(issuerMode),
-		VerifierPermManagementMode: uint32(verifierMode),
+		IssuerOnboardingMode:   uint32(issuerMode),
+		VerifierOnboardingMode: uint32(verifierMode),
 		PricingAssetType:           uint32(cschema.PricingAssetType_TU),
 		PricingAsset:               "tu",
 		DigestAlgorithm:            "sha256",
@@ -390,7 +390,7 @@ func RenewPermissionVP(client cosmosclient.Client, ctx context.Context, account 
 
 	// Set authority and operator to the account address
 	msgToSend := permtypes.MsgRenewPermissionVP{
-		Authority: accountAddr,
+		Corporation: accountAddr,
 		Operator:  accountAddr,
 		Id:        msg.Id,
 	}
@@ -423,7 +423,7 @@ func GetTrustDepositAtHeight(client cosmosclient.Client, ctx context.Context, ac
 
 	tdClient := tdtypes.NewQueryClient(client.Context())
 	req := &tdtypes.QueryGetTrustDepositRequest{
-		Account: creatorAddr,
+		Corporation: creatorAddr,
 	}
 
 	// For height-specific queries, we need to use command line with --height flag
@@ -454,37 +454,6 @@ func GetTrustDepositAtHeight(client cosmosclient.Client, ctx context.Context, ac
 	return &resp.TrustDeposit, nil
 }
 
-// ReclaimTrustDeposit reclaims trust deposit
-func ReclaimTrustDeposit(client cosmosclient.Client, ctx context.Context, creator cosmosaccount.Account, msg tdtypes.MsgReclaimTrustDeposit) (string, error) {
-	creatorAddr, err := creator.Address(addressPrefix)
-	if err != nil {
-		return "", fmt.Errorf("failed to get creator address: %v", err)
-	}
-
-	// Ensure creator is set correctly
-	msgWithCreator := tdtypes.MsgReclaimTrustDeposit{
-		Creator: creatorAddr,
-		Claimed: msg.Claimed,
-	}
-
-	txResp, err := client.BroadcastTx(ctx, creator, &msgWithCreator)
-	if err != nil {
-		return "", fmt.Errorf("failed to broadcast reclaim trust deposit: %v", err)
-	}
-
-	// Print response from broadcasting a transaction
-	fmt.Print("ReclaimTrustDeposit:\n\n")
-	fmt.Println(txResp)
-
-	// Check if the transaction was successful
-	if txResp.TxResponse.Code != 0 {
-		return "", fmt.Errorf("transaction failed with code %d: %s",
-			txResp.TxResponse.Code, txResp.TxResponse.RawLog)
-	}
-
-	return "success", nil
-}
-
 // ReclaimTrustDepositYield reclaims trust deposit yield
 func ReclaimTrustDepositYield(client cosmosclient.Client, ctx context.Context, creator cosmosaccount.Account) (string, error) {
 	_, _, err := ReclaimTrustDepositYieldWithResponse(client, ctx, creator)
@@ -504,7 +473,7 @@ func ReclaimTrustDepositYieldWithResponse(client cosmosclient.Client, ctx contex
 	}
 
 	msg := tdtypes.MsgReclaimTrustDepositYield{
-		Authority: creatorAddr,
+		Corporation: creatorAddr,
 		Operator:  creatorAddr,
 	}
 
@@ -556,9 +525,9 @@ func RepaySlashedTrustDeposit(client cosmosclient.Client, ctx context.Context, o
 	}
 
 	msg := tdtypes.MsgRepaySlashedTrustDeposit{
-		Authority: authorityAddr,
-		Operator:  operatorAddr,
-		Amount:    amount,
+		Corporation: authorityAddr,
+		Operator:    operatorAddr,
+		Deposit:     amount,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, operatorAccount, &msg)
@@ -585,7 +554,7 @@ func ReclaimTrustDepositYieldWithAuthority(client cosmosclient.Client, ctx conte
 	}
 
 	msg := tdtypes.MsgReclaimTrustDepositYield{
-		Authority: authorityAddr,
+		Corporation: authorityAddr,
 		Operator:  operatorAddr,
 	}
 
@@ -704,47 +673,6 @@ func GetBankBalanceAtHeight(client cosmosclient.Client, ctx context.Context, add
 	return *resp.Balance, nil
 }
 
-// VerifyPermissionTerminationRequested verifies a permission is in TERMINATION_REQUESTED state
-func VerifyPermissionTerminationRequested(client cosmosclient.Client, ctx context.Context, permID uint64) bool {
-	perm, err := GetPermission(client, ctx, permID)
-	if err != nil {
-		fmt.Printf("❌ Permission termination verification failed: %v\n", err)
-		return false
-	}
-
-	if perm.VpState != permtypes.ValidationState_TERMINATION_REQUESTED {
-		fmt.Printf("❌ Permission termination verification failed: Permission not in TERMINATION_REQUESTED state, current state: %s\n",
-			perm.VpState)
-		return false
-	}
-
-	if perm.VpTermRequested == nil {
-		fmt.Printf("❌ Permission termination verification failed: VpTermRequested timestamp is not set\n")
-		return false
-	}
-
-	fmt.Printf("✅ Verified permission ID %d is in TERMINATION_REQUESTED state\n", permID)
-	return true
-}
-
-// VerifyPermissionTerminated verifies a permission is in TERMINATED state
-func VerifyPermissionTerminated(client cosmosclient.Client, ctx context.Context, permID uint64) bool {
-	perm, err := GetPermission(client, ctx, permID)
-	if err != nil {
-		fmt.Printf("❌ Permission termination verification failed: %v\n", err)
-		return false
-	}
-
-	if perm.VpState != permtypes.ValidationState_TERMINATED {
-		fmt.Printf("❌ Permission termination verification failed: Permission not in TERMINATED state, current state: %s\n",
-			perm.VpState)
-		return false
-	}
-
-	fmt.Printf("✅ Verified permission ID %d is in TERMINATED state\n", permID)
-	return true
-}
-
 // VerifyTrustDepositClaimable verifies a trust deposit has been made claimable
 func VerifyTrustDepositClaimable(client cosmosclient.Client, ctx context.Context, account cosmosaccount.Account, initialDeposit uint64) bool {
 	trustDeposit, err := GetTrustDeposit(client, ctx, account)
@@ -795,13 +723,13 @@ func AddGovernanceFrameworkDocument(
 	// Create the complete message with authority and operator addresses
 	// For v4 spec, authority and operator are both the creator's address
 	msgWithCreator := trtypes.MsgAddGovernanceFrameworkDocument{
-		Authority:    creatorAddr,
-		Operator:     creatorAddr,
-		Id:           msg.Id,
-		DocLanguage:  msg.DocLanguage,
-		DocUrl:       msg.DocUrl,
-		DocDigestSri: msg.DocDigestSri,
-		Version:      msg.Version,
+		Corporation: creatorAddr,
+		Operator:    creatorAddr,
+		TrId:        msg.TrId,
+		Language:    msg.Language,
+		Url:         msg.Url,
+		DigestSri:   msg.DigestSri,
+		Version:     msg.Version,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, creator, &msgWithCreator)
@@ -837,9 +765,9 @@ func IncreaseActiveGovernanceFrameworkVersion(
 	// Create the complete message with authority and operator addresses
 	// For v4 spec, authority and operator are both the creator's address
 	msgWithCreator := trtypes.MsgIncreaseActiveGovernanceFrameworkVersion{
-		Authority: creatorAddr,
-		Operator:  creatorAddr,
-		Id:        msg.Id,
+		Corporation: creatorAddr,
+		Operator:    creatorAddr,
+		TrId:        msg.TrId,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, creator, &msgWithCreator)
@@ -906,7 +834,7 @@ func RevokePermission(client cosmosclient.Client, ctx context.Context, operator 
 	}
 
 	msg := permtypes.MsgRevokePermission{
-		Authority: authority,
+		Corporation: authority,
 		Operator:  operatorAddr,
 		Id:        id,
 	}
@@ -937,7 +865,7 @@ func AdjustPermission(client cosmosclient.Client, ctx context.Context, operator 
 	}
 
 	msg := permtypes.MsgAdjustPermission{
-		Authority:      authority,
+		Corporation:      authority,
 		Operator:       operatorAddr,
 		Id:             id,
 		EffectiveUntil: effectiveUntil,
@@ -980,7 +908,7 @@ func UpdateCredentialSchema(
 	// All validity period fields are mandatory - always set them (use 0 if not updating)
 	// For v4 spec, authority and operator are both the creator's address
 	msgWithCreator := cschema.MsgUpdateCredentialSchema{
-		Authority: creatorAddr,
+		Corporation: creatorAddr,
 		Operator:  creatorAddr,
 		Id:        schemaID,
 		// Always set OptionalUInt32 fields (mandatory in new version)
@@ -1029,7 +957,7 @@ func ArchiveCredentialSchema(client cosmosclient.Client, ctx context.Context, cr
 	// Create complete message with authority/operator addresses
 	// For v4 spec, authority and operator are both the creator's address
 	msgWithCreator := cschema.MsgArchiveCredentialSchema{
-		Authority: creatorAddr,
+		Corporation: creatorAddr,
 		Operator:  creatorAddr,
 		Id:        msg.Id,
 		Archive:   msg.Archive,
@@ -1064,7 +992,7 @@ func CancelPermissionVPLastRequest(client cosmosclient.Client, ctx context.Conte
 
 	// Create complete message with authority/operator addresses
 	msgComplete := permtypes.MsgCancelPermissionVPLastRequest{
-		Authority: applicantAddr,
+		Corporation: applicantAddr,
 		Operator:  applicantAddr,
 		Id:        msg.Id,
 	}
@@ -1095,7 +1023,7 @@ func SlashPermissionTrustDeposit(client cosmosclient.Client, ctx context.Context
 	}
 
 	msg := &permtypes.MsgSlashPermissionTrustDeposit{
-		Authority: authority,
+		Corporation: authority,
 		Operator:  actorAddr,
 		Id:        id,
 		Amount:    amount,
@@ -1125,7 +1053,7 @@ func RepayPermissionSlashedTrustDeposit(client cosmosclient.Client, ctx context.
 	}
 
 	msg := &permtypes.MsgRepayPermissionSlashedTrustDeposit{
-		Authority: authority,
+		Corporation: authority,
 		Operator:  actorAddr,
 		Id:        id,
 	}
@@ -1143,14 +1071,14 @@ func RepayPermissionSlashedTrustDeposit(client cosmosclient.Client, ctx context.
 }
 
 // CreatePermission creates a permission directly
-func CreatePermission(client cosmosclient.Client, ctx context.Context, actor cosmosaccount.Account, authority string, msg permtypes.MsgCreatePermission) (string, error) {
+func CreatePermission(client cosmosclient.Client, ctx context.Context, actor cosmosaccount.Account, authority string, msg permtypes.MsgSelfCreatePermission) (string, error) {
 	actorAddr, err := actor.Address(addressPrefix)
 	if err != nil {
 		return "", fmt.Errorf("failed to get actor address: %w", err)
 	}
 
-	fullMsg := &permtypes.MsgCreatePermission{
-		Authority:                    authority,
+	fullMsg := &permtypes.MsgSelfCreatePermission{
+		Corporation:                    authority,
 		Operator:                     actorAddr,
 		Type:                         msg.Type,
 		ValidatorPermId:              msg.ValidatorPermId,
@@ -1198,7 +1126,7 @@ func CreatePermissionSession(
 
 	// Create the session creation message
 	msg := &permtypes.MsgCreateOrUpdatePermissionSession{
-		Authority:         authorityAddr,
+		Corporation:       authorityAddr,
 		Operator:          operatorAddr,
 		Id:                sessionID,
 		IssuerPermId:      issuerPermID,
@@ -1246,9 +1174,9 @@ func VerifyPermissionSession(client cosmosclient.Client, ctx context.Context, se
 	}
 
 	// Verify authority matches expectation if provided
-	if expectedAuthority != "" && resp.GetSession().Authority != expectedAuthority {
+	if expectedAuthority != "" && resp.GetSession().Corporation != expectedAuthority {
 		fmt.Printf("❌ Permission session verification failed: Expected authority %s, got %s\n",
-			expectedAuthority, resp.GetSession().Authority)
+			expectedAuthority, resp.GetSession().Corporation)
 		return false
 	}
 
@@ -1441,9 +1369,9 @@ func SubmitSlashTrustDepositProposal(
 
 	// Create the slash trust deposit message
 	slashMsg := &tdtypes.MsgSlashTrustDeposit{
-		Authority: authority,
-		Account:   accountToSlash,
-		Amount:    math.NewIntFromUint64(slashAmount),
+		Authority:   authority,
+		Corporation: accountToSlash,
+		Deposit:     math.NewIntFromUint64(slashAmount),
 	}
 
 	// Wrap in Any
@@ -1900,7 +1828,7 @@ func CreateRootPermissionWithError(client cosmosclient.Client, ctx context.Conte
 
 	// Create the message
 	fullMsg := &permtypes.MsgCreateRootPermission{
-		Authority:        creatorAddr,
+		Corporation:        creatorAddr,
 		Operator:         creatorAddr,
 		SchemaId:         msg.SchemaId,
 		Did:              msg.Did,
@@ -1937,7 +1865,7 @@ func CreateRootPermissionAndGetID(client cosmosclient.Client, ctx context.Contex
 
 	// Create the message
 	fullMsg := &permtypes.MsgCreateRootPermission{
-		Authority:        creatorAddr,
+		Corporation:        creatorAddr,
 		Operator:         creatorAddr,
 		SchemaId:         msg.SchemaId,
 		Did:              msg.Did,
@@ -1999,7 +1927,7 @@ func StartPermissionVPWithError(client cosmosclient.Client, ctx context.Context,
 
 	// Create the message
 	fullMsg := &permtypes.MsgStartPermissionVP{
-		Authority:        msg.Authority,
+		Corporation:      msg.Corporation,
 		Operator:         creatorAddr,
 		Type:             msg.Type,
 		Did:              msg.Did,
@@ -2008,8 +1936,8 @@ func StartPermissionVPWithError(client cosmosclient.Client, ctx context.Context,
 		IssuanceFees:     msg.IssuanceFees,
 		VerificationFees: msg.VerificationFees,
 	}
-	if fullMsg.Authority == "" {
-		fullMsg.Authority = creatorAddr
+	if fullMsg.Corporation == "" {
+		fullMsg.Corporation = creatorAddr
 	}
 
 	txResp, err := client.BroadcastTx(ctx, creator, fullMsg)
@@ -2037,7 +1965,7 @@ func RevokePermissionWithError(client cosmosclient.Client, ctx context.Context,
 	}
 
 	fullMsg := &permtypes.MsgRevokePermission{
-		Authority: authority,
+		Corporation: authority,
 		Operator:  operatorAddr,
 		Id:        id,
 	}
@@ -2078,7 +2006,7 @@ func CreateInactiveValidatorPermission(client cosmosclient.Client, ctx context.C
 	// Create an ECOSYSTEM (root) permission with future effective_from
 	// This will be in FUTURE state (not ACTIVE)
 	msg := &permtypes.MsgCreateRootPermission{
-		Authority:      creatorAddr,
+		Corporation:      creatorAddr,
 		Operator:       creatorAddr,
 		SchemaId:       schemaID,
 		Did:            did,
@@ -2493,14 +2421,14 @@ func CreateTrustRegistryWithAuthority(
 		return "", fmt.Errorf("failed to get operator address: %w", err)
 	}
 
+	_ = docURL
+	_ = docHash
 	msg := &trtypes.MsgCreateTrustRegistry{
-		Authority:    authority,
-		Operator:     operatorAddr,
-		Did:          did,
-		Aka:          aka,
-		Language:     language,
-		DocUrl:       docURL,
-		DocDigestSri: docHash,
+		Corporation: authority,
+		Operator:    operatorAddr,
+		Did:         did,
+		Aka:         aka,
+		Language:    language,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, operatorAccount, msg)
@@ -2556,13 +2484,13 @@ func AddGFDWithAuthority(
 	}
 
 	msg := &trtypes.MsgAddGovernanceFrameworkDocument{
-		Authority:    authority,
-		Operator:     operatorAddr,
-		Id:           trID,
-		DocLanguage:  docLanguage,
-		DocUrl:       docURL,
-		DocDigestSri: docHash,
-		Version:      version,
+		Corporation: authority,
+		Operator:    operatorAddr,
+		TrId:        trID,
+		Language:    docLanguage,
+		Url:         docURL,
+		DigestSri:   docHash,
+		Version:     version,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, operatorAccount, msg)
@@ -2595,9 +2523,9 @@ func IncreaseActiveGFVersionWithAuthority(
 	}
 
 	msg := &trtypes.MsgIncreaseActiveGovernanceFrameworkVersion{
-		Authority: authority,
-		Operator:  operatorAddr,
-		Id:        trID,
+		Corporation: authority,
+		Operator:    operatorAddr,
+		TrId:        trID,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, operatorAccount, msg)
@@ -2626,17 +2554,17 @@ func UpdateTrustRegistryWithAuthority(
 	did string,
 	aka string,
 ) error {
+	_ = did
 	operatorAddr, err := operatorAccount.Address(addressPrefix)
 	if err != nil {
 		return fmt.Errorf("failed to get operator address: %w", err)
 	}
 
 	msg := &trtypes.MsgUpdateTrustRegistry{
-		Authority: authority,
-		Operator:  operatorAddr,
-		Id:        trID,
-		Did:       did,
-		Aka:       aka,
+		Corporation: authority,
+		Operator:    operatorAddr,
+		TrId:        trID,
+		Aka:         aka,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, operatorAccount, msg)
@@ -2670,10 +2598,10 @@ func ArchiveTrustRegistryWithAuthority(
 	}
 
 	msg := &trtypes.MsgArchiveTrustRegistry{
-		Authority: authority,
-		Operator:  operatorAddr,
-		Id:        trID,
-		Archive:   archive,
+		Corporation: authority,
+		Operator:    operatorAddr,
+		TrId:        trID,
+		Archive:     archive,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, operatorAccount, msg)
@@ -2700,8 +2628,8 @@ func CreateCredentialSchemaWithAuthority(
 	authority string,
 	trID uint64,
 	schemaData string,
-	issuerMode cschema.CredentialSchemaPermManagementMode,
-	verifierMode cschema.CredentialSchemaPermManagementMode,
+	issuerMode cschema.IssuerOnboardingMode,
+	verifierMode cschema.VerifierOnboardingMode,
 ) (string, error) {
 	operatorAddr, err := operatorAccount.Address(addressPrefix)
 	if err != nil {
@@ -2709,12 +2637,13 @@ func CreateCredentialSchemaWithAuthority(
 	}
 
 	msg := &cschema.MsgCreateCredentialSchema{
-		Authority:                               authority,
+		Corporation:                             authority,
 		Operator:                                operatorAddr,
 		TrId:                                    trID,
 		JsonSchema:                              schemaData,
-		IssuerPermManagementMode:                uint32(issuerMode),
-		VerifierPermManagementMode:              uint32(verifierMode),
+		IssuerOnboardingMode:                    uint32(issuerMode),
+		VerifierOnboardingMode:                  uint32(verifierMode),
+		HolderOnboardingMode:                    0,
 		PricingAssetType:                        uint32(cschema.PricingAssetType_TU),
 		PricingAsset:                            "tu",
 		DigestAlgorithm:                         "sha256",
@@ -2779,7 +2708,7 @@ func UpdateCredentialSchemaWithAuthority(
 	}
 
 	msg := &cschema.MsgUpdateCredentialSchema{
-		Authority:                               authority,
+		Corporation:                               authority,
 		Operator:                                operatorAddr,
 		Id:                                      csID,
 		IssuerGrantorValidationValidityPeriod:   &cschema.OptionalUInt32{Value: issuerGrantorValidityPeriod},
@@ -2820,7 +2749,7 @@ func ArchiveCredentialSchemaWithAuthority(
 	}
 
 	msg := &cschema.MsgArchiveCredentialSchema{
-		Authority: authority,
+		Corporation: authority,
 		Operator:  operatorAddr,
 		Id:        csID,
 		Archive:   archive,
@@ -2858,7 +2787,7 @@ func StartPermissionVPWithAuthority(
 	}
 
 	msg := &permtypes.MsgStartPermissionVP{
-		Authority:       authority,
+		Corporation:       authority,
 		Operator:        operatorAddr,
 		Type:            permType,
 		ValidatorPermId: validatorPermId,
@@ -2914,7 +2843,7 @@ func RenewPermissionVPWithAuthority(
 	}
 
 	msg := &permtypes.MsgRenewPermissionVP{
-		Authority: authority,
+		Corporation: authority,
 		Operator:  operatorAddr,
 		Id:        permID,
 	}
@@ -2954,7 +2883,7 @@ func CreateRootPermissionWithAuthority(
 	}
 
 	msg := &permtypes.MsgCreateRootPermission{
-		Authority:        authority,
+		Corporation:        authority,
 		Operator:         operatorAddr,
 		SchemaId:         schemaID,
 		Did:              did,
@@ -3019,7 +2948,7 @@ func CancelPermissionVPLastRequestWithAuthority(
 	}
 
 	msg := &permtypes.MsgCancelPermissionVPLastRequest{
-		Authority: authority,
+		Corporation: authority,
 		Operator:  operatorAddr,
 		Id:        permID,
 	}

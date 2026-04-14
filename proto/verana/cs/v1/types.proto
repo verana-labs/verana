@@ -8,16 +8,35 @@ import "google/protobuf/timestamp.proto";
 
 option go_package = "github.com/verana-labs/verana/x/cs/types";
 
-// CredentialSchemaPermManagementMode defines how permissions are managed
-enum CredentialSchemaPermManagementMode {
-  // Default to prevent accidental omission
-  MODE_UNSPECIFIED = 0;
-  // Anyone can create their own permission
-  OPEN = 1;
+// IssuerOnboardingMode defines how issuers are onboarded for a credential schema.
+enum IssuerOnboardingMode {
+  ISSUER_ONBOARDING_MODE_UNSPECIFIED = 0;
+  // Anyone can self-create an issuer permission
+  ISSUER_ONBOARDING_MODE_OPEN = 1;
+  // Requires validation from ecosystem
+  ISSUER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS = 2;
   // Requires validation from a grantor
-  GRANTOR_VALIDATION = 2;
-  // Requires validation from ecosystem (was TRUST_REGISTRY_VALIDATION)
-  ECOSYSTEM = 3;
+  ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS = 3;
+}
+
+// VerifierOnboardingMode defines how verifiers are onboarded for a credential schema.
+enum VerifierOnboardingMode {
+  VERIFIER_ONBOARDING_MODE_UNSPECIFIED = 0;
+  // Anyone can self-create a verifier permission
+  VERIFIER_ONBOARDING_MODE_OPEN = 1;
+  // Requires validation from ecosystem
+  VERIFIER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS = 2;
+  // Requires validation from a grantor
+  VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS = 3;
+}
+
+// HolderOnboardingMode defines how holders are onboarded for a credential schema.
+enum HolderOnboardingMode {
+  HOLDER_ONBOARDING_MODE_UNSPECIFIED = 0;
+  // Holders go through the issuer validation process
+  HOLDER_ONBOARDING_MODE_ISSUER_VALIDATION_PROCESS = 1;
+  // Anyone can self-create a holder permission without validation
+  HOLDER_ONBOARDING_MODE_PERMISSIONLESS = 2;
 }
 
 // PricingAssetType defines the type of asset used for paying business fees
@@ -54,9 +73,10 @@ message CredentialSchema {
   uint32 issuer_validation_validity_period = 10;
   uint32 verifier_validation_validity_period = 11;
   uint32 holder_validation_validity_period = 12;
-  CredentialSchemaPermManagementMode issuer_perm_management_mode = 13;
-  CredentialSchemaPermManagementMode verifier_perm_management_mode = 14;
+  IssuerOnboardingMode issuer_onboarding_mode = 13;
+  VerifierOnboardingMode verifier_onboarding_mode = 14;
   PricingAssetType pricing_asset_type = 15;
   string pricing_asset = 16;
   string digest_algorithm = 17;
+  HolderOnboardingMode holder_onboarding_mode = 18;
 }

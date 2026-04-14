@@ -32,7 +32,8 @@ service Msg {
   rpc CreateOrUpdatePermissionSession(MsgCreateOrUpdatePermissionSession) returns (MsgCreateOrUpdatePermissionSessionResponse);
   rpc SlashPermissionTrustDeposit(MsgSlashPermissionTrustDeposit) returns (MsgSlashPermissionTrustDepositResponse);
   rpc RepayPermissionSlashedTrustDeposit(MsgRepayPermissionSlashedTrustDeposit) returns (MsgRepayPermissionSlashedTrustDepositResponse);
-  rpc CreatePermission(MsgCreatePermission) returns (MsgCreatePermissionResponse);
+  // [MOD-PERM-MSG-14] Self Create Permission (OPEN mode)
+  rpc SelfCreatePermission(MsgSelfCreatePermission) returns (MsgSelfCreatePermissionResponse);
 }
 
 // MsgUpdateParams is the Msg/UpdateParams request type.
@@ -60,9 +61,9 @@ message MsgUpdateParamsResponse {}
 message MsgStartPermissionVP {
   option (cosmos.msg.v1.signer) = "operator";
 
-  // authority is the group account on whose behalf this message is executed
-  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  // operator is the account authorized by the authority to run this Msg
+  // corporation is the group account on whose behalf this message is executed
+  string corporation = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // operator is the account authorized by the corporation to run this Msg
   string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   PermissionType type = 3;
   uint64 validator_perm_id = 4;
@@ -96,7 +97,7 @@ message MsgStartPermissionVPResponse {
 message MsgRenewPermissionVP {
   option (cosmos.msg.v1.signer) = "operator";
 
-  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string corporation = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   uint64 id = 3; // ID of the permission to renew
 }
@@ -108,9 +109,9 @@ message MsgRenewPermissionVPResponse {}
 message MsgSetPermissionVPToValidated {
   option (cosmos.msg.v1.signer) = "operator";
 
-  // authority is the group account on whose behalf this message is executed
-  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  // operator is the account authorized by the authority to run this Msg
+  // corporation is the group account on whose behalf this message is executed
+  string corporation = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // operator is the account authorized by the corporation to run this Msg
   string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   uint64 id = 3;
   google.protobuf.Timestamp effective_until = 4 [
@@ -120,7 +121,7 @@ message MsgSetPermissionVPToValidated {
   uint64 validation_fees = 5;
   uint64 issuance_fees = 6;
   uint64 verification_fees = 7;
-  string vp_summary_digest_sri = 8;
+  string vp_summary_digest = 8;
   // Fee discount fields (scaled: 0 = 0.0, 10000 = 1.0, range 0-10000)
   // Default to 0 (no discount), maximum 10000 (100% discount)
   uint64 issuance_fee_discount = 9; // Issuance fee discount (mandatory, default 0)
@@ -133,9 +134,9 @@ message MsgSetPermissionVPToValidatedResponse {}
 message MsgCancelPermissionVPLastRequest {
   option (cosmos.msg.v1.signer) = "operator";
 
-  // authority is the group account on whose behalf this message is executed
-  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  // operator is the account authorized by the authority to run this Msg
+  // corporation is the group account on whose behalf this message is executed
+  string corporation = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // operator is the account authorized by the corporation to run this Msg
   string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   uint64 id = 3; // Permission ID
 }
@@ -145,7 +146,7 @@ message MsgCancelPermissionVPLastRequestResponse {}
 message MsgCreateRootPermission {
   option (cosmos.msg.v1.signer) = "operator";
 
-  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string corporation = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   uint64 schema_id = 3;
   string did = 4;
@@ -169,7 +170,7 @@ message MsgCreateRootPermissionResponse {
 message MsgAdjustPermission {
   option (cosmos.msg.v1.signer) = "operator";
 
-  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string corporation = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   uint64 id = 3; // Permission ID
   google.protobuf.Timestamp effective_until = 4 [
@@ -183,7 +184,7 @@ message MsgAdjustPermissionResponse {}
 message MsgRevokePermission {
   option (cosmos.msg.v1.signer) = "operator";
 
-  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string corporation = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   uint64 id = 3; // Permission ID
 }
@@ -193,9 +194,9 @@ message MsgRevokePermissionResponse {}
 message MsgCreateOrUpdatePermissionSession {
   option (cosmos.msg.v1.signer) = "operator";
 
-  // authority is the group account on whose behalf this message is executed
-  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  // operator is the account authorized by the authority to run this Msg (vs_operator)
+  // corporation is the group account on whose behalf this message is executed
+  string corporation = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // operator is the account authorized by the corporation to run this Msg (vs_operator)
   string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   string id = 3; // UUID (mandatory)
   uint64 issuer_perm_id = 4; // optional: issuer permission id
@@ -212,9 +213,9 @@ message MsgCreateOrUpdatePermissionSessionResponse {
 message MsgSlashPermissionTrustDeposit {
   option (cosmos.msg.v1.signer) = "operator";
 
-  // authority is the group account on whose behalf this message is executed
-  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  // operator is the account authorized by the authority to run this Msg
+  // corporation is the group account on whose behalf this message is executed
+  string corporation = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // operator is the account authorized by the corporation to run this Msg
   string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   uint64 id = 3;
   uint64 amount = 4;
@@ -225,17 +226,17 @@ message MsgSlashPermissionTrustDepositResponse {}
 message MsgRepayPermissionSlashedTrustDeposit {
   option (cosmos.msg.v1.signer) = "operator";
 
-  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string corporation = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   uint64 id = 3;
 }
 
 message MsgRepayPermissionSlashedTrustDepositResponse {}
 
-message MsgCreatePermission {
+message MsgSelfCreatePermission {
   option (cosmos.msg.v1.signer) = "operator";
 
-  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string corporation = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   PermissionType type = 3;
   uint64 validator_perm_id = 4;
@@ -267,6 +268,6 @@ message MsgCreatePermission {
   google.protobuf.Duration vs_operator_authz_spend_period = 15 [(gogoproto.stdduration) = true];
 }
 
-message MsgCreatePermissionResponse {
+message MsgSelfCreatePermissionResponse {
   uint64 id = 1;
 }

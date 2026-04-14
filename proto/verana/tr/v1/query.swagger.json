@@ -81,8 +81,7 @@
         },
         "parameters": [
           {
-            "name": "controller",
-            "description": "Added controller field",
+            "name": "corporation",
             "in": "query",
             "required": false,
             "type": "string"
@@ -285,7 +284,7 @@
         "did": {
           "type": "string"
         },
-        "controller": {
+        "corporation": {
           "type": "string"
         },
         "created": {
@@ -299,10 +298,6 @@
         "archived": {
           "type": "string",
           "format": "date-time"
-        },
-        "deposit": {
-          "type": "string",
-          "format": "int64"
         },
         "aka": {
           "type": "string"

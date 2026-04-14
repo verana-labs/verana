@@ -29,11 +29,12 @@ var (
 	fd_CredentialSchema_issuer_validation_validity_period           protoreflect.FieldDescriptor
 	fd_CredentialSchema_verifier_validation_validity_period         protoreflect.FieldDescriptor
 	fd_CredentialSchema_holder_validation_validity_period           protoreflect.FieldDescriptor
-	fd_CredentialSchema_issuer_perm_management_mode                 protoreflect.FieldDescriptor
-	fd_CredentialSchema_verifier_perm_management_mode               protoreflect.FieldDescriptor
+	fd_CredentialSchema_issuer_onboarding_mode                      protoreflect.FieldDescriptor
+	fd_CredentialSchema_verifier_onboarding_mode                    protoreflect.FieldDescriptor
 	fd_CredentialSchema_pricing_asset_type                          protoreflect.FieldDescriptor
 	fd_CredentialSchema_pricing_asset                               protoreflect.FieldDescriptor
 	fd_CredentialSchema_digest_algorithm                            protoreflect.FieldDescriptor
+	fd_CredentialSchema_holder_onboarding_mode                      protoreflect.FieldDescriptor
 )
 
 func init() {
@@ -50,11 +51,12 @@ func init() {
 	fd_CredentialSchema_issuer_validation_validity_period = md_CredentialSchema.Fields().ByName("issuer_validation_validity_period")
 	fd_CredentialSchema_verifier_validation_validity_period = md_CredentialSchema.Fields().ByName("verifier_validation_validity_period")
 	fd_CredentialSchema_holder_validation_validity_period = md_CredentialSchema.Fields().ByName("holder_validation_validity_period")
-	fd_CredentialSchema_issuer_perm_management_mode = md_CredentialSchema.Fields().ByName("issuer_perm_management_mode")
-	fd_CredentialSchema_verifier_perm_management_mode = md_CredentialSchema.Fields().ByName("verifier_perm_management_mode")
+	fd_CredentialSchema_issuer_onboarding_mode = md_CredentialSchema.Fields().ByName("issuer_onboarding_mode")
+	fd_CredentialSchema_verifier_onboarding_mode = md_CredentialSchema.Fields().ByName("verifier_onboarding_mode")
 	fd_CredentialSchema_pricing_asset_type = md_CredentialSchema.Fields().ByName("pricing_asset_type")
 	fd_CredentialSchema_pricing_asset = md_CredentialSchema.Fields().ByName("pricing_asset")
 	fd_CredentialSchema_digest_algorithm = md_CredentialSchema.Fields().ByName("digest_algorithm")
+	fd_CredentialSchema_holder_onboarding_mode = md_CredentialSchema.Fields().ByName("holder_onboarding_mode")
 }
 
 var _ protoreflect.Message = (*fastReflection_CredentialSchema)(nil)
@@ -188,15 +190,15 @@ func (x *fastReflection_CredentialSchema) Range(f func(protoreflect.FieldDescrip
 			return
 		}
 	}
-	if x.IssuerPermManagementMode != 0 {
-		value := protoreflect.ValueOfEnum((protoreflect.EnumNumber)(x.IssuerPermManagementMode))
-		if !f(fd_CredentialSchema_issuer_perm_management_mode, value) {
+	if x.IssuerOnboardingMode != 0 {
+		value := protoreflect.ValueOfEnum((protoreflect.EnumNumber)(x.IssuerOnboardingMode))
+		if !f(fd_CredentialSchema_issuer_onboarding_mode, value) {
 			return
 		}
 	}
-	if x.VerifierPermManagementMode != 0 {
-		value := protoreflect.ValueOfEnum((protoreflect.EnumNumber)(x.VerifierPermManagementMode))
-		if !f(fd_CredentialSchema_verifier_perm_management_mode, value) {
+	if x.VerifierOnboardingMode != 0 {
+		value := protoreflect.ValueOfEnum((protoreflect.EnumNumber)(x.VerifierOnboardingMode))
+		if !f(fd_CredentialSchema_verifier_onboarding_mode, value) {
 			return
 		}
 	}
@@ -215,6 +217,12 @@ func (x *fastReflection_CredentialSchema) Range(f func(protoreflect.FieldDescrip
 	if x.DigestAlgorithm != "" {
 		value := protoreflect.ValueOfString(x.DigestAlgorithm)
 		if !f(fd_CredentialSchema_digest_algorithm, value) {
+			return
+		}
+	}
+	if x.HolderOnboardingMode != 0 {
+		value := protoreflect.ValueOfEnum((protoreflect.EnumNumber)(x.HolderOnboardingMode))
+		if !f(fd_CredentialSchema_holder_onboarding_mode, value) {
 			return
 		}
 	}
@@ -255,16 +263,18 @@ func (x *fastReflection_CredentialSchema) Has(fd protoreflect.FieldDescriptor) b
 		return x.VerifierValidationValidityPeriod != uint32(0)
 	case "verana.cs.v1.CredentialSchema.holder_validation_validity_period":
 		return x.HolderValidationValidityPeriod != uint32(0)
-	case "verana.cs.v1.CredentialSchema.issuer_perm_management_mode":
-		return x.IssuerPermManagementMode != 0
-	case "verana.cs.v1.CredentialSchema.verifier_perm_management_mode":
-		return x.VerifierPermManagementMode != 0
+	case "verana.cs.v1.CredentialSchema.issuer_onboarding_mode":
+		return x.IssuerOnboardingMode != 0
+	case "verana.cs.v1.CredentialSchema.verifier_onboarding_mode":
+		return x.VerifierOnboardingMode != 0
 	case "verana.cs.v1.CredentialSchema.pricing_asset_type":
 		return x.PricingAssetType != 0
 	case "verana.cs.v1.CredentialSchema.pricing_asset":
 		return x.PricingAsset != ""
 	case "verana.cs.v1.CredentialSchema.digest_algorithm":
 		return x.DigestAlgorithm != ""
+	case "verana.cs.v1.CredentialSchema.holder_onboarding_mode":
+		return x.HolderOnboardingMode != 0
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.cs.v1.CredentialSchema"))
@@ -303,16 +313,18 @@ func (x *fastReflection_CredentialSchema) Clear(fd protoreflect.FieldDescriptor)
 		x.VerifierValidationValidityPeriod = uint32(0)
 	case "verana.cs.v1.CredentialSchema.holder_validation_validity_period":
 		x.HolderValidationValidityPeriod = uint32(0)
-	case "verana.cs.v1.CredentialSchema.issuer_perm_management_mode":
-		x.IssuerPermManagementMode = 0
-	case "verana.cs.v1.CredentialSchema.verifier_perm_management_mode":
-		x.VerifierPermManagementMode = 0
+	case "verana.cs.v1.CredentialSchema.issuer_onboarding_mode":
+		x.IssuerOnboardingMode = 0
+	case "verana.cs.v1.CredentialSchema.verifier_onboarding_mode":
+		x.VerifierOnboardingMode = 0
 	case "verana.cs.v1.CredentialSchema.pricing_asset_type":
 		x.PricingAssetType = 0
 	case "verana.cs.v1.CredentialSchema.pricing_asset":
 		x.PricingAsset = ""
 	case "verana.cs.v1.CredentialSchema.digest_algorithm":
 		x.DigestAlgorithm = ""
+	case "verana.cs.v1.CredentialSchema.holder_onboarding_mode":
+		x.HolderOnboardingMode = 0
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.cs.v1.CredentialSchema"))
@@ -362,11 +374,11 @@ func (x *fastReflection_CredentialSchema) Get(descriptor protoreflect.FieldDescr
 	case "verana.cs.v1.CredentialSchema.holder_validation_validity_period":
 		value := x.HolderValidationValidityPeriod
 		return protoreflect.ValueOfUint32(value)
-	case "verana.cs.v1.CredentialSchema.issuer_perm_management_mode":
-		value := x.IssuerPermManagementMode
+	case "verana.cs.v1.CredentialSchema.issuer_onboarding_mode":
+		value := x.IssuerOnboardingMode
 		return protoreflect.ValueOfEnum((protoreflect.EnumNumber)(value))
-	case "verana.cs.v1.CredentialSchema.verifier_perm_management_mode":
-		value := x.VerifierPermManagementMode
+	case "verana.cs.v1.CredentialSchema.verifier_onboarding_mode":
+		value := x.VerifierOnboardingMode
 		return protoreflect.ValueOfEnum((protoreflect.EnumNumber)(value))
 	case "verana.cs.v1.CredentialSchema.pricing_asset_type":
 		value := x.PricingAssetType
@@ -377,6 +389,9 @@ func (x *fastReflection_CredentialSchema) Get(descriptor protoreflect.FieldDescr
 	case "verana.cs.v1.CredentialSchema.digest_algorithm":
 		value := x.DigestAlgorithm
 		return protoreflect.ValueOfString(value)
+	case "verana.cs.v1.CredentialSchema.holder_onboarding_mode":
+		value := x.HolderOnboardingMode
+		return protoreflect.ValueOfEnum((protoreflect.EnumNumber)(value))
 	default:
 		if descriptor.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.cs.v1.CredentialSchema"))
@@ -419,16 +434,18 @@ func (x *fastReflection_CredentialSchema) Set(fd protoreflect.FieldDescriptor, v
 		x.VerifierValidationValidityPeriod = uint32(value.Uint())
 	case "verana.cs.v1.CredentialSchema.holder_validation_validity_period":
 		x.HolderValidationValidityPeriod = uint32(value.Uint())
-	case "verana.cs.v1.CredentialSchema.issuer_perm_management_mode":
-		x.IssuerPermManagementMode = (CredentialSchemaPermManagementMode)(value.Enum())
-	case "verana.cs.v1.CredentialSchema.verifier_perm_management_mode":
-		x.VerifierPermManagementMode = (CredentialSchemaPermManagementMode)(value.Enum())
+	case "verana.cs.v1.CredentialSchema.issuer_onboarding_mode":
+		x.IssuerOnboardingMode = (IssuerOnboardingMode)(value.Enum())
+	case "verana.cs.v1.CredentialSchema.verifier_onboarding_mode":
+		x.VerifierOnboardingMode = (VerifierOnboardingMode)(value.Enum())
 	case "verana.cs.v1.CredentialSchema.pricing_asset_type":
 		x.PricingAssetType = (PricingAssetType)(value.Enum())
 	case "verana.cs.v1.CredentialSchema.pricing_asset":
 		x.PricingAsset = value.Interface().(string)
 	case "verana.cs.v1.CredentialSchema.digest_algorithm":
 		x.DigestAlgorithm = value.Interface().(string)
+	case "verana.cs.v1.CredentialSchema.holder_onboarding_mode":
+		x.HolderOnboardingMode = (HolderOnboardingMode)(value.Enum())
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.cs.v1.CredentialSchema"))
@@ -480,16 +497,18 @@ func (x *fastReflection_CredentialSchema) Mutable(fd protoreflect.FieldDescripto
 		panic(fmt.Errorf("field verifier_validation_validity_period of message verana.cs.v1.CredentialSchema is not mutable"))
 	case "verana.cs.v1.CredentialSchema.holder_validation_validity_period":
 		panic(fmt.Errorf("field holder_validation_validity_period of message verana.cs.v1.CredentialSchema is not mutable"))
-	case "verana.cs.v1.CredentialSchema.issuer_perm_management_mode":
-		panic(fmt.Errorf("field issuer_perm_management_mode of message verana.cs.v1.CredentialSchema is not mutable"))
-	case "verana.cs.v1.CredentialSchema.verifier_perm_management_mode":
-		panic(fmt.Errorf("field verifier_perm_management_mode of message verana.cs.v1.CredentialSchema is not mutable"))
+	case "verana.cs.v1.CredentialSchema.issuer_onboarding_mode":
+		panic(fmt.Errorf("field issuer_onboarding_mode of message verana.cs.v1.CredentialSchema is not mutable"))
+	case "verana.cs.v1.CredentialSchema.verifier_onboarding_mode":
+		panic(fmt.Errorf("field verifier_onboarding_mode of message verana.cs.v1.CredentialSchema is not mutable"))
 	case "verana.cs.v1.CredentialSchema.pricing_asset_type":
 		panic(fmt.Errorf("field pricing_asset_type of message verana.cs.v1.CredentialSchema is not mutable"))
 	case "verana.cs.v1.CredentialSchema.pricing_asset":
 		panic(fmt.Errorf("field pricing_asset of message verana.cs.v1.CredentialSchema is not mutable"))
 	case "verana.cs.v1.CredentialSchema.digest_algorithm":
 		panic(fmt.Errorf("field digest_algorithm of message verana.cs.v1.CredentialSchema is not mutable"))
+	case "verana.cs.v1.CredentialSchema.holder_onboarding_mode":
+		panic(fmt.Errorf("field holder_onboarding_mode of message verana.cs.v1.CredentialSchema is not mutable"))
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.cs.v1.CredentialSchema"))
@@ -528,9 +547,9 @@ func (x *fastReflection_CredentialSchema) NewField(fd protoreflect.FieldDescript
 		return protoreflect.ValueOfUint32(uint32(0))
 	case "verana.cs.v1.CredentialSchema.holder_validation_validity_period":
 		return protoreflect.ValueOfUint32(uint32(0))
-	case "verana.cs.v1.CredentialSchema.issuer_perm_management_mode":
+	case "verana.cs.v1.CredentialSchema.issuer_onboarding_mode":
 		return protoreflect.ValueOfEnum(0)
-	case "verana.cs.v1.CredentialSchema.verifier_perm_management_mode":
+	case "verana.cs.v1.CredentialSchema.verifier_onboarding_mode":
 		return protoreflect.ValueOfEnum(0)
 	case "verana.cs.v1.CredentialSchema.pricing_asset_type":
 		return protoreflect.ValueOfEnum(0)
@@ -538,6 +557,8 @@ func (x *fastReflection_CredentialSchema) NewField(fd protoreflect.FieldDescript
 		return protoreflect.ValueOfString("")
 	case "verana.cs.v1.CredentialSchema.digest_algorithm":
 		return protoreflect.ValueOfString("")
+	case "verana.cs.v1.CredentialSchema.holder_onboarding_mode":
+		return protoreflect.ValueOfEnum(0)
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.cs.v1.CredentialSchema"))
@@ -644,11 +665,11 @@ func (x *fastReflection_CredentialSchema) ProtoMethods() *protoiface.Methods {
 		if x.HolderValidationValidityPeriod != 0 {
 			n += 1 + runtime.Sov(uint64(x.HolderValidationValidityPeriod))
 		}
-		if x.IssuerPermManagementMode != 0 {
-			n += 1 + runtime.Sov(uint64(x.IssuerPermManagementMode))
+		if x.IssuerOnboardingMode != 0 {
+			n += 1 + runtime.Sov(uint64(x.IssuerOnboardingMode))
 		}
-		if x.VerifierPermManagementMode != 0 {
-			n += 1 + runtime.Sov(uint64(x.VerifierPermManagementMode))
+		if x.VerifierOnboardingMode != 0 {
+			n += 1 + runtime.Sov(uint64(x.VerifierOnboardingMode))
 		}
 		if x.PricingAssetType != 0 {
 			n += 1 + runtime.Sov(uint64(x.PricingAssetType))
@@ -660,6 +681,9 @@ func (x *fastReflection_CredentialSchema) ProtoMethods() *protoiface.Methods {
 		l = len(x.DigestAlgorithm)
 		if l > 0 {
 			n += 2 + l + runtime.Sov(uint64(l))
+		}
+		if x.HolderOnboardingMode != 0 {
+			n += 2 + runtime.Sov(uint64(x.HolderOnboardingMode))
 		}
 		if x.unknownFields != nil {
 			n += len(x.unknownFields)
@@ -690,6 +714,13 @@ func (x *fastReflection_CredentialSchema) ProtoMethods() *protoiface.Methods {
 			i -= len(x.unknownFields)
 			copy(dAtA[i:], x.unknownFields)
 		}
+		if x.HolderOnboardingMode != 0 {
+			i = runtime.EncodeVarint(dAtA, i, uint64(x.HolderOnboardingMode))
+			i--
+			dAtA[i] = 0x1
+			i--
+			dAtA[i] = 0x90
+		}
 		if len(x.DigestAlgorithm) > 0 {
 			i -= len(x.DigestAlgorithm)
 			copy(dAtA[i:], x.DigestAlgorithm)
@@ -713,13 +744,13 @@ func (x *fastReflection_CredentialSchema) ProtoMethods() *protoiface.Methods {
 			i--
 			dAtA[i] = 0x78
 		}
-		if x.VerifierPermManagementMode != 0 {
-			i = runtime.EncodeVarint(dAtA, i, uint64(x.VerifierPermManagementMode))
+		if x.VerifierOnboardingMode != 0 {
+			i = runtime.EncodeVarint(dAtA, i, uint64(x.VerifierOnboardingMode))
 			i--
 			dAtA[i] = 0x70
 		}
-		if x.IssuerPermManagementMode != 0 {
-			i = runtime.EncodeVarint(dAtA, i, uint64(x.IssuerPermManagementMode))
+		if x.IssuerOnboardingMode != 0 {
+			i = runtime.EncodeVarint(dAtA, i, uint64(x.IssuerOnboardingMode))
 			i--
 			dAtA[i] = 0x68
 		}
@@ -1131,9 +1162,9 @@ func (x *fastReflection_CredentialSchema) ProtoMethods() *protoiface.Methods {
 				}
 			case 13:
 				if wireType != 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field IssuerPermManagementMode", wireType)
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field IssuerOnboardingMode", wireType)
 				}
-				x.IssuerPermManagementMode = 0
+				x.IssuerOnboardingMode = 0
 				for shift := uint(0); ; shift += 7 {
 					if shift >= 64 {
 						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
@@ -1143,16 +1174,16 @@ func (x *fastReflection_CredentialSchema) ProtoMethods() *protoiface.Methods {
 					}
 					b := dAtA[iNdEx]
 					iNdEx++
-					x.IssuerPermManagementMode |= CredentialSchemaPermManagementMode(b&0x7F) << shift
+					x.IssuerOnboardingMode |= IssuerOnboardingMode(b&0x7F) << shift
 					if b < 0x80 {
 						break
 					}
 				}
 			case 14:
 				if wireType != 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field VerifierPermManagementMode", wireType)
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field VerifierOnboardingMode", wireType)
 				}
-				x.VerifierPermManagementMode = 0
+				x.VerifierOnboardingMode = 0
 				for shift := uint(0); ; shift += 7 {
 					if shift >= 64 {
 						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
@@ -1162,7 +1193,7 @@ func (x *fastReflection_CredentialSchema) ProtoMethods() *protoiface.Methods {
 					}
 					b := dAtA[iNdEx]
 					iNdEx++
-					x.VerifierPermManagementMode |= CredentialSchemaPermManagementMode(b&0x7F) << shift
+					x.VerifierOnboardingMode |= VerifierOnboardingMode(b&0x7F) << shift
 					if b < 0x80 {
 						break
 					}
@@ -1250,6 +1281,25 @@ func (x *fastReflection_CredentialSchema) ProtoMethods() *protoiface.Methods {
 				}
 				x.DigestAlgorithm = string(dAtA[iNdEx:postIndex])
 				iNdEx = postIndex
+			case 18:
+				if wireType != 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field HolderOnboardingMode", wireType)
+				}
+				x.HolderOnboardingMode = 0
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					x.HolderOnboardingMode |= HolderOnboardingMode(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
 			default:
 				iNdEx = preIndex
 				skippy, err := runtime.Skip(dAtA[iNdEx:])
@@ -1298,61 +1348,168 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// CredentialSchemaPermManagementMode defines how permissions are managed
-type CredentialSchemaPermManagementMode int32
+// IssuerOnboardingMode defines how issuers are onboarded for a credential schema.
+type IssuerOnboardingMode int32
 
 const (
-	// Default to prevent accidental omission
-	CredentialSchemaPermManagementMode_MODE_UNSPECIFIED CredentialSchemaPermManagementMode = 0
-	// Anyone can create their own permission
-	CredentialSchemaPermManagementMode_OPEN CredentialSchemaPermManagementMode = 1
+	IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_UNSPECIFIED IssuerOnboardingMode = 0
+	// Anyone can self-create an issuer permission
+	IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_OPEN IssuerOnboardingMode = 1
+	// Requires validation from ecosystem
+	IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS IssuerOnboardingMode = 2
 	// Requires validation from a grantor
-	CredentialSchemaPermManagementMode_GRANTOR_VALIDATION CredentialSchemaPermManagementMode = 2
-	// Requires validation from ecosystem (was TRUST_REGISTRY_VALIDATION)
-	CredentialSchemaPermManagementMode_ECOSYSTEM CredentialSchemaPermManagementMode = 3
+	IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS IssuerOnboardingMode = 3
 )
 
-// Enum value maps for CredentialSchemaPermManagementMode.
+// Enum value maps for IssuerOnboardingMode.
 var (
-	CredentialSchemaPermManagementMode_name = map[int32]string{
-		0: "MODE_UNSPECIFIED",
-		1: "OPEN",
-		2: "GRANTOR_VALIDATION",
-		3: "ECOSYSTEM",
+	IssuerOnboardingMode_name = map[int32]string{
+		0: "ISSUER_ONBOARDING_MODE_UNSPECIFIED",
+		1: "ISSUER_ONBOARDING_MODE_OPEN",
+		2: "ISSUER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS",
+		3: "ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS",
 	}
-	CredentialSchemaPermManagementMode_value = map[string]int32{
-		"MODE_UNSPECIFIED":   0,
-		"OPEN":               1,
-		"GRANTOR_VALIDATION": 2,
-		"ECOSYSTEM":          3,
+	IssuerOnboardingMode_value = map[string]int32{
+		"ISSUER_ONBOARDING_MODE_UNSPECIFIED":                  0,
+		"ISSUER_ONBOARDING_MODE_OPEN":                         1,
+		"ISSUER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS": 2,
+		"ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS":   3,
 	}
 )
 
-func (x CredentialSchemaPermManagementMode) Enum() *CredentialSchemaPermManagementMode {
-	p := new(CredentialSchemaPermManagementMode)
+func (x IssuerOnboardingMode) Enum() *IssuerOnboardingMode {
+	p := new(IssuerOnboardingMode)
 	*p = x
 	return p
 }
 
-func (x CredentialSchemaPermManagementMode) String() string {
+func (x IssuerOnboardingMode) String() string {
 	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
 }
 
-func (CredentialSchemaPermManagementMode) Descriptor() protoreflect.EnumDescriptor {
+func (IssuerOnboardingMode) Descriptor() protoreflect.EnumDescriptor {
 	return file_verana_cs_v1_types_proto_enumTypes[0].Descriptor()
 }
 
-func (CredentialSchemaPermManagementMode) Type() protoreflect.EnumType {
+func (IssuerOnboardingMode) Type() protoreflect.EnumType {
 	return &file_verana_cs_v1_types_proto_enumTypes[0]
 }
 
-func (x CredentialSchemaPermManagementMode) Number() protoreflect.EnumNumber {
+func (x IssuerOnboardingMode) Number() protoreflect.EnumNumber {
 	return protoreflect.EnumNumber(x)
 }
 
-// Deprecated: Use CredentialSchemaPermManagementMode.Descriptor instead.
-func (CredentialSchemaPermManagementMode) EnumDescriptor() ([]byte, []int) {
+// Deprecated: Use IssuerOnboardingMode.Descriptor instead.
+func (IssuerOnboardingMode) EnumDescriptor() ([]byte, []int) {
 	return file_verana_cs_v1_types_proto_rawDescGZIP(), []int{0}
+}
+
+// VerifierOnboardingMode defines how verifiers are onboarded for a credential schema.
+type VerifierOnboardingMode int32
+
+const (
+	VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_UNSPECIFIED VerifierOnboardingMode = 0
+	// Anyone can self-create a verifier permission
+	VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_OPEN VerifierOnboardingMode = 1
+	// Requires validation from ecosystem
+	VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS VerifierOnboardingMode = 2
+	// Requires validation from a grantor
+	VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS VerifierOnboardingMode = 3
+)
+
+// Enum value maps for VerifierOnboardingMode.
+var (
+	VerifierOnboardingMode_name = map[int32]string{
+		0: "VERIFIER_ONBOARDING_MODE_UNSPECIFIED",
+		1: "VERIFIER_ONBOARDING_MODE_OPEN",
+		2: "VERIFIER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS",
+		3: "VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS",
+	}
+	VerifierOnboardingMode_value = map[string]int32{
+		"VERIFIER_ONBOARDING_MODE_UNSPECIFIED":                  0,
+		"VERIFIER_ONBOARDING_MODE_OPEN":                         1,
+		"VERIFIER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS": 2,
+		"VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS":   3,
+	}
+)
+
+func (x VerifierOnboardingMode) Enum() *VerifierOnboardingMode {
+	p := new(VerifierOnboardingMode)
+	*p = x
+	return p
+}
+
+func (x VerifierOnboardingMode) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (VerifierOnboardingMode) Descriptor() protoreflect.EnumDescriptor {
+	return file_verana_cs_v1_types_proto_enumTypes[1].Descriptor()
+}
+
+func (VerifierOnboardingMode) Type() protoreflect.EnumType {
+	return &file_verana_cs_v1_types_proto_enumTypes[1]
+}
+
+func (x VerifierOnboardingMode) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use VerifierOnboardingMode.Descriptor instead.
+func (VerifierOnboardingMode) EnumDescriptor() ([]byte, []int) {
+	return file_verana_cs_v1_types_proto_rawDescGZIP(), []int{1}
+}
+
+// HolderOnboardingMode defines how holders are onboarded for a credential schema.
+type HolderOnboardingMode int32
+
+const (
+	HolderOnboardingMode_HOLDER_ONBOARDING_MODE_UNSPECIFIED HolderOnboardingMode = 0
+	// Holders go through the issuer validation process
+	HolderOnboardingMode_HOLDER_ONBOARDING_MODE_ISSUER_VALIDATION_PROCESS HolderOnboardingMode = 1
+	// Anyone can self-create a holder permission without validation
+	HolderOnboardingMode_HOLDER_ONBOARDING_MODE_PERMISSIONLESS HolderOnboardingMode = 2
+)
+
+// Enum value maps for HolderOnboardingMode.
+var (
+	HolderOnboardingMode_name = map[int32]string{
+		0: "HOLDER_ONBOARDING_MODE_UNSPECIFIED",
+		1: "HOLDER_ONBOARDING_MODE_ISSUER_VALIDATION_PROCESS",
+		2: "HOLDER_ONBOARDING_MODE_PERMISSIONLESS",
+	}
+	HolderOnboardingMode_value = map[string]int32{
+		"HOLDER_ONBOARDING_MODE_UNSPECIFIED":               0,
+		"HOLDER_ONBOARDING_MODE_ISSUER_VALIDATION_PROCESS": 1,
+		"HOLDER_ONBOARDING_MODE_PERMISSIONLESS":            2,
+	}
+)
+
+func (x HolderOnboardingMode) Enum() *HolderOnboardingMode {
+	p := new(HolderOnboardingMode)
+	*p = x
+	return p
+}
+
+func (x HolderOnboardingMode) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (HolderOnboardingMode) Descriptor() protoreflect.EnumDescriptor {
+	return file_verana_cs_v1_types_proto_enumTypes[2].Descriptor()
+}
+
+func (HolderOnboardingMode) Type() protoreflect.EnumType {
+	return &file_verana_cs_v1_types_proto_enumTypes[2]
+}
+
+func (x HolderOnboardingMode) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use HolderOnboardingMode.Descriptor instead.
+func (HolderOnboardingMode) EnumDescriptor() ([]byte, []int) {
+	return file_verana_cs_v1_types_proto_rawDescGZIP(), []int{2}
 }
 
 // PricingAssetType defines the type of asset used for paying business fees
@@ -1396,11 +1553,11 @@ func (x PricingAssetType) String() string {
 }
 
 func (PricingAssetType) Descriptor() protoreflect.EnumDescriptor {
-	return file_verana_cs_v1_types_proto_enumTypes[1].Descriptor()
+	return file_verana_cs_v1_types_proto_enumTypes[3].Descriptor()
 }
 
 func (PricingAssetType) Type() protoreflect.EnumType {
-	return &file_verana_cs_v1_types_proto_enumTypes[1]
+	return &file_verana_cs_v1_types_proto_enumTypes[3]
 }
 
 func (x PricingAssetType) Number() protoreflect.EnumNumber {
@@ -1409,7 +1566,7 @@ func (x PricingAssetType) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use PricingAssetType.Descriptor instead.
 func (PricingAssetType) EnumDescriptor() ([]byte, []int) {
-	return file_verana_cs_v1_types_proto_rawDescGZIP(), []int{1}
+	return file_verana_cs_v1_types_proto_rawDescGZIP(), []int{3}
 }
 
 // CredentialSchema defines the structure for a credential schema
@@ -1418,22 +1575,23 @@ type CredentialSchema struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id                                      uint64                             `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	TrId                                    uint64                             `protobuf:"varint,2,opt,name=tr_id,json=trId,proto3" json:"tr_id,omitempty"`
-	Created                                 *timestamppb.Timestamp             `protobuf:"bytes,3,opt,name=created,proto3" json:"created,omitempty"`
-	Modified                                *timestamppb.Timestamp             `protobuf:"bytes,4,opt,name=modified,proto3" json:"modified,omitempty"`
-	Archived                                *timestamppb.Timestamp             `protobuf:"bytes,5,opt,name=archived,proto3" json:"archived,omitempty"`
-	JsonSchema                              string                             `protobuf:"bytes,7,opt,name=json_schema,json=jsonSchema,proto3" json:"json_schema,omitempty"`
-	IssuerGrantorValidationValidityPeriod   uint32                             `protobuf:"varint,8,opt,name=issuer_grantor_validation_validity_period,json=issuerGrantorValidationValidityPeriod,proto3" json:"issuer_grantor_validation_validity_period,omitempty"`
-	VerifierGrantorValidationValidityPeriod uint32                             `protobuf:"varint,9,opt,name=verifier_grantor_validation_validity_period,json=verifierGrantorValidationValidityPeriod,proto3" json:"verifier_grantor_validation_validity_period,omitempty"`
-	IssuerValidationValidityPeriod          uint32                             `protobuf:"varint,10,opt,name=issuer_validation_validity_period,json=issuerValidationValidityPeriod,proto3" json:"issuer_validation_validity_period,omitempty"`
-	VerifierValidationValidityPeriod        uint32                             `protobuf:"varint,11,opt,name=verifier_validation_validity_period,json=verifierValidationValidityPeriod,proto3" json:"verifier_validation_validity_period,omitempty"`
-	HolderValidationValidityPeriod          uint32                             `protobuf:"varint,12,opt,name=holder_validation_validity_period,json=holderValidationValidityPeriod,proto3" json:"holder_validation_validity_period,omitempty"`
-	IssuerPermManagementMode                CredentialSchemaPermManagementMode `protobuf:"varint,13,opt,name=issuer_perm_management_mode,json=issuerPermManagementMode,proto3,enum=verana.cs.v1.CredentialSchemaPermManagementMode" json:"issuer_perm_management_mode,omitempty"`
-	VerifierPermManagementMode              CredentialSchemaPermManagementMode `protobuf:"varint,14,opt,name=verifier_perm_management_mode,json=verifierPermManagementMode,proto3,enum=verana.cs.v1.CredentialSchemaPermManagementMode" json:"verifier_perm_management_mode,omitempty"`
-	PricingAssetType                        PricingAssetType                   `protobuf:"varint,15,opt,name=pricing_asset_type,json=pricingAssetType,proto3,enum=verana.cs.v1.PricingAssetType" json:"pricing_asset_type,omitempty"`
-	PricingAsset                            string                             `protobuf:"bytes,16,opt,name=pricing_asset,json=pricingAsset,proto3" json:"pricing_asset,omitempty"`
-	DigestAlgorithm                         string                             `protobuf:"bytes,17,opt,name=digest_algorithm,json=digestAlgorithm,proto3" json:"digest_algorithm,omitempty"`
+	Id                                      uint64                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	TrId                                    uint64                 `protobuf:"varint,2,opt,name=tr_id,json=trId,proto3" json:"tr_id,omitempty"`
+	Created                                 *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=created,proto3" json:"created,omitempty"`
+	Modified                                *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=modified,proto3" json:"modified,omitempty"`
+	Archived                                *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=archived,proto3" json:"archived,omitempty"`
+	JsonSchema                              string                 `protobuf:"bytes,7,opt,name=json_schema,json=jsonSchema,proto3" json:"json_schema,omitempty"`
+	IssuerGrantorValidationValidityPeriod   uint32                 `protobuf:"varint,8,opt,name=issuer_grantor_validation_validity_period,json=issuerGrantorValidationValidityPeriod,proto3" json:"issuer_grantor_validation_validity_period,omitempty"`
+	VerifierGrantorValidationValidityPeriod uint32                 `protobuf:"varint,9,opt,name=verifier_grantor_validation_validity_period,json=verifierGrantorValidationValidityPeriod,proto3" json:"verifier_grantor_validation_validity_period,omitempty"`
+	IssuerValidationValidityPeriod          uint32                 `protobuf:"varint,10,opt,name=issuer_validation_validity_period,json=issuerValidationValidityPeriod,proto3" json:"issuer_validation_validity_period,omitempty"`
+	VerifierValidationValidityPeriod        uint32                 `protobuf:"varint,11,opt,name=verifier_validation_validity_period,json=verifierValidationValidityPeriod,proto3" json:"verifier_validation_validity_period,omitempty"`
+	HolderValidationValidityPeriod          uint32                 `protobuf:"varint,12,opt,name=holder_validation_validity_period,json=holderValidationValidityPeriod,proto3" json:"holder_validation_validity_period,omitempty"`
+	IssuerOnboardingMode                    IssuerOnboardingMode   `protobuf:"varint,13,opt,name=issuer_onboarding_mode,json=issuerOnboardingMode,proto3,enum=verana.cs.v1.IssuerOnboardingMode" json:"issuer_onboarding_mode,omitempty"`
+	VerifierOnboardingMode                  VerifierOnboardingMode `protobuf:"varint,14,opt,name=verifier_onboarding_mode,json=verifierOnboardingMode,proto3,enum=verana.cs.v1.VerifierOnboardingMode" json:"verifier_onboarding_mode,omitempty"`
+	PricingAssetType                        PricingAssetType       `protobuf:"varint,15,opt,name=pricing_asset_type,json=pricingAssetType,proto3,enum=verana.cs.v1.PricingAssetType" json:"pricing_asset_type,omitempty"`
+	PricingAsset                            string                 `protobuf:"bytes,16,opt,name=pricing_asset,json=pricingAsset,proto3" json:"pricing_asset,omitempty"`
+	DigestAlgorithm                         string                 `protobuf:"bytes,17,opt,name=digest_algorithm,json=digestAlgorithm,proto3" json:"digest_algorithm,omitempty"`
+	HolderOnboardingMode                    HolderOnboardingMode   `protobuf:"varint,18,opt,name=holder_onboarding_mode,json=holderOnboardingMode,proto3,enum=verana.cs.v1.HolderOnboardingMode" json:"holder_onboarding_mode,omitempty"`
 }
 
 func (x *CredentialSchema) Reset() {
@@ -1533,18 +1691,18 @@ func (x *CredentialSchema) GetHolderValidationValidityPeriod() uint32 {
 	return 0
 }
 
-func (x *CredentialSchema) GetIssuerPermManagementMode() CredentialSchemaPermManagementMode {
+func (x *CredentialSchema) GetIssuerOnboardingMode() IssuerOnboardingMode {
 	if x != nil {
-		return x.IssuerPermManagementMode
+		return x.IssuerOnboardingMode
 	}
-	return CredentialSchemaPermManagementMode_MODE_UNSPECIFIED
+	return IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_UNSPECIFIED
 }
 
-func (x *CredentialSchema) GetVerifierPermManagementMode() CredentialSchemaPermManagementMode {
+func (x *CredentialSchema) GetVerifierOnboardingMode() VerifierOnboardingMode {
 	if x != nil {
-		return x.VerifierPermManagementMode
+		return x.VerifierOnboardingMode
 	}
-	return CredentialSchemaPermManagementMode_MODE_UNSPECIFIED
+	return VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_UNSPECIFIED
 }
 
 func (x *CredentialSchema) GetPricingAssetType() PricingAssetType {
@@ -1568,6 +1726,13 @@ func (x *CredentialSchema) GetDigestAlgorithm() string {
 	return ""
 }
 
+func (x *CredentialSchema) GetHolderOnboardingMode() HolderOnboardingMode {
+	if x != nil {
+		return x.HolderOnboardingMode
+	}
+	return HolderOnboardingMode_HOLDER_ONBOARDING_MODE_UNSPECIFIED
+}
+
 var File_verana_cs_v1_types_proto protoreflect.FileDescriptor
 
 var file_verana_cs_v1_types_proto_rawDesc = []byte{
@@ -1579,7 +1744,7 @@ var file_verana_cs_v1_types_proto_rawDesc = []byte{
 	0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x1a, 0x14, 0x67, 0x6f, 0x67, 0x6f, 0x70, 0x72, 0x6f, 0x74,
 	0x6f, 0x2f, 0x67, 0x6f, 0x67, 0x6f, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x1a, 0x1f, 0x67, 0x6f,
 	0x6f, 0x67, 0x6c, 0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2f, 0x74, 0x69,
-	0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0xbd, 0x08,
+	0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0xeb, 0x08,
 	0x0a, 0x10, 0x43, 0x72, 0x65, 0x64, 0x65, 0x6e, 0x74, 0x69, 0x61, 0x6c, 0x53, 0x63, 0x68, 0x65,
 	0x6d, 0x61, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04, 0x52, 0x02,
 	0x69, 0x64, 0x12, 0x13, 0x0a, 0x05, 0x74, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28,
@@ -1623,54 +1788,87 @@ var file_verana_cs_v1_types_proto_rawDesc = []byte{
 	0x69, 0x6f, 0x6e, 0x5f, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x69, 0x74, 0x79, 0x5f, 0x70, 0x65, 0x72,
 	0x69, 0x6f, 0x64, 0x18, 0x0c, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x1e, 0x68, 0x6f, 0x6c, 0x64, 0x65,
 	0x72, 0x56, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x56, 0x61, 0x6c, 0x69, 0x64,
-	0x69, 0x74, 0x79, 0x50, 0x65, 0x72, 0x69, 0x6f, 0x64, 0x12, 0x6f, 0x0a, 0x1b, 0x69, 0x73, 0x73,
-	0x75, 0x65, 0x72, 0x5f, 0x70, 0x65, 0x72, 0x6d, 0x5f, 0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x6d,
-	0x65, 0x6e, 0x74, 0x5f, 0x6d, 0x6f, 0x64, 0x65, 0x18, 0x0d, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x30,
-	0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x63, 0x73, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x72,
-	0x65, 0x64, 0x65, 0x6e, 0x74, 0x69, 0x61, 0x6c, 0x53, 0x63, 0x68, 0x65, 0x6d, 0x61, 0x50, 0x65,
-	0x72, 0x6d, 0x4d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x4d, 0x6f, 0x64, 0x65,
-	0x52, 0x18, 0x69, 0x73, 0x73, 0x75, 0x65, 0x72, 0x50, 0x65, 0x72, 0x6d, 0x4d, 0x61, 0x6e, 0x61,
-	0x67, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x4d, 0x6f, 0x64, 0x65, 0x12, 0x73, 0x0a, 0x1d, 0x76, 0x65,
-	0x72, 0x69, 0x66, 0x69, 0x65, 0x72, 0x5f, 0x70, 0x65, 0x72, 0x6d, 0x5f, 0x6d, 0x61, 0x6e, 0x61,
-	0x67, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x5f, 0x6d, 0x6f, 0x64, 0x65, 0x18, 0x0e, 0x20, 0x01, 0x28,
-	0x0e, 0x32, 0x30, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x63, 0x73, 0x2e, 0x76, 0x31,
-	0x2e, 0x43, 0x72, 0x65, 0x64, 0x65, 0x6e, 0x74, 0x69, 0x61, 0x6c, 0x53, 0x63, 0x68, 0x65, 0x6d,
-	0x61, 0x50, 0x65, 0x72, 0x6d, 0x4d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x4d,
-	0x6f, 0x64, 0x65, 0x52, 0x1a, 0x76, 0x65, 0x72, 0x69, 0x66, 0x69, 0x65, 0x72, 0x50, 0x65, 0x72,
-	0x6d, 0x4d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x4d, 0x6f, 0x64, 0x65, 0x12,
-	0x4c, 0x0a, 0x12, 0x70, 0x72, 0x69, 0x63, 0x69, 0x6e, 0x67, 0x5f, 0x61, 0x73, 0x73, 0x65, 0x74,
-	0x5f, 0x74, 0x79, 0x70, 0x65, 0x18, 0x0f, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x1e, 0x2e, 0x76, 0x65,
-	0x72, 0x61, 0x6e, 0x61, 0x2e, 0x63, 0x73, 0x2e, 0x76, 0x31, 0x2e, 0x50, 0x72, 0x69, 0x63, 0x69,
-	0x6e, 0x67, 0x41, 0x73, 0x73, 0x65, 0x74, 0x54, 0x79, 0x70, 0x65, 0x52, 0x10, 0x70, 0x72, 0x69,
-	0x63, 0x69, 0x6e, 0x67, 0x41, 0x73, 0x73, 0x65, 0x74, 0x54, 0x79, 0x70, 0x65, 0x12, 0x23, 0x0a,
-	0x0d, 0x70, 0x72, 0x69, 0x63, 0x69, 0x6e, 0x67, 0x5f, 0x61, 0x73, 0x73, 0x65, 0x74, 0x18, 0x10,
-	0x20, 0x01, 0x28, 0x09, 0x52, 0x0c, 0x70, 0x72, 0x69, 0x63, 0x69, 0x6e, 0x67, 0x41, 0x73, 0x73,
-	0x65, 0x74, 0x12, 0x29, 0x0a, 0x10, 0x64, 0x69, 0x67, 0x65, 0x73, 0x74, 0x5f, 0x61, 0x6c, 0x67,
-	0x6f, 0x72, 0x69, 0x74, 0x68, 0x6d, 0x18, 0x11, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0f, 0x64, 0x69,
-	0x67, 0x65, 0x73, 0x74, 0x41, 0x6c, 0x67, 0x6f, 0x72, 0x69, 0x74, 0x68, 0x6d, 0x2a, 0x6b, 0x0a,
-	0x22, 0x43, 0x72, 0x65, 0x64, 0x65, 0x6e, 0x74, 0x69, 0x61, 0x6c, 0x53, 0x63, 0x68, 0x65, 0x6d,
-	0x61, 0x50, 0x65, 0x72, 0x6d, 0x4d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x4d,
-	0x6f, 0x64, 0x65, 0x12, 0x14, 0x0a, 0x10, 0x4d, 0x4f, 0x44, 0x45, 0x5f, 0x55, 0x4e, 0x53, 0x50,
-	0x45, 0x43, 0x49, 0x46, 0x49, 0x45, 0x44, 0x10, 0x00, 0x12, 0x08, 0x0a, 0x04, 0x4f, 0x50, 0x45,
-	0x4e, 0x10, 0x01, 0x12, 0x16, 0x0a, 0x12, 0x47, 0x52, 0x41, 0x4e, 0x54, 0x4f, 0x52, 0x5f, 0x56,
-	0x41, 0x4c, 0x49, 0x44, 0x41, 0x54, 0x49, 0x4f, 0x4e, 0x10, 0x02, 0x12, 0x0d, 0x0a, 0x09, 0x45,
-	0x43, 0x4f, 0x53, 0x59, 0x53, 0x54, 0x45, 0x4d, 0x10, 0x03, 0x2a, 0x52, 0x0a, 0x10, 0x50, 0x72,
-	0x69, 0x63, 0x69, 0x6e, 0x67, 0x41, 0x73, 0x73, 0x65, 0x74, 0x54, 0x79, 0x70, 0x65, 0x12, 0x22,
-	0x0a, 0x1e, 0x50, 0x52, 0x49, 0x43, 0x49, 0x4e, 0x47, 0x5f, 0x41, 0x53, 0x53, 0x45, 0x54, 0x5f,
-	0x54, 0x59, 0x50, 0x45, 0x5f, 0x55, 0x4e, 0x53, 0x50, 0x45, 0x43, 0x49, 0x46, 0x49, 0x45, 0x44,
-	0x10, 0x00, 0x12, 0x06, 0x0a, 0x02, 0x54, 0x55, 0x10, 0x01, 0x12, 0x08, 0x0a, 0x04, 0x43, 0x4f,
-	0x49, 0x4e, 0x10, 0x02, 0x12, 0x08, 0x0a, 0x04, 0x46, 0x49, 0x41, 0x54, 0x10, 0x03, 0x42, 0xa5,
-	0x01, 0x0a, 0x10, 0x63, 0x6f, 0x6d, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x63, 0x73,
-	0x2e, 0x76, 0x31, 0x42, 0x0a, 0x54, 0x79, 0x70, 0x65, 0x73, 0x50, 0x72, 0x6f, 0x74, 0x6f, 0x50,
-	0x01, 0x5a, 0x33, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x76, 0x65,
-	0x72, 0x61, 0x6e, 0x61, 0x2d, 0x6c, 0x61, 0x62, 0x73, 0x2f, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61,
-	0x2f, 0x61, 0x70, 0x69, 0x2f, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2f, 0x63, 0x73, 0x2f, 0x76,
-	0x31, 0x3b, 0x63, 0x73, 0x76, 0x31, 0xa2, 0x02, 0x03, 0x56, 0x43, 0x58, 0xaa, 0x02, 0x0c, 0x56,
-	0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x43, 0x73, 0x2e, 0x56, 0x31, 0xca, 0x02, 0x0c, 0x56, 0x65,
-	0x72, 0x61, 0x6e, 0x61, 0x5c, 0x43, 0x73, 0x5c, 0x56, 0x31, 0xe2, 0x02, 0x18, 0x56, 0x65, 0x72,
-	0x61, 0x6e, 0x61, 0x5c, 0x43, 0x73, 0x5c, 0x56, 0x31, 0x5c, 0x47, 0x50, 0x42, 0x4d, 0x65, 0x74,
-	0x61, 0x64, 0x61, 0x74, 0x61, 0xea, 0x02, 0x0e, 0x56, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x3a, 0x3a,
-	0x43, 0x73, 0x3a, 0x3a, 0x56, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x69, 0x74, 0x79, 0x50, 0x65, 0x72, 0x69, 0x6f, 0x64, 0x12, 0x58, 0x0a, 0x16, 0x69, 0x73, 0x73,
+	0x75, 0x65, 0x72, 0x5f, 0x6f, 0x6e, 0x62, 0x6f, 0x61, 0x72, 0x64, 0x69, 0x6e, 0x67, 0x5f, 0x6d,
+	0x6f, 0x64, 0x65, 0x18, 0x0d, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x22, 0x2e, 0x76, 0x65, 0x72, 0x61,
+	0x6e, 0x61, 0x2e, 0x63, 0x73, 0x2e, 0x76, 0x31, 0x2e, 0x49, 0x73, 0x73, 0x75, 0x65, 0x72, 0x4f,
+	0x6e, 0x62, 0x6f, 0x61, 0x72, 0x64, 0x69, 0x6e, 0x67, 0x4d, 0x6f, 0x64, 0x65, 0x52, 0x14, 0x69,
+	0x73, 0x73, 0x75, 0x65, 0x72, 0x4f, 0x6e, 0x62, 0x6f, 0x61, 0x72, 0x64, 0x69, 0x6e, 0x67, 0x4d,
+	0x6f, 0x64, 0x65, 0x12, 0x5e, 0x0a, 0x18, 0x76, 0x65, 0x72, 0x69, 0x66, 0x69, 0x65, 0x72, 0x5f,
+	0x6f, 0x6e, 0x62, 0x6f, 0x61, 0x72, 0x64, 0x69, 0x6e, 0x67, 0x5f, 0x6d, 0x6f, 0x64, 0x65, 0x18,
+	0x0e, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x24, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x63,
+	0x73, 0x2e, 0x76, 0x31, 0x2e, 0x56, 0x65, 0x72, 0x69, 0x66, 0x69, 0x65, 0x72, 0x4f, 0x6e, 0x62,
+	0x6f, 0x61, 0x72, 0x64, 0x69, 0x6e, 0x67, 0x4d, 0x6f, 0x64, 0x65, 0x52, 0x16, 0x76, 0x65, 0x72,
+	0x69, 0x66, 0x69, 0x65, 0x72, 0x4f, 0x6e, 0x62, 0x6f, 0x61, 0x72, 0x64, 0x69, 0x6e, 0x67, 0x4d,
+	0x6f, 0x64, 0x65, 0x12, 0x4c, 0x0a, 0x12, 0x70, 0x72, 0x69, 0x63, 0x69, 0x6e, 0x67, 0x5f, 0x61,
+	0x73, 0x73, 0x65, 0x74, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x18, 0x0f, 0x20, 0x01, 0x28, 0x0e, 0x32,
+	0x1e, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x63, 0x73, 0x2e, 0x76, 0x31, 0x2e, 0x50,
+	0x72, 0x69, 0x63, 0x69, 0x6e, 0x67, 0x41, 0x73, 0x73, 0x65, 0x74, 0x54, 0x79, 0x70, 0x65, 0x52,
+	0x10, 0x70, 0x72, 0x69, 0x63, 0x69, 0x6e, 0x67, 0x41, 0x73, 0x73, 0x65, 0x74, 0x54, 0x79, 0x70,
+	0x65, 0x12, 0x23, 0x0a, 0x0d, 0x70, 0x72, 0x69, 0x63, 0x69, 0x6e, 0x67, 0x5f, 0x61, 0x73, 0x73,
+	0x65, 0x74, 0x18, 0x10, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0c, 0x70, 0x72, 0x69, 0x63, 0x69, 0x6e,
+	0x67, 0x41, 0x73, 0x73, 0x65, 0x74, 0x12, 0x29, 0x0a, 0x10, 0x64, 0x69, 0x67, 0x65, 0x73, 0x74,
+	0x5f, 0x61, 0x6c, 0x67, 0x6f, 0x72, 0x69, 0x74, 0x68, 0x6d, 0x18, 0x11, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x0f, 0x64, 0x69, 0x67, 0x65, 0x73, 0x74, 0x41, 0x6c, 0x67, 0x6f, 0x72, 0x69, 0x74, 0x68,
+	0x6d, 0x12, 0x58, 0x0a, 0x16, 0x68, 0x6f, 0x6c, 0x64, 0x65, 0x72, 0x5f, 0x6f, 0x6e, 0x62, 0x6f,
+	0x61, 0x72, 0x64, 0x69, 0x6e, 0x67, 0x5f, 0x6d, 0x6f, 0x64, 0x65, 0x18, 0x12, 0x20, 0x01, 0x28,
+	0x0e, 0x32, 0x22, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x63, 0x73, 0x2e, 0x76, 0x31,
+	0x2e, 0x48, 0x6f, 0x6c, 0x64, 0x65, 0x72, 0x4f, 0x6e, 0x62, 0x6f, 0x61, 0x72, 0x64, 0x69, 0x6e,
+	0x67, 0x4d, 0x6f, 0x64, 0x65, 0x52, 0x14, 0x68, 0x6f, 0x6c, 0x64, 0x65, 0x72, 0x4f, 0x6e, 0x62,
+	0x6f, 0x61, 0x72, 0x64, 0x69, 0x6e, 0x67, 0x4d, 0x6f, 0x64, 0x65, 0x2a, 0xcf, 0x01, 0x0a, 0x14,
+	0x49, 0x73, 0x73, 0x75, 0x65, 0x72, 0x4f, 0x6e, 0x62, 0x6f, 0x61, 0x72, 0x64, 0x69, 0x6e, 0x67,
+	0x4d, 0x6f, 0x64, 0x65, 0x12, 0x26, 0x0a, 0x22, 0x49, 0x53, 0x53, 0x55, 0x45, 0x52, 0x5f, 0x4f,
+	0x4e, 0x42, 0x4f, 0x41, 0x52, 0x44, 0x49, 0x4e, 0x47, 0x5f, 0x4d, 0x4f, 0x44, 0x45, 0x5f, 0x55,
+	0x4e, 0x53, 0x50, 0x45, 0x43, 0x49, 0x46, 0x49, 0x45, 0x44, 0x10, 0x00, 0x12, 0x1f, 0x0a, 0x1b,
+	0x49, 0x53, 0x53, 0x55, 0x45, 0x52, 0x5f, 0x4f, 0x4e, 0x42, 0x4f, 0x41, 0x52, 0x44, 0x49, 0x4e,
+	0x47, 0x5f, 0x4d, 0x4f, 0x44, 0x45, 0x5f, 0x4f, 0x50, 0x45, 0x4e, 0x10, 0x01, 0x12, 0x37, 0x0a,
+	0x33, 0x49, 0x53, 0x53, 0x55, 0x45, 0x52, 0x5f, 0x4f, 0x4e, 0x42, 0x4f, 0x41, 0x52, 0x44, 0x49,
+	0x4e, 0x47, 0x5f, 0x4d, 0x4f, 0x44, 0x45, 0x5f, 0x45, 0x43, 0x4f, 0x53, 0x59, 0x53, 0x54, 0x45,
+	0x4d, 0x5f, 0x56, 0x41, 0x4c, 0x49, 0x44, 0x41, 0x54, 0x49, 0x4f, 0x4e, 0x5f, 0x50, 0x52, 0x4f,
+	0x43, 0x45, 0x53, 0x53, 0x10, 0x02, 0x12, 0x35, 0x0a, 0x31, 0x49, 0x53, 0x53, 0x55, 0x45, 0x52,
+	0x5f, 0x4f, 0x4e, 0x42, 0x4f, 0x41, 0x52, 0x44, 0x49, 0x4e, 0x47, 0x5f, 0x4d, 0x4f, 0x44, 0x45,
+	0x5f, 0x47, 0x52, 0x41, 0x4e, 0x54, 0x4f, 0x52, 0x5f, 0x56, 0x41, 0x4c, 0x49, 0x44, 0x41, 0x54,
+	0x49, 0x4f, 0x4e, 0x5f, 0x50, 0x52, 0x4f, 0x43, 0x45, 0x53, 0x53, 0x10, 0x03, 0x2a, 0xd9, 0x01,
+	0x0a, 0x16, 0x56, 0x65, 0x72, 0x69, 0x66, 0x69, 0x65, 0x72, 0x4f, 0x6e, 0x62, 0x6f, 0x61, 0x72,
+	0x64, 0x69, 0x6e, 0x67, 0x4d, 0x6f, 0x64, 0x65, 0x12, 0x28, 0x0a, 0x24, 0x56, 0x45, 0x52, 0x49,
+	0x46, 0x49, 0x45, 0x52, 0x5f, 0x4f, 0x4e, 0x42, 0x4f, 0x41, 0x52, 0x44, 0x49, 0x4e, 0x47, 0x5f,
+	0x4d, 0x4f, 0x44, 0x45, 0x5f, 0x55, 0x4e, 0x53, 0x50, 0x45, 0x43, 0x49, 0x46, 0x49, 0x45, 0x44,
+	0x10, 0x00, 0x12, 0x21, 0x0a, 0x1d, 0x56, 0x45, 0x52, 0x49, 0x46, 0x49, 0x45, 0x52, 0x5f, 0x4f,
+	0x4e, 0x42, 0x4f, 0x41, 0x52, 0x44, 0x49, 0x4e, 0x47, 0x5f, 0x4d, 0x4f, 0x44, 0x45, 0x5f, 0x4f,
+	0x50, 0x45, 0x4e, 0x10, 0x01, 0x12, 0x39, 0x0a, 0x35, 0x56, 0x45, 0x52, 0x49, 0x46, 0x49, 0x45,
+	0x52, 0x5f, 0x4f, 0x4e, 0x42, 0x4f, 0x41, 0x52, 0x44, 0x49, 0x4e, 0x47, 0x5f, 0x4d, 0x4f, 0x44,
+	0x45, 0x5f, 0x45, 0x43, 0x4f, 0x53, 0x59, 0x53, 0x54, 0x45, 0x4d, 0x5f, 0x56, 0x41, 0x4c, 0x49,
+	0x44, 0x41, 0x54, 0x49, 0x4f, 0x4e, 0x5f, 0x50, 0x52, 0x4f, 0x43, 0x45, 0x53, 0x53, 0x10, 0x02,
+	0x12, 0x37, 0x0a, 0x33, 0x56, 0x45, 0x52, 0x49, 0x46, 0x49, 0x45, 0x52, 0x5f, 0x4f, 0x4e, 0x42,
+	0x4f, 0x41, 0x52, 0x44, 0x49, 0x4e, 0x47, 0x5f, 0x4d, 0x4f, 0x44, 0x45, 0x5f, 0x47, 0x52, 0x41,
+	0x4e, 0x54, 0x4f, 0x52, 0x5f, 0x56, 0x41, 0x4c, 0x49, 0x44, 0x41, 0x54, 0x49, 0x4f, 0x4e, 0x5f,
+	0x50, 0x52, 0x4f, 0x43, 0x45, 0x53, 0x53, 0x10, 0x03, 0x2a, 0x9f, 0x01, 0x0a, 0x14, 0x48, 0x6f,
+	0x6c, 0x64, 0x65, 0x72, 0x4f, 0x6e, 0x62, 0x6f, 0x61, 0x72, 0x64, 0x69, 0x6e, 0x67, 0x4d, 0x6f,
+	0x64, 0x65, 0x12, 0x26, 0x0a, 0x22, 0x48, 0x4f, 0x4c, 0x44, 0x45, 0x52, 0x5f, 0x4f, 0x4e, 0x42,
+	0x4f, 0x41, 0x52, 0x44, 0x49, 0x4e, 0x47, 0x5f, 0x4d, 0x4f, 0x44, 0x45, 0x5f, 0x55, 0x4e, 0x53,
+	0x50, 0x45, 0x43, 0x49, 0x46, 0x49, 0x45, 0x44, 0x10, 0x00, 0x12, 0x34, 0x0a, 0x30, 0x48, 0x4f,
+	0x4c, 0x44, 0x45, 0x52, 0x5f, 0x4f, 0x4e, 0x42, 0x4f, 0x41, 0x52, 0x44, 0x49, 0x4e, 0x47, 0x5f,
+	0x4d, 0x4f, 0x44, 0x45, 0x5f, 0x49, 0x53, 0x53, 0x55, 0x45, 0x52, 0x5f, 0x56, 0x41, 0x4c, 0x49,
+	0x44, 0x41, 0x54, 0x49, 0x4f, 0x4e, 0x5f, 0x50, 0x52, 0x4f, 0x43, 0x45, 0x53, 0x53, 0x10, 0x01,
+	0x12, 0x29, 0x0a, 0x25, 0x48, 0x4f, 0x4c, 0x44, 0x45, 0x52, 0x5f, 0x4f, 0x4e, 0x42, 0x4f, 0x41,
+	0x52, 0x44, 0x49, 0x4e, 0x47, 0x5f, 0x4d, 0x4f, 0x44, 0x45, 0x5f, 0x50, 0x45, 0x52, 0x4d, 0x49,
+	0x53, 0x53, 0x49, 0x4f, 0x4e, 0x4c, 0x45, 0x53, 0x53, 0x10, 0x02, 0x2a, 0x52, 0x0a, 0x10, 0x50,
+	0x72, 0x69, 0x63, 0x69, 0x6e, 0x67, 0x41, 0x73, 0x73, 0x65, 0x74, 0x54, 0x79, 0x70, 0x65, 0x12,
+	0x22, 0x0a, 0x1e, 0x50, 0x52, 0x49, 0x43, 0x49, 0x4e, 0x47, 0x5f, 0x41, 0x53, 0x53, 0x45, 0x54,
+	0x5f, 0x54, 0x59, 0x50, 0x45, 0x5f, 0x55, 0x4e, 0x53, 0x50, 0x45, 0x43, 0x49, 0x46, 0x49, 0x45,
+	0x44, 0x10, 0x00, 0x12, 0x06, 0x0a, 0x02, 0x54, 0x55, 0x10, 0x01, 0x12, 0x08, 0x0a, 0x04, 0x43,
+	0x4f, 0x49, 0x4e, 0x10, 0x02, 0x12, 0x08, 0x0a, 0x04, 0x46, 0x49, 0x41, 0x54, 0x10, 0x03, 0x42,
+	0xa5, 0x01, 0x0a, 0x10, 0x63, 0x6f, 0x6d, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x63,
+	0x73, 0x2e, 0x76, 0x31, 0x42, 0x0a, 0x54, 0x79, 0x70, 0x65, 0x73, 0x50, 0x72, 0x6f, 0x74, 0x6f,
+	0x50, 0x01, 0x5a, 0x33, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x76,
+	0x65, 0x72, 0x61, 0x6e, 0x61, 0x2d, 0x6c, 0x61, 0x62, 0x73, 0x2f, 0x76, 0x65, 0x72, 0x61, 0x6e,
+	0x61, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2f, 0x63, 0x73, 0x2f,
+	0x76, 0x31, 0x3b, 0x63, 0x73, 0x76, 0x31, 0xa2, 0x02, 0x03, 0x56, 0x43, 0x58, 0xaa, 0x02, 0x0c,
+	0x56, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x43, 0x73, 0x2e, 0x56, 0x31, 0xca, 0x02, 0x0c, 0x56,
+	0x65, 0x72, 0x61, 0x6e, 0x61, 0x5c, 0x43, 0x73, 0x5c, 0x56, 0x31, 0xe2, 0x02, 0x18, 0x56, 0x65,
+	0x72, 0x61, 0x6e, 0x61, 0x5c, 0x43, 0x73, 0x5c, 0x56, 0x31, 0x5c, 0x47, 0x50, 0x42, 0x4d, 0x65,
+	0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0xea, 0x02, 0x0e, 0x56, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x3a,
+	0x3a, 0x43, 0x73, 0x3a, 0x3a, 0x56, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -1685,26 +1883,29 @@ func file_verana_cs_v1_types_proto_rawDescGZIP() []byte {
 	return file_verana_cs_v1_types_proto_rawDescData
 }
 
-var file_verana_cs_v1_types_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
+var file_verana_cs_v1_types_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
 var file_verana_cs_v1_types_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
 var file_verana_cs_v1_types_proto_goTypes = []interface{}{
-	(CredentialSchemaPermManagementMode)(0), // 0: verana.cs.v1.CredentialSchemaPermManagementMode
-	(PricingAssetType)(0),                   // 1: verana.cs.v1.PricingAssetType
-	(*CredentialSchema)(nil),                // 2: verana.cs.v1.CredentialSchema
-	(*timestamppb.Timestamp)(nil),           // 3: google.protobuf.Timestamp
+	(IssuerOnboardingMode)(0),     // 0: verana.cs.v1.IssuerOnboardingMode
+	(VerifierOnboardingMode)(0),   // 1: verana.cs.v1.VerifierOnboardingMode
+	(HolderOnboardingMode)(0),     // 2: verana.cs.v1.HolderOnboardingMode
+	(PricingAssetType)(0),         // 3: verana.cs.v1.PricingAssetType
+	(*CredentialSchema)(nil),      // 4: verana.cs.v1.CredentialSchema
+	(*timestamppb.Timestamp)(nil), // 5: google.protobuf.Timestamp
 }
 var file_verana_cs_v1_types_proto_depIdxs = []int32{
-	3, // 0: verana.cs.v1.CredentialSchema.created:type_name -> google.protobuf.Timestamp
-	3, // 1: verana.cs.v1.CredentialSchema.modified:type_name -> google.protobuf.Timestamp
-	3, // 2: verana.cs.v1.CredentialSchema.archived:type_name -> google.protobuf.Timestamp
-	0, // 3: verana.cs.v1.CredentialSchema.issuer_perm_management_mode:type_name -> verana.cs.v1.CredentialSchemaPermManagementMode
-	0, // 4: verana.cs.v1.CredentialSchema.verifier_perm_management_mode:type_name -> verana.cs.v1.CredentialSchemaPermManagementMode
-	1, // 5: verana.cs.v1.CredentialSchema.pricing_asset_type:type_name -> verana.cs.v1.PricingAssetType
-	6, // [6:6] is the sub-list for method output_type
-	6, // [6:6] is the sub-list for method input_type
-	6, // [6:6] is the sub-list for extension type_name
-	6, // [6:6] is the sub-list for extension extendee
-	0, // [0:6] is the sub-list for field type_name
+	5, // 0: verana.cs.v1.CredentialSchema.created:type_name -> google.protobuf.Timestamp
+	5, // 1: verana.cs.v1.CredentialSchema.modified:type_name -> google.protobuf.Timestamp
+	5, // 2: verana.cs.v1.CredentialSchema.archived:type_name -> google.protobuf.Timestamp
+	0, // 3: verana.cs.v1.CredentialSchema.issuer_onboarding_mode:type_name -> verana.cs.v1.IssuerOnboardingMode
+	1, // 4: verana.cs.v1.CredentialSchema.verifier_onboarding_mode:type_name -> verana.cs.v1.VerifierOnboardingMode
+	3, // 5: verana.cs.v1.CredentialSchema.pricing_asset_type:type_name -> verana.cs.v1.PricingAssetType
+	2, // 6: verana.cs.v1.CredentialSchema.holder_onboarding_mode:type_name -> verana.cs.v1.HolderOnboardingMode
+	7, // [7:7] is the sub-list for method output_type
+	7, // [7:7] is the sub-list for method input_type
+	7, // [7:7] is the sub-list for extension type_name
+	7, // [7:7] is the sub-list for extension extendee
+	0, // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_verana_cs_v1_types_proto_init() }
@@ -1731,7 +1932,7 @@ func file_verana_cs_v1_types_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_verana_cs_v1_types_proto_rawDesc,
-			NumEnums:      2,
+			NumEnums:      4,
 			NumMessages:   1,
 			NumExtensions: 0,
 			NumServices:   0,

@@ -22,9 +22,9 @@ export interface GenesisState {
 
 /** TrustDepositRecord defines a trust deposit entry for genesis state */
 export interface TrustDepositRecord {
-  account: string;
+  corporation: string;
   share: string;
-  amount: number;
+  deposit: number;
   claimable: number;
 }
 
@@ -122,19 +122,19 @@ export const GenesisState = {
 };
 
 function createBaseTrustDepositRecord(): TrustDepositRecord {
-  return { account: "", share: "", amount: 0, claimable: 0 };
+  return { corporation: "", share: "", deposit: 0, claimable: 0 };
 }
 
 export const TrustDepositRecord = {
   encode(message: TrustDepositRecord, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.account !== "") {
-      writer.uint32(10).string(message.account);
+    if (message.corporation !== "") {
+      writer.uint32(10).string(message.corporation);
     }
     if (message.share !== "") {
       writer.uint32(18).string(message.share);
     }
-    if (message.amount !== 0) {
-      writer.uint32(24).uint64(message.amount);
+    if (message.deposit !== 0) {
+      writer.uint32(24).uint64(message.deposit);
     }
     if (message.claimable !== 0) {
       writer.uint32(32).uint64(message.claimable);
@@ -154,7 +154,7 @@ export const TrustDepositRecord = {
             break;
           }
 
-          message.account = reader.string();
+          message.corporation = reader.string();
           continue;
         case 2:
           if (tag !== 18) {
@@ -168,7 +168,7 @@ export const TrustDepositRecord = {
             break;
           }
 
-          message.amount = longToNumber(reader.uint64() as Long);
+          message.deposit = longToNumber(reader.uint64() as Long);
           continue;
         case 4:
           if (tag !== 32) {
@@ -188,23 +188,23 @@ export const TrustDepositRecord = {
 
   fromJSON(object: any): TrustDepositRecord {
     return {
-      account: isSet(object.account) ? globalThis.String(object.account) : "",
+      corporation: isSet(object.corporation) ? globalThis.String(object.corporation) : "",
       share: isSet(object.share) ? globalThis.String(object.share) : "",
-      amount: isSet(object.amount) ? globalThis.Number(object.amount) : 0,
+      deposit: isSet(object.deposit) ? globalThis.Number(object.deposit) : 0,
       claimable: isSet(object.claimable) ? globalThis.Number(object.claimable) : 0,
     };
   },
 
   toJSON(message: TrustDepositRecord): unknown {
     const obj: any = {};
-    if (message.account !== "") {
-      obj.account = message.account;
+    if (message.corporation !== "") {
+      obj.corporation = message.corporation;
     }
     if (message.share !== "") {
       obj.share = message.share;
     }
-    if (message.amount !== 0) {
-      obj.amount = Math.round(message.amount);
+    if (message.deposit !== 0) {
+      obj.deposit = Math.round(message.deposit);
     }
     if (message.claimable !== 0) {
       obj.claimable = Math.round(message.claimable);
@@ -217,9 +217,9 @@ export const TrustDepositRecord = {
   },
   fromPartial<I extends Exact<DeepPartial<TrustDepositRecord>, I>>(object: I): TrustDepositRecord {
     const message = createBaseTrustDepositRecord();
-    message.account = object.account ?? "";
+    message.corporation = object.corporation ?? "";
     message.share = object.share ?? "";
-    message.amount = object.amount ?? 0;
+    message.deposit = object.deposit ?? 0;
     message.claimable = object.claimable ?? 0;
     return message;
   },

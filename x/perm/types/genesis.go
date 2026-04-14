@@ -90,8 +90,8 @@ func validatePermission(perm Permission, allPerms []Permission) error {
 		return fmt.Errorf("perm type cannot be 0 for perm ID %d", perm.Id)
 	}
 
-	if perm.Authority == "" {
-		return fmt.Errorf("authority cannot be empty for perm ID %d", perm.Id)
+	if perm.Corporation == "" {
+		return fmt.Errorf("corporation cannot be empty for perm ID %d", perm.Id)
 	}
 
 	// Validate validator perm reference

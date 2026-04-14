@@ -21,7 +21,7 @@ func TestGetTrustDeposit(t *testing.T) {
 
 	// Test with non-existent trust deposit - should return NotFound error
 	_, err := keeper.GetTrustDeposit(wctx, &types.QueryGetTrustDepositRequest{
-		Account: testAddr,
+		Corporation: testAddr,
 	})
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "trust deposit not found")
@@ -29,26 +29,26 @@ func TestGetTrustDeposit(t *testing.T) {
 
 	// Create a trust deposit
 	trustDeposit := types.TrustDeposit{
-		Account:   testAddr,
-		Share:     math.LegacyNewDec(100),
-		Amount:    1000,
-		Claimable: 50,
+		Corporation: testAddr,
+		Share:       math.LegacyNewDec(100),
+		Deposit:     1000,
+		Claimable:   50,
 	}
 	err = keeper.TrustDeposit.Set(ctx, testAddr, trustDeposit)
 	require.NoError(t, err)
 
 	// Test with existing trust deposit
 	resp, err := keeper.GetTrustDeposit(wctx, &types.QueryGetTrustDepositRequest{
-		Account: testAddr,
+		Corporation: testAddr,
 	})
 	require.NoError(t, err)
 	require.Equal(t, trustDeposit, resp.TrustDeposit)
 
-	// Test with invalid account address
+	// Test with invalid corporation address
 	_, err = keeper.GetTrustDeposit(wctx, &types.QueryGetTrustDepositRequest{
-		Account: "invalid_address",
+		Corporation: "invalid_address",
 	})
 	require.Error(t, err)
-	require.Contains(t, err.Error(), "invalid account address")
+	require.Contains(t, err.Error(), "invalid corporation address")
 	require.Contains(t, status.Code(err).String(), codes.InvalidArgument.String())
 }

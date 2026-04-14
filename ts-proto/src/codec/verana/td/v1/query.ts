@@ -23,7 +23,7 @@ export interface QueryParamsResponse {
 
 /** QueryGetTrustDepositRequest is request type for the GetTrustDeposit RPC method */
 export interface QueryGetTrustDepositRequest {
-  account: string;
+  corporation: string;
 }
 
 /** QueryGetTrustDepositResponse is response type for the GetTrustDeposit RPC method */
@@ -134,13 +134,13 @@ export const QueryParamsResponse = {
 };
 
 function createBaseQueryGetTrustDepositRequest(): QueryGetTrustDepositRequest {
-  return { account: "" };
+  return { corporation: "" };
 }
 
 export const QueryGetTrustDepositRequest = {
   encode(message: QueryGetTrustDepositRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.account !== "") {
-      writer.uint32(10).string(message.account);
+    if (message.corporation !== "") {
+      writer.uint32(10).string(message.corporation);
     }
     return writer;
   },
@@ -157,7 +157,7 @@ export const QueryGetTrustDepositRequest = {
             break;
           }
 
-          message.account = reader.string();
+          message.corporation = reader.string();
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -169,13 +169,13 @@ export const QueryGetTrustDepositRequest = {
   },
 
   fromJSON(object: any): QueryGetTrustDepositRequest {
-    return { account: isSet(object.account) ? globalThis.String(object.account) : "" };
+    return { corporation: isSet(object.corporation) ? globalThis.String(object.corporation) : "" };
   },
 
   toJSON(message: QueryGetTrustDepositRequest): unknown {
     const obj: any = {};
-    if (message.account !== "") {
-      obj.account = message.account;
+    if (message.corporation !== "") {
+      obj.corporation = message.corporation;
     }
     return obj;
   },
@@ -185,7 +185,7 @@ export const QueryGetTrustDepositRequest = {
   },
   fromPartial<I extends Exact<DeepPartial<QueryGetTrustDepositRequest>, I>>(object: I): QueryGetTrustDepositRequest {
     const message = createBaseQueryGetTrustDepositRequest();
-    message.account = object.account ?? "";
+    message.corporation = object.corporation ?? "";
     return message;
   },
 };

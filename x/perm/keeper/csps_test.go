@@ -285,12 +285,12 @@ func NewTrackingCredentialSchemaKeeper() *TrackingCredentialSchemaKeeper {
 	}
 }
 
-func (k *TrackingCredentialSchemaKeeper) UpdateMockCredentialSchema(id uint64, trId uint64, issuerPermMode, verifierPermMode cstypes.CredentialSchemaPermManagementMode) {
+func (k *TrackingCredentialSchemaKeeper) UpdateMockCredentialSchema(id uint64, trId uint64, issuerMode cstypes.IssuerOnboardingMode, verifierMode cstypes.VerifierOnboardingMode) {
 	k.credentialSchemas[id] = cstypes.CredentialSchema{
-		Id:                         id,
-		TrId:                       trId,
-		IssuerPermManagementMode:   issuerPermMode,
-		VerifierPermManagementMode: verifierPermMode,
+		Id:                     id,
+		TrId:                   trId,
+		IssuerOnboardingMode:   issuerMode,
+		VerifierOnboardingMode: verifierMode,
 	}
 }
 
@@ -330,7 +330,7 @@ func (k *TrackingTrustRegistryKeeper) CreateMockTrustRegistry(creator string, di
 	k.trustRegistries[id] = trtypes.TrustRegistry{
 		Id:            id,
 		Did:           did,
-		Controller:    creator,
+		Corporation:   creator,
 		ActiveVersion: 1,
 		Language:      "en",
 	}
@@ -419,7 +419,7 @@ func TestAgentRewardsDistribution(t *testing.T) {
 	creator := creatorAddr.String()
 	ecosystem := ecosystemAddr.String()
 	grantor := grantorAddr.String()
-	issuer := issuerAddr.String()
+	_ = issuerAddr.String()
 	agent := agentAddr.String()
 	walletAgent := walletAgentAddr.String()
 
@@ -434,8 +434,8 @@ func TestAgentRewardsDistribution(t *testing.T) {
 
 	// Create credential schema with GRANTOR mode
 	csKeeper.UpdateMockCredentialSchema(1, trID,
-		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
-		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
+		cstypes.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS,
+		cstypes.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS)
 
 	now := sdkCtx.BlockTime()
 	pastTime := now.Add(-1 * time.Hour) // Set effective_from to past to make it ACTIVE
@@ -444,13 +444,10 @@ func TestAgentRewardsDistribution(t *testing.T) {
 	ecosystemPerm := types.Permission{
 		SchemaId:      1,
 		Type:          types.PermissionType_ECOSYSTEM,
-		Authority:     ecosystem,
+		Corporation:     ecosystem,
 		Created:       &now,
-		CreatedBy:     ecosystem,
 		Adjusted:      &now,
-		AdjustedBy:    ecosystem,
 		Modified:      &now,
-		Country:       "US",
 		VpState:       types.ValidationState_VALIDATED,
 		IssuanceFees:  100, // Ecosystem charges 100 trust units for issuance
 		EffectiveFrom: &pastTime,
@@ -462,13 +459,10 @@ func TestAgentRewardsDistribution(t *testing.T) {
 	grantorPerm := types.Permission{
 		SchemaId:        1,
 		Type:            types.PermissionType_ISSUER_GRANTOR,
-		Authority:       grantor,
+		Corporation:       grantor,
 		Created:         &now,
-		CreatedBy:       ecosystem,
 		Adjusted:        &now,
-		AdjustedBy:      ecosystem,
 		Modified:        &now,
-		Country:         "US",
 		ValidatorPermId: ecosystemPermID,
 		VpState:         types.ValidationState_VALIDATED,
 		IssuanceFees:    50, // Grantor charges 50 trust units
@@ -481,13 +475,10 @@ func TestAgentRewardsDistribution(t *testing.T) {
 	issuerPerm := types.Permission{
 		SchemaId:               1,
 		Type:                   types.PermissionType_ISSUER,
-		Authority:              creator,
+		Corporation:              creator,
 		Created:                &now,
-		CreatedBy:              grantor,
 		Adjusted:               &now,
-		AdjustedBy:             grantor,
 		Modified:               &now,
-		Country:                "US",
 		ValidatorPermId:        grantorPermID,
 		VpState:                types.ValidationState_VALIDATED,
 		EffectiveFrom:          &pastTime,
@@ -501,13 +492,10 @@ func TestAgentRewardsDistribution(t *testing.T) {
 	agentPerm := types.Permission{
 		SchemaId:        1,
 		Type:            types.PermissionType_ISSUER,
-		Authority:       agent,
+		Corporation:       agent,
 		Created:         &now,
-		CreatedBy:       issuer,
 		Adjusted:        &now,
-		AdjustedBy:      issuer,
 		Modified:        &now,
-		Country:         "US",
 		ValidatorPermId: issuerPermID,
 		VpState:         types.ValidationState_VALIDATED,
 		EffectiveFrom:   &pastTime,
@@ -519,13 +507,10 @@ func TestAgentRewardsDistribution(t *testing.T) {
 	walletAgentPerm := types.Permission{
 		SchemaId:        1,
 		Type:            types.PermissionType_ISSUER,
-		Authority:       walletAgent,
+		Corporation:       walletAgent,
 		Created:         &now,
-		CreatedBy:       issuer,
 		Adjusted:        &now,
-		AdjustedBy:      issuer,
 		Modified:        &now,
-		Country:         "US",
 		ValidatorPermId: issuerPermID,
 		VpState:         types.ValidationState_VALIDATED,
 		EffectiveFrom:   &pastTime,
@@ -535,7 +520,7 @@ func TestAgentRewardsDistribution(t *testing.T) {
 
 	// ==================== Execute CreateOrUpdatePermissionSession ====================
 	msg := &types.MsgCreateOrUpdatePermissionSession{
-		Authority:         creator,
+		Corporation:         creator,
 		Operator:          creator,
 		Id:                uuid.New().String(),
 		IssuerPermId:      issuerPermID,
@@ -722,8 +707,8 @@ func TestAgentRewardsWithZeroFees(t *testing.T) {
 
 	// Create credential schema
 	csKeeper.UpdateMockCredentialSchema(1, trID,
-		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
-		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
+		cstypes.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS,
+		cstypes.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS)
 
 	now := sdkCtx.BlockTime()
 	pastTime := now.Add(-1 * time.Hour) // Set effective_from to past to make it ACTIVE
@@ -732,13 +717,10 @@ func TestAgentRewardsWithZeroFees(t *testing.T) {
 	ecosystemPerm := types.Permission{
 		SchemaId:      1,
 		Type:          types.PermissionType_ECOSYSTEM,
-		Authority:     ecosystem,
+		Corporation:     ecosystem,
 		Created:       &now,
-		CreatedBy:     ecosystem,
 		Adjusted:      &now,
-		AdjustedBy:    ecosystem,
 		Modified:      &now,
-		Country:       "US",
 		VpState:       types.ValidationState_VALIDATED,
 		IssuanceFees:  0, // Zero fees
 		EffectiveFrom: &pastTime,
@@ -749,13 +731,10 @@ func TestAgentRewardsWithZeroFees(t *testing.T) {
 	issuerPerm := types.Permission{
 		SchemaId:               1,
 		Type:                   types.PermissionType_ISSUER,
-		Authority:              creator,
+		Corporation:              creator,
 		Created:                &now,
-		CreatedBy:              ecosystem,
 		Adjusted:               &now,
-		AdjustedBy:             ecosystem,
 		Modified:               &now,
-		Country:                "US",
 		ValidatorPermId:        ecosystemPermID,
 		VpState:                types.ValidationState_VALIDATED,
 		EffectiveFrom:          &pastTime,
@@ -768,13 +747,10 @@ func TestAgentRewardsWithZeroFees(t *testing.T) {
 	agentPerm := types.Permission{
 		SchemaId:        1,
 		Type:            types.PermissionType_ISSUER,
-		Authority:       agent,
+		Corporation:       agent,
 		Created:         &now,
-		CreatedBy:       creator,
 		Adjusted:        &now,
-		AdjustedBy:      creator,
 		Modified:        &now,
-		Country:         "US",
 		ValidatorPermId: issuerPermID,
 		VpState:         types.ValidationState_VALIDATED,
 		EffectiveFrom:   &pastTime,
@@ -787,13 +763,10 @@ func TestAgentRewardsWithZeroFees(t *testing.T) {
 	walletAgentPerm := types.Permission{
 		SchemaId:        1,
 		Type:            types.PermissionType_ISSUER,
-		Authority:       walletAgent,
+		Corporation:       walletAgent,
 		Created:         &now,
-		CreatedBy:       creator,
 		Adjusted:        &now,
-		AdjustedBy:      creator,
 		Modified:        &now,
-		Country:         "US",
 		ValidatorPermId: issuerPermID,
 		VpState:         types.ValidationState_VALIDATED,
 		EffectiveFrom:   &pastTime,
@@ -802,7 +775,7 @@ func TestAgentRewardsWithZeroFees(t *testing.T) {
 	require.NoError(t, err)
 
 	msg := &types.MsgCreateOrUpdatePermissionSession{
-		Authority:         creator,
+		Corporation:         creator,
 		Operator:          creator,
 		Id:                uuid.New().String(),
 		IssuerPermId:      issuerPermID,
@@ -852,8 +825,8 @@ func TestAgentRewardsWithDiscount(t *testing.T) {
 
 	// Create credential schema
 	csKeeper.UpdateMockCredentialSchema(1, trID,
-		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
-		cstypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION)
+		cstypes.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS,
+		cstypes.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS)
 
 	now := sdkCtx.BlockTime()
 	pastTime := now.Add(-1 * time.Hour) // Set effective_from to past to make it ACTIVE
@@ -862,13 +835,10 @@ func TestAgentRewardsWithDiscount(t *testing.T) {
 	ecosystemPerm := types.Permission{
 		SchemaId:      1,
 		Type:          types.PermissionType_ECOSYSTEM,
-		Authority:     ecosystem,
+		Corporation:     ecosystem,
 		Created:       &now,
-		CreatedBy:     ecosystem,
 		Adjusted:      &now,
-		AdjustedBy:    ecosystem,
 		Modified:      &now,
-		Country:       "US",
 		VpState:       types.ValidationState_VALIDATED,
 		IssuanceFees:  100,
 		EffectiveFrom: &pastTime,
@@ -880,13 +850,10 @@ func TestAgentRewardsWithDiscount(t *testing.T) {
 	issuerPerm := types.Permission{
 		SchemaId:               1,
 		Type:                   types.PermissionType_ISSUER,
-		Authority:              creator,
+		Corporation:              creator,
 		Created:                &now,
-		CreatedBy:              ecosystem,
 		Adjusted:               &now,
-		AdjustedBy:             ecosystem,
 		Modified:               &now,
-		Country:                "US",
 		ValidatorPermId:        ecosystemPermID,
 		VpState:                types.ValidationState_VALIDATED,
 		IssuanceFeeDiscount:    5000, // 50% discount (per Issue #94)
@@ -900,13 +867,10 @@ func TestAgentRewardsWithDiscount(t *testing.T) {
 	agentPerm := types.Permission{
 		SchemaId:        1,
 		Type:            types.PermissionType_ISSUER,
-		Authority:       agent,
+		Corporation:       agent,
 		Created:         &now,
-		CreatedBy:       creator,
 		Adjusted:        &now,
-		AdjustedBy:      creator,
 		Modified:        &now,
-		Country:         "US",
 		ValidatorPermId: issuerPermID,
 		VpState:         types.ValidationState_VALIDATED,
 		EffectiveFrom:   &pastTime,
@@ -919,13 +883,10 @@ func TestAgentRewardsWithDiscount(t *testing.T) {
 	walletAgentPerm := types.Permission{
 		SchemaId:        1,
 		Type:            types.PermissionType_ISSUER,
-		Authority:       walletAgent,
+		Corporation:       walletAgent,
 		Created:         &now,
-		CreatedBy:       creator,
 		Adjusted:        &now,
-		AdjustedBy:      creator,
 		Modified:        &now,
-		Country:         "US",
 		ValidatorPermId: issuerPermID,
 		VpState:         types.ValidationState_VALIDATED,
 		EffectiveFrom:   &pastTime,
@@ -934,7 +895,7 @@ func TestAgentRewardsWithDiscount(t *testing.T) {
 	require.NoError(t, err)
 
 	msg := &types.MsgCreateOrUpdatePermissionSession{
-		Authority:         creator,
+		Corporation:         creator,
 		Operator:          creator,
 		Id:                uuid.New().String(),
 		IssuerPermId:      issuerPermID,

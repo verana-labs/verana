@@ -51,10 +51,10 @@ func (k Keeper) AdjustTrustDeposit(ctx sdk.Context, account string, augend int64
 		augendShare := k.AmountToShare(uint64(augend), shareValue)
 
 		td = types.TrustDeposit{
-			Account:   account,
-			Amount:    uint64(augend),
-			Share:     augendShare,
-			Claimable: 0,
+			Corporation: account,
+			Deposit:     uint64(augend),
+			Share:       augendShare,
+			Claimable:   0,
 		}
 
 		// Save new trust deposit BEFORE bank transfer
@@ -80,7 +80,7 @@ func (k Keeper) AdjustTrustDeposit(ctx sdk.Context, account string, augend int64
 				sdk.NewAttribute(types.AttributeKeyAccount, account),
 				sdk.NewAttribute(types.AttributeKeyAugend, strconv.FormatInt(augend, 10)),
 				sdk.NewAttribute(types.AttributeKeyAdjustmentType, "increase"),
-				sdk.NewAttribute(types.AttributeKeyNewAmount, strconv.FormatUint(td.Amount, 10)),
+				sdk.NewAttribute(types.AttributeKeyNewAmount, strconv.FormatUint(td.Deposit, 10)),
 				sdk.NewAttribute(types.AttributeKeyNewShare, td.Share.String()),
 				sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
 			),
@@ -95,7 +95,7 @@ func (k Keeper) AdjustTrustDeposit(ctx sdk.Context, account string, augend int64
 	}
 
 	// Convert uint fields to int64 for calculations
-	amount := int64(td.Amount)
+	deposit := int64(td.Deposit)
 	claimable := int64(td.Claimable)
 	// share stays as td.Share (math.LegacyDec)
 
@@ -116,7 +116,7 @@ func (k Keeper) AdjustTrustDeposit(ctx sdk.Context, account string, augend int64
 				// Calculate missing_augend_share = (augend - td.claimable) / GlobalVariables.trust_deposit_share_value
 				missingShare := k.AmountToShare(uint64(neededDeposit), shareValue)
 
-				amount += neededDeposit
+				deposit += neededDeposit
 				td.Share = td.Share.Add(missingShare)
 				claimable = 0
 			}
@@ -127,16 +127,16 @@ func (k Keeper) AdjustTrustDeposit(ctx sdk.Context, account string, augend int64
 			// Calculate augend_share = augend / GlobalVariables.trust_deposit_share_value
 			augendShare := k.AmountToShare(uint64(augend), shareValue)
 
-			amount += augend
+			deposit += augend
 			td.Share = td.Share.Add(augendShare)
 		}
 	} else { // augend < 0
 		// Handle negative adjustment (decrease)
 		absAugend := -augend
 
-		// if augend is negative and td.claimable - augend > td.amount transaction MUST abort
-		if claimable+absAugend > amount {
-			return fmt.Errorf("claimable after adjustment would exceed deposit: %d > %d", claimable+absAugend, amount)
+		// if augend is negative and td.claimable - augend > td.deposit transaction MUST abort
+		if claimable+absAugend > deposit {
+			return fmt.Errorf("claimable after adjustment would exceed deposit: %d > %d", claimable+absAugend, deposit)
 		}
 
 		// Since augend is negative, we add absAugend to claimable
@@ -145,8 +145,8 @@ func (k Keeper) AdjustTrustDeposit(ctx sdk.Context, account string, augend int64
 	}
 
 	// Convert back to uint for storage and ensure no negative values
-	if amount < 0 {
-		return fmt.Errorf("amount cannot be negative after adjustment: %d", amount)
+	if deposit < 0 {
+		return fmt.Errorf("deposit cannot be negative after adjustment: %d", deposit)
 	}
 	if claimable < 0 {
 		return fmt.Errorf("claimable amount cannot be negative after adjustment: %d", claimable)
@@ -155,7 +155,7 @@ func (k Keeper) AdjustTrustDeposit(ctx sdk.Context, account string, augend int64
 		return fmt.Errorf("share cannot be negative after adjustment: %s", td.Share.String())
 	}
 
-	td.Amount = uint64(amount)
+	td.Deposit = uint64(deposit)
 	td.Claimable = uint64(claimable)
 
 	// Save updated trust deposit BEFORE bank transfer
@@ -188,7 +188,7 @@ func (k Keeper) AdjustTrustDeposit(ctx sdk.Context, account string, augend int64
 			sdk.NewAttribute(types.AttributeKeyAccount, account),
 			sdk.NewAttribute(types.AttributeKeyAugend, strconv.FormatInt(augend, 10)),
 			sdk.NewAttribute(types.AttributeKeyAdjustmentType, adjustmentType),
-			sdk.NewAttribute(types.AttributeKeyNewAmount, strconv.FormatUint(td.Amount, 10)),
+			sdk.NewAttribute(types.AttributeKeyNewAmount, strconv.FormatUint(td.Deposit, 10)),
 			sdk.NewAttribute(types.AttributeKeyNewShare, td.Share.String()),
 			sdk.NewAttribute(types.AttributeKeyNewClaimable, strconv.FormatUint(td.Claimable, 10)),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
@@ -228,13 +228,13 @@ func (k Keeper) AdjustTrustDepositOnBehalf(ctx sdk.Context, account string, fund
 	// Load or create trust deposit for account
 	if !exists {
 		td = types.TrustDeposit{
-			Account:   account,
-			Amount:    uint64(amount),
-			Share:     augendShare,
-			Claimable: 0,
+			Corporation: account,
+			Deposit:     uint64(amount),
+			Share:       augendShare,
+			Claimable:   0,
 		}
 	} else {
-		td.Amount += uint64(amount)
+		td.Deposit += uint64(amount)
 		td.Share = td.Share.Add(augendShare)
 	}
 
@@ -259,7 +259,7 @@ func (k Keeper) AdjustTrustDepositOnBehalf(ctx sdk.Context, account string, fund
 			sdk.NewAttribute(types.AttributeKeyAccount, account),
 			sdk.NewAttribute(types.AttributeKeyAugend, strconv.FormatInt(amount, 10)),
 			sdk.NewAttribute(types.AttributeKeyAdjustmentType, "increase_on_behalf"),
-			sdk.NewAttribute(types.AttributeKeyNewAmount, strconv.FormatUint(td.Amount, 10)),
+			sdk.NewAttribute(types.AttributeKeyNewAmount, strconv.FormatUint(td.Deposit, 10)),
 			sdk.NewAttribute(types.AttributeKeyNewShare, td.Share.String()),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
 		),

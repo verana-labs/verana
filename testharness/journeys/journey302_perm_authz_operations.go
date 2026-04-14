@@ -79,8 +79,8 @@ func RunPermissionAuthzOperationsJourney(ctx context.Context, client cosmosclien
 	csIDStr, err := lib.CreateCredentialSchema(client, ctx, operatorAccount, cschema.MsgCreateCredentialSchema{
 		TrId:                       trID,
 		JsonSchema:                 schemaData,
-		IssuerPermManagementMode:   uint32(cschema.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION),
-		VerifierPermManagementMode: uint32(cschema.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION),
+		IssuerOnboardingMode:   uint32(cschema.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS),
+		VerifierOnboardingMode: uint32(cschema.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS),
 		PricingAssetType:           uint32(cschema.PricingAssetType_TU),
 		PricingAsset:               "tu",
 		DigestAlgorithm:            "sha256",
@@ -177,10 +177,10 @@ func RunPermissionAuthzOperationsJourney(ctx context.Context, client cosmosclien
 	if perm.VpState != permtypes.ValidationState_PENDING {
 		return fmt.Errorf("step 1c verification failed: expected PENDING state, got %s", perm.VpState.String())
 	}
-	if perm.Authority != policyAddr {
-		return fmt.Errorf("step 1c verification failed: expected authority=%s, got %s", policyAddr, perm.Authority)
+	if perm.Corporation != policyAddr {
+		return fmt.Errorf("step 1c verification failed: expected authority=%s, got %s", policyAddr, perm.Corporation)
 	}
-	fmt.Printf("OK Step 1c: Verified permission is PENDING, authority=%s\n", perm.Authority)
+	fmt.Printf("OK Step 1c: Verified permission is PENDING, authority=%s\n", perm.Corporation)
 
 	// =========================================================================
 	// TEST 2: RenewPermissionVP

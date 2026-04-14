@@ -10,9 +10,15 @@ import { Timestamp } from "../../../google/protobuf/timestamp";
 import { Params } from "./params";
 import {
   CredentialSchema,
-  CredentialSchemaPermManagementMode,
-  credentialSchemaPermManagementModeFromJSON,
-  credentialSchemaPermManagementModeToJSON,
+  HolderOnboardingMode,
+  holderOnboardingModeFromJSON,
+  holderOnboardingModeToJSON,
+  IssuerOnboardingMode,
+  issuerOnboardingModeFromJSON,
+  issuerOnboardingModeToJSON,
+  VerifierOnboardingMode,
+  verifierOnboardingModeFromJSON,
+  verifierOnboardingModeToJSON,
 } from "./types";
 import Long = require("long");
 
@@ -34,8 +40,9 @@ export interface QueryListCredentialSchemasRequest {
   modifiedAfter: Date | undefined;
   responseMaxSize: number;
   onlyActive: boolean;
-  issuerPermManagementMode: CredentialSchemaPermManagementMode;
-  verifierPermManagementMode: CredentialSchemaPermManagementMode;
+  issuerOnboardingMode: IssuerOnboardingMode;
+  verifierOnboardingMode: VerifierOnboardingMode;
+  holderOnboardingMode: HolderOnboardingMode;
 }
 
 export interface QueryListCredentialSchemasResponse {
@@ -166,8 +173,9 @@ function createBaseQueryListCredentialSchemasRequest(): QueryListCredentialSchem
     modifiedAfter: undefined,
     responseMaxSize: 0,
     onlyActive: false,
-    issuerPermManagementMode: 0,
-    verifierPermManagementMode: 0,
+    issuerOnboardingMode: 0,
+    verifierOnboardingMode: 0,
+    holderOnboardingMode: 0,
   };
 }
 
@@ -185,11 +193,14 @@ export const QueryListCredentialSchemasRequest = {
     if (message.onlyActive !== false) {
       writer.uint32(32).bool(message.onlyActive);
     }
-    if (message.issuerPermManagementMode !== 0) {
-      writer.uint32(40).int32(message.issuerPermManagementMode);
+    if (message.issuerOnboardingMode !== 0) {
+      writer.uint32(40).int32(message.issuerOnboardingMode);
     }
-    if (message.verifierPermManagementMode !== 0) {
-      writer.uint32(48).int32(message.verifierPermManagementMode);
+    if (message.verifierOnboardingMode !== 0) {
+      writer.uint32(48).int32(message.verifierOnboardingMode);
+    }
+    if (message.holderOnboardingMode !== 0) {
+      writer.uint32(56).int32(message.holderOnboardingMode);
     }
     return writer;
   },
@@ -234,14 +245,21 @@ export const QueryListCredentialSchemasRequest = {
             break;
           }
 
-          message.issuerPermManagementMode = reader.int32() as any;
+          message.issuerOnboardingMode = reader.int32() as any;
           continue;
         case 6:
           if (tag !== 48) {
             break;
           }
 
-          message.verifierPermManagementMode = reader.int32() as any;
+          message.verifierOnboardingMode = reader.int32() as any;
+          continue;
+        case 7:
+          if (tag !== 56) {
+            break;
+          }
+
+          message.holderOnboardingMode = reader.int32() as any;
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -258,11 +276,14 @@ export const QueryListCredentialSchemasRequest = {
       modifiedAfter: isSet(object.modifiedAfter) ? fromJsonTimestamp(object.modifiedAfter) : undefined,
       responseMaxSize: isSet(object.responseMaxSize) ? globalThis.Number(object.responseMaxSize) : 0,
       onlyActive: isSet(object.onlyActive) ? globalThis.Boolean(object.onlyActive) : false,
-      issuerPermManagementMode: isSet(object.issuerPermManagementMode)
-        ? credentialSchemaPermManagementModeFromJSON(object.issuerPermManagementMode)
+      issuerOnboardingMode: isSet(object.issuerOnboardingMode)
+        ? issuerOnboardingModeFromJSON(object.issuerOnboardingMode)
         : 0,
-      verifierPermManagementMode: isSet(object.verifierPermManagementMode)
-        ? credentialSchemaPermManagementModeFromJSON(object.verifierPermManagementMode)
+      verifierOnboardingMode: isSet(object.verifierOnboardingMode)
+        ? verifierOnboardingModeFromJSON(object.verifierOnboardingMode)
+        : 0,
+      holderOnboardingMode: isSet(object.holderOnboardingMode)
+        ? holderOnboardingModeFromJSON(object.holderOnboardingMode)
         : 0,
     };
   },
@@ -281,11 +302,14 @@ export const QueryListCredentialSchemasRequest = {
     if (message.onlyActive !== false) {
       obj.onlyActive = message.onlyActive;
     }
-    if (message.issuerPermManagementMode !== 0) {
-      obj.issuerPermManagementMode = credentialSchemaPermManagementModeToJSON(message.issuerPermManagementMode);
+    if (message.issuerOnboardingMode !== 0) {
+      obj.issuerOnboardingMode = issuerOnboardingModeToJSON(message.issuerOnboardingMode);
     }
-    if (message.verifierPermManagementMode !== 0) {
-      obj.verifierPermManagementMode = credentialSchemaPermManagementModeToJSON(message.verifierPermManagementMode);
+    if (message.verifierOnboardingMode !== 0) {
+      obj.verifierOnboardingMode = verifierOnboardingModeToJSON(message.verifierOnboardingMode);
+    }
+    if (message.holderOnboardingMode !== 0) {
+      obj.holderOnboardingMode = holderOnboardingModeToJSON(message.holderOnboardingMode);
     }
     return obj;
   },
@@ -303,8 +327,9 @@ export const QueryListCredentialSchemasRequest = {
     message.modifiedAfter = object.modifiedAfter ?? undefined;
     message.responseMaxSize = object.responseMaxSize ?? 0;
     message.onlyActive = object.onlyActive ?? false;
-    message.issuerPermManagementMode = object.issuerPermManagementMode ?? 0;
-    message.verifierPermManagementMode = object.verifierPermManagementMode ?? 0;
+    message.issuerOnboardingMode = object.issuerOnboardingMode ?? 0;
+    message.verifierOnboardingMode = object.verifierOnboardingMode ?? 0;
+    message.holderOnboardingMode = object.holderOnboardingMode ?? 0;
     return message;
   },
 };

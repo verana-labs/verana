@@ -62,15 +62,15 @@ func request_Query_GetTrustDeposit_0(ctx context.Context, marshaler runtime.Mars
 		_   = err
 	)
 
-	val, ok = pathParams["account"]
+	val, ok = pathParams["corporation"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "account")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "corporation")
 	}
 
-	protoReq.Account, err = runtime.String(val)
+	protoReq.Corporation, err = runtime.String(val)
 
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "account", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "corporation", err)
 	}
 
 	msg, err := client.GetTrustDeposit(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -89,15 +89,15 @@ func local_request_Query_GetTrustDeposit_0(ctx context.Context, marshaler runtim
 		_   = err
 	)
 
-	val, ok = pathParams["account"]
+	val, ok = pathParams["corporation"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "account")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "corporation")
 	}
 
-	protoReq.Account, err = runtime.String(val)
+	protoReq.Corporation, err = runtime.String(val)
 
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "account", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "corporation", err)
 	}
 
 	msg, err := server.GetTrustDeposit(ctx, &protoReq)
@@ -244,7 +244,7 @@ func RegisterQueryHandlerClient(ctx context.Context, mux *runtime.ServeMux, clie
 var (
 	pattern_Query_Params_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"verana", "td", "v1", "params"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_Query_GetTrustDeposit_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"verana", "td", "v1", "get", "account"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_GetTrustDeposit_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"verana", "td", "v1", "get", "corporation"}, "", runtime.AssumeColonVerbOpt(true)))
 )
 
 var (

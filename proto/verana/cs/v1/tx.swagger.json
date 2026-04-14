@@ -182,13 +182,13 @@
     "verana.cs.v1.MsgArchiveCredentialSchema": {
       "type": "object",
       "properties": {
-        "authority": {
+        "corporation": {
           "type": "string",
-          "title": "authority is the group account on whose behalf this message is executed"
+          "title": "corporation is the group account on whose behalf this message is executed"
         },
         "operator": {
           "type": "string",
-          "title": "operator is the account authorized by the authority to run this Msg"
+          "title": "operator is the account authorized by the corporation to run this Msg"
         },
         "id": {
           "type": "string",
@@ -206,13 +206,13 @@
     "verana.cs.v1.MsgCreateCredentialSchema": {
       "type": "object",
       "properties": {
-        "authority": {
+        "corporation": {
           "type": "string",
-          "title": "authority is the group account on whose behalf this message is executed"
+          "title": "corporation is the group account on whose behalf this message is executed"
         },
         "operator": {
           "type": "string",
-          "title": "operator is the account authorized by the authority to run this Msg"
+          "title": "operator is the account authorized by the corporation to run this Msg"
         },
         "tr_id": {
           "type": "string",
@@ -236,11 +236,11 @@
         "holder_validation_validity_period": {
           "$ref": "#/definitions/verana.cs.v1.OptionalUInt32"
         },
-        "issuer_perm_management_mode": {
+        "issuer_onboarding_mode": {
           "type": "integer",
           "format": "int64"
         },
-        "verifier_perm_management_mode": {
+        "verifier_onboarding_mode": {
           "type": "integer",
           "format": "int64"
         },
@@ -253,6 +253,10 @@
         },
         "digest_algorithm": {
           "type": "string"
+        },
+        "holder_onboarding_mode": {
+          "type": "integer",
+          "format": "int64"
         }
       },
       "title": "[MOD-CS-MSG-1] Create New Credential Schema"
@@ -270,13 +274,13 @@
     "verana.cs.v1.MsgUpdateCredentialSchema": {
       "type": "object",
       "properties": {
-        "authority": {
+        "corporation": {
           "type": "string",
-          "title": "authority is the group account on whose behalf this message is executed"
+          "title": "corporation is the group account on whose behalf this message is executed"
         },
         "operator": {
           "type": "string",
-          "title": "operator is the account authorized by the authority to run this Msg"
+          "title": "operator is the account authorized by the corporation to run this Msg"
         },
         "id": {
           "type": "string",

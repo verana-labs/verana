@@ -35,8 +35,8 @@ func main() {
 	effectiveUntil := time.Date(2025, 12, 31, 0, 0, 0, 123000000, time.UTC)
 
 	address := "verana16mzeyu9l6kua2cdg9x0jk5g6e7h0kk8q6uadu4"
-	msg := &permtypes.MsgCreatePermission{
-		Authority:        address,
+	msg := &permtypes.MsgSelfCreatePermission{
+		Corporation:      address,
 		Operator:         address,
 		Type:             permtypes.PermissionType_VERIFIER,
 		ValidatorPermId:  1,

@@ -38,9 +38,9 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					Short:     "List Trust Registries",
 					Long:      "List Trust Registries with optional filtering and pagination. Results are ordered by modified time ascending.",
 					FlagOptions: map[string]*autocliv1.FlagOptions{
-						"controller": {
-							Name:         "controller",
-							Usage:        "Filter by controller account address",
+						"corporation": {
+							Name:         "corporation",
+							Usage:        "Filter by corporation account address",
 							DefaultValue: "",
 						},
 						"modified_after": {
@@ -78,15 +78,13 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 			RpcCommandOptions: []*autocliv1.RpcCommandOptions{
 				{
 					RpcMethod: "CreateTrustRegistry",
-					Use:       "create-trust-registry [authority] [did] [language] [doc-url] [doc-digest-sri]",
+					Use:       "create-trust-registry [corporation] [did] [language]",
 					Short:     "Create a new trust registry",
-					Long:      "Create a new trust registry on behalf of an authority (group account). The operator (transaction signer) must be authorized by the authority.",
+					Long:      "Create a new trust registry on behalf of a corporation (group account). The operator (transaction signer) must be authorized by the corporation.",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
-						{ProtoField: "authority"},
+						{ProtoField: "corporation"},
 						{ProtoField: "did"},
 						{ProtoField: "language"},
-						{ProtoField: "doc_url"},
-						{ProtoField: "doc_digest_sri"},
 					},
 					FlagOptions: map[string]*autocliv1.FlagOptions{
 						"aka": {
@@ -98,37 +96,36 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 				},
 				{
 					RpcMethod: "AddGovernanceFrameworkDocument",
-					Use:       "add-governance-framework-document [authority] [id] [doc-language] [doc-url] [doc-digest-sri] [version]",
+					Use:       "add-governance-framework-document [corporation] [tr-id] [language] [url] [digest-sri] [version]",
 					Short:     "Add a governance framework document",
-					Long:      "Add a new governance framework document to a trust registry. The operator (transaction signer) must be authorized by the authority.",
+					Long:      "Add a new governance framework document to a trust registry. The operator (transaction signer) must be authorized by the corporation.",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
-						{ProtoField: "authority"},
-						{ProtoField: "id"},
-						{ProtoField: "doc_language"},
-						{ProtoField: "doc_url"},
-						{ProtoField: "doc_digest_sri"},
+						{ProtoField: "corporation"},
+						{ProtoField: "tr_id"},
+						{ProtoField: "language"},
+						{ProtoField: "url"},
+						{ProtoField: "digest_sri"},
 						{ProtoField: "version"},
 					},
 				},
 				{
 					RpcMethod: "IncreaseActiveGovernanceFrameworkVersion",
-					Use:       "increase-active-gf-version [authority] [id]",
+					Use:       "increase-active-gf-version [corporation] [tr-id]",
 					Short:     "Increase the active governance framework version",
-					Long:      "Increase the active governance framework version for a trust registry. The operator (transaction signer) must be authorized by the authority. Requires a document in the trust registry's default language for the new version.",
+					Long:      "Increase the active governance framework version for a trust registry. The operator (transaction signer) must be authorized by the corporation. Requires a document in the trust registry's default language for the new version.",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
-						{ProtoField: "authority"},
-						{ProtoField: "id"},
+						{ProtoField: "corporation"},
+						{ProtoField: "tr_id"},
 					},
 				},
 				{
 					RpcMethod: "UpdateTrustRegistry",
-					Use:       "update-trust-registry [authority] [id] [did]",
+					Use:       "update-trust-registry [corporation] [tr-id]",
 					Short:     "Update a trust registry",
-					Long:      "Update a trust registry's DID and AKA URI. The operator (transaction signer) must be authorized by the authority.",
+					Long:      "Update a trust registry's AKA URI and language. The operator (transaction signer) must be authorized by the corporation.",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
-						{ProtoField: "authority"},
-						{ProtoField: "id"},
-						{ProtoField: "did"},
+						{ProtoField: "corporation"},
+						{ProtoField: "tr_id"},
 					},
 					FlagOptions: map[string]*autocliv1.FlagOptions{
 						"aka": {
@@ -136,16 +133,21 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 							DefaultValue: "",
 							Usage:        "aka uri",
 						},
+						"language": {
+							Name:         "language",
+							DefaultValue: "",
+							Usage:        "primary language tag (RFC1766)",
+						},
 					},
 				},
 				{
 					RpcMethod: "ArchiveTrustRegistry",
-					Use:       "archive-trust-registry [authority] [id] [archive]",
+					Use:       "archive-trust-registry [corporation] [tr-id] [archive]",
 					Short:     "Archive or unarchive a trust registry",
-					Long:      "Set the archive status of a trust registry. The operator (transaction signer) must be authorized by the authority. Use true to archive, false to unarchive.",
+					Long:      "Set the archive status of a trust registry. The operator (transaction signer) must be authorized by the corporation. Use true to archive, false to unarchive.",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
-						{ProtoField: "authority"},
-						{ProtoField: "id"},
+						{ProtoField: "corporation"},
+						{ProtoField: "tr_id"},
 						{ProtoField: "archive"},
 					},
 				},

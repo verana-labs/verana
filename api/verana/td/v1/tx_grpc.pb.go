@@ -21,7 +21,6 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	Msg_UpdateParams_FullMethodName             = "/verana.td.v1.Msg/UpdateParams"
 	Msg_ReclaimTrustDepositYield_FullMethodName = "/verana.td.v1.Msg/ReclaimTrustDepositYield"
-	Msg_ReclaimTrustDeposit_FullMethodName      = "/verana.td.v1.Msg/ReclaimTrustDeposit"
 	Msg_SlashTrustDeposit_FullMethodName        = "/verana.td.v1.Msg/SlashTrustDeposit"
 	Msg_RepaySlashedTrustDeposit_FullMethodName = "/verana.td.v1.Msg/RepaySlashedTrustDeposit"
 )
@@ -36,8 +35,7 @@ type MsgClient interface {
 	// parameters. The authority defaults to the x/gov module account.
 	UpdateParams(ctx context.Context, in *MsgUpdateParams, opts ...grpc.CallOption) (*MsgUpdateParamsResponse, error)
 	ReclaimTrustDepositYield(ctx context.Context, in *MsgReclaimTrustDepositYield, opts ...grpc.CallOption) (*MsgReclaimTrustDepositYieldResponse, error)
-	ReclaimTrustDeposit(ctx context.Context, in *MsgReclaimTrustDeposit, opts ...grpc.CallOption) (*MsgReclaimTrustDepositResponse, error)
-	// SlashTrustDeposit defines a governance operation to slash an account's trust deposit
+	// SlashTrustDeposit defines a governance operation to slash a corporation's trust deposit
 	SlashTrustDeposit(ctx context.Context, in *MsgSlashTrustDeposit, opts ...grpc.CallOption) (*MsgSlashTrustDepositResponse, error)
 	RepaySlashedTrustDeposit(ctx context.Context, in *MsgRepaySlashedTrustDeposit, opts ...grpc.CallOption) (*MsgRepaySlashedTrustDepositResponse, error)
 }
@@ -64,16 +62,6 @@ func (c *msgClient) ReclaimTrustDepositYield(ctx context.Context, in *MsgReclaim
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(MsgReclaimTrustDepositYieldResponse)
 	err := c.cc.Invoke(ctx, Msg_ReclaimTrustDepositYield_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *msgClient) ReclaimTrustDeposit(ctx context.Context, in *MsgReclaimTrustDeposit, opts ...grpc.CallOption) (*MsgReclaimTrustDepositResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(MsgReclaimTrustDepositResponse)
-	err := c.cc.Invoke(ctx, Msg_ReclaimTrustDeposit_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -110,8 +98,7 @@ type MsgServer interface {
 	// parameters. The authority defaults to the x/gov module account.
 	UpdateParams(context.Context, *MsgUpdateParams) (*MsgUpdateParamsResponse, error)
 	ReclaimTrustDepositYield(context.Context, *MsgReclaimTrustDepositYield) (*MsgReclaimTrustDepositYieldResponse, error)
-	ReclaimTrustDeposit(context.Context, *MsgReclaimTrustDeposit) (*MsgReclaimTrustDepositResponse, error)
-	// SlashTrustDeposit defines a governance operation to slash an account's trust deposit
+	// SlashTrustDeposit defines a governance operation to slash a corporation's trust deposit
 	SlashTrustDeposit(context.Context, *MsgSlashTrustDeposit) (*MsgSlashTrustDepositResponse, error)
 	RepaySlashedTrustDeposit(context.Context, *MsgRepaySlashedTrustDeposit) (*MsgRepaySlashedTrustDepositResponse, error)
 	mustEmbedUnimplementedMsgServer()
@@ -129,9 +116,6 @@ func (UnimplementedMsgServer) UpdateParams(context.Context, *MsgUpdateParams) (*
 }
 func (UnimplementedMsgServer) ReclaimTrustDepositYield(context.Context, *MsgReclaimTrustDepositYield) (*MsgReclaimTrustDepositYieldResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReclaimTrustDepositYield not implemented")
-}
-func (UnimplementedMsgServer) ReclaimTrustDeposit(context.Context, *MsgReclaimTrustDeposit) (*MsgReclaimTrustDepositResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ReclaimTrustDeposit not implemented")
 }
 func (UnimplementedMsgServer) SlashTrustDeposit(context.Context, *MsgSlashTrustDeposit) (*MsgSlashTrustDepositResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SlashTrustDeposit not implemented")
@@ -196,24 +180,6 @@ func _Msg_ReclaimTrustDepositYield_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Msg_ReclaimTrustDeposit_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(MsgReclaimTrustDeposit)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(MsgServer).ReclaimTrustDeposit(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Msg_ReclaimTrustDeposit_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MsgServer).ReclaimTrustDeposit(ctx, req.(*MsgReclaimTrustDeposit))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _Msg_SlashTrustDeposit_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(MsgSlashTrustDeposit)
 	if err := dec(in); err != nil {
@@ -264,10 +230,6 @@ var Msg_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ReclaimTrustDepositYield",
 			Handler:    _Msg_ReclaimTrustDepositYield_Handler,
-		},
-		{
-			MethodName: "ReclaimTrustDeposit",
-			Handler:    _Msg_ReclaimTrustDeposit_Handler,
 		},
 		{
 			MethodName: "SlashTrustDeposit",

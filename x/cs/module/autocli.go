@@ -116,10 +116,10 @@ $ veranad tx cs create-credential-schema 1 schema.json 2 2 2 uvna sha256`,
 							ProtoField: "json_schema",
 						},
 						{
-							ProtoField: "issuer_perm_management_mode",
+							ProtoField: "issuer_onboarding_mode",
 						},
 						{
-							ProtoField: "verifier_perm_management_mode",
+							ProtoField: "verifier_onboarding_mode",
 						},
 						{
 							ProtoField: "pricing_asset_type",

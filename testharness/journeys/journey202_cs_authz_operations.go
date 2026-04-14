@@ -84,8 +84,8 @@ func RunCredentialSchemaAuthzOperationsJourney(ctx context.Context, client cosmo
 	_, err = lib.CreateCredentialSchemaWithAuthority(
 		client, ctx, operatorAccount, policyAddr,
 		trID, schemaData,
-		cschema.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
-		cschema.CredentialSchemaPermManagementMode_OPEN,
+		cschema.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS,
+		cschema.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_OPEN,
 	)
 	if err := expectAuthorizationError("Step 1a", err); err != nil {
 		return err
@@ -110,8 +110,8 @@ func RunCredentialSchemaAuthzOperationsJourney(ctx context.Context, client cosmo
 	csIDStr, err := lib.CreateCredentialSchemaWithAuthority(
 		client, ctx, operatorAccount, policyAddr,
 		trID, schemaData,
-		cschema.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
-		cschema.CredentialSchemaPermManagementMode_OPEN,
+		cschema.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS,
+		cschema.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_OPEN,
 	)
 	if err != nil {
 		return fmt.Errorf("step 1c failed: %w", err)
@@ -264,8 +264,8 @@ func RunCredentialSchemaAuthzOperationsJourney(ctx context.Context, client cosmo
 	_, err = lib.CreateCredentialSchemaWithAuthority(
 		client, ctx, cooluser, policyAddr,
 		trID, schemaData,
-		cschema.CredentialSchemaPermManagementMode_OPEN,
-		cschema.CredentialSchemaPermManagementMode_OPEN,
+		cschema.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_OPEN,
+		cschema.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_OPEN,
 	)
 	if err := expectAuthorizationError("Step 4", err); err != nil {
 		return err

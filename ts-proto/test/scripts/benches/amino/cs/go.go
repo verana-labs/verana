@@ -29,7 +29,7 @@ func main() {
 
 	address := "verana16mzeyu9l6kua2cdg9x0jk5g6e7h0kk8q6uadu4"
 	msg := &cstypes.MsgCreateCredentialSchema{
-		Authority:                               address,
+		Corporation:                             address,
 		Operator:                                address,
 		TrId:                                    1,
 		JsonSchema:                              jsonSchema,
@@ -38,8 +38,9 @@ func main() {
 		IssuerValidationValidityPeriod:          &cstypes.OptionalUInt32{Value: 0},
 		VerifierValidationValidityPeriod:        &cstypes.OptionalUInt32{Value: 180},
 		HolderValidationValidityPeriod:          &cstypes.OptionalUInt32{Value: 0},
-		IssuerPermManagementMode:                2,
-		VerifierPermManagementMode:              1,
+		IssuerOnboardingMode:                    2,
+		VerifierOnboardingMode:                  1,
+		HolderOnboardingMode:                    0,
 		PricingAssetType:                        1,
 		PricingAsset:                            "tu",
 		DigestAlgorithm:                         "sha256",

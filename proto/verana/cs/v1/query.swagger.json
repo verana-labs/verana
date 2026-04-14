@@ -128,32 +128,45 @@
             "type": "boolean"
           },
           {
-            "name": "issuer_perm_management_mode",
-            "description": " - MODE_UNSPECIFIED: Default to prevent accidental omission\n - OPEN: Anyone can create their own permission\n - GRANTOR_VALIDATION: Requires validation from a grantor\n - ECOSYSTEM: Requires validation from ecosystem (was TRUST_REGISTRY_VALIDATION)",
+            "name": "issuer_onboarding_mode",
+            "description": " - ISSUER_ONBOARDING_MODE_OPEN: Anyone can self-create an issuer permission\n - ISSUER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS: Requires validation from ecosystem\n - ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS: Requires validation from a grantor",
             "in": "query",
             "required": false,
             "type": "string",
             "enum": [
-              "MODE_UNSPECIFIED",
-              "OPEN",
-              "GRANTOR_VALIDATION",
-              "ECOSYSTEM"
+              "ISSUER_ONBOARDING_MODE_UNSPECIFIED",
+              "ISSUER_ONBOARDING_MODE_OPEN",
+              "ISSUER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS",
+              "ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS"
             ],
-            "default": "MODE_UNSPECIFIED"
+            "default": "ISSUER_ONBOARDING_MODE_UNSPECIFIED"
           },
           {
-            "name": "verifier_perm_management_mode",
-            "description": " - MODE_UNSPECIFIED: Default to prevent accidental omission\n - OPEN: Anyone can create their own permission\n - GRANTOR_VALIDATION: Requires validation from a grantor\n - ECOSYSTEM: Requires validation from ecosystem (was TRUST_REGISTRY_VALIDATION)",
+            "name": "verifier_onboarding_mode",
+            "description": " - VERIFIER_ONBOARDING_MODE_OPEN: Anyone can self-create a verifier permission\n - VERIFIER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS: Requires validation from ecosystem\n - VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS: Requires validation from a grantor",
             "in": "query",
             "required": false,
             "type": "string",
             "enum": [
-              "MODE_UNSPECIFIED",
-              "OPEN",
-              "GRANTOR_VALIDATION",
-              "ECOSYSTEM"
+              "VERIFIER_ONBOARDING_MODE_UNSPECIFIED",
+              "VERIFIER_ONBOARDING_MODE_OPEN",
+              "VERIFIER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS",
+              "VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS"
             ],
-            "default": "MODE_UNSPECIFIED"
+            "default": "VERIFIER_ONBOARDING_MODE_UNSPECIFIED"
+          },
+          {
+            "name": "holder_onboarding_mode",
+            "description": " - HOLDER_ONBOARDING_MODE_ISSUER_VALIDATION_PROCESS: Holders go through the issuer validation process\n - HOLDER_ONBOARDING_MODE_PERMISSIONLESS: Anyone can self-create a holder permission without validation",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "HOLDER_ONBOARDING_MODE_UNSPECIFIED",
+              "HOLDER_ONBOARDING_MODE_ISSUER_VALIDATION_PROCESS",
+              "HOLDER_ONBOARDING_MODE_PERMISSIONLESS"
+            ],
+            "default": "HOLDER_ONBOARDING_MODE_UNSPECIFIED"
           }
         ],
         "tags": [
@@ -260,11 +273,11 @@
           "type": "integer",
           "format": "int64"
         },
-        "issuer_perm_management_mode": {
-          "$ref": "#/definitions/verana.cs.v1.CredentialSchemaPermManagementMode"
+        "issuer_onboarding_mode": {
+          "$ref": "#/definitions/verana.cs.v1.IssuerOnboardingMode"
         },
-        "verifier_perm_management_mode": {
-          "$ref": "#/definitions/verana.cs.v1.CredentialSchemaPermManagementMode"
+        "verifier_onboarding_mode": {
+          "$ref": "#/definitions/verana.cs.v1.VerifierOnboardingMode"
         },
         "pricing_asset_type": {
           "$ref": "#/definitions/verana.cs.v1.PricingAssetType"
@@ -274,21 +287,33 @@
         },
         "digest_algorithm": {
           "type": "string"
+        },
+        "holder_onboarding_mode": {
+          "$ref": "#/definitions/verana.cs.v1.HolderOnboardingMode"
         }
       },
       "title": "CredentialSchema defines the structure for a credential schema"
     },
-    "verana.cs.v1.CredentialSchemaPermManagementMode": {
+    "verana.cs.v1.HolderOnboardingMode": {
       "type": "string",
       "enum": [
-        "MODE_UNSPECIFIED",
-        "OPEN",
-        "GRANTOR_VALIDATION",
-        "ECOSYSTEM"
+        "HOLDER_ONBOARDING_MODE_UNSPECIFIED",
+        "HOLDER_ONBOARDING_MODE_ISSUER_VALIDATION_PROCESS",
+        "HOLDER_ONBOARDING_MODE_PERMISSIONLESS"
       ],
-      "default": "MODE_UNSPECIFIED",
-      "description": "- MODE_UNSPECIFIED: Default to prevent accidental omission\n - OPEN: Anyone can create their own permission\n - GRANTOR_VALIDATION: Requires validation from a grantor\n - ECOSYSTEM: Requires validation from ecosystem (was TRUST_REGISTRY_VALIDATION)",
-      "title": "CredentialSchemaPermManagementMode defines how permissions are managed"
+      "default": "HOLDER_ONBOARDING_MODE_UNSPECIFIED",
+      "description": "HolderOnboardingMode defines how holders are onboarded for a credential schema.\n\n - HOLDER_ONBOARDING_MODE_ISSUER_VALIDATION_PROCESS: Holders go through the issuer validation process\n - HOLDER_ONBOARDING_MODE_PERMISSIONLESS: Anyone can self-create a holder permission without validation"
+    },
+    "verana.cs.v1.IssuerOnboardingMode": {
+      "type": "string",
+      "enum": [
+        "ISSUER_ONBOARDING_MODE_UNSPECIFIED",
+        "ISSUER_ONBOARDING_MODE_OPEN",
+        "ISSUER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS",
+        "ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS"
+      ],
+      "default": "ISSUER_ONBOARDING_MODE_UNSPECIFIED",
+      "description": "IssuerOnboardingMode defines how issuers are onboarded for a credential schema.\n\n - ISSUER_ONBOARDING_MODE_OPEN: Anyone can self-create an issuer permission\n - ISSUER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS: Requires validation from ecosystem\n - ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS: Requires validation from a grantor"
     },
     "verana.cs.v1.Params": {
       "type": "object",
@@ -369,6 +394,17 @@
           "type": "string"
         }
       }
+    },
+    "verana.cs.v1.VerifierOnboardingMode": {
+      "type": "string",
+      "enum": [
+        "VERIFIER_ONBOARDING_MODE_UNSPECIFIED",
+        "VERIFIER_ONBOARDING_MODE_OPEN",
+        "VERIFIER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS",
+        "VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS"
+      ],
+      "default": "VERIFIER_ONBOARDING_MODE_UNSPECIFIED",
+      "description": "VerifierOnboardingMode defines how verifiers are onboarded for a credential schema.\n\n - VERIFIER_ONBOARDING_MODE_OPEN: Anyone can self-create a verifier permission\n - VERIFIER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS: Requires validation from ecosystem\n - VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS: Requires validation from a grantor"
     }
   }
 }

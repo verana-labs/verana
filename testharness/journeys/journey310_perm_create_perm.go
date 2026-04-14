@@ -64,8 +64,8 @@ func RunPermissionCreatePermJourney(ctx context.Context, client cosmosclient.Cli
 	csIDStr, err := lib.CreateCredentialSchemaWithAuthority(
 		client, ctx, operatorAccount, policyAddr,
 		trID, schemaData,
-		cschema.CredentialSchemaPermManagementMode_OPEN,
-		cschema.CredentialSchemaPermManagementMode_OPEN,
+		cschema.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_OPEN,
+		cschema.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_OPEN,
 	)
 	if err != nil {
 		return fmt.Errorf("prerequisite 2 failed: %w", err)
@@ -128,7 +128,7 @@ func RunPermissionCreatePermJourney(ctx context.Context, client cosmosclient.Cli
 
 	// 1a: Try WITHOUT authorization (expect failure)
 	fmt.Println("\n--- Step 1a: Operator tries CreatePermission without auth (expect failure) ---")
-	_, err = lib.CreatePermission(client, ctx, operatorAccount, policyAddr, permtypes.MsgCreatePermission{
+	_, err = lib.CreatePermission(client, ctx, operatorAccount, policyAddr, permtypes.MsgSelfCreatePermission{
 		Type:            permtypes.PermissionType_ISSUER,
 		ValidatorPermId: rootPermID,
 		Did:             issuerDID,
@@ -156,7 +156,7 @@ func RunPermissionCreatePermJourney(ctx context.Context, client cosmosclient.Cli
 
 	// 1c: Try WITH authorization (expect success)
 	fmt.Println("\n--- Step 1c: Operator creates permission with auth (expect success) ---")
-	_, err = lib.CreatePermission(client, ctx, operatorAccount, policyAddr, permtypes.MsgCreatePermission{
+	_, err = lib.CreatePermission(client, ctx, operatorAccount, policyAddr, permtypes.MsgSelfCreatePermission{
 		Type:             permtypes.PermissionType_ISSUER,
 		ValidatorPermId:  rootPermID,
 		Did:              issuerDID,
@@ -185,7 +185,7 @@ func RunPermissionCreatePermJourney(ctx context.Context, client cosmosclient.Cli
 
 	var createdPerm *permtypes.Permission
 	for i := len(perms) - 1; i >= 0; i-- {
-		if perms[i].Authority == policyAddr && perms[i].Type == permtypes.PermissionType_ISSUER && perms[i].Did == issuerDID {
+		if perms[i].Corporation == policyAddr && perms[i].Type == permtypes.PermissionType_ISSUER && perms[i].Did == issuerDID {
 			createdPerm = &perms[i]
 			break
 		}
@@ -199,8 +199,8 @@ func RunPermissionCreatePermJourney(ctx context.Context, client cosmosclient.Cli
 	if createdPerm.ValidatorPermId != rootPermID {
 		return fmt.Errorf("step 2 failed: expected validator_perm_id=%d, got %d", rootPermID, createdPerm.ValidatorPermId)
 	}
-	if createdPerm.Authority != policyAddr {
-		return fmt.Errorf("step 2 failed: expected authority=%s, got %s", policyAddr, createdPerm.Authority)
+	if createdPerm.Corporation != policyAddr {
+		return fmt.Errorf("step 2 failed: expected authority=%s, got %s", policyAddr, createdPerm.Corporation)
 	}
 	if createdPerm.Did != issuerDID {
 		return fmt.Errorf("step 2 failed: expected did=%s, got %s", issuerDID, createdPerm.Did)
@@ -213,7 +213,7 @@ func RunPermissionCreatePermJourney(ctx context.Context, client cosmosclient.Cli
 	}
 
 	fmt.Printf("OK Step 2: Verified created permission fields (id=%d, validator_perm_id=%d, authority=%s)\n",
-		createdPerm.Id, createdPerm.ValidatorPermId, createdPerm.Authority)
+		createdPerm.Id, createdPerm.ValidatorPermId, createdPerm.Corporation)
 
 	// =========================================================================
 	// TEST 3: Unauthorized operator (negative test)
@@ -222,7 +222,7 @@ func RunPermissionCreatePermJourney(ctx context.Context, client cosmosclient.Cli
 
 	fmt.Println("\n--- Step 3a: Unauthorized operator tries CreatePermission (expect failure) ---")
 	coolusrAcct := lib.GetAccount(client, lib.COOLUSER_NAME)
-	_, err = lib.CreatePermission(client, ctx, coolusrAcct, policyAddr, permtypes.MsgCreatePermission{
+	_, err = lib.CreatePermission(client, ctx, coolusrAcct, policyAddr, permtypes.MsgSelfCreatePermission{
 		Type:            permtypes.PermissionType_ISSUER,
 		ValidatorPermId: rootPermID,
 		Did:             "did:example:unauthorized",
@@ -240,7 +240,7 @@ func RunPermissionCreatePermJourney(ctx context.Context, client cosmosclient.Cli
 	fmt.Println("\n=== TEST 4: Wrong authority (negative test) ===")
 
 	fmt.Println("\n--- Step 4a: Correct operator but wrong authority (expect failure) ---")
-	_, err = lib.CreatePermission(client, ctx, operatorAccount, operatorAddr, permtypes.MsgCreatePermission{
+	_, err = lib.CreatePermission(client, ctx, operatorAccount, operatorAddr, permtypes.MsgSelfCreatePermission{
 		Type:            permtypes.PermissionType_ISSUER,
 		ValidatorPermId: rootPermID,
 		Did:             "did:example:wrongauth",

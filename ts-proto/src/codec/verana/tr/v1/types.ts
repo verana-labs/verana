@@ -12,14 +12,12 @@ import Long = require("long");
 export const protobufPackage = "verana.tr.v1";
 
 export interface TrustRegistry {
-  /** Added id field */
   id: number;
   did: string;
-  controller: string;
+  corporation: string;
   created: Date | undefined;
   modified: Date | undefined;
   archived: Date | undefined;
-  deposit: number;
   aka: string;
   activeVersion: number;
   language: string;
@@ -60,11 +58,10 @@ export interface GovernanceFrameworkVersionWithDocs {
 export interface TrustRegistryWithVersions {
   id: number;
   did: string;
-  controller: string;
+  corporation: string;
   created: Date | undefined;
   modified: Date | undefined;
   archived: Date | undefined;
-  deposit: number;
   aka: string;
   activeVersion: number;
   language: string;
@@ -75,11 +72,10 @@ function createBaseTrustRegistry(): TrustRegistry {
   return {
     id: 0,
     did: "",
-    controller: "",
+    corporation: "",
     created: undefined,
     modified: undefined,
     archived: undefined,
-    deposit: 0,
     aka: "",
     activeVersion: 0,
     language: "",
@@ -94,8 +90,8 @@ export const TrustRegistry = {
     if (message.did !== "") {
       writer.uint32(18).string(message.did);
     }
-    if (message.controller !== "") {
-      writer.uint32(26).string(message.controller);
+    if (message.corporation !== "") {
+      writer.uint32(26).string(message.corporation);
     }
     if (message.created !== undefined) {
       Timestamp.encode(toTimestamp(message.created), writer.uint32(34).fork()).ldelim();
@@ -105,9 +101,6 @@ export const TrustRegistry = {
     }
     if (message.archived !== undefined) {
       Timestamp.encode(toTimestamp(message.archived), writer.uint32(50).fork()).ldelim();
-    }
-    if (message.deposit !== 0) {
-      writer.uint32(56).int64(message.deposit);
     }
     if (message.aka !== "") {
       writer.uint32(66).string(message.aka);
@@ -147,7 +140,7 @@ export const TrustRegistry = {
             break;
           }
 
-          message.controller = reader.string();
+          message.corporation = reader.string();
           continue;
         case 4:
           if (tag !== 34) {
@@ -169,13 +162,6 @@ export const TrustRegistry = {
           }
 
           message.archived = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
-          continue;
-        case 7:
-          if (tag !== 56) {
-            break;
-          }
-
-          message.deposit = longToNumber(reader.int64() as Long);
           continue;
         case 8:
           if (tag !== 66) {
@@ -211,11 +197,10 @@ export const TrustRegistry = {
     return {
       id: isSet(object.id) ? globalThis.Number(object.id) : 0,
       did: isSet(object.did) ? globalThis.String(object.did) : "",
-      controller: isSet(object.controller) ? globalThis.String(object.controller) : "",
+      corporation: isSet(object.corporation) ? globalThis.String(object.corporation) : "",
       created: isSet(object.created) ? fromJsonTimestamp(object.created) : undefined,
       modified: isSet(object.modified) ? fromJsonTimestamp(object.modified) : undefined,
       archived: isSet(object.archived) ? fromJsonTimestamp(object.archived) : undefined,
-      deposit: isSet(object.deposit) ? globalThis.Number(object.deposit) : 0,
       aka: isSet(object.aka) ? globalThis.String(object.aka) : "",
       activeVersion: isSet(object.activeVersion) ? globalThis.Number(object.activeVersion) : 0,
       language: isSet(object.language) ? globalThis.String(object.language) : "",
@@ -230,8 +215,8 @@ export const TrustRegistry = {
     if (message.did !== "") {
       obj.did = message.did;
     }
-    if (message.controller !== "") {
-      obj.controller = message.controller;
+    if (message.corporation !== "") {
+      obj.corporation = message.corporation;
     }
     if (message.created !== undefined) {
       obj.created = message.created.toISOString();
@@ -241,9 +226,6 @@ export const TrustRegistry = {
     }
     if (message.archived !== undefined) {
       obj.archived = message.archived.toISOString();
-    }
-    if (message.deposit !== 0) {
-      obj.deposit = Math.round(message.deposit);
     }
     if (message.aka !== "") {
       obj.aka = message.aka;
@@ -264,11 +246,10 @@ export const TrustRegistry = {
     const message = createBaseTrustRegistry();
     message.id = object.id ?? 0;
     message.did = object.did ?? "";
-    message.controller = object.controller ?? "";
+    message.corporation = object.corporation ?? "";
     message.created = object.created ?? undefined;
     message.modified = object.modified ?? undefined;
     message.archived = object.archived ?? undefined;
-    message.deposit = object.deposit ?? 0;
     message.aka = object.aka ?? "";
     message.activeVersion = object.activeVersion ?? 0;
     message.language = object.language ?? "";
@@ -673,11 +654,10 @@ function createBaseTrustRegistryWithVersions(): TrustRegistryWithVersions {
   return {
     id: 0,
     did: "",
-    controller: "",
+    corporation: "",
     created: undefined,
     modified: undefined,
     archived: undefined,
-    deposit: 0,
     aka: "",
     activeVersion: 0,
     language: "",
@@ -693,8 +673,8 @@ export const TrustRegistryWithVersions = {
     if (message.did !== "") {
       writer.uint32(18).string(message.did);
     }
-    if (message.controller !== "") {
-      writer.uint32(26).string(message.controller);
+    if (message.corporation !== "") {
+      writer.uint32(26).string(message.corporation);
     }
     if (message.created !== undefined) {
       Timestamp.encode(toTimestamp(message.created), writer.uint32(34).fork()).ldelim();
@@ -704,9 +684,6 @@ export const TrustRegistryWithVersions = {
     }
     if (message.archived !== undefined) {
       Timestamp.encode(toTimestamp(message.archived), writer.uint32(50).fork()).ldelim();
-    }
-    if (message.deposit !== 0) {
-      writer.uint32(56).int64(message.deposit);
     }
     if (message.aka !== "") {
       writer.uint32(66).string(message.aka);
@@ -749,7 +726,7 @@ export const TrustRegistryWithVersions = {
             break;
           }
 
-          message.controller = reader.string();
+          message.corporation = reader.string();
           continue;
         case 4:
           if (tag !== 34) {
@@ -771,13 +748,6 @@ export const TrustRegistryWithVersions = {
           }
 
           message.archived = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
-          continue;
-        case 7:
-          if (tag !== 56) {
-            break;
-          }
-
-          message.deposit = longToNumber(reader.int64() as Long);
           continue;
         case 8:
           if (tag !== 66) {
@@ -820,11 +790,10 @@ export const TrustRegistryWithVersions = {
     return {
       id: isSet(object.id) ? globalThis.Number(object.id) : 0,
       did: isSet(object.did) ? globalThis.String(object.did) : "",
-      controller: isSet(object.controller) ? globalThis.String(object.controller) : "",
+      corporation: isSet(object.corporation) ? globalThis.String(object.corporation) : "",
       created: isSet(object.created) ? fromJsonTimestamp(object.created) : undefined,
       modified: isSet(object.modified) ? fromJsonTimestamp(object.modified) : undefined,
       archived: isSet(object.archived) ? fromJsonTimestamp(object.archived) : undefined,
-      deposit: isSet(object.deposit) ? globalThis.Number(object.deposit) : 0,
       aka: isSet(object.aka) ? globalThis.String(object.aka) : "",
       activeVersion: isSet(object.activeVersion) ? globalThis.Number(object.activeVersion) : 0,
       language: isSet(object.language) ? globalThis.String(object.language) : "",
@@ -842,8 +811,8 @@ export const TrustRegistryWithVersions = {
     if (message.did !== "") {
       obj.did = message.did;
     }
-    if (message.controller !== "") {
-      obj.controller = message.controller;
+    if (message.corporation !== "") {
+      obj.corporation = message.corporation;
     }
     if (message.created !== undefined) {
       obj.created = message.created.toISOString();
@@ -853,9 +822,6 @@ export const TrustRegistryWithVersions = {
     }
     if (message.archived !== undefined) {
       obj.archived = message.archived.toISOString();
-    }
-    if (message.deposit !== 0) {
-      obj.deposit = Math.round(message.deposit);
     }
     if (message.aka !== "") {
       obj.aka = message.aka;
@@ -879,11 +845,10 @@ export const TrustRegistryWithVersions = {
     const message = createBaseTrustRegistryWithVersions();
     message.id = object.id ?? 0;
     message.did = object.did ?? "";
-    message.controller = object.controller ?? "";
+    message.corporation = object.corporation ?? "";
     message.created = object.created ?? undefined;
     message.modified = object.modified ?? undefined;
     message.archived = object.archived ?? undefined;
-    message.deposit = object.deposit ?? 0;
     message.aka = object.aka ?? "";
     message.activeVersion = object.activeVersion ?? 0;
     message.language = object.language ?? "";

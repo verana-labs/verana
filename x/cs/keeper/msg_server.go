@@ -30,7 +30,7 @@ func (ms msgServer) CreateCredentialSchema(goCtx context.Context, msg *types.Msg
 	if ms.delegationKeeper != nil {
 		if err := ms.delegationKeeper.CheckOperatorAuthorization(
 			ctx,
-			msg.Authority,
+			msg.Corporation,
 			msg.Operator,
 			"/verana.cs.v1.MsgCreateCredentialSchema",
 			now,
@@ -60,7 +60,7 @@ func (ms msgServer) CreateCredentialSchema(goCtx context.Context, msg *types.Msg
 			types.EventTypeCreateCredentialSchema,
 			sdk.NewAttribute(types.AttributeKeyId, strconv.FormatUint(nextID, 10)),
 			sdk.NewAttribute(types.AttributeKeyTrId, strconv.FormatUint(msg.TrId, 10)),
-			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Authority),
+			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
 		),
@@ -79,7 +79,7 @@ func (ms msgServer) UpdateCredentialSchema(goCtx context.Context, msg *types.Msg
 	if ms.delegationKeeper != nil {
 		if err := ms.delegationKeeper.CheckOperatorAuthorization(
 			ctx,
-			msg.Authority,
+			msg.Corporation,
 			msg.Operator,
 			"/verana.cs.v1.MsgUpdateCredentialSchema",
 			now,
@@ -99,8 +99,8 @@ func (ms msgServer) UpdateCredentialSchema(goCtx context.Context, msg *types.Msg
 	if err != nil {
 		return nil, fmt.Errorf("trust registry not found: %w", err)
 	}
-	if tr.Controller != msg.Authority {
-		return nil, fmt.Errorf("authority is not the controller of the trust registry")
+	if tr.Corporation != msg.Corporation {
+		return nil, fmt.Errorf("corporation does not match the trust registry corporation")
 	}
 
 	// Validate validity periods against params
@@ -126,7 +126,7 @@ func (ms msgServer) UpdateCredentialSchema(goCtx context.Context, msg *types.Msg
 			types.EventTypeUpdateCredentialSchema,
 			sdk.NewAttribute(types.AttributeKeyId, strconv.FormatUint(msg.Id, 10)),
 			sdk.NewAttribute(types.AttributeKeyTrId, strconv.FormatUint(cs.TrId, 10)),
-			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Authority),
+			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
 			sdk.NewAttribute(types.AttributeKeyIssuerGrantorValidationValidityPeriod, strconv.FormatUint(uint64(msg.GetIssuerGrantorValidationValidityPeriod().GetValue()), 10)),
 			sdk.NewAttribute(types.AttributeKeyVerifierGrantorValidationValidityPeriod, strconv.FormatUint(uint64(msg.GetVerifierGrantorValidationValidityPeriod().GetValue()), 10)),
@@ -181,7 +181,7 @@ func (ms msgServer) ArchiveCredentialSchema(goCtx context.Context, msg *types.Ms
 	if ms.delegationKeeper != nil {
 		if err := ms.delegationKeeper.CheckOperatorAuthorization(
 			ctx,
-			msg.Authority,
+			msg.Corporation,
 			msg.Operator,
 			"/verana.cs.v1.MsgArchiveCredentialSchema",
 			now,
@@ -201,8 +201,8 @@ func (ms msgServer) ArchiveCredentialSchema(goCtx context.Context, msg *types.Ms
 	if err != nil {
 		return nil, fmt.Errorf("trust registry not found: %w", err)
 	}
-	if tr.Controller != msg.Authority {
-		return nil, fmt.Errorf("authority is not the controller of the trust registry")
+	if tr.Corporation != msg.Corporation {
+		return nil, fmt.Errorf("corporation does not match the trust registry corporation")
 	}
 
 	// [MOD-CS-MSG-3-2-1] Check archive state
@@ -238,7 +238,7 @@ func (ms msgServer) ArchiveCredentialSchema(goCtx context.Context, msg *types.Ms
 			types.EventTypeArchiveCredentialSchema,
 			sdk.NewAttribute(types.AttributeKeyId, strconv.FormatUint(msg.Id, 10)),
 			sdk.NewAttribute(types.AttributeKeyTrId, strconv.FormatUint(cs.TrId, 10)),
-			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Authority),
+			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
 			sdk.NewAttribute(types.AttributeKeyArchiveStatus, archiveStatus),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),

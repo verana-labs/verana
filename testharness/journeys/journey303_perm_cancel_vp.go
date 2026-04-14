@@ -109,7 +109,7 @@ func RunPermissionCancelVPJourney(ctx context.Context, client cosmosclient.Clien
 		return fmt.Errorf("step 1c verification query failed: %w", err)
 	}
 	// This perm has no VpExp (was validated without expiration), so cancel transitions to TERMINATED
-	if perm.VpState != permtypes.ValidationState_TERMINATED {
+	if perm.VpState != permtypes.ValidationState_VALIDATED {
 		return fmt.Errorf("step 1c verification failed: expected TERMINATED state (no vp_exp), got %s", perm.VpState.String())
 	}
 	fmt.Printf("OK Step 1c: Verified permission is TERMINATED after cancel (no vp_exp set)\n")

@@ -42,13 +42,11 @@ func TestMsgServerCreateTrustRegistry(t *testing.T) {
 		{
 			name: "Valid Create Trust Registry",
 			msg: &types.MsgCreateTrustRegistry{
-				Authority:    authority,
-				Operator:     operator,
-				Did:          validDid,
-				Aka:          "http://example.com",
-				Language:     "en",
-				DocUrl:       "http://example.com/doc",
-				DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+				Corporation: authority,
+				Operator:    operator,
+				Did:         validDid,
+				Aka:         "http://example.com",
+				Language:    "en",
 			},
 			isValid: true,
 		},
@@ -69,8 +67,8 @@ func TestMsgServerCreateTrustRegistry(t *testing.T) {
 				tr, err := k.TrustRegistry.Get(ctx, id)
 				require.NoError(t, err)
 				require.Equal(t, tc.msg.Did, tr.Did)
-				// Verify authority becomes the controller
-				require.Equal(t, tc.msg.Authority, tr.Controller)
+				// Verify corporation becomes the controller
+				require.Equal(t, tc.msg.Corporation, tr.Corporation)
 				require.Equal(t, int32(1), tr.ActiveVersion)
 				require.Equal(t, tc.msg.Language, tr.Language)
 			} else {
@@ -90,12 +88,10 @@ func TestMsgServerAddGovernanceFrameworkDocument(t *testing.T) {
 
 	// First, create a trust registry
 	createMsg := &types.MsgCreateTrustRegistry{
-		Authority:    authority,
-		Operator:     operator,
-		Did:          validDid,
-		Language:     "en",
-		DocUrl:       "http://example.com/doc",
-		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+		Corporation: authority,
+		Operator:    operator,
+		Did:         validDid,
+		Language:    "en",
 	}
 	_, err := ms.CreateTrustRegistry(ctx, createMsg)
 	require.NoError(t, err)
@@ -113,91 +109,91 @@ func TestMsgServerAddGovernanceFrameworkDocument(t *testing.T) {
 		{
 			name: "Valid Add Document with Next Version",
 			msg: &types.MsgAddGovernanceFrameworkDocument{
-				Authority:    authority,
-				Operator:     operator,
-				Id:           trID,
-				DocLanguage:  "en",
-				DocUrl:       "http://example.com/doc2",
-				DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
-				Version:      2, // Exactly maxVersion + 1
+				Corporation: authority,
+				Operator:    operator,
+				TrId:        trID,
+				Language:    "en",
+				Url:         "http://example.com/doc2",
+				DigestSri:   "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+				Version:     2, // Exactly maxVersion + 1
 			},
 			isValid: true,
 		},
 		{
 			name: "Valid Add Document to Same Version with Different Language",
 			msg: &types.MsgAddGovernanceFrameworkDocument{
-				Authority:    authority,
-				Operator:     operator,
-				Id:           trID,
-				DocLanguage:  "fr",
-				DocUrl:       "http://example.com/doc2-fr",
-				DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
-				Version:      2, // Same version, different language
+				Corporation: authority,
+				Operator:    operator,
+				TrId:        trID,
+				Language:    "fr",
+				Url:         "http://example.com/doc2-fr",
+				DigestSri:   "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+				Version:     2, // Same version, different language
 			},
 			isValid: true,
 		},
 		{
 			name: "Valid Add Next Version",
 			msg: &types.MsgAddGovernanceFrameworkDocument{
-				Authority:    authority,
-				Operator:     operator,
-				Id:           trID,
-				DocLanguage:  "en",
-				DocUrl:       "http://example.com/doc3",
-				DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
-				Version:      3, // Exactly maxVersion + 1
+				Corporation: authority,
+				Operator:    operator,
+				TrId:        trID,
+				Language:    "en",
+				Url:         "http://example.com/doc3",
+				DigestSri:   "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+				Version:     3, // Exactly maxVersion + 1
 			},
 			isValid: true,
 		},
 		{
 			name: "Invalid Version (Less than Active Version)",
 			msg: &types.MsgAddGovernanceFrameworkDocument{
-				Authority:    authority,
-				Operator:     operator,
-				Id:           trID,
-				DocLanguage:  "en",
-				DocUrl:       "http://example.com/doc-old",
-				DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
-				Version:      1,
+				Corporation: authority,
+				Operator:    operator,
+				TrId:        trID,
+				Language:    "en",
+				Url:         "http://example.com/doc-old",
+				DigestSri:   "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+				Version:     1,
 			},
 			isValid: false,
 		},
 		{
 			name: "Invalid Trust Registry ID",
 			msg: &types.MsgAddGovernanceFrameworkDocument{
-				Authority:    authority,
-				Operator:     operator,
-				Id:           99999,
-				DocLanguage:  "en",
-				DocUrl:       "http://example.com/doc2",
-				DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
-				Version:      2,
+				Corporation: authority,
+				Operator:    operator,
+				TrId:        99999,
+				Language:    "en",
+				Url:         "http://example.com/doc2",
+				DigestSri:   "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+				Version:     2,
 			},
 			isValid: false,
 		},
 		{
 			name: "Invalid Language Format",
 			msg: &types.MsgAddGovernanceFrameworkDocument{
-				Authority:    authority,
-				Operator:     operator,
-				Id:           trID,
-				DocLanguage:  "invalid-language",
-				DocUrl:       "http://example.com/doc2",
-				DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
-				Version:      2,
+				Corporation: authority,
+				Operator:    operator,
+				TrId:        trID,
+				Language:    "invalid-language",
+				Url:         "http://example.com/doc2",
+				DigestSri:   "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+				Version:     2,
 			},
 			isValid: false,
 		},
 		{
 			name: "Wrong Controller",
 			msg: &types.MsgAddGovernanceFrameworkDocument{
-				Authority:    "wrong-controller",
-				Operator:     "wrong-controller",
-				Id:           trID,
-				DocLanguage:  "en",
-				DocUrl:       "http://example.com/doc2",
-				DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
-				Version:      2,
+				Corporation: "wrong-controller",
+				Operator:    "wrong-controller",
+				TrId:        trID,
+				Language:    "en",
+				Url:         "http://example.com/doc2",
+				DigestSri:   "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+				Version:     2,
 			},
 			isValid: false,
 		},
@@ -206,25 +202,25 @@ func TestMsgServerAddGovernanceFrameworkDocument(t *testing.T) {
 			setupFunc: func() {
 				// Add version 3 document first
 				msg := &types.MsgAddGovernanceFrameworkDocument{
-					Authority:    authority,
-					Operator:     operator,
-					Id:           trID,
-					DocLanguage:  "en",
-					DocUrl:       "http://example.com/doc3",
-					DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
-					Version:      3,
+					Corporation: authority,
+					Operator:    operator,
+					TrId:        trID,
+					Language:    "en",
+					Url:         "http://example.com/doc3",
+					DigestSri:   "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+					Version:     3,
 				}
 				_, err := ms.AddGovernanceFrameworkDocument(ctx, msg)
 				require.NoError(t, err)
 			},
 			msg: &types.MsgAddGovernanceFrameworkDocument{
-				Authority:    authority,
-				Operator:     operator,
-				Id:           trID,
-				DocLanguage:  "en",
-				DocUrl:       "http://example.com/doc5",
-				DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
-				Version:      5, // Invalid: should be 4 (maxVersion + 1)
+				Corporation: authority,
+				Operator:    operator,
+				TrId:        trID,
+				Language:    "en",
+				Url:         "http://example.com/doc5",
+				DigestSri:   "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+				Version:     5, // Invalid: should be 4 (maxVersion + 1)
 			},
 			isValid: false,
 		},
@@ -244,7 +240,7 @@ func TestMsgServerAddGovernanceFrameworkDocument(t *testing.T) {
 				// Verify document was added
 				var found bool
 				err = k.GFDocument.Walk(ctx, nil, func(id uint64, gfd types.GovernanceFrameworkDocument) (bool, error) {
-					if gfd.Language == tc.msg.DocLanguage && gfd.Url == tc.msg.DocUrl {
+					if gfd.Language == tc.msg.Language && gfd.Url == tc.msg.Url {
 						found = true
 						return true, nil
 					}
@@ -269,12 +265,10 @@ func TestMsgServerIncreaseActiveGovernanceFrameworkVersion(t *testing.T) {
 
 	// Create initial trust registry
 	createMsg := &types.MsgCreateTrustRegistry{
-		Authority:    authority,
-		Operator:     operator,
-		Did:          validDid,
-		Language:     "en",
-		DocUrl:       "http://example.com/doc",
-		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+		Corporation: authority,
+		Operator:    operator,
+		Did:         validDid,
+		Language:    "en",
 	}
 	_, err := ms.CreateTrustRegistry(ctx, createMsg)
 	require.NoError(t, err)
@@ -285,13 +279,13 @@ func TestMsgServerIncreaseActiveGovernanceFrameworkVersion(t *testing.T) {
 
 	// Add version 2 documents
 	addGFDocMsg := &types.MsgAddGovernanceFrameworkDocument{
-		Authority:    authority,
-		Operator:     operator,
-		Id:           trID,
-		DocLanguage:  "es", // First add Spanish version
-		DocUrl:       "http://example.com/doc2-es",
-		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
-		Version:      2,
+		Corporation: authority,
+		Operator:    operator,
+		TrId:        trID,
+		Language:    "es", // First add Spanish version
+		Url:         "http://example.com/doc2-es",
+		DigestSri:   "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+		Version:     2,
 	}
 	_, err = ms.AddGovernanceFrameworkDocument(ctx, addGFDocMsg)
 	require.NoError(t, err)
@@ -306,9 +300,9 @@ func TestMsgServerIncreaseActiveGovernanceFrameworkVersion(t *testing.T) {
 		{
 			name: "Cannot Increase Version - Missing Default Language Document",
 			msg: &types.MsgIncreaseActiveGovernanceFrameworkVersion{
-				Authority: authority,
-				Operator:  operator,
-				Id:        trID,
+				Corporation: authority,
+				Operator:    operator,
+				TrId:        trID,
 			},
 			isValid: false,
 		},
@@ -317,39 +311,39 @@ func TestMsgServerIncreaseActiveGovernanceFrameworkVersion(t *testing.T) {
 			setupFunc: func() {
 				// Add English (default language) document for version 2
 				msg := &types.MsgAddGovernanceFrameworkDocument{
-					Authority:    authority,
-					Operator:     operator,
-					Id:           trID,
-					DocLanguage:  "en",
-					DocUrl:       "http://example.com/doc2-en",
-					DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
-					Version:      2,
+					Corporation: authority,
+					Operator:    operator,
+					TrId:        trID,
+					Language:    "en",
+					Url:         "http://example.com/doc2-en",
+					DigestSri:   "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+					Version:     2,
 				}
 				_, err := ms.AddGovernanceFrameworkDocument(ctx, msg)
 				require.NoError(t, err)
 			},
 			msg: &types.MsgIncreaseActiveGovernanceFrameworkVersion{
-				Authority: authority,
-				Operator:  operator,
-				Id:        trID,
+				Corporation: authority,
+				Operator:    operator,
+				TrId:        trID,
 			},
 			isValid: true,
 		},
 		{
 			name: "Wrong Controller",
 			msg: &types.MsgIncreaseActiveGovernanceFrameworkVersion{
-				Authority: "wrong-controller",
-				Operator:  operator,
-				Id:        trID,
+				Corporation: "wrong-controller",
+				Operator:    operator,
+				TrId:        trID,
 			},
 			isValid: false,
 		},
 		{
 			name: "Non-existent Trust Registry",
 			msg: &types.MsgIncreaseActiveGovernanceFrameworkVersion{
-				Authority: authority,
-				Operator:  operator,
-				Id:        99999,
+				Corporation: authority,
+				Operator:    operator,
+				TrId:        99999,
 			},
 			isValid: false,
 		},
@@ -367,7 +361,7 @@ func TestMsgServerIncreaseActiveGovernanceFrameworkVersion(t *testing.T) {
 				require.NotNil(t, resp)
 
 				// Verify version increase
-				tr, err := k.TrustRegistry.Get(ctx, tc.msg.Id)
+				tr, err := k.TrustRegistry.Get(ctx, tc.msg.TrId)
 				require.NoError(t, err)
 				require.Equal(t, int32(2), tr.ActiveVersion)
 			} else {
@@ -386,12 +380,10 @@ func TestMsgServerUpdateTrustRegistry(t *testing.T) {
 	operator := sdk.AccAddress([]byte("test_operator")).String()
 	validDid := "did:example:123456789abcdefghi"
 	createMsg := &types.MsgCreateTrustRegistry{
-		Authority:    authority,
-		Operator:     operator,
-		Did:          validDid,
-		Language:     "en",
-		DocUrl:       "http://example.com/doc",
-		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+		Corporation: authority,
+		Operator:    operator,
+		Did:         validDid,
+		Language:    "en",
 	}
 	resp, err := ms.CreateTrustRegistry(ctx, createMsg)
 	require.NoError(t, err)
@@ -413,44 +405,40 @@ func TestMsgServerUpdateTrustRegistry(t *testing.T) {
 		{
 			name: "Valid Update",
 			msg: &types.MsgUpdateTrustRegistry{
-				Authority: authority,
-				Operator:  operator,
-				Id:        trID,
-				Did:       "did:example:newdid",
-				Aka:       "http://new.example.com",
+				Corporation: authority,
+				Operator:    operator,
+				TrId:        trID,
+				Aka:         "http://new.example.com",
 			},
 			expectErr: false,
 		},
 		{
 			name: "Wrong Controller",
 			msg: &types.MsgUpdateTrustRegistry{
-				Authority: "wrong-controller",
-				Operator:  "wrong-controller",
-				Id:        trID,
-				Did:       "did:example:newdid",
-				Aka:       "http://example.com",
+				Corporation: "wrong-controller",
+				Operator:    "wrong-controller",
+				TrId:        trID,
+				Aka:         "http://example.com",
 			},
 			expectErr: true,
 		},
 		{
 			name: "Non-existent Trust Registry",
 			msg: &types.MsgUpdateTrustRegistry{
-				Authority: authority,
-				Operator:  operator,
-				Id:        99999,
-				Did:       "did:example:newdid",
-				Aka:       "http://example.com",
+				Corporation: authority,
+				Operator:    operator,
+				TrId:        99999,
+				Aka:         "http://example.com",
 			},
 			expectErr: true,
 		},
 		{
 			name: "Clear AKA",
 			msg: &types.MsgUpdateTrustRegistry{
-				Authority: authority,
-				Operator:  operator,
-				Id:        trID,
-				Did:       "did:example:newdid",
-				Aka:       "", // Empty string to clear AKA
+				Corporation: authority,
+				Operator:    operator,
+				TrId:        trID,
+				Aka:         "", // Empty string to clear AKA
 			},
 			expectErr: false,
 		},
@@ -471,9 +459,8 @@ func TestMsgServerUpdateTrustRegistry(t *testing.T) {
 				require.NotNil(t, resp)
 
 				// Verify changes
-				tr, err := k.TrustRegistry.Get(testCtx, tc.msg.Id)
+				tr, err := k.TrustRegistry.Get(testCtx, tc.msg.TrId)
 				require.NoError(t, err)
-				require.Equal(t, tc.msg.Did, tr.Did)
 				require.Equal(t, tc.msg.Aka, tr.Aka)
 				require.NotEqual(t, tr.Created, tr.Modified)
 			}
@@ -489,12 +476,10 @@ func TestMsgServerArchiveTrustRegistry(t *testing.T) {
 	operator := sdk.AccAddress([]byte("test_operator")).String()
 	validDid := "did:example:123456789abcdefghi"
 	createMsg := &types.MsgCreateTrustRegistry{
-		Authority:    authority,
-		Operator:     operator,
-		Did:          validDid,
-		Language:     "en",
-		DocUrl:       "http://example.com/doc",
-		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+		Corporation: authority,
+		Operator:    operator,
+		Did:         validDid,
+		Language:    "en",
 	}
 	resp, err := ms.CreateTrustRegistry(ctx, createMsg)
 	require.NoError(t, err)
@@ -516,60 +501,60 @@ func TestMsgServerArchiveTrustRegistry(t *testing.T) {
 		{
 			name: "Valid Archive",
 			msg: &types.MsgArchiveTrustRegistry{
-				Authority: authority,
-				Operator:  operator,
-				Id:        trID,
-				Archive:   true,
+				Corporation: authority,
+				Operator:    operator,
+				TrId:        trID,
+				Archive:     true,
 			},
 			expectErr: false,
 		},
 		{
 			name: "Already Archived",
 			msg: &types.MsgArchiveTrustRegistry{
-				Authority: authority,
-				Operator:  operator,
-				Id:        trID,
-				Archive:   true,
+				Corporation: authority,
+				Operator:    operator,
+				TrId:        trID,
+				Archive:     true,
 			},
 			expectErr: true,
 		},
 		{
 			name: "Valid Unarchive",
 			msg: &types.MsgArchiveTrustRegistry{
-				Authority: authority,
-				Operator:  operator,
-				Id:        trID,
-				Archive:   false,
+				Corporation: authority,
+				Operator:    operator,
+				TrId:        trID,
+				Archive:     false,
 			},
 			expectErr: false,
 		},
 		{
 			name: "Already Unarchived",
 			msg: &types.MsgArchiveTrustRegistry{
-				Authority: authority,
-				Operator:  operator,
-				Id:        trID,
-				Archive:   false,
+				Corporation: authority,
+				Operator:    operator,
+				TrId:        trID,
+				Archive:     false,
 			},
 			expectErr: true,
 		},
 		{
 			name: "Wrong Controller",
 			msg: &types.MsgArchiveTrustRegistry{
-				Authority: "wrong-controller",
-				Operator:  operator,
-				Id:        trID,
-				Archive:   true,
+				Corporation: "wrong-controller",
+				Operator:    operator,
+				TrId:        trID,
+				Archive:     true,
 			},
 			expectErr: true,
 		},
 		{
 			name: "Non-existent Trust Registry",
 			msg: &types.MsgArchiveTrustRegistry{
-				Authority: authority,
-				Operator:  operator,
-				Id:        99999,
-				Archive:   true,
+				Corporation: authority,
+				Operator:    operator,
+				TrId:        99999,
+				Archive:     true,
 			},
 			expectErr: true,
 		},
@@ -590,7 +575,7 @@ func TestMsgServerArchiveTrustRegistry(t *testing.T) {
 				require.NotNil(t, resp)
 
 				// Verify changes
-				tr, err := k.TrustRegistry.Get(testCtx, tc.msg.Id)
+				tr, err := k.TrustRegistry.Get(testCtx, tc.msg.TrId)
 				require.NoError(t, err)
 				if tc.msg.Archive {
 					require.NotNil(t, tr.Archived)

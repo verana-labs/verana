@@ -11,53 +11,50 @@ import Long = require("long");
 
 export const protobufPackage = "verana.td.v1";
 
-/** TrustDeposit represents an account's trust deposit */
+/** TrustDeposit represents a corporation's trust deposit */
 export interface TrustDeposit {
-  account: string;
+  corporation: string;
   share: string;
-  amount: number;
+  deposit: number;
   claimable: number;
-  /** NEW v2 fields: Slashing related */
   slashedDeposit: number;
   repaidDeposit: number;
   lastSlashed: Date | undefined;
   lastRepaid: Date | undefined;
   slashCount: number;
-  lastRepaidBy: string;
 }
 
 export interface SlashTrustDepositProposal {
   title: string;
   description: string;
-  account: string;
-  amount: string;
+  corporation: string;
+  deposit: string;
 }
 
 function createBaseTrustDeposit(): TrustDeposit {
   return {
-    account: "",
+    corporation: "",
     share: "",
-    amount: 0,
+    deposit: 0,
     claimable: 0,
     slashedDeposit: 0,
     repaidDeposit: 0,
     lastSlashed: undefined,
     lastRepaid: undefined,
     slashCount: 0,
-    lastRepaidBy: "",
   };
 }
 
 export const TrustDeposit = {
   encode(message: TrustDeposit, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.account !== "") {
-      writer.uint32(10).string(message.account);
+    if (message.corporation !== "") {
+      writer.uint32(10).string(message.corporation);
     }
     if (message.share !== "") {
       writer.uint32(18).string(message.share);
     }
-    if (message.amount !== 0) {
-      writer.uint32(24).uint64(message.amount);
+    if (message.deposit !== 0) {
+      writer.uint32(24).uint64(message.deposit);
     }
     if (message.claimable !== 0) {
       writer.uint32(32).uint64(message.claimable);
@@ -77,9 +74,6 @@ export const TrustDeposit = {
     if (message.slashCount !== 0) {
       writer.uint32(72).uint64(message.slashCount);
     }
-    if (message.lastRepaidBy !== "") {
-      writer.uint32(82).string(message.lastRepaidBy);
-    }
     return writer;
   },
 
@@ -95,7 +89,7 @@ export const TrustDeposit = {
             break;
           }
 
-          message.account = reader.string();
+          message.corporation = reader.string();
           continue;
         case 2:
           if (tag !== 18) {
@@ -109,7 +103,7 @@ export const TrustDeposit = {
             break;
           }
 
-          message.amount = longToNumber(reader.uint64() as Long);
+          message.deposit = longToNumber(reader.uint64() as Long);
           continue;
         case 4:
           if (tag !== 32) {
@@ -153,13 +147,6 @@ export const TrustDeposit = {
 
           message.slashCount = longToNumber(reader.uint64() as Long);
           continue;
-        case 10:
-          if (tag !== 82) {
-            break;
-          }
-
-          message.lastRepaidBy = reader.string();
-          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -171,29 +158,28 @@ export const TrustDeposit = {
 
   fromJSON(object: any): TrustDeposit {
     return {
-      account: isSet(object.account) ? globalThis.String(object.account) : "",
+      corporation: isSet(object.corporation) ? globalThis.String(object.corporation) : "",
       share: isSet(object.share) ? globalThis.String(object.share) : "",
-      amount: isSet(object.amount) ? globalThis.Number(object.amount) : 0,
+      deposit: isSet(object.deposit) ? globalThis.Number(object.deposit) : 0,
       claimable: isSet(object.claimable) ? globalThis.Number(object.claimable) : 0,
       slashedDeposit: isSet(object.slashedDeposit) ? globalThis.Number(object.slashedDeposit) : 0,
       repaidDeposit: isSet(object.repaidDeposit) ? globalThis.Number(object.repaidDeposit) : 0,
       lastSlashed: isSet(object.lastSlashed) ? fromJsonTimestamp(object.lastSlashed) : undefined,
       lastRepaid: isSet(object.lastRepaid) ? fromJsonTimestamp(object.lastRepaid) : undefined,
       slashCount: isSet(object.slashCount) ? globalThis.Number(object.slashCount) : 0,
-      lastRepaidBy: isSet(object.lastRepaidBy) ? globalThis.String(object.lastRepaidBy) : "",
     };
   },
 
   toJSON(message: TrustDeposit): unknown {
     const obj: any = {};
-    if (message.account !== "") {
-      obj.account = message.account;
+    if (message.corporation !== "") {
+      obj.corporation = message.corporation;
     }
     if (message.share !== "") {
       obj.share = message.share;
     }
-    if (message.amount !== 0) {
-      obj.amount = Math.round(message.amount);
+    if (message.deposit !== 0) {
+      obj.deposit = Math.round(message.deposit);
     }
     if (message.claimable !== 0) {
       obj.claimable = Math.round(message.claimable);
@@ -213,9 +199,6 @@ export const TrustDeposit = {
     if (message.slashCount !== 0) {
       obj.slashCount = Math.round(message.slashCount);
     }
-    if (message.lastRepaidBy !== "") {
-      obj.lastRepaidBy = message.lastRepaidBy;
-    }
     return obj;
   },
 
@@ -224,22 +207,21 @@ export const TrustDeposit = {
   },
   fromPartial<I extends Exact<DeepPartial<TrustDeposit>, I>>(object: I): TrustDeposit {
     const message = createBaseTrustDeposit();
-    message.account = object.account ?? "";
+    message.corporation = object.corporation ?? "";
     message.share = object.share ?? "";
-    message.amount = object.amount ?? 0;
+    message.deposit = object.deposit ?? 0;
     message.claimable = object.claimable ?? 0;
     message.slashedDeposit = object.slashedDeposit ?? 0;
     message.repaidDeposit = object.repaidDeposit ?? 0;
     message.lastSlashed = object.lastSlashed ?? undefined;
     message.lastRepaid = object.lastRepaid ?? undefined;
     message.slashCount = object.slashCount ?? 0;
-    message.lastRepaidBy = object.lastRepaidBy ?? "";
     return message;
   },
 };
 
 function createBaseSlashTrustDepositProposal(): SlashTrustDepositProposal {
-  return { title: "", description: "", account: "", amount: "" };
+  return { title: "", description: "", corporation: "", deposit: "" };
 }
 
 export const SlashTrustDepositProposal = {
@@ -250,11 +232,11 @@ export const SlashTrustDepositProposal = {
     if (message.description !== "") {
       writer.uint32(18).string(message.description);
     }
-    if (message.account !== "") {
-      writer.uint32(26).string(message.account);
+    if (message.corporation !== "") {
+      writer.uint32(26).string(message.corporation);
     }
-    if (message.amount !== "") {
-      writer.uint32(34).string(message.amount);
+    if (message.deposit !== "") {
+      writer.uint32(34).string(message.deposit);
     }
     return writer;
   },
@@ -285,14 +267,14 @@ export const SlashTrustDepositProposal = {
             break;
           }
 
-          message.account = reader.string();
+          message.corporation = reader.string();
           continue;
         case 4:
           if (tag !== 34) {
             break;
           }
 
-          message.amount = reader.string();
+          message.deposit = reader.string();
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -307,8 +289,8 @@ export const SlashTrustDepositProposal = {
     return {
       title: isSet(object.title) ? globalThis.String(object.title) : "",
       description: isSet(object.description) ? globalThis.String(object.description) : "",
-      account: isSet(object.account) ? globalThis.String(object.account) : "",
-      amount: isSet(object.amount) ? globalThis.String(object.amount) : "",
+      corporation: isSet(object.corporation) ? globalThis.String(object.corporation) : "",
+      deposit: isSet(object.deposit) ? globalThis.String(object.deposit) : "",
     };
   },
 
@@ -320,11 +302,11 @@ export const SlashTrustDepositProposal = {
     if (message.description !== "") {
       obj.description = message.description;
     }
-    if (message.account !== "") {
-      obj.account = message.account;
+    if (message.corporation !== "") {
+      obj.corporation = message.corporation;
     }
-    if (message.amount !== "") {
-      obj.amount = message.amount;
+    if (message.deposit !== "") {
+      obj.deposit = message.deposit;
     }
     return obj;
   },
@@ -336,8 +318,8 @@ export const SlashTrustDepositProposal = {
     const message = createBaseSlashTrustDepositProposal();
     message.title = object.title ?? "";
     message.description = object.description ?? "";
-    message.account = object.account ?? "";
-    message.amount = object.amount ?? "";
+    message.corporation = object.corporation ?? "";
+    message.deposit = object.deposit ?? "";
     return message;
   },
 };

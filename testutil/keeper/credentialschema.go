@@ -93,12 +93,12 @@ func (k *MockTrustRegistryKeeper) GetTrustRegistry(ctx sdk.Context, id uint64) (
 	return trtypes.TrustRegistry{}, trtypes.ErrTrustRegistryNotFound
 }
 
-func (k *MockTrustRegistryKeeper) CreateMockTrustRegistry(controller string, did string) uint64 {
+func (k *MockTrustRegistryKeeper) CreateMockTrustRegistry(corporation string, did string) uint64 {
 	id := uint64(len(k.trustRegistries) + 1)
 	k.trustRegistries[id] = trtypes.TrustRegistry{
 		Id:            id,
 		Did:           did,
-		Controller:    controller,
+		Corporation:   corporation,
 		ActiveVersion: 1,
 		Language:      "en",
 	}

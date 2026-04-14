@@ -124,12 +124,10 @@ func TestIntegration_OperatorCreatesTrustRegistry(t *testing.T) {
 
 	// ---- Step 2: Operator creates trust registry via TR module ----
 	_, err = f.trMsgServer.CreateTrustRegistry(f.ctx, &trtypes.MsgCreateTrustRegistry{
-		Authority:    groupAccount,
-		Operator:     operator,
-		Did:          "did:example:integration-test-123",
-		Language:     "en",
-		DocUrl:       "https://example.com/governance-framework",
-		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+		Corporation: groupAccount,
+		Operator:    operator,
+		Did:         "did:example:integration-test-123",
+		Language:    "en",
 	})
 	require.NoError(t, err)
 
@@ -140,7 +138,7 @@ func TestIntegration_OperatorCreatesTrustRegistry(t *testing.T) {
 	tr, err := f.trKeeper.TrustRegistry.Get(f.ctx, trID)
 	require.NoError(t, err)
 	require.Equal(t, "did:example:integration-test-123", tr.Did)
-	require.Equal(t, groupAccount, tr.Controller) // authority is the controller
+	require.Equal(t, groupAccount, tr.Corporation) // corporation is the controller
 	require.Equal(t, "en", tr.Language)
 	require.Equal(t, int32(1), tr.ActiveVersion)
 }
@@ -155,12 +153,10 @@ func TestIntegration_UnauthorizedOperatorCannotCreateTrustRegistry(t *testing.T)
 
 	// No operator authorization granted — attempt should fail
 	_, err := f.trMsgServer.CreateTrustRegistry(f.ctx, &trtypes.MsgCreateTrustRegistry{
-		Authority:    groupAccount,
-		Operator:     unauthorizedOp,
-		Did:          "did:example:should-fail",
-		Language:     "en",
-		DocUrl:       "https://example.com/doc",
-		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+		Corporation: groupAccount,
+		Operator:    unauthorizedOp,
+		Did:         "did:example:should-fail",
+		Language:    "en",
 	})
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "authorization check failed")
@@ -186,12 +182,10 @@ func TestIntegration_OperatorWithWrongMsgTypeCannotCreateTrustRegistry(t *testin
 
 	// Operator tries to create trust registry — should fail
 	_, err = f.trMsgServer.CreateTrustRegistry(f.ctx, &trtypes.MsgCreateTrustRegistry{
-		Authority:    groupAccount,
-		Operator:     operator,
-		Did:          "did:example:wrong-type",
-		Language:     "en",
-		DocUrl:       "https://example.com/doc",
-		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+		Corporation: groupAccount,
+		Operator:    operator,
+		Did:         "did:example:wrong-type",
+		Language:    "en",
 	})
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "authorization check failed")
@@ -219,12 +213,10 @@ func TestIntegration_ExpiredOperatorCannotCreateTrustRegistry(t *testing.T) {
 
 	// Operator tries to create trust registry — should fail
 	_, err = f.trMsgServer.CreateTrustRegistry(f.ctx, &trtypes.MsgCreateTrustRegistry{
-		Authority:    groupAccount,
-		Operator:     operator,
-		Did:          "did:example:expired",
-		Language:     "en",
-		DocUrl:       "https://example.com/doc",
-		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+		Corporation: groupAccount,
+		Operator:    operator,
+		Did:         "did:example:expired",
+		Language:    "en",
 	})
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "authorization check failed")
@@ -271,13 +263,11 @@ func TestIntegration_FullBootstrapToTrustRegistryCreation(t *testing.T) {
 
 	// ---- Step 3: TR operator creates a trust registry ----
 	_, err = f.trMsgServer.CreateTrustRegistry(f.ctx, &trtypes.MsgCreateTrustRegistry{
-		Authority:    groupAccount,
-		Operator:     trOperator,
-		Did:          "did:example:full-bootstrap-test",
-		Aka:          "https://example.com/my-registry",
-		Language:     "en",
-		DocUrl:       "https://example.com/governance-framework-v1",
-		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+		Corporation: groupAccount,
+		Operator:    trOperator,
+		Did:         "did:example:full-bootstrap-test",
+		Aka:         "https://example.com/my-registry",
+		Language:    "en",
 	})
 	require.NoError(t, err)
 
@@ -286,7 +276,7 @@ func TestIntegration_FullBootstrapToTrustRegistryCreation(t *testing.T) {
 	require.NoError(t, err)
 	tr, err := f.trKeeper.TrustRegistry.Get(f.ctx, trID)
 	require.NoError(t, err)
-	require.Equal(t, groupAccount, tr.Controller)
+	require.Equal(t, groupAccount, tr.Corporation)
 	require.Equal(t, "https://example.com/my-registry", tr.Aka)
 
 	// ---- Step 4: TR operator CANNOT grant further operators ----
@@ -309,12 +299,10 @@ func TestIntegration_FullBootstrapToTrustRegistryCreation(t *testing.T) {
 
 	// ---- Step 6: Revoked operator cannot create trust registries ----
 	_, err = f.trMsgServer.CreateTrustRegistry(f.ctx, &trtypes.MsgCreateTrustRegistry{
-		Authority:    groupAccount,
-		Operator:     trOperator,
-		Did:          "did:example:should-fail-revoked",
-		Language:     "en",
-		DocUrl:       "https://example.com/doc",
-		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+		Corporation: groupAccount,
+		Operator:    trOperator,
+		Did:         "did:example:should-fail-revoked",
+		Language:    "en",
 	})
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "authorization check failed")
@@ -349,12 +337,10 @@ func TestIntegration_OperatorAddsGovernanceFrameworkDocument(t *testing.T) {
 
 	// Create trust registry
 	_, err = f.trMsgServer.CreateTrustRegistry(f.ctx, &trtypes.MsgCreateTrustRegistry{
-		Authority:    groupAccount,
-		Operator:     operator,
-		Did:          "did:example:gfd-test",
-		Language:     "en",
-		DocUrl:       "https://example.com/gf-v1",
-		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+		Corporation: groupAccount,
+		Operator:    operator,
+		Did:         "did:example:gfd-test",
+		Language:    "en",
 	})
 	require.NoError(t, err)
 
@@ -363,13 +349,13 @@ func TestIntegration_OperatorAddsGovernanceFrameworkDocument(t *testing.T) {
 
 	// Add a governance framework document for version 2 (next version after active=1)
 	_, err = f.trMsgServer.AddGovernanceFrameworkDocument(f.ctx, &trtypes.MsgAddGovernanceFrameworkDocument{
-		Authority:    groupAccount,
-		Operator:     operator,
-		Id:           trID,
-		DocLanguage:  "fr",
-		DocUrl:       "https://example.com/gf-v2-fr",
-		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
-		Version:      2,
+		Corporation: groupAccount,
+		Operator:    operator,
+		TrId:        trID,
+		Language:    "fr",
+		Url:         "https://example.com/gf-v2-fr",
+		DigestSri:   "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+		Version:     2,
 	})
 	require.NoError(t, err)
 }
@@ -393,12 +379,10 @@ func TestIntegration_UnauthorizedOperatorCannotAddGFDocument(t *testing.T) {
 
 	// Create trust registry (should succeed)
 	_, err = f.trMsgServer.CreateTrustRegistry(f.ctx, &trtypes.MsgCreateTrustRegistry{
-		Authority:    groupAccount,
-		Operator:     createOnlyOp,
-		Did:          "did:example:gfd-unauth-test",
-		Language:     "en",
-		DocUrl:       "https://example.com/gf-v1",
-		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+		Corporation: groupAccount,
+		Operator:    createOnlyOp,
+		Did:         "did:example:gfd-unauth-test",
+		Language:    "en",
 	})
 	require.NoError(t, err)
 
@@ -407,13 +391,13 @@ func TestIntegration_UnauthorizedOperatorCannotAddGFDocument(t *testing.T) {
 
 	// Try to add GF document — should fail (no MsgAddGovernanceFrameworkDocument permission)
 	_, err = f.trMsgServer.AddGovernanceFrameworkDocument(f.ctx, &trtypes.MsgAddGovernanceFrameworkDocument{
-		Authority:    groupAccount,
-		Operator:     createOnlyOp,
-		Id:           trID,
-		DocLanguage:  "fr",
-		DocUrl:       "https://example.com/gf-v2-fr",
-		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
-		Version:      2,
+		Corporation: groupAccount,
+		Operator:    createOnlyOp,
+		TrId:        trID,
+		Language:    "fr",
+		Url:         "https://example.com/gf-v2-fr",
+		DigestSri:   "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+		Version:     2,
 	})
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "authorization check failed")
@@ -451,12 +435,10 @@ func TestIntegration_OperatorIncreasesActiveGFVersion(t *testing.T) {
 
 	// Create trust registry (active_version=1, language="en")
 	_, err = f.trMsgServer.CreateTrustRegistry(f.ctx, &trtypes.MsgCreateTrustRegistry{
-		Authority:    groupAccount,
-		Operator:     operator,
-		Did:          "did:example:gfv-increase-test",
-		Language:     "en",
-		DocUrl:       "https://example.com/gf-v1",
-		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+		Corporation: groupAccount,
+		Operator:    operator,
+		Did:         "did:example:gfv-increase-test",
+		Language:    "en",
 	})
 	require.NoError(t, err)
 
@@ -465,21 +447,21 @@ func TestIntegration_OperatorIncreasesActiveGFVersion(t *testing.T) {
 
 	// Add v2 document for default language "en"
 	_, err = f.trMsgServer.AddGovernanceFrameworkDocument(f.ctx, &trtypes.MsgAddGovernanceFrameworkDocument{
-		Authority:    groupAccount,
-		Operator:     operator,
-		Id:           trID,
-		DocLanguage:  "en",
-		DocUrl:       "https://example.com/gf-v2-en",
-		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
-		Version:      2,
+		Corporation: groupAccount,
+		Operator:    operator,
+		TrId:        trID,
+		Language:    "en",
+		Url:         "https://example.com/gf-v2-en",
+		DigestSri:   "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+		Version:     2,
 	})
 	require.NoError(t, err)
 
 	// Increase active GF version to 2
 	_, err = f.trMsgServer.IncreaseActiveGovernanceFrameworkVersion(f.ctx, &trtypes.MsgIncreaseActiveGovernanceFrameworkVersion{
-		Authority: groupAccount,
-		Operator:  operator,
-		Id:        trID,
+		Corporation: groupAccount,
+		Operator:    operator,
+		TrId:        trID,
 	})
 	require.NoError(t, err)
 
@@ -511,12 +493,10 @@ func TestIntegration_UnauthorizedOperatorCannotIncreaseGFVersion(t *testing.T) {
 
 	// Create trust registry
 	_, err = f.trMsgServer.CreateTrustRegistry(f.ctx, &trtypes.MsgCreateTrustRegistry{
-		Authority:    groupAccount,
-		Operator:     operator,
-		Did:          "did:example:gfv-unauth-test",
-		Language:     "en",
-		DocUrl:       "https://example.com/gf-v1",
-		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+		Corporation: groupAccount,
+		Operator:    operator,
+		Did:         "did:example:gfv-unauth-test",
+		Language:    "en",
 	})
 	require.NoError(t, err)
 
@@ -525,21 +505,21 @@ func TestIntegration_UnauthorizedOperatorCannotIncreaseGFVersion(t *testing.T) {
 
 	// Add v2 doc for default language
 	_, err = f.trMsgServer.AddGovernanceFrameworkDocument(f.ctx, &trtypes.MsgAddGovernanceFrameworkDocument{
-		Authority:    groupAccount,
-		Operator:     operator,
-		Id:           trID,
-		DocLanguage:  "en",
-		DocUrl:       "https://example.com/gf-v2-en",
-		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
-		Version:      2,
+		Corporation: groupAccount,
+		Operator:    operator,
+		TrId:        trID,
+		Language:    "en",
+		Url:         "https://example.com/gf-v2-en",
+		DigestSri:   "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+		Version:     2,
 	})
 	require.NoError(t, err)
 
 	// Try to increase active GF version — should fail
 	_, err = f.trMsgServer.IncreaseActiveGovernanceFrameworkVersion(f.ctx, &trtypes.MsgIncreaseActiveGovernanceFrameworkVersion{
-		Authority: groupAccount,
-		Operator:  operator,
-		Id:        trID,
+		Corporation: groupAccount,
+		Operator:    operator,
+		TrId:        trID,
 	})
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "authorization check failed")
@@ -575,12 +555,10 @@ func TestIntegration_OperatorUpdatesTrustRegistry(t *testing.T) {
 
 	// Create trust registry
 	_, err = f.trMsgServer.CreateTrustRegistry(f.ctx, &trtypes.MsgCreateTrustRegistry{
-		Authority:    groupAccount,
-		Operator:     operator,
-		Did:          "did:example:update-test",
-		Language:     "en",
-		DocUrl:       "https://example.com/gf-v1",
-		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+		Corporation: groupAccount,
+		Operator:    operator,
+		Did:         "did:example:update-test",
+		Language:    "en",
 	})
 	require.NoError(t, err)
 
@@ -589,18 +567,16 @@ func TestIntegration_OperatorUpdatesTrustRegistry(t *testing.T) {
 
 	// Update trust registry
 	_, err = f.trMsgServer.UpdateTrustRegistry(f.ctx, &trtypes.MsgUpdateTrustRegistry{
-		Authority: groupAccount,
-		Operator:  operator,
-		Id:        trID,
-		Did:       "did:example:update-test-v2",
-		Aka:       "https://example.com/aka",
+		Corporation: groupAccount,
+		Operator:    operator,
+		TrId:        trID,
+		Aka:         "https://example.com/aka",
 	})
 	require.NoError(t, err)
 
 	// Verify update
 	tr, err := f.trKeeper.TrustRegistry.Get(f.ctx, trID)
 	require.NoError(t, err)
-	require.Equal(t, "did:example:update-test-v2", tr.Did)
 	require.Equal(t, "https://example.com/aka", tr.Aka)
 }
 
@@ -623,12 +599,10 @@ func TestIntegration_UnauthorizedOperatorCannotUpdateTrustRegistry(t *testing.T)
 
 	// Create trust registry (should succeed)
 	_, err = f.trMsgServer.CreateTrustRegistry(f.ctx, &trtypes.MsgCreateTrustRegistry{
-		Authority:    groupAccount,
-		Operator:     operator,
-		Did:          "did:example:update-unauth-test",
-		Language:     "en",
-		DocUrl:       "https://example.com/gf-v1",
-		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+		Corporation: groupAccount,
+		Operator:    operator,
+		Did:         "did:example:update-unauth-test",
+		Language:    "en",
 	})
 	require.NoError(t, err)
 
@@ -637,10 +611,10 @@ func TestIntegration_UnauthorizedOperatorCannotUpdateTrustRegistry(t *testing.T)
 
 	// Try to update trust registry — should fail
 	_, err = f.trMsgServer.UpdateTrustRegistry(f.ctx, &trtypes.MsgUpdateTrustRegistry{
-		Authority: groupAccount,
-		Operator:  operator,
-		Id:        trID,
-		Did:       "did:example:should-fail",
+		Corporation: groupAccount,
+		Operator:    operator,
+		TrId:        trID,
+		Aka:         "https://example.com/should-fail",
 	})
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "authorization check failed")
@@ -677,12 +651,10 @@ func TestIntegration_OperatorArchivesTrustRegistry(t *testing.T) {
 
 	// Create trust registry
 	_, err = f.trMsgServer.CreateTrustRegistry(f.ctx, &trtypes.MsgCreateTrustRegistry{
-		Authority:    groupAccount,
-		Operator:     operator,
-		Did:          "did:example:archive-test",
-		Language:     "en",
-		DocUrl:       "https://example.com/gf-v1",
-		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+		Corporation: groupAccount,
+		Operator:    operator,
+		Did:         "did:example:archive-test",
+		Language:    "en",
 	})
 	require.NoError(t, err)
 
@@ -691,10 +663,10 @@ func TestIntegration_OperatorArchivesTrustRegistry(t *testing.T) {
 
 	// Archive trust registry
 	_, err = f.trMsgServer.ArchiveTrustRegistry(f.ctx, &trtypes.MsgArchiveTrustRegistry{
-		Authority: groupAccount,
-		Operator:  operator,
-		Id:        trID,
-		Archive:   true,
+		Corporation: groupAccount,
+		Operator:    operator,
+		TrId:        trID,
+		Archive:     true,
 	})
 	require.NoError(t, err)
 
@@ -705,10 +677,10 @@ func TestIntegration_OperatorArchivesTrustRegistry(t *testing.T) {
 
 	// Unarchive trust registry
 	_, err = f.trMsgServer.ArchiveTrustRegistry(f.ctx, &trtypes.MsgArchiveTrustRegistry{
-		Authority: groupAccount,
-		Operator:  operator,
-		Id:        trID,
-		Archive:   false,
+		Corporation: groupAccount,
+		Operator:    operator,
+		TrId:        trID,
+		Archive:     false,
 	})
 	require.NoError(t, err)
 
@@ -737,12 +709,10 @@ func TestIntegration_UnauthorizedOperatorCannotArchiveTrustRegistry(t *testing.T
 
 	// Create trust registry (should succeed)
 	_, err = f.trMsgServer.CreateTrustRegistry(f.ctx, &trtypes.MsgCreateTrustRegistry{
-		Authority:    groupAccount,
-		Operator:     operator,
-		Did:          "did:example:archive-unauth-test",
-		Language:     "en",
-		DocUrl:       "https://example.com/gf-v1",
-		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+		Corporation: groupAccount,
+		Operator:    operator,
+		Did:         "did:example:archive-unauth-test",
+		Language:    "en",
 	})
 	require.NoError(t, err)
 
@@ -751,10 +721,10 @@ func TestIntegration_UnauthorizedOperatorCannotArchiveTrustRegistry(t *testing.T
 
 	// Try to archive trust registry — should fail
 	_, err = f.trMsgServer.ArchiveTrustRegistry(f.ctx, &trtypes.MsgArchiveTrustRegistry{
-		Authority: groupAccount,
-		Operator:  operator,
-		Id:        trID,
-		Archive:   true,
+		Corporation: groupAccount,
+		Operator:    operator,
+		TrId:        trID,
+		Archive:     true,
 	})
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "authorization check failed")

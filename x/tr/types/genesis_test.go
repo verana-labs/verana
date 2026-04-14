@@ -21,11 +21,10 @@ func TestGenesis(t *testing.T) {
 		{
 			Id:            1,
 			Did:           "did:example:123",
-			Controller:    "cosmos1abcdefg",
+			Corporation:   "cosmos1abcdefg",
 			Created:       now,
 			Modified:      now,
 			Archived:      nil,
-			Deposit:       10000000,
 			Aka:           "https://example.com",
 			ActiveVersion: 1,
 			Language:      "en",
@@ -33,11 +32,10 @@ func TestGenesis(t *testing.T) {
 		{
 			Id:            2,
 			Did:           "did:example:456",
-			Controller:    "cosmos1hijklmn",
+			Corporation:   "cosmos1hijklmn",
 			Created:       now,
 			Modified:      now,
 			Archived:      nil,
-			Deposit:       20000000,
 			Aka:           "https://example2.com",
 			ActiveVersion: 1,
 			Language:      "fr",
@@ -166,7 +164,7 @@ func TestInvalidGenesis(t *testing.T) {
 			{
 				Id:            1,
 				Did:           "did:example:123",
-				Controller:    "cosmos1abcdefg",
+				Corporation:   "cosmos1abcdefg",
 				Created:       now,
 				Modified:      now,
 				Language:      "en",
@@ -175,7 +173,7 @@ func TestInvalidGenesis(t *testing.T) {
 			{
 				Id:            1, // Duplicate ID
 				Did:           "did:example:456",
-				Controller:    "cosmos1hijklmn",
+				Corporation:   "cosmos1hijklmn",
 				Created:       now,
 				Modified:      now,
 				Language:      "fr",
@@ -195,7 +193,7 @@ func TestInvalidGenesis(t *testing.T) {
 			{
 				Id:            1,
 				Did:           "did:example:123",
-				Controller:    "cosmos1abcdefg",
+				Corporation:   "cosmos1abcdefg",
 				Created:       now,
 				Modified:      now,
 				Language:      "en",
@@ -204,7 +202,7 @@ func TestInvalidGenesis(t *testing.T) {
 			{
 				Id:            2,
 				Did:           "did:example:123", // Duplicate DID
-				Controller:    "cosmos1hijklmn",
+				Corporation:   "cosmos1hijklmn",
 				Created:       now,
 				Modified:      now,
 				Language:      "fr",
@@ -224,7 +222,7 @@ func TestInvalidGenesis(t *testing.T) {
 			{
 				Id:            5, // ID higher than counter
 				Did:           "did:example:123",
-				Controller:    "cosmos1abcdefg",
+				Corporation:   "cosmos1abcdefg",
 				Created:       now,
 				Modified:      now,
 				Language:      "en",

@@ -72,12 +72,12 @@ func NewMockCredentialSchemaKeeper() *MockCredentialSchemaKeeper {
 	}
 }
 
-func (k *MockCredentialSchemaKeeper) UpdateMockCredentialSchema(id uint64, trId uint64, issuerPermMode, verifierPermMode cstypes.CredentialSchemaPermManagementMode) {
+func (k *MockCredentialSchemaKeeper) UpdateMockCredentialSchema(id uint64, trId uint64, issuerMode cstypes.IssuerOnboardingMode, verifierMode cstypes.VerifierOnboardingMode) {
 	k.credentialSchemas[id] = cstypes.CredentialSchema{
-		Id:                         id,
-		TrId:                       trId,
-		IssuerPermManagementMode:   issuerPermMode,
-		VerifierPermManagementMode: verifierPermMode,
+		Id:                     id,
+		TrId:                   trId,
+		IssuerOnboardingMode:   issuerMode,
+		VerifierOnboardingMode: verifierMode,
 	}
 }
 
@@ -88,11 +88,11 @@ func (k *MockCredentialSchemaKeeper) GetCredentialSchemaById(ctx sdk.Context, id
 	return cstypes.CredentialSchema{}, cstypes.ErrCredentialSchemaNotFound
 }
 
-func (k *MockCredentialSchemaKeeper) CreateMockCredentialSchema(id uint64, issuerPermMode, verifierPermMode cstypes.CredentialSchemaPermManagementMode) {
+func (k *MockCredentialSchemaKeeper) CreateMockCredentialSchema(id uint64, issuerMode cstypes.IssuerOnboardingMode, verifierMode cstypes.VerifierOnboardingMode) {
 	k.credentialSchemas[id] = cstypes.CredentialSchema{
-		Id:                         id,
-		IssuerPermManagementMode:   issuerPermMode,
-		VerifierPermManagementMode: verifierPermMode,
+		Id:                     id,
+		IssuerOnboardingMode:   issuerMode,
+		VerifierOnboardingMode: verifierMode,
 	}
 }
 

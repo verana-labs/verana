@@ -50,17 +50,17 @@ func (gs GenesisState) Validate() error {
 			return fmt.Errorf("credential schema at index %d has empty JSON schema", i)
 		}
 
-		// Check perm management modes are valid
-		if cs.IssuerPermManagementMode <= CredentialSchemaPermManagementMode_MODE_UNSPECIFIED ||
-			cs.IssuerPermManagementMode > CredentialSchemaPermManagementMode_ECOSYSTEM {
-			return fmt.Errorf("credential schema at index %d has invalid issuer perm management mode: %d",
-				i, cs.IssuerPermManagementMode)
+		// Check onboarding modes are valid
+		if cs.IssuerOnboardingMode <= IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_UNSPECIFIED ||
+			cs.IssuerOnboardingMode > IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS {
+			return fmt.Errorf("credential schema at index %d has invalid issuer onboarding mode: %d",
+				i, cs.IssuerOnboardingMode)
 		}
 
-		if cs.VerifierPermManagementMode <= CredentialSchemaPermManagementMode_MODE_UNSPECIFIED ||
-			cs.VerifierPermManagementMode > CredentialSchemaPermManagementMode_ECOSYSTEM {
-			return fmt.Errorf("credential schema at index %d has invalid verifier perm management mode: %d",
-				i, cs.VerifierPermManagementMode)
+		if cs.VerifierOnboardingMode <= VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_UNSPECIFIED ||
+			cs.VerifierOnboardingMode > VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS {
+			return fmt.Errorf("credential schema at index %d has invalid verifier onboarding mode: %d",
+				i, cs.VerifierOnboardingMode)
 		}
 
 		// Validate pricing_asset_type
