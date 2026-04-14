@@ -168,7 +168,7 @@ func TestGrantFeeAllowance(t *testing.T) {
 			msgTypes: []string{
 				"/verana.tr.v1.MsgCreateTrustRegistry",
 				"/verana.cs.v1.MsgCreateCredentialSchema",
-				"/verana.perm.v1.MsgCreatePermission",
+				"/verana.perm.v1.MsgSelfCreatePermission",
 			},
 			expectErr: false,
 		},
@@ -556,7 +556,7 @@ func TestMsgServerGrantOperatorAuthorization(t *testing.T) {
 				MsgTypes: []string{
 					"/verana.tr.v1.MsgCreateTrustRegistry",
 					"/verana.cs.v1.MsgCreateCredentialSchema",
-					"/verana.perm.v1.MsgCreatePermission",
+					"/verana.perm.v1.MsgSelfCreatePermission",
 				},
 			},
 			expectErr: false,
@@ -748,7 +748,7 @@ func TestMsgServerGrantOperatorAuthorization_UpdateExisting(t *testing.T) {
 	authority := sdk.AccAddress([]byte("test_authority______")).String()
 	grantee := sdk.AccAddress([]byte("test_grantee________")).String()
 	msgTypes1 := []string{"/verana.tr.v1.MsgCreateTrustRegistry"}
-	msgTypes2 := []string{"/verana.cs.v1.MsgCreateCredentialSchema", "/verana.perm.v1.MsgCreatePermission"}
+	msgTypes2 := []string{"/verana.cs.v1.MsgCreateCredentialSchema", "/verana.perm.v1.MsgSelfCreatePermission"}
 
 	// Create initial
 	msg1 := &types.MsgGrantOperatorAuthorization{
@@ -1587,7 +1587,7 @@ func TestOperatorPrivilegeEscalation_SelfGrant(t *testing.T) {
 	allMsgTypes := []string{
 		"/verana.tr.v1.MsgCreateTrustRegistry",
 		"/verana.cs.v1.MsgCreateCredentialSchema",
-		"/verana.perm.v1.MsgCreatePermission",
+		"/verana.perm.v1.MsgSelfCreatePermission",
 		"/verana.de.v1.MsgGrantOperatorAuthorization",
 		"/verana.de.v1.MsgRevokeOperatorAuthorization",
 	}
