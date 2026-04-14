@@ -43,12 +43,12 @@ func (ms msgServer) CreateTrustRegistry(goCtx context.Context, msg *types.MsgCre
 	// framework document — callers must invoke MsgAddGovernanceFrameworkDocument
 	// separately if they need one.
 
-	tr, err := ms.createTrustRegistryEntries(ctx, msg, now)
+	tr, gfv, err := ms.createTrustRegistryEntries(ctx, msg, now)
 	if err != nil {
 		return nil, err
 	}
 
-	if err := ms.persistEntries(ctx, tr); err != nil {
+	if err := ms.persistEntries(ctx, tr, gfv); err != nil {
 		return nil, err
 	}
 

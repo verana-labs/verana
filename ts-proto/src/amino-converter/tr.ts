@@ -9,59 +9,55 @@ import {
 
 export const MsgCreateTrustRegistryAminoConverter: AminoConverter = {
   aminoType: "/verana.tr.v1.MsgCreateTrustRegistry",
-  toAmino: ({ authority, operator, did, aka, language, docUrl, docDigestSri }: MsgCreateTrustRegistry) => ({
-    authority,
+  toAmino: ({ corporation, operator, did, aka, language }: MsgCreateTrustRegistry) => ({
+    corporation,
     operator,
     did,
     aka,
     language,
-    doc_url: docUrl,
-    doc_digest_sri: docDigestSri,
   }),
   fromAmino: (value: any) =>
     MsgCreateTrustRegistry.fromPartial({
-      authority: value.authority,
+      corporation: value.corporation,
       operator: value.operator,
       did: value.did,
       aka: value.aka,
       language: value.language,
-      docUrl: value.doc_url,
-      docDigestSri: value.doc_digest_sri,
     }),
 };
 
 export const MsgUpdateTrustRegistryAminoConverter: AminoConverter = {
   aminoType: "/verana.tr.v1.MsgUpdateTrustRegistry",
-  toAmino: ({ authority, operator, id, did, aka }: MsgUpdateTrustRegistry) => ({
-    authority,
+  toAmino: ({ corporation, operator, trId, aka, language }: MsgUpdateTrustRegistry) => ({
+    corporation,
     operator,
-    id: id != null ? id.toString() : undefined,
-    did,
+    tr_id: trId != null ? trId.toString() : undefined,
     aka,
+    language,
   }),
   fromAmino: (value: any) =>
     MsgUpdateTrustRegistry.fromPartial({
-      authority: value.authority,
+      corporation: value.corporation,
       operator: value.operator,
-      id: value.id != null ? Number(value.id) : 0,
-      did: value.did,
+      trId: value.tr_id != null ? Number(value.tr_id) : 0,
       aka: value.aka,
+      language: value.language,
     }),
 };
 
 export const MsgArchiveTrustRegistryAminoConverter: AminoConverter = {
   aminoType: "/verana.tr.v1.MsgArchiveTrustRegistry",
-  toAmino: ({ authority, operator, id, archive }: MsgArchiveTrustRegistry) => ({
-    authority,
+  toAmino: ({ corporation, operator, trId, archive }: MsgArchiveTrustRegistry) => ({
+    corporation,
     operator,
-    id: id != null ? id.toString() : undefined,
+    tr_id: trId != null ? trId.toString() : undefined,
     archive,
   }),
   fromAmino: (value: any) =>
     MsgArchiveTrustRegistry.fromPartial({
-      authority: value.authority,
+      corporation: value.corporation,
       operator: value.operator,
-      id: value.id != null ? Number(value.id) : 0,
+      trId: value.tr_id != null ? Number(value.tr_id) : 0,
       archive: value.archive,
     }),
 };
@@ -69,45 +65,45 @@ export const MsgArchiveTrustRegistryAminoConverter: AminoConverter = {
 export const MsgAddGovernanceFrameworkDocumentAminoConverter: AminoConverter = {
   aminoType: "/verana.tr.v1.MsgAddGovernanceFrameworkDocument",
   toAmino: ({
-    authority,
+    corporation,
     operator,
-    id,
-    docLanguage,
-    docUrl,
-    docDigestSri,
+    trId,
+    language,
+    url,
+    digestSri,
     version,
   }: MsgAddGovernanceFrameworkDocument) => ({
-    authority,
+    corporation,
     operator,
-    id: id != null ? id.toString() : undefined,
-    doc_language: docLanguage,
-    doc_url: docUrl,
-    doc_digest_sri: docDigestSri,
+    tr_id: trId != null ? trId.toString() : undefined,
+    language,
+    url,
+    digest_sri: digestSri,
     version,
   }),
   fromAmino: (value: any) =>
     MsgAddGovernanceFrameworkDocument.fromPartial({
-      authority: value.authority,
+      corporation: value.corporation,
       operator: value.operator,
-      id: value.id != null ? Number(value.id) : 0,
-      docLanguage: value.doc_language,
-      docUrl: value.doc_url,
-      docDigestSri: value.doc_digest_sri,
+      trId: value.tr_id != null ? Number(value.tr_id) : 0,
+      language: value.language,
+      url: value.url,
+      digestSri: value.digest_sri,
       version: value.version,
     }),
 };
 
 export const MsgIncreaseActiveGovernanceFrameworkVersionAminoConverter: AminoConverter = {
   aminoType: "/verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion",
-  toAmino: ({ authority, operator, id }: MsgIncreaseActiveGovernanceFrameworkVersion) => ({
-    authority,
+  toAmino: ({ corporation, operator, trId }: MsgIncreaseActiveGovernanceFrameworkVersion) => ({
+    corporation,
     operator,
-    id: id != null ? id.toString() : undefined,
+    tr_id: trId != null ? trId.toString() : undefined,
   }),
   fromAmino: (value: any) =>
     MsgIncreaseActiveGovernanceFrameworkVersion.fromPartial({
-      authority: value.authority,
+      corporation: value.corporation,
       operator: value.operator,
-      id: value.id != null ? Number(value.id) : 0,
+      trId: value.tr_id != null ? Number(value.tr_id) : 0,
     }),
 };

@@ -22,7 +22,7 @@ import {
 } from "../helpers/client";
 import { typeUrls } from "../helpers/registry";
 import { MsgSlashPermissionTrustDeposit } from "../../../src/codec/verana/perm/v1/tx";
-import { CredentialSchemaPermManagementMode } from "../../../src/codec/verana/cs/v1/types";
+import { IssuerOnboardingMode, VerifierOnboardingMode } from "../../../src/codec/verana/cs/v1/types";
 import { getPermAuthzSetup, savePermSlashSetup } from "../helpers/journeyResults";
 import { createPermPrerequisites, createValidatedPermission } from "../helpers/permissionHelpers";
 
@@ -64,7 +64,7 @@ async function main() {
       client,
       setup.authorityAddress,
       setup.operatorAddress,
-      CredentialSchemaPermManagementMode.ECOSYSTEM,
+      IssuerOnboardingMode.ISSUER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS,
     );
     console.log(`  Schema ID: ${schemaId}, Root Permission ID: ${rootPermId}`);
     console.log();
@@ -100,7 +100,7 @@ async function main() {
     const msg = {
       typeUrl: typeUrls.MsgSlashPermissionTrustDeposit,
       value: MsgSlashPermissionTrustDeposit.fromPartial({
-        authority: setup.authorityAddress,
+        corporation: setup.authorityAddress,
         operator: setup.operatorAddress,
         id: issuerPermId,
         amount: slashAmount,

@@ -19,15 +19,15 @@ func isValidLanguageTag(lang string) bool {
 	return match
 }
 
-func (ms msgServer) createTrustRegistryEntries(ctx sdk.Context, msg *types.MsgCreateTrustRegistry, now time.Time) (types.TrustRegistry, error) {
-	// Generate next ID for trust registry
+func (ms msgServer) createTrustRegistryEntries(ctx sdk.Context, msg *types.MsgCreateTrustRegistry, now time.Time) (types.TrustRegistry, types.GovernanceFrameworkVersion, error) {
 	nextTrId, err := ms.Keeper.GetNextID(ctx, "tr")
 	if err != nil {
-		return types.TrustRegistry{}, fmt.Errorf("failed to generate trust registry ID: %w", err)
+		return types.TrustRegistry{}, types.GovernanceFrameworkVersion{}, fmt.Errorf("failed to generate trust registry ID: %w", err)
 	}
 
 	// Spec v4: MsgCreateTrustRegistry no longer bundles an initial governance
-	// framework version/document; those are added via MsgAddGovernanceFrameworkDocument.
+	// framework document, but an empty v1 is seeded internally so active_version=1
+	// and subsequent MsgAddGovernanceFrameworkDocument calls can attach documents.
 	tr := types.TrustRegistry{
 		Id:            nextTrId,
 		Did:           msg.Did,
@@ -36,21 +36,37 @@ func (ms msgServer) createTrustRegistryEntries(ctx sdk.Context, msg *types.MsgCr
 		Modified:      now,
 		Archived:      nil,
 		Aka:           msg.Aka,
-		ActiveVersion: 0,
+		ActiveVersion: 1,
 		Language:      msg.Language,
 	}
 
-	return tr, nil
+	nextGfvId, err := ms.Keeper.GetNextID(ctx, "gfv")
+	if err != nil {
+		return types.TrustRegistry{}, types.GovernanceFrameworkVersion{}, fmt.Errorf("failed to generate governance framework version ID: %w", err)
+	}
+
+	gfv := types.GovernanceFrameworkVersion{
+		Id:          nextGfvId,
+		TrId:        tr.Id,
+		Created:     now,
+		Version:     1,
+		ActiveSince: now,
+	}
+
+	return tr, gfv, nil
 }
 
-func (ms msgServer) persistEntries(ctx sdk.Context, tr types.TrustRegistry) error {
+func (ms msgServer) persistEntries(ctx sdk.Context, tr types.TrustRegistry, gfv types.GovernanceFrameworkVersion) error {
 	if err := ms.TrustRegistry.Set(ctx, tr.Id, tr); err != nil {
 		return fmt.Errorf("failed to persist TrustRegistry: %w", err)
 	}
 
-	// Store DID -> ID index
 	if err := ms.TrustRegistryDIDIndex.Set(ctx, tr.Did, tr.Id); err != nil {
 		return fmt.Errorf("failed to persist DID index: %w", err)
+	}
+
+	if err := ms.GFVersion.Set(ctx, gfv.Id, gfv); err != nil {
+		return fmt.Errorf("failed to persist GovernanceFrameworkVersion: %w", err)
 	}
 
 	return nil

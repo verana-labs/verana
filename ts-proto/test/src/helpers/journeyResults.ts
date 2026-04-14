@@ -43,6 +43,9 @@ export interface JourneyResult {
   // DE + TR authz setup
   authorityAddress?: string;
   operatorAddress?: string;
+
+  // Effective-from timestamp for root permissions
+  effectiveFrom?: string;
 }
 
 /**

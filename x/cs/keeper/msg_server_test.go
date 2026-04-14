@@ -509,7 +509,7 @@ func TestUpdateCredentialSchema(t *testing.T) {
 			name:          "unauthorized update - not controller",
 			msg:           keeper.CreateUpdateMsgWithValidityPeriods(sdk.AccAddress([]byte("wrong_authority_____")).String(), operator, schemaID.Id, 365, 365, 180, 180, 180),
 			expPass:       false,
-			errorContains: "corporation is not the controller",
+			errorContains: "corporation does not match the trust registry corporation",
 		},
 		{
 			name:          "invalid validity period - exceeds maximum",
@@ -631,7 +631,7 @@ func TestArchiveCredentialSchema(t *testing.T) {
 				Archive:     true,
 			},
 			expPass:       false,
-			errorContains: "corporation is not the controller",
+			errorContains: "corporation does not match the trust registry corporation",
 		},
 		{
 			name: "already archived",

@@ -72,7 +72,7 @@ async function main() {
   const msg = {
     typeUrl: typeUrls.MsgArchiveCredentialSchema,
     value: MsgArchiveCredentialSchema.fromPartial({
-      authority: setup.authorityAddress,
+      corporation: setup.authorityAddress,
       operator: account.address,
       id: activeCS.schemaId,
       archive: true,

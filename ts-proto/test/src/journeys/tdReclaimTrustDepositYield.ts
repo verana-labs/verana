@@ -59,7 +59,7 @@ async function main() {
     const msg = {
       typeUrl: typeUrls.MsgReclaimTrustDepositYield,
       value: MsgReclaimTrustDepositYield.fromPartial({
-        authority: setup.authorityAddress,
+        corporation: setup.authorityAddress,
         operator: setup.operatorAddress,
       }),
     };

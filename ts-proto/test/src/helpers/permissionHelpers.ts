@@ -7,13 +7,13 @@ import { SigningStargateClient } from "@cosmjs/stargate";
 import { typeUrls } from "./registry";
 import {
   MsgCreateRootPermission,
-  MsgCreatePermission,
+  MsgSelfCreatePermission,
   MsgStartPermissionVP,
   MsgSetPermissionVPToValidated,
 } from "../../../src/codec/verana/perm/v1/tx";
 import { MsgCreateTrustRegistry } from "../../../src/codec/verana/tr/v1/tx";
 import { MsgCreateCredentialSchema, OptionalUInt32 } from "../../../src/codec/verana/cs/v1/tx";
-import { CredentialSchemaPermManagementMode, PricingAssetType } from "../../../src/codec/verana/cs/v1/types";
+import { IssuerOnboardingMode, VerifierOnboardingMode, PricingAssetType } from "../../../src/codec/verana/cs/v1/types";
 import { PermissionType, OptionalUInt64 } from "../../../src/codec/verana/perm/v1/types";
 // Note: We use Date objects directly, not Timestamp objects
 import { calculateFeeWithSimulation, generateUniqueDID, signAndBroadcastWithRetry, waitForPermissionToBecomeEffective, createQueryClient } from "./client";
@@ -41,7 +41,7 @@ export async function createRootPermissionForTest(
   const msg = {
     typeUrl: typeUrls.MsgCreateRootPermission,
     value: MsgCreateRootPermission.fromPartial({
-      authority: address,
+      corporation: address,
       operator: "",
       schemaId: schemaId,
       did: did,
@@ -180,9 +180,9 @@ export async function createPermissionForTest(
   const validationFees = type === PermissionType.ISSUER ? 1000 : 0;
 
   const msg = {
-    typeUrl: typeUrls.MsgCreatePermission,
-    value: MsgCreatePermission.fromPartial({
-      authority: address,
+    typeUrl: typeUrls.MsgSelfCreatePermission,
+    value: MsgSelfCreatePermission.fromPartial({
+      corporation: address,
       operator: "",
       type: type,
       validatorPermId: 0,
@@ -305,13 +305,11 @@ export async function createSchemaForTest(
   const createTrMsg = {
     typeUrl: typeUrls.MsgCreateTrustRegistry,
     value: MsgCreateTrustRegistry.fromPartial({
-      authority: address,
+      corporation: address,
       operator: "",
       did: did,
       aka: "http://example-trust-registry.com",
       language: "en",
-      docUrl: "https://example.com/governance-framework.pdf",
-      docDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
     }),
   };
 
@@ -381,7 +379,7 @@ export async function createSchemaForTest(
   const createCsMsg = {
     typeUrl: typeUrls.MsgCreateCredentialSchema,
     value: MsgCreateCredentialSchema.fromPartial({
-      authority: address,
+      corporation: address,
       operator: "",
       trId: trId,
       jsonSchema: generateSimpleSchema(trId.toString()),
@@ -390,8 +388,8 @@ export async function createSchemaForTest(
       issuerValidationValidityPeriod: { value: 0 } as OptionalUInt32,
       verifierValidationValidityPeriod: { value: 0 } as OptionalUInt32,
       holderValidationValidityPeriod: { value: 0 } as OptionalUInt32,
-      issuerPermManagementMode: CredentialSchemaPermManagementMode.OPEN,
-      verifierPermManagementMode: CredentialSchemaPermManagementMode.OPEN,
+      issuerOnboardingMode: IssuerOnboardingMode.ISSUER_ONBOARDING_MODE_OPEN,
+      verifierOnboardingMode: VerifierOnboardingMode.VERIFIER_ONBOARDING_MODE_OPEN,
     }),
   };
 
@@ -528,20 +526,18 @@ async function waitForTxConfirmation(
  */
 export async function createTRWithOperator(
   client: SigningStargateClient,
-  authority: string,
+  corporation: string,
   operator: string,
 ): Promise<{ trId: number; did: string }> {
   const did = generateUniqueDID();
   const msg = {
     typeUrl: typeUrls.MsgCreateTrustRegistry,
     value: MsgCreateTrustRegistry.fromPartial({
-      authority,
+      corporation,
       operator,
       did,
       aka: "http://perm-test-trust-registry.com",
       language: "en",
-      docUrl: "https://example.com/perm-governance-framework.pdf",
-      docDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
     }),
   };
 
@@ -566,10 +562,10 @@ export async function createTRWithOperator(
  */
 export async function createCSWithOperator(
   client: SigningStargateClient,
-  authority: string,
+  corporation: string,
   operator: string,
   trId: number,
-  mode: CredentialSchemaPermManagementMode,
+  mode: IssuerOnboardingMode,
 ): Promise<number> {
   const jsonSchema = JSON.stringify({
     $id: "vpr:verana:VPR_CHAIN_ID/cs/v1/js/VPR_CREDENTIAL_SCHEMA_ID",
@@ -591,7 +587,7 @@ export async function createCSWithOperator(
   const msg = {
     typeUrl: typeUrls.MsgCreateCredentialSchema,
     value: MsgCreateCredentialSchema.fromPartial({
-      authority,
+      corporation,
       operator,
       trId,
       jsonSchema,
@@ -600,8 +596,8 @@ export async function createCSWithOperator(
       issuerValidationValidityPeriod: OptionalUInt32.fromPartial({ value: 0 }),
       verifierValidationValidityPeriod: OptionalUInt32.fromPartial({ value: 0 }),
       holderValidationValidityPeriod: OptionalUInt32.fromPartial({ value: 0 }),
-      issuerPermManagementMode: mode,
-      verifierPermManagementMode: CredentialSchemaPermManagementMode.OPEN,
+      issuerOnboardingMode: mode,
+      verifierOnboardingMode: VerifierOnboardingMode.VERIFIER_ONBOARDING_MODE_OPEN,
       pricingAssetType: PricingAssetType.TU,
       pricingAsset: "tu",
       digestAlgorithm: "sha256",
@@ -629,7 +625,7 @@ export async function createCSWithOperator(
  */
 export async function createRootPermWithOperator(
   client: SigningStargateClient,
-  authority: string,
+  corporation: string,
   operator: string,
   schemaId: number,
   did: string,
@@ -641,7 +637,7 @@ export async function createRootPermWithOperator(
   const msg = {
     typeUrl: typeUrls.MsgCreateRootPermission,
     value: MsgCreateRootPermission.fromPartial({
-      authority,
+      corporation,
       operator,
       schemaId,
       did,
@@ -674,20 +670,20 @@ export async function createRootPermWithOperator(
  */
 export async function createPermPrerequisites(
   client: SigningStargateClient,
-  authority: string,
+  corporation: string,
   operator: string,
-  mode: CredentialSchemaPermManagementMode = CredentialSchemaPermManagementMode.ECOSYSTEM,
+  mode: IssuerOnboardingMode = IssuerOnboardingMode.ISSUER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS,
 ): Promise<{ trId: number; schemaId: number; rootPermId: number; did: string; effectiveFrom: Date }> {
   console.log("  Creating TR...");
-  const { trId, did } = await createTRWithOperator(client, authority, operator);
+  const { trId, did } = await createTRWithOperator(client, corporation, operator);
   console.log(`  ✓ TR created (ID: ${trId})`);
 
   console.log("  Creating CS...");
-  const schemaId = await createCSWithOperator(client, authority, operator, trId, mode);
-  console.log(`  ✓ CS created (ID: ${schemaId}, mode: ${mode === CredentialSchemaPermManagementMode.OPEN ? "OPEN" : mode === CredentialSchemaPermManagementMode.ECOSYSTEM ? "ECOSYSTEM" : "GRANTOR_VALIDATION"})`);
+  const schemaId = await createCSWithOperator(client, corporation, operator, trId, mode);
+  console.log(`  ✓ CS created (ID: ${schemaId}, mode: ${mode === IssuerOnboardingMode.ISSUER_ONBOARDING_MODE_OPEN ? "OPEN" : mode === IssuerOnboardingMode.ISSUER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS ? "ECOSYSTEM" : "GRANTOR_VALIDATION"})`);
 
   console.log("  Creating root permission...");
-  const { rootPermId, effectiveFrom } = await createRootPermWithOperator(client, authority, operator, schemaId, did);
+  const { rootPermId, effectiveFrom } = await createRootPermWithOperator(client, corporation, operator, schemaId, did);
   console.log(`  ✓ Root permission created (ID: ${rootPermId})`);
 
   return { trId, schemaId, rootPermId, did, effectiveFrom };
@@ -699,7 +695,7 @@ export async function createPermPrerequisites(
  */
 export async function createValidatedPermission(
   client: SigningStargateClient,
-  authority: string,
+  corporation: string,
   operator: string,
   schemaId: number,
   rootPermId: number,
@@ -709,7 +705,7 @@ export async function createValidatedPermission(
   const startMsg = {
     typeUrl: typeUrls.MsgStartPermissionVP,
     value: MsgStartPermissionVP.fromPartial({
-      authority,
+      corporation,
       operator,
       type: PermissionType.ISSUER,
       validatorPermId: rootPermId,
@@ -741,14 +737,14 @@ export async function createValidatedPermission(
   const validateMsg = {
     typeUrl: typeUrls.MsgSetPermissionVPToValidated,
     value: MsgSetPermissionVPToValidated.fromPartial({
-      authority,
+      corporation,
       operator,
       id: vpPermId,
       effectiveUntil,
       validationFees: 5,
       issuanceFees: 5,
       verificationFees: 5,
-      vpSummaryDigestSri: "sha384-validationSummaryDigest123",
+      vpSummaryDigest: "sha384-validationSummaryDigest123",
       issuanceFeeDiscount: 0,
       verificationFeeDiscount: 0,
     }),

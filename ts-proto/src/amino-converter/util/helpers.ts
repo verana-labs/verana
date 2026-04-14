@@ -20,7 +20,7 @@ export const strToU64 = (s?: string | null) =>
   s != null ? Long.fromString(s) : undefined;
 
 export const u32ToAmino = (n?: number | null) =>
-  n == null ? undefined : (((n >>> 0) === 0) ? 0 : (n >>> 0));
+  n == null ? undefined : (((n >>> 0) === 0) ? undefined : (n >>> 0));
 
 export const pickOptionalUInt32 = (v: any): OptionalUInt32 | undefined => {
   if (v === undefined || v === null) return undefined;

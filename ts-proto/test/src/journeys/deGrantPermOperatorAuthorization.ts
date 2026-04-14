@@ -116,7 +116,7 @@ async function main() {
     typeUrls.MsgArchiveCredentialSchema,
     // PERM messages
     typeUrls.MsgCreateRootPermission,
-    typeUrls.MsgCreatePermission,
+    typeUrls.MsgSelfCreatePermission,
     typeUrls.MsgAdjustPermission,
     typeUrls.MsgRevokePermission,
     typeUrls.MsgStartPermissionVP,

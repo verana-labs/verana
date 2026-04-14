@@ -67,10 +67,9 @@ async function main() {
   const msg = {
     typeUrl: typeUrls.MsgUpdateTrustRegistry,
     value: MsgUpdateTrustRegistry.fromPartial({
-      authority: setup.authorityAddress,
+      corporation: setup.authorityAddress,
       operator: account.address,
-      id: activeTR.trustRegistryId,
-      did: newDid,
+      trId: activeTR.trustRegistryId,
       aka: newAka,
     }),
   };

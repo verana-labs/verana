@@ -115,9 +115,9 @@ async function main() {
     const msg = {
       typeUrl: typeUrls.MsgRepaySlashedTrustDeposit,
       value: MsgRepaySlashedTrustDeposit.fromPartial({
-        authority: setup.authorityAddress,
+        corporation: setup.authorityAddress,
         operator: setup.operatorAddress,
-        amount: outstandingSlash,
+        deposit: outstandingSlash,
       }),
     };
 

@@ -59,7 +59,7 @@ async function main() {
     const msg = {
       typeUrl: typeUrls.MsgRepayPermissionSlashedTrustDeposit,
       value: MsgRepayPermissionSlashedTrustDeposit.fromPartial({
-        authority: authzSetup.authorityAddress,
+        corporation: authzSetup.authorityAddress,
         operator: authzSetup.operatorAddress,
         id: slashSetup.slashedPermId,
       }),

@@ -469,7 +469,7 @@ func TestMsgSlashTrustDeposit(t *testing.T) {
 				Deposit:    math.NewInt(0),
 			},
 			expErr:    true,
-			expErrMsg: "amount must be greater than 0",
+			expErrMsg: "deposit must be greater than 0",
 		},
 		{
 			name: "Negative amount",
@@ -479,7 +479,7 @@ func TestMsgSlashTrustDeposit(t *testing.T) {
 				Deposit:    math.NewInt(-100),
 			},
 			expErr:    true,
-			expErrMsg: "amount must be greater than 0",
+			expErrMsg: "deposit must be greater than 0",
 		},
 		{
 			name: "Trust deposit not found",
@@ -671,7 +671,7 @@ func TestMsgRepaySlashedTrustDeposit(t *testing.T) {
 				Deposit:     200, // outstanding is 300
 			},
 			expErr:    true,
-			expErrMsg: "amount must exactly equal outstanding slashed amount",
+			expErrMsg: "deposit must exactly equal outstanding slashed amount",
 		},
 		{
 			name: "Successful repay",
@@ -870,7 +870,7 @@ func TestBurnEcosystemSlashedTrustDeposit(t *testing.T) {
 			account:   testAccString,
 			amount:    0,
 			expErr:    true,
-			expErrMsg: "amount must be greater than 0",
+			expErrMsg: "deposit must be greater than 0",
 		},
 		{
 			name:      "Trust deposit not found",

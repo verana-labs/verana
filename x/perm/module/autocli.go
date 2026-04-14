@@ -147,9 +147,9 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 						},
 					},
 					FlagOptions: map[string]*autocliv1.FlagOptions{
-						"authority": {
-							Name:  "authority",
-							Usage: "Group account (authority) on whose behalf this message is executed",
+						"corporation": {
+							Name:  "corporation",
+							Usage: "Group account (corporation) on whose behalf this message is executed",
 						},
 						"validation_fees": {
 							Name:         "validation-fees",
@@ -195,9 +195,9 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 						},
 					},
 					FlagOptions: map[string]*autocliv1.FlagOptions{
-						"authority": {
-							Name:  "authority",
-							Usage: "Group account (authority) on whose behalf this message is executed",
+						"corporation": {
+							Name:  "corporation",
+							Usage: "Group account (corporation) on whose behalf this message is executed",
 						},
 					},
 				},
@@ -211,7 +211,7 @@ Requires authority/operator authorization. The authority must be the validator p
 
 Parameters:
 - id: ID of the perm to validate
-- authority: Group account (authority) on whose behalf this message is executed
+- authority: Group account (corporation) on whose behalf this message is executed
 - effective-until: Optional timestamp until when this perm is effective (RFC3339 format)
 - validation-fees: Validation fees (mandatory, 0 for no fees)
 - issuance-fees: Issuance fees (mandatory, 0 for no fees)
@@ -225,9 +225,9 @@ Parameters:
 						},
 					},
 					FlagOptions: map[string]*autocliv1.FlagOptions{
-						"authority": {
-							Name:  "authority",
-							Usage: "Group account (authority) on whose behalf this message is executed",
+						"corporation": {
+							Name:  "corporation",
+							Usage: "Group account (corporation) on whose behalf this message is executed",
 						},
 						"effective_until": {
 							Name:         "effective-until",
@@ -249,8 +249,8 @@ Parameters:
 							Usage:        "Verification fees",
 							DefaultValue: "0",
 						},
-						"vp_summary_digest_sri": {
-							Name:         "vp-summary-digest-sri",
+						"vp_summary_digest": {
+							Name:         "vp-summary-digest",
 							Usage:        "Digest SRI of validation information",
 							DefaultValue: "",
 						},
@@ -278,9 +278,9 @@ Parameters:
 						},
 					},
 					FlagOptions: map[string]*autocliv1.FlagOptions{
-						"authority": {
-							Name:  "authority",
-							Usage: "Group account (authority) on whose behalf this message is executed",
+						"corporation": {
+							Name:  "corporation",
+							Usage: "Group account (corporation) on whose behalf this message is executed",
 						},
 					},
 				},
@@ -307,9 +307,9 @@ Parameters:
 						},
 					},
 					FlagOptions: map[string]*autocliv1.FlagOptions{
-						"authority": {
-							Name:  "authority",
-							Usage: "Group account (authority) on whose behalf this message is executed",
+						"corporation": {
+							Name:  "corporation",
+							Usage: "Group account (corporation) on whose behalf this message is executed",
 						},
 						"effective_from": {
 							Name:         "effective-from",
@@ -337,9 +337,9 @@ Parameters:
 						},
 					},
 					FlagOptions: map[string]*autocliv1.FlagOptions{
-						"authority": {
+						"corporation": {
 							DefaultValue: "",
-							Usage:        "The group policy address (authority) on whose behalf this message is executed",
+							Usage:        "The group policy address (corporation) on whose behalf this message is executed",
 						},
 					},
 				},
@@ -354,9 +354,9 @@ Parameters:
 						},
 					},
 					FlagOptions: map[string]*autocliv1.FlagOptions{
-						"authority": {
+						"corporation": {
 							DefaultValue: "",
-							Usage:        "The group policy address (authority) on whose behalf this message is executed",
+							Usage:        "The group policy address (corporation) on whose behalf this message is executed",
 						},
 					},
 				},
@@ -377,9 +377,9 @@ Parameters:
 						},
 					},
 					FlagOptions: map[string]*autocliv1.FlagOptions{
-						"authority": {
+						"corporation": {
 							DefaultValue: "",
-							Usage:        "The group policy address (authority) on whose behalf this message is executed",
+							Usage:        "The group policy address (corporation) on whose behalf this message is executed",
 						},
 						"issuer_perm_id": {
 							Name:         "issuer-perm-id",
@@ -412,15 +412,15 @@ Parameters:
 						},
 					},
 					FlagOptions: map[string]*autocliv1.FlagOptions{
-						"authority": {
+						"corporation": {
 							DefaultValue: "",
-							Usage:        "The group policy address (authority) on whose behalf this message is executed",
+							Usage:        "The group policy address (corporation) on whose behalf this message is executed",
 						},
 					},
 				},
 				{
 					RpcMethod: "RepayPermissionSlashedTrustDeposit",
-					Use:       "repay-perm-slashed-td [id] --authority [authority]",
+					Use:       "repay-perm-slashed-td [id] --corporation [corporation]",
 					Short:     "Repay a slashed perm's trust deposit",
 					Long: `Repay the slashed trust deposit of a perm. Can only be called by the authority that owns the permission.
 This will repay the full remaining slashed amount and credit it to the perm authority's trust deposit.
@@ -428,22 +428,22 @@ Note: This does not make the slashed perm reusable - a new perm must be requeste
 
 Parameters:
 - id: ID of the perm with slashed deposit to repay
-- authority: The group policy address (authority) that owns the permission`,
+- authority: The group policy address (corporation) that owns the permission`,
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{
 							ProtoField: "id",
 						},
 					},
 					FlagOptions: map[string]*autocliv1.FlagOptions{
-						"authority": {
+						"corporation": {
 							DefaultValue: "",
-							Usage:        "The group policy address (authority) on whose behalf this message is executed",
+							Usage:        "The group policy address (corporation) on whose behalf this message is executed",
 						},
 					},
 				},
 				{
-					RpcMethod: "CreatePermission",
-					Use:       "create-perm [type] [validator-perm-id] [did] --authority [authority]",
+					RpcMethod: "SelfCreatePermission",
+					Use:       "self-create-perm [type] [validator-perm-id] [did] --corporation [corporation]",
 					Short:     "Self-create a new permission for open schemas",
 					Long:      "Self-create a new ISSUER or VERIFIER permission for schemas with OPEN management mode.",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
@@ -458,9 +458,9 @@ Parameters:
 						},
 					},
 					FlagOptions: map[string]*autocliv1.FlagOptions{
-						"authority": {
+						"corporation": {
 							DefaultValue: "",
-							Usage:        "The group policy address (authority) on whose behalf this message is executed",
+							Usage:        "The group policy address (corporation) on whose behalf this message is executed",
 						},
 					},
 				},

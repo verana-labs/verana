@@ -33,7 +33,20 @@ func setupTestData(t *testing.T) (keeper.Keeper, types.QueryServer, context.Cont
 	trID, err := k.TrustRegistryDIDIndex.Get(ctx, "did:example:123")
 	require.NoError(t, err)
 
-	// Add documents in different languages for version 2
+	// Spec v4: MsgCreateTrustRegistry seeds an empty v1 GFV. Attach a document
+	// to v1 explicitly, then add version 2 documents in two languages.
+	v1DocMsg := &types.MsgAddGovernanceFrameworkDocument{
+		Corporation: authority,
+		Operator:    operator,
+		TrId:        trID,
+		Language:    "en",
+		Url:         "http://example.com/doc1-en",
+		DigestSri:   "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+		Version:     1,
+	}
+	_, err = ms.AddGovernanceFrameworkDocument(ctx, v1DocMsg)
+	require.NoError(t, err)
+
 	addDocMsg := &types.MsgAddGovernanceFrameworkDocument{
 		Corporation: authority,
 		Operator:    operator,
@@ -153,6 +166,21 @@ func TestListTrustRegistries(t *testing.T) {
 		Language:    "fr",
 	}
 	_, err := ms.CreateTrustRegistry(ctx, createMsg)
+	require.NoError(t, err)
+
+	// Attach a v1 governance framework document to the second TR so tests that
+	// walk (versions -> documents) see at least one document.
+	trID2, err := k.TrustRegistryDIDIndex.Get(ctx, "did:example:456")
+	require.NoError(t, err)
+	_, err = ms.AddGovernanceFrameworkDocument(ctx, &types.MsgAddGovernanceFrameworkDocument{
+		Corporation: "another_authority",
+		Operator:    "another_operator",
+		TrId:        trID2,
+		Language:    "fr",
+		Url:         "http://example.com/tr2-doc1-fr",
+		DigestSri:   "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+		Version:     1,
+	})
 	require.NoError(t, err)
 
 	testCases := []struct {

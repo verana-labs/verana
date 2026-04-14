@@ -16,7 +16,7 @@ func (k Keeper) BurnEcosystemSlashedTrustDeposit(ctx sdk.Context, account string
 	}
 
 	if amount == 0 {
-		return fmt.Errorf("amount must be greater than 0")
+		return fmt.Errorf("deposit must be greater than 0")
 	}
 
 	// Load existing TrustDeposit entry (must exist)

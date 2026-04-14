@@ -82,7 +82,7 @@ async function main() {
   const msg = {
     typeUrl: typeUrls.MsgUpdateCredentialSchema,
     value: MsgUpdateCredentialSchema.fromPartial({
-      authority: setup.authorityAddress,
+      corporation: setup.authorityAddress,
       operator: account.address,
       id: activeCS.schemaId,
       issuerGrantorValidationValidityPeriod: OptionalUInt32.fromPartial({ value: 730 }),

@@ -32,7 +32,7 @@ import {
   MsgCreateOrUpdatePermissionSession,
 } from "../../../src/codec/verana/perm/v1/tx";
 import { PermissionType, OptionalUInt64 } from "../../../src/codec/verana/perm/v1/types";
-import { CredentialSchemaPermManagementMode } from "../../../src/codec/verana/cs/v1/types";
+import { IssuerOnboardingMode, VerifierOnboardingMode } from "../../../src/codec/verana/cs/v1/types";
 import { getPermAuthzSetup } from "../helpers/journeyResults";
 import { createPermPrerequisites, extractIdFromEvents } from "../helpers/permissionHelpers";
 
@@ -74,7 +74,7 @@ async function main() {
       client,
       setup.authorityAddress,
       setup.operatorAddress,
-      CredentialSchemaPermManagementMode.ECOSYSTEM,
+      IssuerOnboardingMode.ISSUER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS,
     );
     console.log(`  Schema ID: ${schemaId}, Root Permission ID: ${rootPermId}`);
     console.log();
@@ -101,7 +101,7 @@ async function main() {
     const startMsg = {
       typeUrl: typeUrls.MsgStartPermissionVP,
       value: MsgStartPermissionVP.fromPartial({
-        authority: setup.authorityAddress,
+        corporation: setup.authorityAddress,
         operator: setup.operatorAddress,
         type: PermissionType.ISSUER,
         validatorPermId: rootPermId,
@@ -131,14 +131,14 @@ async function main() {
     const validateMsg = {
       typeUrl: typeUrls.MsgSetPermissionVPToValidated,
       value: MsgSetPermissionVPToValidated.fromPartial({
-        authority: setup.authorityAddress,
+        corporation: setup.authorityAddress,
         operator: setup.operatorAddress,
         id: issuerPermId,
         effectiveUntil,
         validationFees: 5,
         issuanceFees: 5,
         verificationFees: 5,
-        vpSummaryDigestSri: "sha384-cspsValidationDigest",
+        vpSummaryDigest: "sha384-cspsValidationDigest",
         issuanceFeeDiscount: 0,
         verificationFeeDiscount: 0,
       }),
@@ -176,7 +176,7 @@ async function main() {
     const cspsMsg = {
       typeUrl: typeUrls.MsgCreateOrUpdatePermissionSession,
       value: MsgCreateOrUpdatePermissionSession.fromPartial({
-        authority: setup.authorityAddress,
+        corporation: setup.authorityAddress,
         operator: vsOperatorAccount.address,
         id: sessionId,
         issuerPermId: issuerPermId,
@@ -207,7 +207,7 @@ async function main() {
     const updateMsg = {
       typeUrl: typeUrls.MsgCreateOrUpdatePermissionSession,
       value: MsgCreateOrUpdatePermissionSession.fromPartial({
-        authority: setup.authorityAddress,
+        corporation: setup.authorityAddress,
         operator: vsOperatorAccount.address,
         id: sessionId,
         issuerPermId: issuerPermId,
@@ -233,7 +233,6 @@ async function main() {
     process.exit(1);
   } finally {
     client.disconnect();
-    try { vsClient?.disconnect(); } catch (_) {}
   }
 
   console.log();

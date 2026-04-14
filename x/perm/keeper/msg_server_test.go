@@ -800,7 +800,7 @@ func TestRenewPermissionVP_ValidateBasic(t *testing.T) {
 				Operator:  sdk.AccAddress([]byte("test_operator")).String(),
 				Id:        1,
 			},
-			err: "invalid authority address",
+			err: "invalid corporation address",
 		},
 		{
 			name: "Invalid authority address",
@@ -809,7 +809,7 @@ func TestRenewPermissionVP_ValidateBasic(t *testing.T) {
 				Operator:  sdk.AccAddress([]byte("test_operator")).String(),
 				Id:        1,
 			},
-			err: "invalid authority address",
+			err: "invalid corporation address",
 		},
 		{
 			name: "Empty operator address",
@@ -1113,7 +1113,7 @@ func TestSetPermissionVPToValidated(t *testing.T) {
 
 		resp, err := ms.SetPermissionVPToValidated(ctx, msg)
 		require.Error(t, err)
-		require.Contains(t, err.Error(), "vp_summary_digest_sri must be null for HOLDER type")
+		require.Contains(t, err.Error(), "vp_summary_digest must be null for HOLDER type")
 		require.Nil(t, resp)
 	})
 
@@ -3405,7 +3405,7 @@ func TestCreateOrUpdatePermissionSession(t *testing.T) {
 				WalletAgentPermId: walletAgentPermID,
 			},
 			expectErr:  true,
-			errMessage: "session authority does not match",
+			errMessage: "session corporation does not match",
 		},
 		{
 			name: "Valid update of existing session",
@@ -4746,7 +4746,7 @@ func TestCreateRootPermission(t *testing.T) {
 				EffectiveUntil: &farFutureTime,
 			},
 			expectErr: true,
-			errMsg:    "authority is not the trust registry controller",
+			errMsg:    "corporation does not match the trust registry corporation",
 		},
 		// === Happy path [MOD-PERM-MSG-7-3] ===
 		{

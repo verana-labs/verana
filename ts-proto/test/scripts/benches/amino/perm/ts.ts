@@ -5,9 +5,9 @@ import { StargateClient } from "@cosmjs/stargate";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { MsgCreatePermission } from "../../../../../src/codec/verana/perm/v1/tx";
+import { MsgSelfCreatePermission } from "../../../../../src/codec/verana/perm/v1/tx";
 import { PermissionType } from "../../../../../src/codec/verana/perm/v1/types";
-import { MsgCreatePermissionAminoConverter } from "../../../../../src/helpers/aminoConverters";
+import { MsgSelfCreatePermissionAminoConverter } from "../../../../../src/helpers/aminoConverters";
 
 type AminoMsg = {
   type: string;
@@ -31,19 +31,20 @@ const MEMO = "Amino bench demo";
 function buildCreatePermissionMsgs(): { clientMsg: AminoMsg; serverMsg: AminoMsg } {
   const effectiveFrom = new Date("2025-01-01T00:00:00.123Z");
   const effectiveUntil = new Date("2025-12-31T00:00:00.123Z");
-  const protoMsg = MsgCreatePermission.fromPartial({
-    creator: "verana16mzeyu9l6kua2cdg9x0jk5g6e7h0kk8q6uadu4",
-    schemaId: 1,
+  const address = "verana16mzeyu9l6kua2cdg9x0jk5g6e7h0kk8q6uadu4";
+  const protoMsg = MsgSelfCreatePermission.fromPartial({
+    corporation: address,
+    operator: address,
     type: PermissionType.VERIFIER,
+    validatorPermId: 1,
     did: "did:verana:test:bench",
-    country: "US",
     effectiveFrom,
     effectiveUntil,
     verificationFees: 0,
     validationFees: 0,
   });
 
-  const serverValue = MsgCreatePermissionAminoConverter.toAmino(protoMsg);
+  const serverValue = MsgSelfCreatePermissionAminoConverter.toAmino(protoMsg);
   const clientValue = {
     ...serverValue,
     verification_fees: "0",
@@ -52,8 +53,8 @@ function buildCreatePermissionMsgs(): { clientMsg: AminoMsg; serverMsg: AminoMsg
 
   return {
     // Use legacy amino type string to match the Go bench output.
-    serverMsg: { type: "/perm/v1/create-perm", value: serverValue },
-    clientMsg: { type: "/perm/v1/create-perm", value: clientValue },
+    serverMsg: { type: "/perm/v1/self-create-perm", value: serverValue },
+    clientMsg: { type: "/perm/v1/self-create-perm", value: clientValue },
   };
 }
 

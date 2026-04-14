@@ -61,14 +61,14 @@ async function main() {
     const msg = {
       typeUrl: typeUrls.MsgSetPermissionVPToValidated,
       value: MsgSetPermissionVPToValidated.fromPartial({
-        authority: authzSetup.authorityAddress,
+        corporation: authzSetup.authorityAddress,
         operator: authzSetup.operatorAddress,
         id: vpSetup.vpPermId,
         effectiveUntil,
         validationFees: 5,
         issuanceFees: 5,
         verificationFees: 5,
-        vpSummaryDigestSri: "sha384-validationSummaryDigest123456",
+        vpSummaryDigest: "sha384-validationSummaryDigest123456",
         issuanceFeeDiscount: 0,
         verificationFeeDiscount: 0,
       }),
