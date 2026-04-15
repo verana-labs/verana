@@ -52,29 +52,20 @@ func (ms msgServer) ReclaimTrustDepositYield(goCtx context.Context, msg *types.M
 		return nil, fmt.Errorf("deposit has been slashed and not repaid")
 	}
 
+	// [MOD-TD-MSG-2-2-1] Precondition: requested amount must not exceed accrued claimable yield
+	if msg.Amount > td.Claimable {
+		return nil, fmt.Errorf("amount %d exceeds claimable %d", msg.Amount, td.Claimable)
+	}
+
 	// Get share value
 	params := ms.Keeper.GetParams(ctx)
 
-	// [MOD-TD-MSG-2-2-1] Calculate claimable yield
-	// claimable_yield = td.share * GlobalVariables.trust_deposit_share_value - td.deposit
-	// Use decimal math to avoid uint64 overflow on large share * shareValue products
-	depositValueDec := td.Share.Mul(params.TrustDepositShareValue)
-	depositAmountDec := math.LegacyNewDecFromInt(math.NewIntFromUint64(td.Deposit))
-	claimableYieldDec := depositValueDec.Sub(depositAmountDec)
-
-	if !claimableYieldDec.IsPositive() {
-		return nil, fmt.Errorf("no claimable yield available")
-	}
-
-	claimableYield := claimableYieldDec.TruncateInt().Uint64()
-	if claimableYield == 0 {
-		return nil, fmt.Errorf("no claimable yield available")
-	}
-
-	// [MOD-TD-MSG-2-3] Calculate shares to reduce
-	// td.share = td.share - claimable_yield / GlobalVariables.trust_deposit_share_value
-	sharesToReduce := ms.Keeper.AmountToShare(claimableYield, params.TrustDepositShareValue)
+	// [MOD-TD-MSG-2-3] Reduce shares proportionally to the withdrawn amount
+	sharesToReduce := ms.Keeper.AmountToShare(msg.Amount, params.TrustDepositShareValue)
 	td.Share = td.Share.Sub(sharesToReduce)
+
+	// Deduct the claimed amount from claimable
+	td.Claimable -= msg.Amount
 
 	// Validate corporation address
 	addr, err := sdk.AccAddressFromBech32(account)
@@ -88,11 +79,11 @@ func (ms msgServer) ReclaimTrustDepositYield(goCtx context.Context, msg *types.M
 		return nil, fmt.Errorf("failed to update trust deposit: %w", err)
 	}
 
-	// [MOD-TD-MSG-2-3] Transfer yield from TrustDeposit account to authority account
-	if claimableYield > uint64(mathstd.MaxInt64) {
-		return nil, fmt.Errorf("claimable yield exceeds maximum coin amount: %d", claimableYield)
+	// [MOD-TD-MSG-2-3] Transfer yield from TrustDeposit module account to corporation
+	if msg.Amount > uint64(mathstd.MaxInt64) {
+		return nil, fmt.Errorf("amount exceeds maximum coin value: %d", msg.Amount)
 	}
-	coins := sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, int64(claimableYield)))
+	coins := sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, int64(msg.Amount)))
 	if err := ms.Keeper.bankKeeper.SendCoinsFromModuleToAccount(
 		ctx,
 		types.ModuleName,
@@ -106,14 +97,14 @@ func (ms msgServer) ReclaimTrustDepositYield(goCtx context.Context, msg *types.M
 		sdk.NewEvent(
 			types.EventTypeReclaimTrustDepositYield,
 			sdk.NewAttribute(types.AttributeKeyAccount, account),
-			sdk.NewAttribute(types.AttributeKeyClaimedYield, strconv.FormatUint(claimableYield, 10)),
+			sdk.NewAttribute(types.AttributeKeyClaimedYield, strconv.FormatUint(msg.Amount, 10)),
 			sdk.NewAttribute(types.AttributeKeySharesReduced, sharesToReduce.String()),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
 		),
 	})
 
 	return &types.MsgReclaimTrustDepositYieldResponse{
-		ClaimedAmount: claimableYield,
+		ClaimedAmount: msg.Amount,
 	}, nil
 }
 
@@ -146,6 +137,11 @@ func (ms msgServer) SlashTrustDeposit(goCtx context.Context, msg *types.MsgSlash
 		return nil, fmt.Errorf("deposit must be greater than 0")
 	}
 
+	// [BUG-H2] Guard against uint64 overflow before calling Uint64()
+	if !msg.Deposit.IsUint64() {
+		return nil, fmt.Errorf("deposit amount exceeds uint64")
+	}
+
 	// Check if TrustDeposit entry exists for the corporation
 	td, err := ms.Keeper.TrustDeposit.Get(ctx, msg.Corporation)
 	if err != nil {
@@ -174,16 +170,12 @@ func (ms msgServer) SlashTrustDeposit(goCtx context.Context, msg *types.MsgSlash
 	td.LastSlashed = &now
 	td.SlashCount++
 
-	// Save the updated TrustDeposit entry BEFORE burning coins to ensure atomicity —
-	// if Set fails, no coins have been burned yet.
+	// Save the updated TrustDeposit entry.
+	// Coins remain locked in the module account as slashed deposit;
+	// they are burned later by BurnEcosystemSlashedTrustDeposit (MOD-TD-MSG-7)
+	// or returned to the depositor via RepaySlashedTrustDeposit (MOD-TD-MSG-6).
 	if err := ms.Keeper.TrustDeposit.Set(ctx, msg.Corporation, td); err != nil {
 		return nil, fmt.Errorf("failed to save trust deposit: %w", err)
-	}
-
-	// Burn the slashed amount from TrustDeposit account
-	burnCoins := sdk.NewCoins(sdk.NewCoin(types.BondDenom, msg.Deposit))
-	if err := ms.Keeper.bankKeeper.BurnCoins(ctx, types.ModuleName, burnCoins); err != nil {
-		return nil, fmt.Errorf("failed to burn coins: %w", err)
 	}
 
 	// Emit event
@@ -255,12 +247,19 @@ func (ms msgServer) RepaySlashedTrustDeposit(goCtx context.Context, msg *types.M
 	// td.last_repaid = now
 	td.LastRepaid = &now
 
+	// When fully repaid, reset slashing counters so yield reclaim is re-enabled.
+	if td.RepaidDeposit >= td.SlashedDeposit {
+		td.SlashedDeposit = 0
+		td.RepaidDeposit = 0
+	}
+
 	// Save updated trust deposit BEFORE bank transfer to ensure atomicity
 	if err := ms.Keeper.TrustDeposit.Set(ctx, account, td); err != nil {
 		return nil, fmt.Errorf("failed to update trust deposit: %w", err)
 	}
 
-	// [MOD-TD-MSG-6-2-2] / [MOD-TD-MSG-6-3] Transfer deposit from corporation to TrustDeposit account
+	// [MOD-TD-MSG-6-2-2] / [MOD-TD-MSG-6-3] Transfer deposit from corporation to TrustDeposit account.
+	// The corporation sends new coins to replenish the locked slashed amount.
 	if msg.Deposit > uint64(mathstd.MaxInt64) {
 		return nil, fmt.Errorf("repay amount exceeds maximum coin amount: %d", msg.Deposit)
 	}
@@ -272,6 +271,13 @@ func (ms msgServer) RepaySlashedTrustDeposit(goCtx context.Context, msg *types.M
 		transferCoins,
 	); err != nil {
 		return nil, fmt.Errorf("failed to transfer tokens: %w", err)
+	}
+
+	// Burn the previously-slashed coins (which were locked in the module account at slash time)
+	// now that new coins have been received from the corporation to replace them.
+	burnCoins := sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, int64(msg.Deposit)))
+	if err := ms.Keeper.bankKeeper.BurnCoins(ctx, types.ModuleName, burnCoins); err != nil {
+		return nil, fmt.Errorf("failed to burn slashed coins on repay: %w", err)
 	}
 
 	// Emit event

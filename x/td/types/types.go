@@ -16,6 +16,9 @@ func (msg *MsgReclaimTrustDepositYield) ValidateBasic() error {
 	if err != nil {
 		return errorsmod.Wrapf(sdkerrors.ErrInvalidAddress, "invalid operator address (%s)", err)
 	}
+	if msg.Amount == 0 {
+		return errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "amount must be > 0")
+	}
 	return nil
 }
 

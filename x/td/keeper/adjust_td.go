@@ -18,10 +18,11 @@ import (
 // - ctx: The SDK context
 // - account: The account address as a Bech32 string
 // - augend: The amount to adjust (positive for increase, negative for decrease)
+// - reason: A human-readable string describing why the adjustment is being made (emitted in events)
 //
 // Returns:
 // - error: If the operation fails
-func (k Keeper) AdjustTrustDeposit(ctx sdk.Context, account string, augend int64) error {
+func (k Keeper) AdjustTrustDeposit(ctx sdk.Context, account string, augend int64, reason string) error {
 	// Basic validation
 	if account == "" {
 		return fmt.Errorf("account cannot be empty")
@@ -82,6 +83,7 @@ func (k Keeper) AdjustTrustDeposit(ctx sdk.Context, account string, augend int64
 				sdk.NewAttribute(types.AttributeKeyAdjustmentType, "increase"),
 				sdk.NewAttribute(types.AttributeKeyNewAmount, strconv.FormatUint(td.Deposit, 10)),
 				sdk.NewAttribute(types.AttributeKeyNewShare, td.Share.String()),
+				sdk.NewAttribute(types.AttributeKeyReason, reason),
 				sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
 			),
 		})
@@ -191,6 +193,7 @@ func (k Keeper) AdjustTrustDeposit(ctx sdk.Context, account string, augend int64
 			sdk.NewAttribute(types.AttributeKeyNewAmount, strconv.FormatUint(td.Deposit, 10)),
 			sdk.NewAttribute(types.AttributeKeyNewShare, td.Share.String()),
 			sdk.NewAttribute(types.AttributeKeyNewClaimable, strconv.FormatUint(td.Claimable, 10)),
+			sdk.NewAttribute(types.AttributeKeyReason, reason),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
 		),
 	})

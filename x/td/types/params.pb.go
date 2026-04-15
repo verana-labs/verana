@@ -36,6 +36,8 @@ type Params struct {
 	TrustDepositMaxYieldRate cosmossdk_io_math.LegacyDec `protobuf:"bytes,6,opt,name=trust_deposit_max_yield_rate,json=trustDepositMaxYieldRate,proto3,customtype=cosmossdk.io/math.LegacyDec" json:"trust_deposit_max_yield_rate" yaml:"trust_deposit_max_yield_rate"`
 	// yield_intermediate_pool is the Bech32 string for the Yield Intermediate Pool module account
 	YieldIntermediatePool string `protobuf:"bytes,7,opt,name=yield_intermediate_pool,json=yieldIntermediatePool,proto3" json:"yield_intermediate_pool,omitempty" yaml:"yield_intermediate_pool"`
+	// trust_deposit_block_reward_share is the fraction of block rewards allocated to trust deposit yield (e.g. "0.2" for 20%)
+	TrustDepositBlockRewardShare cosmossdk_io_math.LegacyDec `protobuf:"bytes,8,opt,name=trust_deposit_block_reward_share,json=trustDepositBlockRewardShare,proto3,customtype=cosmossdk.io/math.LegacyDec" json:"trust_deposit_block_reward_share" yaml:"trust_deposit_block_reward_share"`
 }
 
 func (m *Params) Reset()         { *m = Params{} }
@@ -76,6 +78,13 @@ func (m *Params) GetYieldIntermediatePool() string {
 		return m.YieldIntermediatePool
 	}
 	return ""
+}
+
+func (m *Params) GetTrustDepositBlockRewardShare() cosmossdk_io_math.LegacyDec {
+	if m != nil {
+		return m.TrustDepositBlockRewardShare
+	}
+	return cosmossdk_io_math.LegacyDec{}
 }
 
 func init() {
@@ -160,6 +169,9 @@ func (this *Params) Equal(that interface{}) bool {
 	if this.YieldIntermediatePool != that1.YieldIntermediatePool {
 		return false
 	}
+	if !this.TrustDepositBlockRewardShare.Equal(that1.TrustDepositBlockRewardShare) {
+		return false
+	}
 	return true
 }
 func (m *Params) Marshal() (dAtA []byte, err error) {
@@ -182,6 +194,16 @@ func (m *Params) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	{
+		size := m.TrustDepositBlockRewardShare.Size()
+		i -= size
+		if _, err := m.TrustDepositBlockRewardShare.MarshalTo(dAtA[i:]); err != nil {
+			return 0, err
+		}
+		i = encodeVarintParams(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x42
 	if len(m.YieldIntermediatePool) > 0 {
 		i -= len(m.YieldIntermediatePool)
 		copy(dAtA[i:], m.YieldIntermediatePool)
@@ -285,6 +307,8 @@ func (m *Params) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovParams(uint64(l))
 	}
+	l = m.TrustDepositBlockRewardShare.Size()
+	n += 1 + l + sovParams(uint64(l))
 	return n
 }
 
@@ -558,6 +582,39 @@ func (m *Params) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			m.YieldIntermediatePool = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 8:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field TrustDepositBlockRewardShare", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowParams
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthParams
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthParams
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.TrustDepositBlockRewardShare.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex

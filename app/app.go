@@ -8,7 +8,7 @@ import (
 	demodulekeeper "github.com/verana-labs/verana/x/de/keeper"
 	dimodulekeeper "github.com/verana-labs/verana/x/di/keeper"
 	_ "github.com/verana-labs/verana/x/perm/module" // import for side-effects
-	trustdepositmodule "github.com/verana-labs/verana/x/td/module"
+	_ "github.com/verana-labs/verana/x/td/module" // import for side-effects
 	_ "github.com/verana-labs/verana/x/tr/module" // import for side-effects
 	xrmodulekeeper "github.com/verana-labs/verana/x/xr/keeper"
 
@@ -232,7 +232,6 @@ func getGovProposalHandlers() []govclient.ProposalHandler {
 
 	govProposalHandlers = append(govProposalHandlers,
 		paramsclient.ProposalHandler,
-		trustdepositmodule.SlashTrustDepositHandler,
 		// this line is used by starport scaffolding # stargate/app/govProposalHandler
 	)
 

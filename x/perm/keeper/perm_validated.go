@@ -173,6 +173,7 @@ func (ms msgServer) executeSetPermissionVPToValidated(
 			ctx,
 			validatorPerm.Corporation,
 			vpCurrentDepositI64,
+			"perm_validated_deposit",
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to adjust validator trust deposit: %w", err)

@@ -267,7 +267,7 @@ func TestAdjustTrustDeposit(t *testing.T) {
 				tc.setup()
 			}
 
-			err := k.AdjustTrustDeposit(sdkCtx, tc.account, tc.augend)
+			err := k.AdjustTrustDeposit(sdkCtx, tc.account, tc.augend, "test")
 
 			if tc.expErr {
 				require.Error(t, err)
@@ -1282,7 +1282,7 @@ func TestAdjustTrustDepositSlashedGuard(t *testing.T) {
 	err = k.TrustDeposit.Set(ctx, testAccString, td)
 	require.NoError(t, err)
 
-	err = k.AdjustTrustDeposit(sdkCtx, testAccString, 100)
+	err = k.AdjustTrustDeposit(sdkCtx, testAccString, 100, "test")
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "slashed and not fully repaid")
 }

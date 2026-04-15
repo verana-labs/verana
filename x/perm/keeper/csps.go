@@ -376,7 +376,7 @@ func (ms msgServer) executeCreateOrUpdatePermissionSession(ctx sdk.Context, msg 
 				}
 
 				// Increase payer's own TD (standard self-funded adjustment)
-				err = ms.trustDeposit.AdjustTrustDeposit(ctx, msg.Corporation, payerTDI64)
+				err = ms.trustDeposit.AdjustTrustDeposit(ctx, msg.Corporation, payerTDI64, "csps_payer_trust_deposit")
 				if err != nil {
 					return fmt.Errorf("failed to adjust payer trust deposit: %w", err)
 				}

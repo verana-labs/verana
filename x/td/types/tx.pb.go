@@ -134,6 +134,8 @@ type MsgReclaimTrustDepositYield struct {
 	Corporation string `protobuf:"bytes,1,opt,name=corporation,proto3" json:"corporation,omitempty"`
 	// operator is the account authorized by the corporation to run this Msg.
 	Operator string `protobuf:"bytes,2,opt,name=operator,proto3" json:"operator,omitempty"`
+	// amount is the quantity of claimable yield to withdraw (must be > 0 and <= td.claimable).
+	Amount uint64 `protobuf:"varint,4,opt,name=amount,proto3" json:"amount,omitempty"`
 }
 
 func (m *MsgReclaimTrustDepositYield) Reset()         { *m = MsgReclaimTrustDepositYield{} }
@@ -181,6 +183,13 @@ func (m *MsgReclaimTrustDepositYield) GetOperator() string {
 		return m.Operator
 	}
 	return ""
+}
+
+func (m *MsgReclaimTrustDepositYield) GetAmount() uint64 {
+	if m != nil {
+		return m.Amount
+	}
+	return 0
 }
 
 // MsgReclaimTrustDepositYieldResponse defines the response type
@@ -757,6 +766,11 @@ func (m *MsgReclaimTrustDepositYield) MarshalToSizedBuffer(dAtA []byte) (int, er
 	_ = i
 	var l int
 	_ = l
+	if m.Amount != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.Amount))
+		i--
+		dAtA[i] = 0x20
+	}
 	if len(m.Operator) > 0 {
 		i -= len(m.Operator)
 		copy(dAtA[i:], m.Operator)
@@ -985,6 +999,9 @@ func (m *MsgReclaimTrustDepositYield) Size() (n int) {
 	l = len(m.Operator)
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
+	}
+	if m.Amount != 0 {
+		n += 1 + sovTx(uint64(m.Amount))
 	}
 	return n
 }
@@ -1322,6 +1339,25 @@ func (m *MsgReclaimTrustDepositYield) Unmarshal(dAtA []byte) error {
 			}
 			m.Operator = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Amount", wireType)
+			}
+			m.Amount = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Amount |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
 		default:
 			iNdEx = preIndex
 			skippy, err := skipTx(dAtA[iNdEx:])

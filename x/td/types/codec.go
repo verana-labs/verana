@@ -11,9 +11,9 @@ import (
 
 func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 	legacy.RegisterAminoMsg(cdc, &MsgUpdateParams{}, "verana/x/td/MsgUpdateParams")
-	legacy.RegisterAminoMsg(cdc, &MsgReclaimTrustDepositYield{}, "/td/v1/reclaim-yield")
-	legacy.RegisterAminoMsg(cdc, &MsgSlashTrustDeposit{}, "/td/v1/slash-td")
-	legacy.RegisterAminoMsg(cdc, &MsgRepaySlashedTrustDeposit{}, "/td/v1/repay-slashed-td")
+	legacy.RegisterAminoMsg(cdc, &MsgReclaimTrustDepositYield{}, "verana/x/td/MsgReclaimTrustDepositYield")
+	legacy.RegisterAminoMsg(cdc, &MsgSlashTrustDeposit{}, "verana/x/td/MsgSlashTrustDeposit")
+	legacy.RegisterAminoMsg(cdc, &MsgRepaySlashedTrustDeposit{}, "verana/x/td/MsgRepaySlashedTrustDeposit")
 }
 
 func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {

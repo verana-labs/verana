@@ -32,4 +32,5 @@ const (
 	AttributeKeyAllowance             = "allowance"
 	AttributeKeyTrustDepositBalance   = "trust_deposit_balance"
 	AttributeKeyTransferAmountDec     = "transfer_amount_dec"
+	AttributeKeyReason                = "reason"
 )

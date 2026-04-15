@@ -23,10 +23,6 @@ const (
 	DefaultWalletUserAgentRewardRate   = "0.2"  // 20%
 	DefaultUserAgentRewardRate         = "0.2"  // 20%
 	DefaultTrustDepositMaxYieldRate    = "0.15" // 15% annual yield
-	// TODO (requires proto regen): draft 13 GlobalVariables define
-	// trust_deposit_block_reward_share (mandatory, default 0.20) which is
-	// missing from proto/verana/td/v1/params.proto. Add the field on the
-	// next proto regen pass.
 	DefaultTrustDepositBlockRewardShare = "0.2"
 )
 
@@ -44,15 +40,17 @@ func NewParams(
 	userAgentRewardRate math.LegacyDec,
 	trustDepositMaxYieldRate math.LegacyDec,
 	yieldIntermediatePool string,
+	trustDepositBlockRewardShare math.LegacyDec,
 ) Params {
 	return Params{
-		TrustDepositReclaimBurnRate: trustDepositReclaimBurnRate,
-		TrustDepositShareValue:      trustDepositShareValue,
-		TrustDepositRate:            trustDepositRate,
-		WalletUserAgentRewardRate:   walletUserAgentRewardRate,
-		UserAgentRewardRate:         userAgentRewardRate,
-		TrustDepositMaxYieldRate:    trustDepositMaxYieldRate,
-		YieldIntermediatePool:       yieldIntermediatePool,
+		TrustDepositReclaimBurnRate:  trustDepositReclaimBurnRate,
+		TrustDepositShareValue:       trustDepositShareValue,
+		TrustDepositRate:             trustDepositRate,
+		WalletUserAgentRewardRate:    walletUserAgentRewardRate,
+		UserAgentRewardRate:          userAgentRewardRate,
+		TrustDepositMaxYieldRate:     trustDepositMaxYieldRate,
+		YieldIntermediatePool:        yieldIntermediatePool,
+		TrustDepositBlockRewardShare: trustDepositBlockRewardShare,
 	}
 }
 
@@ -64,6 +62,7 @@ func DefaultParams() Params {
 	WalletUserAgentRewardRate, _ := math.LegacyNewDecFromStr(DefaultWalletUserAgentRewardRate)
 	UserAgentRewardRate, _ := math.LegacyNewDecFromStr(DefaultUserAgentRewardRate)
 	TrustDepositMaxYieldRate, _ := math.LegacyNewDecFromStr(DefaultTrustDepositMaxYieldRate)
+	TrustDepositBlockRewardShare, _ := math.LegacyNewDecFromStr(DefaultTrustDepositBlockRewardShare)
 
 	// Default yield intermediate pool is the module account address derived from the module account name.
 	defaultYieldIntermediatePool := authtypes.NewModuleAddress(YieldIntermediatePool).String()
@@ -76,6 +75,7 @@ func DefaultParams() Params {
 		UserAgentRewardRate,
 		TrustDepositMaxYieldRate,
 		defaultYieldIntermediatePool,
+		TrustDepositBlockRewardShare,
 	)
 }
 
@@ -117,6 +117,11 @@ func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 			&p.YieldIntermediatePool,
 			validateString,
 		),
+		paramtypes.NewParamSetPair(
+			[]byte("TrustDepositBlockRewardShare"),
+			&p.TrustDepositBlockRewardShare,
+			validateLegacyDec,
+		),
 	}
 }
 
@@ -144,6 +149,9 @@ func (p Params) Validate() error {
 		if _, err := sdk.AccAddressFromBech32(p.YieldIntermediatePool); err != nil {
 			return fmt.Errorf("invalid yield_intermediate_pool address: %w", err)
 		}
+	}
+	if err := validateLegacyDec(p.TrustDepositBlockRewardShare); err != nil {
+		return err
 	}
 	return nil
 }

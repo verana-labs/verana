@@ -44,4 +44,10 @@ message Params {
   ];
   // yield_intermediate_pool is the Bech32 string for the Yield Intermediate Pool module account
   string yield_intermediate_pool = 7 [(gogoproto.moretags) = "yaml:\"yield_intermediate_pool\""];
+  // trust_deposit_block_reward_share is the fraction of block rewards allocated to trust deposit yield (e.g. "0.2" for 20%)
+  string trust_deposit_block_reward_share = 8 [
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.moretags) = "yaml:\"trust_deposit_block_reward_share\"",
+    (gogoproto.nullable) = false
+  ];
 }

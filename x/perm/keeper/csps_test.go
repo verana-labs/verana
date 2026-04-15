@@ -230,7 +230,7 @@ func (m *TrackingTrustDepositKeeper) GetTrustDepositRate(ctx sdk.Context) math.L
 	return m.TrustDepositRate
 }
 
-func (m *TrackingTrustDepositKeeper) AdjustTrustDeposit(ctx sdk.Context, account string, augend int64) error {
+func (m *TrackingTrustDepositKeeper) AdjustTrustDeposit(ctx sdk.Context, account string, augend int64, _ string) error {
 	m.TrustDeposits[account] += augend
 	m.AdjustmentLog = append(m.AdjustmentLog, TrustDepositAdjustment{Account: account, Amount: augend})
 	return nil

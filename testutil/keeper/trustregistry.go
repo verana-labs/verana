@@ -62,7 +62,7 @@ func TrustregistryKeeper(t testing.TB) (keeper.Keeper, sdk.Context) {
 // Used by CS, DD, and PERM module test utilities (not by TR module itself).
 type MockTrustDepositKeeper struct{}
 
-func (m *MockTrustDepositKeeper) AdjustTrustDeposit(_ sdk.Context, _ string, _ int64) error {
+func (m *MockTrustDepositKeeper) AdjustTrustDeposit(_ sdk.Context, _ string, _ int64, _ string) error {
 	return nil
 }
 

@@ -173,7 +173,7 @@ func (ms msgServer) executeRenewPermissionVP(ctx sdk.Context, perm types.Permiss
 		if err != nil {
 			return err
 		}
-		if err := ms.trustDeposit.AdjustTrustDeposit(ctx, perm.Corporation, depositI64); err != nil {
+		if err := ms.trustDeposit.AdjustTrustDeposit(ctx, perm.Corporation, depositI64, "renew_perm_deposit"); err != nil {
 			return fmt.Errorf("failed to increase trust deposit: %w", err)
 		}
 	}
@@ -539,6 +539,7 @@ func (ms msgServer) executeCancelPermissionVPLastRequest(ctx sdk.Context, perm t
 			ctx,
 			perm.Corporation,
 			-currentDepositI64, // Negative value to reduce deposit and increase claimable
+			"perm_deactivate_release_deposit",
 		); err != nil {
 			return fmt.Errorf("failed to adjust trust deposit: %w", err)
 		}
@@ -1365,7 +1366,7 @@ func (ms msgServer) RepayPermissionSlashedTrustDeposit(goCtx context.Context, ms
 
 	// [MOD-PERM-MSG-13-3] Execution
 	// Use AdjustTrustDeposit to transfer msg.Amount to trust deposit of applicant_perm.authority
-	if err := ms.trustDeposit.AdjustTrustDeposit(ctx, applicantPerm.Corporation, repayAmountI64); err != nil {
+	if err := ms.trustDeposit.AdjustTrustDeposit(ctx, applicantPerm.Corporation, repayAmountI64, "perm_repay_slashed_deposit"); err != nil {
 		return nil, fmt.Errorf("failed to adjust trust deposit: %w", err)
 	}
 

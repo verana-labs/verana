@@ -101,7 +101,7 @@ func (ms msgServer) executeStartPermissionVP(ctx sdk.Context, msg *types.MsgStar
 		if err != nil {
 			return 0, err
 		}
-		if err := ms.trustDeposit.AdjustTrustDeposit(ctx, msg.Corporation, tdI64); err != nil {
+		if err := ms.trustDeposit.AdjustTrustDeposit(ctx, msg.Corporation, tdI64, "start_perm_vp_deposit"); err != nil {
 			return 0, fmt.Errorf("failed to increase trust deposit: %w", err)
 		}
 	}
