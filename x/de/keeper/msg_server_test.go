@@ -1557,18 +1557,12 @@ func TestGrantOperatorAuthorization_FeegrantFieldsStoredCorrectly(t *testing.T) 
 // Spec concern: Privilege escalation via operator self-grant
 // ---------------------------------------------------------------------------
 
-// TestOperatorPrivilegeEscalation_SelfGrant demonstrates that an operator
-// who only has MsgGrantOperatorAuthorization permission can escalate their
-// own privileges by granting themselves additional msg_types.
-//
-// This is a potential spec concern: AUTHZ-CHECK only verifies the operator
-// has permission for the current message type (MsgGrantOperatorAuthorization),
-// not that the granted msg_types are a subset of the operator's own permissions.
-//
-// WARNING: This test documents the current behavior. If the spec considers
-// this undesirable, a check should be added to verify that an operator cannot
-// grant msg_types beyond their own authorization scope.
-func TestOperatorPrivilegeEscalation_SelfGrant(t *testing.T) {
+// TestOperatorCannotSelfGrant verifies that an operator who holds only
+// MsgGrantOperatorAuthorization authority CANNOT escalate their own privileges
+// by setting themselves as grantee. Self-grants via the operator path are
+// rejected; legitimate self-onboarding must happen through a group proposal
+// (operator == "").
+func TestOperatorCannotSelfGrant(t *testing.T) {
 	k, ms, ctx := setupMsgServer(t)
 
 	authority := sdk.AccAddress([]byte("test_authority______")).String()
@@ -1583,7 +1577,7 @@ func TestOperatorPrivilegeEscalation_SelfGrant(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	// Operator grants THEMSELVES all VPR delegable msg types
+	// Attempt to grant the same operator (self) expanded msg_types — MUST fail.
 	allMsgTypes := []string{
 		"/verana.tr.v1.MsgCreateTrustRegistry",
 		"/verana.cs.v1.MsgCreateCredentialSchema",
@@ -1592,25 +1586,25 @@ func TestOperatorPrivilegeEscalation_SelfGrant(t *testing.T) {
 		"/verana.de.v1.MsgRevokeOperatorAuthorization",
 	}
 
-	// This SUCCEEDS — the operator overwrites their own authorization
 	resp, err := ms.GrantOperatorAuthorization(ctx, &types.MsgGrantOperatorAuthorization{
 		Authority: authority,
 		Operator:  operator,
-		Grantee:   operator, // grantee == operator (self-grant)
+		Grantee:   operator, // grantee == operator (self-grant, forbidden)
 		MsgTypes:  allMsgTypes,
 	})
-	require.NoError(t, err)
-	require.NotNil(t, resp)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "cannot grant authorization to itself")
+	require.Nil(t, resp)
 
-	// Verify the operator now has escalated privileges
+	// Existing authorization must be unchanged — privilege was NOT escalated.
 	oa, err := k.OperatorAuthorizations.Get(ctx, oaKey)
 	require.NoError(t, err)
-	require.Equal(t, allMsgTypes, oa.MsgTypes) // escalated from 1 to 5 msg types
+	require.Equal(t, []string{"/verana.de.v1.MsgGrantOperatorAuthorization"}, oa.MsgTypes)
 
-	// The operator can now execute msg types they originally didn't have
+	// Confirm operator still lacks the msg types they tried to self-grant.
 	err = k.CheckOperatorAuthorization(ctx, authority, operator,
 		"/verana.tr.v1.MsgCreateTrustRegistry", ctx.BlockTime())
-	require.NoError(t, err) // passes — privilege escalated
+	require.Error(t, err) // escalation blocked
 }
 
 // ---------------------------------------------------------------------------

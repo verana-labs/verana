@@ -28,6 +28,17 @@ func (ms msgServer) GrantOperatorAuthorization(goCtx context.Context, msg *types
 		return nil, err
 	}
 
+	// [MOD-DE-MSG-3] Self-grant privilege escalation guard.
+	// An operator invoking this method cannot grant itself (or expand its own
+	// delegation) new msg_types — that would bypass the corporation's intent.
+	// Self-grants are only permitted via a group proposal (operator == "").
+	// Without this guard, an operator holding only
+	// [MsgGrantOperatorAuthorization] authorization could call Grant with
+	// grantee = self and msg_types = [anything], escalating to full delegation.
+	if msg.Operator != "" && msg.Grantee == msg.Operator {
+		return nil, fmt.Errorf("operator cannot grant authorization to itself; use a group proposal")
+	}
+
 	// Expiration must be in the future if specified
 	if msg.Expiration != nil && !msg.Expiration.After(now) {
 		return nil, types.ErrExpirationInPast
