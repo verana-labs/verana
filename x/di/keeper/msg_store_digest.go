@@ -18,16 +18,17 @@ func (ms msgServer) StoreDigest(goCtx context.Context, msg *types.MsgStoreDigest
 	// and digest-not-empty validation.
 
 	// [MOD-DI-MSG-1-2-1] [AUTHZ-CHECK] Verify operator authorization
-	if ms.delegationKeeper != nil {
-		if err := ms.delegationKeeper.CheckOperatorAuthorization(
-			ctx,
-			msg.Authority,
-			msg.Operator,
-			"/verana.di.v1.MsgStoreDigest",
-			now,
-		); err != nil {
-			return nil, fmt.Errorf("authorization check failed: %w", err)
-		}
+	if ms.delegationKeeper == nil {
+		return nil, fmt.Errorf("delegation keeper is required for operator authorization")
+	}
+	if err := ms.delegationKeeper.CheckOperatorAuthorization(
+		ctx,
+		msg.Authority,
+		msg.Operator,
+		"/verana.di.v1.MsgStoreDigest",
+		now,
+	); err != nil {
+		return nil, fmt.Errorf("authorization check failed: %w", err)
 	}
 
 	// [MOD-DI-MSG-1-3] Execution — Create Digest record

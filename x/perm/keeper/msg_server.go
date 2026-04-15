@@ -30,16 +30,17 @@ func (ms msgServer) StartPermissionVP(goCtx context.Context, msg *types.MsgStart
 	now := ctx.BlockTime()
 
 	// [MOD-PERM-MSG-1-2-1] [AUTHZ-CHECK] Verify operator authorization
-	if ms.delegationKeeper != nil {
-		if err := ms.delegationKeeper.CheckOperatorAuthorization(
-			ctx,
-			msg.Corporation,
-			msg.Operator,
-			"/verana.perm.v1.MsgStartPermissionVP",
-			now,
-		); err != nil {
-			return nil, fmt.Errorf("authorization check failed: %w", err)
-		}
+	if ms.delegationKeeper == nil {
+		return nil, fmt.Errorf("delegation keeper is required for operator authorization")
+	}
+	if err := ms.delegationKeeper.CheckOperatorAuthorization(
+		ctx,
+		msg.Corporation,
+		msg.Operator,
+		"/verana.perm.v1.MsgStartPermissionVP",
+		now,
+	); err != nil {
+		return nil, fmt.Errorf("authorization check failed: %w", err)
 	}
 
 	// [MOD-PERM-MSG-1-2-2] Permission checks
@@ -89,16 +90,17 @@ func (ms msgServer) RenewPermissionVP(goCtx context.Context, msg *types.MsgRenew
 	now := ctx.BlockTime()
 
 	// [MOD-PERM-MSG-2-2-1] [AUTHZ-CHECK] Verify operator authorization
-	if ms.delegationKeeper != nil {
-		if err := ms.delegationKeeper.CheckOperatorAuthorization(
-			ctx,
-			msg.Corporation,
-			msg.Operator,
-			"/verana.perm.v1.MsgRenewPermissionVP",
-			now,
-		); err != nil {
-			return nil, fmt.Errorf("authorization check failed: %w", err)
-		}
+	if ms.delegationKeeper == nil {
+		return nil, fmt.Errorf("delegation keeper is required for operator authorization")
+	}
+	if err := ms.delegationKeeper.CheckOperatorAuthorization(
+		ctx,
+		msg.Corporation,
+		msg.Operator,
+		"/verana.perm.v1.MsgRenewPermissionVP",
+		now,
+	); err != nil {
+		return nil, fmt.Errorf("authorization check failed: %w", err)
 	}
 
 	// [MOD-PERM-MSG-2-2-2] Permission checks
@@ -203,16 +205,17 @@ func (ms msgServer) SetPermissionVPToValidated(goCtx context.Context, msg *types
 	now := ctx.BlockTime()
 
 	// [MOD-PERM-MSG-3-2-1] [AUTHZ-CHECK] Verify operator authorization
-	if ms.delegationKeeper != nil {
-		if err := ms.delegationKeeper.CheckOperatorAuthorization(
-			ctx,
-			msg.Corporation,
-			msg.Operator,
-			"/verana.perm.v1.MsgSetPermissionVPToValidated",
-			now,
-		); err != nil {
-			return nil, fmt.Errorf("authorization check failed: %w", err)
-		}
+	if ms.delegationKeeper == nil {
+		return nil, fmt.Errorf("delegation keeper is required for operator authorization")
+	}
+	if err := ms.delegationKeeper.CheckOperatorAuthorization(
+		ctx,
+		msg.Corporation,
+		msg.Operator,
+		"/verana.perm.v1.MsgSetPermissionVPToValidated",
+		now,
+	); err != nil {
+		return nil, fmt.Errorf("authorization check failed: %w", err)
 	}
 
 	// [MOD-PERM-MSG-3-2-1] Basic checks
@@ -406,16 +409,17 @@ func (ms msgServer) CancelPermissionVPLastRequest(goCtx context.Context, msg *ty
 	now := ctx.BlockTime()
 
 	// [MOD-PERM-MSG-6-2-1] [AUTHZ-CHECK] Verify operator authorization
-	if ms.delegationKeeper != nil {
-		if err := ms.delegationKeeper.CheckOperatorAuthorization(
-			ctx,
-			msg.Corporation,
-			msg.Operator,
-			"/verana.perm.v1.MsgCancelPermissionVPLastRequest",
-			now,
-		); err != nil {
-			return nil, fmt.Errorf("authorization check failed: %w", err)
-		}
+	if ms.delegationKeeper == nil {
+		return nil, fmt.Errorf("delegation keeper is required for operator authorization")
+	}
+	if err := ms.delegationKeeper.CheckOperatorAuthorization(
+		ctx,
+		msg.Corporation,
+		msg.Operator,
+		"/verana.perm.v1.MsgCancelPermissionVPLastRequest",
+		now,
+	); err != nil {
+		return nil, fmt.Errorf("authorization check failed: %w", err)
 	}
 
 	// [MOD-PERM-MSG-6-2-1] Load Permission entry applicant_perm from id
@@ -513,16 +517,17 @@ func (ms msgServer) CreateRootPermission(goCtx context.Context, msg *types.MsgCr
 	now := ctx.BlockTime()
 
 	// [MOD-PERM-MSG-7-2-1] [AUTHZ-CHECK] Verify operator authorization
-	if ms.delegationKeeper != nil {
-		if err := ms.delegationKeeper.CheckOperatorAuthorization(
-			ctx,
-			msg.Corporation,
-			msg.Operator,
-			"/verana.perm.v1.MsgCreateRootPermission",
-			now,
-		); err != nil {
-			return nil, fmt.Errorf("authorization check failed: %w", err)
-		}
+	if ms.delegationKeeper == nil {
+		return nil, fmt.Errorf("delegation keeper is required for operator authorization")
+	}
+	if err := ms.delegationKeeper.CheckOperatorAuthorization(
+		ctx,
+		msg.Corporation,
+		msg.Operator,
+		"/verana.perm.v1.MsgCreateRootPermission",
+		now,
+	); err != nil {
+		return nil, fmt.Errorf("authorization check failed: %w", err)
 	}
 
 	// [MOD-PERM-MSG-7-2-1] Create Root Permission basic checks
@@ -685,16 +690,17 @@ func (ms msgServer) AdjustPermission(goCtx context.Context, msg *types.MsgAdjust
 	now := ctx.BlockTime()
 
 	// [MOD-PERM-MSG-8-2-1] [AUTHZ-CHECK] Verify operator authorization
-	if ms.delegationKeeper != nil {
-		if err := ms.delegationKeeper.CheckOperatorAuthorization(
-			ctx,
-			msg.Corporation,
-			msg.Operator,
-			"/verana.perm.v1.MsgAdjustPermission",
-			now,
-		); err != nil {
-			return nil, fmt.Errorf("authorization check failed: %w", err)
-		}
+	if ms.delegationKeeper == nil {
+		return nil, fmt.Errorf("delegation keeper is required for operator authorization")
+	}
+	if err := ms.delegationKeeper.CheckOperatorAuthorization(
+		ctx,
+		msg.Corporation,
+		msg.Operator,
+		"/verana.perm.v1.MsgAdjustPermission",
+		now,
+	); err != nil {
+		return nil, fmt.Errorf("authorization check failed: %w", err)
 	}
 
 	// [MOD-PERM-MSG-8-2-1] Adjust Permission basic checks
@@ -887,16 +893,17 @@ func (ms msgServer) RevokePermission(goCtx context.Context, msg *types.MsgRevoke
 	now := ctx.BlockTime()
 
 	// [MOD-PERM-MSG-9-2-1] [AUTHZ-CHECK] Verify operator authorization
-	if ms.delegationKeeper != nil {
-		if err := ms.delegationKeeper.CheckOperatorAuthorization(
-			ctx,
-			msg.Corporation,
-			msg.Operator,
-			"/verana.perm.v1.MsgRevokePermission",
-			now,
-		); err != nil {
-			return nil, fmt.Errorf("authorization check failed: %w", err)
-		}
+	if ms.delegationKeeper == nil {
+		return nil, fmt.Errorf("delegation keeper is required for operator authorization")
+	}
+	if err := ms.delegationKeeper.CheckOperatorAuthorization(
+		ctx,
+		msg.Corporation,
+		msg.Operator,
+		"/verana.perm.v1.MsgRevokePermission",
+		now,
+	); err != nil {
+		return nil, fmt.Errorf("authorization check failed: %w", err)
 	}
 
 	// [MOD-PERM-MSG-9-2-1] Revoke Permission basic checks
@@ -1133,16 +1140,17 @@ func (ms msgServer) SlashPermissionTrustDeposit(goCtx context.Context, msg *type
 	now := ctx.BlockTime()
 
 	// [MOD-PERM-MSG-12-2-1] [AUTHZ-CHECK] Verify operator authorization
-	if ms.delegationKeeper != nil {
-		if err := ms.delegationKeeper.CheckOperatorAuthorization(
-			ctx,
-			msg.Corporation,
-			msg.Operator,
-			"/verana.perm.v1.MsgSlashPermissionTrustDeposit",
-			now,
-		); err != nil {
-			return nil, fmt.Errorf("authorization check failed: %w", err)
-		}
+	if ms.delegationKeeper == nil {
+		return nil, fmt.Errorf("delegation keeper is required for operator authorization")
+	}
+	if err := ms.delegationKeeper.CheckOperatorAuthorization(
+		ctx,
+		msg.Corporation,
+		msg.Operator,
+		"/verana.perm.v1.MsgSlashPermissionTrustDeposit",
+		now,
+	); err != nil {
+		return nil, fmt.Errorf("authorization check failed: %w", err)
 	}
 
 	// [MOD-PERM-MSG-12-2-1] Slash Permission Trust Deposit basic checks
@@ -1265,11 +1273,12 @@ func (ms msgServer) RepayPermissionSlashedTrustDeposit(goCtx context.Context, ms
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	now := ctx.BlockTime()
 
-	// [AUTHZ-CHECK]
-	if ms.delegationKeeper != nil {
-		if err := ms.delegationKeeper.CheckOperatorAuthorization(ctx, msg.Corporation, msg.Operator, "/verana.perm.v1.MsgRepayPermissionSlashedTrustDeposit", now); err != nil {
-			return nil, fmt.Errorf("authorization check failed: %w", err)
-		}
+	// [MOD-PERM-MSG-13-2-1] [AUTHZ-CHECK] Verify operator authorization
+	if ms.delegationKeeper == nil {
+		return nil, fmt.Errorf("delegation keeper is required for operator authorization")
+	}
+	if err := ms.delegationKeeper.CheckOperatorAuthorization(ctx, msg.Corporation, msg.Operator, "/verana.perm.v1.MsgRepayPermissionSlashedTrustDeposit", now); err != nil {
+		return nil, fmt.Errorf("authorization check failed: %w", err)
 	}
 
 	// [MOD-PERM-MSG-13-2-1] Load Permission entry applicant_perm from id
@@ -1338,11 +1347,12 @@ func (ms msgServer) SelfCreatePermission(goCtx context.Context, msg *types.MsgSe
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	now := ctx.BlockTime()
 
-	// [AUTHZ-CHECK]
-	if ms.delegationKeeper != nil {
-		if err := ms.delegationKeeper.CheckOperatorAuthorization(ctx, msg.Corporation, msg.Operator, "/verana.perm.v1.MsgSelfCreatePermission", now); err != nil {
-			return nil, fmt.Errorf("authorization check failed: %w", err)
-		}
+	// [MOD-PERM-MSG-14-2-1] [AUTHZ-CHECK] Verify operator authorization
+	if ms.delegationKeeper == nil {
+		return nil, fmt.Errorf("delegation keeper is required for operator authorization")
+	}
+	if err := ms.delegationKeeper.CheckOperatorAuthorization(ctx, msg.Corporation, msg.Operator, "/verana.perm.v1.MsgSelfCreatePermission", now); err != nil {
+		return nil, fmt.Errorf("authorization check failed: %w", err)
 	}
 
 	// [MOD-PERM-MSG-14-2-1] Load validator_perm from validator_perm_id

@@ -106,14 +106,15 @@ func (ms msgServer) validateCreateOrUpdatePermissionSessionPreconditions(ctx sdk
 	}
 
 	// [AUTHZ-CHECK-3] MUST pass for this (authority, operator, perm) tuple
-	if ms.delegationKeeper != nil {
-		if err := ms.delegationKeeper.CheckVSOperatorAuthorization(
-			ctx,
-			msg.Corporation,
-			msg.Operator,
-		); err != nil {
-			return fmt.Errorf("VS operator authorization check failed: %w", err)
-		}
+	if ms.delegationKeeper == nil {
+		return fmt.Errorf("delegation keeper is required for VS operator authorization")
+	}
+	if err := ms.delegationKeeper.CheckVSOperatorAuthorization(
+		ctx,
+		msg.Corporation,
+		msg.Operator,
+	); err != nil {
+		return fmt.Errorf("VS operator authorization check failed: %w", err)
 	}
 
 	// Check that perm.vs_operator_authz_enabled is true

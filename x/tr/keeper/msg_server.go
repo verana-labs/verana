@@ -26,16 +26,17 @@ func (ms msgServer) CreateTrustRegistry(goCtx context.Context, msg *types.MsgCre
 	now := ctx.BlockTime()
 
 	// [MOD-TR-MSG-1-2-1] [AUTHZ-CHECK] Verify operator authorization
-	if ms.delegationKeeper != nil {
-		if err := ms.delegationKeeper.CheckOperatorAuthorization(
-			ctx,
-			msg.Corporation,
-			msg.Operator,
-			"/verana.tr.v1.MsgCreateTrustRegistry",
-			now,
-		); err != nil {
-			return nil, fmt.Errorf("authorization check failed: %w", err)
-		}
+	if ms.delegationKeeper == nil {
+		return nil, fmt.Errorf("delegation keeper is required for operator authorization")
+	}
+	if err := ms.delegationKeeper.CheckOperatorAuthorization(
+		ctx,
+		msg.Corporation,
+		msg.Operator,
+		"/verana.tr.v1.MsgCreateTrustRegistry",
+		now,
+	); err != nil {
+		return nil, fmt.Errorf("authorization check failed: %w", err)
 	}
 
 	// [MOD-TR-MSG-1-3] Create New Trust Registry execution
@@ -72,16 +73,17 @@ func (ms msgServer) AddGovernanceFrameworkDocument(goCtx context.Context, msg *t
 	now := ctx.BlockTime()
 
 	// [MOD-TR-MSG-2-2-1] [AUTHZ-CHECK] Verify operator authorization
-	if ms.delegationKeeper != nil {
-		if err := ms.delegationKeeper.CheckOperatorAuthorization(
-			ctx,
-			msg.Corporation,
-			msg.Operator,
-			"/verana.tr.v1.MsgAddGovernanceFrameworkDocument",
-			now,
-		); err != nil {
-			return nil, fmt.Errorf("authorization check failed: %w", err)
-		}
+	if ms.delegationKeeper == nil {
+		return nil, fmt.Errorf("delegation keeper is required for operator authorization")
+	}
+	if err := ms.delegationKeeper.CheckOperatorAuthorization(
+		ctx,
+		msg.Corporation,
+		msg.Operator,
+		"/verana.tr.v1.MsgAddGovernanceFrameworkDocument",
+		now,
+	); err != nil {
+		return nil, fmt.Errorf("authorization check failed: %w", err)
 	}
 
 	if err := ms.validateAddGovernanceFrameworkDocumentParams(ctx, msg); err != nil {
@@ -113,16 +115,17 @@ func (ms msgServer) IncreaseActiveGovernanceFrameworkVersion(goCtx context.Conte
 	now := ctx.BlockTime()
 
 	// [MOD-TR-MSG-3-2-1] [AUTHZ-CHECK] Verify operator authorization
-	if ms.delegationKeeper != nil {
-		if err := ms.delegationKeeper.CheckOperatorAuthorization(
-			ctx,
-			msg.Corporation,
-			msg.Operator,
-			"/verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion",
-			now,
-		); err != nil {
-			return nil, fmt.Errorf("authorization check failed: %w", err)
-		}
+	if ms.delegationKeeper == nil {
+		return nil, fmt.Errorf("delegation keeper is required for operator authorization")
+	}
+	if err := ms.delegationKeeper.CheckOperatorAuthorization(
+		ctx,
+		msg.Corporation,
+		msg.Operator,
+		"/verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion",
+		now,
+	); err != nil {
+		return nil, fmt.Errorf("authorization check failed: %w", err)
 	}
 
 	// Validate parameters
@@ -152,16 +155,17 @@ func (ms msgServer) UpdateTrustRegistry(goCtx context.Context, msg *types.MsgUpd
 	now := ctx.BlockTime()
 
 	// [MOD-TR-MSG-4-2-1] [AUTHZ-CHECK] Verify operator authorization
-	if ms.delegationKeeper != nil {
-		if err := ms.delegationKeeper.CheckOperatorAuthorization(
-			ctx,
-			msg.Corporation,
-			msg.Operator,
-			"/verana.tr.v1.MsgUpdateTrustRegistry",
-			now,
-		); err != nil {
-			return nil, fmt.Errorf("authorization check failed: %w", err)
-		}
+	if ms.delegationKeeper == nil {
+		return nil, fmt.Errorf("delegation keeper is required for operator authorization")
+	}
+	if err := ms.delegationKeeper.CheckOperatorAuthorization(
+		ctx,
+		msg.Corporation,
+		msg.Operator,
+		"/verana.tr.v1.MsgUpdateTrustRegistry",
+		now,
+	); err != nil {
+		return nil, fmt.Errorf("authorization check failed: %w", err)
 	}
 
 	// Get trust registry
@@ -205,16 +209,17 @@ func (ms msgServer) ArchiveTrustRegistry(goCtx context.Context, msg *types.MsgAr
 	now := ctx.BlockTime()
 
 	// [MOD-TR-MSG-5-2-1] [AUTHZ-CHECK] Verify operator authorization
-	if ms.delegationKeeper != nil {
-		if err := ms.delegationKeeper.CheckOperatorAuthorization(
-			ctx,
-			msg.Corporation,
-			msg.Operator,
-			"/verana.tr.v1.MsgArchiveTrustRegistry",
-			now,
-		); err != nil {
-			return nil, fmt.Errorf("authorization check failed: %w", err)
-		}
+	if ms.delegationKeeper == nil {
+		return nil, fmt.Errorf("delegation keeper is required for operator authorization")
+	}
+	if err := ms.delegationKeeper.CheckOperatorAuthorization(
+		ctx,
+		msg.Corporation,
+		msg.Operator,
+		"/verana.tr.v1.MsgArchiveTrustRegistry",
+		now,
+	); err != nil {
+		return nil, fmt.Errorf("authorization check failed: %w", err)
 	}
 
 	// Get trust registry

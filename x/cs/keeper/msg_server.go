@@ -27,16 +27,17 @@ func (ms msgServer) CreateCredentialSchema(goCtx context.Context, msg *types.Msg
 	now := ctx.BlockTime()
 
 	// [MOD-CS-MSG-1-2-1] [AUTHZ-CHECK] Verify operator authorization
-	if ms.delegationKeeper != nil {
-		if err := ms.delegationKeeper.CheckOperatorAuthorization(
-			ctx,
-			msg.Corporation,
-			msg.Operator,
-			"/verana.cs.v1.MsgCreateCredentialSchema",
-			now,
-		); err != nil {
-			return nil, fmt.Errorf("authorization check failed: %w", err)
-		}
+	if ms.delegationKeeper == nil {
+		return nil, fmt.Errorf("delegation keeper is required for operator authorization")
+	}
+	if err := ms.delegationKeeper.CheckOperatorAuthorization(
+		ctx,
+		msg.Corporation,
+		msg.Operator,
+		"/verana.cs.v1.MsgCreateCredentialSchema",
+		now,
+	); err != nil {
+		return nil, fmt.Errorf("authorization check failed: %w", err)
 	}
 
 	// Generate next ID
@@ -76,16 +77,17 @@ func (ms msgServer) UpdateCredentialSchema(goCtx context.Context, msg *types.Msg
 	now := ctx.BlockTime()
 
 	// [MOD-CS-MSG-2-2-1] [AUTHZ-CHECK] Verify operator authorization
-	if ms.delegationKeeper != nil {
-		if err := ms.delegationKeeper.CheckOperatorAuthorization(
-			ctx,
-			msg.Corporation,
-			msg.Operator,
-			"/verana.cs.v1.MsgUpdateCredentialSchema",
-			now,
-		); err != nil {
-			return nil, fmt.Errorf("authorization check failed: %w", err)
-		}
+	if ms.delegationKeeper == nil {
+		return nil, fmt.Errorf("delegation keeper is required for operator authorization")
+	}
+	if err := ms.delegationKeeper.CheckOperatorAuthorization(
+		ctx,
+		msg.Corporation,
+		msg.Operator,
+		"/verana.cs.v1.MsgUpdateCredentialSchema",
+		now,
+	); err != nil {
+		return nil, fmt.Errorf("authorization check failed: %w", err)
 	}
 
 	// Get credential schema
@@ -178,16 +180,17 @@ func (ms msgServer) ArchiveCredentialSchema(goCtx context.Context, msg *types.Ms
 	now := ctx.BlockTime()
 
 	// [MOD-CS-MSG-3-2-1] [AUTHZ-CHECK] Verify operator authorization
-	if ms.delegationKeeper != nil {
-		if err := ms.delegationKeeper.CheckOperatorAuthorization(
-			ctx,
-			msg.Corporation,
-			msg.Operator,
-			"/verana.cs.v1.MsgArchiveCredentialSchema",
-			now,
-		); err != nil {
-			return nil, fmt.Errorf("authorization check failed: %w", err)
-		}
+	if ms.delegationKeeper == nil {
+		return nil, fmt.Errorf("delegation keeper is required for operator authorization")
+	}
+	if err := ms.delegationKeeper.CheckOperatorAuthorization(
+		ctx,
+		msg.Corporation,
+		msg.Operator,
+		"/verana.cs.v1.MsgArchiveCredentialSchema",
+		now,
+	); err != nil {
+		return nil, fmt.Errorf("authorization check failed: %w", err)
 	}
 
 	// Get credential schema

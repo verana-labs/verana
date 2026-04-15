@@ -35,7 +35,7 @@ type ModuleInputs struct {
 
 	AuthKeeper       types.AuthKeeper
 	BankKeeper       types.BankKeeper
-	DelegationKeeper types.DelegationKeeper `optional:"true"`
+	DelegationKeeper types.DelegationKeeper
 }
 
 type ModuleOutputs struct {

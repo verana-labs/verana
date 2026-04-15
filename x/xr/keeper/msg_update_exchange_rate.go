@@ -21,16 +21,17 @@ func (ms msgServer) UpdateExchangeRate(ctx context.Context, msg *types.MsgUpdate
 	now := sdkCtx.BlockTime()
 
 	// [AUTHZ-CHECK] Verify operator authorization via DE module
-	if ms.delegationKeeper != nil {
-		if err := ms.delegationKeeper.CheckOperatorAuthorization(
-			ctx,
-			msg.Authority,
-			msg.Operator,
-			"/verana.xr.v1.MsgUpdateExchangeRate",
-			now,
-		); err != nil {
-			return nil, fmt.Errorf("authorization check failed: %w", err)
-		}
+	if ms.delegationKeeper == nil {
+		return nil, fmt.Errorf("delegation keeper is required for operator authorization")
+	}
+	if err := ms.delegationKeeper.CheckOperatorAuthorization(
+		ctx,
+		msg.Authority,
+		msg.Operator,
+		"/verana.xr.v1.MsgUpdateExchangeRate",
+		now,
+	); err != nil {
+		return nil, fmt.Errorf("authorization check failed: %w", err)
 	}
 
 	// Load ExchangeRate by id

@@ -184,8 +184,8 @@ type ModuleInputs struct {
 
 	BankKeeper          types.BankKeeper          `optional:"true"`
 	AccountKeeper       types.AccountKeeper       `optional:"true"`
-	TrustRegistryKeeper types.TrustRegistryKeeper `optional:"true"`
-	DelegationKeeper    types.DelegationKeeper    `optional:"true"`
+	TrustRegistryKeeper types.TrustRegistryKeeper
+	DelegationKeeper    types.DelegationKeeper
 }
 
 type ModuleOutputs struct {

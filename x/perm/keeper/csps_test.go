@@ -21,6 +21,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 
+	keepertest "github.com/verana-labs/verana/testutil/keeper"
 	cstypes "github.com/verana-labs/verana/x/cs/types"
 	"github.com/verana-labs/verana/x/perm/keeper"
 	"github.com/verana-labs/verana/x/perm/types"
@@ -373,7 +374,7 @@ func setupTrackingMsgServer(t testing.TB, uaRate, wuaRate, tdRate string, trustU
 		trkKeeper,
 		tdKeeper,
 		bankKeeper,
-		nil, // delegationKeeper - not needed for CSPS tests
+		&keepertest.MockDelegationKeeper{}, // permissive mock for CSPS tests
 	)
 
 	// Set a specific block time for consistent testing
