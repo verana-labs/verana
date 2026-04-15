@@ -169,7 +169,11 @@ func (ms msgServer) RenewPermissionVP(goCtx context.Context, msg *types.MsgRenew
 func (ms msgServer) executeRenewPermissionVP(ctx sdk.Context, perm types.Permission, fees, deposit uint64) error {
 	// Increment trust deposit if deposit is greater than 0
 	if deposit > 0 {
-		if err := ms.trustDeposit.AdjustTrustDeposit(ctx, perm.Corporation, int64(deposit)); err != nil {
+		depositI64, err := uint64ToInt64(deposit, "renew_deposit")
+		if err != nil {
+			return err
+		}
+		if err := ms.trustDeposit.AdjustTrustDeposit(ctx, perm.Corporation, depositI64); err != nil {
 			return fmt.Errorf("failed to increase trust deposit: %w", err)
 		}
 	}
@@ -182,12 +186,16 @@ func (ms msgServer) executeRenewPermissionVP(ctx sdk.Context, perm types.Permiss
 			return fmt.Errorf("invalid grantee address: %w", err)
 		}
 
+		feesI64, err := uint64ToInt64(fees, "renew_fees")
+		if err != nil {
+			return err
+		}
 		// Transfer fees to module escrow account
 		err = ms.bankKeeper.SendCoinsFromAccountToModule(
 			ctx,
 			granteeAddr,
 			types.ModuleName, // Using module name as the escrow account
-			sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, int64(fees))),
+			sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, feesI64)),
 		)
 		if err != nil {
 			return fmt.Errorf("failed to transfer validation fees to escrow: %w", err)
@@ -487,12 +495,16 @@ func (ms msgServer) executeCancelPermissionVPLastRequest(ctx sdk.Context, perm t
 			return fmt.Errorf("invalid grantee address: %w", err)
 		}
 
+		currentFeesI64, err := uint64ToInt64(perm.VpCurrentFees, "vp_current_fees")
+		if err != nil {
+			return err
+		}
 		// Transfer fees from module escrow account to applicant account
 		err = ms.bankKeeper.SendCoinsFromModuleToAccount(
 			ctx,
 			types.ModuleName, // Module escrow account
 			granteeAddr,      // Applicant account
-			sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, int64(perm.VpCurrentFees))),
+			sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, currentFeesI64)),
 		)
 		if err != nil {
 			return fmt.Errorf("failed to refund fees: %w", err)
@@ -503,12 +515,16 @@ func (ms msgServer) executeCancelPermissionVPLastRequest(ctx sdk.Context, perm t
 
 	// Handle current deposit if any
 	if perm.VpCurrentDeposit > 0 {
+		currentDepositI64, err := uint64ToInt64(perm.VpCurrentDeposit, "vp_current_deposit")
+		if err != nil {
+			return err
+		}
 		// Use AdjustTrustDeposit to reduce trust deposit with negative value
 		// to move funds from deposit to claimable
 		if err := ms.trustDeposit.AdjustTrustDeposit(
 			ctx,
 			perm.Corporation,
-			-int64(perm.VpCurrentDeposit), // Negative value to reduce deposit and increase claimable
+			-currentDepositI64, // Negative value to reduce deposit and increase claimable
 		); err != nil {
 			return fmt.Errorf("failed to adjust trust deposit: %w", err)
 		}
@@ -1315,14 +1331,18 @@ func (ms msgServer) RepayPermissionSlashedTrustDeposit(goCtx context.Context, ms
 	if err != nil {
 		return nil, fmt.Errorf("invalid authority address: %w", err)
 	}
-	requiredAmount := sdk.NewInt64Coin(types.BondDenom, int64(applicantPerm.SlashedDeposit))
+	slashedDepositI64, err := uint64ToInt64(applicantPerm.SlashedDeposit, "slashed_deposit")
+	if err != nil {
+		return nil, err
+	}
+	requiredAmount := sdk.NewInt64Coin(types.BondDenom, slashedDepositI64)
 	if !ms.bankKeeper.HasBalance(ctx, authorityAddr, requiredAmount) {
 		return nil, fmt.Errorf("insufficient funds to repay slashed deposit: required %d", applicantPerm.SlashedDeposit)
 	}
 
 	// [MOD-PERM-MSG-13-3] Execution
 	// Use AdjustTrustDeposit to transfer applicant_perm.slashed_deposit to trust deposit of applicant_perm.authority
-	if err := ms.trustDeposit.AdjustTrustDeposit(ctx, applicantPerm.Corporation, int64(applicantPerm.SlashedDeposit)); err != nil {
+	if err := ms.trustDeposit.AdjustTrustDeposit(ctx, applicantPerm.Corporation, slashedDepositI64); err != nil {
 		return nil, fmt.Errorf("failed to adjust trust deposit: %w", err)
 	}
 

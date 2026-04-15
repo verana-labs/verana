@@ -41,16 +41,29 @@ func (ms msgServer) validateAndCalculateFees(ctx sdk.Context, validatorPerm type
 	trustUnitPrice := ms.trustRegistryKeeper.GetTrustUnitPrice(ctx)
 	trustDepositRate := ms.trustDeposit.GetTrustDepositRate(ctx)
 
-	validationFeesInDenom := validatorPerm.ValidationFees * trustUnitPrice
-	validationTrustDepositInDenom := ms.Keeper.validationTrustDepositInDenomAmount(validationFeesInDenom, trustDepositRate)
+	// Compute validator_perm.validation_fees * trust_unit_price via arbitrary-precision
+	// math.Int so large fee * price products cannot wrap uint64 silently.
+	feesProduct := math.NewIntFromUint64(validatorPerm.ValidationFees).Mul(math.NewIntFromUint64(trustUnitPrice))
+	if !feesProduct.IsUint64() {
+		return 0, 0, fmt.Errorf("validation fees * trust_unit_price overflows uint64: %s", feesProduct.String())
+	}
+	validationFeesInDenom := feesProduct.Uint64()
+
+	validationTrustDepositInDenom, err := ms.Keeper.validationTrustDepositInDenomAmount(validationFeesInDenom, trustDepositRate)
+	if err != nil {
+		return 0, 0, err
+	}
 
 	return validationFeesInDenom, validationTrustDepositInDenom, nil
 }
 
-func (k Keeper) validationTrustDepositInDenomAmount(validationFeesInDenom uint64, trustDepositRate math.LegacyDec) uint64 {
-	validationFeesInDenomDec := math.LegacyNewDec(int64(validationFeesInDenom))
-	validationTrustDepositInDenom := validationFeesInDenomDec.Mul(trustDepositRate)
-	return validationTrustDepositInDenom.TruncateInt().Uint64()
+func (k Keeper) validationTrustDepositInDenomAmount(validationFeesInDenom uint64, trustDepositRate math.LegacyDec) (uint64, error) {
+	validationFeesInDenomDec := math.LegacyNewDecFromInt(math.NewIntFromUint64(validationFeesInDenom))
+	tdInt := validationFeesInDenomDec.Mul(trustDepositRate).TruncateInt()
+	if !tdInt.IsUint64() {
+		return 0, fmt.Errorf("validation trust deposit overflows uint64: %s", tdInt.String())
+	}
+	return tdInt.Uint64(), nil
 }
 
 // [MOD-PERM-MSG-1-2-4] Overlap checks
@@ -84,7 +97,11 @@ func (ms msgServer) executeStartPermissionVP(ctx sdk.Context, msg *types.MsgStar
 
 	// [MOD-PERM-MSG-1-3] Use [MOD-TD-MSG-1] to increase trust deposit
 	if validationTrustDepositInDenom > 0 {
-		if err := ms.trustDeposit.AdjustTrustDeposit(ctx, msg.Corporation, int64(validationTrustDepositInDenom)); err != nil {
+		tdI64, err := uint64ToInt64(validationTrustDepositInDenom, "validation_trust_deposit")
+		if err != nil {
+			return 0, err
+		}
+		if err := ms.trustDeposit.AdjustTrustDeposit(ctx, msg.Corporation, tdI64); err != nil {
 			return 0, fmt.Errorf("failed to increase trust deposit: %w", err)
 		}
 	}
@@ -96,11 +113,15 @@ func (ms msgServer) executeStartPermissionVP(ctx sdk.Context, msg *types.MsgStar
 			return 0, fmt.Errorf("invalid authority address: %w", err)
 		}
 
+		feesI64, err := uint64ToInt64(validationFeesInDenom, "validation_fees")
+		if err != nil {
+			return 0, err
+		}
 		err = ms.bankKeeper.SendCoinsFromAccountToModule(
 			ctx,
 			senderAddr,
 			types.ModuleName,
-			sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, int64(validationFeesInDenom))),
+			sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, feesI64)),
 		)
 		if err != nil {
 			return 0, fmt.Errorf("failed to transfer validation fees to escrow: %w", err)

@@ -24,9 +24,20 @@ func (msg *MsgStartPermissionVP) ValidateBasic() error {
 		return fmt.Errorf("validator perm ID cannot be 0")
 	}
 
-	// [MOD-PERM-MSG-1-2-1] type MUST be a valid PermissionType
-	if msg.Type == 0 || msg.Type > 6 {
-		return fmt.Errorf("perm type must be between 1 and 6")
+	// [MOD-PERM-MSG-1-2-1] type MUST be a valid PermissionType:
+	// ISSUER_GRANTOR, VERIFIER_GRANTOR, ISSUER, VERIFIER, HOLDER.
+	// ECOSYSTEM (5) is explicitly excluded — root permissions are only
+	// created via MsgCreateRootPermission, never via StartPermissionVP.
+	pt := PermissionType(msg.Type)
+	switch pt {
+	case PermissionType_ISSUER,
+		PermissionType_VERIFIER,
+		PermissionType_ISSUER_GRANTOR,
+		PermissionType_VERIFIER_GRANTOR,
+		PermissionType_HOLDER:
+		// ok
+	default:
+		return fmt.Errorf("perm type must be one of ISSUER, VERIFIER, ISSUER_GRANTOR, VERIFIER_GRANTOR, HOLDER (got %s)", pt.String())
 	}
 
 	// [MOD-PERM-MSG-1-1] did is required and MUST conform to DID Syntax

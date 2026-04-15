@@ -395,7 +395,7 @@ func (k Keeper) FindBeneficiaries(goCtx context.Context, req *types.QueryFindBen
 
 			// if current_perm.revoked IS NULL AND current_perm.slashed IS NULL, Add current_perm to found_perm_set
 			// Note: SlashedDeposit > 0 indicates the permission has been slashed
-			if currentPerm.Revoked == nil && currentPerm.SlashedDeposit == 0 {
+			if currentPerm.Revoked == nil && currentPerm.Slashed == nil {
 				foundPermMap[currentPerm.Id] = *currentPerm
 			}
 		}
@@ -405,7 +405,7 @@ func (k Keeper) FindBeneficiaries(goCtx context.Context, req *types.QueryFindBen
 	if verifierPerm != nil {
 		// if issuer_perm is not null, add issuer_perm to found_perm_set
 		if issuerPerm != nil {
-			if issuerPerm.Revoked == nil && issuerPerm.SlashedDeposit == 0 {
+			if issuerPerm.Revoked == nil && issuerPerm.Slashed == nil {
 				foundPermMap[issuerPerm.Id] = *issuerPerm
 			}
 		}
@@ -423,7 +423,7 @@ func (k Keeper) FindBeneficiaries(goCtx context.Context, req *types.QueryFindBen
 			currentPerm = &perm
 
 			// if current_perm.revoked IS NULL AND current_perm.slashed IS NULL, Add current_perm to found_perm_set
-			if currentPerm.Revoked == nil && currentPerm.SlashedDeposit == 0 {
+			if currentPerm.Revoked == nil && currentPerm.Slashed == nil {
 				foundPermMap[currentPerm.Id] = *currentPerm
 			}
 		}
