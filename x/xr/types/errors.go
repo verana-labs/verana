@@ -20,4 +20,5 @@ var (
 	ErrExchangeRateNotActive  = errors.Register(ModuleName, 1109, "exchange rate is not active")
 	ErrExchangeRateExpired    = errors.Register(ModuleName, 1110, "exchange rate is expired")
 	ErrInvalidAmount          = errors.Register(ModuleName, 1111, "invalid amount")
+	ErrInvalidRequest         = errors.Register(ModuleName, 1112, "invalid request")
 )

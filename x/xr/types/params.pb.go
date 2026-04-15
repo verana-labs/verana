@@ -8,9 +8,11 @@ import (
 	_ "github.com/cosmos/cosmos-sdk/types/tx/amino"
 	_ "github.com/cosmos/gogoproto/gogoproto"
 	proto "github.com/cosmos/gogoproto/proto"
+	github_com_cosmos_gogoproto_types "github.com/cosmos/gogoproto/types"
 	io "io"
 	math "math"
 	math_bits "math/bits"
+	time "time"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -26,6 +28,8 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 // Params defines the parameters for the module.
 type Params struct {
+	// max_validity_duration is the maximum allowed validity duration for an exchange rate.
+	MaxValidityDuration time.Duration `protobuf:"bytes,1,opt,name=max_validity_duration,json=maxValidityDuration,proto3,stdduration" json:"max_validity_duration"`
 }
 
 func (m *Params) Reset()         { *m = Params{} }
@@ -60,6 +64,13 @@ func (m *Params) XXX_DiscardUnknown() {
 }
 
 var xxx_messageInfo_Params proto.InternalMessageInfo
+
+func (m *Params) GetMaxValidityDuration() time.Duration {
+	if m != nil {
+		return m.MaxValidityDuration
+	}
+	return 0
+}
 
 func init() {
 	proto.RegisterType((*Params)(nil), "verana.xr.v1.Params")
@@ -101,6 +112,9 @@ func (this *Params) Equal(that interface{}) bool {
 	} else if this == nil {
 		return false
 	}
+	if this.MaxValidityDuration != that1.MaxValidityDuration {
+		return false
+	}
 	return true
 }
 func (m *Params) Marshal() (dAtA []byte, err error) {
@@ -123,6 +137,16 @@ func (m *Params) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	{
+		n1, err1 := github_com_cosmos_gogoproto_types.StdDurationMarshalTo(m.MaxValidityDuration, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdDuration(m.MaxValidityDuration):])
+		if err1 != nil {
+			return 0, err1
+		}
+		i -= n1
+		i = encodeVarintParams(dAtA, i, uint64(n1))
+	}
+	i--
+	dAtA[i] = 0xa
 	return len(dAtA) - i, nil
 }
 
@@ -143,6 +167,8 @@ func (m *Params) Size() (n int) {
 	}
 	var l int
 	_ = l
+	l = github_com_cosmos_gogoproto_types.SizeOfStdDuration(m.MaxValidityDuration)
+	n += 1 + l + sovParams(uint64(l))
 	return n
 }
 
@@ -181,6 +207,39 @@ func (m *Params) Unmarshal(dAtA []byte) error {
 			return fmt.Errorf("proto: Params: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field MaxValidityDuration", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowParams
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthParams
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthParams
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := github_com_cosmos_gogoproto_types.StdDurationUnmarshal(&m.MaxValidityDuration, dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipParams(dAtA[iNdEx:])

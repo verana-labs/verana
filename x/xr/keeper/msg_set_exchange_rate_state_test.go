@@ -29,7 +29,7 @@ func createTestExchangeRate(t *testing.T, f *fixture, ms types.MsgServer, author
 	return resp.Id
 }
 
-func TestToggleExchangeRateState_HappyPath_Enable(t *testing.T) {
+func TestSetExchangeRateState_HappyPath_Enable(t *testing.T) {
 	f := initFixture(t)
 	ms := keeper.NewMsgServerImpl(f.keeper)
 
@@ -45,7 +45,7 @@ func TestToggleExchangeRateState_HappyPath_Enable(t *testing.T) {
 	require.False(t, xr.State)
 
 	// Toggle to enabled
-	_, err = ms.ToggleExchangeRateState(f.ctx, &types.MsgToggleExchangeRateState{
+	_, err = ms.SetExchangeRateState(f.ctx, &types.MsgSetExchangeRateState{
 		Authority: authorityStr,
 		Id:        id,
 		State:     true,
@@ -58,7 +58,7 @@ func TestToggleExchangeRateState_HappyPath_Enable(t *testing.T) {
 	require.True(t, xr.State)
 }
 
-func TestToggleExchangeRateState_HappyPath_Disable(t *testing.T) {
+func TestSetExchangeRateState_HappyPath_Disable(t *testing.T) {
 	f := initFixture(t)
 	ms := keeper.NewMsgServerImpl(f.keeper)
 
@@ -68,7 +68,7 @@ func TestToggleExchangeRateState_HappyPath_Disable(t *testing.T) {
 	// Create exchange rate and enable it first
 	id := createTestExchangeRate(t, f, ms, authorityStr)
 
-	_, err = ms.ToggleExchangeRateState(f.ctx, &types.MsgToggleExchangeRateState{
+	_, err = ms.SetExchangeRateState(f.ctx, &types.MsgSetExchangeRateState{
 		Authority: authorityStr,
 		Id:        id,
 		State:     true,
@@ -81,7 +81,7 @@ func TestToggleExchangeRateState_HappyPath_Disable(t *testing.T) {
 	require.True(t, xr.State)
 
 	// Now disable
-	_, err = ms.ToggleExchangeRateState(f.ctx, &types.MsgToggleExchangeRateState{
+	_, err = ms.SetExchangeRateState(f.ctx, &types.MsgSetExchangeRateState{
 		Authority: authorityStr,
 		Id:        id,
 		State:     false,
@@ -94,7 +94,7 @@ func TestToggleExchangeRateState_HappyPath_Disable(t *testing.T) {
 	require.False(t, xr.State)
 }
 
-func TestToggleExchangeRateState_InvalidAuthority(t *testing.T) {
+func TestSetExchangeRateState_InvalidAuthority(t *testing.T) {
 	f := initFixture(t)
 	ms := keeper.NewMsgServerImpl(f.keeper)
 
@@ -104,7 +104,7 @@ func TestToggleExchangeRateState_InvalidAuthority(t *testing.T) {
 	id := createTestExchangeRate(t, f, ms, authorityStr)
 
 	nonGovAddr := sdk.AccAddress([]byte("not_gov_authority___")).String()
-	_, err = ms.ToggleExchangeRateState(f.ctx, &types.MsgToggleExchangeRateState{
+	_, err = ms.SetExchangeRateState(f.ctx, &types.MsgSetExchangeRateState{
 		Authority: nonGovAddr,
 		Id:        id,
 		State:     true,
@@ -113,14 +113,14 @@ func TestToggleExchangeRateState_InvalidAuthority(t *testing.T) {
 	require.Contains(t, err.Error(), "expected gov account as only signer")
 }
 
-func TestToggleExchangeRateState_NotFound(t *testing.T) {
+func TestSetExchangeRateState_NotFound(t *testing.T) {
 	f := initFixture(t)
 	ms := keeper.NewMsgServerImpl(f.keeper)
 
 	authorityStr, err := f.addressCodec.BytesToString(f.keeper.GetAuthority())
 	require.NoError(t, err)
 
-	_, err = ms.ToggleExchangeRateState(f.ctx, &types.MsgToggleExchangeRateState{
+	_, err = ms.SetExchangeRateState(f.ctx, &types.MsgSetExchangeRateState{
 		Authority: authorityStr,
 		Id:        999,
 		State:     true,

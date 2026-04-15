@@ -11,7 +11,7 @@ import (
 	"github.com/verana-labs/verana/x/xr/types"
 )
 
-func (ms msgServer) ToggleExchangeRateState(ctx context.Context, msg *types.MsgToggleExchangeRateState) (*types.MsgToggleExchangeRateStateResponse, error) {
+func (ms msgServer) SetExchangeRateState(ctx context.Context, msg *types.MsgSetExchangeRateState) (*types.MsgSetExchangeRateStateResponse, error) {
 	// Validate basic fields
 	if err := msg.ValidateBasic(); err != nil {
 		return nil, err
@@ -50,12 +50,12 @@ func (ms msgServer) ToggleExchangeRateState(ctx context.Context, msg *types.MsgT
 	// Emit event
 	sdkCtx.EventManager().EmitEvent(
 		sdk.NewEvent(
-			types.EventTypeToggleExchangeRateState,
+			types.EventTypeSetExchangeRateState,
 			sdk.NewAttribute(types.AttributeKeyID, fmt.Sprintf("%d", msg.Id)),
 			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Authority),
 			sdk.NewAttribute(types.AttributeKeyState, fmt.Sprintf("%t", msg.State)),
 		),
 	)
 
-	return &types.MsgToggleExchangeRateStateResponse{}, nil
+	return &types.MsgSetExchangeRateStateResponse{}, nil
 }
