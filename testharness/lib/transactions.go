@@ -41,22 +41,23 @@ func SendBankTransaction(client cosmosclient.Client, ctx context.Context, fromAd
 }
 
 // CreateTrustRegistry creates a new trust registry.
-// NOTE: spec v4 MsgCreateTrustRegistry no longer bundles an initial governance framework document.
-// docURL and docHash parameters are retained for API-compatibility but ignored here; use AddGovernanceFrameworkDocument afterwards.
+// Spec draft 13: MsgCreateTrustRegistry seeds the registry, an active v1
+// governance framework version, AND the initial GF document from docURL +
+// docHash in the registry's default language.
 func CreateTrustRegistry(client cosmosclient.Client, ctx context.Context, creator cosmosaccount.Account, did, aka, docURL, docHash, language string) (string, error) {
-	_ = docURL
-	_ = docHash
 	addr, err := creator.Address(addressPrefix)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	msg := &types.MsgCreateTrustRegistry{
-		Corporation: addr,
-		Operator:    addr,
-		Did:         did,
-		Aka:         aka,
-		Language:    language,
+		Corporation:  addr,
+		Operator:     addr,
+		Did:          did,
+		Aka:          aka,
+		Language:     language,
+		DocUrl:       docURL,
+		DocDigestSri: docHash,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, creator, msg)

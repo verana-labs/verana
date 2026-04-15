@@ -199,11 +199,15 @@ func RunTrustRegistryAuthzOperationsJourney(ctx context.Context, client cosmoscl
 	// =========================================================================
 	fmt.Println("\n=== TEST 4: UpdateTrustRegistry ===")
 
+	// Spec draft 13: MsgUpdateTrustRegistry now mutates the DID (mandatory
+	// parameter). Use a fresh DID for the update so we can verify the change.
+	updatedDid := fmt.Sprintf("%s-updated", did)
+
 	// 4a: Try WITHOUT authorization (expect failure)
 	fmt.Println("\n--- Step 4a: Operator tries UpdateTrustRegistry without auth (expect failure) ---")
 	err = lib.UpdateTrustRegistryWithAuthority(
 		client, ctx, operatorAccount, policyAddr,
-		trID, "", "http://updated-aka.com",
+		trID, updatedDid, "http://updated-aka.com",
 	)
 	if err := expectAuthorizationError("Step 4a", err); err != nil {
 		return err
@@ -223,23 +227,23 @@ func RunTrustRegistryAuthzOperationsJourney(ctx context.Context, client cosmoscl
 	fmt.Println("✅ Step 4b: Granted UpdateTrustRegistry authorization")
 	waitForTx("grant UpdateTR auth")
 
-	// 4c: Try WITH authorization (expect success)
-	// Spec v4: MsgUpdateTrustRegistry no longer mutates the DID — only aka / language.
+	// 4c: Try WITH authorization (expect success).
+	// Spec draft 13: did is mandatory and IS mutated. aka is also updated.
 	fmt.Println("\n--- Step 4c: Operator updates trust registry with auth (expect success) ---")
 	err = lib.UpdateTrustRegistryWithAuthority(
 		client, ctx, operatorAccount, policyAddr,
-		trID, "", "http://updated-aka.com",
+		trID, updatedDid, "http://updated-aka.com",
 	)
 	if err != nil {
 		return fmt.Errorf("step 4c failed: %w", err)
 	}
-	fmt.Printf("✅ Step 4c: Updated trust registry aka to: http://updated-aka.com\n")
+	fmt.Printf("✅ Step 4c: Updated trust registry did=%s aka=%s\n", updatedDid, "http://updated-aka.com")
 	waitForTx("UpdateTR success")
 
-	// Verify update: DID must remain the original value (spec v4: immutable).
-	verified = lib.VerifyTrustRegistry(client, ctx, trID, did)
+	// Verify update: DID is now the updated value.
+	verified = lib.VerifyTrustRegistry(client, ctx, trID, updatedDid)
 	if !verified {
-		return fmt.Errorf("step 4c verification failed: TR should still exist with original DID")
+		return fmt.Errorf("step 4c verification failed: TR should now have updated DID %s", updatedDid)
 	}
 
 	// =========================================================================

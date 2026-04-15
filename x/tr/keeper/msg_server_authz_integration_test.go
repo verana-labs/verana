@@ -115,7 +115,7 @@ func TestIntegration_OperatorCreatesTrustRegistry(t *testing.T) {
 
 	// ---- Step 1: Group proposal onboards operator via DE module ----
 	_, err := f.deMsgServer.GrantOperatorAuthorization(f.ctx, &detypes.MsgGrantOperatorAuthorization{
-		Authority: groupAccount,
+		Corporation: groupAccount,
 		Operator:  "", // group proposal
 		Grantee:   operator,
 		MsgTypes:  []string{"/verana.tr.v1.MsgCreateTrustRegistry"},
@@ -124,10 +124,12 @@ func TestIntegration_OperatorCreatesTrustRegistry(t *testing.T) {
 
 	// ---- Step 2: Operator creates trust registry via TR module ----
 	_, err = f.trMsgServer.CreateTrustRegistry(f.ctx, &trtypes.MsgCreateTrustRegistry{
-		Corporation: groupAccount,
-		Operator:    operator,
-		Did:         "did:example:integration-test-123",
-		Language:    "en",
+		Corporation:  groupAccount,
+		Operator:     operator,
+		Did:          "did:example:integration-test-123",
+		Language:     "en",
+		DocUrl:       "http://example.com/doc-v1",
+		DocDigestSri: testDigestSRI,
 	})
 	require.NoError(t, err)
 
@@ -153,10 +155,12 @@ func TestIntegration_UnauthorizedOperatorCannotCreateTrustRegistry(t *testing.T)
 
 	// No operator authorization granted — attempt should fail
 	_, err := f.trMsgServer.CreateTrustRegistry(f.ctx, &trtypes.MsgCreateTrustRegistry{
-		Corporation: groupAccount,
-		Operator:    unauthorizedOp,
-		Did:         "did:example:should-fail",
-		Language:    "en",
+		Corporation:  groupAccount,
+		Operator:     unauthorizedOp,
+		Did:          "did:example:should-fail",
+		Language:     "en",
+		DocUrl:       "http://example.com/doc-v1",
+		DocDigestSri: testDigestSRI,
 	})
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "authorization check failed")
@@ -173,7 +177,7 @@ func TestIntegration_OperatorWithWrongMsgTypeCannotCreateTrustRegistry(t *testin
 
 	// Grant operator authorization for a DIFFERENT msg type
 	_, err := f.deMsgServer.GrantOperatorAuthorization(f.ctx, &detypes.MsgGrantOperatorAuthorization{
-		Authority: groupAccount,
+		Corporation: groupAccount,
 		Operator:  "", // group proposal
 		Grantee:   operator,
 		MsgTypes:  []string{"/verana.cs.v1.MsgCreateCredentialSchema"}, // NOT MsgCreateTrustRegistry
@@ -186,6 +190,8 @@ func TestIntegration_OperatorWithWrongMsgTypeCannotCreateTrustRegistry(t *testin
 		Operator:    operator,
 		Did:         "did:example:wrong-type",
 		Language:    "en",
+		DocUrl:       "http://example.com/doc-v1",
+		DocDigestSri: testDigestSRI,
 	})
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "authorization check failed")
@@ -204,7 +210,7 @@ func TestIntegration_ExpiredOperatorCannotCreateTrustRegistry(t *testing.T) {
 	pastTime := f.ctx.BlockTime().Add(-1 * time.Hour)
 	oaKey := collections.Join(groupAccount, operator)
 	err := f.deKeeper.OperatorAuthorizations.Set(f.ctx, oaKey, detypes.OperatorAuthorization{
-		Authority:  groupAccount,
+		Corporation:  groupAccount,
 		Operator:   operator,
 		MsgTypes:   []string{"/verana.tr.v1.MsgCreateTrustRegistry"},
 		Expiration: &pastTime,
@@ -217,6 +223,8 @@ func TestIntegration_ExpiredOperatorCannotCreateTrustRegistry(t *testing.T) {
 		Operator:    operator,
 		Did:         "did:example:expired",
 		Language:    "en",
+		DocUrl:       "http://example.com/doc-v1",
+		DocDigestSri: testDigestSRI,
 	})
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "authorization check failed")
@@ -241,7 +249,7 @@ func TestIntegration_FullBootstrapToTrustRegistryCreation(t *testing.T) {
 
 	// ---- Step 1: Group proposal onboards admin operator ----
 	_, err := f.deMsgServer.GrantOperatorAuthorization(f.ctx, &detypes.MsgGrantOperatorAuthorization{
-		Authority: groupAccount,
+		Corporation: groupAccount,
 		Operator:  "", // group proposal
 		Grantee:   adminOperator,
 		MsgTypes: []string{
@@ -254,7 +262,7 @@ func TestIntegration_FullBootstrapToTrustRegistryCreation(t *testing.T) {
 
 	// ---- Step 2: Admin operator onboards TR-only operator ----
 	_, err = f.deMsgServer.GrantOperatorAuthorization(f.ctx, &detypes.MsgGrantOperatorAuthorization{
-		Authority: groupAccount,
+		Corporation: groupAccount,
 		Operator:  adminOperator, // admin cosigns
 		Grantee:   trOperator,
 		MsgTypes:  []string{"/verana.tr.v1.MsgCreateTrustRegistry"},
@@ -268,6 +276,8 @@ func TestIntegration_FullBootstrapToTrustRegistryCreation(t *testing.T) {
 		Did:         "did:example:full-bootstrap-test",
 		Aka:         "https://example.com/my-registry",
 		Language:    "en",
+		DocUrl:       "http://example.com/doc-v1",
+		DocDigestSri: testDigestSRI,
 	})
 	require.NoError(t, err)
 
@@ -281,7 +291,7 @@ func TestIntegration_FullBootstrapToTrustRegistryCreation(t *testing.T) {
 
 	// ---- Step 4: TR operator CANNOT grant further operators ----
 	_, err = f.deMsgServer.GrantOperatorAuthorization(f.ctx, &detypes.MsgGrantOperatorAuthorization{
-		Authority: groupAccount,
+		Corporation: groupAccount,
 		Operator:  trOperator, // TR operator doesn't have DE grant permission
 		Grantee:   sdk.AccAddress([]byte("another_operator____")).String(),
 		MsgTypes:  []string{"/verana.tr.v1.MsgCreateTrustRegistry"},
@@ -291,7 +301,7 @@ func TestIntegration_FullBootstrapToTrustRegistryCreation(t *testing.T) {
 
 	// ---- Step 5: Group revokes TR operator ----
 	_, err = f.deMsgServer.RevokeOperatorAuthorization(f.ctx, &detypes.MsgRevokeOperatorAuthorization{
-		Authority: groupAccount,
+		Corporation: groupAccount,
 		Operator:  "", // group proposal
 		Grantee:   trOperator,
 	})
@@ -303,6 +313,8 @@ func TestIntegration_FullBootstrapToTrustRegistryCreation(t *testing.T) {
 		Operator:    trOperator,
 		Did:         "did:example:should-fail-revoked",
 		Language:    "en",
+		DocUrl:       "http://example.com/doc-v1",
+		DocDigestSri: testDigestSRI,
 	})
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "authorization check failed")
@@ -325,7 +337,7 @@ func TestIntegration_OperatorAddsGovernanceFrameworkDocument(t *testing.T) {
 
 	// Grant operator both permissions
 	_, err := f.deMsgServer.GrantOperatorAuthorization(f.ctx, &detypes.MsgGrantOperatorAuthorization{
-		Authority: groupAccount,
+		Corporation: groupAccount,
 		Operator:  "",
 		Grantee:   operator,
 		MsgTypes: []string{
@@ -341,6 +353,8 @@ func TestIntegration_OperatorAddsGovernanceFrameworkDocument(t *testing.T) {
 		Operator:    operator,
 		Did:         "did:example:gfd-test",
 		Language:    "en",
+		DocUrl:       "http://example.com/doc-v1",
+		DocDigestSri: testDigestSRI,
 	})
 	require.NoError(t, err)
 
@@ -370,7 +384,7 @@ func TestIntegration_UnauthorizedOperatorCannotAddGFDocument(t *testing.T) {
 
 	// Grant operator ONLY MsgCreateTrustRegistry (not MsgAddGovernanceFrameworkDocument)
 	_, err := f.deMsgServer.GrantOperatorAuthorization(f.ctx, &detypes.MsgGrantOperatorAuthorization{
-		Authority: groupAccount,
+		Corporation: groupAccount,
 		Operator:  "",
 		Grantee:   createOnlyOp,
 		MsgTypes:  []string{"/verana.tr.v1.MsgCreateTrustRegistry"},
@@ -383,6 +397,8 @@ func TestIntegration_UnauthorizedOperatorCannotAddGFDocument(t *testing.T) {
 		Operator:    createOnlyOp,
 		Did:         "did:example:gfd-unauth-test",
 		Language:    "en",
+		DocUrl:       "http://example.com/doc-v1",
+		DocDigestSri: testDigestSRI,
 	})
 	require.NoError(t, err)
 
@@ -422,7 +438,7 @@ func TestIntegration_OperatorIncreasesActiveGFVersion(t *testing.T) {
 
 	// Grant operator all three permissions
 	_, err := f.deMsgServer.GrantOperatorAuthorization(f.ctx, &detypes.MsgGrantOperatorAuthorization{
-		Authority: groupAccount,
+		Corporation: groupAccount,
 		Operator:  "",
 		Grantee:   operator,
 		MsgTypes: []string{
@@ -439,6 +455,8 @@ func TestIntegration_OperatorIncreasesActiveGFVersion(t *testing.T) {
 		Operator:    operator,
 		Did:         "did:example:gfv-increase-test",
 		Language:    "en",
+		DocUrl:       "http://example.com/doc-v1",
+		DocDigestSri: testDigestSRI,
 	})
 	require.NoError(t, err)
 
@@ -481,7 +499,7 @@ func TestIntegration_UnauthorizedOperatorCannotIncreaseGFVersion(t *testing.T) {
 
 	// Grant operator only CreateTR and AddGFD (NOT IncreaseActiveGFVersion)
 	_, err := f.deMsgServer.GrantOperatorAuthorization(f.ctx, &detypes.MsgGrantOperatorAuthorization{
-		Authority: groupAccount,
+		Corporation: groupAccount,
 		Operator:  "",
 		Grantee:   operator,
 		MsgTypes: []string{
@@ -497,6 +515,8 @@ func TestIntegration_UnauthorizedOperatorCannotIncreaseGFVersion(t *testing.T) {
 		Operator:    operator,
 		Did:         "did:example:gfv-unauth-test",
 		Language:    "en",
+		DocUrl:       "http://example.com/doc-v1",
+		DocDigestSri: testDigestSRI,
 	})
 	require.NoError(t, err)
 
@@ -543,7 +563,7 @@ func TestIntegration_OperatorUpdatesTrustRegistry(t *testing.T) {
 
 	// Grant operator both permissions
 	_, err := f.deMsgServer.GrantOperatorAuthorization(f.ctx, &detypes.MsgGrantOperatorAuthorization{
-		Authority: groupAccount,
+		Corporation: groupAccount,
 		Operator:  "",
 		Grantee:   operator,
 		MsgTypes: []string{
@@ -559,6 +579,8 @@ func TestIntegration_OperatorUpdatesTrustRegistry(t *testing.T) {
 		Operator:    operator,
 		Did:         "did:example:update-test",
 		Language:    "en",
+		DocUrl:       "http://example.com/doc-v1",
+		DocDigestSri: testDigestSRI,
 	})
 	require.NoError(t, err)
 
@@ -570,6 +592,7 @@ func TestIntegration_OperatorUpdatesTrustRegistry(t *testing.T) {
 		Corporation: groupAccount,
 		Operator:    operator,
 		TrId:        trID,
+		Did:         "did:example:update-did",
 		Aka:         "https://example.com/aka",
 	})
 	require.NoError(t, err)
@@ -590,7 +613,7 @@ func TestIntegration_UnauthorizedOperatorCannotUpdateTrustRegistry(t *testing.T)
 
 	// Grant operator ONLY MsgCreateTrustRegistry (not MsgUpdateTrustRegistry)
 	_, err := f.deMsgServer.GrantOperatorAuthorization(f.ctx, &detypes.MsgGrantOperatorAuthorization{
-		Authority: groupAccount,
+		Corporation: groupAccount,
 		Operator:  "",
 		Grantee:   operator,
 		MsgTypes:  []string{"/verana.tr.v1.MsgCreateTrustRegistry"},
@@ -603,6 +626,8 @@ func TestIntegration_UnauthorizedOperatorCannotUpdateTrustRegistry(t *testing.T)
 		Operator:    operator,
 		Did:         "did:example:update-unauth-test",
 		Language:    "en",
+		DocUrl:       "http://example.com/doc-v1",
+		DocDigestSri: testDigestSRI,
 	})
 	require.NoError(t, err)
 
@@ -614,6 +639,7 @@ func TestIntegration_UnauthorizedOperatorCannotUpdateTrustRegistry(t *testing.T)
 		Corporation: groupAccount,
 		Operator:    operator,
 		TrId:        trID,
+		Did:         "did:example:update-did",
 		Aka:         "https://example.com/should-fail",
 	})
 	require.Error(t, err)
@@ -639,7 +665,7 @@ func TestIntegration_OperatorArchivesTrustRegistry(t *testing.T) {
 
 	// Grant operator both permissions
 	_, err := f.deMsgServer.GrantOperatorAuthorization(f.ctx, &detypes.MsgGrantOperatorAuthorization{
-		Authority: groupAccount,
+		Corporation: groupAccount,
 		Operator:  "",
 		Grantee:   operator,
 		MsgTypes: []string{
@@ -655,6 +681,8 @@ func TestIntegration_OperatorArchivesTrustRegistry(t *testing.T) {
 		Operator:    operator,
 		Did:         "did:example:archive-test",
 		Language:    "en",
+		DocUrl:       "http://example.com/doc-v1",
+		DocDigestSri: testDigestSRI,
 	})
 	require.NoError(t, err)
 
@@ -700,7 +728,7 @@ func TestIntegration_UnauthorizedOperatorCannotArchiveTrustRegistry(t *testing.T
 
 	// Grant operator ONLY MsgCreateTrustRegistry (not MsgArchiveTrustRegistry)
 	_, err := f.deMsgServer.GrantOperatorAuthorization(f.ctx, &detypes.MsgGrantOperatorAuthorization{
-		Authority: groupAccount,
+		Corporation: groupAccount,
 		Operator:  "",
 		Grantee:   operator,
 		MsgTypes:  []string{"/verana.tr.v1.MsgCreateTrustRegistry"},
@@ -713,6 +741,8 @@ func TestIntegration_UnauthorizedOperatorCannotArchiveTrustRegistry(t *testing.T
 		Operator:    operator,
 		Did:         "did:example:archive-unauth-test",
 		Language:    "en",
+		DocUrl:       "http://example.com/doc-v1",
+		DocDigestSri: testDigestSRI,
 	})
 	require.NoError(t, err)
 

@@ -15,11 +15,13 @@ func TestAminoJSONEncoder(t *testing.T) {
 
 	// MsgCreateTrustRegistry
 	msg := &trv1.MsgCreateTrustRegistry{
-		Corporation: "verana1f06a8j6n02ash0vtkdge0a9pvvfa5ypghkyttt",
-		Operator:    "verana13627hsukut3p39l5lawa88er0az36227rkwt83",
-		Did:         "did:verana:test:1234567890:abc123",
-		Aka:         "http://ts-proto-test-trust-registry.com",
-		Language:    "en",
+		Corporation:  "verana1f06a8j6n02ash0vtkdge0a9pvvfa5ypghkyttt",
+		Operator:     "verana13627hsukut3p39l5lawa88er0az36227rkwt83",
+		Did:          "did:verana:test:1234567890:abc123",
+		Aka:          "http://ts-proto-test-trust-registry.com",
+		Language:     "en",
+		DocUrl:       "http://ts-proto-test-trust-registry.com/doc-v1",
+		DocDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
 	}
 	bz, _ := enc.Marshal(msg)
 	fmt.Printf("MsgCreateTrustRegistry value:\n%s\n\n", string(bz))
@@ -29,6 +31,7 @@ func TestAminoJSONEncoder(t *testing.T) {
 		Corporation: "verana1f06a8j6n02ash0vtkdge0a9pvvfa5ypghkyttt",
 		Operator:    "verana13627hsukut3p39l5lawa88er0az36227rkwt83",
 		TrId:        1,
+		Did:         "did:verana:test:updated:abc999",
 		Aka:         "http://updated-trust-registry.com",
 	}
 	bz2, _ := enc.Marshal(updateMsg)
@@ -68,9 +71,9 @@ func TestAminoJSONEncoder(t *testing.T) {
 
 	// MsgGrantOperatorAuthorization (DE module)
 	grantMsg := &dev1.MsgGrantOperatorAuthorization{
-		Authority: "verana1f06a8j6n02ash0vtkdge0a9pvvfa5ypghkyttt",
-		Operator:  "",
-		Grantee:   "verana13627hsukut3p39l5lawa88er0az36227rkwt83",
+		Corporation: "verana1f06a8j6n02ash0vtkdge0a9pvvfa5ypghkyttt",
+		Operator:    "",
+		Grantee:     "verana13627hsukut3p39l5lawa88er0az36227rkwt83",
 		MsgTypes: []string{
 			"/verana.tr.v1.MsgCreateTrustRegistry",
 			"/verana.tr.v1.MsgUpdateTrustRegistry",

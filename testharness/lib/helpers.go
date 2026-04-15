@@ -2321,13 +2321,14 @@ func GrantOperatorAuthorizationViaGroup(
 	granteeAddr string,
 	msgTypes []string,
 ) error {
-	// Create the MsgGrantOperatorAuthorization
-	// Operator is empty because this is executed via group proposal (authority signs directly)
+	// Create the MsgGrantOperatorAuthorization.
+	// Operator is empty because this is executed via group proposal — the
+	// corporation (group policy) signs directly.
 	grantMsg := &detypes.MsgGrantOperatorAuthorization{
-		Authority: policyAddr,
-		Operator:  "",
-		Grantee:   granteeAddr,
-		MsgTypes:  msgTypes,
+		Corporation: policyAddr,
+		Operator:    "",
+		Grantee:     granteeAddr,
+		MsgTypes:    msgTypes,
 	}
 
 	// Submit group proposal
@@ -2370,7 +2371,7 @@ func GrantOperatorAuthorizationViaGroup(
 }
 
 // GrantSelfDelegation grants an operator self-delegation so they can execute messages
-// with authority=operator (same address). MsgGrantOperatorAuthorization has signer="authority",
+// with corporation=operator (same address). MsgGrantOperatorAuthorization has signer="corporation",
 // and operator="" bypasses the AUTHZ-CHECK.
 func GrantSelfDelegation(
 	client cosmosclient.Client,
@@ -2384,10 +2385,10 @@ func GrantSelfDelegation(
 	}
 
 	msg := &detypes.MsgGrantOperatorAuthorization{
-		Authority: addr,
-		Operator:  "",
-		Grantee:   addr,
-		MsgTypes:  msgTypes,
+		Corporation: addr,
+		Operator:    "",
+		Grantee:     addr,
+		MsgTypes:    msgTypes,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, account, msg)
@@ -2421,14 +2422,14 @@ func CreateTrustRegistryWithAuthority(
 		return "", fmt.Errorf("failed to get operator address: %w", err)
 	}
 
-	_ = docURL
-	_ = docHash
 	msg := &trtypes.MsgCreateTrustRegistry{
-		Corporation: authority,
-		Operator:    operatorAddr,
-		Did:         did,
-		Aka:         aka,
-		Language:    language,
+		Corporation:  authority,
+		Operator:     operatorAddr,
+		Did:          did,
+		Aka:          aka,
+		Language:     language,
+		DocUrl:       docURL,
+		DocDigestSri: docHash,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, operatorAccount, msg)
@@ -2554,7 +2555,6 @@ func UpdateTrustRegistryWithAuthority(
 	did string,
 	aka string,
 ) error {
-	_ = did
 	operatorAddr, err := operatorAccount.Address(addressPrefix)
 	if err != nil {
 		return fmt.Errorf("failed to get operator address: %w", err)
@@ -2564,6 +2564,7 @@ func UpdateTrustRegistryWithAuthority(
 		Corporation: authority,
 		Operator:    operatorAddr,
 		TrId:        trID,
+		Did:         did,
 		Aka:         aka,
 	}
 
