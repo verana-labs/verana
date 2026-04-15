@@ -375,6 +375,7 @@ func setupTrackingMsgServer(t testing.TB, uaRate, wuaRate, tdRate string, trustU
 		tdKeeper,
 		bankKeeper,
 		&keepertest.MockDelegationKeeper{}, // permissive mock for CSPS tests
+		&keepertest.MockDigestKeeper{},     // permissive mock for CSPS tests
 	)
 
 	// Set a specific block time for consistent testing

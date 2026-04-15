@@ -34,6 +34,7 @@ type (
 		trustDeposit           types.TrustDepositKeeper
 		bankKeeper             types.BankKeeper
 		delegationKeeper       types.DelegationKeeper
+		digestKeeper           types.DigestKeeper
 	}
 )
 
@@ -47,6 +48,7 @@ func NewKeeper(
 	trustDeposit types.TrustDepositKeeper,
 	bankKeeper types.BankKeeper,
 	delegationKeeper types.DelegationKeeper,
+	digestKeeper types.DigestKeeper,
 ) Keeper {
 	sb := collections.NewSchemaBuilder(storeService)
 
@@ -67,6 +69,7 @@ func NewKeeper(
 		trustDeposit:           trustDeposit,
 		bankKeeper:             bankKeeper,
 		delegationKeeper:       delegationKeeper,
+		digestKeeper:           digestKeeper,
 	}
 }
 

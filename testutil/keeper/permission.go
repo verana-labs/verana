@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"context"
 	"testing"
 
 	"cosmossdk.io/log"
@@ -40,6 +41,7 @@ func PermissionKeeper(t testing.TB) (keeper.Keeper, *MockCredentialSchemaKeeper,
 	bankKeeper := NewMockBankKeeper()
 	mockTrustDepositKeeper := &MockTrustDepositKeeper{}
 	mockDelegationKeeper := &MockDelegationKeeper{}
+	mockDigestKeeper := &MockDigestKeeper{}
 	k := keeper.NewKeeper(
 		cdc,
 		runtime.NewKVStoreService(storeKey),
@@ -50,6 +52,7 @@ func PermissionKeeper(t testing.TB) (keeper.Keeper, *MockCredentialSchemaKeeper,
 		mockTrustDepositKeeper,
 		bankKeeper,
 		mockDelegationKeeper,
+		mockDigestKeeper,
 	)
 
 	ctx := sdk.NewContext(stateStore, cmtproto.Header{}, false, log.NewNopLogger())
@@ -98,4 +101,21 @@ func (k *MockCredentialSchemaKeeper) CreateMockCredentialSchema(id uint64, issue
 
 func (k *MockCredentialSchemaKeeper) CreateMockCredentialSchemaFull(cs cstypes.CredentialSchema) {
 	k.credentialSchemas[cs.Id] = cs
+}
+
+// MockDigestKeeper is a permissive mock of the DigestKeeper interface for
+// perm module tests. It records each call so assertions can verify that
+// perm invoked StoreDigestModuleCall during credential-issuance flows.
+type MockDigestKeeper struct {
+	Stored []MockDigestRecord
+}
+
+type MockDigestRecord struct {
+	Authority string
+	Digest    string
+}
+
+func (m *MockDigestKeeper) StoreDigestModuleCall(_ context.Context, authority, digest string) error {
+	m.Stored = append(m.Stored, MockDigestRecord{Authority: authority, Digest: digest})
+	return nil
 }

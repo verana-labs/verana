@@ -491,11 +491,11 @@ func (ms msgServer) executeCreateOrUpdatePermissionSession(ctx sdk.Context, msg 
 
 		// Increase trust deposit of wallet_agent_perm.authority and wallet_agent_perm.deposit
 		if walletAgentTrustDeposit > 0 {
+			// Increase wallet agent's TD funded by payer (transfers from payer to TD module directly)
 			walletAgentTDI64, err := uint64ToInt64(walletAgentTrustDeposit, "wallet_agent_trust_deposit")
 			if err != nil {
 				return err
 			}
-			// Increase wallet agent's TD funded by payer (transfers from payer to TD module directly)
 			err = ms.trustDeposit.AdjustTrustDepositOnBehalf(ctx, walletAgentPerm.Corporation, authorityAddr, walletAgentTDI64)
 			if err != nil {
 				return fmt.Errorf("failed to adjust wallet agent trust deposit: %w", err)
@@ -511,6 +511,17 @@ func (ms msgServer) executeCreateOrUpdatePermissionSession(ctx sdk.Context, msg 
 	// Step 3: Create or update session records
 	if err := ms.createOrUpdateSession(ctx, msg, now); err != nil {
 		return fmt.Errorf("failed to create/update session: %w", err)
+	}
+
+	// [MOD-PERM-MSG-10] If the current transaction is for issuance of a
+	// credential, persist the digest SRI by calling [MOD-DI-MSG-1] keeper-to-
+	// keeper. Spec explicitly lets perm invoke DI with no signer/AUTHZ check.
+	// We scope this to the issuance path (IssuerPermId != 0) and only fire
+	// when the caller supplied a non-empty digest.
+	if msg.Digest != "" && msg.IssuerPermId != 0 && ms.digestKeeper != nil {
+		if err := ms.digestKeeper.StoreDigestModuleCall(ctx, msg.Corporation, msg.Digest); err != nil {
+			return fmt.Errorf("failed to persist credential digest: %w", err)
+		}
 	}
 
 	return nil
