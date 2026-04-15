@@ -12,12 +12,22 @@ import (
 var _ paramtypes.ParamSet = (*Params)(nil)
 
 const (
-	DefaultTrustDepositReclaimBurnRate = "0.6"  // 60%
-	DefaultTrustDepositShareValue      = "1.0"  // Initial value: 1
+	// DefaultTrustDepositReclaimBurnRate is retained for proto back-compat only.
+	// Spec v4 draft 13 [MOD-TD-MSG-2-3] specifies that the full claimable_yield
+	// is transferred to the corporation on reclaim — there is no burn step.
+	// This field is therefore unused by the handler; remove the proto field
+	// (and this constant) on the next proto regeneration.
+	DefaultTrustDepositReclaimBurnRate = "0" // unused; 0 == no burn
+	DefaultTrustDepositShareValue      = "1.0"
 	DefaultTrustDepositRate            = "0.2"  // 20%
 	DefaultWalletUserAgentRewardRate   = "0.2"  // 20%
 	DefaultUserAgentRewardRate         = "0.2"  // 20%
 	DefaultTrustDepositMaxYieldRate    = "0.15" // 15% annual yield
+	// TODO (requires proto regen): draft 13 GlobalVariables define
+	// trust_deposit_block_reward_share (mandatory, default 0.20) which is
+	// missing from proto/verana/td/v1/params.proto. Add the field on the
+	// next proto regen pass.
+	DefaultTrustDepositBlockRewardShare = "0.2"
 )
 
 // ParamKeyTable the param key table for launch module

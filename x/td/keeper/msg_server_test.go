@@ -354,36 +354,6 @@ func TestUtilityFunctions(t *testing.T) {
 		}
 	})
 
-	// Test CalculateBurnAmount
-	t.Run("CalculateBurnAmount", func(t *testing.T) {
-		testCases := []struct {
-			claimed  uint64
-			burnRate math.LegacyDec
-			expected uint64
-		}{
-			{
-				claimed:  1000,
-				burnRate: math.LegacyMustNewDecFromStr("0.6"),
-				expected: 600, // 1000 * 0.6 = 600
-			},
-			{
-				claimed:  1000,
-				burnRate: math.LegacyMustNewDecFromStr("0"),
-				expected: 0,
-			},
-			{
-				claimed:  0,
-				burnRate: math.LegacyMustNewDecFromStr("0.6"),
-				expected: 0,
-			},
-		}
-
-		for _, tc := range testCases {
-			result := k.CalculateBurnAmount(tc.claimed, tc.burnRate)
-			require.Equal(t, tc.expected, result)
-		}
-	})
-
 	// Test parameter getters
 	t.Run("Parameter getters", func(t *testing.T) {
 		// Set custom params for testing

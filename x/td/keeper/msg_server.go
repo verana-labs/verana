@@ -132,13 +132,6 @@ func (k Keeper) AmountToShare(amount uint64, shareValue math.LegacyDec) math.Leg
 	return amountDec.Quo(shareValue)
 }
 
-// CalculateBurnAmount applies burn rate to claimed amount using decimal math
-func (k Keeper) CalculateBurnAmount(claimed uint64, burnRate math.LegacyDec) uint64 {
-	claimedDec := math.LegacyNewDec(int64(claimed))
-	burnAmountDec := claimedDec.Mul(burnRate)
-	return burnAmountDec.TruncateInt().Uint64()
-}
-
 // SlashTrustDeposit handles governance slashing of trust deposits
 func (ms msgServer) SlashTrustDeposit(goCtx context.Context, msg *types.MsgSlashTrustDeposit) (*types.MsgSlashTrustDepositResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
