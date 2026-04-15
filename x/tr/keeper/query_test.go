@@ -33,21 +33,12 @@ func setupTestData(t *testing.T) (keeper.Keeper, types.QueryServer, context.Cont
 	trID, err := k.TrustRegistryDIDIndex.Get(ctx, "did:example:123")
 	require.NoError(t, err)
 
-	// Spec v4: MsgCreateTrustRegistry seeds an empty v1 GFV. Attach a document
-	// to v1 explicitly, then add version 2 documents in two languages.
-	v1DocMsg := &types.MsgAddGovernanceFrameworkDocument{
-		Corporation: authority,
-		Operator:    operator,
-		TrId:        trID,
-		Language:    "en",
-		Url:         "http://example.com/doc1-en",
-		DigestSri:   "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
-		Version:     1,
-	}
-	_, err = ms.AddGovernanceFrameworkDocument(ctx, v1DocMsg)
-	require.NoError(t, err)
-
-	addDocMsg := &types.MsgAddGovernanceFrameworkDocument{
+	// Spec draft 13: active version is immutable, so documents can only be added
+	// to future (in-progress) versions. Seed v2 with an en doc, promote v2 to
+	// active, then add v3 docs in en/es. After setup:
+	//   version 2: 1 document (en) — active
+	//   version 3: 2 documents (en, es) — pending
+	_, err = ms.AddGovernanceFrameworkDocument(ctx, &types.MsgAddGovernanceFrameworkDocument{
 		Corporation: authority,
 		Operator:    operator,
 		TrId:        trID,
@@ -55,13 +46,36 @@ func setupTestData(t *testing.T) (keeper.Keeper, types.QueryServer, context.Cont
 		Url:         "http://example.com/doc2-en",
 		DigestSri:   "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
 		Version:     2,
-	}
-	_, err = ms.AddGovernanceFrameworkDocument(ctx, addDocMsg)
+	})
 	require.NoError(t, err)
 
-	addDocMsg.Language = "es"
-	addDocMsg.Url = "http://example.com/doc2-es"
-	_, err = ms.AddGovernanceFrameworkDocument(ctx, addDocMsg)
+	_, err = ms.IncreaseActiveGovernanceFrameworkVersion(ctx, &types.MsgIncreaseActiveGovernanceFrameworkVersion{
+		Corporation: authority,
+		Operator:    operator,
+		TrId:        trID,
+	})
+	require.NoError(t, err)
+
+	_, err = ms.AddGovernanceFrameworkDocument(ctx, &types.MsgAddGovernanceFrameworkDocument{
+		Corporation: authority,
+		Operator:    operator,
+		TrId:        trID,
+		Language:    "en",
+		Url:         "http://example.com/doc3-en",
+		DigestSri:   "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+		Version:     3,
+	})
+	require.NoError(t, err)
+
+	_, err = ms.AddGovernanceFrameworkDocument(ctx, &types.MsgAddGovernanceFrameworkDocument{
+		Corporation: authority,
+		Operator:    operator,
+		TrId:        trID,
+		Language:    "es",
+		Url:         "http://example.com/doc3-es",
+		DigestSri:   "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+		Version:     3,
+	})
 	require.NoError(t, err)
 
 	return k, qs, ctx, trID
@@ -86,14 +100,17 @@ func TestGetTrustRegistry(t *testing.T) {
 			check: func(t *testing.T, response *types.QueryGetTrustRegistryResponse) {
 				require.NotNil(t, response.TrustRegistry)
 				require.Equal(t, trID, response.TrustRegistry.Id)
-				require.Len(t, response.TrustRegistry.Versions, 2) // Version 1 and 2
+				require.Len(t, response.TrustRegistry.Versions, 3) // v1 (empty), v2 (active), v3 (pending)
 
 				// Check versions and their documents
 				for _, version := range response.TrustRegistry.Versions {
-					if version.Version == 1 {
-						require.Len(t, version.Documents, 1) // Version 1 has 1 document
-					} else if version.Version == 2 {
-						require.Len(t, version.Documents, 2) // Version 2 has 2 documents (en, es)
+					switch version.Version {
+					case 1:
+						require.Len(t, version.Documents, 0) // v1 empty (create seeds but spec draft 13 no longer bundles)
+					case 2:
+						require.Len(t, version.Documents, 1) // v2 active: en
+					case 3:
+						require.Len(t, version.Documents, 2) // v3 pending: en, es
 					}
 				}
 			},
@@ -108,7 +125,7 @@ func TestGetTrustRegistry(t *testing.T) {
 			check: func(t *testing.T, response *types.QueryGetTrustRegistryResponse) {
 				require.NotNil(t, response.TrustRegistry)
 				require.Len(t, response.TrustRegistry.Versions, 1)
-				require.Equal(t, int32(1), response.TrustRegistry.Versions[0].Version)
+				require.Equal(t, int32(2), response.TrustRegistry.Versions[0].Version)
 				require.Len(t, response.TrustRegistry.Versions[0].Documents, 1)
 			},
 		},
@@ -122,7 +139,7 @@ func TestGetTrustRegistry(t *testing.T) {
 			check: func(t *testing.T, response *types.QueryGetTrustRegistryResponse) {
 				require.NotNil(t, response.TrustRegistry)
 				for _, version := range response.TrustRegistry.Versions {
-					if version.Version == 2 {
+					if version.Version == 3 {
 						require.Len(t, version.Documents, 1) // Should only have Spanish document
 						require.Equal(t, "es", version.Documents[0].Language)
 					}
@@ -168,8 +185,9 @@ func TestListTrustRegistries(t *testing.T) {
 	_, err := ms.CreateTrustRegistry(ctx, createMsg)
 	require.NoError(t, err)
 
-	// Attach a v1 governance framework document to the second TR so tests that
-	// walk (versions -> documents) see at least one document.
+	// Attach a v2 GFD to the second TR and activate it so tests that walk
+	// (versions -> documents) see at least one active document. (Spec draft 13:
+	// active version is immutable, so v1 cannot be modified.)
 	trID2, err := k.TrustRegistryDIDIndex.Get(ctx, "did:example:456")
 	require.NoError(t, err)
 	_, err = ms.AddGovernanceFrameworkDocument(ctx, &types.MsgAddGovernanceFrameworkDocument{
@@ -177,9 +195,15 @@ func TestListTrustRegistries(t *testing.T) {
 		Operator:    "another_operator",
 		TrId:        trID2,
 		Language:    "fr",
-		Url:         "http://example.com/tr2-doc1-fr",
+		Url:         "http://example.com/tr2-doc2-fr",
 		DigestSri:   "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
-		Version:     1,
+		Version:     2,
+	})
+	require.NoError(t, err)
+	_, err = ms.IncreaseActiveGovernanceFrameworkVersion(ctx, &types.MsgIncreaseActiveGovernanceFrameworkVersion{
+		Corporation: "another_authority",
+		Operator:    "another_operator",
+		TrId:        trID2,
 	})
 	require.NoError(t, err)
 
@@ -198,12 +222,19 @@ func TestListTrustRegistries(t *testing.T) {
 			check: func(t *testing.T, response *types.QueryListTrustRegistriesResponse) {
 				require.Len(t, response.TrustRegistries, 2)
 
-				// Check nested structure for each trust registry
+				// Check nested structure for each trust registry: each must have
+				// at least one version with at least one document (v1 is always
+				// empty under draft 13 since create doesn't bundle initial GFD).
 				for _, tr := range response.TrustRegistries {
 					require.NotEmpty(t, tr.Versions)
+					hasDocs := false
 					for _, version := range tr.Versions {
-						require.NotEmpty(t, version.Documents)
+						if len(version.Documents) > 0 {
+							hasDocs = true
+							break
+						}
 					}
+					require.True(t, hasDocs, "tr %d should have at least one version with documents", tr.Id)
 				}
 			},
 		},
@@ -218,11 +249,18 @@ func TestListTrustRegistries(t *testing.T) {
 				require.Len(t, response.TrustRegistries, 1)
 				require.Equal(t, "another_authority", response.TrustRegistries[0].Corporation)
 
-				// Check nested structure
+				// Find the active v2 (fr) document.
 				tr := response.TrustRegistries[0]
 				require.NotEmpty(t, tr.Versions)
-				require.Len(t, tr.Versions[0].Documents, 1) // Should have one document
-				require.Equal(t, "fr", tr.Versions[0].Documents[0].Language)
+				var foundFr bool
+				for _, v := range tr.Versions {
+					for _, d := range v.Documents {
+						if d.Language == "fr" {
+							foundFr = true
+						}
+					}
+				}
+				require.True(t, foundFr, "expected at least one fr document")
 			},
 		},
 		{
@@ -241,12 +279,17 @@ func TestListTrustRegistries(t *testing.T) {
 			check: func(t *testing.T, response *types.QueryListTrustRegistriesResponse) {
 				require.Len(t, response.TrustRegistries, 2)
 
-				// Verify nested structure exists for all trust registries
+				// Each TR has at least one version with docs (v1 is always empty).
 				for _, tr := range response.TrustRegistries {
 					require.NotEmpty(t, tr.Versions)
+					hasDocs := false
 					for _, version := range tr.Versions {
-						require.NotEmpty(t, version.Documents)
+						if len(version.Documents) > 0 {
+							hasDocs = true
+							break
+						}
 					}
+					require.True(t, hasDocs)
 				}
 			},
 		},
@@ -281,7 +324,11 @@ func TestPreferredLanguageFallbackToDefaultLanguage(t *testing.T) {
 	require.NotNil(t, response.TrustRegistry)
 
 	for _, version := range response.TrustRegistry.Versions {
-		// Each version should return exactly 1 document (fallback to "en")
+		// Empty versions stay empty (no fallback source); populated versions
+		// fall back to TR default language "en".
+		if len(version.Documents) == 0 {
+			continue
+		}
 		require.Len(t, version.Documents, 1, "version %d should have exactly 1 fallback doc", version.Version)
 		require.Equal(t, "en", version.Documents[0].Language, "version %d should fall back to TR default language 'en'", version.Version)
 	}

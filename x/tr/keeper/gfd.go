@@ -39,18 +39,18 @@ func (ms msgServer) validateAddGovernanceFrameworkDocumentParams(ctx sdk.Context
 		return fmt.Errorf("error checking versions: %w", err)
 	}
 
-	// Spec v4: version must either refer to an existing GF version OR be the next
-	// sequential version (maxVersion+1). Adding documents to older (strictly
-	// inactive) versions is rejected, but documents MAY be added to the current
-	// active version (allows language variants on a fresh/initial version).
+	// [MOD-TR-MSG-2-2-1] Spec draft 13: version MUST be greater than tr.active_version.
+	// Documents can only be added to in-progress (future) versions; the active version
+	// is immutable. This also implies the version either refers to an existing
+	// in-progress GF version OR is the next sequential version (maxVersion+1).
 	nextVersion := maxVersion + 1
 
 	if !hasVersion && msg.Version != nextVersion {
 		return fmt.Errorf("invalid version: must be %d", nextVersion)
 	}
 
-	if msg.Version < tr.ActiveVersion {
-		return fmt.Errorf("invalid version: must be at least %d (current active version)", tr.ActiveVersion)
+	if msg.Version <= tr.ActiveVersion {
+		return fmt.Errorf("invalid version: must be greater than %d (current active version)", tr.ActiveVersion)
 	}
 
 	// Validate language tag
@@ -98,19 +98,39 @@ func (ms msgServer) executeAddGovernanceFrameworkDocument(ctx sdk.Context, msg *
 		}
 	}
 
-	// Create document
-	nextGfdId, err := ms.GetNextID(ctx, "gfd")
-	if err != nil {
-		return fmt.Errorf("failed to generate governance framework document ID: %w", err)
+	// [MOD-TR-MSG-2-1 / 2-3] Spec: if a document already exists for this language
+	// in this GF version, REPLACE the existing entry (in-place); otherwise create new.
+	var existingGfd types.GovernanceFrameworkDocument
+	var hasExisting bool
+	if err := ms.GFDocument.Walk(ctx, nil, func(_ uint64, doc types.GovernanceFrameworkDocument) (bool, error) {
+		if doc.GfvId == gfv.Id && doc.Language == msg.Language {
+			existingGfd = doc
+			hasExisting = true
+			return true, nil
+		}
+		return false, nil
+	}); err != nil {
+		return fmt.Errorf("failed to walk governance framework documents: %w", err)
 	}
 
-	gfd := types.GovernanceFrameworkDocument{
-		Id:        nextGfdId,
-		GfvId:     gfv.Id,
-		Created:   ctx.BlockTime(),
-		Language:  msg.Language,
-		Url:       msg.Url,
-		DigestSri: msg.DigestSri,
+	var gfd types.GovernanceFrameworkDocument
+	if hasExisting {
+		gfd = existingGfd
+		gfd.Url = msg.Url
+		gfd.DigestSri = msg.DigestSri
+	} else {
+		nextGfdId, err := ms.GetNextID(ctx, "gfd")
+		if err != nil {
+			return fmt.Errorf("failed to generate governance framework document ID: %w", err)
+		}
+		gfd = types.GovernanceFrameworkDocument{
+			Id:        nextGfdId,
+			GfvId:     gfv.Id,
+			Created:   ctx.BlockTime(),
+			Language:  msg.Language,
+			Url:       msg.Url,
+			DigestSri: msg.DigestSri,
+		}
 	}
 
 	if err := ms.GFDocument.Set(ctx, gfd.Id, gfd); err != nil {

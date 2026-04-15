@@ -146,9 +146,10 @@ func TestMsgServerAddGovernanceFrameworkDocument(t *testing.T) {
 			isValid: true,
 		},
 		{
-			// Spec v4: the initial v1 is the active version with no documents,
-			// so adding a doc to v1 is valid (language variants allowed).
-			name: "Valid Add Document to Initial Active Version 1",
+			// Spec draft 13 [MOD-TR-MSG-2-2-1]: version MUST be strictly greater
+			// than tr.active_version. The active version is immutable — adding
+			// documents to v1 (the active version) must be rejected.
+			name: "Invalid Add Document to Active Version 1",
 			msg: &types.MsgAddGovernanceFrameworkDocument{
 				Corporation: authority,
 				Operator:    operator,
@@ -158,7 +159,7 @@ func TestMsgServerAddGovernanceFrameworkDocument(t *testing.T) {
 				DigestSri:   "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
 				Version:     1,
 			},
-			isValid: true,
+			isValid: false,
 		},
 		{
 			name: "Invalid Trust Registry ID",
