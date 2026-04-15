@@ -183,31 +183,31 @@ func TestMsgServerCreateCredentialSchema(t *testing.T) {
 	}{
 		{
 			name:              "Valid Create Credential Schema with placeholder $id",
-			msg:               keeper.CreateMsgWithValidityPeriods(authority, operator, trID, validJsonSchemaWithPlaceholder, 365, 365, 180, 180, 180, 2, 2, 1, "tu", "sha256"),
+			msg:               keeper.CreateMsgWithValidityPeriods(authority, operator, trID, validJsonSchemaWithPlaceholder, 365, 365, 180, 180, 180, 2, 2, 2, 1, "tu", "sha256"),
 			isValid:           true,
 			expectIdInjection: true,
 		},
 		{
 			name:              "Valid Create Credential Schema with no $id",
-			msg:               keeper.CreateMsgWithValidityPeriods(authority, operator, trID, validJsonSchemaNoId, 365, 365, 180, 180, 180, 2, 2, 1, "tu", "sha256"),
+			msg:               keeper.CreateMsgWithValidityPeriods(authority, operator, trID, validJsonSchemaNoId, 365, 365, 180, 180, 180, 2, 2, 2, 1, "tu", "sha256"),
 			isValid:           true,
 			expectIdInjection: true,
 		},
 		{
 			name:              "Valid Create Credential Schema with wrong $id",
-			msg:               keeper.CreateMsgWithValidityPeriods(authority, operator, trID, validJsonSchemaWrongId, 365, 365, 180, 180, 180, 2, 2, 1, "tu", "sha256"),
+			msg:               keeper.CreateMsgWithValidityPeriods(authority, operator, trID, validJsonSchemaWrongId, 365, 365, 180, 180, 180, 2, 2, 2, 1, "tu", "sha256"),
 			isValid:           true,
 			expectIdInjection: true,
 		},
 		{
 			name:              "Non-existent Trust Registry",
-			msg:               keeper.CreateMsgWithValidityPeriods(authority, operator, 999, validJsonSchemaWithPlaceholder, 365, 365, 180, 180, 180, 2, 2, 1, "tu", "sha256"),
+			msg:               keeper.CreateMsgWithValidityPeriods(authority, operator, 999, validJsonSchemaWithPlaceholder, 365, 365, 180, 180, 180, 2, 2, 2, 1, "tu", "sha256"),
 			isValid:           false,
 			expectIdInjection: false,
 		},
 		{
 			name:              "Wrong Trust Registry Controller",
-			msg:               keeper.CreateMsgWithValidityPeriods(sdk.AccAddress([]byte("wrong_authority_____")).String(), operator, trID, validJsonSchemaWithPlaceholder, 365, 365, 180, 180, 180, 2, 2, 1, "tu", "sha256"),
+			msg:               keeper.CreateMsgWithValidityPeriods(sdk.AccAddress([]byte("wrong_authority_____")).String(), operator, trID, validJsonSchemaWithPlaceholder, 365, 365, 180, 180, 180, 2, 2, 2, 1, "tu", "sha256"),
 			isValid:           false,
 			expectIdInjection: false,
 		},
@@ -339,7 +339,7 @@ func TestCanonicalIdInjection(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			createMsg := keeper.CreateMsgWithValidityPeriods(authority, operator, trID, tc.inputSchema, 365, 365, 180, 180, 180, 2, 2, 1, "tu", "sha256")
+			createMsg := keeper.CreateMsgWithValidityPeriods(authority, operator, trID, tc.inputSchema, 365, 365, 180, 180, 180, 2, 2, 2, 1, "tu", "sha256")
 			resp, err := ms.CreateCredentialSchema(ctx, createMsg)
 			require.NoError(t, err)
 			require.NotNil(t, resp)
@@ -398,7 +398,7 @@ func TestQueryCanonicalId(t *testing.T) {
   "additionalProperties": false
 }`
 
-	createMsg := keeper.CreateMsgWithValidityPeriods(authority, operator, trID, schemaNoId, 365, 365, 180, 180, 180, 2, 2, 1, "tu", "sha256")
+	createMsg := keeper.CreateMsgWithValidityPeriods(authority, operator, trID, schemaNoId, 365, 365, 180, 180, 180, 2, 2, 2, 1, "tu", "sha256")
 	resp, err := ms.CreateCredentialSchema(ctx, createMsg)
 	require.NoError(t, err)
 	require.NotNil(t, resp)
@@ -480,7 +480,7 @@ func TestUpdateCredentialSchema(t *testing.T) {
         "required": ["name"],
         "additionalProperties": false
     }`
-	createMsg := keeper.CreateMsgWithValidityPeriods(authority, operator, trID, validJsonSchema, 365, 365, 180, 180, 180, 2, 2, 1, "tu", "sha256")
+	createMsg := keeper.CreateMsgWithValidityPeriods(authority, operator, trID, validJsonSchema, 365, 365, 180, 180, 180, 2, 2, 2, 1, "tu", "sha256")
 
 	schemaID, err := ms.CreateCredentialSchema(ctx, createMsg)
 	require.NoError(t, err)
@@ -576,7 +576,7 @@ func TestArchiveCredentialSchema(t *testing.T) {
         "required": ["name"],
         "additionalProperties": false
     }`
-	createMsg := keeper.CreateMsgWithValidityPeriods(authority, operator, trID, validJsonSchema, 365, 365, 180, 180, 180, 2, 2, 1, "tu", "sha256")
+	createMsg := keeper.CreateMsgWithValidityPeriods(authority, operator, trID, validJsonSchema, 365, 365, 180, 180, 180, 2, 2, 2, 1, "tu", "sha256")
 
 	schemaID, err := ms.CreateCredentialSchema(ctx, createMsg)
 	require.NoError(t, err)

@@ -124,6 +124,7 @@ func NewMsgCreateCredentialSchema(
 	holderValidationValidityPeriod uint32,
 	issuerOnboardingMode uint32,
 	verifierOnboardingMode uint32,
+	holderOnboardingMode uint32,
 	pricingAssetType uint32,
 	pricingAsset string,
 	digestAlgorithm string,
@@ -140,7 +141,7 @@ func NewMsgCreateCredentialSchema(
 		HolderValidationValidityPeriod:          &OptionalUInt32{Value: holderValidationValidityPeriod},
 		IssuerOnboardingMode:                    issuerOnboardingMode,
 		VerifierOnboardingMode:                  verifierOnboardingMode,
-		HolderOnboardingMode:                    0,
+		HolderOnboardingMode:                    holderOnboardingMode,
 		PricingAssetType:                        pricingAssetType,
 		PricingAsset:                            pricingAsset,
 		DigestAlgorithm:                         digestAlgorithm,
@@ -636,6 +637,15 @@ func validatePermManagementModes(msg *MsgCreateCredentialSchema) error {
 	}
 	if msg.VerifierOnboardingMode > 3 {
 		return fmt.Errorf("invalid verifier onboarding mode: must be between 1 and 3")
+	}
+
+	// [MOD-CS-MSG-1-2-1] holder_onboarding_mode MUST be a valid HolderOnboardingMode.
+	// Enum values: ISSUER_VALIDATION_PROCESS=1, PERMISSIONLESS=2. UNSPECIFIED=0 is invalid.
+	if msg.HolderOnboardingMode == 0 {
+		return fmt.Errorf("holder onboarding mode must be specified")
+	}
+	if msg.HolderOnboardingMode > 2 {
+		return fmt.Errorf("invalid holder onboarding mode: must be between 1 and 2")
 	}
 
 	return nil
