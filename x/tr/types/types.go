@@ -12,7 +12,7 @@ import (
 // ValidateBasic performs stateless validation of MsgCreateTrustRegistry
 // [MOD-TR-MSG-1-2-1] Create New Trust Registry basic checks
 func (msg *MsgCreateTrustRegistry) ValidateBasic() error {
-	if msg.Did == "" || msg.Language == "" {
+	if msg.Did == "" || msg.Language == "" || msg.DocUrl == "" || msg.DocDigestSri == "" {
 		return fmt.Errorf("missing mandatory parameter")
 	}
 
@@ -34,6 +34,16 @@ func (msg *MsgCreateTrustRegistry) ValidateBasic() error {
 
 	if !isValidLanguageTagForCreateTrustRegistry(msg.Language) {
 		return fmt.Errorf("invalid language tag (must conform to RFC 1766 and be 2 characters long)")
+	}
+
+	// [MOD-TR-MSG-1-2-1] doc_url must be a well-formed URI.
+	if _, err := url.Parse(msg.DocUrl); err != nil {
+		return fmt.Errorf("invalid doc_url: %w", err)
+	}
+
+	// [MOD-TR-MSG-1-2-1] doc_digest_sri must be a valid SRI string.
+	if !isValidDigestSRI(msg.DocDigestSri) {
+		return fmt.Errorf("invalid doc_digest_sri")
 	}
 
 	return nil
@@ -117,6 +127,14 @@ func (msg *MsgUpdateTrustRegistry) ValidateBasic() error {
 
 	if msg.TrId == 0 {
 		return fmt.Errorf("trust registry id is required")
+	}
+
+	// [MOD-TR-MSG-4-1] did is mandatory per spec draft 13.
+	if msg.Did == "" {
+		return fmt.Errorf("did is required")
+	}
+	if !isValidDID(msg.Did) {
+		return fmt.Errorf("invalid DID format")
 	}
 
 	return nil

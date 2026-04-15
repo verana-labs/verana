@@ -39,17 +39,16 @@ func (ms msgServer) CreateTrustRegistry(goCtx context.Context, msg *types.MsgCre
 		return nil, fmt.Errorf("authorization check failed: %w", err)
 	}
 
-	// [MOD-TR-MSG-1-3] Create New Trust Registry execution
-	// Spec v4: MsgCreateTrustRegistry no longer bundles an initial governance
-	// framework document — callers must invoke MsgAddGovernanceFrameworkDocument
-	// separately if they need one.
-
-	tr, gfv, err := ms.createTrustRegistryEntries(ctx, msg, now)
+	// [MOD-TR-MSG-1-3] Create New Trust Registry execution. Spec draft 13
+	// requires the initial v1 GF document to be persisted at creation time
+	// from msg.doc_url / msg.doc_digest_sri, using the registry's default
+	// language.
+	tr, gfv, gfd, err := ms.createTrustRegistryEntries(ctx, msg, now)
 	if err != nil {
 		return nil, err
 	}
 
-	if err := ms.persistEntries(ctx, tr, gfv); err != nil {
+	if err := ms.persistEntries(ctx, tr, gfv, gfd); err != nil {
 		return nil, err
 	}
 
@@ -179,11 +178,19 @@ func (ms msgServer) UpdateTrustRegistry(goCtx context.Context, msg *types.MsgUpd
 		return nil, fmt.Errorf("only trust registry corporation can update trust registry")
 	}
 
-	// Spec v4: MsgUpdateTrustRegistry only updates aka/language; DID is immutable.
-	tr.Aka = msg.Aka
-	if msg.Language != "" {
-		tr.Language = msg.Language
+	// [MOD-TR-MSG-4-3] Spec draft 13: set tr.did = did, tr.aka = aka,
+	// tr.modified = now. Language is NOT updatable.
+	if tr.Did != msg.Did {
+		// Keep the DID index consistent with the new DID.
+		if err := ms.TrustRegistryDIDIndex.Remove(ctx, tr.Did); err != nil {
+			return nil, fmt.Errorf("failed to remove stale DID index: %w", err)
+		}
+		if err := ms.TrustRegistryDIDIndex.Set(ctx, msg.Did, tr.Id); err != nil {
+			return nil, fmt.Errorf("failed to set new DID index: %w", err)
+		}
 	}
+	tr.Did = msg.Did
+	tr.Aka = msg.Aka
 	tr.Modified = now
 
 	// Save updated trust registry
@@ -196,6 +203,7 @@ func (ms msgServer) UpdateTrustRegistry(goCtx context.Context, msg *types.MsgUpd
 			types.EventTypeUpdateTrustRegistry,
 			sdk.NewAttribute(types.AttributeKeyTrustRegistryID, strconv.FormatUint(msg.TrId, 10)),
 			sdk.NewAttribute(types.AttributeKeyController, msg.Corporation),
+			sdk.NewAttribute(types.AttributeKeyDID, msg.Did),
 			sdk.NewAttribute(types.AttributeKeyAka, msg.Aka),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
 		),

@@ -78,13 +78,15 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 			RpcCommandOptions: []*autocliv1.RpcCommandOptions{
 				{
 					RpcMethod: "CreateTrustRegistry",
-					Use:       "create-trust-registry [corporation] [did] [language]",
+					Use:       "create-trust-registry [corporation] [did] [language] [doc-url] [doc-digest-sri]",
 					Short:     "Create a new trust registry",
-					Long:      "Create a new trust registry on behalf of a corporation (group account). The operator (transaction signer) must be authorized by the corporation.",
+					Long:      "Create a new trust registry on behalf of a corporation (group account). The operator (transaction signer) must be authorized by the corporation. The doc-url and doc-digest-sri seed the initial v1 governance framework document in the registry's default language.",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{ProtoField: "corporation"},
 						{ProtoField: "did"},
 						{ProtoField: "language"},
+						{ProtoField: "doc_url"},
+						{ProtoField: "doc_digest_sri"},
 					},
 					FlagOptions: map[string]*autocliv1.FlagOptions{
 						"aka": {
@@ -120,23 +122,19 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 				},
 				{
 					RpcMethod: "UpdateTrustRegistry",
-					Use:       "update-trust-registry [corporation] [tr-id]",
+					Use:       "update-trust-registry [corporation] [tr-id] [did]",
 					Short:     "Update a trust registry",
-					Long:      "Update a trust registry's AKA URI and language. The operator (transaction signer) must be authorized by the corporation.",
+					Long:      "Update a trust registry's DID and optional AKA URI. The operator (transaction signer) must be authorized by the corporation. Language is immutable under spec draft 13.",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{ProtoField: "corporation"},
 						{ProtoField: "tr_id"},
+						{ProtoField: "did"},
 					},
 					FlagOptions: map[string]*autocliv1.FlagOptions{
 						"aka": {
 							Name:         "aka",
 							DefaultValue: "",
 							Usage:        "aka uri",
-						},
-						"language": {
-							Name:         "language",
-							DefaultValue: "",
-							Usage:        "primary language tag (RFC1766)",
 						},
 					},
 				},

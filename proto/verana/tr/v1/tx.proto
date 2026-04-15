@@ -60,6 +60,10 @@ message MsgCreateTrustRegistry {
   string aka = 4 [(gogoproto.nullable) = true];
   // language is the primary language tag (RFC1766) of this trust registry (mandatory)
   string language = 5;
+  // doc_url is the URL where the initial governance framework document is published (mandatory)
+  string doc_url = 6;
+  // doc_digest_sri is the digest SRI of the initial governance framework document (mandatory)
+  string doc_digest_sri = 7;
 }
 
 // MsgCreateTrustRegistryResponse defines the Msg/CreateTrustRegistry response type.
@@ -116,10 +120,10 @@ message MsgUpdateTrustRegistry {
   string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   // tr_id is the trust registry id (mandatory)
   uint64 tr_id = 3;
+  // did is the DID of the ecosystem (mandatory) — spec draft 13 [MOD-TR-MSG-4-1]
+  string did = 4;
   // aka is an optional additional URI of this trust registry
-  string aka = 4 [(gogoproto.nullable) = true];
-  // language is the primary language tag (RFC1766) of this trust registry
-  string language = 5 [(gogoproto.nullable) = true];
+  string aka = 5 [(gogoproto.nullable) = true];
 }
 
 // MsgUpdateTrustRegistryResponse defines the Msg/UpdateTrustRegistry response type.

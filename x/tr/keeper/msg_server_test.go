@@ -13,6 +13,11 @@ import (
 	"github.com/verana-labs/verana/x/tr/types"
 )
 
+// testDigestSRI is a valid sha384 subresource-integrity string reused by
+// MsgCreateTrustRegistry / MsgAddGovernanceFrameworkDocument tests to satisfy
+// the doc_digest_sri ValidateBasic check introduced in spec draft 13.
+const testDigestSRI = "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26"
+
 func setupMsgServer(t testing.TB) (keeper.Keeper, types.MsgServer, context.Context) {
 	k, ctx := keepertest.TrustregistryKeeper(t)
 	return k, keeper.NewMsgServerImpl(k), ctx
@@ -42,11 +47,13 @@ func TestMsgServerCreateTrustRegistry(t *testing.T) {
 		{
 			name: "Valid Create Trust Registry",
 			msg: &types.MsgCreateTrustRegistry{
-				Corporation: authority,
-				Operator:    operator,
-				Did:         validDid,
-				Aka:         "http://example.com",
-				Language:    "en",
+				Corporation:  authority,
+				Operator:     operator,
+				Did:          validDid,
+				Aka:          "http://example.com",
+				Language:     "en",
+				DocUrl:       "http://example.com/doc-v1",
+				DocDigestSri: testDigestSRI,
 			},
 			isValid: true,
 		},
@@ -88,10 +95,12 @@ func TestMsgServerAddGovernanceFrameworkDocument(t *testing.T) {
 
 	// First, create a trust registry
 	createMsg := &types.MsgCreateTrustRegistry{
-		Corporation: authority,
-		Operator:    operator,
-		Did:         validDid,
-		Language:    "en",
+		Corporation:  authority,
+		Operator:     operator,
+		Did:          validDid,
+		Language:     "en",
+		DocUrl:       "http://example.com/doc-v1",
+		DocDigestSri: testDigestSRI,
 	}
 	_, err := ms.CreateTrustRegistry(ctx, createMsg)
 	require.NoError(t, err)
@@ -268,10 +277,12 @@ func TestMsgServerIncreaseActiveGovernanceFrameworkVersion(t *testing.T) {
 
 	// Create initial trust registry
 	createMsg := &types.MsgCreateTrustRegistry{
-		Corporation: authority,
-		Operator:    operator,
-		Did:         validDid,
-		Language:    "en",
+		Corporation:  authority,
+		Operator:     operator,
+		Did:          validDid,
+		Language:     "en",
+		DocUrl:       "http://example.com/doc-v1",
+		DocDigestSri: testDigestSRI,
 	}
 	_, err := ms.CreateTrustRegistry(ctx, createMsg)
 	require.NoError(t, err)
@@ -382,11 +393,14 @@ func TestMsgServerUpdateTrustRegistry(t *testing.T) {
 	authority := sdk.AccAddress([]byte("test_authority")).String()
 	operator := sdk.AccAddress([]byte("test_operator")).String()
 	validDid := "did:example:123456789abcdefghi"
+	newDid := "did:example:updated987654321"
 	createMsg := &types.MsgCreateTrustRegistry{
-		Corporation: authority,
-		Operator:    operator,
-		Did:         validDid,
-		Language:    "en",
+		Corporation:  authority,
+		Operator:     operator,
+		Did:          validDid,
+		Language:     "en",
+		DocUrl:       "http://example.com/doc-v1",
+		DocDigestSri: testDigestSRI,
 	}
 	resp, err := ms.CreateTrustRegistry(ctx, createMsg)
 	require.NoError(t, err)
@@ -411,6 +425,7 @@ func TestMsgServerUpdateTrustRegistry(t *testing.T) {
 				Corporation: authority,
 				Operator:    operator,
 				TrId:        trID,
+				Did:         newDid,
 				Aka:         "http://new.example.com",
 			},
 			expectErr: false,
@@ -421,6 +436,7 @@ func TestMsgServerUpdateTrustRegistry(t *testing.T) {
 				Corporation: "wrong-controller",
 				Operator:    "wrong-controller",
 				TrId:        trID,
+				Did:         newDid,
 				Aka:         "http://example.com",
 			},
 			expectErr: true,
@@ -431,6 +447,7 @@ func TestMsgServerUpdateTrustRegistry(t *testing.T) {
 				Corporation: authority,
 				Operator:    operator,
 				TrId:        99999,
+				Did:         newDid,
 				Aka:         "http://example.com",
 			},
 			expectErr: true,
@@ -441,6 +458,7 @@ func TestMsgServerUpdateTrustRegistry(t *testing.T) {
 				Corporation: authority,
 				Operator:    operator,
 				TrId:        trID,
+				Did:         newDid,
 				Aka:         "", // Empty string to clear AKA
 			},
 			expectErr: false,
@@ -479,10 +497,12 @@ func TestMsgServerArchiveTrustRegistry(t *testing.T) {
 	operator := sdk.AccAddress([]byte("test_operator")).String()
 	validDid := "did:example:123456789abcdefghi"
 	createMsg := &types.MsgCreateTrustRegistry{
-		Corporation: authority,
-		Operator:    operator,
-		Did:         validDid,
-		Language:    "en",
+		Corporation:  authority,
+		Operator:     operator,
+		Did:          validDid,
+		Language:     "en",
+		DocUrl:       "http://example.com/doc-v1",
+		DocDigestSri: testDigestSRI,
 	}
 	resp, err := ms.CreateTrustRegistry(ctx, createMsg)
 	require.NoError(t, err)

@@ -45,6 +45,10 @@ export interface MsgCreateTrustRegistry {
   aka: string;
   /** language is the primary language tag (RFC1766) of this trust registry (mandatory) */
   language: string;
+  /** doc_url is the URL where the initial governance framework document is published (mandatory) */
+  docUrl: string;
+  /** doc_digest_sri is the digest SRI of the initial governance framework document (mandatory) */
+  docDigestSri: string;
 }
 
 /** MsgCreateTrustRegistryResponse defines the Msg/CreateTrustRegistry response type. */
@@ -104,10 +108,10 @@ export interface MsgUpdateTrustRegistry {
   operator: string;
   /** tr_id is the trust registry id (mandatory) */
   trId: number;
+  /** did is the DID of the ecosystem (mandatory) — spec draft 13 [MOD-TR-MSG-4-1] */
+  did: string;
   /** aka is an optional additional URI of this trust registry */
   aka: string;
-  /** language is the primary language tag (RFC1766) of this trust registry */
-  language: string;
 }
 
 /** MsgUpdateTrustRegistryResponse defines the Msg/UpdateTrustRegistry response type. */
@@ -253,7 +257,7 @@ export const MsgUpdateParamsResponse = {
 };
 
 function createBaseMsgCreateTrustRegistry(): MsgCreateTrustRegistry {
-  return { corporation: "", operator: "", did: "", aka: "", language: "" };
+  return { corporation: "", operator: "", did: "", aka: "", language: "", docUrl: "", docDigestSri: "" };
 }
 
 export const MsgCreateTrustRegistry = {
@@ -272,6 +276,12 @@ export const MsgCreateTrustRegistry = {
     }
     if (message.language !== "") {
       writer.uint32(42).string(message.language);
+    }
+    if (message.docUrl !== "") {
+      writer.uint32(50).string(message.docUrl);
+    }
+    if (message.docDigestSri !== "") {
+      writer.uint32(58).string(message.docDigestSri);
     }
     return writer;
   },
@@ -318,6 +328,20 @@ export const MsgCreateTrustRegistry = {
 
           message.language = reader.string();
           continue;
+        case 6:
+          if (tag !== 50) {
+            break;
+          }
+
+          message.docUrl = reader.string();
+          continue;
+        case 7:
+          if (tag !== 58) {
+            break;
+          }
+
+          message.docDigestSri = reader.string();
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -334,6 +358,8 @@ export const MsgCreateTrustRegistry = {
       did: isSet(object.did) ? globalThis.String(object.did) : "",
       aka: isSet(object.aka) ? globalThis.String(object.aka) : "",
       language: isSet(object.language) ? globalThis.String(object.language) : "",
+      docUrl: isSet(object.docUrl) ? globalThis.String(object.docUrl) : "",
+      docDigestSri: isSet(object.docDigestSri) ? globalThis.String(object.docDigestSri) : "",
     };
   },
 
@@ -354,6 +380,12 @@ export const MsgCreateTrustRegistry = {
     if (message.language !== "") {
       obj.language = message.language;
     }
+    if (message.docUrl !== "") {
+      obj.docUrl = message.docUrl;
+    }
+    if (message.docDigestSri !== "") {
+      obj.docDigestSri = message.docDigestSri;
+    }
     return obj;
   },
 
@@ -367,6 +399,8 @@ export const MsgCreateTrustRegistry = {
     message.did = object.did ?? "";
     message.aka = object.aka ?? "";
     message.language = object.language ?? "";
+    message.docUrl = object.docUrl ?? "";
+    message.docDigestSri = object.docDigestSri ?? "";
     return message;
   },
 };
@@ -755,7 +789,7 @@ export const MsgIncreaseActiveGovernanceFrameworkVersionResponse = {
 };
 
 function createBaseMsgUpdateTrustRegistry(): MsgUpdateTrustRegistry {
-  return { corporation: "", operator: "", trId: 0, aka: "", language: "" };
+  return { corporation: "", operator: "", trId: 0, did: "", aka: "" };
 }
 
 export const MsgUpdateTrustRegistry = {
@@ -769,11 +803,11 @@ export const MsgUpdateTrustRegistry = {
     if (message.trId !== 0) {
       writer.uint32(24).uint64(message.trId);
     }
-    if (message.aka !== "") {
-      writer.uint32(34).string(message.aka);
+    if (message.did !== "") {
+      writer.uint32(34).string(message.did);
     }
-    if (message.language !== "") {
-      writer.uint32(42).string(message.language);
+    if (message.aka !== "") {
+      writer.uint32(42).string(message.aka);
     }
     return writer;
   },
@@ -811,14 +845,14 @@ export const MsgUpdateTrustRegistry = {
             break;
           }
 
-          message.aka = reader.string();
+          message.did = reader.string();
           continue;
         case 5:
           if (tag !== 42) {
             break;
           }
 
-          message.language = reader.string();
+          message.aka = reader.string();
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -834,8 +868,8 @@ export const MsgUpdateTrustRegistry = {
       corporation: isSet(object.corporation) ? globalThis.String(object.corporation) : "",
       operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
       trId: isSet(object.trId) ? globalThis.Number(object.trId) : 0,
+      did: isSet(object.did) ? globalThis.String(object.did) : "",
       aka: isSet(object.aka) ? globalThis.String(object.aka) : "",
-      language: isSet(object.language) ? globalThis.String(object.language) : "",
     };
   },
 
@@ -850,11 +884,11 @@ export const MsgUpdateTrustRegistry = {
     if (message.trId !== 0) {
       obj.trId = Math.round(message.trId);
     }
+    if (message.did !== "") {
+      obj.did = message.did;
+    }
     if (message.aka !== "") {
       obj.aka = message.aka;
-    }
-    if (message.language !== "") {
-      obj.language = message.language;
     }
     return obj;
   },
@@ -867,8 +901,8 @@ export const MsgUpdateTrustRegistry = {
     message.corporation = object.corporation ?? "";
     message.operator = object.operator ?? "";
     message.trId = object.trId ?? 0;
+    message.did = object.did ?? "";
     message.aka = object.aka ?? "";
-    message.language = object.language ?? "";
     return message;
   },
 };

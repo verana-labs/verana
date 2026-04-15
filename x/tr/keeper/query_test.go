@@ -21,10 +21,12 @@ func setupTestData(t *testing.T) (keeper.Keeper, types.QueryServer, context.Cont
 	authority := sdk.AccAddress([]byte("test_authority")).String()
 	operator := sdk.AccAddress([]byte("test_operator")).String()
 	createMsg := &types.MsgCreateTrustRegistry{
-		Corporation: authority,
-		Operator:    operator,
-		Did:         "did:example:123",
-		Language:    "en",
+		Corporation:  authority,
+		Operator:     operator,
+		Did:          "did:example:123",
+		Language:     "en",
+		DocUrl:       "http://example.com/doc-v1",
+		DocDigestSri: testDigestSRI,
 	}
 	_, err := ms.CreateTrustRegistry(ctx, createMsg)
 	require.NoError(t, err)
@@ -33,10 +35,12 @@ func setupTestData(t *testing.T) (keeper.Keeper, types.QueryServer, context.Cont
 	trID, err := k.TrustRegistryDIDIndex.Get(ctx, "did:example:123")
 	require.NoError(t, err)
 
-	// Spec draft 13: active version is immutable, so documents can only be added
-	// to future (in-progress) versions. Seed v2 with an en doc, promote v2 to
-	// active, then add v3 docs in en/es. After setup:
-	//   version 2: 1 document (en) — active
+	// Spec draft 13: active version is immutable. Create seeds v1 with a
+	// default-language document (from doc_url/doc_digest_sri). Here we also
+	// add v2 (promoted to active) and v3 (pending) so query tests cover the
+	// full active-vs-pending surface. After setup:
+	//   version 1: 1 document (en) — active initially, then superseded
+	//   version 2: 1 document (en) — active after promotion
 	//   version 3: 2 documents (en, es) — pending
 	_, err = ms.AddGovernanceFrameworkDocument(ctx, &types.MsgAddGovernanceFrameworkDocument{
 		Corporation: authority,
@@ -100,13 +104,13 @@ func TestGetTrustRegistry(t *testing.T) {
 			check: func(t *testing.T, response *types.QueryGetTrustRegistryResponse) {
 				require.NotNil(t, response.TrustRegistry)
 				require.Equal(t, trID, response.TrustRegistry.Id)
-				require.Len(t, response.TrustRegistry.Versions, 3) // v1 (empty), v2 (active), v3 (pending)
+				require.Len(t, response.TrustRegistry.Versions, 3) // v1 (from create), v2 (active), v3 (pending)
 
 				// Check versions and their documents
 				for _, version := range response.TrustRegistry.Versions {
 					switch version.Version {
 					case 1:
-						require.Len(t, version.Documents, 0) // v1 empty (create seeds but spec draft 13 no longer bundles)
+						require.Len(t, version.Documents, 1) // v1 initial GFD seeded on create
 					case 2:
 						require.Len(t, version.Documents, 1) // v2 active: en
 					case 3:
@@ -177,10 +181,12 @@ func TestListTrustRegistries(t *testing.T) {
 	// Create additional trust registry for testing
 	ms := keeper.NewMsgServerImpl(k)
 	createMsg := &types.MsgCreateTrustRegistry{
-		Corporation: "another_authority",
-		Operator:    "another_operator",
-		Did:         "did:example:456",
-		Language:    "fr",
+		Corporation:  "another_authority",
+		Operator:     "another_operator",
+		Did:          "did:example:456",
+		Language:     "fr",
+		DocUrl:       "http://example.com/tr2-doc-v1",
+		DocDigestSri: testDigestSRI,
 	}
 	_, err := ms.CreateTrustRegistry(ctx, createMsg)
 	require.NoError(t, err)
