@@ -301,6 +301,7 @@ func TestRenewPermissionVP(t *testing.T) {
 		Modified:        &now,
 		ValidatorPermId: validatorPermID,
 		VpState:         types.ValidationState_VALIDATED,
+		EffectiveFrom:   &pastTime,
 	}
 	applicantPermID, err := k.CreatePermission(sdk.UnwrapSDKContext(ctx), applicantPerm)
 	require.NoError(t, err)
@@ -398,6 +399,7 @@ func TestRenewPermissionVP_AuthzCheck(t *testing.T) {
 		Modified:        &now,
 		ValidatorPermId: validatorPermID,
 		VpState:         types.ValidationState_VALIDATED,
+		EffectiveFrom:   &pastTime,
 	}
 	applicantPermID, err := k.CreatePermission(sdkCtx, applicantPerm)
 	require.NoError(t, err)
@@ -524,6 +526,7 @@ func TestRenewPermissionVP_VpStatePrecondition(t *testing.T) {
 			Modified:        &now,
 			ValidatorPermId: validatorPermID,
 			VpState:         types.ValidationState_VALIDATED,
+			EffectiveFrom:   &pastTime,
 		}
 		validatedPermID, err := k.CreatePermission(sdkCtx, validatedPerm)
 		require.NoError(t, err)
@@ -585,6 +588,7 @@ func TestRenewPermissionVP_ValidatorPermChecks(t *testing.T) {
 			Modified:        &now,
 			ValidatorPermId: revokedValPermID,
 			VpState:         types.ValidationState_VALIDATED,
+			EffectiveFrom:   &pastTime,
 		}
 		applicantPermID, err := k.CreatePermission(sdkCtx, applicantPerm)
 		require.NoError(t, err)
@@ -622,6 +626,7 @@ func TestRenewPermissionVP_ValidatorPermChecks(t *testing.T) {
 			Modified:        &now,
 			ValidatorPermId: expiredValPermID,
 			VpState:         types.ValidationState_VALIDATED,
+			EffectiveFrom:   &pastTime,
 		}
 		applicantPermID, err := k.CreatePermission(sdkCtx, applicantPerm)
 		require.NoError(t, err)
@@ -657,6 +662,7 @@ func TestRenewPermissionVP_ValidatorPermChecks(t *testing.T) {
 			Modified:        &now,
 			ValidatorPermId: inactiveValPermID,
 			VpState:         types.ValidationState_VALIDATED,
+			EffectiveFrom:   &pastTime,
 		}
 		applicantPermID, err := k.CreatePermission(sdkCtx, applicantPerm)
 		require.NoError(t, err)
@@ -680,6 +686,7 @@ func TestRenewPermissionVP_ValidatorPermChecks(t *testing.T) {
 			Modified:        &now,
 			ValidatorPermId: 99999, // non-existent
 			VpState:         types.ValidationState_VALIDATED,
+			EffectiveFrom:   &pastTime,
 		}
 		applicantPermID, err := k.CreatePermission(sdkCtx, applicantPerm)
 		require.NoError(t, err)
@@ -737,6 +744,7 @@ func TestRenewPermissionVP_FeeAndDepositAccumulation(t *testing.T) {
 			Modified:        &now,
 			ValidatorPermId: validatorPermID,
 			VpState:         types.ValidationState_VALIDATED,
+			EffectiveFrom:   &pastTime,
 			Deposit:         initialDeposit,
 		}
 		applicantPermID, err := k.CreatePermission(sdkCtx, applicantPerm)
@@ -769,6 +777,7 @@ func TestRenewPermissionVP_FeeAndDepositAccumulation(t *testing.T) {
 			Modified:        &now,
 			ValidatorPermId: validatorPermID,
 			VpState:         types.ValidationState_VALIDATED,
+			EffectiveFrom:   &pastTime,
 		}
 		applicantPermID, err := k.CreatePermission(sdkCtx, applicantPerm)
 		require.NoError(t, err)

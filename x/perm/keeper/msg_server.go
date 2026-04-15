@@ -121,6 +121,14 @@ func (ms msgServer) RenewPermissionVP(goCtx context.Context, msg *types.MsgRenew
 		return nil, fmt.Errorf("perm vp_state must be VALIDATED to renew, current state: %s", applicantPerm.VpState.String())
 	}
 
+	// [MOD-PERM-MSG-2-2-2] applicant_perm MUST be an active permission.
+	// Spec: "active permission" = effective_from < now AND (effective_until is null OR > now)
+	// AND revoked is null AND slashed is null. Without this check, revoked/slashed/expired
+	// permissions can be renewed, bypassing governance revocation.
+	if err := IsValidPermission(applicantPerm, ctx.BlockTime()); err != nil {
+		return nil, fmt.Errorf("applicant perm is not active: %w", err)
+	}
+
 	// Get validator perm
 	validatorPerm, err := ms.Keeper.GetPermissionByID(ctx, applicantPerm.ValidatorPermId)
 	if err != nil {
@@ -1379,17 +1387,26 @@ func (ms msgServer) SelfCreatePermission(goCtx context.Context, msg *types.MsgSe
 		return nil, fmt.Errorf("validator permission is expired")
 	}
 
-	// [MOD-PERM-MSG-14-2-1] effective_from checks
-	if msg.EffectiveFrom != nil {
-		if !msg.EffectiveFrom.After(now) {
+	// [MOD-PERM-MSG-14-2-1] effective_from checks. Spec tags the field "optional"
+	// but the precondition "effective_from MUST be in the future" is unconditional,
+	// and an "active permission" requires effective_from < now. A nil effective_from
+	// creates a permanently-inactive permission that can never be used or repaired
+	// (counter slot and overlap slot squatted). To match spec intent, treat a nil
+	// effective_from as "now" so the permission becomes active immediately.
+	effectiveFrom := msg.EffectiveFrom
+	if effectiveFrom == nil {
+		t := now
+		effectiveFrom = &t
+	} else {
+		if !effectiveFrom.After(now) {
 			return nil, fmt.Errorf("effective_from must be in the future")
 		}
 		// MUST be >= validator_perm.effective_from
-		if validatorPerm.EffectiveFrom != nil && msg.EffectiveFrom.Before(*validatorPerm.EffectiveFrom) {
+		if validatorPerm.EffectiveFrom != nil && effectiveFrom.Before(*validatorPerm.EffectiveFrom) {
 			return nil, fmt.Errorf("effective_from must be >= validator_perm.effective_from")
 		}
 		// if validator_perm.effective_until is not null, MUST be < validator_perm.effective_until
-		if validatorPerm.EffectiveUntil != nil && !msg.EffectiveFrom.Before(*validatorPerm.EffectiveUntil) {
+		if validatorPerm.EffectiveUntil != nil && !effectiveFrom.Before(*validatorPerm.EffectiveUntil) {
 			return nil, fmt.Errorf("effective_from must be < validator_perm.effective_until")
 		}
 	}
@@ -1402,7 +1419,7 @@ func (ms msgServer) SelfCreatePermission(goCtx context.Context, msg *types.MsgSe
 		}
 	} else {
 		// must be greater than effective_from
-		if msg.EffectiveFrom != nil && !msg.EffectiveUntil.After(*msg.EffectiveFrom) {
+		if !msg.EffectiveUntil.After(*effectiveFrom) {
 			return nil, fmt.Errorf("effective_until must be greater than effective_from")
 		}
 		// if validator_perm.effective_until is not null, MUST be <= validator_perm.effective_until
@@ -1444,7 +1461,7 @@ func (ms msgServer) SelfCreatePermission(goCtx context.Context, msg *types.MsgSe
 	}
 
 	// [MOD-PERM-MSG-14-2-4] Overlap checks
-	if err := ms.checkCreatePermissionOverlap(ctx, validatorPerm.SchemaId, msg); err != nil {
+	if err := ms.checkCreatePermissionOverlap(ctx, validatorPerm.SchemaId, msg, effectiveFrom); err != nil {
 		return nil, err
 	}
 
@@ -1458,7 +1475,7 @@ func (ms msgServer) SelfCreatePermission(goCtx context.Context, msg *types.MsgSe
 		Corporation:                  msg.Corporation,
 		VsOperator:                   msg.VsOperator,
 		Created:                      &now,
-		EffectiveFrom:                msg.EffectiveFrom,
+		EffectiveFrom:                effectiveFrom,
 		EffectiveUntil:               msg.EffectiveUntil,
 		ValidationFees:               0,
 		IssuanceFees:                 0,
@@ -1511,7 +1528,7 @@ func (ms msgServer) SelfCreatePermission(goCtx context.Context, msg *types.MsgSe
 }
 
 // [MOD-PERM-MSG-14-2-4] Overlap checks for SelfCreatePermission
-func (ms msgServer) checkCreatePermissionOverlap(ctx sdk.Context, schemaId uint64, msg *types.MsgSelfCreatePermission) error {
+func (ms msgServer) checkCreatePermissionOverlap(ctx sdk.Context, schemaId uint64, msg *types.MsgSelfCreatePermission, effectiveFrom *time.Time) error {
 	// Find all active permissions (not revoked, not slashed, not repaid)
 	// for same cs.id, type, validator_perm_id, authority
 	var overlaps []types.Permission
@@ -1535,7 +1552,7 @@ func (ms msgServer) checkCreatePermissionOverlap(ctx sdk.Context, schemaId uint6
 			return fmt.Errorf("existing permission %d never expires; adjust it first", p.Id)
 		}
 		// if p.effective_until is greater than effective_from, abort
-		if msg.EffectiveFrom != nil && p.EffectiveUntil.After(*msg.EffectiveFrom) {
+		if effectiveFrom != nil && p.EffectiveUntil.After(*effectiveFrom) {
 			return fmt.Errorf("existing permission %d overlaps: its effective_until is after your effective_from", p.Id)
 		}
 		// if p.effective_from is lower than effective_until, abort
