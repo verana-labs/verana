@@ -10,8 +10,8 @@ import "google/protobuf/timestamp.proto";
 option go_package = "github.com/verana-labs/verana/x/de/types";
 
 message OperatorAuthorization {
-  // authority is the group granting the authorization.
-  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // corporation is the group granting the authorization.
+  string corporation = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   // operator is the account receiving the authorization.
   string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   // msg_types is the list of module message types this authorization applies to.
@@ -35,6 +35,37 @@ message OperatorAuthorization {
   google.protobuf.Duration period = 7 [(gogoproto.stdduration) = true];
 }
 
+// OperatorAuthorizationUsage tracks per-authorization spend consumption so
+// spec [AUTHZ-CHECK-1] can enforce the spend_limit / period-reset invariant:
+//
+//   "If oauthz.spend_limit is set, the remaining balance MUST be sufficient
+//    for the operation. After successful execution, the consumed amount MUST
+//    be deducted from the remaining balance. If oauthz.period is set and the
+//    current period has elapsed since the last reset, the remaining balance
+//    MUST be reset to oauthz.spend_limit before evaluating the check above."
+//
+// Stored in the DE module keyed by (corporation, operator) just like the
+// parent OperatorAuthorization record.
+message OperatorAuthorizationUsage {
+  // corporation is the group that granted the authorization.
+  string corporation = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // operator is the account holding the authorization.
+  string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // remaining is the balance still available inside the current period.
+  // Decremented on each successful execution that consumed funds.
+  repeated cosmos.base.v1beta1.Coin remaining = 3 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+  // last_reset is the timestamp at which `remaining` was last refilled to
+  // the parent authorization's spend_limit. Zero when no period has elapsed
+  // since grant time.
+  google.protobuf.Timestamp last_reset = 4 [
+    (gogoproto.stdtime) = true,
+    (gogoproto.nullable) = false
+  ];
+}
+
 message FeeGrant {
   // grantor is the authority group granting the fee allowance.
   string grantor = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
@@ -56,8 +87,8 @@ message FeeGrant {
 }
 
 message VSOperatorAuthorization {
-  // authority is the group granting the authorization.
-  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // corporation is the group granting the authorization.
+  string corporation = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   // vs_operator is the operator account receiving the authorization.
   string vs_operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   // permissions is the list of permission ids for which this authorization is

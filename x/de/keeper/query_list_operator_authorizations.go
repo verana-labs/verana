@@ -28,8 +28,8 @@ func (q queryServer) ListOperatorAuthorizations(ctx context.Context, req *types.
 	var results []types.OperatorAuthorization
 
 	err := q.k.OperatorAuthorizations.Walk(ctx, nil, func(key collections.Pair[string, string], oa types.OperatorAuthorization) (bool, error) {
-		// Filter by authority if specified
-		if req.Authority != "" && oa.Authority != req.Authority {
+		// Filter by corporation if specified
+		if req.Corporation != "" && oa.Corporation != req.Corporation {
 			return false, nil
 		}
 		// Filter by operator if specified

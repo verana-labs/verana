@@ -32,8 +32,8 @@ var _ = time.Kitchen
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 type OperatorAuthorization struct {
-	// authority is the group granting the authorization.
-	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
+	// corporation is the group granting the authorization.
+	Corporation string `protobuf:"bytes,1,opt,name=corporation,proto3" json:"corporation,omitempty"`
 	// operator is the account receiving the authorization.
 	Operator string `protobuf:"bytes,2,opt,name=operator,proto3" json:"operator,omitempty"`
 	// msg_types is the list of module message types this authorization applies to.
@@ -84,9 +84,9 @@ func (m *OperatorAuthorization) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_OperatorAuthorization proto.InternalMessageInfo
 
-func (m *OperatorAuthorization) GetAuthority() string {
+func (m *OperatorAuthorization) GetCorporation() string {
 	if m != nil {
-		return m.Authority
+		return m.Corporation
 	}
 	return ""
 }
@@ -133,6 +133,92 @@ func (m *OperatorAuthorization) GetPeriod() *time.Duration {
 	return nil
 }
 
+// OperatorAuthorizationUsage tracks per-authorization spend consumption so
+// spec [AUTHZ-CHECK-1] can enforce the spend_limit / period-reset invariant:
+//
+//	"If oauthz.spend_limit is set, the remaining balance MUST be sufficient
+//	 for the operation. After successful execution, the consumed amount MUST
+//	 be deducted from the remaining balance. If oauthz.period is set and the
+//	 current period has elapsed since the last reset, the remaining balance
+//	 MUST be reset to oauthz.spend_limit before evaluating the check above."
+//
+// Stored in the DE module keyed by (corporation, operator) just like the
+// parent OperatorAuthorization record.
+type OperatorAuthorizationUsage struct {
+	// corporation is the group that granted the authorization.
+	Corporation string `protobuf:"bytes,1,opt,name=corporation,proto3" json:"corporation,omitempty"`
+	// operator is the account holding the authorization.
+	Operator string `protobuf:"bytes,2,opt,name=operator,proto3" json:"operator,omitempty"`
+	// remaining is the balance still available inside the current period.
+	// Decremented on each successful execution that consumed funds.
+	Remaining github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,3,rep,name=remaining,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"remaining"`
+	// last_reset is the timestamp at which `remaining` was last refilled to
+	// the parent authorization's spend_limit. Zero when no period has elapsed
+	// since grant time.
+	LastReset time.Time `protobuf:"bytes,4,opt,name=last_reset,json=lastReset,proto3,stdtime" json:"last_reset"`
+}
+
+func (m *OperatorAuthorizationUsage) Reset()         { *m = OperatorAuthorizationUsage{} }
+func (m *OperatorAuthorizationUsage) String() string { return proto.CompactTextString(m) }
+func (*OperatorAuthorizationUsage) ProtoMessage()    {}
+func (*OperatorAuthorizationUsage) Descriptor() ([]byte, []int) {
+	return fileDescriptor_ceceb116c414c04d, []int{1}
+}
+func (m *OperatorAuthorizationUsage) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *OperatorAuthorizationUsage) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_OperatorAuthorizationUsage.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *OperatorAuthorizationUsage) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_OperatorAuthorizationUsage.Merge(m, src)
+}
+func (m *OperatorAuthorizationUsage) XXX_Size() int {
+	return m.Size()
+}
+func (m *OperatorAuthorizationUsage) XXX_DiscardUnknown() {
+	xxx_messageInfo_OperatorAuthorizationUsage.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_OperatorAuthorizationUsage proto.InternalMessageInfo
+
+func (m *OperatorAuthorizationUsage) GetCorporation() string {
+	if m != nil {
+		return m.Corporation
+	}
+	return ""
+}
+
+func (m *OperatorAuthorizationUsage) GetOperator() string {
+	if m != nil {
+		return m.Operator
+	}
+	return ""
+}
+
+func (m *OperatorAuthorizationUsage) GetRemaining() github_com_cosmos_cosmos_sdk_types.Coins {
+	if m != nil {
+		return m.Remaining
+	}
+	return nil
+}
+
+func (m *OperatorAuthorizationUsage) GetLastReset() time.Time {
+	if m != nil {
+		return m.LastReset
+	}
+	return time.Time{}
+}
+
 type FeeGrant struct {
 	// grantor is the authority group granting the fee allowance.
 	Grantor string `protobuf:"bytes,1,opt,name=grantor,proto3" json:"grantor,omitempty"`
@@ -154,7 +240,7 @@ func (m *FeeGrant) Reset()         { *m = FeeGrant{} }
 func (m *FeeGrant) String() string { return proto.CompactTextString(m) }
 func (*FeeGrant) ProtoMessage()    {}
 func (*FeeGrant) Descriptor() ([]byte, []int) {
-	return fileDescriptor_ceceb116c414c04d, []int{1}
+	return fileDescriptor_ceceb116c414c04d, []int{2}
 }
 func (m *FeeGrant) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -226,8 +312,8 @@ func (m *FeeGrant) GetPeriod() *time.Duration {
 }
 
 type VSOperatorAuthorization struct {
-	// authority is the group granting the authorization.
-	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
+	// corporation is the group granting the authorization.
+	Corporation string `protobuf:"bytes,1,opt,name=corporation,proto3" json:"corporation,omitempty"`
 	// vs_operator is the operator account receiving the authorization.
 	VsOperator string `protobuf:"bytes,2,opt,name=vs_operator,json=vsOperator,proto3" json:"vs_operator,omitempty"`
 	// permissions is the list of permission ids for which this authorization is
@@ -239,7 +325,7 @@ func (m *VSOperatorAuthorization) Reset()         { *m = VSOperatorAuthorization
 func (m *VSOperatorAuthorization) String() string { return proto.CompactTextString(m) }
 func (*VSOperatorAuthorization) ProtoMessage()    {}
 func (*VSOperatorAuthorization) Descriptor() ([]byte, []int) {
-	return fileDescriptor_ceceb116c414c04d, []int{2}
+	return fileDescriptor_ceceb116c414c04d, []int{3}
 }
 func (m *VSOperatorAuthorization) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -268,9 +354,9 @@ func (m *VSOperatorAuthorization) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_VSOperatorAuthorization proto.InternalMessageInfo
 
-func (m *VSOperatorAuthorization) GetAuthority() string {
+func (m *VSOperatorAuthorization) GetCorporation() string {
 	if m != nil {
-		return m.Authority
+		return m.Corporation
 	}
 	return ""
 }
@@ -291,6 +377,7 @@ func (m *VSOperatorAuthorization) GetPermissions() []uint64 {
 
 func init() {
 	proto.RegisterType((*OperatorAuthorization)(nil), "verana.de.v1.OperatorAuthorization")
+	proto.RegisterType((*OperatorAuthorizationUsage)(nil), "verana.de.v1.OperatorAuthorizationUsage")
 	proto.RegisterType((*FeeGrant)(nil), "verana.de.v1.FeeGrant")
 	proto.RegisterType((*VSOperatorAuthorization)(nil), "verana.de.v1.VSOperatorAuthorization")
 }
@@ -298,41 +385,44 @@ func init() {
 func init() { proto.RegisterFile("verana/de/v1/types.proto", fileDescriptor_ceceb116c414c04d) }
 
 var fileDescriptor_ceceb116c414c04d = []byte{
-	// 530 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xcc, 0x54, 0x31, 0x6f, 0xd3, 0x40,
-	0x14, 0x8e, 0x9b, 0x34, 0x4d, 0x2e, 0x20, 0x24, 0xab, 0x08, 0x27, 0x48, 0x4e, 0xd4, 0xc9, 0x4b,
-	0xce, 0x24, 0x20, 0x10, 0x1b, 0x35, 0x08, 0x16, 0x24, 0x24, 0xa7, 0x62, 0x60, 0xb1, 0xce, 0xf1,
-	0x8b, 0x7b, 0x22, 0xf6, 0x59, 0x77, 0x17, 0xab, 0x65, 0xe2, 0x27, 0x74, 0xe4, 0x37, 0x30, 0x30,
-	0xf1, 0x23, 0x3a, 0x56, 0x4c, 0x4c, 0x14, 0x25, 0x7f, 0x82, 0x11, 0xd9, 0x77, 0x6e, 0x03, 0x0c,
-	0x01, 0xd1, 0xa1, 0x53, 0xee, 0xbd, 0xf7, 0x7d, 0xdf, 0x8b, 0xbe, 0xcf, 0x77, 0xc8, 0xca, 0x81,
-	0x93, 0x94, 0xb8, 0x11, 0xb8, 0xf9, 0xc8, 0x95, 0xc7, 0x19, 0x08, 0x9c, 0x71, 0x26, 0x99, 0x79,
-	0x43, 0x4d, 0x70, 0x04, 0x38, 0x1f, 0xf5, 0xec, 0x29, 0x13, 0x09, 0x13, 0x6e, 0x48, 0x44, 0x81,
-	0x0c, 0x41, 0x92, 0x91, 0x3b, 0x65, 0x34, 0x55, 0xe8, 0x5e, 0x57, 0xcd, 0x83, 0xb2, 0x72, 0x55,
-	0xa1, 0x47, 0xbb, 0x31, 0x8b, 0x99, 0xea, 0x17, 0x27, 0xdd, 0xb5, 0x63, 0xc6, 0xe2, 0x39, 0xb8,
-	0x65, 0x15, 0x2e, 0x66, 0x6e, 0xb4, 0xe0, 0x44, 0x52, 0x56, 0x09, 0xf6, 0x7f, 0x9f, 0x4b, 0x9a,
-	0x80, 0x90, 0x24, 0xc9, 0x14, 0x60, 0xef, 0x7d, 0x03, 0xdd, 0x7e, 0x95, 0x01, 0x27, 0x92, 0xf1,
-	0xfd, 0x85, 0x3c, 0x64, 0x9c, 0xbe, 0x2b, 0x05, 0xcc, 0x87, 0xa8, 0x4d, 0x54, 0x43, 0x1e, 0x5b,
-	0xc6, 0xc0, 0x70, 0xda, 0x9e, 0xf5, 0xe5, 0xf3, 0x70, 0x57, 0xff, 0xab, 0xfd, 0x28, 0xe2, 0x20,
-	0xc4, 0x44, 0x72, 0x9a, 0xc6, 0xfe, 0x25, 0xd4, 0x7c, 0x80, 0x5a, 0x4c, 0x0b, 0x5a, 0x5b, 0x1b,
-	0x68, 0x17, 0x48, 0xf3, 0x2e, 0x6a, 0x27, 0x22, 0x0e, 0x4a, 0xeb, 0xac, 0xfa, 0xa0, 0xee, 0xb4,
-	0xfd, 0x56, 0x22, 0xe2, 0x83, 0xa2, 0x36, 0xe7, 0xa8, 0x23, 0x32, 0x48, 0xa3, 0x60, 0x4e, 0x13,
-	0x2a, 0xad, 0xc6, 0xa0, 0xee, 0x74, 0xc6, 0x5d, 0xac, 0x25, 0x0b, 0x33, 0xb1, 0x36, 0x13, 0x3f,
-	0x65, 0x34, 0xf5, 0xee, 0x9d, 0x7e, 0xeb, 0xd7, 0x3e, 0x9e, 0xf7, 0x9d, 0x98, 0xca, 0xc3, 0x45,
-	0x88, 0xa7, 0x2c, 0xd1, 0x66, 0xea, 0x9f, 0xa1, 0x88, 0xde, 0xea, 0x98, 0x0a, 0x82, 0xf0, 0x51,
-	0xa9, 0xff, 0xb2, 0x90, 0x37, 0x05, 0xba, 0x35, 0x03, 0x08, 0xd6, 0x37, 0x6e, 0x5f, 0xfd, 0xc6,
-	0x9b, 0x33, 0x80, 0xc9, 0xe5, 0xd2, 0x27, 0x08, 0xc1, 0x51, 0x46, 0x55, 0x78, 0x56, 0x73, 0x60,
-	0x38, 0x9d, 0x71, 0x0f, 0xab, 0xf4, 0x70, 0x95, 0x1e, 0x3e, 0xa8, 0xd2, 0xf3, 0x1a, 0x27, 0xe7,
-	0x7d, 0xc3, 0x5f, 0xe3, 0x98, 0x8f, 0x50, 0x33, 0x03, 0x4e, 0x59, 0x64, 0xed, 0x94, 0xec, 0xee,
-	0x1f, 0xec, 0x67, 0xfa, 0xdb, 0xf0, 0x1a, 0x1f, 0x0a, 0xb2, 0x86, 0xef, 0xfd, 0xd8, 0x42, 0xad,
-	0xe7, 0x00, 0x2f, 0x38, 0x49, 0xa5, 0x39, 0x46, 0x3b, 0x71, 0x71, 0x60, 0x7c, 0x63, 0xe6, 0x15,
-	0xf0, 0x82, 0x03, 0xb0, 0x31, 0xf0, 0x0a, 0x78, 0x9d, 0xf2, 0xfe, 0xd5, 0xfa, 0xed, 0xff, 0xb2,
-	0xbe, 0xf9, 0x6f, 0xd6, 0x7f, 0x32, 0xd0, 0x9d, 0xd7, 0x93, 0xab, 0xbd, 0x7f, 0x8f, 0x51, 0x27,
-	0x17, 0xc1, 0x5f, 0x5f, 0x41, 0x94, 0x8b, 0x6a, 0xbf, 0x39, 0x40, 0x9d, 0x0c, 0x78, 0x42, 0x85,
-	0xa0, 0x2c, 0x55, 0xb1, 0x34, 0xfc, 0xf5, 0x96, 0xe7, 0x9d, 0x2e, 0x6d, 0xe3, 0x6c, 0x69, 0x1b,
-	0xdf, 0x97, 0xb6, 0x71, 0xb2, 0xb2, 0x6b, 0x67, 0x2b, 0xbb, 0xf6, 0x75, 0x65, 0xd7, 0xde, 0xac,
-	0x7b, 0xaf, 0xde, 0xbc, 0xe1, 0x9c, 0x84, 0x42, 0x9f, 0xdd, 0xa3, 0xe2, 0x6d, 0x2c, 0x13, 0x08,
-	0x9b, 0xa5, 0x2b, 0xf7, 0x7f, 0x06, 0x00, 0x00, 0xff, 0xff, 0xa4, 0x5f, 0x98, 0x28, 0x35, 0x05,
-	0x00, 0x00,
+	// 588 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xcc, 0x55, 0x3f, 0x6f, 0xd3, 0x4e,
+	0x18, 0x8e, 0xdb, 0x34, 0x4d, 0xce, 0xbf, 0x9f, 0x90, 0xac, 0x22, 0x9c, 0x20, 0x39, 0x51, 0xa6,
+	0x2c, 0xb1, 0x49, 0x40, 0x42, 0x30, 0x51, 0x17, 0xc1, 0x82, 0x84, 0xe4, 0x14, 0x06, 0x16, 0xeb,
+	0x1c, 0xbf, 0xb9, 0x9e, 0x88, 0x7d, 0xd6, 0xdd, 0x25, 0x2a, 0xcc, 0x7c, 0x80, 0x8e, 0x7c, 0x06,
+	0x46, 0xc4, 0xcc, 0xdc, 0xb1, 0x62, 0x62, 0xa2, 0x28, 0xf9, 0x12, 0x8c, 0xe8, 0xec, 0x73, 0x1b,
+	0xfe, 0x48, 0x01, 0x11, 0x09, 0xa6, 0xdc, 0x7b, 0xef, 0xf3, 0x3c, 0xaf, 0xf5, 0xbc, 0x4f, 0x6c,
+	0x64, 0xcf, 0x81, 0xe3, 0x14, 0x7b, 0x31, 0x78, 0xf3, 0x81, 0x27, 0x5f, 0x64, 0x20, 0xdc, 0x8c,
+	0x33, 0xc9, 0xac, 0xff, 0x8a, 0x8e, 0x1b, 0x83, 0x3b, 0x1f, 0xb4, 0x9c, 0x31, 0x13, 0x09, 0x13,
+	0x5e, 0x84, 0x85, 0x42, 0x46, 0x20, 0xf1, 0xc0, 0x1b, 0x33, 0x9a, 0x16, 0xe8, 0x56, 0xb3, 0xe8,
+	0x87, 0x79, 0xe5, 0x15, 0x85, 0x6e, 0xed, 0x11, 0x46, 0x58, 0x71, 0xaf, 0x4e, 0xfa, 0xd6, 0x21,
+	0x8c, 0x91, 0x29, 0x78, 0x79, 0x15, 0xcd, 0x26, 0x5e, 0x3c, 0xe3, 0x58, 0x52, 0x56, 0x0a, 0xb6,
+	0xbf, 0xef, 0x4b, 0x9a, 0x80, 0x90, 0x38, 0xc9, 0x0a, 0x40, 0xf7, 0x55, 0x15, 0x5d, 0x7d, 0x9c,
+	0x01, 0xc7, 0x92, 0xf1, 0xfd, 0x99, 0x3c, 0x62, 0x9c, 0xbe, 0xcc, 0x05, 0xac, 0xbb, 0xc8, 0x1c,
+	0x33, 0x9e, 0xb1, 0x42, 0xcf, 0x36, 0x3a, 0x46, 0xaf, 0xe1, 0xdb, 0x1f, 0xde, 0xf5, 0xf7, 0xf4,
+	0x73, 0xed, 0xc7, 0x31, 0x07, 0x21, 0x46, 0x92, 0xd3, 0x94, 0x04, 0xab, 0x60, 0xeb, 0x16, 0xaa,
+	0x33, 0x2d, 0x6a, 0x6f, 0xad, 0x21, 0x5e, 0x20, 0xad, 0xeb, 0xa8, 0x91, 0x08, 0x12, 0xe6, 0xf6,
+	0xd9, 0xdb, 0x9d, 0xed, 0x5e, 0x23, 0xa8, 0x27, 0x82, 0x1c, 0xaa, 0xda, 0x9a, 0x22, 0x53, 0x64,
+	0x90, 0xc6, 0xe1, 0x94, 0x26, 0x54, 0xda, 0xd5, 0xce, 0x76, 0xcf, 0x1c, 0x36, 0x5d, 0x2d, 0xa9,
+	0x0c, 0x75, 0xb5, 0xa1, 0xee, 0x01, 0xa3, 0xa9, 0x7f, 0xe3, 0xf4, 0x53, 0xbb, 0xf2, 0xe6, 0xbc,
+	0xdd, 0x23, 0x54, 0x1e, 0xcd, 0x22, 0x77, 0xcc, 0x12, 0x6d, 0xa8, 0xfe, 0xe9, 0x8b, 0xf8, 0xb9,
+	0x5e, 0x95, 0x22, 0x88, 0x00, 0xe5, 0xfa, 0x8f, 0x94, 0xbc, 0x25, 0xd0, 0x95, 0x09, 0x40, 0xb8,
+	0x3a, 0x71, 0x67, 0xf3, 0x13, 0xff, 0x9f, 0x00, 0x8c, 0x2e, 0x87, 0xde, 0x43, 0x08, 0x8e, 0x33,
+	0xaa, 0x0d, 0xaf, 0x75, 0x8c, 0x9e, 0x39, 0x6c, 0xb9, 0xc5, 0x06, 0xdd, 0x72, 0x83, 0xee, 0x61,
+	0xb9, 0x41, 0xbf, 0x7a, 0x72, 0xde, 0x36, 0x82, 0x15, 0x8e, 0x75, 0x1b, 0xd5, 0x32, 0xe0, 0x94,
+	0xc5, 0xf6, 0x6e, 0xce, 0x6e, 0xfe, 0xc0, 0xbe, 0xaf, 0xf3, 0xe1, 0x57, 0x5f, 0x2b, 0xb2, 0x86,
+	0x77, 0xdf, 0x6f, 0xa1, 0xd6, 0x4f, 0x63, 0xf0, 0x44, 0x60, 0x02, 0x7f, 0x21, 0x0b, 0x14, 0x35,
+	0x38, 0x24, 0x98, 0xa6, 0x34, 0x25, 0x79, 0x16, 0x36, 0x6c, 0xfd, 0xa5, 0xba, 0x75, 0x80, 0xd0,
+	0x14, 0x0b, 0x19, 0x72, 0x10, 0xa0, 0x82, 0xb5, 0xce, 0xf6, 0xba, 0x1a, 0x96, 0x5b, 0xdf, 0x50,
+	0xbc, 0x40, 0xd1, 0xba, 0x5f, 0xb6, 0x50, 0xfd, 0x01, 0xc0, 0x43, 0x8e, 0x53, 0x69, 0x0d, 0xd1,
+	0x2e, 0x51, 0x07, 0xc6, 0xd7, 0x5a, 0x55, 0x02, 0x2f, 0x38, 0x00, 0x6b, 0x5d, 0x2a, 0x81, 0xff,
+	0xd2, 0x1f, 0xe6, 0xdb, 0xec, 0xee, 0xfc, 0x51, 0x76, 0x6b, 0xbf, 0x97, 0xdd, 0xb7, 0x06, 0xba,
+	0xf6, 0x74, 0xb4, 0xf9, 0x97, 0xd8, 0x1d, 0x64, 0xce, 0x45, 0xf8, 0xcb, 0xd9, 0x45, 0x73, 0x51,
+	0x3e, 0x83, 0xd5, 0x41, 0x66, 0x06, 0x3c, 0xa1, 0x42, 0x50, 0x96, 0x16, 0xab, 0xa9, 0x06, 0xab,
+	0x57, 0xbe, 0x7f, 0xba, 0x70, 0x8c, 0xb3, 0x85, 0x63, 0x7c, 0x5e, 0x38, 0xc6, 0xc9, 0xd2, 0xa9,
+	0x9c, 0x2d, 0x9d, 0xca, 0xc7, 0xa5, 0x53, 0x79, 0xb6, 0xea, 0x7f, 0xf1, 0xf1, 0xe8, 0x4f, 0x71,
+	0x24, 0xf4, 0xd9, 0x3b, 0x56, 0x1f, 0x99, 0x7c, 0x0b, 0x51, 0x2d, 0x77, 0xe6, 0xe6, 0xd7, 0x00,
+	0x00, 0x00, 0xff, 0xff, 0x21, 0xa7, 0x9e, 0x30, 0x7e, 0x06, 0x00, 0x00,
 }
 
 func (m *OperatorAuthorization) Marshal() (dAtA []byte, err error) {
@@ -419,10 +509,69 @@ func (m *OperatorAuthorization) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x12
 	}
-	if len(m.Authority) > 0 {
-		i -= len(m.Authority)
-		copy(dAtA[i:], m.Authority)
-		i = encodeVarintTypes(dAtA, i, uint64(len(m.Authority)))
+	if len(m.Corporation) > 0 {
+		i -= len(m.Corporation)
+		copy(dAtA[i:], m.Corporation)
+		i = encodeVarintTypes(dAtA, i, uint64(len(m.Corporation)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *OperatorAuthorizationUsage) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *OperatorAuthorizationUsage) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *OperatorAuthorizationUsage) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	n3, err3 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(m.LastReset, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(m.LastReset):])
+	if err3 != nil {
+		return 0, err3
+	}
+	i -= n3
+	i = encodeVarintTypes(dAtA, i, uint64(n3))
+	i--
+	dAtA[i] = 0x22
+	if len(m.Remaining) > 0 {
+		for iNdEx := len(m.Remaining) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Remaining[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTypes(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x1a
+		}
+	}
+	if len(m.Operator) > 0 {
+		i -= len(m.Operator)
+		copy(dAtA[i:], m.Operator)
+		i = encodeVarintTypes(dAtA, i, uint64(len(m.Operator)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Corporation) > 0 {
+		i -= len(m.Corporation)
+		copy(dAtA[i:], m.Corporation)
+		i = encodeVarintTypes(dAtA, i, uint64(len(m.Corporation)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -450,22 +599,22 @@ func (m *FeeGrant) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	var l int
 	_ = l
 	if m.Period != nil {
-		n3, err3 := github_com_cosmos_gogoproto_types.StdDurationMarshalTo(*m.Period, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdDuration(*m.Period):])
-		if err3 != nil {
-			return 0, err3
-		}
-		i -= n3
-		i = encodeVarintTypes(dAtA, i, uint64(n3))
-		i--
-		dAtA[i] = 0x32
-	}
-	if m.Expiration != nil {
-		n4, err4 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(*m.Expiration, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(*m.Expiration):])
+		n4, err4 := github_com_cosmos_gogoproto_types.StdDurationMarshalTo(*m.Period, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdDuration(*m.Period):])
 		if err4 != nil {
 			return 0, err4
 		}
 		i -= n4
 		i = encodeVarintTypes(dAtA, i, uint64(n4))
+		i--
+		dAtA[i] = 0x32
+	}
+	if m.Expiration != nil {
+		n5, err5 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(*m.Expiration, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(*m.Expiration):])
+		if err5 != nil {
+			return 0, err5
+		}
+		i -= n5
+		i = encodeVarintTypes(dAtA, i, uint64(n5))
 		i--
 		dAtA[i] = 0x2a
 	}
@@ -530,20 +679,20 @@ func (m *VSOperatorAuthorization) MarshalToSizedBuffer(dAtA []byte) (int, error)
 	var l int
 	_ = l
 	if len(m.Permissions) > 0 {
-		dAtA6 := make([]byte, len(m.Permissions)*10)
-		var j5 int
+		dAtA7 := make([]byte, len(m.Permissions)*10)
+		var j6 int
 		for _, num := range m.Permissions {
 			for num >= 1<<7 {
-				dAtA6[j5] = uint8(uint64(num)&0x7f | 0x80)
+				dAtA7[j6] = uint8(uint64(num)&0x7f | 0x80)
 				num >>= 7
-				j5++
+				j6++
 			}
-			dAtA6[j5] = uint8(num)
-			j5++
+			dAtA7[j6] = uint8(num)
+			j6++
 		}
-		i -= j5
-		copy(dAtA[i:], dAtA6[:j5])
-		i = encodeVarintTypes(dAtA, i, uint64(j5))
+		i -= j6
+		copy(dAtA[i:], dAtA7[:j6])
+		i = encodeVarintTypes(dAtA, i, uint64(j6))
 		i--
 		dAtA[i] = 0x1a
 	}
@@ -554,10 +703,10 @@ func (m *VSOperatorAuthorization) MarshalToSizedBuffer(dAtA []byte) (int, error)
 		i--
 		dAtA[i] = 0x12
 	}
-	if len(m.Authority) > 0 {
-		i -= len(m.Authority)
-		copy(dAtA[i:], m.Authority)
-		i = encodeVarintTypes(dAtA, i, uint64(len(m.Authority)))
+	if len(m.Corporation) > 0 {
+		i -= len(m.Corporation)
+		copy(dAtA[i:], m.Corporation)
+		i = encodeVarintTypes(dAtA, i, uint64(len(m.Corporation)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -581,7 +730,7 @@ func (m *OperatorAuthorization) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.Authority)
+	l = len(m.Corporation)
 	if l > 0 {
 		n += 1 + l + sovTypes(uint64(l))
 	}
@@ -615,6 +764,31 @@ func (m *OperatorAuthorization) Size() (n int) {
 		l = github_com_cosmos_gogoproto_types.SizeOfStdDuration(*m.Period)
 		n += 1 + l + sovTypes(uint64(l))
 	}
+	return n
+}
+
+func (m *OperatorAuthorizationUsage) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Corporation)
+	if l > 0 {
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	l = len(m.Operator)
+	if l > 0 {
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	if len(m.Remaining) > 0 {
+		for _, e := range m.Remaining {
+			l = e.Size()
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	l = github_com_cosmos_gogoproto_types.SizeOfStdTime(m.LastReset)
+	n += 1 + l + sovTypes(uint64(l))
 	return n
 }
 
@@ -661,7 +835,7 @@ func (m *VSOperatorAuthorization) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.Authority)
+	l = len(m.Corporation)
 	if l > 0 {
 		n += 1 + l + sovTypes(uint64(l))
 	}
@@ -716,7 +890,7 @@ func (m *OperatorAuthorization) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Authority", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Corporation", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -744,7 +918,7 @@ func (m *OperatorAuthorization) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Authority = string(dAtA[iNdEx:postIndex])
+			m.Corporation = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
@@ -947,6 +1121,187 @@ func (m *OperatorAuthorization) Unmarshal(dAtA []byte) error {
 				m.Period = new(time.Duration)
 			}
 			if err := github_com_cosmos_gogoproto_types.StdDurationUnmarshal(m.Period, dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTypes(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *OperatorAuthorizationUsage) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTypes
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: OperatorAuthorizationUsage: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: OperatorAuthorizationUsage: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Corporation", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Corporation = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Operator", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Operator = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Remaining", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Remaining = append(m.Remaining, types.Coin{})
+			if err := m.Remaining[len(m.Remaining)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field LastReset", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := github_com_cosmos_gogoproto_types.StdTimeUnmarshal(&m.LastReset, dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -1254,7 +1609,7 @@ func (m *VSOperatorAuthorization) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Authority", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Corporation", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -1282,7 +1637,7 @@ func (m *VSOperatorAuthorization) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Authority = string(dAtA[iNdEx:postIndex])
+			m.Corporation = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {

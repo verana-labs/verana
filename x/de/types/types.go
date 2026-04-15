@@ -52,9 +52,9 @@ const MsgCreateOrUpdatePermissionSessionTypeURL = "/verana.perm.v1.MsgCreateOrUp
 
 // ValidateBasic performs stateless validation on MsgGrantOperatorAuthorization.
 func (msg *MsgGrantOperatorAuthorization) ValidateBasic() error {
-	// authority is mandatory
-	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
-		return fmt.Errorf("invalid authority address: %w", err)
+	// corporation is mandatory
+	if _, err := sdk.AccAddressFromBech32(msg.Corporation); err != nil {
+		return fmt.Errorf("invalid corporation address: %w", err)
 	}
 
 	// operator is optional; if present, must be valid
@@ -109,9 +109,9 @@ func (msg *MsgGrantOperatorAuthorization) ValidateBasic() error {
 
 // ValidateBasic performs stateless validation on MsgRevokeOperatorAuthorization.
 func (msg *MsgRevokeOperatorAuthorization) ValidateBasic() error {
-	// authority is mandatory
-	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
-		return fmt.Errorf("invalid authority address: %w", err)
+	// corporation is mandatory
+	if _, err := sdk.AccAddressFromBech32(msg.Corporation); err != nil {
+		return fmt.Errorf("invalid corporation address: %w", err)
 	}
 
 	// operator is optional; if present, must be valid

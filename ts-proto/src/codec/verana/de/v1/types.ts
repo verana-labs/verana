@@ -14,8 +14,8 @@ import Long = require("long");
 export const protobufPackage = "verana.de.v1";
 
 export interface OperatorAuthorization {
-  /** authority is the group granting the authorization. */
-  authority: string;
+  /** corporation is the group granting the authorization. */
+  corporation: string;
   /** operator is the account receiving the authorization. */
   operator: string;
   /** msg_types is the list of module message types this authorization applies to. */
@@ -39,6 +39,37 @@ export interface OperatorAuthorization {
     | undefined;
   /** period is the reset period for spend_limit and fee_spend_limit. */
   period: Duration | undefined;
+}
+
+/**
+ * OperatorAuthorizationUsage tracks per-authorization spend consumption so
+ * spec [AUTHZ-CHECK-1] can enforce the spend_limit / period-reset invariant:
+ *
+ *   "If oauthz.spend_limit is set, the remaining balance MUST be sufficient
+ *    for the operation. After successful execution, the consumed amount MUST
+ *    be deducted from the remaining balance. If oauthz.period is set and the
+ *    current period has elapsed since the last reset, the remaining balance
+ *    MUST be reset to oauthz.spend_limit before evaluating the check above."
+ *
+ * Stored in the DE module keyed by (corporation, operator) just like the
+ * parent OperatorAuthorization record.
+ */
+export interface OperatorAuthorizationUsage {
+  /** corporation is the group that granted the authorization. */
+  corporation: string;
+  /** operator is the account holding the authorization. */
+  operator: string;
+  /**
+   * remaining is the balance still available inside the current period.
+   * Decremented on each successful execution that consumed funds.
+   */
+  remaining: Coin[];
+  /**
+   * last_reset is the timestamp at which `remaining` was last refilled to
+   * the parent authorization's spend_limit. Zero when no period has elapsed
+   * since grant time.
+   */
+  lastReset: Date | undefined;
 }
 
 export interface FeeGrant {
@@ -65,8 +96,8 @@ export interface FeeGrant {
 }
 
 export interface VSOperatorAuthorization {
-  /** authority is the group granting the authorization. */
-  authority: string;
+  /** corporation is the group granting the authorization. */
+  corporation: string;
   /** vs_operator is the operator account receiving the authorization. */
   vsOperator: string;
   /**
@@ -78,7 +109,7 @@ export interface VSOperatorAuthorization {
 
 function createBaseOperatorAuthorization(): OperatorAuthorization {
   return {
-    authority: "",
+    corporation: "",
     operator: "",
     msgTypes: [],
     spendLimit: [],
@@ -90,8 +121,8 @@ function createBaseOperatorAuthorization(): OperatorAuthorization {
 
 export const OperatorAuthorization = {
   encode(message: OperatorAuthorization, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.authority !== "") {
-      writer.uint32(10).string(message.authority);
+    if (message.corporation !== "") {
+      writer.uint32(10).string(message.corporation);
     }
     if (message.operator !== "") {
       writer.uint32(18).string(message.operator);
@@ -126,7 +157,7 @@ export const OperatorAuthorization = {
             break;
           }
 
-          message.authority = reader.string();
+          message.corporation = reader.string();
           continue;
         case 2:
           if (tag !== 18) {
@@ -181,7 +212,7 @@ export const OperatorAuthorization = {
 
   fromJSON(object: any): OperatorAuthorization {
     return {
-      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      corporation: isSet(object.corporation) ? globalThis.String(object.corporation) : "",
       operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
       msgTypes: globalThis.Array.isArray(object?.msgTypes) ? object.msgTypes.map((e: any) => globalThis.String(e)) : [],
       spendLimit: globalThis.Array.isArray(object?.spendLimit)
@@ -197,8 +228,8 @@ export const OperatorAuthorization = {
 
   toJSON(message: OperatorAuthorization): unknown {
     const obj: any = {};
-    if (message.authority !== "") {
-      obj.authority = message.authority;
+    if (message.corporation !== "") {
+      obj.corporation = message.corporation;
     }
     if (message.operator !== "") {
       obj.operator = message.operator;
@@ -226,7 +257,7 @@ export const OperatorAuthorization = {
   },
   fromPartial<I extends Exact<DeepPartial<OperatorAuthorization>, I>>(object: I): OperatorAuthorization {
     const message = createBaseOperatorAuthorization();
-    message.authority = object.authority ?? "";
+    message.corporation = object.corporation ?? "";
     message.operator = object.operator ?? "";
     message.msgTypes = object.msgTypes?.map((e) => e) || [];
     message.spendLimit = object.spendLimit?.map((e) => Coin.fromPartial(e)) || [];
@@ -235,6 +266,110 @@ export const OperatorAuthorization = {
     message.period = (object.period !== undefined && object.period !== null)
       ? Duration.fromPartial(object.period)
       : undefined;
+    return message;
+  },
+};
+
+function createBaseOperatorAuthorizationUsage(): OperatorAuthorizationUsage {
+  return { corporation: "", operator: "", remaining: [], lastReset: undefined };
+}
+
+export const OperatorAuthorizationUsage = {
+  encode(message: OperatorAuthorizationUsage, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.corporation !== "") {
+      writer.uint32(10).string(message.corporation);
+    }
+    if (message.operator !== "") {
+      writer.uint32(18).string(message.operator);
+    }
+    for (const v of message.remaining) {
+      Coin.encode(v!, writer.uint32(26).fork()).ldelim();
+    }
+    if (message.lastReset !== undefined) {
+      Timestamp.encode(toTimestamp(message.lastReset), writer.uint32(34).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): OperatorAuthorizationUsage {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseOperatorAuthorizationUsage();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.corporation = reader.string();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.operator = reader.string();
+          continue;
+        case 3:
+          if (tag !== 26) {
+            break;
+          }
+
+          message.remaining.push(Coin.decode(reader, reader.uint32()));
+          continue;
+        case 4:
+          if (tag !== 34) {
+            break;
+          }
+
+          message.lastReset = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): OperatorAuthorizationUsage {
+    return {
+      corporation: isSet(object.corporation) ? globalThis.String(object.corporation) : "",
+      operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
+      remaining: globalThis.Array.isArray(object?.remaining) ? object.remaining.map((e: any) => Coin.fromJSON(e)) : [],
+      lastReset: isSet(object.lastReset) ? fromJsonTimestamp(object.lastReset) : undefined,
+    };
+  },
+
+  toJSON(message: OperatorAuthorizationUsage): unknown {
+    const obj: any = {};
+    if (message.corporation !== "") {
+      obj.corporation = message.corporation;
+    }
+    if (message.operator !== "") {
+      obj.operator = message.operator;
+    }
+    if (message.remaining?.length) {
+      obj.remaining = message.remaining.map((e) => Coin.toJSON(e));
+    }
+    if (message.lastReset !== undefined) {
+      obj.lastReset = message.lastReset.toISOString();
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<OperatorAuthorizationUsage>, I>>(base?: I): OperatorAuthorizationUsage {
+    return OperatorAuthorizationUsage.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<OperatorAuthorizationUsage>, I>>(object: I): OperatorAuthorizationUsage {
+    const message = createBaseOperatorAuthorizationUsage();
+    message.corporation = object.corporation ?? "";
+    message.operator = object.operator ?? "";
+    message.remaining = object.remaining?.map((e) => Coin.fromPartial(e)) || [];
+    message.lastReset = object.lastReset ?? undefined;
     return message;
   },
 };
@@ -378,13 +513,13 @@ export const FeeGrant = {
 };
 
 function createBaseVSOperatorAuthorization(): VSOperatorAuthorization {
-  return { authority: "", vsOperator: "", permissions: [] };
+  return { corporation: "", vsOperator: "", permissions: [] };
 }
 
 export const VSOperatorAuthorization = {
   encode(message: VSOperatorAuthorization, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.authority !== "") {
-      writer.uint32(10).string(message.authority);
+    if (message.corporation !== "") {
+      writer.uint32(10).string(message.corporation);
     }
     if (message.vsOperator !== "") {
       writer.uint32(18).string(message.vsOperator);
@@ -409,7 +544,7 @@ export const VSOperatorAuthorization = {
             break;
           }
 
-          message.authority = reader.string();
+          message.corporation = reader.string();
           continue;
         case 2:
           if (tag !== 18) {
@@ -446,7 +581,7 @@ export const VSOperatorAuthorization = {
 
   fromJSON(object: any): VSOperatorAuthorization {
     return {
-      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      corporation: isSet(object.corporation) ? globalThis.String(object.corporation) : "",
       vsOperator: isSet(object.vsOperator) ? globalThis.String(object.vsOperator) : "",
       permissions: globalThis.Array.isArray(object?.permissions)
         ? object.permissions.map((e: any) => globalThis.Number(e))
@@ -456,8 +591,8 @@ export const VSOperatorAuthorization = {
 
   toJSON(message: VSOperatorAuthorization): unknown {
     const obj: any = {};
-    if (message.authority !== "") {
-      obj.authority = message.authority;
+    if (message.corporation !== "") {
+      obj.corporation = message.corporation;
     }
     if (message.vsOperator !== "") {
       obj.vsOperator = message.vsOperator;
@@ -473,7 +608,7 @@ export const VSOperatorAuthorization = {
   },
   fromPartial<I extends Exact<DeepPartial<VSOperatorAuthorization>, I>>(object: I): VSOperatorAuthorization {
     const message = createBaseVSOperatorAuthorization();
-    message.authority = object.authority ?? "";
+    message.corporation = object.corporation ?? "";
     message.vsOperator = object.vsOperator ?? "";
     message.permissions = object.permissions?.map((e) => e) || [];
     return message;

@@ -29,7 +29,7 @@ func (q queryServer) ListVSOperatorAuthorizations(ctx context.Context, req *type
 
 	err := q.k.VSOperatorAuthorizations.Walk(ctx, nil, func(key collections.Pair[string, string], vsoa types.VSOperatorAuthorization) (bool, error) {
 		// Filter by authority if specified
-		if req.Authority != "" && vsoa.Authority != req.Authority {
+		if req.Corporation != "" && vsoa.Corporation != req.Corporation {
 			return false, nil
 		}
 		// Filter by vs_operator if specified

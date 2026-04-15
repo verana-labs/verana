@@ -387,7 +387,7 @@ func TestMsgServerGrantOperatorAuthorization(t *testing.T) {
 		{
 			name: "Valid: basic grant without operator (group proposal)",
 			msg: &types.MsgGrantOperatorAuthorization{
-				Authority: authority,
+				Corporation: authority,
 				Operator:  "",
 				Grantee:   grantee,
 				MsgTypes:  validMsgTypes,
@@ -397,7 +397,7 @@ func TestMsgServerGrantOperatorAuthorization(t *testing.T) {
 		{
 			name: "Valid: with expiration",
 			msg: &types.MsgGrantOperatorAuthorization{
-				Authority:  authority,
+				Corporation:  authority,
 				Operator:   "",
 				Grantee:    grantee,
 				MsgTypes:   validMsgTypes,
@@ -408,7 +408,7 @@ func TestMsgServerGrantOperatorAuthorization(t *testing.T) {
 		{
 			name: "Valid: with feegrant",
 			msg: &types.MsgGrantOperatorAuthorization{
-				Authority:    authority,
+				Corporation:    authority,
 				Operator:     "",
 				Grantee:      grantee,
 				MsgTypes:     validMsgTypes,
@@ -419,7 +419,7 @@ func TestMsgServerGrantOperatorAuthorization(t *testing.T) {
 		{
 			name: "Valid: with feegrant and spend limits",
 			msg: &types.MsgGrantOperatorAuthorization{
-				Authority:          authority,
+				Corporation:          authority,
 				Operator:           "",
 				Grantee:            grantee,
 				MsgTypes:           validMsgTypes,
@@ -431,7 +431,7 @@ func TestMsgServerGrantOperatorAuthorization(t *testing.T) {
 		{
 			name: "Valid: with authz spend limit",
 			msg: &types.MsgGrantOperatorAuthorization{
-				Authority:       authority,
+				Corporation:       authority,
 				Operator:        "",
 				Grantee:         grantee,
 				MsgTypes:        validMsgTypes,
@@ -442,7 +442,7 @@ func TestMsgServerGrantOperatorAuthorization(t *testing.T) {
 		{
 			name: "Invalid: expiration in the past",
 			msg: &types.MsgGrantOperatorAuthorization{
-				Authority:  authority,
+				Corporation:  authority,
 				Operator:   "",
 				Grantee:    grantee,
 				MsgTypes:   validMsgTypes,
@@ -457,13 +457,13 @@ func TestMsgServerGrantOperatorAuthorization(t *testing.T) {
 				// Pre-create a VSOperatorAuthorization for authority/grantee2
 				vsKey := collections.Join(authority, grantee2)
 				err := k.VSOperatorAuthorizations.Set(ctx, vsKey, types.VSOperatorAuthorization{
-					Authority:  authority,
+					Corporation:  authority,
 					VsOperator: grantee2,
 				})
 				require.NoError(t, err)
 			},
 			msg: &types.MsgGrantOperatorAuthorization{
-				Authority: authority,
+				Corporation: authority,
 				Operator:  "",
 				Grantee:   grantee2,
 				MsgTypes:  validMsgTypes,
@@ -478,14 +478,14 @@ func TestMsgServerGrantOperatorAuthorization(t *testing.T) {
 				operatorAddr := sdk.AccAddress([]byte("test_operator_______")).String()
 				oaKey := collections.Join(authority, operatorAddr)
 				err := k.OperatorAuthorizations.Set(ctx, oaKey, types.OperatorAuthorization{
-					Authority: authority,
+					Corporation: authority,
 					Operator:  operatorAddr,
 					MsgTypes:  []string{"/verana.de.v1.MsgGrantOperatorAuthorization"},
 				})
 				require.NoError(t, err)
 			},
 			msg: &types.MsgGrantOperatorAuthorization{
-				Authority: authority,
+				Corporation: authority,
 				Operator:  sdk.AccAddress([]byte("test_operator_______")).String(),
 				Grantee:   sdk.AccAddress([]byte("test_new_grantee____")).String(),
 				MsgTypes:  validMsgTypes,
@@ -495,7 +495,7 @@ func TestMsgServerGrantOperatorAuthorization(t *testing.T) {
 		{
 			name: "Invalid: operator without authorization",
 			msg: &types.MsgGrantOperatorAuthorization{
-				Authority: authority,
+				Corporation: authority,
 				Operator:  sdk.AccAddress([]byte("unauthorized_op_____")).String(),
 				Grantee:   grantee,
 				MsgTypes:  validMsgTypes,
@@ -510,7 +510,7 @@ func TestMsgServerGrantOperatorAuthorization(t *testing.T) {
 				pastTime := ctx.BlockTime().Add(-1 * time.Hour)
 				oaKey := collections.Join(authority, expiredOp)
 				err := k.OperatorAuthorizations.Set(ctx, oaKey, types.OperatorAuthorization{
-					Authority:  authority,
+					Corporation:  authority,
 					Operator:   expiredOp,
 					MsgTypes:   []string{"/verana.de.v1.MsgGrantOperatorAuthorization"},
 					Expiration: &pastTime,
@@ -518,7 +518,7 @@ func TestMsgServerGrantOperatorAuthorization(t *testing.T) {
 				require.NoError(t, err)
 			},
 			msg: &types.MsgGrantOperatorAuthorization{
-				Authority: authority,
+				Corporation: authority,
 				Operator:  sdk.AccAddress([]byte("expired_operator____")).String(),
 				Grantee:   grantee,
 				MsgTypes:  validMsgTypes,
@@ -532,14 +532,14 @@ func TestMsgServerGrantOperatorAuthorization(t *testing.T) {
 				wrongTypeOp := sdk.AccAddress([]byte("wrong_type_operator_")).String()
 				oaKey := collections.Join(authority, wrongTypeOp)
 				err := k.OperatorAuthorizations.Set(ctx, oaKey, types.OperatorAuthorization{
-					Authority: authority,
+					Corporation: authority,
 					Operator:  wrongTypeOp,
 					MsgTypes:  []string{"/verana.tr.v1.MsgCreateTrustRegistry"}, // wrong type
 				})
 				require.NoError(t, err)
 			},
 			msg: &types.MsgGrantOperatorAuthorization{
-				Authority: authority,
+				Corporation: authority,
 				Operator:  sdk.AccAddress([]byte("wrong_type_operator_")).String(),
 				Grantee:   grantee,
 				MsgTypes:  validMsgTypes,
@@ -550,7 +550,7 @@ func TestMsgServerGrantOperatorAuthorization(t *testing.T) {
 		{
 			name: "Valid: multiple msg types",
 			msg: &types.MsgGrantOperatorAuthorization{
-				Authority: authority,
+				Corporation: authority,
 				Operator:  "",
 				Grantee:   grantee,
 				MsgTypes: []string{
@@ -564,7 +564,7 @@ func TestMsgServerGrantOperatorAuthorization(t *testing.T) {
 		{
 			name: "Invalid: expiration exactly at block time (boundary)",
 			msg: &types.MsgGrantOperatorAuthorization{
-				Authority:  authority,
+				Corporation:  authority,
 				Operator:   "",
 				Grantee:    grantee,
 				MsgTypes:   validMsgTypes,
@@ -578,7 +578,7 @@ func TestMsgServerGrantOperatorAuthorization(t *testing.T) {
 			msg: func() *types.MsgGrantOperatorAuthorization {
 				negativePeriod := -time.Hour
 				return &types.MsgGrantOperatorAuthorization{
-					Authority:             authority,
+					Corporation:             authority,
 					Operator:              "",
 					Grantee:               grantee,
 					MsgTypes:              validMsgTypes,
@@ -594,7 +594,7 @@ func TestMsgServerGrantOperatorAuthorization(t *testing.T) {
 			msg: func() *types.MsgGrantOperatorAuthorization {
 				zeroPeriod := time.Duration(0)
 				return &types.MsgGrantOperatorAuthorization{
-					Authority:             authority,
+					Corporation:             authority,
 					Operator:              "",
 					Grantee:               grantee,
 					MsgTypes:              validMsgTypes,
@@ -610,7 +610,7 @@ func TestMsgServerGrantOperatorAuthorization(t *testing.T) {
 			msg: func() *types.MsgGrantOperatorAuthorization {
 				negativePeriod := -time.Hour
 				return &types.MsgGrantOperatorAuthorization{
-					Authority:             authority,
+					Corporation:             authority,
 					Operator:              "",
 					Grantee:               grantee,
 					MsgTypes:              validMsgTypes,
@@ -624,7 +624,7 @@ func TestMsgServerGrantOperatorAuthorization(t *testing.T) {
 			msg: func() *types.MsgGrantOperatorAuthorization {
 				validPeriod := time.Hour
 				return &types.MsgGrantOperatorAuthorization{
-					Authority:             authority,
+					Corporation:             authority,
 					Operator:              "",
 					Grantee:               grantee,
 					MsgTypes:              validMsgTypes,
@@ -639,7 +639,7 @@ func TestMsgServerGrantOperatorAuthorization(t *testing.T) {
 			msg: func() *types.MsgGrantOperatorAuthorization {
 				negativePeriod := -time.Hour
 				return &types.MsgGrantOperatorAuthorization{
-					Authority:                authority,
+					Corporation:                authority,
 					Operator:                 "",
 					Grantee:                  grantee,
 					MsgTypes:                 validMsgTypes,
@@ -656,7 +656,7 @@ func TestMsgServerGrantOperatorAuthorization(t *testing.T) {
 			msg: func() *types.MsgGrantOperatorAuthorization {
 				negativePeriod := -time.Hour
 				return &types.MsgGrantOperatorAuthorization{
-					Authority:                authority,
+					Corporation:                authority,
 					Operator:                 "",
 					Grantee:                  grantee,
 					MsgTypes:                 validMsgTypes,
@@ -687,10 +687,10 @@ func TestMsgServerGrantOperatorAuthorization(t *testing.T) {
 				require.NotNil(t, resp)
 
 				// Verify OperatorAuthorization was stored
-				oaKey := collections.Join(tc.msg.Authority, tc.msg.Grantee)
+				oaKey := collections.Join(tc.msg.Corporation, tc.msg.Grantee)
 				oa, err := k.OperatorAuthorizations.Get(ctx, oaKey)
 				require.NoError(t, err)
-				require.Equal(t, tc.msg.Authority, oa.Authority)
+				require.Equal(t, tc.msg.Corporation, oa.Corporation)
 				require.Equal(t, tc.msg.Grantee, oa.Operator) // stored as Operator field
 				require.Equal(t, tc.msg.MsgTypes, oa.MsgTypes)
 			}
@@ -707,7 +707,7 @@ func TestMsgServerGrantOperatorAuthorization_WithFeegrant(t *testing.T) {
 
 	// Grant with feegrant = true
 	msg := &types.MsgGrantOperatorAuthorization{
-		Authority:          authority,
+		Corporation:          authority,
 		Grantee:            grantee,
 		MsgTypes:           validMsgTypes,
 		WithFeegrant:       true,
@@ -727,7 +727,7 @@ func TestMsgServerGrantOperatorAuthorization_WithFeegrant(t *testing.T) {
 
 	// Now grant again with feegrant = false — should revoke existing
 	msg2 := &types.MsgGrantOperatorAuthorization{
-		Authority:    authority,
+		Corporation:    authority,
 		Grantee:      grantee,
 		MsgTypes:     validMsgTypes,
 		WithFeegrant: false,
@@ -752,7 +752,7 @@ func TestMsgServerGrantOperatorAuthorization_UpdateExisting(t *testing.T) {
 
 	// Create initial
 	msg1 := &types.MsgGrantOperatorAuthorization{
-		Authority: authority,
+		Corporation: authority,
 		Grantee:   grantee,
 		MsgTypes:  msgTypes1,
 	}
@@ -761,7 +761,7 @@ func TestMsgServerGrantOperatorAuthorization_UpdateExisting(t *testing.T) {
 
 	// Update with different msg types
 	msg2 := &types.MsgGrantOperatorAuthorization{
-		Authority: authority,
+		Corporation: authority,
 		Grantee:   grantee,
 		MsgTypes:  msgTypes2,
 	}
@@ -800,14 +800,14 @@ func TestMsgServerRevokeOperatorAuthorization(t *testing.T) {
 				// Create OperatorAuthorization to revoke
 				oaKey := collections.Join(authority, grantee)
 				err := k.OperatorAuthorizations.Set(ctx, oaKey, types.OperatorAuthorization{
-					Authority: authority,
+					Corporation: authority,
 					Operator:  grantee,
 					MsgTypes:  validMsgTypes,
 				})
 				require.NoError(t, err)
 			},
 			msg: &types.MsgRevokeOperatorAuthorization{
-				Authority: authority,
+				Corporation: authority,
 				Operator:  "",
 				Grantee:   grantee,
 			},
@@ -816,7 +816,7 @@ func TestMsgServerRevokeOperatorAuthorization(t *testing.T) {
 		{
 			name: "Invalid: authorization does not exist",
 			msg: &types.MsgRevokeOperatorAuthorization{
-				Authority: authority,
+				Corporation: authority,
 				Operator:  "",
 				Grantee:   sdk.AccAddress([]byte("nonexistent_grantee_")).String(),
 			},
@@ -829,14 +829,14 @@ func TestMsgServerRevokeOperatorAuthorization(t *testing.T) {
 				// Create the OA that we want to revoke
 				oaKey := collections.Join(authority, grantee2)
 				err := k.OperatorAuthorizations.Set(ctx, oaKey, types.OperatorAuthorization{
-					Authority: authority,
+					Corporation: authority,
 					Operator:  grantee2,
 					MsgTypes:  validMsgTypes,
 				})
 				require.NoError(t, err)
 			},
 			msg: &types.MsgRevokeOperatorAuthorization{
-				Authority: authority,
+				Corporation: authority,
 				Operator:  sdk.AccAddress([]byte("unauthorized_op_____")).String(),
 				Grantee:   grantee2,
 			},
@@ -850,7 +850,7 @@ func TestMsgServerRevokeOperatorAuthorization(t *testing.T) {
 				operatorAddr := sdk.AccAddress([]byte("revoking_operator___")).String()
 				opKey := collections.Join(authority, operatorAddr)
 				err := k.OperatorAuthorizations.Set(ctx, opKey, types.OperatorAuthorization{
-					Authority: authority,
+					Corporation: authority,
 					Operator:  operatorAddr,
 					MsgTypes:  []string{"/verana.de.v1.MsgRevokeOperatorAuthorization"},
 				})
@@ -860,14 +860,14 @@ func TestMsgServerRevokeOperatorAuthorization(t *testing.T) {
 				targetGrantee := sdk.AccAddress([]byte("target_grantee______")).String()
 				targetKey := collections.Join(authority, targetGrantee)
 				err = k.OperatorAuthorizations.Set(ctx, targetKey, types.OperatorAuthorization{
-					Authority: authority,
+					Corporation: authority,
 					Operator:  targetGrantee,
 					MsgTypes:  validMsgTypes,
 				})
 				require.NoError(t, err)
 			},
 			msg: &types.MsgRevokeOperatorAuthorization{
-				Authority: authority,
+				Corporation: authority,
 				Operator:  sdk.AccAddress([]byte("revoking_operator___")).String(),
 				Grantee:   sdk.AccAddress([]byte("target_grantee______")).String(),
 			},
@@ -880,7 +880,7 @@ func TestMsgServerRevokeOperatorAuthorization(t *testing.T) {
 				pastTime := ctx.BlockTime().Add(-1 * time.Hour)
 				opKey := collections.Join(authority, expiredOp)
 				err := k.OperatorAuthorizations.Set(ctx, opKey, types.OperatorAuthorization{
-					Authority:  authority,
+					Corporation:  authority,
 					Operator:   expiredOp,
 					MsgTypes:   []string{"/verana.de.v1.MsgRevokeOperatorAuthorization"},
 					Expiration: &pastTime,
@@ -891,14 +891,14 @@ func TestMsgServerRevokeOperatorAuthorization(t *testing.T) {
 				revokeTarget := sdk.AccAddress([]byte("revoke_target_______")).String()
 				targetKey := collections.Join(authority, revokeTarget)
 				err = k.OperatorAuthorizations.Set(ctx, targetKey, types.OperatorAuthorization{
-					Authority: authority,
+					Corporation: authority,
 					Operator:  revokeTarget,
 					MsgTypes:  validMsgTypes,
 				})
 				require.NoError(t, err)
 			},
 			msg: &types.MsgRevokeOperatorAuthorization{
-				Authority: authority,
+				Corporation: authority,
 				Operator:  sdk.AccAddress([]byte("expired_revoke_op___")).String(),
 				Grantee:   sdk.AccAddress([]byte("revoke_target_______")).String(),
 			},
@@ -925,7 +925,7 @@ func TestMsgServerRevokeOperatorAuthorization(t *testing.T) {
 				require.NotNil(t, resp)
 
 				// Verify OperatorAuthorization was removed
-				oaKey := collections.Join(tc.msg.Authority, tc.msg.Grantee)
+				oaKey := collections.Join(tc.msg.Corporation, tc.msg.Grantee)
 				has, err := k.OperatorAuthorizations.Has(ctx, oaKey)
 				require.NoError(t, err)
 				require.False(t, has)
@@ -943,7 +943,7 @@ func TestMsgServerRevokeOperatorAuthorization_AlsoRevokesFeeGrant(t *testing.T) 
 
 	// First, grant operator authorization with feegrant
 	grantMsg := &types.MsgGrantOperatorAuthorization{
-		Authority:    authority,
+		Corporation:    authority,
 		Grantee:      grantee,
 		MsgTypes:     validMsgTypes,
 		WithFeegrant: true,
@@ -964,7 +964,7 @@ func TestMsgServerRevokeOperatorAuthorization_AlsoRevokesFeeGrant(t *testing.T) 
 
 	// Revoke operator authorization
 	revokeMsg := &types.MsgRevokeOperatorAuthorization{
-		Authority: authority,
+		Corporation: authority,
 		Grantee:   grantee,
 	}
 	_, err = ms.RevokeOperatorAuthorization(ctx, revokeMsg)
@@ -989,7 +989,7 @@ func TestMsgServerRevokeOperatorAuthorization_NoFeeGrant(t *testing.T) {
 
 	// Grant operator authorization without feegrant
 	grantMsg := &types.MsgGrantOperatorAuthorization{
-		Authority:    authority,
+		Corporation:    authority,
 		Grantee:      grantee,
 		MsgTypes:     validMsgTypes,
 		WithFeegrant: false,
@@ -1010,7 +1010,7 @@ func TestMsgServerRevokeOperatorAuthorization_NoFeeGrant(t *testing.T) {
 
 	// Revoke should succeed even without FeeGrant
 	revokeMsg := &types.MsgRevokeOperatorAuthorization{
-		Authority: authority,
+		Corporation: authority,
 		Grantee:   grantee,
 	}
 	_, err = ms.RevokeOperatorAuthorization(ctx, revokeMsg)
@@ -1056,7 +1056,7 @@ func TestCheckOperatorAuthorization(t *testing.T) {
 			setupFunc: func() {
 				oaKey := collections.Join(authority, operator)
 				err := k.OperatorAuthorizations.Set(ctx, oaKey, types.OperatorAuthorization{
-					Authority: authority,
+					Corporation: authority,
 					Operator:  operator,
 					MsgTypes:  []string{"/verana.de.v1.MsgGrantOperatorAuthorization"},
 				})
@@ -1073,7 +1073,7 @@ func TestCheckOperatorAuthorization(t *testing.T) {
 				op2 := sdk.AccAddress([]byte("op_future_exp_______")).String()
 				oaKey := collections.Join(authority, op2)
 				err := k.OperatorAuthorizations.Set(ctx, oaKey, types.OperatorAuthorization{
-					Authority:  authority,
+					Corporation:  authority,
 					Operator:   op2,
 					MsgTypes:   []string{"/verana.de.v1.MsgGrantOperatorAuthorization"},
 					Expiration: &futureExp,
@@ -1099,7 +1099,7 @@ func TestCheckOperatorAuthorization(t *testing.T) {
 				expOp := sdk.AccAddress([]byte("authz_expired_op____")).String()
 				oaKey := collections.Join(authority, expOp)
 				err := k.OperatorAuthorizations.Set(ctx, oaKey, types.OperatorAuthorization{
-					Authority:  authority,
+					Corporation:  authority,
 					Operator:   expOp,
 					MsgTypes:   []string{"/verana.de.v1.MsgGrantOperatorAuthorization"},
 					Expiration: &pastExp,
@@ -1118,7 +1118,7 @@ func TestCheckOperatorAuthorization(t *testing.T) {
 				wrongOp := sdk.AccAddress([]byte("wrong_msgtype_op____")).String()
 				oaKey := collections.Join(authority, wrongOp)
 				err := k.OperatorAuthorizations.Set(ctx, oaKey, types.OperatorAuthorization{
-					Authority: authority,
+					Corporation: authority,
 					Operator:  wrongOp,
 					MsgTypes:  []string{"/verana.tr.v1.MsgCreateTrustRegistry"},
 				})
@@ -1136,7 +1136,7 @@ func TestCheckOperatorAuthorization(t *testing.T) {
 				multiOp := sdk.AccAddress([]byte("multi_msgtype_op____")).String()
 				oaKey := collections.Join(authority, multiOp)
 				err := k.OperatorAuthorizations.Set(ctx, oaKey, types.OperatorAuthorization{
-					Authority: authority,
+					Corporation: authority,
 					Operator:  multiOp,
 					MsgTypes: []string{
 						"/verana.tr.v1.MsgCreateTrustRegistry",
@@ -1188,7 +1188,7 @@ func TestGrantThenRevokeOperatorAuthorization_E2E(t *testing.T) {
 
 	// Step 1: Grant with feegrant
 	grantMsg := &types.MsgGrantOperatorAuthorization{
-		Authority:          authority,
+		Corporation:          authority,
 		Grantee:            grantee,
 		MsgTypes:           validMsgTypes,
 		WithFeegrant:       true,
@@ -1211,7 +1211,7 @@ func TestGrantThenRevokeOperatorAuthorization_E2E(t *testing.T) {
 
 	// Step 2: Revoke
 	revokeResp, err := ms.RevokeOperatorAuthorization(ctx, &types.MsgRevokeOperatorAuthorization{
-		Authority: authority,
+		Corporation: authority,
 		Grantee:   grantee,
 	})
 	require.NoError(t, err)
@@ -1228,7 +1228,7 @@ func TestGrantThenRevokeOperatorAuthorization_E2E(t *testing.T) {
 
 	// Step 3: Revoke again should fail (no authorization exists)
 	_, err = ms.RevokeOperatorAuthorization(ctx, &types.MsgRevokeOperatorAuthorization{
-		Authority: authority,
+		Corporation: authority,
 		Grantee:   grantee,
 	})
 	require.Error(t, err)
@@ -1245,14 +1245,14 @@ func TestMutualExclusivity_OAAndVSOA(t *testing.T) {
 	// First, create a VSOperatorAuthorization
 	vsKey := collections.Join(authority, grantee)
 	err := k.VSOperatorAuthorizations.Set(ctx, vsKey, types.VSOperatorAuthorization{
-		Authority:  authority,
+		Corporation:  authority,
 		VsOperator: grantee,
 	})
 	require.NoError(t, err)
 
 	// Attempt to grant OperatorAuthorization should fail
 	_, err = ms.GrantOperatorAuthorization(ctx, &types.MsgGrantOperatorAuthorization{
-		Authority: authority,
+		Corporation: authority,
 		Grantee:   grantee,
 		MsgTypes:  validMsgTypes,
 	})
@@ -1265,7 +1265,7 @@ func TestMutualExclusivity_OAAndVSOA(t *testing.T) {
 
 	// Now grant should succeed
 	_, err = ms.GrantOperatorAuthorization(ctx, &types.MsgGrantOperatorAuthorization{
-		Authority: authority,
+		Corporation: authority,
 		Grantee:   grantee,
 		MsgTypes:  validMsgTypes,
 	})
@@ -1284,7 +1284,7 @@ func TestMultipleGranteesForSameAuthority(t *testing.T) {
 	// Grant to multiple grantees
 	for _, grantee := range []string{grantee1, grantee2, grantee3} {
 		_, err := ms.GrantOperatorAuthorization(ctx, &types.MsgGrantOperatorAuthorization{
-			Authority: authority,
+			Corporation: authority,
 			Grantee:   grantee,
 			MsgTypes:  msgTypes,
 		})
@@ -1301,7 +1301,7 @@ func TestMultipleGranteesForSameAuthority(t *testing.T) {
 
 	// Revoke one
 	_, err := ms.RevokeOperatorAuthorization(ctx, &types.MsgRevokeOperatorAuthorization{
-		Authority: authority,
+		Corporation: authority,
 		Grantee:   grantee2,
 	})
 	require.NoError(t, err)
@@ -1329,7 +1329,7 @@ func TestGrantRevokeReGrant_E2E(t *testing.T) {
 
 	// Grant
 	_, err := ms.GrantOperatorAuthorization(ctx, &types.MsgGrantOperatorAuthorization{
-		Authority: authority,
+		Corporation: authority,
 		Grantee:   grantee,
 		MsgTypes:  msgTypes1,
 	})
@@ -1337,14 +1337,14 @@ func TestGrantRevokeReGrant_E2E(t *testing.T) {
 
 	// Revoke
 	_, err = ms.RevokeOperatorAuthorization(ctx, &types.MsgRevokeOperatorAuthorization{
-		Authority: authority,
+		Corporation: authority,
 		Grantee:   grantee,
 	})
 	require.NoError(t, err)
 
 	// Re-grant with different msg types
 	_, err = ms.GrantOperatorAuthorization(ctx, &types.MsgGrantOperatorAuthorization{
-		Authority: authority,
+		Corporation: authority,
 		Grantee:   grantee,
 		MsgTypes:  msgTypes2,
 	})
@@ -1367,7 +1367,7 @@ func TestAuthorityIsolation(t *testing.T) {
 
 	// Grant from authority1
 	_, err := ms.GrantOperatorAuthorization(ctx, &types.MsgGrantOperatorAuthorization{
-		Authority: authority1,
+		Corporation: authority1,
 		Grantee:   grantee,
 		MsgTypes:  msgTypes,
 	})
@@ -1375,7 +1375,7 @@ func TestAuthorityIsolation(t *testing.T) {
 
 	// Grant from authority2 (same grantee, different authority)
 	_, err = ms.GrantOperatorAuthorization(ctx, &types.MsgGrantOperatorAuthorization{
-		Authority: authority2,
+		Corporation: authority2,
 		Grantee:   grantee,
 		MsgTypes:  msgTypes,
 	})
@@ -1392,7 +1392,7 @@ func TestAuthorityIsolation(t *testing.T) {
 
 	// Revoke from authority1 should NOT affect authority2
 	_, err = ms.RevokeOperatorAuthorization(ctx, &types.MsgRevokeOperatorAuthorization{
-		Authority: authority1,
+		Corporation: authority1,
 		Grantee:   grantee,
 	})
 	require.NoError(t, err)
@@ -1407,7 +1407,7 @@ func TestAuthorityIsolation(t *testing.T) {
 
 	// authority1 cannot revoke authority2's grant
 	_, err = ms.RevokeOperatorAuthorization(ctx, &types.MsgRevokeOperatorAuthorization{
-		Authority: authority1,
+		Corporation: authority1,
 		Grantee:   grantee,
 	})
 	require.Error(t, err)
@@ -1426,7 +1426,7 @@ func TestOperatorRevokesOwnAuthorization(t *testing.T) {
 
 	// Grant operator authorization (includes revoke permission)
 	_, err := ms.GrantOperatorAuthorization(ctx, &types.MsgGrantOperatorAuthorization{
-		Authority: authority,
+		Corporation: authority,
 		Grantee:   operator,
 		MsgTypes:  msgTypes,
 	})
@@ -1434,7 +1434,7 @@ func TestOperatorRevokesOwnAuthorization(t *testing.T) {
 
 	// Operator revokes their own authorization
 	_, err = ms.RevokeOperatorAuthorization(ctx, &types.MsgRevokeOperatorAuthorization{
-		Authority: authority,
+		Corporation: authority,
 		Operator:  operator,
 		Grantee:   operator,
 	})
@@ -1457,7 +1457,7 @@ func TestCheckOperatorAuthorization_ExpirationBoundary(t *testing.T) {
 	exactNow := now
 	oaKey := collections.Join(authority, operator)
 	err := k.OperatorAuthorizations.Set(ctx, oaKey, types.OperatorAuthorization{
-		Authority:  authority,
+		Corporation:  authority,
 		Operator:   operator,
 		MsgTypes:   []string{"/verana.de.v1.MsgGrantOperatorAuthorization"},
 		Expiration: &exactNow,
@@ -1472,7 +1472,7 @@ func TestCheckOperatorAuthorization_ExpirationBoundary(t *testing.T) {
 	// Expiration 1 nanosecond after block time — should pass
 	oneNsAfter := now.Add(1 * time.Nanosecond)
 	err = k.OperatorAuthorizations.Set(ctx, oaKey, types.OperatorAuthorization{
-		Authority:  authority,
+		Corporation:  authority,
 		Operator:   operator,
 		MsgTypes:   []string{"/verana.de.v1.MsgGrantOperatorAuthorization"},
 		Expiration: &oneNsAfter,
@@ -1521,7 +1521,7 @@ func TestGrantOperatorAuthorization_FeegrantFieldsStoredCorrectly(t *testing.T) 
 
 	// Grant with all feegrant fields
 	_, err := ms.GrantOperatorAuthorization(ctx, &types.MsgGrantOperatorAuthorization{
-		Authority:                authority,
+		Corporation:                authority,
 		Grantee:                  grantee,
 		MsgTypes:                 validMsgTypes,
 		Expiration:               &futureExp,
@@ -1571,7 +1571,7 @@ func TestOperatorCannotSelfGrant(t *testing.T) {
 	// Operator has ONLY MsgGrantOperatorAuthorization permission
 	oaKey := collections.Join(authority, operator)
 	err := k.OperatorAuthorizations.Set(ctx, oaKey, types.OperatorAuthorization{
-		Authority: authority,
+		Corporation: authority,
 		Operator:  operator,
 		MsgTypes:  []string{"/verana.de.v1.MsgGrantOperatorAuthorization"},
 	})
@@ -1587,7 +1587,7 @@ func TestOperatorCannotSelfGrant(t *testing.T) {
 	}
 
 	resp, err := ms.GrantOperatorAuthorization(ctx, &types.MsgGrantOperatorAuthorization{
-		Authority: authority,
+		Corporation: authority,
 		Operator:  operator,
 		Grantee:   operator, // grantee == operator (self-grant, forbidden)
 		MsgTypes:  allMsgTypes,
@@ -1640,7 +1640,7 @@ func TestBootstrapFlow_GroupProposalOnboardsFirstOperator(t *testing.T) {
 	// ---- Step 1: Group proposal onboards first operator ----
 	// Operator field is empty → simulates group governance execution.
 	_, err := ms.GrantOperatorAuthorization(ctx, &types.MsgGrantOperatorAuthorization{
-		Authority:    groupAccount,
+		Corporation:    groupAccount,
 		Operator:     "", // group proposal — no operator cosigner
 		Grantee:      firstOperator,
 		MsgTypes:     append(deMsgTypes, trMsgTypes...),
@@ -1652,13 +1652,13 @@ func TestBootstrapFlow_GroupProposalOnboardsFirstOperator(t *testing.T) {
 	oaKey := collections.Join(groupAccount, firstOperator)
 	oa, err := k.OperatorAuthorizations.Get(ctx, oaKey)
 	require.NoError(t, err)
-	require.Equal(t, groupAccount, oa.Authority)
+	require.Equal(t, groupAccount, oa.Corporation)
 	require.Equal(t, firstOperator, oa.Operator)
 
 	// ---- Step 2: First operator onboards second operator ----
 	// First operator acts on behalf of the group account (operator field set).
 	_, err = ms.GrantOperatorAuthorization(ctx, &types.MsgGrantOperatorAuthorization{
-		Authority: groupAccount,
+		Corporation: groupAccount,
 		Operator:  firstOperator, // existing operator cosigns
 		Grantee:   secondOperator,
 		MsgTypes:  trMsgTypes, // only TR permissions
@@ -1684,7 +1684,7 @@ func TestBootstrapFlow_GroupProposalOnboardsFirstOperator(t *testing.T) {
 
 	// ---- Step 4: Group can directly revoke any operator (group proposal) ----
 	_, err = ms.RevokeOperatorAuthorization(ctx, &types.MsgRevokeOperatorAuthorization{
-		Authority: groupAccount,
+		Corporation: groupAccount,
 		Operator:  "", // group proposal — direct revocation
 		Grantee:   secondOperator,
 	})
@@ -1719,7 +1719,7 @@ func TestAddPermToVSOA(t *testing.T) {
 		vsKey := collections.Join(authority, vsOperator)
 		vsoa, err := k.VSOperatorAuthorizations.Get(ctx, vsKey)
 		require.NoError(t, err)
-		require.Equal(t, authority, vsoa.Authority)
+		require.Equal(t, authority, vsoa.Corporation)
 		require.Equal(t, vsOperator, vsoa.VsOperator)
 		require.Equal(t, []uint64{1}, vsoa.Permissions)
 
@@ -1761,7 +1761,7 @@ func TestAddPermToVSOA(t *testing.T) {
 		// Create an OperatorAuthorization for the same (authority, vsOperator)
 		oaKey := collections.Join(authority, vsOperator)
 		err := k.OperatorAuthorizations.Set(ctx, oaKey, types.OperatorAuthorization{
-			Authority: authority,
+			Corporation: authority,
 			Operator:  vsOperator,
 			MsgTypes:  []string{"/verana.tr.v1.MsgCreateTrustRegistry"},
 		})
@@ -1791,7 +1791,7 @@ func TestRemovePermFromVSOA(t *testing.T) {
 		// Setup: VSOA with perms [1, 2, 3]
 		vsKey := collections.Join(authority, vsOperator)
 		err := k.VSOperatorAuthorizations.Set(ctx, vsKey, types.VSOperatorAuthorization{
-			Authority:   authority,
+			Corporation:   authority,
 			VsOperator:  vsOperator,
 			Permissions: []uint64{1, 2, 3},
 		})
@@ -1813,7 +1813,7 @@ func TestRemovePermFromVSOA(t *testing.T) {
 	t.Run("remove last perm deletes entry", func(t *testing.T) {
 		vsKey := collections.Join(authority, vsOperator)
 		err := k.VSOperatorAuthorizations.Set(ctx, vsKey, types.VSOperatorAuthorization{
-			Authority:   authority,
+			Corporation:   authority,
 			VsOperator:  vsOperator,
 			Permissions: []uint64{42},
 		})
@@ -1853,15 +1853,15 @@ func TestQueryListVSOperatorAuthorizations(t *testing.T) {
 
 	// Seed data
 	err := k.VSOperatorAuthorizations.Set(ctx, collections.Join(authority1, vsOp1), types.VSOperatorAuthorization{
-		Authority: authority1, VsOperator: vsOp1, Permissions: []uint64{1},
+		Corporation: authority1, VsOperator: vsOp1, Permissions: []uint64{1},
 	})
 	require.NoError(t, err)
 	err = k.VSOperatorAuthorizations.Set(ctx, collections.Join(authority1, vsOp2), types.VSOperatorAuthorization{
-		Authority: authority1, VsOperator: vsOp2, Permissions: []uint64{2, 3},
+		Corporation: authority1, VsOperator: vsOp2, Permissions: []uint64{2, 3},
 	})
 	require.NoError(t, err)
 	err = k.VSOperatorAuthorizations.Set(ctx, collections.Join(authority2, vsOp1), types.VSOperatorAuthorization{
-		Authority: authority2, VsOperator: vsOp1, Permissions: []uint64{4},
+		Corporation: authority2, VsOperator: vsOp1, Permissions: []uint64{4},
 	})
 	require.NoError(t, err)
 
@@ -1873,12 +1873,12 @@ func TestQueryListVSOperatorAuthorizations(t *testing.T) {
 
 	t.Run("filter by authority", func(t *testing.T) {
 		res, err := qs.ListVSOperatorAuthorizations(ctx, &types.QueryListVSOperatorAuthorizationsRequest{
-			Authority: authority1,
+			Corporation: authority1,
 		})
 		require.NoError(t, err)
 		require.Len(t, res.VsOperatorAuthorizations, 2)
 		for _, vsoa := range res.VsOperatorAuthorizations {
-			require.Equal(t, authority1, vsoa.Authority)
+			require.Equal(t, authority1, vsoa.Corporation)
 		}
 	})
 
@@ -1895,12 +1895,12 @@ func TestQueryListVSOperatorAuthorizations(t *testing.T) {
 
 	t.Run("filter by both authority and vs_operator", func(t *testing.T) {
 		res, err := qs.ListVSOperatorAuthorizations(ctx, &types.QueryListVSOperatorAuthorizationsRequest{
-			Authority:  authority1,
+			Corporation:  authority1,
 			VsOperator: vsOp2,
 		})
 		require.NoError(t, err)
 		require.Len(t, res.VsOperatorAuthorizations, 1)
-		require.Equal(t, authority1, res.VsOperatorAuthorizations[0].Authority)
+		require.Equal(t, authority1, res.VsOperatorAuthorizations[0].Corporation)
 		require.Equal(t, vsOp2, res.VsOperatorAuthorizations[0].VsOperator)
 	})
 
@@ -1944,15 +1944,15 @@ func TestQueryListOperatorAuthorizations(t *testing.T) {
 
 	// Seed data
 	err := k.OperatorAuthorizations.Set(ctx, collections.Join(authority1, op1), types.OperatorAuthorization{
-		Authority: authority1, Operator: op1, MsgTypes: []string{"/verana.tr.v1.MsgCreateTrustRegistry"},
+		Corporation: authority1, Operator: op1, MsgTypes: []string{"/verana.tr.v1.MsgCreateTrustRegistry"},
 	})
 	require.NoError(t, err)
 	err = k.OperatorAuthorizations.Set(ctx, collections.Join(authority1, op2), types.OperatorAuthorization{
-		Authority: authority1, Operator: op2, MsgTypes: []string{"/verana.cs.v1.MsgCreateCredentialSchema"},
+		Corporation: authority1, Operator: op2, MsgTypes: []string{"/verana.cs.v1.MsgCreateCredentialSchema"},
 	})
 	require.NoError(t, err)
 	err = k.OperatorAuthorizations.Set(ctx, collections.Join(authority2, op1), types.OperatorAuthorization{
-		Authority: authority2, Operator: op1, MsgTypes: []string{"/verana.tr.v1.MsgCreateTrustRegistry"},
+		Corporation: authority2, Operator: op1, MsgTypes: []string{"/verana.tr.v1.MsgCreateTrustRegistry"},
 	})
 	require.NoError(t, err)
 
@@ -1964,12 +1964,12 @@ func TestQueryListOperatorAuthorizations(t *testing.T) {
 
 	t.Run("filter by authority", func(t *testing.T) {
 		res, err := qs.ListOperatorAuthorizations(ctx, &types.QueryListOperatorAuthorizationsRequest{
-			Authority: authority1,
+			Corporation: authority1,
 		})
 		require.NoError(t, err)
 		require.Len(t, res.OperatorAuthorizations, 2)
 		for _, oa := range res.OperatorAuthorizations {
-			require.Equal(t, authority1, oa.Authority)
+			require.Equal(t, authority1, oa.Corporation)
 		}
 	})
 
@@ -1986,12 +1986,12 @@ func TestQueryListOperatorAuthorizations(t *testing.T) {
 
 	t.Run("filter by both authority and operator", func(t *testing.T) {
 		res, err := qs.ListOperatorAuthorizations(ctx, &types.QueryListOperatorAuthorizationsRequest{
-			Authority: authority1,
+			Corporation: authority1,
 			Operator:  op2,
 		})
 		require.NoError(t, err)
 		require.Len(t, res.OperatorAuthorizations, 1)
-		require.Equal(t, authority1, res.OperatorAuthorizations[0].Authority)
+		require.Equal(t, authority1, res.OperatorAuthorizations[0].Corporation)
 		require.Equal(t, op2, res.OperatorAuthorizations[0].Operator)
 	})
 

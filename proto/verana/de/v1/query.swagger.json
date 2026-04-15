@@ -59,8 +59,8 @@
         },
         "parameters": [
           {
-            "name": "authority",
-            "description": "authority filters by the authority group that granted the authorization.",
+            "name": "corporation",
+            "description": "corporation filters by the corporation group that granted the authorization.",
             "in": "query",
             "required": false,
             "type": "string"
@@ -106,8 +106,8 @@
         },
         "parameters": [
           {
-            "name": "authority",
-            "description": "authority filters by the authority group that granted the authorization.",
+            "name": "corporation",
+            "description": "corporation filters by the corporation group that granted the authorization.",
             "in": "query",
             "required": false,
             "type": "string"
@@ -178,9 +178,9 @@
     "verana.de.v1.OperatorAuthorization": {
       "type": "object",
       "properties": {
-        "authority": {
+        "corporation": {
           "type": "string",
-          "description": "authority is the group granting the authorization."
+          "description": "corporation is the group granting the authorization."
         },
         "operator": {
           "type": "string",
@@ -263,9 +263,9 @@
     "verana.de.v1.VSOperatorAuthorization": {
       "type": "object",
       "properties": {
-        "authority": {
+        "corporation": {
           "type": "string",
-          "description": "authority is the group granting the authorization."
+          "description": "corporation is the group granting the authorization."
         },
         "vs_operator": {
           "type": "string",
