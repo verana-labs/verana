@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"cosmossdk.io/collections"
@@ -45,6 +46,11 @@ func (ms msgServer) RevokeOperatorAuthorization(goCtx context.Context, msg *type
 		return nil, fmt.Errorf("failed to remove OperatorAuthorization: %w", err)
 	}
 
+	// Clear usage ledger so re-grants start fresh
+	if err := ms.Keeper.OperatorAuthorizationUsage.Remove(ctx, oaKey); err != nil && !errors.Is(err, collections.ErrNotFound) {
+		return nil, fmt.Errorf("failed to clear usage ledger: %w", err)
+	}
+
 	// 2. Revoke Fee Allowance (authority, grantee)
 	if err := ms.RevokeFeeAllowance(ctx, msg.Corporation, msg.Grantee); err != nil {
 		return nil, fmt.Errorf("failed to revoke fee allowance: %w", err)
@@ -54,7 +60,7 @@ func (ms msgServer) RevokeOperatorAuthorization(goCtx context.Context, msg *type
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeRevokeOperatorAuthorization,
-			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Corporation),
+			sdk.NewAttribute(types.AttributeKeyCorporation, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyGrantee, msg.Grantee),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
 		),

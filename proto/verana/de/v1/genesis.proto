@@ -24,4 +24,7 @@ message GenesisState {
 
   // vs_operator_authorizations is a list of all VSOperatorAuthorization objects
   repeated VSOperatorAuthorization vs_operator_authorizations = 4 [(gogoproto.nullable) = false];
+
+  // operator_authorization_usages is a list of all OperatorAuthorizationUsage objects
+  repeated OperatorAuthorizationUsage operator_authorization_usages = 5 [(gogoproto.nullable) = false];
 }

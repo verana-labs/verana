@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"cosmossdk.io/collections"
@@ -68,13 +69,19 @@ func (ms msgServer) GrantOperatorAuthorization(goCtx context.Context, msg *types
 
 	// 1. Create or update OperatorAuthorization
 	oaKey := collections.Join(msg.Corporation, msg.Grantee)
+
+	// Reset spend ledger when re-granting so new limit takes effect from zero
+	if err := ms.Keeper.OperatorAuthorizationUsage.Remove(ctx, oaKey); err != nil && !errors.Is(err, collections.ErrNotFound) {
+		return nil, fmt.Errorf("failed to reset usage ledger: %w", err)
+	}
+
 	oa := types.OperatorAuthorization{
-		Corporation:  msg.Corporation,
-		Operator:   msg.Grantee,
-		MsgTypes:   msg.MsgTypes,
-		SpendLimit: msg.AuthzSpendLimit,
-		Expiration: msg.Expiration,
-		Period:     msg.AuthzSpendLimitPeriod,
+		Corporation: msg.Corporation,
+		Operator:    msg.Grantee,
+		MsgTypes:    msg.MsgTypes,
+		SpendLimit:  msg.AuthzSpendLimit,
+		Expiration:  msg.Expiration,
+		Period:      msg.AuthzSpendLimitPeriod,
 	}
 	if err := ms.OperatorAuthorizations.Set(ctx, oaKey, oa); err != nil {
 		return nil, fmt.Errorf("failed to set OperatorAuthorization: %w", err)
@@ -105,7 +112,7 @@ func (ms msgServer) GrantOperatorAuthorization(goCtx context.Context, msg *types
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeGrantOperatorAuthorization,
-			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Corporation),
+			sdk.NewAttribute(types.AttributeKeyCorporation, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyGrantee, msg.Grantee),
 			sdk.NewAttribute(types.AttributeKeyWithFeegrant, fmt.Sprintf("%t", msg.WithFeegrant)),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),

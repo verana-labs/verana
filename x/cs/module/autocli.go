@@ -83,7 +83,7 @@ $ veranad query cs schema 1`,
 				},
 				{
 					RpcMethod: "CreateCredentialSchema",
-					Use:       "create-credential-schema [tr-id] [json-schema] [issuer-mode] [verifier-mode] [pricing-asset-type] [pricing-asset] [digest-algorithm]",
+					Use:       "create-credential-schema [tr-id] [json-schema] [issuer-mode] [verifier-mode] [holder-onboarding-mode] [pricing-asset-type] [pricing-asset] [digest-algorithm]",
 					Short:     "Create a new credential schema",
 					Long: `Create a new credential schema with the specified parameters. The JSON schema supports placeholder replacement:
 - VPR_CREDENTIAL_SCHEMA_ID: Replaced with the generated schema ID

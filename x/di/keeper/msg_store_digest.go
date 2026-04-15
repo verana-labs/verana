@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/verana-labs/verana/x/di/types"
@@ -19,7 +20,7 @@ func (ms msgServer) StoreDigest(goCtx context.Context, msg *types.MsgStoreDigest
 
 	// [MOD-DI-MSG-1-2-1] [AUTHZ-CHECK] Verify operator authorization
 	if ms.delegationKeeper == nil {
-		return nil, fmt.Errorf("delegation keeper is required for operator authorization")
+		return nil, types.ErrDelegationKeeperNil
 	}
 	if err := ms.delegationKeeper.CheckOperatorAuthorization(
 		ctx,
@@ -31,10 +32,16 @@ func (ms msgServer) StoreDigest(goCtx context.Context, msg *types.MsgStoreDigest
 		return nil, fmt.Errorf("authorization check failed: %w", err)
 	}
 
+	// [MOD-DI-MSG-1-3] Execution — prevent duplicate (would overwrite created timestamp)
+	if has, _ := ms.Keeper.Digests.Has(ctx, msg.Digest); has {
+		return nil, errorsmod.Wrap(types.ErrDigestAlreadyExists, msg.Digest)
+	}
+
 	// [MOD-DI-MSG-1-3] Execution — Create Digest record
 	digest := types.Digest{
-		Digest:  msg.Digest,
-		Created: now,
+		Digest:          msg.Digest,
+		Created:         now,
+		DigestAlgorithm: msg.DigestAlgorithm,
 	}
 
 	if err := ms.Digests.Set(ctx, msg.Digest, digest); err != nil {
@@ -58,7 +65,11 @@ func (ms msgServer) StoreDigest(goCtx context.Context, msg *types.MsgStoreDigest
 // StoreDigestModuleCall is the module-call entry point for [MOD-DI-MSG-1].
 // It can be called directly by the perm module (CreateOrUpdatePermissionSession)
 // with no signer/AUTHZ checks.
-func (k Keeper) StoreDigestModuleCall(ctx context.Context, authority, digest string) error {
+func (k Keeper) StoreDigestModuleCall(ctx context.Context, authority, digest, digestAlgorithm string) error {
+	if _, err := sdk.AccAddressFromBech32(authority); err != nil {
+		return fmt.Errorf("invalid authority address: %w", err)
+	}
+
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 	now := sdkCtx.BlockTime()
 
@@ -66,9 +77,15 @@ func (k Keeper) StoreDigestModuleCall(ctx context.Context, authority, digest str
 		return types.ErrDigestEmpty
 	}
 
+	// prevent duplicate (would overwrite created timestamp)
+	if has, _ := k.Digests.Has(ctx, digest); has {
+		return errorsmod.Wrap(types.ErrDigestAlreadyExists, digest)
+	}
+
 	d := types.Digest{
-		Digest:  digest,
-		Created: now,
+		Digest:          digest,
+		Created:         now,
+		DigestAlgorithm: digestAlgorithm,
 	}
 
 	if err := k.Digests.Set(ctx, digest, d); err != nil {

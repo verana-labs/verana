@@ -1300,6 +1300,7 @@ type MsgRepayPermissionSlashedTrustDeposit struct {
 	Corporation string `protobuf:"bytes,1,opt,name=corporation,proto3" json:"corporation,omitempty"`
 	Operator    string `protobuf:"bytes,2,opt,name=operator,proto3" json:"operator,omitempty"`
 	Id          uint64 `protobuf:"varint,3,opt,name=id,proto3" json:"id,omitempty"`
+	Amount      uint64 `protobuf:"varint,4,opt,name=amount,proto3" json:"amount,omitempty"`
 }
 
 func (m *MsgRepayPermissionSlashedTrustDeposit) Reset()         { *m = MsgRepayPermissionSlashedTrustDeposit{} }
@@ -1352,6 +1353,13 @@ func (m *MsgRepayPermissionSlashedTrustDeposit) GetOperator() string {
 func (m *MsgRepayPermissionSlashedTrustDeposit) GetId() uint64 {
 	if m != nil {
 		return m.Id
+	}
+	return 0
+}
+
+func (m *MsgRepayPermissionSlashedTrustDeposit) GetAmount() uint64 {
+	if m != nil {
+		return m.Amount
 	}
 	return 0
 }
@@ -3146,6 +3154,11 @@ func (m *MsgRepayPermissionSlashedTrustDeposit) MarshalToSizedBuffer(dAtA []byte
 	_ = i
 	var l int
 	_ = l
+	if m.Amount != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.Amount))
+		i--
+		dAtA[i] = 0x20
+	}
 	if m.Id != 0 {
 		i = encodeVarintTx(dAtA, i, uint64(m.Id))
 		i--
@@ -3803,6 +3816,9 @@ func (m *MsgRepayPermissionSlashedTrustDeposit) Size() (n int) {
 	}
 	if m.Id != 0 {
 		n += 1 + sovTx(uint64(m.Id))
+	}
+	if m.Amount != 0 {
+		n += 1 + sovTx(uint64(m.Amount))
 	}
 	return n
 }
@@ -6726,6 +6742,25 @@ func (m *MsgRepayPermissionSlashedTrustDeposit) Unmarshal(dAtA []byte) error {
 				b := dAtA[iNdEx]
 				iNdEx++
 				m.Id |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Amount", wireType)
+			}
+			m.Amount = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Amount |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}

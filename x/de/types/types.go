@@ -3,7 +3,9 @@ package types
 import (
 	"fmt"
 
+	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 // VPRDelegableMsgTypes is the set of VPR message types that can be delegated
@@ -82,9 +84,12 @@ func (msg *MsgGrantOperatorAuthorization) ValidateBasic() error {
 		}
 	}
 
-	// authz_spend_limit if specified must be valid
+	// authz_spend_limit if specified must be valid and all-positive
 	if len(msg.AuthzSpendLimit) > 0 && !msg.AuthzSpendLimit.IsValid() {
 		return fmt.Errorf("invalid authz_spend_limit")
+	}
+	if len(msg.AuthzSpendLimit) > 0 && !msg.AuthzSpendLimit.IsAllPositive() {
+		return errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "authz_spend_limit amounts must be positive")
 	}
 
 	// authz_spend_limit_period if specified must be a valid (positive) period;
@@ -93,9 +98,19 @@ func (msg *MsgGrantOperatorAuthorization) ValidateBasic() error {
 		return fmt.Errorf("authz_spend_limit_period must be a positive duration")
 	}
 
-	// feegrant_spend_limit if specified must be valid (only relevant if with_feegrant)
+	// feegrant fields must be empty when with_feegrant is false
+	if !msg.WithFeegrant {
+		if !msg.FeegrantSpendLimit.IsZero() {
+			return errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "feegrant_spend_limit must be empty when with_feegrant is false")
+		}
+	}
+
+	// feegrant_spend_limit if specified must be valid and all-positive (only relevant if with_feegrant)
 	if msg.WithFeegrant && len(msg.FeegrantSpendLimit) > 0 && !msg.FeegrantSpendLimit.IsValid() {
 		return fmt.Errorf("invalid feegrant_spend_limit")
+	}
+	if len(msg.FeegrantSpendLimit) > 0 && !msg.FeegrantSpendLimit.IsAllPositive() {
+		return errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "feegrant_spend_limit amounts must be positive")
 	}
 
 	// feegrant_spend_limit_period if specified must be a valid (positive) period;

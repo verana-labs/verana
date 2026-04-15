@@ -518,8 +518,11 @@ func (ms msgServer) executeCreateOrUpdatePermissionSession(ctx sdk.Context, msg 
 	// keeper. Spec explicitly lets perm invoke DI with no signer/AUTHZ check.
 	// We scope this to the issuance path (IssuerPermId != 0) and only fire
 	// when the caller supplied a non-empty digest.
-	if msg.Digest != "" && msg.IssuerPermId != 0 && ms.digestKeeper != nil {
-		if err := ms.digestKeeper.StoreDigestModuleCall(ctx, msg.Corporation, msg.Digest); err != nil {
+	if msg.Digest != "" && msg.IssuerPermId != 0 {
+		if ms.digestKeeper == nil {
+			return fmt.Errorf("digest keeper is required but not set")
+		}
+		if err := ms.digestKeeper.StoreDigestModuleCall(ctx, msg.Corporation, msg.Digest, "sha2-256"); err != nil {
 			return fmt.Errorf("failed to persist credential digest: %w", err)
 		}
 	}

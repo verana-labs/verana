@@ -37,6 +37,13 @@ func (k Keeper) InitGenesis(ctx context.Context, genState types.GenesisState) er
 		}
 	}
 
+	for _, usage := range genState.OperatorAuthorizationUsages {
+		key := collections.Join(usage.Corporation, usage.Operator)
+		if err := k.OperatorAuthorizationUsage.Set(ctx, key, usage); err != nil {
+			return fmt.Errorf("failed to set operator authorization usage: %w", err)
+		}
+	}
+
 	return nil
 }
 
@@ -97,6 +104,22 @@ func (k Keeper) ExportGenesis(ctx context.Context) (*types.GenesisState, error) 
 		return vsoaList[i].VsOperator < vsoaList[j].VsOperator
 	})
 	genesis.VsOperatorAuthorizations = vsoaList
+
+	// Export operator authorization usages
+	usageList := []types.OperatorAuthorizationUsage{}
+	if err := k.OperatorAuthorizationUsage.Walk(ctx, nil, func(key collections.Pair[string, string], val types.OperatorAuthorizationUsage) (bool, error) {
+		usageList = append(usageList, val)
+		return false, nil
+	}); err != nil {
+		return nil, fmt.Errorf("failed to export operator authorization usages: %w", err)
+	}
+	sort.Slice(usageList, func(i, j int) bool {
+		if usageList[i].Corporation != usageList[j].Corporation {
+			return usageList[i].Corporation < usageList[j].Corporation
+		}
+		return usageList[i].Operator < usageList[j].Operator
+	})
+	genesis.OperatorAuthorizationUsages = usageList
 
 	return genesis, nil
 }

@@ -229,6 +229,7 @@ message MsgRepayPermissionSlashedTrustDeposit {
   string corporation = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   uint64 id = 3;
+  uint64 amount = 4;
 }
 
 message MsgRepayPermissionSlashedTrustDepositResponse {}

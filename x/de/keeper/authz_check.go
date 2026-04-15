@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -77,6 +78,9 @@ func (k Keeper) CheckOperatorAuthorizationWithSpend(
 	key := collections.Join(corporation, operator)
 	usage, err := k.OperatorAuthorizationUsage.Get(ctx, key)
 	if err != nil {
+		if !errors.Is(err, collections.ErrNotFound) {
+			return fmt.Errorf("failed to read usage ledger: %w", err)
+		}
 		// First use — seed remaining at spend_limit with last_reset = now.
 		usage = types.OperatorAuthorizationUsage{
 			Corporation: corporation,
@@ -131,8 +135,8 @@ func (k Keeper) checkOperatorAuthorizationCore(
 		return types.OperatorAuthorization{}, types.ErrAuthzNotFound
 	}
 
-	// 2. Check expiration
-	if oa.Expiration != nil && !oa.Expiration.After(now) {
+	// 2. Check expiration: expired means now > expiration, so at now == expiration auth is still valid.
+	if oa.Expiration != nil && now.After(*oa.Expiration) {
 		return types.OperatorAuthorization{}, types.ErrAuthzExpired
 	}
 

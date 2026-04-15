@@ -119,7 +119,7 @@ func (k Keeper) AddPermToVSOA(ctx context.Context, authority, vsOperator string,
 	sdkCtx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeGrantVSOperatorAuthorization,
-			sdk.NewAttribute(types.AttributeKeyAuthority, authority),
+			sdk.NewAttribute(types.AttributeKeyCorporation, authority),
 			sdk.NewAttribute(types.AttributeKeyVsOperator, vsOperator),
 			sdk.NewAttribute(types.AttributeKeyPermissionID, strconv.FormatUint(permID, 10)),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, sdkCtx.BlockTime().String()),
@@ -163,7 +163,7 @@ func (k Keeper) RemovePermFromVSOA(ctx context.Context, authority, vsOperator st
 	sdkCtx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeRevokeVSOperatorAuthorization,
-			sdk.NewAttribute(types.AttributeKeyAuthority, authority),
+			sdk.NewAttribute(types.AttributeKeyCorporation, authority),
 			sdk.NewAttribute(types.AttributeKeyVsOperator, vsOperator),
 			sdk.NewAttribute(types.AttributeKeyPermissionID, strconv.FormatUint(permID, 10)),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, sdkCtx.BlockTime().String()),

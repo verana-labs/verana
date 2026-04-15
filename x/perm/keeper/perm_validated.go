@@ -115,6 +115,11 @@ func (ms msgServer) executeSetPermissionVPToValidated(
 	effectiveUntil *time.Time,
 ) (*types.MsgSetPermissionVPToValidatedResponse, error) {
 
+	// Guard: cannot validate a slashed permission that has not been repaid
+	if applicantPerm.Slashed != nil && applicantPerm.Repaid == nil {
+		return nil, fmt.Errorf("cannot validate a slashed permission that has not been repaid")
+	}
+
 	// Update Permission applicant_perm:
 	applicantPerm.Modified = &now
 	applicantPerm.VpState = types.ValidationState_VALIDATED
@@ -142,11 +147,15 @@ func (ms msgServer) executeSetPermissionVPToValidated(
 			return nil, fmt.Errorf("invalid validator address: %w", err)
 		}
 
+		vpCurrentFeesI64, err := uint64ToInt64(applicantPerm.VpCurrentFees, "vp_current_fees")
+		if err != nil {
+			return nil, err
+		}
 		err = ms.bankKeeper.SendCoinsFromModuleToAccount(
 			ctx,
 			types.ModuleName,
 			validatorAddr,
-			sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, int64(applicantPerm.VpCurrentFees))),
+			sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, vpCurrentFeesI64)),
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to transfer fees to validator: %w", err)
@@ -156,10 +165,14 @@ func (ms msgServer) executeSetPermissionVPToValidated(
 	// [MOD-PERM-MSG-3-3] Increase validator perm trust deposit:
 	// use [MOD-TD-MSG-1] to increase by applicant_perm.vp_current_deposit
 	if applicantPerm.VpCurrentDeposit > 0 {
-		err := ms.trustDeposit.AdjustTrustDeposit(
+		vpCurrentDepositI64, err := uint64ToInt64(applicantPerm.VpCurrentDeposit, "vp_current_deposit")
+		if err != nil {
+			return nil, err
+		}
+		err = ms.trustDeposit.AdjustTrustDeposit(
 			ctx,
 			validatorPerm.Corporation,
-			int64(applicantPerm.VpCurrentDeposit),
+			vpCurrentDepositI64,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to adjust validator trust deposit: %w", err)
@@ -192,7 +205,7 @@ func (ms msgServer) executeSetPermissionVPToValidated(
 		sdk.NewEvent(
 			types.EventTypeSetPermissionVPToValidated,
 			sdk.NewAttribute(types.AttributeKeyPermissionID, strconv.FormatUint(msg.Id, 10)),
-			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Corporation),
+			sdk.NewAttribute(types.AttributeKeyCorporation, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
 			sdk.NewAttribute(types.AttributeKeyValidatorPermID, strconv.FormatUint(applicantPerm.ValidatorPermId, 10)),
 			sdk.NewAttribute(types.AttributeKeyVpSummaryDigest, msg.VpSummaryDigest),

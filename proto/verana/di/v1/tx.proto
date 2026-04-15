@@ -55,6 +55,8 @@ message MsgStoreDigest {
   string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   // digest is the digest string to store.
   string digest = 3;
+  // digest_algorithm is the hash algorithm used to produce the digest (e.g. "sha2-256").
+  string digest_algorithm = 5;
 }
 
 // MsgStoreDigestResponse defines the response for MsgStoreDigest.
@@ -69,4 +71,6 @@ message Digest {
     (gogoproto.stdtime) = true,
     (gogoproto.nullable) = false
   ];
+  // digest_algorithm is the hash algorithm used to produce the digest (e.g. "sha2-256").
+  string digest_algorithm = 3;
 }

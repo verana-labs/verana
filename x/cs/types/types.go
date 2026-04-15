@@ -221,10 +221,6 @@ func validateJSONSchema(schemaJSON string) error {
 		return fmt.Errorf("json schema cannot be empty")
 	}
 
-	if len(schemaJSON) > int(DefaultCredentialSchemaSchemaMaxSize) {
-		return fmt.Errorf("json schema exceeds maximum size of %d bytes", DefaultCredentialSchemaSchemaMaxSize)
-	}
-
 	// Parse JSON
 	var schemaDoc map[string]interface{}
 	if err := json.Unmarshal([]byte(schemaJSON), &schemaDoc); err != nil {
@@ -593,32 +589,6 @@ func validateValidityPeriods(msg *MsgCreateCredentialSchema) error {
 	}
 	if msg.GetHolderValidationValidityPeriod() == nil {
 		return fmt.Errorf("holder_validation_validity_period is mandatory")
-	}
-
-	// Validate ranges: must be between 0 (never expire) and max_days
-	val := msg.GetIssuerGrantorValidationValidityPeriod().GetValue()
-	if val > 0 && val > DefaultCredentialSchemaIssuerGrantorValidationValidityPeriodMaxDays {
-		return fmt.Errorf("issuer grantor validation validity period exceeds maximum allowed days")
-	}
-
-	val = msg.GetVerifierGrantorValidationValidityPeriod().GetValue()
-	if val > 0 && val > DefaultCredentialSchemaVerifierGrantorValidationValidityPeriodMaxDays {
-		return fmt.Errorf("verifier grantor validation validity period exceeds maximum allowed days")
-	}
-
-	val = msg.GetIssuerValidationValidityPeriod().GetValue()
-	if val > 0 && val > DefaultCredentialSchemaIssuerValidationValidityPeriodMaxDays {
-		return fmt.Errorf("issuer validation validity period exceeds maximum allowed days")
-	}
-
-	val = msg.GetVerifierValidationValidityPeriod().GetValue()
-	if val > 0 && val > DefaultCredentialSchemaVerifierValidationValidityPeriodMaxDays {
-		return fmt.Errorf("verifier validation validity period exceeds maximum allowed days")
-	}
-
-	val = msg.GetHolderValidationValidityPeriod().GetValue()
-	if val > 0 && val > DefaultCredentialSchemaHolderValidationValidityPeriodMaxDays {
-		return fmt.Errorf("holder validation validity period exceeds maximum allowed days")
 	}
 
 	return nil

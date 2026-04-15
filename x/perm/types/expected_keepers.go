@@ -59,7 +59,7 @@ type TrustDepositKeeper interface {
 // spec [MOD-DI-MSG-1] header: "This method can be called directly by Create
 // or Update Permission Session module with no checks."
 type DigestKeeper interface {
-	StoreDigestModuleCall(ctx context.Context, authority, digest string) error
+	StoreDigestModuleCall(ctx context.Context, authority, digest, digestAlgorithm string) error
 }
 
 // DelegationKeeper defines the expected interface for the Delegation Engine (DE) module.

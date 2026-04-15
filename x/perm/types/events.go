@@ -9,6 +9,7 @@ const (
 	AttributeKeyPermissionID                    = "permission_id"
 	AttributeKeyCreator                         = "creator"
 	AttributeKeyAuthority                       = "authority"
+	AttributeKeyCorporation                     = "corporation"
 	AttributeKeyOperator                        = "operator"
 	AttributeKeyFees                            = "fees"
 	AttributeKeyDeposit                         = "deposit"

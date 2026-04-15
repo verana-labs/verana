@@ -70,7 +70,7 @@ func (ms msgServer) StartPermissionVP(goCtx context.Context, msg *types.MsgStart
 		sdk.NewEvent(
 			types.EventTypeStartPermissionVP,
 			sdk.NewAttribute(types.AttributeKeyPermissionID, strconv.FormatUint(permID, 10)),
-			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Corporation),
+			sdk.NewAttribute(types.AttributeKeyCorporation, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
 			sdk.NewAttribute(types.AttributeKeyValidatorPermID, strconv.FormatUint(msg.ValidatorPermId, 10)),
 			sdk.NewAttribute(types.AttributeKeyType, types.PermissionType(msg.Type).String()),
@@ -154,7 +154,7 @@ func (ms msgServer) RenewPermissionVP(goCtx context.Context, msg *types.MsgRenew
 		sdk.NewEvent(
 			types.EventTypeRenewPermissionVP,
 			sdk.NewAttribute(types.AttributeKeyPermissionID, strconv.FormatUint(msg.Id, 10)),
-			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Corporation),
+			sdk.NewAttribute(types.AttributeKeyCorporation, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
 			sdk.NewAttribute(types.AttributeKeyValidatorPermID, strconv.FormatUint(applicantPerm.ValidatorPermId, 10)),
 			sdk.NewAttribute(types.AttributeKeyValidationFees, strconv.FormatUint(validationFees, 10)),
@@ -468,7 +468,7 @@ func (ms msgServer) CancelPermissionVPLastRequest(goCtx context.Context, msg *ty
 		sdk.NewEvent(
 			types.EventTypeCancelPermissionVPLastRequest,
 			sdk.NewAttribute(types.AttributeKeyPermissionID, strconv.FormatUint(msg.Id, 10)),
-			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Corporation),
+			sdk.NewAttribute(types.AttributeKeyCorporation, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
 		),
@@ -479,6 +479,20 @@ func (ms msgServer) CancelPermissionVPLastRequest(goCtx context.Context, msg *ty
 
 func (ms msgServer) executeCancelPermissionVPLastRequest(ctx sdk.Context, perm types.Permission) error {
 	now := ctx.BlockTime()
+
+	// First-time VP (effective_from is nil): delete the permission row entirely
+	if perm.EffectiveFrom == nil {
+		ctx.EventManager().EmitEvents(sdk.Events{
+			sdk.NewEvent(
+				types.EventTypeCancelPermissionVPLastRequest,
+				sdk.NewAttribute(types.AttributeKeyPermissionID, strconv.FormatUint(perm.Id, 10)),
+				sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
+			),
+		})
+		return ms.Keeper.Permission.Remove(ctx, perm.Id)
+	}
+
+	// Renewal: revert to VALIDATED state
 
 	// Update basic fields
 	perm.Modified = &now
@@ -580,7 +594,7 @@ func (ms msgServer) CreateRootPermission(goCtx context.Context, msg *types.MsgCr
 			types.EventTypeCreateRootPermission,
 			sdk.NewAttribute(types.AttributeKeyRootPermissionID, strconv.FormatUint(id, 10)),
 			sdk.NewAttribute(types.AttributeKeySchemaID, strconv.FormatUint(msg.SchemaId, 10)),
-			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Corporation),
+			sdk.NewAttribute(types.AttributeKeyCorporation, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
 			sdk.NewAttribute(types.AttributeKeyEffectiveFrom, formatTimePtr(msg.EffectiveFrom)),
 			sdk.NewAttribute(types.AttributeKeyEffectiveUntil, formatTimePtr(msg.EffectiveUntil)),
@@ -761,7 +775,7 @@ func (ms msgServer) AdjustPermission(goCtx context.Context, msg *types.MsgAdjust
 		sdk.NewEvent(
 			types.EventTypeAdjustPermission,
 			sdk.NewAttribute(types.AttributeKeyPermissionID, strconv.FormatUint(msg.Id, 10)),
-			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Corporation),
+			sdk.NewAttribute(types.AttributeKeyCorporation, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
 			sdk.NewAttribute(types.AttributeKeyNewEffectiveUntil, msg.EffectiveUntil.String()),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
@@ -962,7 +976,7 @@ func (ms msgServer) RevokePermission(goCtx context.Context, msg *types.MsgRevoke
 		sdk.NewEvent(
 			types.EventTypeRevokePermission,
 			sdk.NewAttribute(types.AttributeKeyPermissionID, strconv.FormatUint(msg.Id, 10)),
-			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Corporation),
+			sdk.NewAttribute(types.AttributeKeyCorporation, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
 			sdk.NewAttribute(types.AttributeKeyRevokedAt, now.String()),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
@@ -1142,7 +1156,7 @@ func (ms msgServer) CreateOrUpdatePermissionSession(goCtx context.Context, msg *
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeCreateOrUpdatePermissionSession,
-			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Corporation),
+			sdk.NewAttribute(types.AttributeKeyCorporation, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
 			sdk.NewAttribute(types.AttributeKeySessionID, msg.Id),
 			sdk.NewAttribute(types.AttributeKeyIssuerPermID, strconv.FormatUint(msg.IssuerPermId, 10)),
@@ -1211,7 +1225,7 @@ func (ms msgServer) SlashPermissionTrustDeposit(goCtx context.Context, msg *type
 			types.EventTypeSlashPermissionTrustDeposit,
 			sdk.NewAttribute(types.AttributeKeyPermissionID, strconv.FormatUint(msg.Id, 10)),
 			sdk.NewAttribute(types.AttributeKeySlashedAmount, strconv.FormatUint(msg.Amount, 10)),
-			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Corporation),
+			sdk.NewAttribute(types.AttributeKeyCorporation, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
 		),
@@ -1279,6 +1293,9 @@ func (ms msgServer) executeSlashPermissionTrustDeposit(ctx sdk.Context, applican
 	// set applicant_perm.slashed_deposit to applicant_perm.slashed_deposit + amount
 	applicantPerm.SlashedDeposit = applicantPerm.SlashedDeposit + amount
 
+	// decrement applicant_perm.deposit by amount
+	applicantPerm.Deposit -= amount
+
 	// use MOD-TD-MSG-7 to burn the slashed amount from the trust deposit of applicant_perm.authority
 	if err := ms.trustDeposit.BurnEcosystemSlashedTrustDeposit(ctx, applicantPerm.Corporation, amount); err != nil {
 		return fmt.Errorf("failed to burn trust deposit: %w", err)
@@ -1326,30 +1343,41 @@ func (ms msgServer) RepayPermissionSlashedTrustDeposit(goCtx context.Context, ms
 		return nil, fmt.Errorf("slashed deposit already fully repaid")
 	}
 
-	// [MOD-PERM-MSG-13-2-2] authority MUST have at least applicant_perm.slashed_deposit in its account balance
+	// Check msg.Amount does not exceed outstanding balance
+	outstanding := applicantPerm.SlashedDeposit - applicantPerm.RepaidDeposit
+	if msg.Amount > outstanding {
+		return nil, fmt.Errorf("amount %d exceeds outstanding slashed deposit %d", msg.Amount, outstanding)
+	}
+
+	// [MOD-PERM-MSG-13-2-2] authority MUST have at least msg.Amount in its account balance
 	authorityAddr, err := sdk.AccAddressFromBech32(msg.Corporation)
 	if err != nil {
 		return nil, fmt.Errorf("invalid authority address: %w", err)
 	}
-	slashedDepositI64, err := uint64ToInt64(applicantPerm.SlashedDeposit, "slashed_deposit")
+	repayAmountI64, err := uint64ToInt64(msg.Amount, "amount")
 	if err != nil {
 		return nil, err
 	}
-	requiredAmount := sdk.NewInt64Coin(types.BondDenom, slashedDepositI64)
+	requiredAmount := sdk.NewInt64Coin(types.BondDenom, repayAmountI64)
 	if !ms.bankKeeper.HasBalance(ctx, authorityAddr, requiredAmount) {
-		return nil, fmt.Errorf("insufficient funds to repay slashed deposit: required %d", applicantPerm.SlashedDeposit)
+		return nil, fmt.Errorf("insufficient funds to repay slashed deposit: required %d", msg.Amount)
 	}
 
 	// [MOD-PERM-MSG-13-3] Execution
-	// Use AdjustTrustDeposit to transfer applicant_perm.slashed_deposit to trust deposit of applicant_perm.authority
-	if err := ms.trustDeposit.AdjustTrustDeposit(ctx, applicantPerm.Corporation, slashedDepositI64); err != nil {
+	// Use AdjustTrustDeposit to transfer msg.Amount to trust deposit of applicant_perm.authority
+	if err := ms.trustDeposit.AdjustTrustDeposit(ctx, applicantPerm.Corporation, repayAmountI64); err != nil {
 		return nil, fmt.Errorf("failed to adjust trust deposit: %w", err)
 	}
 
 	// Update Permission entry
-	applicantPerm.Repaid = &now
 	applicantPerm.Modified = &now
-	applicantPerm.RepaidDeposit = applicantPerm.SlashedDeposit
+	applicantPerm.RepaidDeposit += msg.Amount
+	applicantPerm.Deposit += msg.Amount
+
+	// Only mark as fully repaid when repaid_deposit >= slashed_deposit
+	if applicantPerm.RepaidDeposit >= applicantPerm.SlashedDeposit {
+		applicantPerm.Repaid = &now
+	}
 
 	if err := ms.Keeper.UpdatePermission(ctx, applicantPerm); err != nil {
 		return nil, fmt.Errorf("failed to update perm: %w", err)
@@ -1360,8 +1388,8 @@ func (ms msgServer) RepayPermissionSlashedTrustDeposit(goCtx context.Context, ms
 		sdk.NewEvent(
 			types.EventTypeRepayPermissionSlashedTrustDeposit,
 			sdk.NewAttribute(types.AttributeKeyPermissionID, strconv.FormatUint(msg.Id, 10)),
-			sdk.NewAttribute(types.AttributeKeyRepaidAmount, strconv.FormatUint(applicantPerm.SlashedDeposit, 10)),
-			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Corporation),
+			sdk.NewAttribute(types.AttributeKeyRepaidAmount, strconv.FormatUint(msg.Amount, 10)),
+			sdk.NewAttribute(types.AttributeKeyCorporation, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
 		),
@@ -1533,7 +1561,7 @@ func (ms msgServer) SelfCreatePermission(goCtx context.Context, msg *types.MsgSe
 			types.EventTypeCreatePermission,
 			sdk.NewAttribute(types.AttributeKeyPermissionID, strconv.FormatUint(id, 10)),
 			sdk.NewAttribute(types.AttributeKeySchemaID, strconv.FormatUint(validatorPerm.SchemaId, 10)),
-			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Corporation),
+			sdk.NewAttribute(types.AttributeKeyCorporation, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
 			sdk.NewAttribute(types.AttributeKeyType, msg.Type.String()),
 			sdk.NewAttribute(types.AttributeKeyEffectiveFrom, formatTimePtr(msg.EffectiveFrom)),

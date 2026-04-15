@@ -10,9 +10,9 @@ import (
 )
 
 func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
-	legacy.RegisterAminoMsg(cdc, &MsgCreateCredentialSchema{}, "/vpr/v1/cs/create-credential-schema")
-	legacy.RegisterAminoMsg(cdc, &MsgUpdateCredentialSchema{}, "/vpr/v1/cs/update-credential-schema")
-	legacy.RegisterAminoMsg(cdc, &MsgArchiveCredentialSchema{}, "/vpr/v1/cs/archive-credential-schema")
+	legacy.RegisterAminoMsg(cdc, &MsgCreateCredentialSchema{}, "verana/x/cs/MsgCreateCredentialSchema")
+	legacy.RegisterAminoMsg(cdc, &MsgUpdateCredentialSchema{}, "verana/x/cs/MsgUpdateCredentialSchema")
+	legacy.RegisterAminoMsg(cdc, &MsgArchiveCredentialSchema{}, "verana/x/cs/MsgArchiveCredentialSchema")
 }
 
 func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {

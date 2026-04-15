@@ -10,17 +10,17 @@ import (
 )
 
 func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
-	legacy.RegisterAminoMsg(cdc, &MsgStartPermissionVP{}, "/perm/v1/start-perm-vp")
-	legacy.RegisterAminoMsg(cdc, &MsgRenewPermissionVP{}, "/perm/v1/renew-perm-vp")
-	legacy.RegisterAminoMsg(cdc, &MsgSetPermissionVPToValidated{}, "/perm/v1/set-perm-vp-validated")
-	legacy.RegisterAminoMsg(cdc, &MsgCancelPermissionVPLastRequest{}, "/perm/v1/cancel-perm-vp-request")
-	legacy.RegisterAminoMsg(cdc, &MsgCreateRootPermission{}, "/perm/v1/create-root-perm")
-	legacy.RegisterAminoMsg(cdc, &MsgAdjustPermission{}, "/perm/v1/adjust-perm")
-	legacy.RegisterAminoMsg(cdc, &MsgRevokePermission{}, "/perm/v1/revoke-perm")
-	legacy.RegisterAminoMsg(cdc, &MsgCreateOrUpdatePermissionSession{}, "/perm/v1/create-or-update-perm-session")
-	legacy.RegisterAminoMsg(cdc, &MsgSlashPermissionTrustDeposit{}, "/perm/v1/slash-perm-td")
-	legacy.RegisterAminoMsg(cdc, &MsgRepayPermissionSlashedTrustDeposit{}, "/perm/v1/repay-perm-slashed-td")
-	legacy.RegisterAminoMsg(cdc, &MsgSelfCreatePermission{}, "/perm/v1/self-create-perm")
+	legacy.RegisterAminoMsg(cdc, &MsgStartPermissionVP{}, "verana/x/perm/MsgStartPermissionVP")
+	legacy.RegisterAminoMsg(cdc, &MsgRenewPermissionVP{}, "verana/x/perm/MsgRenewPermissionVP")
+	legacy.RegisterAminoMsg(cdc, &MsgSetPermissionVPToValidated{}, "verana/x/perm/MsgSetPermissionVPToValidated")
+	legacy.RegisterAminoMsg(cdc, &MsgCancelPermissionVPLastRequest{}, "verana/x/perm/MsgCancelPermissionVPLastRequest")
+	legacy.RegisterAminoMsg(cdc, &MsgCreateRootPermission{}, "verana/x/perm/MsgCreateRootPermission")
+	legacy.RegisterAminoMsg(cdc, &MsgAdjustPermission{}, "verana/x/perm/MsgAdjustPermission")
+	legacy.RegisterAminoMsg(cdc, &MsgRevokePermission{}, "verana/x/perm/MsgRevokePermission")
+	legacy.RegisterAminoMsg(cdc, &MsgCreateOrUpdatePermissionSession{}, "verana/x/perm/MsgCreateOrUpdatePermissionSession")
+	legacy.RegisterAminoMsg(cdc, &MsgSlashPermissionTrustDeposit{}, "verana/x/perm/MsgSlashPermissionTrustDeposit")
+	legacy.RegisterAminoMsg(cdc, &MsgRepayPermissionSlashedTrustDeposit{}, "verana/x/perm/MsgRepayPermissionSlashedTrustDeposit")
+	legacy.RegisterAminoMsg(cdc, &MsgSelfCreatePermission{}, "verana/x/perm/MsgSelfCreatePermission")
 }
 
 func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {

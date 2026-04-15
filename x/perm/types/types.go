@@ -325,6 +325,11 @@ func (msg *MsgRepayPermissionSlashedTrustDeposit) ValidateBasic() error {
 	if msg.Id == 0 {
 		return sdkerrors.ErrInvalidRequest.Wrap("id must be a valid uint64")
 	}
+
+	if msg.Amount == 0 {
+		return sdkerrors.ErrInvalidRequest.Wrap("amount must be positive")
+	}
+
 	return nil
 }
 

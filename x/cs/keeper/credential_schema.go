@@ -131,7 +131,7 @@ func (ms msgServer) executeCreateCredentialSchema(ctx sdk.Context, schemaID uint
 			types.EventTypeCreateCredentialSchema,
 			sdk.NewAttribute(types.AttributeKeyId, fmt.Sprintf("%d", schemaID)),
 			sdk.NewAttribute(types.AttributeKeyTrId, fmt.Sprintf("%d", msg.TrId)),
-			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Corporation),
+			sdk.NewAttribute(types.AttributeKeyCorporation, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
 		),
 	)

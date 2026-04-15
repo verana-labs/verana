@@ -139,6 +139,8 @@ type MsgStoreDigest struct {
 	Operator string `protobuf:"bytes,2,opt,name=operator,proto3" json:"operator,omitempty"`
 	// digest is the digest string to store.
 	Digest string `protobuf:"bytes,3,opt,name=digest,proto3" json:"digest,omitempty"`
+	// digest_algorithm is the hash algorithm used to produce the digest (e.g. "sha2-256").
+	DigestAlgorithm string `protobuf:"bytes,5,opt,name=digest_algorithm,json=digestAlgorithm,proto3" json:"digest_algorithm,omitempty"`
 }
 
 func (m *MsgStoreDigest) Reset()         { *m = MsgStoreDigest{} }
@@ -195,6 +197,13 @@ func (m *MsgStoreDigest) GetDigest() string {
 	return ""
 }
 
+func (m *MsgStoreDigest) GetDigestAlgorithm() string {
+	if m != nil {
+		return m.DigestAlgorithm
+	}
+	return ""
+}
+
 // MsgStoreDigestResponse defines the response for MsgStoreDigest.
 type MsgStoreDigestResponse struct {
 }
@@ -238,6 +247,8 @@ type Digest struct {
 	Digest string `protobuf:"bytes,1,opt,name=digest,proto3" json:"digest,omitempty"`
 	// created is the timestamp when the digest was stored.
 	Created time.Time `protobuf:"bytes,2,opt,name=created,proto3,stdtime" json:"created"`
+	// digest_algorithm is the hash algorithm used to produce the digest (e.g. "sha2-256").
+	DigestAlgorithm string `protobuf:"bytes,3,opt,name=digest_algorithm,json=digestAlgorithm,proto3" json:"digest_algorithm,omitempty"`
 }
 
 func (m *Digest) Reset()         { *m = Digest{} }
@@ -285,6 +296,13 @@ func (m *Digest) GetCreated() time.Time {
 		return m.Created
 	}
 	return time.Time{}
+}
+
+func (m *Digest) GetDigestAlgorithm() string {
+	if m != nil {
+		return m.DigestAlgorithm
+	}
+	return ""
 }
 
 func init() {
@@ -539,6 +557,13 @@ func (m *MsgStoreDigest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if len(m.DigestAlgorithm) > 0 {
+		i -= len(m.DigestAlgorithm)
+		copy(dAtA[i:], m.DigestAlgorithm)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.DigestAlgorithm)))
+		i--
+		dAtA[i] = 0x2a
+	}
 	if len(m.Digest) > 0 {
 		i -= len(m.Digest)
 		copy(dAtA[i:], m.Digest)
@@ -606,6 +631,13 @@ func (m *Digest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if len(m.DigestAlgorithm) > 0 {
+		i -= len(m.DigestAlgorithm)
+		copy(dAtA[i:], m.DigestAlgorithm)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.DigestAlgorithm)))
+		i--
+		dAtA[i] = 0x1a
+	}
 	n2, err2 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(m.Created, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(m.Created):])
 	if err2 != nil {
 		return 0, err2
@@ -677,6 +709,10 @@ func (m *MsgStoreDigest) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
+	l = len(m.DigestAlgorithm)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
 	return n
 }
 
@@ -701,6 +737,10 @@ func (m *Digest) Size() (n int) {
 	}
 	l = github_com_cosmos_gogoproto_types.SizeOfStdTime(m.Created)
 	n += 1 + l + sovTx(uint64(l))
+	l = len(m.DigestAlgorithm)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
 	return n
 }
 
@@ -1000,6 +1040,38 @@ func (m *MsgStoreDigest) Unmarshal(dAtA []byte) error {
 			}
 			m.Digest = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field DigestAlgorithm", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.DigestAlgorithm = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipTx(dAtA[iNdEx:])
@@ -1164,6 +1236,38 @@ func (m *Digest) Unmarshal(dAtA []byte) error {
 			if err := github_com_cosmos_gogoproto_types.StdTimeUnmarshal(&m.Created, dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field DigestAlgorithm", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.DigestAlgorithm = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex

@@ -34,6 +34,8 @@ type GenesisState struct {
 	FeeGrants []FeeGrant `protobuf:"bytes,3,rep,name=fee_grants,json=feeGrants,proto3" json:"fee_grants"`
 	// vs_operator_authorizations is a list of all VSOperatorAuthorization objects
 	VsOperatorAuthorizations []VSOperatorAuthorization `protobuf:"bytes,4,rep,name=vs_operator_authorizations,json=vsOperatorAuthorizations,proto3" json:"vs_operator_authorizations"`
+	// operator_authorization_usages is a list of all OperatorAuthorizationUsage objects
+	OperatorAuthorizationUsages []OperatorAuthorizationUsage `protobuf:"bytes,5,rep,name=operator_authorization_usages,json=operatorAuthorizationUsages,proto3" json:"operator_authorization_usages"`
 }
 
 func (m *GenesisState) Reset()         { *m = GenesisState{} }
@@ -97,6 +99,13 @@ func (m *GenesisState) GetVsOperatorAuthorizations() []VSOperatorAuthorization {
 	return nil
 }
 
+func (m *GenesisState) GetOperatorAuthorizationUsages() []OperatorAuthorizationUsage {
+	if m != nil {
+		return m.OperatorAuthorizationUsages
+	}
+	return nil
+}
+
 func init() {
 	proto.RegisterType((*GenesisState)(nil), "verana.de.v1.GenesisState")
 }
@@ -148,6 +157,20 @@ func (m *GenesisState) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if len(m.OperatorAuthorizationUsages) > 0 {
+		for iNdEx := len(m.OperatorAuthorizationUsages) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.OperatorAuthorizationUsages[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintGenesis(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x2a
+		}
+	}
 	if len(m.VsOperatorAuthorizations) > 0 {
 		for iNdEx := len(m.VsOperatorAuthorizations) - 1; iNdEx >= 0; iNdEx-- {
 			{
@@ -236,6 +259,12 @@ func (m *GenesisState) Size() (n int) {
 	}
 	if len(m.VsOperatorAuthorizations) > 0 {
 		for _, e := range m.VsOperatorAuthorizations {
+			l = e.Size()
+			n += 1 + l + sovGenesis(uint64(l))
+		}
+	}
+	if len(m.OperatorAuthorizationUsages) > 0 {
+		for _, e := range m.OperatorAuthorizationUsages {
 			l = e.Size()
 			n += 1 + l + sovGenesis(uint64(l))
 		}
@@ -410,6 +439,40 @@ func (m *GenesisState) Unmarshal(dAtA []byte) error {
 			}
 			m.VsOperatorAuthorizations = append(m.VsOperatorAuthorizations, VSOperatorAuthorization{})
 			if err := m.VsOperatorAuthorizations[len(m.VsOperatorAuthorizations)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field OperatorAuthorizationUsages", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowGenesis
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthGenesis
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthGenesis
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.OperatorAuthorizationUsages = append(m.OperatorAuthorizationUsages, OperatorAuthorizationUsage{})
+			if err := m.OperatorAuthorizationUsages[len(m.OperatorAuthorizationUsages)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
