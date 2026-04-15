@@ -21,8 +21,23 @@ import (
 //  1. OperatorAuthorization must exist for (authority, operator)
 //  2. If expiration is set, it must be in the future
 //  3. The requested msgTypeURL must be in the authorization's msg_types
-//  4. If spend_limit is set and spendAmount is non-nil, remaining balance must
-//     suffice (with period reset if elapsed)
+//
+// TODO(spec-v4-draft-13 [AUTHZ-CHECK-1]): full spend-limit enforcement with
+// period reset. The spec mandates:
+//
+//	"If oauthz.spend_limit is set, the remaining balance MUST be sufficient
+//	 for the operation. After successful execution, the consumed amount MUST
+//	 be deducted from the remaining balance. If oauthz.period is set and the
+//	 current period has elapsed since the last reset, the remaining balance
+//	 MUST be reset to oauthz.spend_limit before evaluating the check above."
+//
+// Implementing this requires: (a) a new OperatorAuthorizationUsage collection
+// tracking (remaining_balance, last_reset) per (authority, operator), which
+// needs a proto definition; (b) threading a spend_amount argument through
+// every call site (currently none of tr/cs/perm/di/xr pass one); (c) updating
+// remaining_balance on successful execution inside the outer msg handler.
+// Until those arrive, the check only gates msg_type membership and expiration,
+// matching pre-spec-v4 behavior. Tracked by the spec-alignment audit TODO.
 func (k Keeper) CheckOperatorAuthorization(
 	ctx context.Context,
 	authority string,
