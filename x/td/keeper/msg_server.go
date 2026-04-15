@@ -52,6 +52,11 @@ func (ms msgServer) ReclaimTrustDepositYield(goCtx context.Context, msg *types.M
 		return nil, fmt.Errorf("deposit has been slashed and not repaid")
 	}
 
+	// [MOD-TD-MSG-2-2-1] Precondition: must have accrued claimable yield
+	if td.Claimable == 0 {
+		return nil, fmt.Errorf("no claimable yield")
+	}
+
 	// [MOD-TD-MSG-2-2-1] Precondition: requested amount must not exceed accrued claimable yield
 	if msg.Amount > td.Claimable {
 		return nil, fmt.Errorf("amount %d exceeds claimable %d", msg.Amount, td.Claimable)

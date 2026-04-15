@@ -213,7 +213,7 @@ func RunXrCreateExchangeRateJourney(ctx context.Context, client cosmosclient.Cli
 	// =========================================================================
 	fmt.Println("\n--- Step 4: Submit ToggleExchangeRateState governance proposal ---")
 
-	toggleMsg := &xrtypes.MsgToggleExchangeRateState{
+	toggleMsg := &xrtypes.MsgSetExchangeRateState{
 		Authority: govModuleAddr,
 		Id:        exchangeRateID,
 		State:     true,

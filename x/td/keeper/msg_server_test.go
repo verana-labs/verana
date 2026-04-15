@@ -98,12 +98,12 @@ func TestMsgReclaimTrustDepositYield(t *testing.T) {
 				err := k.SetParams(ctx, params)
 				require.NoError(t, err)
 
-				// Create a trust deposit with potential yield
+				// Create a trust deposit with accrued yield
 				td := types.TrustDeposit{
 					Corporation:   testAccString,
 					Share:     math.LegacyNewDec(1000),
-					Deposit:    1000, // 1000 shares at 1.5 value = 1500 tokens total value
-					Claimable: 0,
+					Deposit:    1000,
+					Claimable: 500, // pre-accrued yield available to claim
 				}
 				err = k.TrustDeposit.Set(ctx, testAccString, td)
 				require.NoError(t, err)
@@ -111,10 +111,10 @@ func TestMsgReclaimTrustDepositYield(t *testing.T) {
 			msg: &types.MsgReclaimTrustDepositYield{
 				Corporation: testAccString,
 				Operator:    testAccString,
+				Amount:      500,
 			},
 			expErr: false,
 			check: func(resp *types.MsgReclaimTrustDepositYieldResponse) {
-				// Expected yield: 1000 shares * 1.5 value = 1500 total value - 1000 deposited = 500 yield
 				require.Equal(t, uint64(500), resp.ClaimedAmount)
 
 				// Verify trust deposit was updated correctly
@@ -668,9 +668,10 @@ func TestMsgRepaySlashedTrustDeposit(t *testing.T) {
 			check: func() {
 				td, err := k.TrustDeposit.Get(ctx, testAccString)
 				require.NoError(t, err)
-				require.Equal(t, uint64(1000), td.Deposit)        // 700 + 300
-				require.Equal(t, uint64(300), td.RepaidDeposit)  // 0 + 300
-				require.Equal(t, uint64(300), td.SlashedDeposit) // unchanged
+				require.Equal(t, uint64(1000), td.Deposit) // 700 + 300
+				// Fully repaid: slashing counters reset to 0 so yield reclaim is re-enabled
+				require.Equal(t, uint64(0), td.RepaidDeposit)
+				require.Equal(t, uint64(0), td.SlashedDeposit)
 				require.NotNil(t, td.LastRepaid)
 				// share increased by 300/1.0 = 300
 				expectedShare := math.LegacyNewDec(1000) // 700 + 300
@@ -702,8 +703,10 @@ func TestMsgRepaySlashedTrustDeposit(t *testing.T) {
 			check: func() {
 				td, err := k.TrustDeposit.Get(ctx, testAccString)
 				require.NoError(t, err)
-				require.Equal(t, uint64(1100), td.Deposit)       // 800 + 300
-				require.Equal(t, uint64(500), td.RepaidDeposit) // 200 + 300
+				require.Equal(t, uint64(1100), td.Deposit) // 800 + 300
+				// Fully repaid: slashing counters reset to 0
+				require.Equal(t, uint64(0), td.RepaidDeposit)
+				require.Equal(t, uint64(0), td.SlashedDeposit)
 			},
 		},
 		{
@@ -1190,9 +1193,10 @@ func TestMsgReclaimTrustDepositYieldEdgeCases(t *testing.T) {
 		require.NoError(t, err)
 
 		td := types.TrustDeposit{
-			Corporation:        testAccString,
+			Corporation:    testAccString,
 			Share:          math.LegacyNewDec(1000),
-			Deposit:         1000,
+			Deposit:        1000,
+			Claimable:      500, // pre-accrued yield
 			SlashedDeposit: 100,
 			RepaidDeposit:  100, // fully repaid
 		}
@@ -1202,9 +1206,10 @@ func TestMsgReclaimTrustDepositYieldEdgeCases(t *testing.T) {
 		resp, err := ms.ReclaimTrustDepositYield(ctx, &types.MsgReclaimTrustDepositYield{
 			Corporation: testAccString,
 			Operator:    testAccString,
+			Amount:      500,
 		})
 		require.NoError(t, err)
-		require.Equal(t, uint64(500), resp.ClaimedAmount) // 1000*1.5 - 1000 = 500
+		require.Equal(t, uint64(500), resp.ClaimedAmount)
 	})
 
 	t.Run("AUTHZ-CHECK fails", func(t *testing.T) {
@@ -1246,8 +1251,9 @@ func TestMsgReclaimTrustDepositYieldEdgeCases(t *testing.T) {
 
 		td := types.TrustDeposit{
 			Corporation: testAccString,
-			Share:   math.LegacyNewDec(1000),
-			Deposit:  1000,
+			Share:       math.LegacyNewDec(1000),
+			Deposit:     1000,
+			Claimable:   500, // pre-accrued yield
 		}
 		err = k.TrustDeposit.Set(ctx, testAccString, td)
 		require.NoError(t, err)
@@ -1256,6 +1262,7 @@ func TestMsgReclaimTrustDepositYieldEdgeCases(t *testing.T) {
 		resp, err := ms.ReclaimTrustDepositYield(ctx, &types.MsgReclaimTrustDepositYield{
 			Corporation: testAccString,
 			Operator:    sdk.AccAddress([]byte("good_operator_ad_1")).String(),
+			Amount:      500,
 		})
 		require.NoError(t, err)
 		require.Equal(t, uint64(500), resp.ClaimedAmount)

@@ -703,19 +703,15 @@ func TestIntegration_OperatorArchivesTrustRegistry(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, tr.Archived)
 
-	// Unarchive trust registry
+	// Attempt to unarchive — rejected since archiving is a terminal operation
 	_, err = f.trMsgServer.ArchiveTrustRegistry(f.ctx, &trtypes.MsgArchiveTrustRegistry{
 		Corporation: groupAccount,
 		Operator:    operator,
 		TrId:        trID,
 		Archive:     false,
 	})
-	require.NoError(t, err)
-
-	// Verify unarchived
-	tr, err = f.trKeeper.TrustRegistry.Get(f.ctx, trID)
-	require.NoError(t, err)
-	require.Nil(t, tr.Archived)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "archive cannot be set to false")
 }
 
 // TestIntegration_UnauthorizedOperatorCannotArchiveTrustRegistry verifies that an

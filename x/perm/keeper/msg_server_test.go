@@ -2341,7 +2341,7 @@ func TestCancelPermissionVPLastRequest(t *testing.T) {
 	validatorPermID, err := k.CreatePermission(sdkCtx, validatorPerm)
 	require.NoError(t, err)
 
-	// 1. Valid cancellation - never validated (vp_exp nil → VALIDATED per spec v4)
+	// 1. Valid cancellation - never validated (EffectiveFrom nil → perm deleted per spec v4)
 	t.Run("Valid cancellation - never validated before", func(t *testing.T) {
 		neverAddr := sdk.AccAddress([]byte("never_val_cancel")).String()
 		neverValidatedPerm := types.Permission{
@@ -2353,8 +2353,8 @@ func TestCancelPermissionVPLastRequest(t *testing.T) {
 			Modified:         &now,
 			ValidatorPermId:  validatorPermID,
 			VpState:          types.ValidationState_PENDING,
-			VpCurrentFees:    100,
-			VpCurrentDeposit: 50,
+			VpCurrentFees:    0,
+			VpCurrentDeposit: 0,
 		}
 		permID, err := k.CreatePermission(sdkCtx, neverValidatedPerm)
 		require.NoError(t, err)
@@ -2369,20 +2369,15 @@ func TestCancelPermissionVPLastRequest(t *testing.T) {
 		require.NoError(t, err)
 		require.NotNil(t, resp)
 
-		perm, err := k.GetPermissionByID(sdkCtx, permID)
-		require.NoError(t, err)
-		require.Equal(t, types.ValidationState_VALIDATED, perm.VpState)
-		require.Equal(t, uint64(0), perm.VpCurrentFees)
-		require.Equal(t, uint64(0), perm.VpCurrentDeposit)
-		require.NotNil(t, perm.Modified)
-		require.Equal(t, now.Unix(), perm.Modified.Unix())
-		require.NotNil(t, perm.VpLastStateChange)
-		require.Equal(t, now.Unix(), perm.VpLastStateChange.Unix())
+		// First-time VP cancellation deletes the permission row entirely
+		_, err = k.GetPermissionByID(sdkCtx, permID)
+		require.Error(t, err)
 	})
 
-	// 2. Valid cancellation - previously validated (vp_exp not nil → VALIDATED)
+	// 2. Valid cancellation - previously validated (renewal: EffectiveFrom set → VALIDATED)
 	t.Run("Valid cancellation - previously validated", func(t *testing.T) {
 		prevAddr := sdk.AccAddress([]byte("prev_val_cancel")).String()
+		pastTime := now.Add(-1 * time.Hour)
 		futureTime := now.Add(24 * time.Hour)
 		previouslyValidatedPerm := types.Permission{
 			SchemaId:         1,
@@ -2394,8 +2389,9 @@ func TestCancelPermissionVPLastRequest(t *testing.T) {
 			ValidatorPermId:  validatorPermID,
 			VpState:          types.ValidationState_PENDING,
 			VpExp:            &futureTime, // Has a previous validation
-			VpCurrentFees:    100,
-			VpCurrentDeposit: 50,
+			EffectiveFrom:    &pastTime,   // Renewal: was previously activated
+			VpCurrentFees:    0,
+			VpCurrentDeposit: 0,
 		}
 		permID, err := k.CreatePermission(sdkCtx, previouslyValidatedPerm)
 		require.NoError(t, err)
@@ -2515,7 +2511,7 @@ func TestCancelPermissionVPLastRequest(t *testing.T) {
 		require.Nil(t, resp)
 	})
 
-	// 7. Valid - slashed but repaid (allowed)
+	// 7. Valid - slashed but repaid (allowed), first-time VP → perm deleted
 	t.Run("Valid - slashed and repaid is allowed", func(t *testing.T) {
 		repaidAddr := sdk.AccAddress([]byte("repaid_cancel_ad")).String()
 		slashedTime := now.Add(-2 * time.Hour)
@@ -2547,9 +2543,9 @@ func TestCancelPermissionVPLastRequest(t *testing.T) {
 		require.NoError(t, err)
 		require.NotNil(t, resp)
 
-		perm, err := k.GetPermissionByID(sdkCtx, permID)
-		require.NoError(t, err)
-		require.Equal(t, types.ValidationState_VALIDATED, perm.VpState) // spec v4: cancellation always returns to VALIDATED
+		// First-time VP (EffectiveFrom nil) cancellation deletes the permission row
+		_, err = k.GetPermissionByID(sdkCtx, permID)
+		require.Error(t, err)
 	})
 
 	// 8. Valid cancellation with zero fees (no transfer needed)
@@ -4281,6 +4277,7 @@ func TestRepayPermissionSlashedTrustDeposit(t *testing.T) {
 			Corporation: authority,
 			Operator:  operator,
 			Id:        applicantPermID,
+			Amount:    500,
 		})
 		require.NoError(t, err)
 		require.NotNil(t, resp)

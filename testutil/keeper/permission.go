@@ -111,11 +111,12 @@ type MockDigestKeeper struct {
 }
 
 type MockDigestRecord struct {
-	Authority string
-	Digest    string
+	Authority       string
+	Digest          string
+	DigestAlgorithm string
 }
 
-func (m *MockDigestKeeper) StoreDigestModuleCall(_ context.Context, authority, digest string) error {
-	m.Stored = append(m.Stored, MockDigestRecord{Authority: authority, Digest: digest})
+func (m *MockDigestKeeper) StoreDigestModuleCall(_ context.Context, authority, digest, digestAlgorithm string) error {
+	m.Stored = append(m.Stored, MockDigestRecord{Authority: authority, Digest: digest, DigestAlgorithm: digestAlgorithm})
 	return nil
 }

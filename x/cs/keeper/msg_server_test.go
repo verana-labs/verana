@@ -609,7 +609,8 @@ func TestArchiveCredentialSchema(t *testing.T) {
 				Id:          schemaID.Id,
 				Archive:   false,
 			},
-			expPass: true,
+			expPass:       false,
+			errorContains: "archive cannot be set to false",
 		},
 		{
 			name: "non-existent schema",
@@ -641,37 +642,19 @@ func TestArchiveCredentialSchema(t *testing.T) {
 				Id:          schemaID.Id,
 				Archive:   true,
 			},
-			setupFn: func() {
-				_, err := ms.ArchiveCredentialSchema(ctx, &types.MsgArchiveCredentialSchema{
-					Corporation: authority,
-					Operator:    operator,
-					Id:          schemaID.Id,
-					Archive:   true,
-				})
-				require.NoError(t, err)
-			},
 			expPass:       false,
 			errorContains: "already archived",
 		},
 		{
-			name: "already unarchived",
+			name: "archive false always rejected",
 			msg: &types.MsgArchiveCredentialSchema{
 				Corporation: authority,
 				Operator:    operator,
 				Id:          schemaID.Id,
 				Archive:   false,
 			},
-			setupFn: func() {
-				_, err := ms.ArchiveCredentialSchema(ctx, &types.MsgArchiveCredentialSchema{
-					Corporation: authority,
-					Operator:    operator,
-					Id:          schemaID.Id,
-					Archive:   false,
-				})
-				require.NoError(t, err)
-			},
 			expPass:       false,
-			errorContains: "not archived",
+			errorContains: "archive cannot be set to false",
 		},
 	}
 

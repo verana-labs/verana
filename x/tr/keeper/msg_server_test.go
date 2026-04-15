@@ -549,7 +549,7 @@ func TestMsgServerArchiveTrustRegistry(t *testing.T) {
 				TrId:        trID,
 				Archive:     false,
 			},
-			expectErr: false,
+			expectErr: true,
 		},
 		{
 			name: "Already Unarchived",

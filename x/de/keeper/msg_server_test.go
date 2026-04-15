@@ -821,7 +821,7 @@ func TestMsgServerRevokeOperatorAuthorization(t *testing.T) {
 				Grantee:   sdk.AccAddress([]byte("nonexistent_grantee_")).String(),
 			},
 			expectErr:   true,
-			errContains: "operator authorization not found for this authority/grantee pair",
+			errContains: "operator authorization not found for this corporation/grantee pair",
 		},
 		{
 			name: "Invalid: operator without authorization",
@@ -1232,7 +1232,7 @@ func TestGrantThenRevokeOperatorAuthorization_E2E(t *testing.T) {
 		Grantee:   grantee,
 	})
 	require.Error(t, err)
-	require.Contains(t, err.Error(), "operator authorization not found for this authority/grantee pair")
+	require.Contains(t, err.Error(), "operator authorization not found for this corporation/grantee pair")
 }
 
 func TestMutualExclusivity_OAAndVSOA(t *testing.T) {
@@ -1411,7 +1411,7 @@ func TestAuthorityIsolation(t *testing.T) {
 		Grantee:   grantee,
 	})
 	require.Error(t, err)
-	require.Contains(t, err.Error(), "operator authorization not found for this authority/grantee pair")
+	require.Contains(t, err.Error(), "operator authorization not found for this corporation/grantee pair")
 }
 
 func TestOperatorRevokesOwnAuthorization(t *testing.T) {

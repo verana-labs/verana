@@ -135,8 +135,8 @@ func (k Keeper) checkOperatorAuthorizationCore(
 		return types.OperatorAuthorization{}, types.ErrAuthzNotFound
 	}
 
-	// 2. Check expiration: expired means now > expiration, so at now == expiration auth is still valid.
-	if oa.Expiration != nil && now.After(*oa.Expiration) {
+	// 2. Check expiration: expired when now >= expiration (i.e. expiration is not strictly after now).
+	if oa.Expiration != nil && !oa.Expiration.After(now) {
 		return types.OperatorAuthorization{}, types.ErrAuthzExpired
 	}
 
