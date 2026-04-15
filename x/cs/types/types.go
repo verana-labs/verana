@@ -651,6 +651,36 @@ func validatePermManagementModes(msg *MsgCreateCredentialSchema) error {
 	return nil
 }
 
+// iso4217Currencies holds the active ISO-4217 alpha-3 currency codes accepted
+// for FIAT-priced credential schemas. Kept as a package-level set so spec
+// [MOD-CS-MSG-1] NOTE "pricing_asset MUST be an ISO-4217 currency code" is
+// enforced stateless-ly in ValidateBasic.
+var iso4217Currencies = map[string]struct{}{
+	"AED": {}, "AFN": {}, "ALL": {}, "AMD": {}, "ANG": {}, "AOA": {}, "ARS": {},
+	"AUD": {}, "AWG": {}, "AZN": {}, "BAM": {}, "BBD": {}, "BDT": {}, "BGN": {},
+	"BHD": {}, "BIF": {}, "BMD": {}, "BND": {}, "BOB": {}, "BRL": {}, "BSD": {},
+	"BTN": {}, "BWP": {}, "BYN": {}, "BZD": {}, "CAD": {}, "CDF": {}, "CHF": {},
+	"CLP": {}, "CNY": {}, "COP": {}, "CRC": {}, "CUP": {}, "CVE": {}, "CZK": {},
+	"DJF": {}, "DKK": {}, "DOP": {}, "DZD": {}, "EGP": {}, "ERN": {}, "ETB": {},
+	"EUR": {}, "FJD": {}, "FKP": {}, "GBP": {}, "GEL": {}, "GHS": {}, "GIP": {},
+	"GMD": {}, "GNF": {}, "GTQ": {}, "GYD": {}, "HKD": {}, "HNL": {}, "HTG": {},
+	"HUF": {}, "IDR": {}, "ILS": {}, "INR": {}, "IQD": {}, "IRR": {}, "ISK": {},
+	"JMD": {}, "JOD": {}, "JPY": {}, "KES": {}, "KGS": {}, "KHR": {}, "KMF": {},
+	"KPW": {}, "KRW": {}, "KWD": {}, "KYD": {}, "KZT": {}, "LAK": {}, "LBP": {},
+	"LKR": {}, "LRD": {}, "LSL": {}, "LYD": {}, "MAD": {}, "MDL": {}, "MGA": {},
+	"MKD": {}, "MMK": {}, "MNT": {}, "MOP": {}, "MRU": {}, "MUR": {}, "MVR": {},
+	"MWK": {}, "MXN": {}, "MYR": {}, "MZN": {}, "NAD": {}, "NGN": {}, "NIO": {},
+	"NOK": {}, "NPR": {}, "NZD": {}, "OMR": {}, "PAB": {}, "PEN": {}, "PGK": {},
+	"PHP": {}, "PKR": {}, "PLN": {}, "PYG": {}, "QAR": {}, "RON": {}, "RSD": {},
+	"RUB": {}, "RWF": {}, "SAR": {}, "SBD": {}, "SCR": {}, "SDG": {}, "SEK": {},
+	"SGD": {}, "SHP": {}, "SLE": {}, "SOS": {}, "SRD": {}, "SSP": {}, "STN": {},
+	"SVC": {}, "SYP": {}, "SZL": {}, "THB": {}, "TJS": {}, "TMT": {}, "TND": {},
+	"TOP": {}, "TRY": {}, "TTD": {}, "TWD": {}, "TZS": {}, "UAH": {}, "UGX": {},
+	"USD": {}, "UYU": {}, "UZS": {}, "VES": {}, "VND": {}, "VUV": {}, "WST": {},
+	"XAF": {}, "XCD": {}, "XOF": {}, "XPF": {}, "YER": {}, "ZAR": {}, "ZMW": {},
+	"ZWL": {},
+}
+
 func validatePricingAsset(msg *MsgCreateCredentialSchema) error {
 	if msg.PricingAssetType == 0 {
 		return fmt.Errorf("pricing_asset_type must be specified")
@@ -663,9 +693,27 @@ func validatePricingAsset(msg *MsgCreateCredentialSchema) error {
 		return fmt.Errorf("pricing_asset is mandatory")
 	}
 
-	// If TU, pricing_asset must be "tu"
-	if msg.PricingAssetType == uint32(PricingAssetType_TU) && msg.PricingAsset != "tu" {
-		return fmt.Errorf("pricing_asset must be 'tu' when pricing_asset_type is TU")
+	// [MOD-CS-MSG-1] pricing_asset semantics by pricing_asset_type.
+	switch msg.PricingAssetType {
+	case uint32(PricingAssetType_TU):
+		// If TU, pricing_asset must be "tu"
+		if msg.PricingAsset != "tu" {
+			return fmt.Errorf("pricing_asset must be 'tu' when pricing_asset_type is TU")
+		}
+	case uint32(PricingAssetType_FIAT):
+		// Spec NOTE: "When pricing_currency is set to FIAT, pricing_asset MUST
+		// be an ISO-4217 currency code." Validated against the alpha-3 set.
+		if _, ok := iso4217Currencies[msg.PricingAsset]; !ok {
+			return fmt.Errorf("pricing_asset %q is not a valid ISO-4217 currency code", msg.PricingAsset)
+		}
+	case uint32(PricingAssetType_COIN):
+		// Spec shows examples like "uvna", "ibc/...", "factory/...". Cosmos SDK
+		// denom format accepts lowercase alphanumeric with separators; a full
+		// denom-regex check happens at bank level, but we can reject obvious
+		// garbage early by enforcing the canonical denom pattern.
+		if err := sdk.ValidateDenom(msg.PricingAsset); err != nil {
+			return fmt.Errorf("pricing_asset must be a valid Cosmos denom when pricing_asset_type is COIN: %w", err)
+		}
 	}
 
 	return nil
