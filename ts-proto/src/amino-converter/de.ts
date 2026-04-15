@@ -14,7 +14,7 @@ import {
 export const MsgGrantOperatorAuthorizationAminoConverter: AminoConverter = {
   aminoType: "/verana.de.v1.MsgGrantOperatorAuthorization",
   toAmino: (m: MsgGrantOperatorAuthorization) => clean({
-    authority: m.authority || undefined,
+    corporation: m.corporation || undefined,
     operator: m.operator || undefined,
     grantee: m.grantee || undefined,
     msg_types: m.msgTypes?.length ? m.msgTypes : undefined,
@@ -27,7 +27,7 @@ export const MsgGrantOperatorAuthorizationAminoConverter: AminoConverter = {
   }),
   fromAmino: (a: any): MsgGrantOperatorAuthorization =>
     MsgGrantOperatorAuthorization.fromPartial({
-      authority: a.authority ?? "",
+      corporation: a.corporation ?? "",
       operator: a.operator ?? "",
       grantee: a.grantee ?? "",
       msgTypes: a.msg_types ?? [],
@@ -42,14 +42,14 @@ export const MsgGrantOperatorAuthorizationAminoConverter: AminoConverter = {
 
 export const MsgRevokeOperatorAuthorizationAminoConverter: AminoConverter = {
   aminoType: "/verana.de.v1.MsgRevokeOperatorAuthorization",
-  toAmino: ({ authority, operator, grantee }: MsgRevokeOperatorAuthorization) => clean({
-    authority: authority || undefined,
+  toAmino: ({ corporation, operator, grantee }: MsgRevokeOperatorAuthorization) => clean({
+    corporation: corporation || undefined,
     operator: operator || undefined,
     grantee: grantee || undefined,
   }),
   fromAmino: (value: any) =>
     MsgRevokeOperatorAuthorization.fromPartial({
-      authority: value.authority,
+      corporation: value.corporation,
       operator: value.operator,
       grantee: value.grantee,
     }),

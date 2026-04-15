@@ -136,7 +136,7 @@ async function main() {
   const msg = {
     typeUrl: typeUrls.MsgGrantOperatorAuthorization,
     value: MsgGrantOperatorAuthorization.fromPartial({
-      authority: authorityAddress,
+      corporation: authorityAddress,
       operator: "", // authority acts alone
       grantee: operatorAccount.address,
       msgTypes: allMsgTypes,

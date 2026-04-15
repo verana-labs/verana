@@ -82,6 +82,8 @@ async function main() {
       did: did,
       aka: aka,
       language: "en",
+      docUrl: "http://ts-proto-test-trust-registry.com/doc-v1",
+      docDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
     }),
   };
 

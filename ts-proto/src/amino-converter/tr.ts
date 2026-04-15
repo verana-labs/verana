@@ -10,12 +10,14 @@ import { clean, u64ToStr } from "./util/helpers";
 
 export const MsgCreateTrustRegistryAminoConverter: AminoConverter = {
   aminoType: "/verana.tr.v1.MsgCreateTrustRegistry",
-  toAmino: ({ corporation, operator, did, aka, language }: MsgCreateTrustRegistry) => clean({
+  toAmino: ({ corporation, operator, did, aka, language, docUrl, docDigestSri }: MsgCreateTrustRegistry) => clean({
     corporation: corporation || undefined,
     operator: operator || undefined,
     did: did || undefined,
     aka: aka || undefined,
     language: language || undefined,
+    doc_url: docUrl || undefined,
+    doc_digest_sri: docDigestSri || undefined,
   }),
   fromAmino: (value: any) =>
     MsgCreateTrustRegistry.fromPartial({
@@ -24,25 +26,27 @@ export const MsgCreateTrustRegistryAminoConverter: AminoConverter = {
       did: value.did ?? "",
       aka: value.aka ?? "",
       language: value.language ?? "",
+      docUrl: value.doc_url ?? "",
+      docDigestSri: value.doc_digest_sri ?? "",
     }),
 };
 
 export const MsgUpdateTrustRegistryAminoConverter: AminoConverter = {
   aminoType: "/verana.tr.v1.MsgUpdateTrustRegistry",
-  toAmino: ({ corporation, operator, trId, aka, language }: MsgUpdateTrustRegistry) => clean({
+  toAmino: ({ corporation, operator, trId, did, aka }: MsgUpdateTrustRegistry) => clean({
     corporation: corporation || undefined,
     operator: operator || undefined,
     tr_id: u64ToStr(trId as any),
+    did: did || undefined,
     aka: aka || undefined,
-    language: language || undefined,
   }),
   fromAmino: (value: any) =>
     MsgUpdateTrustRegistry.fromPartial({
       corporation: value.corporation ?? "",
       operator: value.operator ?? "",
       trId: value.tr_id != null ? Number(value.tr_id) : 0,
+      did: value.did ?? "",
       aka: value.aka ?? "",
-      language: value.language ?? "",
     }),
 };
 

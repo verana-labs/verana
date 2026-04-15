@@ -13,7 +13,7 @@ import {
 } from "../../../src/codec/verana/perm/v1/tx";
 import { MsgCreateTrustRegistry } from "../../../src/codec/verana/tr/v1/tx";
 import { MsgCreateCredentialSchema, OptionalUInt32 } from "../../../src/codec/verana/cs/v1/tx";
-import { IssuerOnboardingMode, VerifierOnboardingMode, PricingAssetType } from "../../../src/codec/verana/cs/v1/types";
+import { IssuerOnboardingMode, VerifierOnboardingMode, HolderOnboardingMode, PricingAssetType } from "../../../src/codec/verana/cs/v1/types";
 import { PermissionType, OptionalUInt64 } from "../../../src/codec/verana/perm/v1/types";
 // Note: We use Date objects directly, not Timestamp objects
 import { calculateFeeWithSimulation, generateUniqueDID, signAndBroadcastWithRetry, waitForPermissionToBecomeEffective, createQueryClient } from "./client";
@@ -300,7 +300,7 @@ export async function createSchemaForTest(
     });
   }
 
-  // Create Trust Registry
+  // Create Trust Registry (spec draft 13: doc_url + doc_digest_sri mandatory)
   const did = generateUniqueDID();
   const createTrMsg = {
     typeUrl: typeUrls.MsgCreateTrustRegistry,
@@ -310,6 +310,8 @@ export async function createSchemaForTest(
       did: did,
       aka: "http://example-trust-registry.com",
       language: "en",
+      docUrl: "http://example-trust-registry.com/doc-v1",
+      docDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
     }),
   };
 
@@ -375,7 +377,7 @@ export async function createSchemaForTest(
   await new Promise((resolve) => setTimeout(resolve, 500));
   await client.getSequence(address);
 
-  // Create Credential Schema
+  // Create Credential Schema (spec draft 13: holder_onboarding_mode mandatory)
   const createCsMsg = {
     typeUrl: typeUrls.MsgCreateCredentialSchema,
     value: MsgCreateCredentialSchema.fromPartial({
@@ -390,6 +392,10 @@ export async function createSchemaForTest(
       holderValidationValidityPeriod: { value: 0 } as OptionalUInt32,
       issuerOnboardingMode: IssuerOnboardingMode.ISSUER_ONBOARDING_MODE_OPEN,
       verifierOnboardingMode: VerifierOnboardingMode.VERIFIER_ONBOARDING_MODE_OPEN,
+      holderOnboardingMode: HolderOnboardingMode.HOLDER_ONBOARDING_MODE_PERMISSIONLESS,
+      pricingAssetType: PricingAssetType.TU,
+      pricingAsset: "tu",
+      digestAlgorithm: "sha256",
     }),
   };
 
@@ -538,6 +544,8 @@ export async function createTRWithOperator(
       did,
       aka: "http://perm-test-trust-registry.com",
       language: "en",
+      docUrl: "http://perm-test-trust-registry.com/doc-v1",
+      docDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
     }),
   };
 
@@ -598,6 +606,7 @@ export async function createCSWithOperator(
       holderValidationValidityPeriod: OptionalUInt32.fromPartial({ value: 0 }),
       issuerOnboardingMode: mode,
       verifierOnboardingMode: VerifierOnboardingMode.VERIFIER_ONBOARDING_MODE_OPEN,
+      holderOnboardingMode: HolderOnboardingMode.HOLDER_ONBOARDING_MODE_PERMISSIONLESS,
       pricingAssetType: PricingAssetType.TU,
       pricingAsset: "tu",
       digestAlgorithm: "sha256",

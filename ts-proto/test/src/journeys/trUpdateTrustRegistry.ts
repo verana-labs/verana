@@ -70,6 +70,7 @@ async function main() {
       corporation: setup.authorityAddress,
       operator: account.address,
       trId: activeTR.trustRegistryId,
+      did: newDid,
       aka: newAka,
     }),
   };

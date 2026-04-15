@@ -71,8 +71,9 @@ func RunPermissionCSPSJourney(ctx context.Context, client cosmosclient.Client) e
 	cs1IDStr, err := lib.CreateCredentialSchema(client, ctx, operatorAccount, cschema.MsgCreateCredentialSchema{
 		TrId:                                    trID,
 		JsonSchema:                              schemaData,
-		IssuerOnboardingMode:                uint32(cschema.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS),
-		VerifierOnboardingMode:              uint32(cschema.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS),
+		IssuerOnboardingMode:                    uint32(cschema.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS),
+		VerifierOnboardingMode:                  uint32(cschema.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS),
+		HolderOnboardingMode:                    uint32(cschema.HolderOnboardingMode_HOLDER_ONBOARDING_MODE_PERMISSIONLESS),
 		PricingAssetType:                        uint32(cschema.PricingAssetType_TU),
 		PricingAsset:                            "tu",
 		DigestAlgorithm:                         "sha256",
@@ -158,8 +159,9 @@ func RunPermissionCSPSJourney(ctx context.Context, client cosmosclient.Client) e
 	cs2IDStr, err := lib.CreateCredentialSchema(client, ctx, operatorAccount, cschema.MsgCreateCredentialSchema{
 		TrId:                                    trID,
 		JsonSchema:                              schemaData2,
-		IssuerOnboardingMode:                uint32(cschema.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS),
-		VerifierOnboardingMode:              uint32(cschema.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS),
+		IssuerOnboardingMode:                    uint32(cschema.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS),
+		VerifierOnboardingMode:                  uint32(cschema.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS),
+		HolderOnboardingMode:                    uint32(cschema.HolderOnboardingMode_HOLDER_ONBOARDING_MODE_PERMISSIONLESS),
 		PricingAssetType:                        uint32(cschema.PricingAssetType_TU),
 		PricingAsset:                            "tu",
 		DigestAlgorithm:                         "sha256",

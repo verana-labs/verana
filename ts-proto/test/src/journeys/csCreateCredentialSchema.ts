@@ -29,6 +29,7 @@ import {
 import {
   IssuerOnboardingMode,
   VerifierOnboardingMode,
+  HolderOnboardingMode,
   PricingAssetType,
 } from "../../../src/codec/verana/cs/v1/types";
 import { getCsAuthzSetup, saveCsActiveTR, saveActiveCS } from "../helpers/journeyResults";
@@ -117,6 +118,8 @@ async function main() {
       did: trDid,
       aka: trAka,
       language: "en",
+      docUrl: "http://cs-ts-proto-test-trust-registry.com/doc-v1",
+      docDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
     }),
   };
 
@@ -193,6 +196,7 @@ async function main() {
       holderValidationValidityPeriod: OptionalUInt32.fromPartial({ value: 0 }),
       issuerOnboardingMode: IssuerOnboardingMode.ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS,
       verifierOnboardingMode: VerifierOnboardingMode.VERIFIER_ONBOARDING_MODE_OPEN,
+      holderOnboardingMode: HolderOnboardingMode.HOLDER_ONBOARDING_MODE_PERMISSIONLESS,
       pricingAssetType: PricingAssetType.TU,
       pricingAsset: "tu",
       digestAlgorithm: "sha256",

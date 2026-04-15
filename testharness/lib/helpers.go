@@ -116,15 +116,17 @@ func CreateSimpleCredentialSchema(
 		panic(fmt.Sprintf("Failed to parse trust registry ID: %v", err))
 	}
 
-	// Create credential schema with default validity periods (0 = never expire)
+	// Create credential schema with default validity periods (0 = never expire).
+	// Spec draft 13: holder_onboarding_mode is mandatory.
 	csStrId, err := CreateCredentialSchema(client, ctx, account, cschema.MsgCreateCredentialSchema{
-		TrId:                       trId,
-		JsonSchema:                 schemaData,
+		TrId:                   trId,
+		JsonSchema:             schemaData,
 		IssuerOnboardingMode:   uint32(issuerMode),
 		VerifierOnboardingMode: uint32(verifierMode),
-		PricingAssetType:           uint32(cschema.PricingAssetType_TU),
-		PricingAsset:               "tu",
-		DigestAlgorithm:            "sha256",
+		HolderOnboardingMode:   uint32(cschema.HolderOnboardingMode_HOLDER_ONBOARDING_MODE_PERMISSIONLESS),
+		PricingAssetType:       uint32(cschema.PricingAssetType_TU),
+		PricingAsset:           "tu",
+		DigestAlgorithm:        "sha256",
 		// Validity periods are mandatory - use 0 (never expire) as default
 		IssuerGrantorValidationValidityPeriod:   &cschema.OptionalUInt32{Value: 0},
 		VerifierGrantorValidationValidityPeriod: &cschema.OptionalUInt32{Value: 0},
@@ -2644,7 +2646,7 @@ func CreateCredentialSchemaWithAuthority(
 		JsonSchema:                              schemaData,
 		IssuerOnboardingMode:                    uint32(issuerMode),
 		VerifierOnboardingMode:                  uint32(verifierMode),
-		HolderOnboardingMode:                    0,
+		HolderOnboardingMode:                    uint32(cschema.HolderOnboardingMode_HOLDER_ONBOARDING_MODE_PERMISSIONLESS),
 		PricingAssetType:                        uint32(cschema.PricingAssetType_TU),
 		PricingAsset:                            "tu",
 		DigestAlgorithm:                         "sha256",

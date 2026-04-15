@@ -77,13 +77,14 @@ func RunPermissionAuthzOperationsJourney(ctx context.Context, client cosmosclien
 	fmt.Println("\n--- Prerequisite 3: Create Credential Schema ---")
 	schemaData := lib.GenerateSimpleSchema(trIDStr)
 	csIDStr, err := lib.CreateCredentialSchema(client, ctx, operatorAccount, cschema.MsgCreateCredentialSchema{
-		TrId:                       trID,
-		JsonSchema:                 schemaData,
+		TrId:                   trID,
+		JsonSchema:             schemaData,
 		IssuerOnboardingMode:   uint32(cschema.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS),
 		VerifierOnboardingMode: uint32(cschema.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS),
-		PricingAssetType:           uint32(cschema.PricingAssetType_TU),
-		PricingAsset:               "tu",
-		DigestAlgorithm:            "sha256",
+		HolderOnboardingMode:   uint32(cschema.HolderOnboardingMode_HOLDER_ONBOARDING_MODE_PERMISSIONLESS),
+		PricingAssetType:       uint32(cschema.PricingAssetType_TU),
+		PricingAsset:           "tu",
+		DigestAlgorithm:        "sha256",
 	})
 	if err != nil {
 		return fmt.Errorf("prerequisite 3 failed: %w", err)
