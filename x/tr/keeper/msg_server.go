@@ -57,7 +57,7 @@ func (ms msgServer) CreateTrustRegistry(goCtx context.Context, msg *types.MsgCre
 			types.EventTypeCreateTrustRegistry,
 			sdk.NewAttribute(types.AttributeKeyTrustRegistryID, strconv.FormatUint(tr.Id, 10)),
 			sdk.NewAttribute(types.AttributeKeyDID, tr.Did),
-			sdk.NewAttribute(types.AttributeKeyController, tr.Corporation),
+			sdk.NewAttribute(types.AttributeKeyCorporation, tr.Corporation),
 			sdk.NewAttribute(types.AttributeKeyAka, tr.Aka),
 			sdk.NewAttribute(types.AttributeKeyLanguage, tr.Language),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
@@ -101,7 +101,7 @@ func (ms msgServer) AddGovernanceFrameworkDocument(goCtx context.Context, msg *t
 			sdk.NewAttribute(types.AttributeKeyLanguage, msg.Language),
 			sdk.NewAttribute(types.AttributeKeyDocURL, msg.Url),
 			sdk.NewAttribute(types.AttributeKeyDigestSri, msg.DigestSri),
-			sdk.NewAttribute(types.AttributeKeyController, msg.Corporation),
+			sdk.NewAttribute(types.AttributeKeyCorporation, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
 		),
 	})
@@ -141,7 +141,7 @@ func (ms msgServer) IncreaseActiveGovernanceFrameworkVersion(goCtx context.Conte
 		sdk.NewEvent(
 			types.EventTypeIncreaseActiveGFVersion,
 			sdk.NewAttribute(types.AttributeKeyTrustRegistryID, strconv.FormatUint(msg.TrId, 10)),
-			sdk.NewAttribute(types.AttributeKeyController, msg.Corporation),
+			sdk.NewAttribute(types.AttributeKeyCorporation, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
 		),
 	})
@@ -202,7 +202,7 @@ func (ms msgServer) UpdateTrustRegistry(goCtx context.Context, msg *types.MsgUpd
 		sdk.NewEvent(
 			types.EventTypeUpdateTrustRegistry,
 			sdk.NewAttribute(types.AttributeKeyTrustRegistryID, strconv.FormatUint(msg.TrId, 10)),
-			sdk.NewAttribute(types.AttributeKeyController, msg.Corporation),
+			sdk.NewAttribute(types.AttributeKeyCorporation, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyDID, msg.Did),
 			sdk.NewAttribute(types.AttributeKeyAka, msg.Aka),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
@@ -241,21 +241,17 @@ func (ms msgServer) ArchiveTrustRegistry(goCtx context.Context, msg *types.MsgAr
 		return nil, fmt.Errorf("only trust registry corporation can archive trust registry")
 	}
 
-	// Check archive state
-	if msg.Archive {
-		if tr.Archived != nil {
-			return nil, fmt.Errorf("trust registry is already archived")
-		}
-	} else {
-		if tr.Archived == nil {
-			return nil, fmt.Errorf("trust registry is not archived")
-		}
+	// Archiving is a terminal operation — it cannot be reversed.
+	if !msg.Archive {
+		return nil, fmt.Errorf("archive cannot be set to false; archiving is a terminal operation")
 	}
-	if msg.Archive {
-		tr.Archived = &now
-	} else {
-		tr.Archived = nil
+
+	// Guard: reject if already archived.
+	if tr.Archived != nil {
+		return nil, fmt.Errorf("trust registry is already archived")
 	}
+
+	tr.Archived = &now
 	tr.Modified = now
 
 	// Save updated trust registry
@@ -263,17 +259,12 @@ func (ms msgServer) ArchiveTrustRegistry(goCtx context.Context, msg *types.MsgAr
 		return nil, fmt.Errorf("failed to update trust registry: %w", err)
 	}
 
-	archiveStatus := "archived"
-	if !msg.Archive {
-		archiveStatus = "unarchived"
-	}
-
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeArchiveTrustRegistry,
 			sdk.NewAttribute(types.AttributeKeyTrustRegistryID, strconv.FormatUint(msg.TrId, 10)),
-			sdk.NewAttribute(types.AttributeKeyController, msg.Corporation),
-			sdk.NewAttribute(types.AttributeKeyArchiveStatus, archiveStatus),
+			sdk.NewAttribute(types.AttributeKeyCorporation, msg.Corporation),
+			sdk.NewAttribute(types.AttributeKeyArchiveStatus, "archived"),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
 		),
 	})

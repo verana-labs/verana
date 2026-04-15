@@ -32,13 +32,14 @@ func (msg *MsgCreateTrustRegistry) ValidateBasic() error {
 		return fmt.Errorf("invalid AKA URI")
 	}
 
-	if !isValidLanguageTagForCreateTrustRegistry(msg.Language) {
-		return fmt.Errorf("invalid language tag (must conform to RFC 1766 and be 2 characters long)")
+	if !isValidBCP47(msg.Language) {
+		return fmt.Errorf("invalid language tag (must be a valid BCP 47 tag)")
 	}
 
-	// [MOD-TR-MSG-1-2-1] doc_url must be a well-formed URI.
-	if _, err := url.Parse(msg.DocUrl); err != nil {
-		return fmt.Errorf("invalid doc_url: %w", err)
+	// [MOD-TR-MSG-1-2-1] doc_url must be a valid http/https URL.
+	u, err := url.ParseRequestURI(msg.DocUrl)
+	if err != nil || (u.Scheme != "http" && u.Scheme != "https") {
+		return fmt.Errorf("doc_url must be a valid http/https URL")
 	}
 
 	// [MOD-TR-MSG-1-2-1] doc_digest_sri must be a valid SRI string.
@@ -47,14 +48,6 @@ func (msg *MsgCreateTrustRegistry) ValidateBasic() error {
 	}
 
 	return nil
-}
-
-func isValidLanguageTagForCreateTrustRegistry(lang string) bool {
-	if len(lang) > 17 || len(lang) < 2 {
-		return false
-	}
-	match, _ := regexp.MatchString(`^[a-z]{2}$`, lang[:2])
-	return match
 }
 
 // ValidateBasic performs stateless validation of MsgAddGovernanceFrameworkDocument
@@ -72,12 +65,13 @@ func (msg *MsgAddGovernanceFrameworkDocument) ValidateBasic() error {
 		return sdkerrors.ErrInvalidAddress.Wrapf("invalid operator address: %s", err)
 	}
 
-	if !isValidLanguageTag(msg.Language) {
-		return fmt.Errorf("invalid language tag (must conform to rfc1766)")
+	if !isValidBCP47(msg.Language) {
+		return fmt.Errorf("invalid language tag (must be a valid BCP 47 tag)")
 	}
 
-	if _, err := url.Parse(msg.Url); err != nil {
-		return fmt.Errorf("invalid document URL")
+	u, err := url.ParseRequestURI(msg.Url)
+	if err != nil || (u.Scheme != "http" && u.Scheme != "https") {
+		return fmt.Errorf("url must be a valid http/https URL")
 	}
 
 	if !isValidDigestSRI(msg.DigestSri) {
@@ -137,6 +131,12 @@ func (msg *MsgUpdateTrustRegistry) ValidateBasic() error {
 		return fmt.Errorf("invalid DID format")
 	}
 
+	if msg.Aka != "" {
+		if !isValidURI(msg.Aka) {
+			return fmt.Errorf("aka must be a valid URI")
+		}
+	}
+
 	return nil
 }
 
@@ -162,16 +162,9 @@ func (msg *MsgArchiveTrustRegistry) ValidateBasic() error {
 }
 
 func isValidDID(did string) bool {
-	didRegex := regexp.MustCompile(`^did:[a-zA-Z0-9]+:[a-zA-Z0-9._:/-]+$`)
-	return didRegex.MatchString(did)
-}
-
-func isValidLanguageTag(lang string) bool {
-	if len(lang) != 2 {
-		return false
-	}
-	match, _ := regexp.MatchString(`^[a-z]{2}$`, lang)
-	return match
+	// Simplified but correct DID syntax: did:method:method-specific-id
+	re := regexp.MustCompile(`^did:[a-zA-Z0-9-]+:[a-zA-Z0-9._:/-]+(#[^\s]*)?(\?[^\s]*)?$`)
+	return re.MatchString(did)
 }
 
 func isValidURI(uri string) bool {

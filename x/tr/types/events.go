@@ -12,6 +12,7 @@ const (
 	AttributeKeyTrustRegistryID = "trust_registry_id"
 	AttributeKeyDID             = "did"
 	AttributeKeyController      = "controller"
+	AttributeKeyCorporation     = "corporation"
 	AttributeKeyAka             = "aka"
 	AttributeKeyLanguage        = "language"
 	AttributeKeyTimestamp       = "timestamp"

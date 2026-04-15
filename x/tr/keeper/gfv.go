@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"cosmossdk.io/collections"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/verana-labs/verana/x/tr/types"
 )
@@ -21,22 +22,15 @@ func (ms msgServer) validateIncreaseActiveGovernanceFrameworkVersionParams(ctx s
 
 	nextVersion := tr.ActiveVersion + 1
 
-	// Find GFV for next version
-	var gfv types.GovernanceFrameworkVersion
-	found := false
-	err = ms.GFVersion.Walk(ctx, nil, func(id uint64, v types.GovernanceFrameworkVersion) (bool, error) {
-		if v.TrId == msg.TrId && v.Version == nextVersion {
-			gfv = v
-			found = true
-			return true, nil
-		}
-		return false, nil
-	})
+	// Use secondary index for O(1) lookup instead of full table scan.
+	gfvId, err := ms.GFVersionByTR.Get(ctx, collections.Join(msg.TrId, nextVersion))
 	if err != nil {
-		return fmt.Errorf("error checking versions: %w", err)
-	}
-	if !found {
 		return fmt.Errorf("no governance framework version found for version %d", nextVersion)
+	}
+
+	gfv, err := ms.GFVersion.Get(ctx, gfvId)
+	if err != nil {
+		return fmt.Errorf("failed to fetch governance framework version %d: %w", gfvId, err)
 	}
 
 	// Check for document in trust registry's language
@@ -66,22 +60,16 @@ func (ms msgServer) executeIncreaseActiveGovernanceFrameworkVersion(ctx sdk.Cont
 	}
 
 	nextVersion := tr.ActiveVersion + 1
-	var nextGfv types.GovernanceFrameworkVersion
-	var found bool
 
-	err = ms.GFVersion.Walk(ctx, nil, func(key uint64, gfv types.GovernanceFrameworkVersion) (bool, error) {
-		if gfv.TrId == msg.TrId && gfv.Version == nextVersion {
-			nextGfv = gfv
-			found = true
-			return true, nil
-		}
-		return false, nil
-	})
+	// Use secondary index for O(1) lookup.
+	gfvId, err := ms.GFVersionByTR.Get(ctx, collections.Join(msg.TrId, nextVersion))
 	if err != nil {
-		return fmt.Errorf("failed to walk governance framework versions: %w", err)
-	}
-	if !found {
 		return fmt.Errorf("next version not found")
+	}
+
+	nextGfv, err := ms.GFVersion.Get(ctx, gfvId)
+	if err != nil {
+		return fmt.Errorf("failed to fetch governance framework version %d: %w", gfvId, err)
 	}
 
 	// Update version

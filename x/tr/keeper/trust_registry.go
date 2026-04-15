@@ -2,22 +2,12 @@ package keeper
 
 import (
 	"fmt"
-	"regexp"
 	"time"
 
+	"cosmossdk.io/collections"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/verana-labs/verana/x/tr/types"
 )
-
-func isValidLanguageTag(lang string) bool {
-	// RFC1766 primary tag must be exactly 2 letters
-	if len(lang) != 2 {
-		return false
-	}
-	// Must be lowercase letters only
-	match, _ := regexp.MatchString(`^[a-z]{2}$`, lang)
-	return match
-}
 
 // [MOD-TR-MSG-1-3] Spec draft 13: MsgCreateTrustRegistry seeds the trust
 // registry, an active v1 governance framework version, AND an initial
@@ -84,6 +74,10 @@ func (ms msgServer) persistEntries(ctx sdk.Context, tr types.TrustRegistry, gfv 
 
 	if err := ms.GFVersion.Set(ctx, gfv.Id, gfv); err != nil {
 		return fmt.Errorf("failed to persist GovernanceFrameworkVersion: %w", err)
+	}
+
+	if err := ms.GFVersionByTR.Set(ctx, collections.Join(gfv.TrId, gfv.Version), gfv.Id); err != nil {
+		return fmt.Errorf("failed to persist GFVersionByTR index: %w", err)
 	}
 
 	if err := ms.GFDocument.Set(ctx, gfd.Id, gfd); err != nil {

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"cosmossdk.io/collections"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/verana-labs/verana/x/tr/types"
 )
@@ -21,22 +22,27 @@ func (ms msgServer) validateAddGovernanceFrameworkDocumentParams(ctx sdk.Context
 		return errors.New("corporation is not the controller of the trust registry")
 	}
 
-	// Check version validity
+	// Use secondary index to find the max version for this TR without a full table scan.
+	// Iterate the prefix (trId, *) in reverse to get the highest version first.
 	var maxVersion int32
 	var hasVersion bool
-	err = ms.GFVersion.Walk(ctx, nil, func(id uint64, gfv types.GovernanceFrameworkVersion) (bool, error) {
-		if gfv.TrId == msg.TrId {
-			if gfv.Version == msg.Version {
-				hasVersion = true
-			}
-			if gfv.Version > maxVersion {
-				maxVersion = gfv.Version
-			}
-		}
-		return false, nil
-	})
+	iter, err := ms.GFVersionByTR.Iterate(ctx, collections.NewPrefixedPairRange[uint64, int32](msg.TrId))
 	if err != nil {
-		return fmt.Errorf("error checking versions: %w", err)
+		return fmt.Errorf("error iterating GFVersionByTR index: %w", err)
+	}
+	defer iter.Close()
+	for ; iter.Valid(); iter.Next() {
+		key, err := iter.Key()
+		if err != nil {
+			return fmt.Errorf("error reading GFVersionByTR key: %w", err)
+		}
+		v := key.K2()
+		if v > maxVersion {
+			maxVersion = v
+		}
+		if v == msg.Version {
+			hasVersion = true
+		}
 	}
 
 	// [MOD-TR-MSG-2-2-1] Spec draft 13: version MUST be greater than tr.active_version.
@@ -54,34 +60,25 @@ func (ms msgServer) validateAddGovernanceFrameworkDocumentParams(ctx sdk.Context
 	}
 
 	// Validate language tag
-	if !isValidLanguageTag(msg.Language) {
-		return errors.New("invalid language tag (must conform to rfc1766)")
+	if !types.IsValidBCP47(msg.Language) {
+		return errors.New("invalid language tag (must be a valid BCP 47 tag)")
 	}
 
 	return nil
 }
 
 func (ms msgServer) executeAddGovernanceFrameworkDocument(ctx sdk.Context, msg *types.MsgAddGovernanceFrameworkDocument) error {
-	// Find or create governance framework version
+	// Use secondary index to find the GFV for this (tr_id, version) pair — O(1) lookup.
+	gfvId, err := ms.GFVersionByTR.Get(ctx, collections.Join(msg.TrId, msg.Version))
 	var gfv types.GovernanceFrameworkVersion
-	maxVersion := int32(0)
-	err := ms.GFVersion.Walk(ctx, nil, func(key uint64, version types.GovernanceFrameworkVersion) (bool, error) {
-		if version.TrId == msg.TrId {
-			if version.Version > maxVersion {
-				maxVersion = version.Version
-			}
-			if version.Version == msg.Version {
-				gfv = version
-			}
+	if err == nil {
+		// Found existing GFV
+		gfv, err = ms.GFVersion.Get(ctx, gfvId)
+		if err != nil {
+			return fmt.Errorf("failed to fetch governance framework version %d: %w", gfvId, err)
 		}
-		return false, nil
-	})
-	if err != nil {
-		return fmt.Errorf("failed to walk governance framework versions: %w", err)
-	}
-
-	// Create new version if needed
-	if gfv.Id == 0 {
+	} else {
+		// Create new version
 		nextGfvId, err := ms.GetNextID(ctx, "gfv")
 		if err != nil {
 			return fmt.Errorf("failed to generate governance framework version ID: %w", err)
@@ -95,6 +92,10 @@ func (ms msgServer) executeAddGovernanceFrameworkDocument(ctx sdk.Context, msg *
 		}
 		if err := ms.GFVersion.Set(ctx, gfv.Id, gfv); err != nil {
 			return fmt.Errorf("failed to persist governance framework version: %w", err)
+		}
+		// Maintain secondary index
+		if err := ms.GFVersionByTR.Set(ctx, collections.Join(gfv.TrId, gfv.Version), gfv.Id); err != nil {
+			return fmt.Errorf("failed to persist GFVersionByTR index: %w", err)
 		}
 	}
 

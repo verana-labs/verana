@@ -10,11 +10,11 @@ import (
 )
 
 func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
-	legacy.RegisterAminoMsg(cdc, &MsgCreateTrustRegistry{}, "/vpr/v1/tr/create-trust-registry")
-	legacy.RegisterAminoMsg(cdc, &MsgAddGovernanceFrameworkDocument{}, "/vpr/v1/tr/add-gfd")
-	legacy.RegisterAminoMsg(cdc, &MsgIncreaseActiveGovernanceFrameworkVersion{}, "/vpr/v1/tr/increase-active-gf-version")
-	legacy.RegisterAminoMsg(cdc, &MsgUpdateTrustRegistry{}, "/vpr/v1/tr/update-trust-registry")
-	legacy.RegisterAminoMsg(cdc, &MsgArchiveTrustRegistry{}, "/vpr/v1/tr/archive-trust-registry")
+	legacy.RegisterAminoMsg(cdc, &MsgCreateTrustRegistry{}, "verana/x/tr/MsgCreateTrustRegistry")
+	legacy.RegisterAminoMsg(cdc, &MsgAddGovernanceFrameworkDocument{}, "verana/x/tr/MsgAddGovernanceFrameworkDocument")
+	legacy.RegisterAminoMsg(cdc, &MsgIncreaseActiveGovernanceFrameworkVersion{}, "verana/x/tr/MsgIncreaseActiveGovernanceFrameworkVersion")
+	legacy.RegisterAminoMsg(cdc, &MsgUpdateTrustRegistry{}, "verana/x/tr/MsgUpdateTrustRegistry")
+	legacy.RegisterAminoMsg(cdc, &MsgArchiveTrustRegistry{}, "verana/x/tr/MsgArchiveTrustRegistry")
 }
 
 func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {

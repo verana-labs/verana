@@ -22,6 +22,7 @@ var (
 	GovernanceFrameworkVersionKey  = collections.NewPrefix(3)
 	GovernanceFrameworkDocumentKey = collections.NewPrefix(4)
 	CounterKey                     = collections.NewPrefix(5)
+	GFVersionByTRKey               = collections.NewPrefix(6) // Secondary index: (tr_id, version) -> gfv_id
 )
 
 func KeyPrefix(p string) []byte {
