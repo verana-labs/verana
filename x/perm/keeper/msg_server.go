@@ -1081,6 +1081,15 @@ func (ms msgServer) checkTrustRegistryControllerOption(ctx sdk.Context, authorit
 
 // [MOD-PERM-MSG-9-3] Revoke Permission execution
 func (ms msgServer) executeRevokePermission(ctx sdk.Context, perm types.Permission, now time.Time) error {
+	// Free associated trust deposit if non-zero
+	if perm.Deposit > 0 {
+		depositI64 := int64(perm.Deposit)
+		if err := ms.trustDeposit.AdjustTrustDeposit(ctx, perm.Corporation, -depositI64, "perm_revoke_release_deposit"); err != nil {
+			return fmt.Errorf("failed to release trust deposit on revocation: %w", err)
+		}
+		perm.Deposit = 0
+	}
+
 	// set applicant_perm.revoked to now
 	perm.Revoked = &now
 

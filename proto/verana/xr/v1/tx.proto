@@ -84,6 +84,15 @@ message MsgUpdateExchangeRate {
 
   // rate is the new exchange rate value.
   string rate = 4;
+
+  // rate_scale is the new scale for the rate (if 0, existing scale is kept).
+  uint32 rate_scale = 5;
+
+  // validity_duration is the new validity duration (optional; if nil, existing duration is kept).
+  google.protobuf.Duration validity_duration = 6 [
+    (gogoproto.stdduration) = true,
+    (gogoproto.nullable) = true
+  ];
 }
 
 // MsgUpdateExchangeRateResponse defines the response for MsgUpdateExchangeRate.

@@ -65,7 +65,7 @@ func (ms msgServer) CreateExchangeRate(ctx context.Context, msg *types.MsgCreate
 		RateScale:        msg.RateScale,
 		ValidityDuration: msg.ValidityDuration,
 		Expires:          blockTime.Add(msg.ValidityDuration),
-		State:            msg.State,
+		State:            true,
 		Updated:          blockTime,
 	}
 

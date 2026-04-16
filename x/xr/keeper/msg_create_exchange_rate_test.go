@@ -43,7 +43,7 @@ func TestCreateExchangeRate_HappyPath(t *testing.T) {
 	require.Equal(t, "100", xr.Rate)
 	require.Equal(t, uint32(2), xr.RateScale)
 	require.Equal(t, 10*time.Minute, xr.ValidityDuration)
-	require.False(t, xr.State)
+	require.True(t, xr.State)
 }
 
 func TestCreateExchangeRate_InvalidAuthority(t *testing.T) {

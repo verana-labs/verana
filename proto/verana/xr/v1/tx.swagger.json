@@ -281,6 +281,15 @@
         "rate": {
           "type": "string",
           "description": "rate is the new exchange rate value."
+        },
+        "rate_scale": {
+          "type": "integer",
+          "format": "int64",
+          "description": "rate_scale is the new scale for the rate (if 0, existing scale is kept)."
+        },
+        "validity_duration": {
+          "type": "string",
+          "description": "validity_duration is the new validity duration (optional; if nil, existing duration is kept)."
         }
       },
       "description": "MsgUpdateExchangeRate is the Msg/UpdateExchangeRate request type."

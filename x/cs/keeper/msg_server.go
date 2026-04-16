@@ -211,20 +211,31 @@ func (ms msgServer) ArchiveCredentialSchema(goCtx context.Context, msg *types.Ms
 		return nil, fmt.Errorf("corporation does not match the trust registry corporation")
 	}
 
-	// [MOD-CS-MSG-3-2-1] Check archive state
-	if !msg.Archive {
-		return nil, fmt.Errorf("archive cannot be set to false; use credential schema lifecycle management")
-	}
-	if cs.Archived != nil {
-		return nil, fmt.Errorf("credential schema is already archived")
+	// [MOD-CS-MSG-3-2-1] Bidirectional archive/unarchive logic.
+	if msg.Archive {
+		// archive=true: reject if already archived
+		if cs.Archived != nil {
+			return nil, fmt.Errorf("credential schema is already archived")
+		}
+		cs.Archived = &now
+	} else {
+		// archive=false: reject if not currently archived
+		if cs.Archived == nil {
+			return nil, fmt.Errorf("credential schema is not archived")
+		}
+		cs.Archived = nil
 	}
 
-	// [MOD-CS-MSG-3-3] Update archive state and modified timestamp
-	cs.Archived = &now
+	// [MOD-CS-MSG-3-3] Update modified timestamp
 	cs.Modified = now
 
 	if err := ms.CredentialSchema.Set(ctx, cs.Id, cs); err != nil {
 		return nil, fmt.Errorf("failed to update credential schema: %w", err)
+	}
+
+	archiveStatus := "archived"
+	if !msg.Archive {
+		archiveStatus = "unarchived"
 	}
 
 	ctx.EventManager().EmitEvents(sdk.Events{
@@ -234,7 +245,7 @@ func (ms msgServer) ArchiveCredentialSchema(goCtx context.Context, msg *types.Ms
 			sdk.NewAttribute(types.AttributeKeyTrId, strconv.FormatUint(cs.TrId, 10)),
 			sdk.NewAttribute(types.AttributeKeyCorporation, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
-			sdk.NewAttribute(types.AttributeKeyArchiveStatus, "archived"),
+			sdk.NewAttribute(types.AttributeKeyArchiveStatus, archiveStatus),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
 		),
 	})

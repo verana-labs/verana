@@ -58,6 +58,10 @@ export interface MsgUpdateExchangeRate {
   id: number;
   /** rate is the new exchange rate value. */
   rate: string;
+  /** rate_scale is the new scale for the rate (if 0, existing scale is kept). */
+  rateScale: number;
+  /** validity_duration is the new validity duration (optional; if nil, existing duration is kept). */
+  validityDuration: Duration | undefined;
 }
 
 /** MsgUpdateExchangeRateResponse defines the response for MsgUpdateExchangeRate. */
@@ -571,7 +575,7 @@ export const MsgCreateExchangeRateResponse = {
 };
 
 function createBaseMsgUpdateExchangeRate(): MsgUpdateExchangeRate {
-  return { authority: "", operator: "", id: 0, rate: "" };
+  return { authority: "", operator: "", id: 0, rate: "", rateScale: 0, validityDuration: undefined };
 }
 
 export const MsgUpdateExchangeRate = {
@@ -587,6 +591,12 @@ export const MsgUpdateExchangeRate = {
     }
     if (message.rate !== "") {
       writer.uint32(34).string(message.rate);
+    }
+    if (message.rateScale !== 0) {
+      writer.uint32(40).uint32(message.rateScale);
+    }
+    if (message.validityDuration !== undefined) {
+      Duration.encode(message.validityDuration, writer.uint32(50).fork()).ldelim();
     }
     return writer;
   },
@@ -626,6 +636,20 @@ export const MsgUpdateExchangeRate = {
 
           message.rate = reader.string();
           continue;
+        case 5:
+          if (tag !== 40) {
+            break;
+          }
+
+          message.rateScale = reader.uint32();
+          continue;
+        case 6:
+          if (tag !== 50) {
+            break;
+          }
+
+          message.validityDuration = Duration.decode(reader, reader.uint32());
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -641,6 +665,8 @@ export const MsgUpdateExchangeRate = {
       operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
       id: isSet(object.id) ? globalThis.Number(object.id) : 0,
       rate: isSet(object.rate) ? globalThis.String(object.rate) : "",
+      rateScale: isSet(object.rateScale) ? globalThis.Number(object.rateScale) : 0,
+      validityDuration: isSet(object.validityDuration) ? Duration.fromJSON(object.validityDuration) : undefined,
     };
   },
 
@@ -658,6 +684,12 @@ export const MsgUpdateExchangeRate = {
     if (message.rate !== "") {
       obj.rate = message.rate;
     }
+    if (message.rateScale !== 0) {
+      obj.rateScale = Math.round(message.rateScale);
+    }
+    if (message.validityDuration !== undefined) {
+      obj.validityDuration = Duration.toJSON(message.validityDuration);
+    }
     return obj;
   },
 
@@ -670,6 +702,10 @@ export const MsgUpdateExchangeRate = {
     message.operator = object.operator ?? "";
     message.id = object.id ?? 0;
     message.rate = object.rate ?? "";
+    message.rateScale = object.rateScale ?? 0;
+    message.validityDuration = (object.validityDuration !== undefined && object.validityDuration !== null)
+      ? Duration.fromPartial(object.validityDuration)
+      : undefined;
     return message;
   },
 };

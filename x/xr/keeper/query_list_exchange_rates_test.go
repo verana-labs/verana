@@ -17,8 +17,8 @@ func seedMultipleExchangeRates(t *testing.T, f *fixture) {
 	authorityStr, err := f.addressCodec.BytesToString(f.keeper.GetAuthority())
 	require.NoError(t, err)
 
-	// Rate 1: COIN/uverana -> FIAT/USD
-	_, err = ms.CreateExchangeRate(f.ctx, &types.MsgCreateExchangeRate{
+	// Rate 1: COIN/uverana -> FIAT/USD (created active per spec; disable for filter test)
+	resp1, err := ms.CreateExchangeRate(f.ctx, &types.MsgCreateExchangeRate{
 		Authority:        authorityStr,
 		BaseAssetType:    cstypes.PricingAssetType_COIN,
 		BaseAsset:        "uverana",
@@ -29,9 +29,15 @@ func seedMultipleExchangeRates(t *testing.T, f *fixture) {
 		ValidityDuration: 10 * time.Minute,
 	})
 	require.NoError(t, err)
+	_, err = ms.SetExchangeRateState(f.ctx, &types.MsgSetExchangeRateState{
+		Authority: authorityStr,
+		Id:        resp1.Id,
+		State:     false,
+	})
+	require.NoError(t, err)
 
-	// Rate 2: COIN/uverana -> FIAT/EUR
-	_, err = ms.CreateExchangeRate(f.ctx, &types.MsgCreateExchangeRate{
+	// Rate 2: COIN/uverana -> FIAT/EUR (created active per spec; disable for filter test)
+	resp2, err := ms.CreateExchangeRate(f.ctx, &types.MsgCreateExchangeRate{
 		Authority:        authorityStr,
 		BaseAssetType:    cstypes.PricingAssetType_COIN,
 		BaseAsset:        "uverana",
@@ -42,9 +48,15 @@ func seedMultipleExchangeRates(t *testing.T, f *fixture) {
 		ValidityDuration: 10 * time.Minute,
 	})
 	require.NoError(t, err)
+	_, err = ms.SetExchangeRateState(f.ctx, &types.MsgSetExchangeRateState{
+		Authority: authorityStr,
+		Id:        resp2.Id,
+		State:     false,
+	})
+	require.NoError(t, err)
 
-	// Rate 3: TU/TU -> FIAT/USD (activate it)
-	resp, err := ms.CreateExchangeRate(f.ctx, &types.MsgCreateExchangeRate{
+	// Rate 3: TU/TU -> FIAT/USD (active — created active per spec, leave enabled)
+	_, err = ms.CreateExchangeRate(f.ctx, &types.MsgCreateExchangeRate{
 		Authority:        authorityStr,
 		BaseAssetType:    cstypes.PricingAssetType_TU,
 		BaseAsset:        "TU",
@@ -54,13 +66,6 @@ func seedMultipleExchangeRates(t *testing.T, f *fixture) {
 		RateScale:        2,
 		ValidityDuration: 10 * time.Minute,
 	})
-	require.NoError(t, err)
-
-	// Set rate 3 to active
-	xr, err := f.keeper.ExchangeRates.Get(f.ctx, resp.Id)
-	require.NoError(t, err)
-	xr.State = true
-	err = f.keeper.ExchangeRates.Set(f.ctx, xr.Id, xr)
 	require.NoError(t, err)
 }
 

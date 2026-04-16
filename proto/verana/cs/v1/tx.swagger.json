@@ -82,6 +82,108 @@
         ]
       }
     },
+    "/verana.cs.v1.Msg/CreateSchemaAuthorizationPolicy": {
+      "post": {
+        "summary": "[MOD-CS-MSG-5] CreateSchemaAuthorizationPolicy creates a versioned policy document for a schema role.",
+        "operationId": "Msg_CreateSchemaAuthorizationPolicy",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.cs.v1.MsgCreateSchemaAuthorizationPolicyResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "[MOD-CS-MSG-5] MsgCreateSchemaAuthorizationPolicy creates a new schema authorization policy.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.cs.v1.MsgCreateSchemaAuthorizationPolicy"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.cs.v1.Msg/IncreaseActiveSchemaAuthorizationPolicyVersion": {
+      "post": {
+        "summary": "[MOD-CS-MSG-6] IncreaseActiveSchemaAuthorizationPolicyVersion advances the active policy version.",
+        "operationId": "Msg_IncreaseActiveSchemaAuthorizationPolicyVersion",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.cs.v1.MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "[MOD-CS-MSG-6] MsgIncreaseActiveSchemaAuthorizationPolicyVersion advances the active policy version for a role.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.cs.v1.MsgIncreaseActiveSchemaAuthorizationPolicyVersion"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.cs.v1.Msg/RevokeSchemaAuthorizationPolicy": {
+      "post": {
+        "summary": "[MOD-CS-MSG-7] RevokeSchemaAuthorizationPolicy revokes a specific policy version.",
+        "operationId": "Msg_RevokeSchemaAuthorizationPolicy",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.cs.v1.MsgRevokeSchemaAuthorizationPolicyResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "[MOD-CS-MSG-7] MsgRevokeSchemaAuthorizationPolicy revokes a specific policy version.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.cs.v1.MsgRevokeSchemaAuthorizationPolicy"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
     "/verana.cs.v1.Msg/UpdateCredentialSchema": {
       "post": {
         "summary": "UpdateCredentialSchema defines a method for updating a credential schema.",
@@ -271,6 +373,96 @@
         }
       }
     },
+    "verana.cs.v1.MsgCreateSchemaAuthorizationPolicy": {
+      "type": "object",
+      "properties": {
+        "corporation": {
+          "type": "string"
+        },
+        "operator": {
+          "type": "string"
+        },
+        "schema_id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "role": {
+          "$ref": "#/definitions/verana.cs.v1.SchemaAuthorizationPolicyRole"
+        },
+        "url": {
+          "type": "string"
+        },
+        "digest_sri": {
+          "type": "string"
+        },
+        "effective_from": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "effective_until": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "description": "[MOD-CS-MSG-5] MsgCreateSchemaAuthorizationPolicy creates a new schema authorization policy."
+    },
+    "verana.cs.v1.MsgCreateSchemaAuthorizationPolicyResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uint64"
+        }
+      }
+    },
+    "verana.cs.v1.MsgIncreaseActiveSchemaAuthorizationPolicyVersion": {
+      "type": "object",
+      "properties": {
+        "corporation": {
+          "type": "string"
+        },
+        "operator": {
+          "type": "string"
+        },
+        "schema_id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "role": {
+          "$ref": "#/definitions/verana.cs.v1.SchemaAuthorizationPolicyRole"
+        }
+      },
+      "description": "[MOD-CS-MSG-6] MsgIncreaseActiveSchemaAuthorizationPolicyVersion advances the active policy version for a role."
+    },
+    "verana.cs.v1.MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse": {
+      "type": "object"
+    },
+    "verana.cs.v1.MsgRevokeSchemaAuthorizationPolicy": {
+      "type": "object",
+      "properties": {
+        "corporation": {
+          "type": "string"
+        },
+        "operator": {
+          "type": "string"
+        },
+        "schema_id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "role": {
+          "$ref": "#/definitions/verana.cs.v1.SchemaAuthorizationPolicyRole"
+        },
+        "version": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "description": "[MOD-CS-MSG-7] MsgRevokeSchemaAuthorizationPolicy revokes a specific policy version."
+    },
+    "verana.cs.v1.MsgRevokeSchemaAuthorizationPolicyResponse": {
+      "type": "object"
+    },
     "verana.cs.v1.MsgUpdateCredentialSchema": {
       "type": "object",
       "properties": {
@@ -364,6 +556,16 @@
         }
       },
       "description": "Params defines the parameters for the module."
+    },
+    "verana.cs.v1.SchemaAuthorizationPolicyRole": {
+      "type": "string",
+      "enum": [
+        "SCHEMA_AUTHORIZATION_POLICY_ROLE_UNSPECIFIED",
+        "SCHEMA_AUTHORIZATION_POLICY_ROLE_ISSUER",
+        "SCHEMA_AUTHORIZATION_POLICY_ROLE_VERIFIER"
+      ],
+      "default": "SCHEMA_AUTHORIZATION_POLICY_ROLE_UNSPECIFIED",
+      "description": "SchemaAuthorizationPolicyRole defines the role for a schema authorization policy."
     }
   }
 }

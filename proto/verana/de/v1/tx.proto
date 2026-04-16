@@ -105,6 +105,13 @@ message MsgGrantOperatorAuthorization {
     (gogoproto.stdduration) = true,
     (gogoproto.nullable) = true
   ];
+
+  // fee_spend_limit is the maximum total amount of fees this authorization
+  // allows the grantee to spend (stored on the OperatorAuthorization record).
+  repeated cosmos.base.v1beta1.Coin fee_spend_limit = 11 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
 }
 
 // MsgGrantOperatorAuthorizationResponse defines the response for

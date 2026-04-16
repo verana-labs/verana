@@ -699,6 +699,88 @@ func validateDigestAlgorithm(algorithm string) error {
 	return nil
 }
 
+func (m *MsgCreateSchemaAuthorizationPolicy) Route() string { return ModuleName }
+func (m *MsgIncreaseActiveSchemaAuthorizationPolicyVersion) Route() string { return ModuleName }
+func (m *MsgRevokeSchemaAuthorizationPolicy) Route() string { return ModuleName }
+
+func (m *MsgCreateSchemaAuthorizationPolicy) ValidateBasic() error {
+	if m.Corporation == "" {
+		return errors.Wrap(sdkerrors.ErrInvalidRequest, "corporation is required")
+	}
+	if _, err := sdk.AccAddressFromBech32(m.Corporation); err != nil {
+		return errors.Wrap(sdkerrors.ErrInvalidAddress, "invalid corporation address")
+	}
+	if m.Operator == "" {
+		return errors.Wrap(sdkerrors.ErrInvalidRequest, "operator is required")
+	}
+	if _, err := sdk.AccAddressFromBech32(m.Operator); err != nil {
+		return errors.Wrap(sdkerrors.ErrInvalidAddress, "invalid operator address")
+	}
+	if m.SchemaId == 0 {
+		return errors.Wrap(sdkerrors.ErrInvalidRequest, "schema_id is required")
+	}
+	if m.Role == SchemaAuthorizationPolicyRole_SCHEMA_AUTHORIZATION_POLICY_ROLE_UNSPECIFIED {
+		return errors.Wrap(sdkerrors.ErrInvalidRequest, "role is required")
+	}
+	if m.Url == "" {
+		return errors.Wrap(sdkerrors.ErrInvalidRequest, "url is required")
+	}
+	if m.DigestSri == "" {
+		return errors.Wrap(sdkerrors.ErrInvalidRequest, "digest_sri is required")
+	}
+	if m.EffectiveUntil != nil && !m.EffectiveUntil.After(m.EffectiveFrom) {
+		return errors.Wrap(sdkerrors.ErrInvalidRequest, "effective_until must be after effective_from")
+	}
+	return nil
+}
+
+func (m *MsgIncreaseActiveSchemaAuthorizationPolicyVersion) ValidateBasic() error {
+	if m.Corporation == "" {
+		return errors.Wrap(sdkerrors.ErrInvalidRequest, "corporation is required")
+	}
+	if _, err := sdk.AccAddressFromBech32(m.Corporation); err != nil {
+		return errors.Wrap(sdkerrors.ErrInvalidAddress, "invalid corporation address")
+	}
+	if m.Operator == "" {
+		return errors.Wrap(sdkerrors.ErrInvalidRequest, "operator is required")
+	}
+	if _, err := sdk.AccAddressFromBech32(m.Operator); err != nil {
+		return errors.Wrap(sdkerrors.ErrInvalidAddress, "invalid operator address")
+	}
+	if m.SchemaId == 0 {
+		return errors.Wrap(sdkerrors.ErrInvalidRequest, "schema_id is required")
+	}
+	if m.Role == SchemaAuthorizationPolicyRole_SCHEMA_AUTHORIZATION_POLICY_ROLE_UNSPECIFIED {
+		return errors.Wrap(sdkerrors.ErrInvalidRequest, "role is required")
+	}
+	return nil
+}
+
+func (m *MsgRevokeSchemaAuthorizationPolicy) ValidateBasic() error {
+	if m.Corporation == "" {
+		return errors.Wrap(sdkerrors.ErrInvalidRequest, "corporation is required")
+	}
+	if _, err := sdk.AccAddressFromBech32(m.Corporation); err != nil {
+		return errors.Wrap(sdkerrors.ErrInvalidAddress, "invalid corporation address")
+	}
+	if m.Operator == "" {
+		return errors.Wrap(sdkerrors.ErrInvalidRequest, "operator is required")
+	}
+	if _, err := sdk.AccAddressFromBech32(m.Operator); err != nil {
+		return errors.Wrap(sdkerrors.ErrInvalidAddress, "invalid operator address")
+	}
+	if m.SchemaId == 0 {
+		return errors.Wrap(sdkerrors.ErrInvalidRequest, "schema_id is required")
+	}
+	if m.Role == SchemaAuthorizationPolicyRole_SCHEMA_AUTHORIZATION_POLICY_ROLE_UNSPECIFIED {
+		return errors.Wrap(sdkerrors.ErrInvalidRequest, "role is required")
+	}
+	if m.Version == 0 {
+		return errors.Wrap(sdkerrors.ErrInvalidRequest, "version is required")
+	}
+	return nil
+}
+
 func (msg *MsgUpdateCredentialSchema) ValidateBasic() error {
 	// Validate corporation address
 	_, err := sdk.AccAddressFromBech32(msg.Corporation)

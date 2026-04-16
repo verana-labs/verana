@@ -14,7 +14,7 @@ import {
 } from "./util/helpers";
 
 export const MsgCreateExchangeRateAminoConverter: AminoConverter = {
-  aminoType: "/verana.xr.v1.MsgCreateExchangeRate",
+  aminoType: "verana/x/xr/MsgCreateExchangeRate",
   toAmino: (m: MsgCreateExchangeRate) => clean({
     authority: m.authority || undefined,
     base_asset_type: m.baseAssetType ?? 0,
@@ -41,12 +41,14 @@ export const MsgCreateExchangeRateAminoConverter: AminoConverter = {
 };
 
 export const MsgUpdateExchangeRateAminoConverter: AminoConverter = {
-  aminoType: "/verana.xr.v1.MsgUpdateExchangeRate",
+  aminoType: "verana/x/xr/MsgUpdateExchangeRate",
   toAmino: (m: MsgUpdateExchangeRate) => clean({
     authority: m.authority || undefined,
     operator: m.operator || undefined,
     id: u64ToStr(m.id),
     rate: m.rate || undefined,
+    rate_scale: m.rateScale ? u32ToAmino(m.rateScale) : undefined,
+    validity_duration: m.validityDuration ? durationToAmino(m.validityDuration) : undefined,
   }),
   fromAmino: (a: any): MsgUpdateExchangeRate =>
     MsgUpdateExchangeRate.fromPartial({
@@ -54,11 +56,13 @@ export const MsgUpdateExchangeRateAminoConverter: AminoConverter = {
       operator: a.operator ?? "",
       id: strToU64(a.id) != null ? Number(strToU64(a.id)!.toString()) : 0,
       rate: a.rate ?? "",
+      rateScale: a.rate_scale ?? 0,
+      validityDuration: aminoToDuration(a.validity_duration),
     }),
 };
 
 export const MsgSetExchangeRateStateAminoConverter: AminoConverter = {
-  aminoType: "/verana.xr.v1.MsgSetExchangeRateState",
+  aminoType: "verana/x/xr/MsgSetExchangeRateState",
   toAmino: (m: MsgSetExchangeRateState) => clean({
     authority: m.authority || undefined,
     id: u64ToStr(m.id),

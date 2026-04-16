@@ -592,25 +592,38 @@ func TestArchiveCredentialSchema(t *testing.T) {
 		errorContains string
 	}{
 		{
+			// schema starts unarchived; archive=true must succeed
 			name: "valid archive",
 			msg: &types.MsgArchiveCredentialSchema{
 				Corporation: authority,
 				Operator:    operator,
 				Id:          schemaID.Id,
-				Archive:   true,
+				Archive:     true,
 			},
 			expPass: true,
 		},
 		{
+			// schema is now archived; archive=false (unarchive) must succeed
 			name: "valid unarchive",
 			msg: &types.MsgArchiveCredentialSchema{
 				Corporation: authority,
 				Operator:    operator,
 				Id:          schemaID.Id,
-				Archive:   false,
+				Archive:     false,
+			},
+			expPass: true,
+		},
+		{
+			// schema is now unarchived; archive=false again must fail
+			name: "unarchive already unarchived",
+			msg: &types.MsgArchiveCredentialSchema{
+				Corporation: authority,
+				Operator:    operator,
+				Id:          schemaID.Id,
+				Archive:     false,
 			},
 			expPass:       false,
-			errorContains: "archive cannot be set to false",
+			errorContains: "credential schema is not archived",
 		},
 		{
 			name: "non-existent schema",
@@ -635,26 +648,27 @@ func TestArchiveCredentialSchema(t *testing.T) {
 			errorContains: "corporation does not match the trust registry corporation",
 		},
 		{
+			// Re-archive the schema (it's unarchived after step 2)
+			name: "re-archive after unarchive",
+			msg: &types.MsgArchiveCredentialSchema{
+				Corporation: authority,
+				Operator:    operator,
+				Id:          schemaID.Id,
+				Archive:     true,
+			},
+			expPass: true,
+		},
+		{
+			// schema is archived again; archive=true must fail with already archived
 			name: "already archived",
 			msg: &types.MsgArchiveCredentialSchema{
 				Corporation: authority,
 				Operator:    operator,
 				Id:          schemaID.Id,
-				Archive:   true,
+				Archive:     true,
 			},
 			expPass:       false,
 			errorContains: "already archived",
-		},
-		{
-			name: "archive false always rejected",
-			msg: &types.MsgArchiveCredentialSchema{
-				Corporation: authority,
-				Operator:    operator,
-				Id:          schemaID.Id,
-				Archive:   false,
-			},
-			expPass:       false,
-			errorContains: "archive cannot be set to false",
 		},
 	}
 

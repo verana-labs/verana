@@ -43,6 +43,16 @@ func (ms msgServer) UpdateExchangeRate(ctx context.Context, msg *types.MsgUpdate
 
 	// Update fields per spec
 	xr.Rate = msg.Rate
+
+	// Update rate_scale if provided (non-zero means "update")
+	if msg.RateScale != 0 {
+		xr.RateScale = msg.RateScale
+	}
+
+	// Update validity_duration if provided, then recalculate expires
+	if msg.ValidityDuration != nil {
+		xr.ValidityDuration = *msg.ValidityDuration
+	}
 	xr.Expires = now.Add(xr.ValidityDuration)
 	xr.Updated = now
 

@@ -112,7 +112,7 @@ func TestUpdateExchangeRate_NotActive(t *testing.T) {
 	authorityStr, err := f.addressCodec.BytesToString(f.keeper.GetAuthority())
 	require.NoError(t, err)
 
-	// Create exchange rate but do NOT activate it (state=false by default)
+	// Create exchange rate (state=true on creation per spec [MOD-XR-MSG-1])
 	resp, err := ms.CreateExchangeRate(f.ctx, &types.MsgCreateExchangeRate{
 		Authority:        authorityStr,
 		BaseAssetType:    cstypes.PricingAssetType_COIN,
@@ -122,6 +122,14 @@ func TestUpdateExchangeRate_NotActive(t *testing.T) {
 		Rate:             "100",
 		RateScale:        2,
 		ValidityDuration: 10 * time.Minute,
+	})
+	require.NoError(t, err)
+
+	// Disable the exchange rate so it is not active
+	_, err = ms.SetExchangeRateState(f.ctx, &types.MsgSetExchangeRateState{
+		Authority: authorityStr,
+		Id:        resp.Id,
+		State:     false,
 	})
 	require.NoError(t, err)
 
@@ -168,6 +176,72 @@ func TestUpdateExchangeRate_InvalidRate(t *testing.T) {
 			require.Contains(t, err.Error(), tc.errMsg)
 		})
 	}
+}
+
+func TestUpdateExchangeRate_RateScale(t *testing.T) {
+	f := initFixture(t)
+	ms := keeper.NewMsgServerImpl(f.keeper)
+
+	id := createActiveExchangeRate(t, f, ms)
+
+	authorityStr, err := f.addressCodec.BytesToString(f.keeper.GetAuthority())
+	require.NoError(t, err)
+	operatorAddr := sdk.AccAddress([]byte("operator_address____")).String()
+
+	// Updating with rate_scale=2 should change xr.RateScale to 2
+	_, err = ms.UpdateExchangeRate(f.ctx, &types.MsgUpdateExchangeRate{
+		Authority: authorityStr,
+		Operator:  operatorAddr,
+		Id:        id,
+		Rate:      "200",
+		RateScale: 2,
+	})
+	require.NoError(t, err)
+	xr, err := f.keeper.ExchangeRates.Get(f.ctx, id)
+	require.NoError(t, err)
+	require.Equal(t, uint32(2), xr.RateScale)
+
+	// Updating with rate_scale=0 should keep existing xr.RateScale
+	_, err = ms.UpdateExchangeRate(f.ctx, &types.MsgUpdateExchangeRate{
+		Authority: authorityStr,
+		Operator:  operatorAddr,
+		Id:        id,
+		Rate:      "300",
+		RateScale: 0,
+	})
+	require.NoError(t, err)
+	xr, err = f.keeper.ExchangeRates.Get(f.ctx, id)
+	require.NoError(t, err)
+	require.Equal(t, uint32(2), xr.RateScale) // unchanged
+}
+
+func TestUpdateExchangeRate_ValidityDuration(t *testing.T) {
+	f := initFixture(t)
+	ms := keeper.NewMsgServerImpl(f.keeper)
+
+	id := createActiveExchangeRate(t, f, ms)
+
+	authorityStr, err := f.addressCodec.BytesToString(f.keeper.GetAuthority())
+	require.NoError(t, err)
+	operatorAddr := sdk.AccAddress([]byte("operator_address____")).String()
+
+	sdkCtx := sdk.UnwrapSDKContext(f.ctx)
+	blockTime := sdkCtx.BlockTime()
+
+	newDuration := 30 * time.Minute
+	_, err = ms.UpdateExchangeRate(f.ctx, &types.MsgUpdateExchangeRate{
+		Authority:        authorityStr,
+		Operator:         operatorAddr,
+		Id:               id,
+		Rate:             "200",
+		ValidityDuration: &newDuration,
+	})
+	require.NoError(t, err)
+
+	xr, err := f.keeper.ExchangeRates.Get(f.ctx, id)
+	require.NoError(t, err)
+	require.Equal(t, newDuration, xr.ValidityDuration)
+	require.Equal(t, blockTime.Add(newDuration), xr.Expires)
 }
 
 func TestUpdateExchangeRate_AuthzFailure(t *testing.T) {

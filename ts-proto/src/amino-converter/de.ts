@@ -24,6 +24,7 @@ export const MsgGrantOperatorAuthorizationAminoConverter: AminoConverter = {
     with_feegrant: m.withFeegrant || undefined,
     feegrant_spend_limit: m.feegrantSpendLimit?.length ? m.feegrantSpendLimit : undefined,
     feegrant_spend_limit_period: durationToAmino(m.feegrantSpendLimitPeriod),
+    fee_spend_limit: m.feeSpendLimit?.length ? m.feeSpendLimit : undefined,
   }),
   fromAmino: (a: any): MsgGrantOperatorAuthorization =>
     MsgGrantOperatorAuthorization.fromPartial({
@@ -37,6 +38,7 @@ export const MsgGrantOperatorAuthorizationAminoConverter: AminoConverter = {
       withFeegrant: a.with_feegrant ?? false,
       feegrantSpendLimit: a.feegrant_spend_limit ?? [],
       feegrantSpendLimitPeriod: aminoToDuration(a.feegrant_spend_limit_period),
+      feeSpendLimit: a.fee_spend_limit ?? [],
     }),
 };
 

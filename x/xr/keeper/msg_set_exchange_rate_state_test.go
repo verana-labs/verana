@@ -36,15 +36,28 @@ func TestSetExchangeRateState_HappyPath_Enable(t *testing.T) {
 	authorityStr, err := f.addressCodec.BytesToString(f.keeper.GetAuthority())
 	require.NoError(t, err)
 
-	// Create exchange rate (state defaults to false)
+	// Create exchange rate (state=true on creation per spec [MOD-XR-MSG-1])
 	id := createTestExchangeRate(t, f, ms, authorityStr)
 
-	// Verify initial state is false
+	// Verify initial state is true
 	xr, err := f.keeper.ExchangeRates.Get(f.ctx, id)
+	require.NoError(t, err)
+	require.True(t, xr.State)
+
+	// Disable it first
+	_, err = ms.SetExchangeRateState(f.ctx, &types.MsgSetExchangeRateState{
+		Authority: authorityStr,
+		Id:        id,
+		State:     false,
+	})
+	require.NoError(t, err)
+
+	// Verify disabled
+	xr, err = f.keeper.ExchangeRates.Get(f.ctx, id)
 	require.NoError(t, err)
 	require.False(t, xr.State)
 
-	// Toggle to enabled
+	// Re-enable
 	_, err = ms.SetExchangeRateState(f.ctx, &types.MsgSetExchangeRateState{
 		Authority: authorityStr,
 		Id:        id,

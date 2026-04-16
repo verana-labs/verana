@@ -201,6 +201,60 @@ export function pricingAssetTypeToJSON(object: PricingAssetType): string {
   }
 }
 
+/** SchemaAuthorizationPolicyRole defines the role for a schema authorization policy. */
+export enum SchemaAuthorizationPolicyRole {
+  SCHEMA_AUTHORIZATION_POLICY_ROLE_UNSPECIFIED = 0,
+  SCHEMA_AUTHORIZATION_POLICY_ROLE_ISSUER = 1,
+  SCHEMA_AUTHORIZATION_POLICY_ROLE_VERIFIER = 2,
+  UNRECOGNIZED = -1,
+}
+
+export function schemaAuthorizationPolicyRoleFromJSON(object: any): SchemaAuthorizationPolicyRole {
+  switch (object) {
+    case 0:
+    case "SCHEMA_AUTHORIZATION_POLICY_ROLE_UNSPECIFIED":
+      return SchemaAuthorizationPolicyRole.SCHEMA_AUTHORIZATION_POLICY_ROLE_UNSPECIFIED;
+    case 1:
+    case "SCHEMA_AUTHORIZATION_POLICY_ROLE_ISSUER":
+      return SchemaAuthorizationPolicyRole.SCHEMA_AUTHORIZATION_POLICY_ROLE_ISSUER;
+    case 2:
+    case "SCHEMA_AUTHORIZATION_POLICY_ROLE_VERIFIER":
+      return SchemaAuthorizationPolicyRole.SCHEMA_AUTHORIZATION_POLICY_ROLE_VERIFIER;
+    case -1:
+    case "UNRECOGNIZED":
+    default:
+      return SchemaAuthorizationPolicyRole.UNRECOGNIZED;
+  }
+}
+
+export function schemaAuthorizationPolicyRoleToJSON(object: SchemaAuthorizationPolicyRole): string {
+  switch (object) {
+    case SchemaAuthorizationPolicyRole.SCHEMA_AUTHORIZATION_POLICY_ROLE_UNSPECIFIED:
+      return "SCHEMA_AUTHORIZATION_POLICY_ROLE_UNSPECIFIED";
+    case SchemaAuthorizationPolicyRole.SCHEMA_AUTHORIZATION_POLICY_ROLE_ISSUER:
+      return "SCHEMA_AUTHORIZATION_POLICY_ROLE_ISSUER";
+    case SchemaAuthorizationPolicyRole.SCHEMA_AUTHORIZATION_POLICY_ROLE_VERIFIER:
+      return "SCHEMA_AUTHORIZATION_POLICY_ROLE_VERIFIER";
+    case SchemaAuthorizationPolicyRole.UNRECOGNIZED:
+    default:
+      return "UNRECOGNIZED";
+  }
+}
+
+/** SchemaAuthorizationPolicy defines a versioned policy document attached to a credential schema role. */
+export interface SchemaAuthorizationPolicy {
+  id: number;
+  schemaId: number;
+  role: SchemaAuthorizationPolicyRole;
+  url: string;
+  digestSri: string;
+  effectiveFrom: Date | undefined;
+  effectiveUntil: Date | undefined;
+  revoked: boolean;
+  created: Date | undefined;
+  version: number;
+}
+
 /** CredentialSchema defines the structure for a credential schema */
 export interface CredentialSchema {
   id: number;
@@ -221,6 +275,211 @@ export interface CredentialSchema {
   digestAlgorithm: string;
   holderOnboardingMode: HolderOnboardingMode;
 }
+
+function createBaseSchemaAuthorizationPolicy(): SchemaAuthorizationPolicy {
+  return {
+    id: 0,
+    schemaId: 0,
+    role: 0,
+    url: "",
+    digestSri: "",
+    effectiveFrom: undefined,
+    effectiveUntil: undefined,
+    revoked: false,
+    created: undefined,
+    version: 0,
+  };
+}
+
+export const SchemaAuthorizationPolicy = {
+  encode(message: SchemaAuthorizationPolicy, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.id !== 0) {
+      writer.uint32(8).uint64(message.id);
+    }
+    if (message.schemaId !== 0) {
+      writer.uint32(16).uint64(message.schemaId);
+    }
+    if (message.role !== 0) {
+      writer.uint32(24).int32(message.role);
+    }
+    if (message.url !== "") {
+      writer.uint32(34).string(message.url);
+    }
+    if (message.digestSri !== "") {
+      writer.uint32(42).string(message.digestSri);
+    }
+    if (message.effectiveFrom !== undefined) {
+      Timestamp.encode(toTimestamp(message.effectiveFrom), writer.uint32(50).fork()).ldelim();
+    }
+    if (message.effectiveUntil !== undefined) {
+      Timestamp.encode(toTimestamp(message.effectiveUntil), writer.uint32(58).fork()).ldelim();
+    }
+    if (message.revoked !== false) {
+      writer.uint32(64).bool(message.revoked);
+    }
+    if (message.created !== undefined) {
+      Timestamp.encode(toTimestamp(message.created), writer.uint32(74).fork()).ldelim();
+    }
+    if (message.version !== 0) {
+      writer.uint32(80).uint32(message.version);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): SchemaAuthorizationPolicy {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseSchemaAuthorizationPolicy();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 8) {
+            break;
+          }
+
+          message.id = longToNumber(reader.uint64() as Long);
+          continue;
+        case 2:
+          if (tag !== 16) {
+            break;
+          }
+
+          message.schemaId = longToNumber(reader.uint64() as Long);
+          continue;
+        case 3:
+          if (tag !== 24) {
+            break;
+          }
+
+          message.role = reader.int32() as any;
+          continue;
+        case 4:
+          if (tag !== 34) {
+            break;
+          }
+
+          message.url = reader.string();
+          continue;
+        case 5:
+          if (tag !== 42) {
+            break;
+          }
+
+          message.digestSri = reader.string();
+          continue;
+        case 6:
+          if (tag !== 50) {
+            break;
+          }
+
+          message.effectiveFrom = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
+          continue;
+        case 7:
+          if (tag !== 58) {
+            break;
+          }
+
+          message.effectiveUntil = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
+          continue;
+        case 8:
+          if (tag !== 64) {
+            break;
+          }
+
+          message.revoked = reader.bool();
+          continue;
+        case 9:
+          if (tag !== 74) {
+            break;
+          }
+
+          message.created = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
+          continue;
+        case 10:
+          if (tag !== 80) {
+            break;
+          }
+
+          message.version = reader.uint32();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): SchemaAuthorizationPolicy {
+    return {
+      id: isSet(object.id) ? globalThis.Number(object.id) : 0,
+      schemaId: isSet(object.schemaId) ? globalThis.Number(object.schemaId) : 0,
+      role: isSet(object.role) ? schemaAuthorizationPolicyRoleFromJSON(object.role) : 0,
+      url: isSet(object.url) ? globalThis.String(object.url) : "",
+      digestSri: isSet(object.digestSri) ? globalThis.String(object.digestSri) : "",
+      effectiveFrom: isSet(object.effectiveFrom) ? fromJsonTimestamp(object.effectiveFrom) : undefined,
+      effectiveUntil: isSet(object.effectiveUntil) ? fromJsonTimestamp(object.effectiveUntil) : undefined,
+      revoked: isSet(object.revoked) ? globalThis.Boolean(object.revoked) : false,
+      created: isSet(object.created) ? fromJsonTimestamp(object.created) : undefined,
+      version: isSet(object.version) ? globalThis.Number(object.version) : 0,
+    };
+  },
+
+  toJSON(message: SchemaAuthorizationPolicy): unknown {
+    const obj: any = {};
+    if (message.id !== 0) {
+      obj.id = Math.round(message.id);
+    }
+    if (message.schemaId !== 0) {
+      obj.schemaId = Math.round(message.schemaId);
+    }
+    if (message.role !== 0) {
+      obj.role = schemaAuthorizationPolicyRoleToJSON(message.role);
+    }
+    if (message.url !== "") {
+      obj.url = message.url;
+    }
+    if (message.digestSri !== "") {
+      obj.digestSri = message.digestSri;
+    }
+    if (message.effectiveFrom !== undefined) {
+      obj.effectiveFrom = message.effectiveFrom.toISOString();
+    }
+    if (message.effectiveUntil !== undefined) {
+      obj.effectiveUntil = message.effectiveUntil.toISOString();
+    }
+    if (message.revoked !== false) {
+      obj.revoked = message.revoked;
+    }
+    if (message.created !== undefined) {
+      obj.created = message.created.toISOString();
+    }
+    if (message.version !== 0) {
+      obj.version = Math.round(message.version);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<SchemaAuthorizationPolicy>, I>>(base?: I): SchemaAuthorizationPolicy {
+    return SchemaAuthorizationPolicy.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<SchemaAuthorizationPolicy>, I>>(object: I): SchemaAuthorizationPolicy {
+    const message = createBaseSchemaAuthorizationPolicy();
+    message.id = object.id ?? 0;
+    message.schemaId = object.schemaId ?? 0;
+    message.role = object.role ?? 0;
+    message.url = object.url ?? "";
+    message.digestSri = object.digestSri ?? "";
+    message.effectiveFrom = object.effectiveFrom ?? undefined;
+    message.effectiveUntil = object.effectiveUntil ?? undefined;
+    message.revoked = object.revoked ?? false;
+    message.created = object.created ?? undefined;
+    message.version = object.version ?? 0;
+    return message;
+  },
+};
 
 function createBaseCredentialSchema(): CredentialSchema {
   return {

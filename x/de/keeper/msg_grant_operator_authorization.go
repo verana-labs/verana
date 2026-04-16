@@ -76,12 +76,13 @@ func (ms msgServer) GrantOperatorAuthorization(goCtx context.Context, msg *types
 	}
 
 	oa := types.OperatorAuthorization{
-		Corporation: msg.Corporation,
-		Operator:    msg.Grantee,
-		MsgTypes:    msg.MsgTypes,
-		SpendLimit:  msg.AuthzSpendLimit,
-		Expiration:  msg.Expiration,
-		Period:      msg.AuthzSpendLimitPeriod,
+		Corporation:  msg.Corporation,
+		Operator:     msg.Grantee,
+		MsgTypes:     msg.MsgTypes,
+		SpendLimit:   msg.AuthzSpendLimit,
+		Expiration:   msg.Expiration,
+		Period:       msg.AuthzSpendLimitPeriod,
+		FeeSpendLimit: msg.FeeSpendLimit,
 	}
 	if err := ms.OperatorAuthorizations.Set(ctx, oaKey, oa); err != nil {
 		return nil, fmt.Errorf("failed to set OperatorAuthorization: %w", err)

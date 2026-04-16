@@ -6,7 +6,13 @@
 
 /* eslint-disable */
 import * as _m0 from "protobufjs/minimal";
+import { Timestamp } from "../../../google/protobuf/timestamp";
 import { Params } from "./params";
+import {
+  SchemaAuthorizationPolicyRole,
+  schemaAuthorizationPolicyRoleFromJSON,
+  schemaAuthorizationPolicyRoleToJSON,
+} from "./types";
 import Long = require("long");
 
 export const protobufPackage = "verana.cs.v1";
@@ -89,6 +95,45 @@ export interface MsgArchiveCredentialSchema {
 }
 
 export interface MsgArchiveCredentialSchemaResponse {
+}
+
+/** [MOD-CS-MSG-5] MsgCreateSchemaAuthorizationPolicy creates a new schema authorization policy. */
+export interface MsgCreateSchemaAuthorizationPolicy {
+  corporation: string;
+  operator: string;
+  schemaId: number;
+  role: SchemaAuthorizationPolicyRole;
+  url: string;
+  digestSri: string;
+  effectiveFrom: Date | undefined;
+  effectiveUntil: Date | undefined;
+}
+
+export interface MsgCreateSchemaAuthorizationPolicyResponse {
+  id: number;
+}
+
+/** [MOD-CS-MSG-6] MsgIncreaseActiveSchemaAuthorizationPolicyVersion advances the active policy version for a role. */
+export interface MsgIncreaseActiveSchemaAuthorizationPolicyVersion {
+  corporation: string;
+  operator: string;
+  schemaId: number;
+  role: SchemaAuthorizationPolicyRole;
+}
+
+export interface MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse {
+}
+
+/** [MOD-CS-MSG-7] MsgRevokeSchemaAuthorizationPolicy revokes a specific policy version. */
+export interface MsgRevokeSchemaAuthorizationPolicy {
+  corporation: string;
+  operator: string;
+  schemaId: number;
+  role: SchemaAuthorizationPolicyRole;
+  version: number;
+}
+
+export interface MsgRevokeSchemaAuthorizationPolicyResponse {
 }
 
 function createBaseMsgUpdateParams(): MsgUpdateParams {
@@ -1044,6 +1089,575 @@ export const MsgArchiveCredentialSchemaResponse = {
   },
 };
 
+function createBaseMsgCreateSchemaAuthorizationPolicy(): MsgCreateSchemaAuthorizationPolicy {
+  return {
+    corporation: "",
+    operator: "",
+    schemaId: 0,
+    role: 0,
+    url: "",
+    digestSri: "",
+    effectiveFrom: undefined,
+    effectiveUntil: undefined,
+  };
+}
+
+export const MsgCreateSchemaAuthorizationPolicy = {
+  encode(message: MsgCreateSchemaAuthorizationPolicy, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.corporation !== "") {
+      writer.uint32(10).string(message.corporation);
+    }
+    if (message.operator !== "") {
+      writer.uint32(18).string(message.operator);
+    }
+    if (message.schemaId !== 0) {
+      writer.uint32(24).uint64(message.schemaId);
+    }
+    if (message.role !== 0) {
+      writer.uint32(32).int32(message.role);
+    }
+    if (message.url !== "") {
+      writer.uint32(42).string(message.url);
+    }
+    if (message.digestSri !== "") {
+      writer.uint32(50).string(message.digestSri);
+    }
+    if (message.effectiveFrom !== undefined) {
+      Timestamp.encode(toTimestamp(message.effectiveFrom), writer.uint32(58).fork()).ldelim();
+    }
+    if (message.effectiveUntil !== undefined) {
+      Timestamp.encode(toTimestamp(message.effectiveUntil), writer.uint32(66).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgCreateSchemaAuthorizationPolicy {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgCreateSchemaAuthorizationPolicy();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.corporation = reader.string();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.operator = reader.string();
+          continue;
+        case 3:
+          if (tag !== 24) {
+            break;
+          }
+
+          message.schemaId = longToNumber(reader.uint64() as Long);
+          continue;
+        case 4:
+          if (tag !== 32) {
+            break;
+          }
+
+          message.role = reader.int32() as any;
+          continue;
+        case 5:
+          if (tag !== 42) {
+            break;
+          }
+
+          message.url = reader.string();
+          continue;
+        case 6:
+          if (tag !== 50) {
+            break;
+          }
+
+          message.digestSri = reader.string();
+          continue;
+        case 7:
+          if (tag !== 58) {
+            break;
+          }
+
+          message.effectiveFrom = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
+          continue;
+        case 8:
+          if (tag !== 66) {
+            break;
+          }
+
+          message.effectiveUntil = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MsgCreateSchemaAuthorizationPolicy {
+    return {
+      corporation: isSet(object.corporation) ? globalThis.String(object.corporation) : "",
+      operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
+      schemaId: isSet(object.schemaId) ? globalThis.Number(object.schemaId) : 0,
+      role: isSet(object.role) ? schemaAuthorizationPolicyRoleFromJSON(object.role) : 0,
+      url: isSet(object.url) ? globalThis.String(object.url) : "",
+      digestSri: isSet(object.digestSri) ? globalThis.String(object.digestSri) : "",
+      effectiveFrom: isSet(object.effectiveFrom) ? fromJsonTimestamp(object.effectiveFrom) : undefined,
+      effectiveUntil: isSet(object.effectiveUntil) ? fromJsonTimestamp(object.effectiveUntil) : undefined,
+    };
+  },
+
+  toJSON(message: MsgCreateSchemaAuthorizationPolicy): unknown {
+    const obj: any = {};
+    if (message.corporation !== "") {
+      obj.corporation = message.corporation;
+    }
+    if (message.operator !== "") {
+      obj.operator = message.operator;
+    }
+    if (message.schemaId !== 0) {
+      obj.schemaId = Math.round(message.schemaId);
+    }
+    if (message.role !== 0) {
+      obj.role = schemaAuthorizationPolicyRoleToJSON(message.role);
+    }
+    if (message.url !== "") {
+      obj.url = message.url;
+    }
+    if (message.digestSri !== "") {
+      obj.digestSri = message.digestSri;
+    }
+    if (message.effectiveFrom !== undefined) {
+      obj.effectiveFrom = message.effectiveFrom.toISOString();
+    }
+    if (message.effectiveUntil !== undefined) {
+      obj.effectiveUntil = message.effectiveUntil.toISOString();
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MsgCreateSchemaAuthorizationPolicy>, I>>(
+    base?: I,
+  ): MsgCreateSchemaAuthorizationPolicy {
+    return MsgCreateSchemaAuthorizationPolicy.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgCreateSchemaAuthorizationPolicy>, I>>(
+    object: I,
+  ): MsgCreateSchemaAuthorizationPolicy {
+    const message = createBaseMsgCreateSchemaAuthorizationPolicy();
+    message.corporation = object.corporation ?? "";
+    message.operator = object.operator ?? "";
+    message.schemaId = object.schemaId ?? 0;
+    message.role = object.role ?? 0;
+    message.url = object.url ?? "";
+    message.digestSri = object.digestSri ?? "";
+    message.effectiveFrom = object.effectiveFrom ?? undefined;
+    message.effectiveUntil = object.effectiveUntil ?? undefined;
+    return message;
+  },
+};
+
+function createBaseMsgCreateSchemaAuthorizationPolicyResponse(): MsgCreateSchemaAuthorizationPolicyResponse {
+  return { id: 0 };
+}
+
+export const MsgCreateSchemaAuthorizationPolicyResponse = {
+  encode(message: MsgCreateSchemaAuthorizationPolicyResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.id !== 0) {
+      writer.uint32(8).uint64(message.id);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgCreateSchemaAuthorizationPolicyResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgCreateSchemaAuthorizationPolicyResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 8) {
+            break;
+          }
+
+          message.id = longToNumber(reader.uint64() as Long);
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MsgCreateSchemaAuthorizationPolicyResponse {
+    return { id: isSet(object.id) ? globalThis.Number(object.id) : 0 };
+  },
+
+  toJSON(message: MsgCreateSchemaAuthorizationPolicyResponse): unknown {
+    const obj: any = {};
+    if (message.id !== 0) {
+      obj.id = Math.round(message.id);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MsgCreateSchemaAuthorizationPolicyResponse>, I>>(
+    base?: I,
+  ): MsgCreateSchemaAuthorizationPolicyResponse {
+    return MsgCreateSchemaAuthorizationPolicyResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgCreateSchemaAuthorizationPolicyResponse>, I>>(
+    object: I,
+  ): MsgCreateSchemaAuthorizationPolicyResponse {
+    const message = createBaseMsgCreateSchemaAuthorizationPolicyResponse();
+    message.id = object.id ?? 0;
+    return message;
+  },
+};
+
+function createBaseMsgIncreaseActiveSchemaAuthorizationPolicyVersion(): MsgIncreaseActiveSchemaAuthorizationPolicyVersion {
+  return { corporation: "", operator: "", schemaId: 0, role: 0 };
+}
+
+export const MsgIncreaseActiveSchemaAuthorizationPolicyVersion = {
+  encode(
+    message: MsgIncreaseActiveSchemaAuthorizationPolicyVersion,
+    writer: _m0.Writer = _m0.Writer.create(),
+  ): _m0.Writer {
+    if (message.corporation !== "") {
+      writer.uint32(10).string(message.corporation);
+    }
+    if (message.operator !== "") {
+      writer.uint32(18).string(message.operator);
+    }
+    if (message.schemaId !== 0) {
+      writer.uint32(24).uint64(message.schemaId);
+    }
+    if (message.role !== 0) {
+      writer.uint32(32).int32(message.role);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgIncreaseActiveSchemaAuthorizationPolicyVersion {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgIncreaseActiveSchemaAuthorizationPolicyVersion();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.corporation = reader.string();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.operator = reader.string();
+          continue;
+        case 3:
+          if (tag !== 24) {
+            break;
+          }
+
+          message.schemaId = longToNumber(reader.uint64() as Long);
+          continue;
+        case 4:
+          if (tag !== 32) {
+            break;
+          }
+
+          message.role = reader.int32() as any;
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MsgIncreaseActiveSchemaAuthorizationPolicyVersion {
+    return {
+      corporation: isSet(object.corporation) ? globalThis.String(object.corporation) : "",
+      operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
+      schemaId: isSet(object.schemaId) ? globalThis.Number(object.schemaId) : 0,
+      role: isSet(object.role) ? schemaAuthorizationPolicyRoleFromJSON(object.role) : 0,
+    };
+  },
+
+  toJSON(message: MsgIncreaseActiveSchemaAuthorizationPolicyVersion): unknown {
+    const obj: any = {};
+    if (message.corporation !== "") {
+      obj.corporation = message.corporation;
+    }
+    if (message.operator !== "") {
+      obj.operator = message.operator;
+    }
+    if (message.schemaId !== 0) {
+      obj.schemaId = Math.round(message.schemaId);
+    }
+    if (message.role !== 0) {
+      obj.role = schemaAuthorizationPolicyRoleToJSON(message.role);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MsgIncreaseActiveSchemaAuthorizationPolicyVersion>, I>>(
+    base?: I,
+  ): MsgIncreaseActiveSchemaAuthorizationPolicyVersion {
+    return MsgIncreaseActiveSchemaAuthorizationPolicyVersion.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgIncreaseActiveSchemaAuthorizationPolicyVersion>, I>>(
+    object: I,
+  ): MsgIncreaseActiveSchemaAuthorizationPolicyVersion {
+    const message = createBaseMsgIncreaseActiveSchemaAuthorizationPolicyVersion();
+    message.corporation = object.corporation ?? "";
+    message.operator = object.operator ?? "";
+    message.schemaId = object.schemaId ?? 0;
+    message.role = object.role ?? 0;
+    return message;
+  },
+};
+
+function createBaseMsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse(): MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse {
+  return {};
+}
+
+export const MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse = {
+  encode(
+    _: MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse,
+    writer: _m0.Writer = _m0.Writer.create(),
+  ): _m0.Writer {
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(_: any): MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse {
+    return {};
+  },
+
+  toJSON(_: MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse>, I>>(
+    base?: I,
+  ): MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse {
+    return MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse>, I>>(
+    _: I,
+  ): MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse {
+    const message = createBaseMsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse();
+    return message;
+  },
+};
+
+function createBaseMsgRevokeSchemaAuthorizationPolicy(): MsgRevokeSchemaAuthorizationPolicy {
+  return { corporation: "", operator: "", schemaId: 0, role: 0, version: 0 };
+}
+
+export const MsgRevokeSchemaAuthorizationPolicy = {
+  encode(message: MsgRevokeSchemaAuthorizationPolicy, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.corporation !== "") {
+      writer.uint32(10).string(message.corporation);
+    }
+    if (message.operator !== "") {
+      writer.uint32(18).string(message.operator);
+    }
+    if (message.schemaId !== 0) {
+      writer.uint32(24).uint64(message.schemaId);
+    }
+    if (message.role !== 0) {
+      writer.uint32(32).int32(message.role);
+    }
+    if (message.version !== 0) {
+      writer.uint32(40).uint32(message.version);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgRevokeSchemaAuthorizationPolicy {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgRevokeSchemaAuthorizationPolicy();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.corporation = reader.string();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.operator = reader.string();
+          continue;
+        case 3:
+          if (tag !== 24) {
+            break;
+          }
+
+          message.schemaId = longToNumber(reader.uint64() as Long);
+          continue;
+        case 4:
+          if (tag !== 32) {
+            break;
+          }
+
+          message.role = reader.int32() as any;
+          continue;
+        case 5:
+          if (tag !== 40) {
+            break;
+          }
+
+          message.version = reader.uint32();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MsgRevokeSchemaAuthorizationPolicy {
+    return {
+      corporation: isSet(object.corporation) ? globalThis.String(object.corporation) : "",
+      operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
+      schemaId: isSet(object.schemaId) ? globalThis.Number(object.schemaId) : 0,
+      role: isSet(object.role) ? schemaAuthorizationPolicyRoleFromJSON(object.role) : 0,
+      version: isSet(object.version) ? globalThis.Number(object.version) : 0,
+    };
+  },
+
+  toJSON(message: MsgRevokeSchemaAuthorizationPolicy): unknown {
+    const obj: any = {};
+    if (message.corporation !== "") {
+      obj.corporation = message.corporation;
+    }
+    if (message.operator !== "") {
+      obj.operator = message.operator;
+    }
+    if (message.schemaId !== 0) {
+      obj.schemaId = Math.round(message.schemaId);
+    }
+    if (message.role !== 0) {
+      obj.role = schemaAuthorizationPolicyRoleToJSON(message.role);
+    }
+    if (message.version !== 0) {
+      obj.version = Math.round(message.version);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MsgRevokeSchemaAuthorizationPolicy>, I>>(
+    base?: I,
+  ): MsgRevokeSchemaAuthorizationPolicy {
+    return MsgRevokeSchemaAuthorizationPolicy.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgRevokeSchemaAuthorizationPolicy>, I>>(
+    object: I,
+  ): MsgRevokeSchemaAuthorizationPolicy {
+    const message = createBaseMsgRevokeSchemaAuthorizationPolicy();
+    message.corporation = object.corporation ?? "";
+    message.operator = object.operator ?? "";
+    message.schemaId = object.schemaId ?? 0;
+    message.role = object.role ?? 0;
+    message.version = object.version ?? 0;
+    return message;
+  },
+};
+
+function createBaseMsgRevokeSchemaAuthorizationPolicyResponse(): MsgRevokeSchemaAuthorizationPolicyResponse {
+  return {};
+}
+
+export const MsgRevokeSchemaAuthorizationPolicyResponse = {
+  encode(_: MsgRevokeSchemaAuthorizationPolicyResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgRevokeSchemaAuthorizationPolicyResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgRevokeSchemaAuthorizationPolicyResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(_: any): MsgRevokeSchemaAuthorizationPolicyResponse {
+    return {};
+  },
+
+  toJSON(_: MsgRevokeSchemaAuthorizationPolicyResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MsgRevokeSchemaAuthorizationPolicyResponse>, I>>(
+    base?: I,
+  ): MsgRevokeSchemaAuthorizationPolicyResponse {
+    return MsgRevokeSchemaAuthorizationPolicyResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgRevokeSchemaAuthorizationPolicyResponse>, I>>(
+    _: I,
+  ): MsgRevokeSchemaAuthorizationPolicyResponse {
+    const message = createBaseMsgRevokeSchemaAuthorizationPolicyResponse();
+    return message;
+  },
+};
+
 /** Msg defines the Msg service. */
 export interface Msg {
   /**
@@ -1057,6 +1671,18 @@ export interface Msg {
   UpdateCredentialSchema(request: MsgUpdateCredentialSchema): Promise<MsgUpdateCredentialSchemaResponse>;
   /** ArchiveCredentialSchema defines a method for archiving a credential schema. */
   ArchiveCredentialSchema(request: MsgArchiveCredentialSchema): Promise<MsgArchiveCredentialSchemaResponse>;
+  /** [MOD-CS-MSG-5] CreateSchemaAuthorizationPolicy creates a versioned policy document for a schema role. */
+  CreateSchemaAuthorizationPolicy(
+    request: MsgCreateSchemaAuthorizationPolicy,
+  ): Promise<MsgCreateSchemaAuthorizationPolicyResponse>;
+  /** [MOD-CS-MSG-6] IncreaseActiveSchemaAuthorizationPolicyVersion advances the active policy version. */
+  IncreaseActiveSchemaAuthorizationPolicyVersion(
+    request: MsgIncreaseActiveSchemaAuthorizationPolicyVersion,
+  ): Promise<MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse>;
+  /** [MOD-CS-MSG-7] RevokeSchemaAuthorizationPolicy revokes a specific policy version. */
+  RevokeSchemaAuthorizationPolicy(
+    request: MsgRevokeSchemaAuthorizationPolicy,
+  ): Promise<MsgRevokeSchemaAuthorizationPolicyResponse>;
 }
 
 export const MsgServiceName = "verana.cs.v1.Msg";
@@ -1070,6 +1696,11 @@ export class MsgClientImpl implements Msg {
     this.CreateCredentialSchema = this.CreateCredentialSchema.bind(this);
     this.UpdateCredentialSchema = this.UpdateCredentialSchema.bind(this);
     this.ArchiveCredentialSchema = this.ArchiveCredentialSchema.bind(this);
+    this.CreateSchemaAuthorizationPolicy = this.CreateSchemaAuthorizationPolicy.bind(this);
+    this.IncreaseActiveSchemaAuthorizationPolicyVersion = this.IncreaseActiveSchemaAuthorizationPolicyVersion.bind(
+      this,
+    );
+    this.RevokeSchemaAuthorizationPolicy = this.RevokeSchemaAuthorizationPolicy.bind(this);
   }
   UpdateParams(request: MsgUpdateParams): Promise<MsgUpdateParamsResponse> {
     const data = MsgUpdateParams.encode(request).finish();
@@ -1094,6 +1725,32 @@ export class MsgClientImpl implements Msg {
     const promise = this.rpc.request(this.service, "ArchiveCredentialSchema", data);
     return promise.then((data) => MsgArchiveCredentialSchemaResponse.decode(_m0.Reader.create(data)));
   }
+
+  CreateSchemaAuthorizationPolicy(
+    request: MsgCreateSchemaAuthorizationPolicy,
+  ): Promise<MsgCreateSchemaAuthorizationPolicyResponse> {
+    const data = MsgCreateSchemaAuthorizationPolicy.encode(request).finish();
+    const promise = this.rpc.request(this.service, "CreateSchemaAuthorizationPolicy", data);
+    return promise.then((data) => MsgCreateSchemaAuthorizationPolicyResponse.decode(_m0.Reader.create(data)));
+  }
+
+  IncreaseActiveSchemaAuthorizationPolicyVersion(
+    request: MsgIncreaseActiveSchemaAuthorizationPolicyVersion,
+  ): Promise<MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse> {
+    const data = MsgIncreaseActiveSchemaAuthorizationPolicyVersion.encode(request).finish();
+    const promise = this.rpc.request(this.service, "IncreaseActiveSchemaAuthorizationPolicyVersion", data);
+    return promise.then((data) =>
+      MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse.decode(_m0.Reader.create(data))
+    );
+  }
+
+  RevokeSchemaAuthorizationPolicy(
+    request: MsgRevokeSchemaAuthorizationPolicy,
+  ): Promise<MsgRevokeSchemaAuthorizationPolicyResponse> {
+    const data = MsgRevokeSchemaAuthorizationPolicy.encode(request).finish();
+    const promise = this.rpc.request(this.service, "RevokeSchemaAuthorizationPolicy", data);
+    return promise.then((data) => MsgRevokeSchemaAuthorizationPolicyResponse.decode(_m0.Reader.create(data)));
+  }
 }
 
 interface Rpc {
@@ -1111,6 +1768,28 @@ export type DeepPartial<T> = T extends Builtin ? T
 type KeysOfUnion<T> = T extends T ? keyof T : never;
 export type Exact<P, I extends P> = P extends Builtin ? P
   : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
+
+function toTimestamp(date: Date): Timestamp {
+  const seconds = Math.trunc(date.getTime() / 1_000);
+  const nanos = (date.getTime() % 1_000) * 1_000_000;
+  return { seconds, nanos };
+}
+
+function fromTimestamp(t: Timestamp): Date {
+  let millis = (t.seconds || 0) * 1_000;
+  millis += (t.nanos || 0) / 1_000_000;
+  return new globalThis.Date(millis);
+}
+
+function fromJsonTimestamp(o: any): Date {
+  if (o instanceof globalThis.Date) {
+    return o;
+  } else if (typeof o === "string") {
+    return new globalThis.Date(o);
+  } else {
+    return fromTimestamp(Timestamp.fromJSON(o));
+  }
+}
 
 function longToNumber(long: Long): number {
   if (long.gt(globalThis.Number.MAX_SAFE_INTEGER)) {

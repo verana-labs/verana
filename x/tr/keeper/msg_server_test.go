@@ -542,6 +542,7 @@ func TestMsgServerArchiveTrustRegistry(t *testing.T) {
 			expectErr: true,
 		},
 		{
+			// After "Already Archived" the TR is still archived; unarchive must succeed.
 			name: "Valid Unarchive",
 			msg: &types.MsgArchiveTrustRegistry{
 				Corporation: authority,
@@ -549,9 +550,10 @@ func TestMsgServerArchiveTrustRegistry(t *testing.T) {
 				TrId:        trID,
 				Archive:     false,
 			},
-			expectErr: true,
+			expectErr: false,
 		},
 		{
+			// TR is now unarchived; a second unarchive must fail.
 			name: "Already Unarchived",
 			msg: &types.MsgArchiveTrustRegistry{
 				Corporation: authority,

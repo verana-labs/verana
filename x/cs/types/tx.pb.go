@@ -12,18 +12,22 @@ import (
 	_ "github.com/cosmos/gogoproto/gogoproto"
 	grpc1 "github.com/cosmos/gogoproto/grpc"
 	proto "github.com/cosmos/gogoproto/proto"
+	github_com_cosmos_gogoproto_types "github.com/cosmos/gogoproto/types"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	_ "google.golang.org/protobuf/types/known/timestamppb"
 	io "io"
 	math "math"
 	math_bits "math/bits"
+	time "time"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
 var _ = fmt.Errorf
 var _ = math.Inf
+var _ = time.Kitchen
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the proto package it is being compiled against.
@@ -620,6 +624,385 @@ func (m *MsgArchiveCredentialSchemaResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgArchiveCredentialSchemaResponse proto.InternalMessageInfo
 
+// [MOD-CS-MSG-5] MsgCreateSchemaAuthorizationPolicy creates a new schema authorization policy.
+type MsgCreateSchemaAuthorizationPolicy struct {
+	Corporation    string                        `protobuf:"bytes,1,opt,name=corporation,proto3" json:"corporation,omitempty"`
+	Operator       string                        `protobuf:"bytes,2,opt,name=operator,proto3" json:"operator,omitempty"`
+	SchemaId       uint64                        `protobuf:"varint,3,opt,name=schema_id,json=schemaId,proto3" json:"schema_id,omitempty"`
+	Role           SchemaAuthorizationPolicyRole `protobuf:"varint,4,opt,name=role,proto3,enum=verana.cs.v1.SchemaAuthorizationPolicyRole" json:"role,omitempty"`
+	Url            string                        `protobuf:"bytes,5,opt,name=url,proto3" json:"url,omitempty"`
+	DigestSri      string                        `protobuf:"bytes,6,opt,name=digest_sri,json=digestSri,proto3" json:"digest_sri,omitempty"`
+	EffectiveFrom  time.Time                     `protobuf:"bytes,7,opt,name=effective_from,json=effectiveFrom,proto3,stdtime" json:"effective_from"`
+	EffectiveUntil *time.Time                    `protobuf:"bytes,8,opt,name=effective_until,json=effectiveUntil,proto3,stdtime" json:"effective_until,omitempty"`
+}
+
+func (m *MsgCreateSchemaAuthorizationPolicy) Reset()         { *m = MsgCreateSchemaAuthorizationPolicy{} }
+func (m *MsgCreateSchemaAuthorizationPolicy) String() string { return proto.CompactTextString(m) }
+func (*MsgCreateSchemaAuthorizationPolicy) ProtoMessage()    {}
+func (*MsgCreateSchemaAuthorizationPolicy) Descriptor() ([]byte, []int) {
+	return fileDescriptor_28caaebe5b206ca2, []int{9}
+}
+func (m *MsgCreateSchemaAuthorizationPolicy) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgCreateSchemaAuthorizationPolicy) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgCreateSchemaAuthorizationPolicy.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgCreateSchemaAuthorizationPolicy) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgCreateSchemaAuthorizationPolicy.Merge(m, src)
+}
+func (m *MsgCreateSchemaAuthorizationPolicy) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgCreateSchemaAuthorizationPolicy) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgCreateSchemaAuthorizationPolicy.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgCreateSchemaAuthorizationPolicy proto.InternalMessageInfo
+
+func (m *MsgCreateSchemaAuthorizationPolicy) GetCorporation() string {
+	if m != nil {
+		return m.Corporation
+	}
+	return ""
+}
+
+func (m *MsgCreateSchemaAuthorizationPolicy) GetOperator() string {
+	if m != nil {
+		return m.Operator
+	}
+	return ""
+}
+
+func (m *MsgCreateSchemaAuthorizationPolicy) GetSchemaId() uint64 {
+	if m != nil {
+		return m.SchemaId
+	}
+	return 0
+}
+
+func (m *MsgCreateSchemaAuthorizationPolicy) GetRole() SchemaAuthorizationPolicyRole {
+	if m != nil {
+		return m.Role
+	}
+	return SchemaAuthorizationPolicyRole_SCHEMA_AUTHORIZATION_POLICY_ROLE_UNSPECIFIED
+}
+
+func (m *MsgCreateSchemaAuthorizationPolicy) GetUrl() string {
+	if m != nil {
+		return m.Url
+	}
+	return ""
+}
+
+func (m *MsgCreateSchemaAuthorizationPolicy) GetDigestSri() string {
+	if m != nil {
+		return m.DigestSri
+	}
+	return ""
+}
+
+func (m *MsgCreateSchemaAuthorizationPolicy) GetEffectiveFrom() time.Time {
+	if m != nil {
+		return m.EffectiveFrom
+	}
+	return time.Time{}
+}
+
+func (m *MsgCreateSchemaAuthorizationPolicy) GetEffectiveUntil() *time.Time {
+	if m != nil {
+		return m.EffectiveUntil
+	}
+	return nil
+}
+
+type MsgCreateSchemaAuthorizationPolicyResponse struct {
+	Id uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+}
+
+func (m *MsgCreateSchemaAuthorizationPolicyResponse) Reset() {
+	*m = MsgCreateSchemaAuthorizationPolicyResponse{}
+}
+func (m *MsgCreateSchemaAuthorizationPolicyResponse) String() string {
+	return proto.CompactTextString(m)
+}
+func (*MsgCreateSchemaAuthorizationPolicyResponse) ProtoMessage() {}
+func (*MsgCreateSchemaAuthorizationPolicyResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_28caaebe5b206ca2, []int{10}
+}
+func (m *MsgCreateSchemaAuthorizationPolicyResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgCreateSchemaAuthorizationPolicyResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgCreateSchemaAuthorizationPolicyResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgCreateSchemaAuthorizationPolicyResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgCreateSchemaAuthorizationPolicyResponse.Merge(m, src)
+}
+func (m *MsgCreateSchemaAuthorizationPolicyResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgCreateSchemaAuthorizationPolicyResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgCreateSchemaAuthorizationPolicyResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgCreateSchemaAuthorizationPolicyResponse proto.InternalMessageInfo
+
+func (m *MsgCreateSchemaAuthorizationPolicyResponse) GetId() uint64 {
+	if m != nil {
+		return m.Id
+	}
+	return 0
+}
+
+// [MOD-CS-MSG-6] MsgIncreaseActiveSchemaAuthorizationPolicyVersion advances the active policy version for a role.
+type MsgIncreaseActiveSchemaAuthorizationPolicyVersion struct {
+	Corporation string                        `protobuf:"bytes,1,opt,name=corporation,proto3" json:"corporation,omitempty"`
+	Operator    string                        `protobuf:"bytes,2,opt,name=operator,proto3" json:"operator,omitempty"`
+	SchemaId    uint64                        `protobuf:"varint,3,opt,name=schema_id,json=schemaId,proto3" json:"schema_id,omitempty"`
+	Role        SchemaAuthorizationPolicyRole `protobuf:"varint,4,opt,name=role,proto3,enum=verana.cs.v1.SchemaAuthorizationPolicyRole" json:"role,omitempty"`
+}
+
+func (m *MsgIncreaseActiveSchemaAuthorizationPolicyVersion) Reset() {
+	*m = MsgIncreaseActiveSchemaAuthorizationPolicyVersion{}
+}
+func (m *MsgIncreaseActiveSchemaAuthorizationPolicyVersion) String() string {
+	return proto.CompactTextString(m)
+}
+func (*MsgIncreaseActiveSchemaAuthorizationPolicyVersion) ProtoMessage() {}
+func (*MsgIncreaseActiveSchemaAuthorizationPolicyVersion) Descriptor() ([]byte, []int) {
+	return fileDescriptor_28caaebe5b206ca2, []int{11}
+}
+func (m *MsgIncreaseActiveSchemaAuthorizationPolicyVersion) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgIncreaseActiveSchemaAuthorizationPolicyVersion) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgIncreaseActiveSchemaAuthorizationPolicyVersion.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgIncreaseActiveSchemaAuthorizationPolicyVersion) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgIncreaseActiveSchemaAuthorizationPolicyVersion.Merge(m, src)
+}
+func (m *MsgIncreaseActiveSchemaAuthorizationPolicyVersion) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgIncreaseActiveSchemaAuthorizationPolicyVersion) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgIncreaseActiveSchemaAuthorizationPolicyVersion.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgIncreaseActiveSchemaAuthorizationPolicyVersion proto.InternalMessageInfo
+
+func (m *MsgIncreaseActiveSchemaAuthorizationPolicyVersion) GetCorporation() string {
+	if m != nil {
+		return m.Corporation
+	}
+	return ""
+}
+
+func (m *MsgIncreaseActiveSchemaAuthorizationPolicyVersion) GetOperator() string {
+	if m != nil {
+		return m.Operator
+	}
+	return ""
+}
+
+func (m *MsgIncreaseActiveSchemaAuthorizationPolicyVersion) GetSchemaId() uint64 {
+	if m != nil {
+		return m.SchemaId
+	}
+	return 0
+}
+
+func (m *MsgIncreaseActiveSchemaAuthorizationPolicyVersion) GetRole() SchemaAuthorizationPolicyRole {
+	if m != nil {
+		return m.Role
+	}
+	return SchemaAuthorizationPolicyRole_SCHEMA_AUTHORIZATION_POLICY_ROLE_UNSPECIFIED
+}
+
+type MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse struct {
+}
+
+func (m *MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse) Reset() {
+	*m = MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse{}
+}
+func (m *MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse) String() string {
+	return proto.CompactTextString(m)
+}
+func (*MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse) ProtoMessage() {}
+func (*MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_28caaebe5b206ca2, []int{12}
+}
+func (m *MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse.Merge(m, src)
+}
+func (m *MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse proto.InternalMessageInfo
+
+// [MOD-CS-MSG-7] MsgRevokeSchemaAuthorizationPolicy revokes a specific policy version.
+type MsgRevokeSchemaAuthorizationPolicy struct {
+	Corporation string                        `protobuf:"bytes,1,opt,name=corporation,proto3" json:"corporation,omitempty"`
+	Operator    string                        `protobuf:"bytes,2,opt,name=operator,proto3" json:"operator,omitempty"`
+	SchemaId    uint64                        `protobuf:"varint,3,opt,name=schema_id,json=schemaId,proto3" json:"schema_id,omitempty"`
+	Role        SchemaAuthorizationPolicyRole `protobuf:"varint,4,opt,name=role,proto3,enum=verana.cs.v1.SchemaAuthorizationPolicyRole" json:"role,omitempty"`
+	Version     uint32                        `protobuf:"varint,5,opt,name=version,proto3" json:"version,omitempty"`
+}
+
+func (m *MsgRevokeSchemaAuthorizationPolicy) Reset()         { *m = MsgRevokeSchemaAuthorizationPolicy{} }
+func (m *MsgRevokeSchemaAuthorizationPolicy) String() string { return proto.CompactTextString(m) }
+func (*MsgRevokeSchemaAuthorizationPolicy) ProtoMessage()    {}
+func (*MsgRevokeSchemaAuthorizationPolicy) Descriptor() ([]byte, []int) {
+	return fileDescriptor_28caaebe5b206ca2, []int{13}
+}
+func (m *MsgRevokeSchemaAuthorizationPolicy) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgRevokeSchemaAuthorizationPolicy) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgRevokeSchemaAuthorizationPolicy.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgRevokeSchemaAuthorizationPolicy) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgRevokeSchemaAuthorizationPolicy.Merge(m, src)
+}
+func (m *MsgRevokeSchemaAuthorizationPolicy) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgRevokeSchemaAuthorizationPolicy) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgRevokeSchemaAuthorizationPolicy.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgRevokeSchemaAuthorizationPolicy proto.InternalMessageInfo
+
+func (m *MsgRevokeSchemaAuthorizationPolicy) GetCorporation() string {
+	if m != nil {
+		return m.Corporation
+	}
+	return ""
+}
+
+func (m *MsgRevokeSchemaAuthorizationPolicy) GetOperator() string {
+	if m != nil {
+		return m.Operator
+	}
+	return ""
+}
+
+func (m *MsgRevokeSchemaAuthorizationPolicy) GetSchemaId() uint64 {
+	if m != nil {
+		return m.SchemaId
+	}
+	return 0
+}
+
+func (m *MsgRevokeSchemaAuthorizationPolicy) GetRole() SchemaAuthorizationPolicyRole {
+	if m != nil {
+		return m.Role
+	}
+	return SchemaAuthorizationPolicyRole_SCHEMA_AUTHORIZATION_POLICY_ROLE_UNSPECIFIED
+}
+
+func (m *MsgRevokeSchemaAuthorizationPolicy) GetVersion() uint32 {
+	if m != nil {
+		return m.Version
+	}
+	return 0
+}
+
+type MsgRevokeSchemaAuthorizationPolicyResponse struct {
+}
+
+func (m *MsgRevokeSchemaAuthorizationPolicyResponse) Reset() {
+	*m = MsgRevokeSchemaAuthorizationPolicyResponse{}
+}
+func (m *MsgRevokeSchemaAuthorizationPolicyResponse) String() string {
+	return proto.CompactTextString(m)
+}
+func (*MsgRevokeSchemaAuthorizationPolicyResponse) ProtoMessage() {}
+func (*MsgRevokeSchemaAuthorizationPolicyResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_28caaebe5b206ca2, []int{14}
+}
+func (m *MsgRevokeSchemaAuthorizationPolicyResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgRevokeSchemaAuthorizationPolicyResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgRevokeSchemaAuthorizationPolicyResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgRevokeSchemaAuthorizationPolicyResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgRevokeSchemaAuthorizationPolicyResponse.Merge(m, src)
+}
+func (m *MsgRevokeSchemaAuthorizationPolicyResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgRevokeSchemaAuthorizationPolicyResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgRevokeSchemaAuthorizationPolicyResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgRevokeSchemaAuthorizationPolicyResponse proto.InternalMessageInfo
+
 func init() {
 	proto.RegisterType((*MsgUpdateParams)(nil), "verana.cs.v1.MsgUpdateParams")
 	proto.RegisterType((*MsgUpdateParamsResponse)(nil), "verana.cs.v1.MsgUpdateParamsResponse")
@@ -630,70 +1013,96 @@ func init() {
 	proto.RegisterType((*MsgUpdateCredentialSchemaResponse)(nil), "verana.cs.v1.MsgUpdateCredentialSchemaResponse")
 	proto.RegisterType((*MsgArchiveCredentialSchema)(nil), "verana.cs.v1.MsgArchiveCredentialSchema")
 	proto.RegisterType((*MsgArchiveCredentialSchemaResponse)(nil), "verana.cs.v1.MsgArchiveCredentialSchemaResponse")
+	proto.RegisterType((*MsgCreateSchemaAuthorizationPolicy)(nil), "verana.cs.v1.MsgCreateSchemaAuthorizationPolicy")
+	proto.RegisterType((*MsgCreateSchemaAuthorizationPolicyResponse)(nil), "verana.cs.v1.MsgCreateSchemaAuthorizationPolicyResponse")
+	proto.RegisterType((*MsgIncreaseActiveSchemaAuthorizationPolicyVersion)(nil), "verana.cs.v1.MsgIncreaseActiveSchemaAuthorizationPolicyVersion")
+	proto.RegisterType((*MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse)(nil), "verana.cs.v1.MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse")
+	proto.RegisterType((*MsgRevokeSchemaAuthorizationPolicy)(nil), "verana.cs.v1.MsgRevokeSchemaAuthorizationPolicy")
+	proto.RegisterType((*MsgRevokeSchemaAuthorizationPolicyResponse)(nil), "verana.cs.v1.MsgRevokeSchemaAuthorizationPolicyResponse")
 }
 
 func init() { proto.RegisterFile("verana/cs/v1/tx.proto", fileDescriptor_28caaebe5b206ca2) }
 
 var fileDescriptor_28caaebe5b206ca2 = []byte{
-	// 915 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xcc, 0x57, 0xbf, 0x6f, 0xdb, 0x46,
-	0x14, 0x36, 0x6d, 0x49, 0x96, 0x9f, 0x7f, 0xa5, 0xac, 0x6a, 0xd3, 0x6a, 0x2b, 0x2b, 0x74, 0x1d,
-	0x2b, 0x6e, 0x23, 0x36, 0x76, 0xd0, 0x04, 0xde, 0xac, 0x0c, 0x45, 0x06, 0x21, 0x01, 0xf3, 0x63,
-	0xe8, 0x42, 0x9c, 0xc5, 0x2b, 0x75, 0x85, 0xc8, 0x63, 0xef, 0x4e, 0x42, 0x0c, 0x74, 0x08, 0x3a,
-	0x76, 0xea, 0x9f, 0x91, 0xd1, 0x28, 0xfa, 0x0f, 0x74, 0xf3, 0x18, 0x74, 0xea, 0x14, 0x14, 0xf6,
-	0xe0, 0xbd, 0x7f, 0x41, 0xc1, 0x3b, 0x52, 0x96, 0x68, 0x51, 0x61, 0x81, 0x22, 0xf1, 0x62, 0x88,
-	0xf7, 0xbe, 0xf7, 0xbd, 0xef, 0x3d, 0xf3, 0x7d, 0x38, 0xc2, 0x27, 0x03, 0xcc, 0x50, 0x80, 0xac,
-	0x0e, 0xb7, 0x06, 0x77, 0x2d, 0xf1, 0xb2, 0x19, 0x32, 0x2a, 0xa8, 0xbe, 0xa4, 0x8e, 0x9b, 0x1d,
-	0xde, 0x1c, 0xdc, 0xad, 0x7e, 0x84, 0x7c, 0x12, 0x50, 0x4b, 0xfe, 0x55, 0x80, 0xea, 0x7a, 0x87,
-	0x72, 0x9f, 0x72, 0xcb, 0xe7, 0x5e, 0x94, 0xe8, 0x73, 0x2f, 0x0e, 0x6c, 0xa8, 0x80, 0x23, 0x9f,
-	0x2c, 0xf5, 0x10, 0x87, 0x2a, 0x1e, 0xf5, 0xa8, 0x3a, 0x8f, 0x7e, 0x25, 0x09, 0x63, 0x0a, 0x42,
-	0xc4, 0x90, 0x9f, 0x24, 0x18, 0xe3, 0xe2, 0x8e, 0x43, 0x1c, 0x47, 0xcc, 0xdf, 0x34, 0x58, 0x6d,
-	0x73, 0xef, 0x79, 0xe8, 0x22, 0x81, 0x9f, 0xc8, 0x1c, 0xfd, 0x1b, 0x58, 0x40, 0x7d, 0xd1, 0xa5,
-	0x8c, 0x88, 0x63, 0x43, 0xab, 0x6b, 0x8d, 0x85, 0x96, 0xf1, 0xe7, 0xef, 0x77, 0x2a, 0xb1, 0x86,
-	0x43, 0xd7, 0x65, 0x98, 0xf3, 0xa7, 0x82, 0x91, 0xc0, 0xb3, 0x2f, 0xa1, 0xfa, 0x7d, 0x28, 0xa9,
-	0xaa, 0xc6, 0x6c, 0x5d, 0x6b, 0x2c, 0xee, 0x55, 0x9a, 0xa3, 0xcd, 0x37, 0x15, 0x7b, 0x6b, 0xe1,
-	0xf4, 0xed, 0xe6, 0xcc, 0xeb, 0x8b, 0x93, 0x5d, 0xcd, 0x8e, 0xe1, 0x07, 0xcd, 0x9f, 0x2f, 0x4e,
-	0x76, 0x2f, 0x89, 0x7e, 0xb9, 0x38, 0xd9, 0xfd, 0x34, 0x56, 0xfc, 0x32, 0xd2, 0x9c, 0x12, 0x68,
-	0x6e, 0xc0, 0x7a, 0xea, 0xc8, 0xc6, 0x3c, 0xa4, 0x01, 0xc7, 0xe6, 0x3f, 0x65, 0xd8, 0x68, 0x73,
-	0xef, 0x21, 0xc3, 0x48, 0xe0, 0x87, 0x0c, 0xbb, 0x38, 0x10, 0x04, 0xf5, 0x9e, 0x76, 0xba, 0xd8,
-	0x47, 0xfa, 0x01, 0x2c, 0x76, 0x28, 0x0b, 0x29, 0x43, 0x82, 0xd0, 0xe0, 0x9d, 0xbd, 0x8d, 0x82,
-	0xf5, 0x7b, 0x50, 0xa6, 0x21, 0x66, 0x48, 0x50, 0x26, 0xfb, 0x9b, 0x96, 0x38, 0x44, 0xea, 0x1f,
-	0x43, 0x51, 0x30, 0x87, 0xb8, 0xc6, 0x5c, 0x5d, 0x6b, 0x14, 0xec, 0x82, 0x60, 0x8f, 0x5c, 0x7d,
-	0x13, 0x16, 0x7f, 0xe0, 0x34, 0x70, 0xb8, 0x54, 0x65, 0x14, 0x22, 0x36, 0x1b, 0xa2, 0xa3, 0x58,
-	0xe7, 0x4f, 0x70, 0x9b, 0x70, 0xde, 0xc7, 0xcc, 0xf1, 0x18, 0x0a, 0x04, 0x65, 0xce, 0x00, 0xf5,
-	0x88, 0x2b, 0x85, 0xa8, 0x9f, 0x44, 0x1c, 0x3b, 0x21, 0x66, 0x84, 0xba, 0x46, 0x51, 0x0e, 0xfb,
-	0xb3, 0xf1, 0x61, 0x3f, 0x0e, 0x23, 0x2c, 0xea, 0x3d, 0x7f, 0x14, 0x88, 0xfd, 0xbd, 0x56, 0xe1,
-	0xf4, 0xed, 0xa6, 0x66, 0x6f, 0x2b, 0xd2, 0x6f, 0x15, 0xe7, 0x8b, 0x21, 0xe5, 0x8b, 0x98, 0xf1,
-	0x89, 0x24, 0xd4, 0x5f, 0x69, 0xf0, 0xe5, 0x00, 0x33, 0xf2, 0x3d, 0xc9, 0x27, 0xa0, 0x94, 0x5b,
-	0xc0, 0x4e, 0x42, 0xfb, 0x2e, 0x09, 0x3e, 0xdc, 0x8c, 0x07, 0x30, 0xa5, 0xee, 0x7c, 0xee, 0xba,
-	0x35, 0x45, 0x96, 0x59, 0xee, 0x47, 0xd8, 0x1a, 0x36, 0x3c, 0xa5, 0x60, 0x39, 0x77, 0xc1, 0x7a,
-	0x42, 0x37, 0xad, 0xc3, 0x2e, 0xed, 0xb9, 0xd3, 0x0b, 0x2e, 0xe4, 0xef, 0x50, 0x91, 0x65, 0x96,
-	0xbb, 0x07, 0x6b, 0xf1, 0x40, 0x69, 0x70, 0x44, 0x11, 0x73, 0x49, 0xe0, 0x39, 0x3e, 0x75, 0xb1,
-	0x01, 0x75, 0xad, 0xb1, 0x6c, 0x57, 0x54, 0xf4, 0xf1, 0x30, 0xd8, 0xa6, 0x2e, 0xd6, 0x1f, 0x80,
-	0x31, 0x9c, 0x4b, 0x3a, 0x6f, 0x51, 0xe6, 0xad, 0x25, 0xf1, 0x54, 0xe6, 0x57, 0xa0, 0x87, 0x8c,
-	0x74, 0x22, 0x34, 0xe2, 0x1c, 0x0b, 0x27, 0x32, 0x1d, 0x63, 0x49, 0xe6, 0xdc, 0x88, 0x23, 0x87,
-	0x51, 0xe0, 0xd9, 0x71, 0x88, 0xf5, 0x2d, 0x58, 0x1e, 0x43, 0x1b, 0xcb, 0x72, 0x25, 0x96, 0x46,
-	0x81, 0xfa, 0x6d, 0xb8, 0xe1, 0x12, 0x0f, 0x73, 0xe1, 0xa0, 0x9e, 0x17, 0x19, 0x45, 0xd7, 0x37,
-	0x56, 0x24, 0x6e, 0x55, 0x9d, 0x1f, 0x26, 0xc7, 0x51, 0xb7, 0xf1, 0x70, 0xd3, 0xaa, 0x57, 0x55,
-	0xb7, 0x2a, 0x3a, 0xae, 0xf9, 0xe0, 0x7e, 0x64, 0x43, 0xc3, 0xd5, 0x8d, 0x5c, 0x68, 0x3b, 0xe5,
-	0x42, 0x93, 0x6d, 0xc5, 0xdc, 0x87, 0x9b, 0x99, 0xc1, 0xc4, 0x99, 0xf4, 0x15, 0x98, 0x25, 0xae,
-	0xb4, 0x9c, 0x82, 0x3d, 0x4b, 0x5c, 0xf3, 0x75, 0x49, 0x3a, 0x95, 0x72, 0xb1, 0x6b, 0xe0, 0x54,
-	0x4a, 0xdf, 0x5c, 0xa2, 0xef, 0xbf, 0x79, 0x50, 0xe1, 0x43, 0x7b, 0x50, 0xf1, 0x03, 0x79, 0x50,
-	0xe9, 0x7d, 0x7b, 0xd0, 0xfc, 0xfb, 0xf6, 0xa0, 0xf2, 0xff, 0xe5, 0x41, 0x39, 0xf6, 0x6b, 0xf2,
-	0x32, 0x98, 0xb7, 0x60, 0x65, 0xbc, 0xa0, 0x5e, 0x81, 0xe2, 0x00, 0xf5, 0xfa, 0x58, 0x2e, 0xc6,
-	0xb2, 0xad, 0x1e, 0xcc, 0x2d, 0xb9, 0x87, 0x93, 0x49, 0x2e, 0x6f, 0x08, 0x1a, 0x54, 0xdb, 0xdc,
-	0x3b, 0x64, 0x9d, 0x2e, 0x19, 0x5c, 0xc7, 0xc5, 0x33, 0x60, 0x1e, 0x29, 0x71, 0x72, 0xad, 0xca,
-	0x76, 0xf2, 0x78, 0xf0, 0xe0, 0xca, 0x00, 0x6f, 0xa5, 0x06, 0x98, 0xd1, 0x95, 0xf9, 0x05, 0x98,
-	0xd9, 0xd1, 0x64, 0x34, 0x7b, 0x7f, 0xcc, 0xc1, 0x5c, 0x9b, 0x7b, 0xfa, 0x33, 0x58, 0x1a, 0xbb,
-	0x10, 0x7e, 0x3e, 0xfe, 0xcf, 0x4f, 0xdd, 0xbd, 0xaa, 0xdb, 0x53, 0xc3, 0x43, 0x03, 0x64, 0xb0,
-	0x96, 0x71, 0x2d, 0xdb, 0xb9, 0x42, 0x30, 0x19, 0x58, 0xb5, 0x72, 0x02, 0x47, 0x6b, 0x66, 0x18,
-	0xec, 0x4e, 0x86, 0xe8, 0x1c, 0x35, 0xa7, 0xbf, 0x60, 0x7a, 0x1f, 0xd6, 0xb3, 0x5e, 0xae, 0xc6,
-	0x15, 0xae, 0x0c, 0x64, 0xf5, 0xeb, 0xbc, 0xc8, 0xa4, 0x6c, 0xb5, 0xf8, 0x2a, 0xba, 0x53, 0xb7,
-	0x5a, 0xa7, 0x67, 0x35, 0xed, 0xcd, 0x59, 0x4d, 0xfb, 0xfb, 0xac, 0xa6, 0xfd, 0x7a, 0x5e, 0x9b,
-	0x79, 0x73, 0x5e, 0x9b, 0xf9, 0xeb, 0xbc, 0x36, 0xf3, 0x5d, 0xc3, 0x23, 0xa2, 0xdb, 0x3f, 0x6a,
-	0x76, 0xa8, 0x6f, 0x29, 0xf2, 0x3b, 0x3d, 0x74, 0xc4, 0xad, 0xd1, 0x57, 0x48, 0x7e, 0x1a, 0x1c,
-	0x95, 0xe4, 0xb7, 0xc1, 0xfe, 0xbf, 0x01, 0x00, 0x00, 0xff, 0xff, 0xd3, 0x53, 0xac, 0x89, 0xd4,
-	0x0c, 0x00, 0x00,
+	// 1244 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe4, 0x58, 0xcf, 0x4f, 0x1b, 0x47,
+	0x14, 0x66, 0xc1, 0x80, 0x3d, 0x60, 0xa0, 0x5b, 0x0a, 0x8b, 0xd3, 0xd8, 0xc4, 0x94, 0xe0, 0x90,
+	0x64, 0x1d, 0x20, 0x6a, 0x28, 0xad, 0x94, 0xda, 0x91, 0x1a, 0xa1, 0xca, 0x0a, 0x5a, 0x7e, 0x1c,
+	0x7a, 0xb1, 0x06, 0xef, 0xb0, 0x9e, 0x76, 0x77, 0x67, 0x3b, 0xb3, 0xb6, 0x42, 0xd5, 0x43, 0xd4,
+	0x63, 0xa5, 0x4a, 0xf9, 0x0b, 0x7a, 0xce, 0x11, 0x55, 0x3d, 0xf5, 0x5e, 0x95, 0x63, 0xd4, 0x53,
+	0x4f, 0x69, 0x05, 0x07, 0xee, 0x3d, 0xf6, 0x54, 0xed, 0xcc, 0xee, 0x1a, 0xdb, 0xac, 0xbd, 0xa8,
+	0x55, 0x88, 0xda, 0x0b, 0xda, 0x99, 0xf7, 0xde, 0xf7, 0xde, 0xfb, 0xd8, 0xf7, 0xcd, 0xac, 0xc1,
+	0x3b, 0x4d, 0x44, 0xa1, 0x0d, 0x8b, 0x35, 0x56, 0x6c, 0xae, 0x14, 0xdd, 0xa7, 0xaa, 0x43, 0x89,
+	0x4b, 0xe4, 0x71, 0xb1, 0xad, 0xd6, 0x98, 0xda, 0x5c, 0xc9, 0xbc, 0x05, 0x2d, 0x6c, 0x93, 0x22,
+	0xff, 0x2b, 0x1c, 0x32, 0xb3, 0x35, 0xc2, 0x2c, 0xc2, 0x8a, 0x16, 0x33, 0xbc, 0x40, 0x8b, 0x19,
+	0xbe, 0x61, 0x4e, 0x18, 0xaa, 0x7c, 0x55, 0x14, 0x0b, 0xdf, 0x34, 0x6d, 0x10, 0x83, 0x88, 0x7d,
+	0xef, 0xc9, 0xdf, 0xcd, 0x19, 0x84, 0x18, 0x26, 0x2a, 0xf2, 0xd5, 0x7e, 0xe3, 0xa0, 0xe8, 0x62,
+	0x0b, 0x31, 0x17, 0x5a, 0x4e, 0x80, 0xd8, 0x56, 0xa2, 0x03, 0x29, 0xb4, 0x02, 0x44, 0xa5, 0xbd,
+	0xfa, 0x43, 0x07, 0xf9, 0x96, 0xfc, 0x0f, 0x12, 0x98, 0xac, 0x30, 0x63, 0xd7, 0xd1, 0xa1, 0x8b,
+	0xb6, 0x78, 0x8c, 0xfc, 0x3e, 0x48, 0xc1, 0x86, 0x5b, 0x27, 0x14, 0xbb, 0x87, 0x8a, 0x34, 0x2f,
+	0x15, 0x52, 0x65, 0xe5, 0xd7, 0x1f, 0xef, 0x4e, 0xfb, 0x45, 0x96, 0x74, 0x9d, 0x22, 0xc6, 0xb6,
+	0x5d, 0x8a, 0x6d, 0x43, 0x6b, 0xb9, 0xca, 0x0f, 0xc0, 0x88, 0xc8, 0xaa, 0x0c, 0xce, 0x4b, 0x85,
+	0xb1, 0xd5, 0x69, 0xf5, 0x3c, 0x3b, 0xaa, 0x40, 0x2f, 0xa7, 0x8e, 0x5f, 0xe5, 0x06, 0x5e, 0x9c,
+	0x1d, 0x2d, 0x4b, 0x9a, 0xef, 0xbe, 0xa1, 0x7e, 0x73, 0x76, 0xb4, 0xdc, 0x02, 0xfa, 0xf6, 0xec,
+	0x68, 0xf9, 0x9a, 0x5f, 0xf1, 0x53, 0xaf, 0xe6, 0x8e, 0x02, 0xf3, 0x73, 0x60, 0xb6, 0x63, 0x4b,
+	0x43, 0xcc, 0x21, 0x36, 0x43, 0xf9, 0x3f, 0x93, 0x60, 0xae, 0xc2, 0x8c, 0x47, 0x14, 0x41, 0x17,
+	0x3d, 0xa2, 0x48, 0x47, 0xb6, 0x8b, 0xa1, 0xb9, 0x5d, 0xab, 0x23, 0x0b, 0xca, 0x1b, 0x60, 0xac,
+	0x46, 0xa8, 0x43, 0x28, 0x74, 0x31, 0xb1, 0xfb, 0xf6, 0x76, 0xde, 0x59, 0xbe, 0x0f, 0x92, 0xc4,
+	0x41, 0x14, 0xba, 0x84, 0xf2, 0xfe, 0x7a, 0x05, 0x86, 0x9e, 0xf2, 0xdb, 0x60, 0xd8, 0xa5, 0x55,
+	0xac, 0x2b, 0x43, 0xf3, 0x52, 0x21, 0xa1, 0x25, 0x5c, 0xba, 0xa9, 0xcb, 0x39, 0x30, 0xf6, 0x39,
+	0x23, 0x76, 0x95, 0xf1, 0xaa, 0x94, 0x84, 0x87, 0xa6, 0x01, 0x6f, 0xcb, 0xaf, 0xf3, 0x6b, 0x70,
+	0x0b, 0x33, 0xd6, 0x40, 0xb4, 0x6a, 0x50, 0x68, 0xbb, 0x84, 0x56, 0x9b, 0xd0, 0xc4, 0x3a, 0x2f,
+	0x44, 0x3c, 0x62, 0xf7, 0xb0, 0xea, 0x20, 0x8a, 0x89, 0xae, 0x0c, 0x73, 0xb2, 0xdf, 0x6d, 0x27,
+	0xfb, 0x89, 0xe3, 0xf9, 0x42, 0x73, 0x77, 0xd3, 0x76, 0xd7, 0x56, 0xcb, 0x89, 0xe3, 0x57, 0x39,
+	0x49, 0x5b, 0x14, 0xa0, 0x8f, 0x05, 0xe6, 0x5e, 0x08, 0xb9, 0xe7, 0x23, 0x6e, 0x71, 0x40, 0xf9,
+	0x99, 0x04, 0x6e, 0x37, 0x11, 0xc5, 0x07, 0x38, 0x5e, 0x01, 0x23, 0xb1, 0x0b, 0x58, 0x0a, 0x60,
+	0xfb, 0x95, 0x60, 0x81, 0x1b, 0x3e, 0x01, 0x3d, 0xf2, 0x8e, 0xc6, 0xce, 0x9b, 0x15, 0x60, 0x91,
+	0xe9, 0xbe, 0x04, 0x0b, 0x61, 0xc3, 0x3d, 0x12, 0x26, 0x63, 0x27, 0x9c, 0x0f, 0xe0, 0x7a, 0x75,
+	0x58, 0x27, 0xa6, 0xde, 0x3b, 0x61, 0x2a, 0x7e, 0x87, 0x02, 0x2c, 0x32, 0xdd, 0x7d, 0x30, 0xe3,
+	0x13, 0x4a, 0xec, 0x7d, 0x02, 0xa9, 0x8e, 0x6d, 0xa3, 0x6a, 0x11, 0x1d, 0x29, 0x60, 0x5e, 0x2a,
+	0xa4, 0xb5, 0x69, 0x61, 0x7d, 0x12, 0x1a, 0x2b, 0x44, 0x47, 0xf2, 0x3a, 0x50, 0x42, 0x5e, 0x3a,
+	0xe3, 0xc6, 0x78, 0xdc, 0x4c, 0x60, 0xef, 0x88, 0xbc, 0x03, 0x64, 0x87, 0xe2, 0x9a, 0xe7, 0x0d,
+	0x19, 0x43, 0x6e, 0xd5, 0x13, 0x1d, 0x65, 0x9c, 0xc7, 0x4c, 0xf9, 0x96, 0x92, 0x67, 0xd8, 0x39,
+	0x74, 0x90, 0xbc, 0x00, 0xd2, 0x6d, 0xde, 0x4a, 0x9a, 0x8f, 0xc4, 0xf8, 0x79, 0x47, 0xf9, 0x16,
+	0x98, 0xd2, 0xb1, 0x81, 0x98, 0x5b, 0x85, 0xa6, 0xe1, 0x09, 0x45, 0xdd, 0x52, 0x26, 0xb8, 0xdf,
+	0xa4, 0xd8, 0x2f, 0x05, 0xdb, 0x5e, 0xb7, 0x3e, 0xb9, 0x9d, 0x55, 0x4f, 0x8a, 0x6e, 0x85, 0xb5,
+	0xbd, 0xe6, 0x8d, 0x07, 0x9e, 0x0c, 0x85, 0xa3, 0xeb, 0xa9, 0xd0, 0x62, 0x87, 0x0a, 0x5d, 0x2c,
+	0x2b, 0xf9, 0x35, 0x70, 0x23, 0xd2, 0x18, 0x28, 0x93, 0x3c, 0x01, 0x06, 0xb1, 0xce, 0x25, 0x27,
+	0xa1, 0x0d, 0x62, 0x3d, 0xff, 0x62, 0x84, 0x2b, 0x95, 0x50, 0xb1, 0x37, 0x40, 0xa9, 0x44, 0x7d,
+	0x43, 0x41, 0x7d, 0x97, 0xd3, 0xa0, 0xc4, 0x55, 0x6b, 0xd0, 0xf0, 0x15, 0x69, 0xd0, 0xc8, 0xeb,
+	0xd6, 0xa0, 0xd1, 0xd7, 0xad, 0x41, 0xc9, 0x7f, 0x4b, 0x83, 0x62, 0xcc, 0xd7, 0xc5, 0xc3, 0x90,
+	0xbf, 0x09, 0x26, 0xda, 0x13, 0xca, 0xd3, 0x60, 0xb8, 0x09, 0xcd, 0x06, 0xe2, 0x83, 0x91, 0xd6,
+	0xc4, 0x22, 0xbf, 0xc0, 0xe7, 0xf0, 0x62, 0x90, 0xd6, 0x0d, 0x41, 0x02, 0x99, 0x0a, 0x33, 0x4a,
+	0xb4, 0x56, 0xc7, 0xcd, 0x37, 0x71, 0xf0, 0x14, 0x30, 0x0a, 0x45, 0x71, 0x7c, 0xac, 0x92, 0x5a,
+	0xb0, 0xdc, 0x58, 0xef, 0x22, 0xf0, 0x66, 0x07, 0x81, 0x11, 0x5d, 0xe5, 0xdf, 0x03, 0xf9, 0x68,
+	0x6b, 0x48, 0xcd, 0x5f, 0x43, 0xdc, 0x4d, 0x08, 0x99, 0xb0, 0x95, 0xc4, 0xa5, 0xec, 0x2b, 0xde,
+	0xe0, 0x16, 0x31, 0x71, 0xed, 0xf0, 0x0a, 0x28, 0xba, 0x06, 0x52, 0xe2, 0xae, 0xd4, 0xba, 0x49,
+	0x25, 0xc5, 0xc6, 0xa6, 0x2e, 0x3f, 0x04, 0x09, 0x4a, 0x4c, 0x41, 0xd6, 0xc4, 0xea, 0xed, 0xf6,
+	0x17, 0x35, 0xb2, 0x0b, 0x8d, 0x98, 0x48, 0xe3, 0x81, 0xf2, 0x14, 0x18, 0x6a, 0x50, 0x93, 0x4b,
+	0x48, 0x4a, 0xf3, 0x1e, 0xe5, 0xeb, 0x00, 0xf8, 0x47, 0x0d, 0xa3, 0x98, 0xcf, 0x78, 0x4a, 0x4b,
+	0x89, 0x9d, 0x6d, 0x8a, 0xe5, 0x4f, 0xc1, 0x04, 0x3a, 0x38, 0x40, 0x35, 0x17, 0x37, 0x51, 0xf5,
+	0x80, 0x12, 0xcb, 0x9f, 0xca, 0x8c, 0x2a, 0xee, 0xe8, 0x6a, 0x70, 0x47, 0x57, 0x77, 0x82, 0x3b,
+	0x7a, 0x39, 0xe9, 0x5d, 0x7b, 0x9f, 0xff, 0x9e, 0x93, 0xb4, 0x74, 0x18, 0xfb, 0x09, 0x25, 0x96,
+	0x5c, 0x01, 0x93, 0x2d, 0xb0, 0x86, 0xed, 0x62, 0xd3, 0x1f, 0xb9, 0x7e, 0x68, 0x12, 0x47, 0x6b,
+	0x55, 0xb2, 0xeb, 0xc5, 0xc6, 0x3e, 0xc4, 0x5a, 0xc4, 0x08, 0x3e, 0xf2, 0x1f, 0x81, 0xe5, 0xfe,
+	0xff, 0xfb, 0xc8, 0xd3, 0xec, 0xe7, 0x41, 0xb0, 0x52, 0x61, 0xc6, 0xa6, 0x5d, 0xa3, 0x08, 0x32,
+	0x54, 0xe2, 0x15, 0x45, 0xc2, 0xec, 0x21, 0xca, 0xbc, 0xb7, 0xe1, 0x3f, 0xf6, 0x26, 0x6d, 0x7c,
+	0xdc, 0x45, 0xbe, 0xda, 0x41, 0x7e, 0x40, 0x50, 0x27, 0xfd, 0x3e, 0x23, 0xf9, 0x0f, 0xc1, 0x07,
+	0x97, 0xa6, 0x31, 0x9c, 0xdf, 0x5f, 0x06, 0xf9, 0xfc, 0x6a, 0xa8, 0x49, 0xbe, 0xf8, 0x1f, 0xcd,
+	0xaf, 0x02, 0x46, 0x9b, 0x82, 0x09, 0x3e, 0xc3, 0x69, 0x2d, 0x58, 0xc6, 0x18, 0x86, 0x4e, 0xae,
+	0xfc, 0x61, 0xb8, 0xc3, 0x87, 0xa1, 0x0f, 0x91, 0x01, 0xef, 0xab, 0xdf, 0x8f, 0x82, 0xa1, 0x0a,
+	0x33, 0xe4, 0x1d, 0x30, 0xde, 0xf6, 0x21, 0x7d, 0xbd, 0xbd, 0x97, 0x8e, 0x6f, 0xd6, 0xcc, 0x62,
+	0x4f, 0x73, 0x38, 0x6a, 0x14, 0xcc, 0x44, 0x7c, 0xce, 0x2e, 0x75, 0x01, 0x5c, 0xec, 0x98, 0x29,
+	0xc6, 0x74, 0x3c, 0x9f, 0x33, 0xe2, 0x62, 0xba, 0x14, 0x51, 0x74, 0x8c, 0x9c, 0xbd, 0x0f, 0x66,
+	0xb9, 0x01, 0x66, 0xa3, 0x0e, 0xe5, 0x42, 0x17, 0x56, 0x84, 0x67, 0xe6, 0x5e, 0x5c, 0xcf, 0x30,
+	0xed, 0x77, 0x12, 0xc8, 0xf5, 0x3b, 0xf1, 0xee, 0x45, 0xf0, 0x17, 0x19, 0x91, 0x59, 0xbf, 0x6c,
+	0x44, 0x58, 0xcf, 0x4f, 0x12, 0x50, 0x2f, 0x29, 0xa3, 0x0f, 0xbb, 0x92, 0x5d, 0x0e, 0x20, 0xf3,
+	0xf8, 0x1f, 0x02, 0xb4, 0x91, 0xd9, 0x4f, 0x7e, 0xba, 0xc9, 0xec, 0x13, 0x71, 0x01, 0x99, 0x31,
+	0x27, 0x33, 0x33, 0xfc, 0xec, 0xec, 0x68, 0x59, 0x2a, 0x97, 0x8f, 0x4f, 0xb2, 0xd2, 0xcb, 0x93,
+	0xac, 0xf4, 0xc7, 0x49, 0x56, 0x7a, 0x7e, 0x9a, 0x1d, 0x78, 0x79, 0x9a, 0x1d, 0xf8, 0xed, 0x34,
+	0x3b, 0xf0, 0x59, 0xc1, 0xc0, 0x6e, 0xbd, 0xb1, 0xaf, 0xd6, 0x88, 0x55, 0x14, 0x49, 0xee, 0x9a,
+	0x70, 0x9f, 0x15, 0xcf, 0xcb, 0x04, 0xff, 0xbd, 0x6c, 0x7f, 0x84, 0x1f, 0xc3, 0x6b, 0x7f, 0x07,
+	0x00, 0x00, 0xff, 0xff, 0xf4, 0x0d, 0xdc, 0xed, 0x0a, 0x14, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -717,6 +1126,12 @@ type MsgClient interface {
 	UpdateCredentialSchema(ctx context.Context, in *MsgUpdateCredentialSchema, opts ...grpc.CallOption) (*MsgUpdateCredentialSchemaResponse, error)
 	// ArchiveCredentialSchema defines a method for archiving a credential schema.
 	ArchiveCredentialSchema(ctx context.Context, in *MsgArchiveCredentialSchema, opts ...grpc.CallOption) (*MsgArchiveCredentialSchemaResponse, error)
+	// [MOD-CS-MSG-5] CreateSchemaAuthorizationPolicy creates a versioned policy document for a schema role.
+	CreateSchemaAuthorizationPolicy(ctx context.Context, in *MsgCreateSchemaAuthorizationPolicy, opts ...grpc.CallOption) (*MsgCreateSchemaAuthorizationPolicyResponse, error)
+	// [MOD-CS-MSG-6] IncreaseActiveSchemaAuthorizationPolicyVersion advances the active policy version.
+	IncreaseActiveSchemaAuthorizationPolicyVersion(ctx context.Context, in *MsgIncreaseActiveSchemaAuthorizationPolicyVersion, opts ...grpc.CallOption) (*MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse, error)
+	// [MOD-CS-MSG-7] RevokeSchemaAuthorizationPolicy revokes a specific policy version.
+	RevokeSchemaAuthorizationPolicy(ctx context.Context, in *MsgRevokeSchemaAuthorizationPolicy, opts ...grpc.CallOption) (*MsgRevokeSchemaAuthorizationPolicyResponse, error)
 }
 
 type msgClient struct {
@@ -763,6 +1178,33 @@ func (c *msgClient) ArchiveCredentialSchema(ctx context.Context, in *MsgArchiveC
 	return out, nil
 }
 
+func (c *msgClient) CreateSchemaAuthorizationPolicy(ctx context.Context, in *MsgCreateSchemaAuthorizationPolicy, opts ...grpc.CallOption) (*MsgCreateSchemaAuthorizationPolicyResponse, error) {
+	out := new(MsgCreateSchemaAuthorizationPolicyResponse)
+	err := c.cc.Invoke(ctx, "/verana.cs.v1.Msg/CreateSchemaAuthorizationPolicy", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *msgClient) IncreaseActiveSchemaAuthorizationPolicyVersion(ctx context.Context, in *MsgIncreaseActiveSchemaAuthorizationPolicyVersion, opts ...grpc.CallOption) (*MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse, error) {
+	out := new(MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse)
+	err := c.cc.Invoke(ctx, "/verana.cs.v1.Msg/IncreaseActiveSchemaAuthorizationPolicyVersion", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *msgClient) RevokeSchemaAuthorizationPolicy(ctx context.Context, in *MsgRevokeSchemaAuthorizationPolicy, opts ...grpc.CallOption) (*MsgRevokeSchemaAuthorizationPolicyResponse, error) {
+	out := new(MsgRevokeSchemaAuthorizationPolicyResponse)
+	err := c.cc.Invoke(ctx, "/verana.cs.v1.Msg/RevokeSchemaAuthorizationPolicy", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MsgServer is the server API for Msg service.
 type MsgServer interface {
 	// UpdateParams defines a (governance) operation for updating the module
@@ -774,6 +1216,12 @@ type MsgServer interface {
 	UpdateCredentialSchema(context.Context, *MsgUpdateCredentialSchema) (*MsgUpdateCredentialSchemaResponse, error)
 	// ArchiveCredentialSchema defines a method for archiving a credential schema.
 	ArchiveCredentialSchema(context.Context, *MsgArchiveCredentialSchema) (*MsgArchiveCredentialSchemaResponse, error)
+	// [MOD-CS-MSG-5] CreateSchemaAuthorizationPolicy creates a versioned policy document for a schema role.
+	CreateSchemaAuthorizationPolicy(context.Context, *MsgCreateSchemaAuthorizationPolicy) (*MsgCreateSchemaAuthorizationPolicyResponse, error)
+	// [MOD-CS-MSG-6] IncreaseActiveSchemaAuthorizationPolicyVersion advances the active policy version.
+	IncreaseActiveSchemaAuthorizationPolicyVersion(context.Context, *MsgIncreaseActiveSchemaAuthorizationPolicyVersion) (*MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse, error)
+	// [MOD-CS-MSG-7] RevokeSchemaAuthorizationPolicy revokes a specific policy version.
+	RevokeSchemaAuthorizationPolicy(context.Context, *MsgRevokeSchemaAuthorizationPolicy) (*MsgRevokeSchemaAuthorizationPolicyResponse, error)
 }
 
 // UnimplementedMsgServer can be embedded to have forward compatible implementations.
@@ -791,6 +1239,15 @@ func (*UnimplementedMsgServer) UpdateCredentialSchema(ctx context.Context, req *
 }
 func (*UnimplementedMsgServer) ArchiveCredentialSchema(ctx context.Context, req *MsgArchiveCredentialSchema) (*MsgArchiveCredentialSchemaResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ArchiveCredentialSchema not implemented")
+}
+func (*UnimplementedMsgServer) CreateSchemaAuthorizationPolicy(ctx context.Context, req *MsgCreateSchemaAuthorizationPolicy) (*MsgCreateSchemaAuthorizationPolicyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateSchemaAuthorizationPolicy not implemented")
+}
+func (*UnimplementedMsgServer) IncreaseActiveSchemaAuthorizationPolicyVersion(ctx context.Context, req *MsgIncreaseActiveSchemaAuthorizationPolicyVersion) (*MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method IncreaseActiveSchemaAuthorizationPolicyVersion not implemented")
+}
+func (*UnimplementedMsgServer) RevokeSchemaAuthorizationPolicy(ctx context.Context, req *MsgRevokeSchemaAuthorizationPolicy) (*MsgRevokeSchemaAuthorizationPolicyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RevokeSchemaAuthorizationPolicy not implemented")
 }
 
 func RegisterMsgServer(s grpc1.Server, srv MsgServer) {
@@ -869,6 +1326,60 @@ func _Msg_ArchiveCredentialSchema_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Msg_CreateSchemaAuthorizationPolicy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgCreateSchemaAuthorizationPolicy)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).CreateSchemaAuthorizationPolicy(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/verana.cs.v1.Msg/CreateSchemaAuthorizationPolicy",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).CreateSchemaAuthorizationPolicy(ctx, req.(*MsgCreateSchemaAuthorizationPolicy))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Msg_IncreaseActiveSchemaAuthorizationPolicyVersion_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgIncreaseActiveSchemaAuthorizationPolicyVersion)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).IncreaseActiveSchemaAuthorizationPolicyVersion(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/verana.cs.v1.Msg/IncreaseActiveSchemaAuthorizationPolicyVersion",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).IncreaseActiveSchemaAuthorizationPolicyVersion(ctx, req.(*MsgIncreaseActiveSchemaAuthorizationPolicyVersion))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Msg_RevokeSchemaAuthorizationPolicy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgRevokeSchemaAuthorizationPolicy)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).RevokeSchemaAuthorizationPolicy(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/verana.cs.v1.Msg/RevokeSchemaAuthorizationPolicy",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).RevokeSchemaAuthorizationPolicy(ctx, req.(*MsgRevokeSchemaAuthorizationPolicy))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var Msg_serviceDesc = _Msg_serviceDesc
 var _Msg_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "verana.cs.v1.Msg",
@@ -889,6 +1400,18 @@ var _Msg_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ArchiveCredentialSchema",
 			Handler:    _Msg_ArchiveCredentialSchema_Handler,
+		},
+		{
+			MethodName: "CreateSchemaAuthorizationPolicy",
+			Handler:    _Msg_CreateSchemaAuthorizationPolicy_Handler,
+		},
+		{
+			MethodName: "IncreaseActiveSchemaAuthorizationPolicyVersion",
+			Handler:    _Msg_IncreaseActiveSchemaAuthorizationPolicyVersion_Handler,
+		},
+		{
+			MethodName: "RevokeSchemaAuthorizationPolicy",
+			Handler:    _Msg_RevokeSchemaAuthorizationPolicy_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -1357,6 +1880,258 @@ func (m *MsgArchiveCredentialSchemaResponse) MarshalToSizedBuffer(dAtA []byte) (
 	return len(dAtA) - i, nil
 }
 
+func (m *MsgCreateSchemaAuthorizationPolicy) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgCreateSchemaAuthorizationPolicy) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgCreateSchemaAuthorizationPolicy) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.EffectiveUntil != nil {
+		n12, err12 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(*m.EffectiveUntil, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(*m.EffectiveUntil):])
+		if err12 != nil {
+			return 0, err12
+		}
+		i -= n12
+		i = encodeVarintTx(dAtA, i, uint64(n12))
+		i--
+		dAtA[i] = 0x42
+	}
+	n13, err13 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(m.EffectiveFrom, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(m.EffectiveFrom):])
+	if err13 != nil {
+		return 0, err13
+	}
+	i -= n13
+	i = encodeVarintTx(dAtA, i, uint64(n13))
+	i--
+	dAtA[i] = 0x3a
+	if len(m.DigestSri) > 0 {
+		i -= len(m.DigestSri)
+		copy(dAtA[i:], m.DigestSri)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.DigestSri)))
+		i--
+		dAtA[i] = 0x32
+	}
+	if len(m.Url) > 0 {
+		i -= len(m.Url)
+		copy(dAtA[i:], m.Url)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Url)))
+		i--
+		dAtA[i] = 0x2a
+	}
+	if m.Role != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.Role))
+		i--
+		dAtA[i] = 0x20
+	}
+	if m.SchemaId != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.SchemaId))
+		i--
+		dAtA[i] = 0x18
+	}
+	if len(m.Operator) > 0 {
+		i -= len(m.Operator)
+		copy(dAtA[i:], m.Operator)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Operator)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Corporation) > 0 {
+		i -= len(m.Corporation)
+		copy(dAtA[i:], m.Corporation)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Corporation)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgCreateSchemaAuthorizationPolicyResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgCreateSchemaAuthorizationPolicyResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgCreateSchemaAuthorizationPolicyResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Id != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.Id))
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgIncreaseActiveSchemaAuthorizationPolicyVersion) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgIncreaseActiveSchemaAuthorizationPolicyVersion) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgIncreaseActiveSchemaAuthorizationPolicyVersion) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Role != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.Role))
+		i--
+		dAtA[i] = 0x20
+	}
+	if m.SchemaId != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.SchemaId))
+		i--
+		dAtA[i] = 0x18
+	}
+	if len(m.Operator) > 0 {
+		i -= len(m.Operator)
+		copy(dAtA[i:], m.Operator)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Operator)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Corporation) > 0 {
+		i -= len(m.Corporation)
+		copy(dAtA[i:], m.Corporation)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Corporation)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgRevokeSchemaAuthorizationPolicy) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgRevokeSchemaAuthorizationPolicy) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgRevokeSchemaAuthorizationPolicy) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Version != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.Version))
+		i--
+		dAtA[i] = 0x28
+	}
+	if m.Role != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.Role))
+		i--
+		dAtA[i] = 0x20
+	}
+	if m.SchemaId != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.SchemaId))
+		i--
+		dAtA[i] = 0x18
+	}
+	if len(m.Operator) > 0 {
+		i -= len(m.Operator)
+		copy(dAtA[i:], m.Operator)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Operator)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Corporation) > 0 {
+		i -= len(m.Corporation)
+		copy(dAtA[i:], m.Corporation)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Corporation)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgRevokeSchemaAuthorizationPolicyResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgRevokeSchemaAuthorizationPolicyResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgRevokeSchemaAuthorizationPolicyResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintTx(dAtA []byte, offset int, v uint64) int {
 	offset -= sovTx(v)
 	base := offset
@@ -1553,6 +2328,122 @@ func (m *MsgArchiveCredentialSchema) Size() (n int) {
 }
 
 func (m *MsgArchiveCredentialSchemaResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
+func (m *MsgCreateSchemaAuthorizationPolicy) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Corporation)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.Operator)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	if m.SchemaId != 0 {
+		n += 1 + sovTx(uint64(m.SchemaId))
+	}
+	if m.Role != 0 {
+		n += 1 + sovTx(uint64(m.Role))
+	}
+	l = len(m.Url)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.DigestSri)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = github_com_cosmos_gogoproto_types.SizeOfStdTime(m.EffectiveFrom)
+	n += 1 + l + sovTx(uint64(l))
+	if m.EffectiveUntil != nil {
+		l = github_com_cosmos_gogoproto_types.SizeOfStdTime(*m.EffectiveUntil)
+		n += 1 + l + sovTx(uint64(l))
+	}
+	return n
+}
+
+func (m *MsgCreateSchemaAuthorizationPolicyResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Id != 0 {
+		n += 1 + sovTx(uint64(m.Id))
+	}
+	return n
+}
+
+func (m *MsgIncreaseActiveSchemaAuthorizationPolicyVersion) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Corporation)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.Operator)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	if m.SchemaId != 0 {
+		n += 1 + sovTx(uint64(m.SchemaId))
+	}
+	if m.Role != 0 {
+		n += 1 + sovTx(uint64(m.Role))
+	}
+	return n
+}
+
+func (m *MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
+func (m *MsgRevokeSchemaAuthorizationPolicy) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Corporation)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.Operator)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	if m.SchemaId != 0 {
+		n += 1 + sovTx(uint64(m.SchemaId))
+	}
+	if m.Role != 0 {
+		n += 1 + sovTx(uint64(m.Role))
+	}
+	if m.Version != 0 {
+		n += 1 + sovTx(uint64(m.Version))
+	}
+	return n
+}
+
+func (m *MsgRevokeSchemaAuthorizationPolicyResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -2898,6 +3789,783 @@ func (m *MsgArchiveCredentialSchemaResponse) Unmarshal(dAtA []byte) error {
 		}
 		if fieldNum <= 0 {
 			return fmt.Errorf("proto: MsgArchiveCredentialSchemaResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgCreateSchemaAuthorizationPolicy) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgCreateSchemaAuthorizationPolicy: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgCreateSchemaAuthorizationPolicy: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Corporation", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Corporation = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Operator", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Operator = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field SchemaId", wireType)
+			}
+			m.SchemaId = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.SchemaId |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Role", wireType)
+			}
+			m.Role = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Role |= SchemaAuthorizationPolicyRole(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Url", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Url = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 6:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field DigestSri", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.DigestSri = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 7:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field EffectiveFrom", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := github_com_cosmos_gogoproto_types.StdTimeUnmarshal(&m.EffectiveFrom, dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 8:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field EffectiveUntil", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.EffectiveUntil == nil {
+				m.EffectiveUntil = new(time.Time)
+			}
+			if err := github_com_cosmos_gogoproto_types.StdTimeUnmarshal(m.EffectiveUntil, dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgCreateSchemaAuthorizationPolicyResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgCreateSchemaAuthorizationPolicyResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgCreateSchemaAuthorizationPolicyResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Id", wireType)
+			}
+			m.Id = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Id |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgIncreaseActiveSchemaAuthorizationPolicyVersion) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgIncreaseActiveSchemaAuthorizationPolicyVersion: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgIncreaseActiveSchemaAuthorizationPolicyVersion: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Corporation", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Corporation = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Operator", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Operator = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field SchemaId", wireType)
+			}
+			m.SchemaId = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.SchemaId |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Role", wireType)
+			}
+			m.Role = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Role |= SchemaAuthorizationPolicyRole(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgRevokeSchemaAuthorizationPolicy) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgRevokeSchemaAuthorizationPolicy: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgRevokeSchemaAuthorizationPolicy: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Corporation", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Corporation = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Operator", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Operator = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field SchemaId", wireType)
+			}
+			m.SchemaId = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.SchemaId |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Role", wireType)
+			}
+			m.Role = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Role |= SchemaAuthorizationPolicyRole(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 5:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Version", wireType)
+			}
+			m.Version = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Version |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgRevokeSchemaAuthorizationPolicyResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgRevokeSchemaAuthorizationPolicyResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgRevokeSchemaAuthorizationPolicyResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		default:

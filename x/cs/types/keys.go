@@ -19,10 +19,13 @@ const (
 )
 
 var (
-	ParamsKey           = []byte("p_credentialschema")
-	CredentialSchemaKey = collections.NewPrefix(1)
-	CounterKey          = collections.NewPrefix(2)
+	ParamsKey                    = []byte("p_credentialschema")
+	CredentialSchemaKey          = collections.NewPrefix(1)
+	CounterKey                   = collections.NewPrefix(2)
+	SchemaAuthorizationPolicyKey = collections.NewPrefix(3)
 )
+
+const CounterKeySchemaAuthorizationPolicy = "schema_authorization_policy"
 
 func KeyPrefix(p string) []byte {
 	return []byte(p)

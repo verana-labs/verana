@@ -86,7 +86,14 @@ export interface MsgGrantOperatorAuthorization {
    * feegrant_spend_limit_period is the optional reset period for
    * feegrant_spend_limit. Ignored if with_feegrant is false.
    */
-  feegrantSpendLimitPeriod: Duration | undefined;
+  feegrantSpendLimitPeriod:
+    | Duration
+    | undefined;
+  /**
+   * fee_spend_limit is the maximum total amount of fees this authorization
+   * allows the grantee to spend (stored on the OperatorAuthorization record).
+   */
+  feeSpendLimit: Coin[];
 }
 
 /**
@@ -251,6 +258,7 @@ function createBaseMsgGrantOperatorAuthorization(): MsgGrantOperatorAuthorizatio
     withFeegrant: false,
     feegrantSpendLimit: [],
     feegrantSpendLimitPeriod: undefined,
+    feeSpendLimit: [],
   };
 }
 
@@ -285,6 +293,9 @@ export const MsgGrantOperatorAuthorization = {
     }
     if (message.feegrantSpendLimitPeriod !== undefined) {
       Duration.encode(message.feegrantSpendLimitPeriod, writer.uint32(82).fork()).ldelim();
+    }
+    for (const v of message.feeSpendLimit) {
+      Coin.encode(v!, writer.uint32(90).fork()).ldelim();
     }
     return writer;
   },
@@ -366,6 +377,13 @@ export const MsgGrantOperatorAuthorization = {
 
           message.feegrantSpendLimitPeriod = Duration.decode(reader, reader.uint32());
           continue;
+        case 11:
+          if (tag !== 90) {
+            break;
+          }
+
+          message.feeSpendLimit.push(Coin.decode(reader, reader.uint32()));
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -395,6 +413,9 @@ export const MsgGrantOperatorAuthorization = {
       feegrantSpendLimitPeriod: isSet(object.feegrantSpendLimitPeriod)
         ? Duration.fromJSON(object.feegrantSpendLimitPeriod)
         : undefined,
+      feeSpendLimit: globalThis.Array.isArray(object?.feeSpendLimit)
+        ? object.feeSpendLimit.map((e: any) => Coin.fromJSON(e))
+        : [],
     };
   },
 
@@ -430,6 +451,9 @@ export const MsgGrantOperatorAuthorization = {
     if (message.feegrantSpendLimitPeriod !== undefined) {
       obj.feegrantSpendLimitPeriod = Duration.toJSON(message.feegrantSpendLimitPeriod);
     }
+    if (message.feeSpendLimit?.length) {
+      obj.feeSpendLimit = message.feeSpendLimit.map((e) => Coin.toJSON(e));
+    }
     return obj;
   },
 
@@ -456,6 +480,7 @@ export const MsgGrantOperatorAuthorization = {
       (object.feegrantSpendLimitPeriod !== undefined && object.feegrantSpendLimitPeriod !== null)
         ? Duration.fromPartial(object.feegrantSpendLimitPeriod)
         : undefined;
+    message.feeSpendLimit = object.feeSpendLimit?.map((e) => Coin.fromPartial(e)) || [];
     return message;
   },
 };
