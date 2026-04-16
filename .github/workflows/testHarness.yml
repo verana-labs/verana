@@ -224,6 +224,14 @@ jobs:
                       name: api
                     - containerPort: 9090
                       name: grpc
+                  readinessProbe:
+                    httpGet:
+                      path: /status
+                      port: 26657
+                    initialDelaySeconds: 30
+                    periodSeconds: 5
+                    failureThreshold: 120
+                    timeoutSeconds: 3
                   resources:
                     requests:
                       cpu: ${K8S_TESTHARNESS_CPU_REQUEST}
@@ -330,7 +338,7 @@ jobs:
           kubectl apply -n "$NAMESPACE" -f /tmp/verana-testharness-svc.yaml
           kubectl apply -n "$NAMESPACE" -f /tmp/verana-testharness-ingress.yaml
 
-          if ! kubectl -n "$NAMESPACE" rollout status deployment/verana-testharness-node --timeout=300s; then
+          if ! kubectl -n "$NAMESPACE" rollout status deployment/verana-testharness-node --timeout=600s; then
             kubectl -n "$NAMESPACE" get pods -o wide || true
             kubectl -n "$NAMESPACE" describe pod -l app=verana-testharness || true
             kubectl -n "$NAMESPACE" logs -l app=verana-testharness --all-containers --tail=200 || true

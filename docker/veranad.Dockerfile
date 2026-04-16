@@ -26,6 +26,7 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \
     curl \
     jq \
+    python3 \
     s3cmd \
     tini \
     wget \
