@@ -14,7 +14,7 @@ import {
 } from "./util/helpers";
 
 export const MsgCreateCredentialSchemaAminoConverter: AminoConverter = {
-  aminoType: "/verana.cs.v1.MsgCreateCredentialSchema",
+  aminoType: "verana/x/cs/MsgCreateCredentialSchema",
   toAmino: (m: MsgCreateCredentialSchema) => clean({
     corporation: m.corporation ?? "",
     operator: m.operator ?? "",
@@ -53,7 +53,7 @@ export const MsgCreateCredentialSchemaAminoConverter: AminoConverter = {
 };
 
 export const MsgUpdateCredentialSchemaAminoConverter: AminoConverter = {
-  aminoType: "/verana.cs.v1.MsgUpdateCredentialSchema",
+  aminoType: "verana/x/cs/MsgUpdateCredentialSchema",
   toAmino: (m: MsgUpdateCredentialSchema) => clean({
     corporation: m.corporation ?? "",
     operator: m.operator ?? "",
@@ -78,7 +78,7 @@ export const MsgUpdateCredentialSchemaAminoConverter: AminoConverter = {
 };
 
 export const MsgArchiveCredentialSchemaAminoConverter: AminoConverter = {
-  aminoType: "/verana.cs.v1.MsgArchiveCredentialSchema",
+  aminoType: "verana/x/cs/MsgArchiveCredentialSchema",
   toAmino: (m: MsgArchiveCredentialSchema) => ({
     corporation: m.corporation ?? "",
     operator: m.operator ?? "",

@@ -6,7 +6,7 @@ import {
 } from "../codec/verana/td/v1/tx";
 
 export const MsgReclaimTrustDepositYieldAminoConverter: AminoConverter = {
-  aminoType: "/verana.td.v1.MsgReclaimTrustDepositYield",
+  aminoType: "verana/x/td/MsgReclaimTrustDepositYield",
   toAmino: ({ corporation, operator }: MsgReclaimTrustDepositYield) => ({
     corporation,
     operator,
@@ -19,7 +19,7 @@ export const MsgReclaimTrustDepositYieldAminoConverter: AminoConverter = {
 };
 
 export const MsgRepaySlashedTrustDepositAminoConverter: AminoConverter = {
-  aminoType: "/verana.td.v1.MsgRepaySlashedTrustDeposit",
+  aminoType: "verana/x/td/MsgRepaySlashedTrustDeposit",
   toAmino: ({ corporation, operator, deposit }: MsgRepaySlashedTrustDeposit) => ({
     corporation,
     operator,
@@ -34,7 +34,7 @@ export const MsgRepaySlashedTrustDepositAminoConverter: AminoConverter = {
 };
 
 export const MsgSlashTrustDepositAminoConverter: AminoConverter = {
-  aminoType: "/verana.td.v1.MsgSlashTrustDeposit",
+  aminoType: "verana/x/td/MsgSlashTrustDeposit",
   toAmino: ({ authority, corporation, deposit }: MsgSlashTrustDeposit) => ({
     authority,
     corporation,

@@ -12,7 +12,7 @@ import {
 } from "./util/helpers";
 
 export const MsgGrantOperatorAuthorizationAminoConverter: AminoConverter = {
-  aminoType: "/verana.de.v1.MsgGrantOperatorAuthorization",
+  aminoType: "verana/x/de/MsgGrantOpAuthorization",
   toAmino: (m: MsgGrantOperatorAuthorization) => clean({
     corporation: m.corporation || undefined,
     operator: m.operator || undefined,
@@ -41,7 +41,7 @@ export const MsgGrantOperatorAuthorizationAminoConverter: AminoConverter = {
 };
 
 export const MsgRevokeOperatorAuthorizationAminoConverter: AminoConverter = {
-  aminoType: "/verana.de.v1.MsgRevokeOperatorAuthorization",
+  aminoType: "verana/x/de/MsgRevokeOpAuthorization",
   toAmino: ({ corporation, operator, grantee }: MsgRevokeOperatorAuthorization) => clean({
     corporation: corporation || undefined,
     operator: operator || undefined,

@@ -9,7 +9,7 @@ import {
 import { clean, u64ToStr } from "./util/helpers";
 
 export const MsgCreateTrustRegistryAminoConverter: AminoConverter = {
-  aminoType: "/verana.tr.v1.MsgCreateTrustRegistry",
+  aminoType: "verana/x/tr/MsgCreateTrustRegistry",
   toAmino: ({ corporation, operator, did, aka, language, docUrl, docDigestSri }: MsgCreateTrustRegistry) => clean({
     corporation: corporation || undefined,
     operator: operator || undefined,
@@ -32,7 +32,7 @@ export const MsgCreateTrustRegistryAminoConverter: AminoConverter = {
 };
 
 export const MsgUpdateTrustRegistryAminoConverter: AminoConverter = {
-  aminoType: "/verana.tr.v1.MsgUpdateTrustRegistry",
+  aminoType: "verana/x/tr/MsgUpdateTrustRegistry",
   toAmino: ({ corporation, operator, trId, did, aka }: MsgUpdateTrustRegistry) => clean({
     corporation: corporation || undefined,
     operator: operator || undefined,
@@ -51,7 +51,7 @@ export const MsgUpdateTrustRegistryAminoConverter: AminoConverter = {
 };
 
 export const MsgArchiveTrustRegistryAminoConverter: AminoConverter = {
-  aminoType: "/verana.tr.v1.MsgArchiveTrustRegistry",
+  aminoType: "verana/x/tr/MsgArchiveTrustRegistry",
   toAmino: ({ corporation, operator, trId, archive }: MsgArchiveTrustRegistry) => clean({
     corporation: corporation || undefined,
     operator: operator || undefined,
@@ -68,7 +68,7 @@ export const MsgArchiveTrustRegistryAminoConverter: AminoConverter = {
 };
 
 export const MsgAddGovernanceFrameworkDocumentAminoConverter: AminoConverter = {
-  aminoType: "/verana.tr.v1.MsgAddGovernanceFrameworkDocument",
+  aminoType: "verana/x/tr/MsgAddGovFrameworkDoc",
   toAmino: ({
     corporation,
     operator,
@@ -99,7 +99,7 @@ export const MsgAddGovernanceFrameworkDocumentAminoConverter: AminoConverter = {
 };
 
 export const MsgIncreaseActiveGovernanceFrameworkVersionAminoConverter: AminoConverter = {
-  aminoType: "/verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion",
+  aminoType: "verana/x/tr/MsgIncreaseActiveGovFWVer",
   toAmino: ({ corporation, operator, trId }: MsgIncreaseActiveGovernanceFrameworkVersion) => clean({
     corporation: corporation || undefined,
     operator: operator || undefined,

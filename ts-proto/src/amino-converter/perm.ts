@@ -25,7 +25,7 @@ import {
 } from "./util/helpers";
 
 export const MsgCreateRootPermissionAminoConverter: AminoConverter = {
-  aminoType: "/verana.perm.v1.MsgCreateRootPermission",
+  aminoType: "verana/x/perm/MsgCreateRootPermission",
   toAmino: (m: MsgCreateRootPermission) => clean({
     corporation: m.corporation ?? "",
     operator: m.operator ?? "",
@@ -52,7 +52,7 @@ export const MsgCreateRootPermissionAminoConverter: AminoConverter = {
 };
 
 export const MsgAdjustPermissionAminoConverter: AminoConverter = {
-  aminoType: "/verana.perm.v1.MsgAdjustPermission",
+  aminoType: "verana/x/perm/MsgAdjustPermission",
   toAmino: (m: MsgAdjustPermission) => clean({
     corporation: m.corporation ?? "",
     operator: m.operator ?? "",
@@ -69,7 +69,7 @@ export const MsgAdjustPermissionAminoConverter: AminoConverter = {
 };
 
 export const MsgRevokePermissionAminoConverter: AminoConverter = {
-  aminoType: "/verana.perm.v1.MsgRevokePermission",
+  aminoType: "verana/x/perm/MsgRevokePermission",
   toAmino: (m: MsgRevokePermission) => clean({
     corporation: m.corporation ?? "",
     operator: m.operator ?? "",
@@ -84,7 +84,7 @@ export const MsgRevokePermissionAminoConverter: AminoConverter = {
 };
 
 export const MsgStartPermissionVPAminoConverter: AminoConverter = {
-  aminoType: "/verana.perm.v1.MsgStartPermissionVP",
+  aminoType: "verana/x/perm/MsgStartPermissionVP",
   toAmino: (m: MsgStartPermissionVP) => clean({
     corporation: m.corporation ?? "",
     operator: m.operator ?? "",
@@ -121,7 +121,7 @@ export const MsgStartPermissionVPAminoConverter: AminoConverter = {
 };
 
 export const MsgRenewPermissionVPAminoConverter: AminoConverter = {
-  aminoType: "/verana.perm.v1.MsgRenewPermissionVP",
+  aminoType: "verana/x/perm/MsgRenewPermissionVP",
   toAmino: (m: MsgRenewPermissionVP) => clean({
     corporation: m.corporation ?? "",
     operator: m.operator ?? "",
@@ -136,7 +136,7 @@ export const MsgRenewPermissionVPAminoConverter: AminoConverter = {
 };
 
 export const MsgSetPermissionVPToValidatedAminoConverter: AminoConverter = {
-  aminoType: "/verana.perm.v1.MsgSetPermissionVPToValidated",
+  aminoType: "verana/x/perm/MsgSetPermVPValidated",
   toAmino: (m: MsgSetPermissionVPToValidated) => clean({
     corporation: m.corporation ?? "",
     operator: m.operator ?? "",
@@ -169,7 +169,7 @@ export const MsgSetPermissionVPToValidatedAminoConverter: AminoConverter = {
 };
 
 export const MsgCancelPermissionVPLastRequestAminoConverter: AminoConverter = {
-  aminoType: "/verana.perm.v1.MsgCancelPermissionVPLastRequest",
+  aminoType: "verana/x/perm/MsgCancelPermVPLastReq",
   toAmino: (m: MsgCancelPermissionVPLastRequest) => clean({
     corporation: m.corporation ?? "",
     operator: m.operator ?? "",
@@ -184,7 +184,7 @@ export const MsgCancelPermissionVPLastRequestAminoConverter: AminoConverter = {
 };
 
 export const MsgCreateOrUpdatePermissionSessionAminoConverter: AminoConverter = {
-  aminoType: "/verana.perm.v1.MsgCreateOrUpdatePermissionSession",
+  aminoType: "verana/x/perm/MsgCreateOrUpdatePermSess",
   toAmino: (m: MsgCreateOrUpdatePermissionSession) => clean({
     corporation: m.corporation ?? "",
     operator: m.operator ?? "",
@@ -211,7 +211,7 @@ export const MsgCreateOrUpdatePermissionSessionAminoConverter: AminoConverter = 
 };
 
 export const MsgSlashPermissionTrustDepositAminoConverter: AminoConverter = {
-  aminoType: "/verana.perm.v1.MsgSlashPermissionTrustDeposit",
+  aminoType: "verana/x/perm/MsgSlashPermTD",
   toAmino: (m: MsgSlashPermissionTrustDeposit) => clean({
     corporation: m.corporation ?? "",
     operator: m.operator ?? "",
@@ -228,7 +228,7 @@ export const MsgSlashPermissionTrustDepositAminoConverter: AminoConverter = {
 };
 
 export const MsgRepayPermissionSlashedTrustDepositAminoConverter: AminoConverter = {
-  aminoType: "/verana.perm.v1.MsgRepayPermissionSlashedTrustDeposit",
+  aminoType: "verana/x/perm/MsgRepayPermSlashedTD",
   toAmino: (m: MsgRepayPermissionSlashedTrustDeposit) => clean({
     corporation: m.corporation ?? "",
     operator: m.operator ?? "",
@@ -243,7 +243,7 @@ export const MsgRepayPermissionSlashedTrustDepositAminoConverter: AminoConverter
 };
 
 export const MsgSelfCreatePermissionAminoConverter: AminoConverter = {
-  aminoType: "/verana.perm.v1.MsgSelfCreatePermission",
+  aminoType: "verana/x/perm/MsgSelfCreatePermission",
   toAmino: (m: MsgSelfCreatePermission) => clean({
     corporation: m.corporation ?? "",
     operator: m.operator ?? "",
