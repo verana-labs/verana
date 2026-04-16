@@ -62,6 +62,7 @@ message MsgUpdateParamsResponse {}
 // semantics from the spec are enforced at the handler level, not at ante.
 message MsgGrantOperatorAuthorization {
   option (cosmos.msg.v1.signer) = "corporation";
+  option (amino.name) = "verana/x/de/MsgGrantOpAuthorization";
 
   // corporation is the group account granting the authorization.
   string corporation = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
@@ -115,6 +116,7 @@ message MsgGrantOperatorAuthorizationResponse {}
 // semantics as MsgGrantOperatorAuthorization (see above).
 message MsgRevokeOperatorAuthorization {
   option (cosmos.msg.v1.signer) = "corporation";
+  option (amino.name) = "verana/x/de/MsgRevokeOpAuthorization";
 
   // corporation is the group account revoking the authorization.
   string corporation = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
