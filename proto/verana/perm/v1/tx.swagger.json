@@ -620,6 +620,10 @@
         "id": {
           "type": "string",
           "format": "uint64"
+        },
+        "amount": {
+          "type": "string",
+          "format": "uint64"
         }
       }
     },

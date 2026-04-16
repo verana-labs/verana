@@ -6,7 +6,7 @@ import { MsgSelfCreatePermission, MsgStartPermissionVP } from "../../src/codec/v
 import { PermissionType } from "../../src/codec/verana/perm/v1/types";
 import {
   MsgCreateExchangeRate,
-  MsgToggleExchangeRateState,
+  MsgSetExchangeRateState,
   MsgUpdateExchangeRate,
 } from "../../src/codec/verana/xr/v1/tx";
 
@@ -22,7 +22,7 @@ const requiredMappings = [
   "MsgStoreDigest",
   "MsgCreateExchangeRate",
   "MsgUpdateExchangeRate",
-  "MsgToggleExchangeRateState",
+  "MsgSetExchangeRateState",
 ] as const;
 
 for (const key of requiredMappings) {
@@ -61,7 +61,7 @@ assert.equal(diRoundTrip.digest, "sha256-abc123");
 
 const xrCreateConverter = amino.register[veranaTypeUrls.MsgCreateExchangeRate];
 const xrCreateMsg = MsgCreateExchangeRate.fromPartial({
-  corporation: "verana1authority0000000000000000000000000000000",
+  authority: "verana1authority0000000000000000000000000000000",
   baseAssetType: 1,
   baseAsset: "EUR",
   quoteAssetType: 1,
@@ -77,7 +77,7 @@ assert.equal(xrCreateRoundTrip.validityDuration?.nanos, 9);
 
 const xrUpdateConverter = amino.register[veranaTypeUrls.MsgUpdateExchangeRate];
 const xrUpdateMsg = MsgUpdateExchangeRate.fromPartial({
-  corporation: "verana1authority0000000000000000000000000000000",
+  authority: "verana1authority0000000000000000000000000000000",
   operator: "verana1operator0000000000000000000000000000000",
   id: 12,
   rate: "1.0800",
@@ -86,15 +86,15 @@ const xrUpdateRoundTrip = xrUpdateConverter.fromAmino(xrUpdateConverter.toAmino(
 assert.equal(xrUpdateRoundTrip.id, 12);
 assert.equal(xrUpdateRoundTrip.rate, "1.0800");
 
-const xrToggleConverter = amino.register[veranaTypeUrls.MsgToggleExchangeRateState];
-const xrToggleMsg = MsgToggleExchangeRateState.fromPartial({
-  corporation: "verana1authority0000000000000000000000000000000",
+const xrSetStateConverter = amino.register[veranaTypeUrls.MsgSetExchangeRateState];
+const xrSetStateMsg = MsgSetExchangeRateState.fromPartial({
+  authority: "verana1authority0000000000000000000000000000000",
   id: 12,
   state: false,
 });
-const xrToggleRoundTrip = xrToggleConverter.fromAmino(xrToggleConverter.toAmino(xrToggleMsg));
-assert.equal(xrToggleRoundTrip.id, 12);
-assert.equal(xrToggleRoundTrip.state, false);
+const xrSetStateRoundTrip = xrSetStateConverter.fromAmino(xrSetStateConverter.toAmino(xrSetStateMsg));
+assert.equal(xrSetStateRoundTrip.id, 12);
+assert.equal(xrSetStateRoundTrip.state, false);
 
 const permConverter = amino.register[veranaTypeUrls.MsgSelfCreatePermission];
 const permMsg = MsgSelfCreatePermission.fromPartial({

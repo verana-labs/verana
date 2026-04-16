@@ -1048,7 +1048,7 @@ func SlashPermissionTrustDeposit(client cosmosclient.Client, ctx context.Context
 }
 
 // RepayPermissionSlashedTrustDeposit repays a slashed permission's trust deposit
-func RepayPermissionSlashedTrustDeposit(client cosmosclient.Client, ctx context.Context, actor cosmosaccount.Account, authority string, id uint64) error {
+func RepayPermissionSlashedTrustDeposit(client cosmosclient.Client, ctx context.Context, actor cosmosaccount.Account, authority string, id uint64, amount uint64) error {
 	actorAddr, err := actor.Address(addressPrefix)
 	if err != nil {
 		return fmt.Errorf("failed to get actor address: %w", err)
@@ -1056,8 +1056,9 @@ func RepayPermissionSlashedTrustDeposit(client cosmosclient.Client, ctx context.
 
 	msg := &permtypes.MsgRepayPermissionSlashedTrustDeposit{
 		Corporation: authority,
-		Operator:  actorAddr,
-		Id:        id,
+		Operator:    actorAddr,
+		Id:          id,
+		Amount:      amount,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, actor, msg)

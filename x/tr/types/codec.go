@@ -11,8 +11,8 @@ import (
 
 func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 	legacy.RegisterAminoMsg(cdc, &MsgCreateTrustRegistry{}, "verana/x/tr/MsgCreateTrustRegistry")
-	legacy.RegisterAminoMsg(cdc, &MsgAddGovernanceFrameworkDocument{}, "verana/x/tr/MsgAddGovernanceFrameworkDocument")
-	legacy.RegisterAminoMsg(cdc, &MsgIncreaseActiveGovernanceFrameworkVersion{}, "verana/x/tr/MsgIncreaseActiveGovernanceFrameworkVersion")
+	legacy.RegisterAminoMsg(cdc, &MsgAddGovernanceFrameworkDocument{}, "verana/x/tr/MsgAddGovFrameworkDoc")
+	legacy.RegisterAminoMsg(cdc, &MsgIncreaseActiveGovernanceFrameworkVersion{}, "verana/x/tr/MsgIncreaseActiveGovFWVer")
 	legacy.RegisterAminoMsg(cdc, &MsgUpdateTrustRegistry{}, "verana/x/tr/MsgUpdateTrustRegistry")
 	legacy.RegisterAminoMsg(cdc, &MsgArchiveTrustRegistry{}, "verana/x/tr/MsgArchiveTrustRegistry")
 }

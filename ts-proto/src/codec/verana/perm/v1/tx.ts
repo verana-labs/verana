@@ -189,6 +189,7 @@ export interface MsgRepayPermissionSlashedTrustDeposit {
   corporation: string;
   operator: string;
   id: number;
+  amount: number;
 }
 
 export interface MsgRepayPermissionSlashedTrustDepositResponse {
@@ -2128,7 +2129,7 @@ export const MsgSlashPermissionTrustDepositResponse = {
 };
 
 function createBaseMsgRepayPermissionSlashedTrustDeposit(): MsgRepayPermissionSlashedTrustDeposit {
-  return { corporation: "", operator: "", id: 0 };
+  return { corporation: "", operator: "", id: 0, amount: 0 };
 }
 
 export const MsgRepayPermissionSlashedTrustDeposit = {
@@ -2141,6 +2142,9 @@ export const MsgRepayPermissionSlashedTrustDeposit = {
     }
     if (message.id !== 0) {
       writer.uint32(24).uint64(message.id);
+    }
+    if (message.amount !== 0) {
+      writer.uint32(32).uint64(message.amount);
     }
     return writer;
   },
@@ -2173,6 +2177,13 @@ export const MsgRepayPermissionSlashedTrustDeposit = {
 
           message.id = longToNumber(reader.uint64() as Long);
           continue;
+        case 4:
+          if (tag !== 32) {
+            break;
+          }
+
+          message.amount = longToNumber(reader.uint64() as Long);
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -2187,6 +2198,7 @@ export const MsgRepayPermissionSlashedTrustDeposit = {
       corporation: isSet(object.corporation) ? globalThis.String(object.corporation) : "",
       operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
       id: isSet(object.id) ? globalThis.Number(object.id) : 0,
+      amount: isSet(object.amount) ? globalThis.Number(object.amount) : 0,
     };
   },
 
@@ -2200,6 +2212,9 @@ export const MsgRepayPermissionSlashedTrustDeposit = {
     }
     if (message.id !== 0) {
       obj.id = Math.round(message.id);
+    }
+    if (message.amount !== 0) {
+      obj.amount = Math.round(message.amount);
     }
     return obj;
   },
@@ -2216,6 +2231,7 @@ export const MsgRepayPermissionSlashedTrustDeposit = {
     message.corporation = object.corporation ?? "";
     message.operator = object.operator ?? "";
     message.id = object.id ?? 0;
+    message.amount = object.amount ?? 0;
     return message;
   },
 };

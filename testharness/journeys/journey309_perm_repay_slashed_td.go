@@ -55,7 +55,7 @@ func RunPermissionRepaySlashedTDJourney(ctx context.Context, client cosmosclient
 
 	// 1a: Try WITHOUT authorization (expect failure)
 	fmt.Println("\n--- Step 1a: Operator tries RepayPermissionSlashedTrustDeposit without auth (expect failure) ---")
-	err = lib.RepayPermissionSlashedTrustDeposit(client, ctx, operatorAccount, policyAddr, issuerPermID)
+	err = lib.RepayPermissionSlashedTrustDeposit(client, ctx, operatorAccount, policyAddr, issuerPermID, slashedPerm.SlashedDeposit)
 	if err := expectAuthorizationError("Step 1a", err); err != nil {
 		return err
 	}
@@ -77,7 +77,7 @@ func RunPermissionRepaySlashedTDJourney(ctx context.Context, client cosmosclient
 
 	// 1c: Try WITH authorization (expect success)
 	fmt.Println("\n--- Step 1c: Operator repays slashed trust deposit with auth (expect success) ---")
-	err = lib.RepayPermissionSlashedTrustDeposit(client, ctx, operatorAccount, policyAddr, issuerPermID)
+	err = lib.RepayPermissionSlashedTrustDeposit(client, ctx, operatorAccount, policyAddr, issuerPermID, slashedPerm.SlashedDeposit)
 	if err != nil {
 		return fmt.Errorf("step 1c failed: %w", err)
 	}
@@ -117,7 +117,7 @@ func RunPermissionRepaySlashedTDJourney(ctx context.Context, client cosmosclient
 
 	fmt.Println("\n--- Step 3a: Unauthorized operator tries RepayPermissionSlashedTrustDeposit (expect failure) ---")
 	coolusrAcct := lib.GetAccount(client, lib.COOLUSER_NAME)
-	err = lib.RepayPermissionSlashedTrustDeposit(client, ctx, coolusrAcct, policyAddr, issuerPermID)
+	err = lib.RepayPermissionSlashedTrustDeposit(client, ctx, coolusrAcct, policyAddr, issuerPermID, slashedPerm.SlashedDeposit)
 	if err := expectAuthorizationError("Step 3a", err); err != nil {
 		return err
 	}
@@ -130,7 +130,7 @@ func RunPermissionRepaySlashedTDJourney(ctx context.Context, client cosmosclient
 
 	fmt.Println("\n--- Step 4a: Correct operator but wrong authority (expect failure) ---")
 	// operatorAddr is not the owner of the perm (policyAddr is)
-	err = lib.RepayPermissionSlashedTrustDeposit(client, ctx, operatorAccount, operatorAddr, issuerPermID)
+	err = lib.RepayPermissionSlashedTrustDeposit(client, ctx, operatorAccount, operatorAddr, issuerPermID, slashedPerm.SlashedDeposit)
 	if err == nil {
 		return fmt.Errorf("step 4a failed: expected error for wrong authority, got nil")
 	}

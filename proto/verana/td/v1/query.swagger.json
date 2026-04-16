@@ -124,6 +124,10 @@
         "yield_intermediate_pool": {
           "type": "string",
           "title": "yield_intermediate_pool is the Bech32 string for the Yield Intermediate Pool module account"
+        },
+        "trust_deposit_block_reward_share": {
+          "type": "string",
+          "title": "trust_deposit_block_reward_share is the fraction of block rewards allocated to trust deposit yield (e.g. \"0.2\" for 20%)"
         }
       },
       "description": "Params defines the parameters for the module."

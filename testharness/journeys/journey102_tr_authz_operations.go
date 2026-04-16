@@ -297,27 +297,16 @@ func RunTrustRegistryAuthzOperationsJourney(ctx context.Context, client cosmoscl
 	}
 	fmt.Println("✅ Step 5c: Verified trust registry is archived")
 
-	// 5d: Unarchive (same msg type, already authorized — expect success)
-	fmt.Println("\n--- Step 5d: Operator unarchives trust registry (already authorized) ---")
+	// 5d: Attempt to unarchive (archiving is terminal per spec v4 — expect rejection)
+	fmt.Println("\n--- Step 5d: Operator tries to unarchive trust registry (expect failure — terminal) ---")
 	err = lib.ArchiveTrustRegistryWithAuthority(
 		client, ctx, operatorAccount, policyAddr,
 		trID, false,
 	)
-	if err != nil {
-		return fmt.Errorf("step 5d failed: %w", err)
+	if err == nil {
+		return fmt.Errorf("step 5d failed: expected rejection for unarchiving a terminal archived TR, but succeeded")
 	}
-	fmt.Println("✅ Step 5d: Trust registry unarchived")
-	waitForTx("UnarchiveTR success")
-
-	// Verify unarchived state
-	trResp, err = lib.QueryTrustRegistry(client, ctx, trID)
-	if err != nil {
-		return fmt.Errorf("step 5d verification query failed: %w", err)
-	}
-	if trResp.TrustRegistry.Archived != nil {
-		return fmt.Errorf("step 5d verification failed: trust registry should not be archived")
-	}
-	fmt.Println("✅ Step 5d: Verified trust registry is unarchived")
+	fmt.Printf("✅ Step 5d: Correctly rejected unarchive attempt: %v\n", err)
 
 	// =========================================================================
 	// TEST 6: Unauthorized operator (negative test)

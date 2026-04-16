@@ -372,6 +372,12 @@
     },
     "verana.xr.v1.Params": {
       "type": "object",
+      "properties": {
+        "max_validity_duration": {
+          "type": "string",
+          "description": "max_validity_duration is the maximum allowed validity duration for an exchange rate."
+        }
+      },
       "description": "Params defines the parameters for the module."
     },
     "verana.xr.v1.QueryGetExchangeRateResponse": {

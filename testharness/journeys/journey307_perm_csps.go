@@ -239,9 +239,10 @@ func RunPermissionCSPSJourney(ctx context.Context, client cosmosclient.Client) e
 
 	sessionID := uuid.New().String()
 
-	// 1a: Unauthorized operator (Credential_Holder) tries CSPS (expect failure)
+	// 1a: Unauthorized operator (tr_operator) tries CSPS (expect failure)
+	// Note: cooluser is the vs_operator (authorized), so we use tr_operator instead.
 	fmt.Println("\n--- Step 1a: Unauthorized operator tries CSPS (expect failure) ---")
-	unauthorizedAccount := lib.GetAccount(client, "Credential_Holder")
+	unauthorizedAccount := lib.GetAccount(client, trOperatorName)
 	err = lib.CreatePermissionSession(
 		client, ctx, unauthorizedAccount, operatorAddr,
 		sessionID, issuerPermID, 0, agentPermID, walletAgentPermID,

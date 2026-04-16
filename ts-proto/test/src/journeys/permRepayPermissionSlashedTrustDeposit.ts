@@ -62,6 +62,7 @@ async function main() {
         corporation: authzSetup.authorityAddress,
         operator: authzSetup.operatorAddress,
         id: slashSetup.slashedPermId,
+        amount: 1,
       }),
     };
 

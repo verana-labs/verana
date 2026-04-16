@@ -1060,6 +1060,7 @@ var (
 	fd_MsgCreateExchangeRate_rate              protoreflect.FieldDescriptor
 	fd_MsgCreateExchangeRate_rate_scale        protoreflect.FieldDescriptor
 	fd_MsgCreateExchangeRate_validity_duration protoreflect.FieldDescriptor
+	fd_MsgCreateExchangeRate_state             protoreflect.FieldDescriptor
 )
 
 func init() {
@@ -1073,6 +1074,7 @@ func init() {
 	fd_MsgCreateExchangeRate_rate = md_MsgCreateExchangeRate.Fields().ByName("rate")
 	fd_MsgCreateExchangeRate_rate_scale = md_MsgCreateExchangeRate.Fields().ByName("rate_scale")
 	fd_MsgCreateExchangeRate_validity_duration = md_MsgCreateExchangeRate.Fields().ByName("validity_duration")
+	fd_MsgCreateExchangeRate_state = md_MsgCreateExchangeRate.Fields().ByName("state")
 }
 
 var _ protoreflect.Message = (*fastReflection_MsgCreateExchangeRate)(nil)
@@ -1188,6 +1190,12 @@ func (x *fastReflection_MsgCreateExchangeRate) Range(f func(protoreflect.FieldDe
 			return
 		}
 	}
+	if x.State != false {
+		value := protoreflect.ValueOfBool(x.State)
+		if !f(fd_MsgCreateExchangeRate_state, value) {
+			return
+		}
+	}
 }
 
 // Has reports whether a field is populated.
@@ -1219,6 +1227,8 @@ func (x *fastReflection_MsgCreateExchangeRate) Has(fd protoreflect.FieldDescript
 		return x.RateScale != uint32(0)
 	case "verana.xr.v1.MsgCreateExchangeRate.validity_duration":
 		return x.ValidityDuration != nil
+	case "verana.xr.v1.MsgCreateExchangeRate.state":
+		return x.State != false
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.xr.v1.MsgCreateExchangeRate"))
@@ -1251,6 +1261,8 @@ func (x *fastReflection_MsgCreateExchangeRate) Clear(fd protoreflect.FieldDescri
 		x.RateScale = uint32(0)
 	case "verana.xr.v1.MsgCreateExchangeRate.validity_duration":
 		x.ValidityDuration = nil
+	case "verana.xr.v1.MsgCreateExchangeRate.state":
+		x.State = false
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.xr.v1.MsgCreateExchangeRate"))
@@ -1291,6 +1303,9 @@ func (x *fastReflection_MsgCreateExchangeRate) Get(descriptor protoreflect.Field
 	case "verana.xr.v1.MsgCreateExchangeRate.validity_duration":
 		value := x.ValidityDuration
 		return protoreflect.ValueOfMessage(value.ProtoReflect())
+	case "verana.xr.v1.MsgCreateExchangeRate.state":
+		value := x.State
+		return protoreflect.ValueOfBool(value)
 	default:
 		if descriptor.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.xr.v1.MsgCreateExchangeRate"))
@@ -1327,6 +1342,8 @@ func (x *fastReflection_MsgCreateExchangeRate) Set(fd protoreflect.FieldDescript
 		x.RateScale = uint32(value.Uint())
 	case "verana.xr.v1.MsgCreateExchangeRate.validity_duration":
 		x.ValidityDuration = value.Message().Interface().(*durationpb.Duration)
+	case "verana.xr.v1.MsgCreateExchangeRate.state":
+		x.State = value.Bool()
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.xr.v1.MsgCreateExchangeRate"))
@@ -1366,6 +1383,8 @@ func (x *fastReflection_MsgCreateExchangeRate) Mutable(fd protoreflect.FieldDesc
 		panic(fmt.Errorf("field rate of message verana.xr.v1.MsgCreateExchangeRate is not mutable"))
 	case "verana.xr.v1.MsgCreateExchangeRate.rate_scale":
 		panic(fmt.Errorf("field rate_scale of message verana.xr.v1.MsgCreateExchangeRate is not mutable"))
+	case "verana.xr.v1.MsgCreateExchangeRate.state":
+		panic(fmt.Errorf("field state of message verana.xr.v1.MsgCreateExchangeRate is not mutable"))
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.xr.v1.MsgCreateExchangeRate"))
@@ -1396,6 +1415,8 @@ func (x *fastReflection_MsgCreateExchangeRate) NewField(fd protoreflect.FieldDes
 	case "verana.xr.v1.MsgCreateExchangeRate.validity_duration":
 		m := new(durationpb.Duration)
 		return protoreflect.ValueOfMessage(m.ProtoReflect())
+	case "verana.xr.v1.MsgCreateExchangeRate.state":
+		return protoreflect.ValueOfBool(false)
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.xr.v1.MsgCreateExchangeRate"))
@@ -1494,6 +1515,9 @@ func (x *fastReflection_MsgCreateExchangeRate) ProtoMethods() *protoiface.Method
 			l = options.Size(x.ValidityDuration)
 			n += 1 + l + runtime.Sov(uint64(l))
 		}
+		if x.State {
+			n += 2
+		}
 		if x.unknownFields != nil {
 			n += len(x.unknownFields)
 		}
@@ -1522,6 +1546,16 @@ func (x *fastReflection_MsgCreateExchangeRate) ProtoMethods() *protoiface.Method
 		if x.unknownFields != nil {
 			i -= len(x.unknownFields)
 			copy(dAtA[i:], x.unknownFields)
+		}
+		if x.State {
+			i--
+			if x.State {
+				dAtA[i] = 1
+			} else {
+				dAtA[i] = 0
+			}
+			i--
+			dAtA[i] = 0x48
 		}
 		if x.ValidityDuration != nil {
 			encoded, err := options.Marshal(x.ValidityDuration)
@@ -1850,6 +1884,26 @@ func (x *fastReflection_MsgCreateExchangeRate) ProtoMethods() *protoiface.Method
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, err
 				}
 				iNdEx = postIndex
+			case 9:
+				if wireType != 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field State", wireType)
+				}
+				var v int
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					v |= int(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				x.State = bool(v != 0)
 			default:
 				iNdEx = preIndex
 				skippy, err := runtime.Skip(dAtA[iNdEx:])
@@ -3741,29 +3795,29 @@ func (x *fastReflection_MsgUpdateParams) ProtoMethods() *protoiface.Methods {
 }
 
 var (
-	md_MsgToggleExchangeRateState           protoreflect.MessageDescriptor
-	fd_MsgToggleExchangeRateState_authority protoreflect.FieldDescriptor
-	fd_MsgToggleExchangeRateState_id        protoreflect.FieldDescriptor
-	fd_MsgToggleExchangeRateState_state     protoreflect.FieldDescriptor
+	md_MsgSetExchangeRateState           protoreflect.MessageDescriptor
+	fd_MsgSetExchangeRateState_authority protoreflect.FieldDescriptor
+	fd_MsgSetExchangeRateState_id        protoreflect.FieldDescriptor
+	fd_MsgSetExchangeRateState_state     protoreflect.FieldDescriptor
 )
 
 func init() {
 	file_verana_xr_v1_tx_proto_init()
-	md_MsgToggleExchangeRateState = File_verana_xr_v1_tx_proto.Messages().ByName("MsgToggleExchangeRateState")
-	fd_MsgToggleExchangeRateState_authority = md_MsgToggleExchangeRateState.Fields().ByName("authority")
-	fd_MsgToggleExchangeRateState_id = md_MsgToggleExchangeRateState.Fields().ByName("id")
-	fd_MsgToggleExchangeRateState_state = md_MsgToggleExchangeRateState.Fields().ByName("state")
+	md_MsgSetExchangeRateState = File_verana_xr_v1_tx_proto.Messages().ByName("MsgSetExchangeRateState")
+	fd_MsgSetExchangeRateState_authority = md_MsgSetExchangeRateState.Fields().ByName("authority")
+	fd_MsgSetExchangeRateState_id = md_MsgSetExchangeRateState.Fields().ByName("id")
+	fd_MsgSetExchangeRateState_state = md_MsgSetExchangeRateState.Fields().ByName("state")
 }
 
-var _ protoreflect.Message = (*fastReflection_MsgToggleExchangeRateState)(nil)
+var _ protoreflect.Message = (*fastReflection_MsgSetExchangeRateState)(nil)
 
-type fastReflection_MsgToggleExchangeRateState MsgToggleExchangeRateState
+type fastReflection_MsgSetExchangeRateState MsgSetExchangeRateState
 
-func (x *MsgToggleExchangeRateState) ProtoReflect() protoreflect.Message {
-	return (*fastReflection_MsgToggleExchangeRateState)(x)
+func (x *MsgSetExchangeRateState) ProtoReflect() protoreflect.Message {
+	return (*fastReflection_MsgSetExchangeRateState)(x)
 }
 
-func (x *MsgToggleExchangeRateState) slowProtoReflect() protoreflect.Message {
+func (x *MsgSetExchangeRateState) slowProtoReflect() protoreflect.Message {
 	mi := &file_verana_xr_v1_tx_proto_msgTypes[6]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -3775,43 +3829,43 @@ func (x *MsgToggleExchangeRateState) slowProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-var _fastReflection_MsgToggleExchangeRateState_messageType fastReflection_MsgToggleExchangeRateState_messageType
-var _ protoreflect.MessageType = fastReflection_MsgToggleExchangeRateState_messageType{}
+var _fastReflection_MsgSetExchangeRateState_messageType fastReflection_MsgSetExchangeRateState_messageType
+var _ protoreflect.MessageType = fastReflection_MsgSetExchangeRateState_messageType{}
 
-type fastReflection_MsgToggleExchangeRateState_messageType struct{}
+type fastReflection_MsgSetExchangeRateState_messageType struct{}
 
-func (x fastReflection_MsgToggleExchangeRateState_messageType) Zero() protoreflect.Message {
-	return (*fastReflection_MsgToggleExchangeRateState)(nil)
+func (x fastReflection_MsgSetExchangeRateState_messageType) Zero() protoreflect.Message {
+	return (*fastReflection_MsgSetExchangeRateState)(nil)
 }
-func (x fastReflection_MsgToggleExchangeRateState_messageType) New() protoreflect.Message {
-	return new(fastReflection_MsgToggleExchangeRateState)
+func (x fastReflection_MsgSetExchangeRateState_messageType) New() protoreflect.Message {
+	return new(fastReflection_MsgSetExchangeRateState)
 }
-func (x fastReflection_MsgToggleExchangeRateState_messageType) Descriptor() protoreflect.MessageDescriptor {
-	return md_MsgToggleExchangeRateState
+func (x fastReflection_MsgSetExchangeRateState_messageType) Descriptor() protoreflect.MessageDescriptor {
+	return md_MsgSetExchangeRateState
 }
 
 // Descriptor returns message descriptor, which contains only the protobuf
 // type information for the message.
-func (x *fastReflection_MsgToggleExchangeRateState) Descriptor() protoreflect.MessageDescriptor {
-	return md_MsgToggleExchangeRateState
+func (x *fastReflection_MsgSetExchangeRateState) Descriptor() protoreflect.MessageDescriptor {
+	return md_MsgSetExchangeRateState
 }
 
 // Type returns the message type, which encapsulates both Go and protobuf
 // type information. If the Go type information is not needed,
 // it is recommended that the message descriptor be used instead.
-func (x *fastReflection_MsgToggleExchangeRateState) Type() protoreflect.MessageType {
-	return _fastReflection_MsgToggleExchangeRateState_messageType
+func (x *fastReflection_MsgSetExchangeRateState) Type() protoreflect.MessageType {
+	return _fastReflection_MsgSetExchangeRateState_messageType
 }
 
 // New returns a newly allocated and mutable empty message.
-func (x *fastReflection_MsgToggleExchangeRateState) New() protoreflect.Message {
-	return new(fastReflection_MsgToggleExchangeRateState)
+func (x *fastReflection_MsgSetExchangeRateState) New() protoreflect.Message {
+	return new(fastReflection_MsgSetExchangeRateState)
 }
 
 // Interface unwraps the message reflection interface and
 // returns the underlying ProtoMessage interface.
-func (x *fastReflection_MsgToggleExchangeRateState) Interface() protoreflect.ProtoMessage {
-	return (*MsgToggleExchangeRateState)(x)
+func (x *fastReflection_MsgSetExchangeRateState) Interface() protoreflect.ProtoMessage {
+	return (*MsgSetExchangeRateState)(x)
 }
 
 // Range iterates over every populated field in an undefined order,
@@ -3819,22 +3873,22 @@ func (x *fastReflection_MsgToggleExchangeRateState) Interface() protoreflect.Pro
 // Range returns immediately if f returns false.
 // While iterating, mutating operations may only be performed
 // on the current field descriptor.
-func (x *fastReflection_MsgToggleExchangeRateState) Range(f func(protoreflect.FieldDescriptor, protoreflect.Value) bool) {
+func (x *fastReflection_MsgSetExchangeRateState) Range(f func(protoreflect.FieldDescriptor, protoreflect.Value) bool) {
 	if x.Authority != "" {
 		value := protoreflect.ValueOfString(x.Authority)
-		if !f(fd_MsgToggleExchangeRateState_authority, value) {
+		if !f(fd_MsgSetExchangeRateState_authority, value) {
 			return
 		}
 	}
 	if x.Id != uint64(0) {
 		value := protoreflect.ValueOfUint64(x.Id)
-		if !f(fd_MsgToggleExchangeRateState_id, value) {
+		if !f(fd_MsgSetExchangeRateState_id, value) {
 			return
 		}
 	}
 	if x.State != false {
 		value := protoreflect.ValueOfBool(x.State)
-		if !f(fd_MsgToggleExchangeRateState_state, value) {
+		if !f(fd_MsgSetExchangeRateState_state, value) {
 			return
 		}
 	}
@@ -3851,19 +3905,19 @@ func (x *fastReflection_MsgToggleExchangeRateState) Range(f func(protoreflect.Fi
 // In other cases (aside from the nullable cases above),
 // a proto3 scalar field is populated if it contains a non-zero value, and
 // a repeated field is populated if it is non-empty.
-func (x *fastReflection_MsgToggleExchangeRateState) Has(fd protoreflect.FieldDescriptor) bool {
+func (x *fastReflection_MsgSetExchangeRateState) Has(fd protoreflect.FieldDescriptor) bool {
 	switch fd.FullName() {
-	case "verana.xr.v1.MsgToggleExchangeRateState.authority":
+	case "verana.xr.v1.MsgSetExchangeRateState.authority":
 		return x.Authority != ""
-	case "verana.xr.v1.MsgToggleExchangeRateState.id":
+	case "verana.xr.v1.MsgSetExchangeRateState.id":
 		return x.Id != uint64(0)
-	case "verana.xr.v1.MsgToggleExchangeRateState.state":
+	case "verana.xr.v1.MsgSetExchangeRateState.state":
 		return x.State != false
 	default:
 		if fd.IsExtension() {
-			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.xr.v1.MsgToggleExchangeRateState"))
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.xr.v1.MsgSetExchangeRateState"))
 		}
-		panic(fmt.Errorf("message verana.xr.v1.MsgToggleExchangeRateState does not contain field %s", fd.FullName()))
+		panic(fmt.Errorf("message verana.xr.v1.MsgSetExchangeRateState does not contain field %s", fd.FullName()))
 	}
 }
 
@@ -3873,19 +3927,19 @@ func (x *fastReflection_MsgToggleExchangeRateState) Has(fd protoreflect.FieldDes
 // associated with the given field number.
 //
 // Clear is a mutating operation and unsafe for concurrent use.
-func (x *fastReflection_MsgToggleExchangeRateState) Clear(fd protoreflect.FieldDescriptor) {
+func (x *fastReflection_MsgSetExchangeRateState) Clear(fd protoreflect.FieldDescriptor) {
 	switch fd.FullName() {
-	case "verana.xr.v1.MsgToggleExchangeRateState.authority":
+	case "verana.xr.v1.MsgSetExchangeRateState.authority":
 		x.Authority = ""
-	case "verana.xr.v1.MsgToggleExchangeRateState.id":
+	case "verana.xr.v1.MsgSetExchangeRateState.id":
 		x.Id = uint64(0)
-	case "verana.xr.v1.MsgToggleExchangeRateState.state":
+	case "verana.xr.v1.MsgSetExchangeRateState.state":
 		x.State = false
 	default:
 		if fd.IsExtension() {
-			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.xr.v1.MsgToggleExchangeRateState"))
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.xr.v1.MsgSetExchangeRateState"))
 		}
-		panic(fmt.Errorf("message verana.xr.v1.MsgToggleExchangeRateState does not contain field %s", fd.FullName()))
+		panic(fmt.Errorf("message verana.xr.v1.MsgSetExchangeRateState does not contain field %s", fd.FullName()))
 	}
 }
 
@@ -3895,22 +3949,22 @@ func (x *fastReflection_MsgToggleExchangeRateState) Clear(fd protoreflect.FieldD
 // the default value of a bytes scalar is guaranteed to be a copy.
 // For unpopulated composite types, it returns an empty, read-only view
 // of the value; to obtain a mutable reference, use Mutable.
-func (x *fastReflection_MsgToggleExchangeRateState) Get(descriptor protoreflect.FieldDescriptor) protoreflect.Value {
+func (x *fastReflection_MsgSetExchangeRateState) Get(descriptor protoreflect.FieldDescriptor) protoreflect.Value {
 	switch descriptor.FullName() {
-	case "verana.xr.v1.MsgToggleExchangeRateState.authority":
+	case "verana.xr.v1.MsgSetExchangeRateState.authority":
 		value := x.Authority
 		return protoreflect.ValueOfString(value)
-	case "verana.xr.v1.MsgToggleExchangeRateState.id":
+	case "verana.xr.v1.MsgSetExchangeRateState.id":
 		value := x.Id
 		return protoreflect.ValueOfUint64(value)
-	case "verana.xr.v1.MsgToggleExchangeRateState.state":
+	case "verana.xr.v1.MsgSetExchangeRateState.state":
 		value := x.State
 		return protoreflect.ValueOfBool(value)
 	default:
 		if descriptor.IsExtension() {
-			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.xr.v1.MsgToggleExchangeRateState"))
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.xr.v1.MsgSetExchangeRateState"))
 		}
-		panic(fmt.Errorf("message verana.xr.v1.MsgToggleExchangeRateState does not contain field %s", descriptor.FullName()))
+		panic(fmt.Errorf("message verana.xr.v1.MsgSetExchangeRateState does not contain field %s", descriptor.FullName()))
 	}
 }
 
@@ -3924,19 +3978,19 @@ func (x *fastReflection_MsgToggleExchangeRateState) Get(descriptor protoreflect.
 // empty, read-only value, then it panics.
 //
 // Set is a mutating operation and unsafe for concurrent use.
-func (x *fastReflection_MsgToggleExchangeRateState) Set(fd protoreflect.FieldDescriptor, value protoreflect.Value) {
+func (x *fastReflection_MsgSetExchangeRateState) Set(fd protoreflect.FieldDescriptor, value protoreflect.Value) {
 	switch fd.FullName() {
-	case "verana.xr.v1.MsgToggleExchangeRateState.authority":
+	case "verana.xr.v1.MsgSetExchangeRateState.authority":
 		x.Authority = value.Interface().(string)
-	case "verana.xr.v1.MsgToggleExchangeRateState.id":
+	case "verana.xr.v1.MsgSetExchangeRateState.id":
 		x.Id = value.Uint()
-	case "verana.xr.v1.MsgToggleExchangeRateState.state":
+	case "verana.xr.v1.MsgSetExchangeRateState.state":
 		x.State = value.Bool()
 	default:
 		if fd.IsExtension() {
-			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.xr.v1.MsgToggleExchangeRateState"))
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.xr.v1.MsgSetExchangeRateState"))
 		}
-		panic(fmt.Errorf("message verana.xr.v1.MsgToggleExchangeRateState does not contain field %s", fd.FullName()))
+		panic(fmt.Errorf("message verana.xr.v1.MsgSetExchangeRateState does not contain field %s", fd.FullName()))
 	}
 }
 
@@ -3950,48 +4004,48 @@ func (x *fastReflection_MsgToggleExchangeRateState) Set(fd protoreflect.FieldDes
 // It panics if the field does not contain a composite type.
 //
 // Mutable is a mutating operation and unsafe for concurrent use.
-func (x *fastReflection_MsgToggleExchangeRateState) Mutable(fd protoreflect.FieldDescriptor) protoreflect.Value {
+func (x *fastReflection_MsgSetExchangeRateState) Mutable(fd protoreflect.FieldDescriptor) protoreflect.Value {
 	switch fd.FullName() {
-	case "verana.xr.v1.MsgToggleExchangeRateState.authority":
-		panic(fmt.Errorf("field authority of message verana.xr.v1.MsgToggleExchangeRateState is not mutable"))
-	case "verana.xr.v1.MsgToggleExchangeRateState.id":
-		panic(fmt.Errorf("field id of message verana.xr.v1.MsgToggleExchangeRateState is not mutable"))
-	case "verana.xr.v1.MsgToggleExchangeRateState.state":
-		panic(fmt.Errorf("field state of message verana.xr.v1.MsgToggleExchangeRateState is not mutable"))
+	case "verana.xr.v1.MsgSetExchangeRateState.authority":
+		panic(fmt.Errorf("field authority of message verana.xr.v1.MsgSetExchangeRateState is not mutable"))
+	case "verana.xr.v1.MsgSetExchangeRateState.id":
+		panic(fmt.Errorf("field id of message verana.xr.v1.MsgSetExchangeRateState is not mutable"))
+	case "verana.xr.v1.MsgSetExchangeRateState.state":
+		panic(fmt.Errorf("field state of message verana.xr.v1.MsgSetExchangeRateState is not mutable"))
 	default:
 		if fd.IsExtension() {
-			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.xr.v1.MsgToggleExchangeRateState"))
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.xr.v1.MsgSetExchangeRateState"))
 		}
-		panic(fmt.Errorf("message verana.xr.v1.MsgToggleExchangeRateState does not contain field %s", fd.FullName()))
+		panic(fmt.Errorf("message verana.xr.v1.MsgSetExchangeRateState does not contain field %s", fd.FullName()))
 	}
 }
 
 // NewField returns a new value that is assignable to the field
 // for the given descriptor. For scalars, this returns the default value.
 // For lists, maps, and messages, this returns a new, empty, mutable value.
-func (x *fastReflection_MsgToggleExchangeRateState) NewField(fd protoreflect.FieldDescriptor) protoreflect.Value {
+func (x *fastReflection_MsgSetExchangeRateState) NewField(fd protoreflect.FieldDescriptor) protoreflect.Value {
 	switch fd.FullName() {
-	case "verana.xr.v1.MsgToggleExchangeRateState.authority":
+	case "verana.xr.v1.MsgSetExchangeRateState.authority":
 		return protoreflect.ValueOfString("")
-	case "verana.xr.v1.MsgToggleExchangeRateState.id":
+	case "verana.xr.v1.MsgSetExchangeRateState.id":
 		return protoreflect.ValueOfUint64(uint64(0))
-	case "verana.xr.v1.MsgToggleExchangeRateState.state":
+	case "verana.xr.v1.MsgSetExchangeRateState.state":
 		return protoreflect.ValueOfBool(false)
 	default:
 		if fd.IsExtension() {
-			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.xr.v1.MsgToggleExchangeRateState"))
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.xr.v1.MsgSetExchangeRateState"))
 		}
-		panic(fmt.Errorf("message verana.xr.v1.MsgToggleExchangeRateState does not contain field %s", fd.FullName()))
+		panic(fmt.Errorf("message verana.xr.v1.MsgSetExchangeRateState does not contain field %s", fd.FullName()))
 	}
 }
 
 // WhichOneof reports which field within the oneof is populated,
 // returning nil if none are populated.
 // It panics if the oneof descriptor does not belong to this message.
-func (x *fastReflection_MsgToggleExchangeRateState) WhichOneof(d protoreflect.OneofDescriptor) protoreflect.FieldDescriptor {
+func (x *fastReflection_MsgSetExchangeRateState) WhichOneof(d protoreflect.OneofDescriptor) protoreflect.FieldDescriptor {
 	switch d.FullName() {
 	default:
-		panic(fmt.Errorf("%s is not a oneof field in verana.xr.v1.MsgToggleExchangeRateState", d.FullName()))
+		panic(fmt.Errorf("%s is not a oneof field in verana.xr.v1.MsgSetExchangeRateState", d.FullName()))
 	}
 	panic("unreachable")
 }
@@ -3999,7 +4053,7 @@ func (x *fastReflection_MsgToggleExchangeRateState) WhichOneof(d protoreflect.On
 // GetUnknown retrieves the entire list of unknown fields.
 // The caller may only mutate the contents of the RawFields
 // if the mutated bytes are stored back into the message with SetUnknown.
-func (x *fastReflection_MsgToggleExchangeRateState) GetUnknown() protoreflect.RawFields {
+func (x *fastReflection_MsgSetExchangeRateState) GetUnknown() protoreflect.RawFields {
 	return x.unknownFields
 }
 
@@ -4010,7 +4064,7 @@ func (x *fastReflection_MsgToggleExchangeRateState) GetUnknown() protoreflect.Ra
 // An empty RawFields may be passed to clear the fields.
 //
 // SetUnknown is a mutating operation and unsafe for concurrent use.
-func (x *fastReflection_MsgToggleExchangeRateState) SetUnknown(fields protoreflect.RawFields) {
+func (x *fastReflection_MsgSetExchangeRateState) SetUnknown(fields protoreflect.RawFields) {
 	x.unknownFields = fields
 }
 
@@ -4022,7 +4076,7 @@ func (x *fastReflection_MsgToggleExchangeRateState) SetUnknown(fields protorefle
 // message type, but the details are implementation dependent.
 // Validity is not part of the protobuf data model, and may not
 // be preserved in marshaling or other operations.
-func (x *fastReflection_MsgToggleExchangeRateState) IsValid() bool {
+func (x *fastReflection_MsgSetExchangeRateState) IsValid() bool {
 	return x != nil
 }
 
@@ -4032,9 +4086,9 @@ func (x *fastReflection_MsgToggleExchangeRateState) IsValid() bool {
 // The returned methods type is identical to
 // "google.golang.org/protobuf/runtime/protoiface".Methods.
 // Consult the protoiface package documentation for details.
-func (x *fastReflection_MsgToggleExchangeRateState) ProtoMethods() *protoiface.Methods {
+func (x *fastReflection_MsgSetExchangeRateState) ProtoMethods() *protoiface.Methods {
 	size := func(input protoiface.SizeInput) protoiface.SizeOutput {
-		x := input.Message.Interface().(*MsgToggleExchangeRateState)
+		x := input.Message.Interface().(*MsgSetExchangeRateState)
 		if x == nil {
 			return protoiface.SizeOutput{
 				NoUnkeyedLiterals: input.NoUnkeyedLiterals,
@@ -4066,7 +4120,7 @@ func (x *fastReflection_MsgToggleExchangeRateState) ProtoMethods() *protoiface.M
 	}
 
 	marshal := func(input protoiface.MarshalInput) (protoiface.MarshalOutput, error) {
-		x := input.Message.Interface().(*MsgToggleExchangeRateState)
+		x := input.Message.Interface().(*MsgSetExchangeRateState)
 		if x == nil {
 			return protoiface.MarshalOutput{
 				NoUnkeyedLiterals: input.NoUnkeyedLiterals,
@@ -4118,7 +4172,7 @@ func (x *fastReflection_MsgToggleExchangeRateState) ProtoMethods() *protoiface.M
 		}, nil
 	}
 	unmarshal := func(input protoiface.UnmarshalInput) (protoiface.UnmarshalOutput, error) {
-		x := input.Message.Interface().(*MsgToggleExchangeRateState)
+		x := input.Message.Interface().(*MsgSetExchangeRateState)
 		if x == nil {
 			return protoiface.UnmarshalOutput{
 				NoUnkeyedLiterals: input.NoUnkeyedLiterals,
@@ -4150,10 +4204,10 @@ func (x *fastReflection_MsgToggleExchangeRateState) ProtoMethods() *protoiface.M
 			fieldNum := int32(wire >> 3)
 			wireType := int(wire & 0x7)
 			if wireType == 4 {
-				return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: MsgToggleExchangeRateState: wiretype end group for non-group")
+				return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: MsgSetExchangeRateState: wiretype end group for non-group")
 			}
 			if fieldNum <= 0 {
-				return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: MsgToggleExchangeRateState: illegal tag %d (wire type %d)", fieldNum, wire)
+				return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: MsgSetExchangeRateState: illegal tag %d (wire type %d)", fieldNum, wire)
 			}
 			switch fieldNum {
 			case 1:
@@ -4263,23 +4317,23 @@ func (x *fastReflection_MsgToggleExchangeRateState) ProtoMethods() *protoiface.M
 }
 
 var (
-	md_MsgToggleExchangeRateStateResponse protoreflect.MessageDescriptor
+	md_MsgSetExchangeRateStateResponse protoreflect.MessageDescriptor
 )
 
 func init() {
 	file_verana_xr_v1_tx_proto_init()
-	md_MsgToggleExchangeRateStateResponse = File_verana_xr_v1_tx_proto.Messages().ByName("MsgToggleExchangeRateStateResponse")
+	md_MsgSetExchangeRateStateResponse = File_verana_xr_v1_tx_proto.Messages().ByName("MsgSetExchangeRateStateResponse")
 }
 
-var _ protoreflect.Message = (*fastReflection_MsgToggleExchangeRateStateResponse)(nil)
+var _ protoreflect.Message = (*fastReflection_MsgSetExchangeRateStateResponse)(nil)
 
-type fastReflection_MsgToggleExchangeRateStateResponse MsgToggleExchangeRateStateResponse
+type fastReflection_MsgSetExchangeRateStateResponse MsgSetExchangeRateStateResponse
 
-func (x *MsgToggleExchangeRateStateResponse) ProtoReflect() protoreflect.Message {
-	return (*fastReflection_MsgToggleExchangeRateStateResponse)(x)
+func (x *MsgSetExchangeRateStateResponse) ProtoReflect() protoreflect.Message {
+	return (*fastReflection_MsgSetExchangeRateStateResponse)(x)
 }
 
-func (x *MsgToggleExchangeRateStateResponse) slowProtoReflect() protoreflect.Message {
+func (x *MsgSetExchangeRateStateResponse) slowProtoReflect() protoreflect.Message {
 	mi := &file_verana_xr_v1_tx_proto_msgTypes[7]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -4291,43 +4345,43 @@ func (x *MsgToggleExchangeRateStateResponse) slowProtoReflect() protoreflect.Mes
 	return mi.MessageOf(x)
 }
 
-var _fastReflection_MsgToggleExchangeRateStateResponse_messageType fastReflection_MsgToggleExchangeRateStateResponse_messageType
-var _ protoreflect.MessageType = fastReflection_MsgToggleExchangeRateStateResponse_messageType{}
+var _fastReflection_MsgSetExchangeRateStateResponse_messageType fastReflection_MsgSetExchangeRateStateResponse_messageType
+var _ protoreflect.MessageType = fastReflection_MsgSetExchangeRateStateResponse_messageType{}
 
-type fastReflection_MsgToggleExchangeRateStateResponse_messageType struct{}
+type fastReflection_MsgSetExchangeRateStateResponse_messageType struct{}
 
-func (x fastReflection_MsgToggleExchangeRateStateResponse_messageType) Zero() protoreflect.Message {
-	return (*fastReflection_MsgToggleExchangeRateStateResponse)(nil)
+func (x fastReflection_MsgSetExchangeRateStateResponse_messageType) Zero() protoreflect.Message {
+	return (*fastReflection_MsgSetExchangeRateStateResponse)(nil)
 }
-func (x fastReflection_MsgToggleExchangeRateStateResponse_messageType) New() protoreflect.Message {
-	return new(fastReflection_MsgToggleExchangeRateStateResponse)
+func (x fastReflection_MsgSetExchangeRateStateResponse_messageType) New() protoreflect.Message {
+	return new(fastReflection_MsgSetExchangeRateStateResponse)
 }
-func (x fastReflection_MsgToggleExchangeRateStateResponse_messageType) Descriptor() protoreflect.MessageDescriptor {
-	return md_MsgToggleExchangeRateStateResponse
+func (x fastReflection_MsgSetExchangeRateStateResponse_messageType) Descriptor() protoreflect.MessageDescriptor {
+	return md_MsgSetExchangeRateStateResponse
 }
 
 // Descriptor returns message descriptor, which contains only the protobuf
 // type information for the message.
-func (x *fastReflection_MsgToggleExchangeRateStateResponse) Descriptor() protoreflect.MessageDescriptor {
-	return md_MsgToggleExchangeRateStateResponse
+func (x *fastReflection_MsgSetExchangeRateStateResponse) Descriptor() protoreflect.MessageDescriptor {
+	return md_MsgSetExchangeRateStateResponse
 }
 
 // Type returns the message type, which encapsulates both Go and protobuf
 // type information. If the Go type information is not needed,
 // it is recommended that the message descriptor be used instead.
-func (x *fastReflection_MsgToggleExchangeRateStateResponse) Type() protoreflect.MessageType {
-	return _fastReflection_MsgToggleExchangeRateStateResponse_messageType
+func (x *fastReflection_MsgSetExchangeRateStateResponse) Type() protoreflect.MessageType {
+	return _fastReflection_MsgSetExchangeRateStateResponse_messageType
 }
 
 // New returns a newly allocated and mutable empty message.
-func (x *fastReflection_MsgToggleExchangeRateStateResponse) New() protoreflect.Message {
-	return new(fastReflection_MsgToggleExchangeRateStateResponse)
+func (x *fastReflection_MsgSetExchangeRateStateResponse) New() protoreflect.Message {
+	return new(fastReflection_MsgSetExchangeRateStateResponse)
 }
 
 // Interface unwraps the message reflection interface and
 // returns the underlying ProtoMessage interface.
-func (x *fastReflection_MsgToggleExchangeRateStateResponse) Interface() protoreflect.ProtoMessage {
-	return (*MsgToggleExchangeRateStateResponse)(x)
+func (x *fastReflection_MsgSetExchangeRateStateResponse) Interface() protoreflect.ProtoMessage {
+	return (*MsgSetExchangeRateStateResponse)(x)
 }
 
 // Range iterates over every populated field in an undefined order,
@@ -4335,7 +4389,7 @@ func (x *fastReflection_MsgToggleExchangeRateStateResponse) Interface() protoref
 // Range returns immediately if f returns false.
 // While iterating, mutating operations may only be performed
 // on the current field descriptor.
-func (x *fastReflection_MsgToggleExchangeRateStateResponse) Range(f func(protoreflect.FieldDescriptor, protoreflect.Value) bool) {
+func (x *fastReflection_MsgSetExchangeRateStateResponse) Range(f func(protoreflect.FieldDescriptor, protoreflect.Value) bool) {
 }
 
 // Has reports whether a field is populated.
@@ -4349,13 +4403,13 @@ func (x *fastReflection_MsgToggleExchangeRateStateResponse) Range(f func(protore
 // In other cases (aside from the nullable cases above),
 // a proto3 scalar field is populated if it contains a non-zero value, and
 // a repeated field is populated if it is non-empty.
-func (x *fastReflection_MsgToggleExchangeRateStateResponse) Has(fd protoreflect.FieldDescriptor) bool {
+func (x *fastReflection_MsgSetExchangeRateStateResponse) Has(fd protoreflect.FieldDescriptor) bool {
 	switch fd.FullName() {
 	default:
 		if fd.IsExtension() {
-			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.xr.v1.MsgToggleExchangeRateStateResponse"))
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.xr.v1.MsgSetExchangeRateStateResponse"))
 		}
-		panic(fmt.Errorf("message verana.xr.v1.MsgToggleExchangeRateStateResponse does not contain field %s", fd.FullName()))
+		panic(fmt.Errorf("message verana.xr.v1.MsgSetExchangeRateStateResponse does not contain field %s", fd.FullName()))
 	}
 }
 
@@ -4365,13 +4419,13 @@ func (x *fastReflection_MsgToggleExchangeRateStateResponse) Has(fd protoreflect.
 // associated with the given field number.
 //
 // Clear is a mutating operation and unsafe for concurrent use.
-func (x *fastReflection_MsgToggleExchangeRateStateResponse) Clear(fd protoreflect.FieldDescriptor) {
+func (x *fastReflection_MsgSetExchangeRateStateResponse) Clear(fd protoreflect.FieldDescriptor) {
 	switch fd.FullName() {
 	default:
 		if fd.IsExtension() {
-			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.xr.v1.MsgToggleExchangeRateStateResponse"))
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.xr.v1.MsgSetExchangeRateStateResponse"))
 		}
-		panic(fmt.Errorf("message verana.xr.v1.MsgToggleExchangeRateStateResponse does not contain field %s", fd.FullName()))
+		panic(fmt.Errorf("message verana.xr.v1.MsgSetExchangeRateStateResponse does not contain field %s", fd.FullName()))
 	}
 }
 
@@ -4381,13 +4435,13 @@ func (x *fastReflection_MsgToggleExchangeRateStateResponse) Clear(fd protoreflec
 // the default value of a bytes scalar is guaranteed to be a copy.
 // For unpopulated composite types, it returns an empty, read-only view
 // of the value; to obtain a mutable reference, use Mutable.
-func (x *fastReflection_MsgToggleExchangeRateStateResponse) Get(descriptor protoreflect.FieldDescriptor) protoreflect.Value {
+func (x *fastReflection_MsgSetExchangeRateStateResponse) Get(descriptor protoreflect.FieldDescriptor) protoreflect.Value {
 	switch descriptor.FullName() {
 	default:
 		if descriptor.IsExtension() {
-			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.xr.v1.MsgToggleExchangeRateStateResponse"))
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.xr.v1.MsgSetExchangeRateStateResponse"))
 		}
-		panic(fmt.Errorf("message verana.xr.v1.MsgToggleExchangeRateStateResponse does not contain field %s", descriptor.FullName()))
+		panic(fmt.Errorf("message verana.xr.v1.MsgSetExchangeRateStateResponse does not contain field %s", descriptor.FullName()))
 	}
 }
 
@@ -4401,13 +4455,13 @@ func (x *fastReflection_MsgToggleExchangeRateStateResponse) Get(descriptor proto
 // empty, read-only value, then it panics.
 //
 // Set is a mutating operation and unsafe for concurrent use.
-func (x *fastReflection_MsgToggleExchangeRateStateResponse) Set(fd protoreflect.FieldDescriptor, value protoreflect.Value) {
+func (x *fastReflection_MsgSetExchangeRateStateResponse) Set(fd protoreflect.FieldDescriptor, value protoreflect.Value) {
 	switch fd.FullName() {
 	default:
 		if fd.IsExtension() {
-			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.xr.v1.MsgToggleExchangeRateStateResponse"))
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.xr.v1.MsgSetExchangeRateStateResponse"))
 		}
-		panic(fmt.Errorf("message verana.xr.v1.MsgToggleExchangeRateStateResponse does not contain field %s", fd.FullName()))
+		panic(fmt.Errorf("message verana.xr.v1.MsgSetExchangeRateStateResponse does not contain field %s", fd.FullName()))
 	}
 }
 
@@ -4421,36 +4475,36 @@ func (x *fastReflection_MsgToggleExchangeRateStateResponse) Set(fd protoreflect.
 // It panics if the field does not contain a composite type.
 //
 // Mutable is a mutating operation and unsafe for concurrent use.
-func (x *fastReflection_MsgToggleExchangeRateStateResponse) Mutable(fd protoreflect.FieldDescriptor) protoreflect.Value {
+func (x *fastReflection_MsgSetExchangeRateStateResponse) Mutable(fd protoreflect.FieldDescriptor) protoreflect.Value {
 	switch fd.FullName() {
 	default:
 		if fd.IsExtension() {
-			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.xr.v1.MsgToggleExchangeRateStateResponse"))
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.xr.v1.MsgSetExchangeRateStateResponse"))
 		}
-		panic(fmt.Errorf("message verana.xr.v1.MsgToggleExchangeRateStateResponse does not contain field %s", fd.FullName()))
+		panic(fmt.Errorf("message verana.xr.v1.MsgSetExchangeRateStateResponse does not contain field %s", fd.FullName()))
 	}
 }
 
 // NewField returns a new value that is assignable to the field
 // for the given descriptor. For scalars, this returns the default value.
 // For lists, maps, and messages, this returns a new, empty, mutable value.
-func (x *fastReflection_MsgToggleExchangeRateStateResponse) NewField(fd protoreflect.FieldDescriptor) protoreflect.Value {
+func (x *fastReflection_MsgSetExchangeRateStateResponse) NewField(fd protoreflect.FieldDescriptor) protoreflect.Value {
 	switch fd.FullName() {
 	default:
 		if fd.IsExtension() {
-			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.xr.v1.MsgToggleExchangeRateStateResponse"))
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.xr.v1.MsgSetExchangeRateStateResponse"))
 		}
-		panic(fmt.Errorf("message verana.xr.v1.MsgToggleExchangeRateStateResponse does not contain field %s", fd.FullName()))
+		panic(fmt.Errorf("message verana.xr.v1.MsgSetExchangeRateStateResponse does not contain field %s", fd.FullName()))
 	}
 }
 
 // WhichOneof reports which field within the oneof is populated,
 // returning nil if none are populated.
 // It panics if the oneof descriptor does not belong to this message.
-func (x *fastReflection_MsgToggleExchangeRateStateResponse) WhichOneof(d protoreflect.OneofDescriptor) protoreflect.FieldDescriptor {
+func (x *fastReflection_MsgSetExchangeRateStateResponse) WhichOneof(d protoreflect.OneofDescriptor) protoreflect.FieldDescriptor {
 	switch d.FullName() {
 	default:
-		panic(fmt.Errorf("%s is not a oneof field in verana.xr.v1.MsgToggleExchangeRateStateResponse", d.FullName()))
+		panic(fmt.Errorf("%s is not a oneof field in verana.xr.v1.MsgSetExchangeRateStateResponse", d.FullName()))
 	}
 	panic("unreachable")
 }
@@ -4458,7 +4512,7 @@ func (x *fastReflection_MsgToggleExchangeRateStateResponse) WhichOneof(d protore
 // GetUnknown retrieves the entire list of unknown fields.
 // The caller may only mutate the contents of the RawFields
 // if the mutated bytes are stored back into the message with SetUnknown.
-func (x *fastReflection_MsgToggleExchangeRateStateResponse) GetUnknown() protoreflect.RawFields {
+func (x *fastReflection_MsgSetExchangeRateStateResponse) GetUnknown() protoreflect.RawFields {
 	return x.unknownFields
 }
 
@@ -4469,7 +4523,7 @@ func (x *fastReflection_MsgToggleExchangeRateStateResponse) GetUnknown() protore
 // An empty RawFields may be passed to clear the fields.
 //
 // SetUnknown is a mutating operation and unsafe for concurrent use.
-func (x *fastReflection_MsgToggleExchangeRateStateResponse) SetUnknown(fields protoreflect.RawFields) {
+func (x *fastReflection_MsgSetExchangeRateStateResponse) SetUnknown(fields protoreflect.RawFields) {
 	x.unknownFields = fields
 }
 
@@ -4481,7 +4535,7 @@ func (x *fastReflection_MsgToggleExchangeRateStateResponse) SetUnknown(fields pr
 // message type, but the details are implementation dependent.
 // Validity is not part of the protobuf data model, and may not
 // be preserved in marshaling or other operations.
-func (x *fastReflection_MsgToggleExchangeRateStateResponse) IsValid() bool {
+func (x *fastReflection_MsgSetExchangeRateStateResponse) IsValid() bool {
 	return x != nil
 }
 
@@ -4491,9 +4545,9 @@ func (x *fastReflection_MsgToggleExchangeRateStateResponse) IsValid() bool {
 // The returned methods type is identical to
 // "google.golang.org/protobuf/runtime/protoiface".Methods.
 // Consult the protoiface package documentation for details.
-func (x *fastReflection_MsgToggleExchangeRateStateResponse) ProtoMethods() *protoiface.Methods {
+func (x *fastReflection_MsgSetExchangeRateStateResponse) ProtoMethods() *protoiface.Methods {
 	size := func(input protoiface.SizeInput) protoiface.SizeOutput {
-		x := input.Message.Interface().(*MsgToggleExchangeRateStateResponse)
+		x := input.Message.Interface().(*MsgSetExchangeRateStateResponse)
 		if x == nil {
 			return protoiface.SizeOutput{
 				NoUnkeyedLiterals: input.NoUnkeyedLiterals,
@@ -4515,7 +4569,7 @@ func (x *fastReflection_MsgToggleExchangeRateStateResponse) ProtoMethods() *prot
 	}
 
 	marshal := func(input protoiface.MarshalInput) (protoiface.MarshalOutput, error) {
-		x := input.Message.Interface().(*MsgToggleExchangeRateStateResponse)
+		x := input.Message.Interface().(*MsgSetExchangeRateStateResponse)
 		if x == nil {
 			return protoiface.MarshalOutput{
 				NoUnkeyedLiterals: input.NoUnkeyedLiterals,
@@ -4545,7 +4599,7 @@ func (x *fastReflection_MsgToggleExchangeRateStateResponse) ProtoMethods() *prot
 		}, nil
 	}
 	unmarshal := func(input protoiface.UnmarshalInput) (protoiface.UnmarshalOutput, error) {
-		x := input.Message.Interface().(*MsgToggleExchangeRateStateResponse)
+		x := input.Message.Interface().(*MsgSetExchangeRateStateResponse)
 		if x == nil {
 			return protoiface.UnmarshalOutput{
 				NoUnkeyedLiterals: input.NoUnkeyedLiterals,
@@ -4577,10 +4631,10 @@ func (x *fastReflection_MsgToggleExchangeRateStateResponse) ProtoMethods() *prot
 			fieldNum := int32(wire >> 3)
 			wireType := int(wire & 0x7)
 			if wireType == 4 {
-				return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: MsgToggleExchangeRateStateResponse: wiretype end group for non-group")
+				return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: MsgSetExchangeRateStateResponse: wiretype end group for non-group")
 			}
 			if fieldNum <= 0 {
-				return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: MsgToggleExchangeRateStateResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+				return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: MsgSetExchangeRateStateResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 			}
 			switch fieldNum {
 			default:
@@ -5118,6 +5172,7 @@ type MsgCreateExchangeRate struct {
 	Rate             string               `protobuf:"bytes,6,opt,name=rate,proto3" json:"rate,omitempty"`
 	RateScale        uint32               `protobuf:"varint,7,opt,name=rate_scale,json=rateScale,proto3" json:"rate_scale,omitempty"`
 	ValidityDuration *durationpb.Duration `protobuf:"bytes,8,opt,name=validity_duration,json=validityDuration,proto3" json:"validity_duration,omitempty"`
+	State            bool                 `protobuf:"varint,9,opt,name=state,proto3" json:"state,omitempty"`
 }
 
 func (x *MsgCreateExchangeRate) Reset() {
@@ -5194,6 +5249,13 @@ func (x *MsgCreateExchangeRate) GetValidityDuration() *durationpb.Duration {
 		return x.ValidityDuration
 	}
 	return nil
+}
+
+func (x *MsgCreateExchangeRate) GetState() bool {
+	if x != nil {
+		return x.State
+	}
+	return false
 }
 
 // MsgCreateExchangeRateResponse defines the response for MsgCreateExchangeRate.
@@ -5371,8 +5433,8 @@ func (x *MsgUpdateParams) GetParams() *Params {
 	return nil
 }
 
-// MsgToggleExchangeRateState is the Msg/ToggleExchangeRateState request type.
-type MsgToggleExchangeRateState struct {
+// MsgSetExchangeRateState is the Msg/SetExchangeRateState request type.
+type MsgSetExchangeRateState struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -5385,8 +5447,8 @@ type MsgToggleExchangeRateState struct {
 	State bool `protobuf:"varint,3,opt,name=state,proto3" json:"state,omitempty"`
 }
 
-func (x *MsgToggleExchangeRateState) Reset() {
-	*x = MsgToggleExchangeRateState{}
+func (x *MsgSetExchangeRateState) Reset() {
+	*x = MsgSetExchangeRateState{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_verana_xr_v1_tx_proto_msgTypes[6]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -5394,47 +5456,47 @@ func (x *MsgToggleExchangeRateState) Reset() {
 	}
 }
 
-func (x *MsgToggleExchangeRateState) String() string {
+func (x *MsgSetExchangeRateState) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*MsgToggleExchangeRateState) ProtoMessage() {}
+func (*MsgSetExchangeRateState) ProtoMessage() {}
 
-// Deprecated: Use MsgToggleExchangeRateState.ProtoReflect.Descriptor instead.
-func (*MsgToggleExchangeRateState) Descriptor() ([]byte, []int) {
+// Deprecated: Use MsgSetExchangeRateState.ProtoReflect.Descriptor instead.
+func (*MsgSetExchangeRateState) Descriptor() ([]byte, []int) {
 	return file_verana_xr_v1_tx_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *MsgToggleExchangeRateState) GetAuthority() string {
+func (x *MsgSetExchangeRateState) GetAuthority() string {
 	if x != nil {
 		return x.Authority
 	}
 	return ""
 }
 
-func (x *MsgToggleExchangeRateState) GetId() uint64 {
+func (x *MsgSetExchangeRateState) GetId() uint64 {
 	if x != nil {
 		return x.Id
 	}
 	return 0
 }
 
-func (x *MsgToggleExchangeRateState) GetState() bool {
+func (x *MsgSetExchangeRateState) GetState() bool {
 	if x != nil {
 		return x.State
 	}
 	return false
 }
 
-// MsgToggleExchangeRateStateResponse defines the response for MsgToggleExchangeRateState.
-type MsgToggleExchangeRateStateResponse struct {
+// MsgSetExchangeRateStateResponse defines the response for MsgSetExchangeRateState.
+type MsgSetExchangeRateStateResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 }
 
-func (x *MsgToggleExchangeRateStateResponse) Reset() {
-	*x = MsgToggleExchangeRateStateResponse{}
+func (x *MsgSetExchangeRateStateResponse) Reset() {
+	*x = MsgSetExchangeRateStateResponse{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_verana_xr_v1_tx_proto_msgTypes[7]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -5442,14 +5504,14 @@ func (x *MsgToggleExchangeRateStateResponse) Reset() {
 	}
 }
 
-func (x *MsgToggleExchangeRateStateResponse) String() string {
+func (x *MsgSetExchangeRateStateResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*MsgToggleExchangeRateStateResponse) ProtoMessage() {}
+func (*MsgSetExchangeRateStateResponse) ProtoMessage() {}
 
-// Deprecated: Use MsgToggleExchangeRateStateResponse.ProtoReflect.Descriptor instead.
-func (*MsgToggleExchangeRateStateResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use MsgSetExchangeRateStateResponse.ProtoReflect.Descriptor instead.
+func (*MsgSetExchangeRateStateResponse) Descriptor() ([]byte, []int) {
 	return file_verana_xr_v1_tx_proto_rawDescGZIP(), []int{7}
 }
 
@@ -5532,7 +5594,7 @@ var file_verana_xr_v1_tx_proto_rawDesc = []byte{
 	0x64, 0x18, 0x0b, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65,
 	0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74,
 	0x61, 0x6d, 0x70, 0x42, 0x08, 0xc8, 0xde, 0x1f, 0x00, 0x90, 0xdf, 0x1f, 0x01, 0x52, 0x07, 0x75,
-	0x70, 0x64, 0x61, 0x74, 0x65, 0x64, 0x22, 0xdc, 0x03, 0x0a, 0x15, 0x4d, 0x73, 0x67, 0x43, 0x72,
+	0x70, 0x64, 0x61, 0x74, 0x65, 0x64, 0x22, 0xf2, 0x03, 0x0a, 0x15, 0x4d, 0x73, 0x67, 0x43, 0x72,
 	0x65, 0x61, 0x74, 0x65, 0x45, 0x78, 0x63, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x52, 0x61, 0x74, 0x65,
 	0x12, 0x36, 0x0a, 0x09, 0x61, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x74, 0x79, 0x18, 0x01, 0x20,
 	0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e,
@@ -5558,94 +5620,95 @@ var file_verana_xr_v1_tx_proto_rawDesc = []byte{
 	0x6f, 0x6e, 0x18, 0x08, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x19, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c,
 	0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x44, 0x75, 0x72, 0x61, 0x74,
 	0x69, 0x6f, 0x6e, 0x42, 0x08, 0xc8, 0xde, 0x1f, 0x00, 0x98, 0xdf, 0x1f, 0x01, 0x52, 0x10, 0x76,
-	0x61, 0x6c, 0x69, 0x64, 0x69, 0x74, 0x79, 0x44, 0x75, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x3a,
-	0x34, 0x82, 0xe7, 0xb0, 0x2a, 0x09, 0x61, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x74, 0x79, 0x8a,
-	0xe7, 0xb0, 0x2a, 0x21, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2f, 0x78, 0x2f, 0x78, 0x72, 0x2f,
-	0x4d, 0x73, 0x67, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x45, 0x78, 0x63, 0x68, 0x61, 0x6e, 0x67,
-	0x65, 0x52, 0x61, 0x74, 0x65, 0x22, 0x2f, 0x0a, 0x1d, 0x4d, 0x73, 0x67, 0x43, 0x72, 0x65, 0x61,
-	0x74, 0x65, 0x45, 0x78, 0x63, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x52, 0x61, 0x74, 0x65, 0x52, 0x65,
-	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01,
-	0x28, 0x04, 0x52, 0x02, 0x69, 0x64, 0x22, 0xde, 0x01, 0x0a, 0x15, 0x4d, 0x73, 0x67, 0x55, 0x70,
-	0x64, 0x61, 0x74, 0x65, 0x45, 0x78, 0x63, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x52, 0x61, 0x74, 0x65,
-	0x12, 0x36, 0x0a, 0x09, 0x61, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x74, 0x79, 0x18, 0x01, 0x20,
-	0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e,
-	0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x09, 0x61,
-	0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x74, 0x79, 0x12, 0x34, 0x0a, 0x08, 0x6f, 0x70, 0x65, 0x72,
-	0x61, 0x74, 0x6f, 0x72, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14,
-	0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74,
-	0x72, 0x69, 0x6e, 0x67, 0x52, 0x08, 0x6f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x12, 0x0e,
-	0x0a, 0x02, 0x69, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28, 0x04, 0x52, 0x02, 0x69, 0x64, 0x12, 0x12,
-	0x0a, 0x04, 0x72, 0x61, 0x74, 0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x72, 0x61,
-	0x74, 0x65, 0x3a, 0x33, 0x82, 0xe7, 0xb0, 0x2a, 0x08, 0x6f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f,
-	0x72, 0x8a, 0xe7, 0xb0, 0x2a, 0x21, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2f, 0x78, 0x2f, 0x78,
-	0x72, 0x2f, 0x4d, 0x73, 0x67, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x45, 0x78, 0x63, 0x68, 0x61,
-	0x6e, 0x67, 0x65, 0x52, 0x61, 0x74, 0x65, 0x22, 0x1f, 0x0a, 0x1d, 0x4d, 0x73, 0x67, 0x55, 0x70,
-	0x64, 0x61, 0x74, 0x65, 0x45, 0x78, 0x63, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x52, 0x61, 0x74, 0x65,
-	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0xb2, 0x01, 0x0a, 0x0f, 0x4d, 0x73, 0x67,
-	0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x50, 0x61, 0x72, 0x61, 0x6d, 0x73, 0x12, 0x36, 0x0a, 0x09,
-	0x61, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x74, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x42,
-	0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72,
-	0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x09, 0x61, 0x75, 0x74, 0x68, 0x6f,
-	0x72, 0x69, 0x74, 0x79, 0x12, 0x37, 0x0a, 0x06, 0x70, 0x61, 0x72, 0x61, 0x6d, 0x73, 0x18, 0x02,
-	0x20, 0x01, 0x28, 0x0b, 0x32, 0x14, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x78, 0x72,
-	0x2e, 0x76, 0x31, 0x2e, 0x50, 0x61, 0x72, 0x61, 0x6d, 0x73, 0x42, 0x09, 0xc8, 0xde, 0x1f, 0x00,
-	0xa8, 0xe7, 0xb0, 0x2a, 0x01, 0x52, 0x06, 0x70, 0x61, 0x72, 0x61, 0x6d, 0x73, 0x3a, 0x2e, 0x82,
-	0xe7, 0xb0, 0x2a, 0x09, 0x61, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x74, 0x79, 0x8a, 0xe7, 0xb0,
-	0x2a, 0x1b, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2f, 0x78, 0x2f, 0x78, 0x72, 0x2f, 0x4d, 0x73,
-	0x67, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x50, 0x61, 0x72, 0x61, 0x6d, 0x73, 0x22, 0xb5, 0x01,
-	0x0a, 0x1a, 0x4d, 0x73, 0x67, 0x54, 0x6f, 0x67, 0x67, 0x6c, 0x65, 0x45, 0x78, 0x63, 0x68, 0x61,
-	0x6e, 0x67, 0x65, 0x52, 0x61, 0x74, 0x65, 0x53, 0x74, 0x61, 0x74, 0x65, 0x12, 0x36, 0x0a, 0x09,
-	0x61, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x74, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x42,
-	0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72,
-	0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x09, 0x61, 0x75, 0x74, 0x68, 0x6f,
-	0x72, 0x69, 0x74, 0x79, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x04,
-	0x52, 0x02, 0x69, 0x64, 0x12, 0x14, 0x0a, 0x05, 0x73, 0x74, 0x61, 0x74, 0x65, 0x18, 0x03, 0x20,
-	0x01, 0x28, 0x08, 0x52, 0x05, 0x73, 0x74, 0x61, 0x74, 0x65, 0x3a, 0x39, 0x82, 0xe7, 0xb0, 0x2a,
-	0x09, 0x61, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x74, 0x79, 0x8a, 0xe7, 0xb0, 0x2a, 0x26, 0x76,
-	0x65, 0x72, 0x61, 0x6e, 0x61, 0x2f, 0x78, 0x2f, 0x78, 0x72, 0x2f, 0x4d, 0x73, 0x67, 0x54, 0x6f,
-	0x67, 0x67, 0x6c, 0x65, 0x45, 0x78, 0x63, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x52, 0x61, 0x74, 0x65,
-	0x53, 0x74, 0x61, 0x74, 0x65, 0x22, 0x24, 0x0a, 0x22, 0x4d, 0x73, 0x67, 0x54, 0x6f, 0x67, 0x67,
-	0x6c, 0x65, 0x45, 0x78, 0x63, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x52, 0x61, 0x74, 0x65, 0x53, 0x74,
-	0x61, 0x74, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x19, 0x0a, 0x17, 0x4d,
-	0x73, 0x67, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x50, 0x61, 0x72, 0x61, 0x6d, 0x73, 0x52, 0x65,
-	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x32, 0xa9, 0x03, 0x0a, 0x03, 0x4d, 0x73, 0x67, 0x12, 0x54,
-	0x0a, 0x0c, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x50, 0x61, 0x72, 0x61, 0x6d, 0x73, 0x12, 0x1d,
-	0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x78, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x4d, 0x73,
-	0x67, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x50, 0x61, 0x72, 0x61, 0x6d, 0x73, 0x1a, 0x25, 0x2e,
-	0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x78, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x4d, 0x73, 0x67,
-	0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x50, 0x61, 0x72, 0x61, 0x6d, 0x73, 0x52, 0x65, 0x73, 0x70,
-	0x6f, 0x6e, 0x73, 0x65, 0x12, 0x66, 0x0a, 0x12, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x45, 0x78,
-	0x63, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x52, 0x61, 0x74, 0x65, 0x12, 0x23, 0x2e, 0x76, 0x65, 0x72,
-	0x61, 0x6e, 0x61, 0x2e, 0x78, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x4d, 0x73, 0x67, 0x43, 0x72, 0x65,
-	0x61, 0x74, 0x65, 0x45, 0x78, 0x63, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x52, 0x61, 0x74, 0x65, 0x1a,
-	0x2b, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x78, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x4d,
+	0x61, 0x6c, 0x69, 0x64, 0x69, 0x74, 0x79, 0x44, 0x75, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12,
+	0x14, 0x0a, 0x05, 0x73, 0x74, 0x61, 0x74, 0x65, 0x18, 0x09, 0x20, 0x01, 0x28, 0x08, 0x52, 0x05,
+	0x73, 0x74, 0x61, 0x74, 0x65, 0x3a, 0x34, 0x82, 0xe7, 0xb0, 0x2a, 0x09, 0x61, 0x75, 0x74, 0x68,
+	0x6f, 0x72, 0x69, 0x74, 0x79, 0x8a, 0xe7, 0xb0, 0x2a, 0x21, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61,
+	0x2f, 0x78, 0x2f, 0x78, 0x72, 0x2f, 0x4d, 0x73, 0x67, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x45,
+	0x78, 0x63, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x52, 0x61, 0x74, 0x65, 0x22, 0x2f, 0x0a, 0x1d, 0x4d,
 	0x73, 0x67, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x45, 0x78, 0x63, 0x68, 0x61, 0x6e, 0x67, 0x65,
-	0x52, 0x61, 0x74, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x66, 0x0a, 0x12,
-	0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x45, 0x78, 0x63, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x52, 0x61,
-	0x74, 0x65, 0x12, 0x23, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x78, 0x72, 0x2e, 0x76,
-	0x31, 0x2e, 0x4d, 0x73, 0x67, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x45, 0x78, 0x63, 0x68, 0x61,
-	0x6e, 0x67, 0x65, 0x52, 0x61, 0x74, 0x65, 0x1a, 0x2b, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61,
-	0x2e, 0x78, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x4d, 0x73, 0x67, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65,
-	0x45, 0x78, 0x63, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x52, 0x61, 0x74, 0x65, 0x52, 0x65, 0x73, 0x70,
-	0x6f, 0x6e, 0x73, 0x65, 0x12, 0x75, 0x0a, 0x17, 0x54, 0x6f, 0x67, 0x67, 0x6c, 0x65, 0x45, 0x78,
+	0x52, 0x61, 0x74, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x0e, 0x0a, 0x02,
+	0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04, 0x52, 0x02, 0x69, 0x64, 0x22, 0xde, 0x01, 0x0a,
+	0x15, 0x4d, 0x73, 0x67, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x45, 0x78, 0x63, 0x68, 0x61, 0x6e,
+	0x67, 0x65, 0x52, 0x61, 0x74, 0x65, 0x12, 0x36, 0x0a, 0x09, 0x61, 0x75, 0x74, 0x68, 0x6f, 0x72,
+	0x69, 0x74, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63,
+	0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72,
+	0x69, 0x6e, 0x67, 0x52, 0x09, 0x61, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x74, 0x79, 0x12, 0x34,
+	0x0a, 0x08, 0x6f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09,
+	0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64,
+	0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x08, 0x6f, 0x70, 0x65, 0x72,
+	0x61, 0x74, 0x6f, 0x72, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28, 0x04,
+	0x52, 0x02, 0x69, 0x64, 0x12, 0x12, 0x0a, 0x04, 0x72, 0x61, 0x74, 0x65, 0x18, 0x04, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x04, 0x72, 0x61, 0x74, 0x65, 0x3a, 0x33, 0x82, 0xe7, 0xb0, 0x2a, 0x08, 0x6f,
+	0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x8a, 0xe7, 0xb0, 0x2a, 0x21, 0x76, 0x65, 0x72, 0x61,
+	0x6e, 0x61, 0x2f, 0x78, 0x2f, 0x78, 0x72, 0x2f, 0x4d, 0x73, 0x67, 0x55, 0x70, 0x64, 0x61, 0x74,
+	0x65, 0x45, 0x78, 0x63, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x52, 0x61, 0x74, 0x65, 0x22, 0x1f, 0x0a,
+	0x1d, 0x4d, 0x73, 0x67, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x45, 0x78, 0x63, 0x68, 0x61, 0x6e,
+	0x67, 0x65, 0x52, 0x61, 0x74, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0xb2,
+	0x01, 0x0a, 0x0f, 0x4d, 0x73, 0x67, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x50, 0x61, 0x72, 0x61,
+	0x6d, 0x73, 0x12, 0x36, 0x0a, 0x09, 0x61, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x74, 0x79, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f,
+	0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x52,
+	0x09, 0x61, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x74, 0x79, 0x12, 0x37, 0x0a, 0x06, 0x70, 0x61,
+	0x72, 0x61, 0x6d, 0x73, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x14, 0x2e, 0x76, 0x65, 0x72,
+	0x61, 0x6e, 0x61, 0x2e, 0x78, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x50, 0x61, 0x72, 0x61, 0x6d, 0x73,
+	0x42, 0x09, 0xc8, 0xde, 0x1f, 0x00, 0xa8, 0xe7, 0xb0, 0x2a, 0x01, 0x52, 0x06, 0x70, 0x61, 0x72,
+	0x61, 0x6d, 0x73, 0x3a, 0x2e, 0x82, 0xe7, 0xb0, 0x2a, 0x09, 0x61, 0x75, 0x74, 0x68, 0x6f, 0x72,
+	0x69, 0x74, 0x79, 0x8a, 0xe7, 0xb0, 0x2a, 0x1b, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2f, 0x78,
+	0x2f, 0x78, 0x72, 0x2f, 0x4d, 0x73, 0x67, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x50, 0x61, 0x72,
+	0x61, 0x6d, 0x73, 0x22, 0xaf, 0x01, 0x0a, 0x17, 0x4d, 0x73, 0x67, 0x53, 0x65, 0x74, 0x45, 0x78,
 	0x63, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x52, 0x61, 0x74, 0x65, 0x53, 0x74, 0x61, 0x74, 0x65, 0x12,
-	0x28, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x78, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x4d,
-	0x73, 0x67, 0x54, 0x6f, 0x67, 0x67, 0x6c, 0x65, 0x45, 0x78, 0x63, 0x68, 0x61, 0x6e, 0x67, 0x65,
-	0x52, 0x61, 0x74, 0x65, 0x53, 0x74, 0x61, 0x74, 0x65, 0x1a, 0x30, 0x2e, 0x76, 0x65, 0x72, 0x61,
-	0x6e, 0x61, 0x2e, 0x78, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x4d, 0x73, 0x67, 0x54, 0x6f, 0x67, 0x67,
-	0x6c, 0x65, 0x45, 0x78, 0x63, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x52, 0x61, 0x74, 0x65, 0x53, 0x74,
-	0x61, 0x74, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x1a, 0x05, 0x80, 0xe7, 0xb0,
-	0x2a, 0x01, 0x42, 0xa2, 0x01, 0x0a, 0x10, 0x63, 0x6f, 0x6d, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e,
-	0x61, 0x2e, 0x78, 0x72, 0x2e, 0x76, 0x31, 0x42, 0x07, 0x54, 0x78, 0x50, 0x72, 0x6f, 0x74, 0x6f,
-	0x50, 0x01, 0x5a, 0x33, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x76,
-	0x65, 0x72, 0x61, 0x6e, 0x61, 0x2d, 0x6c, 0x61, 0x62, 0x73, 0x2f, 0x76, 0x65, 0x72, 0x61, 0x6e,
-	0x61, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2f, 0x78, 0x72, 0x2f,
-	0x76, 0x31, 0x3b, 0x78, 0x72, 0x76, 0x31, 0xa2, 0x02, 0x03, 0x56, 0x58, 0x58, 0xaa, 0x02, 0x0c,
-	0x56, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x58, 0x72, 0x2e, 0x56, 0x31, 0xca, 0x02, 0x0c, 0x56,
-	0x65, 0x72, 0x61, 0x6e, 0x61, 0x5c, 0x58, 0x72, 0x5c, 0x56, 0x31, 0xe2, 0x02, 0x18, 0x56, 0x65,
-	0x72, 0x61, 0x6e, 0x61, 0x5c, 0x58, 0x72, 0x5c, 0x56, 0x31, 0x5c, 0x47, 0x50, 0x42, 0x4d, 0x65,
-	0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0xea, 0x02, 0x0e, 0x56, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x3a,
-	0x3a, 0x58, 0x72, 0x3a, 0x3a, 0x56, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x36, 0x0a, 0x09, 0x61, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x74, 0x79, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41,
+	0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x09, 0x61, 0x75,
+	0x74, 0x68, 0x6f, 0x72, 0x69, 0x74, 0x79, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x02, 0x20,
+	0x01, 0x28, 0x04, 0x52, 0x02, 0x69, 0x64, 0x12, 0x14, 0x0a, 0x05, 0x73, 0x74, 0x61, 0x74, 0x65,
+	0x18, 0x03, 0x20, 0x01, 0x28, 0x08, 0x52, 0x05, 0x73, 0x74, 0x61, 0x74, 0x65, 0x3a, 0x36, 0x82,
+	0xe7, 0xb0, 0x2a, 0x09, 0x61, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x74, 0x79, 0x8a, 0xe7, 0xb0,
+	0x2a, 0x23, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2f, 0x78, 0x2f, 0x78, 0x72, 0x2f, 0x4d, 0x73,
+	0x67, 0x53, 0x65, 0x74, 0x45, 0x78, 0x63, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x52, 0x61, 0x74, 0x65,
+	0x53, 0x74, 0x61, 0x74, 0x65, 0x22, 0x21, 0x0a, 0x1f, 0x4d, 0x73, 0x67, 0x53, 0x65, 0x74, 0x45,
+	0x78, 0x63, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x52, 0x61, 0x74, 0x65, 0x53, 0x74, 0x61, 0x74, 0x65,
+	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x19, 0x0a, 0x17, 0x4d, 0x73, 0x67, 0x55,
+	0x70, 0x64, 0x61, 0x74, 0x65, 0x50, 0x61, 0x72, 0x61, 0x6d, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f,
+	0x6e, 0x73, 0x65, 0x32, 0xa0, 0x03, 0x0a, 0x03, 0x4d, 0x73, 0x67, 0x12, 0x54, 0x0a, 0x0c, 0x55,
+	0x70, 0x64, 0x61, 0x74, 0x65, 0x50, 0x61, 0x72, 0x61, 0x6d, 0x73, 0x12, 0x1d, 0x2e, 0x76, 0x65,
+	0x72, 0x61, 0x6e, 0x61, 0x2e, 0x78, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x4d, 0x73, 0x67, 0x55, 0x70,
+	0x64, 0x61, 0x74, 0x65, 0x50, 0x61, 0x72, 0x61, 0x6d, 0x73, 0x1a, 0x25, 0x2e, 0x76, 0x65, 0x72,
+	0x61, 0x6e, 0x61, 0x2e, 0x78, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x4d, 0x73, 0x67, 0x55, 0x70, 0x64,
+	0x61, 0x74, 0x65, 0x50, 0x61, 0x72, 0x61, 0x6d, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
+	0x65, 0x12, 0x66, 0x0a, 0x12, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x45, 0x78, 0x63, 0x68, 0x61,
+	0x6e, 0x67, 0x65, 0x52, 0x61, 0x74, 0x65, 0x12, 0x23, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61,
+	0x2e, 0x78, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x4d, 0x73, 0x67, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65,
+	0x45, 0x78, 0x63, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x52, 0x61, 0x74, 0x65, 0x1a, 0x2b, 0x2e, 0x76,
+	0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x78, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x4d, 0x73, 0x67, 0x43,
+	0x72, 0x65, 0x61, 0x74, 0x65, 0x45, 0x78, 0x63, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x52, 0x61, 0x74,
+	0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x66, 0x0a, 0x12, 0x55, 0x70, 0x64,
+	0x61, 0x74, 0x65, 0x45, 0x78, 0x63, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x52, 0x61, 0x74, 0x65, 0x12,
+	0x23, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x78, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x4d,
+	0x73, 0x67, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x45, 0x78, 0x63, 0x68, 0x61, 0x6e, 0x67, 0x65,
+	0x52, 0x61, 0x74, 0x65, 0x1a, 0x2b, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x78, 0x72,
+	0x2e, 0x76, 0x31, 0x2e, 0x4d, 0x73, 0x67, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x45, 0x78, 0x63,
+	0x68, 0x61, 0x6e, 0x67, 0x65, 0x52, 0x61, 0x74, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
+	0x65, 0x12, 0x6c, 0x0a, 0x14, 0x53, 0x65, 0x74, 0x45, 0x78, 0x63, 0x68, 0x61, 0x6e, 0x67, 0x65,
+	0x52, 0x61, 0x74, 0x65, 0x53, 0x74, 0x61, 0x74, 0x65, 0x12, 0x25, 0x2e, 0x76, 0x65, 0x72, 0x61,
+	0x6e, 0x61, 0x2e, 0x78, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x4d, 0x73, 0x67, 0x53, 0x65, 0x74, 0x45,
+	0x78, 0x63, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x52, 0x61, 0x74, 0x65, 0x53, 0x74, 0x61, 0x74, 0x65,
+	0x1a, 0x2d, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x78, 0x72, 0x2e, 0x76, 0x31, 0x2e,
+	0x4d, 0x73, 0x67, 0x53, 0x65, 0x74, 0x45, 0x78, 0x63, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x52, 0x61,
+	0x74, 0x65, 0x53, 0x74, 0x61, 0x74, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x1a,
+	0x05, 0x80, 0xe7, 0xb0, 0x2a, 0x01, 0x42, 0xa2, 0x01, 0x0a, 0x10, 0x63, 0x6f, 0x6d, 0x2e, 0x76,
+	0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x78, 0x72, 0x2e, 0x76, 0x31, 0x42, 0x07, 0x54, 0x78, 0x50,
+	0x72, 0x6f, 0x74, 0x6f, 0x50, 0x01, 0x5a, 0x33, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63,
+	0x6f, 0x6d, 0x2f, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2d, 0x6c, 0x61, 0x62, 0x73, 0x2f, 0x76,
+	0x65, 0x72, 0x61, 0x6e, 0x61, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61,
+	0x2f, 0x78, 0x72, 0x2f, 0x76, 0x31, 0x3b, 0x78, 0x72, 0x76, 0x31, 0xa2, 0x02, 0x03, 0x56, 0x58,
+	0x58, 0xaa, 0x02, 0x0c, 0x56, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x58, 0x72, 0x2e, 0x56, 0x31,
+	0xca, 0x02, 0x0c, 0x56, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x5c, 0x58, 0x72, 0x5c, 0x56, 0x31, 0xe2,
+	0x02, 0x18, 0x56, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x5c, 0x58, 0x72, 0x5c, 0x56, 0x31, 0x5c, 0x47,
+	0x50, 0x42, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0xea, 0x02, 0x0e, 0x56, 0x65, 0x72,
+	0x61, 0x6e, 0x61, 0x3a, 0x3a, 0x58, 0x72, 0x3a, 0x3a, 0x56, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f,
+	0x74, 0x6f, 0x33,
 }
 
 var (
@@ -5662,19 +5725,19 @@ func file_verana_xr_v1_tx_proto_rawDescGZIP() []byte {
 
 var file_verana_xr_v1_tx_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_verana_xr_v1_tx_proto_goTypes = []interface{}{
-	(*ExchangeRate)(nil),                       // 0: verana.xr.v1.ExchangeRate
-	(*MsgCreateExchangeRate)(nil),              // 1: verana.xr.v1.MsgCreateExchangeRate
-	(*MsgCreateExchangeRateResponse)(nil),      // 2: verana.xr.v1.MsgCreateExchangeRateResponse
-	(*MsgUpdateExchangeRate)(nil),              // 3: verana.xr.v1.MsgUpdateExchangeRate
-	(*MsgUpdateExchangeRateResponse)(nil),      // 4: verana.xr.v1.MsgUpdateExchangeRateResponse
-	(*MsgUpdateParams)(nil),                    // 5: verana.xr.v1.MsgUpdateParams
-	(*MsgToggleExchangeRateState)(nil),         // 6: verana.xr.v1.MsgToggleExchangeRateState
-	(*MsgToggleExchangeRateStateResponse)(nil), // 7: verana.xr.v1.MsgToggleExchangeRateStateResponse
-	(*MsgUpdateParamsResponse)(nil),            // 8: verana.xr.v1.MsgUpdateParamsResponse
-	(v1.PricingAssetType)(0),                   // 9: verana.cs.v1.PricingAssetType
-	(*durationpb.Duration)(nil),                // 10: google.protobuf.Duration
-	(*timestamppb.Timestamp)(nil),              // 11: google.protobuf.Timestamp
-	(*Params)(nil),                             // 12: verana.xr.v1.Params
+	(*ExchangeRate)(nil),                    // 0: verana.xr.v1.ExchangeRate
+	(*MsgCreateExchangeRate)(nil),           // 1: verana.xr.v1.MsgCreateExchangeRate
+	(*MsgCreateExchangeRateResponse)(nil),   // 2: verana.xr.v1.MsgCreateExchangeRateResponse
+	(*MsgUpdateExchangeRate)(nil),           // 3: verana.xr.v1.MsgUpdateExchangeRate
+	(*MsgUpdateExchangeRateResponse)(nil),   // 4: verana.xr.v1.MsgUpdateExchangeRateResponse
+	(*MsgUpdateParams)(nil),                 // 5: verana.xr.v1.MsgUpdateParams
+	(*MsgSetExchangeRateState)(nil),         // 6: verana.xr.v1.MsgSetExchangeRateState
+	(*MsgSetExchangeRateStateResponse)(nil), // 7: verana.xr.v1.MsgSetExchangeRateStateResponse
+	(*MsgUpdateParamsResponse)(nil),         // 8: verana.xr.v1.MsgUpdateParamsResponse
+	(v1.PricingAssetType)(0),                // 9: verana.cs.v1.PricingAssetType
+	(*durationpb.Duration)(nil),             // 10: google.protobuf.Duration
+	(*timestamppb.Timestamp)(nil),           // 11: google.protobuf.Timestamp
+	(*Params)(nil),                          // 12: verana.xr.v1.Params
 }
 var file_verana_xr_v1_tx_proto_depIdxs = []int32{
 	9,  // 0: verana.xr.v1.ExchangeRate.base_asset_type:type_name -> verana.cs.v1.PricingAssetType
@@ -5689,11 +5752,11 @@ var file_verana_xr_v1_tx_proto_depIdxs = []int32{
 	5,  // 9: verana.xr.v1.Msg.UpdateParams:input_type -> verana.xr.v1.MsgUpdateParams
 	1,  // 10: verana.xr.v1.Msg.CreateExchangeRate:input_type -> verana.xr.v1.MsgCreateExchangeRate
 	3,  // 11: verana.xr.v1.Msg.UpdateExchangeRate:input_type -> verana.xr.v1.MsgUpdateExchangeRate
-	6,  // 12: verana.xr.v1.Msg.ToggleExchangeRateState:input_type -> verana.xr.v1.MsgToggleExchangeRateState
+	6,  // 12: verana.xr.v1.Msg.SetExchangeRateState:input_type -> verana.xr.v1.MsgSetExchangeRateState
 	8,  // 13: verana.xr.v1.Msg.UpdateParams:output_type -> verana.xr.v1.MsgUpdateParamsResponse
 	2,  // 14: verana.xr.v1.Msg.CreateExchangeRate:output_type -> verana.xr.v1.MsgCreateExchangeRateResponse
 	4,  // 15: verana.xr.v1.Msg.UpdateExchangeRate:output_type -> verana.xr.v1.MsgUpdateExchangeRateResponse
-	7,  // 16: verana.xr.v1.Msg.ToggleExchangeRateState:output_type -> verana.xr.v1.MsgToggleExchangeRateStateResponse
+	7,  // 16: verana.xr.v1.Msg.SetExchangeRateState:output_type -> verana.xr.v1.MsgSetExchangeRateStateResponse
 	13, // [13:17] is the sub-list for method output_type
 	9,  // [9:13] is the sub-list for method input_type
 	9,  // [9:9] is the sub-list for extension type_name
@@ -5781,7 +5844,7 @@ func file_verana_xr_v1_tx_proto_init() {
 			}
 		}
 		file_verana_xr_v1_tx_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*MsgToggleExchangeRateState); i {
+			switch v := v.(*MsgSetExchangeRateState); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -5793,7 +5856,7 @@ func file_verana_xr_v1_tx_proto_init() {
 			}
 		}
 		file_verana_xr_v1_tx_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*MsgToggleExchangeRateStateResponse); i {
+			switch v := v.(*MsgSetExchangeRateStateResponse); i {
 			case 0:
 				return &v.state
 			case 1:

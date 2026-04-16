@@ -18,13 +18,6 @@ log() {
     echo "$(date '+%Y-%m-%d %H:%M:%S') - $1"
 }
 
-# Detect if running on macOS or Linux
-if [[ "$OSTYPE" == "darwin"* ]]; then
-  SED_CMD="sed -i ''"
-else
-  SED_CMD="sed -i"
-fi
-
 # Variables
 CHAIN_ID="vna-testnet-1"
 MONIKER="validator1"
@@ -49,9 +42,9 @@ log "=========================================="
 log "  Initializing Local Verana Chain"
 log "=========================================="
 
-# Initialize the chain
+# Initialize the chain with uvna as default denom
 log "Initializing the chain..."
-$BINARY init $MONIKER --chain-id $CHAIN_ID
+$BINARY init $MONIKER --chain-id $CHAIN_ID --default-denom uvna
 
 if [ $? -ne 0 ]; then
     log "Error: Failed to initialize the chain."
@@ -76,7 +69,37 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Create gentx
+# Replace remaining "stake" references and update governance params BEFORE gentx
+# Use Python for reliable cross-platform editing (macOS sed -i '' has issues with bash variables)
+log "Replacing 'stake' with 'uvna' in genesis.json and updating governance params..."
+python3 - <<'PYEOF'
+import json, os
+
+home = os.path.expanduser("~")
+genesis_path = os.path.join(home, ".verana", "config", "genesis.json")
+
+with open(genesis_path) as f:
+    content = f.read()
+
+# Replace any remaining "stake" denom references
+content = content.replace('"stake"', '"uvna"')
+
+with open(genesis_path, "w") as f:
+    f.write(content)
+
+# Now update governance params via JSON
+with open(genesis_path) as f:
+    g = json.load(f)
+
+g['app_state']['gov']['params']['max_deposit_period'] = '100s'
+g['app_state']['gov']['params']['voting_period'] = '30s'
+g['app_state']['gov']['params']['expedited_voting_period'] = '20s'
+
+with open(genesis_path, "w") as f:
+    json.dump(g, f, indent=" ")
+PYEOF
+
+# Create gentx (bond_denom=uvna is now set in genesis)
 log "Creating genesis transaction..."
 $BINARY gentx $VALIDATOR_NAME $GENTX_AMOUNT \
     --chain-id $CHAIN_ID \
@@ -92,44 +115,39 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Set minimum-gas-prices to 0uvna
-log "Setting minimum gas prices to 0uvna..."
-$SED_CMD 's/^minimum-gas-prices = .*/minimum-gas-prices = "0uvna"/' "$APP_TOML_PATH"
-
-# Configure ports in app.toml
-$SED_CMD "s/:1317/:$API_PORT/" "$APP_TOML_PATH"
-$SED_CMD "s/:9090/:$GRPC_PORT/" "$APP_TOML_PATH"
-$SED_CMD "s/:9091/:$GRPC_WEB_PORT/" "$APP_TOML_PATH"
-
-# Replace all occurrences of "stake" with "uvna" in genesis.json
-log "Replacing 'stake' with 'uvna' in genesis.json..."
-$SED_CMD 's/stake/uvna/g' "$GENESIS_JSON_PATH"
-
-# Update governance params in genesis.json (fast periods for testing)
-log "Updating governance parameters in genesis.json..."
-$SED_CMD 's/"max_deposit_period": ".*"/"max_deposit_period": "100s"/' "$GENESIS_JSON_PATH"
-$SED_CMD 's/"voting_period": ".*"/"voting_period": "30s"/' "$GENESIS_JSON_PATH"
-$SED_CMD 's/"expedited_voting_period": ".*"/"expedited_voting_period": "20s"/' "$GENESIS_JSON_PATH"
-
-if [ $? -ne 0 ]; then
-    log "Error: Failed to update governance parameters in genesis.json."
-    exit 1
-fi
-
-# Configure ports in config.toml
-$SED_CMD "s/:26656/:$P2P_PORT/" "$CONFIG_TOML_PATH"
-$SED_CMD "s/:26657/:$RPC_PORT/" "$CONFIG_TOML_PATH"
-
-# Enable API and CORS
-log "Updating API and CORS settings..."
-$SED_CMD 's/enable = false/enable = true/' "$APP_TOML_PATH"
-$SED_CMD 's/swagger = false/swagger = true/' "$APP_TOML_PATH"
-$SED_CMD 's/enabled-unsafe-cors = false/enabled-unsafe-cors = true/' "$APP_TOML_PATH"
-$SED_CMD 's/cors_allowed_origins = \[\]/cors_allowed_origins = \["*"\]/' "$CONFIG_TOML_PATH"
-
 # Collect genesis transactions
 log "Collecting genesis transactions..."
 $BINARY collect-gentxs
+
+# Configure app.toml and config.toml using Python
+log "Configuring app.toml and config.toml..."
+python3 - <<PYEOF
+import os
+
+home = os.path.expanduser("~")
+app_toml = os.path.join(home, ".verana", "config", "app.toml")
+config_toml = os.path.join(home, ".verana", "config", "config.toml")
+
+with open(app_toml) as f:
+    c = f.read()
+c = c.replace('minimum-gas-prices = ""', 'minimum-gas-prices = "0uvna"')
+c = c.replace('enable = false', 'enable = true')
+c = c.replace('swagger = false', 'swagger = true')
+c = c.replace('enabled-unsafe-cors = false', 'enabled-unsafe-cors = true')
+c = c.replace(':1317', ':${API_PORT}')
+c = c.replace(':9090', ':${GRPC_PORT}')
+c = c.replace(':9091', ':${GRPC_WEB_PORT}')
+with open(app_toml, 'w') as f:
+    f.write(c)
+
+with open(config_toml) as f:
+    c = f.read()
+c = c.replace('cors_allowed_origins = []', 'cors_allowed_origins = ["*"]')
+c = c.replace(':26656', ':${P2P_PORT}')
+c = c.replace(':26657', ':${RPC_PORT}')
+with open(config_toml, 'w') as f:
+    f.write(c)
+PYEOF
 
 # Validate genesis file
 log "Validating genesis file..."
@@ -155,11 +173,7 @@ log "  API:       http://localhost:$API_PORT"
 log "  gRPC:      localhost:$GRPC_PORT"
 log ""
 log "  Next steps:"
-log "    1. Chain will start automatically below"
+log "    1. Start the chain: veranad start"
 log "    2. In a new terminal: bash scripts/setup_group.sh"
 log ""
 log "=========================================="
-
-# Start the chain
-log "Starting the chain..."
-$BINARY start

@@ -37,7 +37,7 @@ import {
 } from "./codec/verana/tr/v1/tx";
 import {
   MsgCreateExchangeRate,
-  MsgToggleExchangeRateState,
+  MsgSetExchangeRateState,
   MsgUpdateExchangeRate,
 } from "./codec/verana/xr/v1/tx";
 import {
@@ -77,7 +77,7 @@ import {
 } from "./amino-converter/tr";
 import {
   MsgCreateExchangeRateAminoConverter,
-  MsgToggleExchangeRateStateAminoConverter,
+  MsgSetExchangeRateStateAminoConverter,
   MsgUpdateExchangeRateAminoConverter,
 } from "./amino-converter/xr";
 
@@ -109,7 +109,7 @@ export const veranaTypeUrls = {
   MsgStoreDigest: "/verana.di.v1.MsgStoreDigest",
   MsgCreateExchangeRate: "/verana.xr.v1.MsgCreateExchangeRate",
   MsgUpdateExchangeRate: "/verana.xr.v1.MsgUpdateExchangeRate",
-  MsgToggleExchangeRateState: "/verana.xr.v1.MsgToggleExchangeRateState",
+  MsgSetExchangeRateState: "/verana.xr.v1.MsgSetExchangeRateState",
 } as const;
 
 export const typeUrls = veranaTypeUrls;
@@ -142,7 +142,7 @@ export const veranaRegistryTypes: ReadonlyArray<[string, GeneratedType]> = [
   [veranaTypeUrls.MsgStoreDigest, MsgStoreDigest as GeneratedType],
   [veranaTypeUrls.MsgCreateExchangeRate, MsgCreateExchangeRate as GeneratedType],
   [veranaTypeUrls.MsgUpdateExchangeRate, MsgUpdateExchangeRate as GeneratedType],
-  [veranaTypeUrls.MsgToggleExchangeRateState, MsgToggleExchangeRateState as GeneratedType],
+  [veranaTypeUrls.MsgSetExchangeRateState, MsgSetExchangeRateState as GeneratedType],
 ];
 
 export function createVeranaRegistry(): Registry {
@@ -182,6 +182,6 @@ export function createVeranaAminoTypes(): AminoTypes {
     [veranaTypeUrls.MsgStoreDigest]: MsgStoreDigestAminoConverter,
     [veranaTypeUrls.MsgCreateExchangeRate]: MsgCreateExchangeRateAminoConverter,
     [veranaTypeUrls.MsgUpdateExchangeRate]: MsgUpdateExchangeRateAminoConverter,
-    [veranaTypeUrls.MsgToggleExchangeRateState]: MsgToggleExchangeRateStateAminoConverter,
+    [veranaTypeUrls.MsgSetExchangeRateState]: MsgSetExchangeRateStateAminoConverter,
   });
 }

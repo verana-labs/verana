@@ -39,6 +39,8 @@ export interface MsgReclaimTrustDepositYield {
   corporation: string;
   /** operator is the account authorized by the corporation to run this Msg. */
   operator: string;
+  /** amount is the quantity of claimable yield to withdraw (must be > 0 and <= td.claimable). */
+  amount: number;
 }
 
 /** MsgReclaimTrustDepositYieldResponse defines the response type */
@@ -199,7 +201,7 @@ export const MsgUpdateParamsResponse = {
 };
 
 function createBaseMsgReclaimTrustDepositYield(): MsgReclaimTrustDepositYield {
-  return { corporation: "", operator: "" };
+  return { corporation: "", operator: "", amount: 0 };
 }
 
 export const MsgReclaimTrustDepositYield = {
@@ -209,6 +211,9 @@ export const MsgReclaimTrustDepositYield = {
     }
     if (message.operator !== "") {
       writer.uint32(18).string(message.operator);
+    }
+    if (message.amount !== 0) {
+      writer.uint32(32).uint64(message.amount);
     }
     return writer;
   },
@@ -234,6 +239,13 @@ export const MsgReclaimTrustDepositYield = {
 
           message.operator = reader.string();
           continue;
+        case 4:
+          if (tag !== 32) {
+            break;
+          }
+
+          message.amount = longToNumber(reader.uint64() as Long);
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -247,6 +259,7 @@ export const MsgReclaimTrustDepositYield = {
     return {
       corporation: isSet(object.corporation) ? globalThis.String(object.corporation) : "",
       operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
+      amount: isSet(object.amount) ? globalThis.Number(object.amount) : 0,
     };
   },
 
@@ -258,6 +271,9 @@ export const MsgReclaimTrustDepositYield = {
     if (message.operator !== "") {
       obj.operator = message.operator;
     }
+    if (message.amount !== 0) {
+      obj.amount = Math.round(message.amount);
+    }
     return obj;
   },
 
@@ -268,6 +284,7 @@ export const MsgReclaimTrustDepositYield = {
     const message = createBaseMsgReclaimTrustDepositYield();
     message.corporation = object.corporation ?? "";
     message.operator = object.operator ?? "";
+    message.amount = object.amount ?? 0;
     return message;
   },
 };

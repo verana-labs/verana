@@ -1,7 +1,7 @@
 import type { AminoConverter } from "@cosmjs/stargate";
 import {
   MsgCreateExchangeRate,
-  MsgToggleExchangeRateState,
+  MsgSetExchangeRateState,
   MsgUpdateExchangeRate,
 } from "../codec/verana/xr/v1/tx";
 import {
@@ -24,6 +24,7 @@ export const MsgCreateExchangeRateAminoConverter: AminoConverter = {
     rate: m.rate || undefined,
     rate_scale: u32ToAmino(m.rateScale),
     validity_duration: durationToAmino(m.validityDuration),
+    state: m.state ? true : undefined,
   }),
   fromAmino: (a: any): MsgCreateExchangeRate =>
     MsgCreateExchangeRate.fromPartial({
@@ -35,6 +36,7 @@ export const MsgCreateExchangeRateAminoConverter: AminoConverter = {
       rate: a.rate ?? "",
       rateScale: a.rate_scale ?? 0,
       validityDuration: aminoToDuration(a.validity_duration),
+      state: a.state ?? false,
     }),
 };
 
@@ -55,15 +57,15 @@ export const MsgUpdateExchangeRateAminoConverter: AminoConverter = {
     }),
 };
 
-export const MsgToggleExchangeRateStateAminoConverter: AminoConverter = {
-  aminoType: "/verana.xr.v1.MsgToggleExchangeRateState",
-  toAmino: (m: MsgToggleExchangeRateState) => clean({
+export const MsgSetExchangeRateStateAminoConverter: AminoConverter = {
+  aminoType: "/verana.xr.v1.MsgSetExchangeRateState",
+  toAmino: (m: MsgSetExchangeRateState) => clean({
     authority: m.authority || undefined,
     id: u64ToStr(m.id),
     state: m.state ? true : undefined,
   }),
-  fromAmino: (a: any): MsgToggleExchangeRateState =>
-    MsgToggleExchangeRateState.fromPartial({
+  fromAmino: (a: any): MsgSetExchangeRateState =>
+    MsgSetExchangeRateState.fromPartial({
       authority: a.authority ?? "",
       id: strToU64(a.id) != null ? Number(strToU64(a.id)!.toString()) : 0,
       state: a.state ?? false,
