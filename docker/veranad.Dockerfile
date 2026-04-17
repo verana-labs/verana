@@ -21,7 +21,8 @@ FROM ${BASE_IMAGE}
 
 ARG INCLUDE_GO=false
 
-RUN apt-get update && apt-get install -y \
+RUN sed -i 's|http://archive.ubuntu.com|http://azure.archive.ubuntu.com|g' /etc/apt/sources.list \
+  && apt-get update && apt-get install -y \
     bash \
     ca-certificates \
     curl \
