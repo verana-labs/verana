@@ -11,7 +11,6 @@ on:
 
 permissions:
   contents: read
-  actions: write
 
 env:
   DH_USERNAME: ${{ secrets.DOCKER_HUB_LOGIN }}
@@ -67,5 +66,3 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             LDFLAGS=${{ env.LDFLAGS }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max

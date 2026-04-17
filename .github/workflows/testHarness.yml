@@ -65,8 +65,7 @@ jobs:
           fi
           if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
             PR_NUMBER=$(echo "$GITHUB_REF" | awk -F'/' '{print $3}')
-            SHORT_SHA="$(echo "${GITHUB_SHA}" | cut -c1-7)"
-            echo "IMAGE_TAG=${IMAGE_REPO}:sha-${SHORT_SHA}" >> $GITHUB_ENV
+            echo "IMAGE_TAG=${IMAGE_REPO}:pr-${PR_NUMBER}" >> $GITHUB_ENV
             BRANCH_REF="${GITHUB_HEAD_REF:-${GITHUB_REF_NAME:-$GITHUB_REF}}"
           elif [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
             BRANCH_REF="${GITHUB_REF_NAME:-$GITHUB_REF}"
@@ -121,7 +120,7 @@ jobs:
         run: |
           echo "Pulling $IMAGE_TAG"
           attempts=0
-          max_attempts=60
+          max_attempts=30
           until docker pull "$IMAGE_TAG"; do
             attempts=$((attempts + 1))
             if [ "$attempts" -ge "$max_attempts" ]; then
@@ -149,7 +148,7 @@ jobs:
           export KUBECONFIG=$KUBECONFIG
           echo "Checking image availability: $IMAGE_TAG"
           attempts=0
-          max_attempts=60
+          max_attempts=30
           until docker pull "$IMAGE_TAG"; do
             attempts=$((attempts + 1))
             if [ "$attempts" -ge "$max_attempts" ]; then
