@@ -21,8 +21,7 @@ FROM ${BASE_IMAGE}
 
 ARG INCLUDE_GO=false
 
-RUN for i in 1 2 3 4 5; do apt-get update && break || (echo "apt-get update failed, retrying in 15s ($i/5)..." && sleep 15); done \
-  && apt-get install -y \
+RUN apt-get update && apt-get install -y \
     bash \
     ca-certificates \
     curl \
