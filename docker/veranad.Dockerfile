@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.5
 ARG GO_VERSION=1.25
-ARG BASE_IMAGE=debian:bookworm-slim
+ARG BASE_IMAGE=ubuntu:22.04
 
 FROM golang:${GO_VERSION}-bookworm AS builder
 
@@ -21,7 +21,8 @@ FROM ${BASE_IMAGE}
 
 ARG INCLUDE_GO=false
 
-RUN apt-get update && apt-get install -y \
+RUN for i in 1 2 3 4 5; do apt-get update && break || (echo "apt-get update failed, retrying in 15s ($i/5)..." && sleep 15); done \
+  && apt-get install -y \
     bash \
     ca-certificates \
     curl \
