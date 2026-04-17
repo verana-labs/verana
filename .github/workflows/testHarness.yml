@@ -121,7 +121,7 @@ jobs:
         run: |
           echo "Pulling $IMAGE_TAG"
           attempts=0
-          max_attempts=30
+          max_attempts=60
           until docker pull "$IMAGE_TAG"; do
             attempts=$((attempts + 1))
             if [ "$attempts" -ge "$max_attempts" ]; then
@@ -149,7 +149,7 @@ jobs:
           export KUBECONFIG=$KUBECONFIG
           echo "Checking image availability: $IMAGE_TAG"
           attempts=0
-          max_attempts=30
+          max_attempts=60
           until docker pull "$IMAGE_TAG"; do
             attempts=$((attempts + 1))
             if [ "$attempts" -ge "$max_attempts" ]; then
