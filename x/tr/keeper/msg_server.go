@@ -241,20 +241,14 @@ func (ms msgServer) ArchiveTrustRegistry(goCtx context.Context, msg *types.MsgAr
 		return nil, fmt.Errorf("only trust registry corporation can archive trust registry")
 	}
 
-	// [MOD-TR-MSG-5] Bidirectional archive/unarchive logic.
-	if msg.Archive {
-		// archive=true: reject if already archived
-		if tr.Archived != nil {
-			return nil, fmt.Errorf("trust registry is already archived")
-		}
-		tr.Archived = &now
-	} else {
-		// archive=false: reject if not currently archived
-		if tr.Archived == nil {
-			return nil, fmt.Errorf("trust registry is not archived")
-		}
-		tr.Archived = nil
+	// [MOD-TR-MSG-5] Archiving is terminal (spec v4 draft 13): once archived, a TR cannot be unarchived.
+	if !msg.Archive {
+		return nil, fmt.Errorf("archiving is irreversible: trust registry cannot be unarchived")
 	}
+	if tr.Archived != nil {
+		return nil, fmt.Errorf("trust registry is already archived")
+	}
+	tr.Archived = &now
 	tr.Modified = now
 
 	// Save updated trust registry
@@ -262,17 +256,12 @@ func (ms msgServer) ArchiveTrustRegistry(goCtx context.Context, msg *types.MsgAr
 		return nil, fmt.Errorf("failed to update trust registry: %w", err)
 	}
 
-	archiveStatus := "archived"
-	if !msg.Archive {
-		archiveStatus = "unarchived"
-	}
-
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeArchiveTrustRegistry,
 			sdk.NewAttribute(types.AttributeKeyTrustRegistryID, strconv.FormatUint(msg.TrId, 10)),
 			sdk.NewAttribute(types.AttributeKeyCorporation, msg.Corporation),
-			sdk.NewAttribute(types.AttributeKeyArchiveStatus, archiveStatus),
+			sdk.NewAttribute(types.AttributeKeyArchiveStatus, "archived"),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
 		),
 	})

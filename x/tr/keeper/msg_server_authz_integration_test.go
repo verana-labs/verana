@@ -655,8 +655,8 @@ func TestIntegration_UnauthorizedOperatorCannotUpdateTrustRegistry(t *testing.T)
 //
 //  1. Grant operator with CreateTR and ArchiveTR permissions.
 //  2. Operator creates a trust registry.
-//  3. Operator archives the trust registry.
-//  4. Operator unarchives the trust registry.
+//  3. Operator archives the trust registry (archiving is terminal per spec v4).
+//  4. Unarchive attempt is rejected (archiving is irreversible).
 func TestIntegration_OperatorArchivesTrustRegistry(t *testing.T) {
 	f := setupIntegrationFixture(t)
 
@@ -703,19 +703,15 @@ func TestIntegration_OperatorArchivesTrustRegistry(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, tr.Archived)
 
-	// Unarchive — bidirectional per spec [MOD-TR-MSG-5]; must succeed
+	// Unarchive attempt must be rejected — archiving is terminal per spec v4 draft 13
 	_, err = f.trMsgServer.ArchiveTrustRegistry(f.ctx, &trtypes.MsgArchiveTrustRegistry{
 		Corporation: groupAccount,
 		Operator:    operator,
 		TrId:        trID,
 		Archive:     false,
 	})
-	require.NoError(t, err)
-
-	// Verify unarchived
-	tr, err = f.trKeeper.TrustRegistry.Get(f.ctx, trID)
-	require.NoError(t, err)
-	require.Nil(t, tr.Archived)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "irreversible")
 }
 
 // TestIntegration_UnauthorizedOperatorCannotArchiveTrustRegistry verifies that an
