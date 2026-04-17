@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.5
 ARG GO_VERSION=1.25
-ARG BASE_IMAGE=ubuntu:22.04
+ARG BASE_IMAGE=debian:bookworm-slim
 
 FROM golang:${GO_VERSION}-bookworm AS builder
 
