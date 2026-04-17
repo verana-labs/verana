@@ -603,19 +603,8 @@ func TestArchiveCredentialSchema(t *testing.T) {
 			expPass: true,
 		},
 		{
-			// schema is now archived; archive=false (unarchive) must succeed
-			name: "valid unarchive",
-			msg: &types.MsgArchiveCredentialSchema{
-				Corporation: authority,
-				Operator:    operator,
-				Id:          schemaID.Id,
-				Archive:     false,
-			},
-			expPass: true,
-		},
-		{
-			// schema is now unarchived; archive=false again must fail
-			name: "unarchive already unarchived",
+			// Archiving is terminal per spec v4 draft 13; unarchive must be rejected
+			name: "unarchive rejected (terminal)",
 			msg: &types.MsgArchiveCredentialSchema{
 				Corporation: authority,
 				Operator:    operator,
@@ -623,7 +612,19 @@ func TestArchiveCredentialSchema(t *testing.T) {
 				Archive:     false,
 			},
 			expPass:       false,
-			errorContains: "credential schema is not archived",
+			errorContains: "irreversible",
+		},
+		{
+			// schema is already archived; archive=true again must fail
+			name: "already archived",
+			msg: &types.MsgArchiveCredentialSchema{
+				Corporation: authority,
+				Operator:    operator,
+				Id:          schemaID.Id,
+				Archive:     true,
+			},
+			expPass:       false,
+			errorContains: "already archived",
 		},
 		{
 			name: "non-existent schema",
@@ -648,19 +649,8 @@ func TestArchiveCredentialSchema(t *testing.T) {
 			errorContains: "corporation does not match the trust registry corporation",
 		},
 		{
-			// Re-archive the schema (it's unarchived after step 2)
-			name: "re-archive after unarchive",
-			msg: &types.MsgArchiveCredentialSchema{
-				Corporation: authority,
-				Operator:    operator,
-				Id:          schemaID.Id,
-				Archive:     true,
-			},
-			expPass: true,
-		},
-		{
-			// schema is archived again; archive=true must fail with already archived
-			name: "already archived",
+			// schema is already archived; archive=true again must fail
+			name: "already archived again",
 			msg: &types.MsgArchiveCredentialSchema{
 				Corporation: authority,
 				Operator:    operator,
