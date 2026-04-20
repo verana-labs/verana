@@ -50,13 +50,17 @@ export async function createRootPermissionForTest(
       validationFees: 5,
       verificationFees: 5,
       issuanceFees: 5,
+      // [MOD-PERM-MSG-7-1] permission_type is mandatory on the wire (spec v4 draft 13).
+      // ECOSYSTEM is the grantor root used by downstream Self-Create flows in this test.
+      permissionType: PermissionType.ECOSYSTEM,
+      vsOperator: address,
     }),
   };
 
   try {
     // Get sequence BEFORE transaction to track if it increments
     const sequenceBefore = await client.getSequence(address);
-    
+
     const fee = await calculateFeeWithSimulation(client, address, [msg], "Creating root permission (ecosystem permission) for test");
     // Use retry logic for consistency (matches frontend pattern)
     const result = await signAndBroadcastWithRetry(client, address, [msg], fee, "Creating root permission (ecosystem permission) for test");
@@ -655,6 +659,9 @@ export async function createRootPermWithOperator(
       validationFees: opts?.validationFees ?? 5,
       issuanceFees: opts?.issuanceFees ?? 5,
       verificationFees: opts?.verificationFees ?? 5,
+      // [MOD-PERM-MSG-7-1] spec v4 draft 13 mandates permission_type and vs_operator.
+      permissionType: PermissionType.ECOSYSTEM,
+      vsOperator: operator,
     }),
   };
 

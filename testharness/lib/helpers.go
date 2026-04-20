@@ -1017,8 +1017,9 @@ func CancelPermissionVPLastRequest(client cosmosclient.Client, ctx context.Conte
 	return "success", nil
 }
 
-// SlashPermissionTrustDeposit slashes a permission's trust deposit
-func SlashPermissionTrustDeposit(client cosmosclient.Client, ctx context.Context, actor cosmosaccount.Account, authority string, id uint64, amount uint64) error {
+// SlashPermissionTrustDeposit slashes a permission's trust deposit.
+// [MOD-PERM-MSG-12-1] reason is mandatory per spec v4 draft 13.
+func SlashPermissionTrustDeposit(client cosmosclient.Client, ctx context.Context, actor cosmosaccount.Account, authority string, id uint64, amount uint64, reason string) error {
 	actorAddr, err := actor.Address(addressPrefix)
 	if err != nil {
 		return fmt.Errorf("failed to get actor address: %w", err)
@@ -1026,9 +1027,10 @@ func SlashPermissionTrustDeposit(client cosmosclient.Client, ctx context.Context
 
 	msg := &permtypes.MsgSlashPermissionTrustDeposit{
 		Corporation: authority,
-		Operator:  actorAddr,
-		Id:        id,
-		Amount:    amount,
+		Operator:    actorAddr,
+		Id:          id,
+		Amount:      amount,
+		Reason:      reason,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, actor, msg)
@@ -1354,7 +1356,9 @@ func GetAllKnownTrustDepositsAtHeight(client cosmosclient.Client, ctx context.Co
 	return results, nil
 }
 
-// SubmitSlashTrustDepositProposal submits a slash trust deposit governance proposal
+// SubmitSlashTrustDepositProposal submits a slash trust deposit governance proposal.
+// [MOD-TD-MSG-5-1] reason is mandatory per spec v4 draft 13; we reuse the proposal
+// summary as the on-chain slash reason.
 func SubmitSlashTrustDepositProposal(
 	client cosmosclient.Client,
 	ctx context.Context,
@@ -1371,10 +1375,15 @@ func SubmitSlashTrustDepositProposal(
 	}
 
 	// Create the slash trust deposit message
+	reason := summary
+	if reason == "" {
+		reason = title
+	}
 	slashMsg := &tdtypes.MsgSlashTrustDeposit{
 		Authority:   authority,
 		Corporation: accountToSlash,
 		Deposit:     math.NewIntFromUint64(slashAmount),
+		Reason:      reason,
 	}
 
 	// Wrap in Any
@@ -1830,8 +1839,9 @@ func CreateRootPermissionWithError(client cosmosclient.Client, ctx context.Conte
 	}
 
 	// Create the message
+	// [MOD-PERM-MSG-7-1] spec v4 draft 13 mandates permission_type and vs_operator.
 	fullMsg := &permtypes.MsgCreateRootPermission{
-		Corporation:        creatorAddr,
+		Corporation:      creatorAddr,
 		Operator:         creatorAddr,
 		SchemaId:         msg.SchemaId,
 		Did:              msg.Did,
@@ -1840,6 +1850,8 @@ func CreateRootPermissionWithError(client cosmosclient.Client, ctx context.Conte
 		ValidationFees:   msg.ValidationFees,
 		VerificationFees: msg.VerificationFees,
 		IssuanceFees:     msg.IssuanceFees,
+		PermissionType:   permtypes.PermissionType_ECOSYSTEM,
+		VsOperator:       creatorAddr,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, creator, fullMsg)
@@ -1867,8 +1879,9 @@ func CreateRootPermissionAndGetID(client cosmosclient.Client, ctx context.Contex
 	}
 
 	// Create the message
+	// [MOD-PERM-MSG-7-1] spec v4 draft 13 mandates permission_type and vs_operator.
 	fullMsg := &permtypes.MsgCreateRootPermission{
-		Corporation:        creatorAddr,
+		Corporation:      creatorAddr,
 		Operator:         creatorAddr,
 		SchemaId:         msg.SchemaId,
 		Did:              msg.Did,
@@ -1877,6 +1890,8 @@ func CreateRootPermissionAndGetID(client cosmosclient.Client, ctx context.Contex
 		ValidationFees:   msg.ValidationFees,
 		VerificationFees: msg.VerificationFees,
 		IssuanceFees:     msg.IssuanceFees,
+		PermissionType:   permtypes.PermissionType_ECOSYSTEM,
+		VsOperator:       creatorAddr,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, creator, fullMsg)
@@ -2007,14 +2022,17 @@ func CreateInactiveValidatorPermission(client cosmosclient.Client, ctx context.C
 	}
 
 	// Create an ECOSYSTEM (root) permission with future effective_from
-	// This will be in FUTURE state (not ACTIVE)
+	// This will be in FUTURE state (not ACTIVE).
+	// [MOD-PERM-MSG-7-1] spec v4 draft 13 mandates permission_type and vs_operator.
 	msg := &permtypes.MsgCreateRootPermission{
-		Corporation:      creatorAddr,
+		Corporation:    creatorAddr,
 		Operator:       creatorAddr,
 		SchemaId:       schemaID,
 		Did:            did,
 		EffectiveFrom:  &futureTime, // Future = not yet active
 		EffectiveUntil: &farFuture,
+		PermissionType: permtypes.PermissionType_ECOSYSTEM,
+		VsOperator:     creatorAddr,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, creator, msg)
@@ -2886,8 +2904,10 @@ func CreateRootPermissionWithAuthority(
 		return 0, fmt.Errorf("failed to get operator address: %w", err)
 	}
 
+	// [MOD-PERM-MSG-7-1] spec v4 draft 13 mandates permission_type and vs_operator.
+	// ECOSYSTEM preserves the grantor-root semantic used by downstream flows.
 	msg := &permtypes.MsgCreateRootPermission{
-		Corporation:        authority,
+		Corporation:      authority,
 		Operator:         operatorAddr,
 		SchemaId:         schemaID,
 		Did:              did,
@@ -2896,6 +2916,8 @@ func CreateRootPermissionWithAuthority(
 		ValidationFees:   validationFees,
 		IssuanceFees:     issuanceFees,
 		VerificationFees: verificationFees,
+		PermissionType:   permtypes.PermissionType_ECOSYSTEM,
+		VsOperator:       operatorAddr,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, operatorAccount, msg)

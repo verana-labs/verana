@@ -79,18 +79,13 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					RpcMethod: "FindPermissionsWithDID",
 					Use:       "find-permissions-with-did [did] [type] [schema-id]",
 					Short:     "Find permissions with DID",
-					Long:      "Find permissions matching the specified DID, type, and schema ID with optional filtering by country and timestamp",
+					Long:      "Find permissions matching the specified DID, type, and schema ID with optional filtering by timestamp",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{ProtoField: "did"},
 						{ProtoField: "type"},
 						{ProtoField: "schema_id"},
 					},
 					FlagOptions: map[string]*autocliv1.FlagOptions{
-						"country": {
-							Name:         "country",
-							DefaultValue: "",
-							Usage:        "Filter by country code (ISO 3166-1 alpha-2)",
-						},
 						"when": {
 							Name:         "when",
 							DefaultValue: "",
@@ -400,15 +395,18 @@ Parameters:
 				},
 				{
 					RpcMethod: "SlashPermissionTrustDeposit",
-					Use:       "slash-perm-td [id] [amount]",
+					Use:       "slash-perm-td [id] [amount] [reason]",
 					Short:     "Slash a permission's trust deposit",
-					Long:      "Slash a permission's trust deposit. Can only be executed by a validator ancestor or the trust registry controller.",
+					Long:      "Slash a permission's trust deposit. Requires a non-empty reason per [MOD-PERM-MSG-12-1].",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{
 							ProtoField: "id",
 						},
 						{
 							ProtoField: "amount",
+						},
+						{
+							ProtoField: "reason",
 						},
 					},
 					FlagOptions: map[string]*autocliv1.FlagOptions{

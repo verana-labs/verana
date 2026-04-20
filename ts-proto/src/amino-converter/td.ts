@@ -36,15 +36,18 @@ export const MsgRepaySlashedTrustDepositAminoConverter: AminoConverter = {
 
 export const MsgSlashTrustDepositAminoConverter: AminoConverter = {
   aminoType: "verana/x/td/MsgSlashTrustDeposit",
-  toAmino: ({ authority, corporation, deposit }: MsgSlashTrustDeposit) => ({
+  // [MOD-TD-MSG-5-1] spec v4 draft 13 adds mandatory reason.
+  toAmino: ({ authority, corporation, deposit, reason }: MsgSlashTrustDeposit) => ({
     authority,
     corporation,
     deposit,
+    reason,
   }),
   fromAmino: (value: any) =>
     MsgSlashTrustDeposit.fromPartial({
       authority: value.authority,
       corporation: value.corporation,
       deposit: value.deposit,
+      reason: value.reason,
     }),
 };

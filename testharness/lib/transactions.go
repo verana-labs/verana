@@ -242,6 +242,16 @@ func CreateRootPermission(client cosmosclient.Client, ctx context.Context, creat
 		log.Fatal(err)
 	}
 
+	// [MOD-PERM-MSG-7-1] spec v4 draft 13 mandates permission_type and vs_operator.
+	// Use override.PermissionType if set; default to ECOSYSTEM for grantor-root semantic.
+	permType := override.PermissionType
+	if permType == permtypes.PermissionType_UNSPECIFIED {
+		permType = permtypes.PermissionType_ECOSYSTEM
+	}
+	vsOp := override.VsOperator
+	if vsOp == "" {
+		vsOp = creatorAddr
+	}
 	msg := &permtypes.MsgCreateRootPermission{
 		Corporation:      creatorAddr,
 		Operator:         creatorAddr,
@@ -252,6 +262,8 @@ func CreateRootPermission(client cosmosclient.Client, ctx context.Context, creat
 		ValidationFees:   override.ValidationFees,
 		VerificationFees: override.VerificationFees,
 		IssuanceFees:     override.IssuanceFees,
+		PermissionType:   permType,
+		VsOperator:       vsOp,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, creator, msg)

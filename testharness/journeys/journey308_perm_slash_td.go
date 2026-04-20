@@ -180,7 +180,7 @@ func RunPermissionSlashTDJourney(ctx context.Context, client cosmosclient.Client
 
 	// 1a: Try WITHOUT authorization (expect failure)
 	fmt.Println("\n--- Step 1a: Operator tries SlashPermissionTrustDeposit without auth (expect failure) ---")
-	err = lib.SlashPermissionTrustDeposit(client, ctx, operatorAccount, policyAddr, issuerPermID, slashAmount)
+	err = lib.SlashPermissionTrustDeposit(client, ctx, operatorAccount, policyAddr, issuerPermID, slashAmount, "journey 308 test slash")
 	if err := expectAuthorizationError("Step 1a", err); err != nil {
 		return err
 	}
@@ -202,7 +202,7 @@ func RunPermissionSlashTDJourney(ctx context.Context, client cosmosclient.Client
 
 	// 1c: Try WITH authorization (expect success - validator ancestor)
 	fmt.Println("\n--- Step 1c: Operator slashes perm trust deposit with auth (expect success) ---")
-	err = lib.SlashPermissionTrustDeposit(client, ctx, operatorAccount, policyAddr, issuerPermID, slashAmount)
+	err = lib.SlashPermissionTrustDeposit(client, ctx, operatorAccount, policyAddr, issuerPermID, slashAmount, "journey 308 test slash")
 	if err != nil {
 		return fmt.Errorf("step 1c failed: %w", err)
 	}
@@ -245,7 +245,7 @@ func RunPermissionSlashTDJourney(ctx context.Context, client cosmosclient.Client
 
 	fmt.Println("\n--- Step 3a: Unauthorized operator tries SlashPermissionTrustDeposit (expect failure) ---")
 	coolusrAcct := lib.GetAccount(client, lib.COOLUSER_NAME)
-	err = lib.SlashPermissionTrustDeposit(client, ctx, coolusrAcct, policyAddr, issuerPermID, slashAmount)
+	err = lib.SlashPermissionTrustDeposit(client, ctx, coolusrAcct, policyAddr, issuerPermID, slashAmount, "journey 308 test slash")
 	if err := expectAuthorizationError("Step 3a", err); err != nil {
 		return err
 	}
@@ -259,7 +259,7 @@ func RunPermissionSlashTDJourney(ctx context.Context, client cosmosclient.Client
 	fmt.Println("\n--- Step 4a: Correct operator but wrong authority (expect failure) ---")
 	// The operator has a self-delegation but the self-delegation authority is operatorAddr,
 	// not an ancestor validator or TR controller for the issuer perm
-	err = lib.SlashPermissionTrustDeposit(client, ctx, operatorAccount, operatorAddr, issuerPermID, slashAmount)
+	err = lib.SlashPermissionTrustDeposit(client, ctx, operatorAccount, operatorAddr, issuerPermID, slashAmount, "journey 308 test slash")
 	if err == nil {
 		return fmt.Errorf("step 4a failed: expected error for wrong authority, got nil")
 	}

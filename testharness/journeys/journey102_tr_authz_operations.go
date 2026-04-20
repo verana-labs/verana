@@ -297,16 +297,34 @@ func RunTrustRegistryAuthzOperationsJourney(ctx context.Context, client cosmoscl
 	}
 	fmt.Println("✅ Step 5c: Verified trust registry is archived")
 
-	// 5d: Attempt to unarchive (archiving is terminal per spec v4 — expect rejection)
-	fmt.Println("\n--- Step 5d: Operator tries to unarchive trust registry (expect failure — terminal) ---")
+	// 5d: [MOD-TR-MSG-5-3] spec v4 draft 13: archive is bidirectional; archive=false unarchives.
+	fmt.Println("\n--- Step 5d: Operator unarchives trust registry (expect success) ---")
+	err = lib.ArchiveTrustRegistryWithAuthority(
+		client, ctx, operatorAccount, policyAddr,
+		trID, false,
+	)
+	if err != nil {
+		return fmt.Errorf("step 5d failed: expected unarchive to succeed per spec v4 draft 13: %w", err)
+	}
+	trResp, err = lib.QueryTrustRegistry(client, ctx, trID)
+	if err != nil {
+		return fmt.Errorf("step 5d verification query failed: %w", err)
+	}
+	if trResp.TrustRegistry.Archived != nil {
+		return fmt.Errorf("step 5d verification failed: trust registry should be unarchived")
+	}
+	fmt.Println("✅ Step 5d: Verified trust registry is unarchived per [MOD-TR-MSG-5-3]")
+
+	// 5e: [MOD-TR-MSG-5-2-1] unarchiving a non-archived TR must abort.
+	fmt.Println("\n--- Step 5e: Unarchive a non-archived TR (expect failure) ---")
 	err = lib.ArchiveTrustRegistryWithAuthority(
 		client, ctx, operatorAccount, policyAddr,
 		trID, false,
 	)
 	if err == nil {
-		return fmt.Errorf("step 5d failed: expected rejection for unarchiving a terminal archived TR, but succeeded")
+		return fmt.Errorf("step 5e failed: expected rejection for unarchiving a non-archived TR")
 	}
-	fmt.Printf("✅ Step 5d: Correctly rejected unarchive attempt: %v\n", err)
+	fmt.Printf("✅ Step 5e: Correctly rejected unarchive on non-archived TR: %v\n", err)
 
 	// =========================================================================
 	// TEST 6: Unauthorized operator (negative test)

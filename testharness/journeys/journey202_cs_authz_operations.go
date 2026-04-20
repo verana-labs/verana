@@ -230,16 +230,34 @@ func RunCredentialSchemaAuthzOperationsJourney(ctx context.Context, client cosmo
 	}
 	fmt.Println("✅ Step 3c: Verified credential schema is archived")
 
-	// 3d: Attempt to unarchive (archiving is terminal per spec v4 — expect rejection)
-	fmt.Println("\n--- Step 3d: Operator tries to unarchive credential schema (expect failure — terminal) ---")
+	// 3d: [MOD-CS-MSG-3-3] spec v4 draft 13: archive is bidirectional; archive=false unarchives.
+	fmt.Println("\n--- Step 3d: Operator unarchives credential schema (expect success) ---")
+	err = lib.ArchiveCredentialSchemaWithAuthority(
+		client, ctx, operatorAccount, policyAddr,
+		csID, false,
+	)
+	if err != nil {
+		return fmt.Errorf("step 3d failed: expected unarchive to succeed per spec v4 draft 13: %w", err)
+	}
+	unarchivedSchema, err := lib.QueryCredentialSchema(client, ctx, csID)
+	if err != nil {
+		return fmt.Errorf("step 3d verification query failed: %w", err)
+	}
+	if unarchivedSchema.Schema.Archived != nil {
+		return fmt.Errorf("step 3d verification failed: credential schema should be unarchived")
+	}
+	fmt.Println("✅ Step 3d: Verified credential schema is unarchived per [MOD-CS-MSG-3-3]")
+
+	// 3e: [MOD-CS-MSG-3-2-1] unarchiving a non-archived CS must abort.
+	fmt.Println("\n--- Step 3e: Unarchive a non-archived CS (expect failure) ---")
 	err = lib.ArchiveCredentialSchemaWithAuthority(
 		client, ctx, operatorAccount, policyAddr,
 		csID, false,
 	)
 	if err == nil {
-		return fmt.Errorf("step 3d failed: expected rejection for unarchiving a terminal archived CS, but succeeded")
+		return fmt.Errorf("step 3e failed: expected rejection for unarchiving a non-archived CS")
 	}
-	fmt.Printf("✅ Step 3d: Correctly rejected unarchive attempt: %v\n", err)
+	fmt.Printf("✅ Step 3e: Correctly rejected unarchive on non-archived CS: %v\n", err)
 
 	// =========================================================================
 	// TEST 4: Unauthorized operator (negative test)
