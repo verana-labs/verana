@@ -37,8 +37,8 @@ func (ms msgServer) SetExchangeRateState(ctx context.Context, msg *types.MsgSetE
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 	blockTime := sdkCtx.BlockTime()
 
-	// Set state to the provided value
-	xr.State = msg.State
+	// [MOD-XR-MSG-3-3] Spec v4 draft 13: toggle the stored state (no explicit value from caller).
+	xr.State = !xr.State
 	// Set updated to block time
 	xr.Updated = blockTime
 
@@ -53,7 +53,7 @@ func (ms msgServer) SetExchangeRateState(ctx context.Context, msg *types.MsgSetE
 			types.EventTypeSetExchangeRateState,
 			sdk.NewAttribute(types.AttributeKeyID, fmt.Sprintf("%d", msg.Id)),
 			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Authority),
-			sdk.NewAttribute(types.AttributeKeyState, fmt.Sprintf("%t", msg.State)),
+			sdk.NewAttribute(types.AttributeKeyState, fmt.Sprintf("%t", xr.State)),
 		),
 	)
 

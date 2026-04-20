@@ -189,12 +189,8 @@ func (k Keeper) FindPermissionsWithDID(goCtx context.Context, req *types.QueryFi
 		return nil, status.Error(codes.NotFound, fmt.Sprintf("credential schema not found: %v", err))
 	}
 
-	// Check country code if provided
-	if req.Country != "" && !isValidCountryCode(req.Country) {
-		return nil, status.Error(codes.InvalidArgument, "invalid country code format")
-	}
-
 	// [MOD-PERM-QRY-3-3] Execution
+	// country was removed from the Permission entity and from this query per spec v4 draft 13.
 	var foundPerms []types.Permission
 
 	// Check if we need to handle the special OPEN mode case
@@ -217,9 +213,6 @@ func (k Keeper) FindPermissionsWithDID(goCtx context.Context, req *types.QueryFi
 		if perm.Did != req.Did || perm.Type != permType {
 			return false, nil
 		}
-
-		// Country field removed from Permission in spec v4; req.Country is retained
-		// but no longer filters on per-permission country.
 
 		// If "when" is not specified, add all matching permissions
 		if req.When == nil {

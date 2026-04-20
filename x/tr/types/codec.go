@@ -10,6 +10,7 @@ import (
 )
 
 func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
+	legacy.RegisterAminoMsg(cdc, &MsgUpdateParams{}, "verana/x/tr/MsgUpdateParams")
 	legacy.RegisterAminoMsg(cdc, &MsgCreateTrustRegistry{}, "verana/x/tr/MsgCreateTrustRegistry")
 	legacy.RegisterAminoMsg(cdc, &MsgAddGovernanceFrameworkDocument{}, "verana/x/tr/MsgAddGovFrameworkDoc")
 	legacy.RegisterAminoMsg(cdc, &MsgIncreaseActiveGovernanceFrameworkVersion{}, "verana/x/tr/MsgIncreaseActiveGovFWVer")

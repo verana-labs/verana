@@ -65,8 +65,9 @@ message SchemaAuthorizationPolicy {
   SchemaAuthorizationPolicyRole role = 3;
   string url = 4;
   string digest_sri = 5;
+  // [MOD-CS-MSG-5-3] effective_from is null at creation; set to now at MOD-CS-MSG-6 activation.
   google.protobuf.Timestamp effective_from = 6 [
-    (gogoproto.nullable) = false,
+    (gogoproto.nullable) = true,
     (gogoproto.stdtime) = true
   ];
   google.protobuf.Timestamp effective_until = 7 [

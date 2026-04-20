@@ -542,8 +542,20 @@ func TestMsgServerArchiveTrustRegistry(t *testing.T) {
 			expectErr: true,
 		},
 		{
-			// Archiving is terminal per spec v4 draft 13; unarchive must be rejected.
-			name: "Unarchive Rejected (terminal)",
+			// [MOD-TR-MSG-5-3] spec v4 draft 13: archive=false unarchives a currently archived TR.
+			// Preceding "Already Archived" run left the TR archived, so this unarchive succeeds.
+			name: "Unarchive Succeeds",
+			msg: &types.MsgArchiveTrustRegistry{
+				Corporation: authority,
+				Operator:    operator,
+				TrId:        trID,
+				Archive:     false,
+			},
+			expectErr: false,
+		},
+		{
+			// [MOD-TR-MSG-5-2-1] unarchive on a non-archived TR must abort.
+			name: "Unarchive Not Archived (abort)",
 			msg: &types.MsgArchiveTrustRegistry{
 				Corporation: authority,
 				Operator:    operator,

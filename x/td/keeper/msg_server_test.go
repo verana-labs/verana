@@ -111,7 +111,6 @@ func TestMsgReclaimTrustDepositYield(t *testing.T) {
 			msg: &types.MsgReclaimTrustDepositYield{
 				Corporation: testAccString,
 				Operator:    testAccString,
-				Amount:      500,
 			},
 			expErr: false,
 			check: func(resp *types.MsgReclaimTrustDepositYieldResponse) {
@@ -669,8 +668,9 @@ func TestMsgRepaySlashedTrustDeposit(t *testing.T) {
 				td, err := k.TrustDeposit.Get(ctx, testAccString)
 				require.NoError(t, err)
 				require.Equal(t, uint64(1000), td.Deposit) // 700 + 300
-				// Fully repaid: slashing counters reset to 0 so yield reclaim is re-enabled
-				require.Equal(t, uint64(0), td.RepaidDeposit)
+				// [MOD-TD-MSG-6-3] spec v4 draft 13: slashed_deposit decremented,
+				// repaid_deposit cumulative.
+				require.Equal(t, uint64(300), td.RepaidDeposit)
 				require.Equal(t, uint64(0), td.SlashedDeposit)
 				require.NotNil(t, td.LastRepaid)
 				// share increased by 300/1.0 = 300
@@ -683,12 +683,14 @@ func TestMsgRepaySlashedTrustDeposit(t *testing.T) {
 			setup: func() {
 				err := k.SetParams(ctx, defaultTestParams())
 				require.NoError(t, err)
+				// [MOD-TD-MSG-6-3] spec v4 draft 13: slashed_deposit holds outstanding
+				// balance (300 remaining after 200 already repaid); repaid_deposit is cumulative.
 				td := types.TrustDeposit{
-					Corporation:        testAccString,
+					Corporation:    testAccString,
 					Share:          math.LegacyNewDec(800),
-					Deposit:         800,
-					SlashedDeposit: 500,
-					RepaidDeposit:  200, // already partially repaid
+					Deposit:        800,
+					SlashedDeposit: 300, // outstanding slashed amount
+					RepaidDeposit:  200, // cumulative repaid so far
 					SlashCount:     2,
 				}
 				err = k.TrustDeposit.Set(ctx, testAccString, td)
@@ -697,15 +699,15 @@ func TestMsgRepaySlashedTrustDeposit(t *testing.T) {
 			msg: &types.MsgRepaySlashedTrustDeposit{
 				Corporation: testAccString,
 				Operator:    testAccString,
-				Deposit:     300, // outstanding = 500 - 200 = 300
+				Deposit:     300, // clears the remaining outstanding slash
 			},
 			expErr: false,
 			check: func() {
 				td, err := k.TrustDeposit.Get(ctx, testAccString)
 				require.NoError(t, err)
 				require.Equal(t, uint64(1100), td.Deposit) // 800 + 300
-				// Fully repaid: slashing counters reset to 0
-				require.Equal(t, uint64(0), td.RepaidDeposit)
+				// [MOD-TD-MSG-6-3] spec v4 draft 13: 200 prior + 300 now = 500 cumulative repaid.
+				require.Equal(t, uint64(500), td.RepaidDeposit)
 				require.Equal(t, uint64(0), td.SlashedDeposit)
 			},
 		},
@@ -1192,13 +1194,15 @@ func TestMsgReclaimTrustDepositYieldEdgeCases(t *testing.T) {
 		err := k.SetParams(ctx, params)
 		require.NoError(t, err)
 
+		// [MOD-TD-MSG-6-3] spec v4 draft 13: on full repay, slashed_deposit is decremented to 0
+		// and repaid_deposit keeps cumulative history. Reclaim is enabled while slashed_deposit == 0.
 		td := types.TrustDeposit{
 			Corporation:    testAccString,
 			Share:          math.LegacyNewDec(1000),
 			Deposit:        1000,
 			Claimable:      500, // pre-accrued yield
-			SlashedDeposit: 100,
-			RepaidDeposit:  100, // fully repaid
+			SlashedDeposit: 0,   // fully repaid — decremented to 0
+			RepaidDeposit:  100, // cumulative history preserved
 		}
 		err = k.TrustDeposit.Set(ctx, testAccString, td)
 		require.NoError(t, err)
@@ -1206,7 +1210,6 @@ func TestMsgReclaimTrustDepositYieldEdgeCases(t *testing.T) {
 		resp, err := ms.ReclaimTrustDepositYield(ctx, &types.MsgReclaimTrustDepositYield{
 			Corporation: testAccString,
 			Operator:    testAccString,
-			Amount:      500,
 		})
 		require.NoError(t, err)
 		require.Equal(t, uint64(500), resp.ClaimedAmount)
@@ -1262,7 +1265,6 @@ func TestMsgReclaimTrustDepositYieldEdgeCases(t *testing.T) {
 		resp, err := ms.ReclaimTrustDepositYield(ctx, &types.MsgReclaimTrustDepositYield{
 			Corporation: testAccString,
 			Operator:    sdk.AccAddress([]byte("good_operator_ad_1")).String(),
-			Amount:      500,
 		})
 		require.NoError(t, err)
 		require.Equal(t, uint64(500), resp.ClaimedAmount)

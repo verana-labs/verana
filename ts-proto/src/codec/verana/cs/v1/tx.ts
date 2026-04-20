@@ -6,7 +6,6 @@
 
 /* eslint-disable */
 import * as _m0 from "protobufjs/minimal";
-import { Timestamp } from "../../../google/protobuf/timestamp";
 import { Params } from "./params";
 import {
   SchemaAuthorizationPolicyRole,
@@ -99,14 +98,17 @@ export interface MsgArchiveCredentialSchemaResponse {
 
 /** [MOD-CS-MSG-5] MsgCreateSchemaAuthorizationPolicy creates a new schema authorization policy. */
 export interface MsgCreateSchemaAuthorizationPolicy {
+  /**
+   * [MOD-CS-MSG-5-1] parameters per spec v4 draft 13:
+   * corporation, operator, schema_id, role, url, digest_sri.
+   * effective_from and effective_until are set to null at creation (MOD-CS-MSG-5-3).
+   */
   corporation: string;
   operator: string;
   schemaId: number;
   role: SchemaAuthorizationPolicyRole;
   url: string;
   digestSri: string;
-  effectiveFrom: Date | undefined;
-  effectiveUntil: Date | undefined;
 }
 
 export interface MsgCreateSchemaAuthorizationPolicyResponse {
@@ -1090,16 +1092,7 @@ export const MsgArchiveCredentialSchemaResponse = {
 };
 
 function createBaseMsgCreateSchemaAuthorizationPolicy(): MsgCreateSchemaAuthorizationPolicy {
-  return {
-    corporation: "",
-    operator: "",
-    schemaId: 0,
-    role: 0,
-    url: "",
-    digestSri: "",
-    effectiveFrom: undefined,
-    effectiveUntil: undefined,
-  };
+  return { corporation: "", operator: "", schemaId: 0, role: 0, url: "", digestSri: "" };
 }
 
 export const MsgCreateSchemaAuthorizationPolicy = {
@@ -1121,12 +1114,6 @@ export const MsgCreateSchemaAuthorizationPolicy = {
     }
     if (message.digestSri !== "") {
       writer.uint32(50).string(message.digestSri);
-    }
-    if (message.effectiveFrom !== undefined) {
-      Timestamp.encode(toTimestamp(message.effectiveFrom), writer.uint32(58).fork()).ldelim();
-    }
-    if (message.effectiveUntil !== undefined) {
-      Timestamp.encode(toTimestamp(message.effectiveUntil), writer.uint32(66).fork()).ldelim();
     }
     return writer;
   },
@@ -1180,20 +1167,6 @@ export const MsgCreateSchemaAuthorizationPolicy = {
 
           message.digestSri = reader.string();
           continue;
-        case 7:
-          if (tag !== 58) {
-            break;
-          }
-
-          message.effectiveFrom = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
-          continue;
-        case 8:
-          if (tag !== 66) {
-            break;
-          }
-
-          message.effectiveUntil = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
-          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -1211,8 +1184,6 @@ export const MsgCreateSchemaAuthorizationPolicy = {
       role: isSet(object.role) ? schemaAuthorizationPolicyRoleFromJSON(object.role) : 0,
       url: isSet(object.url) ? globalThis.String(object.url) : "",
       digestSri: isSet(object.digestSri) ? globalThis.String(object.digestSri) : "",
-      effectiveFrom: isSet(object.effectiveFrom) ? fromJsonTimestamp(object.effectiveFrom) : undefined,
-      effectiveUntil: isSet(object.effectiveUntil) ? fromJsonTimestamp(object.effectiveUntil) : undefined,
     };
   },
 
@@ -1236,12 +1207,6 @@ export const MsgCreateSchemaAuthorizationPolicy = {
     if (message.digestSri !== "") {
       obj.digestSri = message.digestSri;
     }
-    if (message.effectiveFrom !== undefined) {
-      obj.effectiveFrom = message.effectiveFrom.toISOString();
-    }
-    if (message.effectiveUntil !== undefined) {
-      obj.effectiveUntil = message.effectiveUntil.toISOString();
-    }
     return obj;
   },
 
@@ -1260,8 +1225,6 @@ export const MsgCreateSchemaAuthorizationPolicy = {
     message.role = object.role ?? 0;
     message.url = object.url ?? "";
     message.digestSri = object.digestSri ?? "";
-    message.effectiveFrom = object.effectiveFrom ?? undefined;
-    message.effectiveUntil = object.effectiveUntil ?? undefined;
     return message;
   },
 };
@@ -1768,28 +1731,6 @@ export type DeepPartial<T> = T extends Builtin ? T
 type KeysOfUnion<T> = T extends T ? keyof T : never;
 export type Exact<P, I extends P> = P extends Builtin ? P
   : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
-
-function toTimestamp(date: Date): Timestamp {
-  const seconds = Math.trunc(date.getTime() / 1_000);
-  const nanos = (date.getTime() % 1_000) * 1_000_000;
-  return { seconds, nanos };
-}
-
-function fromTimestamp(t: Timestamp): Date {
-  let millis = (t.seconds || 0) * 1_000;
-  millis += (t.nanos || 0) / 1_000_000;
-  return new globalThis.Date(millis);
-}
-
-function fromJsonTimestamp(o: any): Date {
-  if (o instanceof globalThis.Date) {
-    return o;
-  } else if (typeof o === "string") {
-    return new globalThis.Date(o);
-  } else {
-    return fromTimestamp(Timestamp.fromJSON(o));
-  }
-}
 
 function longToNumber(long: Long): number {
   if (long.gt(globalThis.Number.MAX_SAFE_INTEGER)) {

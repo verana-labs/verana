@@ -7,16 +7,15 @@ import {
 
 export const MsgReclaimTrustDepositYieldAminoConverter: AminoConverter = {
   aminoType: "verana/x/td/MsgReclaimTrustDepositYield",
-  toAmino: ({ corporation, operator, amount }: MsgReclaimTrustDepositYield) => ({
+  // [MOD-TD-MSG-2-1] Spec v4 draft 13: parameters are corporation + operator only.
+  toAmino: ({ corporation, operator }: MsgReclaimTrustDepositYield) => ({
     corporation,
     operator,
-    amount: amount != null ? amount.toString() : undefined,
   }),
   fromAmino: (value: any) =>
     MsgReclaimTrustDepositYield.fromPartial({
       corporation: value.corporation,
       operator: value.operator,
-      amount: value.amount != null ? Number(value.amount) : 0,
     }),
 };
 

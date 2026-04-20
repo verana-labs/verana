@@ -2592,16 +2592,17 @@ type SchemaAuthorizationPolicy struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id             uint64                        `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	SchemaId       uint64                        `protobuf:"varint,2,opt,name=schema_id,json=schemaId,proto3" json:"schema_id,omitempty"`
-	Role           SchemaAuthorizationPolicyRole `protobuf:"varint,3,opt,name=role,proto3,enum=verana.cs.v1.SchemaAuthorizationPolicyRole" json:"role,omitempty"`
-	Url            string                        `protobuf:"bytes,4,opt,name=url,proto3" json:"url,omitempty"`
-	DigestSri      string                        `protobuf:"bytes,5,opt,name=digest_sri,json=digestSri,proto3" json:"digest_sri,omitempty"`
-	EffectiveFrom  *timestamppb.Timestamp        `protobuf:"bytes,6,opt,name=effective_from,json=effectiveFrom,proto3" json:"effective_from,omitempty"`
-	EffectiveUntil *timestamppb.Timestamp        `protobuf:"bytes,7,opt,name=effective_until,json=effectiveUntil,proto3" json:"effective_until,omitempty"`
-	Revoked        bool                          `protobuf:"varint,8,opt,name=revoked,proto3" json:"revoked,omitempty"`
-	Created        *timestamppb.Timestamp        `protobuf:"bytes,9,opt,name=created,proto3" json:"created,omitempty"`
-	Version        uint32                        `protobuf:"varint,10,opt,name=version,proto3" json:"version,omitempty"`
+	Id        uint64                        `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	SchemaId  uint64                        `protobuf:"varint,2,opt,name=schema_id,json=schemaId,proto3" json:"schema_id,omitempty"`
+	Role      SchemaAuthorizationPolicyRole `protobuf:"varint,3,opt,name=role,proto3,enum=verana.cs.v1.SchemaAuthorizationPolicyRole" json:"role,omitempty"`
+	Url       string                        `protobuf:"bytes,4,opt,name=url,proto3" json:"url,omitempty"`
+	DigestSri string                        `protobuf:"bytes,5,opt,name=digest_sri,json=digestSri,proto3" json:"digest_sri,omitempty"`
+	// [MOD-CS-MSG-5-3] effective_from is null at creation; set to now at MOD-CS-MSG-6 activation.
+	EffectiveFrom  *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=effective_from,json=effectiveFrom,proto3" json:"effective_from,omitempty"`
+	EffectiveUntil *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=effective_until,json=effectiveUntil,proto3" json:"effective_until,omitempty"`
+	Revoked        bool                   `protobuf:"varint,8,opt,name=revoked,proto3" json:"revoked,omitempty"`
+	Created        *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=created,proto3" json:"created,omitempty"`
+	Version        uint32                 `protobuf:"varint,10,opt,name=version,proto3" json:"version,omitempty"`
 }
 
 func (x *SchemaAuthorizationPolicy) Reset() {
@@ -2885,7 +2886,7 @@ var file_verana_cs_v1_types_proto_rawDesc = []byte{
 	0x66, 0x65, 0x63, 0x74, 0x69, 0x76, 0x65, 0x5f, 0x66, 0x72, 0x6f, 0x6d, 0x18, 0x06, 0x20, 0x01,
 	0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74,
 	0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x42, 0x08,
-	0xc8, 0xde, 0x1f, 0x00, 0x90, 0xdf, 0x1f, 0x01, 0x52, 0x0d, 0x65, 0x66, 0x66, 0x65, 0x63, 0x74,
+	0xc8, 0xde, 0x1f, 0x01, 0x90, 0xdf, 0x1f, 0x01, 0x52, 0x0d, 0x65, 0x66, 0x66, 0x65, 0x63, 0x74,
 	0x69, 0x76, 0x65, 0x46, 0x72, 0x6f, 0x6d, 0x12, 0x4d, 0x0a, 0x0f, 0x65, 0x66, 0x66, 0x65, 0x63,
 	0x74, 0x69, 0x76, 0x65, 0x5f, 0x75, 0x6e, 0x74, 0x69, 0x6c, 0x18, 0x07, 0x20, 0x01, 0x28, 0x0b,
 	0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62,

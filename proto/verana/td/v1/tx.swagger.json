@@ -188,11 +188,6 @@
         "operator": {
           "type": "string",
           "description": "operator is the account authorized by the corporation to run this Msg."
-        },
-        "amount": {
-          "type": "string",
-          "format": "uint64",
-          "description": "amount is the quantity of claimable yield to withdraw (must be \u003e 0 and \u003c= td.claimable)."
         }
       },
       "title": "MsgReclaimTrustDepositYield defines the request type\n[MOD-TD-MSG-2] Reclaim Trust Deposit Yield"
@@ -243,6 +238,10 @@
         "deposit": {
           "type": "string",
           "title": "deposit is the deposit amount to slash (in base denom)"
+        },
+        "reason": {
+          "type": "string",
+          "title": "[MOD-TD-MSG-5-1] reason for the slash (mandatory per spec v4 draft 13)"
         }
       },
       "title": "MsgSlashTrustDeposit defines the message for slashing a corporation's trust deposit\nThis can only be executed by the governance module"

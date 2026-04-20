@@ -603,8 +603,19 @@ func TestArchiveCredentialSchema(t *testing.T) {
 			expPass: true,
 		},
 		{
-			// Archiving is terminal per spec v4 draft 13; unarchive must be rejected
-			name: "unarchive rejected (terminal)",
+			// [MOD-CS-MSG-3-3] spec v4 draft 13: archive=false on an archived CS unarchives it.
+			name: "unarchive succeeds",
+			msg: &types.MsgArchiveCredentialSchema{
+				Corporation: authority,
+				Operator:    operator,
+				Id:          schemaID.Id,
+				Archive:     false,
+			},
+			expPass: true,
+		},
+		{
+			// [MOD-CS-MSG-3-2-1] archive=false on a non-archived CS must abort.
+			name: "unarchive not archived",
 			msg: &types.MsgArchiveCredentialSchema{
 				Corporation: authority,
 				Operator:    operator,
@@ -612,10 +623,21 @@ func TestArchiveCredentialSchema(t *testing.T) {
 				Archive:     false,
 			},
 			expPass:       false,
-			errorContains: "irreversible",
+			errorContains: "not archived",
 		},
 		{
-			// schema is already archived; archive=true again must fail
+			// Re-archive the CS to set up the next "already archived" case.
+			name: "re-archive for next case",
+			msg: &types.MsgArchiveCredentialSchema{
+				Corporation: authority,
+				Operator:    operator,
+				Id:          schemaID.Id,
+				Archive:     true,
+			},
+			expPass: true,
+		},
+		{
+			// schema is archived; archive=true again must fail.
 			name: "already archived",
 			msg: &types.MsgArchiveCredentialSchema{
 				Corporation: authority,

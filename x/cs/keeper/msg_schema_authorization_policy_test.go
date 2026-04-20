@@ -42,16 +42,14 @@ func TestCreateSchemaAuthorizationPolicy_HappyPath(t *testing.T) {
 	schemaResp, err := ms.CreateCredentialSchema(goCtx, createSchemaMsg)
 	require.NoError(t, err)
 
-	// Create schema authorization policy with effective_from in the future
-	futureTime := now.Add(time.Hour)
+	// [MOD-CS-MSG-5-3] Create schema authorization policy — effective_from/until are null at creation.
 	msg := &types.MsgCreateSchemaAuthorizationPolicy{
-		Corporation:   corporation,
-		Operator:      operator,
-		SchemaId:      schemaResp.Id,
-		Role:          types.SchemaAuthorizationPolicyRole_SCHEMA_AUTHORIZATION_POLICY_ROLE_ISSUER,
-		Url:           "https://example.com/policy",
-		DigestSri:     "sha256-abc123",
-		EffectiveFrom: futureTime,
+		Corporation: corporation,
+		Operator:    operator,
+		SchemaId:    schemaResp.Id,
+		Role:        types.SchemaAuthorizationPolicyRole_SCHEMA_AUTHORIZATION_POLICY_ROLE_ISSUER,
+		Url:         "https://example.com/policy",
+		DigestSri:   "sha256-abc123",
 	}
 
 	resp, err := ms.CreateSchemaAuthorizationPolicy(goCtx, msg)
@@ -68,6 +66,9 @@ func TestCreateSchemaAuthorizationPolicy_HappyPath(t *testing.T) {
 	require.Equal(t, "sha256-abc123", policy.DigestSri)
 	require.Equal(t, uint32(1), policy.Version)
 	require.False(t, policy.Revoked)
+	// Spec v4 draft 13: effective_from starts null (pending).
+	require.Nil(t, policy.EffectiveFrom)
+	require.Nil(t, policy.EffectiveUntil)
 }
 
 func TestCreateSchemaAuthorizationPolicy_VersionIncrement(t *testing.T) {
@@ -86,30 +87,26 @@ func TestCreateSchemaAuthorizationPolicy_VersionIncrement(t *testing.T) {
 	schemaResp, err := ms.CreateCredentialSchema(goCtx, createSchemaMsg)
 	require.NoError(t, err)
 
-	futureTime := now.Add(time.Hour)
-
 	// Create first policy
 	msg1 := &types.MsgCreateSchemaAuthorizationPolicy{
-		Corporation:   corporation,
-		Operator:      operator,
-		SchemaId:      schemaResp.Id,
-		Role:          types.SchemaAuthorizationPolicyRole_SCHEMA_AUTHORIZATION_POLICY_ROLE_ISSUER,
-		Url:           "https://example.com/policy/v1",
-		DigestSri:     "sha256-v1",
-		EffectiveFrom: futureTime,
+		Corporation: corporation,
+		Operator:    operator,
+		SchemaId:    schemaResp.Id,
+		Role:        types.SchemaAuthorizationPolicyRole_SCHEMA_AUTHORIZATION_POLICY_ROLE_ISSUER,
+		Url:         "https://example.com/policy/v1",
+		DigestSri:   "sha256-v1",
 	}
 	resp1, err := ms.CreateSchemaAuthorizationPolicy(goCtx, msg1)
 	require.NoError(t, err)
 
 	// Create second policy for the same (schema_id, role)
 	msg2 := &types.MsgCreateSchemaAuthorizationPolicy{
-		Corporation:   corporation,
-		Operator:      operator,
-		SchemaId:      schemaResp.Id,
-		Role:          types.SchemaAuthorizationPolicyRole_SCHEMA_AUTHORIZATION_POLICY_ROLE_ISSUER,
-		Url:           "https://example.com/policy/v2",
-		DigestSri:     "sha256-v2",
-		EffectiveFrom: futureTime.Add(time.Hour),
+		Corporation: corporation,
+		Operator:    operator,
+		SchemaId:    schemaResp.Id,
+		Role:        types.SchemaAuthorizationPolicyRole_SCHEMA_AUTHORIZATION_POLICY_ROLE_ISSUER,
+		Url:         "https://example.com/policy/v2",
+		DigestSri:   "sha256-v2",
 	}
 	resp2, err := ms.CreateSchemaAuthorizationPolicy(goCtx, msg2)
 	require.NoError(t, err)
@@ -133,13 +130,12 @@ func TestCreateSchemaAuthorizationPolicy_SchemaNotFound(t *testing.T) {
 	goCtx := sdk.WrapSDKContext(sdkCtx)
 
 	msg := &types.MsgCreateSchemaAuthorizationPolicy{
-		Corporation:   corporation,
-		Operator:      operator,
-		SchemaId:      9999, // non-existent schema
-		Role:          types.SchemaAuthorizationPolicyRole_SCHEMA_AUTHORIZATION_POLICY_ROLE_ISSUER,
-		Url:           "https://example.com/policy",
-		DigestSri:     "sha256-abc",
-		EffectiveFrom: now.Add(time.Hour),
+		Corporation: corporation,
+		Operator:    operator,
+		SchemaId:    9999, // non-existent schema
+		Role:        types.SchemaAuthorizationPolicyRole_SCHEMA_AUTHORIZATION_POLICY_ROLE_ISSUER,
+		Url:         "https://example.com/policy",
+		DigestSri:   "sha256-abc",
 	}
 
 	resp, err := ms.CreateSchemaAuthorizationPolicy(goCtx, msg)
@@ -168,13 +164,12 @@ func TestCreateSchemaAuthorizationPolicy_WrongCorporation(t *testing.T) {
 	require.NoError(t, err)
 
 	msg := &types.MsgCreateSchemaAuthorizationPolicy{
-		Corporation:   wrongCorp, // wrong corporation
-		Operator:      operator,
-		SchemaId:      schemaResp.Id,
-		Role:          types.SchemaAuthorizationPolicyRole_SCHEMA_AUTHORIZATION_POLICY_ROLE_ISSUER,
-		Url:           "https://example.com/policy",
-		DigestSri:     "sha256-abc",
-		EffectiveFrom: now.Add(time.Hour),
+		Corporation: wrongCorp, // wrong corporation
+		Operator:    operator,
+		SchemaId:    schemaResp.Id,
+		Role:        types.SchemaAuthorizationPolicyRole_SCHEMA_AUTHORIZATION_POLICY_ROLE_ISSUER,
+		Url:         "https://example.com/policy",
+		DigestSri:   "sha256-abc",
 	}
 
 	resp, err := ms.CreateSchemaAuthorizationPolicy(goCtx, msg)
@@ -201,15 +196,14 @@ func TestRevokeSchemaAuthorizationPolicy_HappyPath(t *testing.T) {
 	schemaResp, err := ms.CreateCredentialSchema(goCtx, createSchemaMsg)
 	require.NoError(t, err)
 
-	// Create an already-active policy (effective_from == block time: not before now, allowed by ValidateBasic, and not After(now) so revocable)
+	// [MOD-CS-MSG-5-3] Policy is created pending (effective_from null).
 	createMsg := &types.MsgCreateSchemaAuthorizationPolicy{
-		Corporation:   corporation,
-		Operator:      operator,
-		SchemaId:      schemaResp.Id,
-		Role:          types.SchemaAuthorizationPolicyRole_SCHEMA_AUTHORIZATION_POLICY_ROLE_ISSUER,
-		Url:           "https://example.com/policy",
-		DigestSri:     "sha256-abc",
-		EffectiveFrom: now, // exactly at block time
+		Corporation: corporation,
+		Operator:    operator,
+		SchemaId:    schemaResp.Id,
+		Role:        types.SchemaAuthorizationPolicyRole_SCHEMA_AUTHORIZATION_POLICY_ROLE_ISSUER,
+		Url:         "https://example.com/policy",
+		DigestSri:   "sha256-abc",
 	}
 	policyResp, err := ms.CreateSchemaAuthorizationPolicy(goCtx, createMsg)
 	require.NoError(t, err)
@@ -217,6 +211,15 @@ func TestRevokeSchemaAuthorizationPolicy_HappyPath(t *testing.T) {
 	policy, err := k.SchemaAuthorizationPolicies.Get(goCtx, policyResp.Id)
 	require.NoError(t, err)
 	require.Equal(t, uint32(1), policy.Version)
+
+	// [MOD-CS-MSG-6] Activate the policy so it can be revoked per spec.
+	_, err = ms.IncreaseActiveSchemaAuthorizationPolicyVersion(goCtx, &types.MsgIncreaseActiveSchemaAuthorizationPolicyVersion{
+		Corporation: corporation,
+		Operator:    operator,
+		SchemaId:    schemaResp.Id,
+		Role:        types.SchemaAuthorizationPolicyRole_SCHEMA_AUTHORIZATION_POLICY_ROLE_ISSUER,
+	})
+	require.NoError(t, err)
 
 	// Revoke it
 	revokeMsg := &types.MsgRevokeSchemaAuthorizationPolicy{
@@ -252,17 +255,24 @@ func TestRevokeSchemaAuthorizationPolicy_AlreadyRevoked(t *testing.T) {
 	schemaResp, err := ms.CreateCredentialSchema(goCtx, createSchemaMsg)
 	require.NoError(t, err)
 
-	// Create active policy
+	// Create pending policy, then activate so revoke is valid.
 	createMsg := &types.MsgCreateSchemaAuthorizationPolicy{
-		Corporation:   corporation,
-		Operator:      operator,
-		SchemaId:      schemaResp.Id,
-		Role:          types.SchemaAuthorizationPolicyRole_SCHEMA_AUTHORIZATION_POLICY_ROLE_VERIFIER,
-		Url:           "https://example.com/policy",
-		DigestSri:     "sha256-abc",
-		EffectiveFrom: now,
+		Corporation: corporation,
+		Operator:    operator,
+		SchemaId:    schemaResp.Id,
+		Role:        types.SchemaAuthorizationPolicyRole_SCHEMA_AUTHORIZATION_POLICY_ROLE_VERIFIER,
+		Url:         "https://example.com/policy",
+		DigestSri:   "sha256-abc",
 	}
 	_, err = ms.CreateSchemaAuthorizationPolicy(goCtx, createMsg)
+	require.NoError(t, err)
+
+	_, err = ms.IncreaseActiveSchemaAuthorizationPolicyVersion(goCtx, &types.MsgIncreaseActiveSchemaAuthorizationPolicyVersion{
+		Corporation: corporation,
+		Operator:    operator,
+		SchemaId:    schemaResp.Id,
+		Role:        types.SchemaAuthorizationPolicyRole_SCHEMA_AUTHORIZATION_POLICY_ROLE_VERIFIER,
+	})
 	require.NoError(t, err)
 
 	revokeMsg := &types.MsgRevokeSchemaAuthorizationPolicy{

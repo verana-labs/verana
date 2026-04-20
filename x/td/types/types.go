@@ -7,6 +7,7 @@ import (
 )
 
 // ValidateBasic implements sdk.Msg
+// [MOD-TD-MSG-2-1] Spec v4 draft 13: parameters are corporation + operator only.
 func (msg *MsgReclaimTrustDepositYield) ValidateBasic() error {
 	_, err := sdk.AccAddressFromBech32(msg.Corporation)
 	if err != nil {
@@ -15,9 +16,6 @@ func (msg *MsgReclaimTrustDepositYield) ValidateBasic() error {
 	_, err = sdk.AccAddressFromBech32(msg.Operator)
 	if err != nil {
 		return errorsmod.Wrapf(sdkerrors.ErrInvalidAddress, "invalid operator address (%s)", err)
-	}
-	if msg.Amount == 0 {
-		return errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "amount must be > 0")
 	}
 	return nil
 }
@@ -35,6 +33,11 @@ func (msg *MsgSlashTrustDeposit) ValidateBasic() error {
 
 	if msg.Deposit.IsZero() || msg.Deposit.IsNegative() {
 		return errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "deposit must be greater than 0")
+	}
+
+	// [MOD-TD-MSG-5-1] reason is mandatory per spec v4 draft 13
+	if msg.Reason == "" {
+		return errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "reason is required")
 	}
 
 	return nil

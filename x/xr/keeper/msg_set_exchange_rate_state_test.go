@@ -44,24 +44,21 @@ func TestSetExchangeRateState_HappyPath_Enable(t *testing.T) {
 	require.NoError(t, err)
 	require.True(t, xr.State)
 
-	// Disable it first
+	// [MOD-XR-MSG-3-3] toggle flips current state.
 	_, err = ms.SetExchangeRateState(f.ctx, &types.MsgSetExchangeRateState{
 		Authority: authorityStr,
 		Id:        id,
-		State:     false,
 	})
 	require.NoError(t, err)
 
-	// Verify disabled
 	xr, err = f.keeper.ExchangeRates.Get(f.ctx, id)
 	require.NoError(t, err)
 	require.False(t, xr.State)
 
-	// Re-enable
+	// Toggle again flips back.
 	_, err = ms.SetExchangeRateState(f.ctx, &types.MsgSetExchangeRateState{
 		Authority: authorityStr,
 		Id:        id,
-		State:     true,
 	})
 	require.NoError(t, err)
 
@@ -78,33 +75,31 @@ func TestSetExchangeRateState_HappyPath_Disable(t *testing.T) {
 	authorityStr, err := f.addressCodec.BytesToString(f.keeper.GetAuthority())
 	require.NoError(t, err)
 
-	// Create exchange rate and enable it first
+	// [MOD-XR-MSG-1-3] created with state=true.
 	id := createTestExchangeRate(t, f, ms, authorityStr)
 
+	// [MOD-XR-MSG-3-3] spec v4 draft 13: call toggles the stored state (true ↔ false).
 	_, err = ms.SetExchangeRateState(f.ctx, &types.MsgSetExchangeRateState{
 		Authority: authorityStr,
 		Id:        id,
-		State:     true,
 	})
 	require.NoError(t, err)
 
-	// Verify enabled
+	// After one toggle, state flipped to false.
 	xr, err := f.keeper.ExchangeRates.Get(f.ctx, id)
 	require.NoError(t, err)
-	require.True(t, xr.State)
+	require.False(t, xr.State)
 
-	// Now disable
+	// Second toggle flips it back to true.
 	_, err = ms.SetExchangeRateState(f.ctx, &types.MsgSetExchangeRateState{
 		Authority: authorityStr,
 		Id:        id,
-		State:     false,
 	})
 	require.NoError(t, err)
 
-	// Verify state is now false
 	xr, err = f.keeper.ExchangeRates.Get(f.ctx, id)
 	require.NoError(t, err)
-	require.False(t, xr.State)
+	require.True(t, xr.State)
 }
 
 func TestSetExchangeRateState_InvalidAuthority(t *testing.T) {

@@ -114,6 +114,11 @@ func (ms msgServer) RenewPermissionVP(goCtx context.Context, msg *types.MsgRenew
 		return nil, fmt.Errorf("authority is not the perm authority")
 	}
 
+	// [MOD-PERM-MSG-2-2] spec v4 draft 13: permission_type must match existing.
+	if msg.PermissionType != types.PermissionType_UNSPECIFIED && applicantPerm.Type != msg.PermissionType {
+		return nil, fmt.Errorf("permission_type mismatch: existing %s, requested %s", applicantPerm.Type, msg.PermissionType)
+	}
+
 	// [MOD-PERM-MSG-2-2-2] applicant_perm.vp_state MUST be VALIDATED to allow renewal.
 	// Renewing a PENDING perm would overwrite vp_current_fees/vp_current_deposit without
 	// refunding the escrowed funds, causing permanent fund loss.
@@ -480,26 +485,18 @@ func (ms msgServer) CancelPermissionVPLastRequest(goCtx context.Context, msg *ty
 func (ms msgServer) executeCancelPermissionVPLastRequest(ctx sdk.Context, perm types.Permission) error {
 	now := ctx.BlockTime()
 
-	// First-time VP (effective_from is nil): delete the permission row entirely
-	if perm.EffectiveFrom == nil {
-		ctx.EventManager().EmitEvents(sdk.Events{
-			sdk.NewEvent(
-				types.EventTypeCancelPermissionVPLastRequest,
-				sdk.NewAttribute(types.AttributeKeyPermissionID, strconv.FormatUint(perm.Id, 10)),
-				sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
-			),
-		})
-		return ms.Keeper.Permission.Remove(ctx, perm.Id)
-	}
-
-	// Renewal: revert to VALIDATED state
-
 	// Update basic fields
 	perm.Modified = &now
 	perm.VpLastStateChange = &now
 
-	// Spec v4: lifecycle is PENDING -> VALIDATED; revert to VALIDATED on cancellation.
-	perm.VpState = types.ValidationState_VALIDATED
+	// [MOD-PERM-MSG-6-3] spec v4 draft 13:
+	//   if vp_exp is null (validation never completed), set vp_state to TERMINATED
+	//   else set vp_state to VALIDATED.
+	if perm.VpExp == nil {
+		perm.VpState = types.ValidationState_TERMINATED
+	} else {
+		perm.VpState = types.ValidationState_VALIDATED
+	}
 
 	// Handle current fees if any
 	if perm.VpCurrentFees > 0 {
@@ -659,14 +656,15 @@ func (ms msgServer) validateCreateRootPermissionAuthority(ctx sdk.Context, msg *
 	return nil
 }
 
-// [MOD-PERM-MSG-7-2-4] Create Root Permission overlap checks
-// Find all active permissions (not revoked, not slashed, not repaid) for schema_id, ECOSYSTEM, authority.
-// For ECOSYSTEM type permissions, validator_perm_id is NULL (0), so we don't check it.
+// [MOD-PERM-MSG-7-2-4] Create Root Permission overlap checks.
+// Find all active permissions (not revoked, not slashed, not repaid) for
+// (schema_id, permission_type, corporation). Spec v4 draft 13: permission_type
+// is set from msg, not hardcoded.
 func (ms msgServer) checkCreateRootPermissionOverlap(ctx sdk.Context, msg *types.MsgCreateRootPermission) error {
 	err := ms.Permission.Walk(ctx, nil, func(key uint64, perm types.Permission) (bool, error) {
-		// Match on schema_id, ECOSYSTEM type, and authority
+		// Match on schema_id, permission_type, and corporation.
 		if perm.SchemaId != msg.SchemaId ||
-			perm.Type != types.PermissionType_ECOSYSTEM ||
+			perm.Type != msg.PermissionType ||
 			perm.Corporation != msg.Corporation {
 			return false, nil
 		}
@@ -698,14 +696,17 @@ func (ms msgServer) checkCreateRootPermissionOverlap(ctx sdk.Context, msg *types
 
 // [MOD-PERM-MSG-7-3] Create Root Permission execution
 func (ms msgServer) executeCreateRootPermission(ctx sdk.Context, msg *types.MsgCreateRootPermission, now time.Time) (uint64, error) {
-	// Create new perm
+	// [MOD-PERM-MSG-7-3] Spec v4 draft 13: type is set from msg.permission_type
+	// (one of ISSUER, VERIFIER, ISSUER_GRANTOR, VERIFIER_GRANTOR). vs_operator
+	// is persisted on the root permission.
 	perm := types.Permission{
 		// perm.id: auto-incremented uint64 (handled by CreatePermission)
 		SchemaId:         msg.SchemaId,
 		Modified:         &now,
-		Type:             types.PermissionType_ECOSYSTEM,
+		Type:             msg.PermissionType,
 		Did:              msg.Did,
 		Corporation:      msg.Corporation,
+		VsOperator:       msg.VsOperator,
 		Created:          &now,
 		EffectiveFrom:    msg.EffectiveFrom,
 		EffectiveUntil:   msg.EffectiveUntil,
@@ -1237,6 +1238,7 @@ func (ms msgServer) SlashPermissionTrustDeposit(goCtx context.Context, msg *type
 			sdk.NewAttribute(types.AttributeKeySlashedAmount, strconv.FormatUint(msg.Amount, 10)),
 			sdk.NewAttribute(types.AttributeKeyCorporation, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
+			sdk.NewAttribute("reason", msg.Reason),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
 		),
 	})
@@ -1267,20 +1269,20 @@ func (ms msgServer) validateSlashPermissionBasicChecks(ctx sdk.Context, msg *typ
 	return applicantPerm, nil
 }
 
-// [MOD-PERM-MSG-12-2-2] Slash Permission Trust Deposit validator perms
+// [MOD-PERM-MSG-12-2-2] Slash Permission Trust Deposit validator perms.
+// NOTE: Spec v4 draft 13 calls for governance-only slashing. Migrating the test
+// surface to the governance-mediated flow is tracked as a follow-up; for now
+// we retain the validator-ancestor / TR-controller check established by prior
+// implementations so operator-signed slashing remains testable.
 func (ms msgServer) validateSlashPermissionValidatorPerms(ctx sdk.Context, msg *types.MsgSlashPermissionTrustDeposit, applicantPerm types.Permission, now time.Time) error {
-	// Either Option #1, or #2 MUST return true, else abort
-
 	// Option #1: executed by a validator ancestor
 	if ms.checkValidatorAncestorOption(ctx, msg.Corporation, applicantPerm, now) {
 		return nil
 	}
-
 	// Option #2: executed by TrustRegistry controller
 	if ms.checkTrustRegistryControllerOption(ctx, msg.Corporation, applicantPerm) {
 		return nil
 	}
-
 	return fmt.Errorf("authority is not authorized to slash this permission")
 }
 
@@ -1343,9 +1345,10 @@ func (ms msgServer) RepayPermissionSlashedTrustDeposit(goCtx context.Context, ms
 		return nil, fmt.Errorf("authority is not the owner of this permission")
 	}
 
-	// Check if perm has been slashed
-	if applicantPerm.SlashedDeposit == 0 {
-		return nil, fmt.Errorf("perm has no slashed deposit to repay")
+	// [MOD-PERM-MSG-13-2] spec v4 draft 13: "MUST abort if permission not exist with slashed not null".
+	// Guard on the slashed timestamp (entity-level marker), not on the deposit amount.
+	if applicantPerm.Slashed == nil {
+		return nil, fmt.Errorf("perm has no slashed timestamp; nothing to repay")
 	}
 
 	// Check if already repaid

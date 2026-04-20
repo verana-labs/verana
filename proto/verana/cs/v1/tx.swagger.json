@@ -377,7 +377,8 @@
       "type": "object",
       "properties": {
         "corporation": {
-          "type": "string"
+          "type": "string",
+          "description": "[MOD-CS-MSG-5-1] parameters per spec v4 draft 13:\ncorporation, operator, schema_id, role, url, digest_sri.\neffective_from and effective_until are set to null at creation (MOD-CS-MSG-5-3)."
         },
         "operator": {
           "type": "string"
@@ -394,14 +395,6 @@
         },
         "digest_sri": {
           "type": "string"
-        },
-        "effective_from": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "effective_until": {
-          "type": "string",
-          "format": "date-time"
         }
       },
       "description": "[MOD-CS-MSG-5] MsgCreateSchemaAuthorizationPolicy creates a new schema authorization policy."

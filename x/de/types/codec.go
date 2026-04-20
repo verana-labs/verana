@@ -9,6 +9,7 @@ import (
 )
 
 func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
+	legacy.RegisterAminoMsg(cdc, &MsgUpdateParams{}, "verana/x/de/MsgUpdateParams")
 	legacy.RegisterAminoMsg(cdc, &MsgGrantOperatorAuthorization{}, "verana/x/de/MsgGrantOpAuthorization")
 	legacy.RegisterAminoMsg(cdc, &MsgRevokeOperatorAuthorization{}, "verana/x/de/MsgRevokeOpAuthorization")
 }

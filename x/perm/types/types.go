@@ -307,6 +307,10 @@ func (msg *MsgSlashPermissionTrustDeposit) ValidateBasic() error {
 	if msg.Amount == 0 {
 		return sdkerrors.ErrInvalidRequest.Wrap("amount must be greater than 0")
 	}
+	// [MOD-PERM-MSG-12-1] reason is mandatory per spec v4 draft 13
+	if msg.Reason == "" {
+		return sdkerrors.ErrInvalidRequest.Wrap("reason is required")
+	}
 	return nil
 }
 

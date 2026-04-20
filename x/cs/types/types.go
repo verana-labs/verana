@@ -728,9 +728,7 @@ func (m *MsgCreateSchemaAuthorizationPolicy) ValidateBasic() error {
 	if m.DigestSri == "" {
 		return errors.Wrap(sdkerrors.ErrInvalidRequest, "digest_sri is required")
 	}
-	if m.EffectiveUntil != nil && !m.EffectiveUntil.After(m.EffectiveFrom) {
-		return errors.Wrap(sdkerrors.ErrInvalidRequest, "effective_until must be after effective_from")
-	}
+	// [MOD-CS-MSG-5-3] effective_from/effective_until are set to null at creation per spec v4 draft 13.
 	return nil
 }
 

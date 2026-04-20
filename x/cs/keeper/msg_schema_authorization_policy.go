@@ -38,11 +38,6 @@ func (ms msgServer) CreateSchemaAuthorizationPolicy(goCtx context.Context, msg *
 		return nil, fmt.Errorf("authorization check failed: %w", err)
 	}
 
-	// effective_from must not be in the past
-	if msg.EffectiveFrom.Before(now) {
-		return nil, fmt.Errorf("effective_from must not be in the past")
-	}
-
 	// Load credential schema
 	cs, err := ms.CredentialSchema.Get(ctx, msg.SchemaId)
 	if err != nil {
@@ -70,14 +65,15 @@ func (ms msgServer) CreateSchemaAuthorizationPolicy(goCtx context.Context, msg *
 		return nil, fmt.Errorf("failed to generate policy id: %w", err)
 	}
 
+	// [MOD-CS-MSG-5-3] effective_from and effective_until are set to null at creation per spec v4 draft 13.
 	policy := types.SchemaAuthorizationPolicy{
 		Id:             id,
 		SchemaId:       msg.SchemaId,
 		Role:           msg.Role,
 		Url:            msg.Url,
 		DigestSri:      msg.DigestSri,
-		EffectiveFrom:  msg.EffectiveFrom,
-		EffectiveUntil: msg.EffectiveUntil,
+		EffectiveFrom:  nil,
+		EffectiveUntil: nil,
 		Revoked:        false,
 		Created:        now,
 		Version:        nextVersion,
@@ -137,13 +133,14 @@ func (ms msgServer) IncreaseActiveSchemaAuthorizationPolicyVersion(goCtx context
 		return nil, fmt.Errorf("no schema authorization policy exists for schema_id %d and role %s", msg.SchemaId, msg.Role)
 	}
 
-	// Find pending policies (not revoked, effective_from in the future)
+	// [MOD-CS-MSG-6-2-2] Find pending policies (not revoked, not yet active):
+	// effective_from is null (created but not activated) OR effective_from is in the future.
 	var pendingPolicies []types.SchemaAuthorizationPolicy
 	for _, p := range policies {
 		if p.Revoked {
 			continue
 		}
-		if p.EffectiveFrom.After(now) {
+		if p.EffectiveFrom == nil || p.EffectiveFrom.After(now) {
 			pendingPolicies = append(pendingPolicies, p)
 		}
 	}
@@ -160,7 +157,8 @@ func (ms msgServer) IncreaseActiveSchemaAuthorizationPolicyVersion(goCtx context
 		}
 	}
 
-	next.EffectiveFrom = now
+	// [MOD-CS-MSG-6-3] activate the pending policy by setting effective_from to now.
+	next.EffectiveFrom = &now
 	if err := ms.SchemaAuthorizationPolicies.Set(ctx, next.Id, next); err != nil {
 		return nil, fmt.Errorf("failed to update policy: %w", err)
 	}
@@ -224,8 +222,9 @@ func (ms msgServer) RevokeSchemaAuthorizationPolicy(goCtx context.Context, msg *
 	if target.Revoked {
 		return nil, fmt.Errorf("policy is already revoked")
 	}
-	// Policy must be active (effective_from <= now) to be revoked
-	if target.EffectiveFrom.After(now) {
+	// [MOD-CS-MSG-7-2-1] Policy must be active (effective_from <= now) to be revoked.
+	// A null effective_from means the policy has never been activated.
+	if target.EffectiveFrom == nil || target.EffectiveFrom.After(now) {
 		return nil, fmt.Errorf("policy is not yet active; cannot revoke a future policy")
 	}
 

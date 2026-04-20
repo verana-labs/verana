@@ -93,12 +93,6 @@
             "format": "uint64"
           },
           {
-            "name": "country",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
             "name": "when",
             "in": "query",
             "required": false,
@@ -619,7 +613,8 @@
       "enum": [
         "VALIDATION_STATE_UNSPECIFIED",
         "PENDING",
-        "VALIDATED"
+        "VALIDATED",
+        "TERMINATED"
       ],
       "default": "VALIDATION_STATE_UNSPECIFIED",
       "title": "Validation process states"

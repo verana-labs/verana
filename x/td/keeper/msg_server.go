@@ -47,8 +47,9 @@ func (ms msgServer) ReclaimTrustDepositYield(goCtx context.Context, msg *types.M
 		return nil, fmt.Errorf("trust deposit not found for account: %s", account)
 	}
 
-	// [MOD-TD-MSG-2-2-1] Check slashing condition - CRITICAL MISSING CHECK
-	if td.SlashedDeposit > 0 && td.RepaidDeposit < td.SlashedDeposit {
+	// [MOD-TD-MSG-2-2-1] Spec v4 draft 13: slashed_deposit is decremented on each repay,
+	// so any non-zero value means an outstanding (unrepaid) slash balance.
+	if td.SlashedDeposit > 0 {
 		return nil, fmt.Errorf("deposit has been slashed and not repaid")
 	}
 
@@ -57,20 +58,19 @@ func (ms msgServer) ReclaimTrustDepositYield(goCtx context.Context, msg *types.M
 		return nil, fmt.Errorf("no claimable yield")
 	}
 
-	// [MOD-TD-MSG-2-2-1] Precondition: requested amount must not exceed accrued claimable yield
-	if msg.Amount > td.Claimable {
-		return nil, fmt.Errorf("amount %d exceeds claimable %d", msg.Amount, td.Claimable)
-	}
+	// [MOD-TD-MSG-2-3] Spec v4 draft 13: transfer the full claimable balance
+	// and set claimable to 0. No per-call amount parameter.
+	claimed := td.Claimable
 
 	// Get share value
 	params := ms.Keeper.GetParams(ctx)
 
 	// [MOD-TD-MSG-2-3] Reduce shares proportionally to the withdrawn amount
-	sharesToReduce := ms.Keeper.AmountToShare(msg.Amount, params.TrustDepositShareValue)
+	sharesToReduce := ms.Keeper.AmountToShare(claimed, params.TrustDepositShareValue)
 	td.Share = td.Share.Sub(sharesToReduce)
 
-	// Deduct the claimed amount from claimable
-	td.Claimable -= msg.Amount
+	// Drain claimable per spec.
+	td.Claimable = 0
 
 	// Validate corporation address
 	addr, err := sdk.AccAddressFromBech32(account)
@@ -85,10 +85,10 @@ func (ms msgServer) ReclaimTrustDepositYield(goCtx context.Context, msg *types.M
 	}
 
 	// [MOD-TD-MSG-2-3] Transfer yield from TrustDeposit module account to corporation
-	if msg.Amount > uint64(mathstd.MaxInt64) {
-		return nil, fmt.Errorf("amount exceeds maximum coin value: %d", msg.Amount)
+	if claimed > uint64(mathstd.MaxInt64) {
+		return nil, fmt.Errorf("amount exceeds maximum coin value: %d", claimed)
 	}
-	coins := sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, int64(msg.Amount)))
+	coins := sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, int64(claimed)))
 	if err := ms.Keeper.bankKeeper.SendCoinsFromModuleToAccount(
 		ctx,
 		types.ModuleName,
@@ -102,14 +102,14 @@ func (ms msgServer) ReclaimTrustDepositYield(goCtx context.Context, msg *types.M
 		sdk.NewEvent(
 			types.EventTypeReclaimTrustDepositYield,
 			sdk.NewAttribute(types.AttributeKeyAccount, account),
-			sdk.NewAttribute(types.AttributeKeyClaimedYield, strconv.FormatUint(msg.Amount, 10)),
+			sdk.NewAttribute(types.AttributeKeyClaimedYield, strconv.FormatUint(claimed, 10)),
 			sdk.NewAttribute(types.AttributeKeySharesReduced, sharesToReduce.String()),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
 		),
 	})
 
 	return &types.MsgReclaimTrustDepositYieldResponse{
-		ClaimedAmount: msg.Amount,
+		ClaimedAmount: claimed,
 	}, nil
 }
 
@@ -190,6 +190,7 @@ func (ms msgServer) SlashTrustDeposit(goCtx context.Context, msg *types.MsgSlash
 			sdk.NewAttribute(types.AttributeKeyAccount, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyAmount, msg.Deposit.String()),
 			sdk.NewAttribute(types.AttributeKeySlashCount, strconv.FormatUint(td.SlashCount, 10)),
+			sdk.NewAttribute("reason", msg.Reason),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
 		),
 	)
@@ -221,13 +222,10 @@ func (ms msgServer) RepaySlashedTrustDeposit(goCtx context.Context, msg *types.M
 		return nil, fmt.Errorf("trust deposit entry not found for corporation %s: %w", account, err)
 	}
 
-	// [MOD-TD-MSG-6-2-1] deposit MUST be exactly equal to td.slashed_deposit - td.repaid_deposit
-	if td.RepaidDeposit > td.SlashedDeposit {
-		return nil, fmt.Errorf("invalid trust deposit state: repaid_deposit (%d) exceeds slashed_deposit (%d)", td.RepaidDeposit, td.SlashedDeposit)
-	}
-	outstandingSlash := td.SlashedDeposit - td.RepaidDeposit
-	if msg.Deposit != outstandingSlash {
-		return nil, fmt.Errorf("deposit must exactly equal outstanding slashed amount: expected %d, got %d", outstandingSlash, msg.Deposit)
+	// [MOD-TD-MSG-6-2-1] spec v4 draft 13: slashed_deposit is the outstanding balance
+	// (decremented on each repay). deposit MUST equal td.slashed_deposit.
+	if msg.Deposit != td.SlashedDeposit {
+		return nil, fmt.Errorf("deposit must exactly equal outstanding slashed amount: expected %d, got %d", td.SlashedDeposit, msg.Deposit)
 	}
 
 	// Validate corporation address for bank transfer
@@ -247,16 +245,12 @@ func (ms msgServer) RepaySlashedTrustDeposit(goCtx context.Context, msg *types.M
 	shareIncrease := ms.Keeper.AmountToShare(msg.Deposit, params.TrustDepositShareValue)
 	td.Share = td.Share.Add(shareIncrease)
 
-	// td.repaid_deposit = td.repaid_deposit + deposit
+	// [MOD-TD-MSG-6-3] spec v4 draft 13: decrement slashed_deposit by the repay amount,
+	// and track cumulative repaid_deposit. Preserves historical slash accounting.
+	td.SlashedDeposit -= msg.Deposit
 	td.RepaidDeposit += msg.Deposit
 	// td.last_repaid = now
 	td.LastRepaid = &now
-
-	// When fully repaid, reset slashing counters so yield reclaim is re-enabled.
-	if td.RepaidDeposit >= td.SlashedDeposit {
-		td.SlashedDeposit = 0
-		td.RepaidDeposit = 0
-	}
 
 	// Save updated trust deposit BEFORE bank transfer to ensure atomicity
 	if err := ms.Keeper.TrustDeposit.Set(ctx, account, td); err != nil {

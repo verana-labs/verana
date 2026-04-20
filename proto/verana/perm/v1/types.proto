@@ -26,6 +26,7 @@ enum ValidationState {
   VALIDATION_STATE_UNSPECIFIED = 0;
   PENDING = 1;
   VALIDATED = 2;
+  TERMINATED = 3;
 }
 
 message Permission {

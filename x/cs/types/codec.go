@@ -10,6 +10,7 @@ import (
 )
 
 func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
+	legacy.RegisterAminoMsg(cdc, &MsgUpdateParams{}, "verana/x/cs/MsgUpdateParams")
 	legacy.RegisterAminoMsg(cdc, &MsgCreateCredentialSchema{}, "verana/x/cs/MsgCreateCredentialSchema")
 	legacy.RegisterAminoMsg(cdc, &MsgUpdateCredentialSchema{}, "verana/x/cs/MsgUpdateCredentialSchema")
 	legacy.RegisterAminoMsg(cdc, &MsgArchiveCredentialSchema{}, "verana/x/cs/MsgArchiveCredentialSchema")

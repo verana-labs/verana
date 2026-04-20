@@ -248,6 +248,7 @@ export interface SchemaAuthorizationPolicy {
   role: SchemaAuthorizationPolicyRole;
   url: string;
   digestSri: string;
+  /** [MOD-CS-MSG-5-3] effective_from is null at creation; set to now at MOD-CS-MSG-6 activation. */
   effectiveFrom: Date | undefined;
   effectiveUntil: Date | undefined;
   revoked: boolean;

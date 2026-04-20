@@ -83,6 +83,7 @@ export enum ValidationState {
   VALIDATION_STATE_UNSPECIFIED = 0,
   PENDING = 1,
   VALIDATED = 2,
+  TERMINATED = 3,
   UNRECOGNIZED = -1,
 }
 
@@ -97,6 +98,9 @@ export function validationStateFromJSON(object: any): ValidationState {
     case 2:
     case "VALIDATED":
       return ValidationState.VALIDATED;
+    case 3:
+    case "TERMINATED":
+      return ValidationState.TERMINATED;
     case -1:
     case "UNRECOGNIZED":
     default:
@@ -112,6 +116,8 @@ export function validationStateToJSON(object: ValidationState): string {
       return "PENDING";
     case ValidationState.VALIDATED:
       return "VALIDATED";
+    case ValidationState.TERMINATED:
+      return "TERMINATED";
     case ValidationState.UNRECOGNIZED:
     default:
       return "UNRECOGNIZED";

@@ -101,6 +101,8 @@ export const MsgArchiveCredentialSchemaAminoConverter: AminoConverter = {
 
 export const MsgCreateSchemaAuthorizationPolicyAminoConverter: AminoConverter = {
   aminoType: "verana/x/cs/MsgCreateSchemaAuthPolicy",
+  // [MOD-CS-MSG-5-1] Spec v4 draft 13: parameters are corporation, operator,
+  // schema_id, role, url, digest_sri. effective_from/until are set to null at creation.
   toAmino: (m: MsgCreateSchemaAuthorizationPolicy) => clean({
     corporation: m.corporation ?? "",
     operator: m.operator ?? "",
@@ -108,8 +110,6 @@ export const MsgCreateSchemaAuthorizationPolicyAminoConverter: AminoConverter = 
     role: m.role ?? 0,
     url: m.url ?? "",
     digest_sri: m.digestSri ?? "",
-    effective_from: dateToIsoAmino(m.effectiveFrom),
-    effective_until: dateToIsoAmino(m.effectiveUntil),
   }),
   fromAmino: (a: any): MsgCreateSchemaAuthorizationPolicy =>
     MsgCreateSchemaAuthorizationPolicy.fromPartial({
@@ -119,8 +119,6 @@ export const MsgCreateSchemaAuthorizationPolicyAminoConverter: AminoConverter = 
       role: a.role ?? 0,
       url: a.url ?? "",
       digestSri: a.digest_sri ?? "",
-      effectiveFrom: isoToDate(a.effective_from),
-      effectiveUntil: isoToDate(a.effective_until),
     }),
 };
 

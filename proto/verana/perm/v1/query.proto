@@ -93,7 +93,8 @@ message QueryFindPermissionsWithDIDRequest {
   string did = 1;
   uint32 type = 2;
   uint64 schema_id = 3;
-  string country = 4 [(gogoproto.nullable) = true];
+  reserved 4;
+  reserved "country";
   google.protobuf.Timestamp when = 5 [
     (gogoproto.stdtime) = true,
     (gogoproto.nullable) = true

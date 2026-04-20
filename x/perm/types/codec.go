@@ -10,6 +10,7 @@ import (
 )
 
 func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
+	legacy.RegisterAminoMsg(cdc, &MsgUpdateParams{}, "verana/x/perm/MsgUpdateParams")
 	legacy.RegisterAminoMsg(cdc, &MsgStartPermissionVP{}, "verana/x/perm/MsgStartPermissionVP")
 	legacy.RegisterAminoMsg(cdc, &MsgRenewPermissionVP{}, "verana/x/perm/MsgRenewPermissionVP")
 	legacy.RegisterAminoMsg(cdc, &MsgSetPermissionVPToValidated{}, "verana/x/perm/MsgSetPermVPValidated")

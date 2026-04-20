@@ -39,8 +39,6 @@ export interface MsgReclaimTrustDepositYield {
   corporation: string;
   /** operator is the account authorized by the corporation to run this Msg. */
   operator: string;
-  /** amount is the quantity of claimable yield to withdraw (must be > 0 and <= td.claimable). */
-  amount: number;
 }
 
 /** MsgReclaimTrustDepositYieldResponse defines the response type */
@@ -59,6 +57,8 @@ export interface MsgSlashTrustDeposit {
   corporation: string;
   /** deposit is the deposit amount to slash (in base denom) */
   deposit: string;
+  /** [MOD-TD-MSG-5-1] reason for the slash (mandatory per spec v4 draft 13) */
+  reason: string;
 }
 
 /** MsgSlashTrustDepositResponse defines the response for MsgSlashTrustDeposit */
@@ -201,7 +201,7 @@ export const MsgUpdateParamsResponse = {
 };
 
 function createBaseMsgReclaimTrustDepositYield(): MsgReclaimTrustDepositYield {
-  return { corporation: "", operator: "", amount: 0 };
+  return { corporation: "", operator: "" };
 }
 
 export const MsgReclaimTrustDepositYield = {
@@ -211,9 +211,6 @@ export const MsgReclaimTrustDepositYield = {
     }
     if (message.operator !== "") {
       writer.uint32(18).string(message.operator);
-    }
-    if (message.amount !== 0) {
-      writer.uint32(32).uint64(message.amount);
     }
     return writer;
   },
@@ -239,13 +236,6 @@ export const MsgReclaimTrustDepositYield = {
 
           message.operator = reader.string();
           continue;
-        case 4:
-          if (tag !== 32) {
-            break;
-          }
-
-          message.amount = longToNumber(reader.uint64() as Long);
-          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -259,7 +249,6 @@ export const MsgReclaimTrustDepositYield = {
     return {
       corporation: isSet(object.corporation) ? globalThis.String(object.corporation) : "",
       operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
-      amount: isSet(object.amount) ? globalThis.Number(object.amount) : 0,
     };
   },
 
@@ -271,9 +260,6 @@ export const MsgReclaimTrustDepositYield = {
     if (message.operator !== "") {
       obj.operator = message.operator;
     }
-    if (message.amount !== 0) {
-      obj.amount = Math.round(message.amount);
-    }
     return obj;
   },
 
@@ -284,7 +270,6 @@ export const MsgReclaimTrustDepositYield = {
     const message = createBaseMsgReclaimTrustDepositYield();
     message.corporation = object.corporation ?? "";
     message.operator = object.operator ?? "";
-    message.amount = object.amount ?? 0;
     return message;
   },
 };
@@ -351,7 +336,7 @@ export const MsgReclaimTrustDepositYieldResponse = {
 };
 
 function createBaseMsgSlashTrustDeposit(): MsgSlashTrustDeposit {
-  return { authority: "", corporation: "", deposit: "" };
+  return { authority: "", corporation: "", deposit: "", reason: "" };
 }
 
 export const MsgSlashTrustDeposit = {
@@ -364,6 +349,9 @@ export const MsgSlashTrustDeposit = {
     }
     if (message.deposit !== "") {
       writer.uint32(26).string(message.deposit);
+    }
+    if (message.reason !== "") {
+      writer.uint32(34).string(message.reason);
     }
     return writer;
   },
@@ -396,6 +384,13 @@ export const MsgSlashTrustDeposit = {
 
           message.deposit = reader.string();
           continue;
+        case 4:
+          if (tag !== 34) {
+            break;
+          }
+
+          message.reason = reader.string();
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -410,6 +405,7 @@ export const MsgSlashTrustDeposit = {
       authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
       corporation: isSet(object.corporation) ? globalThis.String(object.corporation) : "",
       deposit: isSet(object.deposit) ? globalThis.String(object.deposit) : "",
+      reason: isSet(object.reason) ? globalThis.String(object.reason) : "",
     };
   },
 
@@ -424,6 +420,9 @@ export const MsgSlashTrustDeposit = {
     if (message.deposit !== "") {
       obj.deposit = message.deposit;
     }
+    if (message.reason !== "") {
+      obj.reason = message.reason;
+    }
     return obj;
   },
 
@@ -435,6 +434,7 @@ export const MsgSlashTrustDeposit = {
     message.authority = object.authority ?? "";
     message.corporation = object.corporation ?? "";
     message.deposit = object.deposit ?? "";
+    message.reason = object.reason ?? "";
     return message;
   },
 };
