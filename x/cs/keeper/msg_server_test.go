@@ -183,31 +183,31 @@ func TestMsgServerCreateCredentialSchema(t *testing.T) {
 	}{
 		{
 			name:              "Valid Create Credential Schema with placeholder $id",
-			msg:               keeper.CreateMsgWithValidityPeriods(authority, operator, trID, validJsonSchemaWithPlaceholder, 365, 365, 180, 180, 180, 2, 2, 1, "tu", "sha256"),
+			msg:               keeper.CreateMsgWithValidityPeriods(authority, operator, trID, validJsonSchemaWithPlaceholder, 365, 365, 180, 180, 180, 2, 2, 2, 1, "tu", "sha256"),
 			isValid:           true,
 			expectIdInjection: true,
 		},
 		{
 			name:              "Valid Create Credential Schema with no $id",
-			msg:               keeper.CreateMsgWithValidityPeriods(authority, operator, trID, validJsonSchemaNoId, 365, 365, 180, 180, 180, 2, 2, 1, "tu", "sha256"),
+			msg:               keeper.CreateMsgWithValidityPeriods(authority, operator, trID, validJsonSchemaNoId, 365, 365, 180, 180, 180, 2, 2, 2, 1, "tu", "sha256"),
 			isValid:           true,
 			expectIdInjection: true,
 		},
 		{
 			name:              "Valid Create Credential Schema with wrong $id",
-			msg:               keeper.CreateMsgWithValidityPeriods(authority, operator, trID, validJsonSchemaWrongId, 365, 365, 180, 180, 180, 2, 2, 1, "tu", "sha256"),
+			msg:               keeper.CreateMsgWithValidityPeriods(authority, operator, trID, validJsonSchemaWrongId, 365, 365, 180, 180, 180, 2, 2, 2, 1, "tu", "sha256"),
 			isValid:           true,
 			expectIdInjection: true,
 		},
 		{
 			name:              "Non-existent Trust Registry",
-			msg:               keeper.CreateMsgWithValidityPeriods(authority, operator, 999, validJsonSchemaWithPlaceholder, 365, 365, 180, 180, 180, 2, 2, 1, "tu", "sha256"),
+			msg:               keeper.CreateMsgWithValidityPeriods(authority, operator, 999, validJsonSchemaWithPlaceholder, 365, 365, 180, 180, 180, 2, 2, 2, 1, "tu", "sha256"),
 			isValid:           false,
 			expectIdInjection: false,
 		},
 		{
 			name:              "Wrong Trust Registry Controller",
-			msg:               keeper.CreateMsgWithValidityPeriods(sdk.AccAddress([]byte("wrong_authority_____")).String(), operator, trID, validJsonSchemaWithPlaceholder, 365, 365, 180, 180, 180, 2, 2, 1, "tu", "sha256"),
+			msg:               keeper.CreateMsgWithValidityPeriods(sdk.AccAddress([]byte("wrong_authority_____")).String(), operator, trID, validJsonSchemaWithPlaceholder, 365, 365, 180, 180, 180, 2, 2, 2, 1, "tu", "sha256"),
 			isValid:           false,
 			expectIdInjection: false,
 		},
@@ -339,7 +339,7 @@ func TestCanonicalIdInjection(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			createMsg := keeper.CreateMsgWithValidityPeriods(authority, operator, trID, tc.inputSchema, 365, 365, 180, 180, 180, 2, 2, 1, "tu", "sha256")
+			createMsg := keeper.CreateMsgWithValidityPeriods(authority, operator, trID, tc.inputSchema, 365, 365, 180, 180, 180, 2, 2, 2, 1, "tu", "sha256")
 			resp, err := ms.CreateCredentialSchema(ctx, createMsg)
 			require.NoError(t, err)
 			require.NotNil(t, resp)
@@ -398,7 +398,7 @@ func TestQueryCanonicalId(t *testing.T) {
   "additionalProperties": false
 }`
 
-	createMsg := keeper.CreateMsgWithValidityPeriods(authority, operator, trID, schemaNoId, 365, 365, 180, 180, 180, 2, 2, 1, "tu", "sha256")
+	createMsg := keeper.CreateMsgWithValidityPeriods(authority, operator, trID, schemaNoId, 365, 365, 180, 180, 180, 2, 2, 2, 1, "tu", "sha256")
 	resp, err := ms.CreateCredentialSchema(ctx, createMsg)
 	require.NoError(t, err)
 	require.NotNil(t, resp)
@@ -480,7 +480,7 @@ func TestUpdateCredentialSchema(t *testing.T) {
         "required": ["name"],
         "additionalProperties": false
     }`
-	createMsg := keeper.CreateMsgWithValidityPeriods(authority, operator, trID, validJsonSchema, 365, 365, 180, 180, 180, 2, 2, 1, "tu", "sha256")
+	createMsg := keeper.CreateMsgWithValidityPeriods(authority, operator, trID, validJsonSchema, 365, 365, 180, 180, 180, 2, 2, 2, 1, "tu", "sha256")
 
 	schemaID, err := ms.CreateCredentialSchema(ctx, createMsg)
 	require.NoError(t, err)
@@ -509,7 +509,7 @@ func TestUpdateCredentialSchema(t *testing.T) {
 			name:          "unauthorized update - not controller",
 			msg:           keeper.CreateUpdateMsgWithValidityPeriods(sdk.AccAddress([]byte("wrong_authority_____")).String(), operator, schemaID.Id, 365, 365, 180, 180, 180),
 			expPass:       false,
-			errorContains: "authority is not the controller",
+			errorContains: "corporation does not match the trust registry corporation",
 		},
 		{
 			name:          "invalid validity period - exceeds maximum",
@@ -576,7 +576,7 @@ func TestArchiveCredentialSchema(t *testing.T) {
         "required": ["name"],
         "additionalProperties": false
     }`
-	createMsg := keeper.CreateMsgWithValidityPeriods(authority, operator, trID, validJsonSchema, 365, 365, 180, 180, 180, 2, 2, 1, "tu", "sha256")
+	createMsg := keeper.CreateMsgWithValidityPeriods(authority, operator, trID, validJsonSchema, 365, 365, 180, 180, 180, 2, 2, 2, 1, "tu", "sha256")
 
 	schemaID, err := ms.CreateCredentialSchema(ctx, createMsg)
 	require.NoError(t, err)
@@ -592,32 +592,69 @@ func TestArchiveCredentialSchema(t *testing.T) {
 		errorContains string
 	}{
 		{
+			// schema starts unarchived; archive=true must succeed
 			name: "valid archive",
 			msg: &types.MsgArchiveCredentialSchema{
-				Authority: authority,
-				Operator:  operator,
-				Id:        schemaID.Id,
-				Archive:   true,
+				Corporation: authority,
+				Operator:    operator,
+				Id:          schemaID.Id,
+				Archive:     true,
 			},
 			expPass: true,
 		},
 		{
-			name: "valid unarchive",
+			// [MOD-CS-MSG-3-3] spec v4 draft 13: archive=false on an archived CS unarchives it.
+			name: "unarchive succeeds",
 			msg: &types.MsgArchiveCredentialSchema{
-				Authority: authority,
-				Operator:  operator,
-				Id:        schemaID.Id,
-				Archive:   false,
+				Corporation: authority,
+				Operator:    operator,
+				Id:          schemaID.Id,
+				Archive:     false,
 			},
 			expPass: true,
+		},
+		{
+			// [MOD-CS-MSG-3-2-1] archive=false on a non-archived CS must abort.
+			name: "unarchive not archived",
+			msg: &types.MsgArchiveCredentialSchema{
+				Corporation: authority,
+				Operator:    operator,
+				Id:          schemaID.Id,
+				Archive:     false,
+			},
+			expPass:       false,
+			errorContains: "not archived",
+		},
+		{
+			// Re-archive the CS to set up the next "already archived" case.
+			name: "re-archive for next case",
+			msg: &types.MsgArchiveCredentialSchema{
+				Corporation: authority,
+				Operator:    operator,
+				Id:          schemaID.Id,
+				Archive:     true,
+			},
+			expPass: true,
+		},
+		{
+			// schema is archived; archive=true again must fail.
+			name: "already archived",
+			msg: &types.MsgArchiveCredentialSchema{
+				Corporation: authority,
+				Operator:    operator,
+				Id:          schemaID.Id,
+				Archive:     true,
+			},
+			expPass:       false,
+			errorContains: "already archived",
 		},
 		{
 			name: "non-existent schema",
 			msg: &types.MsgArchiveCredentialSchema{
-				Authority: authority,
-				Operator:  operator,
-				Id:        999,
-				Archive:   true,
+				Corporation: authority,
+				Operator:    operator,
+				Id:          999,
+				Archive:     true,
 			},
 			expPass:       false,
 			errorContains: "credential schema not found",
@@ -625,53 +662,25 @@ func TestArchiveCredentialSchema(t *testing.T) {
 		{
 			name: "unauthorized archive - not controller",
 			msg: &types.MsgArchiveCredentialSchema{
-				Authority: sdk.AccAddress([]byte("wrong_authority_____")).String(),
-				Operator:  operator,
-				Id:        schemaID.Id,
-				Archive:   true,
+				Corporation: sdk.AccAddress([]byte("wrong_authority_____")).String(),
+				Operator:    operator,
+				Id:          schemaID.Id,
+				Archive:     true,
 			},
 			expPass:       false,
-			errorContains: "authority is not the controller",
+			errorContains: "corporation does not match the trust registry corporation",
 		},
 		{
-			name: "already archived",
+			// schema is already archived; archive=true again must fail
+			name: "already archived again",
 			msg: &types.MsgArchiveCredentialSchema{
-				Authority: authority,
-				Operator:  operator,
-				Id:        schemaID.Id,
-				Archive:   true,
-			},
-			setupFn: func() {
-				_, err := ms.ArchiveCredentialSchema(ctx, &types.MsgArchiveCredentialSchema{
-					Authority: authority,
-					Operator:  operator,
-					Id:        schemaID.Id,
-					Archive:   true,
-				})
-				require.NoError(t, err)
+				Corporation: authority,
+				Operator:    operator,
+				Id:          schemaID.Id,
+				Archive:     true,
 			},
 			expPass:       false,
 			errorContains: "already archived",
-		},
-		{
-			name: "already unarchived",
-			msg: &types.MsgArchiveCredentialSchema{
-				Authority: authority,
-				Operator:  operator,
-				Id:        schemaID.Id,
-				Archive:   false,
-			},
-			setupFn: func() {
-				_, err := ms.ArchiveCredentialSchema(ctx, &types.MsgArchiveCredentialSchema{
-					Authority: authority,
-					Operator:  operator,
-					Id:        schemaID.Id,
-					Archive:   false,
-				})
-				require.NoError(t, err)
-			},
-			expPass:       false,
-			errorContains: "not archived",
 		},
 	}
 

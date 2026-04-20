@@ -159,7 +159,7 @@ async function main() {
   const msg = {
     typeUrl: typeUrls.MsgGrantOperatorAuthorization,
     value: MsgGrantOperatorAuthorization.fromPartial({
-      authority: authorityAccount.address,
+      corporation: authorityAccount.address,
       operator: "", // empty — authority acts alone (AUTHZ-CHECK skipped)
       grantee: operatorAccount.address,
       msgTypes: allCsMsgTypes,

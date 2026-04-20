@@ -15,8 +15,8 @@ func (ms msgServer) validateCreateCredentialSchemaParams(ctx sdk.Context, msg *t
 	if err != nil {
 		return fmt.Errorf("trust registry not found: %w", err)
 	}
-	if tr.Controller != msg.Authority {
-		return fmt.Errorf("authority is not the controller of the trust registry")
+	if tr.Corporation != msg.Corporation {
+		return fmt.Errorf("corporation does not match the trust registry corporation")
 	}
 
 	// Check schema size
@@ -112,8 +112,9 @@ func (ms msgServer) executeCreateCredentialSchema(ctx sdk.Context, schemaID uint
 		IssuerValidationValidityPeriod:          msg.GetIssuerValidationValidityPeriod().GetValue(),
 		VerifierValidationValidityPeriod:        msg.GetVerifierValidationValidityPeriod().GetValue(),
 		HolderValidationValidityPeriod:          msg.GetHolderValidationValidityPeriod().GetValue(),
-		IssuerPermManagementMode:                types.CredentialSchemaPermManagementMode(msg.IssuerPermManagementMode),
-		VerifierPermManagementMode:              types.CredentialSchemaPermManagementMode(msg.VerifierPermManagementMode),
+		IssuerOnboardingMode:                    types.IssuerOnboardingMode(msg.IssuerOnboardingMode),
+		VerifierOnboardingMode:                  types.VerifierOnboardingMode(msg.VerifierOnboardingMode),
+		HolderOnboardingMode:                    types.HolderOnboardingMode(msg.HolderOnboardingMode),
 		PricingAssetType:                        types.PricingAssetType(msg.PricingAssetType),
 		PricingAsset:                            msg.PricingAsset,
 		DigestAlgorithm:                         msg.DigestAlgorithm,
@@ -130,7 +131,7 @@ func (ms msgServer) executeCreateCredentialSchema(ctx sdk.Context, schemaID uint
 			types.EventTypeCreateCredentialSchema,
 			sdk.NewAttribute(types.AttributeKeyId, fmt.Sprintf("%d", schemaID)),
 			sdk.NewAttribute(types.AttributeKeyTrId, fmt.Sprintf("%d", msg.TrId)),
-			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Authority),
+			sdk.NewAttribute(types.AttributeKeyCorporation, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
 		),
 	)

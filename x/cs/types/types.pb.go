@@ -29,40 +29,105 @@ var _ = time.Kitchen
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
-// CredentialSchemaPermManagementMode defines how permissions are managed
-type CredentialSchemaPermManagementMode int32
+// IssuerOnboardingMode defines how issuers are onboarded for a credential schema.
+type IssuerOnboardingMode int32
 
 const (
-	// Default to prevent accidental omission
-	CredentialSchemaPermManagementMode_MODE_UNSPECIFIED CredentialSchemaPermManagementMode = 0
-	// Anyone can create their own permission
-	CredentialSchemaPermManagementMode_OPEN CredentialSchemaPermManagementMode = 1
+	IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_UNSPECIFIED IssuerOnboardingMode = 0
+	// Anyone can self-create an issuer permission
+	IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_OPEN IssuerOnboardingMode = 1
+	// Requires validation from ecosystem
+	IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS IssuerOnboardingMode = 2
 	// Requires validation from a grantor
-	CredentialSchemaPermManagementMode_GRANTOR_VALIDATION CredentialSchemaPermManagementMode = 2
-	// Requires validation from ecosystem (was TRUST_REGISTRY_VALIDATION)
-	CredentialSchemaPermManagementMode_ECOSYSTEM CredentialSchemaPermManagementMode = 3
+	IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS IssuerOnboardingMode = 3
 )
 
-var CredentialSchemaPermManagementMode_name = map[int32]string{
-	0: "MODE_UNSPECIFIED",
-	1: "OPEN",
-	2: "GRANTOR_VALIDATION",
-	3: "ECOSYSTEM",
+var IssuerOnboardingMode_name = map[int32]string{
+	0: "ISSUER_ONBOARDING_MODE_UNSPECIFIED",
+	1: "ISSUER_ONBOARDING_MODE_OPEN",
+	2: "ISSUER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS",
+	3: "ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS",
 }
 
-var CredentialSchemaPermManagementMode_value = map[string]int32{
-	"MODE_UNSPECIFIED":   0,
-	"OPEN":               1,
-	"GRANTOR_VALIDATION": 2,
-	"ECOSYSTEM":          3,
+var IssuerOnboardingMode_value = map[string]int32{
+	"ISSUER_ONBOARDING_MODE_UNSPECIFIED":                  0,
+	"ISSUER_ONBOARDING_MODE_OPEN":                         1,
+	"ISSUER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS": 2,
+	"ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS":   3,
 }
 
-func (x CredentialSchemaPermManagementMode) String() string {
-	return proto.EnumName(CredentialSchemaPermManagementMode_name, int32(x))
+func (x IssuerOnboardingMode) String() string {
+	return proto.EnumName(IssuerOnboardingMode_name, int32(x))
 }
 
-func (CredentialSchemaPermManagementMode) EnumDescriptor() ([]byte, []int) {
+func (IssuerOnboardingMode) EnumDescriptor() ([]byte, []int) {
 	return fileDescriptor_73b144e4376bdc5f, []int{0}
+}
+
+// VerifierOnboardingMode defines how verifiers are onboarded for a credential schema.
+type VerifierOnboardingMode int32
+
+const (
+	VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_UNSPECIFIED VerifierOnboardingMode = 0
+	// Anyone can self-create a verifier permission
+	VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_OPEN VerifierOnboardingMode = 1
+	// Requires validation from ecosystem
+	VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS VerifierOnboardingMode = 2
+	// Requires validation from a grantor
+	VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS VerifierOnboardingMode = 3
+)
+
+var VerifierOnboardingMode_name = map[int32]string{
+	0: "VERIFIER_ONBOARDING_MODE_UNSPECIFIED",
+	1: "VERIFIER_ONBOARDING_MODE_OPEN",
+	2: "VERIFIER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS",
+	3: "VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS",
+}
+
+var VerifierOnboardingMode_value = map[string]int32{
+	"VERIFIER_ONBOARDING_MODE_UNSPECIFIED":                  0,
+	"VERIFIER_ONBOARDING_MODE_OPEN":                         1,
+	"VERIFIER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS": 2,
+	"VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS":   3,
+}
+
+func (x VerifierOnboardingMode) String() string {
+	return proto.EnumName(VerifierOnboardingMode_name, int32(x))
+}
+
+func (VerifierOnboardingMode) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_73b144e4376bdc5f, []int{1}
+}
+
+// HolderOnboardingMode defines how holders are onboarded for a credential schema.
+type HolderOnboardingMode int32
+
+const (
+	HolderOnboardingMode_HOLDER_ONBOARDING_MODE_UNSPECIFIED HolderOnboardingMode = 0
+	// Holders go through the issuer validation process
+	HolderOnboardingMode_HOLDER_ONBOARDING_MODE_ISSUER_VALIDATION_PROCESS HolderOnboardingMode = 1
+	// Anyone can self-create a holder permission without validation
+	HolderOnboardingMode_HOLDER_ONBOARDING_MODE_PERMISSIONLESS HolderOnboardingMode = 2
+)
+
+var HolderOnboardingMode_name = map[int32]string{
+	0: "HOLDER_ONBOARDING_MODE_UNSPECIFIED",
+	1: "HOLDER_ONBOARDING_MODE_ISSUER_VALIDATION_PROCESS",
+	2: "HOLDER_ONBOARDING_MODE_PERMISSIONLESS",
+}
+
+var HolderOnboardingMode_value = map[string]int32{
+	"HOLDER_ONBOARDING_MODE_UNSPECIFIED":               0,
+	"HOLDER_ONBOARDING_MODE_ISSUER_VALIDATION_PROCESS": 1,
+	"HOLDER_ONBOARDING_MODE_PERMISSIONLESS":            2,
+}
+
+func (x HolderOnboardingMode) String() string {
+	return proto.EnumName(HolderOnboardingMode_name, int32(x))
+}
+
+func (HolderOnboardingMode) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_73b144e4376bdc5f, []int{2}
 }
 
 // PricingAssetType defines the type of asset used for paying business fees
@@ -98,34 +163,182 @@ func (x PricingAssetType) String() string {
 }
 
 func (PricingAssetType) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_73b144e4376bdc5f, []int{1}
+	return fileDescriptor_73b144e4376bdc5f, []int{3}
+}
+
+// SchemaAuthorizationPolicyRole defines the role for a schema authorization policy.
+type SchemaAuthorizationPolicyRole int32
+
+const (
+	SchemaAuthorizationPolicyRole_SCHEMA_AUTHORIZATION_POLICY_ROLE_UNSPECIFIED SchemaAuthorizationPolicyRole = 0
+	SchemaAuthorizationPolicyRole_SCHEMA_AUTHORIZATION_POLICY_ROLE_ISSUER      SchemaAuthorizationPolicyRole = 1
+	SchemaAuthorizationPolicyRole_SCHEMA_AUTHORIZATION_POLICY_ROLE_VERIFIER    SchemaAuthorizationPolicyRole = 2
+)
+
+var SchemaAuthorizationPolicyRole_name = map[int32]string{
+	0: "SCHEMA_AUTHORIZATION_POLICY_ROLE_UNSPECIFIED",
+	1: "SCHEMA_AUTHORIZATION_POLICY_ROLE_ISSUER",
+	2: "SCHEMA_AUTHORIZATION_POLICY_ROLE_VERIFIER",
+}
+
+var SchemaAuthorizationPolicyRole_value = map[string]int32{
+	"SCHEMA_AUTHORIZATION_POLICY_ROLE_UNSPECIFIED": 0,
+	"SCHEMA_AUTHORIZATION_POLICY_ROLE_ISSUER":      1,
+	"SCHEMA_AUTHORIZATION_POLICY_ROLE_VERIFIER":    2,
+}
+
+func (x SchemaAuthorizationPolicyRole) String() string {
+	return proto.EnumName(SchemaAuthorizationPolicyRole_name, int32(x))
+}
+
+func (SchemaAuthorizationPolicyRole) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_73b144e4376bdc5f, []int{4}
+}
+
+// SchemaAuthorizationPolicy defines a versioned policy document attached to a credential schema role.
+type SchemaAuthorizationPolicy struct {
+	Id        uint64                        `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	SchemaId  uint64                        `protobuf:"varint,2,opt,name=schema_id,json=schemaId,proto3" json:"schema_id,omitempty"`
+	Role      SchemaAuthorizationPolicyRole `protobuf:"varint,3,opt,name=role,proto3,enum=verana.cs.v1.SchemaAuthorizationPolicyRole" json:"role,omitempty"`
+	Url       string                        `protobuf:"bytes,4,opt,name=url,proto3" json:"url,omitempty"`
+	DigestSri string                        `protobuf:"bytes,5,opt,name=digest_sri,json=digestSri,proto3" json:"digest_sri,omitempty"`
+	// [MOD-CS-MSG-5-3] effective_from is null at creation; set to now at MOD-CS-MSG-6 activation.
+	EffectiveFrom  *time.Time `protobuf:"bytes,6,opt,name=effective_from,json=effectiveFrom,proto3,stdtime" json:"effective_from,omitempty"`
+	EffectiveUntil *time.Time `protobuf:"bytes,7,opt,name=effective_until,json=effectiveUntil,proto3,stdtime" json:"effective_until,omitempty"`
+	Revoked        bool       `protobuf:"varint,8,opt,name=revoked,proto3" json:"revoked,omitempty"`
+	Created        time.Time  `protobuf:"bytes,9,opt,name=created,proto3,stdtime" json:"created"`
+	Version        uint32     `protobuf:"varint,10,opt,name=version,proto3" json:"version,omitempty"`
+}
+
+func (m *SchemaAuthorizationPolicy) Reset()         { *m = SchemaAuthorizationPolicy{} }
+func (m *SchemaAuthorizationPolicy) String() string { return proto.CompactTextString(m) }
+func (*SchemaAuthorizationPolicy) ProtoMessage()    {}
+func (*SchemaAuthorizationPolicy) Descriptor() ([]byte, []int) {
+	return fileDescriptor_73b144e4376bdc5f, []int{0}
+}
+func (m *SchemaAuthorizationPolicy) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *SchemaAuthorizationPolicy) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_SchemaAuthorizationPolicy.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *SchemaAuthorizationPolicy) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_SchemaAuthorizationPolicy.Merge(m, src)
+}
+func (m *SchemaAuthorizationPolicy) XXX_Size() int {
+	return m.Size()
+}
+func (m *SchemaAuthorizationPolicy) XXX_DiscardUnknown() {
+	xxx_messageInfo_SchemaAuthorizationPolicy.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_SchemaAuthorizationPolicy proto.InternalMessageInfo
+
+func (m *SchemaAuthorizationPolicy) GetId() uint64 {
+	if m != nil {
+		return m.Id
+	}
+	return 0
+}
+
+func (m *SchemaAuthorizationPolicy) GetSchemaId() uint64 {
+	if m != nil {
+		return m.SchemaId
+	}
+	return 0
+}
+
+func (m *SchemaAuthorizationPolicy) GetRole() SchemaAuthorizationPolicyRole {
+	if m != nil {
+		return m.Role
+	}
+	return SchemaAuthorizationPolicyRole_SCHEMA_AUTHORIZATION_POLICY_ROLE_UNSPECIFIED
+}
+
+func (m *SchemaAuthorizationPolicy) GetUrl() string {
+	if m != nil {
+		return m.Url
+	}
+	return ""
+}
+
+func (m *SchemaAuthorizationPolicy) GetDigestSri() string {
+	if m != nil {
+		return m.DigestSri
+	}
+	return ""
+}
+
+func (m *SchemaAuthorizationPolicy) GetEffectiveFrom() *time.Time {
+	if m != nil {
+		return m.EffectiveFrom
+	}
+	return nil
+}
+
+func (m *SchemaAuthorizationPolicy) GetEffectiveUntil() *time.Time {
+	if m != nil {
+		return m.EffectiveUntil
+	}
+	return nil
+}
+
+func (m *SchemaAuthorizationPolicy) GetRevoked() bool {
+	if m != nil {
+		return m.Revoked
+	}
+	return false
+}
+
+func (m *SchemaAuthorizationPolicy) GetCreated() time.Time {
+	if m != nil {
+		return m.Created
+	}
+	return time.Time{}
+}
+
+func (m *SchemaAuthorizationPolicy) GetVersion() uint32 {
+	if m != nil {
+		return m.Version
+	}
+	return 0
 }
 
 // CredentialSchema defines the structure for a credential schema
 type CredentialSchema struct {
-	Id                                      uint64                             `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	TrId                                    uint64                             `protobuf:"varint,2,opt,name=tr_id,json=trId,proto3" json:"tr_id,omitempty"`
-	Created                                 time.Time                          `protobuf:"bytes,3,opt,name=created,proto3,stdtime" json:"created"`
-	Modified                                time.Time                          `protobuf:"bytes,4,opt,name=modified,proto3,stdtime" json:"modified"`
-	Archived                                *time.Time                         `protobuf:"bytes,5,opt,name=archived,proto3,stdtime" json:"archived,omitempty"`
-	JsonSchema                              string                             `protobuf:"bytes,7,opt,name=json_schema,json=jsonSchema,proto3" json:"json_schema,omitempty"`
-	IssuerGrantorValidationValidityPeriod   uint32                             `protobuf:"varint,8,opt,name=issuer_grantor_validation_validity_period,json=issuerGrantorValidationValidityPeriod,proto3" json:"issuer_grantor_validation_validity_period,omitempty"`
-	VerifierGrantorValidationValidityPeriod uint32                             `protobuf:"varint,9,opt,name=verifier_grantor_validation_validity_period,json=verifierGrantorValidationValidityPeriod,proto3" json:"verifier_grantor_validation_validity_period,omitempty"`
-	IssuerValidationValidityPeriod          uint32                             `protobuf:"varint,10,opt,name=issuer_validation_validity_period,json=issuerValidationValidityPeriod,proto3" json:"issuer_validation_validity_period,omitempty"`
-	VerifierValidationValidityPeriod        uint32                             `protobuf:"varint,11,opt,name=verifier_validation_validity_period,json=verifierValidationValidityPeriod,proto3" json:"verifier_validation_validity_period,omitempty"`
-	HolderValidationValidityPeriod          uint32                             `protobuf:"varint,12,opt,name=holder_validation_validity_period,json=holderValidationValidityPeriod,proto3" json:"holder_validation_validity_period,omitempty"`
-	IssuerPermManagementMode                CredentialSchemaPermManagementMode `protobuf:"varint,13,opt,name=issuer_perm_management_mode,json=issuerPermManagementMode,proto3,enum=verana.cs.v1.CredentialSchemaPermManagementMode" json:"issuer_perm_management_mode,omitempty"`
-	VerifierPermManagementMode              CredentialSchemaPermManagementMode `protobuf:"varint,14,opt,name=verifier_perm_management_mode,json=verifierPermManagementMode,proto3,enum=verana.cs.v1.CredentialSchemaPermManagementMode" json:"verifier_perm_management_mode,omitempty"`
-	PricingAssetType                        PricingAssetType                   `protobuf:"varint,15,opt,name=pricing_asset_type,json=pricingAssetType,proto3,enum=verana.cs.v1.PricingAssetType" json:"pricing_asset_type,omitempty"`
-	PricingAsset                            string                             `protobuf:"bytes,16,opt,name=pricing_asset,json=pricingAsset,proto3" json:"pricing_asset,omitempty"`
-	DigestAlgorithm                         string                             `protobuf:"bytes,17,opt,name=digest_algorithm,json=digestAlgorithm,proto3" json:"digest_algorithm,omitempty"`
+	Id                                      uint64                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	TrId                                    uint64                 `protobuf:"varint,2,opt,name=tr_id,json=trId,proto3" json:"tr_id,omitempty"`
+	Created                                 time.Time              `protobuf:"bytes,3,opt,name=created,proto3,stdtime" json:"created"`
+	Modified                                time.Time              `protobuf:"bytes,4,opt,name=modified,proto3,stdtime" json:"modified"`
+	Archived                                *time.Time             `protobuf:"bytes,5,opt,name=archived,proto3,stdtime" json:"archived,omitempty"`
+	JsonSchema                              string                 `protobuf:"bytes,7,opt,name=json_schema,json=jsonSchema,proto3" json:"json_schema,omitempty"`
+	IssuerGrantorValidationValidityPeriod   uint32                 `protobuf:"varint,8,opt,name=issuer_grantor_validation_validity_period,json=issuerGrantorValidationValidityPeriod,proto3" json:"issuer_grantor_validation_validity_period,omitempty"`
+	VerifierGrantorValidationValidityPeriod uint32                 `protobuf:"varint,9,opt,name=verifier_grantor_validation_validity_period,json=verifierGrantorValidationValidityPeriod,proto3" json:"verifier_grantor_validation_validity_period,omitempty"`
+	IssuerValidationValidityPeriod          uint32                 `protobuf:"varint,10,opt,name=issuer_validation_validity_period,json=issuerValidationValidityPeriod,proto3" json:"issuer_validation_validity_period,omitempty"`
+	VerifierValidationValidityPeriod        uint32                 `protobuf:"varint,11,opt,name=verifier_validation_validity_period,json=verifierValidationValidityPeriod,proto3" json:"verifier_validation_validity_period,omitempty"`
+	HolderValidationValidityPeriod          uint32                 `protobuf:"varint,12,opt,name=holder_validation_validity_period,json=holderValidationValidityPeriod,proto3" json:"holder_validation_validity_period,omitempty"`
+	IssuerOnboardingMode                    IssuerOnboardingMode   `protobuf:"varint,13,opt,name=issuer_onboarding_mode,json=issuerOnboardingMode,proto3,enum=verana.cs.v1.IssuerOnboardingMode" json:"issuer_onboarding_mode,omitempty"`
+	VerifierOnboardingMode                  VerifierOnboardingMode `protobuf:"varint,14,opt,name=verifier_onboarding_mode,json=verifierOnboardingMode,proto3,enum=verana.cs.v1.VerifierOnboardingMode" json:"verifier_onboarding_mode,omitempty"`
+	PricingAssetType                        PricingAssetType       `protobuf:"varint,15,opt,name=pricing_asset_type,json=pricingAssetType,proto3,enum=verana.cs.v1.PricingAssetType" json:"pricing_asset_type,omitempty"`
+	PricingAsset                            string                 `protobuf:"bytes,16,opt,name=pricing_asset,json=pricingAsset,proto3" json:"pricing_asset,omitempty"`
+	DigestAlgorithm                         string                 `protobuf:"bytes,17,opt,name=digest_algorithm,json=digestAlgorithm,proto3" json:"digest_algorithm,omitempty"`
+	HolderOnboardingMode                    HolderOnboardingMode   `protobuf:"varint,18,opt,name=holder_onboarding_mode,json=holderOnboardingMode,proto3,enum=verana.cs.v1.HolderOnboardingMode" json:"holder_onboarding_mode,omitempty"`
 }
 
 func (m *CredentialSchema) Reset()         { *m = CredentialSchema{} }
 func (m *CredentialSchema) String() string { return proto.CompactTextString(m) }
 func (*CredentialSchema) ProtoMessage()    {}
 func (*CredentialSchema) Descriptor() ([]byte, []int) {
-	return fileDescriptor_73b144e4376bdc5f, []int{0}
+	return fileDescriptor_73b144e4376bdc5f, []int{1}
 }
 func (m *CredentialSchema) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -231,18 +444,18 @@ func (m *CredentialSchema) GetHolderValidationValidityPeriod() uint32 {
 	return 0
 }
 
-func (m *CredentialSchema) GetIssuerPermManagementMode() CredentialSchemaPermManagementMode {
+func (m *CredentialSchema) GetIssuerOnboardingMode() IssuerOnboardingMode {
 	if m != nil {
-		return m.IssuerPermManagementMode
+		return m.IssuerOnboardingMode
 	}
-	return CredentialSchemaPermManagementMode_MODE_UNSPECIFIED
+	return IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_UNSPECIFIED
 }
 
-func (m *CredentialSchema) GetVerifierPermManagementMode() CredentialSchemaPermManagementMode {
+func (m *CredentialSchema) GetVerifierOnboardingMode() VerifierOnboardingMode {
 	if m != nil {
-		return m.VerifierPermManagementMode
+		return m.VerifierOnboardingMode
 	}
-	return CredentialSchemaPermManagementMode_MODE_UNSPECIFIED
+	return VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_UNSPECIFIED
 }
 
 func (m *CredentialSchema) GetPricingAssetType() PricingAssetType {
@@ -266,61 +479,189 @@ func (m *CredentialSchema) GetDigestAlgorithm() string {
 	return ""
 }
 
+func (m *CredentialSchema) GetHolderOnboardingMode() HolderOnboardingMode {
+	if m != nil {
+		return m.HolderOnboardingMode
+	}
+	return HolderOnboardingMode_HOLDER_ONBOARDING_MODE_UNSPECIFIED
+}
+
 func init() {
-	proto.RegisterEnum("verana.cs.v1.CredentialSchemaPermManagementMode", CredentialSchemaPermManagementMode_name, CredentialSchemaPermManagementMode_value)
+	proto.RegisterEnum("verana.cs.v1.IssuerOnboardingMode", IssuerOnboardingMode_name, IssuerOnboardingMode_value)
+	proto.RegisterEnum("verana.cs.v1.VerifierOnboardingMode", VerifierOnboardingMode_name, VerifierOnboardingMode_value)
+	proto.RegisterEnum("verana.cs.v1.HolderOnboardingMode", HolderOnboardingMode_name, HolderOnboardingMode_value)
 	proto.RegisterEnum("verana.cs.v1.PricingAssetType", PricingAssetType_name, PricingAssetType_value)
+	proto.RegisterEnum("verana.cs.v1.SchemaAuthorizationPolicyRole", SchemaAuthorizationPolicyRole_name, SchemaAuthorizationPolicyRole_value)
+	proto.RegisterType((*SchemaAuthorizationPolicy)(nil), "verana.cs.v1.SchemaAuthorizationPolicy")
 	proto.RegisterType((*CredentialSchema)(nil), "verana.cs.v1.CredentialSchema")
 }
 
 func init() { proto.RegisterFile("verana/cs/v1/types.proto", fileDescriptor_73b144e4376bdc5f) }
 
 var fileDescriptor_73b144e4376bdc5f = []byte{
-	// 706 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x94, 0xdf, 0x4e, 0xdb, 0x48,
-	0x14, 0xc6, 0xe3, 0x10, 0x20, 0x0c, 0x04, 0xcc, 0x2c, 0x5a, 0x79, 0xb3, 0x5a, 0x27, 0x0b, 0x5a,
-	0x6d, 0x60, 0xb5, 0xf6, 0xc2, 0xde, 0xaf, 0x36, 0x84, 0x80, 0x2c, 0x91, 0x3f, 0x72, 0x0c, 0x2a,
-	0x55, 0x25, 0x6b, 0x62, 0x0f, 0xce, 0xb4, 0xb1, 0xc7, 0x9a, 0x19, 0xa2, 0xf2, 0x16, 0xbc, 0x50,
-	0xef, 0xb9, 0xe4, 0xb2, 0x57, 0x6d, 0x05, 0x2f, 0x52, 0xd9, 0x13, 0x47, 0x90, 0x42, 0xa0, 0xbd,
-	0xb1, 0x66, 0xce, 0x7c, 0xe7, 0xf7, 0x9d, 0x33, 0x1a, 0x1f, 0xa0, 0x8d, 0x30, 0x43, 0x11, 0x32,
-	0x3d, 0x6e, 0x8e, 0x76, 0x4d, 0x71, 0x19, 0x63, 0x6e, 0xc4, 0x8c, 0x0a, 0x0a, 0x57, 0xe4, 0x89,
-	0xe1, 0x71, 0x63, 0xb4, 0x5b, 0x5e, 0x47, 0x21, 0x89, 0xa8, 0x99, 0x7e, 0xa5, 0xa0, 0xfc, 0x8b,
-	0x47, 0x79, 0x48, 0xb9, 0x9b, 0xee, 0x4c, 0xb9, 0x19, 0x1f, 0x6d, 0x04, 0x34, 0xa0, 0x32, 0x9e,
-	0xac, 0xc6, 0xd1, 0x4a, 0x40, 0x69, 0x30, 0xc4, 0x66, 0xba, 0xeb, 0x5f, 0x9c, 0x9b, 0x82, 0x84,
-	0x98, 0x0b, 0x14, 0xc6, 0x52, 0xb0, 0xf9, 0xa1, 0x08, 0xd4, 0x06, 0xc3, 0x3e, 0x8e, 0x04, 0x41,
-	0xc3, 0x9e, 0x37, 0xc0, 0x21, 0x82, 0xab, 0x20, 0x4f, 0x7c, 0x4d, 0xa9, 0x2a, 0xb5, 0x82, 0x9d,
-	0x27, 0x3e, 0xfc, 0x09, 0xcc, 0x0b, 0xe6, 0x12, 0x5f, 0xcb, 0xa7, 0xa1, 0x82, 0x60, 0x96, 0x0f,
-	0xff, 0x03, 0x8b, 0x1e, 0xc3, 0x48, 0x60, 0x5f, 0x9b, 0xab, 0x2a, 0xb5, 0xe5, 0xbd, 0xb2, 0x21,
-	0xcd, 0x8c, 0xcc, 0xcc, 0x70, 0x32, 0xb3, 0xfd, 0xe2, 0xf5, 0xa7, 0x4a, 0xee, 0xea, 0x73, 0x45,
-	0xb1, 0xb3, 0x24, 0xf8, 0x3f, 0x28, 0x86, 0xd4, 0x27, 0xe7, 0x04, 0xfb, 0x5a, 0xe1, 0x3b, 0x00,
-	0x93, 0xac, 0x84, 0x80, 0x98, 0x37, 0x20, 0x23, 0xec, 0x6b, 0xf3, 0x2f, 0x22, 0x28, 0x92, 0x90,
-	0x65, 0xc1, 0x0a, 0x58, 0x7e, 0xcb, 0x69, 0xe4, 0xf2, 0xb4, 0x6f, 0x6d, 0xb1, 0xaa, 0xd4, 0x96,
-	0x6c, 0x90, 0x84, 0xc6, 0x37, 0xf1, 0x0a, 0x6c, 0x13, 0xce, 0x2f, 0x30, 0x73, 0x03, 0x86, 0x22,
-	0x41, 0x99, 0x3b, 0x42, 0x43, 0xe2, 0x23, 0x41, 0x68, 0x24, 0x97, 0x44, 0x5c, 0xba, 0x31, 0x66,
-	0x84, 0xfa, 0x5a, 0xb1, 0xaa, 0xd4, 0x4a, 0xf6, 0x1f, 0x32, 0xe1, 0x48, 0xea, 0x4f, 0x27, 0xf2,
-	0xd3, 0xb1, 0xba, 0x9b, 0x8a, 0xe1, 0x1b, 0xf0, 0xd7, 0x08, 0xb3, 0xa4, 0x91, 0x17, 0xb1, 0x97,
-	0x52, 0xf6, 0x9f, 0x59, 0xca, 0x73, 0x74, 0x0b, 0xfc, 0x3e, 0xae, 0x7b, 0x06, 0x13, 0xa4, 0x4c,
-	0x5d, 0x0a, 0x9f, 0x44, 0xb5, 0xc0, 0xd6, 0xa4, 0xd0, 0x19, 0xb0, 0xe5, 0x14, 0x56, 0xcd, 0xa4,
-	0xb3, 0x2a, 0x1b, 0xd0, 0xa1, 0x3f, 0x1b, 0xb6, 0x22, 0x2b, 0x93, 0xc2, 0x27, 0x51, 0x14, 0xfc,
-	0x3a, 0x6e, 0x32, 0xc6, 0x2c, 0x74, 0x43, 0x14, 0xa1, 0x00, 0x87, 0x38, 0x12, 0x6e, 0x48, 0x7d,
-	0xac, 0x95, 0xaa, 0x4a, 0x6d, 0x75, 0xef, 0x1f, 0xe3, 0xfe, 0x4f, 0x65, 0x4c, 0xbf, 0xf5, 0x2e,
-	0x66, 0x61, 0x6b, 0x92, 0xd8, 0xa2, 0x3e, 0xb6, 0x35, 0x09, 0xfd, 0xf6, 0x04, 0x72, 0xf0, 0xdb,
-	0xe4, 0x2a, 0x1e, 0xb5, 0x5c, 0xfd, 0x41, 0xcb, 0x72, 0x86, 0x7d, 0xc4, 0xf4, 0x18, 0xc0, 0x98,
-	0x11, 0x8f, 0x44, 0x81, 0x8b, 0x38, 0xc7, 0xc2, 0x4d, 0x26, 0x86, 0xb6, 0x96, 0x3a, 0xe9, 0x0f,
-	0x9d, 0xba, 0x52, 0x57, 0x4f, 0x64, 0xce, 0x65, 0x8c, 0x6d, 0x35, 0x9e, 0x8a, 0xc0, 0x2d, 0x50,
-	0x7a, 0x40, 0xd3, 0xd4, 0xf4, 0xcd, 0xaf, 0xdc, 0x17, 0xc2, 0x6d, 0xa0, 0xfa, 0x24, 0xc0, 0x5c,
-	0xb8, 0x68, 0x18, 0x50, 0x46, 0xc4, 0x20, 0xd4, 0xd6, 0x53, 0xdd, 0x9a, 0x8c, 0xd7, 0xb3, 0xf0,
-	0xce, 0x3b, 0xb0, 0xf9, 0x7c, 0x7f, 0x70, 0x03, 0xa8, 0xad, 0xce, 0x41, 0xd3, 0x3d, 0x69, 0xf7,
-	0xba, 0xcd, 0x86, 0x75, 0x68, 0x35, 0x0f, 0xd4, 0x1c, 0x2c, 0x82, 0x42, 0xa7, 0xdb, 0x6c, 0xab,
-	0x0a, 0xfc, 0x19, 0xc0, 0x23, 0xbb, 0xde, 0x76, 0x3a, 0xb6, 0x7b, 0x5a, 0x3f, 0xb6, 0x0e, 0xea,
-	0x8e, 0xd5, 0x69, 0xab, 0x79, 0x58, 0x02, 0x4b, 0xcd, 0x46, 0xa7, 0x77, 0xd6, 0x73, 0x9a, 0x2d,
-	0x75, 0x6e, 0xc7, 0x06, 0xea, 0x74, 0x8b, 0x70, 0x13, 0xe8, 0x5d, 0xdb, 0x6a, 0x58, 0xed, 0x23,
-	0xb7, 0xde, 0xeb, 0x35, 0x1d, 0xd7, 0x39, 0xeb, 0x4e, 0x1b, 0x2d, 0x80, 0xbc, 0x73, 0xa2, 0x2a,
-	0x89, 0x61, 0xa3, 0x63, 0x25, 0xe0, 0x22, 0x28, 0x1c, 0x5a, 0x75, 0x47, 0x9d, 0xdb, 0xdf, 0xbf,
-	0xbe, 0xd5, 0x95, 0x9b, 0x5b, 0x5d, 0xf9, 0x72, 0xab, 0x2b, 0x57, 0x77, 0x7a, 0xee, 0xe6, 0x4e,
-	0xcf, 0x7d, 0xbc, 0xd3, 0x73, 0xaf, 0x6b, 0x01, 0x11, 0x83, 0x8b, 0xbe, 0xe1, 0xd1, 0xd0, 0x94,
-	0xd7, 0xfc, 0xf7, 0x10, 0xf5, 0xf9, 0x78, 0x6d, 0xbe, 0x4f, 0x06, 0x78, 0x3a, 0xbd, 0xfb, 0x0b,
-	0xe9, 0xb8, 0xf9, 0xf7, 0x6b, 0x00, 0x00, 0x00, 0xff, 0xff, 0x08, 0xf5, 0x1e, 0x23, 0xda, 0x05,
-	0x00, 0x00,
+	// 1057 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x56, 0xdf, 0x72, 0xda, 0xc6,
+	0x17, 0xb6, 0xc0, 0x49, 0xe0, 0xf8, 0x9f, 0xb2, 0x3f, 0x8f, 0x47, 0x71, 0xc6, 0x98, 0x38, 0xc9,
+	0x2f, 0xd8, 0x6e, 0x20, 0x8e, 0x9b, 0xc9, 0xf4, 0xa6, 0x2d, 0xc6, 0xb2, 0xad, 0x29, 0x20, 0x66,
+	0x85, 0x3d, 0x71, 0xa6, 0x53, 0x8d, 0x8c, 0xd6, 0xb0, 0x2d, 0x62, 0x99, 0x95, 0x60, 0xea, 0x3e,
+	0x45, 0xde, 0xa0, 0x4f, 0xd0, 0xf7, 0xc8, 0xf4, 0xa6, 0xb9, 0x6c, 0x6f, 0xda, 0x8e, 0x7d, 0xd9,
+	0x97, 0xe8, 0x68, 0x57, 0xe0, 0x98, 0x22, 0x70, 0x7b, 0xc3, 0xec, 0x9e, 0xfd, 0xbe, 0x6f, 0xcf,
+	0x77, 0xce, 0x6a, 0x59, 0xd0, 0xfa, 0x84, 0x3b, 0x1d, 0xa7, 0xd0, 0xf0, 0x0b, 0xfd, 0x9d, 0x42,
+	0x70, 0xd1, 0x25, 0x7e, 0xbe, 0xcb, 0x59, 0xc0, 0xd0, 0xbc, 0x5c, 0xc9, 0x37, 0xfc, 0x7c, 0x7f,
+	0x67, 0xf5, 0xbe, 0xe3, 0xd1, 0x0e, 0x2b, 0x88, 0x5f, 0x09, 0x58, 0x7d, 0xd0, 0x60, 0xbe, 0xc7,
+	0x7c, 0x5b, 0xcc, 0x0a, 0x72, 0x12, 0x2d, 0x2d, 0x37, 0x59, 0x93, 0xc9, 0x78, 0x38, 0x8a, 0xa2,
+	0xeb, 0x4d, 0xc6, 0x9a, 0x6d, 0x52, 0x10, 0xb3, 0xb3, 0xde, 0x79, 0x21, 0xa0, 0x1e, 0xf1, 0x03,
+	0xc7, 0xeb, 0x4a, 0xc0, 0xc6, 0xcf, 0x49, 0x78, 0x60, 0x35, 0x5a, 0xc4, 0x73, 0x8a, 0xbd, 0xa0,
+	0xc5, 0x38, 0xfd, 0xc1, 0x09, 0x28, 0xeb, 0xd4, 0x58, 0x9b, 0x36, 0x2e, 0xd0, 0x22, 0x24, 0xa8,
+	0xab, 0x29, 0x59, 0x25, 0x37, 0x8b, 0x13, 0xd4, 0x45, 0x0f, 0x21, 0xed, 0x0b, 0xb0, 0x4d, 0x5d,
+	0x2d, 0x21, 0xc2, 0x29, 0x19, 0x30, 0x5c, 0xf4, 0x05, 0xcc, 0x72, 0xd6, 0x26, 0x5a, 0x32, 0xab,
+	0xe4, 0x16, 0x5f, 0x6e, 0xe7, 0x3f, 0x36, 0x93, 0x8f, 0xdd, 0x03, 0xb3, 0x36, 0xc1, 0x82, 0x88,
+	0x54, 0x48, 0xf6, 0x78, 0x5b, 0x9b, 0xcd, 0x2a, 0xb9, 0x34, 0x0e, 0x87, 0x68, 0x0d, 0xc0, 0xa5,
+	0x4d, 0xe2, 0x07, 0xb6, 0xcf, 0xa9, 0x76, 0x47, 0x2c, 0xa4, 0x65, 0xc4, 0xe2, 0x14, 0x7d, 0x05,
+	0x8b, 0xe4, 0xfc, 0x9c, 0x34, 0x02, 0xda, 0x27, 0xf6, 0x39, 0x67, 0x9e, 0x76, 0x37, 0xab, 0xe4,
+	0xe6, 0x5e, 0xae, 0xe6, 0xa5, 0xed, 0xfc, 0xc0, 0x76, 0xbe, 0x3e, 0xb0, 0xbd, 0x97, 0x7a, 0xff,
+	0xfb, 0xba, 0xf2, 0xee, 0x8f, 0x75, 0x05, 0x2f, 0x0c, 0xb9, 0x07, 0x9c, 0x79, 0xa8, 0x02, 0x4b,
+	0xd7, 0x62, 0xbd, 0x4e, 0x40, 0xdb, 0xda, 0xbd, 0x7f, 0xa1, 0x76, 0x9d, 0xc9, 0x71, 0xc8, 0x45,
+	0x1a, 0xdc, 0xe3, 0xa4, 0xcf, 0xbe, 0x23, 0xae, 0x96, 0xca, 0x2a, 0xb9, 0x14, 0x1e, 0x4c, 0xd1,
+	0xe7, 0x70, 0xaf, 0xc1, 0x89, 0x13, 0x10, 0x57, 0x4b, 0xdf, 0x6a, 0x83, 0x19, 0xb1, 0xc1, 0x80,
+	0x14, 0x2a, 0xf7, 0x09, 0xf7, 0x29, 0xeb, 0x68, 0x90, 0x55, 0x72, 0x0b, 0x78, 0x30, 0xdd, 0xf8,
+	0x2b, 0x05, 0x6a, 0x89, 0x13, 0x97, 0x74, 0x02, 0xea, 0xb4, 0x65, 0xc9, 0xff, 0xd1, 0xc3, 0xff,
+	0xc1, 0x9d, 0x80, 0x5f, 0xf7, 0x6f, 0x36, 0xe0, 0xc6, 0x8d, 0x9c, 0x92, 0xff, 0x25, 0xa7, 0x2f,
+	0x21, 0xe5, 0x31, 0x97, 0x9e, 0x53, 0xe2, 0x8a, 0xfe, 0xdd, 0x56, 0x60, 0xc8, 0x0a, 0x15, 0x1c,
+	0xde, 0x68, 0xd1, 0x3e, 0x71, 0x45, 0xa3, 0x6f, 0x5b, 0xf7, 0x21, 0x0b, 0xad, 0xc3, 0xdc, 0xb7,
+	0x3e, 0xeb, 0xd8, 0xf2, 0x40, 0x8a, 0xe6, 0xa5, 0x31, 0x84, 0xa1, 0xa8, 0x12, 0x6f, 0x60, 0x93,
+	0xfa, 0x7e, 0x8f, 0x70, 0xbb, 0xc9, 0x9d, 0x4e, 0xc0, 0xb8, 0xdd, 0x77, 0xda, 0xd4, 0x15, 0x87,
+	0x51, 0x0e, 0x69, 0x70, 0x61, 0x77, 0x09, 0xa7, 0x4c, 0x36, 0x6d, 0x01, 0x3f, 0x95, 0x84, 0x43,
+	0x89, 0x3f, 0x19, 0xc2, 0x4f, 0x22, 0x74, 0x4d, 0x80, 0xd1, 0xd7, 0xb0, 0xdd, 0x27, 0x3c, 0x34,
+	0x72, 0x2b, 0xed, 0xb4, 0xd0, 0x7e, 0x36, 0xa0, 0x4c, 0x53, 0x37, 0xe0, 0x51, 0x94, 0xf7, 0x04,
+	0x4d, 0x79, 0x14, 0x32, 0x12, 0x18, 0x2b, 0x55, 0x81, 0xc7, 0xc3, 0x44, 0x27, 0x88, 0xcd, 0x09,
+	0xb1, 0xec, 0x00, 0x3a, 0x29, 0xb3, 0x16, 0x6b, 0xbb, 0x93, 0xc5, 0xe6, 0x65, 0x66, 0x12, 0x18,
+	0x2b, 0xf5, 0x06, 0x56, 0x22, 0x93, 0xac, 0x73, 0xc6, 0x1c, 0xee, 0xd2, 0x4e, 0xd3, 0xf6, 0x98,
+	0x4b, 0xb4, 0x05, 0x71, 0x9f, 0x6c, 0xdc, 0xbc, 0x4f, 0x0c, 0x81, 0x35, 0x87, 0xd0, 0x0a, 0x73,
+	0x09, 0x5e, 0xa6, 0x63, 0xa2, 0xe8, 0x1b, 0x71, 0xe3, 0x4a, 0xcf, 0xa3, 0xda, 0x8b, 0x42, 0xfb,
+	0xc9, 0x4d, 0xed, 0x93, 0x08, 0x3d, 0xa2, 0xbe, 0xd2, 0x1f, 0x1b, 0x47, 0x65, 0x40, 0x5d, 0x4e,
+	0x1b, 0xa1, 0xa6, 0xe3, 0xfb, 0x24, 0xb0, 0xc3, 0x2b, 0x5d, 0x5b, 0x12, 0xca, 0x99, 0x9b, 0xca,
+	0x35, 0x89, 0x2b, 0x86, 0xb0, 0xfa, 0x45, 0x97, 0x60, 0xb5, 0x3b, 0x12, 0x41, 0x8f, 0x61, 0xe1,
+	0x86, 0x9a, 0xa6, 0x8a, 0x73, 0x3c, 0xff, 0x31, 0x10, 0x6d, 0x82, 0x1a, 0xdd, 0x8b, 0x4e, 0xbb,
+	0xc9, 0x38, 0x0d, 0x5a, 0x9e, 0x76, 0x5f, 0xe0, 0x96, 0x64, 0xbc, 0x38, 0x08, 0x87, 0x75, 0x8d,
+	0x5a, 0x34, 0xea, 0x1d, 0x8d, 0xab, 0xeb, 0x91, 0xc0, 0x8e, 0xd6, 0xb5, 0x35, 0x26, 0xba, 0xf5,
+	0x8b, 0x02, 0xcb, 0xe3, 0xda, 0x80, 0xfe, 0x0f, 0x1b, 0x86, 0x65, 0x1d, 0xeb, 0xd8, 0x36, 0xab,
+	0x7b, 0x66, 0x11, 0xef, 0x1b, 0xd5, 0x43, 0xbb, 0x62, 0xee, 0xeb, 0xf6, 0x71, 0xd5, 0xaa, 0xe9,
+	0x25, 0xe3, 0xc0, 0xd0, 0xf7, 0xd5, 0x19, 0xb4, 0x0e, 0x0f, 0x63, 0x70, 0x66, 0x4d, 0xaf, 0xaa,
+	0x0a, 0x7a, 0x0d, 0xbb, 0x31, 0x00, 0xbd, 0x64, 0x5a, 0xa7, 0x56, 0x5d, 0xaf, 0xd8, 0x27, 0xc5,
+	0xb2, 0xb1, 0x5f, 0xac, 0x1b, 0x66, 0xd5, 0xae, 0x61, 0xb3, 0xa4, 0x5b, 0x96, 0x9a, 0x40, 0xaf,
+	0x60, 0x27, 0x86, 0x78, 0x88, 0x8b, 0xd5, 0xba, 0x89, 0xc7, 0xd1, 0x92, 0x5b, 0xbf, 0x29, 0xb0,
+	0x32, 0xbe, 0xf9, 0x28, 0x07, 0x4f, 0x4e, 0x74, 0x1c, 0x66, 0x3e, 0xcd, 0xd5, 0x23, 0x58, 0x8b,
+	0x45, 0x46, 0xbe, 0x3e, 0x83, 0x57, 0xb1, 0x90, 0x29, 0xce, 0x5e, 0xc3, 0x6e, 0x2c, 0x75, 0xa2,
+	0xb7, 0x1f, 0x15, 0x58, 0x1e, 0xd7, 0xdc, 0xb0, 0x5b, 0x47, 0x66, 0x79, 0x7f, 0xaa, 0xaf, 0x4f,
+	0xe1, 0x45, 0x0c, 0x2e, 0x2a, 0xf5, 0x98, 0x6d, 0x15, 0xb4, 0x09, 0x4f, 0x63, 0x58, 0x35, 0x1d,
+	0x57, 0x0c, 0xcb, 0x32, 0xcc, 0x6a, 0x59, 0x58, 0xdb, 0xc2, 0xa0, 0x8e, 0x7e, 0x1f, 0x68, 0x03,
+	0x32, 0x35, 0x6c, 0x94, 0x42, 0x52, 0xd1, 0xb2, 0xf4, 0xba, 0x5d, 0x3f, 0xad, 0x8d, 0x26, 0x76,
+	0x17, 0x12, 0xf5, 0x63, 0x55, 0x41, 0x29, 0x98, 0x2d, 0x99, 0x46, 0x55, 0x4d, 0x84, 0xa3, 0x03,
+	0xa3, 0x58, 0x57, 0x93, 0x5b, 0x3f, 0x29, 0xb0, 0x36, 0xf1, 0xe9, 0x81, 0x5e, 0xc0, 0x27, 0x56,
+	0xe9, 0x48, 0xaf, 0x14, 0xed, 0xe2, 0x71, 0xfd, 0xc8, 0xc4, 0xc6, 0xdb, 0xc8, 0x82, 0x59, 0x36,
+	0x4a, 0xa7, 0x36, 0x36, 0xcb, 0xa3, 0xfb, 0x6d, 0xc3, 0xb3, 0xa9, 0x0c, 0x59, 0x12, 0x55, 0x41,
+	0xcf, 0x61, 0x73, 0x2a, 0x78, 0xd0, 0x50, 0x35, 0xb1, 0xb7, 0xf7, 0xfe, 0x32, 0xa3, 0x7c, 0xb8,
+	0xcc, 0x28, 0x7f, 0x5e, 0x66, 0x94, 0x77, 0x57, 0x99, 0x99, 0x0f, 0x57, 0x99, 0x99, 0x5f, 0xaf,
+	0x32, 0x33, 0x6f, 0x73, 0x4d, 0x1a, 0xb4, 0x7a, 0x67, 0xf9, 0x06, 0xf3, 0x0a, 0xf2, 0x8b, 0x7d,
+	0xde, 0x76, 0xce, 0xfc, 0x68, 0x5c, 0xf8, 0x3e, 0x7c, 0x4e, 0x8a, 0xb7, 0xe4, 0xd9, 0x5d, 0xf1,
+	0x7f, 0xb9, 0xfb, 0x77, 0x00, 0x00, 0x00, 0xff, 0xff, 0x0f, 0x82, 0xfe, 0xa9, 0x68, 0x0a, 0x00,
+	0x00,
+}
+
+func (m *SchemaAuthorizationPolicy) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *SchemaAuthorizationPolicy) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *SchemaAuthorizationPolicy) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Version != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.Version))
+		i--
+		dAtA[i] = 0x50
+	}
+	n1, err1 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(m.Created, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(m.Created):])
+	if err1 != nil {
+		return 0, err1
+	}
+	i -= n1
+	i = encodeVarintTypes(dAtA, i, uint64(n1))
+	i--
+	dAtA[i] = 0x4a
+	if m.Revoked {
+		i--
+		if m.Revoked {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x40
+	}
+	if m.EffectiveUntil != nil {
+		n2, err2 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(*m.EffectiveUntil, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(*m.EffectiveUntil):])
+		if err2 != nil {
+			return 0, err2
+		}
+		i -= n2
+		i = encodeVarintTypes(dAtA, i, uint64(n2))
+		i--
+		dAtA[i] = 0x3a
+	}
+	if m.EffectiveFrom != nil {
+		n3, err3 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(*m.EffectiveFrom, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(*m.EffectiveFrom):])
+		if err3 != nil {
+			return 0, err3
+		}
+		i -= n3
+		i = encodeVarintTypes(dAtA, i, uint64(n3))
+		i--
+		dAtA[i] = 0x32
+	}
+	if len(m.DigestSri) > 0 {
+		i -= len(m.DigestSri)
+		copy(dAtA[i:], m.DigestSri)
+		i = encodeVarintTypes(dAtA, i, uint64(len(m.DigestSri)))
+		i--
+		dAtA[i] = 0x2a
+	}
+	if len(m.Url) > 0 {
+		i -= len(m.Url)
+		copy(dAtA[i:], m.Url)
+		i = encodeVarintTypes(dAtA, i, uint64(len(m.Url)))
+		i--
+		dAtA[i] = 0x22
+	}
+	if m.Role != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.Role))
+		i--
+		dAtA[i] = 0x18
+	}
+	if m.SchemaId != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.SchemaId))
+		i--
+		dAtA[i] = 0x10
+	}
+	if m.Id != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.Id))
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
 }
 
 func (m *CredentialSchema) Marshal() (dAtA []byte, err error) {
@@ -343,6 +684,13 @@ func (m *CredentialSchema) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.HolderOnboardingMode != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.HolderOnboardingMode))
+		i--
+		dAtA[i] = 0x1
+		i--
+		dAtA[i] = 0x90
+	}
 	if len(m.DigestAlgorithm) > 0 {
 		i -= len(m.DigestAlgorithm)
 		copy(dAtA[i:], m.DigestAlgorithm)
@@ -366,13 +714,13 @@ func (m *CredentialSchema) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x78
 	}
-	if m.VerifierPermManagementMode != 0 {
-		i = encodeVarintTypes(dAtA, i, uint64(m.VerifierPermManagementMode))
+	if m.VerifierOnboardingMode != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.VerifierOnboardingMode))
 		i--
 		dAtA[i] = 0x70
 	}
-	if m.IssuerPermManagementMode != 0 {
-		i = encodeVarintTypes(dAtA, i, uint64(m.IssuerPermManagementMode))
+	if m.IssuerOnboardingMode != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.IssuerOnboardingMode))
 		i--
 		dAtA[i] = 0x68
 	}
@@ -409,29 +757,29 @@ func (m *CredentialSchema) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		dAtA[i] = 0x3a
 	}
 	if m.Archived != nil {
-		n1, err1 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(*m.Archived, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(*m.Archived):])
-		if err1 != nil {
-			return 0, err1
+		n4, err4 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(*m.Archived, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(*m.Archived):])
+		if err4 != nil {
+			return 0, err4
 		}
-		i -= n1
-		i = encodeVarintTypes(dAtA, i, uint64(n1))
+		i -= n4
+		i = encodeVarintTypes(dAtA, i, uint64(n4))
 		i--
 		dAtA[i] = 0x2a
 	}
-	n2, err2 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(m.Modified, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(m.Modified):])
-	if err2 != nil {
-		return 0, err2
+	n5, err5 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(m.Modified, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(m.Modified):])
+	if err5 != nil {
+		return 0, err5
 	}
-	i -= n2
-	i = encodeVarintTypes(dAtA, i, uint64(n2))
+	i -= n5
+	i = encodeVarintTypes(dAtA, i, uint64(n5))
 	i--
 	dAtA[i] = 0x22
-	n3, err3 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(m.Created, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(m.Created):])
-	if err3 != nil {
-		return 0, err3
+	n6, err6 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(m.Created, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(m.Created):])
+	if err6 != nil {
+		return 0, err6
 	}
-	i -= n3
-	i = encodeVarintTypes(dAtA, i, uint64(n3))
+	i -= n6
+	i = encodeVarintTypes(dAtA, i, uint64(n6))
 	i--
 	dAtA[i] = 0x1a
 	if m.TrId != 0 {
@@ -458,6 +806,48 @@ func encodeVarintTypes(dAtA []byte, offset int, v uint64) int {
 	dAtA[offset] = uint8(v)
 	return base
 }
+func (m *SchemaAuthorizationPolicy) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Id != 0 {
+		n += 1 + sovTypes(uint64(m.Id))
+	}
+	if m.SchemaId != 0 {
+		n += 1 + sovTypes(uint64(m.SchemaId))
+	}
+	if m.Role != 0 {
+		n += 1 + sovTypes(uint64(m.Role))
+	}
+	l = len(m.Url)
+	if l > 0 {
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	l = len(m.DigestSri)
+	if l > 0 {
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	if m.EffectiveFrom != nil {
+		l = github_com_cosmos_gogoproto_types.SizeOfStdTime(*m.EffectiveFrom)
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	if m.EffectiveUntil != nil {
+		l = github_com_cosmos_gogoproto_types.SizeOfStdTime(*m.EffectiveUntil)
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	if m.Revoked {
+		n += 2
+	}
+	l = github_com_cosmos_gogoproto_types.SizeOfStdTime(m.Created)
+	n += 1 + l + sovTypes(uint64(l))
+	if m.Version != 0 {
+		n += 1 + sovTypes(uint64(m.Version))
+	}
+	return n
+}
+
 func (m *CredentialSchema) Size() (n int) {
 	if m == nil {
 		return 0
@@ -497,11 +887,11 @@ func (m *CredentialSchema) Size() (n int) {
 	if m.HolderValidationValidityPeriod != 0 {
 		n += 1 + sovTypes(uint64(m.HolderValidationValidityPeriod))
 	}
-	if m.IssuerPermManagementMode != 0 {
-		n += 1 + sovTypes(uint64(m.IssuerPermManagementMode))
+	if m.IssuerOnboardingMode != 0 {
+		n += 1 + sovTypes(uint64(m.IssuerOnboardingMode))
 	}
-	if m.VerifierPermManagementMode != 0 {
-		n += 1 + sovTypes(uint64(m.VerifierPermManagementMode))
+	if m.VerifierOnboardingMode != 0 {
+		n += 1 + sovTypes(uint64(m.VerifierOnboardingMode))
 	}
 	if m.PricingAssetType != 0 {
 		n += 1 + sovTypes(uint64(m.PricingAssetType))
@@ -514,6 +904,9 @@ func (m *CredentialSchema) Size() (n int) {
 	if l > 0 {
 		n += 2 + l + sovTypes(uint64(l))
 	}
+	if m.HolderOnboardingMode != 0 {
+		n += 2 + sovTypes(uint64(m.HolderOnboardingMode))
+	}
 	return n
 }
 
@@ -522,6 +915,321 @@ func sovTypes(x uint64) (n int) {
 }
 func sozTypes(x uint64) (n int) {
 	return sovTypes(uint64((x << 1) ^ uint64((int64(x) >> 63))))
+}
+func (m *SchemaAuthorizationPolicy) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTypes
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: SchemaAuthorizationPolicy: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: SchemaAuthorizationPolicy: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Id", wireType)
+			}
+			m.Id = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Id |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field SchemaId", wireType)
+			}
+			m.SchemaId = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.SchemaId |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Role", wireType)
+			}
+			m.Role = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Role |= SchemaAuthorizationPolicyRole(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Url", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Url = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field DigestSri", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.DigestSri = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 6:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field EffectiveFrom", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.EffectiveFrom == nil {
+				m.EffectiveFrom = new(time.Time)
+			}
+			if err := github_com_cosmos_gogoproto_types.StdTimeUnmarshal(m.EffectiveFrom, dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 7:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field EffectiveUntil", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.EffectiveUntil == nil {
+				m.EffectiveUntil = new(time.Time)
+			}
+			if err := github_com_cosmos_gogoproto_types.StdTimeUnmarshal(m.EffectiveUntil, dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 8:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Revoked", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.Revoked = bool(v != 0)
+		case 9:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Created", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := github_com_cosmos_gogoproto_types.StdTimeUnmarshal(&m.Created, dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 10:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Version", wireType)
+			}
+			m.Version = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Version |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTypes(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
 }
 func (m *CredentialSchema) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
@@ -821,9 +1529,9 @@ func (m *CredentialSchema) Unmarshal(dAtA []byte) error {
 			}
 		case 13:
 			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field IssuerPermManagementMode", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field IssuerOnboardingMode", wireType)
 			}
-			m.IssuerPermManagementMode = 0
+			m.IssuerOnboardingMode = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowTypes
@@ -833,16 +1541,16 @@ func (m *CredentialSchema) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.IssuerPermManagementMode |= CredentialSchemaPermManagementMode(b&0x7F) << shift
+				m.IssuerOnboardingMode |= IssuerOnboardingMode(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
 		case 14:
 			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field VerifierPermManagementMode", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field VerifierOnboardingMode", wireType)
 			}
-			m.VerifierPermManagementMode = 0
+			m.VerifierOnboardingMode = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowTypes
@@ -852,7 +1560,7 @@ func (m *CredentialSchema) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.VerifierPermManagementMode |= CredentialSchemaPermManagementMode(b&0x7F) << shift
+				m.VerifierOnboardingMode |= VerifierOnboardingMode(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -940,6 +1648,25 @@ func (m *CredentialSchema) Unmarshal(dAtA []byte) error {
 			}
 			m.DigestAlgorithm = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
+		case 18:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field HolderOnboardingMode", wireType)
+			}
+			m.HolderOnboardingMode = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.HolderOnboardingMode |= HolderOnboardingMode(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
 		default:
 			iNdEx = preIndex
 			skippy, err := skipTypes(dAtA[iNdEx:])

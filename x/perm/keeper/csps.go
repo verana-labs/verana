@@ -15,6 +15,21 @@ import (
 	"github.com/verana-labs/verana/x/perm/types"
 )
 
+// maxInt64AsUint64 is the highest uint64 that still fits in a signed int64.
+// Used to guard narrowing conversions of fee/deposit amounts before they
+// reach bank/sdk helpers that take int64.
+const maxInt64AsUint64 uint64 = 1<<63 - 1
+
+// uint64ToInt64 narrows a uint64 to int64 with an overflow guard. Returns an
+// error when x does not fit, so the caller can abort the transaction rather
+// than silently wrap to a negative amount.
+func uint64ToInt64(x uint64, field string) (int64, error) {
+	if x > maxInt64AsUint64 {
+		return 0, fmt.Errorf("%s overflows int64: %d", field, x)
+	}
+	return int64(x), nil
+}
+
 // [MOD-PERM-MSG-10-2] Create or Update Permission Session precondition checks
 func (ms msgServer) validateCreateOrUpdatePermissionSessionPreconditions(ctx sdk.Context, msg *types.MsgCreateOrUpdatePermissionSession, now time.Time) error {
 	// if issuer_perm_id is null AND verifier_perm_id is null, MUST abort
@@ -46,7 +61,7 @@ func (ms msgServer) validateCreateOrUpdatePermissionSessionPreconditions(ctx sdk
 		}
 
 		// if issuer_perm is not an active permission, abort
-		if err := IsValidPermission(issuerPerm, issuerPerm.Country, now); err != nil {
+		if err := IsValidPermission(issuerPerm, now); err != nil {
 			return fmt.Errorf("issuer permission is not valid: %w", err)
 		}
 
@@ -56,7 +71,7 @@ func (ms msgServer) validateCreateOrUpdatePermissionSessionPreconditions(ctx sdk
 		}
 
 		// if issuer_perm.authority is not equal to authority, abort
-		if issuerPerm.Authority != msg.Authority {
+		if issuerPerm.Corporation != msg.Corporation {
 			return fmt.Errorf("issuer permission authority does not match authority")
 		}
 
@@ -79,7 +94,7 @@ func (ms msgServer) validateCreateOrUpdatePermissionSessionPreconditions(ctx sdk
 		}
 
 		// if verifier_perm is not an active permission, abort
-		if err := IsValidPermission(verifierPerm, verifierPerm.Country, now); err != nil {
+		if err := IsValidPermission(verifierPerm, now); err != nil {
 			return fmt.Errorf("verifier permission is not valid: %w", err)
 		}
 
@@ -89,7 +104,7 @@ func (ms msgServer) validateCreateOrUpdatePermissionSessionPreconditions(ctx sdk
 		}
 
 		// if verifier_perm.authority is not equal to authority, abort
-		if verifierPerm.Authority != msg.Authority {
+		if verifierPerm.Corporation != msg.Corporation {
 			return fmt.Errorf("verifier permission authority does not match authority")
 		}
 
@@ -106,14 +121,15 @@ func (ms msgServer) validateCreateOrUpdatePermissionSessionPreconditions(ctx sdk
 	}
 
 	// [AUTHZ-CHECK-3] MUST pass for this (authority, operator, perm) tuple
-	if ms.delegationKeeper != nil {
-		if err := ms.delegationKeeper.CheckVSOperatorAuthorization(
-			ctx,
-			msg.Authority,
-			msg.Operator,
-		); err != nil {
-			return fmt.Errorf("VS operator authorization check failed: %w", err)
-		}
+	if ms.delegationKeeper == nil {
+		return fmt.Errorf("delegation keeper is required for VS operator authorization")
+	}
+	if err := ms.delegationKeeper.CheckVSOperatorAuthorization(
+		ctx,
+		msg.Corporation,
+		msg.Operator,
+	); err != nil {
+		return fmt.Errorf("VS operator authorization check failed: %w", err)
 	}
 
 	// Check that perm.vs_operator_authz_enabled is true
@@ -133,7 +149,7 @@ func (ms msgServer) validateCreateOrUpdatePermissionSessionPreconditions(ctx sdk
 	}
 
 	// if agent_perm is not an active permission, abort
-	if err := IsValidPermission(agentPerm, agentPerm.Country, now); err != nil {
+	if err := IsValidPermission(agentPerm, now); err != nil {
 		return fmt.Errorf("agent permission is not valid: %w", err)
 	}
 
@@ -149,7 +165,7 @@ func (ms msgServer) validateCreateOrUpdatePermissionSessionPreconditions(ctx sdk
 	}
 
 	// if wallet_agent_perm is not an active permission, abort
-	if err := IsValidPermission(walletAgentPerm, walletAgentPerm.Country, now); err != nil {
+	if err := IsValidPermission(walletAgentPerm, now); err != nil {
 		return fmt.Errorf("wallet agent permission is not valid: %w", err)
 	}
 
@@ -209,16 +225,33 @@ func (ms msgServer) validateCreateOrUpdatePermissionSessionFees(ctx sdk.Context,
 	trustUnitPrice := ms.trustRegistryKeeper.GetTrustUnitPrice(ctx)
 
 	// Calculate trust_fees = beneficiary_fees * (1 + user_agent_reward_rate + wallet_user_agent_reward_rate + trust_deposit_rate) * trust_unit_price
+	//
+	// Use math.Int arbitrary-precision arithmetic throughout: naive int64(fees)
+	// would wrap for values >= 2^63, and uint64 * uint64 multiplications can
+	// overflow silently before any int64 cast. Convert uint64 inputs via
+	// math.NewIntFromUint64, multiply through LegacyDec, then bounds-check
+	// before narrowing back to uint64/int64.
 	multiplier := math.LegacyOneDec().Add(userAgentRewardRate).Add(walletUserAgentRewardRate).Add(trustDepositRate)
-	trustFees := uint64(math.LegacyNewDec(int64(beneficiaryFees)).Mul(multiplier).Mul(math.LegacyNewDec(int64(trustUnitPrice))).TruncateInt64())
+	trustFeesDec := math.LegacyNewDecFromInt(math.NewIntFromUint64(beneficiaryFees)).
+		Mul(multiplier).
+		Mul(math.LegacyNewDecFromInt(math.NewIntFromUint64(trustUnitPrice)))
+	trustFeesInt := trustFeesDec.TruncateInt()
+	if !trustFeesInt.IsUint64() {
+		return nil, 0, 0, fmt.Errorf("trust fees overflow uint64: %s", trustFeesInt.String())
+	}
+	trustFees := trustFeesInt.Uint64()
 
 	// authority account MUST have sufficient available balance
-	authorityAddr, err := sdk.AccAddressFromBech32(msg.Authority)
+	authorityAddr, err := sdk.AccAddressFromBech32(msg.Corporation)
 	if err != nil {
 		return nil, 0, 0, fmt.Errorf("invalid authority address: %w", err)
 	}
 
-	requiredAmount := sdk.NewInt64Coin(types.BondDenom, int64(trustFees))
+	trustFeesI64, err := uint64ToInt64(trustFees, "trust_fees")
+	if err != nil {
+		return nil, 0, 0, err
+	}
+	requiredAmount := sdk.NewInt64Coin(types.BondDenom, trustFeesI64)
 	if !ms.bankKeeper.HasBalance(ctx, authorityAddr, requiredAmount) {
 		return nil, 0, 0, fmt.Errorf("insufficient funds: required %s", requiredAmount)
 	}
@@ -234,7 +267,7 @@ func (ms msgServer) executeCreateOrUpdatePermissionSession(ctx sdk.Context, msg 
 	userAgentRewardRate := ms.trustDeposit.GetUserAgentRewardRate(ctx)
 	walletUserAgentRewardRate := ms.trustDeposit.GetWalletUserAgentRewardRate(ctx)
 
-	authorityAddr, err := sdk.AccAddressFromBech32(msg.Authority)
+	authorityAddr, err := sdk.AccAddressFromBech32(msg.Corporation)
 	if err != nil {
 		return fmt.Errorf("invalid authority address: %w", err)
 	}
@@ -278,12 +311,25 @@ func (ms msgServer) executeCreateOrUpdatePermissionSession(ctx sdk.Context, msg 
 				fees = (fees * (discountScale - executorDiscount)) / discountScale
 			}
 
-			// Calculate fee_in_native_denom (using trust unit price for now - Case B: TU pricing)
-			feeInNativeDenom := math.LegacyNewDec(int64(fees * trustUnitPrice))
+			// Calculate fee_in_native_denom (using trust unit price for now - Case B: TU pricing).
+			//
+			// Safety: compute fees * trustUnitPrice via math.Int (arbitrary precision)
+			// to avoid uint64*uint64 overflow, then lift into LegacyDec for the rate math.
+			feeInNativeDenom := math.LegacyNewDecFromInt(
+				math.NewIntFromUint64(fees).Mul(math.NewIntFromUint64(trustUnitPrice)),
+			)
 
 			// Calculate trust deposit and direct account amounts
-			payerTrustDeposit := uint64(feeInNativeDenom.Mul(trustDepositRate).TruncateInt64())
-			payeeFeesToAccount := uint64(feeInNativeDenom.TruncateInt64()) - payerTrustDeposit
+			payerTrustDepositInt := feeInNativeDenom.Mul(trustDepositRate).TruncateInt()
+			if !payerTrustDepositInt.IsUint64() {
+				return fmt.Errorf("payer trust deposit overflows uint64: %s", payerTrustDepositInt.String())
+			}
+			payerTrustDeposit := payerTrustDepositInt.Uint64()
+			feeNativeInt := feeInNativeDenom.TruncateInt()
+			if !feeNativeInt.IsUint64() {
+				return fmt.Errorf("fee in native denom overflows uint64: %s", feeNativeInt.String())
+			}
+			payeeFeesToAccount := feeNativeInt.Uint64() - payerTrustDeposit
 
 			// Accumulate agent rewards
 			accumulatedUserAgentReward = accumulatedUserAgentReward.Add(feeInNativeDenom.Mul(userAgentRewardRate))
@@ -291,16 +337,20 @@ func (ms msgServer) executeCreateOrUpdatePermissionSession(ctx sdk.Context, msg 
 
 			// Transfer payee_fees_to_account to perm.authority
 			if payeeFeesToAccount > 0 {
-				granteeAddr, err := sdk.AccAddressFromBech32(perm.Authority)
+				granteeAddr, err := sdk.AccAddressFromBech32(perm.Corporation)
 				if err != nil {
 					return fmt.Errorf("invalid grantee address: %w", err)
 				}
 
+				payeeFeesI64, err := uint64ToInt64(payeeFeesToAccount, "payee_fees_to_account")
+				if err != nil {
+					return err
+				}
 				err = ms.bankKeeper.SendCoins(
 					ctx,
 					authorityAddr,
 					granteeAddr,
-					sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, int64(payeeFeesToAccount))),
+					sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, payeeFeesI64)),
 				)
 				if err != nil {
 					return fmt.Errorf("failed to transfer direct fees: %w", err)
@@ -309,8 +359,12 @@ func (ms msgServer) executeCreateOrUpdatePermissionSession(ctx sdk.Context, msg 
 
 			// Increase trust deposit of perm.authority (payee) and perm.deposit
 			if payerTrustDeposit > 0 {
+				payerTDI64, err := uint64ToInt64(payerTrustDeposit, "payer_trust_deposit")
+				if err != nil {
+					return err
+				}
 				// Increase beneficiary's TD funded by payer (transfers from payer to TD module directly)
-				err = ms.trustDeposit.AdjustTrustDepositOnBehalf(ctx, perm.Authority, authorityAddr, int64(payerTrustDeposit))
+				err = ms.trustDeposit.AdjustTrustDepositOnBehalf(ctx, perm.Corporation, authorityAddr, payerTDI64)
 				if err != nil {
 					return fmt.Errorf("failed to adjust grantee trust deposit: %w", err)
 				}
@@ -322,7 +376,7 @@ func (ms msgServer) executeCreateOrUpdatePermissionSession(ctx sdk.Context, msg 
 				}
 
 				// Increase payer's own TD (standard self-funded adjustment)
-				err = ms.trustDeposit.AdjustTrustDeposit(ctx, msg.Authority, int64(payerTrustDeposit))
+				err = ms.trustDeposit.AdjustTrustDeposit(ctx, msg.Corporation, payerTDI64, "csps_payer_trust_deposit")
 				if err != nil {
 					return fmt.Errorf("failed to adjust payer trust deposit: %w", err)
 				}
@@ -343,21 +397,33 @@ func (ms msgServer) executeCreateOrUpdatePermissionSession(ctx sdk.Context, msg 
 			return fmt.Errorf("failed to get agent permission: %w", err)
 		}
 
-		agentTrustDeposit := uint64(accumulatedUserAgentReward.Mul(trustDepositRate).TruncateInt64())
-		agentFeesToAccount := uint64(accumulatedUserAgentReward.TruncateInt64()) - agentTrustDeposit
+		agentTrustDepositInt := accumulatedUserAgentReward.Mul(trustDepositRate).TruncateInt()
+		if !agentTrustDepositInt.IsUint64() {
+			return fmt.Errorf("agent trust deposit overflows uint64: %s", agentTrustDepositInt.String())
+		}
+		agentTrustDeposit := agentTrustDepositInt.Uint64()
+		agentAccumInt := accumulatedUserAgentReward.TruncateInt()
+		if !agentAccumInt.IsUint64() {
+			return fmt.Errorf("agent accumulated reward overflows uint64: %s", agentAccumInt.String())
+		}
+		agentFeesToAccount := agentAccumInt.Uint64() - agentTrustDeposit
 
 		// Transfer direct amount to agent_perm.authority
 		if agentFeesToAccount > 0 {
-			agentGranteeAddr, err := sdk.AccAddressFromBech32(agentPerm.Authority)
+			agentGranteeAddr, err := sdk.AccAddressFromBech32(agentPerm.Corporation)
 			if err != nil {
 				return fmt.Errorf("invalid agent grantee address: %w", err)
 			}
 
+			agentFeesI64, err := uint64ToInt64(agentFeesToAccount, "agent_fees_to_account")
+			if err != nil {
+				return err
+			}
 			err = ms.bankKeeper.SendCoins(
 				ctx,
 				authorityAddr,
 				agentGranteeAddr,
-				sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, int64(agentFeesToAccount))),
+				sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, agentFeesI64)),
 			)
 			if err != nil {
 				return fmt.Errorf("failed to transfer user agent reward: %w", err)
@@ -366,8 +432,12 @@ func (ms msgServer) executeCreateOrUpdatePermissionSession(ctx sdk.Context, msg 
 
 		// Increase trust deposit of agent_perm.authority and agent_perm.deposit
 		if agentTrustDeposit > 0 {
+			agentTDI64, err := uint64ToInt64(agentTrustDeposit, "agent_trust_deposit")
+			if err != nil {
+				return err
+			}
 			// Increase agent's TD funded by payer (transfers from payer to TD module directly)
-			err = ms.trustDeposit.AdjustTrustDepositOnBehalf(ctx, agentPerm.Authority, authorityAddr, int64(agentTrustDeposit))
+			err = ms.trustDeposit.AdjustTrustDepositOnBehalf(ctx, agentPerm.Corporation, authorityAddr, agentTDI64)
 			if err != nil {
 				return fmt.Errorf("failed to adjust agent trust deposit: %w", err)
 			}
@@ -386,21 +456,33 @@ func (ms msgServer) executeCreateOrUpdatePermissionSession(ctx sdk.Context, msg 
 			return fmt.Errorf("failed to get wallet agent permission: %w", err)
 		}
 
-		walletAgentTrustDeposit := uint64(accumulatedWalletAgentReward.Mul(trustDepositRate).TruncateInt64())
-		walletAgentFeesToAccount := uint64(accumulatedWalletAgentReward.TruncateInt64()) - walletAgentTrustDeposit
+		walletAgentTDInt := accumulatedWalletAgentReward.Mul(trustDepositRate).TruncateInt()
+		if !walletAgentTDInt.IsUint64() {
+			return fmt.Errorf("wallet agent trust deposit overflows uint64: %s", walletAgentTDInt.String())
+		}
+		walletAgentTrustDeposit := walletAgentTDInt.Uint64()
+		walletAccumInt := accumulatedWalletAgentReward.TruncateInt()
+		if !walletAccumInt.IsUint64() {
+			return fmt.Errorf("wallet agent accumulated reward overflows uint64: %s", walletAccumInt.String())
+		}
+		walletAgentFeesToAccount := walletAccumInt.Uint64() - walletAgentTrustDeposit
 
 		// Transfer direct amount to wallet_agent_perm.authority
 		if walletAgentFeesToAccount > 0 {
-			walletAgentGranteeAddr, err := sdk.AccAddressFromBech32(walletAgentPerm.Authority)
+			walletAgentGranteeAddr, err := sdk.AccAddressFromBech32(walletAgentPerm.Corporation)
 			if err != nil {
 				return fmt.Errorf("invalid wallet agent grantee address: %w", err)
 			}
 
+			walletAgentFeesI64, err := uint64ToInt64(walletAgentFeesToAccount, "wallet_agent_fees_to_account")
+			if err != nil {
+				return err
+			}
 			err = ms.bankKeeper.SendCoins(
 				ctx,
 				authorityAddr,
 				walletAgentGranteeAddr,
-				sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, int64(walletAgentFeesToAccount))),
+				sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, walletAgentFeesI64)),
 			)
 			if err != nil {
 				return fmt.Errorf("failed to transfer wallet user agent reward: %w", err)
@@ -410,7 +492,11 @@ func (ms msgServer) executeCreateOrUpdatePermissionSession(ctx sdk.Context, msg 
 		// Increase trust deposit of wallet_agent_perm.authority and wallet_agent_perm.deposit
 		if walletAgentTrustDeposit > 0 {
 			// Increase wallet agent's TD funded by payer (transfers from payer to TD module directly)
-			err = ms.trustDeposit.AdjustTrustDepositOnBehalf(ctx, walletAgentPerm.Authority, authorityAddr, int64(walletAgentTrustDeposit))
+			walletAgentTDI64, err := uint64ToInt64(walletAgentTrustDeposit, "wallet_agent_trust_deposit")
+			if err != nil {
+				return err
+			}
+			err = ms.trustDeposit.AdjustTrustDepositOnBehalf(ctx, walletAgentPerm.Corporation, authorityAddr, walletAgentTDI64)
 			if err != nil {
 				return fmt.Errorf("failed to adjust wallet agent trust deposit: %w", err)
 			}
@@ -427,6 +513,20 @@ func (ms msgServer) executeCreateOrUpdatePermissionSession(ctx sdk.Context, msg 
 		return fmt.Errorf("failed to create/update session: %w", err)
 	}
 
+	// [MOD-PERM-MSG-10] If the current transaction is for issuance of a
+	// credential, persist the digest SRI by calling [MOD-DI-MSG-1] keeper-to-
+	// keeper. Spec explicitly lets perm invoke DI with no signer/AUTHZ check.
+	// We scope this to the issuance path (IssuerPermId != 0) and only fire
+	// when the caller supplied a non-empty digest.
+	if msg.Digest != "" && msg.IssuerPermId != 0 {
+		if ms.digestKeeper == nil {
+			return fmt.Errorf("digest keeper is required but not set")
+		}
+		if err := ms.digestKeeper.StoreDigestModuleCall(ctx, msg.Corporation, msg.Digest, "sha2-256"); err != nil {
+			return fmt.Errorf("failed to persist credential digest: %w", err)
+		}
+	}
+
 	return nil
 }
 
@@ -439,9 +539,9 @@ func (ms msgServer) validateSessionAccess(ctx sdk.Context, msg *types.MsgCreateO
 		return fmt.Errorf("failed to get session: %w", err)
 	}
 
-	// existing_entry.authority MUST be equal to authority
-	if existingSession.Authority != msg.Authority {
-		return fmt.Errorf("session authority does not match: expected %s, got %s", existingSession.Authority, msg.Authority)
+	// existing_entry.corporation MUST be equal to corporation
+	if existingSession.Corporation != msg.Corporation {
+		return fmt.Errorf("session corporation does not match: expected %s, got %s", existingSession.Corporation, msg.Corporation)
 	}
 
 	// existing_entry.vs_operator MUST be equal to operator
@@ -455,7 +555,7 @@ func (ms msgServer) validateSessionAccess(ctx sdk.Context, msg *types.MsgCreateO
 func (ms msgServer) createOrUpdateSession(ctx sdk.Context, msg *types.MsgCreateOrUpdatePermissionSession, now time.Time) error {
 	session := &types.PermissionSession{
 		Id:          msg.Id,
-		Authority:   msg.Authority,
+		Corporation: msg.Corporation,
 		VsOperator:  msg.Operator,
 		AgentPermId: msg.AgentPermId,
 		Modified:    &now,
@@ -527,8 +627,8 @@ func (ms msgServer) findBeneficiaries(ctx sdk.Context, issuerPermId, verifierPer
 
 	// Check if schema is configured with OPEN permission management mode
 	isOpenMode := false
-	if (issuerPermId != 0 && cs.IssuerPermManagementMode == credentialschematypes.CredentialSchemaPermManagementMode_OPEN) ||
-		(verifierPermId != 0 && cs.VerifierPermManagementMode == credentialschematypes.CredentialSchemaPermManagementMode_OPEN) {
+	if (issuerPermId != 0 && cs.IssuerOnboardingMode == credentialschematypes.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_OPEN) ||
+		(verifierPermId != 0 && cs.VerifierOnboardingMode == credentialschematypes.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_OPEN) {
 		isOpenMode = true
 	}
 
@@ -538,7 +638,7 @@ func (ms msgServer) findBeneficiaries(ctx sdk.Context, issuerPermId, verifierPer
 		err = ms.Permission.Walk(ctx, nil, func(id uint64, perm types.Permission) (bool, error) {
 			if perm.SchemaId == schemaID &&
 				perm.Type == types.PermissionType_ECOSYSTEM &&
-				perm.Revoked == nil && perm.SlashedDeposit == 0 {
+				perm.Revoked == nil && perm.Slashed == nil {
 				foundPerms = append(foundPerms, perm)
 				return true, nil // Stop iteration once found
 			}
@@ -569,7 +669,7 @@ func (ms msgServer) findBeneficiaries(ctx sdk.Context, issuerPermId, verifierPer
 				}
 
 				// Add to set if valid and not already included
-				if currentPerm.Revoked == nil && currentPerm.SlashedDeposit == 0 && !containsPerm(currentPermID) {
+				if currentPerm.Revoked == nil && currentPerm.Slashed == nil && !containsPerm(currentPermID) {
 					foundPerms = append(foundPerms, currentPerm)
 				}
 
@@ -604,7 +704,7 @@ func (ms msgServer) findBeneficiaries(ctx sdk.Context, issuerPermId, verifierPer
 				}
 
 				// Add to set if valid and not already included
-				if currentPerm.Revoked == nil && currentPerm.SlashedDeposit == 0 && !containsPerm(currentPermID) {
+				if currentPerm.Revoked == nil && currentPerm.Slashed == nil && !containsPerm(currentPermID) {
 					foundPerms = append(foundPerms, currentPerm)
 				}
 

@@ -35,9 +35,9 @@ export interface MsgUpdateParamsResponse {
  * [MOD-TR-MSG-1] Create New Trust Registry
  */
 export interface MsgCreateTrustRegistry {
-  /** authority is the group account on whose behalf this message is executed */
-  authority: string;
-  /** operator is the account authorized by the authority to run this Msg */
+  /** corporation is the group account on whose behalf this message is executed */
+  corporation: string;
+  /** operator is the account authorized by the corporation to run this Msg */
   operator: string;
   /** did is the DID of the ecosystem creating this trust registry (mandatory) */
   did: string;
@@ -45,9 +45,9 @@ export interface MsgCreateTrustRegistry {
   aka: string;
   /** language is the primary language tag (RFC1766) of this trust registry (mandatory) */
   language: string;
-  /** doc_url is the URL where the governance framework document is published (mandatory) */
+  /** doc_url is the URL where the initial governance framework document is published (mandatory) */
   docUrl: string;
-  /** doc_digest_sri is the SRI digest of the governance framework document (mandatory) */
+  /** doc_digest_sri is the digest SRI of the initial governance framework document (mandatory) */
   docDigestSri: string;
 }
 
@@ -60,18 +60,18 @@ export interface MsgCreateTrustRegistryResponse {
  * [MOD-TR-MSG-2] Add Governance Framework Document
  */
 export interface MsgAddGovernanceFrameworkDocument {
-  /** authority is the group account on whose behalf this message is executed */
-  authority: string;
-  /** operator is the account authorized by the authority to run this Msg */
+  /** corporation is the group account on whose behalf this message is executed */
+  corporation: string;
+  /** operator is the account authorized by the corporation to run this Msg */
   operator: string;
-  /** id is the trust registry id (mandatory) */
-  id: number;
-  /** doc_language is the language tag (RFC1766) of the document (mandatory) */
-  docLanguage: string;
-  /** doc_url is the URL where the document is published (mandatory) */
-  docUrl: string;
-  /** doc_digest_sri is the digest SRI of the document (mandatory) */
-  docDigestSri: string;
+  /** tr_id is the trust registry id (mandatory) */
+  trId: number;
+  /** language is the language tag (RFC1766) of the document (mandatory) */
+  language: string;
+  /** url is the URL where the document is published (mandatory) */
+  url: string;
+  /** digest_sri is the digest SRI of the document (mandatory) */
+  digestSri: string;
   /** version is the targeted version (mandatory) */
   version: number;
 }
@@ -85,12 +85,12 @@ export interface MsgAddGovernanceFrameworkDocumentResponse {
  * [MOD-TR-MSG-3] Increase Active Governance Framework Version
  */
 export interface MsgIncreaseActiveGovernanceFrameworkVersion {
-  /** authority is the group account on whose behalf this message is executed */
-  authority: string;
-  /** operator is the account authorized by the authority to run this Msg */
+  /** corporation is the group account on whose behalf this message is executed */
+  corporation: string;
+  /** operator is the account authorized by the corporation to run this Msg */
   operator: string;
-  /** id is the trust registry id (mandatory) */
-  id: number;
+  /** tr_id is the trust registry id (mandatory) */
+  trId: number;
 }
 
 /** MsgIncreaseActiveGovernanceFrameworkVersion defines the Msg/IncreaseActiveGovernanceFrameworkVersion response type. */
@@ -102,13 +102,13 @@ export interface MsgIncreaseActiveGovernanceFrameworkVersionResponse {
  * [MOD-TR-MSG-4] Update Trust Registry
  */
 export interface MsgUpdateTrustRegistry {
-  /** authority is the group account on whose behalf this message is executed */
-  authority: string;
-  /** operator is the account authorized by the authority to run this Msg */
+  /** corporation is the group account on whose behalf this message is executed */
+  corporation: string;
+  /** operator is the account authorized by the corporation to run this Msg */
   operator: string;
-  /** id is the trust registry id (mandatory) */
-  id: number;
-  /** did is the DID of the trust registry (mandatory) */
+  /** tr_id is the trust registry id (mandatory) */
+  trId: number;
+  /** did is the DID of the ecosystem (mandatory) — spec draft 13 [MOD-TR-MSG-4-1] */
   did: string;
   /** aka is an optional additional URI of this trust registry */
   aka: string;
@@ -123,12 +123,12 @@ export interface MsgUpdateTrustRegistryResponse {
  * [MOD-TR-MSG-5] Archive Trust Registry
  */
 export interface MsgArchiveTrustRegistry {
-  /** authority is the group account on whose behalf this message is executed */
-  authority: string;
-  /** operator is the account authorized by the authority to run this Msg */
+  /** corporation is the group account on whose behalf this message is executed */
+  corporation: string;
+  /** operator is the account authorized by the corporation to run this Msg */
   operator: string;
-  /** id is the trust registry id (mandatory) */
-  id: number;
+  /** tr_id is the trust registry id (mandatory) */
+  trId: number;
   /** archive is true to archive, false to unarchive (mandatory) */
   archive: boolean;
 }
@@ -257,13 +257,13 @@ export const MsgUpdateParamsResponse = {
 };
 
 function createBaseMsgCreateTrustRegistry(): MsgCreateTrustRegistry {
-  return { authority: "", operator: "", did: "", aka: "", language: "", docUrl: "", docDigestSri: "" };
+  return { corporation: "", operator: "", did: "", aka: "", language: "", docUrl: "", docDigestSri: "" };
 }
 
 export const MsgCreateTrustRegistry = {
   encode(message: MsgCreateTrustRegistry, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.authority !== "") {
-      writer.uint32(10).string(message.authority);
+    if (message.corporation !== "") {
+      writer.uint32(10).string(message.corporation);
     }
     if (message.operator !== "") {
       writer.uint32(18).string(message.operator);
@@ -298,7 +298,7 @@ export const MsgCreateTrustRegistry = {
             break;
           }
 
-          message.authority = reader.string();
+          message.corporation = reader.string();
           continue;
         case 2:
           if (tag !== 18) {
@@ -353,7 +353,7 @@ export const MsgCreateTrustRegistry = {
 
   fromJSON(object: any): MsgCreateTrustRegistry {
     return {
-      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      corporation: isSet(object.corporation) ? globalThis.String(object.corporation) : "",
       operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
       did: isSet(object.did) ? globalThis.String(object.did) : "",
       aka: isSet(object.aka) ? globalThis.String(object.aka) : "",
@@ -365,8 +365,8 @@ export const MsgCreateTrustRegistry = {
 
   toJSON(message: MsgCreateTrustRegistry): unknown {
     const obj: any = {};
-    if (message.authority !== "") {
-      obj.authority = message.authority;
+    if (message.corporation !== "") {
+      obj.corporation = message.corporation;
     }
     if (message.operator !== "") {
       obj.operator = message.operator;
@@ -394,7 +394,7 @@ export const MsgCreateTrustRegistry = {
   },
   fromPartial<I extends Exact<DeepPartial<MsgCreateTrustRegistry>, I>>(object: I): MsgCreateTrustRegistry {
     const message = createBaseMsgCreateTrustRegistry();
-    message.authority = object.authority ?? "";
+    message.corporation = object.corporation ?? "";
     message.operator = object.operator ?? "";
     message.did = object.did ?? "";
     message.aka = object.aka ?? "";
@@ -449,28 +449,28 @@ export const MsgCreateTrustRegistryResponse = {
 };
 
 function createBaseMsgAddGovernanceFrameworkDocument(): MsgAddGovernanceFrameworkDocument {
-  return { authority: "", operator: "", id: 0, docLanguage: "", docUrl: "", docDigestSri: "", version: 0 };
+  return { corporation: "", operator: "", trId: 0, language: "", url: "", digestSri: "", version: 0 };
 }
 
 export const MsgAddGovernanceFrameworkDocument = {
   encode(message: MsgAddGovernanceFrameworkDocument, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.authority !== "") {
-      writer.uint32(10).string(message.authority);
+    if (message.corporation !== "") {
+      writer.uint32(10).string(message.corporation);
     }
     if (message.operator !== "") {
       writer.uint32(18).string(message.operator);
     }
-    if (message.id !== 0) {
-      writer.uint32(24).uint64(message.id);
+    if (message.trId !== 0) {
+      writer.uint32(24).uint64(message.trId);
     }
-    if (message.docLanguage !== "") {
-      writer.uint32(34).string(message.docLanguage);
+    if (message.language !== "") {
+      writer.uint32(34).string(message.language);
     }
-    if (message.docUrl !== "") {
-      writer.uint32(42).string(message.docUrl);
+    if (message.url !== "") {
+      writer.uint32(42).string(message.url);
     }
-    if (message.docDigestSri !== "") {
-      writer.uint32(50).string(message.docDigestSri);
+    if (message.digestSri !== "") {
+      writer.uint32(50).string(message.digestSri);
     }
     if (message.version !== 0) {
       writer.uint32(56).int32(message.version);
@@ -490,7 +490,7 @@ export const MsgAddGovernanceFrameworkDocument = {
             break;
           }
 
-          message.authority = reader.string();
+          message.corporation = reader.string();
           continue;
         case 2:
           if (tag !== 18) {
@@ -504,28 +504,28 @@ export const MsgAddGovernanceFrameworkDocument = {
             break;
           }
 
-          message.id = longToNumber(reader.uint64() as Long);
+          message.trId = longToNumber(reader.uint64() as Long);
           continue;
         case 4:
           if (tag !== 34) {
             break;
           }
 
-          message.docLanguage = reader.string();
+          message.language = reader.string();
           continue;
         case 5:
           if (tag !== 42) {
             break;
           }
 
-          message.docUrl = reader.string();
+          message.url = reader.string();
           continue;
         case 6:
           if (tag !== 50) {
             break;
           }
 
-          message.docDigestSri = reader.string();
+          message.digestSri = reader.string();
           continue;
         case 7:
           if (tag !== 56) {
@@ -545,35 +545,35 @@ export const MsgAddGovernanceFrameworkDocument = {
 
   fromJSON(object: any): MsgAddGovernanceFrameworkDocument {
     return {
-      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      corporation: isSet(object.corporation) ? globalThis.String(object.corporation) : "",
       operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
-      id: isSet(object.id) ? globalThis.Number(object.id) : 0,
-      docLanguage: isSet(object.docLanguage) ? globalThis.String(object.docLanguage) : "",
-      docUrl: isSet(object.docUrl) ? globalThis.String(object.docUrl) : "",
-      docDigestSri: isSet(object.docDigestSri) ? globalThis.String(object.docDigestSri) : "",
+      trId: isSet(object.trId) ? globalThis.Number(object.trId) : 0,
+      language: isSet(object.language) ? globalThis.String(object.language) : "",
+      url: isSet(object.url) ? globalThis.String(object.url) : "",
+      digestSri: isSet(object.digestSri) ? globalThis.String(object.digestSri) : "",
       version: isSet(object.version) ? globalThis.Number(object.version) : 0,
     };
   },
 
   toJSON(message: MsgAddGovernanceFrameworkDocument): unknown {
     const obj: any = {};
-    if (message.authority !== "") {
-      obj.authority = message.authority;
+    if (message.corporation !== "") {
+      obj.corporation = message.corporation;
     }
     if (message.operator !== "") {
       obj.operator = message.operator;
     }
-    if (message.id !== 0) {
-      obj.id = Math.round(message.id);
+    if (message.trId !== 0) {
+      obj.trId = Math.round(message.trId);
     }
-    if (message.docLanguage !== "") {
-      obj.docLanguage = message.docLanguage;
+    if (message.language !== "") {
+      obj.language = message.language;
     }
-    if (message.docUrl !== "") {
-      obj.docUrl = message.docUrl;
+    if (message.url !== "") {
+      obj.url = message.url;
     }
-    if (message.docDigestSri !== "") {
-      obj.docDigestSri = message.docDigestSri;
+    if (message.digestSri !== "") {
+      obj.digestSri = message.digestSri;
     }
     if (message.version !== 0) {
       obj.version = Math.round(message.version);
@@ -590,12 +590,12 @@ export const MsgAddGovernanceFrameworkDocument = {
     object: I,
   ): MsgAddGovernanceFrameworkDocument {
     const message = createBaseMsgAddGovernanceFrameworkDocument();
-    message.authority = object.authority ?? "";
+    message.corporation = object.corporation ?? "";
     message.operator = object.operator ?? "";
-    message.id = object.id ?? 0;
-    message.docLanguage = object.docLanguage ?? "";
-    message.docUrl = object.docUrl ?? "";
-    message.docDigestSri = object.docDigestSri ?? "";
+    message.trId = object.trId ?? 0;
+    message.language = object.language ?? "";
+    message.url = object.url ?? "";
+    message.digestSri = object.digestSri ?? "";
     message.version = object.version ?? 0;
     return message;
   },
@@ -649,19 +649,19 @@ export const MsgAddGovernanceFrameworkDocumentResponse = {
 };
 
 function createBaseMsgIncreaseActiveGovernanceFrameworkVersion(): MsgIncreaseActiveGovernanceFrameworkVersion {
-  return { authority: "", operator: "", id: 0 };
+  return { corporation: "", operator: "", trId: 0 };
 }
 
 export const MsgIncreaseActiveGovernanceFrameworkVersion = {
   encode(message: MsgIncreaseActiveGovernanceFrameworkVersion, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.authority !== "") {
-      writer.uint32(10).string(message.authority);
+    if (message.corporation !== "") {
+      writer.uint32(10).string(message.corporation);
     }
     if (message.operator !== "") {
       writer.uint32(18).string(message.operator);
     }
-    if (message.id !== 0) {
-      writer.uint32(24).uint64(message.id);
+    if (message.trId !== 0) {
+      writer.uint32(24).uint64(message.trId);
     }
     return writer;
   },
@@ -678,7 +678,7 @@ export const MsgIncreaseActiveGovernanceFrameworkVersion = {
             break;
           }
 
-          message.authority = reader.string();
+          message.corporation = reader.string();
           continue;
         case 2:
           if (tag !== 18) {
@@ -692,7 +692,7 @@ export const MsgIncreaseActiveGovernanceFrameworkVersion = {
             break;
           }
 
-          message.id = longToNumber(reader.uint64() as Long);
+          message.trId = longToNumber(reader.uint64() as Long);
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -705,22 +705,22 @@ export const MsgIncreaseActiveGovernanceFrameworkVersion = {
 
   fromJSON(object: any): MsgIncreaseActiveGovernanceFrameworkVersion {
     return {
-      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      corporation: isSet(object.corporation) ? globalThis.String(object.corporation) : "",
       operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
-      id: isSet(object.id) ? globalThis.Number(object.id) : 0,
+      trId: isSet(object.trId) ? globalThis.Number(object.trId) : 0,
     };
   },
 
   toJSON(message: MsgIncreaseActiveGovernanceFrameworkVersion): unknown {
     const obj: any = {};
-    if (message.authority !== "") {
-      obj.authority = message.authority;
+    if (message.corporation !== "") {
+      obj.corporation = message.corporation;
     }
     if (message.operator !== "") {
       obj.operator = message.operator;
     }
-    if (message.id !== 0) {
-      obj.id = Math.round(message.id);
+    if (message.trId !== 0) {
+      obj.trId = Math.round(message.trId);
     }
     return obj;
   },
@@ -734,9 +734,9 @@ export const MsgIncreaseActiveGovernanceFrameworkVersion = {
     object: I,
   ): MsgIncreaseActiveGovernanceFrameworkVersion {
     const message = createBaseMsgIncreaseActiveGovernanceFrameworkVersion();
-    message.authority = object.authority ?? "";
+    message.corporation = object.corporation ?? "";
     message.operator = object.operator ?? "";
-    message.id = object.id ?? 0;
+    message.trId = object.trId ?? 0;
     return message;
   },
 };
@@ -789,19 +789,19 @@ export const MsgIncreaseActiveGovernanceFrameworkVersionResponse = {
 };
 
 function createBaseMsgUpdateTrustRegistry(): MsgUpdateTrustRegistry {
-  return { authority: "", operator: "", id: 0, did: "", aka: "" };
+  return { corporation: "", operator: "", trId: 0, did: "", aka: "" };
 }
 
 export const MsgUpdateTrustRegistry = {
   encode(message: MsgUpdateTrustRegistry, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.authority !== "") {
-      writer.uint32(10).string(message.authority);
+    if (message.corporation !== "") {
+      writer.uint32(10).string(message.corporation);
     }
     if (message.operator !== "") {
       writer.uint32(18).string(message.operator);
     }
-    if (message.id !== 0) {
-      writer.uint32(24).uint64(message.id);
+    if (message.trId !== 0) {
+      writer.uint32(24).uint64(message.trId);
     }
     if (message.did !== "") {
       writer.uint32(34).string(message.did);
@@ -824,7 +824,7 @@ export const MsgUpdateTrustRegistry = {
             break;
           }
 
-          message.authority = reader.string();
+          message.corporation = reader.string();
           continue;
         case 2:
           if (tag !== 18) {
@@ -838,7 +838,7 @@ export const MsgUpdateTrustRegistry = {
             break;
           }
 
-          message.id = longToNumber(reader.uint64() as Long);
+          message.trId = longToNumber(reader.uint64() as Long);
           continue;
         case 4:
           if (tag !== 34) {
@@ -865,9 +865,9 @@ export const MsgUpdateTrustRegistry = {
 
   fromJSON(object: any): MsgUpdateTrustRegistry {
     return {
-      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      corporation: isSet(object.corporation) ? globalThis.String(object.corporation) : "",
       operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
-      id: isSet(object.id) ? globalThis.Number(object.id) : 0,
+      trId: isSet(object.trId) ? globalThis.Number(object.trId) : 0,
       did: isSet(object.did) ? globalThis.String(object.did) : "",
       aka: isSet(object.aka) ? globalThis.String(object.aka) : "",
     };
@@ -875,14 +875,14 @@ export const MsgUpdateTrustRegistry = {
 
   toJSON(message: MsgUpdateTrustRegistry): unknown {
     const obj: any = {};
-    if (message.authority !== "") {
-      obj.authority = message.authority;
+    if (message.corporation !== "") {
+      obj.corporation = message.corporation;
     }
     if (message.operator !== "") {
       obj.operator = message.operator;
     }
-    if (message.id !== 0) {
-      obj.id = Math.round(message.id);
+    if (message.trId !== 0) {
+      obj.trId = Math.round(message.trId);
     }
     if (message.did !== "") {
       obj.did = message.did;
@@ -898,9 +898,9 @@ export const MsgUpdateTrustRegistry = {
   },
   fromPartial<I extends Exact<DeepPartial<MsgUpdateTrustRegistry>, I>>(object: I): MsgUpdateTrustRegistry {
     const message = createBaseMsgUpdateTrustRegistry();
-    message.authority = object.authority ?? "";
+    message.corporation = object.corporation ?? "";
     message.operator = object.operator ?? "";
-    message.id = object.id ?? 0;
+    message.trId = object.trId ?? 0;
     message.did = object.did ?? "";
     message.aka = object.aka ?? "";
     return message;
@@ -951,19 +951,19 @@ export const MsgUpdateTrustRegistryResponse = {
 };
 
 function createBaseMsgArchiveTrustRegistry(): MsgArchiveTrustRegistry {
-  return { authority: "", operator: "", id: 0, archive: false };
+  return { corporation: "", operator: "", trId: 0, archive: false };
 }
 
 export const MsgArchiveTrustRegistry = {
   encode(message: MsgArchiveTrustRegistry, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.authority !== "") {
-      writer.uint32(10).string(message.authority);
+    if (message.corporation !== "") {
+      writer.uint32(10).string(message.corporation);
     }
     if (message.operator !== "") {
       writer.uint32(18).string(message.operator);
     }
-    if (message.id !== 0) {
-      writer.uint32(24).uint64(message.id);
+    if (message.trId !== 0) {
+      writer.uint32(24).uint64(message.trId);
     }
     if (message.archive !== false) {
       writer.uint32(32).bool(message.archive);
@@ -983,7 +983,7 @@ export const MsgArchiveTrustRegistry = {
             break;
           }
 
-          message.authority = reader.string();
+          message.corporation = reader.string();
           continue;
         case 2:
           if (tag !== 18) {
@@ -997,7 +997,7 @@ export const MsgArchiveTrustRegistry = {
             break;
           }
 
-          message.id = longToNumber(reader.uint64() as Long);
+          message.trId = longToNumber(reader.uint64() as Long);
           continue;
         case 4:
           if (tag !== 32) {
@@ -1017,23 +1017,23 @@ export const MsgArchiveTrustRegistry = {
 
   fromJSON(object: any): MsgArchiveTrustRegistry {
     return {
-      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      corporation: isSet(object.corporation) ? globalThis.String(object.corporation) : "",
       operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
-      id: isSet(object.id) ? globalThis.Number(object.id) : 0,
+      trId: isSet(object.trId) ? globalThis.Number(object.trId) : 0,
       archive: isSet(object.archive) ? globalThis.Boolean(object.archive) : false,
     };
   },
 
   toJSON(message: MsgArchiveTrustRegistry): unknown {
     const obj: any = {};
-    if (message.authority !== "") {
-      obj.authority = message.authority;
+    if (message.corporation !== "") {
+      obj.corporation = message.corporation;
     }
     if (message.operator !== "") {
       obj.operator = message.operator;
     }
-    if (message.id !== 0) {
-      obj.id = Math.round(message.id);
+    if (message.trId !== 0) {
+      obj.trId = Math.round(message.trId);
     }
     if (message.archive !== false) {
       obj.archive = message.archive;
@@ -1046,9 +1046,9 @@ export const MsgArchiveTrustRegistry = {
   },
   fromPartial<I extends Exact<DeepPartial<MsgArchiveTrustRegistry>, I>>(object: I): MsgArchiveTrustRegistry {
     const message = createBaseMsgArchiveTrustRegistry();
-    message.authority = object.authority ?? "";
+    message.corporation = object.corporation ?? "";
     message.operator = object.operator ?? "";
-    message.id = object.id ?? 0;
+    message.trId = object.trId ?? 0;
     message.archive = object.archive ?? false;
     return message;
   },

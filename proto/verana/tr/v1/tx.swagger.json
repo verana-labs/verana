@@ -244,30 +244,30 @@
     "verana.tr.v1.MsgAddGovernanceFrameworkDocument": {
       "type": "object",
       "properties": {
-        "authority": {
+        "corporation": {
           "type": "string",
-          "title": "authority is the group account on whose behalf this message is executed"
+          "title": "corporation is the group account on whose behalf this message is executed"
         },
         "operator": {
           "type": "string",
-          "title": "operator is the account authorized by the authority to run this Msg"
+          "title": "operator is the account authorized by the corporation to run this Msg"
         },
-        "id": {
+        "tr_id": {
           "type": "string",
           "format": "uint64",
-          "title": "id is the trust registry id (mandatory)"
+          "title": "tr_id is the trust registry id (mandatory)"
         },
-        "doc_language": {
+        "language": {
           "type": "string",
-          "title": "doc_language is the language tag (RFC1766) of the document (mandatory)"
+          "title": "language is the language tag (RFC1766) of the document (mandatory)"
         },
-        "doc_url": {
+        "url": {
           "type": "string",
-          "title": "doc_url is the URL where the document is published (mandatory)"
+          "title": "url is the URL where the document is published (mandatory)"
         },
-        "doc_digest_sri": {
+        "digest_sri": {
           "type": "string",
-          "title": "doc_digest_sri is the digest SRI of the document (mandatory)"
+          "title": "digest_sri is the digest SRI of the document (mandatory)"
         },
         "version": {
           "type": "integer",
@@ -284,18 +284,18 @@
     "verana.tr.v1.MsgArchiveTrustRegistry": {
       "type": "object",
       "properties": {
-        "authority": {
+        "corporation": {
           "type": "string",
-          "title": "authority is the group account on whose behalf this message is executed"
+          "title": "corporation is the group account on whose behalf this message is executed"
         },
         "operator": {
           "type": "string",
-          "title": "operator is the account authorized by the authority to run this Msg"
+          "title": "operator is the account authorized by the corporation to run this Msg"
         },
-        "id": {
+        "tr_id": {
           "type": "string",
           "format": "uint64",
-          "title": "id is the trust registry id (mandatory)"
+          "title": "tr_id is the trust registry id (mandatory)"
         },
         "archive": {
           "type": "boolean",
@@ -311,13 +311,13 @@
     "verana.tr.v1.MsgCreateTrustRegistry": {
       "type": "object",
       "properties": {
-        "authority": {
+        "corporation": {
           "type": "string",
-          "title": "authority is the group account on whose behalf this message is executed"
+          "title": "corporation is the group account on whose behalf this message is executed"
         },
         "operator": {
           "type": "string",
-          "title": "operator is the account authorized by the authority to run this Msg"
+          "title": "operator is the account authorized by the corporation to run this Msg"
         },
         "did": {
           "type": "string",
@@ -333,11 +333,11 @@
         },
         "doc_url": {
           "type": "string",
-          "title": "doc_url is the URL where the governance framework document is published (mandatory)"
+          "title": "doc_url is the URL where the initial governance framework document is published (mandatory)"
         },
         "doc_digest_sri": {
           "type": "string",
-          "title": "doc_digest_sri is the SRI digest of the governance framework document (mandatory)"
+          "title": "doc_digest_sri is the digest SRI of the initial governance framework document (mandatory)"
         }
       },
       "title": "MsgCreateTrustRegistry defines the Msg/CreateTrustRegistry request type.\n[MOD-TR-MSG-1] Create New Trust Registry"
@@ -349,18 +349,18 @@
     "verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion": {
       "type": "object",
       "properties": {
-        "authority": {
+        "corporation": {
           "type": "string",
-          "title": "authority is the group account on whose behalf this message is executed"
+          "title": "corporation is the group account on whose behalf this message is executed"
         },
         "operator": {
           "type": "string",
-          "title": "operator is the account authorized by the authority to run this Msg"
+          "title": "operator is the account authorized by the corporation to run this Msg"
         },
-        "id": {
+        "tr_id": {
           "type": "string",
           "format": "uint64",
-          "title": "id is the trust registry id (mandatory)"
+          "title": "tr_id is the trust registry id (mandatory)"
         }
       },
       "title": "MsgIncreaseActiveGovernanceFrameworkVersion defines the Msg/IncreaseActiveGovernanceFrameworkVersion request type.\n[MOD-TR-MSG-3] Increase Active Governance Framework Version"
@@ -390,22 +390,22 @@
     "verana.tr.v1.MsgUpdateTrustRegistry": {
       "type": "object",
       "properties": {
-        "authority": {
+        "corporation": {
           "type": "string",
-          "title": "authority is the group account on whose behalf this message is executed"
+          "title": "corporation is the group account on whose behalf this message is executed"
         },
         "operator": {
           "type": "string",
-          "title": "operator is the account authorized by the authority to run this Msg"
+          "title": "operator is the account authorized by the corporation to run this Msg"
         },
-        "id": {
+        "tr_id": {
           "type": "string",
           "format": "uint64",
-          "title": "id is the trust registry id (mandatory)"
+          "title": "tr_id is the trust registry id (mandatory)"
         },
         "did": {
           "type": "string",
-          "title": "did is the DID of the trust registry (mandatory)"
+          "title": "did is the DID of the ecosystem (mandatory) — spec draft 13 [MOD-TR-MSG-4-1]"
         },
         "aka": {
           "type": "string",

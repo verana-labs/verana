@@ -34,6 +34,7 @@ type (
 		trustDeposit           types.TrustDepositKeeper
 		bankKeeper             types.BankKeeper
 		delegationKeeper       types.DelegationKeeper
+		digestKeeper           types.DigestKeeper
 	}
 )
 
@@ -47,6 +48,7 @@ func NewKeeper(
 	trustDeposit types.TrustDepositKeeper,
 	bankKeeper types.BankKeeper,
 	delegationKeeper types.DelegationKeeper,
+	digestKeeper types.DigestKeeper,
 ) Keeper {
 	sb := collections.NewSchemaBuilder(storeService)
 
@@ -67,6 +69,7 @@ func NewKeeper(
 		trustDeposit:           trustDeposit,
 		bankKeeper:             bankKeeper,
 		delegationKeeper:       delegationKeeper,
+		digestKeeper:           digestKeeper,
 	}
 }
 
@@ -118,22 +121,15 @@ func (k Keeper) UpdatePermission(ctx sdk.Context, perm types.Permission) error {
 	return k.Permission.Set(ctx, perm.Id, perm)
 }
 
-// IsValidPermission checks if a perm is valid for a given country code and time
+// IsValidPermission checks if a perm is valid for a given time
 // A valid perm (ACTIVE state):
-// - Has a matching country (perm country is null or matches the provided country)
 // - Is currently effective (effective_from must be set and effective_from ≤ now < effective_until)
 // - Is not revoked
 // - Is not slashed
 // - Is not repaid
 // According to the spec, if validator permission is INACTIVE (not valid), it must abort.
 // INACTIVE means: effective_from is null OR effective_from equals now() exactly (not before).
-func IsValidPermission(perm types.Permission, country string, checkTime time.Time) error {
-	// Check country compatibility (skip check if no country was requested)
-	if country != "" && perm.Country != "" && perm.Country != country {
-		return fmt.Errorf("perm country mismatch: perm has %s, requested %s",
-			perm.Country, country)
-	}
-
+func IsValidPermission(perm types.Permission, checkTime time.Time) error {
 	// Check if perm is repaid (REPAID state)
 	if perm.Repaid != nil {
 		return fmt.Errorf("perm is repaid since %v", perm.Repaid)

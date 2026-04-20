@@ -1,63 +1,53 @@
 import type { AminoConverter } from "@cosmjs/stargate";
 import {
-  MsgReclaimTrustDeposit,
   MsgReclaimTrustDepositYield,
   MsgRepaySlashedTrustDeposit,
   MsgSlashTrustDeposit,
 } from "../codec/verana/td/v1/tx";
 
-export const MsgReclaimTrustDepositAminoConverter: AminoConverter = {
-  aminoType: "/verana.td.v1.MsgReclaimTrustDeposit",
-  toAmino: ({ creator, claimed }: MsgReclaimTrustDeposit) => ({
-    creator,
-    claimed: claimed != null ? claimed.toString() : undefined,
-  }),
-  fromAmino: (value: any) =>
-    MsgReclaimTrustDeposit.fromPartial({
-      creator: value.creator,
-      claimed: value.claimed != null ? Number(value.claimed) : 0,
-    }),
-};
-
 export const MsgReclaimTrustDepositYieldAminoConverter: AminoConverter = {
-  aminoType: "/verana.td.v1.MsgReclaimTrustDepositYield",
-  toAmino: ({ authority, operator }: MsgReclaimTrustDepositYield) => ({
-    authority,
+  aminoType: "verana/x/td/MsgReclaimTrustDepositYield",
+  // [MOD-TD-MSG-2-1] Spec v4 draft 13: parameters are corporation + operator only.
+  toAmino: ({ corporation, operator }: MsgReclaimTrustDepositYield) => ({
+    corporation,
     operator,
   }),
   fromAmino: (value: any) =>
     MsgReclaimTrustDepositYield.fromPartial({
-      authority: value.authority,
+      corporation: value.corporation,
       operator: value.operator,
     }),
 };
 
 export const MsgRepaySlashedTrustDepositAminoConverter: AminoConverter = {
-  aminoType: "/verana.td.v1.MsgRepaySlashedTrustDeposit",
-  toAmino: ({ authority, operator, amount }: MsgRepaySlashedTrustDeposit) => ({
-    authority,
+  aminoType: "verana/x/td/MsgRepaySlashedTrustDeposit",
+  toAmino: ({ corporation, operator, deposit }: MsgRepaySlashedTrustDeposit) => ({
+    corporation,
     operator,
-    amount: amount != null ? amount.toString() : undefined,
+    deposit: deposit != null ? deposit.toString() : undefined,
   }),
   fromAmino: (value: any) =>
     MsgRepaySlashedTrustDeposit.fromPartial({
-      authority: value.authority,
+      corporation: value.corporation,
       operator: value.operator,
-      amount: value.amount != null ? Number(value.amount) : 0,
+      deposit: value.deposit != null ? Number(value.deposit) : 0,
     }),
 };
 
 export const MsgSlashTrustDepositAminoConverter: AminoConverter = {
-  aminoType: "/verana.td.v1.MsgSlashTrustDeposit",
-  toAmino: ({ authority, account, amount }: MsgSlashTrustDeposit) => ({
+  aminoType: "verana/x/td/MsgSlashTrustDeposit",
+  // [MOD-TD-MSG-5-1] spec v4 draft 13 adds mandatory reason.
+  toAmino: ({ authority, corporation, deposit, reason }: MsgSlashTrustDeposit) => ({
     authority,
-    account,
-    amount,
+    corporation,
+    deposit,
+    reason,
   }),
   fromAmino: (value: any) =>
     MsgSlashTrustDeposit.fromPartial({
       authority: value.authority,
-      account: value.account,
-      amount: value.amount,
+      corporation: value.corporation,
+      deposit: value.deposit,
+      reason: value.reason,
     }),
 };

@@ -12,9 +12,9 @@ import {
 } from "./util/helpers";
 
 export const MsgGrantOperatorAuthorizationAminoConverter: AminoConverter = {
-  aminoType: "/verana.de.v1.MsgGrantOperatorAuthorization",
+  aminoType: "verana/x/de/MsgGrantOpAuthorization",
   toAmino: (m: MsgGrantOperatorAuthorization) => clean({
-    authority: m.authority || undefined,
+    corporation: m.corporation || undefined,
     operator: m.operator || undefined,
     grantee: m.grantee || undefined,
     msg_types: m.msgTypes?.length ? m.msgTypes : undefined,
@@ -24,10 +24,11 @@ export const MsgGrantOperatorAuthorizationAminoConverter: AminoConverter = {
     with_feegrant: m.withFeegrant || undefined,
     feegrant_spend_limit: m.feegrantSpendLimit?.length ? m.feegrantSpendLimit : undefined,
     feegrant_spend_limit_period: durationToAmino(m.feegrantSpendLimitPeriod),
+    fee_spend_limit: m.feeSpendLimit?.length ? m.feeSpendLimit : undefined,
   }),
   fromAmino: (a: any): MsgGrantOperatorAuthorization =>
     MsgGrantOperatorAuthorization.fromPartial({
-      authority: a.authority ?? "",
+      corporation: a.corporation ?? "",
       operator: a.operator ?? "",
       grantee: a.grantee ?? "",
       msgTypes: a.msg_types ?? [],
@@ -37,19 +38,20 @@ export const MsgGrantOperatorAuthorizationAminoConverter: AminoConverter = {
       withFeegrant: a.with_feegrant ?? false,
       feegrantSpendLimit: a.feegrant_spend_limit ?? [],
       feegrantSpendLimitPeriod: aminoToDuration(a.feegrant_spend_limit_period),
+      feeSpendLimit: a.fee_spend_limit ?? [],
     }),
 };
 
 export const MsgRevokeOperatorAuthorizationAminoConverter: AminoConverter = {
-  aminoType: "/verana.de.v1.MsgRevokeOperatorAuthorization",
-  toAmino: ({ authority, operator, grantee }: MsgRevokeOperatorAuthorization) => clean({
-    authority: authority || undefined,
+  aminoType: "verana/x/de/MsgRevokeOpAuthorization",
+  toAmino: ({ corporation, operator, grantee }: MsgRevokeOperatorAuthorization) => clean({
+    corporation: corporation || undefined,
     operator: operator || undefined,
     grantee: grantee || undefined,
   }),
   fromAmino: (value: any) =>
     MsgRevokeOperatorAuthorization.fromPartial({
-      authority: value.authority,
+      corporation: value.corporation,
       operator: value.operator,
       grantee: value.grantee,
     }),

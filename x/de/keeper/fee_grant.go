@@ -72,7 +72,7 @@ func (k Keeper) GrantFeeAllowance(
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeGrantFeeAllowance,
-			sdk.NewAttribute(types.AttributeKeyAuthority, authority),
+			sdk.NewAttribute(types.AttributeKeyCorporation, authority),
 			sdk.NewAttribute(types.AttributeKeyGrantee, grantee),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
 		),
@@ -113,7 +113,7 @@ func (k Keeper) RevokeFeeAllowance(goCtx context.Context, authority string, gran
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeRevokeFeeAllowance,
-			sdk.NewAttribute(types.AttributeKeyAuthority, authority),
+			sdk.NewAttribute(types.AttributeKeyCorporation, authority),
 			sdk.NewAttribute(types.AttributeKeyGrantee, grantee),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
 		),

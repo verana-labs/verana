@@ -20,6 +20,8 @@ export interface Params {
   trustDepositMaxYieldRate: string;
   /** yield_intermediate_pool is the Bech32 string for the Yield Intermediate Pool module account */
   yieldIntermediatePool: string;
+  /** trust_deposit_block_reward_share is the fraction of block rewards allocated to trust deposit yield (e.g. "0.2" for 20%) */
+  trustDepositBlockRewardShare: string;
 }
 
 function createBaseParams(): Params {
@@ -31,6 +33,7 @@ function createBaseParams(): Params {
     userAgentRewardRate: "",
     trustDepositMaxYieldRate: "",
     yieldIntermediatePool: "",
+    trustDepositBlockRewardShare: "",
   };
 }
 
@@ -56,6 +59,9 @@ export const Params = {
     }
     if (message.yieldIntermediatePool !== "") {
       writer.uint32(58).string(message.yieldIntermediatePool);
+    }
+    if (message.trustDepositBlockRewardShare !== "") {
+      writer.uint32(66).string(message.trustDepositBlockRewardShare);
     }
     return writer;
   },
@@ -116,6 +122,13 @@ export const Params = {
 
           message.yieldIntermediatePool = reader.string();
           continue;
+        case 8:
+          if (tag !== 66) {
+            break;
+          }
+
+          message.trustDepositBlockRewardShare = reader.string();
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -142,6 +155,9 @@ export const Params = {
         ? globalThis.String(object.trustDepositMaxYieldRate)
         : "",
       yieldIntermediatePool: isSet(object.yieldIntermediatePool) ? globalThis.String(object.yieldIntermediatePool) : "",
+      trustDepositBlockRewardShare: isSet(object.trustDepositBlockRewardShare)
+        ? globalThis.String(object.trustDepositBlockRewardShare)
+        : "",
     };
   },
 
@@ -168,6 +184,9 @@ export const Params = {
     if (message.yieldIntermediatePool !== "") {
       obj.yieldIntermediatePool = message.yieldIntermediatePool;
     }
+    if (message.trustDepositBlockRewardShare !== "") {
+      obj.trustDepositBlockRewardShare = message.trustDepositBlockRewardShare;
+    }
     return obj;
   },
 
@@ -183,6 +202,7 @@ export const Params = {
     message.userAgentRewardRate = object.userAgentRewardRate ?? "";
     message.trustDepositMaxYieldRate = object.trustDepositMaxYieldRate ?? "";
     message.yieldIntermediatePool = object.yieldIntermediatePool ?? "";
+    message.trustDepositBlockRewardShare = object.trustDepositBlockRewardShare ?? "";
     return message;
   },
 };

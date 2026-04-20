@@ -8,7 +8,7 @@ const (
 	EventTypeGrantVSOperatorAuthorization  = "grant_vs_operator_authorization"
 	EventTypeRevokeVSOperatorAuthorization = "revoke_vs_operator_authorization"
 
-	AttributeKeyAuthority    = "authority"
+	AttributeKeyCorporation  = "corporation"
 	AttributeKeyOperator     = "operator"
 	AttributeKeyGrantee      = "grantee"
 	AttributeKeyWithFeegrant = "with_feegrant"

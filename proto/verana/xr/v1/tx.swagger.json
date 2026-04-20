@@ -50,15 +50,15 @@
         ]
       }
     },
-    "/verana.xr.v1.Msg/ToggleExchangeRateState": {
+    "/verana.xr.v1.Msg/SetExchangeRateState": {
       "post": {
-        "summary": "ToggleExchangeRateState defines a governance operation for enabling or disabling an exchange rate.",
-        "operationId": "Msg_ToggleExchangeRateState",
+        "summary": "SetExchangeRateState defines a governance operation for enabling or disabling an exchange rate.",
+        "operationId": "Msg_SetExchangeRateState",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/verana.xr.v1.MsgToggleExchangeRateStateResponse"
+              "$ref": "#/definitions/verana.xr.v1.MsgSetExchangeRateStateResponse"
             }
           },
           "default": {
@@ -71,11 +71,11 @@
         "parameters": [
           {
             "name": "body",
-            "description": "MsgToggleExchangeRateState is the Msg/ToggleExchangeRateState request type.",
+            "description": "MsgSetExchangeRateState is the Msg/SetExchangeRateState request type.",
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/verana.xr.v1.MsgToggleExchangeRateState"
+              "$ref": "#/definitions/verana.xr.v1.MsgSetExchangeRateState"
             }
           }
         ],
@@ -222,6 +222,9 @@
         },
         "validity_duration": {
           "type": "string"
+        },
+        "state": {
+          "type": "boolean"
         }
       },
       "description": "MsgCreateExchangeRate is the Msg/CreateExchangeRate request type."
@@ -236,7 +239,7 @@
       },
       "description": "MsgCreateExchangeRateResponse defines the response for MsgCreateExchangeRate."
     },
-    "verana.xr.v1.MsgToggleExchangeRateState": {
+    "verana.xr.v1.MsgSetExchangeRateState": {
       "type": "object",
       "properties": {
         "authority": {
@@ -253,11 +256,11 @@
           "description": "state is the desired state: true for enabled, false for disabled."
         }
       },
-      "description": "MsgToggleExchangeRateState is the Msg/ToggleExchangeRateState request type."
+      "description": "MsgSetExchangeRateState is the Msg/SetExchangeRateState request type."
     },
-    "verana.xr.v1.MsgToggleExchangeRateStateResponse": {
+    "verana.xr.v1.MsgSetExchangeRateStateResponse": {
       "type": "object",
-      "description": "MsgToggleExchangeRateStateResponse defines the response for MsgToggleExchangeRateState."
+      "description": "MsgSetExchangeRateStateResponse defines the response for MsgSetExchangeRateState."
     },
     "verana.xr.v1.MsgUpdateExchangeRate": {
       "type": "object",
@@ -278,6 +281,15 @@
         "rate": {
           "type": "string",
           "description": "rate is the new exchange rate value."
+        },
+        "rate_scale": {
+          "type": "integer",
+          "format": "int64",
+          "description": "rate_scale is the new scale for the rate (if 0, existing scale is kept)."
+        },
+        "validity_duration": {
+          "type": "string",
+          "description": "validity_duration is the new validity duration (optional; if nil, existing duration is kept)."
         }
       },
       "description": "MsgUpdateExchangeRate is the Msg/UpdateExchangeRate request type."
@@ -306,6 +318,12 @@
     },
     "verana.xr.v1.Params": {
       "type": "object",
+      "properties": {
+        "max_validity_duration": {
+          "type": "string",
+          "description": "max_validity_duration is the maximum allowed validity duration for an exchange rate."
+        }
+      },
       "description": "Params defines the parameters for the module."
     }
   }

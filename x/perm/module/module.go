@@ -184,10 +184,11 @@ type ModuleInputs struct {
 
 	AccountKeeper          types.AccountKeeper
 	BankKeeper             types.BankKeeper
-	CredentialSchemaKeeper types.CredentialSchemaKeeper `optional:"true"`
-	TrustRegistryKeeper    types.TrustRegistryKeeper    `optional:"true"`
-	TrustDepositKeeper     types.TrustDepositKeeper     `optional:"true"`
-	DelegationKeeper       types.DelegationKeeper       `optional:"true"`
+	CredentialSchemaKeeper types.CredentialSchemaKeeper
+	TrustRegistryKeeper    types.TrustRegistryKeeper
+	TrustDepositKeeper     types.TrustDepositKeeper
+	DelegationKeeper       types.DelegationKeeper
+	DigestKeeper           types.DigestKeeper
 }
 
 type ModuleOutputs struct {
@@ -213,6 +214,7 @@ func ProvideModule(in ModuleInputs) ModuleOutputs {
 		in.TrustDepositKeeper,
 		in.BankKeeper,
 		in.DelegationKeeper,
+		in.DigestKeeper,
 	)
 	m := NewAppModule(
 		in.Cdc,

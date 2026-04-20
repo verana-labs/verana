@@ -9,6 +9,7 @@ const (
 	AttributeKeyPermissionID                    = "permission_id"
 	AttributeKeyCreator                         = "creator"
 	AttributeKeyAuthority                       = "authority"
+	AttributeKeyCorporation                     = "corporation"
 	AttributeKeyOperator                        = "operator"
 	AttributeKeyFees                            = "fees"
 	AttributeKeyDeposit                         = "deposit"
@@ -20,21 +21,18 @@ const (
 	AttributeKeyWalletAgentPermID               = "wallet_agent_perm_id"
 	EventTypeSlashPermissionTrustDeposit        = "slash_permission_trust_deposit"
 	AttributeKeySlashedAmount                   = "slashed_amount"
-	AttributeKeySlashedBy                       = "slashed_by"
 	EventTypeRepayPermissionSlashedTrustDeposit = "repay_permission_slashed_trust_deposit"
 	AttributeKeyRepaidAmount                    = "repaid_amount"
-	AttributeKeyRepaidBy                        = "repaid_by"
 	EventTypeCreatePermission                   = "create_permission"
 	AttributeKeyValidatorPermID                 = "validator_perm_id"
 	AttributeKeyType                            = "type"
-	AttributeKeyCountry                         = "country"
 
 	EventTypeRenewPermissionVP    = "renew_permission_vp"
 	AttributeKeyValidationFees    = "validation_fees"
 	AttributeKeyValidationDeposit = "validation_deposit"
 
 	EventTypeSetPermissionVPToValidated = "set_permission_vp_to_validated"
-	AttributeKeyVpSummaryDigestSri      = "vp_summary_digest_sri"
+	AttributeKeyVpSummaryDigest         = "vp_summary_digest"
 	AttributeKeyEffectiveFrom           = "effective_from"
 	AttributeKeyEffectiveUntil          = "effective_until"
 	AttributeKeyIssuanceFees            = "issuance_fees"
@@ -44,10 +42,8 @@ const (
 	EventTypeCancelPermissionVPLastRequest = "cancel_permission_vp_last_request"
 
 	EventTypeAdjustPermission     = "adjust_permission"
-	AttributeKeyAdjustedBy        = "adjusted_by"
 	AttributeKeyNewEffectiveUntil = "new_effective_until"
 
 	EventTypeRevokePermission = "revoke_permission"
-	AttributeKeyRevokedBy     = "revoked_by"
 	AttributeKeyRevokedAt     = "revoked_at"
 )

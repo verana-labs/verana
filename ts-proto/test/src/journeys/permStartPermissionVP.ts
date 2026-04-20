@@ -79,7 +79,7 @@ async function main() {
     const msg = {
       typeUrl: typeUrls.MsgStartPermissionVP,
       value: MsgStartPermissionVP.fromPartial({
-        authority: authzSetup.authorityAddress,
+        corporation: authzSetup.authorityAddress,
         operator: authzSetup.operatorAddress,
         type: PermissionType.ISSUER,
         validatorPermId: rootSetup.rootPermId,

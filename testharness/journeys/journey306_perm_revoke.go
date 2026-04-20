@@ -63,8 +63,8 @@ func RunPermissionRevokeJourney(ctx context.Context, client cosmosclient.Client)
 	csIDStr, err := lib.CreateCredentialSchemaWithAuthority(
 		client, ctx, operatorAccount, policyAddr,
 		trID, schemaData,
-		cschema.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
-		cschema.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION,
+		cschema.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS,
+		cschema.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS,
 	)
 	if err != nil {
 		return fmt.Errorf("prerequisite 2 failed: could not create CS: %w", err)
@@ -166,9 +166,7 @@ func RunPermissionRevokeJourney(ctx context.Context, client cosmosclient.Client)
 	}
 
 	// Verify revoked_by is set to the authority (policy address)
-	if revokedPerm.RevokedBy != policyAddr {
-		return fmt.Errorf("step 2 failed: expected revoked_by=%s, got %s", policyAddr, revokedPerm.RevokedBy)
-	}
+	// spec v4: removed field assertion (adjusted_by/revoked_by/slashed_by no longer exist)
 
 	// Verify modified timestamp is set
 	if revokedPerm.Modified == nil {
@@ -181,7 +179,7 @@ func RunPermissionRevokeJourney(ctx context.Context, client cosmosclient.Client)
 	}
 
 	// Verify authority unchanged
-	if revokedPerm.Authority != policyAddr {
+	if revokedPerm.Corporation != policyAddr {
 		return fmt.Errorf("step 2 failed: authority changed unexpectedly")
 	}
 

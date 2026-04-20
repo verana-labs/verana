@@ -77,12 +77,12 @@ async function main() {
   const msg = {
     typeUrl: typeUrls.MsgCreateTrustRegistry,
     value: MsgCreateTrustRegistry.fromPartial({
-      authority: setup.authorityAddress,
+      corporation: setup.authorityAddress,
       operator: account.address,
       did: did,
       aka: aka,
       language: "en",
-      docUrl: "https://example.com/governance-framework.pdf",
+      docUrl: "http://ts-proto-test-trust-registry.com/doc-v1",
       docDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
     }),
   };

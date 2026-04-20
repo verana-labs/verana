@@ -12,12 +12,18 @@ import (
 var _ paramtypes.ParamSet = (*Params)(nil)
 
 const (
-	DefaultTrustDepositReclaimBurnRate = "0.6"  // 60%
-	DefaultTrustDepositShareValue      = "1.0"  // Initial value: 1
+	// DefaultTrustDepositReclaimBurnRate is retained for proto back-compat only.
+	// Spec v4 draft 13 [MOD-TD-MSG-2-3] specifies that the full claimable_yield
+	// is transferred to the corporation on reclaim — there is no burn step.
+	// This field is therefore unused by the handler; remove the proto field
+	// (and this constant) on the next proto regeneration.
+	DefaultTrustDepositReclaimBurnRate = "0" // unused; 0 == no burn
+	DefaultTrustDepositShareValue      = "1.0"
 	DefaultTrustDepositRate            = "0.2"  // 20%
 	DefaultWalletUserAgentRewardRate   = "0.2"  // 20%
 	DefaultUserAgentRewardRate         = "0.2"  // 20%
 	DefaultTrustDepositMaxYieldRate    = "0.15" // 15% annual yield
+	DefaultTrustDepositBlockRewardShare = "0.2"
 )
 
 // ParamKeyTable the param key table for launch module
@@ -34,15 +40,17 @@ func NewParams(
 	userAgentRewardRate math.LegacyDec,
 	trustDepositMaxYieldRate math.LegacyDec,
 	yieldIntermediatePool string,
+	trustDepositBlockRewardShare math.LegacyDec,
 ) Params {
 	return Params{
-		TrustDepositReclaimBurnRate: trustDepositReclaimBurnRate,
-		TrustDepositShareValue:      trustDepositShareValue,
-		TrustDepositRate:            trustDepositRate,
-		WalletUserAgentRewardRate:   walletUserAgentRewardRate,
-		UserAgentRewardRate:         userAgentRewardRate,
-		TrustDepositMaxYieldRate:    trustDepositMaxYieldRate,
-		YieldIntermediatePool:       yieldIntermediatePool,
+		TrustDepositReclaimBurnRate:  trustDepositReclaimBurnRate,
+		TrustDepositShareValue:       trustDepositShareValue,
+		TrustDepositRate:             trustDepositRate,
+		WalletUserAgentRewardRate:    walletUserAgentRewardRate,
+		UserAgentRewardRate:          userAgentRewardRate,
+		TrustDepositMaxYieldRate:     trustDepositMaxYieldRate,
+		YieldIntermediatePool:        yieldIntermediatePool,
+		TrustDepositBlockRewardShare: trustDepositBlockRewardShare,
 	}
 }
 
@@ -54,6 +62,7 @@ func DefaultParams() Params {
 	WalletUserAgentRewardRate, _ := math.LegacyNewDecFromStr(DefaultWalletUserAgentRewardRate)
 	UserAgentRewardRate, _ := math.LegacyNewDecFromStr(DefaultUserAgentRewardRate)
 	TrustDepositMaxYieldRate, _ := math.LegacyNewDecFromStr(DefaultTrustDepositMaxYieldRate)
+	TrustDepositBlockRewardShare, _ := math.LegacyNewDecFromStr(DefaultTrustDepositBlockRewardShare)
 
 	// Default yield intermediate pool is the module account address derived from the module account name.
 	defaultYieldIntermediatePool := authtypes.NewModuleAddress(YieldIntermediatePool).String()
@@ -66,6 +75,7 @@ func DefaultParams() Params {
 		UserAgentRewardRate,
 		TrustDepositMaxYieldRate,
 		defaultYieldIntermediatePool,
+		TrustDepositBlockRewardShare,
 	)
 }
 
@@ -107,6 +117,11 @@ func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 			&p.YieldIntermediatePool,
 			validateString,
 		),
+		paramtypes.NewParamSetPair(
+			[]byte("TrustDepositBlockRewardShare"),
+			&p.TrustDepositBlockRewardShare,
+			validateLegacyDec,
+		),
 	}
 }
 
@@ -134,6 +149,9 @@ func (p Params) Validate() error {
 		if _, err := sdk.AccAddressFromBech32(p.YieldIntermediatePool); err != nil {
 			return fmt.Errorf("invalid yield_intermediate_pool address: %w", err)
 		}
+	}
+	if err := validateLegacyDec(p.TrustDepositBlockRewardShare); err != nil {
+		return err
 	}
 	return nil
 }

@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"context"
 	"testing"
 
 	"cosmossdk.io/log"
@@ -40,6 +41,7 @@ func PermissionKeeper(t testing.TB) (keeper.Keeper, *MockCredentialSchemaKeeper,
 	bankKeeper := NewMockBankKeeper()
 	mockTrustDepositKeeper := &MockTrustDepositKeeper{}
 	mockDelegationKeeper := &MockDelegationKeeper{}
+	mockDigestKeeper := &MockDigestKeeper{}
 	k := keeper.NewKeeper(
 		cdc,
 		runtime.NewKVStoreService(storeKey),
@@ -50,6 +52,7 @@ func PermissionKeeper(t testing.TB) (keeper.Keeper, *MockCredentialSchemaKeeper,
 		mockTrustDepositKeeper,
 		bankKeeper,
 		mockDelegationKeeper,
+		mockDigestKeeper,
 	)
 
 	ctx := sdk.NewContext(stateStore, cmtproto.Header{}, false, log.NewNopLogger())
@@ -72,12 +75,12 @@ func NewMockCredentialSchemaKeeper() *MockCredentialSchemaKeeper {
 	}
 }
 
-func (k *MockCredentialSchemaKeeper) UpdateMockCredentialSchema(id uint64, trId uint64, issuerPermMode, verifierPermMode cstypes.CredentialSchemaPermManagementMode) {
+func (k *MockCredentialSchemaKeeper) UpdateMockCredentialSchema(id uint64, trId uint64, issuerMode cstypes.IssuerOnboardingMode, verifierMode cstypes.VerifierOnboardingMode) {
 	k.credentialSchemas[id] = cstypes.CredentialSchema{
-		Id:                         id,
-		TrId:                       trId,
-		IssuerPermManagementMode:   issuerPermMode,
-		VerifierPermManagementMode: verifierPermMode,
+		Id:                     id,
+		TrId:                   trId,
+		IssuerOnboardingMode:   issuerMode,
+		VerifierOnboardingMode: verifierMode,
 	}
 }
 
@@ -88,14 +91,32 @@ func (k *MockCredentialSchemaKeeper) GetCredentialSchemaById(ctx sdk.Context, id
 	return cstypes.CredentialSchema{}, cstypes.ErrCredentialSchemaNotFound
 }
 
-func (k *MockCredentialSchemaKeeper) CreateMockCredentialSchema(id uint64, issuerPermMode, verifierPermMode cstypes.CredentialSchemaPermManagementMode) {
+func (k *MockCredentialSchemaKeeper) CreateMockCredentialSchema(id uint64, issuerMode cstypes.IssuerOnboardingMode, verifierMode cstypes.VerifierOnboardingMode) {
 	k.credentialSchemas[id] = cstypes.CredentialSchema{
-		Id:                         id,
-		IssuerPermManagementMode:   issuerPermMode,
-		VerifierPermManagementMode: verifierPermMode,
+		Id:                     id,
+		IssuerOnboardingMode:   issuerMode,
+		VerifierOnboardingMode: verifierMode,
 	}
 }
 
 func (k *MockCredentialSchemaKeeper) CreateMockCredentialSchemaFull(cs cstypes.CredentialSchema) {
 	k.credentialSchemas[cs.Id] = cs
+}
+
+// MockDigestKeeper is a permissive mock of the DigestKeeper interface for
+// perm module tests. It records each call so assertions can verify that
+// perm invoked StoreDigestModuleCall during credential-issuance flows.
+type MockDigestKeeper struct {
+	Stored []MockDigestRecord
+}
+
+type MockDigestRecord struct {
+	Authority       string
+	Digest          string
+	DigestAlgorithm string
+}
+
+func (m *MockDigestKeeper) StoreDigestModuleCall(_ context.Context, authority, digest, digestAlgorithm string) error {
+	m.Stored = append(m.Stored, MockDigestRecord{Authority: authority, Digest: digest, DigestAlgorithm: digestAlgorithm})
+	return nil
 }

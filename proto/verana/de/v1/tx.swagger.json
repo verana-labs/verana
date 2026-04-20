@@ -37,7 +37,7 @@
         "parameters": [
           {
             "name": "body",
-            "description": "[MOD-DE-MSG-3] MsgGrantOperatorAuthorization grants an operator authorization\nto a grantee on behalf of an authority.",
+            "description": "[MOD-DE-MSG-3] MsgGrantOperatorAuthorization grants an operator authorization\nto a grantee on behalf of a corporation.\n\nSigner semantics (spec draft 13 \"corporation + operator OR group proposal\"):\n- Primary signer is `corporation` — either a group policy address (group\n  proposal path) or a plain account that delegates to the corporation.\n- When `operator` is non-empty, the AUTHZ-CHECK in the handler verifies\n  the operator's delegation from the corporation covers this message type.\n- When `operator` is empty, the corporation is acting alone (group proposal\n  path) and AUTHZ-CHECK is skipped.\nCosmos SDK requires a single `cosmos.msg.v1.signer` field so the dual-signer\nsemantics from the spec are enforced at the handler level, not at ante.",
             "in": "body",
             "required": true,
             "schema": {
@@ -71,7 +71,7 @@
         "parameters": [
           {
             "name": "body",
-            "description": "[MOD-DE-MSG-4] MsgRevokeOperatorAuthorization revokes an operator\nauthorization for a grantee on behalf of an authority.",
+            "description": "[MOD-DE-MSG-4] MsgRevokeOperatorAuthorization revokes an operator\nauthorization for a grantee on behalf of a corporation. Same signer\nsemantics as MsgGrantOperatorAuthorization (see above).",
             "in": "body",
             "required": true,
             "schema": {
@@ -163,13 +163,13 @@
     "verana.de.v1.MsgGrantOperatorAuthorization": {
       "type": "object",
       "properties": {
-        "authority": {
+        "corporation": {
           "type": "string",
-          "description": "authority is the group account granting the authorization."
+          "description": "corporation is the group account granting the authorization."
         },
         "operator": {
           "type": "string",
-          "description": "operator is the optional account authorized by the authority to run this\nMsg."
+          "description": "operator is the optional account authorized by the corporation to run this\nMsg on its behalf. Empty when the message is signed directly by the\ncorporation via a group proposal."
         },
         "grantee": {
           "type": "string",
@@ -214,9 +214,17 @@
         "feegrant_spend_limit_period": {
           "type": "string",
           "description": "feegrant_spend_limit_period is the optional reset period for\nfeegrant_spend_limit. Ignored if with_feegrant is false."
+        },
+        "fee_spend_limit": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
+          },
+          "description": "fee_spend_limit is the maximum total amount of fees this authorization\nallows the grantee to spend (stored on the OperatorAuthorization record)."
         }
       },
-      "description": "[MOD-DE-MSG-3] MsgGrantOperatorAuthorization grants an operator authorization\nto a grantee on behalf of an authority."
+      "description": "[MOD-DE-MSG-3] MsgGrantOperatorAuthorization grants an operator authorization\nto a grantee on behalf of a corporation.\n\nSigner semantics (spec draft 13 \"corporation + operator OR group proposal\"):\n- Primary signer is `corporation` — either a group policy address (group\n  proposal path) or a plain account that delegates to the corporation.\n- When `operator` is non-empty, the AUTHZ-CHECK in the handler verifies\n  the operator's delegation from the corporation covers this message type.\n- When `operator` is empty, the corporation is acting alone (group proposal\n  path) and AUTHZ-CHECK is skipped.\nCosmos SDK requires a single `cosmos.msg.v1.signer` field so the dual-signer\nsemantics from the spec are enforced at the handler level, not at ante."
     },
     "verana.de.v1.MsgGrantOperatorAuthorizationResponse": {
       "type": "object",
@@ -225,20 +233,20 @@
     "verana.de.v1.MsgRevokeOperatorAuthorization": {
       "type": "object",
       "properties": {
-        "authority": {
+        "corporation": {
           "type": "string",
-          "description": "authority is the group account revoking the authorization."
+          "description": "corporation is the group account revoking the authorization."
         },
         "operator": {
           "type": "string",
-          "description": "operator is the optional account authorized by the authority to run this\nMsg."
+          "description": "operator is the optional account authorized by the corporation to run this\nMsg on its behalf."
         },
         "grantee": {
           "type": "string",
           "description": "grantee is the account whose authorization is being revoked."
         }
       },
-      "description": "[MOD-DE-MSG-4] MsgRevokeOperatorAuthorization revokes an operator\nauthorization for a grantee on behalf of an authority."
+      "description": "[MOD-DE-MSG-4] MsgRevokeOperatorAuthorization revokes an operator\nauthorization for a grantee on behalf of a corporation. Same signer\nsemantics as MsgGrantOperatorAuthorization (see above)."
     },
     "verana.de.v1.MsgRevokeOperatorAuthorizationResponse": {
       "type": "object",

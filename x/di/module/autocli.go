@@ -38,12 +38,13 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 				},
 				{
 					RpcMethod: "StoreDigest",
-					Use:       "store-digest [authority] [digest]",
+					Use:       "store-digest [authority] [digest] [digest_algorithm]",
 					Short:     "Store a digest on behalf of a corporation",
 					Long:      "[MOD-DI-MSG-1] Store Digest. The operator (--from) stores a digest on behalf of the authority (corporation).",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{ProtoField: "authority"},
 						{ProtoField: "digest"},
+						{ProtoField: "digest_algorithm"},
 					},
 				},
 				// this line is used by ignite scaffolding # autocli/tx

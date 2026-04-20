@@ -12,89 +12,69 @@ import (
 // ValidateBasic performs stateless validation of MsgCreateTrustRegistry
 // [MOD-TR-MSG-1-2-1] Create New Trust Registry basic checks
 func (msg *MsgCreateTrustRegistry) ValidateBasic() error {
-	// Check mandatory parameters
 	if msg.Did == "" || msg.Language == "" || msg.DocUrl == "" || msg.DocDigestSri == "" {
 		return fmt.Errorf("missing mandatory parameter")
 	}
 
-	// Validate authority address (group account)
-	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
-		return sdkerrors.ErrInvalidAddress.Wrapf("invalid authority address: %s", err)
+	if _, err := sdk.AccAddressFromBech32(msg.Corporation); err != nil {
+		return sdkerrors.ErrInvalidAddress.Wrapf("invalid corporation address: %s", err)
 	}
 
-	// Validate operator address (signer authorized by authority)
 	if _, err := sdk.AccAddressFromBech32(msg.Operator); err != nil {
 		return sdkerrors.ErrInvalidAddress.Wrapf("invalid operator address: %s", err)
 	}
 
-	// DID syntax validation - must conform to DID-CORE spec
 	if !isValidDID(msg.Did) {
 		return fmt.Errorf("invalid DID syntax")
 	}
 
-	// Validate AKA URI if present - must be a valid URI
 	if msg.Aka != "" && !isValidURI(msg.Aka) {
 		return fmt.Errorf("invalid AKA URI")
 	}
 
-	// Validate language tag (RFC1766, max 17 chars)
-	if !isValidLanguageTagForCreateTrustRegistry(msg.Language) {
-		return fmt.Errorf("invalid language tag (must conform to RFC 1766 and be 2 characters long)")
+	if !isValidBCP47(msg.Language) {
+		return fmt.Errorf("invalid language tag (must be a valid BCP 47 tag)")
 	}
 
-	// Validate URL
-	if !isValidURL(msg.DocUrl) {
-		return fmt.Errorf("invalid document URL")
+	// [MOD-TR-MSG-1-2-1] doc_url must be a valid http/https URL.
+	u, err := url.ParseRequestURI(msg.DocUrl)
+	if err != nil || (u.Scheme != "http" && u.Scheme != "https") {
+		return fmt.Errorf("doc_url must be a valid http/https URL")
 	}
 
-	// Validate document digest sri
+	// [MOD-TR-MSG-1-2-1] doc_digest_sri must be a valid SRI string.
 	if !isValidDigestSRI(msg.DocDigestSri) {
-		return fmt.Errorf("invalid document digest sri")
+		return fmt.Errorf("invalid doc_digest_sri")
 	}
 
 	return nil
 }
 
-func isValidLanguageTagForCreateTrustRegistry(lang string) bool {
-	// RFC1766 primary tag must be exactly 2 letters
-	if len(lang) > 17 || len(lang) < 2 {
-		return false
-	}
-	// Must be lowercase letters only
-	match, _ := regexp.MatchString(`^[a-z]{2}$`, lang[:2]) // Check only the first two characters
-	return match
-}
-
 // ValidateBasic performs stateless validation of MsgAddGovernanceFrameworkDocument
 // [MOD-TR-MSG-2-2-1] Add Governance Framework Document basic checks
 func (msg *MsgAddGovernanceFrameworkDocument) ValidateBasic() error {
-	// Check mandatory parameters
-	if msg.Id == 0 || msg.DocLanguage == "" || msg.DocUrl == "" || msg.DocDigestSri == "" || msg.Version == 0 {
+	if msg.TrId == 0 || msg.Language == "" || msg.Url == "" || msg.DigestSri == "" || msg.Version == 0 {
 		return fmt.Errorf("missing mandatory parameter")
 	}
 
-	// Validate authority address (group account)
-	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
-		return sdkerrors.ErrInvalidAddress.Wrapf("invalid authority address: %s", err)
+	if _, err := sdk.AccAddressFromBech32(msg.Corporation); err != nil {
+		return sdkerrors.ErrInvalidAddress.Wrapf("invalid corporation address: %s", err)
 	}
 
-	// Validate operator address (signer authorized by authority)
 	if _, err := sdk.AccAddressFromBech32(msg.Operator); err != nil {
 		return sdkerrors.ErrInvalidAddress.Wrapf("invalid operator address: %s", err)
 	}
 
-	// Language tag validation (RFC1766)
-	if !isValidLanguageTag(msg.DocLanguage) {
-		return fmt.Errorf("invalid language tag (must conform to rfc1766)")
+	if !isValidBCP47(msg.Language) {
+		return fmt.Errorf("invalid language tag (must be a valid BCP 47 tag)")
 	}
 
-	// Validate URL
-	if _, err := url.Parse(msg.DocUrl); err != nil {
-		return fmt.Errorf("invalid document URL")
+	u, err := url.ParseRequestURI(msg.Url)
+	if err != nil || (u.Scheme != "http" && u.Scheme != "https") {
+		return fmt.Errorf("url must be a valid http/https URL")
 	}
 
-	// Validate document digest sri
-	if !isValidDigestSRI(msg.DocDigestSri) {
+	if !isValidDigestSRI(msg.DigestSri) {
 		return fmt.Errorf("invalid document digest sri")
 	}
 
@@ -104,20 +84,18 @@ func (msg *MsgAddGovernanceFrameworkDocument) ValidateBasic() error {
 // ValidateBasic performs stateless validation of MsgIncreaseActiveGovernanceFrameworkVersion
 // [MOD-TR-MSG-3-2-1] Increase Active Governance Framework Version basic checks
 func (msg *MsgIncreaseActiveGovernanceFrameworkVersion) ValidateBasic() error {
-	// Validate authority address (group account)
-	if msg.Authority == "" {
-		return fmt.Errorf("authority address is required")
+	if msg.Corporation == "" {
+		return fmt.Errorf("corporation address is required")
 	}
-	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
-		return sdkerrors.ErrInvalidAddress.Wrapf("invalid authority address: %s", err)
+	if _, err := sdk.AccAddressFromBech32(msg.Corporation); err != nil {
+		return sdkerrors.ErrInvalidAddress.Wrapf("invalid corporation address: %s", err)
 	}
 
-	// Validate operator address (signer authorized by authority)
 	if _, err := sdk.AccAddressFromBech32(msg.Operator); err != nil {
 		return sdkerrors.ErrInvalidAddress.Wrapf("invalid operator address: %s", err)
 	}
 
-	if msg.Id == 0 {
+	if msg.TrId == 0 {
 		return fmt.Errorf("trust registry id is required")
 	}
 
@@ -127,15 +105,13 @@ func (msg *MsgIncreaseActiveGovernanceFrameworkVersion) ValidateBasic() error {
 // ValidateBasic performs stateless validation of MsgUpdateTrustRegistry
 // [MOD-TR-MSG-4-2-1] Update Trust Registry basic checks
 func (msg *MsgUpdateTrustRegistry) ValidateBasic() error {
-	// Validate authority address (group account)
-	if msg.Authority == "" {
-		return fmt.Errorf("authority address is required")
+	if msg.Corporation == "" {
+		return fmt.Errorf("corporation address is required")
 	}
-	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
-		return sdkerrors.ErrInvalidAddress.Wrapf("invalid authority address: %s", err)
+	if _, err := sdk.AccAddressFromBech32(msg.Corporation); err != nil {
+		return sdkerrors.ErrInvalidAddress.Wrapf("invalid corporation address: %s", err)
 	}
 
-	// Validate operator address (signer authorized by authority)
 	if msg.Operator == "" {
 		return fmt.Errorf("operator address is required")
 	}
@@ -143,16 +119,22 @@ func (msg *MsgUpdateTrustRegistry) ValidateBasic() error {
 		return sdkerrors.ErrInvalidAddress.Wrapf("invalid operator address: %s", err)
 	}
 
-	if msg.Id == 0 {
+	if msg.TrId == 0 {
 		return fmt.Errorf("trust registry id is required")
 	}
 
+	// [MOD-TR-MSG-4-1] did is mandatory per spec draft 13.
 	if msg.Did == "" {
 		return fmt.Errorf("did is required")
 	}
-
 	if !isValidDID(msg.Did) {
-		return fmt.Errorf("invalid did")
+		return fmt.Errorf("invalid DID format")
+	}
+
+	if msg.Aka != "" {
+		if !isValidURI(msg.Aka) {
+			return fmt.Errorf("aka must be a valid URI")
+		}
 	}
 
 	return nil
@@ -161,43 +143,28 @@ func (msg *MsgUpdateTrustRegistry) ValidateBasic() error {
 // ValidateBasic performs stateless validation of MsgArchiveTrustRegistry
 // [MOD-TR-MSG-5-2-1] Archive Trust Registry basic checks
 func (msg *MsgArchiveTrustRegistry) ValidateBasic() error {
-	// Validate authority address (group account)
-	if msg.Authority == "" {
-		return fmt.Errorf("authority address is required")
+	if msg.Corporation == "" {
+		return fmt.Errorf("corporation address is required")
 	}
-	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
-		return sdkerrors.ErrInvalidAddress.Wrapf("invalid authority address: %s", err)
+	if _, err := sdk.AccAddressFromBech32(msg.Corporation); err != nil {
+		return sdkerrors.ErrInvalidAddress.Wrapf("invalid corporation address: %s", err)
 	}
 
-	// Validate operator address (signer authorized by authority)
 	if _, err := sdk.AccAddressFromBech32(msg.Operator); err != nil {
 		return sdkerrors.ErrInvalidAddress.Wrapf("invalid operator address: %s", err)
 	}
 
-	if msg.Id == 0 {
+	if msg.TrId == 0 {
 		return fmt.Errorf("trust registry id is required")
 	}
 
 	return nil
 }
 
-// Helper functions
 func isValidDID(did string) bool {
-	// DID validation regex following W3C DID specification
-	// Format: did:<method-name>:<method-specific-id>
-	// Method-specific-id can contain alphanumeric, dots, underscores, hyphens, colons, and slashes
-	didRegex := regexp.MustCompile(`^did:[a-zA-Z0-9]+:[a-zA-Z0-9._:/-]+$`)
-	return didRegex.MatchString(did)
-}
-
-func isValidLanguageTag(lang string) bool {
-	// RFC1766 primary tag must be exactly 2 letters
-	if len(lang) != 2 {
-		return false
-	}
-	// Must be lowercase letters only
-	match, _ := regexp.MatchString(`^[a-z]{2}$`, lang)
-	return match
+	// Simplified but correct DID syntax: did:method:method-specific-id
+	re := regexp.MustCompile(`^did:[a-zA-Z0-9-]+:[a-zA-Z0-9._:/-]+(#[^\s]*)?(\?[^\s]*)?$`)
+	return re.MatchString(did)
 }
 
 func isValidURI(uri string) bool {
@@ -205,13 +172,7 @@ func isValidURI(uri string) bool {
 	return err == nil
 }
 
-func isValidURL(urlStr string) bool {
-	_, err := url.ParseRequestURI(urlStr)
-	return err == nil
-}
-
 func isValidDigestSRI(digestSRI string) bool {
-	// sha256-[base64], sha384-[base64], or sha512-[base64]
 	sriRegex := regexp.MustCompile(`^(sha256|sha384|sha512)-[A-Za-z0-9+/]+[=]{0,2}$`)
 	return sriRegex.MatchString(digestSRI)
 }

@@ -27,7 +27,9 @@ import {
   OptionalUInt32,
 } from "../../../src/codec/verana/cs/v1/tx";
 import {
-  CredentialSchemaPermManagementMode,
+  IssuerOnboardingMode,
+  VerifierOnboardingMode,
+  HolderOnboardingMode,
   PricingAssetType,
 } from "../../../src/codec/verana/cs/v1/types";
 import { getCsAuthzSetup, saveCsActiveTR, saveActiveCS } from "../helpers/journeyResults";
@@ -111,12 +113,12 @@ async function main() {
   const trMsg = {
     typeUrl: typeUrls.MsgCreateTrustRegistry,
     value: MsgCreateTrustRegistry.fromPartial({
-      authority: setup.authorityAddress,
+      corporation: setup.authorityAddress,
       operator: account.address,
       did: trDid,
       aka: trAka,
       language: "en",
-      docUrl: "https://example.com/cs-governance-framework.pdf",
+      docUrl: "http://cs-ts-proto-test-trust-registry.com/doc-v1",
       docDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
     }),
   };
@@ -183,7 +185,7 @@ async function main() {
   const csMsg = {
     typeUrl: typeUrls.MsgCreateCredentialSchema,
     value: MsgCreateCredentialSchema.fromPartial({
-      authority: setup.authorityAddress,
+      corporation: setup.authorityAddress,
       operator: account.address,
       trId: trId!,
       jsonSchema: jsonSchema,
@@ -192,8 +194,9 @@ async function main() {
       issuerValidationValidityPeriod: OptionalUInt32.fromPartial({ value: 0 }),
       verifierValidationValidityPeriod: OptionalUInt32.fromPartial({ value: 0 }),
       holderValidationValidityPeriod: OptionalUInt32.fromPartial({ value: 0 }),
-      issuerPermManagementMode: CredentialSchemaPermManagementMode.GRANTOR_VALIDATION,
-      verifierPermManagementMode: CredentialSchemaPermManagementMode.OPEN,
+      issuerOnboardingMode: IssuerOnboardingMode.ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS,
+      verifierOnboardingMode: VerifierOnboardingMode.VERIFIER_ONBOARDING_MODE_OPEN,
+      holderOnboardingMode: HolderOnboardingMode.HOLDER_ONBOARDING_MODE_PERMISSIONLESS,
       pricingAssetType: PricingAssetType.TU,
       pricingAsset: "tu",
       digestAlgorithm: "sha256",

@@ -65,7 +65,6 @@ export interface QueryFindPermissionsWithDIDRequest {
   did: string;
   type: number;
   schemaId: number;
-  country: string;
   when: Date | undefined;
 }
 
@@ -703,7 +702,7 @@ export const QueryListPermissionSessionsResponse = {
 };
 
 function createBaseQueryFindPermissionsWithDIDRequest(): QueryFindPermissionsWithDIDRequest {
-  return { did: "", type: 0, schemaId: 0, country: "", when: undefined };
+  return { did: "", type: 0, schemaId: 0, when: undefined };
 }
 
 export const QueryFindPermissionsWithDIDRequest = {
@@ -716,9 +715,6 @@ export const QueryFindPermissionsWithDIDRequest = {
     }
     if (message.schemaId !== 0) {
       writer.uint32(24).uint64(message.schemaId);
-    }
-    if (message.country !== "") {
-      writer.uint32(34).string(message.country);
     }
     if (message.when !== undefined) {
       Timestamp.encode(toTimestamp(message.when), writer.uint32(42).fork()).ldelim();
@@ -754,13 +750,6 @@ export const QueryFindPermissionsWithDIDRequest = {
 
           message.schemaId = longToNumber(reader.uint64() as Long);
           continue;
-        case 4:
-          if (tag !== 34) {
-            break;
-          }
-
-          message.country = reader.string();
-          continue;
         case 5:
           if (tag !== 42) {
             break;
@@ -782,7 +771,6 @@ export const QueryFindPermissionsWithDIDRequest = {
       did: isSet(object.did) ? globalThis.String(object.did) : "",
       type: isSet(object.type) ? globalThis.Number(object.type) : 0,
       schemaId: isSet(object.schemaId) ? globalThis.Number(object.schemaId) : 0,
-      country: isSet(object.country) ? globalThis.String(object.country) : "",
       when: isSet(object.when) ? fromJsonTimestamp(object.when) : undefined,
     };
   },
@@ -797,9 +785,6 @@ export const QueryFindPermissionsWithDIDRequest = {
     }
     if (message.schemaId !== 0) {
       obj.schemaId = Math.round(message.schemaId);
-    }
-    if (message.country !== "") {
-      obj.country = message.country;
     }
     if (message.when !== undefined) {
       obj.when = message.when.toISOString();
@@ -819,7 +804,6 @@ export const QueryFindPermissionsWithDIDRequest = {
     message.did = object.did ?? "";
     message.type = object.type ?? 0;
     message.schemaId = object.schemaId ?? 0;
-    message.country = object.country ?? "";
     message.when = object.when ?? undefined;
     return message;
   },

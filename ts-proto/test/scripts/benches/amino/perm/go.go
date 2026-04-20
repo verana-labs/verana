@@ -35,8 +35,8 @@ func main() {
 	effectiveUntil := time.Date(2025, 12, 31, 0, 0, 0, 123000000, time.UTC)
 
 	address := "verana16mzeyu9l6kua2cdg9x0jk5g6e7h0kk8q6uadu4"
-	msg := &permtypes.MsgCreatePermission{
-		Authority:        address,
+	msg := &permtypes.MsgSelfCreatePermission{
+		Corporation:      address,
 		Operator:         address,
 		Type:             permtypes.PermissionType_VERIFIER,
 		ValidatorPermId:  1,
@@ -151,17 +151,19 @@ func buildClientSignBytes(address string, accountNumber, sequence uint64) []byte
 		},
 		"msgs": []map[string]any{
 			{
-				"type": "/perm/v1/create-perm",
+				"type": "/perm/v1/self-create-perm",
 				"value": map[string]any{
-					"creator":           address,
-					"schema_id":         "1",
-					"type":              2,
-					"did":               "did:verana:test:bench",
-					"country":           "US",
-					"effective_from":    "2025-01-01T00:00:00.123Z",
-					"effective_until":   "2025-12-31T00:00:00.123Z",
-					"verification_fees": "0",
-					"validation_fees":   "0",
+					"corporation":                       address,
+					"operator":                          address,
+					"type":                              2,
+					"validator_perm_id":                 "1",
+					"did":                               "did:verana:test:bench",
+					"effective_from":                    "2025-01-01T00:00:00.123Z",
+					"effective_until":                   "2025-12-31T00:00:00.123Z",
+					"verification_fees":                 "0",
+					"validation_fees":                   "0",
+					"vs_operator_authz_spend_limit":     []any{},
+					"vs_operator_authz_fee_spend_limit": []any{},
 				},
 			},
 		},

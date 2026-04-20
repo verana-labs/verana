@@ -41,8 +41,8 @@ service Msg {
   // UpdateExchangeRate defines an operator operation for updating an exchange rate.
   rpc UpdateExchangeRate(MsgUpdateExchangeRate) returns (MsgUpdateExchangeRateResponse);
 
-  // ToggleExchangeRateState defines a governance operation for enabling or disabling an exchange rate.
-  rpc ToggleExchangeRateState(MsgToggleExchangeRateState) returns (MsgToggleExchangeRateStateResponse);
+  // SetExchangeRateState defines a governance operation for enabling or disabling an exchange rate.
+  rpc SetExchangeRateState(MsgSetExchangeRateState) returns (MsgSetExchangeRateStateResponse);
 }
 
 // MsgCreateExchangeRate is the Msg/CreateExchangeRate request type.
@@ -60,6 +60,7 @@ message MsgCreateExchangeRate {
   string rate = 6;
   uint32 rate_scale = 7;
   google.protobuf.Duration validity_duration = 8 [(gogoproto.nullable) = false, (gogoproto.stdduration) = true];
+  bool state = 9;
 }
 
 // MsgCreateExchangeRateResponse defines the response for MsgCreateExchangeRate.
@@ -83,6 +84,15 @@ message MsgUpdateExchangeRate {
 
   // rate is the new exchange rate value.
   string rate = 4;
+
+  // rate_scale is the new scale for the rate (if 0, existing scale is kept).
+  uint32 rate_scale = 5;
+
+  // validity_duration is the new validity duration (optional; if nil, existing duration is kept).
+  google.protobuf.Duration validity_duration = 6 [
+    (gogoproto.stdduration) = true,
+    (gogoproto.nullable) = true
+  ];
 }
 
 // MsgUpdateExchangeRateResponse defines the response for MsgUpdateExchangeRate.
@@ -105,10 +115,10 @@ message MsgUpdateParams {
   ];
 }
 
-// MsgToggleExchangeRateState is the Msg/ToggleExchangeRateState request type.
-message MsgToggleExchangeRateState {
+// MsgSetExchangeRateState is the Msg/SetExchangeRateState request type.
+message MsgSetExchangeRateState {
   option (cosmos.msg.v1.signer) = "authority";
-  option (amino.name) = "verana/x/xr/MsgToggleExchangeRateState";
+  option (amino.name) = "verana/x/xr/MsgSetExchangeRateState";
 
   // authority is the address that controls the module (defaults to x/gov unless overwritten).
   string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
@@ -120,8 +130,8 @@ message MsgToggleExchangeRateState {
   bool state = 3;
 }
 
-// MsgToggleExchangeRateStateResponse defines the response for MsgToggleExchangeRateState.
-message MsgToggleExchangeRateStateResponse {}
+// MsgSetExchangeRateStateResponse defines the response for MsgSetExchangeRateState.
+message MsgSetExchangeRateStateResponse {}
 
 // MsgUpdateParamsResponse defines the response structure for executing a
 // MsgUpdateParams message.

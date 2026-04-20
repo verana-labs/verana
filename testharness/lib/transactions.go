@@ -21,7 +21,6 @@ import (
 
 // SendBankTransaction sends tokens from one account to another
 func SendBankTransaction(client cosmosclient.Client, ctx context.Context, fromAddress, toAddress string, amount math.Int) error {
-	// Get account from the keyring
 	account, err := client.Account(fromAddress)
 	if err != nil {
 		log.Fatal(err)
@@ -35,24 +34,24 @@ func SendBankTransaction(client cosmosclient.Client, ctx context.Context, fromAd
 		log.Fatal(err)
 	}
 
-	// Print response from broadcasting a transaction
 	fmt.Print("SendBankTransaction:\n\n")
 	fmt.Println(txResp)
 
 	return nil
 }
 
-// CreateTrustRegistry creates a new trust registry
+// CreateTrustRegistry creates a new trust registry.
+// Spec draft 13: MsgCreateTrustRegistry seeds the registry, an active v1
+// governance framework version, AND the initial GF document from docURL +
+// docHash in the registry's default language.
 func CreateTrustRegistry(client cosmosclient.Client, ctx context.Context, creator cosmosaccount.Account, did, aka, docURL, docHash, language string) (string, error) {
 	addr, err := creator.Address(addressPrefix)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// Define a message to create a post
-	// For v4 spec, authority and operator are both the creator's address
 	msg := &types.MsgCreateTrustRegistry{
-		Authority:    addr,
+		Corporation:  addr,
 		Operator:     addr,
 		Did:          did,
 		Aka:          aka,
@@ -61,13 +60,11 @@ func CreateTrustRegistry(client cosmosclient.Client, ctx context.Context, creato
 		DocDigestSri: docHash,
 	}
 
-	// Broadcast a transaction from account `cooluser` with the message
 	txResp, err := client.BroadcastTx(ctx, creator, msg)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// Print response from broadcasting a transaction
 	fmt.Print("MsgCreateTrustRegistry:\n\n")
 	fmt.Println(txResp)
 
@@ -96,7 +93,6 @@ func CreateTrustRegistry(client cosmosclient.Client, ctx context.Context, creato
 
 // SubmitProposal submits a governance proposal
 func SubmitProposal(client cosmosclient.Client, ctx context.Context, proposer cosmosaccount.Account, proposalFile string) error {
-	// Read proposal file
 	proposalData, err := os.ReadFile(proposalFile)
 	if err != nil {
 		log.Fatal(err)
@@ -127,7 +123,6 @@ func SubmitProposal(client cosmosclient.Client, ctx context.Context, proposer co
 		log.Fatal(err)
 	}
 
-	// Print response from broadcasting a transaction
 	fmt.Print("SubmitProposal:\n\n")
 	prettyJSON := PrettyJSON(client, txResp)
 	fmt.Println(prettyJSON)
@@ -137,7 +132,6 @@ func SubmitProposal(client cosmosclient.Client, ctx context.Context, proposer co
 
 // VoteOnProposal votes on a governance proposal
 func VoteOnProposal(client cosmosclient.Client, ctx context.Context, voter cosmosaccount.Account, proposalID uint64, voteOption string) error {
-	// Create a vote message
 	voterAddr, err := voter.Address(addressPrefix)
 	if err != nil {
 		log.Fatal(err)
@@ -148,13 +142,11 @@ func VoteOnProposal(client cosmosclient.Client, ctx context.Context, voter cosmo
 		Option:     govtypes.VoteOption(govtypes.VoteOption_value[voteOption]),
 	}
 
-	// Broadcast the vote transaction
 	txResp, err := client.BroadcastTx(ctx, voter, msg)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// Print response from broadcasting the transaction
 	fmt.Print("VoteOnProposal:\n\n")
 	prettyJSON := PrettyJSON(client, txResp)
 	fmt.Println(prettyJSON)
@@ -169,17 +161,13 @@ func CreateCredentialSchema(client cosmosclient.Client, ctx context.Context, cre
 		log.Fatal(err)
 	}
 
-	// Create message with all required fields
-	// Validity period fields are mandatory - use 0 if not specified
-	// For v4 spec, authority and operator are both the creator's address
 	msg := &cschema.MsgCreateCredentialSchema{
-		Authority:  creatorAddr,
-		Operator:   creatorAddr,
-		TrId:       override.TrId,
-		JsonSchema: override.JsonSchema,
+		Corporation: creatorAddr,
+		Operator:    creatorAddr,
+		TrId:        override.TrId,
+		JsonSchema:  override.JsonSchema,
 	}
 
-	// Set validity period fields - use values from override if provided, otherwise 0
 	var issuerGrantorValidity uint32 = 0
 	var verifierGrantorValidity uint32 = 0
 	var issuerValidity uint32 = 0
@@ -202,28 +190,16 @@ func CreateCredentialSchema(client cosmosclient.Client, ctx context.Context, cre
 		holderValidity = override.HolderValidationValidityPeriod.Value
 	}
 
-	// Always set the OptionalUInt32 fields (mandatory in new version)
-	msg.IssuerGrantorValidationValidityPeriod = &cschema.OptionalUInt32{
-		Value: issuerGrantorValidity,
-	}
-	msg.VerifierGrantorValidationValidityPeriod = &cschema.OptionalUInt32{
-		Value: verifierGrantorValidity,
-	}
-	msg.IssuerValidationValidityPeriod = &cschema.OptionalUInt32{
-		Value: issuerValidity,
-	}
-	msg.VerifierValidationValidityPeriod = &cschema.OptionalUInt32{
-		Value: verifierValidity,
-	}
-	msg.HolderValidationValidityPeriod = &cschema.OptionalUInt32{
-		Value: holderValidity,
-	}
+	msg.IssuerGrantorValidationValidityPeriod = &cschema.OptionalUInt32{Value: issuerGrantorValidity}
+	msg.VerifierGrantorValidationValidityPeriod = &cschema.OptionalUInt32{Value: verifierGrantorValidity}
+	msg.IssuerValidationValidityPeriod = &cschema.OptionalUInt32{Value: issuerValidity}
+	msg.VerifierValidationValidityPeriod = &cschema.OptionalUInt32{Value: verifierValidity}
+	msg.HolderValidationValidityPeriod = &cschema.OptionalUInt32{Value: holderValidity}
 
-	// Set permission management modes
-	msg.IssuerPermManagementMode = override.IssuerPermManagementMode
-	msg.VerifierPermManagementMode = override.VerifierPermManagementMode
+	msg.IssuerOnboardingMode = override.IssuerOnboardingMode
+	msg.VerifierOnboardingMode = override.VerifierOnboardingMode
+	msg.HolderOnboardingMode = override.HolderOnboardingMode
 
-	// Set pricing and digest fields
 	msg.PricingAssetType = override.PricingAssetType
 	msg.PricingAsset = override.PricingAsset
 	msg.DigestAlgorithm = override.DigestAlgorithm
@@ -233,7 +209,6 @@ func CreateCredentialSchema(client cosmosclient.Client, ctx context.Context, cre
 		log.Fatal(err)
 	}
 
-	// Print response from broadcasting a transaction
 	fmt.Print("CreateCredentialSchema:\n\n")
 	fmt.Println(txResp)
 
@@ -267,9 +242,18 @@ func CreateRootPermission(client cosmosclient.Client, ctx context.Context, creat
 		log.Fatal(err)
 	}
 
-	// Start with an empty struct and set only the defined attributes from override
+	// [MOD-PERM-MSG-7-1] spec v4 draft 13 mandates permission_type and vs_operator.
+	// Use override.PermissionType if set; default to ECOSYSTEM for grantor-root semantic.
+	permType := override.PermissionType
+	if permType == permtypes.PermissionType_UNSPECIFIED {
+		permType = permtypes.PermissionType_ECOSYSTEM
+	}
+	vsOp := override.VsOperator
+	if vsOp == "" {
+		vsOp = creatorAddr
+	}
 	msg := &permtypes.MsgCreateRootPermission{
-		Authority:        creatorAddr,
+		Corporation:      creatorAddr,
 		Operator:         creatorAddr,
 		SchemaId:         override.SchemaId,
 		Did:              override.Did,
@@ -278,19 +262,8 @@ func CreateRootPermission(client cosmosclient.Client, ctx context.Context, creat
 		ValidationFees:   override.ValidationFees,
 		VerificationFees: override.VerificationFees,
 		IssuanceFees:     override.IssuanceFees,
-	}
-
-	if override.Did != "" {
-		msg.Did = override.Did
-	}
-	if override.ValidationFees != 0 {
-		msg.ValidationFees = override.ValidationFees
-	}
-	if override.IssuanceFees != 0 {
-		msg.IssuanceFees = override.IssuanceFees
-	}
-	if override.VerificationFees != 0 {
-		msg.VerificationFees = override.VerificationFees
+		PermissionType:   permType,
+		VsOperator:       vsOp,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, creator, msg)
@@ -298,7 +271,6 @@ func CreateRootPermission(client cosmosclient.Client, ctx context.Context, creat
 		log.Fatal(err)
 	}
 
-	// Print response from broadcasting a transaction
 	fmt.Print("CreatePermission:\n\n")
 	fmt.Println(txResp)
 
@@ -332,9 +304,8 @@ func StartPermissionVP(client cosmosclient.Client, ctx context.Context, creator 
 		log.Fatal(err)
 	}
 
-	// Start with an empty struct and set only the defined attributes from override
 	msg := &permtypes.MsgStartPermissionVP{
-		Authority:                    override.Authority,
+		Corporation:                  override.Corporation,
 		Operator:                     creatorAddr,
 		Type:                         override.Type,
 		Did:                          override.Did,
@@ -349,21 +320,15 @@ func StartPermissionVP(client cosmosclient.Client, ctx context.Context, creator 
 		VsOperatorAuthzFeeSpendLimit: override.VsOperatorAuthzFeeSpendLimit,
 		VsOperatorAuthzSpendPeriod:   override.VsOperatorAuthzSpendPeriod,
 	}
-	if msg.Authority == "" {
-		msg.Authority = creatorAddr
+	if msg.Corporation == "" {
+		msg.Corporation = creatorAddr
 	}
-
-	if override.Did != "" {
-		msg.Did = override.Did
-	}
-	// Optional fee fields are already set from override
 
 	txResp, err := client.BroadcastTx(ctx, creator, msg)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// Print response from broadcasting a transaction
 	fmt.Print("StartPermissionVP:\n\n")
 	fmt.Println(txResp)
 
@@ -397,24 +362,21 @@ func SetPermissionVPToValidated(client cosmosclient.Client, ctx context.Context,
 		log.Fatal(err)
 	}
 
-	// Create the message with authority/operator pattern
 	msg := &permtypes.MsgSetPermissionVPToValidated{
-		Authority:               override.Authority,
+		Corporation:             override.Corporation,
 		Operator:                creatorAddr,
 		Id:                      override.Id,
 		ValidationFees:          override.ValidationFees,
 		IssuanceFees:            override.IssuanceFees,
 		VerificationFees:        override.VerificationFees,
-		VpSummaryDigestSri:      override.VpSummaryDigestSri,
+		VpSummaryDigest:         override.VpSummaryDigest,
 		IssuanceFeeDiscount:     override.IssuanceFeeDiscount,
 		VerificationFeeDiscount: override.VerificationFeeDiscount,
 	}
-	if msg.Authority == "" {
-		msg.Authority = creatorAddr
+	if msg.Corporation == "" {
+		msg.Corporation = creatorAddr
 	}
 
-	// Only set EffectiveUntil if it's explicitly provided
-	// Let the blockchain calculate it otherwise
 	if override.EffectiveUntil != nil {
 		msg.EffectiveUntil = override.EffectiveUntil
 	}
@@ -424,11 +386,9 @@ func SetPermissionVPToValidated(client cosmosclient.Client, ctx context.Context,
 		return "", err
 	}
 
-	// Print response from broadcasting a transaction
 	fmt.Print("SetPermissionVPToValidated:\n\n")
 	fmt.Println(txResp)
 
-	// We don't need to extract any particular attribute here, just check success
 	if txResp.TxResponse.Code != 0 {
 		return "", fmt.Errorf("transaction failed with code %d: %s",
 			txResp.TxResponse.Code, txResp.TxResponse.RawLog)

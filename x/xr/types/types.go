@@ -104,8 +104,8 @@ func (msg *MsgUpdateExchangeRate) ValidateBasic() error {
 	return nil
 }
 
-// ValidateBasic performs stateless validation on MsgToggleExchangeRateState.
-func (msg *MsgToggleExchangeRateState) ValidateBasic() error {
+// ValidateBasic performs stateless validation on MsgSetExchangeRateState.
+func (msg *MsgSetExchangeRateState) ValidateBasic() error {
 	// Validate authority address
 	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
 		return fmt.Errorf("invalid authority address: %w", err)

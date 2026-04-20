@@ -11,51 +11,141 @@ import Long = require("long");
 
 export const protobufPackage = "verana.cs.v1";
 
-/** CredentialSchemaPermManagementMode defines how permissions are managed */
-export enum CredentialSchemaPermManagementMode {
-  /** MODE_UNSPECIFIED - Default to prevent accidental omission */
-  MODE_UNSPECIFIED = 0,
-  /** OPEN - Anyone can create their own permission */
-  OPEN = 1,
-  /** GRANTOR_VALIDATION - Requires validation from a grantor */
-  GRANTOR_VALIDATION = 2,
-  /** ECOSYSTEM - Requires validation from ecosystem (was TRUST_REGISTRY_VALIDATION) */
-  ECOSYSTEM = 3,
+/** IssuerOnboardingMode defines how issuers are onboarded for a credential schema. */
+export enum IssuerOnboardingMode {
+  ISSUER_ONBOARDING_MODE_UNSPECIFIED = 0,
+  /** ISSUER_ONBOARDING_MODE_OPEN - Anyone can self-create an issuer permission */
+  ISSUER_ONBOARDING_MODE_OPEN = 1,
+  /** ISSUER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS - Requires validation from ecosystem */
+  ISSUER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS = 2,
+  /** ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS - Requires validation from a grantor */
+  ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS = 3,
   UNRECOGNIZED = -1,
 }
 
-export function credentialSchemaPermManagementModeFromJSON(object: any): CredentialSchemaPermManagementMode {
+export function issuerOnboardingModeFromJSON(object: any): IssuerOnboardingMode {
   switch (object) {
     case 0:
-    case "MODE_UNSPECIFIED":
-      return CredentialSchemaPermManagementMode.MODE_UNSPECIFIED;
+    case "ISSUER_ONBOARDING_MODE_UNSPECIFIED":
+      return IssuerOnboardingMode.ISSUER_ONBOARDING_MODE_UNSPECIFIED;
     case 1:
-    case "OPEN":
-      return CredentialSchemaPermManagementMode.OPEN;
+    case "ISSUER_ONBOARDING_MODE_OPEN":
+      return IssuerOnboardingMode.ISSUER_ONBOARDING_MODE_OPEN;
     case 2:
-    case "GRANTOR_VALIDATION":
-      return CredentialSchemaPermManagementMode.GRANTOR_VALIDATION;
+    case "ISSUER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS":
+      return IssuerOnboardingMode.ISSUER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS;
     case 3:
-    case "ECOSYSTEM":
-      return CredentialSchemaPermManagementMode.ECOSYSTEM;
+    case "ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS":
+      return IssuerOnboardingMode.ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS;
     case -1:
     case "UNRECOGNIZED":
     default:
-      return CredentialSchemaPermManagementMode.UNRECOGNIZED;
+      return IssuerOnboardingMode.UNRECOGNIZED;
   }
 }
 
-export function credentialSchemaPermManagementModeToJSON(object: CredentialSchemaPermManagementMode): string {
+export function issuerOnboardingModeToJSON(object: IssuerOnboardingMode): string {
   switch (object) {
-    case CredentialSchemaPermManagementMode.MODE_UNSPECIFIED:
-      return "MODE_UNSPECIFIED";
-    case CredentialSchemaPermManagementMode.OPEN:
-      return "OPEN";
-    case CredentialSchemaPermManagementMode.GRANTOR_VALIDATION:
-      return "GRANTOR_VALIDATION";
-    case CredentialSchemaPermManagementMode.ECOSYSTEM:
-      return "ECOSYSTEM";
-    case CredentialSchemaPermManagementMode.UNRECOGNIZED:
+    case IssuerOnboardingMode.ISSUER_ONBOARDING_MODE_UNSPECIFIED:
+      return "ISSUER_ONBOARDING_MODE_UNSPECIFIED";
+    case IssuerOnboardingMode.ISSUER_ONBOARDING_MODE_OPEN:
+      return "ISSUER_ONBOARDING_MODE_OPEN";
+    case IssuerOnboardingMode.ISSUER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS:
+      return "ISSUER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS";
+    case IssuerOnboardingMode.ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS:
+      return "ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS";
+    case IssuerOnboardingMode.UNRECOGNIZED:
+    default:
+      return "UNRECOGNIZED";
+  }
+}
+
+/** VerifierOnboardingMode defines how verifiers are onboarded for a credential schema. */
+export enum VerifierOnboardingMode {
+  VERIFIER_ONBOARDING_MODE_UNSPECIFIED = 0,
+  /** VERIFIER_ONBOARDING_MODE_OPEN - Anyone can self-create a verifier permission */
+  VERIFIER_ONBOARDING_MODE_OPEN = 1,
+  /** VERIFIER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS - Requires validation from ecosystem */
+  VERIFIER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS = 2,
+  /** VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS - Requires validation from a grantor */
+  VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS = 3,
+  UNRECOGNIZED = -1,
+}
+
+export function verifierOnboardingModeFromJSON(object: any): VerifierOnboardingMode {
+  switch (object) {
+    case 0:
+    case "VERIFIER_ONBOARDING_MODE_UNSPECIFIED":
+      return VerifierOnboardingMode.VERIFIER_ONBOARDING_MODE_UNSPECIFIED;
+    case 1:
+    case "VERIFIER_ONBOARDING_MODE_OPEN":
+      return VerifierOnboardingMode.VERIFIER_ONBOARDING_MODE_OPEN;
+    case 2:
+    case "VERIFIER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS":
+      return VerifierOnboardingMode.VERIFIER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS;
+    case 3:
+    case "VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS":
+      return VerifierOnboardingMode.VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS;
+    case -1:
+    case "UNRECOGNIZED":
+    default:
+      return VerifierOnboardingMode.UNRECOGNIZED;
+  }
+}
+
+export function verifierOnboardingModeToJSON(object: VerifierOnboardingMode): string {
+  switch (object) {
+    case VerifierOnboardingMode.VERIFIER_ONBOARDING_MODE_UNSPECIFIED:
+      return "VERIFIER_ONBOARDING_MODE_UNSPECIFIED";
+    case VerifierOnboardingMode.VERIFIER_ONBOARDING_MODE_OPEN:
+      return "VERIFIER_ONBOARDING_MODE_OPEN";
+    case VerifierOnboardingMode.VERIFIER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS:
+      return "VERIFIER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS";
+    case VerifierOnboardingMode.VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS:
+      return "VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS";
+    case VerifierOnboardingMode.UNRECOGNIZED:
+    default:
+      return "UNRECOGNIZED";
+  }
+}
+
+/** HolderOnboardingMode defines how holders are onboarded for a credential schema. */
+export enum HolderOnboardingMode {
+  HOLDER_ONBOARDING_MODE_UNSPECIFIED = 0,
+  /** HOLDER_ONBOARDING_MODE_ISSUER_VALIDATION_PROCESS - Holders go through the issuer validation process */
+  HOLDER_ONBOARDING_MODE_ISSUER_VALIDATION_PROCESS = 1,
+  /** HOLDER_ONBOARDING_MODE_PERMISSIONLESS - Anyone can self-create a holder permission without validation */
+  HOLDER_ONBOARDING_MODE_PERMISSIONLESS = 2,
+  UNRECOGNIZED = -1,
+}
+
+export function holderOnboardingModeFromJSON(object: any): HolderOnboardingMode {
+  switch (object) {
+    case 0:
+    case "HOLDER_ONBOARDING_MODE_UNSPECIFIED":
+      return HolderOnboardingMode.HOLDER_ONBOARDING_MODE_UNSPECIFIED;
+    case 1:
+    case "HOLDER_ONBOARDING_MODE_ISSUER_VALIDATION_PROCESS":
+      return HolderOnboardingMode.HOLDER_ONBOARDING_MODE_ISSUER_VALIDATION_PROCESS;
+    case 2:
+    case "HOLDER_ONBOARDING_MODE_PERMISSIONLESS":
+      return HolderOnboardingMode.HOLDER_ONBOARDING_MODE_PERMISSIONLESS;
+    case -1:
+    case "UNRECOGNIZED":
+    default:
+      return HolderOnboardingMode.UNRECOGNIZED;
+  }
+}
+
+export function holderOnboardingModeToJSON(object: HolderOnboardingMode): string {
+  switch (object) {
+    case HolderOnboardingMode.HOLDER_ONBOARDING_MODE_UNSPECIFIED:
+      return "HOLDER_ONBOARDING_MODE_UNSPECIFIED";
+    case HolderOnboardingMode.HOLDER_ONBOARDING_MODE_ISSUER_VALIDATION_PROCESS:
+      return "HOLDER_ONBOARDING_MODE_ISSUER_VALIDATION_PROCESS";
+    case HolderOnboardingMode.HOLDER_ONBOARDING_MODE_PERMISSIONLESS:
+      return "HOLDER_ONBOARDING_MODE_PERMISSIONLESS";
+    case HolderOnboardingMode.UNRECOGNIZED:
     default:
       return "UNRECOGNIZED";
   }
@@ -111,6 +201,61 @@ export function pricingAssetTypeToJSON(object: PricingAssetType): string {
   }
 }
 
+/** SchemaAuthorizationPolicyRole defines the role for a schema authorization policy. */
+export enum SchemaAuthorizationPolicyRole {
+  SCHEMA_AUTHORIZATION_POLICY_ROLE_UNSPECIFIED = 0,
+  SCHEMA_AUTHORIZATION_POLICY_ROLE_ISSUER = 1,
+  SCHEMA_AUTHORIZATION_POLICY_ROLE_VERIFIER = 2,
+  UNRECOGNIZED = -1,
+}
+
+export function schemaAuthorizationPolicyRoleFromJSON(object: any): SchemaAuthorizationPolicyRole {
+  switch (object) {
+    case 0:
+    case "SCHEMA_AUTHORIZATION_POLICY_ROLE_UNSPECIFIED":
+      return SchemaAuthorizationPolicyRole.SCHEMA_AUTHORIZATION_POLICY_ROLE_UNSPECIFIED;
+    case 1:
+    case "SCHEMA_AUTHORIZATION_POLICY_ROLE_ISSUER":
+      return SchemaAuthorizationPolicyRole.SCHEMA_AUTHORIZATION_POLICY_ROLE_ISSUER;
+    case 2:
+    case "SCHEMA_AUTHORIZATION_POLICY_ROLE_VERIFIER":
+      return SchemaAuthorizationPolicyRole.SCHEMA_AUTHORIZATION_POLICY_ROLE_VERIFIER;
+    case -1:
+    case "UNRECOGNIZED":
+    default:
+      return SchemaAuthorizationPolicyRole.UNRECOGNIZED;
+  }
+}
+
+export function schemaAuthorizationPolicyRoleToJSON(object: SchemaAuthorizationPolicyRole): string {
+  switch (object) {
+    case SchemaAuthorizationPolicyRole.SCHEMA_AUTHORIZATION_POLICY_ROLE_UNSPECIFIED:
+      return "SCHEMA_AUTHORIZATION_POLICY_ROLE_UNSPECIFIED";
+    case SchemaAuthorizationPolicyRole.SCHEMA_AUTHORIZATION_POLICY_ROLE_ISSUER:
+      return "SCHEMA_AUTHORIZATION_POLICY_ROLE_ISSUER";
+    case SchemaAuthorizationPolicyRole.SCHEMA_AUTHORIZATION_POLICY_ROLE_VERIFIER:
+      return "SCHEMA_AUTHORIZATION_POLICY_ROLE_VERIFIER";
+    case SchemaAuthorizationPolicyRole.UNRECOGNIZED:
+    default:
+      return "UNRECOGNIZED";
+  }
+}
+
+/** SchemaAuthorizationPolicy defines a versioned policy document attached to a credential schema role. */
+export interface SchemaAuthorizationPolicy {
+  id: number;
+  schemaId: number;
+  role: SchemaAuthorizationPolicyRole;
+  url: string;
+  digestSri: string;
+  /** [MOD-CS-MSG-5-3] effective_from is null at creation; set to now at MOD-CS-MSG-6 activation. */
+  effectiveFrom: Date | undefined;
+  effectiveUntil: Date | undefined;
+  revoked: boolean;
+  created: Date | undefined;
+  version: number;
+}
+
 /** CredentialSchema defines the structure for a credential schema */
 export interface CredentialSchema {
   id: number;
@@ -124,12 +269,218 @@ export interface CredentialSchema {
   issuerValidationValidityPeriod: number;
   verifierValidationValidityPeriod: number;
   holderValidationValidityPeriod: number;
-  issuerPermManagementMode: CredentialSchemaPermManagementMode;
-  verifierPermManagementMode: CredentialSchemaPermManagementMode;
+  issuerOnboardingMode: IssuerOnboardingMode;
+  verifierOnboardingMode: VerifierOnboardingMode;
   pricingAssetType: PricingAssetType;
   pricingAsset: string;
   digestAlgorithm: string;
+  holderOnboardingMode: HolderOnboardingMode;
 }
+
+function createBaseSchemaAuthorizationPolicy(): SchemaAuthorizationPolicy {
+  return {
+    id: 0,
+    schemaId: 0,
+    role: 0,
+    url: "",
+    digestSri: "",
+    effectiveFrom: undefined,
+    effectiveUntil: undefined,
+    revoked: false,
+    created: undefined,
+    version: 0,
+  };
+}
+
+export const SchemaAuthorizationPolicy = {
+  encode(message: SchemaAuthorizationPolicy, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.id !== 0) {
+      writer.uint32(8).uint64(message.id);
+    }
+    if (message.schemaId !== 0) {
+      writer.uint32(16).uint64(message.schemaId);
+    }
+    if (message.role !== 0) {
+      writer.uint32(24).int32(message.role);
+    }
+    if (message.url !== "") {
+      writer.uint32(34).string(message.url);
+    }
+    if (message.digestSri !== "") {
+      writer.uint32(42).string(message.digestSri);
+    }
+    if (message.effectiveFrom !== undefined) {
+      Timestamp.encode(toTimestamp(message.effectiveFrom), writer.uint32(50).fork()).ldelim();
+    }
+    if (message.effectiveUntil !== undefined) {
+      Timestamp.encode(toTimestamp(message.effectiveUntil), writer.uint32(58).fork()).ldelim();
+    }
+    if (message.revoked !== false) {
+      writer.uint32(64).bool(message.revoked);
+    }
+    if (message.created !== undefined) {
+      Timestamp.encode(toTimestamp(message.created), writer.uint32(74).fork()).ldelim();
+    }
+    if (message.version !== 0) {
+      writer.uint32(80).uint32(message.version);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): SchemaAuthorizationPolicy {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseSchemaAuthorizationPolicy();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 8) {
+            break;
+          }
+
+          message.id = longToNumber(reader.uint64() as Long);
+          continue;
+        case 2:
+          if (tag !== 16) {
+            break;
+          }
+
+          message.schemaId = longToNumber(reader.uint64() as Long);
+          continue;
+        case 3:
+          if (tag !== 24) {
+            break;
+          }
+
+          message.role = reader.int32() as any;
+          continue;
+        case 4:
+          if (tag !== 34) {
+            break;
+          }
+
+          message.url = reader.string();
+          continue;
+        case 5:
+          if (tag !== 42) {
+            break;
+          }
+
+          message.digestSri = reader.string();
+          continue;
+        case 6:
+          if (tag !== 50) {
+            break;
+          }
+
+          message.effectiveFrom = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
+          continue;
+        case 7:
+          if (tag !== 58) {
+            break;
+          }
+
+          message.effectiveUntil = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
+          continue;
+        case 8:
+          if (tag !== 64) {
+            break;
+          }
+
+          message.revoked = reader.bool();
+          continue;
+        case 9:
+          if (tag !== 74) {
+            break;
+          }
+
+          message.created = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
+          continue;
+        case 10:
+          if (tag !== 80) {
+            break;
+          }
+
+          message.version = reader.uint32();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): SchemaAuthorizationPolicy {
+    return {
+      id: isSet(object.id) ? globalThis.Number(object.id) : 0,
+      schemaId: isSet(object.schemaId) ? globalThis.Number(object.schemaId) : 0,
+      role: isSet(object.role) ? schemaAuthorizationPolicyRoleFromJSON(object.role) : 0,
+      url: isSet(object.url) ? globalThis.String(object.url) : "",
+      digestSri: isSet(object.digestSri) ? globalThis.String(object.digestSri) : "",
+      effectiveFrom: isSet(object.effectiveFrom) ? fromJsonTimestamp(object.effectiveFrom) : undefined,
+      effectiveUntil: isSet(object.effectiveUntil) ? fromJsonTimestamp(object.effectiveUntil) : undefined,
+      revoked: isSet(object.revoked) ? globalThis.Boolean(object.revoked) : false,
+      created: isSet(object.created) ? fromJsonTimestamp(object.created) : undefined,
+      version: isSet(object.version) ? globalThis.Number(object.version) : 0,
+    };
+  },
+
+  toJSON(message: SchemaAuthorizationPolicy): unknown {
+    const obj: any = {};
+    if (message.id !== 0) {
+      obj.id = Math.round(message.id);
+    }
+    if (message.schemaId !== 0) {
+      obj.schemaId = Math.round(message.schemaId);
+    }
+    if (message.role !== 0) {
+      obj.role = schemaAuthorizationPolicyRoleToJSON(message.role);
+    }
+    if (message.url !== "") {
+      obj.url = message.url;
+    }
+    if (message.digestSri !== "") {
+      obj.digestSri = message.digestSri;
+    }
+    if (message.effectiveFrom !== undefined) {
+      obj.effectiveFrom = message.effectiveFrom.toISOString();
+    }
+    if (message.effectiveUntil !== undefined) {
+      obj.effectiveUntil = message.effectiveUntil.toISOString();
+    }
+    if (message.revoked !== false) {
+      obj.revoked = message.revoked;
+    }
+    if (message.created !== undefined) {
+      obj.created = message.created.toISOString();
+    }
+    if (message.version !== 0) {
+      obj.version = Math.round(message.version);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<SchemaAuthorizationPolicy>, I>>(base?: I): SchemaAuthorizationPolicy {
+    return SchemaAuthorizationPolicy.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<SchemaAuthorizationPolicy>, I>>(object: I): SchemaAuthorizationPolicy {
+    const message = createBaseSchemaAuthorizationPolicy();
+    message.id = object.id ?? 0;
+    message.schemaId = object.schemaId ?? 0;
+    message.role = object.role ?? 0;
+    message.url = object.url ?? "";
+    message.digestSri = object.digestSri ?? "";
+    message.effectiveFrom = object.effectiveFrom ?? undefined;
+    message.effectiveUntil = object.effectiveUntil ?? undefined;
+    message.revoked = object.revoked ?? false;
+    message.created = object.created ?? undefined;
+    message.version = object.version ?? 0;
+    return message;
+  },
+};
 
 function createBaseCredentialSchema(): CredentialSchema {
   return {
@@ -144,11 +495,12 @@ function createBaseCredentialSchema(): CredentialSchema {
     issuerValidationValidityPeriod: 0,
     verifierValidationValidityPeriod: 0,
     holderValidationValidityPeriod: 0,
-    issuerPermManagementMode: 0,
-    verifierPermManagementMode: 0,
+    issuerOnboardingMode: 0,
+    verifierOnboardingMode: 0,
     pricingAssetType: 0,
     pricingAsset: "",
     digestAlgorithm: "",
+    holderOnboardingMode: 0,
   };
 }
 
@@ -187,11 +539,11 @@ export const CredentialSchema = {
     if (message.holderValidationValidityPeriod !== 0) {
       writer.uint32(96).uint32(message.holderValidationValidityPeriod);
     }
-    if (message.issuerPermManagementMode !== 0) {
-      writer.uint32(104).int32(message.issuerPermManagementMode);
+    if (message.issuerOnboardingMode !== 0) {
+      writer.uint32(104).int32(message.issuerOnboardingMode);
     }
-    if (message.verifierPermManagementMode !== 0) {
-      writer.uint32(112).int32(message.verifierPermManagementMode);
+    if (message.verifierOnboardingMode !== 0) {
+      writer.uint32(112).int32(message.verifierOnboardingMode);
     }
     if (message.pricingAssetType !== 0) {
       writer.uint32(120).int32(message.pricingAssetType);
@@ -201,6 +553,9 @@ export const CredentialSchema = {
     }
     if (message.digestAlgorithm !== "") {
       writer.uint32(138).string(message.digestAlgorithm);
+    }
+    if (message.holderOnboardingMode !== 0) {
+      writer.uint32(144).int32(message.holderOnboardingMode);
     }
     return writer;
   },
@@ -294,14 +649,14 @@ export const CredentialSchema = {
             break;
           }
 
-          message.issuerPermManagementMode = reader.int32() as any;
+          message.issuerOnboardingMode = reader.int32() as any;
           continue;
         case 14:
           if (tag !== 112) {
             break;
           }
 
-          message.verifierPermManagementMode = reader.int32() as any;
+          message.verifierOnboardingMode = reader.int32() as any;
           continue;
         case 15:
           if (tag !== 120) {
@@ -323,6 +678,13 @@ export const CredentialSchema = {
           }
 
           message.digestAlgorithm = reader.string();
+          continue;
+        case 18:
+          if (tag !== 144) {
+            break;
+          }
+
+          message.holderOnboardingMode = reader.int32() as any;
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -356,15 +718,18 @@ export const CredentialSchema = {
       holderValidationValidityPeriod: isSet(object.holderValidationValidityPeriod)
         ? globalThis.Number(object.holderValidationValidityPeriod)
         : 0,
-      issuerPermManagementMode: isSet(object.issuerPermManagementMode)
-        ? credentialSchemaPermManagementModeFromJSON(object.issuerPermManagementMode)
+      issuerOnboardingMode: isSet(object.issuerOnboardingMode)
+        ? issuerOnboardingModeFromJSON(object.issuerOnboardingMode)
         : 0,
-      verifierPermManagementMode: isSet(object.verifierPermManagementMode)
-        ? credentialSchemaPermManagementModeFromJSON(object.verifierPermManagementMode)
+      verifierOnboardingMode: isSet(object.verifierOnboardingMode)
+        ? verifierOnboardingModeFromJSON(object.verifierOnboardingMode)
         : 0,
       pricingAssetType: isSet(object.pricingAssetType) ? pricingAssetTypeFromJSON(object.pricingAssetType) : 0,
       pricingAsset: isSet(object.pricingAsset) ? globalThis.String(object.pricingAsset) : "",
       digestAlgorithm: isSet(object.digestAlgorithm) ? globalThis.String(object.digestAlgorithm) : "",
+      holderOnboardingMode: isSet(object.holderOnboardingMode)
+        ? holderOnboardingModeFromJSON(object.holderOnboardingMode)
+        : 0,
     };
   },
 
@@ -403,11 +768,11 @@ export const CredentialSchema = {
     if (message.holderValidationValidityPeriod !== 0) {
       obj.holderValidationValidityPeriod = Math.round(message.holderValidationValidityPeriod);
     }
-    if (message.issuerPermManagementMode !== 0) {
-      obj.issuerPermManagementMode = credentialSchemaPermManagementModeToJSON(message.issuerPermManagementMode);
+    if (message.issuerOnboardingMode !== 0) {
+      obj.issuerOnboardingMode = issuerOnboardingModeToJSON(message.issuerOnboardingMode);
     }
-    if (message.verifierPermManagementMode !== 0) {
-      obj.verifierPermManagementMode = credentialSchemaPermManagementModeToJSON(message.verifierPermManagementMode);
+    if (message.verifierOnboardingMode !== 0) {
+      obj.verifierOnboardingMode = verifierOnboardingModeToJSON(message.verifierOnboardingMode);
     }
     if (message.pricingAssetType !== 0) {
       obj.pricingAssetType = pricingAssetTypeToJSON(message.pricingAssetType);
@@ -417,6 +782,9 @@ export const CredentialSchema = {
     }
     if (message.digestAlgorithm !== "") {
       obj.digestAlgorithm = message.digestAlgorithm;
+    }
+    if (message.holderOnboardingMode !== 0) {
+      obj.holderOnboardingMode = holderOnboardingModeToJSON(message.holderOnboardingMode);
     }
     return obj;
   },
@@ -437,11 +805,12 @@ export const CredentialSchema = {
     message.issuerValidationValidityPeriod = object.issuerValidationValidityPeriod ?? 0;
     message.verifierValidationValidityPeriod = object.verifierValidationValidityPeriod ?? 0;
     message.holderValidationValidityPeriod = object.holderValidationValidityPeriod ?? 0;
-    message.issuerPermManagementMode = object.issuerPermManagementMode ?? 0;
-    message.verifierPermManagementMode = object.verifierPermManagementMode ?? 0;
+    message.issuerOnboardingMode = object.issuerOnboardingMode ?? 0;
+    message.verifierOnboardingMode = object.verifierOnboardingMode ?? 0;
     message.pricingAssetType = object.pricingAssetType ?? 0;
     message.pricingAsset = object.pricingAsset ?? "";
     message.digestAlgorithm = object.digestAlgorithm ?? "";
+    message.holderOnboardingMode = object.holderOnboardingMode ?? 0;
     return message;
   },
 };

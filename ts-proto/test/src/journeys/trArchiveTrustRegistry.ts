@@ -60,9 +60,9 @@ async function main() {
   const msg = {
     typeUrl: typeUrls.MsgArchiveTrustRegistry,
     value: MsgArchiveTrustRegistry.fromPartial({
-      authority: setup.authorityAddress,
+      corporation: setup.authorityAddress,
       operator: account.address,
-      id: activeTR.trustRegistryId,
+      trId: activeTR.trustRegistryId,
       archive: true,
     }),
   };

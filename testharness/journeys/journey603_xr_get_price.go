@@ -37,7 +37,7 @@ func RunXrGetPriceJourney(ctx context.Context, client cosmosclient.Client) error
 
 	priceResp, err := xrQueryClient.GetPrice(ctx, &xrtypes.QueryGetPriceRequest{
 		BaseAssetType:  cstypes.PricingAssetType_TU,
-		BaseAsset:      "tu",
+		BaseAsset:      "TU",
 		QuoteAssetType: cstypes.PricingAssetType_COIN,
 		QuoteAsset:     "uvna",
 		Amount:         testAmount,

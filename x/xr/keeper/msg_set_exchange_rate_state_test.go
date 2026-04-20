@@ -29,26 +29,36 @@ func createTestExchangeRate(t *testing.T, f *fixture, ms types.MsgServer, author
 	return resp.Id
 }
 
-func TestToggleExchangeRateState_HappyPath_Enable(t *testing.T) {
+func TestSetExchangeRateState_HappyPath_Enable(t *testing.T) {
 	f := initFixture(t)
 	ms := keeper.NewMsgServerImpl(f.keeper)
 
 	authorityStr, err := f.addressCodec.BytesToString(f.keeper.GetAuthority())
 	require.NoError(t, err)
 
-	// Create exchange rate (state defaults to false)
+	// Create exchange rate (state=true on creation per spec [MOD-XR-MSG-1])
 	id := createTestExchangeRate(t, f, ms, authorityStr)
 
-	// Verify initial state is false
+	// Verify initial state is true
 	xr, err := f.keeper.ExchangeRates.Get(f.ctx, id)
+	require.NoError(t, err)
+	require.True(t, xr.State)
+
+	// [MOD-XR-MSG-3-3] toggle flips current state.
+	_, err = ms.SetExchangeRateState(f.ctx, &types.MsgSetExchangeRateState{
+		Authority: authorityStr,
+		Id:        id,
+	})
+	require.NoError(t, err)
+
+	xr, err = f.keeper.ExchangeRates.Get(f.ctx, id)
 	require.NoError(t, err)
 	require.False(t, xr.State)
 
-	// Toggle to enabled
-	_, err = ms.ToggleExchangeRateState(f.ctx, &types.MsgToggleExchangeRateState{
+	// Toggle again flips back.
+	_, err = ms.SetExchangeRateState(f.ctx, &types.MsgSetExchangeRateState{
 		Authority: authorityStr,
 		Id:        id,
-		State:     true,
 	})
 	require.NoError(t, err)
 
@@ -58,43 +68,41 @@ func TestToggleExchangeRateState_HappyPath_Enable(t *testing.T) {
 	require.True(t, xr.State)
 }
 
-func TestToggleExchangeRateState_HappyPath_Disable(t *testing.T) {
+func TestSetExchangeRateState_HappyPath_Disable(t *testing.T) {
 	f := initFixture(t)
 	ms := keeper.NewMsgServerImpl(f.keeper)
 
 	authorityStr, err := f.addressCodec.BytesToString(f.keeper.GetAuthority())
 	require.NoError(t, err)
 
-	// Create exchange rate and enable it first
+	// [MOD-XR-MSG-1-3] created with state=true.
 	id := createTestExchangeRate(t, f, ms, authorityStr)
 
-	_, err = ms.ToggleExchangeRateState(f.ctx, &types.MsgToggleExchangeRateState{
+	// [MOD-XR-MSG-3-3] spec v4 draft 13: call toggles the stored state (true ↔ false).
+	_, err = ms.SetExchangeRateState(f.ctx, &types.MsgSetExchangeRateState{
 		Authority: authorityStr,
 		Id:        id,
-		State:     true,
 	})
 	require.NoError(t, err)
 
-	// Verify enabled
+	// After one toggle, state flipped to false.
 	xr, err := f.keeper.ExchangeRates.Get(f.ctx, id)
 	require.NoError(t, err)
-	require.True(t, xr.State)
+	require.False(t, xr.State)
 
-	// Now disable
-	_, err = ms.ToggleExchangeRateState(f.ctx, &types.MsgToggleExchangeRateState{
+	// Second toggle flips it back to true.
+	_, err = ms.SetExchangeRateState(f.ctx, &types.MsgSetExchangeRateState{
 		Authority: authorityStr,
 		Id:        id,
-		State:     false,
 	})
 	require.NoError(t, err)
 
-	// Verify state is now false
 	xr, err = f.keeper.ExchangeRates.Get(f.ctx, id)
 	require.NoError(t, err)
-	require.False(t, xr.State)
+	require.True(t, xr.State)
 }
 
-func TestToggleExchangeRateState_InvalidAuthority(t *testing.T) {
+func TestSetExchangeRateState_InvalidAuthority(t *testing.T) {
 	f := initFixture(t)
 	ms := keeper.NewMsgServerImpl(f.keeper)
 
@@ -104,7 +112,7 @@ func TestToggleExchangeRateState_InvalidAuthority(t *testing.T) {
 	id := createTestExchangeRate(t, f, ms, authorityStr)
 
 	nonGovAddr := sdk.AccAddress([]byte("not_gov_authority___")).String()
-	_, err = ms.ToggleExchangeRateState(f.ctx, &types.MsgToggleExchangeRateState{
+	_, err = ms.SetExchangeRateState(f.ctx, &types.MsgSetExchangeRateState{
 		Authority: nonGovAddr,
 		Id:        id,
 		State:     true,
@@ -113,14 +121,14 @@ func TestToggleExchangeRateState_InvalidAuthority(t *testing.T) {
 	require.Contains(t, err.Error(), "expected gov account as only signer")
 }
 
-func TestToggleExchangeRateState_NotFound(t *testing.T) {
+func TestSetExchangeRateState_NotFound(t *testing.T) {
 	f := initFixture(t)
 	ms := keeper.NewMsgServerImpl(f.keeper)
 
 	authorityStr, err := f.addressCodec.BytesToString(f.keeper.GetAuthority())
 	require.NoError(t, err)
 
-	_, err = ms.ToggleExchangeRateState(f.ctx, &types.MsgToggleExchangeRateState{
+	_, err = ms.SetExchangeRateState(f.ctx, &types.MsgSetExchangeRateState{
 		Authority: authorityStr,
 		Id:        999,
 		State:     true,

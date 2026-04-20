@@ -6,108 +6,109 @@ import {
   MsgIncreaseActiveGovernanceFrameworkVersion,
   MsgUpdateTrustRegistry,
 } from "../codec/verana/tr/v1/tx";
+import { clean, u64ToStr } from "./util/helpers";
 
 export const MsgCreateTrustRegistryAminoConverter: AminoConverter = {
-  aminoType: "/verana.tr.v1.MsgCreateTrustRegistry",
-  toAmino: ({ authority, operator, did, aka, language, docUrl, docDigestSri }: MsgCreateTrustRegistry) => ({
-    authority,
-    operator,
-    did,
-    aka,
-    language,
-    doc_url: docUrl,
-    doc_digest_sri: docDigestSri,
+  aminoType: "verana/x/tr/MsgCreateTrustRegistry",
+  toAmino: ({ corporation, operator, did, aka, language, docUrl, docDigestSri }: MsgCreateTrustRegistry) => clean({
+    corporation: corporation || undefined,
+    operator: operator || undefined,
+    did: did || undefined,
+    aka: aka || undefined,
+    language: language || undefined,
+    doc_url: docUrl || undefined,
+    doc_digest_sri: docDigestSri || undefined,
   }),
   fromAmino: (value: any) =>
     MsgCreateTrustRegistry.fromPartial({
-      authority: value.authority,
-      operator: value.operator,
-      did: value.did,
-      aka: value.aka,
-      language: value.language,
-      docUrl: value.doc_url,
-      docDigestSri: value.doc_digest_sri,
+      corporation: value.corporation ?? "",
+      operator: value.operator ?? "",
+      did: value.did ?? "",
+      aka: value.aka ?? "",
+      language: value.language ?? "",
+      docUrl: value.doc_url ?? "",
+      docDigestSri: value.doc_digest_sri ?? "",
     }),
 };
 
 export const MsgUpdateTrustRegistryAminoConverter: AminoConverter = {
-  aminoType: "/verana.tr.v1.MsgUpdateTrustRegistry",
-  toAmino: ({ authority, operator, id, did, aka }: MsgUpdateTrustRegistry) => ({
-    authority,
-    operator,
-    id: id != null ? id.toString() : undefined,
-    did,
-    aka,
+  aminoType: "verana/x/tr/MsgUpdateTrustRegistry",
+  toAmino: ({ corporation, operator, trId, did, aka }: MsgUpdateTrustRegistry) => clean({
+    corporation: corporation || undefined,
+    operator: operator || undefined,
+    tr_id: u64ToStr(trId as any),
+    did: did || undefined,
+    aka: aka || undefined,
   }),
   fromAmino: (value: any) =>
     MsgUpdateTrustRegistry.fromPartial({
-      authority: value.authority,
-      operator: value.operator,
-      id: value.id != null ? Number(value.id) : 0,
-      did: value.did,
-      aka: value.aka,
+      corporation: value.corporation ?? "",
+      operator: value.operator ?? "",
+      trId: value.tr_id != null ? Number(value.tr_id) : 0,
+      did: value.did ?? "",
+      aka: value.aka ?? "",
     }),
 };
 
 export const MsgArchiveTrustRegistryAminoConverter: AminoConverter = {
-  aminoType: "/verana.tr.v1.MsgArchiveTrustRegistry",
-  toAmino: ({ authority, operator, id, archive }: MsgArchiveTrustRegistry) => ({
-    authority,
-    operator,
-    id: id != null ? id.toString() : undefined,
-    archive,
+  aminoType: "verana/x/tr/MsgArchiveTrustRegistry",
+  toAmino: ({ corporation, operator, trId, archive }: MsgArchiveTrustRegistry) => clean({
+    corporation: corporation || undefined,
+    operator: operator || undefined,
+    tr_id: u64ToStr(trId as any),
+    archive: archive || undefined,
   }),
   fromAmino: (value: any) =>
     MsgArchiveTrustRegistry.fromPartial({
-      authority: value.authority,
-      operator: value.operator,
-      id: value.id != null ? Number(value.id) : 0,
-      archive: value.archive,
+      corporation: value.corporation ?? "",
+      operator: value.operator ?? "",
+      trId: value.tr_id != null ? Number(value.tr_id) : 0,
+      archive: value.archive ?? false,
     }),
 };
 
 export const MsgAddGovernanceFrameworkDocumentAminoConverter: AminoConverter = {
-  aminoType: "/verana.tr.v1.MsgAddGovernanceFrameworkDocument",
+  aminoType: "verana/x/tr/MsgAddGovFrameworkDoc",
   toAmino: ({
-    authority,
+    corporation,
     operator,
-    id,
-    docLanguage,
-    docUrl,
-    docDigestSri,
+    trId,
+    language,
+    url,
+    digestSri,
     version,
-  }: MsgAddGovernanceFrameworkDocument) => ({
-    authority,
-    operator,
-    id: id != null ? id.toString() : undefined,
-    doc_language: docLanguage,
-    doc_url: docUrl,
-    doc_digest_sri: docDigestSri,
-    version,
+  }: MsgAddGovernanceFrameworkDocument) => clean({
+    corporation: corporation || undefined,
+    operator: operator || undefined,
+    tr_id: u64ToStr(trId as any),
+    language: language || undefined,
+    url: url || undefined,
+    digest_sri: digestSri || undefined,
+    version: version || undefined,
   }),
   fromAmino: (value: any) =>
     MsgAddGovernanceFrameworkDocument.fromPartial({
-      authority: value.authority,
-      operator: value.operator,
-      id: value.id != null ? Number(value.id) : 0,
-      docLanguage: value.doc_language,
-      docUrl: value.doc_url,
-      docDigestSri: value.doc_digest_sri,
-      version: value.version,
+      corporation: value.corporation ?? "",
+      operator: value.operator ?? "",
+      trId: value.tr_id != null ? Number(value.tr_id) : 0,
+      language: value.language ?? "",
+      url: value.url ?? "",
+      digestSri: value.digest_sri ?? "",
+      version: value.version ?? 0,
     }),
 };
 
 export const MsgIncreaseActiveGovernanceFrameworkVersionAminoConverter: AminoConverter = {
-  aminoType: "/verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion",
-  toAmino: ({ authority, operator, id }: MsgIncreaseActiveGovernanceFrameworkVersion) => ({
-    authority,
-    operator,
-    id: id != null ? id.toString() : undefined,
+  aminoType: "verana/x/tr/MsgIncreaseActiveGovFWVer",
+  toAmino: ({ corporation, operator, trId }: MsgIncreaseActiveGovernanceFrameworkVersion) => clean({
+    corporation: corporation || undefined,
+    operator: operator || undefined,
+    tr_id: u64ToStr(trId as any),
   }),
   fromAmino: (value: any) =>
     MsgIncreaseActiveGovernanceFrameworkVersion.fromPartial({
-      authority: value.authority,
-      operator: value.operator,
-      id: value.id != null ? Number(value.id) : 0,
+      corporation: value.corporation ?? "",
+      operator: value.operator ?? "",
+      trId: value.tr_id != null ? Number(value.tr_id) : 0,
     }),
 };

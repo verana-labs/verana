@@ -2,11 +2,11 @@ import assert from "node:assert/strict";
 import { createVeranaAminoTypes, createVeranaRegistry, veranaTypeUrls } from "../../src/signing";
 import { MsgGrantOperatorAuthorization } from "../../src/codec/verana/de/v1/tx";
 import { MsgStoreDigest } from "../../src/codec/verana/di/v1/tx";
-import { MsgCreatePermission, MsgStartPermissionVP } from "../../src/codec/verana/perm/v1/tx";
+import { MsgSelfCreatePermission, MsgStartPermissionVP } from "../../src/codec/verana/perm/v1/tx";
 import { PermissionType } from "../../src/codec/verana/perm/v1/types";
 import {
   MsgCreateExchangeRate,
-  MsgToggleExchangeRateState,
+  MsgSetExchangeRateState,
   MsgUpdateExchangeRate,
 } from "../../src/codec/verana/xr/v1/tx";
 
@@ -16,13 +16,13 @@ const amino = createVeranaAminoTypes() as any;
 const requiredMappings = [
   "MsgCreateTrustRegistry",
   "MsgCreateCredentialSchema",
-  "MsgCreatePermission",
+  "MsgSelfCreatePermission",
   "MsgReclaimTrustDepositYield",
   "MsgGrantOperatorAuthorization",
   "MsgStoreDigest",
   "MsgCreateExchangeRate",
   "MsgUpdateExchangeRate",
-  "MsgToggleExchangeRateState",
+  "MsgSetExchangeRateState",
 ] as const;
 
 for (const key of requiredMappings) {
@@ -32,10 +32,10 @@ for (const key of requiredMappings) {
 
 const deConverter = amino.register[veranaTypeUrls.MsgGrantOperatorAuthorization];
 const deMsg = MsgGrantOperatorAuthorization.fromPartial({
-  authority: "verana1authority0000000000000000000000000000000",
+  corporation: "verana1authority0000000000000000000000000000000",
   operator: "verana1operator0000000000000000000000000000000",
   grantee: "verana1grantee00000000000000000000000000000000",
-  msgTypes: [veranaTypeUrls.MsgCreateTrustRegistry, veranaTypeUrls.MsgCreatePermission],
+  msgTypes: [veranaTypeUrls.MsgCreateTrustRegistry, veranaTypeUrls.MsgSelfCreatePermission],
   expiration: new Date("2026-04-01T12:00:00.123Z"),
   authzSpendLimit: [{ denom: "uvna", amount: "42" }],
   authzSpendLimitPeriod: { seconds: 3600, nanos: 5 },
@@ -52,7 +52,7 @@ assert.equal(deRoundTrip.feegrantSpendLimitPeriod?.seconds, 7200);
 
 const diConverter = amino.register[veranaTypeUrls.MsgStoreDigest];
 const diMsg = MsgStoreDigest.fromPartial({
-  authority: "verana1corp0000000000000000000000000000000000",
+  corporation: "verana1corp0000000000000000000000000000000000",
   operator: "verana1operator0000000000000000000000000000000",
   digest: "sha256-abc123",
 });
@@ -86,19 +86,19 @@ const xrUpdateRoundTrip = xrUpdateConverter.fromAmino(xrUpdateConverter.toAmino(
 assert.equal(xrUpdateRoundTrip.id, 12);
 assert.equal(xrUpdateRoundTrip.rate, "1.0800");
 
-const xrToggleConverter = amino.register[veranaTypeUrls.MsgToggleExchangeRateState];
-const xrToggleMsg = MsgToggleExchangeRateState.fromPartial({
+const xrSetStateConverter = amino.register[veranaTypeUrls.MsgSetExchangeRateState];
+const xrSetStateMsg = MsgSetExchangeRateState.fromPartial({
   authority: "verana1authority0000000000000000000000000000000",
   id: 12,
   state: false,
 });
-const xrToggleRoundTrip = xrToggleConverter.fromAmino(xrToggleConverter.toAmino(xrToggleMsg));
-assert.equal(xrToggleRoundTrip.id, 12);
-assert.equal(xrToggleRoundTrip.state, false);
+const xrSetStateRoundTrip = xrSetStateConverter.fromAmino(xrSetStateConverter.toAmino(xrSetStateMsg));
+assert.equal(xrSetStateRoundTrip.id, 12);
+assert.equal(xrSetStateRoundTrip.state, false);
 
-const permConverter = amino.register[veranaTypeUrls.MsgCreatePermission];
-const permMsg = MsgCreatePermission.fromPartial({
-  authority: "verana1authority0000000000000000000000000000000",
+const permConverter = amino.register[veranaTypeUrls.MsgSelfCreatePermission];
+const permMsg = MsgSelfCreatePermission.fromPartial({
+  corporation: "verana1authority0000000000000000000000000000000",
   operator: "verana1operator0000000000000000000000000000000",
   type: PermissionType.VERIFIER,
   validatorPermId: 17,
@@ -118,7 +118,7 @@ assert.equal(permRoundTrip.vsOperatorAuthzSpendPeriod?.nanos, 11);
 
 const startVpConverter = amino.register[veranaTypeUrls.MsgStartPermissionVP];
 const startVpMsg = MsgStartPermissionVP.fromPartial({
-  authority: "verana1authority0000000000000000000000000000000",
+  corporation: "verana1authority0000000000000000000000000000000",
   operator: "verana1operator0000000000000000000000000000000",
   type: PermissionType.VALIDATOR,
   validatorPermId: 21,

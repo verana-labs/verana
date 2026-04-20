@@ -143,7 +143,7 @@ func RunXrCreateExchangeRateJourney(ctx context.Context, client cosmosclient.Cli
 	createMsg := &xrtypes.MsgCreateExchangeRate{
 		Authority:        govModuleAddr,
 		BaseAssetType:    cstypes.PricingAssetType_TU,
-		BaseAsset:        "tu",
+		BaseAsset:        "TU",
 		QuoteAssetType:   cstypes.PricingAssetType_COIN,
 		QuoteAsset:       "uvna",
 		Rate:             "1000000",
@@ -181,7 +181,7 @@ func RunXrCreateExchangeRateJourney(ctx context.Context, client cosmosclient.Cli
 	xrQueryClient := xrtypes.NewQueryClient(client.Context())
 	listResp, err := xrQueryClient.ListExchangeRates(ctx, &xrtypes.QueryListExchangeRatesRequest{
 		BaseAssetType:  cstypes.PricingAssetType_TU,
-		BaseAsset:      "tu",
+		BaseAsset:      "TU",
 		QuoteAssetType: cstypes.PricingAssetType_COIN,
 		QuoteAsset:     "uvna",
 	})
@@ -213,7 +213,7 @@ func RunXrCreateExchangeRateJourney(ctx context.Context, client cosmosclient.Cli
 	// =========================================================================
 	fmt.Println("\n--- Step 4: Submit ToggleExchangeRateState governance proposal ---")
 
-	toggleMsg := &xrtypes.MsgToggleExchangeRateState{
+	toggleMsg := &xrtypes.MsgSetExchangeRateState{
 		Authority: govModuleAddr,
 		Id:        exchangeRateID,
 		State:     true,

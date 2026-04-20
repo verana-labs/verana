@@ -68,7 +68,7 @@ func (ms msgServer) checkValidatedOverlap(ctx sdk.Context, applicantPerm types.P
 		if perm.SchemaId != applicantPerm.SchemaId ||
 			perm.Type != applicantPerm.Type ||
 			perm.ValidatorPermId != applicantPerm.ValidatorPermId ||
-			perm.Authority != applicantPerm.Authority {
+			perm.Corporation != applicantPerm.Corporation {
 			return false, nil
 		}
 
@@ -115,11 +115,16 @@ func (ms msgServer) executeSetPermissionVPToValidated(
 	effectiveUntil *time.Time,
 ) (*types.MsgSetPermissionVPToValidatedResponse, error) {
 
+	// Guard: cannot validate a slashed permission that has not been repaid
+	if applicantPerm.Slashed != nil && applicantPerm.Repaid == nil {
+		return nil, fmt.Errorf("cannot validate a slashed permission that has not been repaid")
+	}
+
 	// Update Permission applicant_perm:
 	applicantPerm.Modified = &now
 	applicantPerm.VpState = types.ValidationState_VALIDATED
 	applicantPerm.VpLastStateChange = &now
-	applicantPerm.VpSummaryDigestSri = msg.VpSummaryDigestSri
+	applicantPerm.VpSummaryDigest = msg.VpSummaryDigest
 	applicantPerm.VpExp = vpExp
 	applicantPerm.EffectiveUntil = effectiveUntil
 
@@ -137,16 +142,20 @@ func (ms msgServer) executeSetPermissionVPToValidated(
 	// [MOD-PERM-MSG-3-3] Fees and Trust Deposits:
 	// transfer the full amount applicant_perm.vp_current_fees from escrow account to validator account
 	if applicantPerm.VpCurrentFees > 0 {
-		validatorAddr, err := sdk.AccAddressFromBech32(validatorPerm.Authority)
+		validatorAddr, err := sdk.AccAddressFromBech32(validatorPerm.Corporation)
 		if err != nil {
 			return nil, fmt.Errorf("invalid validator address: %w", err)
 		}
 
+		vpCurrentFeesI64, err := uint64ToInt64(applicantPerm.VpCurrentFees, "vp_current_fees")
+		if err != nil {
+			return nil, err
+		}
 		err = ms.bankKeeper.SendCoinsFromModuleToAccount(
 			ctx,
 			types.ModuleName,
 			validatorAddr,
-			sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, int64(applicantPerm.VpCurrentFees))),
+			sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, vpCurrentFeesI64)),
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to transfer fees to validator: %w", err)
@@ -156,10 +165,15 @@ func (ms msgServer) executeSetPermissionVPToValidated(
 	// [MOD-PERM-MSG-3-3] Increase validator perm trust deposit:
 	// use [MOD-TD-MSG-1] to increase by applicant_perm.vp_current_deposit
 	if applicantPerm.VpCurrentDeposit > 0 {
-		err := ms.trustDeposit.AdjustTrustDeposit(
+		vpCurrentDepositI64, err := uint64ToInt64(applicantPerm.VpCurrentDeposit, "vp_current_deposit")
+		if err != nil {
+			return nil, err
+		}
+		err = ms.trustDeposit.AdjustTrustDeposit(
 			ctx,
-			validatorPerm.Authority,
-			int64(applicantPerm.VpCurrentDeposit),
+			validatorPerm.Corporation,
+			vpCurrentDepositI64,
+			"perm_validated_deposit",
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to adjust validator trust deposit: %w", err)
@@ -192,10 +206,10 @@ func (ms msgServer) executeSetPermissionVPToValidated(
 		sdk.NewEvent(
 			types.EventTypeSetPermissionVPToValidated,
 			sdk.NewAttribute(types.AttributeKeyPermissionID, strconv.FormatUint(msg.Id, 10)),
-			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Authority),
+			sdk.NewAttribute(types.AttributeKeyCorporation, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
 			sdk.NewAttribute(types.AttributeKeyValidatorPermID, strconv.FormatUint(applicantPerm.ValidatorPermId, 10)),
-			sdk.NewAttribute(types.AttributeKeyVpSummaryDigestSri, msg.VpSummaryDigestSri),
+			sdk.NewAttribute(types.AttributeKeyVpSummaryDigest, msg.VpSummaryDigest),
 			sdk.NewAttribute(types.AttributeKeyEffectiveUntil, formatTimePtr(msg.EffectiveUntil)),
 			sdk.NewAttribute(types.AttributeKeyValidationFees, strconv.FormatUint(msg.ValidationFees, 10)),
 			sdk.NewAttribute(types.AttributeKeyIssuanceFees, strconv.FormatUint(msg.IssuanceFees, 10)),
@@ -222,13 +236,13 @@ func (ms msgServer) grantVSOperatorAuthorization(ctx sdk.Context, perm types.Per
 	// [MOD-DE-MSG-5-2] Basic checks: authority and vs_operator already validated by caller
 
 	// Add permission to VSOA (DE handles mutual exclusivity check internally)
-	if err := ms.delegationKeeper.AddPermToVSOA(ctx, perm.Authority, perm.VsOperator, perm.Id); err != nil {
+	if err := ms.delegationKeeper.AddPermToVSOA(ctx, perm.Corporation, perm.VsOperator, perm.Id); err != nil {
 		return fmt.Errorf("failed to grant VS operator authorization: %w", err)
 	}
 
 	// [MOD-DE-MSG-5-4] Handle feegrant
 	if perm.VsOperatorAuthzWithFeegrant {
-		expiration, err := ms.computeVSOAFeegrantExpiration(ctx, perm.Authority, perm.VsOperator)
+		expiration, err := ms.computeVSOAFeegrantExpiration(ctx, perm.Corporation, perm.VsOperator)
 		if err != nil {
 			return fmt.Errorf("failed to compute feegrant expiration: %w", err)
 		}
@@ -236,7 +250,7 @@ func (ms msgServer) grantVSOperatorAuthorization(ctx sdk.Context, perm types.Per
 		// Only grant if expiration is nil (no limit) or in the future
 		if expiration == nil || expiration.After(ctx.BlockTime()) {
 			msgTypes := []string{"/verana.perm.v1.MsgCreateOrUpdatePermissionSession"}
-			if err := ms.delegationKeeper.GrantFeeAllowance(ctx, perm.Authority, perm.VsOperator, msgTypes, expiration, nil, nil); err != nil {
+			if err := ms.delegationKeeper.GrantFeeAllowance(ctx, perm.Corporation, perm.VsOperator, msgTypes, expiration, nil, nil); err != nil {
 				return fmt.Errorf("failed to grant fee allowance: %w", err)
 			}
 		}

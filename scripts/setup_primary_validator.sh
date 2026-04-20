@@ -5,13 +5,6 @@ log() {
     echo "$(date '+%Y-%m-%d %H:%M:%S') - $1"
 }
 
-# Detect if running on macOS or Linux
-if [[ "$OSTYPE" == "darwin"* ]]; then
-  SED_CMD="sed -i ''"
-else
-  SED_CMD="sed -i"
-fi
-
 # Variables
 CHAIN_ID="vna-testnet-1"
 MONIKER="validator1"
@@ -34,9 +27,9 @@ GRPC_WEB_PORT="9091"
 
 log "Starting Primary Validator setup..."
 
-# Initialize the chain
+# Initialize the chain with uvna as default denom
 log "Initializing the chain..."
-$BINARY init $MONIKER --chain-id $CHAIN_ID
+$BINARY init $MONIKER --chain-id $CHAIN_ID --default-denom uvna
 if [ $? -ne 0 ]; then
     log "Error: Failed to initialize the chain."
     exit 1
@@ -58,7 +51,37 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Create gentx
+# Replace remaining "stake" references and update governance params BEFORE gentx
+# Use Python for reliable cross-platform editing
+log "Replacing 'stake' with 'uvna' in genesis.json and updating governance params..."
+python3 - <<'PYEOF'
+import json, os
+
+home = os.path.expanduser("~")
+genesis_path = os.path.join(home, ".verana", "config", "genesis.json")
+
+with open(genesis_path) as f:
+    content = f.read()
+
+# Replace any remaining "stake" denom references
+content = content.replace('"stake"', '"uvna"')
+
+with open(genesis_path, "w") as f:
+    f.write(content)
+
+# Now update governance params via JSON
+with open(genesis_path) as f:
+    g = json.load(f)
+
+g['app_state']['gov']['params']['max_deposit_period'] = '100s'
+g['app_state']['gov']['params']['voting_period'] = '100s'
+g['app_state']['gov']['params']['expedited_voting_period'] = '90s'
+
+with open(genesis_path, "w") as f:
+    json.dump(g, f, indent=2)
+PYEOF
+
+# Create gentx (bond_denom=uvna is now set in genesis)
 log "Creating genesis transaction..."
 $BINARY gentx $VALIDATOR_NAME $GENTX_AMOUNT \
     --chain-id $CHAIN_ID \
@@ -73,42 +96,38 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Update minimum-gas-prices in app.toml
-log "Updating minimum gas prices..."
-$SED_CMD 's/^minimum-gas-prices = ""/minimum-gas-prices = "0.25uvna"/' "$APP_TOML_PATH"
+# Configure app.toml and config.toml using Python for reliable cross-platform editing
+log "Updating app.toml and config.toml..."
+python3 - <<PYEOF
+import os
 
-# Configure ports in app.toml
-$SED_CMD "s/:1317/:$API_PORT/" "$APP_TOML_PATH"
-$SED_CMD "s/:9090/:$GRPC_PORT/" "$APP_TOML_PATH"
-$SED_CMD "s/:9091/:$GRPC_WEB_PORT/" "$APP_TOML_PATH"
-$SED_CMD 's|^address = "tcp://localhost:|address = "tcp://0.0.0.0:|' "$APP_TOML_PATH"
-$SED_CMD 's|^address = "localhost:|address = "0.0.0.0:|' "$APP_TOML_PATH"
+home = os.path.expanduser("~")
+app_toml = os.path.join(home, ".verana", "config", "app.toml")
+config_toml = os.path.join(home, ".verana", "config", "config.toml")
 
-# Replace all occurrences of "stake" with "uvna" in genesis.json
-log "Replacing 'stake' with 'uvna' in genesis.json..."
-$SED_CMD 's/stake/uvna/g' "$GENESIS_JSON_PATH"
+with open(app_toml) as f:
+    c = f.read()
+c = c.replace('minimum-gas-prices = ""', 'minimum-gas-prices = "0.25uvna"')
+c = c.replace('enable = false', 'enable = true')
+c = c.replace('swagger = false', 'swagger = true')
+c = c.replace('enabled-unsafe-cors = false', 'enabled-unsafe-cors = true')
+c = c.replace(':1317', ':${API_PORT}')
+c = c.replace(':9090', ':${GRPC_PORT}')
+c = c.replace(':9091', ':${GRPC_WEB_PORT}')
+c = c.replace('address = "tcp://localhost:', 'address = "tcp://0.0.0.0:')
+c = c.replace('address = "localhost:', 'address = "0.0.0.0:')
+with open(app_toml, 'w') as f:
+    f.write(c)
 
-# Update governance params in genesis.json
-log "Updating governance parameters in genesis.json..."
-$SED_CMD 's/"max_deposit_period": ".*"/"max_deposit_period": "100s"/' "$GENESIS_JSON_PATH"
-$SED_CMD 's/"voting_period": ".*"/"voting_period": "100s"/' "$GENESIS_JSON_PATH"
-$SED_CMD 's/"expedited_voting_period": ".*"/"expedited_voting_period": "90s"/' "$GENESIS_JSON_PATH"
-if [ $? -ne 0 ]; then
-    log "Error: Failed to update governance parameters in genesis.json."
-    exit 1
-fi
-
-# Configure ports in config.toml
-$SED_CMD "s/:26656/:$P2P_PORT/" "$CONFIG_TOML_PATH"
-$SED_CMD "s/:26657/:$RPC_PORT/" "$CONFIG_TOML_PATH"
-$SED_CMD 's|^laddr = "tcp://127.0.0.1:|laddr = "tcp://0.0.0.0:|' "$CONFIG_TOML_PATH"
-
-# Enable API and CORS
-log "Updating API and CORS settings..."
-$SED_CMD 's/enable = false/enable = true/' "$APP_TOML_PATH"
-$SED_CMD 's/swagger = false/swagger = true/' "$APP_TOML_PATH"
-$SED_CMD 's/enabled-unsafe-cors = false/enabled-unsafe-cors = true/' "$APP_TOML_PATH"
-$SED_CMD 's/cors_allowed_origins = \[\]/cors_allowed_origins = \["*"\]/' "$CONFIG_TOML_PATH"
+with open(config_toml) as f:
+    c = f.read()
+c = c.replace('cors_allowed_origins = []', 'cors_allowed_origins = ["*"]')
+c = c.replace(':26656', ':${P2P_PORT}')
+c = c.replace(':26657', ':${RPC_PORT}')
+c = c.replace('laddr = "tcp://127.0.0.1:', 'laddr = "tcp://0.0.0.0:')
+with open(config_toml, 'w') as f:
+    f.write(c)
+PYEOF
 
 # Initialize YieldIntermediatePool module account with 1 uvna to prevent invariant violations
 # This addresses the issue where empty module accounts break invariants when receiving funds

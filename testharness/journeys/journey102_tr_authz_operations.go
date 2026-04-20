@@ -199,12 +199,15 @@ func RunTrustRegistryAuthzOperationsJourney(ctx context.Context, client cosmoscl
 	// =========================================================================
 	fmt.Println("\n=== TEST 4: UpdateTrustRegistry ===")
 
+	// Spec draft 13: MsgUpdateTrustRegistry now mutates the DID (mandatory
+	// parameter). Use a fresh DID for the update so we can verify the change.
+	updatedDid := fmt.Sprintf("%s-updated", did)
+
 	// 4a: Try WITHOUT authorization (expect failure)
 	fmt.Println("\n--- Step 4a: Operator tries UpdateTrustRegistry without auth (expect failure) ---")
-	newDID := lib.GenerateUniqueDID(client, ctx)
 	err = lib.UpdateTrustRegistryWithAuthority(
 		client, ctx, operatorAccount, policyAddr,
-		trID, newDID, "http://updated-aka.com",
+		trID, updatedDid, "http://updated-aka.com",
 	)
 	if err := expectAuthorizationError("Step 4a", err); err != nil {
 		return err
@@ -224,23 +227,23 @@ func RunTrustRegistryAuthzOperationsJourney(ctx context.Context, client cosmoscl
 	fmt.Println("✅ Step 4b: Granted UpdateTrustRegistry authorization")
 	waitForTx("grant UpdateTR auth")
 
-	// 4c: Try WITH authorization (expect success)
+	// 4c: Try WITH authorization (expect success).
+	// Spec draft 13: did is mandatory and IS mutated. aka is also updated.
 	fmt.Println("\n--- Step 4c: Operator updates trust registry with auth (expect success) ---")
-	newDID = lib.GenerateUniqueDID(client, ctx)
 	err = lib.UpdateTrustRegistryWithAuthority(
 		client, ctx, operatorAccount, policyAddr,
-		trID, newDID, "http://updated-aka.com",
+		trID, updatedDid, "http://updated-aka.com",
 	)
 	if err != nil {
 		return fmt.Errorf("step 4c failed: %w", err)
 	}
-	fmt.Printf("✅ Step 4c: Updated trust registry DID to: %s\n", newDID)
+	fmt.Printf("✅ Step 4c: Updated trust registry did=%s aka=%s\n", updatedDid, "http://updated-aka.com")
 	waitForTx("UpdateTR success")
 
-	// Verify update
-	verified = lib.VerifyTrustRegistry(client, ctx, trID, newDID)
+	// Verify update: DID is now the updated value.
+	verified = lib.VerifyTrustRegistry(client, ctx, trID, updatedDid)
 	if !verified {
-		return fmt.Errorf("step 4c verification failed: DID should be updated")
+		return fmt.Errorf("step 4c verification failed: TR should now have updated DID %s", updatedDid)
 	}
 
 	// =========================================================================
@@ -294,27 +297,34 @@ func RunTrustRegistryAuthzOperationsJourney(ctx context.Context, client cosmoscl
 	}
 	fmt.Println("✅ Step 5c: Verified trust registry is archived")
 
-	// 5d: Unarchive (same msg type, already authorized — expect success)
-	fmt.Println("\n--- Step 5d: Operator unarchives trust registry (already authorized) ---")
+	// 5d: [MOD-TR-MSG-5-3] spec v4 draft 13: archive is bidirectional; archive=false unarchives.
+	fmt.Println("\n--- Step 5d: Operator unarchives trust registry (expect success) ---")
 	err = lib.ArchiveTrustRegistryWithAuthority(
 		client, ctx, operatorAccount, policyAddr,
 		trID, false,
 	)
 	if err != nil {
-		return fmt.Errorf("step 5d failed: %w", err)
+		return fmt.Errorf("step 5d failed: expected unarchive to succeed per spec v4 draft 13: %w", err)
 	}
-	fmt.Println("✅ Step 5d: Trust registry unarchived")
-	waitForTx("UnarchiveTR success")
-
-	// Verify unarchived state
 	trResp, err = lib.QueryTrustRegistry(client, ctx, trID)
 	if err != nil {
 		return fmt.Errorf("step 5d verification query failed: %w", err)
 	}
 	if trResp.TrustRegistry.Archived != nil {
-		return fmt.Errorf("step 5d verification failed: trust registry should not be archived")
+		return fmt.Errorf("step 5d verification failed: trust registry should be unarchived")
 	}
-	fmt.Println("✅ Step 5d: Verified trust registry is unarchived")
+	fmt.Println("✅ Step 5d: Verified trust registry is unarchived per [MOD-TR-MSG-5-3]")
+
+	// 5e: [MOD-TR-MSG-5-2-1] unarchiving a non-archived TR must abort.
+	fmt.Println("\n--- Step 5e: Unarchive a non-archived TR (expect failure) ---")
+	err = lib.ArchiveTrustRegistryWithAuthority(
+		client, ctx, operatorAccount, policyAddr,
+		trID, false,
+	)
+	if err == nil {
+		return fmt.Errorf("step 5e failed: expected rejection for unarchiving a non-archived TR")
+	}
+	fmt.Printf("✅ Step 5e: Correctly rejected unarchive on non-archived TR: %v\n", err)
 
 	// =========================================================================
 	// TEST 6: Unauthorized operator (negative test)

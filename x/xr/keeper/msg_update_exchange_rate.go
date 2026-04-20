@@ -20,17 +20,9 @@ func (ms msgServer) UpdateExchangeRate(ctx context.Context, msg *types.MsgUpdate
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 	now := sdkCtx.BlockTime()
 
-	// [AUTHZ-CHECK] Verify operator authorization via DE module
-	if ms.delegationKeeper != nil {
-		if err := ms.delegationKeeper.CheckOperatorAuthorization(
-			ctx,
-			msg.Authority,
-			msg.Operator,
-			"/verana.xr.v1.MsgUpdateExchangeRate",
-			now,
-		); err != nil {
-			return nil, fmt.Errorf("authorization check failed: %w", err)
-		}
+	// Authorization check: verify operator is authorized by authority
+	if err := ms.delegationKeeper.CheckOperatorAuthorization(ctx, msg.Authority, msg.Operator, "/verana.xr.v1.Msg/UpdateExchangeRate", now); err != nil {
+		return nil, errorsmod.Wrapf(types.ErrInvalidSigner, "authorization check failed: %s", err)
 	}
 
 	// Load ExchangeRate by id
@@ -44,8 +36,23 @@ func (ms msgServer) UpdateExchangeRate(ctx context.Context, msg *types.MsgUpdate
 		return nil, errorsmod.Wrapf(types.ErrExchangeRateNotActive, "exchange rate with id %d is not active", msg.Id)
 	}
 
+	// Check exchange rate is not expired
+	if !xr.Expires.After(now) {
+		return nil, errorsmod.Wrapf(types.ErrInvalidRequest, "exchange rate is expired")
+	}
+
 	// Update fields per spec
 	xr.Rate = msg.Rate
+
+	// Update rate_scale if provided (non-zero means "update")
+	if msg.RateScale != 0 {
+		xr.RateScale = msg.RateScale
+	}
+
+	// Update validity_duration if provided, then recalculate expires
+	if msg.ValidityDuration != nil {
+		xr.ValidityDuration = *msg.ValidityDuration
+	}
 	xr.Expires = now.Add(xr.ValidityDuration)
 	xr.Updated = now
 
@@ -60,7 +67,6 @@ func (ms msgServer) UpdateExchangeRate(ctx context.Context, msg *types.MsgUpdate
 			types.EventTypeUpdateExchangeRate,
 			sdk.NewAttribute(types.AttributeKeyID, fmt.Sprintf("%d", msg.Id)),
 			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Authority),
-			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
 			sdk.NewAttribute(types.AttributeKeyRate, msg.Rate),
 		),
 	)

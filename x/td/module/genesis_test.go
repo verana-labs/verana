@@ -21,16 +21,16 @@ func TestGenesis(t *testing.T) {
 		Params: types.DefaultParams(),
 		TrustDeposits: []types.TrustDepositRecord{
 			{
-				Account:   addr1,
-				Share:     math.LegacyNewDec(100),
-				Amount:    1000,
-				Claimable: 50,
+				Corporation: addr1,
+				Share:       math.LegacyNewDec(100),
+				Deposit:     1000,
+				Claimable:   50,
 			},
 			{
-				Account:   addr2,
-				Share:     math.LegacyNewDec(200),
-				Amount:    2000,
-				Claimable: 100,
+				Corporation: addr2,
+				Share:       math.LegacyNewDec(200),
+				Deposit:     2000,
+				Claimable:   100,
 			},
 		},
 	}
@@ -52,11 +52,11 @@ func TestGenesis(t *testing.T) {
 
 	// Verify that trust deposits were correctly stored in the keeper
 	for _, td := range genesisState.TrustDeposits {
-		stored, err := k.TrustDeposit.Get(ctx, td.Account)
+		stored, err := k.TrustDeposit.Get(ctx, td.Corporation)
 		require.NoError(t, err)
-		require.Equal(t, td.Account, stored.Account)
+		require.Equal(t, td.Corporation, stored.Corporation)
 		require.Equal(t, td.Share, stored.Share)
-		require.Equal(t, td.Amount, stored.Amount)
+		require.Equal(t, td.Deposit, stored.Deposit)
 		require.Equal(t, td.Claimable, stored.Claimable)
 	}
 }
@@ -86,17 +86,17 @@ func TestImportExportGenesisWithTrustDeposits(t *testing.T) {
 	addr2 := sdk.AccAddress([]byte("test_address2")).String()
 
 	td1 := types.TrustDeposit{
-		Account:   addr1,
-		Share:     math.LegacyNewDec(100),
-		Amount:    1000,
-		Claimable: 50,
+		Corporation: addr1,
+		Share:       math.LegacyNewDec(100),
+		Deposit:     1000,
+		Claimable:   50,
 	}
 
 	td2 := types.TrustDeposit{
-		Account:   addr2,
-		Share:     math.LegacyNewDec(200),
-		Amount:    2000,
-		Claimable: 100,
+		Corporation: addr2,
+		Share:       math.LegacyNewDec(200),
+		Deposit:     2000,
+		Claimable:   100,
 	}
 
 	// Save trust deposits

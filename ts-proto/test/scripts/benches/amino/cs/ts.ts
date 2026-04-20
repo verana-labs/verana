@@ -7,7 +7,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import Long from "long";
 import { MsgCreateCredentialSchema, OptionalUInt32 } from "../../../../../src/codec/verana/cs/v1/tx";
-import { CredentialSchemaPermManagementMode } from "../../../../../src/codec/verana/cs/v1/types";
+import { IssuerOnboardingMode, VerifierOnboardingMode } from "../../../../../src/codec/verana/cs/v1/types";
 import { MsgCreateCredentialSchemaAminoConverter } from "../../../../../src/helpers/aminoConverters";
 
 type AminoMsg = {
@@ -33,8 +33,10 @@ const JSON_SCHEMA =
   "{\"$id\":\"vpr:verana:VPR_CHAIN_ID/cs/v1/js/VPR_CREDENTIAL_SCHEMA_ID\",\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"title\":\"ExampleCredential\",\"description\":\"ExampleCredential using JsonSchema\",\"type\":\"object\",\"properties\":{\"credentialSubject\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\",\"format\":\"uri\"},\"firstName\":{\"type\":\"string\",\"minLength\":0,\"maxLength\":256},\"lastName\":{\"type\":\"string\",\"minLength\":1,\"maxLength\":256},\"expirationDate\":{\"type\":\"string\",\"format\":\"date\"},\"countryOfResidence\":{\"type\":\"string\",\"minLength\":2,\"maxLength\":2}},\"required\":[\"id\",\"lastName\",\"expirationDate\",\"countryOfResidence\"]}}}";
 
 function buildCreateCredentialSchemaMsg(): AminoMsg {
+  const address = "verana16mzeyu9l6kua2cdg9x0jk5g6e7h0kk8q6uadu4";
   const protoMsg = MsgCreateCredentialSchema.fromPartial({
-    creator: "verana16mzeyu9l6kua2cdg9x0jk5g6e7h0kk8q6uadu4",
+    corporation: address,
+    operator: address,
     trId: Long.fromNumber(1),
     jsonSchema: JSON_SCHEMA,
     issuerGrantorValidationValidityPeriod: { value: 0 } as OptionalUInt32,
@@ -42,8 +44,12 @@ function buildCreateCredentialSchemaMsg(): AminoMsg {
     issuerValidationValidityPeriod: { value: 0 } as OptionalUInt32,
     verifierValidationValidityPeriod: { value: 180 } as OptionalUInt32,
     holderValidationValidityPeriod: { value: 0 } as OptionalUInt32,
-    issuerPermManagementMode: CredentialSchemaPermManagementMode.GRANTOR_VALIDATION,
-    verifierPermManagementMode: CredentialSchemaPermManagementMode.OPEN,
+    issuerOnboardingMode: IssuerOnboardingMode.ISSUER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS,
+    verifierOnboardingMode: VerifierOnboardingMode.VERIFIER_ONBOARDING_MODE_OPEN,
+    holderOnboardingMode: 0,
+    pricingAssetType: 1,
+    pricingAsset: "tu",
+    digestAlgorithm: "sha256",
   });
 
   return {

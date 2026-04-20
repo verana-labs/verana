@@ -29,8 +29,9 @@ type (
 		// State management
 		Schema collections.Schema
 		//Params           collections.Item[types.Params]
-		CredentialSchema collections.Map[uint64, types.CredentialSchema]
-		Counter          collections.Map[string, uint64]
+		CredentialSchema             collections.Map[uint64, types.CredentialSchema]
+		Counter                      collections.Map[string, uint64]
+		SchemaAuthorizationPolicies  collections.Map[uint64, types.SchemaAuthorizationPolicy]
 	}
 )
 
@@ -72,6 +73,13 @@ func NewKeeper(
 			"counter",
 			collections.StringKey,
 			collections.Uint64Value,
+		),
+		SchemaAuthorizationPolicies: collections.NewMap(
+			sb,
+			types.SchemaAuthorizationPolicyKey,
+			"schema_authorization_policy",
+			collections.Uint64Key,
+			codec.CollValue[types.SchemaAuthorizationPolicy](cdc),
 		),
 	}
 
@@ -131,9 +139,9 @@ func (k Keeper) GetNextID(ctx sdk.Context, entityType string) (uint64, error) {
 	return nextID, nil
 }
 
-func CreateMsgWithValidityPeriods(authority string, operator string, trID uint64, jsonSchema string, issuerGrantor, verifierGrantor, issuer, verifier, holder uint32, issuerMode, verifierMode uint32, pricingAssetType uint32, pricingAsset string, digestAlgorithm string) *types.MsgCreateCredentialSchema {
+func CreateMsgWithValidityPeriods(authority string, operator string, trID uint64, jsonSchema string, issuerGrantor, verifierGrantor, issuer, verifier, holder uint32, issuerMode, verifierMode, holderMode uint32, pricingAssetType uint32, pricingAsset string, digestAlgorithm string) *types.MsgCreateCredentialSchema {
 	msg := &types.MsgCreateCredentialSchema{
-		Authority:                               authority,
+		Corporation:                             authority,
 		Operator:                                operator,
 		TrId:                                    trID,
 		JsonSchema:                              jsonSchema,
@@ -142,8 +150,9 @@ func CreateMsgWithValidityPeriods(authority string, operator string, trID uint64
 		IssuerValidationValidityPeriod:          &types.OptionalUInt32{Value: issuer},
 		VerifierValidationValidityPeriod:        &types.OptionalUInt32{Value: verifier},
 		HolderValidationValidityPeriod:          &types.OptionalUInt32{Value: holder},
-		IssuerPermManagementMode:                issuerMode,
-		VerifierPermManagementMode:              verifierMode,
+		IssuerOnboardingMode:                    issuerMode,
+		VerifierOnboardingMode:                  verifierMode,
+		HolderOnboardingMode:                    holderMode,
 		PricingAssetType:                        pricingAssetType,
 		PricingAsset:                            pricingAsset,
 		DigestAlgorithm:                         digestAlgorithm,
@@ -154,9 +163,9 @@ func CreateMsgWithValidityPeriods(authority string, operator string, trID uint64
 
 func CreateUpdateMsgWithValidityPeriods(authority string, operator string, id uint64, issuerGrantor, verifierGrantor, issuer, verifier, holder uint32) *types.MsgUpdateCredentialSchema {
 	msg := &types.MsgUpdateCredentialSchema{
-		Authority: authority,
-		Operator:  operator,
-		Id:        id,
+		Corporation: authority,
+		Operator:    operator,
+		Id:          id,
 	}
 
 	// Set optional fields using wrapper messages (0 is valid - means never expires)

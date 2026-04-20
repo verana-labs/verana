@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"cosmossdk.io/collections"
@@ -20,12 +21,23 @@ func (ms msgServer) GrantOperatorAuthorization(goCtx context.Context, msg *types
 	// [AUTHZ-CHECK-1] Verify operator authorization for this (authority, operator) pair
 	if err := ms.CheckOperatorAuthorization(
 		ctx,
-		msg.Authority,
+		msg.Corporation,
 		msg.Operator,
 		"/verana.de.v1.MsgGrantOperatorAuthorization",
 		now,
 	); err != nil {
 		return nil, err
+	}
+
+	// [MOD-DE-MSG-3] Self-grant privilege escalation guard.
+	// An operator invoking this method cannot grant itself (or expand its own
+	// delegation) new msg_types — that would bypass the corporation's intent.
+	// Self-grants are only permitted via a group proposal (operator == "").
+	// Without this guard, an operator holding only
+	// [MsgGrantOperatorAuthorization] authorization could call Grant with
+	// grantee = self and msg_types = [anything], escalating to full delegation.
+	if msg.Operator != "" && msg.Grantee == msg.Operator {
+		return nil, fmt.Errorf("operator cannot grant authorization to itself; use a group proposal")
 	}
 
 	// Expiration must be in the future if specified
@@ -44,7 +56,7 @@ func (ms msgServer) GrantOperatorAuthorization(goCtx context.Context, msg *types
 	// a VSOperatorAuthorization, verify that no OperatorAuthorization exists for
 	// the same (authority, grantee) pair. Implement this in the
 	// GrantVSOperatorAuthorization handler.
-	vsKey := collections.Join(msg.Authority, msg.Grantee)
+	vsKey := collections.Join(msg.Corporation, msg.Grantee)
 	hasVSOA, err := ms.VSOperatorAuthorizations.Has(ctx, vsKey)
 	if err != nil {
 		return nil, fmt.Errorf("failed to check VSOperatorAuthorization: %w", err)
@@ -56,14 +68,21 @@ func (ms msgServer) GrantOperatorAuthorization(goCtx context.Context, msg *types
 	// [MOD-DE-MSG-3-4] Execution
 
 	// 1. Create or update OperatorAuthorization
-	oaKey := collections.Join(msg.Authority, msg.Grantee)
+	oaKey := collections.Join(msg.Corporation, msg.Grantee)
+
+	// Reset spend ledger when re-granting so new limit takes effect from zero
+	if err := ms.Keeper.OperatorAuthorizationUsage.Remove(ctx, oaKey); err != nil && !errors.Is(err, collections.ErrNotFound) {
+		return nil, fmt.Errorf("failed to reset usage ledger: %w", err)
+	}
+
 	oa := types.OperatorAuthorization{
-		Authority:  msg.Authority,
-		Operator:   msg.Grantee,
-		MsgTypes:   msg.MsgTypes,
-		SpendLimit: msg.AuthzSpendLimit,
-		Expiration: msg.Expiration,
-		Period:     msg.AuthzSpendLimitPeriod,
+		Corporation:  msg.Corporation,
+		Operator:     msg.Grantee,
+		MsgTypes:     msg.MsgTypes,
+		SpendLimit:   msg.AuthzSpendLimit,
+		Expiration:   msg.Expiration,
+		Period:       msg.AuthzSpendLimitPeriod,
+		FeeSpendLimit: msg.FeeSpendLimit,
 	}
 	if err := ms.OperatorAuthorizations.Set(ctx, oaKey, oa); err != nil {
 		return nil, fmt.Errorf("failed to set OperatorAuthorization: %w", err)
@@ -72,14 +91,14 @@ func (ms msgServer) GrantOperatorAuthorization(goCtx context.Context, msg *types
 	// 2. Handle fee grant
 	if !msg.WithFeegrant {
 		// Revoke any existing fee grant
-		if err := ms.RevokeFeeAllowance(ctx, msg.Authority, msg.Grantee); err != nil {
+		if err := ms.RevokeFeeAllowance(ctx, msg.Corporation, msg.Grantee); err != nil {
 			return nil, fmt.Errorf("failed to revoke fee allowance: %w", err)
 		}
 	} else {
 		// Grant fee allowance
 		if err := ms.GrantFeeAllowance(
 			ctx,
-			msg.Authority,
+			msg.Corporation,
 			msg.Grantee,
 			msg.MsgTypes,
 			msg.Expiration,
@@ -94,7 +113,7 @@ func (ms msgServer) GrantOperatorAuthorization(goCtx context.Context, msg *types
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeGrantOperatorAuthorization,
-			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Authority),
+			sdk.NewAttribute(types.AttributeKeyCorporation, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyGrantee, msg.Grantee),
 			sdk.NewAttribute(types.AttributeKeyWithFeegrant, fmt.Sprintf("%t", msg.WithFeegrant)),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),

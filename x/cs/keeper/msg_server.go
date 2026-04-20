@@ -24,19 +24,19 @@ var _ types.MsgServer = msgServer{}
 
 func (ms msgServer) CreateCredentialSchema(goCtx context.Context, msg *types.MsgCreateCredentialSchema) (*types.MsgCreateCredentialSchemaResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	now := ctx.BlockTime()
 
 	// [MOD-CS-MSG-1-2-1] [AUTHZ-CHECK] Verify operator authorization
-	if ms.delegationKeeper != nil {
-		if err := ms.delegationKeeper.CheckOperatorAuthorization(
-			ctx,
-			msg.Authority,
-			msg.Operator,
-			"/verana.cs.v1.MsgCreateCredentialSchema",
-			now,
-		); err != nil {
-			return nil, fmt.Errorf("authorization check failed: %w", err)
-		}
+	if ms.delegationKeeper == nil {
+		return nil, fmt.Errorf("delegation keeper is required for operator authorization")
+	}
+	if err := ms.delegationKeeper.CheckOperatorAuthorization(
+		ctx,
+		msg.Corporation,
+		msg.Operator,
+		"/verana.cs.v1.MsgCreateCredentialSchema",
+		ctx.BlockTime(),
+	); err != nil {
+		return nil, fmt.Errorf("authorization check failed: %w", err)
 	}
 
 	// Generate next ID
@@ -55,17 +55,6 @@ func (ms msgServer) CreateCredentialSchema(goCtx context.Context, msg *types.Msg
 		return nil, err
 	}
 
-	ctx.EventManager().EmitEvents(sdk.Events{
-		sdk.NewEvent(
-			types.EventTypeCreateCredentialSchema,
-			sdk.NewAttribute(types.AttributeKeyId, strconv.FormatUint(nextID, 10)),
-			sdk.NewAttribute(types.AttributeKeyTrId, strconv.FormatUint(msg.TrId, 10)),
-			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Authority),
-			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
-			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
-		),
-	})
-
 	return &types.MsgCreateCredentialSchemaResponse{
 		Id: nextID,
 	}, nil
@@ -76,16 +65,17 @@ func (ms msgServer) UpdateCredentialSchema(goCtx context.Context, msg *types.Msg
 	now := ctx.BlockTime()
 
 	// [MOD-CS-MSG-2-2-1] [AUTHZ-CHECK] Verify operator authorization
-	if ms.delegationKeeper != nil {
-		if err := ms.delegationKeeper.CheckOperatorAuthorization(
-			ctx,
-			msg.Authority,
-			msg.Operator,
-			"/verana.cs.v1.MsgUpdateCredentialSchema",
-			now,
-		); err != nil {
-			return nil, fmt.Errorf("authorization check failed: %w", err)
-		}
+	if ms.delegationKeeper == nil {
+		return nil, fmt.Errorf("delegation keeper is required for operator authorization")
+	}
+	if err := ms.delegationKeeper.CheckOperatorAuthorization(
+		ctx,
+		msg.Corporation,
+		msg.Operator,
+		"/verana.cs.v1.MsgUpdateCredentialSchema",
+		now,
+	); err != nil {
+		return nil, fmt.Errorf("authorization check failed: %w", err)
 	}
 
 	// Get credential schema
@@ -94,13 +84,18 @@ func (ms msgServer) UpdateCredentialSchema(goCtx context.Context, msg *types.Msg
 		return nil, fmt.Errorf("credential schema not found: %w", err)
 	}
 
+	// [MOD-CS-MSG-2-2-1] Archived schemas cannot be updated
+	if cs.Archived != nil {
+		return nil, fmt.Errorf("cannot update an archived credential schema")
+	}
+
 	// [MOD-CS-MSG-2-2-1] Check trust registry authority
 	tr, err := ms.trustRegistryKeeper.GetTrustRegistry(ctx, cs.TrId)
 	if err != nil {
 		return nil, fmt.Errorf("trust registry not found: %w", err)
 	}
-	if tr.Controller != msg.Authority {
-		return nil, fmt.Errorf("authority is not the controller of the trust registry")
+	if tr.Corporation != msg.Corporation {
+		return nil, fmt.Errorf("corporation does not match the trust registry corporation")
 	}
 
 	// Validate validity periods against params
@@ -109,12 +104,22 @@ func (ms msgServer) UpdateCredentialSchema(goCtx context.Context, msg *types.Msg
 		return nil, fmt.Errorf("invalid validity period: %w", err)
 	}
 
-	// [MOD-CS-MSG-2-3] Update mutable fields
-	cs.IssuerGrantorValidationValidityPeriod = msg.GetIssuerGrantorValidationValidityPeriod().GetValue()
-	cs.VerifierGrantorValidationValidityPeriod = msg.GetVerifierGrantorValidationValidityPeriod().GetValue()
-	cs.IssuerValidationValidityPeriod = msg.GetIssuerValidationValidityPeriod().GetValue()
-	cs.VerifierValidationValidityPeriod = msg.GetVerifierValidationValidityPeriod().GetValue()
-	cs.HolderValidationValidityPeriod = msg.GetHolderValidationValidityPeriod().GetValue()
+	// [MOD-CS-MSG-2-3] Update mutable fields (only overwrite if the field is explicitly provided)
+	if msg.GetIssuerGrantorValidationValidityPeriod() != nil {
+		cs.IssuerGrantorValidationValidityPeriod = msg.GetIssuerGrantorValidationValidityPeriod().GetValue()
+	}
+	if msg.GetVerifierGrantorValidationValidityPeriod() != nil {
+		cs.VerifierGrantorValidationValidityPeriod = msg.GetVerifierGrantorValidationValidityPeriod().GetValue()
+	}
+	if msg.GetIssuerValidationValidityPeriod() != nil {
+		cs.IssuerValidationValidityPeriod = msg.GetIssuerValidationValidityPeriod().GetValue()
+	}
+	if msg.GetVerifierValidationValidityPeriod() != nil {
+		cs.VerifierValidationValidityPeriod = msg.GetVerifierValidationValidityPeriod().GetValue()
+	}
+	if msg.GetHolderValidationValidityPeriod() != nil {
+		cs.HolderValidationValidityPeriod = msg.GetHolderValidationValidityPeriod().GetValue()
+	}
 	cs.Modified = now
 
 	if err := ms.CredentialSchema.Set(ctx, cs.Id, cs); err != nil {
@@ -126,13 +131,13 @@ func (ms msgServer) UpdateCredentialSchema(goCtx context.Context, msg *types.Msg
 			types.EventTypeUpdateCredentialSchema,
 			sdk.NewAttribute(types.AttributeKeyId, strconv.FormatUint(msg.Id, 10)),
 			sdk.NewAttribute(types.AttributeKeyTrId, strconv.FormatUint(cs.TrId, 10)),
-			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Authority),
+			sdk.NewAttribute(types.AttributeKeyCorporation, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
-			sdk.NewAttribute(types.AttributeKeyIssuerGrantorValidationValidityPeriod, strconv.FormatUint(uint64(msg.GetIssuerGrantorValidationValidityPeriod().GetValue()), 10)),
-			sdk.NewAttribute(types.AttributeKeyVerifierGrantorValidationValidityPeriod, strconv.FormatUint(uint64(msg.GetVerifierGrantorValidationValidityPeriod().GetValue()), 10)),
-			sdk.NewAttribute(types.AttributeKeyIssuerValidationValidityPeriod, strconv.FormatUint(uint64(msg.GetIssuerValidationValidityPeriod().GetValue()), 10)),
-			sdk.NewAttribute(types.AttributeKeyVerifierValidationValidityPeriod, strconv.FormatUint(uint64(msg.GetVerifierValidationValidityPeriod().GetValue()), 10)),
-			sdk.NewAttribute(types.AttributeKeyHolderValidationValidityPeriod, strconv.FormatUint(uint64(msg.GetHolderValidationValidityPeriod().GetValue()), 10)),
+			sdk.NewAttribute(types.AttributeKeyIssuerGrantorValidationValidityPeriod, strconv.FormatUint(uint64(cs.IssuerGrantorValidationValidityPeriod), 10)),
+			sdk.NewAttribute(types.AttributeKeyVerifierGrantorValidationValidityPeriod, strconv.FormatUint(uint64(cs.VerifierGrantorValidationValidityPeriod), 10)),
+			sdk.NewAttribute(types.AttributeKeyIssuerValidationValidityPeriod, strconv.FormatUint(uint64(cs.IssuerValidationValidityPeriod), 10)),
+			sdk.NewAttribute(types.AttributeKeyVerifierValidationValidityPeriod, strconv.FormatUint(uint64(cs.VerifierValidationValidityPeriod), 10)),
+			sdk.NewAttribute(types.AttributeKeyHolderValidationValidityPeriod, strconv.FormatUint(uint64(cs.HolderValidationValidityPeriod), 10)),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
 		),
 	})
@@ -178,16 +183,17 @@ func (ms msgServer) ArchiveCredentialSchema(goCtx context.Context, msg *types.Ms
 	now := ctx.BlockTime()
 
 	// [MOD-CS-MSG-3-2-1] [AUTHZ-CHECK] Verify operator authorization
-	if ms.delegationKeeper != nil {
-		if err := ms.delegationKeeper.CheckOperatorAuthorization(
-			ctx,
-			msg.Authority,
-			msg.Operator,
-			"/verana.cs.v1.MsgArchiveCredentialSchema",
-			now,
-		); err != nil {
-			return nil, fmt.Errorf("authorization check failed: %w", err)
-		}
+	if ms.delegationKeeper == nil {
+		return nil, fmt.Errorf("delegation keeper is required for operator authorization")
+	}
+	if err := ms.delegationKeeper.CheckOperatorAuthorization(
+		ctx,
+		msg.Corporation,
+		msg.Operator,
+		"/verana.cs.v1.MsgArchiveCredentialSchema",
+		now,
+	); err != nil {
+		return nil, fmt.Errorf("authorization check failed: %w", err)
 	}
 
 	// Get credential schema
@@ -201,36 +207,31 @@ func (ms msgServer) ArchiveCredentialSchema(goCtx context.Context, msg *types.Ms
 	if err != nil {
 		return nil, fmt.Errorf("trust registry not found: %w", err)
 	}
-	if tr.Controller != msg.Authority {
-		return nil, fmt.Errorf("authority is not the controller of the trust registry")
+	if tr.Corporation != msg.Corporation {
+		return nil, fmt.Errorf("corporation does not match the trust registry corporation")
 	}
 
-	// [MOD-CS-MSG-3-2-1] Check archive state
+	// [MOD-CS-MSG-3] Spec v4 draft 13: archive is a bidirectional toggle.
+	// MOD-CS-MSG-3-3: if archive is false, set cs.archived to null.
+	archiveStatus := "archived"
 	if msg.Archive {
 		if cs.Archived != nil {
 			return nil, fmt.Errorf("credential schema is already archived")
 		}
+		cs.Archived = &now
 	} else {
 		if cs.Archived == nil {
 			return nil, fmt.Errorf("credential schema is not archived")
 		}
+		cs.Archived = nil
+		archiveStatus = "unarchived"
 	}
 
-	// [MOD-CS-MSG-3-3] Update archive state and modified timestamp
-	if msg.Archive {
-		cs.Archived = &now
-	} else {
-		cs.Archived = nil
-	}
+	// [MOD-CS-MSG-3-3] Update modified timestamp
 	cs.Modified = now
 
 	if err := ms.CredentialSchema.Set(ctx, cs.Id, cs); err != nil {
 		return nil, fmt.Errorf("failed to update credential schema: %w", err)
-	}
-
-	archiveStatus := "archived"
-	if !msg.Archive {
-		archiveStatus = "unarchived"
 	}
 
 	ctx.EventManager().EmitEvents(sdk.Events{
@@ -238,7 +239,7 @@ func (ms msgServer) ArchiveCredentialSchema(goCtx context.Context, msg *types.Ms
 			types.EventTypeArchiveCredentialSchema,
 			sdk.NewAttribute(types.AttributeKeyId, strconv.FormatUint(msg.Id, 10)),
 			sdk.NewAttribute(types.AttributeKeyTrId, strconv.FormatUint(cs.TrId, 10)),
-			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Authority),
+			sdk.NewAttribute(types.AttributeKeyCorporation, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
 			sdk.NewAttribute(types.AttributeKeyArchiveStatus, archiveStatus),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),

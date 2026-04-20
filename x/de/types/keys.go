@@ -20,6 +20,9 @@ var (
 	ParamsKey = collections.NewPrefix("p_de")
 	// OperatorAuthorizationKey is the prefix for OperatorAuthorization storage
 	OperatorAuthorizationKey = collections.NewPrefix("oa_de")
+	// OperatorAuthorizationUsageKey is the prefix for OperatorAuthorizationUsage
+	// storage — per-authorization spend-limit ledger for [AUTHZ-CHECK-1].
+	OperatorAuthorizationUsageKey = collections.NewPrefix("oau_de")
 	// FeeGrantKey is the prefix for FeeGrant storage
 	FeeGrantKey = collections.NewPrefix("fg_de")
 	// VSOperatorAuthorizationKey is the prefix for VSOperatorAuthorization storage

@@ -113,38 +113,6 @@
         ]
       }
     },
-    "/verana.perm.v1.Msg/CreatePermission": {
-      "post": {
-        "operationId": "Msg_CreatePermission",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/verana.perm.v1.MsgCreatePermissionResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/google.rpc.Status"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/verana.perm.v1.MsgCreatePermission"
-            }
-          }
-        ],
-        "tags": [
-          "Msg"
-        ]
-      }
-    },
     "/verana.perm.v1.Msg/CreateRootPermission": {
       "post": {
         "operationId": "Msg_CreateRootPermission",
@@ -265,6 +233,39 @@
             "required": true,
             "schema": {
               "$ref": "#/definitions/verana.perm.v1.MsgRevokePermission"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.perm.v1.Msg/SelfCreatePermission": {
+      "post": {
+        "summary": "[MOD-PERM-MSG-14] Self Create Permission (OPEN mode)",
+        "operationId": "Msg_SelfCreatePermission",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.perm.v1.MsgSelfCreatePermissionResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.perm.v1.MsgSelfCreatePermission"
             }
           }
         ],
@@ -448,7 +449,7 @@
     "verana.perm.v1.MsgAdjustPermission": {
       "type": "object",
       "properties": {
-        "authority": {
+        "corporation": {
           "type": "string"
         },
         "operator": {
@@ -471,13 +472,13 @@
     "verana.perm.v1.MsgCancelPermissionVPLastRequest": {
       "type": "object",
       "properties": {
-        "authority": {
+        "corporation": {
           "type": "string",
-          "title": "authority is the group account on whose behalf this message is executed"
+          "title": "corporation is the group account on whose behalf this message is executed"
         },
         "operator": {
           "type": "string",
-          "title": "operator is the account authorized by the authority to run this Msg"
+          "title": "operator is the account authorized by the corporation to run this Msg"
         },
         "id": {
           "type": "string",
@@ -492,13 +493,13 @@
     "verana.perm.v1.MsgCreateOrUpdatePermissionSession": {
       "type": "object",
       "properties": {
-        "authority": {
+        "corporation": {
           "type": "string",
-          "title": "authority is the group account on whose behalf this message is executed"
+          "title": "corporation is the group account on whose behalf this message is executed"
         },
         "operator": {
           "type": "string",
-          "title": "operator is the account authorized by the authority to run this Msg (vs_operator)"
+          "title": "operator is the account authorized by the corporation to run this Msg (vs_operator)"
         },
         "id": {
           "type": "string",
@@ -538,10 +539,132 @@
         }
       }
     },
-    "verana.perm.v1.MsgCreatePermission": {
+    "verana.perm.v1.MsgCreateRootPermission": {
       "type": "object",
       "properties": {
-        "authority": {
+        "corporation": {
+          "type": "string"
+        },
+        "operator": {
+          "type": "string"
+        },
+        "schema_id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "did": {
+          "type": "string"
+        },
+        "effective_from": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "effective_until": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "validation_fees": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "issuance_fees": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "verification_fees": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "permission_type": {
+          "$ref": "#/definitions/verana.perm.v1.PermissionType",
+          "description": "[MOD-PERM-MSG-7-1] permission_type mandatory per spec v4 draft 13:\none of ISSUER, VERIFIER, ISSUER_GRANTOR, VERIFIER_GRANTOR."
+        },
+        "vs_operator": {
+          "type": "string",
+          "description": "[MOD-PERM-MSG-7-1] vs_operator mandatory per spec v4 draft 13."
+        }
+      }
+    },
+    "verana.perm.v1.MsgCreateRootPermissionResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uint64",
+          "title": "ID of the created permission"
+        }
+      }
+    },
+    "verana.perm.v1.MsgRenewPermissionVP": {
+      "type": "object",
+      "properties": {
+        "corporation": {
+          "type": "string"
+        },
+        "operator": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string",
+          "format": "uint64",
+          "title": "ID of the permission to renew"
+        },
+        "permission_type": {
+          "$ref": "#/definitions/verana.perm.v1.PermissionType",
+          "description": "[MOD-PERM-MSG-2-1] permission_type mandatory per spec v4 draft 13.\nMust match the existing permission's type."
+        }
+      },
+      "title": "MsgRenewPermissionVP represents a message to renew a permission validation process"
+    },
+    "verana.perm.v1.MsgRenewPermissionVPResponse": {
+      "type": "object",
+      "title": "MsgRenewPermissionVPResponse defines the Msg/RenewPermissionVP response type"
+    },
+    "verana.perm.v1.MsgRepayPermissionSlashedTrustDeposit": {
+      "type": "object",
+      "properties": {
+        "corporation": {
+          "type": "string"
+        },
+        "operator": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "amount": {
+          "type": "string",
+          "format": "uint64"
+        }
+      }
+    },
+    "verana.perm.v1.MsgRepayPermissionSlashedTrustDepositResponse": {
+      "type": "object"
+    },
+    "verana.perm.v1.MsgRevokePermission": {
+      "type": "object",
+      "properties": {
+        "corporation": {
+          "type": "string"
+        },
+        "operator": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string",
+          "format": "uint64",
+          "title": "Permission ID"
+        }
+      }
+    },
+    "verana.perm.v1.MsgRevokePermissionResponse": {
+      "type": "object"
+    },
+    "verana.perm.v1.MsgSelfCreatePermission": {
+      "type": "object",
+      "properties": {
+        "corporation": {
           "type": "string"
         },
         "operator": {
@@ -602,7 +725,7 @@
         }
       }
     },
-    "verana.perm.v1.MsgCreatePermissionResponse": {
+    "verana.perm.v1.MsgSelfCreatePermissionResponse": {
       "type": "object",
       "properties": {
         "id": {
@@ -610,123 +733,17 @@
           "format": "uint64"
         }
       }
-    },
-    "verana.perm.v1.MsgCreateRootPermission": {
-      "type": "object",
-      "properties": {
-        "authority": {
-          "type": "string"
-        },
-        "operator": {
-          "type": "string"
-        },
-        "schema_id": {
-          "type": "string",
-          "format": "uint64"
-        },
-        "did": {
-          "type": "string"
-        },
-        "effective_from": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "effective_until": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "validation_fees": {
-          "type": "string",
-          "format": "uint64"
-        },
-        "issuance_fees": {
-          "type": "string",
-          "format": "uint64"
-        },
-        "verification_fees": {
-          "type": "string",
-          "format": "uint64"
-        }
-      }
-    },
-    "verana.perm.v1.MsgCreateRootPermissionResponse": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "format": "uint64",
-          "title": "ID of the created permission"
-        }
-      }
-    },
-    "verana.perm.v1.MsgRenewPermissionVP": {
-      "type": "object",
-      "properties": {
-        "authority": {
-          "type": "string"
-        },
-        "operator": {
-          "type": "string"
-        },
-        "id": {
-          "type": "string",
-          "format": "uint64",
-          "title": "ID of the permission to renew"
-        }
-      },
-      "title": "MsgRenewPermissionVP represents a message to renew a permission validation process"
-    },
-    "verana.perm.v1.MsgRenewPermissionVPResponse": {
-      "type": "object",
-      "title": "MsgRenewPermissionVPResponse defines the Msg/RenewPermissionVP response type"
-    },
-    "verana.perm.v1.MsgRepayPermissionSlashedTrustDeposit": {
-      "type": "object",
-      "properties": {
-        "authority": {
-          "type": "string"
-        },
-        "operator": {
-          "type": "string"
-        },
-        "id": {
-          "type": "string",
-          "format": "uint64"
-        }
-      }
-    },
-    "verana.perm.v1.MsgRepayPermissionSlashedTrustDepositResponse": {
-      "type": "object"
-    },
-    "verana.perm.v1.MsgRevokePermission": {
-      "type": "object",
-      "properties": {
-        "authority": {
-          "type": "string"
-        },
-        "operator": {
-          "type": "string"
-        },
-        "id": {
-          "type": "string",
-          "format": "uint64",
-          "title": "Permission ID"
-        }
-      }
-    },
-    "verana.perm.v1.MsgRevokePermissionResponse": {
-      "type": "object"
     },
     "verana.perm.v1.MsgSetPermissionVPToValidated": {
       "type": "object",
       "properties": {
-        "authority": {
+        "corporation": {
           "type": "string",
-          "title": "authority is the group account on whose behalf this message is executed"
+          "title": "corporation is the group account on whose behalf this message is executed"
         },
         "operator": {
           "type": "string",
-          "title": "operator is the account authorized by the authority to run this Msg"
+          "title": "operator is the account authorized by the corporation to run this Msg"
         },
         "id": {
           "type": "string",
@@ -748,7 +765,7 @@
           "type": "string",
           "format": "uint64"
         },
-        "vp_summary_digest_sri": {
+        "vp_summary_digest": {
           "type": "string"
         },
         "issuance_fee_discount": {
@@ -772,13 +789,13 @@
     "verana.perm.v1.MsgSlashPermissionTrustDeposit": {
       "type": "object",
       "properties": {
-        "authority": {
+        "corporation": {
           "type": "string",
-          "title": "authority is the group account on whose behalf this message is executed"
+          "title": "corporation is the group account on whose behalf this message is executed"
         },
         "operator": {
           "type": "string",
-          "title": "operator is the account authorized by the authority to run this Msg"
+          "title": "operator is the account authorized by the corporation to run this Msg"
         },
         "id": {
           "type": "string",
@@ -787,6 +804,10 @@
         "amount": {
           "type": "string",
           "format": "uint64"
+        },
+        "reason": {
+          "type": "string",
+          "title": "[MOD-PERM-MSG-12-1] reason for the slash (mandatory per spec v4 draft 13)"
         }
       }
     },
@@ -796,13 +817,13 @@
     "verana.perm.v1.MsgStartPermissionVP": {
       "type": "object",
       "properties": {
-        "authority": {
+        "corporation": {
           "type": "string",
-          "title": "authority is the group account on whose behalf this message is executed"
+          "title": "corporation is the group account on whose behalf this message is executed"
         },
         "operator": {
           "type": "string",
-          "title": "operator is the account authorized by the authority to run this Msg"
+          "title": "operator is the account authorized by the corporation to run this Msg"
         },
         "type": {
           "$ref": "#/definitions/verana.perm.v1.PermissionType"

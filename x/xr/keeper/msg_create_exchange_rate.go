@@ -18,6 +18,15 @@ func (ms msgServer) CreateExchangeRate(ctx context.Context, msg *types.MsgCreate
 		return nil, err
 	}
 
+	// Load and check params
+	params, err := ms.Params.Get(ctx)
+	if err != nil {
+		return nil, errorsmod.Wrap(err, "failed to load params")
+	}
+	if msg.ValidityDuration > params.MaxValidityDuration {
+		return nil, errorsmod.Wrapf(types.ErrInvalidRequest, "validity_duration %s exceeds max_validity_duration %s", msg.ValidityDuration, params.MaxValidityDuration)
+	}
+
 	// Governance authority check
 	authority, err := ms.addressCodec.StringToBytes(msg.Authority)
 	if err != nil {
@@ -56,7 +65,7 @@ func (ms msgServer) CreateExchangeRate(ctx context.Context, msg *types.MsgCreate
 		RateScale:        msg.RateScale,
 		ValidityDuration: msg.ValidityDuration,
 		Expires:          blockTime.Add(msg.ValidityDuration),
-		State:            false,
+		State:            true,
 		Updated:          blockTime,
 	}
 

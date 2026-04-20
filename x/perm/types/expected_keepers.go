@@ -45,12 +45,21 @@ type TrustRegistryKeeper interface {
 
 // TrustDepositKeeper defines the expected interface for the Trust Deposit module.
 type TrustDepositKeeper interface {
-	AdjustTrustDeposit(ctx sdk.Context, account string, augend int64) error
+	AdjustTrustDeposit(ctx sdk.Context, account string, augend int64, reason string) error
 	AdjustTrustDepositOnBehalf(ctx sdk.Context, account string, funder sdk.AccAddress, amount int64) error
 	GetTrustDepositRate(ctx sdk.Context) math.LegacyDec
 	GetUserAgentRewardRate(ctx sdk.Context) math.LegacyDec
 	GetWalletUserAgentRewardRate(ctx sdk.Context) math.LegacyDec
 	BurnEcosystemSlashedTrustDeposit(ctx sdk.Context, account string, amount uint64) error
+}
+
+// DigestKeeper defines the expected interface for the Digest (DI) module.
+// Used by [MOD-PERM-MSG-10] to persist credential digests discovered during
+// permission-session creation. Called keeper-to-keeper (no signer check) per
+// spec [MOD-DI-MSG-1] header: "This method can be called directly by Create
+// or Update Permission Session module with no checks."
+type DigestKeeper interface {
+	StoreDigestModuleCall(ctx context.Context, authority, digest, digestAlgorithm string) error
 }
 
 // DelegationKeeper defines the expected interface for the Delegation Engine (DE) module.

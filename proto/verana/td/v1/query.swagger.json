@@ -16,7 +16,7 @@
     "application/json"
   ],
   "paths": {
-    "/verana/td/v1/get/{account}": {
+    "/verana/td/v1/get/{corporation}": {
       "get": {
         "operationId": "Query_GetTrustDeposit",
         "responses": {
@@ -35,7 +35,7 @@
         },
         "parameters": [
           {
-            "name": "account",
+            "name": "corporation",
             "in": "path",
             "required": true,
             "type": "string"
@@ -124,6 +124,10 @@
         "yield_intermediate_pool": {
           "type": "string",
           "title": "yield_intermediate_pool is the Bech32 string for the Yield Intermediate Pool module account"
+        },
+        "trust_deposit_block_reward_share": {
+          "type": "string",
+          "title": "trust_deposit_block_reward_share is the fraction of block rewards allocated to trust deposit yield (e.g. \"0.2\" for 20%)"
         }
       },
       "description": "Params defines the parameters for the module."
@@ -150,13 +154,13 @@
     "verana.td.v1.TrustDeposit": {
       "type": "object",
       "properties": {
-        "account": {
+        "corporation": {
           "type": "string"
         },
         "share": {
           "type": "string"
         },
-        "amount": {
+        "deposit": {
           "type": "string",
           "format": "uint64"
         },
@@ -166,8 +170,7 @@
         },
         "slashed_deposit": {
           "type": "string",
-          "format": "uint64",
-          "title": "NEW v2 fields: Slashing related"
+          "format": "uint64"
         },
         "repaid_deposit": {
           "type": "string",
@@ -184,12 +187,9 @@
         "slash_count": {
           "type": "string",
           "format": "uint64"
-        },
-        "last_repaid_by": {
-          "type": "string"
         }
       },
-      "title": "TrustDeposit represents an account's trust deposit"
+      "title": "TrustDeposit represents a corporation's trust deposit"
     }
   }
 }

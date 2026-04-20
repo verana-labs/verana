@@ -18,7 +18,7 @@ import {
 } from "../helpers/client";
 import { getPermAuthzSetup, savePermRootSetup } from "../helpers/journeyResults";
 import { createPermPrerequisites } from "../helpers/permissionHelpers";
-import { CredentialSchemaPermManagementMode } from "../../../src/codec/verana/cs/v1/types";
+import { IssuerOnboardingMode, VerifierOnboardingMode } from "../../../src/codec/verana/cs/v1/types";
 
 const COOLUSER_MNEMONIC =
   (process.env.MNEMONIC && process.env.MNEMONIC.trim()) ||
@@ -65,7 +65,7 @@ async function main() {
       client,
       setup.authorityAddress,
       setup.operatorAddress,
-      CredentialSchemaPermManagementMode.ECOSYSTEM,
+      IssuerOnboardingMode.ISSUER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS,
     );
 
     console.log();

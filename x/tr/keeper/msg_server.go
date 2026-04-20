@@ -26,20 +26,23 @@ func (ms msgServer) CreateTrustRegistry(goCtx context.Context, msg *types.MsgCre
 	now := ctx.BlockTime()
 
 	// [MOD-TR-MSG-1-2-1] [AUTHZ-CHECK] Verify operator authorization
-	if ms.delegationKeeper != nil {
-		if err := ms.delegationKeeper.CheckOperatorAuthorization(
-			ctx,
-			msg.Authority,
-			msg.Operator,
-			"/verana.tr.v1.MsgCreateTrustRegistry",
-			now,
-		); err != nil {
-			return nil, fmt.Errorf("authorization check failed: %w", err)
-		}
+	if ms.delegationKeeper == nil {
+		return nil, fmt.Errorf("delegation keeper is required for operator authorization")
+	}
+	if err := ms.delegationKeeper.CheckOperatorAuthorization(
+		ctx,
+		msg.Corporation,
+		msg.Operator,
+		"/verana.tr.v1.MsgCreateTrustRegistry",
+		now,
+	); err != nil {
+		return nil, fmt.Errorf("authorization check failed: %w", err)
 	}
 
-	// [MOD-TR-MSG-1-3] Create New Trust Registry execution
-
+	// [MOD-TR-MSG-1-3] Create New Trust Registry execution. Spec draft 13
+	// requires the initial v1 GF document to be persisted at creation time
+	// from msg.doc_url / msg.doc_digest_sri, using the registry's default
+	// language.
 	tr, gfv, gfd, err := ms.createTrustRegistryEntries(ctx, msg, now)
 	if err != nil {
 		return nil, err
@@ -54,23 +57,10 @@ func (ms msgServer) CreateTrustRegistry(goCtx context.Context, msg *types.MsgCre
 			types.EventTypeCreateTrustRegistry,
 			sdk.NewAttribute(types.AttributeKeyTrustRegistryID, strconv.FormatUint(tr.Id, 10)),
 			sdk.NewAttribute(types.AttributeKeyDID, tr.Did),
-			sdk.NewAttribute(types.AttributeKeyController, tr.Controller),
+			sdk.NewAttribute(types.AttributeKeyCorporation, tr.Corporation),
 			sdk.NewAttribute(types.AttributeKeyAka, tr.Aka),
 			sdk.NewAttribute(types.AttributeKeyLanguage, tr.Language),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
-		),
-		sdk.NewEvent(
-			types.EventTypeCreateGovernanceFrameworkVersion,
-			sdk.NewAttribute(types.AttributeKeyGFVersionID, strconv.FormatUint(gfv.Id, 10)),
-			sdk.NewAttribute(types.AttributeKeyTrustRegistryID, strconv.FormatUint(gfv.TrId, 10)),
-			sdk.NewAttribute(types.AttributeKeyVersion, strconv.FormatUint(uint64(gfv.Version), 10)),
-		),
-		sdk.NewEvent(
-			types.EventTypeCreateGovernanceFrameworkDocument,
-			sdk.NewAttribute(types.AttributeKeyGFDocumentID, strconv.FormatUint(gfd.Id, 10)),
-			sdk.NewAttribute(types.AttributeKeyGFVersionID, strconv.FormatUint(gfd.GfvId, 10)),
-			sdk.NewAttribute(types.AttributeKeyDocURL, gfd.Url),
-			sdk.NewAttribute(types.AttributeKeyDigestSri, gfd.DigestSri),
 		),
 	})
 
@@ -82,16 +72,17 @@ func (ms msgServer) AddGovernanceFrameworkDocument(goCtx context.Context, msg *t
 	now := ctx.BlockTime()
 
 	// [MOD-TR-MSG-2-2-1] [AUTHZ-CHECK] Verify operator authorization
-	if ms.delegationKeeper != nil {
-		if err := ms.delegationKeeper.CheckOperatorAuthorization(
-			ctx,
-			msg.Authority,
-			msg.Operator,
-			"/verana.tr.v1.MsgAddGovernanceFrameworkDocument",
-			now,
-		); err != nil {
-			return nil, fmt.Errorf("authorization check failed: %w", err)
-		}
+	if ms.delegationKeeper == nil {
+		return nil, fmt.Errorf("delegation keeper is required for operator authorization")
+	}
+	if err := ms.delegationKeeper.CheckOperatorAuthorization(
+		ctx,
+		msg.Corporation,
+		msg.Operator,
+		"/verana.tr.v1.MsgAddGovernanceFrameworkDocument",
+		now,
+	); err != nil {
+		return nil, fmt.Errorf("authorization check failed: %w", err)
 	}
 
 	if err := ms.validateAddGovernanceFrameworkDocumentParams(ctx, msg); err != nil {
@@ -105,12 +96,12 @@ func (ms msgServer) AddGovernanceFrameworkDocument(goCtx context.Context, msg *t
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeAddGovernanceFrameworkDocument,
-			sdk.NewAttribute(types.AttributeKeyGFVersionID, strconv.FormatUint(msg.Id, 10)),
+			sdk.NewAttribute(types.AttributeKeyGFVersionID, strconv.FormatUint(msg.TrId, 10)),
 			sdk.NewAttribute(types.AttributeKeyVersion, strconv.FormatInt(int64(msg.Version), 10)),
-			sdk.NewAttribute(types.AttributeKeyLanguage, msg.DocLanguage),
-			sdk.NewAttribute(types.AttributeKeyDocURL, msg.DocUrl),
-			sdk.NewAttribute(types.AttributeKeyDigestSri, msg.DocDigestSri),
-			sdk.NewAttribute(types.AttributeKeyController, msg.Authority),
+			sdk.NewAttribute(types.AttributeKeyLanguage, msg.Language),
+			sdk.NewAttribute(types.AttributeKeyDocURL, msg.Url),
+			sdk.NewAttribute(types.AttributeKeyDigestSri, msg.DigestSri),
+			sdk.NewAttribute(types.AttributeKeyCorporation, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
 		),
 	})
@@ -123,16 +114,17 @@ func (ms msgServer) IncreaseActiveGovernanceFrameworkVersion(goCtx context.Conte
 	now := ctx.BlockTime()
 
 	// [MOD-TR-MSG-3-2-1] [AUTHZ-CHECK] Verify operator authorization
-	if ms.delegationKeeper != nil {
-		if err := ms.delegationKeeper.CheckOperatorAuthorization(
-			ctx,
-			msg.Authority,
-			msg.Operator,
-			"/verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion",
-			now,
-		); err != nil {
-			return nil, fmt.Errorf("authorization check failed: %w", err)
-		}
+	if ms.delegationKeeper == nil {
+		return nil, fmt.Errorf("delegation keeper is required for operator authorization")
+	}
+	if err := ms.delegationKeeper.CheckOperatorAuthorization(
+		ctx,
+		msg.Corporation,
+		msg.Operator,
+		"/verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion",
+		now,
+	); err != nil {
+		return nil, fmt.Errorf("authorization check failed: %w", err)
 	}
 
 	// Validate parameters
@@ -148,8 +140,8 @@ func (ms msgServer) IncreaseActiveGovernanceFrameworkVersion(goCtx context.Conte
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeIncreaseActiveGFVersion,
-			sdk.NewAttribute(types.AttributeKeyTrustRegistryID, strconv.FormatUint(msg.Id, 10)),
-			sdk.NewAttribute(types.AttributeKeyController, msg.Authority),
+			sdk.NewAttribute(types.AttributeKeyTrustRegistryID, strconv.FormatUint(msg.TrId, 10)),
+			sdk.NewAttribute(types.AttributeKeyCorporation, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
 		),
 	})
@@ -162,43 +154,41 @@ func (ms msgServer) UpdateTrustRegistry(goCtx context.Context, msg *types.MsgUpd
 	now := ctx.BlockTime()
 
 	// [MOD-TR-MSG-4-2-1] [AUTHZ-CHECK] Verify operator authorization
-	if ms.delegationKeeper != nil {
-		if err := ms.delegationKeeper.CheckOperatorAuthorization(
-			ctx,
-			msg.Authority,
-			msg.Operator,
-			"/verana.tr.v1.MsgUpdateTrustRegistry",
-			now,
-		); err != nil {
-			return nil, fmt.Errorf("authorization check failed: %w", err)
-		}
+	if ms.delegationKeeper == nil {
+		return nil, fmt.Errorf("delegation keeper is required for operator authorization")
+	}
+	if err := ms.delegationKeeper.CheckOperatorAuthorization(
+		ctx,
+		msg.Corporation,
+		msg.Operator,
+		"/verana.tr.v1.MsgUpdateTrustRegistry",
+		now,
+	); err != nil {
+		return nil, fmt.Errorf("authorization check failed: %w", err)
 	}
 
 	// Get trust registry
-	tr, err := ms.TrustRegistry.Get(ctx, msg.Id)
+	tr, err := ms.TrustRegistry.Get(ctx, msg.TrId)
 	if err != nil {
 		return nil, fmt.Errorf("trust registry not found: %w", err)
 	}
 
-	// Check controller - authority must match the trust registry controller
-	if tr.Controller != msg.Authority {
-		return nil, fmt.Errorf("only trust registry controller can update trust registry")
+	// Check corporation - corporation must match the trust registry corporation
+	if tr.Corporation != msg.Corporation {
+		return nil, fmt.Errorf("only trust registry corporation can update trust registry")
 	}
 
-	// Update DID index if DID changed
-	oldDID := tr.Did
-	if msg.Did != oldDID {
-		// Remove old DID index entry
-		if err := ms.TrustRegistryDIDIndex.Remove(ctx, oldDID); err != nil {
-			return nil, fmt.Errorf("failed to remove old DID index: %w", err)
+	// [MOD-TR-MSG-4-3] Spec draft 13: set tr.did = did, tr.aka = aka,
+	// tr.modified = now. Language is NOT updatable.
+	if tr.Did != msg.Did {
+		// Keep the DID index consistent with the new DID.
+		if err := ms.TrustRegistryDIDIndex.Remove(ctx, tr.Did); err != nil {
+			return nil, fmt.Errorf("failed to remove stale DID index: %w", err)
 		}
-		// Add new DID index entry
 		if err := ms.TrustRegistryDIDIndex.Set(ctx, msg.Did, tr.Id); err != nil {
 			return nil, fmt.Errorf("failed to set new DID index: %w", err)
 		}
 	}
-
-	// Update fields
 	tr.Did = msg.Did
 	tr.Aka = msg.Aka
 	tr.Modified = now
@@ -211,8 +201,8 @@ func (ms msgServer) UpdateTrustRegistry(goCtx context.Context, msg *types.MsgUpd
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeUpdateTrustRegistry,
-			sdk.NewAttribute(types.AttributeKeyTrustRegistryID, strconv.FormatUint(msg.Id, 10)),
-			sdk.NewAttribute(types.AttributeKeyController, msg.Authority),
+			sdk.NewAttribute(types.AttributeKeyTrustRegistryID, strconv.FormatUint(msg.TrId, 10)),
+			sdk.NewAttribute(types.AttributeKeyCorporation, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyDID, msg.Did),
 			sdk.NewAttribute(types.AttributeKeyAka, msg.Aka),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
@@ -227,43 +217,44 @@ func (ms msgServer) ArchiveTrustRegistry(goCtx context.Context, msg *types.MsgAr
 	now := ctx.BlockTime()
 
 	// [MOD-TR-MSG-5-2-1] [AUTHZ-CHECK] Verify operator authorization
-	if ms.delegationKeeper != nil {
-		if err := ms.delegationKeeper.CheckOperatorAuthorization(
-			ctx,
-			msg.Authority,
-			msg.Operator,
-			"/verana.tr.v1.MsgArchiveTrustRegistry",
-			now,
-		); err != nil {
-			return nil, fmt.Errorf("authorization check failed: %w", err)
-		}
+	if ms.delegationKeeper == nil {
+		return nil, fmt.Errorf("delegation keeper is required for operator authorization")
+	}
+	if err := ms.delegationKeeper.CheckOperatorAuthorization(
+		ctx,
+		msg.Corporation,
+		msg.Operator,
+		"/verana.tr.v1.MsgArchiveTrustRegistry",
+		now,
+	); err != nil {
+		return nil, fmt.Errorf("authorization check failed: %w", err)
 	}
 
 	// Get trust registry
-	tr, err := ms.TrustRegistry.Get(ctx, msg.Id)
+	tr, err := ms.TrustRegistry.Get(ctx, msg.TrId)
 	if err != nil {
 		return nil, fmt.Errorf("trust registry not found: %w", err)
 	}
 
-	// Check controller
-	if tr.Controller != msg.Authority {
-		return nil, fmt.Errorf("only trust registry controller can archive trust registry")
+	// Check corporation
+	if tr.Corporation != msg.Corporation {
+		return nil, fmt.Errorf("only trust registry corporation can archive trust registry")
 	}
 
-	// Check archive state
+	// [MOD-TR-MSG-5] Spec v4 draft 13: archive is a bidirectional toggle.
+	// MOD-TR-MSG-5-3: if archived is false, set tr.archived to null.
+	archiveStatus := "archived"
 	if msg.Archive {
 		if tr.Archived != nil {
 			return nil, fmt.Errorf("trust registry is already archived")
 		}
+		tr.Archived = &now
 	} else {
 		if tr.Archived == nil {
 			return nil, fmt.Errorf("trust registry is not archived")
 		}
-	}
-	if msg.Archive {
-		tr.Archived = &now
-	} else {
 		tr.Archived = nil
+		archiveStatus = "unarchived"
 	}
 	tr.Modified = now
 
@@ -272,16 +263,11 @@ func (ms msgServer) ArchiveTrustRegistry(goCtx context.Context, msg *types.MsgAr
 		return nil, fmt.Errorf("failed to update trust registry: %w", err)
 	}
 
-	archiveStatus := "archived"
-	if !msg.Archive {
-		archiveStatus = "unarchived"
-	}
-
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeArchiveTrustRegistry,
-			sdk.NewAttribute(types.AttributeKeyTrustRegistryID, strconv.FormatUint(msg.Id, 10)),
-			sdk.NewAttribute(types.AttributeKeyController, msg.Authority),
+			sdk.NewAttribute(types.AttributeKeyTrustRegistryID, strconv.FormatUint(msg.TrId, 10)),
+			sdk.NewAttribute(types.AttributeKeyCorporation, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyArchiveStatus, archiveStatus),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
 		),

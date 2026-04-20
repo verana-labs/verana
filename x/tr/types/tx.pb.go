@@ -129,9 +129,9 @@ var xxx_messageInfo_MsgUpdateParamsResponse proto.InternalMessageInfo
 // MsgCreateTrustRegistry defines the Msg/CreateTrustRegistry request type.
 // [MOD-TR-MSG-1] Create New Trust Registry
 type MsgCreateTrustRegistry struct {
-	// authority is the group account on whose behalf this message is executed
-	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
-	// operator is the account authorized by the authority to run this Msg
+	// corporation is the group account on whose behalf this message is executed
+	Corporation string `protobuf:"bytes,1,opt,name=corporation,proto3" json:"corporation,omitempty"`
+	// operator is the account authorized by the corporation to run this Msg
 	Operator string `protobuf:"bytes,2,opt,name=operator,proto3" json:"operator,omitempty"`
 	// did is the DID of the ecosystem creating this trust registry (mandatory)
 	Did string `protobuf:"bytes,3,opt,name=did,proto3" json:"did,omitempty"`
@@ -139,9 +139,9 @@ type MsgCreateTrustRegistry struct {
 	Aka string `protobuf:"bytes,4,opt,name=aka,proto3" json:"aka,omitempty"`
 	// language is the primary language tag (RFC1766) of this trust registry (mandatory)
 	Language string `protobuf:"bytes,5,opt,name=language,proto3" json:"language,omitempty"`
-	// doc_url is the URL where the governance framework document is published (mandatory)
+	// doc_url is the URL where the initial governance framework document is published (mandatory)
 	DocUrl string `protobuf:"bytes,6,opt,name=doc_url,json=docUrl,proto3" json:"doc_url,omitempty"`
-	// doc_digest_sri is the SRI digest of the governance framework document (mandatory)
+	// doc_digest_sri is the digest SRI of the initial governance framework document (mandatory)
 	DocDigestSri string `protobuf:"bytes,7,opt,name=doc_digest_sri,json=docDigestSri,proto3" json:"doc_digest_sri,omitempty"`
 }
 
@@ -178,9 +178,9 @@ func (m *MsgCreateTrustRegistry) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgCreateTrustRegistry proto.InternalMessageInfo
 
-func (m *MsgCreateTrustRegistry) GetAuthority() string {
+func (m *MsgCreateTrustRegistry) GetCorporation() string {
 	if m != nil {
-		return m.Authority
+		return m.Corporation
 	}
 	return ""
 }
@@ -267,18 +267,18 @@ var xxx_messageInfo_MsgCreateTrustRegistryResponse proto.InternalMessageInfo
 // MsgAddGovernanceFrameworkDocument defines the Msg/AddGovernanceFrameworkDocument request type.
 // [MOD-TR-MSG-2] Add Governance Framework Document
 type MsgAddGovernanceFrameworkDocument struct {
-	// authority is the group account on whose behalf this message is executed
-	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
-	// operator is the account authorized by the authority to run this Msg
+	// corporation is the group account on whose behalf this message is executed
+	Corporation string `protobuf:"bytes,1,opt,name=corporation,proto3" json:"corporation,omitempty"`
+	// operator is the account authorized by the corporation to run this Msg
 	Operator string `protobuf:"bytes,2,opt,name=operator,proto3" json:"operator,omitempty"`
-	// id is the trust registry id (mandatory)
-	Id uint64 `protobuf:"varint,3,opt,name=id,proto3" json:"id,omitempty"`
-	// doc_language is the language tag (RFC1766) of the document (mandatory)
-	DocLanguage string `protobuf:"bytes,4,opt,name=doc_language,json=docLanguage,proto3" json:"doc_language,omitempty"`
-	// doc_url is the URL where the document is published (mandatory)
-	DocUrl string `protobuf:"bytes,5,opt,name=doc_url,json=docUrl,proto3" json:"doc_url,omitempty"`
-	// doc_digest_sri is the digest SRI of the document (mandatory)
-	DocDigestSri string `protobuf:"bytes,6,opt,name=doc_digest_sri,json=docDigestSri,proto3" json:"doc_digest_sri,omitempty"`
+	// tr_id is the trust registry id (mandatory)
+	TrId uint64 `protobuf:"varint,3,opt,name=tr_id,json=trId,proto3" json:"tr_id,omitempty"`
+	// language is the language tag (RFC1766) of the document (mandatory)
+	Language string `protobuf:"bytes,4,opt,name=language,proto3" json:"language,omitempty"`
+	// url is the URL where the document is published (mandatory)
+	Url string `protobuf:"bytes,5,opt,name=url,proto3" json:"url,omitempty"`
+	// digest_sri is the digest SRI of the document (mandatory)
+	DigestSri string `protobuf:"bytes,6,opt,name=digest_sri,json=digestSri,proto3" json:"digest_sri,omitempty"`
 	// version is the targeted version (mandatory)
 	Version int32 `protobuf:"varint,7,opt,name=version,proto3" json:"version,omitempty"`
 }
@@ -316,9 +316,9 @@ func (m *MsgAddGovernanceFrameworkDocument) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgAddGovernanceFrameworkDocument proto.InternalMessageInfo
 
-func (m *MsgAddGovernanceFrameworkDocument) GetAuthority() string {
+func (m *MsgAddGovernanceFrameworkDocument) GetCorporation() string {
 	if m != nil {
-		return m.Authority
+		return m.Corporation
 	}
 	return ""
 }
@@ -330,30 +330,30 @@ func (m *MsgAddGovernanceFrameworkDocument) GetOperator() string {
 	return ""
 }
 
-func (m *MsgAddGovernanceFrameworkDocument) GetId() uint64 {
+func (m *MsgAddGovernanceFrameworkDocument) GetTrId() uint64 {
 	if m != nil {
-		return m.Id
+		return m.TrId
 	}
 	return 0
 }
 
-func (m *MsgAddGovernanceFrameworkDocument) GetDocLanguage() string {
+func (m *MsgAddGovernanceFrameworkDocument) GetLanguage() string {
 	if m != nil {
-		return m.DocLanguage
+		return m.Language
 	}
 	return ""
 }
 
-func (m *MsgAddGovernanceFrameworkDocument) GetDocUrl() string {
+func (m *MsgAddGovernanceFrameworkDocument) GetUrl() string {
 	if m != nil {
-		return m.DocUrl
+		return m.Url
 	}
 	return ""
 }
 
-func (m *MsgAddGovernanceFrameworkDocument) GetDocDigestSri() string {
+func (m *MsgAddGovernanceFrameworkDocument) GetDigestSri() string {
 	if m != nil {
-		return m.DocDigestSri
+		return m.DigestSri
 	}
 	return ""
 }
@@ -409,12 +409,12 @@ var xxx_messageInfo_MsgAddGovernanceFrameworkDocumentResponse proto.InternalMess
 // MsgIncreaseActiveGovernanceFrameworkVersion defines the Msg/IncreaseActiveGovernanceFrameworkVersion request type.
 // [MOD-TR-MSG-3] Increase Active Governance Framework Version
 type MsgIncreaseActiveGovernanceFrameworkVersion struct {
-	// authority is the group account on whose behalf this message is executed
-	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
-	// operator is the account authorized by the authority to run this Msg
+	// corporation is the group account on whose behalf this message is executed
+	Corporation string `protobuf:"bytes,1,opt,name=corporation,proto3" json:"corporation,omitempty"`
+	// operator is the account authorized by the corporation to run this Msg
 	Operator string `protobuf:"bytes,2,opt,name=operator,proto3" json:"operator,omitempty"`
-	// id is the trust registry id (mandatory)
-	Id uint64 `protobuf:"varint,3,opt,name=id,proto3" json:"id,omitempty"`
+	// tr_id is the trust registry id (mandatory)
+	TrId uint64 `protobuf:"varint,3,opt,name=tr_id,json=trId,proto3" json:"tr_id,omitempty"`
 }
 
 func (m *MsgIncreaseActiveGovernanceFrameworkVersion) Reset() {
@@ -454,9 +454,9 @@ func (m *MsgIncreaseActiveGovernanceFrameworkVersion) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgIncreaseActiveGovernanceFrameworkVersion proto.InternalMessageInfo
 
-func (m *MsgIncreaseActiveGovernanceFrameworkVersion) GetAuthority() string {
+func (m *MsgIncreaseActiveGovernanceFrameworkVersion) GetCorporation() string {
 	if m != nil {
-		return m.Authority
+		return m.Corporation
 	}
 	return ""
 }
@@ -468,9 +468,9 @@ func (m *MsgIncreaseActiveGovernanceFrameworkVersion) GetOperator() string {
 	return ""
 }
 
-func (m *MsgIncreaseActiveGovernanceFrameworkVersion) GetId() uint64 {
+func (m *MsgIncreaseActiveGovernanceFrameworkVersion) GetTrId() uint64 {
 	if m != nil {
-		return m.Id
+		return m.TrId
 	}
 	return 0
 }
@@ -519,13 +519,13 @@ var xxx_messageInfo_MsgIncreaseActiveGovernanceFrameworkVersionResponse proto.In
 // MsgUpdateTrustRegistry defines the Msg/UpdateTrustRegistry request type.
 // [MOD-TR-MSG-4] Update Trust Registry
 type MsgUpdateTrustRegistry struct {
-	// authority is the group account on whose behalf this message is executed
-	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
-	// operator is the account authorized by the authority to run this Msg
+	// corporation is the group account on whose behalf this message is executed
+	Corporation string `protobuf:"bytes,1,opt,name=corporation,proto3" json:"corporation,omitempty"`
+	// operator is the account authorized by the corporation to run this Msg
 	Operator string `protobuf:"bytes,2,opt,name=operator,proto3" json:"operator,omitempty"`
-	// id is the trust registry id (mandatory)
-	Id uint64 `protobuf:"varint,3,opt,name=id,proto3" json:"id,omitempty"`
-	// did is the DID of the trust registry (mandatory)
+	// tr_id is the trust registry id (mandatory)
+	TrId uint64 `protobuf:"varint,3,opt,name=tr_id,json=trId,proto3" json:"tr_id,omitempty"`
+	// did is the DID of the ecosystem (mandatory) — spec draft 13 [MOD-TR-MSG-4-1]
 	Did string `protobuf:"bytes,4,opt,name=did,proto3" json:"did,omitempty"`
 	// aka is an optional additional URI of this trust registry
 	Aka string `protobuf:"bytes,5,opt,name=aka,proto3" json:"aka,omitempty"`
@@ -564,9 +564,9 @@ func (m *MsgUpdateTrustRegistry) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgUpdateTrustRegistry proto.InternalMessageInfo
 
-func (m *MsgUpdateTrustRegistry) GetAuthority() string {
+func (m *MsgUpdateTrustRegistry) GetCorporation() string {
 	if m != nil {
-		return m.Authority
+		return m.Corporation
 	}
 	return ""
 }
@@ -578,9 +578,9 @@ func (m *MsgUpdateTrustRegistry) GetOperator() string {
 	return ""
 }
 
-func (m *MsgUpdateTrustRegistry) GetId() uint64 {
+func (m *MsgUpdateTrustRegistry) GetTrId() uint64 {
 	if m != nil {
-		return m.Id
+		return m.TrId
 	}
 	return 0
 }
@@ -639,12 +639,12 @@ var xxx_messageInfo_MsgUpdateTrustRegistryResponse proto.InternalMessageInfo
 // MsgArchiveTrustRegistry defines the Msg/ArchiveTrustRegistry request type.
 // [MOD-TR-MSG-5] Archive Trust Registry
 type MsgArchiveTrustRegistry struct {
-	// authority is the group account on whose behalf this message is executed
-	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
-	// operator is the account authorized by the authority to run this Msg
+	// corporation is the group account on whose behalf this message is executed
+	Corporation string `protobuf:"bytes,1,opt,name=corporation,proto3" json:"corporation,omitempty"`
+	// operator is the account authorized by the corporation to run this Msg
 	Operator string `protobuf:"bytes,2,opt,name=operator,proto3" json:"operator,omitempty"`
-	// id is the trust registry id (mandatory)
-	Id uint64 `protobuf:"varint,3,opt,name=id,proto3" json:"id,omitempty"`
+	// tr_id is the trust registry id (mandatory)
+	TrId uint64 `protobuf:"varint,3,opt,name=tr_id,json=trId,proto3" json:"tr_id,omitempty"`
 	// archive is true to archive, false to unarchive (mandatory)
 	Archive bool `protobuf:"varint,4,opt,name=archive,proto3" json:"archive,omitempty"`
 }
@@ -682,9 +682,9 @@ func (m *MsgArchiveTrustRegistry) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgArchiveTrustRegistry proto.InternalMessageInfo
 
-func (m *MsgArchiveTrustRegistry) GetAuthority() string {
+func (m *MsgArchiveTrustRegistry) GetCorporation() string {
 	if m != nil {
-		return m.Authority
+		return m.Corporation
 	}
 	return ""
 }
@@ -696,9 +696,9 @@ func (m *MsgArchiveTrustRegistry) GetOperator() string {
 	return ""
 }
 
-func (m *MsgArchiveTrustRegistry) GetId() uint64 {
+func (m *MsgArchiveTrustRegistry) GetTrId() uint64 {
 	if m != nil {
-		return m.Id
+		return m.TrId
 	}
 	return 0
 }
@@ -765,55 +765,59 @@ func init() {
 func init() { proto.RegisterFile("verana/tr/v1/tx.proto", fileDescriptor_7e1b7399a439fd58) }
 
 var fileDescriptor_7e1b7399a439fd58 = []byte{
-	// 771 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xcc, 0x56, 0xbf, 0x4f, 0xdb, 0x4c,
-	0x18, 0x8e, 0xf3, 0x13, 0x0e, 0x3e, 0xbe, 0xef, 0x73, 0x53, 0x30, 0xae, 0x6a, 0x20, 0xa2, 0x52,
-	0x0a, 0x25, 0x16, 0xd0, 0x16, 0x95, 0x2d, 0x29, 0x6a, 0x55, 0xa9, 0x91, 0x2a, 0x03, 0x1d, 0xba,
-	0x44, 0x87, 0x7d, 0x3a, 0x2c, 0x62, 0x5f, 0x74, 0x77, 0x49, 0x61, 0xab, 0x3a, 0x32, 0x75, 0xee,
-	0x5f, 0xc0, 0xd0, 0x01, 0x55, 0x9d, 0x3a, 0x75, 0x64, 0x2b, 0xea, 0xd4, 0x09, 0x55, 0x30, 0xf0,
-	0x6f, 0x54, 0x3e, 0x3b, 0x06, 0x1c, 0x93, 0x04, 0x86, 0xd2, 0x25, 0xf2, 0xdd, 0xfb, 0x3e, 0xef,
-	0xbd, 0xcf, 0x63, 0x3f, 0x6f, 0x0e, 0xdc, 0x6e, 0x21, 0x0a, 0x5d, 0xa8, 0x73, 0xaa, 0xb7, 0xe6,
-	0x75, 0xbe, 0x5d, 0x6a, 0x50, 0xc2, 0x89, 0x3c, 0xec, 0x6f, 0x97, 0x38, 0x2d, 0xb5, 0xe6, 0xd5,
-	0xff, 0xa1, 0x63, 0xbb, 0x44, 0x17, 0xbf, 0x7e, 0x82, 0x3a, 0x66, 0x12, 0xe6, 0x10, 0xa6, 0x3b,
-	0x0c, 0x7b, 0x40, 0x87, 0xe1, 0x20, 0x30, 0xee, 0x07, 0x6a, 0x62, 0xa5, 0xfb, 0x8b, 0x20, 0x94,
-	0xc7, 0x04, 0x13, 0x7f, 0xdf, 0x7b, 0x6a, 0x03, 0x2e, 0x74, 0xd0, 0x80, 0x14, 0x3a, 0x01, 0xa0,
-	0xf0, 0x59, 0x02, 0xff, 0x56, 0x19, 0x5e, 0x6f, 0x58, 0x90, 0xa3, 0x57, 0x22, 0x22, 0x3f, 0x06,
-	0x83, 0xb0, 0xc9, 0x37, 0x09, 0xb5, 0xf9, 0x8e, 0x22, 0x4d, 0x4a, 0xc5, 0xc1, 0x8a, 0xf2, 0xe3,
-	0xcb, 0x5c, 0x3e, 0x38, 0xa9, 0x6c, 0x59, 0x14, 0x31, 0xb6, 0xca, 0xa9, 0xed, 0x62, 0xe3, 0x2c,
-	0x55, 0x5e, 0x02, 0x59, 0xbf, 0xb6, 0x92, 0x9c, 0x94, 0x8a, 0x43, 0x0b, 0xf9, 0xd2, 0x79, 0x8a,
-	0x25, 0xbf, 0x7a, 0x65, 0xf0, 0xe0, 0x68, 0x22, 0xb1, 0x77, 0xba, 0x3f, 0x23, 0x19, 0x41, 0xfa,
-	0x72, 0xe9, 0xfd, 0xe9, 0xfe, 0xcc, 0x59, 0xa1, 0xdd, 0xd3, 0xfd, 0x99, 0x3b, 0x41, 0xcb, 0xdb,
-	0x5e, 0xd3, 0x91, 0x06, 0x0b, 0xe3, 0x60, 0x2c, 0xb2, 0x65, 0x20, 0xd6, 0x20, 0x2e, 0x43, 0x85,
-	0x8f, 0x49, 0x30, 0x5a, 0x65, 0xf8, 0x29, 0x45, 0x90, 0xa3, 0x35, 0xda, 0x64, 0xdc, 0x40, 0xd8,
-	0x66, 0x9c, 0xee, 0x5c, 0x9b, 0xd6, 0x43, 0x30, 0x40, 0x1a, 0x88, 0x42, 0x4e, 0xa8, 0x20, 0xd6,
-	0x0d, 0x16, 0x66, 0xca, 0xff, 0x81, 0x94, 0x65, 0x5b, 0x4a, 0xca, 0x03, 0x18, 0xde, 0xa3, 0x3c,
-	0x0a, 0x52, 0x70, 0x0b, 0x2a, 0x69, 0x51, 0x22, 0x7d, 0x70, 0x34, 0x21, 0x19, 0xde, 0x86, 0xac,
-	0x82, 0x81, 0x3a, 0x74, 0x71, 0x13, 0x62, 0xa4, 0x64, 0x44, 0x7a, 0xb8, 0x96, 0xc7, 0x40, 0xce,
-	0x22, 0x66, 0xad, 0x49, 0xeb, 0x4a, 0x56, 0x84, 0xb2, 0x16, 0x31, 0xd7, 0x69, 0x5d, 0x9e, 0x06,
-	0x23, 0x5e, 0xc0, 0xb2, 0x31, 0x62, 0xbc, 0xc6, 0xa8, 0xad, 0xe4, 0x44, 0x7c, 0xd8, 0x22, 0xe6,
-	0x8a, 0xd8, 0x5c, 0xa5, 0xf6, 0xf2, 0x3f, 0x9e, 0xb0, 0x61, 0x4f, 0x85, 0x49, 0xa0, 0xc5, 0x6b,
-	0x13, 0xca, 0xf7, 0x29, 0x09, 0xa6, 0xaa, 0x0c, 0x97, 0x2d, 0xeb, 0x39, 0x69, 0x21, 0xea, 0x42,
-	0xd7, 0x44, 0xcf, 0x28, 0x74, 0xd0, 0x5b, 0x42, 0xb7, 0x56, 0x88, 0xd9, 0x74, 0x90, 0xcb, 0xff,
-	0xb0, 0x92, 0x23, 0x20, 0x19, 0x08, 0x99, 0x36, 0x92, 0xb6, 0x25, 0x4f, 0x01, 0x8f, 0x64, 0x2d,
-	0xd4, 0x4c, 0x08, 0x6a, 0x0c, 0x59, 0xc4, 0x7c, 0x19, 0x23, 0x5b, 0xa6, 0x87, 0x6c, 0xd9, 0x4e,
-	0xd9, 0x64, 0x05, 0xe4, 0x5a, 0x88, 0x32, 0x9b, 0xb8, 0x42, 0xd5, 0x8c, 0xd1, 0x5e, 0x46, 0x05,
-	0x9d, 0x05, 0xf7, 0x7b, 0xaa, 0x15, 0x6a, 0xfb, 0x55, 0x02, 0xb3, 0x55, 0x86, 0x5f, 0xb8, 0x26,
-	0x45, 0x90, 0xa1, 0xb2, 0xc9, 0xed, 0x16, 0x8a, 0x01, 0xbe, 0xf6, 0xcf, 0xba, 0x59, 0x95, 0xa3,
-	0x4c, 0x1f, 0x81, 0xc5, 0x2b, 0xf4, 0x1e, 0x72, 0xfe, 0x2e, 0x09, 0x3b, 0xfa, 0x56, 0xbd, 0x49,
-	0x3b, 0x46, 0x3f, 0xa2, 0xc0, 0x9e, 0xe9, 0x0e, 0x7b, 0x66, 0x22, 0xf6, 0x8c, 0xf7, 0x50, 0x0c,
-	0xa1, 0x90, 0xf3, 0x37, 0x49, 0x8c, 0xa7, 0x32, 0x35, 0x37, 0xed, 0xd6, 0x5f, 0x45, 0x5a, 0x01,
-	0x39, 0xe8, 0x77, 0x25, 0x88, 0x0f, 0x18, 0xed, 0x65, 0x94, 0xe4, 0x14, 0x98, 0xb8, 0x84, 0x41,
-	0x9b, 0xe5, 0xc2, 0x51, 0x06, 0xa4, 0xaa, 0x0c, 0xcb, 0x6b, 0x60, 0xf8, 0xc2, 0x9f, 0xc7, 0xdd,
-	0x8b, 0x43, 0x3f, 0x32, 0xa7, 0xd5, 0x7b, 0x5d, 0xc3, 0xed, 0xea, 0xb2, 0x0d, 0x6e, 0xc5, 0x8d,
-	0xf0, 0xe9, 0x0e, 0x74, 0x4c, 0x96, 0xfa, 0xa0, 0x9f, 0xac, 0xf0, 0xa8, 0x5d, 0x09, 0x68, 0x3d,
-	0xe6, 0x9d, 0xde, 0x51, 0xb0, 0x3b, 0x40, 0x5d, 0xba, 0x22, 0x20, 0x6c, 0x66, 0x4f, 0x02, 0xc5,
-	0xbe, 0x07, 0xc4, 0x93, 0x8e, 0x53, 0xfa, 0x85, 0xaa, 0xe5, 0x6b, 0x43, 0xcf, 0xbf, 0xa2, 0x38,
-	0x5b, 0x4f, 0x5f, 0xf2, 0x82, 0x7b, 0xbd, 0xa2, 0x2e, 0x8e, 0x92, 0xeb, 0x20, 0x1f, 0xeb, 0xa6,
-	0xce, 0x8f, 0x29, 0x2e, 0x4d, 0x9d, 0xeb, 0x2b, 0xad, 0x7d, 0x9a, 0x9a, 0x79, 0xe7, 0x5d, 0x4e,
-	0x2a, 0x95, 0x83, 0x63, 0x4d, 0x3a, 0x3c, 0xd6, 0xa4, 0x5f, 0xc7, 0x9a, 0xf4, 0xe1, 0x44, 0x4b,
-	0x1c, 0x9e, 0x68, 0x89, 0x9f, 0x27, 0x5a, 0xe2, 0x4d, 0x11, 0xdb, 0x7c, 0xb3, 0xb9, 0x51, 0x32,
-	0x89, 0xa3, 0xfb, 0x95, 0xe7, 0xea, 0x70, 0x83, 0xe9, 0xe7, 0xaf, 0x2c, 0x7c, 0xa7, 0x81, 0xd8,
-	0x46, 0x56, 0x5c, 0xb2, 0x16, 0x7f, 0x07, 0x00, 0x00, 0xff, 0xff, 0x27, 0x75, 0x40, 0x6d, 0x03,
+	// 835 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xcc, 0x96, 0x4b, 0x4f, 0xe3, 0x48,
+	0x10, 0xc7, 0x63, 0xf2, 0x22, 0x0d, 0xda, 0x65, 0x4d, 0x16, 0x8c, 0x57, 0x18, 0xf0, 0x82, 0x94,
+	0x85, 0x25, 0x16, 0xaf, 0x45, 0x9b, 0x5b, 0xb2, 0x88, 0x15, 0x87, 0x48, 0x2b, 0xf3, 0x58, 0x69,
+	0x2e, 0x51, 0x63, 0xb7, 0x8c, 0x45, 0xec, 0x8e, 0xba, 0x3b, 0x19, 0xb8, 0x8d, 0xe6, 0xc8, 0x69,
+	0x3e, 0x06, 0x47, 0x34, 0x9a, 0xaf, 0x30, 0x23, 0x8e, 0x68, 0x4e, 0x73, 0x42, 0x23, 0x38, 0x70,
+	0x9a, 0xc3, 0x7c, 0x82, 0x19, 0xf9, 0x11, 0x93, 0xd8, 0x26, 0x09, 0x73, 0x81, 0x4b, 0xe4, 0xee,
+	0xaa, 0x7f, 0x75, 0xd5, 0xcf, 0xa9, 0x6a, 0x83, 0x5f, 0x5b, 0x88, 0x40, 0x1b, 0x2a, 0x8c, 0x28,
+	0xad, 0x15, 0x85, 0x9d, 0x14, 0x1b, 0x04, 0x33, 0xcc, 0x8f, 0x7a, 0xdb, 0x45, 0x46, 0x8a, 0xad,
+	0x15, 0xf1, 0x17, 0x68, 0x99, 0x36, 0x56, 0xdc, 0x5f, 0xcf, 0x41, 0x9c, 0xd4, 0x30, 0xb5, 0x30,
+	0x55, 0x2c, 0x6a, 0x38, 0x42, 0x8b, 0x1a, 0xbe, 0x61, 0xca, 0x33, 0xd4, 0xdc, 0x95, 0xe2, 0x2d,
+	0x7c, 0x53, 0xde, 0xc0, 0x06, 0xf6, 0xf6, 0x9d, 0xa7, 0xb6, 0xa0, 0x2b, 0x83, 0x06, 0x24, 0xd0,
+	0xf2, 0x05, 0xf2, 0x5b, 0x0e, 0xfc, 0x5c, 0xa5, 0xc6, 0x7e, 0x43, 0x87, 0x0c, 0xfd, 0xe7, 0x5a,
+	0xf8, 0xbf, 0x40, 0x0e, 0x36, 0xd9, 0x11, 0x26, 0x26, 0x3b, 0x15, 0xb8, 0x59, 0xae, 0x90, 0xab,
+	0x08, 0x1f, 0xdf, 0x2d, 0xe7, 0xfd, 0x93, 0xca, 0xba, 0x4e, 0x10, 0xa5, 0xbb, 0x8c, 0x98, 0xb6,
+	0xa1, 0xde, 0xbb, 0xf2, 0x9b, 0x20, 0xe3, 0xc5, 0x16, 0x86, 0x66, 0xb9, 0xc2, 0xc8, 0x6a, 0xbe,
+	0xd8, 0x59, 0x62, 0xd1, 0x8b, 0x5e, 0xc9, 0x5d, 0x5e, 0xcf, 0x24, 0xce, 0xef, 0x2e, 0x16, 0x39,
+	0xd5, 0x77, 0x2f, 0x15, 0x5f, 0xdf, 0x5d, 0x2c, 0xde, 0x07, 0x3a, 0xbb, 0xbb, 0x58, 0xfc, 0xcd,
+	0x4f, 0xf9, 0xc4, 0x49, 0x3a, 0x94, 0xa0, 0x3c, 0x05, 0x26, 0x43, 0x5b, 0x2a, 0xa2, 0x0d, 0x6c,
+	0x53, 0x24, 0xbf, 0x1f, 0x02, 0x13, 0x55, 0x6a, 0xfc, 0x43, 0x10, 0x64, 0x68, 0x8f, 0x34, 0x29,
+	0x53, 0x91, 0x61, 0x52, 0x46, 0x4e, 0xf9, 0x12, 0x18, 0xd1, 0x30, 0x69, 0x60, 0x02, 0x99, 0x89,
+	0xed, 0xbe, 0x85, 0x75, 0x3a, 0xf3, 0xeb, 0x60, 0x18, 0x37, 0x10, 0x81, 0x0c, 0x13, 0xb7, 0xb8,
+	0x5e, 0xc2, 0xc0, 0x93, 0x1f, 0x03, 0x49, 0xdd, 0xd4, 0x85, 0xa4, 0x23, 0x50, 0x9d, 0x47, 0x7e,
+	0x02, 0x24, 0xe1, 0x31, 0x14, 0x52, 0x6e, 0x88, 0xd4, 0xe5, 0xf5, 0x0c, 0xa7, 0x3a, 0x1b, 0xbc,
+	0x08, 0x86, 0xeb, 0xd0, 0x36, 0x9a, 0xd0, 0x40, 0x42, 0xda, 0x75, 0x0f, 0xd6, 0xfc, 0x24, 0xc8,
+	0xea, 0x58, 0xab, 0x35, 0x49, 0x5d, 0xc8, 0xb8, 0xa6, 0x8c, 0x8e, 0xb5, 0x7d, 0x52, 0xe7, 0xe7,
+	0xc1, 0x4f, 0x8e, 0x41, 0x37, 0x0d, 0x44, 0x59, 0x8d, 0x12, 0x53, 0xc8, 0xba, 0xf6, 0x51, 0x1d,
+	0x6b, 0x5b, 0xee, 0xe6, 0x2e, 0x31, 0x4b, 0xeb, 0x0e, 0xdc, 0x20, 0x27, 0x87, 0xad, 0x1c, 0x62,
+	0x1b, 0x03, 0x4b, 0x9e, 0x05, 0x52, 0xbc, 0x25, 0x20, 0xfd, 0x61, 0x08, 0xcc, 0x55, 0xa9, 0x51,
+	0xd6, 0xf5, 0x7f, 0x71, 0x0b, 0x11, 0x1b, 0xda, 0x1a, 0xda, 0x26, 0xd0, 0x42, 0x2f, 0x31, 0x39,
+	0xde, 0xc2, 0x5a, 0xd3, 0x42, 0x36, 0x7b, 0x02, 0xe8, 0xe3, 0x20, 0xcd, 0x48, 0xcd, 0xc7, 0x9e,
+	0x52, 0x53, 0x8c, 0xec, 0xe8, 0x5d, 0x7c, 0x53, 0x21, 0xbe, 0x63, 0x20, 0xe9, 0xb0, 0xf5, 0xb0,
+	0x3b, 0x8f, 0xfc, 0x34, 0x00, 0x1d, 0x50, 0x3d, 0xe8, 0x39, 0xbd, 0x4d, 0x94, 0x17, 0x40, 0xb6,
+	0x85, 0x08, 0x75, 0xea, 0x71, 0x80, 0xa7, 0xd5, 0xf6, 0xb2, 0xb4, 0x16, 0x61, 0x3d, 0x17, 0x62,
+	0xed, 0xe1, 0xea, 0xe4, 0x24, 0x2f, 0x81, 0x3f, 0xfa, 0x72, 0x0c, 0xa8, 0x7f, 0xe1, 0xc0, 0x52,
+	0x95, 0x1a, 0x3b, 0xb6, 0x46, 0x10, 0xa4, 0xa8, 0xac, 0x31, 0xb3, 0x85, 0x62, 0x84, 0x07, 0x5e,
+	0x46, 0xcf, 0x84, 0x7f, 0x69, 0x33, 0x02, 0x66, 0x21, 0x04, 0x26, 0x52, 0xd1, 0xf6, 0xff, 0x07,
+	0x88, 0xc8, 0x1b, 0x60, 0xed, 0x11, 0xe5, 0x06, 0x98, 0xbe, 0x71, 0xee, 0x18, 0xf0, 0x46, 0xc4,
+	0x53, 0x8f, 0x81, 0xd8, 0x7f, 0xa4, 0x3f, 0x1b, 0x52, 0x91, 0xd9, 0x90, 0x0e, 0xcd, 0x86, 0x01,
+	0x1a, 0x38, 0xa6, 0x4c, 0xbf, 0x81, 0x63, 0x2c, 0x01, 0xa3, 0xaf, 0x9c, 0x3b, 0x46, 0xcb, 0x44,
+	0x3b, 0x32, 0x5b, 0xcf, 0x13, 0x92, 0x00, 0xb2, 0xd0, 0x4b, 0xcf, 0x05, 0x35, 0xac, 0xb6, 0x97,
+	0xa5, 0x8d, 0x08, 0x94, 0xdf, 0xc3, 0x9d, 0x16, 0x53, 0x97, 0x3c, 0x07, 0x66, 0x1e, 0x30, 0xb5,
+	0xb1, 0xac, 0x5e, 0xa7, 0x41, 0xb2, 0x4a, 0x0d, 0x7e, 0x0f, 0x8c, 0x76, 0xdd, 0x8a, 0xd3, 0xdd,
+	0xb7, 0x59, 0xe8, 0x02, 0x12, 0x17, 0x7a, 0x9a, 0xdb, 0xd1, 0x79, 0x13, 0x8c, 0xc7, 0xdd, 0x4d,
+	0xf3, 0x11, 0x75, 0x8c, 0x97, 0xf8, 0xe7, 0x20, 0x5e, 0xc1, 0x51, 0x67, 0x1c, 0x90, 0xfa, 0x4c,
+	0x67, 0x25, 0x12, 0xb0, 0xb7, 0x40, 0xdc, 0x7c, 0xa4, 0x20, 0x48, 0xe6, 0x9c, 0x03, 0x85, 0x81,
+	0x87, 0xd6, 0xdf, 0x91, 0x53, 0x06, 0x95, 0x8a, 0xe5, 0x1f, 0x96, 0x76, 0xbe, 0xa2, 0xb8, 0xb9,
+	0x31, 0xff, 0xc0, 0x0b, 0xee, 0xf7, 0x8a, 0x7a, 0xb4, 0x20, 0x5f, 0x07, 0xf9, 0xd8, 0xf6, 0x8b,
+	0xfe, 0x99, 0xe2, 0xdc, 0xc4, 0xe5, 0x81, 0xdc, 0xda, 0xa7, 0x89, 0xe9, 0x57, 0xce, 0x57, 0x57,
+	0xa5, 0x72, 0x79, 0x23, 0x71, 0x57, 0x37, 0x12, 0xf7, 0xf9, 0x46, 0xe2, 0xde, 0xdc, 0x4a, 0x89,
+	0xab, 0x5b, 0x29, 0xf1, 0xe9, 0x56, 0x4a, 0xbc, 0x28, 0x18, 0x26, 0x3b, 0x6a, 0x1e, 0x16, 0x35,
+	0x6c, 0x29, 0x5e, 0xe4, 0xe5, 0x3a, 0x3c, 0xa4, 0x4a, 0x67, 0x67, 0xb1, 0xd3, 0x06, 0xa2, 0x87,
+	0x19, 0xf7, 0xeb, 0x71, 0xed, 0x7b, 0x00, 0x00, 0x00, 0xff, 0xff, 0x47, 0x38, 0x5f, 0x9f, 0xdc,
 	0x0a, 0x00, 0x00,
 }
 
@@ -1209,10 +1213,10 @@ func (m *MsgCreateTrustRegistry) MarshalToSizedBuffer(dAtA []byte) (int, error) 
 		i--
 		dAtA[i] = 0x12
 	}
-	if len(m.Authority) > 0 {
-		i -= len(m.Authority)
-		copy(dAtA[i:], m.Authority)
-		i = encodeVarintTx(dAtA, i, uint64(len(m.Authority)))
+	if len(m.Corporation) > 0 {
+		i -= len(m.Corporation)
+		copy(dAtA[i:], m.Corporation)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Corporation)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -1267,29 +1271,29 @@ func (m *MsgAddGovernanceFrameworkDocument) MarshalToSizedBuffer(dAtA []byte) (i
 		i--
 		dAtA[i] = 0x38
 	}
-	if len(m.DocDigestSri) > 0 {
-		i -= len(m.DocDigestSri)
-		copy(dAtA[i:], m.DocDigestSri)
-		i = encodeVarintTx(dAtA, i, uint64(len(m.DocDigestSri)))
+	if len(m.DigestSri) > 0 {
+		i -= len(m.DigestSri)
+		copy(dAtA[i:], m.DigestSri)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.DigestSri)))
 		i--
 		dAtA[i] = 0x32
 	}
-	if len(m.DocUrl) > 0 {
-		i -= len(m.DocUrl)
-		copy(dAtA[i:], m.DocUrl)
-		i = encodeVarintTx(dAtA, i, uint64(len(m.DocUrl)))
+	if len(m.Url) > 0 {
+		i -= len(m.Url)
+		copy(dAtA[i:], m.Url)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Url)))
 		i--
 		dAtA[i] = 0x2a
 	}
-	if len(m.DocLanguage) > 0 {
-		i -= len(m.DocLanguage)
-		copy(dAtA[i:], m.DocLanguage)
-		i = encodeVarintTx(dAtA, i, uint64(len(m.DocLanguage)))
+	if len(m.Language) > 0 {
+		i -= len(m.Language)
+		copy(dAtA[i:], m.Language)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Language)))
 		i--
 		dAtA[i] = 0x22
 	}
-	if m.Id != 0 {
-		i = encodeVarintTx(dAtA, i, uint64(m.Id))
+	if m.TrId != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.TrId))
 		i--
 		dAtA[i] = 0x18
 	}
@@ -1300,10 +1304,10 @@ func (m *MsgAddGovernanceFrameworkDocument) MarshalToSizedBuffer(dAtA []byte) (i
 		i--
 		dAtA[i] = 0x12
 	}
-	if len(m.Authority) > 0 {
-		i -= len(m.Authority)
-		copy(dAtA[i:], m.Authority)
-		i = encodeVarintTx(dAtA, i, uint64(len(m.Authority)))
+	if len(m.Corporation) > 0 {
+		i -= len(m.Corporation)
+		copy(dAtA[i:], m.Corporation)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Corporation)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -1353,8 +1357,8 @@ func (m *MsgIncreaseActiveGovernanceFrameworkVersion) MarshalToSizedBuffer(dAtA 
 	_ = i
 	var l int
 	_ = l
-	if m.Id != 0 {
-		i = encodeVarintTx(dAtA, i, uint64(m.Id))
+	if m.TrId != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.TrId))
 		i--
 		dAtA[i] = 0x18
 	}
@@ -1365,10 +1369,10 @@ func (m *MsgIncreaseActiveGovernanceFrameworkVersion) MarshalToSizedBuffer(dAtA 
 		i--
 		dAtA[i] = 0x12
 	}
-	if len(m.Authority) > 0 {
-		i -= len(m.Authority)
-		copy(dAtA[i:], m.Authority)
-		i = encodeVarintTx(dAtA, i, uint64(len(m.Authority)))
+	if len(m.Corporation) > 0 {
+		i -= len(m.Corporation)
+		copy(dAtA[i:], m.Corporation)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Corporation)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -1432,8 +1436,8 @@ func (m *MsgUpdateTrustRegistry) MarshalToSizedBuffer(dAtA []byte) (int, error) 
 		i--
 		dAtA[i] = 0x22
 	}
-	if m.Id != 0 {
-		i = encodeVarintTx(dAtA, i, uint64(m.Id))
+	if m.TrId != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.TrId))
 		i--
 		dAtA[i] = 0x18
 	}
@@ -1444,10 +1448,10 @@ func (m *MsgUpdateTrustRegistry) MarshalToSizedBuffer(dAtA []byte) (int, error) 
 		i--
 		dAtA[i] = 0x12
 	}
-	if len(m.Authority) > 0 {
-		i -= len(m.Authority)
-		copy(dAtA[i:], m.Authority)
-		i = encodeVarintTx(dAtA, i, uint64(len(m.Authority)))
+	if len(m.Corporation) > 0 {
+		i -= len(m.Corporation)
+		copy(dAtA[i:], m.Corporation)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Corporation)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -1507,8 +1511,8 @@ func (m *MsgArchiveTrustRegistry) MarshalToSizedBuffer(dAtA []byte) (int, error)
 		i--
 		dAtA[i] = 0x20
 	}
-	if m.Id != 0 {
-		i = encodeVarintTx(dAtA, i, uint64(m.Id))
+	if m.TrId != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.TrId))
 		i--
 		dAtA[i] = 0x18
 	}
@@ -1519,10 +1523,10 @@ func (m *MsgArchiveTrustRegistry) MarshalToSizedBuffer(dAtA []byte) (int, error)
 		i--
 		dAtA[i] = 0x12
 	}
-	if len(m.Authority) > 0 {
-		i -= len(m.Authority)
-		copy(dAtA[i:], m.Authority)
-		i = encodeVarintTx(dAtA, i, uint64(len(m.Authority)))
+	if len(m.Corporation) > 0 {
+		i -= len(m.Corporation)
+		copy(dAtA[i:], m.Corporation)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Corporation)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -1593,7 +1597,7 @@ func (m *MsgCreateTrustRegistry) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.Authority)
+	l = len(m.Corporation)
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
@@ -1639,7 +1643,7 @@ func (m *MsgAddGovernanceFrameworkDocument) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.Authority)
+	l = len(m.Corporation)
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
@@ -1647,18 +1651,18 @@ func (m *MsgAddGovernanceFrameworkDocument) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
-	if m.Id != 0 {
-		n += 1 + sovTx(uint64(m.Id))
+	if m.TrId != 0 {
+		n += 1 + sovTx(uint64(m.TrId))
 	}
-	l = len(m.DocLanguage)
+	l = len(m.Language)
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
-	l = len(m.DocUrl)
+	l = len(m.Url)
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
-	l = len(m.DocDigestSri)
+	l = len(m.DigestSri)
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
@@ -1683,7 +1687,7 @@ func (m *MsgIncreaseActiveGovernanceFrameworkVersion) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.Authority)
+	l = len(m.Corporation)
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
@@ -1691,8 +1695,8 @@ func (m *MsgIncreaseActiveGovernanceFrameworkVersion) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
-	if m.Id != 0 {
-		n += 1 + sovTx(uint64(m.Id))
+	if m.TrId != 0 {
+		n += 1 + sovTx(uint64(m.TrId))
 	}
 	return n
 }
@@ -1712,7 +1716,7 @@ func (m *MsgUpdateTrustRegistry) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.Authority)
+	l = len(m.Corporation)
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
@@ -1720,8 +1724,8 @@ func (m *MsgUpdateTrustRegistry) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
-	if m.Id != 0 {
-		n += 1 + sovTx(uint64(m.Id))
+	if m.TrId != 0 {
+		n += 1 + sovTx(uint64(m.TrId))
 	}
 	l = len(m.Did)
 	if l > 0 {
@@ -1749,7 +1753,7 @@ func (m *MsgArchiveTrustRegistry) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.Authority)
+	l = len(m.Corporation)
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
@@ -1757,8 +1761,8 @@ func (m *MsgArchiveTrustRegistry) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
-	if m.Id != 0 {
-		n += 1 + sovTx(uint64(m.Id))
+	if m.TrId != 0 {
+		n += 1 + sovTx(uint64(m.TrId))
 	}
 	if m.Archive {
 		n += 2
@@ -1977,7 +1981,7 @@ func (m *MsgCreateTrustRegistry) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Authority", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Corporation", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -2005,7 +2009,7 @@ func (m *MsgCreateTrustRegistry) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Authority = string(dAtA[iNdEx:postIndex])
+			m.Corporation = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
@@ -2301,7 +2305,7 @@ func (m *MsgAddGovernanceFrameworkDocument) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Authority", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Corporation", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -2329,7 +2333,7 @@ func (m *MsgAddGovernanceFrameworkDocument) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Authority = string(dAtA[iNdEx:postIndex])
+			m.Corporation = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
@@ -2365,9 +2369,9 @@ func (m *MsgAddGovernanceFrameworkDocument) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 3:
 			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Id", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field TrId", wireType)
 			}
-			m.Id = 0
+			m.TrId = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowTx
@@ -2377,14 +2381,14 @@ func (m *MsgAddGovernanceFrameworkDocument) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.Id |= uint64(b&0x7F) << shift
+				m.TrId |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
 		case 4:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field DocLanguage", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Language", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -2412,11 +2416,11 @@ func (m *MsgAddGovernanceFrameworkDocument) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.DocLanguage = string(dAtA[iNdEx:postIndex])
+			m.Language = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 5:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field DocUrl", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Url", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -2444,11 +2448,11 @@ func (m *MsgAddGovernanceFrameworkDocument) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.DocUrl = string(dAtA[iNdEx:postIndex])
+			m.Url = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 6:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field DocDigestSri", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field DigestSri", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -2476,7 +2480,7 @@ func (m *MsgAddGovernanceFrameworkDocument) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.DocDigestSri = string(dAtA[iNdEx:postIndex])
+			m.DigestSri = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 7:
 			if wireType != 0 {
@@ -2599,7 +2603,7 @@ func (m *MsgIncreaseActiveGovernanceFrameworkVersion) Unmarshal(dAtA []byte) err
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Authority", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Corporation", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -2627,7 +2631,7 @@ func (m *MsgIncreaseActiveGovernanceFrameworkVersion) Unmarshal(dAtA []byte) err
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Authority = string(dAtA[iNdEx:postIndex])
+			m.Corporation = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
@@ -2663,9 +2667,9 @@ func (m *MsgIncreaseActiveGovernanceFrameworkVersion) Unmarshal(dAtA []byte) err
 			iNdEx = postIndex
 		case 3:
 			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Id", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field TrId", wireType)
 			}
-			m.Id = 0
+			m.TrId = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowTx
@@ -2675,7 +2679,7 @@ func (m *MsgIncreaseActiveGovernanceFrameworkVersion) Unmarshal(dAtA []byte) err
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.Id |= uint64(b&0x7F) << shift
+				m.TrId |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -2782,7 +2786,7 @@ func (m *MsgUpdateTrustRegistry) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Authority", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Corporation", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -2810,7 +2814,7 @@ func (m *MsgUpdateTrustRegistry) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Authority = string(dAtA[iNdEx:postIndex])
+			m.Corporation = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
@@ -2846,9 +2850,9 @@ func (m *MsgUpdateTrustRegistry) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 3:
 			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Id", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field TrId", wireType)
 			}
-			m.Id = 0
+			m.TrId = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowTx
@@ -2858,7 +2862,7 @@ func (m *MsgUpdateTrustRegistry) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.Id |= uint64(b&0x7F) << shift
+				m.TrId |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -3029,7 +3033,7 @@ func (m *MsgArchiveTrustRegistry) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Authority", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Corporation", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -3057,7 +3061,7 @@ func (m *MsgArchiveTrustRegistry) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Authority = string(dAtA[iNdEx:postIndex])
+			m.Corporation = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
@@ -3093,9 +3097,9 @@ func (m *MsgArchiveTrustRegistry) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 3:
 			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Id", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field TrId", wireType)
 			}
-			m.Id = 0
+			m.TrId = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowTx
@@ -3105,7 +3109,7 @@ func (m *MsgArchiveTrustRegistry) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.Id |= uint64(b&0x7F) << shift
+				m.TrId |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}

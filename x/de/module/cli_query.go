@@ -32,21 +32,21 @@ func CmdListOperatorAuthorizations() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list-operator-authorizations",
 		Short: "List operator authorizations with optional filters",
-		Long:  "[MOD-DE-QRY-1] List operator authorizations. Optionally filter by authority and/or operator address.",
+		Long:  "[MOD-DE-QRY-1] List operator authorizations. Optionally filter by corporation and/or operator address.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
 				return err
 			}
 
-			authority, _ := cmd.Flags().GetString("authority")
+			corporation, _ := cmd.Flags().GetString("corporation")
 			operator, _ := cmd.Flags().GetString("operator")
 			limit, _ := cmd.Flags().GetUint32("limit")
 
 			queryClient := types.NewQueryClient(clientCtx)
 
 			res, err := queryClient.ListOperatorAuthorizations(cmd.Context(), &types.QueryListOperatorAuthorizationsRequest{
-				Authority:       authority,
+				Corporation:     corporation,
 				Operator:        operator,
 				ResponseMaxSize: limit,
 			})
@@ -58,7 +58,7 @@ func CmdListOperatorAuthorizations() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().String("authority", "", "filter by the authority group that granted the authorization")
+	cmd.Flags().String("corporation", "", "filter by the corporation group that granted the authorization")
 	cmd.Flags().String("operator", "", "filter by the operator account that received the authorization")
 	cmd.Flags().Uint32("limit", 64, "maximum number of results (1-1024, default 64)")
 
@@ -73,21 +73,21 @@ func CmdListVSOperatorAuthorizations() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list-vs-operator-authorizations",
 		Short: "List VS operator authorizations with optional filters",
-		Long:  "[MOD-DE-QRY-2] List VS operator authorizations. Optionally filter by authority and/or vs_operator address.",
+		Long:  "[MOD-DE-QRY-2] List VS operator authorizations. Optionally filter by corporation and/or vs_operator address.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
 				return err
 			}
 
-			authority, _ := cmd.Flags().GetString("authority")
+			corporation, _ := cmd.Flags().GetString("corporation")
 			vsOperator, _ := cmd.Flags().GetString("vs-operator")
 			limit, _ := cmd.Flags().GetUint32("limit")
 
 			queryClient := types.NewQueryClient(clientCtx)
 
 			res, err := queryClient.ListVSOperatorAuthorizations(cmd.Context(), &types.QueryListVSOperatorAuthorizationsRequest{
-				Authority:       authority,
+				Corporation:     corporation,
 				VsOperator:      vsOperator,
 				ResponseMaxSize: limit,
 			})
@@ -99,7 +99,7 @@ func CmdListVSOperatorAuthorizations() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().String("authority", "", "filter by the authority group that granted the authorization")
+	cmd.Flags().String("corporation", "", "filter by the corporation group that granted the authorization")
 	cmd.Flags().String("vs-operator", "", "filter by the VS operator account")
 	cmd.Flags().Uint32("limit", 64, "maximum number of results (1-1024, default 64)")
 

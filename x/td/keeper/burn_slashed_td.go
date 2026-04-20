@@ -16,7 +16,7 @@ func (k Keeper) BurnEcosystemSlashedTrustDeposit(ctx sdk.Context, account string
 	}
 
 	if amount == 0 {
-		return fmt.Errorf("amount must be greater than 0")
+		return fmt.Errorf("deposit must be greater than 0")
 	}
 
 	// Load existing TrustDeposit entry (must exist)
@@ -25,9 +25,9 @@ func (k Keeper) BurnEcosystemSlashedTrustDeposit(ctx sdk.Context, account string
 		return fmt.Errorf("trust deposit entry not found for account %s: %w", account, err)
 	}
 
-	// amount MUST be lower or equal than td.amount
-	if amount > td.Amount {
-		return fmt.Errorf("amount exceeds available deposit: %d > %d", amount, td.Amount)
+	// amount MUST be lower or equal than td.deposit
+	if amount > td.Deposit {
+		return fmt.Errorf("amount exceeds available deposit: %d > %d", amount, td.Deposit)
 	}
 
 	// [MOD-TD-MSG-7-3] Execution
@@ -48,7 +48,7 @@ func (k Keeper) executeBurnEcosystemSlashedTrustDeposit(ctx sdk.Context, account
 	}
 
 	// [MOD-TD-MSG-7-3] td.deposit = td.deposit - amount
-	td.Amount = td.Amount - amount
+	td.Deposit = td.Deposit - amount
 
 	// [MOD-TD-MSG-7-3] td.share = td.share - amount / GlobalVariables.trust_deposit_share_value
 	shareReduction := math.LegacyNewDecFromInt(math.NewInt(int64(amount))).Quo(trustDepositShareValue)
@@ -81,7 +81,7 @@ func (k Keeper) executeBurnEcosystemSlashedTrustDeposit(ctx sdk.Context, account
 			types.EventTypeBurnEcosystemSlashedTrustDeposit,
 			sdk.NewAttribute(types.AttributeKeyAccount, account),
 			sdk.NewAttribute(types.AttributeKeyAmount, strconv.FormatUint(amount, 10)),
-			sdk.NewAttribute(types.AttributeKeyNewAmount, strconv.FormatUint(td.Amount, 10)),
+			sdk.NewAttribute(types.AttributeKeyNewAmount, strconv.FormatUint(td.Deposit, 10)),
 			sdk.NewAttribute(types.AttributeKeyNewShare, td.Share.String()),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
 		),

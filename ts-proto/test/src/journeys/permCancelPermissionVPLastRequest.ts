@@ -62,7 +62,7 @@ async function main() {
     const renewMsg = {
       typeUrl: typeUrls.MsgRenewPermissionVP,
       value: MsgRenewPermissionVP.fromPartial({
-        authority: authzSetup.authorityAddress,
+        corporation: authzSetup.authorityAddress,
         operator: authzSetup.operatorAddress,
         id: permId,
       }),
@@ -84,7 +84,7 @@ async function main() {
     const cancelMsg = {
       typeUrl: typeUrls.MsgCancelPermissionVPLastRequest,
       value: MsgCancelPermissionVPLastRequest.fromPartial({
-        authority: authzSetup.authorityAddress,
+        corporation: authzSetup.authorityAddress,
         operator: authzSetup.operatorAddress,
         id: permId,
       }),

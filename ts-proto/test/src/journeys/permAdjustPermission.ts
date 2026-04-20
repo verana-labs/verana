@@ -81,7 +81,7 @@ async function main() {
     const msg = {
       typeUrl: typeUrls.MsgAdjustPermission,
       value: MsgAdjustPermission.fromPartial({
-        authority: authzSetup.authorityAddress,
+        corporation: authzSetup.authorityAddress,
         operator: authzSetup.operatorAddress,
         id: rootSetup.rootPermId,
         effectiveUntil: newEffectiveUntil,

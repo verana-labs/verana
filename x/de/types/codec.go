@@ -9,8 +9,9 @@ import (
 )
 
 func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
-	legacy.RegisterAminoMsg(cdc, &MsgGrantOperatorAuthorization{}, "/de/v1/grant-operator-auth")
-	legacy.RegisterAminoMsg(cdc, &MsgRevokeOperatorAuthorization{}, "/de/v1/revoke-operator-auth")
+	legacy.RegisterAminoMsg(cdc, &MsgUpdateParams{}, "verana/x/de/MsgUpdateParams")
+	legacy.RegisterAminoMsg(cdc, &MsgGrantOperatorAuthorization{}, "verana/x/de/MsgGrantOpAuthorization")
+	legacy.RegisterAminoMsg(cdc, &MsgRevokeOperatorAuthorization{}, "verana/x/de/MsgRevokeOpAuthorization")
 }
 
 func RegisterInterfaces(registrar codectypes.InterfaceRegistry) {

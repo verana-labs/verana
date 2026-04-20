@@ -63,12 +63,12 @@ async function main() {
   const msg = {
     typeUrl: typeUrls.MsgAddGovernanceFrameworkDocument,
     value: MsgAddGovernanceFrameworkDocument.fromPartial({
-      authority: setup.authorityAddress,
+      corporation: setup.authorityAddress,
       operator: account.address,
-      id: activeTR.trustRegistryId,
-      docLanguage: "en",
-      docUrl: "https://example.com/governance-framework-v2.pdf",
-      docDigestSri: "sha384-TsProtoTestDocHash1234567890123456789012345678901234567890123456789012345678",
+      trId: activeTR.trustRegistryId,
+      language: "en",
+      url: "https://example.com/governance-framework-v2.pdf",
+      digestSri: "sha384-TsProtoTestDocHash1234567890123456789012345678901234567890123456789012345678",
       version: 2,
     }),
   };

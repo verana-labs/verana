@@ -22,7 +22,7 @@ import {
 } from "../helpers/client";
 import { typeUrls } from "../helpers/registry";
 import { MsgRevokePermission } from "../../../src/codec/verana/perm/v1/tx";
-import { CredentialSchemaPermManagementMode } from "../../../src/codec/verana/cs/v1/types";
+import { IssuerOnboardingMode, VerifierOnboardingMode } from "../../../src/codec/verana/cs/v1/types";
 import { getPermAuthzSetup } from "../helpers/journeyResults";
 import { createPermPrerequisites } from "../helpers/permissionHelpers";
 
@@ -64,7 +64,7 @@ async function main() {
       client,
       setup.authorityAddress,
       setup.operatorAddress,
-      CredentialSchemaPermManagementMode.GRANTOR_VALIDATION,
+      IssuerOnboardingMode.ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS,
     );
     console.log(`  Root Permission ID: ${rootPermId}`);
     console.log();
@@ -85,7 +85,7 @@ async function main() {
     const msg = {
       typeUrl: typeUrls.MsgRevokePermission,
       value: MsgRevokePermission.fromPartial({
-        authority: setup.authorityAddress,
+        corporation: setup.authorityAddress,
         operator: setup.operatorAddress,
         id: rootPermId,
       }),

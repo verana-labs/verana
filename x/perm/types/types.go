@@ -11,8 +11,8 @@ import (
 
 func (msg *MsgStartPermissionVP) ValidateBasic() error {
 	// [MOD-PERM-MSG-1-2-1] authority (group): signature must be verified
-	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
-		return fmt.Errorf("invalid authority address: %w", err)
+	if _, err := sdk.AccAddressFromBech32(msg.Corporation); err != nil {
+		return fmt.Errorf("invalid corporation address: %w", err)
 	}
 
 	// [MOD-PERM-MSG-1-2-1] operator (account): signature must be verified
@@ -24,9 +24,20 @@ func (msg *MsgStartPermissionVP) ValidateBasic() error {
 		return fmt.Errorf("validator perm ID cannot be 0")
 	}
 
-	// [MOD-PERM-MSG-1-2-1] type MUST be a valid PermissionType
-	if msg.Type == 0 || msg.Type > 6 {
-		return fmt.Errorf("perm type must be between 1 and 6")
+	// [MOD-PERM-MSG-1-2-1] type MUST be a valid PermissionType:
+	// ISSUER_GRANTOR, VERIFIER_GRANTOR, ISSUER, VERIFIER, HOLDER.
+	// ECOSYSTEM (5) is explicitly excluded — root permissions are only
+	// created via MsgCreateRootPermission, never via StartPermissionVP.
+	pt := PermissionType(msg.Type)
+	switch pt {
+	case PermissionType_ISSUER,
+		PermissionType_VERIFIER,
+		PermissionType_ISSUER_GRANTOR,
+		PermissionType_VERIFIER_GRANTOR,
+		PermissionType_HOLDER:
+		// ok
+	default:
+		return fmt.Errorf("perm type must be one of ISSUER, VERIFIER, ISSUER_GRANTOR, VERIFIER_GRANTOR, HOLDER (got %s)", pt.String())
 	}
 
 	// [MOD-PERM-MSG-1-1] did is required and MUST conform to DID Syntax
@@ -78,8 +89,8 @@ func isValidDID(did string) bool {
 
 func (msg *MsgRenewPermissionVP) ValidateBasic() error {
 	// [MOD-PERM-MSG-2-2-1] authority (group): signature must be verified
-	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
-		return fmt.Errorf("invalid authority address: %w", err)
+	if _, err := sdk.AccAddressFromBech32(msg.Corporation); err != nil {
+		return fmt.Errorf("invalid corporation address: %w", err)
 	}
 
 	// [MOD-PERM-MSG-2-2-1] operator (account): signature must be verified
@@ -98,8 +109,8 @@ func (msg *MsgRenewPermissionVP) ValidateBasic() error {
 // ValidateBasic for MsgSetPermissionVPToValidated
 func (msg *MsgSetPermissionVPToValidated) ValidateBasic() error {
 	// [MOD-PERM-MSG-3-2-1] authority (group): signature must be verified
-	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
-		return fmt.Errorf("invalid authority address: %w", err)
+	if _, err := sdk.AccAddressFromBech32(msg.Corporation); err != nil {
+		return fmt.Errorf("invalid corporation address: %w", err)
 	}
 
 	// [MOD-PERM-MSG-3-2-1] operator (account): signature must be verified
@@ -113,8 +124,8 @@ func (msg *MsgSetPermissionVPToValidated) ValidateBasic() error {
 	}
 
 	// Validate digest SRI format if provided (optional)
-	if msg.VpSummaryDigestSri != "" && !isValidDigestSRI(msg.VpSummaryDigestSri) {
-		return fmt.Errorf("invalid vp_summary_digest_sri format")
+	if msg.VpSummaryDigest != "" && !isValidDigestSRI(msg.VpSummaryDigest) {
+		return fmt.Errorf("invalid vp_summary_digest format")
 	}
 
 	// Validate discount fields (scaled: 0 = 0.0, 10000 = 1.0, range 0-10000)
@@ -145,8 +156,8 @@ func isValidDigestSRI(digestSRI string) bool {
 // ValidateBasic for MsgConfirmPermissionVPTermination
 func (msg *MsgCancelPermissionVPLastRequest) ValidateBasic() error {
 	// Validate authority address
-	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
-		return fmt.Errorf("invalid authority address: %w", err)
+	if _, err := sdk.AccAddressFromBech32(msg.Corporation); err != nil {
+		return fmt.Errorf("invalid corporation address: %w", err)
 	}
 
 	// Validate operator address
@@ -164,8 +175,8 @@ func (msg *MsgCancelPermissionVPLastRequest) ValidateBasic() error {
 
 func (msg *MsgCreateRootPermission) ValidateBasic() error {
 	// Validate authority address
-	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
-		return fmt.Errorf("invalid authority address: %w", err)
+	if _, err := sdk.AccAddressFromBech32(msg.Corporation); err != nil {
+		return fmt.Errorf("invalid corporation address: %w", err)
 	}
 
 	// Validate operator address
@@ -195,8 +206,8 @@ func (msg *MsgCreateRootPermission) ValidateBasic() error {
 
 func (msg *MsgAdjustPermission) ValidateBasic() error {
 	// Validate authority address
-	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
-		return fmt.Errorf("invalid authority address: %w", err)
+	if _, err := sdk.AccAddressFromBech32(msg.Corporation); err != nil {
+		return fmt.Errorf("invalid corporation address: %w", err)
 	}
 
 	// Validate operator address
@@ -220,8 +231,8 @@ func (msg *MsgAdjustPermission) ValidateBasic() error {
 
 func (msg *MsgRevokePermission) ValidateBasic() error {
 	// Validate authority address
-	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
-		return fmt.Errorf("invalid authority address: %w", err)
+	if _, err := sdk.AccAddressFromBech32(msg.Corporation); err != nil {
+		return fmt.Errorf("invalid corporation address: %w", err)
 	}
 
 	// Validate operator address
@@ -239,8 +250,8 @@ func (msg *MsgRevokePermission) ValidateBasic() error {
 
 func (msg *MsgCreateOrUpdatePermissionSession) ValidateBasic() error {
 	// [MOD-PERM-MSG-10-2] authority (group): signature must be verified
-	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
-		return fmt.Errorf("invalid authority address: %w", err)
+	if _, err := sdk.AccAddressFromBech32(msg.Corporation); err != nil {
+		return fmt.Errorf("invalid corporation address: %w", err)
 	}
 
 	// [MOD-PERM-MSG-10-2] operator (account): signature must be verified
@@ -278,8 +289,8 @@ func (msg *MsgCreateOrUpdatePermissionSession) ValidateBasic() error {
 
 func (msg *MsgSlashPermissionTrustDeposit) ValidateBasic() error {
 	// [MOD-PERM-MSG-12-2-1] authority (group): signature must be verified
-	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
-		return fmt.Errorf("invalid authority address: %w", err)
+	if _, err := sdk.AccAddressFromBech32(msg.Corporation); err != nil {
+		return fmt.Errorf("invalid corporation address: %w", err)
 	}
 
 	// [MOD-PERM-MSG-12-2-1] operator (account): signature must be verified
@@ -296,13 +307,17 @@ func (msg *MsgSlashPermissionTrustDeposit) ValidateBasic() error {
 	if msg.Amount == 0 {
 		return sdkerrors.ErrInvalidRequest.Wrap("amount must be greater than 0")
 	}
+	// [MOD-PERM-MSG-12-1] reason is mandatory per spec v4 draft 13
+	if msg.Reason == "" {
+		return sdkerrors.ErrInvalidRequest.Wrap("reason is required")
+	}
 	return nil
 }
 
 func (msg *MsgRepayPermissionSlashedTrustDeposit) ValidateBasic() error {
 	// [MOD-PERM-MSG-13-2-1] authority (group): signature must be verified
-	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
-		return fmt.Errorf("invalid authority address: %w", err)
+	if _, err := sdk.AccAddressFromBech32(msg.Corporation); err != nil {
+		return fmt.Errorf("invalid corporation address: %w", err)
 	}
 
 	// [MOD-PERM-MSG-13-2-1] operator (account): signature must be verified
@@ -314,13 +329,18 @@ func (msg *MsgRepayPermissionSlashedTrustDeposit) ValidateBasic() error {
 	if msg.Id == 0 {
 		return sdkerrors.ErrInvalidRequest.Wrap("id must be a valid uint64")
 	}
+
+	if msg.Amount == 0 {
+		return sdkerrors.ErrInvalidRequest.Wrap("amount must be positive")
+	}
+
 	return nil
 }
 
-func (msg *MsgCreatePermission) ValidateBasic() error {
-	// [MOD-PERM-MSG-14-2-1] authority (group): signature must be verified
-	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
-		return fmt.Errorf("invalid authority address: %w", err)
+func (msg *MsgSelfCreatePermission) ValidateBasic() error {
+	// [MOD-PERM-MSG-14-2-1] corporation (group): signature must be verified
+	if _, err := sdk.AccAddressFromBech32(msg.Corporation); err != nil {
+		return fmt.Errorf("invalid corporation address: %w", err)
 	}
 
 	// [MOD-PERM-MSG-14-2-1] operator (account): signature must be verified

@@ -35,9 +35,9 @@ export interface MsgUpdateParamsResponse {
  * [MOD-TD-MSG-2] Reclaim Trust Deposit Yield
  */
 export interface MsgReclaimTrustDepositYield {
-  /** authority is the group address that owns the trust deposit. */
-  authority: string;
-  /** operator is the account authorized by the authority to run this Msg. */
+  /** corporation is the group address that owns the trust deposit. */
+  corporation: string;
+  /** operator is the account authorized by the corporation to run this Msg. */
   operator: string;
 }
 
@@ -46,30 +46,19 @@ export interface MsgReclaimTrustDepositYieldResponse {
   claimedAmount: number;
 }
 
-export interface MsgReclaimTrustDeposit {
-  creator: string;
-  /** Amount to reclaim in denom */
-  claimed: number;
-}
-
-export interface MsgReclaimTrustDepositResponse {
-  /** Amount burned */
-  burnedAmount: number;
-  /** Amount transferred to account */
-  claimedAmount: number;
-}
-
 /**
- * MsgSlashTrustDeposit defines the message for slashing an account's trust deposit
+ * MsgSlashTrustDeposit defines the message for slashing a corporation's trust deposit
  * This can only be executed by the governance module
  */
 export interface MsgSlashTrustDeposit {
   /** authority is the address that controls the module (defaults to x/gov unless overwritten). */
   authority: string;
-  /** account is the address of the account whose trust deposit will be slashed */
-  account: string;
-  /** amount is the amount to slash (in base denom) */
-  amount: string;
+  /** corporation is the address of the corporation whose trust deposit will be slashed */
+  corporation: string;
+  /** deposit is the deposit amount to slash (in base denom) */
+  deposit: string;
+  /** [MOD-TD-MSG-5-1] reason for the slash (mandatory per spec v4 draft 13) */
+  reason: string;
 }
 
 /** MsgSlashTrustDepositResponse defines the response for MsgSlashTrustDeposit */
@@ -78,15 +67,15 @@ export interface MsgSlashTrustDepositResponse {
 
 /**
  * MsgRepaySlashedTrustDeposit defines the message for repaying a slashed trust deposit.
- * [MOD-TD-MSG-6] Any authorized operator CAN execute this on behalf of an authority.
+ * [MOD-TD-MSG-6] Any authorized operator CAN execute this on behalf of a corporation.
  */
 export interface MsgRepaySlashedTrustDeposit {
-  /** authority is the group address that owns the slashed trust deposit. */
-  authority: string;
-  /** operator is the account authorized by the authority to run this Msg. */
+  /** corporation is the group address that owns the slashed trust deposit. */
+  corporation: string;
+  /** operator is the account authorized by the corporation to run this Msg. */
   operator: string;
-  /** amount is the repayment amount (must equal outstanding slashed amount). */
-  amount: number;
+  /** deposit is the repayment amount (must equal outstanding slashed amount). */
+  deposit: number;
 }
 
 export interface MsgRepaySlashedTrustDepositResponse {
@@ -212,13 +201,13 @@ export const MsgUpdateParamsResponse = {
 };
 
 function createBaseMsgReclaimTrustDepositYield(): MsgReclaimTrustDepositYield {
-  return { authority: "", operator: "" };
+  return { corporation: "", operator: "" };
 }
 
 export const MsgReclaimTrustDepositYield = {
   encode(message: MsgReclaimTrustDepositYield, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.authority !== "") {
-      writer.uint32(10).string(message.authority);
+    if (message.corporation !== "") {
+      writer.uint32(10).string(message.corporation);
     }
     if (message.operator !== "") {
       writer.uint32(18).string(message.operator);
@@ -238,7 +227,7 @@ export const MsgReclaimTrustDepositYield = {
             break;
           }
 
-          message.authority = reader.string();
+          message.corporation = reader.string();
           continue;
         case 2:
           if (tag !== 18) {
@@ -258,15 +247,15 @@ export const MsgReclaimTrustDepositYield = {
 
   fromJSON(object: any): MsgReclaimTrustDepositYield {
     return {
-      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      corporation: isSet(object.corporation) ? globalThis.String(object.corporation) : "",
       operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
     };
   },
 
   toJSON(message: MsgReclaimTrustDepositYield): unknown {
     const obj: any = {};
-    if (message.authority !== "") {
-      obj.authority = message.authority;
+    if (message.corporation !== "") {
+      obj.corporation = message.corporation;
     }
     if (message.operator !== "") {
       obj.operator = message.operator;
@@ -279,7 +268,7 @@ export const MsgReclaimTrustDepositYield = {
   },
   fromPartial<I extends Exact<DeepPartial<MsgReclaimTrustDepositYield>, I>>(object: I): MsgReclaimTrustDepositYield {
     const message = createBaseMsgReclaimTrustDepositYield();
-    message.authority = object.authority ?? "";
+    message.corporation = object.corporation ?? "";
     message.operator = object.operator ?? "";
     return message;
   },
@@ -346,158 +335,8 @@ export const MsgReclaimTrustDepositYieldResponse = {
   },
 };
 
-function createBaseMsgReclaimTrustDeposit(): MsgReclaimTrustDeposit {
-  return { creator: "", claimed: 0 };
-}
-
-export const MsgReclaimTrustDeposit = {
-  encode(message: MsgReclaimTrustDeposit, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.creator !== "") {
-      writer.uint32(10).string(message.creator);
-    }
-    if (message.claimed !== 0) {
-      writer.uint32(16).uint64(message.claimed);
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): MsgReclaimTrustDeposit {
-    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseMsgReclaimTrustDeposit();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          if (tag !== 10) {
-            break;
-          }
-
-          message.creator = reader.string();
-          continue;
-        case 2:
-          if (tag !== 16) {
-            break;
-          }
-
-          message.claimed = longToNumber(reader.uint64() as Long);
-          continue;
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skipType(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): MsgReclaimTrustDeposit {
-    return {
-      creator: isSet(object.creator) ? globalThis.String(object.creator) : "",
-      claimed: isSet(object.claimed) ? globalThis.Number(object.claimed) : 0,
-    };
-  },
-
-  toJSON(message: MsgReclaimTrustDeposit): unknown {
-    const obj: any = {};
-    if (message.creator !== "") {
-      obj.creator = message.creator;
-    }
-    if (message.claimed !== 0) {
-      obj.claimed = Math.round(message.claimed);
-    }
-    return obj;
-  },
-
-  create<I extends Exact<DeepPartial<MsgReclaimTrustDeposit>, I>>(base?: I): MsgReclaimTrustDeposit {
-    return MsgReclaimTrustDeposit.fromPartial(base ?? ({} as any));
-  },
-  fromPartial<I extends Exact<DeepPartial<MsgReclaimTrustDeposit>, I>>(object: I): MsgReclaimTrustDeposit {
-    const message = createBaseMsgReclaimTrustDeposit();
-    message.creator = object.creator ?? "";
-    message.claimed = object.claimed ?? 0;
-    return message;
-  },
-};
-
-function createBaseMsgReclaimTrustDepositResponse(): MsgReclaimTrustDepositResponse {
-  return { burnedAmount: 0, claimedAmount: 0 };
-}
-
-export const MsgReclaimTrustDepositResponse = {
-  encode(message: MsgReclaimTrustDepositResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.burnedAmount !== 0) {
-      writer.uint32(8).uint64(message.burnedAmount);
-    }
-    if (message.claimedAmount !== 0) {
-      writer.uint32(16).uint64(message.claimedAmount);
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): MsgReclaimTrustDepositResponse {
-    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseMsgReclaimTrustDepositResponse();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          if (tag !== 8) {
-            break;
-          }
-
-          message.burnedAmount = longToNumber(reader.uint64() as Long);
-          continue;
-        case 2:
-          if (tag !== 16) {
-            break;
-          }
-
-          message.claimedAmount = longToNumber(reader.uint64() as Long);
-          continue;
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skipType(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): MsgReclaimTrustDepositResponse {
-    return {
-      burnedAmount: isSet(object.burnedAmount) ? globalThis.Number(object.burnedAmount) : 0,
-      claimedAmount: isSet(object.claimedAmount) ? globalThis.Number(object.claimedAmount) : 0,
-    };
-  },
-
-  toJSON(message: MsgReclaimTrustDepositResponse): unknown {
-    const obj: any = {};
-    if (message.burnedAmount !== 0) {
-      obj.burnedAmount = Math.round(message.burnedAmount);
-    }
-    if (message.claimedAmount !== 0) {
-      obj.claimedAmount = Math.round(message.claimedAmount);
-    }
-    return obj;
-  },
-
-  create<I extends Exact<DeepPartial<MsgReclaimTrustDepositResponse>, I>>(base?: I): MsgReclaimTrustDepositResponse {
-    return MsgReclaimTrustDepositResponse.fromPartial(base ?? ({} as any));
-  },
-  fromPartial<I extends Exact<DeepPartial<MsgReclaimTrustDepositResponse>, I>>(
-    object: I,
-  ): MsgReclaimTrustDepositResponse {
-    const message = createBaseMsgReclaimTrustDepositResponse();
-    message.burnedAmount = object.burnedAmount ?? 0;
-    message.claimedAmount = object.claimedAmount ?? 0;
-    return message;
-  },
-};
-
 function createBaseMsgSlashTrustDeposit(): MsgSlashTrustDeposit {
-  return { authority: "", account: "", amount: "" };
+  return { authority: "", corporation: "", deposit: "", reason: "" };
 }
 
 export const MsgSlashTrustDeposit = {
@@ -505,11 +344,14 @@ export const MsgSlashTrustDeposit = {
     if (message.authority !== "") {
       writer.uint32(10).string(message.authority);
     }
-    if (message.account !== "") {
-      writer.uint32(18).string(message.account);
+    if (message.corporation !== "") {
+      writer.uint32(18).string(message.corporation);
     }
-    if (message.amount !== "") {
-      writer.uint32(26).string(message.amount);
+    if (message.deposit !== "") {
+      writer.uint32(26).string(message.deposit);
+    }
+    if (message.reason !== "") {
+      writer.uint32(34).string(message.reason);
     }
     return writer;
   },
@@ -533,14 +375,21 @@ export const MsgSlashTrustDeposit = {
             break;
           }
 
-          message.account = reader.string();
+          message.corporation = reader.string();
           continue;
         case 3:
           if (tag !== 26) {
             break;
           }
 
-          message.amount = reader.string();
+          message.deposit = reader.string();
+          continue;
+        case 4:
+          if (tag !== 34) {
+            break;
+          }
+
+          message.reason = reader.string();
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -554,8 +403,9 @@ export const MsgSlashTrustDeposit = {
   fromJSON(object: any): MsgSlashTrustDeposit {
     return {
       authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
-      account: isSet(object.account) ? globalThis.String(object.account) : "",
-      amount: isSet(object.amount) ? globalThis.String(object.amount) : "",
+      corporation: isSet(object.corporation) ? globalThis.String(object.corporation) : "",
+      deposit: isSet(object.deposit) ? globalThis.String(object.deposit) : "",
+      reason: isSet(object.reason) ? globalThis.String(object.reason) : "",
     };
   },
 
@@ -564,11 +414,14 @@ export const MsgSlashTrustDeposit = {
     if (message.authority !== "") {
       obj.authority = message.authority;
     }
-    if (message.account !== "") {
-      obj.account = message.account;
+    if (message.corporation !== "") {
+      obj.corporation = message.corporation;
     }
-    if (message.amount !== "") {
-      obj.amount = message.amount;
+    if (message.deposit !== "") {
+      obj.deposit = message.deposit;
+    }
+    if (message.reason !== "") {
+      obj.reason = message.reason;
     }
     return obj;
   },
@@ -579,8 +432,9 @@ export const MsgSlashTrustDeposit = {
   fromPartial<I extends Exact<DeepPartial<MsgSlashTrustDeposit>, I>>(object: I): MsgSlashTrustDeposit {
     const message = createBaseMsgSlashTrustDeposit();
     message.authority = object.authority ?? "";
-    message.account = object.account ?? "";
-    message.amount = object.amount ?? "";
+    message.corporation = object.corporation ?? "";
+    message.deposit = object.deposit ?? "";
+    message.reason = object.reason ?? "";
     return message;
   },
 };
@@ -629,19 +483,19 @@ export const MsgSlashTrustDepositResponse = {
 };
 
 function createBaseMsgRepaySlashedTrustDeposit(): MsgRepaySlashedTrustDeposit {
-  return { authority: "", operator: "", amount: 0 };
+  return { corporation: "", operator: "", deposit: 0 };
 }
 
 export const MsgRepaySlashedTrustDeposit = {
   encode(message: MsgRepaySlashedTrustDeposit, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.authority !== "") {
-      writer.uint32(10).string(message.authority);
+    if (message.corporation !== "") {
+      writer.uint32(10).string(message.corporation);
     }
     if (message.operator !== "") {
       writer.uint32(18).string(message.operator);
     }
-    if (message.amount !== 0) {
-      writer.uint32(24).uint64(message.amount);
+    if (message.deposit !== 0) {
+      writer.uint32(24).uint64(message.deposit);
     }
     return writer;
   },
@@ -658,7 +512,7 @@ export const MsgRepaySlashedTrustDeposit = {
             break;
           }
 
-          message.authority = reader.string();
+          message.corporation = reader.string();
           continue;
         case 2:
           if (tag !== 18) {
@@ -672,7 +526,7 @@ export const MsgRepaySlashedTrustDeposit = {
             break;
           }
 
-          message.amount = longToNumber(reader.uint64() as Long);
+          message.deposit = longToNumber(reader.uint64() as Long);
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -685,22 +539,22 @@ export const MsgRepaySlashedTrustDeposit = {
 
   fromJSON(object: any): MsgRepaySlashedTrustDeposit {
     return {
-      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      corporation: isSet(object.corporation) ? globalThis.String(object.corporation) : "",
       operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
-      amount: isSet(object.amount) ? globalThis.Number(object.amount) : 0,
+      deposit: isSet(object.deposit) ? globalThis.Number(object.deposit) : 0,
     };
   },
 
   toJSON(message: MsgRepaySlashedTrustDeposit): unknown {
     const obj: any = {};
-    if (message.authority !== "") {
-      obj.authority = message.authority;
+    if (message.corporation !== "") {
+      obj.corporation = message.corporation;
     }
     if (message.operator !== "") {
       obj.operator = message.operator;
     }
-    if (message.amount !== 0) {
-      obj.amount = Math.round(message.amount);
+    if (message.deposit !== 0) {
+      obj.deposit = Math.round(message.deposit);
     }
     return obj;
   },
@@ -710,9 +564,9 @@ export const MsgRepaySlashedTrustDeposit = {
   },
   fromPartial<I extends Exact<DeepPartial<MsgRepaySlashedTrustDeposit>, I>>(object: I): MsgRepaySlashedTrustDeposit {
     const message = createBaseMsgRepaySlashedTrustDeposit();
-    message.authority = object.authority ?? "";
+    message.corporation = object.corporation ?? "";
     message.operator = object.operator ?? "";
-    message.amount = object.amount ?? 0;
+    message.deposit = object.deposit ?? 0;
     return message;
   },
 };
@@ -772,8 +626,7 @@ export interface Msg {
    */
   UpdateParams(request: MsgUpdateParams): Promise<MsgUpdateParamsResponse>;
   ReclaimTrustDepositYield(request: MsgReclaimTrustDepositYield): Promise<MsgReclaimTrustDepositYieldResponse>;
-  ReclaimTrustDeposit(request: MsgReclaimTrustDeposit): Promise<MsgReclaimTrustDepositResponse>;
-  /** SlashTrustDeposit defines a governance operation to slash an account's trust deposit */
+  /** SlashTrustDeposit defines a governance operation to slash a corporation's trust deposit */
   SlashTrustDeposit(request: MsgSlashTrustDeposit): Promise<MsgSlashTrustDepositResponse>;
   RepaySlashedTrustDeposit(request: MsgRepaySlashedTrustDeposit): Promise<MsgRepaySlashedTrustDepositResponse>;
 }
@@ -787,7 +640,6 @@ export class MsgClientImpl implements Msg {
     this.rpc = rpc;
     this.UpdateParams = this.UpdateParams.bind(this);
     this.ReclaimTrustDepositYield = this.ReclaimTrustDepositYield.bind(this);
-    this.ReclaimTrustDeposit = this.ReclaimTrustDeposit.bind(this);
     this.SlashTrustDeposit = this.SlashTrustDeposit.bind(this);
     this.RepaySlashedTrustDeposit = this.RepaySlashedTrustDeposit.bind(this);
   }
@@ -801,12 +653,6 @@ export class MsgClientImpl implements Msg {
     const data = MsgReclaimTrustDepositYield.encode(request).finish();
     const promise = this.rpc.request(this.service, "ReclaimTrustDepositYield", data);
     return promise.then((data) => MsgReclaimTrustDepositYieldResponse.decode(_m0.Reader.create(data)));
-  }
-
-  ReclaimTrustDeposit(request: MsgReclaimTrustDeposit): Promise<MsgReclaimTrustDepositResponse> {
-    const data = MsgReclaimTrustDeposit.encode(request).finish();
-    const promise = this.rpc.request(this.service, "ReclaimTrustDeposit", data);
-    return promise.then((data) => MsgReclaimTrustDepositResponse.decode(_m0.Reader.create(data)));
   }
 
   SlashTrustDeposit(request: MsgSlashTrustDeposit): Promise<MsgSlashTrustDepositResponse> {

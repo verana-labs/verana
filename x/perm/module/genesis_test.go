@@ -48,12 +48,10 @@ func TestDeterministicGenesis(t *testing.T) {
 		Id:              2,
 		Type:            types.PermissionType_ISSUER,
 		Did:             "did:example:67890",
-		Authority:       creatorAddr,
+		Corporation:     creatorAddr,
 		Created:         &nowTime,
-		CreatedBy:       creatorAddr,
 		Modified:        &nowTime,
 		SchemaId:        1,
-		Country:         "CA",
 		ValidatorPermId: 1,
 		EffectiveFrom:   &nowTime,
 		EffectiveUntil:  &futureTime,
@@ -63,12 +61,10 @@ func TestDeterministicGenesis(t *testing.T) {
 		Id:             1,
 		Type:           types.PermissionType_ECOSYSTEM,
 		Did:            "did:example:12345",
-		Authority:      creatorAddr,
+		Corporation:    creatorAddr,
 		Created:        &nowTime,
-		CreatedBy:      creatorAddr,
 		Modified:       &nowTime,
 		SchemaId:       1,
-		Country:        "US",
 		EffectiveFrom:  &nowTime,
 		EffectiveUntil: &futureTime,
 	}
@@ -81,7 +77,7 @@ func TestDeterministicGenesis(t *testing.T) {
 	// Create test sessions in random order
 	session2 := types.PermissionSession{
 		Id:          "test-session-id-2",
-		Authority:   creatorAddr,
+		Corporation: creatorAddr,
 		VsOperator:  creatorAddr,
 		AgentPermId: 2,
 		Created:     &nowTime,
@@ -96,7 +92,7 @@ func TestDeterministicGenesis(t *testing.T) {
 
 	session1 := types.PermissionSession{
 		Id:          "test-session-id-1",
-		Authority:   creatorAddr,
+		Corporation: creatorAddr,
 		VsOperator:  creatorAddr,
 		AgentPermId: 1,
 		Created:     &nowTime,
@@ -174,12 +170,10 @@ func TestGenesisImportExport(t *testing.T) {
 		Id:             1,
 		Type:           types.PermissionType_ECOSYSTEM,
 		Did:            "did:example:12345",
-		Authority:      creatorAddr,
+		Corporation:    creatorAddr,
 		Created:        &nowTime,
-		CreatedBy:      creatorAddr,
 		Modified:       &nowTime,
 		SchemaId:       1,
-		Country:        "US",
 		EffectiveFrom:  &nowTime,
 		EffectiveUntil: &futureTime,
 	}
@@ -188,12 +182,10 @@ func TestGenesisImportExport(t *testing.T) {
 		Id:              2,
 		Type:            types.PermissionType_ISSUER,
 		Did:             "did:example:67890",
-		Authority:       creatorAddr,
+		Corporation:     creatorAddr,
 		Created:         &nowTime,
-		CreatedBy:       creatorAddr,
 		Modified:        &nowTime,
 		SchemaId:        1,
-		Country:         "CA",
 		EffectiveFrom:   &nowTime,
 		EffectiveUntil:  &futureTime,
 		ValidatorPermId: 1,
@@ -203,12 +195,10 @@ func TestGenesisImportExport(t *testing.T) {
 		Id:              3,
 		Type:            types.PermissionType_VERIFIER,
 		Did:             "did:example:verifier",
-		Authority:       creatorAddr,
+		Corporation:     creatorAddr,
 		Created:         &nowTime,
-		CreatedBy:       creatorAddr,
 		Modified:        &nowTime,
 		SchemaId:        1,
-		Country:         "UK",
 		EffectiveFrom:   &nowTime,
 		EffectiveUntil:  &futureTime,
 		ValidatorPermId: 1,
@@ -222,7 +212,7 @@ func TestGenesisImportExport(t *testing.T) {
 	// Create test perm sessions
 	session1 := types.PermissionSession{
 		Id:          "test-session-id-1",
-		Authority:   creatorAddr,
+		Corporation: creatorAddr,
 		VsOperator:  creatorAddr,
 		AgentPermId: 2,
 		Created:     &nowTime,
@@ -237,7 +227,7 @@ func TestGenesisImportExport(t *testing.T) {
 
 	session2 := types.PermissionSession{
 		Id:          "test-session-id-2",
-		Authority:   creatorAddr,
+		Corporation: creatorAddr,
 		VsOperator:  creatorAddr,
 		AgentPermId: 3,
 		Created:     &nowTime,
@@ -283,7 +273,7 @@ func TestGenesisImportExport(t *testing.T) {
 	perm3Get, err := k2.Permission.Get(ctx2, 3)
 	require.NoError(t, err)
 	require.Equal(t, perm3.Id, perm3Get.Id)
-	require.Equal(t, perm3.Country, perm3Get.Country)
+	require.Equal(t, perm3.Corporation, perm3Get.Corporation)
 
 	counter, err := k2.PermissionCounter.Get(ctx2)
 	require.NoError(t, err)
@@ -323,18 +313,18 @@ func TestGenesisValidation(t *testing.T) {
 				Params: types.DefaultParams(),
 				Permissions: []types.Permission{
 					{
-						Id:        1,
-						Type:      types.PermissionType_ISSUER,
-						Authority: creatorAddr,
-						Created:   &nowTime,
-						Modified:  &nowTime,
+						Id:          1,
+						Type:        types.PermissionType_ISSUER,
+						Corporation: creatorAddr,
+						Created:     &nowTime,
+						Modified:    &nowTime,
 					},
 					{
-						Id:        1, // Duplicate ID
-						Type:      types.PermissionType_VERIFIER,
-						Authority: creatorAddr,
-						Created:   &nowTime,
-						Modified:  &nowTime,
+						Id:          1, // Duplicate ID
+						Type:        types.PermissionType_VERIFIER,
+						Corporation: creatorAddr,
+						Created:     &nowTime,
+						Modified:    &nowTime,
 					},
 				},
 				NextPermissionId: 2,
@@ -347,11 +337,11 @@ func TestGenesisValidation(t *testing.T) {
 				Params: types.DefaultParams(),
 				Permissions: []types.Permission{
 					{
-						Id:        5,
-						Type:      types.PermissionType_ISSUER,
-						Authority: creatorAddr,
-						Created:   &nowTime,
-						Modified:  &nowTime,
+						Id:          5,
+						Type:        types.PermissionType_ISSUER,
+						Corporation: creatorAddr,
+						Created:     &nowTime,
+						Modified:    &nowTime,
 					},
 				},
 				NextPermissionId: 3, // Should be > 5
@@ -366,14 +356,14 @@ func TestGenesisValidation(t *testing.T) {
 					{
 						Id:   1,
 						Type: types.PermissionType_ISSUER,
-						// Missing Authority field
+						// Missing Corporation field
 						Created:  &nowTime,
 						Modified: &nowTime,
 					},
 				},
 				NextPermissionId: 2,
 			},
-			expectedErr: "authority cannot be empty for perm ID 1",
+			expectedErr: "corporation cannot be empty for perm ID 1",
 		},
 		{
 			name: "invalid validator reference",
@@ -383,7 +373,7 @@ func TestGenesisValidation(t *testing.T) {
 					{
 						Id:              2,
 						Type:            types.PermissionType_ISSUER,
-						Authority:       creatorAddr,
+						Corporation:     creatorAddr,
 						Created:         &nowTime,
 						Modified:        &nowTime,
 						ValidatorPermId: 999, // Non-existent validator

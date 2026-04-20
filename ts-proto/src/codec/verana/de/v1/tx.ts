@@ -34,14 +34,25 @@ export interface MsgUpdateParamsResponse {
 
 /**
  * [MOD-DE-MSG-3] MsgGrantOperatorAuthorization grants an operator authorization
- * to a grantee on behalf of an authority.
+ * to a grantee on behalf of a corporation.
+ *
+ * Signer semantics (spec draft 13 "corporation + operator OR group proposal"):
+ * - Primary signer is `corporation` — either a group policy address (group
+ *   proposal path) or a plain account that delegates to the corporation.
+ * - When `operator` is non-empty, the AUTHZ-CHECK in the handler verifies
+ *   the operator's delegation from the corporation covers this message type.
+ * - When `operator` is empty, the corporation is acting alone (group proposal
+ *   path) and AUTHZ-CHECK is skipped.
+ * Cosmos SDK requires a single `cosmos.msg.v1.signer` field so the dual-signer
+ * semantics from the spec are enforced at the handler level, not at ante.
  */
 export interface MsgGrantOperatorAuthorization {
-  /** authority is the group account granting the authorization. */
-  authority: string;
+  /** corporation is the group account granting the authorization. */
+  corporation: string;
   /**
-   * operator is the optional account authorized by the authority to run this
-   * Msg.
+   * operator is the optional account authorized by the corporation to run this
+   * Msg on its behalf. Empty when the message is signed directly by the
+   * corporation via a group proposal.
    */
   operator: string;
   /** grantee is the account that receives the authorization from authority. */
@@ -75,7 +86,14 @@ export interface MsgGrantOperatorAuthorization {
    * feegrant_spend_limit_period is the optional reset period for
    * feegrant_spend_limit. Ignored if with_feegrant is false.
    */
-  feegrantSpendLimitPeriod: Duration | undefined;
+  feegrantSpendLimitPeriod:
+    | Duration
+    | undefined;
+  /**
+   * fee_spend_limit is the maximum total amount of fees this authorization
+   * allows the grantee to spend (stored on the OperatorAuthorization record).
+   */
+  feeSpendLimit: Coin[];
 }
 
 /**
@@ -87,14 +105,15 @@ export interface MsgGrantOperatorAuthorizationResponse {
 
 /**
  * [MOD-DE-MSG-4] MsgRevokeOperatorAuthorization revokes an operator
- * authorization for a grantee on behalf of an authority.
+ * authorization for a grantee on behalf of a corporation. Same signer
+ * semantics as MsgGrantOperatorAuthorization (see above).
  */
 export interface MsgRevokeOperatorAuthorization {
-  /** authority is the group account revoking the authorization. */
-  authority: string;
+  /** corporation is the group account revoking the authorization. */
+  corporation: string;
   /**
-   * operator is the optional account authorized by the authority to run this
-   * Msg.
+   * operator is the optional account authorized by the corporation to run this
+   * Msg on its behalf.
    */
   operator: string;
   /** grantee is the account whose authorization is being revoked. */
@@ -229,7 +248,7 @@ export const MsgUpdateParamsResponse = {
 
 function createBaseMsgGrantOperatorAuthorization(): MsgGrantOperatorAuthorization {
   return {
-    authority: "",
+    corporation: "",
     operator: "",
     grantee: "",
     msgTypes: [],
@@ -239,13 +258,14 @@ function createBaseMsgGrantOperatorAuthorization(): MsgGrantOperatorAuthorizatio
     withFeegrant: false,
     feegrantSpendLimit: [],
     feegrantSpendLimitPeriod: undefined,
+    feeSpendLimit: [],
   };
 }
 
 export const MsgGrantOperatorAuthorization = {
   encode(message: MsgGrantOperatorAuthorization, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.authority !== "") {
-      writer.uint32(10).string(message.authority);
+    if (message.corporation !== "") {
+      writer.uint32(10).string(message.corporation);
     }
     if (message.operator !== "") {
       writer.uint32(18).string(message.operator);
@@ -274,6 +294,9 @@ export const MsgGrantOperatorAuthorization = {
     if (message.feegrantSpendLimitPeriod !== undefined) {
       Duration.encode(message.feegrantSpendLimitPeriod, writer.uint32(82).fork()).ldelim();
     }
+    for (const v of message.feeSpendLimit) {
+      Coin.encode(v!, writer.uint32(90).fork()).ldelim();
+    }
     return writer;
   },
 
@@ -289,7 +312,7 @@ export const MsgGrantOperatorAuthorization = {
             break;
           }
 
-          message.authority = reader.string();
+          message.corporation = reader.string();
           continue;
         case 2:
           if (tag !== 18) {
@@ -354,6 +377,13 @@ export const MsgGrantOperatorAuthorization = {
 
           message.feegrantSpendLimitPeriod = Duration.decode(reader, reader.uint32());
           continue;
+        case 11:
+          if (tag !== 90) {
+            break;
+          }
+
+          message.feeSpendLimit.push(Coin.decode(reader, reader.uint32()));
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -365,7 +395,7 @@ export const MsgGrantOperatorAuthorization = {
 
   fromJSON(object: any): MsgGrantOperatorAuthorization {
     return {
-      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      corporation: isSet(object.corporation) ? globalThis.String(object.corporation) : "",
       operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
       grantee: isSet(object.grantee) ? globalThis.String(object.grantee) : "",
       msgTypes: globalThis.Array.isArray(object?.msgTypes) ? object.msgTypes.map((e: any) => globalThis.String(e)) : [],
@@ -383,13 +413,16 @@ export const MsgGrantOperatorAuthorization = {
       feegrantSpendLimitPeriod: isSet(object.feegrantSpendLimitPeriod)
         ? Duration.fromJSON(object.feegrantSpendLimitPeriod)
         : undefined,
+      feeSpendLimit: globalThis.Array.isArray(object?.feeSpendLimit)
+        ? object.feeSpendLimit.map((e: any) => Coin.fromJSON(e))
+        : [],
     };
   },
 
   toJSON(message: MsgGrantOperatorAuthorization): unknown {
     const obj: any = {};
-    if (message.authority !== "") {
-      obj.authority = message.authority;
+    if (message.corporation !== "") {
+      obj.corporation = message.corporation;
     }
     if (message.operator !== "") {
       obj.operator = message.operator;
@@ -418,6 +451,9 @@ export const MsgGrantOperatorAuthorization = {
     if (message.feegrantSpendLimitPeriod !== undefined) {
       obj.feegrantSpendLimitPeriod = Duration.toJSON(message.feegrantSpendLimitPeriod);
     }
+    if (message.feeSpendLimit?.length) {
+      obj.feeSpendLimit = message.feeSpendLimit.map((e) => Coin.toJSON(e));
+    }
     return obj;
   },
 
@@ -428,7 +464,7 @@ export const MsgGrantOperatorAuthorization = {
     object: I,
   ): MsgGrantOperatorAuthorization {
     const message = createBaseMsgGrantOperatorAuthorization();
-    message.authority = object.authority ?? "";
+    message.corporation = object.corporation ?? "";
     message.operator = object.operator ?? "";
     message.grantee = object.grantee ?? "";
     message.msgTypes = object.msgTypes?.map((e) => e) || [];
@@ -444,6 +480,7 @@ export const MsgGrantOperatorAuthorization = {
       (object.feegrantSpendLimitPeriod !== undefined && object.feegrantSpendLimitPeriod !== null)
         ? Duration.fromPartial(object.feegrantSpendLimitPeriod)
         : undefined;
+    message.feeSpendLimit = object.feeSpendLimit?.map((e) => Coin.fromPartial(e)) || [];
     return message;
   },
 };
@@ -496,13 +533,13 @@ export const MsgGrantOperatorAuthorizationResponse = {
 };
 
 function createBaseMsgRevokeOperatorAuthorization(): MsgRevokeOperatorAuthorization {
-  return { authority: "", operator: "", grantee: "" };
+  return { corporation: "", operator: "", grantee: "" };
 }
 
 export const MsgRevokeOperatorAuthorization = {
   encode(message: MsgRevokeOperatorAuthorization, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.authority !== "") {
-      writer.uint32(10).string(message.authority);
+    if (message.corporation !== "") {
+      writer.uint32(10).string(message.corporation);
     }
     if (message.operator !== "") {
       writer.uint32(18).string(message.operator);
@@ -525,7 +562,7 @@ export const MsgRevokeOperatorAuthorization = {
             break;
           }
 
-          message.authority = reader.string();
+          message.corporation = reader.string();
           continue;
         case 2:
           if (tag !== 18) {
@@ -552,7 +589,7 @@ export const MsgRevokeOperatorAuthorization = {
 
   fromJSON(object: any): MsgRevokeOperatorAuthorization {
     return {
-      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      corporation: isSet(object.corporation) ? globalThis.String(object.corporation) : "",
       operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
       grantee: isSet(object.grantee) ? globalThis.String(object.grantee) : "",
     };
@@ -560,8 +597,8 @@ export const MsgRevokeOperatorAuthorization = {
 
   toJSON(message: MsgRevokeOperatorAuthorization): unknown {
     const obj: any = {};
-    if (message.authority !== "") {
-      obj.authority = message.authority;
+    if (message.corporation !== "") {
+      obj.corporation = message.corporation;
     }
     if (message.operator !== "") {
       obj.operator = message.operator;
@@ -579,7 +616,7 @@ export const MsgRevokeOperatorAuthorization = {
     object: I,
   ): MsgRevokeOperatorAuthorization {
     const message = createBaseMsgRevokeOperatorAuthorization();
-    message.authority = object.authority ?? "";
+    message.corporation = object.corporation ?? "";
     message.operator = object.operator ?? "";
     message.grantee = object.grantee ?? "";
     return message;

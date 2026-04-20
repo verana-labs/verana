@@ -27,15 +27,15 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 	for _, td := range genState.TrustDeposits {
 		// Create trust deposit entry
 		trustDeposit := types.TrustDeposit{
-			Account:   td.Account,
-			Share:     td.Share,
-			Amount:    td.Amount,
-			Claimable: td.Claimable,
+			Corporation: td.Corporation,
+			Share:       td.Share,
+			Deposit:     td.Deposit,
+			Claimable:   td.Claimable,
 		}
 
 		// Store the trust deposit
-		if err := k.TrustDeposit.Set(ctx, td.Account, trustDeposit); err != nil {
-			panic(fmt.Sprintf("failed to set trust deposit for account %s: %s", td.Account, err))
+		if err := k.TrustDeposit.Set(ctx, td.Corporation, trustDeposit); err != nil {
+			panic(fmt.Sprintf("failed to set trust deposit for corporation %s: %s", td.Corporation, err))
 		}
 	}
 }
@@ -52,10 +52,10 @@ func ExportGenesis(ctx sdk.Context, k keeper.Keeper) *types.GenesisState {
 	// The Walk function should iterate over keys in lexicographical order
 	_ = k.TrustDeposit.Walk(ctx, nil, func(key string, value types.TrustDeposit) (bool, error) {
 		trustDeposits = append(trustDeposits, types.TrustDepositRecord{
-			Account:   value.Account,
-			Share:     value.Share,
-			Amount:    value.Amount,
-			Claimable: value.Claimable,
+			Corporation: value.Corporation,
+			Share:       value.Share,
+			Deposit:     value.Deposit,
+			Claimable:   value.Claimable,
 		})
 		return false, nil // Continue iteration
 	})

@@ -26,25 +26,22 @@ func (gs GenesisState) Validate() error {
 		return err
 	}
 
-	// Check for duplicate addresses in trust deposits
-	accountSet := make(map[string]struct{}, len(gs.TrustDeposits))
+	// Check for duplicate corporations in trust deposits
+	corporationSet := make(map[string]struct{}, len(gs.TrustDeposits))
 
 	for i, td := range gs.TrustDeposits {
-		// Check for valid account address
-		if _, err := sdk.AccAddressFromBech32(td.Account); err != nil {
-			return fmt.Errorf("invalid account address at index %d: %s", i, err)
+		if _, err := sdk.AccAddressFromBech32(td.Corporation); err != nil {
+			return fmt.Errorf("invalid corporation address at index %d: %s", i, err)
 		}
 
-		// Check for duplicate account addresses
-		if _, exists := accountSet[td.Account]; exists {
-			return fmt.Errorf("duplicate trust deposit for account: %s", td.Account)
+		if _, exists := corporationSet[td.Corporation]; exists {
+			return fmt.Errorf("duplicate trust deposit for corporation: %s", td.Corporation)
 		}
-		accountSet[td.Account] = struct{}{}
+		corporationSet[td.Corporation] = struct{}{}
 
-		// Ensure other fields are valid
-		if td.Amount < td.Claimable {
-			return fmt.Errorf("claimable amount exceeds deposit amount for account %s: %d > %d",
-				td.Account, td.Claimable, td.Amount)
+		if td.Deposit < td.Claimable {
+			return fmt.Errorf("claimable amount exceeds deposit for corporation %s: %d > %d",
+				td.Corporation, td.Claimable, td.Deposit)
 		}
 	}
 

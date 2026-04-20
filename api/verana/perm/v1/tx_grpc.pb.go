@@ -30,7 +30,7 @@ const (
 	Msg_CreateOrUpdatePermissionSession_FullMethodName    = "/verana.perm.v1.Msg/CreateOrUpdatePermissionSession"
 	Msg_SlashPermissionTrustDeposit_FullMethodName        = "/verana.perm.v1.Msg/SlashPermissionTrustDeposit"
 	Msg_RepayPermissionSlashedTrustDeposit_FullMethodName = "/verana.perm.v1.Msg/RepayPermissionSlashedTrustDeposit"
-	Msg_CreatePermission_FullMethodName                   = "/verana.perm.v1.Msg/CreatePermission"
+	Msg_SelfCreatePermission_FullMethodName               = "/verana.perm.v1.Msg/SelfCreatePermission"
 )
 
 // MsgClient is the client API for Msg service.
@@ -54,7 +54,8 @@ type MsgClient interface {
 	CreateOrUpdatePermissionSession(ctx context.Context, in *MsgCreateOrUpdatePermissionSession, opts ...grpc.CallOption) (*MsgCreateOrUpdatePermissionSessionResponse, error)
 	SlashPermissionTrustDeposit(ctx context.Context, in *MsgSlashPermissionTrustDeposit, opts ...grpc.CallOption) (*MsgSlashPermissionTrustDepositResponse, error)
 	RepayPermissionSlashedTrustDeposit(ctx context.Context, in *MsgRepayPermissionSlashedTrustDeposit, opts ...grpc.CallOption) (*MsgRepayPermissionSlashedTrustDepositResponse, error)
-	CreatePermission(ctx context.Context, in *MsgCreatePermission, opts ...grpc.CallOption) (*MsgCreatePermissionResponse, error)
+	// [MOD-PERM-MSG-14] Self Create Permission (OPEN mode)
+	SelfCreatePermission(ctx context.Context, in *MsgSelfCreatePermission, opts ...grpc.CallOption) (*MsgSelfCreatePermissionResponse, error)
 }
 
 type msgClient struct {
@@ -175,10 +176,10 @@ func (c *msgClient) RepayPermissionSlashedTrustDeposit(ctx context.Context, in *
 	return out, nil
 }
 
-func (c *msgClient) CreatePermission(ctx context.Context, in *MsgCreatePermission, opts ...grpc.CallOption) (*MsgCreatePermissionResponse, error) {
+func (c *msgClient) SelfCreatePermission(ctx context.Context, in *MsgSelfCreatePermission, opts ...grpc.CallOption) (*MsgSelfCreatePermissionResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(MsgCreatePermissionResponse)
-	err := c.cc.Invoke(ctx, Msg_CreatePermission_FullMethodName, in, out, cOpts...)
+	out := new(MsgSelfCreatePermissionResponse)
+	err := c.cc.Invoke(ctx, Msg_SelfCreatePermission_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -206,7 +207,8 @@ type MsgServer interface {
 	CreateOrUpdatePermissionSession(context.Context, *MsgCreateOrUpdatePermissionSession) (*MsgCreateOrUpdatePermissionSessionResponse, error)
 	SlashPermissionTrustDeposit(context.Context, *MsgSlashPermissionTrustDeposit) (*MsgSlashPermissionTrustDepositResponse, error)
 	RepayPermissionSlashedTrustDeposit(context.Context, *MsgRepayPermissionSlashedTrustDeposit) (*MsgRepayPermissionSlashedTrustDepositResponse, error)
-	CreatePermission(context.Context, *MsgCreatePermission) (*MsgCreatePermissionResponse, error)
+	// [MOD-PERM-MSG-14] Self Create Permission (OPEN mode)
+	SelfCreatePermission(context.Context, *MsgSelfCreatePermission) (*MsgSelfCreatePermissionResponse, error)
 	mustEmbedUnimplementedMsgServer()
 }
 
@@ -250,8 +252,8 @@ func (UnimplementedMsgServer) SlashPermissionTrustDeposit(context.Context, *MsgS
 func (UnimplementedMsgServer) RepayPermissionSlashedTrustDeposit(context.Context, *MsgRepayPermissionSlashedTrustDeposit) (*MsgRepayPermissionSlashedTrustDepositResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RepayPermissionSlashedTrustDeposit not implemented")
 }
-func (UnimplementedMsgServer) CreatePermission(context.Context, *MsgCreatePermission) (*MsgCreatePermissionResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreatePermission not implemented")
+func (UnimplementedMsgServer) SelfCreatePermission(context.Context, *MsgSelfCreatePermission) (*MsgSelfCreatePermissionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SelfCreatePermission not implemented")
 }
 func (UnimplementedMsgServer) mustEmbedUnimplementedMsgServer() {}
 func (UnimplementedMsgServer) testEmbeddedByValue()             {}
@@ -472,20 +474,20 @@ func _Msg_RepayPermissionSlashedTrustDeposit_Handler(srv interface{}, ctx contex
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Msg_CreatePermission_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(MsgCreatePermission)
+func _Msg_SelfCreatePermission_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgSelfCreatePermission)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MsgServer).CreatePermission(ctx, in)
+		return srv.(MsgServer).SelfCreatePermission(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Msg_CreatePermission_FullMethodName,
+		FullMethod: Msg_SelfCreatePermission_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MsgServer).CreatePermission(ctx, req.(*MsgCreatePermission))
+		return srv.(MsgServer).SelfCreatePermission(ctx, req.(*MsgSelfCreatePermission))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -542,8 +544,8 @@ var Msg_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Msg_RepayPermissionSlashedTrustDeposit_Handler,
 		},
 		{
-			MethodName: "CreatePermission",
-			Handler:    _Msg_CreatePermission_Handler,
+			MethodName: "SelfCreatePermission",
+			Handler:    _Msg_SelfCreatePermission_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

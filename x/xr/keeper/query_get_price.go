@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"cosmossdk.io/collections"
+	errorsmod "cosmossdk.io/errors"
 	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -42,6 +43,11 @@ func (k Keeper) GetPrice(ctx context.Context, baseAssetType cstypes.PricingAsset
 		return "", status.Error(codes.InvalidArgument, "invalid amount: must be a valid integer")
 	}
 
+	// Amount must be positive
+	if !amountInt.IsPositive() {
+		return "", errorsmod.Wrapf(types.ErrInvalidAmount, "amount must be positive, got %s", amount)
+	}
+
 	// Same asset pair: return amount directly
 	if baseAssetType == quoteAssetType && baseAsset == quoteAsset {
 		return amountInt.String(), nil
@@ -60,6 +66,11 @@ func (k Keeper) GetPrice(ctx context.Context, baseAssetType cstypes.PricingAsset
 	xr, err := k.ExchangeRates.Get(ctx, id)
 	if err != nil {
 		return "", status.Error(codes.Internal, err.Error())
+	}
+
+	// Check rate_scale bound
+	if xr.RateScale > 18 {
+		return "", errorsmod.Wrapf(types.ErrInvalidRequest, "invalid rate_scale %d in stored record", xr.RateScale)
 	}
 
 	// Check active

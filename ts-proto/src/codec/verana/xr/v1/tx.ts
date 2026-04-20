@@ -40,6 +40,7 @@ export interface MsgCreateExchangeRate {
   rate: string;
   rateScale: number;
   validityDuration: Duration | undefined;
+  state: boolean;
 }
 
 /** MsgCreateExchangeRateResponse defines the response for MsgCreateExchangeRate. */
@@ -57,6 +58,10 @@ export interface MsgUpdateExchangeRate {
   id: number;
   /** rate is the new exchange rate value. */
   rate: string;
+  /** rate_scale is the new scale for the rate (if 0, existing scale is kept). */
+  rateScale: number;
+  /** validity_duration is the new validity duration (optional; if nil, existing duration is kept). */
+  validityDuration: Duration | undefined;
 }
 
 /** MsgUpdateExchangeRateResponse defines the response for MsgUpdateExchangeRate. */
@@ -75,8 +80,8 @@ export interface MsgUpdateParams {
   params: Params | undefined;
 }
 
-/** MsgToggleExchangeRateState is the Msg/ToggleExchangeRateState request type. */
-export interface MsgToggleExchangeRateState {
+/** MsgSetExchangeRateState is the Msg/SetExchangeRateState request type. */
+export interface MsgSetExchangeRateState {
   /** authority is the address that controls the module (defaults to x/gov unless overwritten). */
   authority: string;
   /** id is the exchange rate entry to toggle. */
@@ -85,8 +90,8 @@ export interface MsgToggleExchangeRateState {
   state: boolean;
 }
 
-/** MsgToggleExchangeRateStateResponse defines the response for MsgToggleExchangeRateState. */
-export interface MsgToggleExchangeRateStateResponse {
+/** MsgSetExchangeRateStateResponse defines the response for MsgSetExchangeRateState. */
+export interface MsgSetExchangeRateStateResponse {
 }
 
 /**
@@ -329,6 +334,7 @@ function createBaseMsgCreateExchangeRate(): MsgCreateExchangeRate {
     rate: "",
     rateScale: 0,
     validityDuration: undefined,
+    state: false,
   };
 }
 
@@ -357,6 +363,9 @@ export const MsgCreateExchangeRate = {
     }
     if (message.validityDuration !== undefined) {
       Duration.encode(message.validityDuration, writer.uint32(66).fork()).ldelim();
+    }
+    if (message.state !== false) {
+      writer.uint32(72).bool(message.state);
     }
     return writer;
   },
@@ -424,6 +433,13 @@ export const MsgCreateExchangeRate = {
 
           message.validityDuration = Duration.decode(reader, reader.uint32());
           continue;
+        case 9:
+          if (tag !== 72) {
+            break;
+          }
+
+          message.state = reader.bool();
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -443,6 +459,7 @@ export const MsgCreateExchangeRate = {
       rate: isSet(object.rate) ? globalThis.String(object.rate) : "",
       rateScale: isSet(object.rateScale) ? globalThis.Number(object.rateScale) : 0,
       validityDuration: isSet(object.validityDuration) ? Duration.fromJSON(object.validityDuration) : undefined,
+      state: isSet(object.state) ? globalThis.Boolean(object.state) : false,
     };
   },
 
@@ -472,6 +489,9 @@ export const MsgCreateExchangeRate = {
     if (message.validityDuration !== undefined) {
       obj.validityDuration = Duration.toJSON(message.validityDuration);
     }
+    if (message.state !== false) {
+      obj.state = message.state;
+    }
     return obj;
   },
 
@@ -490,6 +510,7 @@ export const MsgCreateExchangeRate = {
     message.validityDuration = (object.validityDuration !== undefined && object.validityDuration !== null)
       ? Duration.fromPartial(object.validityDuration)
       : undefined;
+    message.state = object.state ?? false;
     return message;
   },
 };
@@ -554,7 +575,7 @@ export const MsgCreateExchangeRateResponse = {
 };
 
 function createBaseMsgUpdateExchangeRate(): MsgUpdateExchangeRate {
-  return { authority: "", operator: "", id: 0, rate: "" };
+  return { authority: "", operator: "", id: 0, rate: "", rateScale: 0, validityDuration: undefined };
 }
 
 export const MsgUpdateExchangeRate = {
@@ -570,6 +591,12 @@ export const MsgUpdateExchangeRate = {
     }
     if (message.rate !== "") {
       writer.uint32(34).string(message.rate);
+    }
+    if (message.rateScale !== 0) {
+      writer.uint32(40).uint32(message.rateScale);
+    }
+    if (message.validityDuration !== undefined) {
+      Duration.encode(message.validityDuration, writer.uint32(50).fork()).ldelim();
     }
     return writer;
   },
@@ -609,6 +636,20 @@ export const MsgUpdateExchangeRate = {
 
           message.rate = reader.string();
           continue;
+        case 5:
+          if (tag !== 40) {
+            break;
+          }
+
+          message.rateScale = reader.uint32();
+          continue;
+        case 6:
+          if (tag !== 50) {
+            break;
+          }
+
+          message.validityDuration = Duration.decode(reader, reader.uint32());
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -624,6 +665,8 @@ export const MsgUpdateExchangeRate = {
       operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
       id: isSet(object.id) ? globalThis.Number(object.id) : 0,
       rate: isSet(object.rate) ? globalThis.String(object.rate) : "",
+      rateScale: isSet(object.rateScale) ? globalThis.Number(object.rateScale) : 0,
+      validityDuration: isSet(object.validityDuration) ? Duration.fromJSON(object.validityDuration) : undefined,
     };
   },
 
@@ -641,6 +684,12 @@ export const MsgUpdateExchangeRate = {
     if (message.rate !== "") {
       obj.rate = message.rate;
     }
+    if (message.rateScale !== 0) {
+      obj.rateScale = Math.round(message.rateScale);
+    }
+    if (message.validityDuration !== undefined) {
+      obj.validityDuration = Duration.toJSON(message.validityDuration);
+    }
     return obj;
   },
 
@@ -653,6 +702,10 @@ export const MsgUpdateExchangeRate = {
     message.operator = object.operator ?? "";
     message.id = object.id ?? 0;
     message.rate = object.rate ?? "";
+    message.rateScale = object.rateScale ?? 0;
+    message.validityDuration = (object.validityDuration !== undefined && object.validityDuration !== null)
+      ? Duration.fromPartial(object.validityDuration)
+      : undefined;
     return message;
   },
 };
@@ -776,12 +829,12 @@ export const MsgUpdateParams = {
   },
 };
 
-function createBaseMsgToggleExchangeRateState(): MsgToggleExchangeRateState {
+function createBaseMsgSetExchangeRateState(): MsgSetExchangeRateState {
   return { authority: "", id: 0, state: false };
 }
 
-export const MsgToggleExchangeRateState = {
-  encode(message: MsgToggleExchangeRateState, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+export const MsgSetExchangeRateState = {
+  encode(message: MsgSetExchangeRateState, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.authority !== "") {
       writer.uint32(10).string(message.authority);
     }
@@ -794,10 +847,10 @@ export const MsgToggleExchangeRateState = {
     return writer;
   },
 
-  decode(input: _m0.Reader | Uint8Array, length?: number): MsgToggleExchangeRateState {
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgSetExchangeRateState {
     const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseMsgToggleExchangeRateState();
+    const message = createBaseMsgSetExchangeRateState();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -831,7 +884,7 @@ export const MsgToggleExchangeRateState = {
     return message;
   },
 
-  fromJSON(object: any): MsgToggleExchangeRateState {
+  fromJSON(object: any): MsgSetExchangeRateState {
     return {
       authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
       id: isSet(object.id) ? globalThis.Number(object.id) : 0,
@@ -839,7 +892,7 @@ export const MsgToggleExchangeRateState = {
     };
   },
 
-  toJSON(message: MsgToggleExchangeRateState): unknown {
+  toJSON(message: MsgSetExchangeRateState): unknown {
     const obj: any = {};
     if (message.authority !== "") {
       obj.authority = message.authority;
@@ -853,11 +906,11 @@ export const MsgToggleExchangeRateState = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<MsgToggleExchangeRateState>, I>>(base?: I): MsgToggleExchangeRateState {
-    return MsgToggleExchangeRateState.fromPartial(base ?? ({} as any));
+  create<I extends Exact<DeepPartial<MsgSetExchangeRateState>, I>>(base?: I): MsgSetExchangeRateState {
+    return MsgSetExchangeRateState.fromPartial(base ?? ({} as any));
   },
-  fromPartial<I extends Exact<DeepPartial<MsgToggleExchangeRateState>, I>>(object: I): MsgToggleExchangeRateState {
-    const message = createBaseMsgToggleExchangeRateState();
+  fromPartial<I extends Exact<DeepPartial<MsgSetExchangeRateState>, I>>(object: I): MsgSetExchangeRateState {
+    const message = createBaseMsgSetExchangeRateState();
     message.authority = object.authority ?? "";
     message.id = object.id ?? 0;
     message.state = object.state ?? false;
@@ -865,19 +918,19 @@ export const MsgToggleExchangeRateState = {
   },
 };
 
-function createBaseMsgToggleExchangeRateStateResponse(): MsgToggleExchangeRateStateResponse {
+function createBaseMsgSetExchangeRateStateResponse(): MsgSetExchangeRateStateResponse {
   return {};
 }
 
-export const MsgToggleExchangeRateStateResponse = {
-  encode(_: MsgToggleExchangeRateStateResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+export const MsgSetExchangeRateStateResponse = {
+  encode(_: MsgSetExchangeRateStateResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     return writer;
   },
 
-  decode(input: _m0.Reader | Uint8Array, length?: number): MsgToggleExchangeRateStateResponse {
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgSetExchangeRateStateResponse {
     const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseMsgToggleExchangeRateStateResponse();
+    const message = createBaseMsgSetExchangeRateStateResponse();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -890,24 +943,20 @@ export const MsgToggleExchangeRateStateResponse = {
     return message;
   },
 
-  fromJSON(_: any): MsgToggleExchangeRateStateResponse {
+  fromJSON(_: any): MsgSetExchangeRateStateResponse {
     return {};
   },
 
-  toJSON(_: MsgToggleExchangeRateStateResponse): unknown {
+  toJSON(_: MsgSetExchangeRateStateResponse): unknown {
     const obj: any = {};
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<MsgToggleExchangeRateStateResponse>, I>>(
-    base?: I,
-  ): MsgToggleExchangeRateStateResponse {
-    return MsgToggleExchangeRateStateResponse.fromPartial(base ?? ({} as any));
+  create<I extends Exact<DeepPartial<MsgSetExchangeRateStateResponse>, I>>(base?: I): MsgSetExchangeRateStateResponse {
+    return MsgSetExchangeRateStateResponse.fromPartial(base ?? ({} as any));
   },
-  fromPartial<I extends Exact<DeepPartial<MsgToggleExchangeRateStateResponse>, I>>(
-    _: I,
-  ): MsgToggleExchangeRateStateResponse {
-    const message = createBaseMsgToggleExchangeRateStateResponse();
+  fromPartial<I extends Exact<DeepPartial<MsgSetExchangeRateStateResponse>, I>>(_: I): MsgSetExchangeRateStateResponse {
+    const message = createBaseMsgSetExchangeRateStateResponse();
     return message;
   },
 };
@@ -966,8 +1015,8 @@ export interface Msg {
   CreateExchangeRate(request: MsgCreateExchangeRate): Promise<MsgCreateExchangeRateResponse>;
   /** UpdateExchangeRate defines an operator operation for updating an exchange rate. */
   UpdateExchangeRate(request: MsgUpdateExchangeRate): Promise<MsgUpdateExchangeRateResponse>;
-  /** ToggleExchangeRateState defines a governance operation for enabling or disabling an exchange rate. */
-  ToggleExchangeRateState(request: MsgToggleExchangeRateState): Promise<MsgToggleExchangeRateStateResponse>;
+  /** SetExchangeRateState defines a governance operation for enabling or disabling an exchange rate. */
+  SetExchangeRateState(request: MsgSetExchangeRateState): Promise<MsgSetExchangeRateStateResponse>;
 }
 
 export const MsgServiceName = "verana.xr.v1.Msg";
@@ -980,7 +1029,7 @@ export class MsgClientImpl implements Msg {
     this.UpdateParams = this.UpdateParams.bind(this);
     this.CreateExchangeRate = this.CreateExchangeRate.bind(this);
     this.UpdateExchangeRate = this.UpdateExchangeRate.bind(this);
-    this.ToggleExchangeRateState = this.ToggleExchangeRateState.bind(this);
+    this.SetExchangeRateState = this.SetExchangeRateState.bind(this);
   }
   UpdateParams(request: MsgUpdateParams): Promise<MsgUpdateParamsResponse> {
     const data = MsgUpdateParams.encode(request).finish();
@@ -1000,10 +1049,10 @@ export class MsgClientImpl implements Msg {
     return promise.then((data) => MsgUpdateExchangeRateResponse.decode(_m0.Reader.create(data)));
   }
 
-  ToggleExchangeRateState(request: MsgToggleExchangeRateState): Promise<MsgToggleExchangeRateStateResponse> {
-    const data = MsgToggleExchangeRateState.encode(request).finish();
-    const promise = this.rpc.request(this.service, "ToggleExchangeRateState", data);
-    return promise.then((data) => MsgToggleExchangeRateStateResponse.decode(_m0.Reader.create(data)));
+  SetExchangeRateState(request: MsgSetExchangeRateState): Promise<MsgSetExchangeRateStateResponse> {
+    const data = MsgSetExchangeRateState.encode(request).finish();
+    const promise = this.rpc.request(this.service, "SetExchangeRateState", data);
+    return promise.then((data) => MsgSetExchangeRateStateResponse.decode(_m0.Reader.create(data)));
   }
 }
 

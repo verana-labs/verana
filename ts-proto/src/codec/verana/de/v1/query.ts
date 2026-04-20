@@ -26,8 +26,8 @@ export interface QueryParamsResponse {
  * Query/ListOperatorAuthorizations RPC method.
  */
 export interface QueryListOperatorAuthorizationsRequest {
-  /** authority filters by the authority group that granted the authorization. */
-  authority: string;
+  /** corporation filters by the corporation group that granted the authorization. */
+  corporation: string;
   /** operator filters by the operator account that received the authorization. */
   operator: string;
   /** response_max_size limits the number of results. Must be 1-1024, defaults to 64. */
@@ -47,8 +47,8 @@ export interface QueryListOperatorAuthorizationsResponse {
  * Query/ListVSOperatorAuthorizations RPC method.
  */
 export interface QueryListVSOperatorAuthorizationsRequest {
-  /** authority filters by the authority group that granted the authorization. */
-  authority: string;
+  /** corporation filters by the corporation group that granted the authorization. */
+  corporation: string;
   /** vs_operator filters by the VS operator account. */
   vsOperator: string;
   /** response_max_size limits the number of results. Must be 1-1024, defaults to 64. */
@@ -166,13 +166,13 @@ export const QueryParamsResponse = {
 };
 
 function createBaseQueryListOperatorAuthorizationsRequest(): QueryListOperatorAuthorizationsRequest {
-  return { authority: "", operator: "", responseMaxSize: 0 };
+  return { corporation: "", operator: "", responseMaxSize: 0 };
 }
 
 export const QueryListOperatorAuthorizationsRequest = {
   encode(message: QueryListOperatorAuthorizationsRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.authority !== "") {
-      writer.uint32(10).string(message.authority);
+    if (message.corporation !== "") {
+      writer.uint32(10).string(message.corporation);
     }
     if (message.operator !== "") {
       writer.uint32(18).string(message.operator);
@@ -195,7 +195,7 @@ export const QueryListOperatorAuthorizationsRequest = {
             break;
           }
 
-          message.authority = reader.string();
+          message.corporation = reader.string();
           continue;
         case 2:
           if (tag !== 18) {
@@ -222,7 +222,7 @@ export const QueryListOperatorAuthorizationsRequest = {
 
   fromJSON(object: any): QueryListOperatorAuthorizationsRequest {
     return {
-      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      corporation: isSet(object.corporation) ? globalThis.String(object.corporation) : "",
       operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
       responseMaxSize: isSet(object.responseMaxSize) ? globalThis.Number(object.responseMaxSize) : 0,
     };
@@ -230,8 +230,8 @@ export const QueryListOperatorAuthorizationsRequest = {
 
   toJSON(message: QueryListOperatorAuthorizationsRequest): unknown {
     const obj: any = {};
-    if (message.authority !== "") {
-      obj.authority = message.authority;
+    if (message.corporation !== "") {
+      obj.corporation = message.corporation;
     }
     if (message.operator !== "") {
       obj.operator = message.operator;
@@ -251,7 +251,7 @@ export const QueryListOperatorAuthorizationsRequest = {
     object: I,
   ): QueryListOperatorAuthorizationsRequest {
     const message = createBaseQueryListOperatorAuthorizationsRequest();
-    message.authority = object.authority ?? "";
+    message.corporation = object.corporation ?? "";
     message.operator = object.operator ?? "";
     message.responseMaxSize = object.responseMaxSize ?? 0;
     return message;
@@ -325,13 +325,13 @@ export const QueryListOperatorAuthorizationsResponse = {
 };
 
 function createBaseQueryListVSOperatorAuthorizationsRequest(): QueryListVSOperatorAuthorizationsRequest {
-  return { authority: "", vsOperator: "", responseMaxSize: 0 };
+  return { corporation: "", vsOperator: "", responseMaxSize: 0 };
 }
 
 export const QueryListVSOperatorAuthorizationsRequest = {
   encode(message: QueryListVSOperatorAuthorizationsRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.authority !== "") {
-      writer.uint32(10).string(message.authority);
+    if (message.corporation !== "") {
+      writer.uint32(10).string(message.corporation);
     }
     if (message.vsOperator !== "") {
       writer.uint32(18).string(message.vsOperator);
@@ -354,7 +354,7 @@ export const QueryListVSOperatorAuthorizationsRequest = {
             break;
           }
 
-          message.authority = reader.string();
+          message.corporation = reader.string();
           continue;
         case 2:
           if (tag !== 18) {
@@ -381,7 +381,7 @@ export const QueryListVSOperatorAuthorizationsRequest = {
 
   fromJSON(object: any): QueryListVSOperatorAuthorizationsRequest {
     return {
-      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      corporation: isSet(object.corporation) ? globalThis.String(object.corporation) : "",
       vsOperator: isSet(object.vsOperator) ? globalThis.String(object.vsOperator) : "",
       responseMaxSize: isSet(object.responseMaxSize) ? globalThis.Number(object.responseMaxSize) : 0,
     };
@@ -389,8 +389,8 @@ export const QueryListVSOperatorAuthorizationsRequest = {
 
   toJSON(message: QueryListVSOperatorAuthorizationsRequest): unknown {
     const obj: any = {};
-    if (message.authority !== "") {
-      obj.authority = message.authority;
+    if (message.corporation !== "") {
+      obj.corporation = message.corporation;
     }
     if (message.vsOperator !== "") {
       obj.vsOperator = message.vsOperator;
@@ -410,7 +410,7 @@ export const QueryListVSOperatorAuthorizationsRequest = {
     object: I,
   ): QueryListVSOperatorAuthorizationsRequest {
     const message = createBaseQueryListVSOperatorAuthorizationsRequest();
-    message.authority = object.authority ?? "";
+    message.corporation = object.corporation ?? "";
     message.vsOperator = object.vsOperator ?? "";
     message.responseMaxSize = object.responseMaxSize ?? 0;
     return message;

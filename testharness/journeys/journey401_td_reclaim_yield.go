@@ -118,8 +118,8 @@ func RunTDReclaimYieldJourney(ctx context.Context, client cosmosclient.Client) e
 		fmt.Printf("  Step 1d: Could not query TD for policy address (may not have a deposit): %s\n", err.Error())
 	} else {
 		fmt.Printf("OK Step 1d: TD state for policy address:\n")
-		fmt.Printf("    Account:        %s\n", td.Account)
-		fmt.Printf("    Amount:         %d\n", td.Amount)
+		fmt.Printf("    Account:        %s\n", td.Corporation)
+		fmt.Printf("    Amount:         %d\n", td.Deposit)
 		fmt.Printf("    Claimable:      %d\n", td.Claimable)
 		fmt.Printf("    SlashedDeposit: %d\n", td.SlashedDeposit)
 		fmt.Printf("    RepaidDeposit:  %d\n", td.RepaidDeposit)
@@ -219,7 +219,7 @@ func RunTDReclaimYieldJourney(ctx context.Context, client cosmosclient.Client) e
 		fmt.Printf("    RepaidDeposit:  %d (expected %d)\n", tdAfter.RepaidDeposit, expectedRepaid)
 		fmt.Printf("    Outstanding:    %d (expected 0)\n", remainingSlash)
 		fmt.Printf("    LastRepaid:     %v\n", tdAfter.LastRepaid)
-		fmt.Printf("    LastRepaidBy:   %s\n", tdAfter.LastRepaidBy)
+	// spec v4: LastRepaidBy field removed
 	}
 
 	// Save results for downstream journeys

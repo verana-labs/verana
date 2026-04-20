@@ -19,10 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Msg_UpdateParams_FullMethodName            = "/verana.xr.v1.Msg/UpdateParams"
-	Msg_CreateExchangeRate_FullMethodName      = "/verana.xr.v1.Msg/CreateExchangeRate"
-	Msg_UpdateExchangeRate_FullMethodName      = "/verana.xr.v1.Msg/UpdateExchangeRate"
-	Msg_ToggleExchangeRateState_FullMethodName = "/verana.xr.v1.Msg/ToggleExchangeRateState"
+	Msg_UpdateParams_FullMethodName         = "/verana.xr.v1.Msg/UpdateParams"
+	Msg_CreateExchangeRate_FullMethodName   = "/verana.xr.v1.Msg/CreateExchangeRate"
+	Msg_UpdateExchangeRate_FullMethodName   = "/verana.xr.v1.Msg/UpdateExchangeRate"
+	Msg_SetExchangeRateState_FullMethodName = "/verana.xr.v1.Msg/SetExchangeRateState"
 )
 
 // MsgClient is the client API for Msg service.
@@ -38,8 +38,8 @@ type MsgClient interface {
 	CreateExchangeRate(ctx context.Context, in *MsgCreateExchangeRate, opts ...grpc.CallOption) (*MsgCreateExchangeRateResponse, error)
 	// UpdateExchangeRate defines an operator operation for updating an exchange rate.
 	UpdateExchangeRate(ctx context.Context, in *MsgUpdateExchangeRate, opts ...grpc.CallOption) (*MsgUpdateExchangeRateResponse, error)
-	// ToggleExchangeRateState defines a governance operation for enabling or disabling an exchange rate.
-	ToggleExchangeRateState(ctx context.Context, in *MsgToggleExchangeRateState, opts ...grpc.CallOption) (*MsgToggleExchangeRateStateResponse, error)
+	// SetExchangeRateState defines a governance operation for enabling or disabling an exchange rate.
+	SetExchangeRateState(ctx context.Context, in *MsgSetExchangeRateState, opts ...grpc.CallOption) (*MsgSetExchangeRateStateResponse, error)
 }
 
 type msgClient struct {
@@ -80,10 +80,10 @@ func (c *msgClient) UpdateExchangeRate(ctx context.Context, in *MsgUpdateExchang
 	return out, nil
 }
 
-func (c *msgClient) ToggleExchangeRateState(ctx context.Context, in *MsgToggleExchangeRateState, opts ...grpc.CallOption) (*MsgToggleExchangeRateStateResponse, error) {
+func (c *msgClient) SetExchangeRateState(ctx context.Context, in *MsgSetExchangeRateState, opts ...grpc.CallOption) (*MsgSetExchangeRateStateResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(MsgToggleExchangeRateStateResponse)
-	err := c.cc.Invoke(ctx, Msg_ToggleExchangeRateState_FullMethodName, in, out, cOpts...)
+	out := new(MsgSetExchangeRateStateResponse)
+	err := c.cc.Invoke(ctx, Msg_SetExchangeRateState_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -103,8 +103,8 @@ type MsgServer interface {
 	CreateExchangeRate(context.Context, *MsgCreateExchangeRate) (*MsgCreateExchangeRateResponse, error)
 	// UpdateExchangeRate defines an operator operation for updating an exchange rate.
 	UpdateExchangeRate(context.Context, *MsgUpdateExchangeRate) (*MsgUpdateExchangeRateResponse, error)
-	// ToggleExchangeRateState defines a governance operation for enabling or disabling an exchange rate.
-	ToggleExchangeRateState(context.Context, *MsgToggleExchangeRateState) (*MsgToggleExchangeRateStateResponse, error)
+	// SetExchangeRateState defines a governance operation for enabling or disabling an exchange rate.
+	SetExchangeRateState(context.Context, *MsgSetExchangeRateState) (*MsgSetExchangeRateStateResponse, error)
 	mustEmbedUnimplementedMsgServer()
 }
 
@@ -124,8 +124,8 @@ func (UnimplementedMsgServer) CreateExchangeRate(context.Context, *MsgCreateExch
 func (UnimplementedMsgServer) UpdateExchangeRate(context.Context, *MsgUpdateExchangeRate) (*MsgUpdateExchangeRateResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateExchangeRate not implemented")
 }
-func (UnimplementedMsgServer) ToggleExchangeRateState(context.Context, *MsgToggleExchangeRateState) (*MsgToggleExchangeRateStateResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ToggleExchangeRateState not implemented")
+func (UnimplementedMsgServer) SetExchangeRateState(context.Context, *MsgSetExchangeRateState) (*MsgSetExchangeRateStateResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetExchangeRateState not implemented")
 }
 func (UnimplementedMsgServer) mustEmbedUnimplementedMsgServer() {}
 func (UnimplementedMsgServer) testEmbeddedByValue()             {}
@@ -202,20 +202,20 @@ func _Msg_UpdateExchangeRate_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Msg_ToggleExchangeRateState_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(MsgToggleExchangeRateState)
+func _Msg_SetExchangeRateState_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgSetExchangeRateState)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MsgServer).ToggleExchangeRateState(ctx, in)
+		return srv.(MsgServer).SetExchangeRateState(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Msg_ToggleExchangeRateState_FullMethodName,
+		FullMethod: Msg_SetExchangeRateState_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MsgServer).ToggleExchangeRateState(ctx, req.(*MsgToggleExchangeRateState))
+		return srv.(MsgServer).SetExchangeRateState(ctx, req.(*MsgSetExchangeRateState))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -240,8 +240,8 @@ var Msg_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Msg_UpdateExchangeRate_Handler,
 		},
 		{
-			MethodName: "ToggleExchangeRateState",
-			Handler:    _Msg_ToggleExchangeRateState_Handler,
+			MethodName: "SetExchangeRateState",
+			Handler:    _Msg_SetExchangeRateState_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

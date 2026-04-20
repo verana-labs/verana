@@ -189,20 +189,16 @@ func (k Keeper) FindPermissionsWithDID(goCtx context.Context, req *types.QueryFi
 		return nil, status.Error(codes.NotFound, fmt.Sprintf("credential schema not found: %v", err))
 	}
 
-	// Check country code if provided
-	if req.Country != "" && !isValidCountryCode(req.Country) {
-		return nil, status.Error(codes.InvalidArgument, "invalid country code format")
-	}
-
 	// [MOD-PERM-QRY-3-3] Execution
+	// country was removed from the Permission entity and from this query per spec v4 draft 13.
 	var foundPerms []types.Permission
 
 	// Check if we need to handle the special OPEN mode case
 	isOpenMode := false
 	if (permType == types.PermissionType_ISSUER &&
-		cs.IssuerPermManagementMode == credentialschematypes.CredentialSchemaPermManagementMode_OPEN) ||
+		cs.IssuerOnboardingMode == credentialschematypes.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_OPEN) ||
 		(permType == types.PermissionType_VERIFIER &&
-			cs.VerifierPermManagementMode == credentialschematypes.CredentialSchemaPermManagementMode_OPEN) {
+			cs.VerifierOnboardingMode == credentialschematypes.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_OPEN) {
 		isOpenMode = true
 	}
 
@@ -215,11 +211,6 @@ func (k Keeper) FindPermissionsWithDID(goCtx context.Context, req *types.QueryFi
 
 		// Filter by DID and type
 		if perm.Did != req.Did || perm.Type != permType {
-			return false, nil
-		}
-
-		// Filter by country
-		if req.Country != "" && perm.Country != "" && perm.Country != req.Country {
 			return false, nil
 		}
 
@@ -251,14 +242,11 @@ func (k Keeper) FindPermissionsWithDID(goCtx context.Context, req *types.QueryFi
 		err = k.Permission.Walk(ctx, nil, func(id uint64, perm types.Permission) (bool, error) {
 			if perm.SchemaId == req.SchemaId &&
 				perm.Type == types.PermissionType_ECOSYSTEM {
-				// Check country compatibility
-				if req.Country == "" || perm.Country == "" || perm.Country == req.Country {
-					// Check time validity if "when" is specified
-					if req.When == nil || isPermissionValidAtTime(perm, *req.When) {
-						ecosystemPerm = perm
-						ecosystemPermFound = true
-						return true, nil // Stop iteration once found
-					}
+				// Check time validity if "when" is specified
+				if req.When == nil || isPermissionValidAtTime(perm, *req.When) {
+					ecosystemPerm = perm
+					ecosystemPermFound = true
+					return true, nil // Stop iteration once found
 				}
 			}
 			return false, nil
@@ -272,7 +260,7 @@ func (k Keeper) FindPermissionsWithDID(goCtx context.Context, req *types.QueryFi
 		// authorized even without an explicit perm record
 		if ecosystemPermFound {
 			// Include a note in the response that this is an implicit perm in OPEN mode
-			ecosystemPerm.VpSummaryDigestSri = "OPEN_MODE_IMPLICIT_PERMISSION"
+			ecosystemPerm.VpSummaryDigest = "OPEN_MODE_IMPLICIT_PERMISSION"
 			foundPerms = append(foundPerms, ecosystemPerm)
 		}
 	}
@@ -358,7 +346,7 @@ func (k Keeper) FindBeneficiaries(goCtx context.Context, req *types.QueryFindBen
 		}
 
 		// MUST be a valid permission
-		if err := IsValidPermission(perm, perm.Country, ctx.BlockTime()); err != nil {
+		if err := IsValidPermission(perm, ctx.BlockTime()); err != nil {
 			return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("issuer permission is not valid: %v", err))
 		}
 
@@ -373,7 +361,7 @@ func (k Keeper) FindBeneficiaries(goCtx context.Context, req *types.QueryFindBen
 		}
 
 		// MUST be a valid permission
-		if err := IsValidPermission(perm, perm.Country, ctx.BlockTime()); err != nil {
+		if err := IsValidPermission(perm, ctx.BlockTime()); err != nil {
 			return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("verifier permission is not valid: %v", err))
 		}
 
@@ -400,7 +388,7 @@ func (k Keeper) FindBeneficiaries(goCtx context.Context, req *types.QueryFindBen
 
 			// if current_perm.revoked IS NULL AND current_perm.slashed IS NULL, Add current_perm to found_perm_set
 			// Note: SlashedDeposit > 0 indicates the permission has been slashed
-			if currentPerm.Revoked == nil && currentPerm.SlashedDeposit == 0 {
+			if currentPerm.Revoked == nil && currentPerm.Slashed == nil {
 				foundPermMap[currentPerm.Id] = *currentPerm
 			}
 		}
@@ -410,7 +398,7 @@ func (k Keeper) FindBeneficiaries(goCtx context.Context, req *types.QueryFindBen
 	if verifierPerm != nil {
 		// if issuer_perm is not null, add issuer_perm to found_perm_set
 		if issuerPerm != nil {
-			if issuerPerm.Revoked == nil && issuerPerm.SlashedDeposit == 0 {
+			if issuerPerm.Revoked == nil && issuerPerm.Slashed == nil {
 				foundPermMap[issuerPerm.Id] = *issuerPerm
 			}
 		}
@@ -428,7 +416,7 @@ func (k Keeper) FindBeneficiaries(goCtx context.Context, req *types.QueryFindBen
 			currentPerm = &perm
 
 			// if current_perm.revoked IS NULL AND current_perm.slashed IS NULL, Add current_perm to found_perm_set
-			if currentPerm.Revoked == nil && currentPerm.SlashedDeposit == 0 {
+			if currentPerm.Revoked == nil && currentPerm.Slashed == nil {
 				foundPermMap[currentPerm.Id] = *currentPerm
 			}
 		}

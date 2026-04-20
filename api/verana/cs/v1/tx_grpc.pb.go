@@ -19,10 +19,13 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Msg_UpdateParams_FullMethodName            = "/verana.cs.v1.Msg/UpdateParams"
-	Msg_CreateCredentialSchema_FullMethodName  = "/verana.cs.v1.Msg/CreateCredentialSchema"
-	Msg_UpdateCredentialSchema_FullMethodName  = "/verana.cs.v1.Msg/UpdateCredentialSchema"
-	Msg_ArchiveCredentialSchema_FullMethodName = "/verana.cs.v1.Msg/ArchiveCredentialSchema"
+	Msg_UpdateParams_FullMethodName                                   = "/verana.cs.v1.Msg/UpdateParams"
+	Msg_CreateCredentialSchema_FullMethodName                         = "/verana.cs.v1.Msg/CreateCredentialSchema"
+	Msg_UpdateCredentialSchema_FullMethodName                         = "/verana.cs.v1.Msg/UpdateCredentialSchema"
+	Msg_ArchiveCredentialSchema_FullMethodName                        = "/verana.cs.v1.Msg/ArchiveCredentialSchema"
+	Msg_CreateSchemaAuthorizationPolicy_FullMethodName                = "/verana.cs.v1.Msg/CreateSchemaAuthorizationPolicy"
+	Msg_IncreaseActiveSchemaAuthorizationPolicyVersion_FullMethodName = "/verana.cs.v1.Msg/IncreaseActiveSchemaAuthorizationPolicyVersion"
+	Msg_RevokeSchemaAuthorizationPolicy_FullMethodName                = "/verana.cs.v1.Msg/RevokeSchemaAuthorizationPolicy"
 )
 
 // MsgClient is the client API for Msg service.
@@ -40,6 +43,12 @@ type MsgClient interface {
 	UpdateCredentialSchema(ctx context.Context, in *MsgUpdateCredentialSchema, opts ...grpc.CallOption) (*MsgUpdateCredentialSchemaResponse, error)
 	// ArchiveCredentialSchema defines a method for archiving a credential schema.
 	ArchiveCredentialSchema(ctx context.Context, in *MsgArchiveCredentialSchema, opts ...grpc.CallOption) (*MsgArchiveCredentialSchemaResponse, error)
+	// [MOD-CS-MSG-5] CreateSchemaAuthorizationPolicy creates a versioned policy document for a schema role.
+	CreateSchemaAuthorizationPolicy(ctx context.Context, in *MsgCreateSchemaAuthorizationPolicy, opts ...grpc.CallOption) (*MsgCreateSchemaAuthorizationPolicyResponse, error)
+	// [MOD-CS-MSG-6] IncreaseActiveSchemaAuthorizationPolicyVersion advances the active policy version.
+	IncreaseActiveSchemaAuthorizationPolicyVersion(ctx context.Context, in *MsgIncreaseActiveSchemaAuthorizationPolicyVersion, opts ...grpc.CallOption) (*MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse, error)
+	// [MOD-CS-MSG-7] RevokeSchemaAuthorizationPolicy revokes a specific policy version.
+	RevokeSchemaAuthorizationPolicy(ctx context.Context, in *MsgRevokeSchemaAuthorizationPolicy, opts ...grpc.CallOption) (*MsgRevokeSchemaAuthorizationPolicyResponse, error)
 }
 
 type msgClient struct {
@@ -90,6 +99,36 @@ func (c *msgClient) ArchiveCredentialSchema(ctx context.Context, in *MsgArchiveC
 	return out, nil
 }
 
+func (c *msgClient) CreateSchemaAuthorizationPolicy(ctx context.Context, in *MsgCreateSchemaAuthorizationPolicy, opts ...grpc.CallOption) (*MsgCreateSchemaAuthorizationPolicyResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(MsgCreateSchemaAuthorizationPolicyResponse)
+	err := c.cc.Invoke(ctx, Msg_CreateSchemaAuthorizationPolicy_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *msgClient) IncreaseActiveSchemaAuthorizationPolicyVersion(ctx context.Context, in *MsgIncreaseActiveSchemaAuthorizationPolicyVersion, opts ...grpc.CallOption) (*MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse)
+	err := c.cc.Invoke(ctx, Msg_IncreaseActiveSchemaAuthorizationPolicyVersion_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *msgClient) RevokeSchemaAuthorizationPolicy(ctx context.Context, in *MsgRevokeSchemaAuthorizationPolicy, opts ...grpc.CallOption) (*MsgRevokeSchemaAuthorizationPolicyResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(MsgRevokeSchemaAuthorizationPolicyResponse)
+	err := c.cc.Invoke(ctx, Msg_RevokeSchemaAuthorizationPolicy_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MsgServer is the server API for Msg service.
 // All implementations must embed UnimplementedMsgServer
 // for forward compatibility.
@@ -105,6 +144,12 @@ type MsgServer interface {
 	UpdateCredentialSchema(context.Context, *MsgUpdateCredentialSchema) (*MsgUpdateCredentialSchemaResponse, error)
 	// ArchiveCredentialSchema defines a method for archiving a credential schema.
 	ArchiveCredentialSchema(context.Context, *MsgArchiveCredentialSchema) (*MsgArchiveCredentialSchemaResponse, error)
+	// [MOD-CS-MSG-5] CreateSchemaAuthorizationPolicy creates a versioned policy document for a schema role.
+	CreateSchemaAuthorizationPolicy(context.Context, *MsgCreateSchemaAuthorizationPolicy) (*MsgCreateSchemaAuthorizationPolicyResponse, error)
+	// [MOD-CS-MSG-6] IncreaseActiveSchemaAuthorizationPolicyVersion advances the active policy version.
+	IncreaseActiveSchemaAuthorizationPolicyVersion(context.Context, *MsgIncreaseActiveSchemaAuthorizationPolicyVersion) (*MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse, error)
+	// [MOD-CS-MSG-7] RevokeSchemaAuthorizationPolicy revokes a specific policy version.
+	RevokeSchemaAuthorizationPolicy(context.Context, *MsgRevokeSchemaAuthorizationPolicy) (*MsgRevokeSchemaAuthorizationPolicyResponse, error)
 	mustEmbedUnimplementedMsgServer()
 }
 
@@ -126,6 +171,15 @@ func (UnimplementedMsgServer) UpdateCredentialSchema(context.Context, *MsgUpdate
 }
 func (UnimplementedMsgServer) ArchiveCredentialSchema(context.Context, *MsgArchiveCredentialSchema) (*MsgArchiveCredentialSchemaResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ArchiveCredentialSchema not implemented")
+}
+func (UnimplementedMsgServer) CreateSchemaAuthorizationPolicy(context.Context, *MsgCreateSchemaAuthorizationPolicy) (*MsgCreateSchemaAuthorizationPolicyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateSchemaAuthorizationPolicy not implemented")
+}
+func (UnimplementedMsgServer) IncreaseActiveSchemaAuthorizationPolicyVersion(context.Context, *MsgIncreaseActiveSchemaAuthorizationPolicyVersion) (*MsgIncreaseActiveSchemaAuthorizationPolicyVersionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method IncreaseActiveSchemaAuthorizationPolicyVersion not implemented")
+}
+func (UnimplementedMsgServer) RevokeSchemaAuthorizationPolicy(context.Context, *MsgRevokeSchemaAuthorizationPolicy) (*MsgRevokeSchemaAuthorizationPolicyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RevokeSchemaAuthorizationPolicy not implemented")
 }
 func (UnimplementedMsgServer) mustEmbedUnimplementedMsgServer() {}
 func (UnimplementedMsgServer) testEmbeddedByValue()             {}
@@ -220,6 +274,60 @@ func _Msg_ArchiveCredentialSchema_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Msg_CreateSchemaAuthorizationPolicy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgCreateSchemaAuthorizationPolicy)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).CreateSchemaAuthorizationPolicy(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Msg_CreateSchemaAuthorizationPolicy_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).CreateSchemaAuthorizationPolicy(ctx, req.(*MsgCreateSchemaAuthorizationPolicy))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Msg_IncreaseActiveSchemaAuthorizationPolicyVersion_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgIncreaseActiveSchemaAuthorizationPolicyVersion)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).IncreaseActiveSchemaAuthorizationPolicyVersion(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Msg_IncreaseActiveSchemaAuthorizationPolicyVersion_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).IncreaseActiveSchemaAuthorizationPolicyVersion(ctx, req.(*MsgIncreaseActiveSchemaAuthorizationPolicyVersion))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Msg_RevokeSchemaAuthorizationPolicy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgRevokeSchemaAuthorizationPolicy)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).RevokeSchemaAuthorizationPolicy(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Msg_RevokeSchemaAuthorizationPolicy_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).RevokeSchemaAuthorizationPolicy(ctx, req.(*MsgRevokeSchemaAuthorizationPolicy))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Msg_ServiceDesc is the grpc.ServiceDesc for Msg service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -242,6 +350,18 @@ var Msg_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ArchiveCredentialSchema",
 			Handler:    _Msg_ArchiveCredentialSchema_Handler,
+		},
+		{
+			MethodName: "CreateSchemaAuthorizationPolicy",
+			Handler:    _Msg_CreateSchemaAuthorizationPolicy_Handler,
+		},
+		{
+			MethodName: "IncreaseActiveSchemaAuthorizationPolicyVersion",
+			Handler:    _Msg_IncreaseActiveSchemaAuthorizationPolicyVersion_Handler,
+		},
+		{
+			MethodName: "RevokeSchemaAuthorizationPolicy",
+			Handler:    _Msg_RevokeSchemaAuthorizationPolicy_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

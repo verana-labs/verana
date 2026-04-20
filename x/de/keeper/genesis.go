@@ -17,7 +17,7 @@ func (k Keeper) InitGenesis(ctx context.Context, genState types.GenesisState) er
 	}
 
 	for _, oa := range genState.OperatorAuthorizations {
-		key := collections.Join(oa.Authority, oa.Operator)
+		key := collections.Join(oa.Corporation, oa.Operator)
 		if err := k.OperatorAuthorizations.Set(ctx, key, oa); err != nil {
 			return fmt.Errorf("failed to set operator authorization: %w", err)
 		}
@@ -31,9 +31,16 @@ func (k Keeper) InitGenesis(ctx context.Context, genState types.GenesisState) er
 	}
 
 	for _, vsoa := range genState.VsOperatorAuthorizations {
-		key := collections.Join(vsoa.Authority, vsoa.VsOperator)
+		key := collections.Join(vsoa.Corporation, vsoa.VsOperator)
 		if err := k.VSOperatorAuthorizations.Set(ctx, key, vsoa); err != nil {
 			return fmt.Errorf("failed to set vs operator authorization: %w", err)
+		}
+	}
+
+	for _, usage := range genState.OperatorAuthorizationUsages {
+		key := collections.Join(usage.Corporation, usage.Operator)
+		if err := k.OperatorAuthorizationUsage.Set(ctx, key, usage); err != nil {
+			return fmt.Errorf("failed to set operator authorization usage: %w", err)
 		}
 	}
 
@@ -59,8 +66,8 @@ func (k Keeper) ExportGenesis(ctx context.Context) (*types.GenesisState, error) 
 		return nil, fmt.Errorf("failed to export operator authorizations: %w", err)
 	}
 	sort.Slice(oaList, func(i, j int) bool {
-		if oaList[i].Authority != oaList[j].Authority {
-			return oaList[i].Authority < oaList[j].Authority
+		if oaList[i].Corporation != oaList[j].Corporation {
+			return oaList[i].Corporation < oaList[j].Corporation
 		}
 		return oaList[i].Operator < oaList[j].Operator
 	})
@@ -91,12 +98,28 @@ func (k Keeper) ExportGenesis(ctx context.Context) (*types.GenesisState, error) 
 		return nil, fmt.Errorf("failed to export vs operator authorizations: %w", err)
 	}
 	sort.Slice(vsoaList, func(i, j int) bool {
-		if vsoaList[i].Authority != vsoaList[j].Authority {
-			return vsoaList[i].Authority < vsoaList[j].Authority
+		if vsoaList[i].Corporation != vsoaList[j].Corporation {
+			return vsoaList[i].Corporation < vsoaList[j].Corporation
 		}
 		return vsoaList[i].VsOperator < vsoaList[j].VsOperator
 	})
 	genesis.VsOperatorAuthorizations = vsoaList
+
+	// Export operator authorization usages
+	usageList := []types.OperatorAuthorizationUsage{}
+	if err := k.OperatorAuthorizationUsage.Walk(ctx, nil, func(key collections.Pair[string, string], val types.OperatorAuthorizationUsage) (bool, error) {
+		usageList = append(usageList, val)
+		return false, nil
+	}); err != nil {
+		return nil, fmt.Errorf("failed to export operator authorization usages: %w", err)
+	}
+	sort.Slice(usageList, func(i, j int) bool {
+		if usageList[i].Corporation != usageList[j].Corporation {
+			return usageList[i].Corporation < usageList[j].Corporation
+		}
+		return usageList[i].Operator < usageList[j].Operator
+	})
+	genesis.OperatorAuthorizationUsages = usageList
 
 	return genesis, nil
 }

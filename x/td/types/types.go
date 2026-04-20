@@ -7,10 +7,11 @@ import (
 )
 
 // ValidateBasic implements sdk.Msg
+// [MOD-TD-MSG-2-1] Spec v4 draft 13: parameters are corporation + operator only.
 func (msg *MsgReclaimTrustDepositYield) ValidateBasic() error {
-	_, err := sdk.AccAddressFromBech32(msg.Authority)
+	_, err := sdk.AccAddressFromBech32(msg.Corporation)
 	if err != nil {
-		return errorsmod.Wrapf(sdkerrors.ErrInvalidAddress, "invalid authority address (%s)", err)
+		return errorsmod.Wrapf(sdkerrors.ErrInvalidAddress, "invalid corporation address (%s)", err)
 	}
 	_, err = sdk.AccAddressFromBech32(msg.Operator)
 	if err != nil {
@@ -19,42 +20,33 @@ func (msg *MsgReclaimTrustDepositYield) ValidateBasic() error {
 	return nil
 }
 
-func (msg *MsgReclaimTrustDeposit) ValidateBasic() error {
-	_, err := sdk.AccAddressFromBech32(msg.Creator)
-	if err != nil {
-		return errorsmod.Wrapf(sdkerrors.ErrInvalidAddress, "invalid creator address (%s)", err)
-	}
-	if msg.Claimed == 0 {
-		return errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "claimed amount must be greater than 0")
-	}
-	return nil
-}
-
 func (msg *MsgSlashTrustDeposit) ValidateBasic() error {
-	// Validate authority address
 	_, err := sdk.AccAddressFromBech32(msg.Authority)
 	if err != nil {
 		return errorsmod.Wrapf(sdkerrors.ErrInvalidAddress, "invalid authority address (%s)", err)
 	}
 
-	// Validate account address
-	_, err = sdk.AccAddressFromBech32(msg.Account)
+	_, err = sdk.AccAddressFromBech32(msg.Corporation)
 	if err != nil {
-		return errorsmod.Wrapf(sdkerrors.ErrInvalidAddress, "invalid account address (%s)", err)
+		return errorsmod.Wrapf(sdkerrors.ErrInvalidAddress, "invalid corporation address (%s)", err)
 	}
 
-	// Validate amount
-	if msg.Amount.IsZero() || msg.Amount.IsNegative() {
-		return errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "amount must be greater than 0")
+	if msg.Deposit.IsZero() || msg.Deposit.IsNegative() {
+		return errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "deposit must be greater than 0")
+	}
+
+	// [MOD-TD-MSG-5-1] reason is mandatory per spec v4 draft 13
+	if msg.Reason == "" {
+		return errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "reason is required")
 	}
 
 	return nil
 }
 
 func (msg *MsgRepaySlashedTrustDeposit) ValidateBasic() error {
-	_, err := sdk.AccAddressFromBech32(msg.Authority)
+	_, err := sdk.AccAddressFromBech32(msg.Corporation)
 	if err != nil {
-		return errorsmod.Wrapf(sdkerrors.ErrInvalidAddress, "invalid authority address (%s)", err)
+		return errorsmod.Wrapf(sdkerrors.ErrInvalidAddress, "invalid corporation address (%s)", err)
 	}
 
 	_, err = sdk.AccAddressFromBech32(msg.Operator)
@@ -62,8 +54,8 @@ func (msg *MsgRepaySlashedTrustDeposit) ValidateBasic() error {
 		return errorsmod.Wrapf(sdkerrors.ErrInvalidAddress, "invalid operator address (%s)", err)
 	}
 
-	if msg.Amount == 0 {
-		return errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "amount must be greater than 0")
+	if msg.Deposit == 0 {
+		return errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "deposit must be greater than 0")
 	}
 
 	return nil

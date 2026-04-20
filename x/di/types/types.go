@@ -2,9 +2,22 @@ package types
 
 import (
 	"fmt"
+	"regexp"
 
+	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
+
+// [MOD-DI-MSG-1-1] SRI format: e.g. "sha256-AbCd...=" or "sha384-...".
+var sriFormat = regexp.MustCompile(`^(sha256|sha384|sha512)-[A-Za-z0-9+/]+={0,2}$`)
+
+// allowedDigestAlgorithms is the set of accepted hash algorithm identifiers.
+var allowedDigestAlgorithms = map[string]struct{}{
+	"sha2-256": {},
+	"sha2-512": {},
+	"sha3-256": {},
+}
 
 // ValidateBasic performs stateless validation on MsgStoreDigest.
 func (msg *MsgStoreDigest) ValidateBasic() error {
@@ -21,6 +34,24 @@ func (msg *MsgStoreDigest) ValidateBasic() error {
 	// digest must not be empty
 	if msg.Digest == "" {
 		return ErrDigestEmpty
+	}
+
+	// digest must not exceed maximum length
+	if len(msg.Digest) > 256 {
+		return errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "digest exceeds maximum length of 256 bytes")
+	}
+
+	// [MOD-DI-MSG-1-1] digest must be a valid SRI string per spec v4 draft 13.
+	if !sriFormat.MatchString(msg.Digest) {
+		return errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "digest must be a valid SRI string (e.g. sha256-<base64>)")
+	}
+
+	// digest_algorithm is mandatory and must be a known algorithm
+	if msg.DigestAlgorithm == "" {
+		return errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "digest_algorithm is required")
+	}
+	if _, ok := allowedDigestAlgorithms[msg.DigestAlgorithm]; !ok {
+		return errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "digest_algorithm must be one of: sha2-256, sha2-512, sha3-256")
 	}
 
 	return nil

@@ -55,7 +55,7 @@ message QueryGetTrustRegistryResponse {
 
 // QueryListTrustRegistriesRequest is the request type for the Query/ListTrustRegistries RPC method.
 message QueryListTrustRegistriesRequest {
-  string controller = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"]; // Added controller field
+  string corporation = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   google.protobuf.Timestamp modified_after = 2 [
     (gogoproto.stdtime) = true,
     (gogoproto.nullable) = true

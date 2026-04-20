@@ -128,9 +128,7 @@ func RunPermissionAdjustJourney(ctx context.Context, client cosmosclient.Client)
 	}
 
 	// Verify adjusted_by is set to the authority (policy address)
-	if adjustedPerm.AdjustedBy != policyAddr {
-		return fmt.Errorf("step 2 failed: expected adjusted_by=%s, got %s", policyAddr, adjustedPerm.AdjustedBy)
-	}
+	// spec v4: removed field assertion (adjusted_by/revoked_by/slashed_by no longer exist)
 
 	// Verify modified timestamp is set
 	if adjustedPerm.Modified == nil {
@@ -141,7 +139,7 @@ func RunPermissionAdjustJourney(ctx context.Context, client cosmosclient.Client)
 	if adjustedPerm.Type != permtypes.PermissionType_ECOSYSTEM {
 		return fmt.Errorf("step 2 failed: expected ECOSYSTEM type, got %s", adjustedPerm.Type.String())
 	}
-	if adjustedPerm.Authority != policyAddr {
+	if adjustedPerm.Corporation != policyAddr {
 		return fmt.Errorf("step 2 failed: authority changed unexpectedly")
 	}
 

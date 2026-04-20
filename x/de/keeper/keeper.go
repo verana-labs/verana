@@ -22,11 +22,12 @@ type Keeper struct {
 	// Typically, this should be the x/gov module account.
 	authority []byte
 
-	Schema                   collections.Schema
-	Params                   collections.Item[types.Params]
-	OperatorAuthorizations   collections.Map[collections.Pair[string, string], types.OperatorAuthorization]
-	FeeGrants                collections.Map[collections.Pair[string, string], types.FeeGrant]
-	VSOperatorAuthorizations collections.Map[collections.Pair[string, string], types.VSOperatorAuthorization]
+	Schema                     collections.Schema
+	Params                     collections.Item[types.Params]
+	OperatorAuthorizations     collections.Map[collections.Pair[string, string], types.OperatorAuthorization]
+	OperatorAuthorizationUsage collections.Map[collections.Pair[string, string], types.OperatorAuthorizationUsage]
+	FeeGrants                  collections.Map[collections.Pair[string, string], types.FeeGrant]
+	VSOperatorAuthorizations   collections.Map[collections.Pair[string, string], types.VSOperatorAuthorization]
 }
 
 func NewKeeper(
@@ -53,6 +54,8 @@ func NewKeeper(
 		Params: collections.NewItem(sb, types.ParamsKey, "params", codec.CollValue[types.Params](cdc)),
 		OperatorAuthorizations: collections.NewMap(sb, types.OperatorAuthorizationKey, "operator_authorization",
 			pairKeyCodec, codec.CollValue[types.OperatorAuthorization](cdc)),
+		OperatorAuthorizationUsage: collections.NewMap(sb, types.OperatorAuthorizationUsageKey, "operator_authorization_usage",
+			pairKeyCodec, codec.CollValue[types.OperatorAuthorizationUsage](cdc)),
 		FeeGrants: collections.NewMap(sb, types.FeeGrantKey, "fee_grant",
 			pairKeyCodec, codec.CollValue[types.FeeGrant](cdc)),
 		VSOperatorAuthorizations: collections.NewMap(sb, types.VSOperatorAuthorizationKey, "vs_operator_authorization",
@@ -94,7 +97,7 @@ func (k Keeper) AddPermToVSOA(ctx context.Context, authority, vsOperator string,
 	vsoa, err := k.VSOperatorAuthorizations.Get(sdkCtx, vsKey)
 	if err != nil {
 		vsoa = types.VSOperatorAuthorization{
-			Authority:   authority,
+			Corporation: authority,
 			VsOperator:  vsOperator,
 			Permissions: []uint64{},
 		}
@@ -116,7 +119,7 @@ func (k Keeper) AddPermToVSOA(ctx context.Context, authority, vsOperator string,
 	sdkCtx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeGrantVSOperatorAuthorization,
-			sdk.NewAttribute(types.AttributeKeyAuthority, authority),
+			sdk.NewAttribute(types.AttributeKeyCorporation, authority),
 			sdk.NewAttribute(types.AttributeKeyVsOperator, vsOperator),
 			sdk.NewAttribute(types.AttributeKeyPermissionID, strconv.FormatUint(permID, 10)),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, sdkCtx.BlockTime().String()),
@@ -160,7 +163,7 @@ func (k Keeper) RemovePermFromVSOA(ctx context.Context, authority, vsOperator st
 	sdkCtx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeRevokeVSOperatorAuthorization,
-			sdk.NewAttribute(types.AttributeKeyAuthority, authority),
+			sdk.NewAttribute(types.AttributeKeyCorporation, authority),
 			sdk.NewAttribute(types.AttributeKeyVsOperator, vsOperator),
 			sdk.NewAttribute(types.AttributeKeyPermissionID, strconv.FormatUint(permID, 10)),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, sdkCtx.BlockTime().String()),

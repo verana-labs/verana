@@ -47,8 +47,8 @@ func TestMsgReclaimTrustDepositYield(t *testing.T) {
 		{
 			name: "Trust deposit not found",
 			msg: &types.MsgReclaimTrustDepositYield{
-				Authority: testAccString,
-				Operator:  testAccString,
+				Corporation: testAccString,
+				Operator:    testAccString,
 			},
 			expErr:    true,
 			expErrMsg: "trust deposit not found",
@@ -69,17 +69,17 @@ func TestMsgReclaimTrustDepositYield(t *testing.T) {
 
 				// Create a trust deposit with no yield
 				td := types.TrustDeposit{
-					Account:   testAccString,
+					Corporation:   testAccString,
 					Share:     math.LegacyNewDec(1000),
-					Amount:    1000,
+					Deposit:    1000,
 					Claimable: 0,
 				}
 				err = k.TrustDeposit.Set(ctx, testAccString, td)
 				require.NoError(t, err)
 			},
 			msg: &types.MsgReclaimTrustDepositYield{
-				Authority: testAccString,
-				Operator:  testAccString,
+				Corporation: testAccString,
+				Operator:    testAccString,
 			},
 			expErr:    true,
 			expErrMsg: "no claimable yield",
@@ -98,23 +98,22 @@ func TestMsgReclaimTrustDepositYield(t *testing.T) {
 				err := k.SetParams(ctx, params)
 				require.NoError(t, err)
 
-				// Create a trust deposit with potential yield
+				// Create a trust deposit with accrued yield
 				td := types.TrustDeposit{
-					Account:   testAccString,
+					Corporation:   testAccString,
 					Share:     math.LegacyNewDec(1000),
-					Amount:    1000, // 1000 shares at 1.5 value = 1500 tokens total value
-					Claimable: 0,
+					Deposit:    1000,
+					Claimable: 500, // pre-accrued yield available to claim
 				}
 				err = k.TrustDeposit.Set(ctx, testAccString, td)
 				require.NoError(t, err)
 			},
 			msg: &types.MsgReclaimTrustDepositYield{
-				Authority: testAccString,
-				Operator:  testAccString,
+				Corporation: testAccString,
+				Operator:    testAccString,
 			},
 			expErr: false,
 			check: func(resp *types.MsgReclaimTrustDepositYieldResponse) {
-				// Expected yield: 1000 shares * 1.5 value = 1500 total value - 1000 deposited = 500 yield
 				require.Equal(t, uint64(500), resp.ClaimedAmount)
 
 				// Verify trust deposit was updated correctly
@@ -123,7 +122,7 @@ func TestMsgReclaimTrustDepositYield(t *testing.T) {
 				// Shares reduced by 500/1.5 = 333.33...
 				expectedShare := math.LegacyNewDec(1000).Sub(math.LegacyMustNewDecFromStr("333.333333333333333333"))
 				require.True(t, td.Share.Equal(expectedShare), "expected %s, got %s", expectedShare.String(), td.Share.String())
-				require.Equal(t, uint64(1000), td.Amount) // Original deposit unchanged
+				require.Equal(t, uint64(1000), td.Deposit) // Original deposit unchanged
 			},
 		},
 	}
@@ -135,165 +134,6 @@ func TestMsgReclaimTrustDepositYield(t *testing.T) {
 			}
 
 			resp, err := ms.ReclaimTrustDepositYield(ctx, tc.msg)
-
-			if tc.expErr {
-				require.Error(t, err)
-				if tc.expErrMsg != "" {
-					require.Contains(t, err.Error(), tc.expErrMsg)
-				}
-			} else {
-				require.NoError(t, err)
-				require.NotNil(t, resp)
-
-				if tc.check != nil {
-					tc.check(resp)
-				}
-			}
-		})
-	}
-}
-
-func TestMsgReclaimTrustDeposit(t *testing.T) {
-	k, ms, ctx := setupMsgServer(t)
-
-	// Create test account
-	testAddr := sdk.AccAddress([]byte("test_address"))
-	testAccString := testAddr.String()
-
-	// Test cases
-	testCases := []struct {
-		name      string
-		setup     func() // Setup function to prepare the test state
-		msg       *types.MsgReclaimTrustDeposit
-		expErr    bool
-		expErrMsg string
-		check     func(*types.MsgReclaimTrustDepositResponse) // Function to check response
-	}{
-		{
-			name: "Zero claimed amount",
-			msg: &types.MsgReclaimTrustDeposit{
-				Creator: testAccString,
-				Claimed: 0,
-			},
-			expErr:    true,
-			expErrMsg: "claimed amount must be greater than 0",
-		},
-		{
-			name: "Trust deposit not found",
-			msg: &types.MsgReclaimTrustDeposit{
-				Creator: testAccString,
-				Claimed: 100,
-			},
-			expErr:    true,
-			expErrMsg: "trust deposit not found",
-		},
-		{
-			name: "Claimed exceeds claimable",
-			setup: func() {
-				// Set default params
-				params := types.DefaultParams()
-				err := k.SetParams(ctx, params)
-				require.NoError(t, err)
-
-				// Create a trust deposit with limited claimable amount
-				td := types.TrustDeposit{
-					Account:   testAccString,
-					Share:     math.LegacyNewDec(1000),
-					Amount:    1000,
-					Claimable: 500,
-				}
-				err = k.TrustDeposit.Set(ctx, testAccString, td)
-				require.NoError(t, err)
-			},
-			msg: &types.MsgReclaimTrustDeposit{
-				Creator: testAccString,
-				Claimed: 600, // More than the 500 claimable
-			},
-			expErr:    true,
-			expErrMsg: "claimed amount exceeds claimable balance",
-		},
-		{
-			name: "Insufficient required minimum deposit",
-			setup: func() {
-				// Set params with a lower share value to make required minimum deposit less than remaining amount
-				params := types.Params{
-					TrustDepositShareValue:      math.LegacyMustNewDecFromStr("0.8"), // Makes required min deposit < actual deposit
-					TrustDepositReclaimBurnRate: math.LegacyMustNewDecFromStr("0.6"),
-					TrustDepositRate:            math.LegacyMustNewDecFromStr("0.2"),
-					WalletUserAgentRewardRate:   math.LegacyMustNewDecFromStr("0.3"),
-					UserAgentRewardRate:         math.LegacyMustNewDecFromStr("0.2"),
-				}
-				err := k.SetParams(ctx, params)
-				require.NoError(t, err)
-
-				// Create a trust deposit
-				td := types.TrustDeposit{
-					Account:   testAccString,
-					Share:     math.LegacyNewDec(1000),
-					Amount:    1000,
-					Claimable: 500,
-				}
-				err = k.TrustDeposit.Set(ctx, testAccString, td)
-				require.NoError(t, err)
-			},
-			msg: &types.MsgReclaimTrustDeposit{
-				Creator: testAccString,
-				Claimed: 100,
-			},
-			expErr:    true,
-			expErrMsg: "insufficient required minimum deposit",
-		},
-		{
-			name: "Successful reclaim",
-			setup: func() {
-				// Set params with 1:1 share value for simplicity
-				params := types.Params{
-					TrustDepositShareValue:      math.LegacyMustNewDecFromStr("1.0"),
-					TrustDepositReclaimBurnRate: math.LegacyMustNewDecFromStr("0.6"), // 60% burn rate
-					TrustDepositRate:            math.LegacyMustNewDecFromStr("0.2"),
-					WalletUserAgentRewardRate:   math.LegacyMustNewDecFromStr("0.3"),
-					UserAgentRewardRate:         math.LegacyMustNewDecFromStr("0.2"),
-				}
-				err := k.SetParams(ctx, params)
-				require.NoError(t, err)
-
-				// Create a trust deposit with claimable amount
-				td := types.TrustDeposit{
-					Account:   testAccString,
-					Share:     math.LegacyNewDec(1000),
-					Amount:    1000,
-					Claimable: 500,
-				}
-				err = k.TrustDeposit.Set(ctx, testAccString, td)
-				require.NoError(t, err)
-			},
-			msg: &types.MsgReclaimTrustDeposit{
-				Creator: testAccString,
-				Claimed: 200,
-			},
-			expErr: false,
-			check: func(resp *types.MsgReclaimTrustDepositResponse) {
-				// With 60% burn rate: 200 * 0.6 = 120 burned, 80 claimed
-				require.Equal(t, uint64(120), resp.BurnedAmount)
-				require.Equal(t, uint64(80), resp.ClaimedAmount)
-
-				// Verify trust deposit was updated correctly
-				td, err := k.TrustDeposit.Get(ctx, testAccString)
-				require.NoError(t, err)
-				require.Equal(t, uint64(300), td.Claimable)                                                        // 500 - 200 = 300
-				require.Equal(t, uint64(800), td.Amount)                                                           // 1000 - 200 = 800
-				require.True(t, td.Share.Equal(math.LegacyNewDec(800)), "expected 800, got %s", td.Share.String()) // 1000 - 200 = 800 (1:1 ratio)
-			},
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			if tc.setup != nil {
-				tc.setup()
-			}
-
-			resp, err := ms.ReclaimTrustDeposit(ctx, tc.msg)
 
 			if tc.expErr {
 				require.Error(t, err)
@@ -357,9 +197,9 @@ func TestAdjustTrustDeposit(t *testing.T) {
 			setup: func() {
 				// Create a trust deposit
 				td := types.TrustDeposit{
-					Account:   testAccString,
+					Corporation:   testAccString,
 					Share:     math.LegacyNewDec(1000),
-					Amount:    1000,
+					Deposit:    1000,
 					Claimable: 200,
 				}
 				err := k.TrustDeposit.Set(ctx, testAccString, td)
@@ -371,7 +211,7 @@ func TestAdjustTrustDeposit(t *testing.T) {
 				td, err := k.TrustDeposit.Get(ctx, testAccString)
 				require.NoError(t, err)
 				require.Equal(t, uint64(300), td.Claimable)                                                          // 200 + 100 = 300
-				require.Equal(t, uint64(1000), td.Amount)                                                            // Unchanged
+				require.Equal(t, uint64(1000), td.Deposit)                                                            // Unchanged
 				require.True(t, td.Share.Equal(math.LegacyNewDec(1000)), "expected 1000, got %s", td.Share.String()) // Unchanged
 			},
 		},
@@ -382,9 +222,9 @@ func TestAdjustTrustDeposit(t *testing.T) {
 			setup: func() {
 				// Create a trust deposit
 				td := types.TrustDeposit{
-					Account:   testAccString,
+					Corporation:   testAccString,
 					Share:     math.LegacyNewDec(1000),
-					Amount:    1000,
+					Deposit:    1000,
 					Claimable: 200,
 				}
 				err := k.TrustDeposit.Set(ctx, testAccString, td)
@@ -400,9 +240,9 @@ func TestAdjustTrustDeposit(t *testing.T) {
 			setup: func() {
 				// Create a trust deposit with claimable amount
 				td := types.TrustDeposit{
-					Account:   testAccString,
+					Corporation:   testAccString,
 					Share:     math.LegacyNewDec(1000),
-					Amount:    1000,
+					Deposit:    1000,
 					Claimable: 300,
 				}
 				err := k.TrustDeposit.Set(ctx, testAccString, td)
@@ -414,7 +254,7 @@ func TestAdjustTrustDeposit(t *testing.T) {
 				td, err := k.TrustDeposit.Get(ctx, testAccString)
 				require.NoError(t, err)
 				require.Equal(t, uint64(250), td.Claimable)                                                          // 300 - 50 = 250
-				require.Equal(t, uint64(1000), td.Amount)                                                            // Unchanged
+				require.Equal(t, uint64(1000), td.Deposit)                                                            // Unchanged
 				require.True(t, td.Share.Equal(math.LegacyNewDec(1000)), "expected 1000, got %s", td.Share.String()) // Unchanged
 			},
 		},
@@ -426,7 +266,7 @@ func TestAdjustTrustDeposit(t *testing.T) {
 				tc.setup()
 			}
 
-			err := k.AdjustTrustDeposit(sdkCtx, tc.account, tc.augend)
+			err := k.AdjustTrustDeposit(sdkCtx, tc.account, tc.augend, "test")
 
 			if tc.expErr {
 				require.Error(t, err)
@@ -513,36 +353,6 @@ func TestUtilityFunctions(t *testing.T) {
 		}
 	})
 
-	// Test CalculateBurnAmount
-	t.Run("CalculateBurnAmount", func(t *testing.T) {
-		testCases := []struct {
-			claimed  uint64
-			burnRate math.LegacyDec
-			expected uint64
-		}{
-			{
-				claimed:  1000,
-				burnRate: math.LegacyMustNewDecFromStr("0.6"),
-				expected: 600, // 1000 * 0.6 = 600
-			},
-			{
-				claimed:  1000,
-				burnRate: math.LegacyMustNewDecFromStr("0"),
-				expected: 0,
-			},
-			{
-				claimed:  0,
-				burnRate: math.LegacyMustNewDecFromStr("0.6"),
-				expected: 0,
-			},
-		}
-
-		for _, tc := range testCases {
-			result := k.CalculateBurnAmount(tc.claimed, tc.burnRate)
-			require.Equal(t, tc.expected, result)
-		}
-	})
-
 	// Test parameter getters
 	t.Run("Parameter getters", func(t *testing.T) {
 		// Set custom params for testing
@@ -614,8 +424,8 @@ func TestMsgSlashTrustDeposit(t *testing.T) {
 			name: "Invalid authority",
 			msg: &types.MsgSlashTrustDeposit{
 				Authority: "verana1invalidauthority",
-				Account:   testAccString,
-				Amount:    math.NewInt(100),
+				Corporation:   testAccString,
+				Deposit:    math.NewInt(100),
 			},
 			expErr:    true,
 			expErrMsg: "invalid authority",
@@ -624,28 +434,28 @@ func TestMsgSlashTrustDeposit(t *testing.T) {
 			name: "Zero amount",
 			msg: &types.MsgSlashTrustDeposit{
 				Authority: govAuthority(),
-				Account:   testAccString,
-				Amount:    math.NewInt(0),
+				Corporation:   testAccString,
+				Deposit:    math.NewInt(0),
 			},
 			expErr:    true,
-			expErrMsg: "amount must be greater than 0",
+			expErrMsg: "deposit must be greater than 0",
 		},
 		{
 			name: "Negative amount",
 			msg: &types.MsgSlashTrustDeposit{
 				Authority: govAuthority(),
-				Account:   testAccString,
-				Amount:    math.NewInt(-100),
+				Corporation:   testAccString,
+				Deposit:    math.NewInt(-100),
 			},
 			expErr:    true,
-			expErrMsg: "amount must be greater than 0",
+			expErrMsg: "deposit must be greater than 0",
 		},
 		{
 			name: "Trust deposit not found",
 			msg: &types.MsgSlashTrustDeposit{
 				Authority: govAuthority(),
-				Account:   sdk.AccAddress([]byte("nonexistent_addr")).String(),
-				Amount:    math.NewInt(100),
+				Corporation:   sdk.AccAddress([]byte("nonexistent_addr")).String(),
+				Deposit:    math.NewInt(100),
 			},
 			expErr:    true,
 			expErrMsg: "trust deposit not found",
@@ -656,17 +466,17 @@ func TestMsgSlashTrustDeposit(t *testing.T) {
 				err := k.SetParams(ctx, defaultTestParams())
 				require.NoError(t, err)
 				td := types.TrustDeposit{
-					Account: testAccString,
+					Corporation: testAccString,
 					Share:   math.LegacyNewDec(100),
-					Amount:  100,
+					Deposit:  100,
 				}
 				err = k.TrustDeposit.Set(ctx, testAccString, td)
 				require.NoError(t, err)
 			},
 			msg: &types.MsgSlashTrustDeposit{
 				Authority: govAuthority(),
-				Account:   testAccString,
-				Amount:    math.NewInt(200),
+				Corporation:   testAccString,
+				Deposit:    math.NewInt(200),
 			},
 			expErr:    true,
 			expErrMsg: "insufficient trust deposit",
@@ -677,23 +487,23 @@ func TestMsgSlashTrustDeposit(t *testing.T) {
 				err := k.SetParams(ctx, defaultTestParams())
 				require.NoError(t, err)
 				td := types.TrustDeposit{
-					Account: testAccString,
+					Corporation: testAccString,
 					Share:   math.LegacyNewDec(1000),
-					Amount:  1000,
+					Deposit:  1000,
 				}
 				err = k.TrustDeposit.Set(ctx, testAccString, td)
 				require.NoError(t, err)
 			},
 			msg: &types.MsgSlashTrustDeposit{
 				Authority: govAuthority(),
-				Account:   testAccString,
-				Amount:    math.NewInt(300),
+				Corporation:   testAccString,
+				Deposit:    math.NewInt(300),
 			},
 			expErr: false,
 			check: func() {
 				td, err := k.TrustDeposit.Get(ctx, testAccString)
 				require.NoError(t, err)
-				require.Equal(t, uint64(700), td.Amount)
+				require.Equal(t, uint64(700), td.Deposit)
 				require.Equal(t, uint64(300), td.SlashedDeposit)
 				require.Equal(t, uint64(1), td.SlashCount)
 				require.NotNil(t, td.LastSlashed)
@@ -708,9 +518,9 @@ func TestMsgSlashTrustDeposit(t *testing.T) {
 				err := k.SetParams(ctx, defaultTestParams())
 				require.NoError(t, err)
 				td := types.TrustDeposit{
-					Account:        testAccString,
+					Corporation:        testAccString,
 					Share:          math.LegacyNewDec(1000),
-					Amount:         1000,
+					Deposit:         1000,
 					SlashedDeposit: 200,
 					SlashCount:     1,
 				}
@@ -719,14 +529,14 @@ func TestMsgSlashTrustDeposit(t *testing.T) {
 			},
 			msg: &types.MsgSlashTrustDeposit{
 				Authority: govAuthority(),
-				Account:   testAccString,
-				Amount:    math.NewInt(100),
+				Corporation:   testAccString,
+				Deposit:    math.NewInt(100),
 			},
 			expErr: false,
 			check: func() {
 				td, err := k.TrustDeposit.Get(ctx, testAccString)
 				require.NoError(t, err)
-				require.Equal(t, uint64(900), td.Amount)
+				require.Equal(t, uint64(900), td.Deposit)
 				require.Equal(t, uint64(300), td.SlashedDeposit) // 200 + 100
 				require.Equal(t, uint64(2), td.SlashCount)       // 1 + 1
 			},
@@ -737,23 +547,23 @@ func TestMsgSlashTrustDeposit(t *testing.T) {
 				err := k.SetParams(ctx, defaultTestParams())
 				require.NoError(t, err)
 				td := types.TrustDeposit{
-					Account: testAccString,
+					Corporation: testAccString,
 					Share:   math.LegacyNewDec(500),
-					Amount:  500,
+					Deposit:  500,
 				}
 				err = k.TrustDeposit.Set(ctx, testAccString, td)
 				require.NoError(t, err)
 			},
 			msg: &types.MsgSlashTrustDeposit{
 				Authority: govAuthority(),
-				Account:   testAccString,
-				Amount:    math.NewInt(500),
+				Corporation:   testAccString,
+				Deposit:    math.NewInt(500),
 			},
 			expErr: false,
 			check: func() {
 				td, err := k.TrustDeposit.Get(ctx, testAccString)
 				require.NoError(t, err)
-				require.Equal(t, uint64(0), td.Amount)
+				require.Equal(t, uint64(0), td.Deposit)
 				require.Equal(t, uint64(500), td.SlashedDeposit)
 				require.True(t, td.Share.Equal(math.LegacyZeroDec()), "expected 0, got %s", td.Share)
 			},
@@ -802,9 +612,9 @@ func TestMsgRepaySlashedTrustDeposit(t *testing.T) {
 		{
 			name: "Trust deposit not found",
 			msg: &types.MsgRepaySlashedTrustDeposit{
-				Authority: sdk.AccAddress([]byte("nonexistent_addr__")).String(),
-				Operator:  testAccString,
-				Amount:    100,
+				Corporation: sdk.AccAddress([]byte("nonexistent_addr__")).String(),
+				Operator:    testAccString,
+				Deposit:     100,
 			},
 			expErr:    true,
 			expErrMsg: "trust deposit entry not found",
@@ -815,9 +625,9 @@ func TestMsgRepaySlashedTrustDeposit(t *testing.T) {
 				err := k.SetParams(ctx, defaultTestParams())
 				require.NoError(t, err)
 				td := types.TrustDeposit{
-					Account:        testAccString,
+					Corporation:        testAccString,
 					Share:          math.LegacyNewDec(700),
-					Amount:         700,
+					Deposit:         700,
 					SlashedDeposit: 300,
 					RepaidDeposit:  0,
 				}
@@ -825,12 +635,12 @@ func TestMsgRepaySlashedTrustDeposit(t *testing.T) {
 				require.NoError(t, err)
 			},
 			msg: &types.MsgRepaySlashedTrustDeposit{
-				Authority: testAccString,
-				Operator:  testAccString,
-				Amount:    200, // outstanding is 300
+				Corporation: testAccString,
+				Operator:    testAccString,
+				Deposit:     200, // outstanding is 300
 			},
 			expErr:    true,
-			expErrMsg: "amount must exactly equal outstanding slashed amount",
+			expErrMsg: "deposit must exactly equal outstanding slashed amount",
 		},
 		{
 			name: "Successful repay",
@@ -838,9 +648,9 @@ func TestMsgRepaySlashedTrustDeposit(t *testing.T) {
 				err := k.SetParams(ctx, defaultTestParams())
 				require.NoError(t, err)
 				td := types.TrustDeposit{
-					Account:        testAccString,
+					Corporation:        testAccString,
 					Share:          math.LegacyNewDec(700),
-					Amount:         700,
+					Deposit:         700,
 					SlashedDeposit: 300,
 					RepaidDeposit:  0,
 					SlashCount:     1,
@@ -849,17 +659,19 @@ func TestMsgRepaySlashedTrustDeposit(t *testing.T) {
 				require.NoError(t, err)
 			},
 			msg: &types.MsgRepaySlashedTrustDeposit{
-				Authority: testAccString,
-				Operator:  testAccString,
-				Amount:    300,
+				Corporation: testAccString,
+				Operator:    testAccString,
+				Deposit:     300,
 			},
 			expErr: false,
 			check: func() {
 				td, err := k.TrustDeposit.Get(ctx, testAccString)
 				require.NoError(t, err)
-				require.Equal(t, uint64(1000), td.Amount)        // 700 + 300
-				require.Equal(t, uint64(300), td.RepaidDeposit)  // 0 + 300
-				require.Equal(t, uint64(300), td.SlashedDeposit) // unchanged
+				require.Equal(t, uint64(1000), td.Deposit) // 700 + 300
+				// [MOD-TD-MSG-6-3] spec v4 draft 13: slashed_deposit decremented,
+				// repaid_deposit cumulative.
+				require.Equal(t, uint64(300), td.RepaidDeposit)
+				require.Equal(t, uint64(0), td.SlashedDeposit)
 				require.NotNil(t, td.LastRepaid)
 				// share increased by 300/1.0 = 300
 				expectedShare := math.LegacyNewDec(1000) // 700 + 300
@@ -871,28 +683,32 @@ func TestMsgRepaySlashedTrustDeposit(t *testing.T) {
 			setup: func() {
 				err := k.SetParams(ctx, defaultTestParams())
 				require.NoError(t, err)
+				// [MOD-TD-MSG-6-3] spec v4 draft 13: slashed_deposit holds outstanding
+				// balance (300 remaining after 200 already repaid); repaid_deposit is cumulative.
 				td := types.TrustDeposit{
-					Account:        testAccString,
+					Corporation:    testAccString,
 					Share:          math.LegacyNewDec(800),
-					Amount:         800,
-					SlashedDeposit: 500,
-					RepaidDeposit:  200, // already partially repaid
+					Deposit:        800,
+					SlashedDeposit: 300, // outstanding slashed amount
+					RepaidDeposit:  200, // cumulative repaid so far
 					SlashCount:     2,
 				}
 				err = k.TrustDeposit.Set(ctx, testAccString, td)
 				require.NoError(t, err)
 			},
 			msg: &types.MsgRepaySlashedTrustDeposit{
-				Authority: testAccString,
-				Operator:  testAccString,
-				Amount:    300, // outstanding = 500 - 200 = 300
+				Corporation: testAccString,
+				Operator:    testAccString,
+				Deposit:     300, // clears the remaining outstanding slash
 			},
 			expErr: false,
 			check: func() {
 				td, err := k.TrustDeposit.Get(ctx, testAccString)
 				require.NoError(t, err)
-				require.Equal(t, uint64(1100), td.Amount)       // 800 + 300
-				require.Equal(t, uint64(500), td.RepaidDeposit) // 200 + 300
+				require.Equal(t, uint64(1100), td.Deposit) // 800 + 300
+				// [MOD-TD-MSG-6-3] spec v4 draft 13: 200 prior + 300 now = 500 cumulative repaid.
+				require.Equal(t, uint64(500), td.RepaidDeposit)
+				require.Equal(t, uint64(0), td.SlashedDeposit)
 			},
 		},
 		{
@@ -901,9 +717,9 @@ func TestMsgRepaySlashedTrustDeposit(t *testing.T) {
 				err := k.SetParams(ctx, defaultTestParams())
 				require.NoError(t, err)
 				td := types.TrustDeposit{
-					Account:        testAccString,
+					Corporation:        testAccString,
 					Share:          math.LegacyNewDec(900),
-					Amount:         900,
+					Deposit:         900,
 					SlashedDeposit: 100,
 					RepaidDeposit:  0,
 				}
@@ -911,9 +727,9 @@ func TestMsgRepaySlashedTrustDeposit(t *testing.T) {
 				require.NoError(t, err)
 			},
 			msg: &types.MsgRepaySlashedTrustDeposit{
-				Authority: testAccString,
-				Operator:  sdk.AccAddress([]byte("different_operator")).String(),
-				Amount:    100,
+				Corporation: testAccString,
+				Operator:    sdk.AccAddress([]byte("different_operator")).String(),
+				Deposit:     100,
 			},
 			expErr: false,
 		},
@@ -955,9 +771,9 @@ func TestMsgRepaySlashedTrustDepositAuthz(t *testing.T) {
 		err := k.SetParams(ctx, defaultTestParams())
 		require.NoError(t, err)
 		td := types.TrustDeposit{
-			Account:        testAccString,
+			Corporation:        testAccString,
 			Share:          math.LegacyNewDec(700),
-			Amount:         700,
+			Deposit:         700,
 			SlashedDeposit: 300,
 			RepaidDeposit:  0,
 		}
@@ -966,9 +782,9 @@ func TestMsgRepaySlashedTrustDepositAuthz(t *testing.T) {
 
 		dk.ErrToReturn = fmt.Errorf("mock: operator not authorized")
 		_, err = ms.RepaySlashedTrustDeposit(ctx, &types.MsgRepaySlashedTrustDeposit{
-			Authority: testAccString,
-			Operator:  operatorAddr,
-			Amount:    300,
+			Corporation: testAccString,
+			Operator:    operatorAddr,
+			Deposit:     300,
 		})
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "authorization check failed")
@@ -978,9 +794,9 @@ func TestMsgRepaySlashedTrustDepositAuthz(t *testing.T) {
 		err := k.SetParams(ctx, defaultTestParams())
 		require.NoError(t, err)
 		td := types.TrustDeposit{
-			Account:        testAccString,
+			Corporation:        testAccString,
 			Share:          math.LegacyNewDec(700),
-			Amount:         700,
+			Deposit:         700,
 			SlashedDeposit: 300,
 			RepaidDeposit:  0,
 		}
@@ -989,9 +805,9 @@ func TestMsgRepaySlashedTrustDepositAuthz(t *testing.T) {
 
 		dk.ErrToReturn = nil
 		_, err = ms.RepaySlashedTrustDeposit(ctx, &types.MsgRepaySlashedTrustDeposit{
-			Authority: testAccString,
-			Operator:  operatorAddr,
-			Amount:    300,
+			Corporation: testAccString,
+			Operator:    operatorAddr,
+			Deposit:     300,
 		})
 		require.NoError(t, err)
 	})
@@ -1029,7 +845,7 @@ func TestBurnEcosystemSlashedTrustDeposit(t *testing.T) {
 			account:   testAccString,
 			amount:    0,
 			expErr:    true,
-			expErrMsg: "amount must be greater than 0",
+			expErrMsg: "deposit must be greater than 0",
 		},
 		{
 			name:      "Trust deposit not found",
@@ -1046,9 +862,9 @@ func TestBurnEcosystemSlashedTrustDeposit(t *testing.T) {
 				err := k.SetParams(ctx, defaultTestParams())
 				require.NoError(t, err)
 				td := types.TrustDeposit{
-					Account: testAccString,
+					Corporation: testAccString,
 					Share:   math.LegacyNewDec(100),
-					Amount:  100,
+					Deposit:  100,
 				}
 				err = k.TrustDeposit.Set(ctx, testAccString, td)
 				require.NoError(t, err)
@@ -1066,9 +882,9 @@ func TestBurnEcosystemSlashedTrustDeposit(t *testing.T) {
 				err := k.SetParams(ctx, params)
 				require.NoError(t, err)
 				td := types.TrustDeposit{
-					Account: testAccString,
+					Corporation: testAccString,
 					Share:   math.LegacyNewDec(100),
-					Amount:  100,
+					Deposit:  100,
 				}
 				err = k.TrustDeposit.Set(ctx, testAccString, td)
 				require.NoError(t, err)
@@ -1084,9 +900,9 @@ func TestBurnEcosystemSlashedTrustDeposit(t *testing.T) {
 				err := k.SetParams(ctx, defaultTestParams())
 				require.NoError(t, err)
 				td := types.TrustDeposit{
-					Account: testAccString,
+					Corporation: testAccString,
 					Share:   math.LegacyNewDec(1000),
-					Amount:  1000,
+					Deposit:  1000,
 				}
 				err = k.TrustDeposit.Set(ctx, testAccString, td)
 				require.NoError(t, err)
@@ -1095,7 +911,7 @@ func TestBurnEcosystemSlashedTrustDeposit(t *testing.T) {
 			check: func() {
 				td, err := k.TrustDeposit.Get(ctx, testAccString)
 				require.NoError(t, err)
-				require.Equal(t, uint64(700), td.Amount)
+				require.Equal(t, uint64(700), td.Deposit)
 				expectedShare := math.LegacyNewDec(700) // 1000 - 300/1.0
 				require.True(t, td.Share.Equal(expectedShare), "expected %s, got %s", expectedShare, td.Share)
 			},
@@ -1108,9 +924,9 @@ func TestBurnEcosystemSlashedTrustDeposit(t *testing.T) {
 				err := k.SetParams(ctx, defaultTestParams())
 				require.NoError(t, err)
 				td := types.TrustDeposit{
-					Account: testAccString,
+					Corporation: testAccString,
 					Share:   math.LegacyNewDec(500),
-					Amount:  500,
+					Deposit:  500,
 				}
 				err = k.TrustDeposit.Set(ctx, testAccString, td)
 				require.NoError(t, err)
@@ -1119,7 +935,7 @@ func TestBurnEcosystemSlashedTrustDeposit(t *testing.T) {
 			check: func() {
 				td, err := k.TrustDeposit.Get(ctx, testAccString)
 				require.NoError(t, err)
-				require.Equal(t, uint64(0), td.Amount)
+				require.Equal(t, uint64(0), td.Deposit)
 				require.True(t, td.Share.Equal(math.LegacyZeroDec()) || !td.Share.IsNegative(),
 					"share should be zero or non-negative, got %s", td.Share)
 			},
@@ -1132,9 +948,9 @@ func TestBurnEcosystemSlashedTrustDeposit(t *testing.T) {
 				err := k.SetParams(ctx, defaultTestParams())
 				require.NoError(t, err)
 				td := types.TrustDeposit{
-					Account:        testAccString,
+					Corporation:        testAccString,
 					Share:          math.LegacyNewDec(1000),
-					Amount:         1000,
+					Deposit:         1000,
 					SlashedDeposit: 50,
 					SlashCount:     2,
 				}
@@ -1233,7 +1049,7 @@ func TestAdjustTrustDepositOnBehalf(t *testing.T) {
 			check: func() {
 				td, err := k.TrustDeposit.Get(ctx, testAccString)
 				require.NoError(t, err)
-				require.Equal(t, uint64(500), td.Amount)
+				require.Equal(t, uint64(500), td.Deposit)
 				require.Equal(t, uint64(0), td.Claimable)
 				expectedShare := math.LegacyNewDec(500) // 500/1.0
 				require.True(t, td.Share.Equal(expectedShare), "expected %s, got %s", expectedShare, td.Share)
@@ -1248,9 +1064,9 @@ func TestAdjustTrustDepositOnBehalf(t *testing.T) {
 				err := k.SetParams(ctx, defaultTestParams())
 				require.NoError(t, err)
 				td := types.TrustDeposit{
-					Account:   testAccString,
+					Corporation:   testAccString,
 					Share:     math.LegacyNewDec(1000),
-					Amount:    1000,
+					Deposit:    1000,
 					Claimable: 100,
 				}
 				err = k.TrustDeposit.Set(ctx, testAccString, td)
@@ -1260,7 +1076,7 @@ func TestAdjustTrustDepositOnBehalf(t *testing.T) {
 			check: func() {
 				td, err := k.TrustDeposit.Get(ctx, testAccString)
 				require.NoError(t, err)
-				require.Equal(t, uint64(1200), td.Amount)   // 1000 + 200
+				require.Equal(t, uint64(1200), td.Deposit)   // 1000 + 200
 				require.Equal(t, uint64(100), td.Claimable) // unchanged
 				expectedShare := math.LegacyNewDec(1200)    // 1000 + 200/1.0
 				require.True(t, td.Share.Equal(expectedShare), "expected %s, got %s", expectedShare, td.Share)
@@ -1275,9 +1091,9 @@ func TestAdjustTrustDepositOnBehalf(t *testing.T) {
 				err := k.SetParams(ctx, defaultTestParams())
 				require.NoError(t, err)
 				td := types.TrustDeposit{
-					Account:        testAccString,
+					Corporation:        testAccString,
 					Share:          math.LegacyNewDec(700),
-					Amount:         700,
+					Deposit:         700,
 					SlashedDeposit: 300,
 					RepaidDeposit:  0,
 				}
@@ -1296,9 +1112,9 @@ func TestAdjustTrustDepositOnBehalf(t *testing.T) {
 				err := k.SetParams(ctx, defaultTestParams())
 				require.NoError(t, err)
 				td := types.TrustDeposit{
-					Account:        testAccString,
+					Corporation:        testAccString,
 					Share:          math.LegacyNewDec(1000),
-					Amount:         1000,
+					Deposit:         1000,
 					SlashedDeposit: 300,
 					RepaidDeposit:  300,
 				}
@@ -1309,7 +1125,7 @@ func TestAdjustTrustDepositOnBehalf(t *testing.T) {
 			check: func() {
 				td, err := k.TrustDeposit.Get(ctx, testAccString)
 				require.NoError(t, err)
-				require.Equal(t, uint64(1100), td.Amount) // 1000 + 100
+				require.Equal(t, uint64(1100), td.Deposit) // 1000 + 100
 			},
 		},
 	}
@@ -1351,9 +1167,9 @@ func TestMsgReclaimTrustDepositYieldEdgeCases(t *testing.T) {
 		require.NoError(t, err)
 
 		td := types.TrustDeposit{
-			Account:        testAccString,
+			Corporation:        testAccString,
 			Share:          math.LegacyNewDec(1000),
-			Amount:         1000,
+			Deposit:         1000,
 			SlashedDeposit: 100,
 			RepaidDeposit:  0,
 		}
@@ -1361,8 +1177,8 @@ func TestMsgReclaimTrustDepositYieldEdgeCases(t *testing.T) {
 		require.NoError(t, err)
 
 		_, err = ms.ReclaimTrustDepositYield(ctx, &types.MsgReclaimTrustDepositYield{
-			Authority: testAccString,
-			Operator:  testAccString,
+			Corporation: testAccString,
+			Operator:    testAccString,
 		})
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "deposit has been slashed and not repaid")
@@ -1378,22 +1194,25 @@ func TestMsgReclaimTrustDepositYieldEdgeCases(t *testing.T) {
 		err := k.SetParams(ctx, params)
 		require.NoError(t, err)
 
+		// [MOD-TD-MSG-6-3] spec v4 draft 13: on full repay, slashed_deposit is decremented to 0
+		// and repaid_deposit keeps cumulative history. Reclaim is enabled while slashed_deposit == 0.
 		td := types.TrustDeposit{
-			Account:        testAccString,
+			Corporation:    testAccString,
 			Share:          math.LegacyNewDec(1000),
-			Amount:         1000,
-			SlashedDeposit: 100,
-			RepaidDeposit:  100, // fully repaid
+			Deposit:        1000,
+			Claimable:      500, // pre-accrued yield
+			SlashedDeposit: 0,   // fully repaid — decremented to 0
+			RepaidDeposit:  100, // cumulative history preserved
 		}
 		err = k.TrustDeposit.Set(ctx, testAccString, td)
 		require.NoError(t, err)
 
 		resp, err := ms.ReclaimTrustDepositYield(ctx, &types.MsgReclaimTrustDepositYield{
-			Authority: testAccString,
-			Operator:  testAccString,
+			Corporation: testAccString,
+			Operator:    testAccString,
 		})
 		require.NoError(t, err)
-		require.Equal(t, uint64(500), resp.ClaimedAmount) // 1000*1.5 - 1000 = 500
+		require.Equal(t, uint64(500), resp.ClaimedAmount)
 	})
 
 	t.Run("AUTHZ-CHECK fails", func(t *testing.T) {
@@ -1407,17 +1226,17 @@ func TestMsgReclaimTrustDepositYieldEdgeCases(t *testing.T) {
 		require.NoError(t, err)
 
 		td := types.TrustDeposit{
-			Account: testAccString,
+			Corporation: testAccString,
 			Share:   math.LegacyNewDec(1000),
-			Amount:  1000,
+			Deposit:  1000,
 		}
 		err = k.TrustDeposit.Set(ctx, testAccString, td)
 		require.NoError(t, err)
 
 		dk.ErrToReturn = fmt.Errorf("mock: not authorized")
 		_, err = ms.ReclaimTrustDepositYield(ctx, &types.MsgReclaimTrustDepositYield{
-			Authority: testAccString,
-			Operator:  sdk.AccAddress([]byte("bad_operator_addr1")).String(),
+			Corporation: testAccString,
+			Operator:    sdk.AccAddress([]byte("bad_operator_addr1")).String(),
 		})
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "authorization check failed")
@@ -1434,17 +1253,18 @@ func TestMsgReclaimTrustDepositYieldEdgeCases(t *testing.T) {
 		require.NoError(t, err)
 
 		td := types.TrustDeposit{
-			Account: testAccString,
-			Share:   math.LegacyNewDec(1000),
-			Amount:  1000,
+			Corporation: testAccString,
+			Share:       math.LegacyNewDec(1000),
+			Deposit:     1000,
+			Claimable:   500, // pre-accrued yield
 		}
 		err = k.TrustDeposit.Set(ctx, testAccString, td)
 		require.NoError(t, err)
 
 		dk.ErrToReturn = nil
 		resp, err := ms.ReclaimTrustDepositYield(ctx, &types.MsgReclaimTrustDepositYield{
-			Authority: testAccString,
-			Operator:  sdk.AccAddress([]byte("good_operator_ad_1")).String(),
+			Corporation: testAccString,
+			Operator:    sdk.AccAddress([]byte("good_operator_ad_1")).String(),
 		})
 		require.NoError(t, err)
 		require.Equal(t, uint64(500), resp.ClaimedAmount)
@@ -1462,16 +1282,16 @@ func TestAdjustTrustDepositSlashedGuard(t *testing.T) {
 	require.NoError(t, err)
 
 	td := types.TrustDeposit{
-		Account:        testAccString,
+		Corporation:        testAccString,
 		Share:          math.LegacyNewDec(700),
-		Amount:         700,
+		Deposit:         700,
 		SlashedDeposit: 300,
 		RepaidDeposit:  0,
 	}
 	err = k.TrustDeposit.Set(ctx, testAccString, td)
 	require.NoError(t, err)
 
-	err = k.AdjustTrustDeposit(sdkCtx, testAccString, 100)
+	err = k.AdjustTrustDeposit(sdkCtx, testAccString, 100, "test")
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "slashed and not fully repaid")
 }

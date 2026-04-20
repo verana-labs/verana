@@ -93,12 +93,6 @@
             "format": "uint64"
           },
           {
-            "name": "country",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
             "name": "when",
             "in": "query",
             "required": false,
@@ -342,42 +336,28 @@
         "did": {
           "type": "string"
         },
-        "authority": {
+        "corporation": {
           "type": "string"
         },
         "created": {
           "type": "string",
           "format": "date-time"
         },
-        "created_by": {
-          "type": "string"
-        },
         "adjusted": {
           "type": "string",
           "format": "date-time"
         },
-        "adjusted_by": {
-          "type": "string"
-        },
         "slashed": {
           "type": "string",
-          "format": "date-time",
-          "title": "NEW: Slashing related fields"
-        },
-        "slashed_by": {
-          "type": "string"
+          "format": "date-time"
         },
         "repaid": {
           "type": "string",
           "format": "date-time"
         },
-        "repaid_by": {
-          "type": "string"
-        },
         "effective_from": {
           "type": "string",
-          "format": "date-time",
-          "title": "END NEW"
+          "format": "date-time"
         },
         "effective_until": {
           "type": "string",
@@ -405,8 +385,7 @@
         },
         "slashed_deposit": {
           "type": "string",
-          "format": "uint64",
-          "title": "NEW: Slashing deposit fields"
+          "format": "uint64"
         },
         "repaid_deposit": {
           "type": "string",
@@ -414,14 +393,7 @@
         },
         "revoked": {
           "type": "string",
-          "format": "date-time",
-          "title": "END NEW"
-        },
-        "revoked_by": {
-          "type": "string"
-        },
-        "country": {
-          "type": "string"
+          "format": "date-time"
         },
         "validator_perm_id": {
           "type": "string",
@@ -450,23 +422,17 @@
           "type": "string",
           "format": "uint64"
         },
-        "vp_summary_digest_sri": {
+        "vp_summary_digest": {
           "type": "string"
-        },
-        "vp_term_requested": {
-          "type": "string",
-          "format": "date-time"
         },
         "issuance_fee_discount": {
           "type": "string",
           "format": "uint64",
-          "description": "Issuance fee discount (0-10000, where 10000 = 100% discount)",
-          "title": "Fee discount fields (scaled: 0 = 0.0, 10000 = 1.0, range 0-10000)\nPer Issue #94: spec merged exemption and discount into single *_fee_discount field"
+          "description": "TODO(spec v4): Fee discount should be LegacyDec in [0, 1] per spec.\nCurrently scaled 0..10000 for compatibility; full migration deferred."
         },
         "verification_fee_discount": {
           "type": "string",
-          "format": "uint64",
-          "title": "Verification fee discount (0-10000, where 10000 = 100% discount)"
+          "format": "uint64"
         },
         "vs_operator": {
           "type": "string",
@@ -503,7 +469,7 @@
         "id": {
           "type": "string"
         },
-        "authority": {
+        "corporation": {
           "type": "string",
           "title": "group account that owns this session"
         },
@@ -648,8 +614,7 @@
         "VALIDATION_STATE_UNSPECIFIED",
         "PENDING",
         "VALIDATED",
-        "TERMINATED",
-        "TERMINATION_REQUESTED"
+        "TERMINATED"
       ],
       "default": "VALIDATION_STATE_UNSPECIFIED",
       "title": "Validation process states"

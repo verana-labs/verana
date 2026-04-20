@@ -18,7 +18,7 @@ func (ms msgServer) validatePermissionChecks(ctx sdk.Context, msg *types.MsgStar
 
 	// [MOD-PERM-MSG-1-2-2] Load Permission entry validator_perm from validator_perm_id.
 	// It MUST be an active permission else transaction MUST abort.
-	if err := IsValidPermission(validatorPerm, "", ctx.BlockTime()); err != nil {
+	if err := IsValidPermission(validatorPerm, ctx.BlockTime()); err != nil {
 		return types.Permission{}, fmt.Errorf("validator perm is not valid (must be ACTIVE): %w", err)
 	}
 
@@ -41,28 +41,41 @@ func (ms msgServer) validateAndCalculateFees(ctx sdk.Context, validatorPerm type
 	trustUnitPrice := ms.trustRegistryKeeper.GetTrustUnitPrice(ctx)
 	trustDepositRate := ms.trustDeposit.GetTrustDepositRate(ctx)
 
-	validationFeesInDenom := validatorPerm.ValidationFees * trustUnitPrice
-	validationTrustDepositInDenom := ms.Keeper.validationTrustDepositInDenomAmount(validationFeesInDenom, trustDepositRate)
+	// Compute validator_perm.validation_fees * trust_unit_price via arbitrary-precision
+	// math.Int so large fee * price products cannot wrap uint64 silently.
+	feesProduct := math.NewIntFromUint64(validatorPerm.ValidationFees).Mul(math.NewIntFromUint64(trustUnitPrice))
+	if !feesProduct.IsUint64() {
+		return 0, 0, fmt.Errorf("validation fees * trust_unit_price overflows uint64: %s", feesProduct.String())
+	}
+	validationFeesInDenom := feesProduct.Uint64()
+
+	validationTrustDepositInDenom, err := ms.Keeper.validationTrustDepositInDenomAmount(validationFeesInDenom, trustDepositRate)
+	if err != nil {
+		return 0, 0, err
+	}
 
 	return validationFeesInDenom, validationTrustDepositInDenom, nil
 }
 
-func (k Keeper) validationTrustDepositInDenomAmount(validationFeesInDenom uint64, trustDepositRate math.LegacyDec) uint64 {
-	validationFeesInDenomDec := math.LegacyNewDec(int64(validationFeesInDenom))
-	validationTrustDepositInDenom := validationFeesInDenomDec.Mul(trustDepositRate)
-	return validationTrustDepositInDenom.TruncateInt().Uint64()
+func (k Keeper) validationTrustDepositInDenomAmount(validationFeesInDenom uint64, trustDepositRate math.LegacyDec) (uint64, error) {
+	validationFeesInDenomDec := math.LegacyNewDecFromInt(math.NewIntFromUint64(validationFeesInDenom))
+	tdInt := validationFeesInDenomDec.Mul(trustDepositRate).TruncateInt()
+	if !tdInt.IsUint64() {
+		return 0, fmt.Errorf("validation trust deposit overflows uint64: %s", tdInt.String())
+	}
+	return tdInt.Uint64(), nil
 }
 
 // [MOD-PERM-MSG-1-2-4] Overlap checks
 // Find all permissions for (schema_id, type, validator_perm_id, authority) with vp_state = VALIDATED or PENDING.
 // If any found, abort — cannot have 2 active VPs in the same context.
-func (ms msgServer) checkOverlap(ctx sdk.Context, schemaId uint64, permType types.PermissionType, validatorPermId uint64, authority string) error {
+func (ms msgServer) checkOverlap(ctx sdk.Context, schemaId uint64, permType types.PermissionType, validatorPermId uint64, corporation string) error {
 	var found bool
 	err := ms.Permission.Walk(ctx, nil, func(key uint64, perm types.Permission) (bool, error) {
 		if perm.SchemaId == schemaId &&
 			perm.Type == permType &&
 			perm.ValidatorPermId == validatorPermId &&
-			perm.Authority == authority &&
+			perm.Corporation == corporation &&
 			(perm.VpState == types.ValidationState_PENDING || perm.VpState == types.ValidationState_VALIDATED) {
 			found = true
 			return true, nil // stop walking
@@ -84,23 +97,31 @@ func (ms msgServer) executeStartPermissionVP(ctx sdk.Context, msg *types.MsgStar
 
 	// [MOD-PERM-MSG-1-3] Use [MOD-TD-MSG-1] to increase trust deposit
 	if validationTrustDepositInDenom > 0 {
-		if err := ms.trustDeposit.AdjustTrustDeposit(ctx, msg.Authority, int64(validationTrustDepositInDenom)); err != nil {
+		tdI64, err := uint64ToInt64(validationTrustDepositInDenom, "validation_trust_deposit")
+		if err != nil {
+			return 0, err
+		}
+		if err := ms.trustDeposit.AdjustTrustDeposit(ctx, msg.Corporation, tdI64, "start_perm_vp_deposit"); err != nil {
 			return 0, fmt.Errorf("failed to increase trust deposit: %w", err)
 		}
 	}
 
 	// Send validation fees to escrow account if greater than 0
 	if validationFeesInDenom > 0 {
-		senderAddr, err := sdk.AccAddressFromBech32(msg.Authority)
+		senderAddr, err := sdk.AccAddressFromBech32(msg.Corporation)
 		if err != nil {
 			return 0, fmt.Errorf("invalid authority address: %w", err)
 		}
 
+		feesI64, err := uint64ToInt64(validationFeesInDenom, "validation_fees")
+		if err != nil {
+			return 0, err
+		}
 		err = ms.bankKeeper.SendCoinsFromAccountToModule(
 			ctx,
 			senderAddr,
 			types.ModuleName,
-			sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, int64(validationFeesInDenom))),
+			sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, feesI64)),
 		)
 		if err != nil {
 			return 0, fmt.Errorf("failed to transfer validation fees to escrow: %w", err)
@@ -126,13 +147,12 @@ func (ms msgServer) executeStartPermissionVP(ctx sdk.Context, msg *types.MsgStar
 
 	// [MOD-PERM-MSG-1-3] Create and persist new permission entry
 	applicantPerm := types.Permission{
-		Authority:                    msg.Authority,                  // applicant_perm.authority
+		Corporation:                  msg.Corporation,                // applicant_perm.corporation
 		Type:                         types.PermissionType(msg.Type), // applicant_perm.type
 		SchemaId:                     validatorPerm.SchemaId,         // applicant_perm.schema_id = validator_perm.schema_id
 		Did:                          msg.Did,
 		VsOperator:                   msg.VsOperator,                   // applicant_perm.vs_operator
 		Created:                      &now,                             // applicant_perm.created: now
-		CreatedBy:                    msg.Operator,                     // created_by: operator who signed the tx
 		Modified:                     &now,                             // applicant_perm.modified: now
 		Deposit:                      validationTrustDepositInDenom,    // applicant_perm.deposit
 		ValidationFees:               requestedValidationFees,          // applicant_perm.validation_fees
@@ -143,8 +163,7 @@ func (ms msgServer) executeStartPermissionVP(ctx sdk.Context, msg *types.MsgStar
 		VpState:                      types.ValidationState_PENDING,    // applicant_perm.vp_state: PENDING
 		VpCurrentFees:                validationFeesInDenom,            // applicant_perm.vp_current_fees
 		VpCurrentDeposit:             validationTrustDepositInDenom,    // applicant_perm.vp_current_deposit
-		VpSummaryDigestSri:           "",                               // applicant_perm.vp_summary_digest: null
-		VpTermRequested:              nil,                              // not set
+		VpSummaryDigest:              "",                               // applicant_perm.vp_summary_digest: null
 		VpValidatorDeposit:           0,                                // applicant_perm.vp_validator_deposit: 0
 		VsOperatorAuthzEnabled:       msg.VsOperatorAuthzEnabled,       // applicant_perm.vs_operator_authz_enabled
 		VsOperatorAuthzSpendLimit:    msg.VsOperatorAuthzSpendLimit,    // applicant_perm.vs_operator_authz_spend_limit
@@ -166,11 +185,11 @@ func validatePermissionTypeCombination(requestedType, validatorType types.Permis
 	switch requestedType {
 	case types.PermissionType_ISSUER:
 		// if cs.issuer_perm_management_mode == GRANTOR: validator_perm.type MUST be ISSUER_GRANTOR
-		if cs.IssuerPermManagementMode == credentialschematypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION {
+		if cs.IssuerOnboardingMode == credentialschematypes.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS {
 			if validatorType != types.PermissionType_ISSUER_GRANTOR {
 				return fmt.Errorf("issuer perm requires ISSUER_GRANTOR validator when mode is GRANTOR_VALIDATION")
 			}
-		} else if cs.IssuerPermManagementMode == credentialschematypes.CredentialSchemaPermManagementMode_ECOSYSTEM {
+		} else if cs.IssuerOnboardingMode == credentialschematypes.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS {
 			// if cs.issuer_perm_management_mode == ECOSYSTEM: validator_perm.type MUST be ECOSYSTEM
 			if validatorType != types.PermissionType_ECOSYSTEM {
 				return fmt.Errorf("issuer perm requires ECOSYSTEM validator when mode is ECOSYSTEM")
@@ -182,7 +201,7 @@ func validatePermissionTypeCombination(requestedType, validatorType types.Permis
 
 	case types.PermissionType_ISSUER_GRANTOR:
 		// if cs.issuer_perm_management_mode == GRANTOR: validator_perm.type MUST be ECOSYSTEM
-		if cs.IssuerPermManagementMode == credentialschematypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION {
+		if cs.IssuerOnboardingMode == credentialschematypes.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS {
 			if validatorType != types.PermissionType_ECOSYSTEM {
 				return fmt.Errorf("issuer grantor perm requires ECOSYSTEM validator")
 			}
@@ -193,11 +212,11 @@ func validatePermissionTypeCombination(requestedType, validatorType types.Permis
 
 	case types.PermissionType_VERIFIER:
 		// if cs.verifier_perm_management_mode == GRANTOR: validator_perm.type MUST be VERIFIER_GRANTOR
-		if cs.VerifierPermManagementMode == credentialschematypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION {
+		if cs.VerifierOnboardingMode == credentialschematypes.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS {
 			if validatorType != types.PermissionType_VERIFIER_GRANTOR {
 				return fmt.Errorf("verifier perm requires VERIFIER_GRANTOR validator when mode is GRANTOR_VALIDATION")
 			}
-		} else if cs.VerifierPermManagementMode == credentialschematypes.CredentialSchemaPermManagementMode_ECOSYSTEM {
+		} else if cs.VerifierOnboardingMode == credentialschematypes.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS {
 			// if cs.verifier_perm_management_mode == ECOSYSTEM: validator_perm.type MUST be ECOSYSTEM
 			if validatorType != types.PermissionType_ECOSYSTEM {
 				return fmt.Errorf("verifier perm requires ECOSYSTEM validator when mode is ECOSYSTEM")
@@ -209,7 +228,7 @@ func validatePermissionTypeCombination(requestedType, validatorType types.Permis
 
 	case types.PermissionType_VERIFIER_GRANTOR:
 		// if cs.verifier_perm_management_mode == GRANTOR: validator_perm.type MUST be ECOSYSTEM
-		if cs.VerifierPermManagementMode == credentialschematypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION {
+		if cs.VerifierOnboardingMode == credentialschematypes.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS {
 			if validatorType != types.PermissionType_ECOSYSTEM {
 				return fmt.Errorf("verifier grantor perm requires ECOSYSTEM validator")
 			}
@@ -220,8 +239,8 @@ func validatePermissionTypeCombination(requestedType, validatorType types.Permis
 
 	case types.PermissionType_HOLDER:
 		// if cs.verifier_perm_management_mode == GRANTOR or ECOSYSTEM: validator_perm.type MUST be ISSUER
-		if cs.VerifierPermManagementMode == credentialschematypes.CredentialSchemaPermManagementMode_GRANTOR_VALIDATION ||
-			cs.VerifierPermManagementMode == credentialschematypes.CredentialSchemaPermManagementMode_ECOSYSTEM {
+		if cs.VerifierOnboardingMode == credentialschematypes.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS ||
+			cs.VerifierOnboardingMode == credentialschematypes.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS {
 			if validatorType != types.PermissionType_ISSUER {
 				return fmt.Errorf("holder perm requires ISSUER validator")
 			}

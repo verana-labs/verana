@@ -41,6 +41,8 @@ export interface MsgStoreDigest {
   operator: string;
   /** digest is the digest string to store. */
   digest: string;
+  /** digest_algorithm is the hash algorithm used to produce the digest (e.g. "sha2-256"). */
+  digestAlgorithm: string;
 }
 
 /** MsgStoreDigestResponse defines the response for MsgStoreDigest. */
@@ -52,7 +54,11 @@ export interface Digest {
   /** digest is the digest string. */
   digest: string;
   /** created is the timestamp when the digest was stored. */
-  created: Date | undefined;
+  created:
+    | Date
+    | undefined;
+  /** digest_algorithm is the hash algorithm used to produce the digest (e.g. "sha2-256"). */
+  digestAlgorithm: string;
 }
 
 function createBaseMsgUpdateParams(): MsgUpdateParams {
@@ -175,7 +181,7 @@ export const MsgUpdateParamsResponse = {
 };
 
 function createBaseMsgStoreDigest(): MsgStoreDigest {
-  return { authority: "", operator: "", digest: "" };
+  return { authority: "", operator: "", digest: "", digestAlgorithm: "" };
 }
 
 export const MsgStoreDigest = {
@@ -188,6 +194,9 @@ export const MsgStoreDigest = {
     }
     if (message.digest !== "") {
       writer.uint32(26).string(message.digest);
+    }
+    if (message.digestAlgorithm !== "") {
+      writer.uint32(42).string(message.digestAlgorithm);
     }
     return writer;
   },
@@ -220,6 +229,13 @@ export const MsgStoreDigest = {
 
           message.digest = reader.string();
           continue;
+        case 5:
+          if (tag !== 42) {
+            break;
+          }
+
+          message.digestAlgorithm = reader.string();
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -234,6 +250,7 @@ export const MsgStoreDigest = {
       authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
       operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
       digest: isSet(object.digest) ? globalThis.String(object.digest) : "",
+      digestAlgorithm: isSet(object.digestAlgorithm) ? globalThis.String(object.digestAlgorithm) : "",
     };
   },
 
@@ -248,6 +265,9 @@ export const MsgStoreDigest = {
     if (message.digest !== "") {
       obj.digest = message.digest;
     }
+    if (message.digestAlgorithm !== "") {
+      obj.digestAlgorithm = message.digestAlgorithm;
+    }
     return obj;
   },
 
@@ -259,6 +279,7 @@ export const MsgStoreDigest = {
     message.authority = object.authority ?? "";
     message.operator = object.operator ?? "";
     message.digest = object.digest ?? "";
+    message.digestAlgorithm = object.digestAlgorithm ?? "";
     return message;
   },
 };
@@ -307,7 +328,7 @@ export const MsgStoreDigestResponse = {
 };
 
 function createBaseDigest(): Digest {
-  return { digest: "", created: undefined };
+  return { digest: "", created: undefined, digestAlgorithm: "" };
 }
 
 export const Digest = {
@@ -317,6 +338,9 @@ export const Digest = {
     }
     if (message.created !== undefined) {
       Timestamp.encode(toTimestamp(message.created), writer.uint32(18).fork()).ldelim();
+    }
+    if (message.digestAlgorithm !== "") {
+      writer.uint32(26).string(message.digestAlgorithm);
     }
     return writer;
   },
@@ -342,6 +366,13 @@ export const Digest = {
 
           message.created = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
           continue;
+        case 3:
+          if (tag !== 26) {
+            break;
+          }
+
+          message.digestAlgorithm = reader.string();
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -355,6 +386,7 @@ export const Digest = {
     return {
       digest: isSet(object.digest) ? globalThis.String(object.digest) : "",
       created: isSet(object.created) ? fromJsonTimestamp(object.created) : undefined,
+      digestAlgorithm: isSet(object.digestAlgorithm) ? globalThis.String(object.digestAlgorithm) : "",
     };
   },
 
@@ -366,6 +398,9 @@ export const Digest = {
     if (message.created !== undefined) {
       obj.created = message.created.toISOString();
     }
+    if (message.digestAlgorithm !== "") {
+      obj.digestAlgorithm = message.digestAlgorithm;
+    }
     return obj;
   },
 
@@ -376,6 +411,7 @@ export const Digest = {
     const message = createBaseDigest();
     message.digest = object.digest ?? "";
     message.created = object.created ?? undefined;
+    message.digestAlgorithm = object.digestAlgorithm ?? "";
     return message;
   },
 };

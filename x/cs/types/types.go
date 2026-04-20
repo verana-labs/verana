@@ -122,14 +122,15 @@ func NewMsgCreateCredentialSchema(
 	issuerValidationValidityPeriod uint32,
 	verifierValidationValidityPeriod uint32,
 	holderValidationValidityPeriod uint32,
-	issuerPermManagementMode uint32,
-	verifierPermManagementMode uint32,
+	issuerOnboardingMode uint32,
+	verifierOnboardingMode uint32,
+	holderOnboardingMode uint32,
 	pricingAssetType uint32,
 	pricingAsset string,
 	digestAlgorithm string,
 ) *MsgCreateCredentialSchema {
 	msg := &MsgCreateCredentialSchema{
-		Authority:                               authority,
+		Corporation:                             authority,
 		Operator:                                operator,
 		TrId:                                    trId,
 		JsonSchema:                              jsonSchema,
@@ -138,8 +139,9 @@ func NewMsgCreateCredentialSchema(
 		IssuerValidationValidityPeriod:          &OptionalUInt32{Value: issuerValidationValidityPeriod},
 		VerifierValidationValidityPeriod:        &OptionalUInt32{Value: verifierValidationValidityPeriod},
 		HolderValidationValidityPeriod:          &OptionalUInt32{Value: holderValidationValidityPeriod},
-		IssuerPermManagementMode:                issuerPermManagementMode,
-		VerifierPermManagementMode:              verifierPermManagementMode,
+		IssuerOnboardingMode:                    issuerOnboardingMode,
+		VerifierOnboardingMode:                  verifierOnboardingMode,
+		HolderOnboardingMode:                    holderOnboardingMode,
 		PricingAssetType:                        pricingAssetType,
 		PricingAsset:                            pricingAsset,
 		DigestAlgorithm:                         digestAlgorithm,
@@ -169,10 +171,10 @@ func (msg *MsgCreateCredentialSchema) GetSigners() []sdk.AccAddress {
 
 // ValidateBasic implements sdk.Msg
 func (msg *MsgCreateCredentialSchema) ValidateBasic() error {
-	// Validate authority address
-	_, err := sdk.AccAddressFromBech32(msg.Authority)
+	// Validate corporation address
+	_, err := sdk.AccAddressFromBech32(msg.Corporation)
 	if err != nil {
-		return errors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid authority address (%s)", err)
+		return errors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid corporation address (%s)", err)
 	}
 
 	// Validate operator address
@@ -217,10 +219,6 @@ func (msg *MsgCreateCredentialSchema) ValidateBasic() error {
 func validateJSONSchema(schemaJSON string) error {
 	if schemaJSON == "" {
 		return fmt.Errorf("json schema cannot be empty")
-	}
-
-	if len(schemaJSON) > int(DefaultCredentialSchemaSchemaMaxSize) {
-		return fmt.Errorf("json schema exceeds maximum size of %d bytes", DefaultCredentialSchemaSchemaMaxSize)
 	}
 
 	// Parse JSON
@@ -593,51 +591,64 @@ func validateValidityPeriods(msg *MsgCreateCredentialSchema) error {
 		return fmt.Errorf("holder_validation_validity_period is mandatory")
 	}
 
-	// Validate ranges: must be between 0 (never expire) and max_days
-	val := msg.GetIssuerGrantorValidationValidityPeriod().GetValue()
-	if val > 0 && val > DefaultCredentialSchemaIssuerGrantorValidationValidityPeriodMaxDays {
-		return fmt.Errorf("issuer grantor validation validity period exceeds maximum allowed days")
+	return nil
+}
+
+func validatePermManagementModes(msg *MsgCreateCredentialSchema) error {
+	if msg.IssuerOnboardingMode == 0 {
+		return fmt.Errorf("issuer onboarding mode must be specified")
+	}
+	if msg.IssuerOnboardingMode > 3 {
+		return fmt.Errorf("invalid issuer onboarding mode: must be between 1 and 3")
 	}
 
-	val = msg.GetVerifierGrantorValidationValidityPeriod().GetValue()
-	if val > 0 && val > DefaultCredentialSchemaVerifierGrantorValidationValidityPeriodMaxDays {
-		return fmt.Errorf("verifier grantor validation validity period exceeds maximum allowed days")
+	if msg.VerifierOnboardingMode == 0 {
+		return fmt.Errorf("verifier onboarding mode must be specified")
+	}
+	if msg.VerifierOnboardingMode > 3 {
+		return fmt.Errorf("invalid verifier onboarding mode: must be between 1 and 3")
 	}
 
-	val = msg.GetIssuerValidationValidityPeriod().GetValue()
-	if val > 0 && val > DefaultCredentialSchemaIssuerValidationValidityPeriodMaxDays {
-		return fmt.Errorf("issuer validation validity period exceeds maximum allowed days")
+	// [MOD-CS-MSG-1-2-1] holder_onboarding_mode MUST be a valid HolderOnboardingMode.
+	// Enum values: ISSUER_VALIDATION_PROCESS=1, PERMISSIONLESS=2. UNSPECIFIED=0 is invalid.
+	if msg.HolderOnboardingMode == 0 {
+		return fmt.Errorf("holder onboarding mode must be specified")
 	}
-
-	val = msg.GetVerifierValidationValidityPeriod().GetValue()
-	if val > 0 && val > DefaultCredentialSchemaVerifierValidationValidityPeriodMaxDays {
-		return fmt.Errorf("verifier validation validity period exceeds maximum allowed days")
-	}
-
-	val = msg.GetHolderValidationValidityPeriod().GetValue()
-	if val > 0 && val > DefaultCredentialSchemaHolderValidationValidityPeriodMaxDays {
-		return fmt.Errorf("holder validation validity period exceeds maximum allowed days")
+	if msg.HolderOnboardingMode > 2 {
+		return fmt.Errorf("invalid holder onboarding mode: must be between 1 and 2")
 	}
 
 	return nil
 }
 
-func validatePermManagementModes(msg *MsgCreateCredentialSchema) error {
-	if msg.IssuerPermManagementMode == 0 {
-		return fmt.Errorf("issuer perm management mode must be specified")
-	}
-	if msg.IssuerPermManagementMode > 3 {
-		return fmt.Errorf("invalid issuer perm management mode: must be between 1 and 3")
-	}
-
-	if msg.VerifierPermManagementMode == 0 {
-		return fmt.Errorf("verifier perm management mode must be specified")
-	}
-	if msg.VerifierPermManagementMode > 3 {
-		return fmt.Errorf("invalid verifier perm management mode: must be between 1 and 3")
-	}
-
-	return nil
+// iso4217Currencies holds the active ISO-4217 alpha-3 currency codes accepted
+// for FIAT-priced credential schemas. Kept as a package-level set so spec
+// [MOD-CS-MSG-1] NOTE "pricing_asset MUST be an ISO-4217 currency code" is
+// enforced stateless-ly in ValidateBasic.
+var iso4217Currencies = map[string]struct{}{
+	"AED": {}, "AFN": {}, "ALL": {}, "AMD": {}, "ANG": {}, "AOA": {}, "ARS": {},
+	"AUD": {}, "AWG": {}, "AZN": {}, "BAM": {}, "BBD": {}, "BDT": {}, "BGN": {},
+	"BHD": {}, "BIF": {}, "BMD": {}, "BND": {}, "BOB": {}, "BRL": {}, "BSD": {},
+	"BTN": {}, "BWP": {}, "BYN": {}, "BZD": {}, "CAD": {}, "CDF": {}, "CHF": {},
+	"CLP": {}, "CNY": {}, "COP": {}, "CRC": {}, "CUP": {}, "CVE": {}, "CZK": {},
+	"DJF": {}, "DKK": {}, "DOP": {}, "DZD": {}, "EGP": {}, "ERN": {}, "ETB": {},
+	"EUR": {}, "FJD": {}, "FKP": {}, "GBP": {}, "GEL": {}, "GHS": {}, "GIP": {},
+	"GMD": {}, "GNF": {}, "GTQ": {}, "GYD": {}, "HKD": {}, "HNL": {}, "HTG": {},
+	"HUF": {}, "IDR": {}, "ILS": {}, "INR": {}, "IQD": {}, "IRR": {}, "ISK": {},
+	"JMD": {}, "JOD": {}, "JPY": {}, "KES": {}, "KGS": {}, "KHR": {}, "KMF": {},
+	"KPW": {}, "KRW": {}, "KWD": {}, "KYD": {}, "KZT": {}, "LAK": {}, "LBP": {},
+	"LKR": {}, "LRD": {}, "LSL": {}, "LYD": {}, "MAD": {}, "MDL": {}, "MGA": {},
+	"MKD": {}, "MMK": {}, "MNT": {}, "MOP": {}, "MRU": {}, "MUR": {}, "MVR": {},
+	"MWK": {}, "MXN": {}, "MYR": {}, "MZN": {}, "NAD": {}, "NGN": {}, "NIO": {},
+	"NOK": {}, "NPR": {}, "NZD": {}, "OMR": {}, "PAB": {}, "PEN": {}, "PGK": {},
+	"PHP": {}, "PKR": {}, "PLN": {}, "PYG": {}, "QAR": {}, "RON": {}, "RSD": {},
+	"RUB": {}, "RWF": {}, "SAR": {}, "SBD": {}, "SCR": {}, "SDG": {}, "SEK": {},
+	"SGD": {}, "SHP": {}, "SLE": {}, "SOS": {}, "SRD": {}, "SSP": {}, "STN": {},
+	"SVC": {}, "SYP": {}, "SZL": {}, "THB": {}, "TJS": {}, "TMT": {}, "TND": {},
+	"TOP": {}, "TRY": {}, "TTD": {}, "TWD": {}, "TZS": {}, "UAH": {}, "UGX": {},
+	"USD": {}, "UYU": {}, "UZS": {}, "VES": {}, "VND": {}, "VUV": {}, "WST": {},
+	"XAF": {}, "XCD": {}, "XOF": {}, "XPF": {}, "YER": {}, "ZAR": {}, "ZMW": {},
+	"ZWL": {},
 }
 
 func validatePricingAsset(msg *MsgCreateCredentialSchema) error {
@@ -652,9 +663,27 @@ func validatePricingAsset(msg *MsgCreateCredentialSchema) error {
 		return fmt.Errorf("pricing_asset is mandatory")
 	}
 
-	// If TU, pricing_asset must be "tu"
-	if msg.PricingAssetType == uint32(PricingAssetType_TU) && msg.PricingAsset != "tu" {
-		return fmt.Errorf("pricing_asset must be 'tu' when pricing_asset_type is TU")
+	// [MOD-CS-MSG-1] pricing_asset semantics by pricing_asset_type.
+	switch msg.PricingAssetType {
+	case uint32(PricingAssetType_TU):
+		// If TU, pricing_asset must be "tu"
+		if msg.PricingAsset != "tu" {
+			return fmt.Errorf("pricing_asset must be 'tu' when pricing_asset_type is TU")
+		}
+	case uint32(PricingAssetType_FIAT):
+		// Spec NOTE: "When pricing_currency is set to FIAT, pricing_asset MUST
+		// be an ISO-4217 currency code." Validated against the alpha-3 set.
+		if _, ok := iso4217Currencies[msg.PricingAsset]; !ok {
+			return fmt.Errorf("pricing_asset %q is not a valid ISO-4217 currency code", msg.PricingAsset)
+		}
+	case uint32(PricingAssetType_COIN):
+		// Spec shows examples like "uvna", "ibc/...", "factory/...". Cosmos SDK
+		// denom format accepts lowercase alphanumeric with separators; a full
+		// denom-regex check happens at bank level, but we can reject obvious
+		// garbage early by enforcing the canonical denom pattern.
+		if err := sdk.ValidateDenom(msg.PricingAsset); err != nil {
+			return fmt.Errorf("pricing_asset must be a valid Cosmos denom when pricing_asset_type is COIN: %w", err)
+		}
 	}
 
 	return nil
@@ -670,11 +699,91 @@ func validateDigestAlgorithm(algorithm string) error {
 	return nil
 }
 
+func (m *MsgCreateSchemaAuthorizationPolicy) Route() string { return ModuleName }
+func (m *MsgIncreaseActiveSchemaAuthorizationPolicyVersion) Route() string { return ModuleName }
+func (m *MsgRevokeSchemaAuthorizationPolicy) Route() string { return ModuleName }
+
+func (m *MsgCreateSchemaAuthorizationPolicy) ValidateBasic() error {
+	if m.Corporation == "" {
+		return errors.Wrap(sdkerrors.ErrInvalidRequest, "corporation is required")
+	}
+	if _, err := sdk.AccAddressFromBech32(m.Corporation); err != nil {
+		return errors.Wrap(sdkerrors.ErrInvalidAddress, "invalid corporation address")
+	}
+	if m.Operator == "" {
+		return errors.Wrap(sdkerrors.ErrInvalidRequest, "operator is required")
+	}
+	if _, err := sdk.AccAddressFromBech32(m.Operator); err != nil {
+		return errors.Wrap(sdkerrors.ErrInvalidAddress, "invalid operator address")
+	}
+	if m.SchemaId == 0 {
+		return errors.Wrap(sdkerrors.ErrInvalidRequest, "schema_id is required")
+	}
+	if m.Role == SchemaAuthorizationPolicyRole_SCHEMA_AUTHORIZATION_POLICY_ROLE_UNSPECIFIED {
+		return errors.Wrap(sdkerrors.ErrInvalidRequest, "role is required")
+	}
+	if m.Url == "" {
+		return errors.Wrap(sdkerrors.ErrInvalidRequest, "url is required")
+	}
+	if m.DigestSri == "" {
+		return errors.Wrap(sdkerrors.ErrInvalidRequest, "digest_sri is required")
+	}
+	// [MOD-CS-MSG-5-3] effective_from/effective_until are set to null at creation per spec v4 draft 13.
+	return nil
+}
+
+func (m *MsgIncreaseActiveSchemaAuthorizationPolicyVersion) ValidateBasic() error {
+	if m.Corporation == "" {
+		return errors.Wrap(sdkerrors.ErrInvalidRequest, "corporation is required")
+	}
+	if _, err := sdk.AccAddressFromBech32(m.Corporation); err != nil {
+		return errors.Wrap(sdkerrors.ErrInvalidAddress, "invalid corporation address")
+	}
+	if m.Operator == "" {
+		return errors.Wrap(sdkerrors.ErrInvalidRequest, "operator is required")
+	}
+	if _, err := sdk.AccAddressFromBech32(m.Operator); err != nil {
+		return errors.Wrap(sdkerrors.ErrInvalidAddress, "invalid operator address")
+	}
+	if m.SchemaId == 0 {
+		return errors.Wrap(sdkerrors.ErrInvalidRequest, "schema_id is required")
+	}
+	if m.Role == SchemaAuthorizationPolicyRole_SCHEMA_AUTHORIZATION_POLICY_ROLE_UNSPECIFIED {
+		return errors.Wrap(sdkerrors.ErrInvalidRequest, "role is required")
+	}
+	return nil
+}
+
+func (m *MsgRevokeSchemaAuthorizationPolicy) ValidateBasic() error {
+	if m.Corporation == "" {
+		return errors.Wrap(sdkerrors.ErrInvalidRequest, "corporation is required")
+	}
+	if _, err := sdk.AccAddressFromBech32(m.Corporation); err != nil {
+		return errors.Wrap(sdkerrors.ErrInvalidAddress, "invalid corporation address")
+	}
+	if m.Operator == "" {
+		return errors.Wrap(sdkerrors.ErrInvalidRequest, "operator is required")
+	}
+	if _, err := sdk.AccAddressFromBech32(m.Operator); err != nil {
+		return errors.Wrap(sdkerrors.ErrInvalidAddress, "invalid operator address")
+	}
+	if m.SchemaId == 0 {
+		return errors.Wrap(sdkerrors.ErrInvalidRequest, "schema_id is required")
+	}
+	if m.Role == SchemaAuthorizationPolicyRole_SCHEMA_AUTHORIZATION_POLICY_ROLE_UNSPECIFIED {
+		return errors.Wrap(sdkerrors.ErrInvalidRequest, "role is required")
+	}
+	if m.Version == 0 {
+		return errors.Wrap(sdkerrors.ErrInvalidRequest, "version is required")
+	}
+	return nil
+}
+
 func (msg *MsgUpdateCredentialSchema) ValidateBasic() error {
-	// Validate authority address
-	_, err := sdk.AccAddressFromBech32(msg.Authority)
+	// Validate corporation address
+	_, err := sdk.AccAddressFromBech32(msg.Corporation)
 	if err != nil {
-		return errors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid authority address (%s)", err)
+		return errors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid corporation address (%s)", err)
 	}
 
 	// Validate operator address
@@ -707,10 +816,10 @@ func (msg *MsgUpdateCredentialSchema) ValidateBasic() error {
 }
 
 func (msg *MsgArchiveCredentialSchema) ValidateBasic() error {
-	// Validate authority address
-	_, err := sdk.AccAddressFromBech32(msg.Authority)
+	// Validate corporation address
+	_, err := sdk.AccAddressFromBech32(msg.Corporation)
 	if err != nil {
-		return errors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid authority address (%s)", err)
+		return errors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid corporation address (%s)", err)
 	}
 
 	// Validate operator address

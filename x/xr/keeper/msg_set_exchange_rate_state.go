@@ -11,7 +11,7 @@ import (
 	"github.com/verana-labs/verana/x/xr/types"
 )
 
-func (ms msgServer) ToggleExchangeRateState(ctx context.Context, msg *types.MsgToggleExchangeRateState) (*types.MsgToggleExchangeRateStateResponse, error) {
+func (ms msgServer) SetExchangeRateState(ctx context.Context, msg *types.MsgSetExchangeRateState) (*types.MsgSetExchangeRateStateResponse, error) {
 	// Validate basic fields
 	if err := msg.ValidateBasic(); err != nil {
 		return nil, err
@@ -37,8 +37,8 @@ func (ms msgServer) ToggleExchangeRateState(ctx context.Context, msg *types.MsgT
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 	blockTime := sdkCtx.BlockTime()
 
-	// Set state to the provided value
-	xr.State = msg.State
+	// [MOD-XR-MSG-3-3] Spec v4 draft 13: toggle the stored state (no explicit value from caller).
+	xr.State = !xr.State
 	// Set updated to block time
 	xr.Updated = blockTime
 
@@ -50,12 +50,12 @@ func (ms msgServer) ToggleExchangeRateState(ctx context.Context, msg *types.MsgT
 	// Emit event
 	sdkCtx.EventManager().EmitEvent(
 		sdk.NewEvent(
-			types.EventTypeToggleExchangeRateState,
+			types.EventTypeSetExchangeRateState,
 			sdk.NewAttribute(types.AttributeKeyID, fmt.Sprintf("%d", msg.Id)),
 			sdk.NewAttribute(types.AttributeKeyAuthority, msg.Authority),
-			sdk.NewAttribute(types.AttributeKeyState, fmt.Sprintf("%t", msg.State)),
+			sdk.NewAttribute(types.AttributeKeyState, fmt.Sprintf("%t", xr.State)),
 		),
 	)
 
-	return &types.MsgToggleExchangeRateStateResponse{}, nil
+	return &types.MsgSetExchangeRateStateResponse{}, nil
 }

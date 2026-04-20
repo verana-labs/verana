@@ -84,7 +84,6 @@ export enum ValidationState {
   PENDING = 1,
   VALIDATED = 2,
   TERMINATED = 3,
-  TERMINATION_REQUESTED = 4,
   UNRECOGNIZED = -1,
 }
 
@@ -102,9 +101,6 @@ export function validationStateFromJSON(object: any): ValidationState {
     case 3:
     case "TERMINATED":
       return ValidationState.TERMINATED;
-    case 4:
-    case "TERMINATION_REQUESTED":
-      return ValidationState.TERMINATION_REQUESTED;
     case -1:
     case "UNRECOGNIZED":
     default:
@@ -122,8 +118,6 @@ export function validationStateToJSON(object: ValidationState): string {
       return "VALIDATED";
     case ValidationState.TERMINATED:
       return "TERMINATED";
-    case ValidationState.TERMINATION_REQUESTED:
-      return "TERMINATION_REQUESTED";
     case ValidationState.UNRECOGNIZED:
     default:
       return "UNRECOGNIZED";
@@ -135,17 +129,11 @@ export interface Permission {
   schemaId: number;
   type: PermissionType;
   did: string;
-  authority: string;
+  corporation: string;
   created: Date | undefined;
-  createdBy: string;
   adjusted: Date | undefined;
-  adjustedBy: string;
-  /** NEW: Slashing related fields */
   slashed: Date | undefined;
-  slashedBy: string;
   repaid: Date | undefined;
-  repaidBy: string;
-  /** END NEW */
   effectiveFrom: Date | undefined;
   effectiveUntil: Date | undefined;
   modified: Date | undefined;
@@ -153,13 +141,9 @@ export interface Permission {
   issuanceFees: number;
   verificationFees: number;
   deposit: number;
-  /** NEW: Slashing deposit fields */
   slashedDeposit: number;
   repaidDeposit: number;
-  /** END NEW */
   revoked: Date | undefined;
-  revokedBy: string;
-  country: string;
   validatorPermId: number;
   vpState: ValidationState;
   vpExp: Date | undefined;
@@ -167,16 +151,12 @@ export interface Permission {
   vpValidatorDeposit: number;
   vpCurrentFees: number;
   vpCurrentDeposit: number;
-  vpSummaryDigestSri: string;
-  vpTermRequested:
-    | Date
-    | undefined;
+  vpSummaryDigest: string;
   /**
-   * Fee discount fields (scaled: 0 = 0.0, 10000 = 1.0, range 0-10000)
-   * Per Issue #94: spec merged exemption and discount into single *_fee_discount field
+   * TODO(spec v4): Fee discount should be LegacyDec in [0, 1] per spec.
+   * Currently scaled 0..10000 for compatibility; full migration deferred.
    */
   issuanceFeeDiscount: number;
-  /** Verification fee discount (0-10000, where 10000 = 100% discount) */
   verificationFeeDiscount: number;
   /** VS Operator fields (spec v4) */
   vsOperator: string;
@@ -190,7 +170,7 @@ export interface Permission {
 export interface PermissionSession {
   id: string;
   /** group account that owns this session */
-  authority: string;
+  corporation: string;
   /** the VS operator account */
   vsOperator: string;
   agentPermId: number;
@@ -217,15 +197,11 @@ function createBasePermission(): Permission {
     schemaId: 0,
     type: 0,
     did: "",
-    authority: "",
+    corporation: "",
     created: undefined,
-    createdBy: "",
     adjusted: undefined,
-    adjustedBy: "",
     slashed: undefined,
-    slashedBy: "",
     repaid: undefined,
-    repaidBy: "",
     effectiveFrom: undefined,
     effectiveUntil: undefined,
     modified: undefined,
@@ -236,8 +212,6 @@ function createBasePermission(): Permission {
     slashedDeposit: 0,
     repaidDeposit: 0,
     revoked: undefined,
-    revokedBy: "",
-    country: "",
     validatorPermId: 0,
     vpState: 0,
     vpExp: undefined,
@@ -245,8 +219,7 @@ function createBasePermission(): Permission {
     vpValidatorDeposit: 0,
     vpCurrentFees: 0,
     vpCurrentDeposit: 0,
-    vpSummaryDigestSri: "",
-    vpTermRequested: undefined,
+    vpSummaryDigest: "",
     issuanceFeeDiscount: 0,
     verificationFeeDiscount: 0,
     vsOperator: "",
@@ -272,32 +245,20 @@ export const Permission = {
     if (message.did !== "") {
       writer.uint32(34).string(message.did);
     }
-    if (message.authority !== "") {
-      writer.uint32(42).string(message.authority);
+    if (message.corporation !== "") {
+      writer.uint32(42).string(message.corporation);
     }
     if (message.created !== undefined) {
       Timestamp.encode(toTimestamp(message.created), writer.uint32(50).fork()).ldelim();
     }
-    if (message.createdBy !== "") {
-      writer.uint32(58).string(message.createdBy);
-    }
     if (message.adjusted !== undefined) {
       Timestamp.encode(toTimestamp(message.adjusted), writer.uint32(66).fork()).ldelim();
-    }
-    if (message.adjustedBy !== "") {
-      writer.uint32(74).string(message.adjustedBy);
     }
     if (message.slashed !== undefined) {
       Timestamp.encode(toTimestamp(message.slashed), writer.uint32(82).fork()).ldelim();
     }
-    if (message.slashedBy !== "") {
-      writer.uint32(90).string(message.slashedBy);
-    }
     if (message.repaid !== undefined) {
       Timestamp.encode(toTimestamp(message.repaid), writer.uint32(98).fork()).ldelim();
-    }
-    if (message.repaidBy !== "") {
-      writer.uint32(106).string(message.repaidBy);
     }
     if (message.effectiveFrom !== undefined) {
       Timestamp.encode(toTimestamp(message.effectiveFrom), writer.uint32(114).fork()).ldelim();
@@ -329,12 +290,6 @@ export const Permission = {
     if (message.revoked !== undefined) {
       Timestamp.encode(toTimestamp(message.revoked), writer.uint32(186).fork()).ldelim();
     }
-    if (message.revokedBy !== "") {
-      writer.uint32(194).string(message.revokedBy);
-    }
-    if (message.country !== "") {
-      writer.uint32(202).string(message.country);
-    }
     if (message.validatorPermId !== 0) {
       writer.uint32(208).uint64(message.validatorPermId);
     }
@@ -356,11 +311,8 @@ export const Permission = {
     if (message.vpCurrentDeposit !== 0) {
       writer.uint32(256).uint64(message.vpCurrentDeposit);
     }
-    if (message.vpSummaryDigestSri !== "") {
-      writer.uint32(266).string(message.vpSummaryDigestSri);
-    }
-    if (message.vpTermRequested !== undefined) {
-      Timestamp.encode(toTimestamp(message.vpTermRequested), writer.uint32(274).fork()).ldelim();
+    if (message.vpSummaryDigest !== "") {
+      writer.uint32(266).string(message.vpSummaryDigest);
     }
     if (message.issuanceFeeDiscount !== 0) {
       writer.uint32(280).uint64(message.issuanceFeeDiscount);
@@ -429,7 +381,7 @@ export const Permission = {
             break;
           }
 
-          message.authority = reader.string();
+          message.corporation = reader.string();
           continue;
         case 6:
           if (tag !== 50) {
@@ -438,26 +390,12 @@ export const Permission = {
 
           message.created = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
           continue;
-        case 7:
-          if (tag !== 58) {
-            break;
-          }
-
-          message.createdBy = reader.string();
-          continue;
         case 8:
           if (tag !== 66) {
             break;
           }
 
           message.adjusted = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
-          continue;
-        case 9:
-          if (tag !== 74) {
-            break;
-          }
-
-          message.adjustedBy = reader.string();
           continue;
         case 10:
           if (tag !== 82) {
@@ -466,26 +404,12 @@ export const Permission = {
 
           message.slashed = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
           continue;
-        case 11:
-          if (tag !== 90) {
-            break;
-          }
-
-          message.slashedBy = reader.string();
-          continue;
         case 12:
           if (tag !== 98) {
             break;
           }
 
           message.repaid = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
-          continue;
-        case 13:
-          if (tag !== 106) {
-            break;
-          }
-
-          message.repaidBy = reader.string();
           continue;
         case 14:
           if (tag !== 114) {
@@ -557,20 +481,6 @@ export const Permission = {
 
           message.revoked = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
           continue;
-        case 24:
-          if (tag !== 194) {
-            break;
-          }
-
-          message.revokedBy = reader.string();
-          continue;
-        case 25:
-          if (tag !== 202) {
-            break;
-          }
-
-          message.country = reader.string();
-          continue;
         case 26:
           if (tag !== 208) {
             break;
@@ -625,14 +535,7 @@ export const Permission = {
             break;
           }
 
-          message.vpSummaryDigestSri = reader.string();
-          continue;
-        case 34:
-          if (tag !== 274) {
-            break;
-          }
-
-          message.vpTermRequested = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
+          message.vpSummaryDigest = reader.string();
           continue;
         case 35:
           if (tag !== 280) {
@@ -705,15 +608,11 @@ export const Permission = {
       schemaId: isSet(object.schemaId) ? globalThis.Number(object.schemaId) : 0,
       type: isSet(object.type) ? permissionTypeFromJSON(object.type) : 0,
       did: isSet(object.did) ? globalThis.String(object.did) : "",
-      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      corporation: isSet(object.corporation) ? globalThis.String(object.corporation) : "",
       created: isSet(object.created) ? fromJsonTimestamp(object.created) : undefined,
-      createdBy: isSet(object.createdBy) ? globalThis.String(object.createdBy) : "",
       adjusted: isSet(object.adjusted) ? fromJsonTimestamp(object.adjusted) : undefined,
-      adjustedBy: isSet(object.adjustedBy) ? globalThis.String(object.adjustedBy) : "",
       slashed: isSet(object.slashed) ? fromJsonTimestamp(object.slashed) : undefined,
-      slashedBy: isSet(object.slashedBy) ? globalThis.String(object.slashedBy) : "",
       repaid: isSet(object.repaid) ? fromJsonTimestamp(object.repaid) : undefined,
-      repaidBy: isSet(object.repaidBy) ? globalThis.String(object.repaidBy) : "",
       effectiveFrom: isSet(object.effectiveFrom) ? fromJsonTimestamp(object.effectiveFrom) : undefined,
       effectiveUntil: isSet(object.effectiveUntil) ? fromJsonTimestamp(object.effectiveUntil) : undefined,
       modified: isSet(object.modified) ? fromJsonTimestamp(object.modified) : undefined,
@@ -724,8 +623,6 @@ export const Permission = {
       slashedDeposit: isSet(object.slashedDeposit) ? globalThis.Number(object.slashedDeposit) : 0,
       repaidDeposit: isSet(object.repaidDeposit) ? globalThis.Number(object.repaidDeposit) : 0,
       revoked: isSet(object.revoked) ? fromJsonTimestamp(object.revoked) : undefined,
-      revokedBy: isSet(object.revokedBy) ? globalThis.String(object.revokedBy) : "",
-      country: isSet(object.country) ? globalThis.String(object.country) : "",
       validatorPermId: isSet(object.validatorPermId) ? globalThis.Number(object.validatorPermId) : 0,
       vpState: isSet(object.vpState) ? validationStateFromJSON(object.vpState) : 0,
       vpExp: isSet(object.vpExp) ? fromJsonTimestamp(object.vpExp) : undefined,
@@ -733,8 +630,7 @@ export const Permission = {
       vpValidatorDeposit: isSet(object.vpValidatorDeposit) ? globalThis.Number(object.vpValidatorDeposit) : 0,
       vpCurrentFees: isSet(object.vpCurrentFees) ? globalThis.Number(object.vpCurrentFees) : 0,
       vpCurrentDeposit: isSet(object.vpCurrentDeposit) ? globalThis.Number(object.vpCurrentDeposit) : 0,
-      vpSummaryDigestSri: isSet(object.vpSummaryDigestSri) ? globalThis.String(object.vpSummaryDigestSri) : "",
-      vpTermRequested: isSet(object.vpTermRequested) ? fromJsonTimestamp(object.vpTermRequested) : undefined,
+      vpSummaryDigest: isSet(object.vpSummaryDigest) ? globalThis.String(object.vpSummaryDigest) : "",
       issuanceFeeDiscount: isSet(object.issuanceFeeDiscount) ? globalThis.Number(object.issuanceFeeDiscount) : 0,
       verificationFeeDiscount: isSet(object.verificationFeeDiscount)
         ? globalThis.Number(object.verificationFeeDiscount)
@@ -772,32 +668,20 @@ export const Permission = {
     if (message.did !== "") {
       obj.did = message.did;
     }
-    if (message.authority !== "") {
-      obj.authority = message.authority;
+    if (message.corporation !== "") {
+      obj.corporation = message.corporation;
     }
     if (message.created !== undefined) {
       obj.created = message.created.toISOString();
     }
-    if (message.createdBy !== "") {
-      obj.createdBy = message.createdBy;
-    }
     if (message.adjusted !== undefined) {
       obj.adjusted = message.adjusted.toISOString();
-    }
-    if (message.adjustedBy !== "") {
-      obj.adjustedBy = message.adjustedBy;
     }
     if (message.slashed !== undefined) {
       obj.slashed = message.slashed.toISOString();
     }
-    if (message.slashedBy !== "") {
-      obj.slashedBy = message.slashedBy;
-    }
     if (message.repaid !== undefined) {
       obj.repaid = message.repaid.toISOString();
-    }
-    if (message.repaidBy !== "") {
-      obj.repaidBy = message.repaidBy;
     }
     if (message.effectiveFrom !== undefined) {
       obj.effectiveFrom = message.effectiveFrom.toISOString();
@@ -829,12 +713,6 @@ export const Permission = {
     if (message.revoked !== undefined) {
       obj.revoked = message.revoked.toISOString();
     }
-    if (message.revokedBy !== "") {
-      obj.revokedBy = message.revokedBy;
-    }
-    if (message.country !== "") {
-      obj.country = message.country;
-    }
     if (message.validatorPermId !== 0) {
       obj.validatorPermId = Math.round(message.validatorPermId);
     }
@@ -856,11 +734,8 @@ export const Permission = {
     if (message.vpCurrentDeposit !== 0) {
       obj.vpCurrentDeposit = Math.round(message.vpCurrentDeposit);
     }
-    if (message.vpSummaryDigestSri !== "") {
-      obj.vpSummaryDigestSri = message.vpSummaryDigestSri;
-    }
-    if (message.vpTermRequested !== undefined) {
-      obj.vpTermRequested = message.vpTermRequested.toISOString();
+    if (message.vpSummaryDigest !== "") {
+      obj.vpSummaryDigest = message.vpSummaryDigest;
     }
     if (message.issuanceFeeDiscount !== 0) {
       obj.issuanceFeeDiscount = Math.round(message.issuanceFeeDiscount);
@@ -898,15 +773,11 @@ export const Permission = {
     message.schemaId = object.schemaId ?? 0;
     message.type = object.type ?? 0;
     message.did = object.did ?? "";
-    message.authority = object.authority ?? "";
+    message.corporation = object.corporation ?? "";
     message.created = object.created ?? undefined;
-    message.createdBy = object.createdBy ?? "";
     message.adjusted = object.adjusted ?? undefined;
-    message.adjustedBy = object.adjustedBy ?? "";
     message.slashed = object.slashed ?? undefined;
-    message.slashedBy = object.slashedBy ?? "";
     message.repaid = object.repaid ?? undefined;
-    message.repaidBy = object.repaidBy ?? "";
     message.effectiveFrom = object.effectiveFrom ?? undefined;
     message.effectiveUntil = object.effectiveUntil ?? undefined;
     message.modified = object.modified ?? undefined;
@@ -917,8 +788,6 @@ export const Permission = {
     message.slashedDeposit = object.slashedDeposit ?? 0;
     message.repaidDeposit = object.repaidDeposit ?? 0;
     message.revoked = object.revoked ?? undefined;
-    message.revokedBy = object.revokedBy ?? "";
-    message.country = object.country ?? "";
     message.validatorPermId = object.validatorPermId ?? 0;
     message.vpState = object.vpState ?? 0;
     message.vpExp = object.vpExp ?? undefined;
@@ -926,8 +795,7 @@ export const Permission = {
     message.vpValidatorDeposit = object.vpValidatorDeposit ?? 0;
     message.vpCurrentFees = object.vpCurrentFees ?? 0;
     message.vpCurrentDeposit = object.vpCurrentDeposit ?? 0;
-    message.vpSummaryDigestSri = object.vpSummaryDigestSri ?? "";
-    message.vpTermRequested = object.vpTermRequested ?? undefined;
+    message.vpSummaryDigest = object.vpSummaryDigest ?? "";
     message.issuanceFeeDiscount = object.issuanceFeeDiscount ?? 0;
     message.verificationFeeDiscount = object.verificationFeeDiscount ?? 0;
     message.vsOperator = object.vsOperator ?? "";
@@ -946,7 +814,7 @@ export const Permission = {
 function createBasePermissionSession(): PermissionSession {
   return {
     id: "",
-    authority: "",
+    corporation: "",
     vsOperator: "",
     agentPermId: 0,
     sessionRecords: [],
@@ -960,8 +828,8 @@ export const PermissionSession = {
     if (message.id !== "") {
       writer.uint32(10).string(message.id);
     }
-    if (message.authority !== "") {
-      writer.uint32(18).string(message.authority);
+    if (message.corporation !== "") {
+      writer.uint32(18).string(message.corporation);
     }
     if (message.vsOperator !== "") {
       writer.uint32(26).string(message.vsOperator);
@@ -1000,7 +868,7 @@ export const PermissionSession = {
             break;
           }
 
-          message.authority = reader.string();
+          message.corporation = reader.string();
           continue;
         case 3:
           if (tag !== 26) {
@@ -1049,7 +917,7 @@ export const PermissionSession = {
   fromJSON(object: any): PermissionSession {
     return {
       id: isSet(object.id) ? globalThis.String(object.id) : "",
-      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      corporation: isSet(object.corporation) ? globalThis.String(object.corporation) : "",
       vsOperator: isSet(object.vsOperator) ? globalThis.String(object.vsOperator) : "",
       agentPermId: isSet(object.agentPermId) ? globalThis.Number(object.agentPermId) : 0,
       sessionRecords: globalThis.Array.isArray(object?.sessionRecords)
@@ -1065,8 +933,8 @@ export const PermissionSession = {
     if (message.id !== "") {
       obj.id = message.id;
     }
-    if (message.authority !== "") {
-      obj.authority = message.authority;
+    if (message.corporation !== "") {
+      obj.corporation = message.corporation;
     }
     if (message.vsOperator !== "") {
       obj.vsOperator = message.vsOperator;
@@ -1092,7 +960,7 @@ export const PermissionSession = {
   fromPartial<I extends Exact<DeepPartial<PermissionSession>, I>>(object: I): PermissionSession {
     const message = createBasePermissionSession();
     message.id = object.id ?? "";
-    message.authority = object.authority ?? "";
+    message.corporation = object.corporation ?? "";
     message.vsOperator = object.vsOperator ?? "";
     message.agentPermId = object.agentPermId ?? 0;
     message.sessionRecords = object.sessionRecords?.map((e) => PermissionSessionRecord.fromPartial(e)) || [];

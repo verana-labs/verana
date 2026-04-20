@@ -71,8 +71,9 @@ func RunPermissionCSPSJourney(ctx context.Context, client cosmosclient.Client) e
 	cs1IDStr, err := lib.CreateCredentialSchema(client, ctx, operatorAccount, cschema.MsgCreateCredentialSchema{
 		TrId:                                    trID,
 		JsonSchema:                              schemaData,
-		IssuerPermManagementMode:                uint32(cschema.CredentialSchemaPermManagementMode_ECOSYSTEM),
-		VerifierPermManagementMode:              uint32(cschema.CredentialSchemaPermManagementMode_ECOSYSTEM),
+		IssuerOnboardingMode:                    uint32(cschema.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS),
+		VerifierOnboardingMode:                  uint32(cschema.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS),
+		HolderOnboardingMode:                    uint32(cschema.HolderOnboardingMode_HOLDER_ONBOARDING_MODE_PERMISSIONLESS),
 		PricingAssetType:                        uint32(cschema.PricingAssetType_TU),
 		PricingAsset:                            "tu",
 		DigestAlgorithm:                         "sha256",
@@ -158,8 +159,9 @@ func RunPermissionCSPSJourney(ctx context.Context, client cosmosclient.Client) e
 	cs2IDStr, err := lib.CreateCredentialSchema(client, ctx, operatorAccount, cschema.MsgCreateCredentialSchema{
 		TrId:                                    trID,
 		JsonSchema:                              schemaData2,
-		IssuerPermManagementMode:                uint32(cschema.CredentialSchemaPermManagementMode_ECOSYSTEM),
-		VerifierPermManagementMode:              uint32(cschema.CredentialSchemaPermManagementMode_ECOSYSTEM),
+		IssuerOnboardingMode:                    uint32(cschema.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS),
+		VerifierOnboardingMode:                  uint32(cschema.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS),
+		HolderOnboardingMode:                    uint32(cschema.HolderOnboardingMode_HOLDER_ONBOARDING_MODE_PERMISSIONLESS),
 		PricingAssetType:                        uint32(cschema.PricingAssetType_TU),
 		PricingAsset:                            "tu",
 		DigestAlgorithm:                         "sha256",
@@ -237,9 +239,10 @@ func RunPermissionCSPSJourney(ctx context.Context, client cosmosclient.Client) e
 
 	sessionID := uuid.New().String()
 
-	// 1a: Unauthorized operator (Credential_Holder) tries CSPS (expect failure)
+	// 1a: Unauthorized operator (tr_operator) tries CSPS (expect failure)
+	// Note: cooluser is the vs_operator (authorized), so we use tr_operator instead.
 	fmt.Println("\n--- Step 1a: Unauthorized operator tries CSPS (expect failure) ---")
-	unauthorizedAccount := lib.GetAccount(client, "Credential_Holder")
+	unauthorizedAccount := lib.GetAccount(client, trOperatorName)
 	err = lib.CreatePermissionSession(
 		client, ctx, unauthorizedAccount, operatorAddr,
 		sessionID, issuerPermID, 0, agentPermID, walletAgentPermID,
