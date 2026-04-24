@@ -26,7 +26,8 @@ import {
 
 export const MsgCreateRootPermissionAminoConverter: AminoConverter = {
   aminoType: "verana/x/perm/MsgCreateRootPermission",
-  // [MOD-PERM-MSG-7-1] spec v4 draft 13 mandates permission_type and vs_operator.
+  // [MOD-PERM-MSG-7-3] spec v4 draft 13: perm.type is hardcoded to ECOSYSTEM;
+  // vs_operator is not set on root permissions.
   toAmino: (m: MsgCreateRootPermission) => clean({
     corporation: m.corporation ?? "",
     operator: m.operator ?? "",
@@ -37,8 +38,6 @@ export const MsgCreateRootPermissionAminoConverter: AminoConverter = {
     validation_fees: u64ToStr(m.validationFees),
     issuance_fees: u64ToStr(m.issuanceFees),
     verification_fees: u64ToStr(m.verificationFees),
-    permission_type: m.permissionType ?? 0,
-    vs_operator: m.vsOperator ?? "",
   }),
   fromAmino: (a: any): MsgCreateRootPermission =>
     MsgCreateRootPermission.fromPartial({
@@ -51,8 +50,6 @@ export const MsgCreateRootPermissionAminoConverter: AminoConverter = {
       validationFees: strToU64(a.validation_fees) != null ? Number(strToU64(a.validation_fees)!.toString()) : 0,
       issuanceFees: strToU64(a.issuance_fees) != null ? Number(strToU64(a.issuance_fees)!.toString()) : 0,
       verificationFees: strToU64(a.verification_fees) != null ? Number(strToU64(a.verification_fees)!.toString()) : 0,
-      permissionType: a.permission_type ?? 0,
-      vsOperator: a.vs_operator ?? "",
     }),
 };
 
@@ -127,19 +124,17 @@ export const MsgStartPermissionVPAminoConverter: AminoConverter = {
 
 export const MsgRenewPermissionVPAminoConverter: AminoConverter = {
   aminoType: "verana/x/perm/MsgRenewPermissionVP",
-  // [MOD-PERM-MSG-2-1] spec v4 draft 13 adds mandatory permission_type.
+  // [MOD-PERM-MSG-2-1] spec v4 draft 13 parameters: corporation, operator, id.
   toAmino: (m: MsgRenewPermissionVP) => clean({
     corporation: m.corporation ?? "",
     operator: m.operator ?? "",
     id: u64ToStr(m.id),
-    permission_type: m.permissionType ?? 0,
   }),
   fromAmino: (a: any): MsgRenewPermissionVP =>
     MsgRenewPermissionVP.fromPartial({
       corporation: a.corporation ?? "",
       operator: a.operator ?? "",
       id: strToU64(a.id) != null ? Number(strToU64(a.id)!.toString()) : 0,
-      permissionType: a.permission_type ?? 0,
     }),
 };
 
