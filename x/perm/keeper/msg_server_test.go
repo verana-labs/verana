@@ -2287,7 +2287,6 @@ func TestMsgServerCreateRootPermission(t *testing.T) {
 	resp, err := ms.CreateRootPermission(ctx, &types.MsgCreateRootPermission{
 		Corporation: authority, Operator: operator,
 		SchemaId: 1, Did: validDid,
-			PermissionType: types.PermissionType_ISSUER, VsOperator: operator,
 		ValidationFees: 100, IssuanceFees: 50, VerificationFees: 25,
 		EffectiveFrom: &futureTime, EffectiveUntil: &farFuture,
 	})
@@ -2300,8 +2299,8 @@ func TestMsgServerCreateRootPermission(t *testing.T) {
 	require.Equal(t, uint64(1), perm.SchemaId)
 	require.Equal(t, validDid, perm.Did)
 	require.Equal(t, authority, perm.Corporation)
-	// [MOD-PERM-MSG-7-3] spec v4 draft 13: type comes from msg.permission_type.
-	require.Equal(t, types.PermissionType_ISSUER, perm.Type)
+	// [MOD-PERM-MSG-7-3] spec v4 draft 13: perm.type is hardcoded to ECOSYSTEM.
+	require.Equal(t, types.PermissionType_ECOSYSTEM, perm.Type)
 	require.Equal(t, uint64(100), perm.ValidationFees)
 	require.Equal(t, uint64(50), perm.IssuanceFees)
 	require.Equal(t, uint64(25), perm.VerificationFees)
@@ -4701,7 +4700,7 @@ func TestCreateRootPermission(t *testing.T) {
 			msg: &types.MsgCreateRootPermission{
 				Corporation: authority, Operator: operator,
 				SchemaId: 1, Did: validDid,
-			PermissionType: types.PermissionType_ISSUER, VsOperator: operator,
+
 				EffectiveFrom: nil,
 			},
 			expectErr: true,
@@ -4712,7 +4711,7 @@ func TestCreateRootPermission(t *testing.T) {
 			msg: &types.MsgCreateRootPermission{
 				Corporation: authority, Operator: operator,
 				SchemaId: 1, Did: validDid,
-			PermissionType: types.PermissionType_ISSUER, VsOperator: operator,
+
 				EffectiveFrom: &pastTime,
 			},
 			expectErr: true,
@@ -4723,7 +4722,7 @@ func TestCreateRootPermission(t *testing.T) {
 			msg: &types.MsgCreateRootPermission{
 				Corporation: authority, Operator: operator,
 				SchemaId: 1, Did: validDid,
-			PermissionType: types.PermissionType_ISSUER, VsOperator: operator,
+
 				EffectiveFrom: &now,
 			},
 			expectErr: true,
@@ -4734,7 +4733,7 @@ func TestCreateRootPermission(t *testing.T) {
 			msg: &types.MsgCreateRootPermission{
 				Corporation: authority, Operator: operator,
 				SchemaId: 1, Did: validDid,
-			PermissionType: types.PermissionType_ISSUER, VsOperator: operator,
+
 				EffectiveFrom:  &futureTime,
 				EffectiveUntil: &futureTime, // equal, not greater
 			},
@@ -4757,7 +4756,7 @@ func TestCreateRootPermission(t *testing.T) {
 			msg: &types.MsgCreateRootPermission{
 				Corporation: otherAddr, Operator: otherAddr,
 				SchemaId: 1, Did: validDid,
-			PermissionType: types.PermissionType_ISSUER, VsOperator: operator,
+
 				EffectiveFrom:  &futureTime,
 				EffectiveUntil: &farFutureTime,
 			},
@@ -4775,8 +4774,6 @@ func TestCreateRootPermission(t *testing.T) {
 				ValidationFees:   100,
 				IssuanceFees:     200,
 				VerificationFees: 300,
-				PermissionType:   types.PermissionType_ISSUER,
-				VsOperator:       operator,
 			},
 			expectErr: false,
 		},
@@ -4787,8 +4784,6 @@ func TestCreateRootPermission(t *testing.T) {
 				SchemaId: 1, Did: "did:example:second",
 				EffectiveFrom:  &veryFarFuture,
 				EffectiveUntil: nil,
-				PermissionType: types.PermissionType_ISSUER,
-				VsOperator:     operator,
 			},
 			expectErr: false,
 		},
@@ -4807,11 +4802,14 @@ func TestCreateRootPermission(t *testing.T) {
 				require.NotNil(t, resp)
 
 				// [MOD-PERM-MSG-7-3] verify created permission per spec v4 draft 13:
-				// type is set from msg.permission_type.
+				// perm.type is hardcoded to ECOSYSTEM, and perm.vs_operator is not set by this message.
 				perm, err := k.GetPermissionByID(sdkCtx, resp.Id)
 				require.NoError(t, err)
 				require.Equal(t, tc.msg.SchemaId, perm.SchemaId)
-				require.Equal(t, tc.msg.PermissionType, perm.Type)
+				require.Equal(t, types.PermissionType_ECOSYSTEM, perm.Type,
+					"Create Root Permission MUST hardcode perm.type to ECOSYSTEM per spec [MOD-PERM-MSG-7-3]")
+				require.Empty(t, perm.VsOperator,
+					"Create Root Permission MUST NOT set perm.vs_operator per spec [MOD-PERM-MSG-7-3]")
 				require.Equal(t, tc.msg.Did, perm.Did)
 				require.Equal(t, tc.msg.Corporation, perm.Corporation)
 				require.Equal(t, now, *perm.Created)
@@ -4856,7 +4854,7 @@ func TestCreateRootPermission_OverlapChecks(t *testing.T) {
 	resp, err := ms.CreateRootPermission(ctx, &types.MsgCreateRootPermission{
 		Corporation: authority, Operator: operator,
 		SchemaId: 1, Did: validDid,
-			PermissionType: types.PermissionType_ISSUER, VsOperator: operator,
+
 		EffectiveFrom:  &existingFrom,
 		EffectiveUntil: &existingUntil,
 	})
@@ -4871,7 +4869,7 @@ func TestCreateRootPermission_OverlapChecks(t *testing.T) {
 		_, err := ms.CreateRootPermission(ctx, &types.MsgCreateRootPermission{
 			Corporation: authority, Operator: operator,
 			SchemaId: 1, Did: validDid,
-			PermissionType: types.PermissionType_ISSUER, VsOperator: operator,
+
 			EffectiveFrom:  &newFrom,
 			EffectiveUntil: &newUntil,
 		})
@@ -4887,7 +4885,7 @@ func TestCreateRootPermission_OverlapChecks(t *testing.T) {
 		_, err := ms.CreateRootPermission(ctx, &types.MsgCreateRootPermission{
 			Corporation: authority, Operator: operator,
 			SchemaId: 1, Did: validDid,
-			PermissionType: types.PermissionType_ISSUER, VsOperator: operator,
+
 			EffectiveFrom:  &newFrom,
 			EffectiveUntil: &newUntil,
 		})
@@ -4905,7 +4903,7 @@ func TestCreateRootPermission_OverlapChecks(t *testing.T) {
 		resp2, err := ms.CreateRootPermission(ctx, &types.MsgCreateRootPermission{
 			Corporation: authority, Operator: operator,
 			SchemaId: 2, Did: validDid,
-			PermissionType: types.PermissionType_ISSUER, VsOperator: operator,
+
 			EffectiveFrom:  &neverExpiresFrom,
 			EffectiveUntil: nil, // Never expires
 		})
@@ -4918,7 +4916,7 @@ func TestCreateRootPermission_OverlapChecks(t *testing.T) {
 		_, err = ms.CreateRootPermission(ctx, &types.MsgCreateRootPermission{
 			Corporation: authority, Operator: operator,
 			SchemaId: 2, Did: validDid,
-			PermissionType: types.PermissionType_ISSUER, VsOperator: operator,
+
 			EffectiveFrom:  &newFrom,
 			EffectiveUntil: &newUntil,
 		})
@@ -4937,7 +4935,7 @@ func TestCreateRootPermission_OverlapChecks(t *testing.T) {
 		resp3, err := ms.CreateRootPermission(ctx, &types.MsgCreateRootPermission{
 			Corporation: authority, Operator: operator,
 			SchemaId: 3, Did: validDid,
-			PermissionType: types.PermissionType_ISSUER, VsOperator: operator,
+
 			EffectiveFrom:  &revokedFrom,
 			EffectiveUntil: &revokedUntil,
 		})
@@ -4957,7 +4955,7 @@ func TestCreateRootPermission_OverlapChecks(t *testing.T) {
 		_, err = ms.CreateRootPermission(ctx, &types.MsgCreateRootPermission{
 			Corporation: authority, Operator: operator,
 			SchemaId: 3, Did: validDid,
-			PermissionType: types.PermissionType_ISSUER, VsOperator: operator,
+
 			EffectiveFrom:  &newFrom,
 			EffectiveUntil: &newUntil,
 		})
@@ -4977,7 +4975,7 @@ func TestCreateRootPermission_OverlapChecks(t *testing.T) {
 		_, err := ms.CreateRootPermission(ctx, &types.MsgCreateRootPermission{
 			Corporation: authority, Operator: operator,
 			SchemaId: 4, Did: validDid,
-			PermissionType: types.PermissionType_ISSUER, VsOperator: operator,
+
 			EffectiveFrom:  &firstFrom,
 			EffectiveUntil: &firstUntil,
 		})
@@ -4992,7 +4990,7 @@ func TestCreateRootPermission_OverlapChecks(t *testing.T) {
 		_, err = ms.CreateRootPermission(ctx, &types.MsgCreateRootPermission{
 			Corporation: authority, Operator: operator,
 			SchemaId: 4, Did: validDid,
-			PermissionType: types.PermissionType_ISSUER, VsOperator: operator,
+
 			EffectiveFrom:  &secondFrom,
 			EffectiveUntil: &secondUntil,
 		})
@@ -5028,7 +5026,7 @@ func TestCreateRootPermission_AuthzCheck(t *testing.T) {
 		_, err := ms.CreateRootPermission(ctx, &types.MsgCreateRootPermission{
 			Corporation: authority, Operator: operator,
 			SchemaId: 1, Did: validDid,
-			PermissionType: types.PermissionType_ISSUER, VsOperator: operator,
+
 			EffectiveFrom:  &futureTime,
 			EffectiveUntil: &farFuture,
 		})
@@ -5040,7 +5038,7 @@ func TestCreateRootPermission_AuthzCheck(t *testing.T) {
 		resp, err := ms.CreateRootPermission(ctx, &types.MsgCreateRootPermission{
 			Corporation: authority, Operator: operator,
 			SchemaId: 1, Did: validDid,
-			PermissionType: types.PermissionType_ISSUER, VsOperator: operator,
+
 			EffectiveFrom:  &futureTime,
 			EffectiveUntil: &farFuture,
 		})

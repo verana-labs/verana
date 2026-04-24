@@ -543,7 +543,8 @@
       "type": "object",
       "properties": {
         "corporation": {
-          "type": "string"
+          "type": "string",
+          "description": "[MOD-PERM-MSG-7-1] Spec v4 draft 13 parameters.\nperm.type is hardcoded to ECOSYSTEM by the handler per [MOD-PERM-MSG-7-3];\nvs_operator is not set on root permissions."
         },
         "operator": {
           "type": "string"
@@ -574,14 +575,6 @@
         "verification_fees": {
           "type": "string",
           "format": "uint64"
-        },
-        "permission_type": {
-          "$ref": "#/definitions/verana.perm.v1.PermissionType",
-          "description": "[MOD-PERM-MSG-7-1] permission_type mandatory per spec v4 draft 13:\none of ISSUER, VERIFIER, ISSUER_GRANTOR, VERIFIER_GRANTOR."
-        },
-        "vs_operator": {
-          "type": "string",
-          "description": "[MOD-PERM-MSG-7-1] vs_operator mandatory per spec v4 draft 13."
         }
       }
     },
@@ -599,7 +592,8 @@
       "type": "object",
       "properties": {
         "corporation": {
-          "type": "string"
+          "type": "string",
+          "description": "[MOD-PERM-MSG-2-1] Spec v4 draft 13 parameters: corporation, operator, id."
         },
         "operator": {
           "type": "string"
@@ -608,10 +602,6 @@
           "type": "string",
           "format": "uint64",
           "title": "ID of the permission to renew"
-        },
-        "permission_type": {
-          "$ref": "#/definitions/verana.perm.v1.PermissionType",
-          "description": "[MOD-PERM-MSG-2-1] permission_type mandatory per spec v4 draft 13.\nMust match the existing permission's type."
         }
       },
       "title": "MsgRenewPermissionVP represents a message to renew a permission validation process"

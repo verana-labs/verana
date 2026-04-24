@@ -1850,8 +1850,6 @@ func CreateRootPermissionWithError(client cosmosclient.Client, ctx context.Conte
 		ValidationFees:   msg.ValidationFees,
 		VerificationFees: msg.VerificationFees,
 		IssuanceFees:     msg.IssuanceFees,
-		PermissionType:   permtypes.PermissionType_ECOSYSTEM,
-		VsOperator:       creatorAddr,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, creator, fullMsg)
@@ -1890,8 +1888,6 @@ func CreateRootPermissionAndGetID(client cosmosclient.Client, ctx context.Contex
 		ValidationFees:   msg.ValidationFees,
 		VerificationFees: msg.VerificationFees,
 		IssuanceFees:     msg.IssuanceFees,
-		PermissionType:   permtypes.PermissionType_ECOSYSTEM,
-		VsOperator:       creatorAddr,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, creator, fullMsg)
@@ -2031,8 +2027,6 @@ func CreateInactiveValidatorPermission(client cosmosclient.Client, ctx context.C
 		Did:            did,
 		EffectiveFrom:  &futureTime, // Future = not yet active
 		EffectiveUntil: &farFuture,
-		PermissionType: permtypes.PermissionType_ECOSYSTEM,
-		VsOperator:     creatorAddr,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, creator, msg)
@@ -2904,8 +2898,7 @@ func CreateRootPermissionWithAuthority(
 		return 0, fmt.Errorf("failed to get operator address: %w", err)
 	}
 
-	// [MOD-PERM-MSG-7-1] spec v4 draft 13 mandates permission_type and vs_operator.
-	// ECOSYSTEM preserves the grantor-root semantic used by downstream flows.
+	// [MOD-PERM-MSG-7-3] spec v4 draft 13: handler hardcodes perm.type = ECOSYSTEM.
 	msg := &permtypes.MsgCreateRootPermission{
 		Corporation:      authority,
 		Operator:         operatorAddr,
@@ -2916,8 +2909,6 @@ func CreateRootPermissionWithAuthority(
 		ValidationFees:   validationFees,
 		IssuanceFees:     issuanceFees,
 		VerificationFees: verificationFees,
-		PermissionType:   permtypes.PermissionType_ECOSYSTEM,
-		VsOperator:       operatorAddr,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, operatorAccount, msg)
