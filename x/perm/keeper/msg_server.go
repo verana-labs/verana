@@ -114,11 +114,6 @@ func (ms msgServer) RenewPermissionVP(goCtx context.Context, msg *types.MsgRenew
 		return nil, fmt.Errorf("authority is not the perm authority")
 	}
 
-	// [MOD-PERM-MSG-2-2] spec v4 draft 13: permission_type must match existing.
-	if msg.PermissionType != types.PermissionType_UNSPECIFIED && applicantPerm.Type != msg.PermissionType {
-		return nil, fmt.Errorf("permission_type mismatch: existing %s, requested %s", applicantPerm.Type, msg.PermissionType)
-	}
-
 	// [MOD-PERM-MSG-2-2-2] applicant_perm.vp_state MUST be VALIDATED to allow renewal.
 	// Renewing a PENDING perm would overwrite vp_current_fees/vp_current_deposit without
 	// refunding the escrowed funds, causing permanent fund loss.
@@ -657,14 +652,15 @@ func (ms msgServer) validateCreateRootPermissionAuthority(ctx sdk.Context, msg *
 }
 
 // [MOD-PERM-MSG-7-2-4] Create Root Permission overlap checks.
-// Find all active permissions (not revoked, not slashed, not repaid) for
-// (schema_id, permission_type, corporation). Spec v4 draft 13: permission_type
-// is set from msg, not hardcoded.
+// Spec v4 draft 13: find all active permissions (not revoked, not slashed,
+// not repaid) for (schema_id, ECOSYSTEM, corporation). Unlike other overlap
+// checks, validator_perm_id is not checked because ECOSYSTEM permissions
+// always have validator_perm_id = NULL.
 func (ms msgServer) checkCreateRootPermissionOverlap(ctx sdk.Context, msg *types.MsgCreateRootPermission) error {
 	err := ms.Permission.Walk(ctx, nil, func(key uint64, perm types.Permission) (bool, error) {
-		// Match on schema_id, permission_type, and corporation.
+		// Match on schema_id, ECOSYSTEM type, and corporation.
 		if perm.SchemaId != msg.SchemaId ||
-			perm.Type != msg.PermissionType ||
+			perm.Type != types.PermissionType_ECOSYSTEM ||
 			perm.Corporation != msg.Corporation {
 			return false, nil
 		}
@@ -695,18 +691,16 @@ func (ms msgServer) checkCreateRootPermissionOverlap(ctx sdk.Context, msg *types
 }
 
 // [MOD-PERM-MSG-7-3] Create Root Permission execution
+// Spec v4 draft 13: perm.type is hardcoded to ECOSYSTEM. vs_operator is not
+// set on root permissions; only on perms created via StartPermissionVP or
+// SelfCreatePermission.
 func (ms msgServer) executeCreateRootPermission(ctx sdk.Context, msg *types.MsgCreateRootPermission, now time.Time) (uint64, error) {
-	// [MOD-PERM-MSG-7-3] Spec v4 draft 13: type is set from msg.permission_type
-	// (one of ISSUER, VERIFIER, ISSUER_GRANTOR, VERIFIER_GRANTOR). vs_operator
-	// is persisted on the root permission.
 	perm := types.Permission{
-		// perm.id: auto-incremented uint64 (handled by CreatePermission)
 		SchemaId:         msg.SchemaId,
 		Modified:         &now,
-		Type:             msg.PermissionType,
+		Type:             types.PermissionType_ECOSYSTEM,
 		Did:              msg.Did,
 		Corporation:      msg.Corporation,
-		VsOperator:       msg.VsOperator,
 		Created:          &now,
 		EffectiveFrom:    msg.EffectiveFrom,
 		EffectiveUntil:   msg.EffectiveUntil,
@@ -716,7 +710,6 @@ func (ms msgServer) executeCreateRootPermission(ctx sdk.Context, msg *types.MsgC
 		Deposit:          0,
 	}
 
-	// Store the perm
 	id, err := ms.Keeper.CreatePermission(ctx, perm)
 	if err != nil {
 		return 0, fmt.Errorf("failed to create perm: %w", err)

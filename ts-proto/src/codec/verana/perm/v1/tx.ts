@@ -65,15 +65,11 @@ export interface MsgStartPermissionVPResponse {
 
 /** MsgRenewPermissionVP represents a message to renew a permission validation process */
 export interface MsgRenewPermissionVP {
+  /** [MOD-PERM-MSG-2-1] Spec v4 draft 13 parameters: corporation, operator, id. */
   corporation: string;
   operator: string;
   /** ID of the permission to renew */
   id: number;
-  /**
-   * [MOD-PERM-MSG-2-1] permission_type mandatory per spec v4 draft 13.
-   * Must match the existing permission's type.
-   */
-  permissionType: PermissionType;
 }
 
 /** MsgRenewPermissionVPResponse defines the Msg/RenewPermissionVP response type */
@@ -118,6 +114,11 @@ export interface MsgCancelPermissionVPLastRequestResponse {
 }
 
 export interface MsgCreateRootPermission {
+  /**
+   * [MOD-PERM-MSG-7-1] Spec v4 draft 13 parameters.
+   * perm.type is hardcoded to ECOSYSTEM by the handler per [MOD-PERM-MSG-7-3];
+   * vs_operator is not set on root permissions.
+   */
   corporation: string;
   operator: string;
   schemaId: number;
@@ -127,13 +128,6 @@ export interface MsgCreateRootPermission {
   validationFees: number;
   issuanceFees: number;
   verificationFees: number;
-  /**
-   * [MOD-PERM-MSG-7-1] permission_type mandatory per spec v4 draft 13:
-   * one of ISSUER, VERIFIER, ISSUER_GRANTOR, VERIFIER_GRANTOR.
-   */
-  permissionType: PermissionType;
-  /** [MOD-PERM-MSG-7-1] vs_operator mandatory per spec v4 draft 13. */
-  vsOperator: string;
 }
 
 export interface MsgCreateRootPermissionResponse {
@@ -697,7 +691,7 @@ export const MsgStartPermissionVPResponse = {
 };
 
 function createBaseMsgRenewPermissionVP(): MsgRenewPermissionVP {
-  return { corporation: "", operator: "", id: 0, permissionType: 0 };
+  return { corporation: "", operator: "", id: 0 };
 }
 
 export const MsgRenewPermissionVP = {
@@ -710,9 +704,6 @@ export const MsgRenewPermissionVP = {
     }
     if (message.id !== 0) {
       writer.uint32(24).uint64(message.id);
-    }
-    if (message.permissionType !== 0) {
-      writer.uint32(32).int32(message.permissionType);
     }
     return writer;
   },
@@ -745,13 +736,6 @@ export const MsgRenewPermissionVP = {
 
           message.id = longToNumber(reader.uint64() as Long);
           continue;
-        case 4:
-          if (tag !== 32) {
-            break;
-          }
-
-          message.permissionType = reader.int32() as any;
-          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -766,7 +750,6 @@ export const MsgRenewPermissionVP = {
       corporation: isSet(object.corporation) ? globalThis.String(object.corporation) : "",
       operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
       id: isSet(object.id) ? globalThis.Number(object.id) : 0,
-      permissionType: isSet(object.permissionType) ? permissionTypeFromJSON(object.permissionType) : 0,
     };
   },
 
@@ -781,9 +764,6 @@ export const MsgRenewPermissionVP = {
     if (message.id !== 0) {
       obj.id = Math.round(message.id);
     }
-    if (message.permissionType !== 0) {
-      obj.permissionType = permissionTypeToJSON(message.permissionType);
-    }
     return obj;
   },
 
@@ -795,7 +775,6 @@ export const MsgRenewPermissionVP = {
     message.corporation = object.corporation ?? "";
     message.operator = object.operator ?? "";
     message.id = object.id ?? 0;
-    message.permissionType = object.permissionType ?? 0;
     return message;
   },
 };
@@ -1250,8 +1229,6 @@ function createBaseMsgCreateRootPermission(): MsgCreateRootPermission {
     validationFees: 0,
     issuanceFees: 0,
     verificationFees: 0,
-    permissionType: 0,
-    vsOperator: "",
   };
 }
 
@@ -1283,12 +1260,6 @@ export const MsgCreateRootPermission = {
     }
     if (message.verificationFees !== 0) {
       writer.uint32(72).uint64(message.verificationFees);
-    }
-    if (message.permissionType !== 0) {
-      writer.uint32(80).int32(message.permissionType);
-    }
-    if (message.vsOperator !== "") {
-      writer.uint32(90).string(message.vsOperator);
     }
     return writer;
   },
@@ -1363,20 +1334,6 @@ export const MsgCreateRootPermission = {
 
           message.verificationFees = longToNumber(reader.uint64() as Long);
           continue;
-        case 10:
-          if (tag !== 80) {
-            break;
-          }
-
-          message.permissionType = reader.int32() as any;
-          continue;
-        case 11:
-          if (tag !== 90) {
-            break;
-          }
-
-          message.vsOperator = reader.string();
-          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -1397,8 +1354,6 @@ export const MsgCreateRootPermission = {
       validationFees: isSet(object.validationFees) ? globalThis.Number(object.validationFees) : 0,
       issuanceFees: isSet(object.issuanceFees) ? globalThis.Number(object.issuanceFees) : 0,
       verificationFees: isSet(object.verificationFees) ? globalThis.Number(object.verificationFees) : 0,
-      permissionType: isSet(object.permissionType) ? permissionTypeFromJSON(object.permissionType) : 0,
-      vsOperator: isSet(object.vsOperator) ? globalThis.String(object.vsOperator) : "",
     };
   },
 
@@ -1431,12 +1386,6 @@ export const MsgCreateRootPermission = {
     if (message.verificationFees !== 0) {
       obj.verificationFees = Math.round(message.verificationFees);
     }
-    if (message.permissionType !== 0) {
-      obj.permissionType = permissionTypeToJSON(message.permissionType);
-    }
-    if (message.vsOperator !== "") {
-      obj.vsOperator = message.vsOperator;
-    }
     return obj;
   },
 
@@ -1454,8 +1403,6 @@ export const MsgCreateRootPermission = {
     message.validationFees = object.validationFees ?? 0;
     message.issuanceFees = object.issuanceFees ?? 0;
     message.verificationFees = object.verificationFees ?? 0;
-    message.permissionType = object.permissionType ?? 0;
-    message.vsOperator = object.vsOperator ?? "";
     return message;
   },
 };
