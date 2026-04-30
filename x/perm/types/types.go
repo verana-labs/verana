@@ -390,3 +390,17 @@ func (msg *MsgSelfCreatePermission) ValidateBasic() error {
 
 	return nil
 }
+
+// [MOD-PERM-MSG-15] Trigger Resolver basic checks.
+func (msg *MsgTriggerResolver) ValidateBasic() error {
+	if _, err := sdk.AccAddressFromBech32(msg.Corporation); err != nil {
+		return fmt.Errorf("invalid corporation address: %w", err)
+	}
+	if _, err := sdk.AccAddressFromBech32(msg.Operator); err != nil {
+		return fmt.Errorf("invalid operator address: %w", err)
+	}
+	if msg.Id == 0 {
+		return fmt.Errorf("perm ID cannot be 0")
+	}
+	return nil
+}

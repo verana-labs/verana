@@ -22,6 +22,7 @@ import {
   MsgSetPermissionVPToValidated,
   MsgSlashPermissionTrustDeposit,
   MsgStartPermissionVP,
+  MsgTriggerResolver,
 } from "./codec/verana/perm/v1/tx";
 import {
   MsgReclaimTrustDepositYield,
@@ -62,6 +63,7 @@ import {
   MsgSetPermissionVPToValidatedAminoConverter,
   MsgSlashPermissionTrustDepositAminoConverter,
   MsgStartPermissionVPAminoConverter,
+  MsgTriggerResolverAminoConverter,
 } from "./amino-converter/perm";
 import {
   MsgReclaimTrustDepositYieldAminoConverter,
@@ -101,6 +103,7 @@ export const veranaTypeUrls = {
   MsgCreateOrUpdatePermissionSession: "/verana.perm.v1.MsgCreateOrUpdatePermissionSession",
   MsgSlashPermissionTrustDeposit: "/verana.perm.v1.MsgSlashPermissionTrustDeposit",
   MsgRepayPermissionSlashedTrustDeposit: "/verana.perm.v1.MsgRepayPermissionSlashedTrustDeposit",
+  MsgTriggerResolver: "/verana.perm.v1.MsgTriggerResolver",
   MsgReclaimTrustDepositYield: "/verana.td.v1.MsgReclaimTrustDepositYield",
   MsgSlashTrustDeposit: "/verana.td.v1.MsgSlashTrustDeposit",
   MsgRepaySlashedTrustDeposit: "/verana.td.v1.MsgRepaySlashedTrustDeposit",
@@ -134,6 +137,7 @@ export const veranaRegistryTypes: ReadonlyArray<[string, GeneratedType]> = [
   [veranaTypeUrls.MsgCreateOrUpdatePermissionSession, MsgCreateOrUpdatePermissionSession as GeneratedType],
   [veranaTypeUrls.MsgSlashPermissionTrustDeposit, MsgSlashPermissionTrustDeposit as GeneratedType],
   [veranaTypeUrls.MsgRepayPermissionSlashedTrustDeposit, MsgRepayPermissionSlashedTrustDeposit as GeneratedType],
+  [veranaTypeUrls.MsgTriggerResolver, MsgTriggerResolver as GeneratedType],
   [veranaTypeUrls.MsgReclaimTrustDepositYield, MsgReclaimTrustDepositYield as GeneratedType],
   [veranaTypeUrls.MsgSlashTrustDeposit, MsgSlashTrustDeposit as GeneratedType],
   [veranaTypeUrls.MsgRepaySlashedTrustDeposit, MsgRepaySlashedTrustDeposit as GeneratedType],
@@ -174,6 +178,7 @@ export function createVeranaAminoTypes(): AminoTypes {
     [veranaTypeUrls.MsgCreateOrUpdatePermissionSession]: MsgCreateOrUpdatePermissionSessionAminoConverter,
     [veranaTypeUrls.MsgSlashPermissionTrustDeposit]: MsgSlashPermissionTrustDepositAminoConverter,
     [veranaTypeUrls.MsgRepayPermissionSlashedTrustDeposit]: MsgRepayPermissionSlashedTrustDepositAminoConverter,
+    [veranaTypeUrls.MsgTriggerResolver]: MsgTriggerResolverAminoConverter,
     [veranaTypeUrls.MsgReclaimTrustDepositYield]: MsgReclaimTrustDepositYieldAminoConverter,
     [veranaTypeUrls.MsgSlashTrustDeposit]: MsgSlashTrustDepositAminoConverter,
     [veranaTypeUrls.MsgRepaySlashedTrustDeposit]: MsgRepaySlashedTrustDepositAminoConverter,

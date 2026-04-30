@@ -46,4 +46,7 @@ const (
 
 	EventTypeRevokePermission = "revoke_permission"
 	AttributeKeyRevokedAt     = "revoked_at"
+
+	// [MOD-PERM-MSG-15] Trigger Resolver
+	EventTypeTriggerResolver = "trigger_resolver"
 )

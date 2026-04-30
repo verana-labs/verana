@@ -466,6 +466,23 @@ Parameters:
 						},
 					},
 				},
+				{
+					RpcMethod: "TriggerResolver",
+					Use:       "trigger-resolver [id] --corporation [corporation]",
+					Short:     "Trigger external trust resolver re-resolution for a permission",
+					Long:      "Emits an on-chain event signaling that an external trust resolver should re-resolve the DID registered in the permission. Performs no state mutation.",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
+						{
+							ProtoField: "id",
+						},
+					},
+					FlagOptions: map[string]*autocliv1.FlagOptions{
+						"corporation": {
+							DefaultValue: "",
+							Usage:        "The group policy address (corporation) on whose behalf this message is executed",
+						},
+					},
+				},
 				// this line is used by ignite scaffolding # autocli/tx
 			},
 		},

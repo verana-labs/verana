@@ -31,6 +31,7 @@ const (
 	Msg_SlashPermissionTrustDeposit_FullMethodName        = "/verana.perm.v1.Msg/SlashPermissionTrustDeposit"
 	Msg_RepayPermissionSlashedTrustDeposit_FullMethodName = "/verana.perm.v1.Msg/RepayPermissionSlashedTrustDeposit"
 	Msg_SelfCreatePermission_FullMethodName               = "/verana.perm.v1.Msg/SelfCreatePermission"
+	Msg_TriggerResolver_FullMethodName                    = "/verana.perm.v1.Msg/TriggerResolver"
 )
 
 // MsgClient is the client API for Msg service.
@@ -56,6 +57,9 @@ type MsgClient interface {
 	RepayPermissionSlashedTrustDeposit(ctx context.Context, in *MsgRepayPermissionSlashedTrustDeposit, opts ...grpc.CallOption) (*MsgRepayPermissionSlashedTrustDepositResponse, error)
 	// [MOD-PERM-MSG-14] Self Create Permission (OPEN mode)
 	SelfCreatePermission(ctx context.Context, in *MsgSelfCreatePermission, opts ...grpc.CallOption) (*MsgSelfCreatePermissionResponse, error)
+	// [MOD-PERM-MSG-15] Trigger Resolver — emits an on-chain event so an external
+	// trust resolver re-resolves the permission's DID. No state mutation.
+	TriggerResolver(ctx context.Context, in *MsgTriggerResolver, opts ...grpc.CallOption) (*MsgTriggerResolverResponse, error)
 }
 
 type msgClient struct {
@@ -186,6 +190,16 @@ func (c *msgClient) SelfCreatePermission(ctx context.Context, in *MsgSelfCreateP
 	return out, nil
 }
 
+func (c *msgClient) TriggerResolver(ctx context.Context, in *MsgTriggerResolver, opts ...grpc.CallOption) (*MsgTriggerResolverResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(MsgTriggerResolverResponse)
+	err := c.cc.Invoke(ctx, Msg_TriggerResolver_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MsgServer is the server API for Msg service.
 // All implementations must embed UnimplementedMsgServer
 // for forward compatibility.
@@ -209,6 +223,9 @@ type MsgServer interface {
 	RepayPermissionSlashedTrustDeposit(context.Context, *MsgRepayPermissionSlashedTrustDeposit) (*MsgRepayPermissionSlashedTrustDepositResponse, error)
 	// [MOD-PERM-MSG-14] Self Create Permission (OPEN mode)
 	SelfCreatePermission(context.Context, *MsgSelfCreatePermission) (*MsgSelfCreatePermissionResponse, error)
+	// [MOD-PERM-MSG-15] Trigger Resolver — emits an on-chain event so an external
+	// trust resolver re-resolves the permission's DID. No state mutation.
+	TriggerResolver(context.Context, *MsgTriggerResolver) (*MsgTriggerResolverResponse, error)
 	mustEmbedUnimplementedMsgServer()
 }
 
@@ -254,6 +271,9 @@ func (UnimplementedMsgServer) RepayPermissionSlashedTrustDeposit(context.Context
 }
 func (UnimplementedMsgServer) SelfCreatePermission(context.Context, *MsgSelfCreatePermission) (*MsgSelfCreatePermissionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SelfCreatePermission not implemented")
+}
+func (UnimplementedMsgServer) TriggerResolver(context.Context, *MsgTriggerResolver) (*MsgTriggerResolverResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method TriggerResolver not implemented")
 }
 func (UnimplementedMsgServer) mustEmbedUnimplementedMsgServer() {}
 func (UnimplementedMsgServer) testEmbeddedByValue()             {}
@@ -492,6 +512,24 @@ func _Msg_SelfCreatePermission_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Msg_TriggerResolver_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgTriggerResolver)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).TriggerResolver(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Msg_TriggerResolver_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).TriggerResolver(ctx, req.(*MsgTriggerResolver))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Msg_ServiceDesc is the grpc.ServiceDesc for Msg service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -546,6 +584,10 @@ var Msg_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SelfCreatePermission",
 			Handler:    _Msg_SelfCreatePermission_Handler,
+		},
+		{
+			MethodName: "TriggerResolver",
+			Handler:    _Msg_TriggerResolver_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

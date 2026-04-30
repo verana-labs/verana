@@ -11,6 +11,7 @@ import {
   MsgSetPermissionVPToValidated,
   MsgSlashPermissionTrustDeposit,
   MsgStartPermissionVP,
+  MsgTriggerResolver,
 } from "../codec/verana/perm/v1/tx";
 import { PermissionType } from "../codec/verana/perm/v1/types";
 import {
@@ -284,5 +285,21 @@ export const MsgSelfCreatePermissionAminoConverter: AminoConverter = {
       vsOperatorAuthzWithFeegrant: a.vs_operator_authz_with_feegrant ?? false,
       vsOperatorAuthzFeeSpendLimit: a.vs_operator_authz_fee_spend_limit ?? [],
       vsOperatorAuthzSpendPeriod: aminoToDuration(a.vs_operator_authz_spend_period),
+    }),
+};
+
+// [MOD-PERM-MSG-15] Trigger Resolver — emits an event only, no state mutation.
+export const MsgTriggerResolverAminoConverter: AminoConverter = {
+  aminoType: "verana/x/perm/MsgTriggerResolver",
+  toAmino: (m: MsgTriggerResolver) => clean({
+    corporation: m.corporation ?? "",
+    operator: m.operator ?? "",
+    id: u64ToStr(m.id),
+  }),
+  fromAmino: (a: any): MsgTriggerResolver =>
+    MsgTriggerResolver.fromPartial({
+      corporation: a.corporation ?? "",
+      operator: a.operator ?? "",
+      id: strToU64(a.id) != null ? Number(strToU64(a.id)!.toString()) : 0,
     }),
 };

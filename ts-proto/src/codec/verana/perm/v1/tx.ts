@@ -226,6 +226,23 @@ export interface MsgSelfCreatePermissionResponse {
   id: number;
 }
 
+/**
+ * MsgTriggerResolver requests an on-chain event signaling that an external
+ * trust resolver should re-resolve the DID registered in the target permission.
+ * [MOD-PERM-MSG-15] Trigger Resolver
+ */
+export interface MsgTriggerResolver {
+  /** corporation is the group account on whose behalf this message is executed */
+  corporation: string;
+  /** operator is the account authorized by the corporation to run this Msg */
+  operator: string;
+  /** id of the permission for which a trust resolution must be triggered */
+  id: number;
+}
+
+export interface MsgTriggerResolverResponse {
+}
+
 function createBaseMsgUpdateParams(): MsgUpdateParams {
   return { authority: "", params: undefined };
 }
@@ -2663,6 +2680,138 @@ export const MsgSelfCreatePermissionResponse = {
   },
 };
 
+function createBaseMsgTriggerResolver(): MsgTriggerResolver {
+  return { corporation: "", operator: "", id: 0 };
+}
+
+export const MsgTriggerResolver = {
+  encode(message: MsgTriggerResolver, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.corporation !== "") {
+      writer.uint32(10).string(message.corporation);
+    }
+    if (message.operator !== "") {
+      writer.uint32(18).string(message.operator);
+    }
+    if (message.id !== 0) {
+      writer.uint32(24).uint64(message.id);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgTriggerResolver {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgTriggerResolver();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.corporation = reader.string();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.operator = reader.string();
+          continue;
+        case 3:
+          if (tag !== 24) {
+            break;
+          }
+
+          message.id = longToNumber(reader.uint64() as Long);
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MsgTriggerResolver {
+    return {
+      corporation: isSet(object.corporation) ? globalThis.String(object.corporation) : "",
+      operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
+      id: isSet(object.id) ? globalThis.Number(object.id) : 0,
+    };
+  },
+
+  toJSON(message: MsgTriggerResolver): unknown {
+    const obj: any = {};
+    if (message.corporation !== "") {
+      obj.corporation = message.corporation;
+    }
+    if (message.operator !== "") {
+      obj.operator = message.operator;
+    }
+    if (message.id !== 0) {
+      obj.id = Math.round(message.id);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MsgTriggerResolver>, I>>(base?: I): MsgTriggerResolver {
+    return MsgTriggerResolver.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgTriggerResolver>, I>>(object: I): MsgTriggerResolver {
+    const message = createBaseMsgTriggerResolver();
+    message.corporation = object.corporation ?? "";
+    message.operator = object.operator ?? "";
+    message.id = object.id ?? 0;
+    return message;
+  },
+};
+
+function createBaseMsgTriggerResolverResponse(): MsgTriggerResolverResponse {
+  return {};
+}
+
+export const MsgTriggerResolverResponse = {
+  encode(_: MsgTriggerResolverResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgTriggerResolverResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgTriggerResolverResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(_: any): MsgTriggerResolverResponse {
+    return {};
+  },
+
+  toJSON(_: MsgTriggerResolverResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MsgTriggerResolverResponse>, I>>(base?: I): MsgTriggerResolverResponse {
+    return MsgTriggerResolverResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgTriggerResolverResponse>, I>>(_: I): MsgTriggerResolverResponse {
+    const message = createBaseMsgTriggerResolverResponse();
+    return message;
+  },
+};
+
 /** Msg defines the Msg service. */
 export interface Msg {
   /**
@@ -2692,6 +2841,11 @@ export interface Msg {
   ): Promise<MsgRepayPermissionSlashedTrustDepositResponse>;
   /** [MOD-PERM-MSG-14] Self Create Permission (OPEN mode) */
   SelfCreatePermission(request: MsgSelfCreatePermission): Promise<MsgSelfCreatePermissionResponse>;
+  /**
+   * [MOD-PERM-MSG-15] Trigger Resolver — emits an on-chain event so an external
+   * trust resolver re-resolves the permission's DID. No state mutation.
+   */
+  TriggerResolver(request: MsgTriggerResolver): Promise<MsgTriggerResolverResponse>;
 }
 
 export const MsgServiceName = "verana.perm.v1.Msg";
@@ -2713,6 +2867,7 @@ export class MsgClientImpl implements Msg {
     this.SlashPermissionTrustDeposit = this.SlashPermissionTrustDeposit.bind(this);
     this.RepayPermissionSlashedTrustDeposit = this.RepayPermissionSlashedTrustDeposit.bind(this);
     this.SelfCreatePermission = this.SelfCreatePermission.bind(this);
+    this.TriggerResolver = this.TriggerResolver.bind(this);
   }
   UpdateParams(request: MsgUpdateParams): Promise<MsgUpdateParamsResponse> {
     const data = MsgUpdateParams.encode(request).finish();
@@ -2792,6 +2947,12 @@ export class MsgClientImpl implements Msg {
     const data = MsgSelfCreatePermission.encode(request).finish();
     const promise = this.rpc.request(this.service, "SelfCreatePermission", data);
     return promise.then((data) => MsgSelfCreatePermissionResponse.decode(_m0.Reader.create(data)));
+  }
+
+  TriggerResolver(request: MsgTriggerResolver): Promise<MsgTriggerResolverResponse> {
+    const data = MsgTriggerResolver.encode(request).finish();
+    const promise = this.rpc.request(this.service, "TriggerResolver", data);
+    return promise.then((data) => MsgTriggerResolverResponse.decode(_m0.Reader.create(data)));
   }
 }
 

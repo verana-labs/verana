@@ -370,6 +370,39 @@
         ]
       }
     },
+    "/verana.perm.v1.Msg/TriggerResolver": {
+      "post": {
+        "summary": "[MOD-PERM-MSG-15] Trigger Resolver — emits an on-chain event so an external\ntrust resolver re-resolves the permission's DID. No state mutation.",
+        "operationId": "Msg_TriggerResolver",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.perm.v1.MsgTriggerResolverResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.perm.v1.MsgTriggerResolver"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
     "/verana.perm.v1.Msg/UpdateParams": {
       "post": {
         "summary": "UpdateParams defines a (governance) operation for updating the module\nparameters. The authority defaults to the x/gov module account.",
@@ -874,6 +907,28 @@
         }
       },
       "title": "MsgStartPermissionVPResponse defines the Msg/StartPermissionVP response type"
+    },
+    "verana.perm.v1.MsgTriggerResolver": {
+      "type": "object",
+      "properties": {
+        "corporation": {
+          "type": "string",
+          "title": "corporation is the group account on whose behalf this message is executed"
+        },
+        "operator": {
+          "type": "string",
+          "title": "operator is the account authorized by the corporation to run this Msg"
+        },
+        "id": {
+          "type": "string",
+          "format": "uint64",
+          "title": "id of the permission for which a trust resolution must be triggered"
+        }
+      },
+      "title": "MsgTriggerResolver requests an on-chain event signaling that an external\ntrust resolver should re-resolve the DID registered in the target permission.\n[MOD-PERM-MSG-15] Trigger Resolver"
+    },
+    "verana.perm.v1.MsgTriggerResolverResponse": {
+      "type": "object"
     },
     "verana.perm.v1.MsgUpdateParams": {
       "type": "object",
