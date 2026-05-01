@@ -47,30 +47,27 @@ func (ms msgServer) ReclaimTrustDepositYield(goCtx context.Context, msg *types.M
 		return nil, fmt.Errorf("trust deposit not found for account: %s", account)
 	}
 
-	// [MOD-TD-MSG-2-2-1] Spec v4 draft 13: slashed_deposit is decremented on each repay,
-	// so any non-zero value means an outstanding (unrepaid) slash balance.
-	if td.SlashedDeposit > 0 {
+	// [MOD-TD-MSG-2-2-1] Spec: abort if slashed_deposit > 0 AND
+	// repaid_deposit < slashed_deposit (outstanding slash exists).
+	// slashed_deposit is cumulative; equality with repaid_deposit means fully repaid.
+	if td.SlashedDeposit > 0 && td.RepaidDeposit < td.SlashedDeposit {
 		return nil, fmt.Errorf("deposit has been slashed and not repaid")
 	}
 
-	// [MOD-TD-MSG-2-2-1] Precondition: must have accrued claimable yield
-	if td.Claimable == 0 {
+	// [MOD-TD-MSG-2-2-1] / [MOD-TD-MSG-2-3] Spec: claimable_yield is computed,
+	// not stored. Formula: td.share * trust_deposit_share_value - td.deposit.
+	// The stored td.Claimable field is owned by MOD-TD-MSG-1 (Adjust); reclaim
+	// MUST NOT consult or mutate it.
+	params := ms.Keeper.GetParams(ctx)
+	yieldDec := td.Share.Mul(params.TrustDepositShareValue).Sub(math.LegacyNewDec(int64(td.Deposit)))
+	if !yieldDec.IsPositive() {
 		return nil, fmt.Errorf("no claimable yield")
 	}
+	claimed := yieldDec.TruncateInt().Uint64()
 
-	// [MOD-TD-MSG-2-3] Spec v4 draft 13: transfer the full claimable balance
-	// and set claimable to 0. No per-call amount parameter.
-	claimed := td.Claimable
-
-	// Get share value
-	params := ms.Keeper.GetParams(ctx)
-
-	// [MOD-TD-MSG-2-3] Reduce shares proportionally to the withdrawn amount
+	// [MOD-TD-MSG-2-3] Reduce shares by claimable_yield / trust_deposit_share_value.
 	sharesToReduce := ms.Keeper.AmountToShare(claimed, params.TrustDepositShareValue)
 	td.Share = td.Share.Sub(sharesToReduce)
-
-	// Drain claimable per spec.
-	td.Claimable = 0
 
 	// Validate corporation address
 	addr, err := sdk.AccAddressFromBech32(account)
@@ -169,18 +166,26 @@ func (ms msgServer) SlashTrustDeposit(goCtx context.Context, msg *types.MsgSlash
 	shareReduction := math.LegacyNewDecFromInt(msg.Deposit).Quo(shareValue)
 
 	// [MOD-TD-MSG-5-3] Update TrustDeposit entry
-	td.Deposit = td.Deposit - msg.Deposit.Uint64()
+	slashAmt := msg.Deposit.Uint64()
+	td.Deposit = td.Deposit - slashAmt
 	td.Share = td.Share.Sub(shareReduction)
-	td.SlashedDeposit = td.SlashedDeposit + msg.Deposit.Uint64()
+	td.SlashedDeposit = td.SlashedDeposit + slashAmt
 	td.LastSlashed = &now
 	td.SlashCount++
 
-	// Save the updated TrustDeposit entry.
-	// Coins remain locked in the module account as slashed deposit;
-	// they are burned later by BurnEcosystemSlashedTrustDeposit (MOD-TD-MSG-7)
-	// or returned to the depositor via RepaySlashedTrustDeposit (MOD-TD-MSG-6).
+	// Save state BEFORE burning to ensure atomicity — if Set fails,
+	// no coins are burned.
 	if err := ms.Keeper.TrustDeposit.Set(ctx, msg.Corporation, td); err != nil {
 		return nil, fmt.Errorf("failed to save trust deposit: %w", err)
+	}
+
+	// [MOD-TD-MSG-5-3] Burn `amount` from TrustDeposit account immediately.
+	if slashAmt > uint64(mathstd.MaxInt64) {
+		return nil, fmt.Errorf("slash amount exceeds int64: %d", slashAmt)
+	}
+	burnCoins := sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, int64(slashAmt)))
+	if err := ms.Keeper.bankKeeper.BurnCoins(ctx, types.ModuleName, burnCoins); err != nil {
+		return nil, fmt.Errorf("failed to burn slashed coins: %w", err)
 	}
 
 	// Emit event
@@ -222,10 +227,15 @@ func (ms msgServer) RepaySlashedTrustDeposit(goCtx context.Context, msg *types.M
 		return nil, fmt.Errorf("trust deposit entry not found for corporation %s: %w", account, err)
 	}
 
-	// [MOD-TD-MSG-6-2-1] spec v4 draft 13: slashed_deposit is the outstanding balance
-	// (decremented on each repay). deposit MUST equal td.slashed_deposit.
-	if msg.Deposit != td.SlashedDeposit {
-		return nil, fmt.Errorf("deposit must exactly equal outstanding slashed amount: expected %d, got %d", td.SlashedDeposit, msg.Deposit)
+	// [MOD-TD-MSG-6-2-1] Spec: amount MUST be exactly equal to
+	// (td.slashed_deposit - td.repaid_deposit). slashed_deposit is a
+	// cumulative counter; outstanding = slashed_deposit - repaid_deposit.
+	if td.SlashedDeposit < td.RepaidDeposit {
+		return nil, fmt.Errorf("invariant violated: repaid_deposit (%d) > slashed_deposit (%d)", td.RepaidDeposit, td.SlashedDeposit)
+	}
+	outstanding := td.SlashedDeposit - td.RepaidDeposit
+	if msg.Deposit != outstanding {
+		return nil, fmt.Errorf("deposit must exactly equal outstanding slashed amount: expected %d, got %d", outstanding, msg.Deposit)
 	}
 
 	// Validate corporation address for bank transfer
@@ -238,18 +248,16 @@ func (ms msgServer) RepaySlashedTrustDeposit(goCtx context.Context, msg *types.M
 	params := ms.Keeper.GetParams(ctx)
 	now := ctx.BlockTime()
 
-	// Update trust deposit fields
+	// td.deposit += amount
 	td.Deposit += msg.Deposit
 
-	// td.share = td.share + deposit / GlobalVariables.trust_deposit_share_value
+	// td.share += amount / GlobalVariables.trust_deposit_share_value
 	shareIncrease := ms.Keeper.AmountToShare(msg.Deposit, params.TrustDepositShareValue)
 	td.Share = td.Share.Add(shareIncrease)
 
-	// [MOD-TD-MSG-6-3] spec v4 draft 13: decrement slashed_deposit by the repay amount,
-	// and track cumulative repaid_deposit. Preserves historical slash accounting.
-	td.SlashedDeposit -= msg.Deposit
+	// [MOD-TD-MSG-6-3] Spec: slashed_deposit is cumulative — DO NOT decrement.
+	// Only repaid_deposit grows. Outstanding is derived as slashed - repaid.
 	td.RepaidDeposit += msg.Deposit
-	// td.last_repaid = now
 	td.LastRepaid = &now
 
 	// Save updated trust deposit BEFORE bank transfer to ensure atomicity
@@ -257,8 +265,9 @@ func (ms msgServer) RepaySlashedTrustDeposit(goCtx context.Context, msg *types.M
 		return nil, fmt.Errorf("failed to update trust deposit: %w", err)
 	}
 
-	// [MOD-TD-MSG-6-2-2] / [MOD-TD-MSG-6-3] Transfer deposit from corporation to TrustDeposit account.
-	// The corporation sends new coins to replenish the locked slashed amount.
+	// [MOD-TD-MSG-6-3] "add `amount` to TrustDeposit account": corporation
+	// transfers fresh coins in. No burn here — the burn happened at slash time
+	// per MOD-TD-MSG-5-3.
 	if msg.Deposit > uint64(mathstd.MaxInt64) {
 		return nil, fmt.Errorf("repay amount exceeds maximum coin amount: %d", msg.Deposit)
 	}
@@ -270,13 +279,6 @@ func (ms msgServer) RepaySlashedTrustDeposit(goCtx context.Context, msg *types.M
 		transferCoins,
 	); err != nil {
 		return nil, fmt.Errorf("failed to transfer tokens: %w", err)
-	}
-
-	// Burn the previously-slashed coins (which were locked in the module account at slash time)
-	// now that new coins have been received from the corporation to replace them.
-	burnCoins := sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, int64(msg.Deposit)))
-	if err := ms.Keeper.bankKeeper.BurnCoins(ctx, types.ModuleName, burnCoins); err != nil {
-		return nil, fmt.Errorf("failed to burn slashed coins on repay: %w", err)
 	}
 
 	// Emit event

@@ -668,10 +668,10 @@ func TestMsgRepaySlashedTrustDeposit(t *testing.T) {
 				td, err := k.TrustDeposit.Get(ctx, testAccString)
 				require.NoError(t, err)
 				require.Equal(t, uint64(1000), td.Deposit) // 700 + 300
-				// [MOD-TD-MSG-6-3] spec v4 draft 13: slashed_deposit decremented,
-				// repaid_deposit cumulative.
+				// [MOD-TD-MSG-6-3] slashed_deposit is cumulative — never decremented.
+				// repaid_deposit grows by amount. Outstanding = slashed - repaid = 0.
 				require.Equal(t, uint64(300), td.RepaidDeposit)
-				require.Equal(t, uint64(0), td.SlashedDeposit)
+				require.Equal(t, uint64(300), td.SlashedDeposit, "cumulative; not decremented")
 				require.NotNil(t, td.LastRepaid)
 				// share increased by 300/1.0 = 300
 				expectedShare := math.LegacyNewDec(1000) // 700 + 300
@@ -683,14 +683,15 @@ func TestMsgRepaySlashedTrustDeposit(t *testing.T) {
 			setup: func() {
 				err := k.SetParams(ctx, defaultTestParams())
 				require.NoError(t, err)
-				// [MOD-TD-MSG-6-3] spec v4 draft 13: slashed_deposit holds outstanding
-				// balance (300 remaining after 200 already repaid); repaid_deposit is cumulative.
+				// [MOD-TD-MSG-6-3] slashed_deposit and repaid_deposit are both
+				// cumulative counters. Total slashed=500 historically, 200 already
+				// repaid → outstanding = 500 - 200 = 300.
 				td := types.TrustDeposit{
 					Corporation:    testAccString,
 					Share:          math.LegacyNewDec(800),
 					Deposit:        800,
-					SlashedDeposit: 300, // outstanding slashed amount
-					RepaidDeposit:  200, // cumulative repaid so far
+					SlashedDeposit: 500, // cumulative total ever slashed
+					RepaidDeposit:  200, // cumulative repaid so far → outstanding = 300
 					SlashCount:     2,
 				}
 				err = k.TrustDeposit.Set(ctx, testAccString, td)
@@ -699,16 +700,16 @@ func TestMsgRepaySlashedTrustDeposit(t *testing.T) {
 			msg: &types.MsgRepaySlashedTrustDeposit{
 				Corporation: testAccString,
 				Operator:    testAccString,
-				Deposit:     300, // clears the remaining outstanding slash
+				Deposit:     300, // exactly the outstanding amount
 			},
 			expErr: false,
 			check: func() {
 				td, err := k.TrustDeposit.Get(ctx, testAccString)
 				require.NoError(t, err)
 				require.Equal(t, uint64(1100), td.Deposit) // 800 + 300
-				// [MOD-TD-MSG-6-3] spec v4 draft 13: 200 prior + 300 now = 500 cumulative repaid.
+				// [MOD-TD-MSG-6-3] repaid_deposit grew 200 → 500; slashed unchanged.
 				require.Equal(t, uint64(500), td.RepaidDeposit)
-				require.Equal(t, uint64(0), td.SlashedDeposit)
+				require.Equal(t, uint64(500), td.SlashedDeposit, "cumulative; not decremented")
 			},
 		},
 		{
