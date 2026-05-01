@@ -33,7 +33,7 @@ RUN apt-get update && apt-get install -y \
     $(if [ "$INCLUDE_GO" = "true" ]; then echo golang; fi) \
   && rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /tmp/veranad /usr/local/bin/veranad
+COPY --chmod=0755 --from=builder /tmp/veranad /usr/local/bin/veranad
 
 EXPOSE 26656 26657 1317 9090
 

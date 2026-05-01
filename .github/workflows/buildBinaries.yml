@@ -320,7 +320,6 @@ jobs:
           push: true
           tags: |
             ${{ env.CANONICAL_IMAGE_NAME }}:${{ needs.build-binaries-s3.outputs.version }}
-            ${{ env.CANONICAL_IMAGE_NAME }}:sha-${{ needs.build-binaries-s3.outputs.commit }}
           build-args: |
             USE_PREBUILT=true
             PREBUILT_BINARY=binaries/veranad-linux-amd64
