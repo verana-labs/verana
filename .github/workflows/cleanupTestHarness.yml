@@ -1,0 +1,79 @@
+name: Cleanup Test Harness K8s Namespaces
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 */6 * * *'
+
+jobs:
+  cleanup-test-harness-namespaces:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      KUBECONFIG: ${{ secrets.OVH_KUBECONFIG }}
+      STALE_AFTER_HOURS: "6"
+
+    steps:
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Configure kubeconfig
+        run: |
+          if [ -z "${KUBECONFIG:-}" ]; then
+            echo "Missing OVH_KUBECONFIG secret; cannot clean K8s namespaces." >&2
+            exit 1
+          fi
+          echo "$KUBECONFIG" > k8s_config
+          echo "KUBECONFIG=$(pwd)/k8s_config" >> $GITHUB_ENV
+
+      - name: Delete stale test harness namespaces
+        run: |
+          export KUBECONFIG=$KUBECONFIG
+          python3 - <<'PY' > /tmp/stale-testharness-namespaces
+          import datetime
+          import json
+          import os
+          import subprocess
+
+          stale_after = datetime.timedelta(hours=int(os.environ.get("STALE_AFTER_HOURS", "6")))
+          cutoff = datetime.datetime.now(datetime.timezone.utc) - stale_after
+          namespaces = json.loads(subprocess.check_output(["kubectl", "get", "namespaces", "-o", "json"]))
+
+          for item in namespaces.get("items", []):
+              metadata = item.get("metadata", {})
+              name = metadata.get("name", "")
+              if not name.startswith("vna-devnet-"):
+                  continue
+
+              created_raw = metadata.get("creationTimestamp")
+              if not created_raw:
+                  continue
+              created = datetime.datetime.fromisoformat(created_raw.replace("Z", "+00:00"))
+              if created > cutoff:
+                  continue
+
+              labels = metadata.get("labels", {})
+              if labels.get("ci.verana/workflow") == "test-harness":
+                  print(name)
+          PY
+
+          if [ ! -s /tmp/stale-testharness-namespaces ]; then
+            echo "No stale test harness namespaces found."
+            exit 0
+          fi
+
+          while IFS= read -r namespace; do
+            echo "Deleting stale test harness namespace ${namespace}"
+            kubectl delete namespace "$namespace" --wait=false
+          done < /tmp/stale-testharness-namespaces
+
+          while IFS= read -r namespace; do
+            if kubectl get namespace "$namespace" >/dev/null 2>&1; then
+              if ! kubectl wait --for=delete "namespace/$namespace" --timeout=600s; then
+                echo "Namespace $namespace is still present after cleanup timeout." >&2
+                kubectl get namespace "$namespace" -o yaml || true
+                exit 1
+              fi
+            fi
+          done < /tmp/stale-testharness-namespaces

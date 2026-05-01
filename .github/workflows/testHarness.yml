@@ -35,7 +35,6 @@ jobs:
       K8S_TESTHARNESS_INGRESS_CLASS: nginx
       K8S_TESTHARNESS_TLS_CLUSTER_ISSUER: letsencrypt-prod
       K8S_TESTHARNESS_MAIN_TLS_SECRET: vna-devnet-main.testnet.verana.network-cert
-      TESTHARNESS_CLEANUP_MAIN_ENV: ${{ vars.TESTHARNESS_CLEANUP_MAIN_ENV }}
       DH_USERNAME: ${{ secrets.DOCKER_HUB_LOGIN }}
       DH_TOKEN: ${{ secrets.DOCKER_HUB_PWD }}
       IMAGE_REPO: ${{ secrets.DOCKER_HUB_LOGIN }}/verana-node
@@ -43,13 +42,16 @@ jobs:
 
     steps:
       - name: Checkout this repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ github.head_ref || github.ref_name }}
 
       - name: Determine harness mode
         run: |
+          SHORT_SHA="$(echo "${GITHUB_SHA}" | cut -c1-7)"
+          echo "IMAGE_TAG=${IMAGE_REPO}:sha-${SHORT_SHA}" >> $GITHUB_ENV
+          echo "Using commit image tag sha-${SHORT_SHA} for this test harness run." >> $GITHUB_STEP_SUMMARY
+
           if [ "$HARNESS_MODE" = "k8s" ]; then
             if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ] && [ "${{ inputs.run_k8s }}" != "true" ]; then
               echo "HARNESS_MODE_EFFECTIVE=docker" >> $GITHUB_ENV
@@ -65,26 +67,20 @@ jobs:
           fi
           if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
             PR_NUMBER=$(echo "$GITHUB_REF" | awk -F'/' '{print $3}')
-            echo "IMAGE_TAG=${IMAGE_REPO}:pr-${PR_NUMBER}" >> $GITHUB_ENV
             BRANCH_REF="${GITHUB_HEAD_REF:-${GITHUB_REF_NAME:-$GITHUB_REF}}"
           elif [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
             BRANCH_REF="${GITHUB_REF_NAME:-$GITHUB_REF}"
             export BRANCH_REF
             PR_NUMBER="$(python3 scripts/ci/resolve_pr_number.py)"
             if [ -n "${PR_NUMBER}" ]; then
-              echo "IMAGE_TAG=${IMAGE_REPO}:pr-${PR_NUMBER}" >> $GITHUB_ENV
-              echo "Resolved PR #${PR_NUMBER} for ${BRANCH_REF}; using PR image tag." >> $GITHUB_STEP_SUMMARY
+              echo "Resolved PR #${PR_NUMBER} for ${BRANCH_REF}; using PR namespace and commit image tag." >> $GITHUB_STEP_SUMMARY
             else
               BRANCH_TAG="${BRANCH_REF//\//-}"
-              SHORT_SHA="$(echo "${GITHUB_SHA}" | cut -c1-7)"
-              echo "IMAGE_TAG=${IMAGE_REPO}:sha-${SHORT_SHA}" >> $GITHUB_ENV
-              echo "No open PR for ${BRANCH_REF}; using sha tag ${SHORT_SHA}." >> $GITHUB_STEP_SUMMARY
+              echo "No open PR for ${BRANCH_REF}; using branch namespace and commit image tag." >> $GITHUB_STEP_SUMMARY
             fi
           else
             BRANCH_REF="${GITHUB_REF_NAME:-$GITHUB_REF}"
             BRANCH_TAG="${BRANCH_REF//\//-}"
-            SHORT_SHA="$(echo "${GITHUB_SHA}" | cut -c1-7)"
-            echo "IMAGE_TAG=${IMAGE_REPO}:sha-${SHORT_SHA}" >> $GITHUB_ENV
           fi
           BRANCH_REF="${BRANCH_REF:-${GITHUB_REF_NAME:-$GITHUB_REF}}"
           BRANCH_TAG="${BRANCH_REF//\//-}"
@@ -97,16 +93,11 @@ jobs:
             echo "NAMESPACE=vna-devnet-${NAMESPACE_BRANCH_TAG}-pr-${PR_NUMBER}" >> $GITHUB_ENV
           elif [ "${BRANCH_TAG}" = "main" ]; then
             echo "NAMESPACE=vna-devnet-main" >> $GITHUB_ENV
-            if [ "${TESTHARNESS_CLEANUP_MAIN_ENV:-}" = "true" ]; then
-              echo "Main namespace cleanup is enabled via TESTHARNESS_CLEANUP_MAIN_ENV=true." >> $GITHUB_STEP_SUMMARY
-            else
-              echo "Main namespace will remain deployed after test harness completion." >> $GITHUB_STEP_SUMMARY
-              echo "Set TESTHARNESS_CLEANUP_MAIN_ENV=true in GitHub Actions variables to clean it up after successful main runs." >> $GITHUB_STEP_SUMMARY
-            fi
           else
             NAMESPACE_BRANCH_TAG="$(printf '%.51s' "${NAMESPACE_BRANCH_TAG}" | sed -E 's/-+$//')"
             echo "NAMESPACE=vna-devnet-${NAMESPACE_BRANCH_TAG}" >> $GITHUB_ENV
           fi
+          echo "K8s harness namespaces are recreated at start and deleted at the end of each run." >> $GITHUB_STEP_SUMMARY
 
       - name: Login to Docker Hub
         if: env.HARNESS_MODE_EFFECTIVE == 'docker'
@@ -158,27 +149,36 @@ jobs:
             echo "Image not ready yet, retrying in 20s... ($attempts/$max_attempts)"
             sleep 20
           done
+          IMAGE_DIGEST_REF="$(docker image inspect --format='{{index .RepoDigests 0}}' "$IMAGE_TAG")"
+          if [ -z "$IMAGE_DIGEST_REF" ]; then
+            echo "Could not resolve immutable digest for $IMAGE_TAG." >&2
+            exit 1
+          fi
+          echo "Resolved $IMAGE_TAG to $IMAGE_DIGEST_REF"
+          if ! docker run --rm --entrypoint /bin/bash "$IMAGE_DIGEST_REF" -lc 'test -x /usr/local/bin/veranad && /usr/local/bin/veranad version >/dev/null'; then
+            echo "Image $IMAGE_DIGEST_REF does not contain an executable /usr/local/bin/veranad." >&2
+            exit 1
+          fi
           echo "Installing veranad from $IMAGE_TAG for local test harness use"
-          container_id="$(docker create "$IMAGE_TAG")"
+          container_id="$(docker create "$IMAGE_DIGEST_REF")"
           docker cp "${container_id}:/usr/local/bin/veranad" /usr/local/bin/veranad
           docker rm "$container_id"
           chmod +x /usr/local/bin/veranad
           if kubectl get namespace "$NAMESPACE" >/dev/null 2>&1; then
-            deletion_ts="$(kubectl get namespace "$NAMESPACE" -o jsonpath='{.metadata.deletionTimestamp}')"
-            if [ -n "$deletion_ts" ]; then
-              echo "Namespace $NAMESPACE is terminating; waiting for deletion before recreating..."
-              if ! kubectl wait --for=delete "namespace/$NAMESPACE" --timeout=300s; then
-                echo "Namespace $NAMESPACE is still terminating after 300s." >&2
-                kubectl get namespace "$NAMESPACE" -o yaml || true
-                exit 1
-              fi
-            else
-              echo "Reusing existing namespace $NAMESPACE"
+            echo "Deleting existing namespace $NAMESPACE before test harness deployment"
+            kubectl delete namespace "$NAMESPACE" --wait=false
+            if ! kubectl wait --for=delete "namespace/$NAMESPACE" --timeout=600s; then
+              echo "Namespace $NAMESPACE is still present after cleanup timeout." >&2
+              kubectl get namespace "$NAMESPACE" -o yaml || true
+              exit 1
             fi
           fi
-          if ! kubectl get namespace "$NAMESPACE" >/dev/null 2>&1; then
-            kubectl create namespace "$NAMESPACE"
-          fi
+          kubectl create namespace "$NAMESPACE"
+          kubectl label namespace "$NAMESPACE" \
+            app.kubernetes.io/managed-by=github-actions \
+            ci.verana/workflow=test-harness \
+            ci.verana/run-id="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --overwrite
           kubectl -n "$NAMESPACE" create configmap verana-testharness-scripts \
             --from-file=scripts/setup_primary_validator.sh \
             --from-file=scripts/setup_secondary_validator.sh \
@@ -203,11 +203,13 @@ jobs:
                   app: verana-testharness
                 annotations:
                   ci.verana/run-id: "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+                  ci.verana/image-tag: "${IMAGE_TAG}"
+                  ci.verana/image-digest: "${IMAGE_DIGEST_REF}"
               spec:
                 containers:
                 - name: veranad
-                  image: ${IMAGE_TAG}
-                  imagePullPolicy: Always
+                  image: ${IMAGE_DIGEST_REF}
+                  imagePullPolicy: IfNotPresent
                   command: ["/bin/bash","-lc"]
                   args:
                     - |
@@ -493,14 +495,16 @@ jobs:
       - name: Finalize without error
         run: echo "Test harness execution completed successfully."
 
-      - name: Cleanup K8s namespace after successful K8s run
-        if: success() && env.HARNESS_MODE_EFFECTIVE == 'k8s' && (github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref_name == 'main' && env.TESTHARNESS_CLEANUP_MAIN_ENV == 'true'))
+      - name: Cleanup K8s namespace
+        if: always() && env.HARNESS_MODE_EFFECTIVE == 'k8s'
         run: |
           export KUBECONFIG=$KUBECONFIG
           echo "Cleaning up namespace $NAMESPACE"
           kubectl delete namespace "$NAMESPACE" --ignore-not-found=true --wait=false
-          if ! kubectl wait --for=delete "namespace/$NAMESPACE" --timeout=300s; then
-            echo "Namespace $NAMESPACE is still present after cleanup timeout." >&2
-            kubectl get namespace "$NAMESPACE" -o yaml || true
-            exit 1
+          if kubectl get namespace "$NAMESPACE" >/dev/null 2>&1; then
+            if ! kubectl wait --for=delete "namespace/$NAMESPACE" --timeout=600s; then
+              echo "Namespace $NAMESPACE is still present after cleanup timeout." >&2
+              kubectl get namespace "$NAMESPACE" -o yaml || true
+              exit 1
+            fi
           fi
