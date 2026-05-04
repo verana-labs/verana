@@ -357,18 +357,15 @@ Parameters:
 				},
 				{
 					RpcMethod: "CreateOrUpdatePermissionSession",
-					Use:       "create-or-update-perm-session [id] [agent-perm-id] [wallet-agent-perm-id]",
+					Use:       "create-or-update-perm-session [id]",
 					Short:     "Create or update a permission session",
-					Long:      "Create or update a permission session for credential exchange operations. At least one of issuer-perm-id or verifier-perm-id must be provided.",
+					// [MOD-PERM-MSG-10] spec breaking change: agent_perm_id and
+					// wallet_agent_perm_id are now optional (set only for VUA peers, omitted
+					// for VS peers), so they moved from positional args to flags.
+					Long: "Create or update a permission session for credential exchange operations. At least one of --issuer-perm-id or --verifier-perm-id must be provided. Set --agent-perm-id and --wallet-agent-perm-id only when peer is a Verifiable User Agent.",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{
 							ProtoField: "id",
-						},
-						{
-							ProtoField: "agent_perm_id",
-						},
-						{
-							ProtoField: "wallet_agent_perm_id",
 						},
 					},
 					FlagOptions: map[string]*autocliv1.FlagOptions{
@@ -384,6 +381,16 @@ Parameters:
 						"verifier_perm_id": {
 							Name:         "verifier-perm-id",
 							Usage:        "ID of the verifier permission",
+							DefaultValue: "0",
+						},
+						"agent_perm_id": {
+							Name:         "agent-perm-id",
+							Usage:        "Optional agent credential issuer permission id (set only when peer is a Verifiable User Agent)",
+							DefaultValue: "0",
+						},
+						"wallet_agent_perm_id": {
+							Name:         "wallet-agent-perm-id",
+							Usage:        "Optional wallet credential issuer permission id (set only when peer is a Verifiable User Agent)",
 							DefaultValue: "0",
 						},
 						"digest": {
