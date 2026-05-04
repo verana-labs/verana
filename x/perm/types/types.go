@@ -269,15 +269,11 @@ func (msg *MsgCreateOrUpdatePermissionSession) ValidateBasic() error {
 		return sdkerrors.ErrInvalidRequest.Wrap("at least one of issuer_perm_id or verifier_perm_id must be provided")
 	}
 
-	// agent_perm_id is mandatory
-	if msg.AgentPermId == 0 {
-		return sdkerrors.ErrInvalidRequest.Wrap("agent_perm_id is mandatory")
-	}
-
-	// wallet_agent_perm_id is mandatory
-	if msg.WalletAgentPermId == 0 {
-		return sdkerrors.ErrInvalidRequest.Wrap("wallet_agent_perm_id is mandatory")
-	}
+	// [MOD-PERM-MSG-10] spec breaking change: agent_perm_id and wallet_agent_perm_id
+	// are now optional. They are set only when peer is a Verifiable User Agent (VUA);
+	// they MUST NOT be specified when peer is a Verifiable Service (VS).
+	// The chain has no way to authoritatively know peer type from the msg alone, so the
+	// VS-must-not-set rule is enforced off-chain (the peer "MUST refuse" per spec).
 
 	// Validate digest SRI format if provided
 	if msg.Digest != "" && !isValidDigestSRI(msg.Digest) {

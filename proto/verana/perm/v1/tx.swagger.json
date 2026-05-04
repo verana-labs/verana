@@ -518,12 +518,12 @@
         "agent_perm_id": {
           "type": "string",
           "format": "uint64",
-          "title": "mandatory: agent credential issuer permission id"
+          "description": "[MOD-PERM-MSG-10] spec breaking change: now optional. Set only when peer is a Verifiable User Agent (VUA);\nMUST NOT be specified when peer is a Verifiable Service (VS)."
         },
         "wallet_agent_perm_id": {
           "type": "string",
           "format": "uint64",
-          "title": "mandatory: wallet credential issuer permission id"
+          "description": "[MOD-PERM-MSG-10] spec breaking change: now optional. Set only when peer is a Verifiable User Agent (VUA);\nMUST NOT be specified when peer is a Verifiable Service (VS)."
         },
         "digest": {
           "type": "string",

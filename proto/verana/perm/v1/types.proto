@@ -82,7 +82,9 @@ message PermissionSession {
   string id = 1;
   string corporation = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"]; // group account that owns this session
   string vs_operator = 3 [(cosmos_proto.scalar) = "cosmos.AddressString"]; // the VS operator account
-  uint64 agent_perm_id = 4;
+  // [MOD-PERM-MSG-10] spec breaking change: agent_perm_id moved to PermissionSessionRecord.
+  reserved 4;
+  reserved "agent_perm_id";
   repeated PermissionSessionRecord session_records = 5;
   google.protobuf.Timestamp created = 6 [(gogoproto.stdtime) = true];
   google.protobuf.Timestamp modified = 7 [(gogoproto.stdtime) = true];
@@ -92,7 +94,8 @@ message PermissionSessionRecord {
   google.protobuf.Timestamp created = 1 [(gogoproto.stdtime) = true];
   uint64 issuer_perm_id = 2;
   uint64 verifier_perm_id = 3;
-  uint64 wallet_agent_perm_id = 4;
+  uint64 wallet_agent_perm_id = 4; // optional: 0 means not set (only for VUA peers)
+  uint64 agent_perm_id = 5;        // optional: 0 means not set (only for VUA peers)
 }
 
 // OptionalUInt64 is a wrapper for optional uint64 values

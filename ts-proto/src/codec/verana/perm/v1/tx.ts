@@ -167,9 +167,15 @@ export interface MsgCreateOrUpdatePermissionSession {
   issuerPermId: number;
   /** optional: verifier permission id */
   verifierPermId: number;
-  /** mandatory: agent credential issuer permission id */
+  /**
+   * [MOD-PERM-MSG-10] spec breaking change: now optional. Set only when peer is a Verifiable User Agent (VUA);
+   * MUST NOT be specified when peer is a Verifiable Service (VS).
+   */
   agentPermId: number;
-  /** mandatory: wallet credential issuer permission id */
+  /**
+   * [MOD-PERM-MSG-10] spec breaking change: now optional. Set only when peer is a Verifiable User Agent (VUA);
+   * MUST NOT be specified when peer is a Verifiable Service (VS).
+   */
   walletAgentPermId: number;
   /** optional: digest derived from an issued or verified credential */
   digest: string;

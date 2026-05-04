@@ -213,8 +213,12 @@ message MsgCreateOrUpdatePermissionSession {
   string id = 3; // UUID (mandatory)
   uint64 issuer_perm_id = 4; // optional: issuer permission id
   uint64 verifier_perm_id = 5; // optional: verifier permission id
-  uint64 agent_perm_id = 6; // mandatory: agent credential issuer permission id
-  uint64 wallet_agent_perm_id = 7; // mandatory: wallet credential issuer permission id
+  // [MOD-PERM-MSG-10] spec breaking change: now optional. Set only when peer is a Verifiable User Agent (VUA);
+  // MUST NOT be specified when peer is a Verifiable Service (VS).
+  uint64 agent_perm_id = 6;
+  // [MOD-PERM-MSG-10] spec breaking change: now optional. Set only when peer is a Verifiable User Agent (VUA);
+  // MUST NOT be specified when peer is a Verifiable Service (VS).
+  uint64 wallet_agent_perm_id = 7;
   string digest = 8; // optional: digest derived from an issued or verified credential
 }
 

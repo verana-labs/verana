@@ -477,10 +477,6 @@
           "type": "string",
           "title": "the VS operator account"
         },
-        "agent_perm_id": {
-          "type": "string",
-          "format": "uint64"
-        },
         "session_records": {
           "type": "array",
           "items": {
@@ -515,7 +511,13 @@
         },
         "wallet_agent_perm_id": {
           "type": "string",
-          "format": "uint64"
+          "format": "uint64",
+          "title": "optional: 0 means not set (only for VUA peers)"
+        },
+        "agent_perm_id": {
+          "type": "string",
+          "format": "uint64",
+          "title": "optional: 0 means not set (only for VUA peers)"
         }
       }
     },

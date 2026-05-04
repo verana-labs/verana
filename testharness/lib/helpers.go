@@ -1185,17 +1185,17 @@ func VerifyPermissionSession(client cosmosclient.Client, ctx context.Context, se
 		return false
 	}
 
-	// Verify agent permission ID matches expectation
-	if resp.GetSession().AgentPermId != expectedAgentPermID {
-		fmt.Printf("❌ Permission session verification failed: Expected agent permission ID %d, got %d\n",
-			expectedAgentPermID, resp.GetSession().AgentPermId)
-		return false
-	}
-
-	// Check session records for expected permissions
+	// [MOD-PERM-MSG-10] spec breaking change: agent_perm_id moved from PermissionSession
+	// into each PermissionSessionRecord. The helper now scans records for a match.
+	// expectedAgentPermID == 0 means "agent_perm_id was not set" — match records that
+	// also carry 0.
+	agentFound := false
 	issuerFound := false
 	verifierFound := false
 	for _, record := range resp.GetSession().SessionRecords {
+		if record.GetAgentPermId() == expectedAgentPermID {
+			agentFound = true
+		}
 		// Check for issuer permission ID if expected
 		if expectedIssuerPermID > 0 && record.GetIssuerPermId() == expectedIssuerPermID {
 			issuerFound = true
@@ -1205,6 +1205,12 @@ func VerifyPermissionSession(client cosmosclient.Client, ctx context.Context, se
 		if expectedVerifierPermID > 0 && record.GetVerifierPermId() == expectedVerifierPermID {
 			verifierFound = true
 		}
+	}
+
+	if !agentFound {
+		fmt.Printf("❌ Permission session verification failed: Expected agent permission ID %d not found in any session record\n",
+			expectedAgentPermID)
+		return false
 	}
 
 	// Verify issuer permission if expected

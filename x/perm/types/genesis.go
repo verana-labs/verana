@@ -144,17 +144,11 @@ func validatePermissionTimestamps(perm Permission) error {
 	return nil
 }
 
-// validatePermissionSession validates a single perm session
+// validatePermissionSession validates a single perm session.
+// [MOD-PERM-MSG-10] spec breaking change: agent_perm_id moved from PermissionSession
+// to PermissionSessionRecord; both agent_perm_id and wallet_agent_perm_id are optional
+// (per-record), set only when peer is a Verifiable User Agent.
 func validatePermissionSession(session PermissionSession, permissionIds map[uint64]bool) error {
-	// Check that agent perm exists
-	if session.AgentPermId == 0 {
-		return fmt.Errorf("agent perm ID cannot be 0 for session ID %s", session.Id)
-	}
-
-	if !permissionIds[session.AgentPermId] {
-		return fmt.Errorf("agent perm ID %d not found for session ID %s", session.AgentPermId, session.Id)
-	}
-
 	// Validate timestamps
 	if session.Created == nil {
 		return fmt.Errorf("created timestamp is required for session ID %s", session.Id)
@@ -184,7 +178,13 @@ func validatePermissionSession(session PermissionSession, permissionIds map[uint
 				record.VerifierPermId, session.Id, i)
 		}
 
-		// Check that wallet agent perm exists if set
+		// Check that agent perm exists if set (optional)
+		if record.AgentPermId != 0 && !permissionIds[record.AgentPermId] {
+			return fmt.Errorf("agent perm ID %d not found for session ID %s, record index %d",
+				record.AgentPermId, session.Id, i)
+		}
+
+		// Check that wallet agent perm exists if set (optional)
 		if record.WalletAgentPermId != 0 && !permissionIds[record.WalletAgentPermId] {
 			return fmt.Errorf("wallet agent perm ID %d not found for session ID %s, record index %d",
 				record.WalletAgentPermId, session.Id, i)

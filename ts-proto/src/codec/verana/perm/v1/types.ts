@@ -173,7 +173,6 @@ export interface PermissionSession {
   corporation: string;
   /** the VS operator account */
   vsOperator: string;
-  agentPermId: number;
   sessionRecords: PermissionSessionRecord[];
   created: Date | undefined;
   modified: Date | undefined;
@@ -183,7 +182,10 @@ export interface PermissionSessionRecord {
   created: Date | undefined;
   issuerPermId: number;
   verifierPermId: number;
+  /** optional: 0 means not set (only for VUA peers) */
   walletAgentPermId: number;
+  /** optional: 0 means not set (only for VUA peers) */
+  agentPermId: number;
 }
 
 /** OptionalUInt64 is a wrapper for optional uint64 values */
@@ -812,15 +814,7 @@ export const Permission = {
 };
 
 function createBasePermissionSession(): PermissionSession {
-  return {
-    id: "",
-    corporation: "",
-    vsOperator: "",
-    agentPermId: 0,
-    sessionRecords: [],
-    created: undefined,
-    modified: undefined,
-  };
+  return { id: "", corporation: "", vsOperator: "", sessionRecords: [], created: undefined, modified: undefined };
 }
 
 export const PermissionSession = {
@@ -833,9 +827,6 @@ export const PermissionSession = {
     }
     if (message.vsOperator !== "") {
       writer.uint32(26).string(message.vsOperator);
-    }
-    if (message.agentPermId !== 0) {
-      writer.uint32(32).uint64(message.agentPermId);
     }
     for (const v of message.sessionRecords) {
       PermissionSessionRecord.encode(v!, writer.uint32(42).fork()).ldelim();
@@ -877,13 +868,6 @@ export const PermissionSession = {
 
           message.vsOperator = reader.string();
           continue;
-        case 4:
-          if (tag !== 32) {
-            break;
-          }
-
-          message.agentPermId = longToNumber(reader.uint64() as Long);
-          continue;
         case 5:
           if (tag !== 42) {
             break;
@@ -919,7 +903,6 @@ export const PermissionSession = {
       id: isSet(object.id) ? globalThis.String(object.id) : "",
       corporation: isSet(object.corporation) ? globalThis.String(object.corporation) : "",
       vsOperator: isSet(object.vsOperator) ? globalThis.String(object.vsOperator) : "",
-      agentPermId: isSet(object.agentPermId) ? globalThis.Number(object.agentPermId) : 0,
       sessionRecords: globalThis.Array.isArray(object?.sessionRecords)
         ? object.sessionRecords.map((e: any) => PermissionSessionRecord.fromJSON(e))
         : [],
@@ -938,9 +921,6 @@ export const PermissionSession = {
     }
     if (message.vsOperator !== "") {
       obj.vsOperator = message.vsOperator;
-    }
-    if (message.agentPermId !== 0) {
-      obj.agentPermId = Math.round(message.agentPermId);
     }
     if (message.sessionRecords?.length) {
       obj.sessionRecords = message.sessionRecords.map((e) => PermissionSessionRecord.toJSON(e));
@@ -962,7 +942,6 @@ export const PermissionSession = {
     message.id = object.id ?? "";
     message.corporation = object.corporation ?? "";
     message.vsOperator = object.vsOperator ?? "";
-    message.agentPermId = object.agentPermId ?? 0;
     message.sessionRecords = object.sessionRecords?.map((e) => PermissionSessionRecord.fromPartial(e)) || [];
     message.created = object.created ?? undefined;
     message.modified = object.modified ?? undefined;
@@ -971,7 +950,7 @@ export const PermissionSession = {
 };
 
 function createBasePermissionSessionRecord(): PermissionSessionRecord {
-  return { created: undefined, issuerPermId: 0, verifierPermId: 0, walletAgentPermId: 0 };
+  return { created: undefined, issuerPermId: 0, verifierPermId: 0, walletAgentPermId: 0, agentPermId: 0 };
 }
 
 export const PermissionSessionRecord = {
@@ -987,6 +966,9 @@ export const PermissionSessionRecord = {
     }
     if (message.walletAgentPermId !== 0) {
       writer.uint32(32).uint64(message.walletAgentPermId);
+    }
+    if (message.agentPermId !== 0) {
+      writer.uint32(40).uint64(message.agentPermId);
     }
     return writer;
   },
@@ -1026,6 +1008,13 @@ export const PermissionSessionRecord = {
 
           message.walletAgentPermId = longToNumber(reader.uint64() as Long);
           continue;
+        case 5:
+          if (tag !== 40) {
+            break;
+          }
+
+          message.agentPermId = longToNumber(reader.uint64() as Long);
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -1041,6 +1030,7 @@ export const PermissionSessionRecord = {
       issuerPermId: isSet(object.issuerPermId) ? globalThis.Number(object.issuerPermId) : 0,
       verifierPermId: isSet(object.verifierPermId) ? globalThis.Number(object.verifierPermId) : 0,
       walletAgentPermId: isSet(object.walletAgentPermId) ? globalThis.Number(object.walletAgentPermId) : 0,
+      agentPermId: isSet(object.agentPermId) ? globalThis.Number(object.agentPermId) : 0,
     };
   },
 
@@ -1058,6 +1048,9 @@ export const PermissionSessionRecord = {
     if (message.walletAgentPermId !== 0) {
       obj.walletAgentPermId = Math.round(message.walletAgentPermId);
     }
+    if (message.agentPermId !== 0) {
+      obj.agentPermId = Math.round(message.agentPermId);
+    }
     return obj;
   },
 
@@ -1070,6 +1063,7 @@ export const PermissionSessionRecord = {
     message.issuerPermId = object.issuerPermId ?? 0;
     message.verifierPermId = object.verifierPermId ?? 0;
     message.walletAgentPermId = object.walletAgentPermId ?? 0;
+    message.agentPermId = object.agentPermId ?? 0;
     return message;
   },
 };

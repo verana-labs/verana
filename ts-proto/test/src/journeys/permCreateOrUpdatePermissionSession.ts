@@ -227,6 +227,36 @@ async function main() {
 
     console.log("  Session updated!");
     console.log(`  Tx Hash: ${updateResult.transactionHash}`);
+
+    // Step 9: [MOD-PERM-MSG-10] Create a session with optional agent fields
+    // omitted, simulating a Verifiable Service peer. agent_perm_id and
+    // wallet_agent_perm_id are now optional per the spec breaking change.
+    console.log();
+    console.log("Step 9: Creating session with optional agent fields omitted (VS peer)...");
+    const vsPeerSessionId = crypto.randomUUID();
+    const vsPeerMsg = {
+      typeUrl: typeUrls.MsgCreateOrUpdatePermissionSession,
+      value: MsgCreateOrUpdatePermissionSession.fromPartial({
+        corporation: setup.authorityAddress,
+        operator: vsOperatorAccount.address,
+        id: vsPeerSessionId,
+        issuerPermId: issuerPermId,
+        verifierPermId: 0,
+        // agentPermId and walletAgentPermId intentionally omitted (= 0).
+        digest: "sha384-vsPeerSessionDigest",
+      }),
+    };
+
+    const vsPeerFee = await calculateFeeWithSimulation(vsClient, vsOperatorAccount.address, [vsPeerMsg], "Creating VS-peer permission session");
+    const vsPeerResult = await signAndBroadcastWithRetry(vsClient, vsOperatorAccount.address, [vsPeerMsg], vsPeerFee, "Creating VS-peer permission session");
+
+    if (vsPeerResult.code !== 0) {
+      throw new Error(`Failed to create VS-peer permission session: ${vsPeerResult.rawLog}`);
+    }
+
+    console.log("  VS-peer session created!");
+    console.log(`  Tx Hash: ${vsPeerResult.transactionHash}`);
+    console.log(`  Session ID: ${vsPeerSessionId}`);
   } catch (error: any) {
     console.log("ERROR!");
     console.error(error);

@@ -939,3 +939,185 @@ func TestAgentRewardsWithDiscount(t *testing.T) {
 			"Agent TD should increase by 1")
 	})
 }
+
+// setupCspsOptionalScenario builds the minimum perm graph for [MOD-PERM-MSG-10]
+// optional-agent tests: ecosystem (fees=100), issuer (executor), agent, wallet_agent.
+// Returns the msg server, ctx, all addresses, all perm IDs, and the trackers.
+func setupCspsOptionalScenario(t *testing.T) (
+	keeper.Keeper, types.MsgServer, sdk.Context,
+	string, string, string, // creator, agent, walletAgent
+	uint64, uint64, uint64, // ecosystemPermID, issuerPermID, agentPermID
+	uint64, // walletAgentPermID
+	*TrackingBankKeeper, *TrackingTrustDepositKeeper,
+) {
+	t.Helper()
+	k, ms, csKeeper, trkKeeper, bankKeeper, tdKeeper, ctx := setupTrackingMsgServer(t,
+		"0.1", "0.05", "0.2", 1,
+	)
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	creator := sdk.AccAddress([]byte("creator_address_____")).String()
+	ecosystem := sdk.AccAddress([]byte("ecosystem_address___")).String()
+	agent := sdk.AccAddress([]byte("agent_address_______")).String()
+	walletAgent := sdk.AccAddress([]byte("wallet_agent_addr___")).String()
+
+	bankKeeper.SetBalance(creator, sdk.NewCoins(sdk.NewInt64Coin(types.BondDenom, 100000)))
+	trID := trkKeeper.CreateMockTrustRegistry(ecosystem, "did:example:123456789abcdefghi")
+	csKeeper.UpdateMockCredentialSchema(1, trID,
+		cstypes.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS,
+		cstypes.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS)
+
+	now := sdkCtx.BlockTime()
+	past := now.Add(-1 * time.Hour)
+
+	ecosystemPermID, err := k.CreatePermission(sdkCtx, types.Permission{
+		SchemaId: 1, Type: types.PermissionType_ECOSYSTEM, Corporation: ecosystem,
+		Created: &now, Adjusted: &now, Modified: &now,
+		VpState: types.ValidationState_VALIDATED, IssuanceFees: 100, EffectiveFrom: &past,
+	})
+	require.NoError(t, err)
+
+	issuerPermID, err := k.CreatePermission(sdkCtx, types.Permission{
+		SchemaId: 1, Type: types.PermissionType_ISSUER, Corporation: creator,
+		Created: &now, Adjusted: &now, Modified: &now,
+		ValidatorPermId: ecosystemPermID, VpState: types.ValidationState_VALIDATED,
+		EffectiveFrom: &past, VsOperator: creator, VsOperatorAuthzEnabled: true,
+	})
+	require.NoError(t, err)
+
+	agentPermID, err := k.CreatePermission(sdkCtx, types.Permission{
+		SchemaId: 1, Type: types.PermissionType_ISSUER, Corporation: agent,
+		Created: &now, Adjusted: &now, Modified: &now,
+		ValidatorPermId: issuerPermID, VpState: types.ValidationState_VALIDATED, EffectiveFrom: &past,
+	})
+	require.NoError(t, err)
+
+	walletAgentPermID, err := k.CreatePermission(sdkCtx, types.Permission{
+		SchemaId: 1, Type: types.PermissionType_ISSUER, Corporation: walletAgent,
+		Created: &now, Adjusted: &now, Modified: &now,
+		ValidatorPermId: issuerPermID, VpState: types.ValidationState_VALIDATED, EffectiveFrom: &past,
+	})
+	require.NoError(t, err)
+
+	return k, ms, ctx, creator, agent, walletAgent,
+		ecosystemPermID, issuerPermID, agentPermID, walletAgentPermID, bankKeeper, tdKeeper
+}
+
+// TestCspsOptionalAgentFields_NeitherSet verifies the VS-peer flow per [MOD-PERM-MSG-10]:
+// when neither agent_perm_id nor wallet_agent_perm_id is set, the multiplier
+// excludes both reward terms (multiplier = 1 + trust_deposit_rate), and no
+// agent or wallet-agent rewards are distributed.
+func TestCspsOptionalAgentFields_NeitherSet(t *testing.T) {
+	_, ms, ctx, creator, agent, walletAgent, _, issuerPermID, _, _, bankKeeper, tdKeeper :=
+		setupCspsOptionalScenario(t)
+
+	msg := &types.MsgCreateOrUpdatePermissionSession{
+		Corporation:       creator,
+		Operator:          creator,
+		Id:                uuid.New().String(),
+		IssuerPermId:      issuerPermID,
+		AgentPermId:       0, // VS peer
+		WalletAgentPermId: 0, // VS peer
+	}
+	resp, err := ms.CreateOrUpdatePermissionSession(ctx, msg)
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+
+	// MOD-PERM-MSG-10: no rewards distributed when neither *_perm_id is set.
+	require.Equal(t, int64(0), bankKeeper.GetTotalReceived(agent).AmountOf(types.BondDenom).Int64(),
+		"agent must receive no reward when agent_perm_id is unset")
+	require.Equal(t, int64(0), bankKeeper.GetTotalReceived(walletAgent).AmountOf(types.BondDenom).Int64(),
+		"wallet agent must receive no reward when wallet_agent_perm_id is unset")
+	require.Equal(t, int64(0), tdKeeper.GetTotalAdjustment(agent),
+		"agent TD must not be adjusted when agent_perm_id is unset")
+	require.Equal(t, int64(0), tdKeeper.GetTotalAdjustment(walletAgent),
+		"wallet agent TD must not be adjusted when wallet_agent_perm_id is unset")
+}
+
+// TestCspsOptionalAgentFields_OnlyAgentSet verifies the VUA-with-only-agent flow:
+// agent reward is computed and distributed; wallet-agent terms are skipped.
+func TestCspsOptionalAgentFields_OnlyAgentSet(t *testing.T) {
+	_, ms, ctx, creator, agent, walletAgent, _, issuerPermID, agentPermID, _, bankKeeper, tdKeeper :=
+		setupCspsOptionalScenario(t)
+
+	msg := &types.MsgCreateOrUpdatePermissionSession{
+		Corporation:       creator,
+		Operator:          creator,
+		Id:                uuid.New().String(),
+		IssuerPermId:      issuerPermID,
+		AgentPermId:       agentPermID,
+		WalletAgentPermId: 0,
+	}
+	resp, err := ms.CreateOrUpdatePermissionSession(ctx, msg)
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+
+	// Agent reward = ecosystemFees * uaRate = 100 * 0.1 = 10.
+	// agentToTD = 10 * 0.2 = 2; agentToAccount = 10 - 2 = 8.
+	require.Equal(t, int64(8), bankKeeper.GetTotalReceived(agent).AmountOf(types.BondDenom).Int64(),
+		"agent must receive 8 (= 100 * 0.1 - 2 TD)")
+	require.Equal(t, int64(2), tdKeeper.GetTotalAdjustment(agent), "agent TD must increase by 2")
+
+	require.Equal(t, int64(0), bankKeeper.GetTotalReceived(walletAgent).AmountOf(types.BondDenom).Int64(),
+		"wallet agent must receive no reward when wallet_agent_perm_id is unset")
+	require.Equal(t, int64(0), tdKeeper.GetTotalAdjustment(walletAgent),
+		"wallet agent TD must not be adjusted when wallet_agent_perm_id is unset")
+}
+
+// TestCspsOptionalAgentFields_OnlyWalletSet verifies the VUA-with-only-wallet flow:
+// wallet-agent reward is computed and distributed; agent terms are skipped.
+func TestCspsOptionalAgentFields_OnlyWalletSet(t *testing.T) {
+	_, ms, ctx, creator, agent, walletAgent, _, issuerPermID, _, walletAgentPermID, bankKeeper, tdKeeper :=
+		setupCspsOptionalScenario(t)
+
+	msg := &types.MsgCreateOrUpdatePermissionSession{
+		Corporation:       creator,
+		Operator:          creator,
+		Id:                uuid.New().String(),
+		IssuerPermId:      issuerPermID,
+		AgentPermId:       0,
+		WalletAgentPermId: walletAgentPermID,
+	}
+	resp, err := ms.CreateOrUpdatePermissionSession(ctx, msg)
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+
+	// Wallet agent reward = ecosystemFees * wuaRate = 100 * 0.05 = 5.
+	// walletToTD = 5 * 0.2 = 1; walletToAccount = 5 - 1 = 4.
+	require.Equal(t, int64(4), bankKeeper.GetTotalReceived(walletAgent).AmountOf(types.BondDenom).Int64(),
+		"wallet agent must receive 4 (= 100 * 0.05 - 1 TD)")
+	require.Equal(t, int64(1), tdKeeper.GetTotalAdjustment(walletAgent),
+		"wallet agent TD must increase by 1")
+
+	require.Equal(t, int64(0), bankKeeper.GetTotalReceived(agent).AmountOf(types.BondDenom).Int64(),
+		"agent must receive no reward when agent_perm_id is unset")
+	require.Equal(t, int64(0), tdKeeper.GetTotalAdjustment(agent),
+		"agent TD must not be adjusted when agent_perm_id is unset")
+}
+
+// TestCspsOptionalAgentFields_RecordCarriesAgentPermId verifies that
+// [MOD-PERM-MSG-10]'s data-model change is honored: agent_perm_id is persisted
+// at the PermissionSessionRecord level (not at PermissionSession).
+func TestCspsOptionalAgentFields_RecordCarriesAgentPermId(t *testing.T) {
+	k, ms, ctx, creator, _, _, _, issuerPermID, agentPermID, walletAgentPermID, _, _ :=
+		setupCspsOptionalScenario(t)
+
+	sessionID := uuid.New().String()
+	_, err := ms.CreateOrUpdatePermissionSession(ctx, &types.MsgCreateOrUpdatePermissionSession{
+		Corporation:       creator,
+		Operator:          creator,
+		Id:                sessionID,
+		IssuerPermId:      issuerPermID,
+		AgentPermId:       agentPermID,
+		WalletAgentPermId: walletAgentPermID,
+	})
+	require.NoError(t, err)
+
+	session, err := k.PermissionSession.Get(sdk.UnwrapSDKContext(ctx), sessionID)
+	require.NoError(t, err)
+	require.Len(t, session.SessionRecords, 1)
+	require.Equal(t, agentPermID, session.SessionRecords[0].AgentPermId,
+		"agent_perm_id must live on the per-record struct")
+	require.Equal(t, walletAgentPermID, session.SessionRecords[0].WalletAgentPermId,
+		"wallet_agent_perm_id must live on the per-record struct")
+}

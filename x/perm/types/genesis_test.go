@@ -43,12 +43,12 @@ func TestGenesisState_Validate(t *testing.T) {
 		Id:          "test-session-id",
 		Corporation: creatorAddr,
 		VsOperator:  creatorAddr,
-		AgentPermId: 2,
 		Created:     &nowTime,
 		Modified:    &nowTime,
 		SessionRecords: []*types.PermissionSessionRecord{
 			{
 				IssuerPermId: 1,
+				AgentPermId:  2, // [MOD-PERM-MSG-10] agent_perm_id now per-record
 				Created:      &nowTime,
 			},
 		},
@@ -159,9 +159,15 @@ func TestGenesisState_Validate(t *testing.T) {
 						Id:          "test-session-id",
 						Corporation: creatorAddr,
 						VsOperator:  creatorAddr,
-						AgentPermId: 999, // Non-existent perm
 						Created:     &nowTime,
 						Modified:    &nowTime,
+						SessionRecords: []*types.PermissionSessionRecord{
+							{
+								IssuerPermId: 1,
+								AgentPermId:  999, // [MOD-PERM-MSG-10] non-existent perm at record level
+								Created:      &nowTime,
+							},
+						},
 					},
 				},
 				NextPermissionId: 2,

@@ -137,36 +137,44 @@ func (ms msgServer) validateCreateOrUpdatePermissionSessionPreconditions(ctx sdk
 		return fmt.Errorf("VS operator authorization is not enabled for permission %d", primaryPerm.Id)
 	}
 
-	// agent: Load agent_perm from agent_perm_id
-	agentPerm, err := ms.Permission.Get(ctx, msg.AgentPermId)
-	if err != nil {
-		return fmt.Errorf("agent permission not found: %w", err)
+	// [MOD-PERM-MSG-10] spec breaking change: agent_perm_id and wallet_agent_perm_id
+	// are optional (only set when peer is a Verifiable User Agent). Validate each
+	// only when supplied.
+
+	// agent: Load agent_perm from agent_perm_id (if set)
+	if msg.AgentPermId != 0 {
+		agentPerm, err := ms.Permission.Get(ctx, msg.AgentPermId)
+		if err != nil {
+			return fmt.Errorf("agent permission not found: %w", err)
+		}
+
+		// if agent_perm.type is not ISSUER, abort
+		if agentPerm.Type != types.PermissionType_ISSUER {
+			return fmt.Errorf("agent permission must be ISSUER type")
+		}
+
+		// if agent_perm is not an active permission, abort
+		if err := IsValidPermission(agentPerm, now); err != nil {
+			return fmt.Errorf("agent permission is not valid: %w", err)
+		}
 	}
 
-	// if agent_perm.type is not ISSUER, abort
-	if agentPerm.Type != types.PermissionType_ISSUER {
-		return fmt.Errorf("agent permission must be ISSUER type")
-	}
+	// wallet_agent: Load wallet_agent_perm from wallet_agent_perm_id (if set)
+	if msg.WalletAgentPermId != 0 {
+		walletAgentPerm, err := ms.Permission.Get(ctx, msg.WalletAgentPermId)
+		if err != nil {
+			return fmt.Errorf("wallet agent permission not found: %w", err)
+		}
 
-	// if agent_perm is not an active permission, abort
-	if err := IsValidPermission(agentPerm, now); err != nil {
-		return fmt.Errorf("agent permission is not valid: %w", err)
-	}
+		// if wallet_agent_perm.type is not ISSUER, abort
+		if walletAgentPerm.Type != types.PermissionType_ISSUER {
+			return fmt.Errorf("wallet agent permission must be ISSUER type")
+		}
 
-	// wallet_agent: Load wallet_agent_perm from wallet_agent_perm_id
-	walletAgentPerm, err := ms.Permission.Get(ctx, msg.WalletAgentPermId)
-	if err != nil {
-		return fmt.Errorf("wallet agent permission not found: %w", err)
-	}
-
-	// if wallet_agent_perm.type is not ISSUER, abort
-	if walletAgentPerm.Type != types.PermissionType_ISSUER {
-		return fmt.Errorf("wallet agent permission must be ISSUER type")
-	}
-
-	// if wallet_agent_perm is not an active permission, abort
-	if err := IsValidPermission(walletAgentPerm, now); err != nil {
-		return fmt.Errorf("wallet agent permission is not valid: %w", err)
+		// if wallet_agent_perm is not an active permission, abort
+		if err := IsValidPermission(walletAgentPerm, now); err != nil {
+			return fmt.Errorf("wallet agent permission is not valid: %w", err)
+		}
 	}
 
 	return nil
@@ -224,14 +232,24 @@ func (ms msgServer) validateCreateOrUpdatePermissionSessionFees(ctx sdk.Context,
 	trustDepositRate := ms.trustDeposit.GetTrustDepositRate(ctx)
 	trustUnitPrice := ms.trustRegistryKeeper.GetTrustUnitPrice(ctx)
 
-	// Calculate trust_fees = beneficiary_fees * (1 + user_agent_reward_rate + wallet_user_agent_reward_rate + trust_deposit_rate) * trust_unit_price
+	// Calculate trust_fees = beneficiary_fees * (1 + [user_agent_reward_rate?] + [wallet_user_agent_reward_rate?] + trust_deposit_rate) * trust_unit_price
+	//
+	// [MOD-PERM-MSG-10] spec: agent and wallet-agent reward terms are added to
+	// the multiplier ONLY when the corresponding *_perm_id is set (rewards are
+	// optional per the breaking change).
 	//
 	// Use math.Int arbitrary-precision arithmetic throughout: naive int64(fees)
 	// would wrap for values >= 2^63, and uint64 * uint64 multiplications can
 	// overflow silently before any int64 cast. Convert uint64 inputs via
 	// math.NewIntFromUint64, multiply through LegacyDec, then bounds-check
 	// before narrowing back to uint64/int64.
-	multiplier := math.LegacyOneDec().Add(userAgentRewardRate).Add(walletUserAgentRewardRate).Add(trustDepositRate)
+	multiplier := math.LegacyOneDec().Add(trustDepositRate)
+	if msg.AgentPermId != 0 {
+		multiplier = multiplier.Add(userAgentRewardRate)
+	}
+	if msg.WalletAgentPermId != 0 {
+		multiplier = multiplier.Add(walletUserAgentRewardRate)
+	}
 	trustFeesDec := math.LegacyNewDecFromInt(math.NewIntFromUint64(beneficiaryFees)).
 		Mul(multiplier).
 		Mul(math.LegacyNewDecFromInt(math.NewIntFromUint64(trustUnitPrice)))
@@ -331,9 +349,14 @@ func (ms msgServer) executeCreateOrUpdatePermissionSession(ctx sdk.Context, msg 
 			}
 			payeeFeesToAccount := feeNativeInt.Uint64() - payerTrustDeposit
 
-			// Accumulate agent rewards
-			accumulatedUserAgentReward = accumulatedUserAgentReward.Add(feeInNativeDenom.Mul(userAgentRewardRate))
-			accumulatedWalletAgentReward = accumulatedWalletAgentReward.Add(feeInNativeDenom.Mul(walletUserAgentRewardRate))
+			// [MOD-PERM-MSG-10] Accumulate agent rewards only when the corresponding
+			// *_perm_id is set. Both rewards are optional per the spec breaking change.
+			if msg.AgentPermId != 0 {
+				accumulatedUserAgentReward = accumulatedUserAgentReward.Add(feeInNativeDenom.Mul(userAgentRewardRate))
+			}
+			if msg.WalletAgentPermId != 0 {
+				accumulatedWalletAgentReward = accumulatedWalletAgentReward.Add(feeInNativeDenom.Mul(walletUserAgentRewardRate))
+			}
 
 			// Transfer payee_fees_to_account to perm.authority
 			if payeeFeesToAccount > 0 {
@@ -390,8 +413,8 @@ func (ms msgServer) executeCreateOrUpdatePermissionSession(ctx sdk.Context, msg 
 	}
 
 	// Step 2: Process agent rewards
-	// User Agent Reward
-	if accumulatedUserAgentReward.IsPositive() {
+	// [MOD-PERM-MSG-10] Distribute User Agent reward only if agent_perm_id is set.
+	if msg.AgentPermId != 0 && accumulatedUserAgentReward.IsPositive() {
 		agentPerm, err := ms.Permission.Get(ctx, msg.AgentPermId)
 		if err != nil {
 			return fmt.Errorf("failed to get agent permission: %w", err)
@@ -449,8 +472,8 @@ func (ms msgServer) executeCreateOrUpdatePermissionSession(ctx sdk.Context, msg 
 		}
 	}
 
-	// Wallet Agent Reward
-	if accumulatedWalletAgentReward.IsPositive() {
+	// [MOD-PERM-MSG-10] Distribute Wallet Agent reward only if wallet_agent_perm_id is set.
+	if msg.WalletAgentPermId != 0 && accumulatedWalletAgentReward.IsPositive() {
 		walletAgentPerm, err := ms.Permission.Get(ctx, msg.WalletAgentPermId)
 		if err != nil {
 			return fmt.Errorf("failed to get wallet agent permission: %w", err)
@@ -553,11 +576,12 @@ func (ms msgServer) validateSessionAccess(ctx sdk.Context, msg *types.MsgCreateO
 }
 
 func (ms msgServer) createOrUpdateSession(ctx sdk.Context, msg *types.MsgCreateOrUpdatePermissionSession, now time.Time) error {
+	// [MOD-PERM-MSG-10] spec breaking change: agent_perm_id moved out of
+	// PermissionSession into each PermissionSessionRecord.
 	session := &types.PermissionSession{
 		Id:          msg.Id,
 		Corporation: msg.Corporation,
 		VsOperator:  msg.Operator,
-		AgentPermId: msg.AgentPermId,
 		Modified:    &now,
 	}
 
@@ -573,12 +597,14 @@ func (ms msgServer) createOrUpdateSession(ctx sdk.Context, msg *types.MsgCreateO
 		return err
 	}
 
-	// Create PermissionSessionRecord
+	// [MOD-PERM-MSG-10] Both agent_perm_id and wallet_agent_perm_id are recorded
+	// per-session-record (optional; 0 when not provided).
 	record := &types.PermissionSessionRecord{
 		Created:           &now,
 		IssuerPermId:      msg.IssuerPermId,
 		VerifierPermId:    msg.VerifierPermId,
 		WalletAgentPermId: msg.WalletAgentPermId,
+		AgentPermId:       msg.AgentPermId,
 	}
 
 	// Add the record to session.session_records

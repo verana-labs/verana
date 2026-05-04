@@ -14752,13 +14752,17 @@ type MsgCreateOrUpdatePermissionSession struct {
 	// corporation is the group account on whose behalf this message is executed
 	Corporation string `protobuf:"bytes,1,opt,name=corporation,proto3" json:"corporation,omitempty"`
 	// operator is the account authorized by the corporation to run this Msg (vs_operator)
-	Operator          string `protobuf:"bytes,2,opt,name=operator,proto3" json:"operator,omitempty"`
-	Id                string `protobuf:"bytes,3,opt,name=id,proto3" json:"id,omitempty"`                                                             // UUID (mandatory)
-	IssuerPermId      uint64 `protobuf:"varint,4,opt,name=issuer_perm_id,json=issuerPermId,proto3" json:"issuer_perm_id,omitempty"`                  // optional: issuer permission id
-	VerifierPermId    uint64 `protobuf:"varint,5,opt,name=verifier_perm_id,json=verifierPermId,proto3" json:"verifier_perm_id,omitempty"`            // optional: verifier permission id
-	AgentPermId       uint64 `protobuf:"varint,6,opt,name=agent_perm_id,json=agentPermId,proto3" json:"agent_perm_id,omitempty"`                     // mandatory: agent credential issuer permission id
-	WalletAgentPermId uint64 `protobuf:"varint,7,opt,name=wallet_agent_perm_id,json=walletAgentPermId,proto3" json:"wallet_agent_perm_id,omitempty"` // mandatory: wallet credential issuer permission id
-	Digest            string `protobuf:"bytes,8,opt,name=digest,proto3" json:"digest,omitempty"`                                                     // optional: digest derived from an issued or verified credential
+	Operator       string `protobuf:"bytes,2,opt,name=operator,proto3" json:"operator,omitempty"`
+	Id             string `protobuf:"bytes,3,opt,name=id,proto3" json:"id,omitempty"`                                                  // UUID (mandatory)
+	IssuerPermId   uint64 `protobuf:"varint,4,opt,name=issuer_perm_id,json=issuerPermId,proto3" json:"issuer_perm_id,omitempty"`       // optional: issuer permission id
+	VerifierPermId uint64 `protobuf:"varint,5,opt,name=verifier_perm_id,json=verifierPermId,proto3" json:"verifier_perm_id,omitempty"` // optional: verifier permission id
+	// [MOD-PERM-MSG-10] spec breaking change: now optional. Set only when peer is a Verifiable User Agent (VUA);
+	// MUST NOT be specified when peer is a Verifiable Service (VS).
+	AgentPermId uint64 `protobuf:"varint,6,opt,name=agent_perm_id,json=agentPermId,proto3" json:"agent_perm_id,omitempty"`
+	// [MOD-PERM-MSG-10] spec breaking change: now optional. Set only when peer is a Verifiable User Agent (VUA);
+	// MUST NOT be specified when peer is a Verifiable Service (VS).
+	WalletAgentPermId uint64 `protobuf:"varint,7,opt,name=wallet_agent_perm_id,json=walletAgentPermId,proto3" json:"wallet_agent_perm_id,omitempty"`
+	Digest            string `protobuf:"bytes,8,opt,name=digest,proto3" json:"digest,omitempty"` // optional: digest derived from an issued or verified credential
 }
 
 func (x *MsgCreateOrUpdatePermissionSession) Reset() {

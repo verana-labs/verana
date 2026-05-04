@@ -3451,16 +3451,17 @@ func TestCreateOrUpdatePermissionSession(t *testing.T) {
 				// Verify session was created/updated
 				session, err := k.PermissionSession.Get(sdkCtx, tc.msg.Id)
 				require.NoError(t, err)
-				require.Equal(t, tc.msg.AgentPermId, session.AgentPermId)
 				require.Equal(t, tc.msg.Corporation, session.Corporation)
 				require.Equal(t, tc.msg.Operator, session.VsOperator)
 
-				// Check that the session contains an appropriate session record
+				// [MOD-PERM-MSG-10] agent_perm_id and wallet_agent_perm_id now live
+				// on the per-record struct, not on PermissionSession.
 				foundRecord := false
 				for _, rec := range session.SessionRecords {
 					if rec.IssuerPermId == tc.msg.IssuerPermId &&
 						rec.VerifierPermId == tc.msg.VerifierPermId &&
-						rec.WalletAgentPermId == tc.msg.WalletAgentPermId {
+						rec.WalletAgentPermId == tc.msg.WalletAgentPermId &&
+						rec.AgentPermId == tc.msg.AgentPermId {
 						foundRecord = true
 						break
 					}
@@ -3811,15 +3812,15 @@ func TestQueryPermissions(t *testing.T) {
 	sessionID := uuid.New().String()
 	session := types.PermissionSession{
 		Id:          sessionID,
-		Corporation:   creator,
+		Corporation: creator,
 		VsOperator:  creator,
-		AgentPermId: issuerPermID, // Using issuer as agent for simplicity in test
 		Created:     &now,
 		Modified:    &now,
 		SessionRecords: []*types.PermissionSessionRecord{
 			{
 				IssuerPermId:   issuerPermID,
 				VerifierPermId: verifierPermID,
+				AgentPermId:    issuerPermID, // [MOD-PERM-MSG-10] agent_perm_id now per-record
 			},
 		},
 	}
