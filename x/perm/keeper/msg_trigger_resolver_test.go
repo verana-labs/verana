@@ -309,6 +309,40 @@ func TestMsgTriggerResolver_SelfCycleRejected(t *testing.T) {
 	require.ErrorIs(t, err, types.ErrTriggerResolverUnauthorized)
 }
 
+func TestMsgTriggerResolver_SelfCycleDoesNotAuthorizeTargetAsAncestor(t *testing.T) {
+	k, ms, _, _, ctx, mockDel := setupMsgServerWithDelegation(t)
+	ctx, sdkCtx := withBlockTime(ctx)
+	now := sdkCtx.BlockTime()
+
+	corp := tr_addr("corp_self_______")
+	targetVS := tr_addr("op_target_vs____")
+	callerOp := tr_addr("op_caller_______") // != targetVS, so Path 1 fails
+
+	target := activePerm(now)
+	target.Corporation = corp
+	target.VsOperator = targetVS
+	target.VsOperatorAuthzEnabled = true
+	tgtID, err := k.CreatePermission(sdkCtx, target)
+	require.NoError(t, err)
+
+	// Corrupt/malformed ancestry: target points to itself.
+	target.Id = tgtID
+	target.ValidatorPermId = tgtID
+	require.NoError(t, k.UpdatePermission(sdkCtx, target))
+
+	// OperatorAuthorization would allow Path 2b if the target is incorrectly
+	// considered its own ancestor.
+	mockDel.ErrToReturn = nil
+
+	_, err = ms.TriggerResolver(ctx, &types.MsgTriggerResolver{
+		Corporation: corp,
+		Operator:    callerOp,
+		Id:          tgtID,
+	})
+	require.Error(t, err)
+	require.ErrorIs(t, err, types.ErrTriggerResolverUnauthorized)
+}
+
 func TestMsgTriggerResolver_RejectInactivePerm(t *testing.T) {
 	k, ms, _, _, ctx, mockDel := setupMsgServerWithDelegation(t)
 	ctx, sdkCtx := withBlockTime(ctx)
