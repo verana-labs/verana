@@ -1,9 +1,11 @@
 package keeper_test
 
 import (
+	"context"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/stretchr/testify/require"
 
 	testkeeper "github.com/verana-labs/verana/testutil/keeper"
@@ -78,4 +80,66 @@ func TestSetBalance_PerDenomIsolation(t *testing.T) {
 	m.SetBalance(alice, "ustake", 500)
 	require.Equal(t, int64(1_000), m.BalanceOf(alice, "uvna"))
 	require.Equal(t, int64(500), m.BalanceOf(alice, "ustake"))
+}
+
+// --- Task 3: SendCoins ---
+
+func TestSendCoins_HappyPath(t *testing.T) {
+	m := newMock(t)
+	m.SetBalance(alice, denom, 1_000)
+	m.SetBalance(bob, denom, 200)
+
+	err := m.SendCoins(context.Background(), alice, bob,
+		sdk.NewCoins(sdk.NewInt64Coin(denom, 300)))
+	require.NoError(t, err)
+
+	require.Equal(t, int64(700), m.BalanceOf(alice, denom))
+	require.Equal(t, int64(500), m.BalanceOf(bob, denom))
+}
+
+func TestSendCoins_MultiCoin(t *testing.T) {
+	m := newMock(t)
+	m.SetBalance(alice, "uvna", 1_000)
+	m.SetBalance(alice, "ustake", 500)
+
+	err := m.SendCoins(context.Background(), alice, bob, sdk.NewCoins(
+		sdk.NewInt64Coin("uvna", 100),
+		sdk.NewInt64Coin("ustake", 50),
+	))
+	require.NoError(t, err)
+
+	require.Equal(t, int64(900), m.BalanceOf(alice, "uvna"))
+	require.Equal(t, int64(450), m.BalanceOf(alice, "ustake"))
+	require.Equal(t, int64(100), m.BalanceOf(bob, "uvna"))
+	require.Equal(t, int64(50), m.BalanceOf(bob, "ustake"))
+}
+
+func TestSendCoins_InsufficientFundsDoesNotMutate(t *testing.T) {
+	m := newMock(t)
+	m.SetBalance(alice, denom, 100)
+	m.SetBalance(bob, denom, 0)
+
+	err := m.SendCoins(context.Background(), alice, bob,
+		sdk.NewCoins(sdk.NewInt64Coin(denom, 200)))
+	require.ErrorIs(t, err, sdkerrors.ErrInsufficientFunds)
+
+	require.Equal(t, int64(100), m.BalanceOf(alice, denom))
+	require.Equal(t, int64(0), m.BalanceOf(bob, denom))
+}
+
+func TestSendCoins_InsufficientOnSecondDenomDoesNotMutateFirst(t *testing.T) {
+	// Atomicity: if the second coin has insufficient funds, the first must
+	// NOT be debited. Otherwise tests can't reason about partial state.
+	m := newMock(t)
+	m.SetBalance(alice, "uvna", 1_000)
+	m.SetBalance(alice, "ustake", 10)
+
+	err := m.SendCoins(context.Background(), alice, bob, sdk.NewCoins(
+		sdk.NewInt64Coin("uvna", 100),
+		sdk.NewInt64Coin("ustake", 50),
+	))
+	require.ErrorIs(t, err, sdkerrors.ErrInsufficientFunds)
+	require.Equal(t, int64(1_000), m.BalanceOf(alice, "uvna"))
+	require.Equal(t, int64(10), m.BalanceOf(alice, "ustake"))
+	require.Equal(t, int64(0), m.BalanceOf(bob, "uvna"))
 }

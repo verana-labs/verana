@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/stretchr/testify/require"
 )
@@ -105,8 +106,17 @@ func (m *StatefulBankMock) RequireBalanceDelta(t require.TestingT, addr sdk.AccA
 
 // --- BankKeeper interface methods ---
 
+// SendCoins moves amt from->to. It is atomic: if any denom is insufficient,
+// no balance is mutated and sdkerrors.ErrInsufficientFunds is returned.
 func (m *StatefulBankMock) SendCoins(ctx context.Context, from, to sdk.AccAddress, amt sdk.Coins) error {
-	panic("not implemented")
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	fromKey, toKey := from.String(), to.String()
+	if err := m.transfer(fromKey, toKey, amt); err != nil {
+		return err
+	}
+	m.calls = append(m.calls, BankCall{Method: "SendCoins", From: fromKey, To: toKey, Amount: copyCoins(amt)})
+	return nil
 }
 
 func (m *StatefulBankMock) SendCoinsFromAccountToModule(ctx context.Context, sender sdk.AccAddress, recipientModule string, amt sdk.Coins) error {
@@ -149,6 +159,45 @@ func (m *StatefulBankMock) resolveModule(name string) sdk.AccAddress {
 		panic(fmt.Sprintf("StatefulBankMock: unknown module %q (register it in NewStatefulBankMock's modAddrs)", name))
 	}
 	return a
+}
+
+// transfer is the atomic core. It assumes m.mu is held. It first verifies
+// the sender has enough of every denom, then performs all debits and
+// credits. Returns sdkerrors.ErrInsufficientFunds (wrapped with detail) on
+// failure without mutating any balance.
+func (m *StatefulBankMock) transfer(fromKey, toKey string, amt sdk.Coins) error {
+	for _, c := range amt {
+		need := nonNegativeAmount(c)
+		have := int64(0)
+		if d, ok := m.balances[fromKey]; ok {
+			have = d[c.Denom]
+		}
+		if have < need {
+			return sdkerrors.ErrInsufficientFunds.Wrapf(
+				"%s: have %d%s, need %d%s", fromKey, have, c.Denom, need, c.Denom)
+		}
+	}
+	for _, c := range amt {
+		amount := nonNegativeAmount(c)
+		if m.balances[fromKey] == nil {
+			m.balances[fromKey] = map[string]int64{}
+		}
+		if m.balances[toKey] == nil {
+			m.balances[toKey] = map[string]int64{}
+		}
+		m.balances[fromKey][c.Denom] -= amount
+		m.balances[toKey][c.Denom] += amount
+	}
+	return nil
+}
+
+// copyCoins returns a shallow copy of the slice header so that the
+// caller-supplied amt cannot be mutated post-record. sdk.Coin elements are
+// value-copied; their math.Int internals are immutable.
+func copyCoins(amt sdk.Coins) sdk.Coins {
+	out := make(sdk.Coins, len(amt))
+	copy(out, amt)
+	return out
 }
 
 // nonNegativeAmount returns coin.Amount.Int64() and panics if it would
