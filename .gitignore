@@ -40,3 +40,6 @@ ts-proto/test/out/
 
 # Compiled binaries in ts-proto
 ts-proto/cmd
+
+# Git worktrees (subagent-driven dev workflow)
+.worktrees/
