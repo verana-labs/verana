@@ -2,6 +2,7 @@ package keeper_test
 
 import (
 	"context"
+	"sync"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -478,4 +479,44 @@ func TestRequireBalanceDelta_RebaselinesOnSetBalance(t *testing.T) {
 
 	m.SetBalance(alice, denom, 5_000) // new baseline
 	m.RequireBalanceDelta(t, alice, denom, 0)
+}
+
+// --- Task 11: Concurrency safety ---
+
+func TestStatefulBankMock_ConcurrentTransfersAreRaceFree(t *testing.T) {
+	m := newMock(t)
+	addrs := make([]sdk.AccAddress, 16)
+	for i := range addrs {
+		var a [20]byte
+		a[0] = byte(i)
+		addrs[i] = sdk.AccAddress(a[:])
+		m.SetBalance(addrs[i], denom, 1_000_000)
+	}
+
+	const workers = 8
+	const ops = 200
+	var wg sync.WaitGroup
+	wg.Add(workers)
+	for w := 0; w < workers; w++ {
+		go func(w int) {
+			defer wg.Done()
+			for i := 0; i < ops; i++ {
+				from := addrs[(w+i)%len(addrs)]
+				to := addrs[(w+i+1)%len(addrs)]
+				_ = m.SendCoins(context.Background(), from, to,
+					sdk.NewCoins(sdk.NewInt64Coin(denom, 1)))
+				_ = m.HasBalance(context.Background(), from, sdk.NewInt64Coin(denom, 1))
+				_ = m.GetAllBalances(context.Background(), to)
+				_ = m.Calls()
+			}
+		}(w)
+	}
+	wg.Wait()
+
+	// Conservation: total amount across all addrs is unchanged.
+	var total int64
+	for _, a := range addrs {
+		total += m.BalanceOf(a, denom)
+	}
+	require.Equal(t, int64(16_000_000), total)
 }
