@@ -3,7 +3,6 @@ package keeper
 import (
 	"context"
 	"fmt"
-	"sort"
 	"sync"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -129,16 +128,6 @@ func (m *StatefulBankMock) resolveModule(name string) sdk.AccAddress {
 		panic(fmt.Sprintf("StatefulBankMock: unknown module %q (register it in NewStatefulBankMock's modAddrs)", name))
 	}
 	return a
-}
-
-// sortedDenoms returns coin denoms sorted ascending — matches sdk.Coins ordering.
-func sortedDenoms(c sdk.Coins) []string {
-	d := make([]string, 0, len(c))
-	for _, coin := range c {
-		d = append(d, coin.Denom)
-	}
-	sort.Strings(d)
-	return d
 }
 
 // nonNegativeAmount returns coin.Amount.Int64() and panics if it would

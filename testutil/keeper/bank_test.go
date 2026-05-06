@@ -44,13 +44,10 @@ func newMock(t *testing.T) *testkeeper.StatefulBankMock {
 // would have failed. Used to test RequireBalanceDelta itself.
 type captureT struct {
 	failed bool
-	last   string
 }
 
-func (c *captureT) Errorf(format string, args ...interface{}) {
-	c.failed = true
-}
-func (c *captureT) FailNow() { c.failed = true }
+func (c *captureT) Errorf(format string, args ...interface{}) { c.failed = true }
+func (c *captureT) FailNow()                                  { c.failed = true }
 
 // Compile-time assertion: captureT implements require.TestingT.
 var _ require.TestingT = (*captureT)(nil)
