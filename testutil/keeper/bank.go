@@ -66,12 +66,33 @@ func DefaultModuleAddrs() map[string]sdk.AccAddress {
 
 // --- Mock-only helpers (not part of the BankKeeper interface) ---
 
+// SetBalance sets the balance for (addr, denom) and snapshots it as the
+// baseline used by RequireBalanceDelta. Subsequent SetBalance calls on the
+// same (addr, denom) reset both current and baseline.
 func (m *StatefulBankMock) SetBalance(addr sdk.AccAddress, denom string, amount int64) {
-	panic("not implemented")
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	key := addr.String()
+	if m.balances[key] == nil {
+		m.balances[key] = map[string]int64{}
+	}
+	if m.baseline[key] == nil {
+		m.baseline[key] = map[string]int64{}
+	}
+	m.balances[key][denom] = amount
+	m.baseline[key][denom] = amount
 }
 
+// BalanceOf returns the int64 balance for (addr, denom). It is the
+// assertion-friendly sibling of GetBalance (which returns sdk.Coin to
+// satisfy the BankKeeper interface).
 func (m *StatefulBankMock) BalanceOf(addr sdk.AccAddress, denom string) int64 {
-	panic("not implemented")
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if d, ok := m.balances[addr.String()]; ok {
+		return d[denom]
+	}
+	return 0
 }
 
 func (m *StatefulBankMock) Calls() []BankCall {

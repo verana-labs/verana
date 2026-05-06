@@ -51,3 +51,31 @@ func (c *captureT) FailNow()                                  { c.failed = true 
 
 // Compile-time assertion: captureT implements require.TestingT.
 var _ require.TestingT = (*captureT)(nil)
+
+// --- Task 2: SetBalance and BalanceOf ---
+
+func TestSetBalance_GetSet(t *testing.T) {
+	m := newMock(t)
+	m.SetBalance(alice, denom, 1_000)
+	require.Equal(t, int64(1_000), m.BalanceOf(alice, denom))
+}
+
+func TestSetBalance_OverwritesPreviousValue(t *testing.T) {
+	m := newMock(t)
+	m.SetBalance(alice, denom, 1_000)
+	m.SetBalance(alice, denom, 2_500)
+	require.Equal(t, int64(2_500), m.BalanceOf(alice, denom))
+}
+
+func TestBalanceOf_UnsetReturnsZero(t *testing.T) {
+	m := newMock(t)
+	require.Equal(t, int64(0), m.BalanceOf(alice, denom))
+}
+
+func TestSetBalance_PerDenomIsolation(t *testing.T) {
+	m := newMock(t)
+	m.SetBalance(alice, "uvna", 1_000)
+	m.SetBalance(alice, "ustake", 500)
+	require.Equal(t, int64(1_000), m.BalanceOf(alice, "uvna"))
+	require.Equal(t, int64(500), m.BalanceOf(alice, "ustake"))
+}
