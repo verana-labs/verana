@@ -52,10 +52,5 @@ func (c *captureT) Errorf(format string, args ...interface{}) {
 }
 func (c *captureT) FailNow() { c.failed = true }
 
-// Suppress unused-variable warnings for package-level vars used by future tasks.
-var (
-	_ = denom
-	_ = alice
-	_ = bob
-	_ require.TestingT = (*captureT)(nil)
-)
+// Compile-time assertion: captureT implements require.TestingT.
+var _ require.TestingT = (*captureT)(nil)
