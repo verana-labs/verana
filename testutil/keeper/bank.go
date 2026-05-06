@@ -1,0 +1,154 @@
+package keeper
+
+import (
+	"context"
+	"fmt"
+	"sort"
+	"sync"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	"github.com/stretchr/testify/require"
+)
+
+// BankCall records one invocation of a StatefulBankMock send/burn method.
+// From and To are the resolved bech32 addresses (module names are resolved
+// via the modAddrs map at the time of the call). To is empty for BurnCoins.
+type BankCall struct {
+	Method string
+	From   string
+	To     string
+	Amount sdk.Coins
+}
+
+// StatefulBankMock is a stateful test double for the BankKeeper interface
+// used across verana modules. It tracks balances per (addr, denom), enforces
+// deductions, errors on insufficient funds with sdkerrors.ErrInsufficientFunds,
+// and records every send/burn call so tests can assert exact movements.
+//
+// Construct with NewStatefulBankMock and a module-name → module-account-address
+// map (use DefaultModuleAddrs for the standard verana set).
+type StatefulBankMock struct {
+	mu       sync.Mutex
+	balances map[string]map[string]int64 // addr -> denom -> amount
+	baseline map[string]map[string]int64 // addr -> denom -> baseline (set by SetBalance)
+	modAddrs map[string]sdk.AccAddress   // module name -> module account address
+	calls    []BankCall
+}
+
+// NewStatefulBankMock returns a new mock pre-wired with the supplied
+// module-name → module-account-address mapping. Every module name referenced
+// by SendCoinsFromAccountToModule, SendCoinsFromModuleToAccount,
+// SendCoinsFromModuleToModule, or BurnCoins MUST be in modAddrs; unknown
+// names panic to surface test wiring bugs loudly.
+func NewStatefulBankMock(modAddrs map[string]sdk.AccAddress) *StatefulBankMock {
+	return &StatefulBankMock{
+		balances: map[string]map[string]int64{},
+		baseline: map[string]map[string]int64{},
+		modAddrs: modAddrs,
+	}
+}
+
+// DefaultModuleAddrs returns the verana module-name → module-account-address
+// mapping for every module that moves funds, plus the yield_intermediate_pool
+// sub-account used by td. Sourced from authtypes.NewModuleAddress, mirroring
+// what the real app does at startup.
+func DefaultModuleAddrs() map[string]sdk.AccAddress {
+	names := []string{
+		"tr", "cs", "td", "perm", "de", "xr", "di",
+		"gov", "yield_intermediate_pool",
+	}
+	out := make(map[string]sdk.AccAddress, len(names))
+	for _, n := range names {
+		out[n] = authtypes.NewModuleAddress(n)
+	}
+	return out
+}
+
+// --- Mock-only helpers (not part of the BankKeeper interface) ---
+
+func (m *StatefulBankMock) SetBalance(addr sdk.AccAddress, denom string, amount int64) {
+	panic("not implemented")
+}
+
+func (m *StatefulBankMock) BalanceOf(addr sdk.AccAddress, denom string) int64 {
+	panic("not implemented")
+}
+
+func (m *StatefulBankMock) Calls() []BankCall {
+	panic("not implemented")
+}
+
+func (m *StatefulBankMock) RequireBalanceDelta(t require.TestingT, addr sdk.AccAddress, denom string, delta int64) {
+	panic("not implemented")
+}
+
+// --- BankKeeper interface methods ---
+
+func (m *StatefulBankMock) SendCoins(ctx context.Context, from, to sdk.AccAddress, amt sdk.Coins) error {
+	panic("not implemented")
+}
+
+func (m *StatefulBankMock) SendCoinsFromAccountToModule(ctx context.Context, sender sdk.AccAddress, recipientModule string, amt sdk.Coins) error {
+	panic("not implemented")
+}
+
+func (m *StatefulBankMock) SendCoinsFromModuleToAccount(ctx context.Context, senderModule string, recipient sdk.AccAddress, amt sdk.Coins) error {
+	panic("not implemented")
+}
+
+func (m *StatefulBankMock) SendCoinsFromModuleToModule(ctx context.Context, senderModule, recipientModule string, amt sdk.Coins) error {
+	panic("not implemented")
+}
+
+func (m *StatefulBankMock) BurnCoins(ctx context.Context, name string, amt sdk.Coins) error {
+	panic("not implemented")
+}
+
+func (m *StatefulBankMock) HasBalance(ctx context.Context, addr sdk.AccAddress, amt sdk.Coin) bool {
+	panic("not implemented")
+}
+
+func (m *StatefulBankMock) GetBalance(ctx context.Context, addr sdk.AccAddress, denom string) sdk.Coin {
+	panic("not implemented")
+}
+
+func (m *StatefulBankMock) GetAllBalances(ctx context.Context, addr sdk.AccAddress) sdk.Coins {
+	panic("not implemented")
+}
+
+func (m *StatefulBankMock) SpendableCoins(ctx context.Context, addr sdk.AccAddress) sdk.Coins {
+	panic("not implemented")
+}
+
+// resolveModule returns the module account address for name, or panics if
+// the module is not registered in modAddrs.
+func (m *StatefulBankMock) resolveModule(name string) sdk.AccAddress {
+	a, ok := m.modAddrs[name]
+	if !ok {
+		panic(fmt.Sprintf("StatefulBankMock: unknown module %q (register it in NewStatefulBankMock's modAddrs)", name))
+	}
+	return a
+}
+
+// sortedDenoms returns coin denoms sorted ascending — matches sdk.Coins ordering.
+func sortedDenoms(c sdk.Coins) []string {
+	d := make([]string, 0, len(c))
+	for _, coin := range c {
+		d = append(d, coin.Denom)
+	}
+	sort.Strings(d)
+	return d
+}
+
+// nonNegativeAmount returns coin.Amount.Int64() and panics if it would
+// overflow or be negative — sdk.Coins must always be sorted, non-negative.
+func nonNegativeAmount(coin sdk.Coin) int64 {
+	if coin.Amount.IsNegative() {
+		panic(fmt.Sprintf("StatefulBankMock: negative amount for denom %s", coin.Denom))
+	}
+	if !coin.Amount.IsInt64() {
+		panic(fmt.Sprintf("StatefulBankMock: amount for denom %s exceeds int64", coin.Denom))
+	}
+	return coin.Amount.Int64()
+}
