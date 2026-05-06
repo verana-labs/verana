@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"sync"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -96,12 +97,37 @@ func (m *StatefulBankMock) BalanceOf(addr sdk.AccAddress, denom string) int64 {
 	return 0
 }
 
+// Calls returns a defensive copy of the recorded call history. Tests can
+// mutate the returned slice without affecting the mock.
 func (m *StatefulBankMock) Calls() []BankCall {
-	panic("not implemented")
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	out := make([]BankCall, len(m.calls))
+	copy(out, m.calls)
+	return out
 }
 
+// RequireBalanceDelta asserts that (current - baseline) for (addr, denom)
+// equals delta. The baseline is whatever SetBalance most recently wrote
+// for (addr, denom); if SetBalance was never called for that pair, the
+// baseline is 0.
 func (m *StatefulBankMock) RequireBalanceDelta(t require.TestingT, addr sdk.AccAddress, denom string, delta int64) {
-	panic("not implemented")
+	if h, ok := t.(interface{ Helper() }); ok {
+		h.Helper()
+	}
+	m.mu.Lock()
+	current, baseline := int64(0), int64(0)
+	if d, ok := m.balances[addr.String()]; ok {
+		current = d[denom]
+	}
+	if d, ok := m.baseline[addr.String()]; ok {
+		baseline = d[denom]
+	}
+	m.mu.Unlock()
+	got := current - baseline
+	require.Equalf(t, delta, got,
+		"balance delta for %s [%s]: want %d, got %d (baseline=%d, current=%d)",
+		addr.String(), denom, delta, got, baseline, current)
 }
 
 // --- BankKeeper interface methods ---
@@ -188,20 +214,49 @@ func (m *StatefulBankMock) BurnCoins(ctx context.Context, name string, amt sdk.C
 	return nil
 }
 
+// HasBalance returns true iff addr's balance of amt.Denom is at least amt.Amount.
 func (m *StatefulBankMock) HasBalance(ctx context.Context, addr sdk.AccAddress, amt sdk.Coin) bool {
-	panic("not implemented")
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	have := int64(0)
+	if d, ok := m.balances[addr.String()]; ok {
+		have = d[amt.Denom]
+	}
+	return have >= nonNegativeAmount(amt)
 }
 
+// GetBalance returns the sdk.Coin for (addr, denom). Unset balances yield a
+// zero coin in the requested denom (denom preserved).
 func (m *StatefulBankMock) GetBalance(ctx context.Context, addr sdk.AccAddress, denom string) sdk.Coin {
-	panic("not implemented")
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	have := int64(0)
+	if d, ok := m.balances[addr.String()]; ok {
+		have = d[denom]
+	}
+	return sdk.NewCoin(denom, math.NewInt(have))
 }
 
+// GetAllBalances returns all non-zero balances held by addr, sorted in
+// canonical sdk.Coins order. Zero-amount denoms are omitted.
 func (m *StatefulBankMock) GetAllBalances(ctx context.Context, addr sdk.AccAddress) sdk.Coins {
-	panic("not implemented")
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	out := sdk.Coins{}
+	if d, ok := m.balances[addr.String()]; ok {
+		for denom, amt := range d {
+			if amt > 0 {
+				out = append(out, sdk.NewCoin(denom, math.NewInt(amt)))
+			}
+		}
+	}
+	return out.Sort()
 }
 
+// SpendableCoins matches GetAllBalances for the mock — there are no
+// vesting or escrow constraints in the test surface.
 func (m *StatefulBankMock) SpendableCoins(ctx context.Context, addr sdk.AccAddress) sdk.Coins {
-	panic("not implemented")
+	return m.GetAllBalances(ctx, addr)
 }
 
 // resolveModule returns the module account address for name, or panics if

@@ -288,3 +288,194 @@ func TestBurnCoins_UnknownModulePanics(t *testing.T) {
 			sdk.NewCoins(sdk.NewInt64Coin(denom, 1)))
 	})
 }
+
+// --- Task 8: read methods ---
+
+func TestHasBalance_TrueWhenSufficient(t *testing.T) {
+	m := newMock(t)
+	m.SetBalance(alice, denom, 100)
+	require.True(t, m.HasBalance(context.Background(), alice, sdk.NewInt64Coin(denom, 100)))
+	require.True(t, m.HasBalance(context.Background(), alice, sdk.NewInt64Coin(denom, 50)))
+}
+
+func TestHasBalance_FalseWhenInsufficient(t *testing.T) {
+	m := newMock(t)
+	m.SetBalance(alice, denom, 100)
+	require.False(t, m.HasBalance(context.Background(), alice, sdk.NewInt64Coin(denom, 101)))
+	require.False(t, m.HasBalance(context.Background(), bob, sdk.NewInt64Coin(denom, 1)))
+}
+
+func TestGetBalance_ReflectsState(t *testing.T) {
+	m := newMock(t)
+	m.SetBalance(alice, denom, 250)
+	got := m.GetBalance(context.Background(), alice, denom)
+	require.Equal(t, denom, got.Denom)
+	require.Equal(t, int64(250), got.Amount.Int64())
+}
+
+func TestGetBalance_UnsetIsZeroCoin(t *testing.T) {
+	m := newMock(t)
+	got := m.GetBalance(context.Background(), alice, denom)
+	require.Equal(t, denom, got.Denom)
+	require.True(t, got.Amount.IsZero())
+}
+
+func TestGetAllBalances_AllDenoms(t *testing.T) {
+	m := newMock(t)
+	m.SetBalance(alice, "uvna", 100)
+	m.SetBalance(alice, "ustake", 50)
+
+	got := m.GetAllBalances(context.Background(), alice)
+	require.Equal(t, sdk.NewCoins(
+		sdk.NewInt64Coin("uvna", 100),
+		sdk.NewInt64Coin("ustake", 50),
+	), got)
+}
+
+func TestGetAllBalances_UnsetReturnsEmpty(t *testing.T) {
+	m := newMock(t)
+	require.Empty(t, m.GetAllBalances(context.Background(), alice))
+}
+
+func TestGetAllBalances_SkipsZero(t *testing.T) {
+	// After a transfer that drains a denom to zero, GetAllBalances should
+	// not surface the zero entry — sdk.Coins is canonically sorted with
+	// only non-zero amounts.
+	m := newMock(t)
+	m.SetBalance(alice, denom, 100)
+	require.NoError(t, m.SendCoins(context.Background(), alice, bob,
+		sdk.NewCoins(sdk.NewInt64Coin(denom, 100))))
+
+	got := m.GetAllBalances(context.Background(), alice)
+	require.Empty(t, got)
+}
+
+func TestSpendableCoins_MatchesGetAllBalances(t *testing.T) {
+	m := newMock(t)
+	m.SetBalance(alice, "uvna", 100)
+	m.SetBalance(alice, "ustake", 50)
+	require.Equal(t, m.GetAllBalances(context.Background(), alice),
+		m.SpendableCoins(context.Background(), alice))
+}
+
+// --- Task 9: Calls() accessor and call-recording verification ---
+
+func TestCalls_Empty(t *testing.T) {
+	m := newMock(t)
+	require.Empty(t, m.Calls())
+}
+
+func TestCalls_RecordsEachMethodInOrder(t *testing.T) {
+	m := newMock(t)
+	m.SetBalance(alice, denom, 10_000)
+	tdAddr := authtypes.NewModuleAddress("td")
+	yipAddr := authtypes.NewModuleAddress("yield_intermediate_pool")
+	m.SetBalance(tdAddr, denom, 10_000)
+	m.SetBalance(yipAddr, denom, 0)
+
+	require.NoError(t, m.SendCoins(context.Background(), alice, bob,
+		sdk.NewCoins(sdk.NewInt64Coin(denom, 10))))
+	require.NoError(t, m.SendCoinsFromAccountToModule(context.Background(), alice, "td",
+		sdk.NewCoins(sdk.NewInt64Coin(denom, 20))))
+	require.NoError(t, m.SendCoinsFromModuleToAccount(context.Background(), "td", bob,
+		sdk.NewCoins(sdk.NewInt64Coin(denom, 30))))
+	require.NoError(t, m.SendCoinsFromModuleToModule(context.Background(), "td", "yield_intermediate_pool",
+		sdk.NewCoins(sdk.NewInt64Coin(denom, 40))))
+	require.NoError(t, m.BurnCoins(context.Background(), "td",
+		sdk.NewCoins(sdk.NewInt64Coin(denom, 50))))
+
+	calls := m.Calls()
+	require.Len(t, calls, 5)
+	require.Equal(t, "SendCoins", calls[0].Method)
+	require.Equal(t, alice.String(), calls[0].From)
+	require.Equal(t, bob.String(), calls[0].To)
+	require.Equal(t, sdk.NewCoins(sdk.NewInt64Coin(denom, 10)), calls[0].Amount)
+
+	require.Equal(t, "SendCoinsFromAccountToModule", calls[1].Method)
+	require.Equal(t, tdAddr.String(), calls[1].To)
+
+	require.Equal(t, "SendCoinsFromModuleToAccount", calls[2].Method)
+	require.Equal(t, tdAddr.String(), calls[2].From)
+	require.Equal(t, bob.String(), calls[2].To)
+
+	require.Equal(t, "SendCoinsFromModuleToModule", calls[3].Method)
+	require.Equal(t, tdAddr.String(), calls[3].From)
+	require.Equal(t, yipAddr.String(), calls[3].To)
+
+	require.Equal(t, "BurnCoins", calls[4].Method)
+	require.Equal(t, tdAddr.String(), calls[4].From)
+	require.Equal(t, "", calls[4].To)
+}
+
+func TestCalls_FailedTransferIsNotRecorded(t *testing.T) {
+	m := newMock(t)
+	m.SetBalance(alice, denom, 1)
+	err := m.SendCoins(context.Background(), alice, bob,
+		sdk.NewCoins(sdk.NewInt64Coin(denom, 100)))
+	require.Error(t, err)
+	require.Empty(t, m.Calls(), "failed transfers must not appear in call history")
+}
+
+func TestCalls_ReturnsCopyNotInternalSlice(t *testing.T) {
+	m := newMock(t)
+	m.SetBalance(alice, denom, 100)
+	require.NoError(t, m.SendCoins(context.Background(), alice, bob,
+		sdk.NewCoins(sdk.NewInt64Coin(denom, 1))))
+
+	c1 := m.Calls()
+	c1[0].Method = "tampered"
+
+	c2 := m.Calls()
+	require.Equal(t, "SendCoins", c2[0].Method, "Calls() must return a defensive copy")
+}
+
+// --- Task 10: RequireBalanceDelta ---
+
+func TestRequireBalanceDelta_NoChange(t *testing.T) {
+	m := newMock(t)
+	m.SetBalance(alice, denom, 1_000)
+	m.RequireBalanceDelta(t, alice, denom, 0)
+}
+
+func TestRequireBalanceDelta_NegativeAfterSend(t *testing.T) {
+	m := newMock(t)
+	m.SetBalance(alice, denom, 1_000)
+	m.SetBalance(bob, denom, 0)
+	require.NoError(t, m.SendCoins(context.Background(), alice, bob,
+		sdk.NewCoins(sdk.NewInt64Coin(denom, 300))))
+	m.RequireBalanceDelta(t, alice, denom, -300)
+	m.RequireBalanceDelta(t, bob, denom, +300)
+}
+
+func TestRequireBalanceDelta_UnsetBaselineTreatedAsZero(t *testing.T) {
+	m := newMock(t)
+	m.SetBalance(alice, denom, 500)
+	require.NoError(t, m.SendCoinsFromAccountToModule(context.Background(), alice, "perm",
+		sdk.NewCoins(sdk.NewInt64Coin(denom, 200))))
+	// perm module addr was never SetBalance'd → baseline 0 → delta +200.
+	m.RequireBalanceDelta(t, authtypes.NewModuleAddress("perm"), denom, +200)
+}
+
+func TestRequireBalanceDelta_FailsOnWrongDelta(t *testing.T) {
+	m := newMock(t)
+	m.SetBalance(alice, denom, 1_000)
+	m.SetBalance(bob, denom, 0)
+	require.NoError(t, m.SendCoins(context.Background(), alice, bob,
+		sdk.NewCoins(sdk.NewInt64Coin(denom, 300))))
+
+	cap := &captureT{}
+	m.RequireBalanceDelta(cap, alice, denom, -100) // wrong: actual is -300
+	require.True(t, cap.failed, "RequireBalanceDelta must fail on wrong delta")
+}
+
+func TestRequireBalanceDelta_RebaselinesOnSetBalance(t *testing.T) {
+	// Calling SetBalance again resets the baseline.
+	m := newMock(t)
+	m.SetBalance(alice, denom, 1_000)
+	require.NoError(t, m.SendCoins(context.Background(), alice, bob,
+		sdk.NewCoins(sdk.NewInt64Coin(denom, 100))))
+	require.Equal(t, int64(900), m.BalanceOf(alice, denom))
+
+	m.SetBalance(alice, denom, 5_000) // new baseline
+	m.RequireBalanceDelta(t, alice, denom, 0)
+}
