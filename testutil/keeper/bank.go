@@ -33,7 +33,7 @@ type StatefulBankMock struct {
 	mu       sync.Mutex
 	balances map[string]map[string]int64 // addr -> denom -> amount
 	baseline map[string]map[string]int64 // addr -> denom -> baseline (set by SetBalance)
-	modAddrs map[string]sdk.AccAddress   // module name -> module account address
+	modAddrs map[string]sdk.AccAddress   // module name -> module account address (set once at construction; read-only thereafter, so resolveModule reads it without taking m.mu)
 	calls    []BankCall
 }
 
@@ -285,9 +285,10 @@ func (m *StatefulBankMock) transfer(fromKey, toKey string, amt sdk.Coins) error 
 				"%s: have %d%s, need %d%s", fromKey, have, c.Denom, need, c.Denom)
 		}
 	}
-	// fromKey's inner map is guaranteed non-nil at this point: the check
-	// above only passes when have>=need>0, which means balances[fromKey]
-	// was already initialized when have was read. toKey may still be new.
+	// fromKey's inner map is guaranteed non-nil here: sdk.NewCoins prunes
+	// zero amounts, so every c.Amount is positive, so the validation pass
+	// above only passes when m.balances[fromKey] was already initialized
+	// when have was read. toKey may still be new.
 	for _, c := range amt {
 		amount := nonNegativeAmount(c)
 		if m.balances[toKey] == nil {
@@ -299,9 +300,10 @@ func (m *StatefulBankMock) transfer(fromKey, toKey string, amt sdk.Coins) error 
 	return nil
 }
 
-// copyCoins returns a shallow copy of the slice header so that the
-// caller-supplied amt cannot be mutated post-record. sdk.Coin elements are
-// value-copied; their math.Int internals are immutable.
+// copyCoins returns an independent slice (fresh backing array) holding the
+// same Coin values. After Tasks 3-7 record a BankCall with Amount: copyCoins(amt),
+// callers cannot mutate the recorded amount by mutating their original slice.
+// math.Int amounts are immutable, so element aliasing is safe.
 func copyCoins(amt sdk.Coins) sdk.Coins {
 	out := make(sdk.Coins, len(amt))
 	copy(out, amt)
