@@ -5,6 +5,7 @@ import (
 	"sync"
 	"testing"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -479,6 +480,28 @@ func TestRequireBalanceDelta_RebaselinesOnSetBalance(t *testing.T) {
 
 	m.SetBalance(alice, denom, 5_000) // new baseline
 	m.RequireBalanceDelta(t, alice, denom, 0)
+}
+
+// --- Defensive-guard panic paths ---
+
+func TestSendCoins_NegativeAmountPanics(t *testing.T) {
+	m := newMock(t)
+	m.SetBalance(alice, denom, 1_000)
+	bad := sdk.Coins{sdk.Coin{Denom: denom, Amount: math.NewInt(-1)}}
+	require.Panics(t, func() {
+		_ = m.SendCoins(context.Background(), alice, bob, bad)
+	})
+}
+
+func TestSendCoins_OverflowAmountPanics(t *testing.T) {
+	m := newMock(t)
+	m.SetBalance(alice, denom, 1_000)
+	huge, ok := math.NewIntFromString("18446744073709551616") // 2^64
+	require.True(t, ok)
+	bad := sdk.Coins{sdk.Coin{Denom: denom, Amount: huge}}
+	require.Panics(t, func() {
+		_ = m.SendCoins(context.Background(), alice, bob, bad)
+	})
 }
 
 // --- Task 11: Concurrency safety ---

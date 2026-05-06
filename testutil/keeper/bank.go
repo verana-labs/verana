@@ -285,11 +285,11 @@ func (m *StatefulBankMock) transfer(fromKey, toKey string, amt sdk.Coins) error 
 				"%s: have %d%s, need %d%s", fromKey, have, c.Denom, need, c.Denom)
 		}
 	}
+	// fromKey's inner map is guaranteed non-nil at this point: the check
+	// above only passes when have>=need>0, which means balances[fromKey]
+	// was already initialized when have was read. toKey may still be new.
 	for _, c := range amt {
 		amount := nonNegativeAmount(c)
-		if m.balances[fromKey] == nil {
-			m.balances[fromKey] = map[string]int64{}
-		}
 		if m.balances[toKey] == nil {
 			m.balances[toKey] = map[string]int64{}
 		}
