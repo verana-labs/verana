@@ -119,20 +119,73 @@ func (m *StatefulBankMock) SendCoins(ctx context.Context, from, to sdk.AccAddres
 	return nil
 }
 
+// SendCoinsFromAccountToModule debits sender, credits the resolved address
+// of recipientModule. Panics if recipientModule is not registered in modAddrs.
 func (m *StatefulBankMock) SendCoinsFromAccountToModule(ctx context.Context, sender sdk.AccAddress, recipientModule string, amt sdk.Coins) error {
-	panic("not implemented")
+	modAddr := m.resolveModule(recipientModule)
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	fromKey, toKey := sender.String(), modAddr.String()
+	if err := m.transfer(fromKey, toKey, amt); err != nil {
+		return err
+	}
+	m.calls = append(m.calls, BankCall{Method: "SendCoinsFromAccountToModule", From: fromKey, To: toKey, Amount: copyCoins(amt)})
+	return nil
 }
 
+// SendCoinsFromModuleToAccount debits the resolved address of senderModule,
+// credits recipient. Panics if senderModule is not registered.
 func (m *StatefulBankMock) SendCoinsFromModuleToAccount(ctx context.Context, senderModule string, recipient sdk.AccAddress, amt sdk.Coins) error {
-	panic("not implemented")
+	modAddr := m.resolveModule(senderModule)
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	fromKey, toKey := modAddr.String(), recipient.String()
+	if err := m.transfer(fromKey, toKey, amt); err != nil {
+		return err
+	}
+	m.calls = append(m.calls, BankCall{Method: "SendCoinsFromModuleToAccount", From: fromKey, To: toKey, Amount: copyCoins(amt)})
+	return nil
 }
 
+// SendCoinsFromModuleToModule debits senderModule's resolved address,
+// credits recipientModule's. Panics if either is not registered.
 func (m *StatefulBankMock) SendCoinsFromModuleToModule(ctx context.Context, senderModule, recipientModule string, amt sdk.Coins) error {
-	panic("not implemented")
+	fromAddr := m.resolveModule(senderModule)
+	toAddr := m.resolveModule(recipientModule)
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	fromKey, toKey := fromAddr.String(), toAddr.String()
+	if err := m.transfer(fromKey, toKey, amt); err != nil {
+		return err
+	}
+	m.calls = append(m.calls, BankCall{Method: "SendCoinsFromModuleToModule", From: fromKey, To: toKey, Amount: copyCoins(amt)})
+	return nil
 }
 
+// BurnCoins debits the resolved address of name; nothing is credited
+// elsewhere. Errors atomically with sdkerrors.ErrInsufficientFunds if the
+// module account is short. Panics if name is not registered.
 func (m *StatefulBankMock) BurnCoins(ctx context.Context, name string, amt sdk.Coins) error {
-	panic("not implemented")
+	modAddr := m.resolveModule(name)
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	fromKey := modAddr.String()
+	for _, c := range amt {
+		need := nonNegativeAmount(c)
+		have := int64(0)
+		if d, ok := m.balances[fromKey]; ok {
+			have = d[c.Denom]
+		}
+		if have < need {
+			return sdkerrors.ErrInsufficientFunds.Wrapf(
+				"%s: have %d%s, need %d%s to burn", fromKey, have, c.Denom, need, c.Denom)
+		}
+	}
+	for _, c := range amt {
+		m.balances[fromKey][c.Denom] -= nonNegativeAmount(c)
+	}
+	m.calls = append(m.calls, BankCall{Method: "BurnCoins", From: fromKey, To: "", Amount: copyCoins(amt)})
+	return nil
 }
 
 func (m *StatefulBankMock) HasBalance(ctx context.Context, addr sdk.AccAddress, amt sdk.Coin) bool {

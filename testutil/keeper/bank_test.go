@@ -6,6 +6,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/stretchr/testify/require"
 
 	testkeeper "github.com/verana-labs/verana/testutil/keeper"
@@ -142,4 +143,148 @@ func TestSendCoins_InsufficientOnSecondDenomDoesNotMutateFirst(t *testing.T) {
 	require.Equal(t, int64(1_000), m.BalanceOf(alice, "uvna"))
 	require.Equal(t, int64(10), m.BalanceOf(alice, "ustake"))
 	require.Equal(t, int64(0), m.BalanceOf(bob, "uvna"))
+}
+
+// --- Task 4: SendCoinsFromAccountToModule ---
+
+func TestSendCoinsFromAccountToModule_HappyPath(t *testing.T) {
+	m := newMock(t)
+	m.SetBalance(alice, denom, 1_000)
+	modAddr := authtypes.NewModuleAddress("perm")
+
+	err := m.SendCoinsFromAccountToModule(context.Background(), alice, "perm",
+		sdk.NewCoins(sdk.NewInt64Coin(denom, 300)))
+	require.NoError(t, err)
+
+	require.Equal(t, int64(700), m.BalanceOf(alice, denom))
+	require.Equal(t, int64(300), m.BalanceOf(modAddr, denom))
+}
+
+func TestSendCoinsFromAccountToModule_InsufficientFunds(t *testing.T) {
+	m := newMock(t)
+	m.SetBalance(alice, denom, 50)
+
+	err := m.SendCoinsFromAccountToModule(context.Background(), alice, "perm",
+		sdk.NewCoins(sdk.NewInt64Coin(denom, 300)))
+	require.ErrorIs(t, err, sdkerrors.ErrInsufficientFunds)
+	require.Equal(t, int64(50), m.BalanceOf(alice, denom))
+	require.Equal(t, int64(0), m.BalanceOf(authtypes.NewModuleAddress("perm"), denom))
+}
+
+func TestSendCoinsFromAccountToModule_UnknownModulePanics(t *testing.T) {
+	m := newMock(t)
+	m.SetBalance(alice, denom, 1_000)
+	require.PanicsWithValue(t,
+		`StatefulBankMock: unknown module "no_such_mod" (register it in NewStatefulBankMock's modAddrs)`,
+		func() {
+			_ = m.SendCoinsFromAccountToModule(context.Background(), alice, "no_such_mod",
+				sdk.NewCoins(sdk.NewInt64Coin(denom, 1)))
+		})
+}
+
+// --- Task 5: SendCoinsFromModuleToAccount ---
+
+func TestSendCoinsFromModuleToAccount_HappyPath(t *testing.T) {
+	m := newMock(t)
+	modAddr := authtypes.NewModuleAddress("td")
+	m.SetBalance(modAddr, denom, 5_000)
+
+	err := m.SendCoinsFromModuleToAccount(context.Background(), "td", alice,
+		sdk.NewCoins(sdk.NewInt64Coin(denom, 1_200)))
+	require.NoError(t, err)
+	require.Equal(t, int64(3_800), m.BalanceOf(modAddr, denom))
+	require.Equal(t, int64(1_200), m.BalanceOf(alice, denom))
+}
+
+func TestSendCoinsFromModuleToAccount_InsufficientFunds(t *testing.T) {
+	m := newMock(t)
+	modAddr := authtypes.NewModuleAddress("td")
+	m.SetBalance(modAddr, denom, 100)
+
+	err := m.SendCoinsFromModuleToAccount(context.Background(), "td", alice,
+		sdk.NewCoins(sdk.NewInt64Coin(denom, 200)))
+	require.ErrorIs(t, err, sdkerrors.ErrInsufficientFunds)
+	require.Equal(t, int64(100), m.BalanceOf(modAddr, denom))
+	require.Equal(t, int64(0), m.BalanceOf(alice, denom))
+}
+
+func TestSendCoinsFromModuleToAccount_UnknownModulePanics(t *testing.T) {
+	m := newMock(t)
+	require.Panics(t, func() {
+		_ = m.SendCoinsFromModuleToAccount(context.Background(), "ghost", alice,
+			sdk.NewCoins(sdk.NewInt64Coin(denom, 1)))
+	})
+}
+
+// --- Task 6: SendCoinsFromModuleToModule ---
+
+func TestSendCoinsFromModuleToModule_HappyPath(t *testing.T) {
+	m := newMock(t)
+	tdAddr := authtypes.NewModuleAddress("td")
+	yipAddr := authtypes.NewModuleAddress("yield_intermediate_pool")
+	m.SetBalance(tdAddr, denom, 10_000)
+
+	err := m.SendCoinsFromModuleToModule(context.Background(), "td", "yield_intermediate_pool",
+		sdk.NewCoins(sdk.NewInt64Coin(denom, 4_000)))
+	require.NoError(t, err)
+	require.Equal(t, int64(6_000), m.BalanceOf(tdAddr, denom))
+	require.Equal(t, int64(4_000), m.BalanceOf(yipAddr, denom))
+}
+
+func TestSendCoinsFromModuleToModule_InsufficientFunds(t *testing.T) {
+	m := newMock(t)
+	tdAddr := authtypes.NewModuleAddress("td")
+	m.SetBalance(tdAddr, denom, 50)
+
+	err := m.SendCoinsFromModuleToModule(context.Background(), "td", "yield_intermediate_pool",
+		sdk.NewCoins(sdk.NewInt64Coin(denom, 100)))
+	require.ErrorIs(t, err, sdkerrors.ErrInsufficientFunds)
+}
+
+func TestSendCoinsFromModuleToModule_UnknownSenderPanics(t *testing.T) {
+	m := newMock(t)
+	require.Panics(t, func() {
+		_ = m.SendCoinsFromModuleToModule(context.Background(), "ghost", "td",
+			sdk.NewCoins(sdk.NewInt64Coin(denom, 1)))
+	})
+}
+
+func TestSendCoinsFromModuleToModule_UnknownRecipientPanics(t *testing.T) {
+	m := newMock(t)
+	require.Panics(t, func() {
+		_ = m.SendCoinsFromModuleToModule(context.Background(), "td", "ghost",
+			sdk.NewCoins(sdk.NewInt64Coin(denom, 1)))
+	})
+}
+
+// --- Task 7: BurnCoins ---
+
+func TestBurnCoins_HappyPath(t *testing.T) {
+	m := newMock(t)
+	tdAddr := authtypes.NewModuleAddress("td")
+	m.SetBalance(tdAddr, denom, 5_000)
+
+	err := m.BurnCoins(context.Background(), "td",
+		sdk.NewCoins(sdk.NewInt64Coin(denom, 1_500)))
+	require.NoError(t, err)
+	require.Equal(t, int64(3_500), m.BalanceOf(tdAddr, denom))
+}
+
+func TestBurnCoins_InsufficientFunds(t *testing.T) {
+	m := newMock(t)
+	tdAddr := authtypes.NewModuleAddress("td")
+	m.SetBalance(tdAddr, denom, 100)
+
+	err := m.BurnCoins(context.Background(), "td",
+		sdk.NewCoins(sdk.NewInt64Coin(denom, 1_000)))
+	require.ErrorIs(t, err, sdkerrors.ErrInsufficientFunds)
+	require.Equal(t, int64(100), m.BalanceOf(tdAddr, denom))
+}
+
+func TestBurnCoins_UnknownModulePanics(t *testing.T) {
+	m := newMock(t)
+	require.Panics(t, func() {
+		_ = m.BurnCoins(context.Background(), "ghost",
+			sdk.NewCoins(sdk.NewInt64Coin(denom, 1)))
+	})
 }
