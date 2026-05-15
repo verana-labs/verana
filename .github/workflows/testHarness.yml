@@ -52,7 +52,10 @@ jobs:
           echo "IMAGE_TAG=${IMAGE_REPO}:sha-${SHORT_SHA}" >> $GITHUB_ENV
           echo "Using commit image tag sha-${SHORT_SHA} for this test harness run." >> $GITHUB_STEP_SUMMARY
 
-          if [ "$HARNESS_MODE" = "k8s" ]; then
+          if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
+            echo "HARNESS_MODE_EFFECTIVE=docker" >> $GITHUB_ENV
+            echo "PR event: using local docker mode." >> $GITHUB_STEP_SUMMARY
+          elif [ "$HARNESS_MODE" = "k8s" ]; then
             if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ] && [ "${{ inputs.run_k8s }}" != "true" ]; then
               echo "HARNESS_MODE_EFFECTIVE=docker" >> $GITHUB_ENV
               echo "K8S disabled via workflow_dispatch input; falling back to docker." >> $GITHUB_STEP_SUMMARY
@@ -100,28 +103,15 @@ jobs:
           echo "K8s harness namespaces are recreated at start and deleted at the end of each run." >> $GITHUB_STEP_SUMMARY
 
       - name: Login to Docker Hub
-        if: env.HARNESS_MODE_EFFECTIVE == 'docker'
+        if: env.HARNESS_MODE_EFFECTIVE == 'k8s'
         uses: docker/login-action@v3
         with:
           username: ${{ env.DH_USERNAME }}
           password: ${{ env.DH_TOKEN }}
 
-      - name: Build canonical image
+      - name: Build canonical image locally
         if: env.HARNESS_MODE_EFFECTIVE == 'docker'
-        run: |
-          echo "Pulling $IMAGE_TAG"
-          attempts=0
-          max_attempts=30
-          until docker pull "$IMAGE_TAG"; do
-            attempts=$((attempts + 1))
-            if [ "$attempts" -ge "$max_attempts" ]; then
-              echo "Failed to pull $IMAGE_TAG after $attempts attempts." >&2
-              exit 1
-            fi
-            echo "Image not ready yet, retrying in 20s... ($attempts/$max_attempts)"
-            sleep 20
-          done
-          docker tag "$IMAGE_TAG" verana-node:ci
+        run: docker build -f docker/veranad.Dockerfile -t verana-node:ci .
 
       - name: Set up kubectl
         if: env.HARNESS_MODE_EFFECTIVE == 'k8s'
