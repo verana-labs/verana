@@ -2,14 +2,14 @@ package types
 
 import (
 	"context"
-
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"time"
 )
 
 // DelegationKeeper is the minimum surface MOD-GF needs from x/de for AUTHZ-CHECK-1.
-// Mirrors x/tr/types.DelegationKeeper.
+// Signature matches x/de/keeper.Keeper.CheckOperatorAuthorization exactly so the
+// DE keeper concrete type satisfies this interface and depinject can auto-wire it.
 type DelegationKeeper interface {
-	CheckOperatorAuthorization(ctx sdk.Context, corporation string, operator string, msgType string) error
+	CheckOperatorAuthorization(ctx context.Context, corporation string, operator string, msgTypeURL string, now time.Time) error
 }
 
 // EcosystemView is the read shape MOD-GF needs to validate ecosystem subjects.

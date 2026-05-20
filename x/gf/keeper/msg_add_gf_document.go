@@ -129,7 +129,7 @@ func (ms msgServer) AddGovernanceFrameworkDocument(goCtx context.Context, msg *t
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	// AUTHZ-CHECK-1
-	if err := ms.delegationKeeper.CheckOperatorAuthorization(ctx, msg.Corporation, msg.Operator, sdk.MsgTypeURL(msg)); err != nil {
+	if err := ms.delegationKeeper.CheckOperatorAuthorization(ctx, msg.Corporation, msg.Operator, sdk.MsgTypeURL(msg), ctx.BlockTime()); err != nil {
 		return nil, err
 	}
 

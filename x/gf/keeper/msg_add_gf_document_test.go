@@ -6,7 +6,6 @@ import (
 	"time"
 
 	cerrors "cosmossdk.io/errors"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/stretchr/testify/require"
 
@@ -25,7 +24,7 @@ const (
 // mockDelegation implements types.DelegationKeeper.
 type mockDelegation struct{ err error }
 
-func (m mockDelegation) CheckOperatorAuthorization(_ sdk.Context, _, _, _ string) error {
+func (m mockDelegation) CheckOperatorAuthorization(_ context.Context, _, _, _ string, _ time.Time) error {
 	return m.err
 }
 
