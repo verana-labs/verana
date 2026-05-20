@@ -109,9 +109,20 @@ jobs:
           username: ${{ env.DH_USERNAME }}
           password: ${{ env.DH_TOKEN }}
 
+      - name: Set up Docker Buildx
+        if: env.HARNESS_MODE_EFFECTIVE == 'docker'
+        uses: docker/setup-buildx-action@v3
+
       - name: Build canonical image locally
         if: env.HARNESS_MODE_EFFECTIVE == 'docker'
-        run: docker build -f docker/veranad.Dockerfile -t verana-node:ci .
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/veranad.Dockerfile
+          load: true
+          tags: verana-node:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Set up kubectl
         if: env.HARNESS_MODE_EFFECTIVE == 'k8s'
