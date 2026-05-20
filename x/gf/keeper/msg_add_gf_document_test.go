@@ -1,0 +1,189 @@
+package keeper_test
+
+import (
+	"context"
+	"testing"
+	"time"
+
+	cerrors "cosmossdk.io/errors"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	"github.com/stretchr/testify/require"
+
+	keepertest "github.com/verana-labs/verana/testutil/keeper"
+	"github.com/verana-labs/verana/x/gf/keeper"
+	"github.com/verana-labs/verana/x/gf/types"
+)
+
+const (
+	testCorp     = "cosmos1corp00000000000000000000000000000abc"
+	testOperator = "cosmos1op0000000000000000000000000000000abc"
+	testDigest   = "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26"
+	testURL      = "https://example.com/gf-v1.html"
+)
+
+// mockDelegation implements types.DelegationKeeper.
+type mockDelegation struct{ err error }
+
+func (m mockDelegation) CheckOperatorAuthorization(_ sdk.Context, _, _, _ string) error {
+	return m.err
+}
+
+// mockEcosystem implements types.EcosystemKeeper.
+type mockEcosystem struct {
+	view  types.EcosystemView
+	found bool
+	setFn func(uint64, int32) error
+}
+
+func (m *mockEcosystem) GetEcosystemView(_ context.Context, _ uint64) (types.EcosystemView, bool) {
+	return m.view, m.found
+}
+func (m *mockEcosystem) SetEcosystemActiveVersion(_ context.Context, id uint64, v int32) error {
+	if m.setFn != nil {
+		return m.setFn(id, v)
+	}
+	return nil
+}
+
+// mockCorporation implements types.CorporationKeeper.
+type mockCorporation struct {
+	view  types.CorporationView
+	found bool
+	setFn func(string, int32) error
+}
+
+func (m *mockCorporation) GetCorporationView(_ context.Context, _ string) (types.CorporationView, bool) {
+	return m.view, m.found
+}
+func (m *mockCorporation) SetCorporationActiveVersion(_ context.Context, addr string, v int32) error {
+	if m.setFn != nil {
+		return m.setFn(addr, v)
+	}
+	return nil
+}
+
+func validMsg(corp, op string, ecoID uint64, version int32) *types.MsgAddGovernanceFrameworkDocument {
+	return &types.MsgAddGovernanceFrameworkDocument{
+		Corporation:  corp,
+		Operator:     op,
+		EcosystemId:  ecoID,
+		DocLanguage:  "en",
+		DocUrl:       testURL,
+		DocDigestSri: testDigest,
+		Version:      version,
+	}
+}
+
+func TestAddGovernanceFrameworkDocument(t *testing.T) {
+	t.Run("MOD-GF-MSG-1: happy path adds GFV+GFD to Corporation subject", func(t *testing.T) {
+		corp := &mockCorporation{
+			view:  types.CorporationView{GroupPolicyAddress: testCorp, Language: "en", ActiveVersion: 0},
+			found: true,
+		}
+		eco := &mockEcosystem{}
+		k, ctx := keepertest.GfKeeperWithDelegation(t, mockDelegation{}, eco, corp)
+		ms := keeper.NewMsgServerImpl(k)
+
+		now := time.Date(2026, 5, 20, 12, 0, 0, 0, time.UTC)
+		ctx = ctx.WithBlockTime(now)
+
+		_, err := ms.AddGovernanceFrameworkDocument(ctx, validMsg(testCorp, testOperator, 0, 1))
+		require.NoError(t, err)
+
+		var gfvCount int
+		_ = k.GFVersion.Walk(ctx, nil, func(_ uint64, gfv types.GovernanceFrameworkVersion) (bool, error) {
+			gfvCount++
+			require.Equal(t, testCorp, gfv.Corporation)
+			require.Zero(t, gfv.EcosystemId)
+			require.Equal(t, int32(1), gfv.Version)
+			require.True(t, gfv.ActiveSince.IsZero())
+			return false, nil
+		})
+		require.Equal(t, 1, gfvCount)
+	})
+
+	t.Run("MOD-GF-MSG-1-2-1: AUTHZ-CHECK-1 failure aborts", func(t *testing.T) {
+		corp := &mockCorporation{view: types.CorporationView{GroupPolicyAddress: testCorp}, found: true}
+		eco := &mockEcosystem{}
+		k, ctx := keepertest.GfKeeperWithDelegation(t,
+			mockDelegation{err: cerrors.Wrap(sdkerrors.ErrUnauthorized, "unauthorized")},
+			eco, corp,
+		)
+		ms := keeper.NewMsgServerImpl(k)
+		_, err := ms.AddGovernanceFrameworkDocument(ctx, validMsg(testCorp, testOperator, 0, 1))
+		require.Error(t, err)
+	})
+
+	t.Run("MOD-GF-MSG-1-2-1: ecosystem not controlled by signer aborts", func(t *testing.T) {
+		eco := &mockEcosystem{
+			view:  types.EcosystemView{Id: 1, Corporation: "other_corp", Language: "en"},
+			found: true,
+		}
+		corp := &mockCorporation{}
+		k, ctx := keepertest.GfKeeperWithDelegation(t, mockDelegation{}, eco, corp)
+		ms := keeper.NewMsgServerImpl(k)
+		_, err := ms.AddGovernanceFrameworkDocument(ctx, validMsg(testCorp, testOperator, 1, 1))
+		require.ErrorIs(t, err, types.ErrSubjectNotControlled)
+	})
+
+	t.Run("MOD-GF-MSG-1-2-1: version must be > active_version", func(t *testing.T) {
+		corp := &mockCorporation{
+			view:  types.CorporationView{GroupPolicyAddress: testCorp, Language: "en", ActiveVersion: 2},
+			found: true,
+		}
+		eco := &mockEcosystem{}
+		k, ctx := keepertest.GfKeeperWithDelegation(t, mockDelegation{}, eco, corp)
+		ms := keeper.NewMsgServerImpl(k)
+		// Set up a v1 first so MaxV becomes 1 and v2 attempt fails on active_version check.
+		_, _ = ms.AddGovernanceFrameworkDocument(ctx, validMsg(testCorp, testOperator, 0, 1))
+		_, _ = ms.AddGovernanceFrameworkDocument(ctx, validMsg(testCorp, testOperator, 0, 2))
+		_, err := ms.AddGovernanceFrameworkDocument(ctx, validMsg(testCorp, testOperator, 0, 2))
+		require.ErrorIs(t, err, types.ErrInvalidVersion)
+	})
+
+	t.Run("MOD-GF-MSG-1-3: replaces existing GFD for same language", func(t *testing.T) {
+		corp := &mockCorporation{
+			view:  types.CorporationView{GroupPolicyAddress: testCorp, Language: "en", ActiveVersion: 0},
+			found: true,
+		}
+		eco := &mockEcosystem{}
+		k, ctx := keepertest.GfKeeperWithDelegation(t, mockDelegation{}, eco, corp)
+		ms := keeper.NewMsgServerImpl(k)
+
+		_, err := ms.AddGovernanceFrameworkDocument(ctx, validMsg(testCorp, testOperator, 0, 1))
+		require.NoError(t, err)
+
+		updated := validMsg(testCorp, testOperator, 0, 1)
+		updated.DocUrl = "https://example.com/gf-v1-updated.html"
+		_, err = ms.AddGovernanceFrameworkDocument(ctx, updated)
+		require.NoError(t, err)
+
+		var gfdCount int
+		_ = k.GFDocument.Walk(ctx, nil, func(_ uint64, d types.GovernanceFrameworkDocument) (bool, error) {
+			gfdCount++
+			require.Equal(t, "https://example.com/gf-v1-updated.html", d.Url)
+			return false, nil
+		})
+		require.Equal(t, 1, gfdCount, "GFD count must be 1 — same-language doc must be replaced, not appended")
+	})
+
+	t.Run("MOD-GF-MSG-1-3: ecosystem subject creates GFV with ecosystem_id set", func(t *testing.T) {
+		eco := &mockEcosystem{
+			view:  types.EcosystemView{Id: 7, Corporation: testCorp, Language: "en"},
+			found: true,
+		}
+		corp := &mockCorporation{}
+		k, ctx := keepertest.GfKeeperWithDelegation(t, mockDelegation{}, eco, corp)
+		ms := keeper.NewMsgServerImpl(k)
+
+		_, err := ms.AddGovernanceFrameworkDocument(ctx, validMsg(testCorp, testOperator, 7, 1))
+		require.NoError(t, err)
+
+		_ = k.GFVersion.Walk(ctx, nil, func(_ uint64, gfv types.GovernanceFrameworkVersion) (bool, error) {
+			require.Equal(t, uint64(7), gfv.EcosystemId)
+			require.Equal(t, "", gfv.Corporation)
+			return false, nil
+		})
+	})
+}
