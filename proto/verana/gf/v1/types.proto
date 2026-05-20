@@ -1,0 +1,67 @@
+syntax = "proto3";
+package verana.gf.v1;
+
+import "amino/amino.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/verana-labs/verana/x/gf/types";
+
+// GovernanceFrameworkVersion represents a versioned governance framework owned
+// by either an Ecosystem (ecosystem_id set, corporation empty) or a Corporation
+// (corporation set, ecosystem_id zero). Exactly one of the two owner fields is set.
+message GovernanceFrameworkVersion {
+  uint64 id = 1;
+  uint64 ecosystem_id = 2;
+  string corporation = 3 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  google.protobuf.Timestamp created = 4 [
+    (gogoproto.stdtime) = true,
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+  int32 version = 5;
+  google.protobuf.Timestamp active_since = 6 [
+    (gogoproto.stdtime) = true,
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+}
+
+// GovernanceFrameworkDocument is a single (language, url, digest_sri) tuple
+// attached to a GovernanceFrameworkVersion.
+message GovernanceFrameworkDocument {
+  uint64 id = 1;
+  uint64 gfv_id = 2;
+  google.protobuf.Timestamp created = 3 [
+    (gogoproto.stdtime) = true,
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+  string language = 4;
+  string url = 5;
+  string digest_sri = 6;
+}
+
+// GovernanceFrameworkVersionWithDocs is the response shape for the query layer,
+// returning a version with its nested documents.
+message GovernanceFrameworkVersionWithDocs {
+  uint64 id = 1;
+  uint64 ecosystem_id = 2;
+  string corporation = 3 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  google.protobuf.Timestamp created = 4 [
+    (gogoproto.stdtime) = true,
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+  int32 version = 5;
+  google.protobuf.Timestamp active_since = 6 [
+    (gogoproto.stdtime) = true,
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+  repeated GovernanceFrameworkDocument documents = 7 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+}
