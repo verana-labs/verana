@@ -21,7 +21,7 @@ func (k Keeper) InitGenesis(ctx sdk.Context, gs types.GenesisState) error {
 				return err
 			}
 		} else {
-			if err := k.GFVersionByCorporation.Set(ctx, collections.Join(gfv.Corporation, gfv.Version), gfv.Id); err != nil {
+			if err := k.GFVersionByCorporation.Set(ctx, collections.Join(gfv.CorporationId, gfv.Version), gfv.Id); err != nil {
 				return err
 			}
 		}

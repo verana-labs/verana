@@ -14,11 +14,11 @@ import (
 func TestIncreaseActiveGovernanceFrameworkVersion(t *testing.T) {
 	t.Run("MOD-GF-MSG-2: happy path activates next version for Corporation", func(t *testing.T) {
 		corp := &mockCorporation{
-			view:  types.CorporationView{GroupPolicyAddress: testCorp, Language: "en", ActiveVersion: 0},
+			view:  types.CorporationView{Id: 1, PolicyAddress: testCorp, Language: "en", ActiveVersion: 0},
 			found: true,
 		}
 		var newActive int32
-		corp.setFn = func(_ string, v int32) error { newActive = v; return nil }
+		corp.setFn = func(_ uint64, v int32) error { newActive = v; return nil }
 
 		eco := &mockEcosystem{}
 		k, ctx := keepertest.GfKeeperWithDelegation(t, mockDelegation{}, eco, corp)
@@ -50,7 +50,7 @@ func TestIncreaseActiveGovernanceFrameworkVersion(t *testing.T) {
 
 	t.Run("MOD-GF-MSG-2-2-1: aborts when no next-version GFV exists", func(t *testing.T) {
 		corp := &mockCorporation{
-			view:  types.CorporationView{GroupPolicyAddress: testCorp, Language: "en", ActiveVersion: 0},
+			view:  types.CorporationView{Id: 1, PolicyAddress: testCorp, Language: "en", ActiveVersion: 0},
 			found: true,
 		}
 		eco := &mockEcosystem{}
@@ -67,7 +67,7 @@ func TestIncreaseActiveGovernanceFrameworkVersion(t *testing.T) {
 
 	t.Run("MOD-GF-MSG-2-2-1: aborts when default-language doc missing", func(t *testing.T) {
 		corp := &mockCorporation{
-			view:  types.CorporationView{GroupPolicyAddress: testCorp, Language: "en", ActiveVersion: 0},
+			view:  types.CorporationView{Id: 1, PolicyAddress: testCorp, Language: "en", ActiveVersion: 0},
 			found: true,
 		}
 		eco := &mockEcosystem{}

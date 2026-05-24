@@ -45,7 +45,7 @@ message QueryGetGovernanceFrameworkVersionResponse {
 
 message QueryListGovernanceFrameworkVersionsRequest {
   uint64 ecosystem_id = 1;
-  string corporation = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  uint64 corporation_id = 2;
   bool active_only = 3;
   string preferred_language = 4;
   uint32 response_max_size = 5;

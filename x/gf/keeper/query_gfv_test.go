@@ -14,7 +14,7 @@ import (
 func TestQueryGetGovernanceFrameworkVersion(t *testing.T) {
 	t.Run("MOD-GF-QRY-1: returns GFV with docs, preferred language filter applied", func(t *testing.T) {
 		corp := &mockCorporation{
-			view:  types.CorporationView{GroupPolicyAddress: testCorp, Language: "en", ActiveVersion: 0},
+			view:  types.CorporationView{Id: 1, PolicyAddress: testCorp, Language: "en", ActiveVersion: 0},
 			found: true,
 		}
 		k, ctx := keepertest.GfKeeperWithDelegation(t, mockDelegation{}, &mockEcosystem{}, corp)
@@ -50,14 +50,14 @@ func TestQueryListGovernanceFrameworkVersions(t *testing.T) {
 		require.Error(t, err)
 		_, err = qs.ListGovernanceFrameworkVersions(ctx, &types.QueryListGovernanceFrameworkVersionsRequest{
 			EcosystemId: 1,
-			Corporation: "x",
+			CorporationId: 1,
 		})
 		require.Error(t, err)
 	})
 
 	t.Run("MOD-GF-QRY-2-3: results ordered by ascending version, active_only respected", func(t *testing.T) {
 		corp := &mockCorporation{
-			view:  types.CorporationView{GroupPolicyAddress: testCorp, Language: "en", ActiveVersion: 0},
+			view:  types.CorporationView{Id: 1, PolicyAddress: testCorp, Language: "en", ActiveVersion: 0},
 			found: true,
 		}
 		k, ctx := keepertest.GfKeeperWithDelegation(t, mockDelegation{}, &mockEcosystem{}, corp)
@@ -77,14 +77,14 @@ func TestQueryListGovernanceFrameworkVersions(t *testing.T) {
 		require.NoError(t, err)
 
 		qs := keeper.NewQueryServerImpl(k)
-		all, err := qs.ListGovernanceFrameworkVersions(ctx, &types.QueryListGovernanceFrameworkVersionsRequest{Corporation: testCorp})
+		all, err := qs.ListGovernanceFrameworkVersions(ctx, &types.QueryListGovernanceFrameworkVersionsRequest{CorporationId: 1})
 		require.NoError(t, err)
 		require.Len(t, all.Versions, 2)
 		require.Equal(t, int32(1), all.Versions[0].Version)
 		require.Equal(t, int32(2), all.Versions[1].Version)
 
 		activeOnly, err := qs.ListGovernanceFrameworkVersions(ctx, &types.QueryListGovernanceFrameworkVersionsRequest{
-			Corporation: testCorp,
+			CorporationId: 1,
 			ActiveOnly:  true,
 		})
 		require.NoError(t, err)

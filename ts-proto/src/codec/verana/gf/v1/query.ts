@@ -30,7 +30,7 @@ export interface QueryGetGovernanceFrameworkVersionResponse {
 
 export interface QueryListGovernanceFrameworkVersionsRequest {
   ecosystemId: number;
-  corporation: string;
+  corporationId: number;
   activeOnly: boolean;
   preferredLanguage: string;
   responseMaxSize: number;
@@ -284,7 +284,7 @@ export const QueryGetGovernanceFrameworkVersionResponse = {
 };
 
 function createBaseQueryListGovernanceFrameworkVersionsRequest(): QueryListGovernanceFrameworkVersionsRequest {
-  return { ecosystemId: 0, corporation: "", activeOnly: false, preferredLanguage: "", responseMaxSize: 0 };
+  return { ecosystemId: 0, corporationId: 0, activeOnly: false, preferredLanguage: "", responseMaxSize: 0 };
 }
 
 export const QueryListGovernanceFrameworkVersionsRequest = {
@@ -292,8 +292,8 @@ export const QueryListGovernanceFrameworkVersionsRequest = {
     if (message.ecosystemId !== 0) {
       writer.uint32(8).uint64(message.ecosystemId);
     }
-    if (message.corporation !== "") {
-      writer.uint32(18).string(message.corporation);
+    if (message.corporationId !== 0) {
+      writer.uint32(16).uint64(message.corporationId);
     }
     if (message.activeOnly !== false) {
       writer.uint32(24).bool(message.activeOnly);
@@ -322,11 +322,11 @@ export const QueryListGovernanceFrameworkVersionsRequest = {
           message.ecosystemId = longToNumber(reader.uint64() as Long);
           continue;
         case 2:
-          if (tag !== 18) {
+          if (tag !== 16) {
             break;
           }
 
-          message.corporation = reader.string();
+          message.corporationId = longToNumber(reader.uint64() as Long);
           continue;
         case 3:
           if (tag !== 24) {
@@ -361,7 +361,7 @@ export const QueryListGovernanceFrameworkVersionsRequest = {
   fromJSON(object: any): QueryListGovernanceFrameworkVersionsRequest {
     return {
       ecosystemId: isSet(object.ecosystemId) ? globalThis.Number(object.ecosystemId) : 0,
-      corporation: isSet(object.corporation) ? globalThis.String(object.corporation) : "",
+      corporationId: isSet(object.corporationId) ? globalThis.Number(object.corporationId) : 0,
       activeOnly: isSet(object.activeOnly) ? globalThis.Boolean(object.activeOnly) : false,
       preferredLanguage: isSet(object.preferredLanguage) ? globalThis.String(object.preferredLanguage) : "",
       responseMaxSize: isSet(object.responseMaxSize) ? globalThis.Number(object.responseMaxSize) : 0,
@@ -373,8 +373,8 @@ export const QueryListGovernanceFrameworkVersionsRequest = {
     if (message.ecosystemId !== 0) {
       obj.ecosystemId = Math.round(message.ecosystemId);
     }
-    if (message.corporation !== "") {
-      obj.corporation = message.corporation;
+    if (message.corporationId !== 0) {
+      obj.corporationId = Math.round(message.corporationId);
     }
     if (message.activeOnly !== false) {
       obj.activeOnly = message.activeOnly;
@@ -398,7 +398,7 @@ export const QueryListGovernanceFrameworkVersionsRequest = {
   ): QueryListGovernanceFrameworkVersionsRequest {
     const message = createBaseQueryListGovernanceFrameworkVersionsRequest();
     message.ecosystemId = object.ecosystemId ?? 0;
-    message.corporation = object.corporation ?? "";
+    message.corporationId = object.corporationId ?? 0;
     message.activeOnly = object.activeOnly ?? false;
     message.preferredLanguage = object.preferredLanguage ?? "";
     message.responseMaxSize = object.responseMaxSize ?? 0;

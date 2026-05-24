@@ -23,20 +23,28 @@ const (
 type resolvedSubject struct {
 	kind          subjectKind
 	ecosystemID   uint64
-	corporation   string
+	corporationID uint64
 	language      string
 	activeVersion int32
 }
 
 // resolveSubject implements the spec's "Define subject as ..." block for
-// MOD-GF-MSG-1-2-1 and MOD-GF-MSG-2-2-1.
+// MOD-GF-MSG-1-2-1 and MOD-GF-MSG-2-2-1, on top of AUTHZ-CHECK-5 which
+// resolves the signing account → Corporation by policy_address → co.id.
 func (k Keeper) resolveSubject(ctx context.Context, signingCorp string, ecosystemID uint64) (resolvedSubject, error) {
+	// AUTHZ-CHECK-5 surface: resolve the signing corporation account.
+	// Stub returns (zero, false) until #303 lands → all corp-targeted calls fail here.
+	coView, ok := k.corporationKeeper.ResolveByPolicyAddress(ctx, signingCorp)
+	if !ok {
+		return resolvedSubject{}, cerrors.Wrapf(types.ErrSubjectNotFound, "no Corporation registered for signing account %s", signingCorp)
+	}
+
 	if ecosystemID != 0 {
 		eco, ok := k.ecosystemKeeper.GetEcosystemView(ctx, ecosystemID)
 		if !ok {
 			return resolvedSubject{}, cerrors.Wrapf(types.ErrSubjectNotFound, "ecosystem %d", ecosystemID)
 		}
-		if eco.Corporation != signingCorp {
+		if eco.CorporationID != coView.Id {
 			return resolvedSubject{}, types.ErrSubjectNotControlled
 		}
 		return resolvedSubject{
@@ -47,15 +55,11 @@ func (k Keeper) resolveSubject(ctx context.Context, signingCorp string, ecosyste
 		}, nil
 	}
 
-	corp, ok := k.corporationKeeper.GetCorporationView(ctx, signingCorp)
-	if !ok {
-		return resolvedSubject{}, cerrors.Wrapf(types.ErrSubjectNotFound, "corporation %s", signingCorp)
-	}
 	return resolvedSubject{
 		kind:          subjectCorporation,
-		corporation:   corp.GroupPolicyAddress,
-		language:      corp.Language,
-		activeVersion: corp.ActiveVersion,
+		corporationID: coView.Id,
+		language:      coView.Language,
+		activeVersion: coView.ActiveVersion,
 	}, nil
 }
 
@@ -91,7 +95,7 @@ func (k Keeper) maxVersionFor(ctx context.Context, sub resolvedSubject, targetVe
 			}
 		}
 	case subjectCorporation:
-		iter, e := k.GFVersionByCorporation.Iterate(ctx, collections.NewPrefixedPairRange[string, int32](sub.corporation))
+		iter, e := k.GFVersionByCorporation.Iterate(ctx, collections.NewPrefixedPairRange[uint64, int32](sub.corporationID))
 		if e != nil {
 			err = e
 			return
@@ -171,7 +175,7 @@ func (ms msgServer) AddGovernanceFrameworkDocument(goCtx context.Context, msg *t
 		if sub.kind == subjectEcosystem {
 			gfv.EcosystemId = sub.ecosystemID
 		} else {
-			gfv.Corporation = sub.corporation
+			gfv.CorporationId = sub.corporationID
 		}
 		if err := ms.GFVersion.Set(ctx, gfv.Id, gfv); err != nil {
 			return nil, fmt.Errorf("persist gfv: %w", err)
@@ -182,7 +186,7 @@ func (ms msgServer) AddGovernanceFrameworkDocument(goCtx context.Context, msg *t
 				return nil, fmt.Errorf("persist gfv eco index: %w", err)
 			}
 		} else {
-			if err := ms.GFVersionByCorporation.Set(ctx, collections.Join(sub.corporation, msg.Version), gfv.Id); err != nil {
+			if err := ms.GFVersionByCorporation.Set(ctx, collections.Join(sub.corporationID, msg.Version), gfv.Id); err != nil {
 				return nil, fmt.Errorf("persist gfv corp index: %w", err)
 			}
 		}

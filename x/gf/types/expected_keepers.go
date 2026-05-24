@@ -13,37 +13,48 @@ type DelegationKeeper interface {
 }
 
 // EcosystemView is the read shape MOD-GF needs to validate ecosystem subjects.
-// `Corporation` is the controlling corporation (group_policy_address).
+// `CorporationID` is the uint64 FK to the controlling Corporation.
 // `Language` is the ecosystem's primary language.
 // `ActiveVersion` is the ecosystem's current active GF version.
 type EcosystemView struct {
 	Id            uint64
-	Corporation   string
+	CorporationID uint64
 	Language      string
 	ActiveVersion int32
 }
 
 // EcosystemKeeper is the minimum surface MOD-GF needs for ecosystem-targeted GF ops.
-// Until issue #305 (TR→EC rename) lands, the x/tr keeper provides this via an adapter.
+// Until issue #305 (TR→EC rename) lands, the x/tr keeper provides this via an
+// adapter that returns CorporationID=0 (interim — ecosystem-targeted MOD-GF calls
+// will fail the subject controller check until MOD-CO and the rename land).
 type EcosystemKeeper interface {
 	GetEcosystemView(ctx context.Context, ecosystemID uint64) (EcosystemView, bool)
 	SetEcosystemActiveVersion(ctx context.Context, ecosystemID uint64, newVersion int32) error
 }
 
-// CorporationView is the read shape MOD-GF needs to validate corporation subjects.
-// ActiveVersion uses int32 to match EcosystemView and the underlying spec
-// (`active_version (int)`), preventing silent overflow on cast in resolveSubject.
+// CorporationView is the read shape MOD-GF needs about a Corporation subject.
+// `Id` is the canonical uint64 FK target everywhere in VPR.
+// `PolicyAddress` is the on-chain account that signs on the Corporation's behalf.
 type CorporationView struct {
-	GroupPolicyAddress string
-	Language           string
-	ActiveVersion      int32
+	Id            uint64
+	PolicyAddress string
+	Language      string
+	ActiveVersion int32
 }
 
-// CorporationKeeper is the minimum surface MOD-GF needs for corporation-targeted GF ops.
-// Until issue #303 (MOD-CO) lands, a stub keeper returns (zero, false) for all calls.
-// The implementation MUST also bump `corp.modified` when active_version is updated
-// (per MOD-GF-MSG-2-3 step "Set subject.modified to current timestamp").
+// CorporationKeeper is the minimum surface MOD-GF needs for:
+//   - AUTHZ-CHECK-5 resolution: ResolveByPolicyAddress takes the signing account
+//     (= policy_address) and returns the registered Corporation (its id, language,
+//     active_version). MUST be called at the entry of every delegable MOD-GF Msg.
+//   - Subject lookups by id: GetByID returns a Corporation by its uint64 id (used
+//     by the query layer for the active_only filter).
+//   - Active version mutation: SetActiveVersion bumps `co.active_version` and
+//     `co.modified` per MOD-GF-MSG-2-3.
+//
+// Until issue #303 (MOD-CO) lands, a stub keeper returns (zero, false) for all
+// lookups so all corporation-targeted MOD-GF calls abort with ErrSubjectNotFound.
 type CorporationKeeper interface {
-	GetCorporationView(ctx context.Context, groupPolicyAddress string) (CorporationView, bool)
-	SetCorporationActiveVersion(ctx context.Context, groupPolicyAddress string, newVersion int32) error
+	ResolveByPolicyAddress(ctx context.Context, policyAddress string) (CorporationView, bool)
+	GetByID(ctx context.Context, corporationID uint64) (CorporationView, bool)
+	SetActiveVersion(ctx context.Context, corporationID uint64, newVersion int32) error
 }

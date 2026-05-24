@@ -19,7 +19,7 @@ export const protobufPackage = "verana.gf.v1";
 export interface GovernanceFrameworkVersion {
   id: number;
   ecosystemId: number;
-  corporation: string;
+  corporationId: number;
   created: Date | undefined;
   version: number;
   activeSince: Date | undefined;
@@ -45,7 +45,7 @@ export interface GovernanceFrameworkDocument {
 export interface GovernanceFrameworkVersionWithDocs {
   id: number;
   ecosystemId: number;
-  corporation: string;
+  corporationId: number;
   created: Date | undefined;
   version: number;
   activeSince: Date | undefined;
@@ -53,7 +53,7 @@ export interface GovernanceFrameworkVersionWithDocs {
 }
 
 function createBaseGovernanceFrameworkVersion(): GovernanceFrameworkVersion {
-  return { id: 0, ecosystemId: 0, corporation: "", created: undefined, version: 0, activeSince: undefined };
+  return { id: 0, ecosystemId: 0, corporationId: 0, created: undefined, version: 0, activeSince: undefined };
 }
 
 export const GovernanceFrameworkVersion = {
@@ -64,8 +64,8 @@ export const GovernanceFrameworkVersion = {
     if (message.ecosystemId !== 0) {
       writer.uint32(16).uint64(message.ecosystemId);
     }
-    if (message.corporation !== "") {
-      writer.uint32(26).string(message.corporation);
+    if (message.corporationId !== 0) {
+      writer.uint32(24).uint64(message.corporationId);
     }
     if (message.created !== undefined) {
       Timestamp.encode(toTimestamp(message.created), writer.uint32(34).fork()).ldelim();
@@ -101,11 +101,11 @@ export const GovernanceFrameworkVersion = {
           message.ecosystemId = longToNumber(reader.uint64() as Long);
           continue;
         case 3:
-          if (tag !== 26) {
+          if (tag !== 24) {
             break;
           }
 
-          message.corporation = reader.string();
+          message.corporationId = longToNumber(reader.uint64() as Long);
           continue;
         case 4:
           if (tag !== 34) {
@@ -141,7 +141,7 @@ export const GovernanceFrameworkVersion = {
     return {
       id: isSet(object.id) ? globalThis.Number(object.id) : 0,
       ecosystemId: isSet(object.ecosystemId) ? globalThis.Number(object.ecosystemId) : 0,
-      corporation: isSet(object.corporation) ? globalThis.String(object.corporation) : "",
+      corporationId: isSet(object.corporationId) ? globalThis.Number(object.corporationId) : 0,
       created: isSet(object.created) ? fromJsonTimestamp(object.created) : undefined,
       version: isSet(object.version) ? globalThis.Number(object.version) : 0,
       activeSince: isSet(object.activeSince) ? fromJsonTimestamp(object.activeSince) : undefined,
@@ -156,8 +156,8 @@ export const GovernanceFrameworkVersion = {
     if (message.ecosystemId !== 0) {
       obj.ecosystemId = Math.round(message.ecosystemId);
     }
-    if (message.corporation !== "") {
-      obj.corporation = message.corporation;
+    if (message.corporationId !== 0) {
+      obj.corporationId = Math.round(message.corporationId);
     }
     if (message.created !== undefined) {
       obj.created = message.created.toISOString();
@@ -178,7 +178,7 @@ export const GovernanceFrameworkVersion = {
     const message = createBaseGovernanceFrameworkVersion();
     message.id = object.id ?? 0;
     message.ecosystemId = object.ecosystemId ?? 0;
-    message.corporation = object.corporation ?? "";
+    message.corporationId = object.corporationId ?? 0;
     message.created = object.created ?? undefined;
     message.version = object.version ?? 0;
     message.activeSince = object.activeSince ?? undefined;
@@ -324,7 +324,7 @@ function createBaseGovernanceFrameworkVersionWithDocs(): GovernanceFrameworkVers
   return {
     id: 0,
     ecosystemId: 0,
-    corporation: "",
+    corporationId: 0,
     created: undefined,
     version: 0,
     activeSince: undefined,
@@ -340,8 +340,8 @@ export const GovernanceFrameworkVersionWithDocs = {
     if (message.ecosystemId !== 0) {
       writer.uint32(16).uint64(message.ecosystemId);
     }
-    if (message.corporation !== "") {
-      writer.uint32(26).string(message.corporation);
+    if (message.corporationId !== 0) {
+      writer.uint32(24).uint64(message.corporationId);
     }
     if (message.created !== undefined) {
       Timestamp.encode(toTimestamp(message.created), writer.uint32(34).fork()).ldelim();
@@ -380,11 +380,11 @@ export const GovernanceFrameworkVersionWithDocs = {
           message.ecosystemId = longToNumber(reader.uint64() as Long);
           continue;
         case 3:
-          if (tag !== 26) {
+          if (tag !== 24) {
             break;
           }
 
-          message.corporation = reader.string();
+          message.corporationId = longToNumber(reader.uint64() as Long);
           continue;
         case 4:
           if (tag !== 34) {
@@ -427,7 +427,7 @@ export const GovernanceFrameworkVersionWithDocs = {
     return {
       id: isSet(object.id) ? globalThis.Number(object.id) : 0,
       ecosystemId: isSet(object.ecosystemId) ? globalThis.Number(object.ecosystemId) : 0,
-      corporation: isSet(object.corporation) ? globalThis.String(object.corporation) : "",
+      corporationId: isSet(object.corporationId) ? globalThis.Number(object.corporationId) : 0,
       created: isSet(object.created) ? fromJsonTimestamp(object.created) : undefined,
       version: isSet(object.version) ? globalThis.Number(object.version) : 0,
       activeSince: isSet(object.activeSince) ? fromJsonTimestamp(object.activeSince) : undefined,
@@ -445,8 +445,8 @@ export const GovernanceFrameworkVersionWithDocs = {
     if (message.ecosystemId !== 0) {
       obj.ecosystemId = Math.round(message.ecosystemId);
     }
-    if (message.corporation !== "") {
-      obj.corporation = message.corporation;
+    if (message.corporationId !== 0) {
+      obj.corporationId = Math.round(message.corporationId);
     }
     if (message.created !== undefined) {
       obj.created = message.created.toISOString();
@@ -474,7 +474,7 @@ export const GovernanceFrameworkVersionWithDocs = {
     const message = createBaseGovernanceFrameworkVersionWithDocs();
     message.id = object.id ?? 0;
     message.ecosystemId = object.ecosystemId ?? 0;
-    message.corporation = object.corporation ?? "";
+    message.corporationId = object.corporationId ?? 0;
     message.created = object.created ?? undefined;
     message.version = object.version ?? 0;
     message.activeSince = object.activeSince ?? undefined;

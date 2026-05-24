@@ -25,13 +25,13 @@ func (q querier) GetGovernanceFrameworkVersion(goCtx context.Context, req *types
 	}
 	return &types.QueryGetGovernanceFrameworkVersionResponse{
 		Version: types.GovernanceFrameworkVersionWithDocs{
-			Id:          gfv.Id,
-			EcosystemId: gfv.EcosystemId,
-			Corporation: gfv.Corporation,
-			Created:     gfv.Created,
-			Version:     gfv.Version,
-			ActiveSince: gfv.ActiveSince,
-			Documents:   docs,
+			Id:            gfv.Id,
+			EcosystemId:   gfv.EcosystemId,
+			CorporationId: gfv.CorporationId,
+			Created:       gfv.Created,
+			Version:       gfv.Version,
+			ActiveSince:   gfv.ActiveSince,
+			Documents:     docs,
 		},
 	}, nil
 }
@@ -41,15 +41,34 @@ func (q querier) ListGovernanceFrameworkVersions(goCtx context.Context, req *typ
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 	hasEco := req.EcosystemId > 0
-	hasCorp := req.Corporation != ""
+	hasCorp := req.CorporationId > 0
 	if hasEco == hasCorp {
-		return nil, status.Error(codes.InvalidArgument, "exactly one of ecosystem_id or corporation must be set")
+		return nil, status.Error(codes.InvalidArgument, "exactly one of ecosystem_id or corporation_id must be set")
 	}
 	if req.ResponseMaxSize == 0 {
 		req.ResponseMaxSize = 64
 	}
 	if req.ResponseMaxSize > 1024 {
 		return nil, status.Error(codes.InvalidArgument, "response_max_size must be <= 1024")
+	}
+
+	// Spec MOD-GF-QRY-2-1: active_only returns "only the entry corresponding to
+	// the subject's active_version" — resolve subject's active_version once.
+	var subjectActiveVersion int32
+	if req.ActiveOnly {
+		if hasEco {
+			eco, ok := q.ecosystemKeeper.GetEcosystemView(goCtx, req.EcosystemId)
+			if !ok {
+				return nil, status.Errorf(codes.NotFound, "ecosystem %d not found", req.EcosystemId)
+			}
+			subjectActiveVersion = eco.ActiveVersion
+		} else {
+			coView, ok := q.corporationKeeper.GetByID(goCtx, req.CorporationId)
+			if !ok {
+				return nil, status.Errorf(codes.NotFound, "corporation %d not found", req.CorporationId)
+			}
+			subjectActiveVersion = coView.ActiveVersion
+		}
 	}
 
 	var gfvIDs []uint64
@@ -67,7 +86,7 @@ func (q querier) ListGovernanceFrameworkVersions(goCtx context.Context, req *typ
 			gfvIDs = append(gfvIDs, id)
 		}
 	} else {
-		iter, err := q.GFVersionByCorporation.Iterate(goCtx, collections.NewPrefixedPairRange[string, int32](req.Corporation))
+		iter, err := q.GFVersionByCorporation.Iterate(goCtx, collections.NewPrefixedPairRange[uint64, int32](req.CorporationId))
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "iterate: %v", err)
 		}
@@ -87,7 +106,7 @@ func (q querier) ListGovernanceFrameworkVersions(goCtx context.Context, req *typ
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "fetch gfv %d: %v", id, err)
 		}
-		if req.ActiveOnly && gfv.ActiveSince.IsZero() {
+		if req.ActiveOnly && gfv.Version != subjectActiveVersion {
 			continue
 		}
 		docs, err := q.collectDocs(goCtx, gfv.Id, req.PreferredLanguage)
@@ -95,13 +114,13 @@ func (q querier) ListGovernanceFrameworkVersions(goCtx context.Context, req *typ
 			return nil, status.Errorf(codes.Internal, "collect docs: %v", err)
 		}
 		versions = append(versions, types.GovernanceFrameworkVersionWithDocs{
-			Id:          gfv.Id,
-			EcosystemId: gfv.EcosystemId,
-			Corporation: gfv.Corporation,
-			Created:     gfv.Created,
-			Version:     gfv.Version,
-			ActiveSince: gfv.ActiveSince,
-			Documents:   docs,
+			Id:            gfv.Id,
+			EcosystemId:   gfv.EcosystemId,
+			CorporationId: gfv.CorporationId,
+			Created:       gfv.Created,
+			Version:       gfv.Version,
+			ActiveSince:   gfv.ActiveSince,
+			Documents:     docs,
 		})
 	}
 	// Spec MOD-GF-QRY-2-3: order by ascending version.

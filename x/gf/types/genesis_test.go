@@ -17,7 +17,7 @@ func TestGenesisValidate(t *testing.T) {
 		gs := types.GenesisState{
 			Params: types.DefaultParams(),
 			Versions: []types.GovernanceFrameworkVersion{
-				{Id: 1, EcosystemId: 1, Corporation: "x", Version: 1},
+				{Id: 1, EcosystemId: 1, CorporationId: 1, Version: 1},
 			},
 		}
 		require.ErrorIs(t, gs.Validate(), types.ErrInvalidSubject)
@@ -37,7 +37,7 @@ func TestGenesisValidate(t *testing.T) {
 		gs := types.GenesisState{
 			Params: types.DefaultParams(),
 			Versions: []types.GovernanceFrameworkVersion{
-				{Id: 1, Corporation: "x", Version: 1},
+				{Id: 1, CorporationId: 1, Version: 1},
 			},
 			Documents: []types.GovernanceFrameworkDocument{
 				{Id: 1, GfvId: 999, Language: "en"},

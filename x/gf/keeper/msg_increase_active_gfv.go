@@ -35,7 +35,7 @@ func (ms msgServer) IncreaseActiveGovernanceFrameworkVersion(goCtx context.Conte
 	case subjectEcosystem:
 		gfvID, err = ms.GFVersionByEcosystem.Get(ctx, collections.Join(sub.ecosystemID, nextVersion))
 	case subjectCorporation:
-		gfvID, err = ms.GFVersionByCorporation.Get(ctx, collections.Join(sub.corporation, nextVersion))
+		gfvID, err = ms.GFVersionByCorporation.Get(ctx, collections.Join(sub.corporationID, nextVersion))
 	}
 	if err != nil {
 		return nil, cerrors.Wrapf(types.ErrNoActivatableVersion, "no GFV for next version %d", nextVersion)
@@ -73,7 +73,7 @@ func (ms msgServer) IncreaseActiveGovernanceFrameworkVersion(goCtx context.Conte
 			return nil, fmt.Errorf("update ecosystem active version: %w", err)
 		}
 	case subjectCorporation:
-		if err := ms.corporationKeeper.SetCorporationActiveVersion(ctx, sub.corporation, nextVersion); err != nil {
+		if err := ms.corporationKeeper.SetActiveVersion(ctx, sub.corporationID, nextVersion); err != nil {
 			return nil, fmt.Errorf("update corporation active version: %w", err)
 		}
 	}

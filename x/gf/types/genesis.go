@@ -16,7 +16,7 @@ func (gs GenesisState) Validate() error {
 	// GFV: exactly one of ecosystem_id (>0) and corporation (non-empty) must be set.
 	for _, gfv := range gs.Versions {
 		hasEco := gfv.EcosystemId > 0
-		hasCorp := gfv.Corporation != ""
+		hasCorp := gfv.CorporationId > 0
 		if hasEco == hasCorp {
 			return ErrInvalidSubject
 		}

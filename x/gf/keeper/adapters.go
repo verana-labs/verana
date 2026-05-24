@@ -13,7 +13,16 @@ import (
 
 // TRAsEcosystemKeeper wraps the existing x/tr keeper to satisfy
 // gftypes.EcosystemKeeper. Removed when issue #305 (TR→EC rename) lands —
-// the renamed EC keeper will implement gftypes.EcosystemKeeper directly.
+// the renamed EC keeper will implement gftypes.EcosystemKeeper directly with
+// the proper CorporationID FK.
+//
+// INTERIM: TR stores `corporation` as a bech32 address; MOD-GF needs
+// corporation_id (uint64). Without MOD-CO (#303) to resolve address → id, we
+// set CorporationID = 0 in the returned view. Any ecosystem-targeted GF
+// subject check that compares `eco.CorporationID == co.id` will fail. This
+// adapter is replaced wholesale when #305 lands; until then, EC-targeted
+// MOD-GF calls are intentionally non-functional. Corporation-targeted MOD-GF
+// calls are gated by StubCorporationKeeper below and are also non-functional.
 type TRAsEcosystemKeeper struct {
 	k trkeeper.Keeper
 }
@@ -30,7 +39,7 @@ func (a TRAsEcosystemKeeper) GetEcosystemView(ctx context.Context, id uint64) (g
 	}
 	return gftypes.EcosystemView{
 		Id:            tr.Id,
-		Corporation:   tr.Corporation,
+		CorporationID: 0, // intentional — see file header
 		Language:      tr.Language,
 		ActiveVersion: tr.ActiveVersion,
 	}, true
@@ -49,7 +58,7 @@ func (a TRAsEcosystemKeeper) SetEcosystemActiveVersion(ctx context.Context, id u
 
 // StubCorporationKeeper returns (zero, false) for all lookups. Replaced when
 // issue #303 (MOD-CO) lands; until then corporation-targeted MOD-GF calls
-// abort cleanly with gftypes.ErrSubjectNotFound (because GetCorporationView
+// abort cleanly with gftypes.ErrSubjectNotFound (because ResolveByPolicyAddress
 // returns ok=false).
 type StubCorporationKeeper struct{}
 
@@ -57,10 +66,14 @@ func NewStubCorporationKeeper() gftypes.CorporationKeeper {
 	return StubCorporationKeeper{}
 }
 
-func (StubCorporationKeeper) GetCorporationView(ctx context.Context, _ string) (gftypes.CorporationView, bool) {
+func (StubCorporationKeeper) ResolveByPolicyAddress(_ context.Context, _ string) (gftypes.CorporationView, bool) {
 	return gftypes.CorporationView{}, false
 }
 
-func (StubCorporationKeeper) SetCorporationActiveVersion(ctx context.Context, _ string, _ int32) error {
+func (StubCorporationKeeper) GetByID(_ context.Context, _ uint64) (gftypes.CorporationView, bool) {
+	return gftypes.CorporationView{}, false
+}
+
+func (StubCorporationKeeper) SetActiveVersion(_ context.Context, _ uint64, _ int32) error {
 	return errors.New("corporation keeper not wired yet (MOD-CO pending in issue #303)")
 }

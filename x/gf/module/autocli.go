@@ -32,17 +32,17 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					RpcMethod: "ListGovernanceFrameworkVersions",
 					Use:       "list-governance-framework-versions",
 					Short:     "List GovernanceFrameworkVersions for an Ecosystem or Corporation",
-					Long:      "List GovernanceFrameworkVersion entries owned by the target subject. Exactly one of --ecosystem-id and --corporation must be set. Results ordered by ascending version.",
+					Long:      "List GovernanceFrameworkVersion entries owned by the target subject. Exactly one of --ecosystem-id and --corporation-id must be set. Results ordered by ascending version.",
 					FlagOptions: map[string]*autocliv1.FlagOptions{
 						"ecosystem_id": {
 							Name:         "ecosystem-id",
 							DefaultValue: "0",
-							Usage:        "Ecosystem ID (XOR with --corporation).",
+							Usage:        "Ecosystem ID (XOR with --corporation-id).",
 						},
-						"corporation": {
-							Name:         "corporation",
-							DefaultValue: "",
-							Usage:        "Corporation group_policy_address (XOR with --ecosystem-id).",
+						"corporation_id": {
+							Name:         "corporation-id",
+							DefaultValue: "0",
+							Usage:        "Corporation ID (uint64, XOR with --ecosystem-id).",
 						},
 						"active_only": {
 							Name:         "active-only",
