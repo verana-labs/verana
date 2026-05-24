@@ -45,4 +45,42 @@ func TestGenesisValidate(t *testing.T) {
 		}
 		require.ErrorIs(t, gs.Validate(), types.ErrInvalidVersion)
 	})
+
+	t.Run("rejects GFD with invalid BCP47 language", func(t *testing.T) {
+		gs := types.GenesisState{
+			Params: types.DefaultParams(),
+			Versions: []types.GovernanceFrameworkVersion{
+				{Id: 1, CorporationId: 1, Version: 1},
+			},
+			Documents: []types.GovernanceFrameworkDocument{
+				{Id: 1, GfvId: 1, Language: "1bad"},
+			},
+		}
+		require.ErrorIs(t, gs.Validate(), types.ErrInvalidLanguage)
+	})
+
+	t.Run("rejects GFV with version below 1", func(t *testing.T) {
+		gs := types.GenesisState{
+			Params: types.DefaultParams(),
+			Versions: []types.GovernanceFrameworkVersion{
+				{Id: 1, CorporationId: 1, Version: 0},
+			},
+		}
+		require.ErrorIs(t, gs.Validate(), types.ErrInvalidVersion)
+	})
+
+	t.Run("accepts valid mixed eco + corp GFVs with valid GFDs", func(t *testing.T) {
+		gs := types.GenesisState{
+			Params: types.DefaultParams(),
+			Versions: []types.GovernanceFrameworkVersion{
+				{Id: 1, EcosystemId: 7, Version: 1},
+				{Id: 2, CorporationId: 9, Version: 1},
+			},
+			Documents: []types.GovernanceFrameworkDocument{
+				{Id: 1, GfvId: 1, Language: "en"},
+				{Id: 2, GfvId: 2, Language: "fr"},
+			},
+		}
+		require.NoError(t, gs.Validate())
+	})
 }

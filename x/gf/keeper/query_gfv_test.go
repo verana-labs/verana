@@ -11,6 +11,113 @@ import (
 	"github.com/verana-labs/verana/x/gf/types"
 )
 
+func TestQueryGetGovernanceFrameworkVersion_NilRequest(t *testing.T) {
+	k, ctx := keepertest.GfKeeperWithDelegation(t, mockDelegation{}, &mockEcosystem{}, &mockCorporation{})
+	qs := keeper.NewQueryServerImpl(k)
+	_, err := qs.GetGovernanceFrameworkVersion(ctx, nil)
+	require.Error(t, err)
+}
+
+func TestQueryGetGovernanceFrameworkVersion_NotFound(t *testing.T) {
+	k, ctx := keepertest.GfKeeperWithDelegation(t, mockDelegation{}, &mockEcosystem{}, &mockCorporation{})
+	qs := keeper.NewQueryServerImpl(k)
+	_, err := qs.GetGovernanceFrameworkVersion(ctx, &types.QueryGetGovernanceFrameworkVersionRequest{Id: 999})
+	require.Error(t, err)
+}
+
+func TestQueryGetGovernanceFrameworkVersion_PreferredLanguageFallbackWhenNoMatch(t *testing.T) {
+	corp := &mockCorporation{
+		view:  types.CorporationView{Id: 1, PolicyAddress: testCorp, Language: "en"},
+		found: true,
+	}
+	k, ctx := keepertest.GfKeeperWithDelegation(t, mockDelegation{}, &mockEcosystem{}, corp)
+	ms := keeper.NewMsgServerImpl(k)
+	_, err := ms.AddGovernanceFrameworkDocument(ctx, validMsg(testCorp, testOperator, 0, 1))
+	require.NoError(t, err)
+
+	qs := keeper.NewQueryServerImpl(k)
+	// Ask for "es" which doesn't exist — must fall back to all docs.
+	resp, err := qs.GetGovernanceFrameworkVersion(ctx, &types.QueryGetGovernanceFrameworkVersionRequest{
+		Id:                1,
+		PreferredLanguage: "es",
+	})
+	require.NoError(t, err)
+	require.NotEmpty(t, resp.Version.Documents, "must fall back to all docs when preferred language is absent")
+}
+
+func TestQueryListGovernanceFrameworkVersions_NilRequest(t *testing.T) {
+	k, ctx := keepertest.GfKeeperWithDelegation(t, mockDelegation{}, &mockEcosystem{}, &mockCorporation{})
+	qs := keeper.NewQueryServerImpl(k)
+	_, err := qs.ListGovernanceFrameworkVersions(ctx, nil)
+	require.Error(t, err)
+}
+
+func TestQueryListGovernanceFrameworkVersions_MaxSizeCap(t *testing.T) {
+	k, ctx := keepertest.GfKeeperWithDelegation(t, mockDelegation{}, &mockEcosystem{}, &mockCorporation{})
+	qs := keeper.NewQueryServerImpl(k)
+	_, err := qs.ListGovernanceFrameworkVersions(ctx, &types.QueryListGovernanceFrameworkVersionsRequest{
+		CorporationId:   1,
+		ResponseMaxSize: 2000, // exceeds 1024 limit
+	})
+	require.Error(t, err)
+}
+
+func TestQueryListGovernanceFrameworkVersions_EmptyResultForUnknownCorp(t *testing.T) {
+	k, ctx := keepertest.GfKeeperWithDelegation(t, mockDelegation{}, &mockEcosystem{}, &mockCorporation{})
+	qs := keeper.NewQueryServerImpl(k)
+	resp, err := qs.ListGovernanceFrameworkVersions(ctx, &types.QueryListGovernanceFrameworkVersionsRequest{
+		CorporationId: 12345,
+	})
+	require.NoError(t, err)
+	require.Empty(t, resp.Versions)
+}
+
+func TestQueryListGovernanceFrameworkVersions_EcosystemPath(t *testing.T) {
+	corp := &mockCorporation{
+		view:  types.CorporationView{Id: 1, PolicyAddress: testCorp, Language: "en"},
+		found: true,
+	}
+	eco := &mockEcosystem{
+		view:  types.EcosystemView{Id: 7, CorporationID: 1, Language: "en", ActiveVersion: 0},
+		found: true,
+	}
+	k, ctx := keepertest.GfKeeperWithDelegation(t, mockDelegation{}, eco, corp)
+	ms := keeper.NewMsgServerImpl(k)
+	_, err := ms.AddGovernanceFrameworkDocument(ctx, validMsg(testCorp, testOperator, 7, 1))
+	require.NoError(t, err)
+
+	qs := keeper.NewQueryServerImpl(k)
+	resp, err := qs.ListGovernanceFrameworkVersions(ctx, &types.QueryListGovernanceFrameworkVersionsRequest{
+		EcosystemId: 7,
+	})
+	require.NoError(t, err)
+	require.Len(t, resp.Versions, 1)
+	require.Equal(t, uint64(7), resp.Versions[0].EcosystemId)
+}
+
+func TestQueryListGovernanceFrameworkVersions_ActiveOnlySubjectNotFound(t *testing.T) {
+	// Corporation lookup by id fails — active_only path must return NotFound.
+	corp := &mockCorporation{found: false}
+	k, ctx := keepertest.GfKeeperWithDelegation(t, mockDelegation{}, &mockEcosystem{}, corp)
+	qs := keeper.NewQueryServerImpl(k)
+	_, err := qs.ListGovernanceFrameworkVersions(ctx, &types.QueryListGovernanceFrameworkVersionsRequest{
+		CorporationId: 1,
+		ActiveOnly:    true,
+	})
+	require.Error(t, err)
+}
+
+func TestQueryListGovernanceFrameworkVersions_ActiveOnlyEcosystemSubjectNotFound(t *testing.T) {
+	eco := &mockEcosystem{found: false}
+	k, ctx := keepertest.GfKeeperWithDelegation(t, mockDelegation{}, eco, &mockCorporation{})
+	qs := keeper.NewQueryServerImpl(k)
+	_, err := qs.ListGovernanceFrameworkVersions(ctx, &types.QueryListGovernanceFrameworkVersionsRequest{
+		EcosystemId: 7,
+		ActiveOnly:  true,
+	})
+	require.Error(t, err)
+}
+
 func TestQueryGetGovernanceFrameworkVersion(t *testing.T) {
 	t.Run("MOD-GF-QRY-1: returns GFV with docs, preferred language filter applied", func(t *testing.T) {
 		corp := &mockCorporation{

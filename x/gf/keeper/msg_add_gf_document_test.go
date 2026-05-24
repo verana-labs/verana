@@ -174,6 +174,76 @@ func TestAddGovernanceFrameworkDocument(t *testing.T) {
 		require.Equal(t, 1, gfdCount, "GFD count must be 1 — same-language doc must be replaced, not appended")
 	})
 
+	t.Run("MOD-GF-MSG-1-2-1: ecosystem not found aborts", func(t *testing.T) {
+		corp := &mockCorporation{
+			view:  types.CorporationView{Id: 1, PolicyAddress: testCorp, Language: "en"},
+			found: true,
+		}
+		eco := &mockEcosystem{found: false} // GetEcosystemView returns (zero, false)
+		k, ctx := keepertest.GfKeeperWithDelegation(t, mockDelegation{}, eco, corp)
+		ms := keeper.NewMsgServerImpl(k)
+		_, err := ms.AddGovernanceFrameworkDocument(ctx, validMsg(testCorp, testOperator, 42, 1))
+		require.ErrorIs(t, err, types.ErrSubjectNotFound)
+	})
+
+	t.Run("MOD-GF-MSG-1-2-1: corporation not registered aborts (StubCorporationKeeper behaviour)", func(t *testing.T) {
+		// found: false — simulates the StubCorporationKeeper that returns
+		// (zero, false) from ResolveByPolicyAddress until MOD-CO (#303) lands.
+		corp := &mockCorporation{found: false}
+		eco := &mockEcosystem{}
+		k, ctx := keepertest.GfKeeperWithDelegation(t, mockDelegation{}, eco, corp)
+		ms := keeper.NewMsgServerImpl(k)
+		_, err := ms.AddGovernanceFrameworkDocument(ctx, validMsg(testCorp, testOperator, 0, 1))
+		require.ErrorIs(t, err, types.ErrSubjectNotFound)
+	})
+
+	t.Run("MOD-GF-MSG-1-1: ValidateBasic rejects malformed Msg before AUTHZ-CHECK", func(t *testing.T) {
+		corp := &mockCorporation{
+			view:  types.CorporationView{Id: 1, PolicyAddress: testCorp, Language: "en"},
+			found: true,
+		}
+		k, ctx := keepertest.GfKeeperWithDelegation(t, mockDelegation{}, &mockEcosystem{}, corp)
+		ms := keeper.NewMsgServerImpl(k)
+		bad := validMsg(testCorp, testOperator, 0, 1)
+		bad.DocUrl = "not a url"
+		_, err := ms.AddGovernanceFrameworkDocument(ctx, bad)
+		require.ErrorIs(t, err, types.ErrInvalidURL)
+	})
+
+	t.Run("MOD-GF-MSG-1-3: target version exists (in-place update of existing GFV)", func(t *testing.T) {
+		// Verify the maxVersionFor `hasTarget=true` branch: passing the same
+		// version twice does NOT mint a new GFV id; it reuses the existing one
+		// and just upserts the document.
+		corp := &mockCorporation{
+			view:  types.CorporationView{Id: 1, PolicyAddress: testCorp, Language: "en"},
+			found: true,
+		}
+		k, ctx := keepertest.GfKeeperWithDelegation(t, mockDelegation{}, &mockEcosystem{}, corp)
+		ms := keeper.NewMsgServerImpl(k)
+
+		// Add v1 with "en" doc.
+		_, err := ms.AddGovernanceFrameworkDocument(ctx, validMsg(testCorp, testOperator, 0, 1))
+		require.NoError(t, err)
+		// Add a SECOND v1 with "fr" doc — should reuse the same GFV.
+		frMsg := validMsg(testCorp, testOperator, 0, 1)
+		frMsg.DocLanguage = "fr"
+		frMsg.DocUrl = "https://example.com/v1-fr.html"
+		_, err = ms.AddGovernanceFrameworkDocument(ctx, frMsg)
+		require.NoError(t, err)
+
+		var gfvCount, gfdCount int
+		_ = k.GFVersion.Walk(ctx, nil, func(_ uint64, _ types.GovernanceFrameworkVersion) (bool, error) {
+			gfvCount++
+			return false, nil
+		})
+		_ = k.GFDocument.Walk(ctx, nil, func(_ uint64, _ types.GovernanceFrameworkDocument) (bool, error) {
+			gfdCount++
+			return false, nil
+		})
+		require.Equal(t, 1, gfvCount, "v1 must be reused, not duplicated")
+		require.Equal(t, 2, gfdCount, "two language docs must coexist under the same GFV")
+	})
+
 	t.Run("MOD-GF-MSG-1-3: ecosystem subject creates GFV with ecosystem_id set", func(t *testing.T) {
 		// AUTHZ-CHECK-5 resolves signing corporation to co.id = 1; ecosystem #7 is controlled by corp id 1.
 		corp := &mockCorporation{
