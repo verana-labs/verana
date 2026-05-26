@@ -1,0 +1,89 @@
+package keeper
+
+import (
+	"fmt"
+
+	"cosmossdk.io/collections"
+	"cosmossdk.io/core/store"
+	"cosmossdk.io/log"
+	"github.com/cosmos/cosmos-sdk/codec"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/verana-labs/verana/x/gf/types"
+)
+
+type Keeper struct {
+	cdc          codec.BinaryCodec
+	storeService store.KVStoreService
+	logger       log.Logger
+	authority    string
+
+	Schema                 collections.Schema
+	Params                 collections.Item[types.Params]
+	GFVersion              collections.Map[uint64, types.GovernanceFrameworkVersion]
+	GFDocument             collections.Map[uint64, types.GovernanceFrameworkDocument]
+	GFVersionByEcosystem   collections.Map[collections.Pair[uint64, int32], uint64]
+	GFVersionByCorporation collections.Map[collections.Pair[uint64, int32], uint64]
+	Counter                collections.Map[string, uint64]
+
+	delegationKeeper  types.DelegationKeeper
+	ecosystemKeeper   types.EcosystemKeeper
+	corporationKeeper types.CorporationKeeper
+}
+
+func NewKeeper(
+	cdc codec.BinaryCodec,
+	storeService store.KVStoreService,
+	logger log.Logger,
+	authority string,
+	delegationKeeper types.DelegationKeeper,
+	ecosystemKeeper types.EcosystemKeeper,
+	corporationKeeper types.CorporationKeeper,
+) Keeper {
+	if _, err := sdk.AccAddressFromBech32(authority); err != nil {
+		panic(fmt.Sprintf("invalid authority address: %s", authority))
+	}
+
+	sb := collections.NewSchemaBuilder(storeService)
+	k := Keeper{
+		cdc:          cdc,
+		storeService: storeService,
+		authority:    authority,
+		logger:       logger,
+		Params:       collections.NewItem(sb, types.ParamsKey, "params", codec.CollValue[types.Params](cdc)),
+		GFVersion:    collections.NewMap(sb, types.GovernanceFrameworkVersionKey, "gf_version", collections.Uint64Key, codec.CollValue[types.GovernanceFrameworkVersion](cdc)),
+		GFDocument:   collections.NewMap(sb, types.GovernanceFrameworkDocumentKey, "gf_document", collections.Uint64Key, codec.CollValue[types.GovernanceFrameworkDocument](cdc)),
+		GFVersionByEcosystem:   collections.NewMap(sb, types.GFVersionByEcosystemKey, "gf_version_by_ecosystem", collections.PairKeyCodec(collections.Uint64Key, collections.Int32Key), collections.Uint64Value),
+		GFVersionByCorporation: collections.NewMap(sb, types.GFVersionByCorporationKey, "gf_version_by_corporation", collections.PairKeyCodec(collections.Uint64Key, collections.Int32Key), collections.Uint64Value),
+		Counter:                collections.NewMap(sb, types.CounterKey, "counter", collections.StringKey, collections.Uint64Value),
+
+		delegationKeeper:  delegationKeeper,
+		ecosystemKeeper:   ecosystemKeeper,
+		corporationKeeper: corporationKeeper,
+	}
+
+	schema, err := sb.Build()
+	if err != nil {
+		panic(err)
+	}
+	k.Schema = schema
+	return k
+}
+
+func (k Keeper) GetAuthority() string { return k.authority }
+
+func (k Keeper) Logger() log.Logger {
+	return k.logger.With("module", "x/"+types.ModuleName)
+}
+
+func (k Keeper) GetNextID(ctx sdk.Context, entityType string) (uint64, error) {
+	current, err := k.Counter.Get(ctx, entityType)
+	if err != nil {
+		current = 0
+	}
+	next := current + 1
+	if err := k.Counter.Set(ctx, entityType, next); err != nil {
+		return 0, fmt.Errorf("failed to set counter: %w", err)
+	}
+	return next, nil
+}

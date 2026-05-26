@@ -1,0 +1,56 @@
+syntax = "proto3";
+package verana.gf.v1;
+
+import "amino/amino.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "verana/gf/v1/params.proto";
+import "verana/gf/v1/types.proto";
+
+option go_package = "github.com/verana-labs/verana/x/gf/types";
+
+// Query defines the Query service.
+service Query {
+  // Params returns the total set of module parameters.
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+    option (google.api.http).get = "/verana/gf/v1/params";
+  }
+
+  // [MOD-GF-QRY-1] Get Governance Framework Version
+  rpc GetGovernanceFrameworkVersion(QueryGetGovernanceFrameworkVersionRequest) returns (QueryGetGovernanceFrameworkVersionResponse) {
+    option (google.api.http).get = "/gf/v1/get";
+  }
+
+  // [MOD-GF-QRY-2] List Governance Framework Versions
+  rpc ListGovernanceFrameworkVersions(QueryListGovernanceFrameworkVersionsRequest) returns (QueryListGovernanceFrameworkVersionsResponse) {
+    option (google.api.http).get = "/gf/v1/list";
+  }
+}
+
+message QueryParamsRequest {}
+
+message QueryParamsResponse {
+  Params params = 1 [(gogoproto.nullable) = false, (amino.dont_omitempty) = true];
+}
+
+message QueryGetGovernanceFrameworkVersionRequest {
+  uint64 id = 1;
+  string preferred_language = 2;
+}
+
+message QueryGetGovernanceFrameworkVersionResponse {
+  GovernanceFrameworkVersionWithDocs version = 1 [(gogoproto.nullable) = false, (amino.dont_omitempty) = true];
+}
+
+message QueryListGovernanceFrameworkVersionsRequest {
+  uint64 ecosystem_id = 1;
+  uint64 corporation_id = 2;
+  bool active_only = 3;
+  string preferred_language = 4;
+  uint32 response_max_size = 5;
+}
+
+message QueryListGovernanceFrameworkVersionsResponse {
+  repeated GovernanceFrameworkVersionWithDocs versions = 1 [(gogoproto.nullable) = false, (amino.dont_omitempty) = true];
+}

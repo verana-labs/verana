@@ -1,0 +1,234 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "verana/gf/v1/tx.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "Msg"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/verana.gf.v1.Msg/AddGovernanceFrameworkDocument": {
+      "post": {
+        "summary": "[MOD-GF-MSG-1] Add Governance Framework Document",
+        "operationId": "Msg_AddGovernanceFrameworkDocument",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.gf.v1.MsgAddGovernanceFrameworkDocumentResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "[MOD-GF-MSG-1] Adds (or replaces) a GovernanceFrameworkDocument for a draft\nversion owned by an Ecosystem or a Corporation.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.gf.v1.MsgAddGovernanceFrameworkDocument"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.gf.v1.Msg/IncreaseActiveGovernanceFrameworkVersion": {
+      "post": {
+        "summary": "[MOD-GF-MSG-2] Increase Active Governance Framework Version",
+        "operationId": "Msg_IncreaseActiveGovernanceFrameworkVersion",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.gf.v1.MsgIncreaseActiveGovernanceFrameworkVersionResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "[MOD-GF-MSG-2] Activates the next governance framework version for an\nEcosystem or Corporation owned by the signing corporation.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.gf.v1.MsgIncreaseActiveGovernanceFrameworkVersion"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.gf.v1.Msg/UpdateParams": {
+      "post": {
+        "summary": "UpdateParams defines a (governance) operation for updating the module\nparameters. The authority defaults to the x/gov module account.",
+        "operationId": "Msg_UpdateParams",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.gf.v1.MsgUpdateParamsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "MsgUpdateParams is the Msg/UpdateParams request type.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.gf.v1.MsgUpdateParams"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "google.protobuf.Any": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "google.rpc.Status": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/google.protobuf.Any"
+          }
+        }
+      }
+    },
+    "verana.gf.v1.MsgAddGovernanceFrameworkDocument": {
+      "type": "object",
+      "properties": {
+        "corporation": {
+          "type": "string",
+          "description": "corporation is the signing corporation (group_policy_address)."
+        },
+        "operator": {
+          "type": "string",
+          "description": "operator is the account authorized by corporation to run this Msg."
+        },
+        "ecosystem_id": {
+          "type": "string",
+          "format": "uint64",
+          "description": "ecosystem_id is optional. If set, the GF target is an Ecosystem owned by\n`corporation`. If zero, the GF target is the signing Corporation's own CGF."
+        },
+        "doc_language": {
+          "type": "string",
+          "description": "doc_language is a BCP 47 language tag."
+        },
+        "doc_url": {
+          "type": "string",
+          "description": "doc_url is the URL where the document is published."
+        },
+        "doc_digest_sri": {
+          "type": "string",
+          "description": "doc_digest_sri is the SRI digest of the document."
+        },
+        "version": {
+          "type": "integer",
+          "format": "int32",
+          "description": "version is the target governance framework version."
+        }
+      },
+      "description": "[MOD-GF-MSG-1] Adds (or replaces) a GovernanceFrameworkDocument for a draft\nversion owned by an Ecosystem or a Corporation."
+    },
+    "verana.gf.v1.MsgAddGovernanceFrameworkDocumentResponse": {
+      "type": "object"
+    },
+    "verana.gf.v1.MsgIncreaseActiveGovernanceFrameworkVersion": {
+      "type": "object",
+      "properties": {
+        "corporation": {
+          "type": "string",
+          "description": "corporation is the signing corporation (group_policy_address)."
+        },
+        "operator": {
+          "type": "string",
+          "description": "operator is the account authorized by corporation to run this Msg."
+        },
+        "ecosystem_id": {
+          "type": "string",
+          "format": "uint64",
+          "description": "ecosystem_id is optional. If set, target is the Ecosystem; otherwise the\nsigning Corporation's own CGF."
+        }
+      },
+      "description": "[MOD-GF-MSG-2] Activates the next governance framework version for an\nEcosystem or Corporation owned by the signing corporation."
+    },
+    "verana.gf.v1.MsgIncreaseActiveGovernanceFrameworkVersionResponse": {
+      "type": "object"
+    },
+    "verana.gf.v1.MsgUpdateParams": {
+      "type": "object",
+      "properties": {
+        "authority": {
+          "type": "string",
+          "description": "authority is the address that controls the module (defaults to x/gov)."
+        },
+        "params": {
+          "$ref": "#/definitions/verana.gf.v1.Params",
+          "description": "params defines the module parameters to update.\nNOTE: All parameters must be supplied."
+        }
+      },
+      "description": "MsgUpdateParams is the Msg/UpdateParams request type."
+    },
+    "verana.gf.v1.MsgUpdateParamsResponse": {
+      "type": "object"
+    },
+    "verana.gf.v1.Params": {
+      "type": "object",
+      "description": "Params defines the parameters for the x/gf module.\nThe module has no parameters at this time; the message is kept for forward compat\nso that gov-proposed parameter changes can land without proto migrations."
+    }
+  }
+}
