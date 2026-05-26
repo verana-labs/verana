@@ -63,7 +63,7 @@ func (q querier) ListGovernanceFrameworkVersions(goCtx context.Context, req *typ
 			}
 			subjectActiveVersion = eco.ActiveVersion
 		} else {
-			coView, ok := q.corporationKeeper.GetByID(goCtx, req.CorporationId)
+			coView, ok := q.corporationKeeper().GetByID(goCtx, req.CorporationId)
 			if !ok {
 				return nil, status.Errorf(codes.NotFound, "corporation %d not found", req.CorporationId)
 			}

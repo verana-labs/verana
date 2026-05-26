@@ -47,8 +47,8 @@ func GfKeeperWithDelegation(
 		authority.String(),
 		del,
 		eco,
-		corp,
 	)
+	k.SetCorporationKeeper(corp)
 	ctx := sdk.NewContext(stateStore, cmtproto.Header{}, false, log.NewNopLogger())
 	if err := k.SetParams(ctx, types.DefaultParams()); err != nil {
 		panic(err)

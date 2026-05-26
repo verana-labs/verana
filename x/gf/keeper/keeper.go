@@ -12,6 +12,15 @@ import (
 	"github.com/verana-labs/verana/x/gf/types"
 )
 
+// corpKeeperRef is a stable container for the CorporationKeeper interface,
+// indirected behind a pointer so all by-value copies of Keeper (held by msg
+// server, query server, etc.) see the same instance. SetCorporationKeeper
+// writes to this container after construction — required because MOD-CO and
+// MOD-GF are mutually-dependent at the keeper layer (cycle break per #303).
+type corpKeeperRef struct {
+	K types.CorporationKeeper
+}
+
 type Keeper struct {
 	cdc          codec.BinaryCodec
 	storeService store.KVStoreService
@@ -26,9 +35,9 @@ type Keeper struct {
 	GFVersionByCorporation collections.Map[collections.Pair[uint64, int32], uint64]
 	Counter                collections.Map[string, uint64]
 
-	delegationKeeper  types.DelegationKeeper
-	ecosystemKeeper   types.EcosystemKeeper
-	corporationKeeper types.CorporationKeeper
+	delegationKeeper types.DelegationKeeper
+	ecosystemKeeper  types.EcosystemKeeper
+	corpRef          *corpKeeperRef
 }
 
 func NewKeeper(
@@ -38,7 +47,6 @@ func NewKeeper(
 	authority string,
 	delegationKeeper types.DelegationKeeper,
 	ecosystemKeeper types.EcosystemKeeper,
-	corporationKeeper types.CorporationKeeper,
 ) Keeper {
 	if _, err := sdk.AccAddressFromBech32(authority); err != nil {
 		panic(fmt.Sprintf("invalid authority address: %s", authority))
@@ -57,9 +65,9 @@ func NewKeeper(
 		GFVersionByCorporation: collections.NewMap(sb, types.GFVersionByCorporationKey, "gf_version_by_corporation", collections.PairKeyCodec(collections.Uint64Key, collections.Int32Key), collections.Uint64Value),
 		Counter:                collections.NewMap(sb, types.CounterKey, "counter", collections.StringKey, collections.Uint64Value),
 
-		delegationKeeper:  delegationKeeper,
-		ecosystemKeeper:   ecosystemKeeper,
-		corporationKeeper: corporationKeeper,
+		delegationKeeper: delegationKeeper,
+		ecosystemKeeper:  ecosystemKeeper,
+		corpRef:          &corpKeeperRef{K: StubCorporationKeeper{}},
 	}
 
 	schema, err := sb.Build()
@@ -68,6 +76,19 @@ func NewKeeper(
 	}
 	k.Schema = schema
 	return k
+}
+
+// SetCorporationKeeper wires the real MOD-CO keeper after both keepers exist.
+// The receiver is by-value because the inner *corpKeeperRef is shared by all
+// keeper copies (msg server, query server, etc.). MUST be called once during
+// app init before any handler runs.
+func (k Keeper) SetCorporationKeeper(c types.CorporationKeeper) {
+	k.corpRef.K = c
+}
+
+// corporationKeeper returns the wired CorporationKeeper (real or stub).
+func (k Keeper) corporationKeeper() types.CorporationKeeper {
+	return k.corpRef.K
 }
 
 func (k Keeper) GetAuthority() string { return k.authority }

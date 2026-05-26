@@ -33,8 +33,7 @@ type resolvedSubject struct {
 // resolves the signing account → Corporation by policy_address → co.id.
 func (k Keeper) resolveSubject(ctx context.Context, signingCorp string, ecosystemID uint64) (resolvedSubject, error) {
 	// AUTHZ-CHECK-5 surface: resolve the signing corporation account.
-	// Stub returns (zero, false) until #303 lands → all corp-targeted calls fail here.
-	coView, ok := k.corporationKeeper.ResolveByPolicyAddress(ctx, signingCorp)
+	coView, ok := k.corporationKeeper().ResolveByPolicyAddress(ctx, signingCorp)
 	if !ok {
 		return resolvedSubject{}, cerrors.Wrapf(types.ErrSubjectNotFound, "no Corporation registered for signing account %s", signingCorp)
 	}
