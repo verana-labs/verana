@@ -1,0 +1,57 @@
+package types
+
+import (
+	"net/url"
+	"regexp"
+	"strings"
+)
+
+// IsValidBCP47 returns true if s looks like a valid BCP 47 language tag.
+// Mirrors x/gf/types.IsValidBCP47.
+func IsValidBCP47(s string) bool {
+	if s == "" {
+		return false
+	}
+	if len(s) > 17 {
+		return false
+	}
+	for i, part := range strings.Split(s, "-") {
+		if len(part) < 1 || len(part) > 8 {
+			return false
+		}
+		if i == 0 {
+			for _, r := range part {
+				if !((r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z')) {
+					return false
+				}
+			}
+			continue
+		}
+		for _, r := range part {
+			if !((r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9')) {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+func IsValidURL(s string) bool {
+	u, err := url.Parse(s)
+	if err != nil {
+		return false
+	}
+	return u.Scheme != "" && u.Host != ""
+}
+
+var digestSRIRe = regexp.MustCompile(`^(sha256|sha384|sha512)-[A-Za-z0-9+/=]+$`)
+
+func IsValidDigestSRI(s string) bool { return digestSRIRe.MatchString(s) }
+
+// didRe enforces a minimal subset of RFC 3986 + W3C DID Core syntax:
+// `did:` <method-name> `:` <method-specific-id>. Method name is one or more
+// lowercase letters/digits; method-specific-id is one or more allowed chars
+// (alphanumerics, `.`, `-`, `_`, `:`).
+var didRe = regexp.MustCompile(`^did:[a-z0-9]+:[A-Za-z0-9._:-]+$`)
+
+func IsValidDID(s string) bool { return didRe.MatchString(s) }

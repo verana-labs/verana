@@ -1,0 +1,16 @@
+syntax = "proto3";
+package verana.co.v1;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/verana-labs/verana/x/co/types";
+
+// Params defines the parameters for the x/co module.
+// The module has no parameters at this time; the message is kept for forward
+// compatibility so that gov-proposed parameter changes can land without proto
+// migrations.
+message Params {
+  option (amino.name) = "verana/x/co/Params";
+  option (gogoproto.equal) = true;
+}

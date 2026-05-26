@@ -9,6 +9,7 @@ import (
 	dimodulekeeper "github.com/verana-labs/verana/x/di/keeper"
 	_ "github.com/verana-labs/verana/x/perm/module" // import for side-effects
 	_ "github.com/verana-labs/verana/x/td/module" // import for side-effects
+	_ "github.com/verana-labs/verana/x/co/module" // import for side-effects
 	_ "github.com/verana-labs/verana/x/gf/module" // import for side-effects
 	_ "github.com/verana-labs/verana/x/tr/module" // import for side-effects
 	xrmodulekeeper "github.com/verana-labs/verana/x/xr/keeper"
@@ -105,6 +106,7 @@ import (
 	ibctransferkeeper "github.com/cosmos/ibc-go/v8/modules/apps/transfer/keeper"
 	ibckeeper "github.com/cosmos/ibc-go/v8/modules/core/keeper"
 
+	comodulekeeper "github.com/verana-labs/verana/x/co/keeper"
 	gfmodulekeeper "github.com/verana-labs/verana/x/gf/keeper"
 	trustregistrymodulekeeper "github.com/verana-labs/verana/x/tr/keeper"
 
@@ -206,6 +208,7 @@ type App struct {
 	ScopedKeepers             map[string]capabilitykeeper.ScopedKeeper
 
 	TrustregistryKeeper    trustregistrymodulekeeper.Keeper
+	CoKeeper               comodulekeeper.Keeper
 	GfKeeper               gfmodulekeeper.Keeper
 	CredentialschemaKeeper credentialschemamodulekeeper.Keeper
 	PermissionKeeper       permissionmodulekeeper.Keeper
@@ -347,6 +350,7 @@ func New(
 		&app.ProtocolPoolKeeper,
 		&app.TrustregistryKeeper,
 		&app.GfKeeper,
+		&app.CoKeeper,
 		&app.CredentialschemaKeeper,
 		&app.PermissionKeeper,
 		&app.TrustdepositKeeper,

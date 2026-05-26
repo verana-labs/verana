@@ -57,6 +57,8 @@ import (
 	permissionmodulev1 "github.com/verana-labs/verana/api/verana/perm/module"
 	trustdepositmodulev1 "github.com/verana-labs/verana/api/verana/td/module"
 	trustregistrymodulev1 "github.com/verana-labs/verana/api/verana/tr/module"
+	_ "github.com/verana-labs/verana/x/co/module"
+	comoduletypes "github.com/verana-labs/verana/x/co/types"
 	credentialschemamoduletypes "github.com/verana-labs/verana/x/cs/types"
 	_ "github.com/verana-labs/verana/x/de/module"
 	demoduletypes "github.com/verana-labs/verana/x/de/types"
@@ -112,6 +114,7 @@ var (
 		protocolpooltypes.ModuleName,
 		// chain modules
 		trustregistrymoduletypes.ModuleName,
+		comoduletypes.ModuleName,
 		gfmoduletypes.ModuleName,
 		credentialschemamoduletypes.ModuleName,
 		permissionmoduletypes.ModuleName,
@@ -145,6 +148,7 @@ var (
 		ibcfeetypes.ModuleName,
 		// chain modules
 		trustregistrymoduletypes.ModuleName,
+		comoduletypes.ModuleName,
 		gfmoduletypes.ModuleName,
 		credentialschemamoduletypes.ModuleName,
 		permissionmoduletypes.ModuleName,
@@ -172,6 +176,7 @@ var (
 		ibcfeetypes.ModuleName,
 		// chain modules
 		trustregistrymoduletypes.ModuleName,
+		comoduletypes.ModuleName,
 		gfmoduletypes.ModuleName,
 		credentialschemamoduletypes.ModuleName,
 		permissionmoduletypes.ModuleName,
@@ -348,6 +353,10 @@ var (
 			{
 				Name:   trustregistrymoduletypes.ModuleName,
 				Config: appconfig.WrapAny(&trustregistrymodulev1.Module{}),
+			},
+			{
+				Name:   comoduletypes.ModuleName,
+				Config: appconfig.WrapAny(&comoduletypes.Module{}),
 			},
 			{
 				Name:   gfmoduletypes.ModuleName,
