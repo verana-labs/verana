@@ -58,10 +58,10 @@ async function main() {
   console.log(`  Balance: ${balance.amount}${balance.denom}`);
   console.log();
 
-  // Step 3: Create TR → CS (GRANTOR_VALIDATION) → Root Permission
-  console.log("Step 3: Creating prerequisites (TR + CS + Root Permission)...");
+  // Step 3: Create EC → CS (GRANTOR_VALIDATION) → Root Permission
+  console.log("Step 3: Creating prerequisites (EC + CS + Root Permission)...");
   try {
-    const { trId, schemaId, rootPermId, did, effectiveFrom } = await createPermPrerequisites(
+    const { ecId, schemaId, rootPermId, did, effectiveFrom } = await createPermPrerequisites(
       client,
       setup.authorityAddress,
       setup.operatorAddress,
@@ -70,13 +70,13 @@ async function main() {
 
     console.log();
     console.log("SUCCESS! Root permission created!");
-    console.log(`  TR ID: ${trId}`);
+    console.log(`  EC ID: ${ecId}`);
     console.log(`  CS ID: ${schemaId} (ECOSYSTEM mode)`);
     console.log(`  Root Permission ID: ${rootPermId}`);
     console.log(`  DID: ${did}`);
     console.log(`  Effective From: ${effectiveFrom.toISOString()}`);
 
-    savePermRootSetup(trId, schemaId, rootPermId, did, effectiveFrom);
+    savePermRootSetup(ecId, schemaId, rootPermId, did, effectiveFrom);
     console.log("  Saved perm-root-setup");
   } catch (error: any) {
     console.log("ERROR!");

@@ -1,11 +1,15 @@
 /**
- * Journey: TR Increase Active Governance Framework Version (Operator-signed)
+ * Journey: GF Add Governance Framework Document (Operator-signed)
  *
- * Increases the active GF version. Requires a GFD for the next version to exist.
- * Depends on: test:de-grant-auth, test:tr-create, test:tr-add-gfd
+ * Adds a GFD to an existing Ecosystem. Moved from `verana.tr.v1` to
+ * `verana.gf.v1` in v4-rc2 and now uses `ecosystem_id` (replacing `tr_id`).
+ * When `ecosystem_id == 0`, the GF target is the signing Corporation's own
+ * CGF instead.
+ *
+ * Depends on: test:de-grant-auth, test:ec-create
  *
  * Usage:
- *   npm run test:tr-increase-gf-version
+ *   npm run test:gf-add-doc
  */
 
 import {
@@ -17,8 +21,8 @@ import {
   config,
 } from "../helpers/client";
 import { typeUrls } from "../helpers/registry";
-import { MsgIncreaseActiveGovernanceFrameworkVersion } from "../../../src/codec/verana/tr/v1/tx";
-import { getTrAuthzSetup, getActiveTR } from "../helpers/journeyResults";
+import { MsgAddGovernanceFrameworkDocument } from "../../../src/codec/verana/gf/v1/tx";
+import { getEcAuthzSetup, getActiveEC } from "../helpers/journeyResults";
 
 const COOLUSER_MNEMONIC =
   (process.env.MNEMONIC && process.env.MNEMONIC.trim()) ||
@@ -28,24 +32,24 @@ const OPERATOR_INDEX = 11;
 
 async function main() {
   console.log("=".repeat(60));
-  console.log("Journey: TR Increase Active GF Version (Operator-signed)");
+  console.log("Journey: GF Add Governance Framework Document (Operator-signed)");
   console.log("=".repeat(60));
   console.log();
 
-  const setup = getTrAuthzSetup();
+  const setup = getEcAuthzSetup();
   if (!setup) {
-    console.log("  ❌ No authz setup found. Run test:de-grant-auth first.");
+    console.log("  ❌ No EC authz setup found. Run test:de-grant-auth first.");
     process.exit(1);
   }
 
-  const activeTR = getActiveTR();
-  if (!activeTR) {
-    console.log("  ❌ No active TR found. Run test:tr-create first.");
+  const activeEC = getActiveEC();
+  if (!activeEC) {
+    console.log("  ❌ No active EC found. Run test:ec-create first.");
     process.exit(1);
   }
 
-  console.log(`  Authority: ${setup.authorityAddress}`);
-  console.log(`  TR ID:     ${activeTR.trustRegistryId}`);
+  console.log(`  Corporation: ${setup.authorityAddress}`);
+  console.log(`  EC ID:       ${activeEC.ecosystemId}`);
   console.log();
 
   const wallet = await createAccountFromMnemonic(COOLUSER_MNEMONIC, OPERATOR_INDEX);
@@ -55,31 +59,35 @@ async function main() {
   console.log(`  Operator:  ${account.address}`);
   console.log();
 
-  // Increase active GF version (from 1 to 2)
-  console.log("Increasing active Governance Framework version...");
+  // Add GFD for version 2
+  console.log("Adding Governance Framework Document for version 2...");
   const msg = {
-    typeUrl: typeUrls.MsgIncreaseActiveGovernanceFrameworkVersion,
-    value: MsgIncreaseActiveGovernanceFrameworkVersion.fromPartial({
+    typeUrl: typeUrls.MsgAddGovernanceFrameworkDocument,
+    value: MsgAddGovernanceFrameworkDocument.fromPartial({
       corporation: setup.authorityAddress,
       operator: account.address,
-      trId: activeTR.trustRegistryId,
+      ecosystemId: activeEC.ecosystemId,
+      docLanguage: "en",
+      docUrl: "https://example.com/governance-framework-v2.pdf",
+      docDigestSri: "sha384-TsProtoTestDocHash1234567890123456789012345678901234567890123456789012345678",
+      version: 2,
     }),
   };
 
   try {
     const fee = await calculateFeeWithSimulation(
       client, account.address, [msg],
-      "Increasing GF version via operator",
+      "Adding GFD via operator",
     );
 
     const result = await signAndBroadcastWithRetry(
       client, account.address, [msg], fee,
-      "Increasing GF version via operator",
+      "Adding GFD via operator",
     );
 
     if (result.code === 0) {
       console.log();
-      console.log("✅ SUCCESS! Active GF version increased!");
+      console.log("✅ SUCCESS! Governance Framework Document added!");
       console.log(`  Tx Hash: ${result.transactionHash}`);
       console.log(`  Block:   ${result.height}`);
       console.log(`  Gas:     ${result.gasUsed}/${result.gasWanted}`);

@@ -1,11 +1,17 @@
 /**
- * Journey: TR Create Trust Registry (Operator-signed)
+ * Journey: EC Create Ecosystem (Operator-signed)
  *
- * The operator signs MsgCreateTrustRegistry on behalf of the authority.
- * Requires DE grant operator authorization journey to run first.
+ * The operator signs MsgCreateEcosystem on behalf of the Corporation. The
+ * Corporation policy_address (from coCreateCorporation) is the `corporation`
+ * field; AUTHZ-CHECK-5 verifies it resolves to a registered MOD-CO entry.
+ *
+ * Replaces the v3 `trCreateTrustRegistry` journey. Drops `aka`. Extracts
+ * `ecosystem_id` from `create_ecosystem` events.
+ *
+ * Requires: test:de-grant-auth must be run first.
  *
  * Usage:
- *   npm run test:tr-create
+ *   npm run test:ec-create
  */
 
 import {
@@ -18,8 +24,8 @@ import {
   config,
 } from "../helpers/client";
 import { typeUrls } from "../helpers/registry";
-import { MsgCreateTrustRegistry } from "../../../src/codec/verana/tr/v1/tx";
-import { getTrAuthzSetup, saveActiveTR } from "../helpers/journeyResults";
+import { MsgCreateEcosystem } from "../../../src/codec/verana/ec/v1/tx";
+import { getEcAuthzSetup, saveActiveEC } from "../helpers/journeyResults";
 
 const COOLUSER_MNEMONIC =
   (process.env.MNEMONIC && process.env.MNEMONIC.trim()) ||
@@ -29,19 +35,19 @@ const OPERATOR_INDEX = 11;
 
 async function main() {
   console.log("=".repeat(60));
-  console.log("Journey: TR Create Trust Registry (Operator-signed)");
+  console.log("Journey: EC Create Ecosystem (Operator-signed)");
   console.log("=".repeat(60));
   console.log();
 
-  // Step 1: Load authz setup
-  console.log("Step 1: Loading authz setup...");
-  const setup = getTrAuthzSetup();
+  // Step 1: Load EC authz setup
+  console.log("Step 1: Loading EC authz setup...");
+  const setup = getEcAuthzSetup();
   if (!setup) {
-    console.log("  ❌ No authz setup found. Run test:de-grant-auth first.");
+    console.log("  ❌ No EC authz setup found. Run test:de-grant-auth first.");
     process.exit(1);
   }
-  console.log(`  Authority: ${setup.authorityAddress}`);
-  console.log(`  Operator:  ${setup.operatorAddress}`);
+  console.log(`  Corporation (policy_address): ${setup.authorityAddress}`);
+  console.log(`  Operator:                     ${setup.operatorAddress}`);
   console.log();
 
   // Step 2: Create operator wallet and connect
@@ -69,67 +75,64 @@ async function main() {
   }
   console.log();
 
-  // Step 4: Create Trust Registry
-  console.log("Step 4: Creating Trust Registry...");
+  // Step 4: Create Ecosystem
+  console.log("Step 4: Creating Ecosystem...");
   const did = generateUniqueDID();
-  const aka = "http://ts-proto-test-trust-registry.com";
 
   const msg = {
-    typeUrl: typeUrls.MsgCreateTrustRegistry,
-    value: MsgCreateTrustRegistry.fromPartial({
+    typeUrl: typeUrls.MsgCreateEcosystem,
+    value: MsgCreateEcosystem.fromPartial({
       corporation: setup.authorityAddress,
       operator: account.address,
-      did: did,
-      aka: aka,
+      did,
       language: "en",
-      docUrl: "http://ts-proto-test-trust-registry.com/doc-v1",
+      docUrl: "http://ts-proto-test-ecosystem.com/doc-v1",
       docDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
     }),
   };
 
-  console.log(`  Authority: ${setup.authorityAddress}`);
-  console.log(`  Operator:  ${account.address}`);
-  console.log(`  DID:       ${did}`);
-  console.log(`  AKA:       ${aka}`);
+  console.log(`  Corporation: ${setup.authorityAddress}`);
+  console.log(`  Operator:    ${account.address}`);
+  console.log(`  DID:         ${did}`);
   console.log();
 
   try {
     const fee = await calculateFeeWithSimulation(
       client, account.address, [msg],
-      "Creating Trust Registry via operator",
+      "Creating Ecosystem via operator",
     );
     console.log(`  Gas: ${fee.gas}, Fee: ${fee.amount[0].amount}${fee.amount[0].denom}`);
 
     const result = await signAndBroadcastWithRetry(
       client, account.address, [msg], fee,
-      "Creating Trust Registry via operator",
+      "Creating Ecosystem via operator",
     );
 
     if (result.code === 0) {
       console.log();
-      console.log("✅ SUCCESS! Trust Registry created!");
+      console.log("✅ SUCCESS! Ecosystem created!");
       console.log(`  Tx Hash: ${result.transactionHash}`);
       console.log(`  Block:   ${result.height}`);
       console.log(`  Gas:     ${result.gasUsed}/${result.gasWanted}`);
 
-      // Extract TR ID from events
-      let trId: number | undefined;
+      // Extract EC ID from events (v4-rc2 event type: `create_ecosystem`)
+      let ecId: number | undefined;
       for (const event of (result.events || [])) {
-        if (event.type === "create_trust_registry" || event.type === "verana.tr.v1.EventCreateTrustRegistry") {
+        if (event.type === "create_ecosystem" || event.type === "verana.ec.v1.EventCreateEcosystem") {
           for (const attr of event.attributes) {
-            if (attr.key === "trust_registry_id" || attr.key === "id" || attr.key === "tr_id") {
-              trId = parseInt(attr.value, 10);
-              if (!isNaN(trId)) {
-                console.log(`  TR ID:   ${trId}`);
+            if (attr.key === "ecosystem_id" || attr.key === "id") {
+              ecId = parseInt(attr.value, 10);
+              if (!isNaN(ecId)) {
+                console.log(`  EC ID:   ${ecId}`);
               }
             }
           }
         }
       }
 
-      if (trId) {
-        saveActiveTR(trId, did);
-        console.log("  💾 Saved active TR for subsequent journeys");
+      if (ecId) {
+        saveActiveEC(ecId, did);
+        console.log("  💾 Saved active EC for subsequent journeys");
       }
     } else {
       console.log("❌ FAILED!");

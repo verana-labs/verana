@@ -1,12 +1,14 @@
 /**
- * Journey: TR Add Governance Framework Document (Operator-signed)
+ * Journey: GF Increase Active Governance Framework Version (Operator-signed)
  *
- * Adds a GFD to an existing Trust Registry. Requires:
- * - DE grant operator auth journey (test:de-grant-auth)
- * - TR create journey (test:tr-create)
+ * Activates the next governance-framework version for an Ecosystem. Moved
+ * from `verana.tr.v1` to `verana.gf.v1` in v4-rc2; `ecosystem_id == 0`
+ * targets the signing Corporation's own CGF.
+ *
+ * Depends on: test:de-grant-auth, test:ec-create, test:gf-add-doc
  *
  * Usage:
- *   npm run test:tr-add-gfd
+ *   npm run test:gf-increase-version
  */
 
 import {
@@ -18,8 +20,8 @@ import {
   config,
 } from "../helpers/client";
 import { typeUrls } from "../helpers/registry";
-import { MsgAddGovernanceFrameworkDocument } from "../../../src/codec/verana/tr/v1/tx";
-import { getTrAuthzSetup, getActiveTR } from "../helpers/journeyResults";
+import { MsgIncreaseActiveGovernanceFrameworkVersion } from "../../../src/codec/verana/gf/v1/tx";
+import { getEcAuthzSetup, getActiveEC } from "../helpers/journeyResults";
 
 const COOLUSER_MNEMONIC =
   (process.env.MNEMONIC && process.env.MNEMONIC.trim()) ||
@@ -29,28 +31,26 @@ const OPERATOR_INDEX = 11;
 
 async function main() {
   console.log("=".repeat(60));
-  console.log("Journey: TR Add Governance Framework Document (Operator-signed)");
+  console.log("Journey: GF Increase Active GF Version (Operator-signed)");
   console.log("=".repeat(60));
   console.log();
 
-  // Load setup
-  const setup = getTrAuthzSetup();
+  const setup = getEcAuthzSetup();
   if (!setup) {
-    console.log("  ❌ No authz setup found. Run test:de-grant-auth first.");
+    console.log("  ❌ No EC authz setup found. Run test:de-grant-auth first.");
     process.exit(1);
   }
 
-  const activeTR = getActiveTR();
-  if (!activeTR) {
-    console.log("  ❌ No active TR found. Run test:tr-create first.");
+  const activeEC = getActiveEC();
+  if (!activeEC) {
+    console.log("  ❌ No active EC found. Run test:ec-create first.");
     process.exit(1);
   }
 
-  console.log(`  Authority: ${setup.authorityAddress}`);
-  console.log(`  TR ID:     ${activeTR.trustRegistryId}`);
+  console.log(`  Corporation: ${setup.authorityAddress}`);
+  console.log(`  EC ID:       ${activeEC.ecosystemId}`);
   console.log();
 
-  // Setup operator
   const wallet = await createAccountFromMnemonic(COOLUSER_MNEMONIC, OPERATOR_INDEX);
   const account = await getAccountInfo(wallet);
   const client = await createSigningClient(wallet);
@@ -58,35 +58,30 @@ async function main() {
   console.log(`  Operator:  ${account.address}`);
   console.log();
 
-  // Add GFD for version 2
-  console.log("Adding Governance Framework Document for version 2...");
+  console.log("Increasing active Governance Framework version...");
   const msg = {
-    typeUrl: typeUrls.MsgAddGovernanceFrameworkDocument,
-    value: MsgAddGovernanceFrameworkDocument.fromPartial({
+    typeUrl: typeUrls.MsgIncreaseActiveGovernanceFrameworkVersion,
+    value: MsgIncreaseActiveGovernanceFrameworkVersion.fromPartial({
       corporation: setup.authorityAddress,
       operator: account.address,
-      trId: activeTR.trustRegistryId,
-      language: "en",
-      url: "https://example.com/governance-framework-v2.pdf",
-      digestSri: "sha384-TsProtoTestDocHash1234567890123456789012345678901234567890123456789012345678",
-      version: 2,
+      ecosystemId: activeEC.ecosystemId,
     }),
   };
 
   try {
     const fee = await calculateFeeWithSimulation(
       client, account.address, [msg],
-      "Adding GFD via operator",
+      "Increasing GF version via operator",
     );
 
     const result = await signAndBroadcastWithRetry(
       client, account.address, [msg], fee,
-      "Adding GFD via operator",
+      "Increasing GF version via operator",
     );
 
     if (result.code === 0) {
       console.log();
-      console.log("✅ SUCCESS! Governance Framework Document added!");
+      console.log("✅ SUCCESS! Active GF version increased!");
       console.log(`  Tx Hash: ${result.transactionHash}`);
       console.log(`  Block:   ${result.height}`);
       console.log(`  Gas:     ${result.gasUsed}/${result.gasWanted}`);

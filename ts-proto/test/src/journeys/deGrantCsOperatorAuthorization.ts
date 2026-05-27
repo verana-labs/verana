@@ -139,11 +139,12 @@ async function main() {
   queryClient.disconnect();
   console.log();
 
-  // Step 3: Authority grants operator authorization for TR create + all 3 CS message types
+  // Step 3: Authority grants operator authorization for EC create + all 3 CS message types
+  // (v4-rc2: EC replaces TR as the parent of credential schemas).
   console.log("Step 3: Granting CS operator authorization...");
 
   const allCsMsgTypes = [
-    typeUrls.MsgCreateTrustRegistry,        // needed so operator can create the TR for CS tests
+    typeUrls.MsgCreateEcosystem,            // needed so operator can create the EC for CS tests
     typeUrls.MsgCreateCredentialSchema,
     typeUrls.MsgUpdateCredentialSchema,
     typeUrls.MsgArchiveCredentialSchema,

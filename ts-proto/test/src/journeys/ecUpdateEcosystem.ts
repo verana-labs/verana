@@ -1,11 +1,11 @@
 /**
- * Journey: TR Archive Trust Registry (Operator-signed)
+ * Journey: EC Update Ecosystem (Operator-signed)
  *
- * Archives a Trust Registry.
- * Depends on: test:de-grant-auth, test:tr-create
+ * Rotates an Ecosystem's DID. `language` is immutable per MOD-ES-MSG-2.
+ * Depends on: test:de-grant-auth, test:ec-create
  *
  * Usage:
- *   npm run test:tr-archive
+ *   npm run test:ec-update
  */
 
 import {
@@ -14,11 +14,12 @@ import {
   getAccountInfo,
   calculateFeeWithSimulation,
   signAndBroadcastWithRetry,
+  generateUniqueDID,
   config,
 } from "../helpers/client";
 import { typeUrls } from "../helpers/registry";
-import { MsgArchiveTrustRegistry } from "../../../src/codec/verana/tr/v1/tx";
-import { getTrAuthzSetup, getActiveTR } from "../helpers/journeyResults";
+import { MsgUpdateEcosystem } from "../../../src/codec/verana/ec/v1/tx";
+import { getEcAuthzSetup, getActiveEC } from "../helpers/journeyResults";
 
 const COOLUSER_MNEMONIC =
   (process.env.MNEMONIC && process.env.MNEMONIC.trim()) ||
@@ -28,24 +29,24 @@ const OPERATOR_INDEX = 11;
 
 async function main() {
   console.log("=".repeat(60));
-  console.log("Journey: TR Archive Trust Registry (Operator-signed)");
+  console.log("Journey: EC Update Ecosystem (Operator-signed)");
   console.log("=".repeat(60));
   console.log();
 
-  const setup = getTrAuthzSetup();
+  const setup = getEcAuthzSetup();
   if (!setup) {
-    console.log("  ❌ No authz setup found. Run test:de-grant-auth first.");
+    console.log("  ❌ No EC authz setup found. Run test:de-grant-auth first.");
     process.exit(1);
   }
 
-  const activeTR = getActiveTR();
-  if (!activeTR) {
-    console.log("  ❌ No active TR found. Run test:tr-create first.");
+  const activeEC = getActiveEC();
+  if (!activeEC) {
+    console.log("  ❌ No active EC found. Run test:ec-create first.");
     process.exit(1);
   }
 
-  console.log(`  Authority: ${setup.authorityAddress}`);
-  console.log(`  TR ID:     ${activeTR.trustRegistryId}`);
+  console.log(`  Corporation: ${setup.authorityAddress}`);
+  console.log(`  EC ID:       ${activeEC.ecosystemId}`);
   console.log();
 
   const wallet = await createAccountFromMnemonic(COOLUSER_MNEMONIC, OPERATOR_INDEX);
@@ -55,32 +56,36 @@ async function main() {
   console.log(`  Operator:  ${account.address}`);
   console.log();
 
-  // Archive Trust Registry
-  console.log("Archiving Trust Registry...");
+  // Update Ecosystem — only DID is mutable
+  const newDid = generateUniqueDID();
+
+  console.log("Updating Ecosystem...");
+  console.log(`  New DID: ${newDid}`);
+
   const msg = {
-    typeUrl: typeUrls.MsgArchiveTrustRegistry,
-    value: MsgArchiveTrustRegistry.fromPartial({
+    typeUrl: typeUrls.MsgUpdateEcosystem,
+    value: MsgUpdateEcosystem.fromPartial({
       corporation: setup.authorityAddress,
       operator: account.address,
-      trId: activeTR.trustRegistryId,
-      archive: true,
+      id: activeEC.ecosystemId,
+      did: newDid,
     }),
   };
 
   try {
     const fee = await calculateFeeWithSimulation(
       client, account.address, [msg],
-      "Archiving Trust Registry via operator",
+      "Updating Ecosystem via operator",
     );
 
     const result = await signAndBroadcastWithRetry(
       client, account.address, [msg], fee,
-      "Archiving Trust Registry via operator",
+      "Updating Ecosystem via operator",
     );
 
     if (result.code === 0) {
       console.log();
-      console.log("✅ SUCCESS! Trust Registry archived!");
+      console.log("✅ SUCCESS! Ecosystem updated!");
       console.log(`  Tx Hash: ${result.transactionHash}`);
       console.log(`  Block:   ${result.height}`);
       console.log(`  Gas:     ${result.gasUsed}/${result.gasWanted}`);

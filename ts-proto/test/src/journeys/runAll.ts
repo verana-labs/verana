@@ -29,14 +29,19 @@ interface TestConfig {
 }
 
 const tests: TestConfig[] = [
+  // Corporation (CO) module: seed the Corporation that downstream
+  // EC/GF/CS/PERM journeys use as their `corporation` (AUTHZ-CHECK-5).
+  // This MUST run first — every other test reads its policy_address.
+  { name: "CO: Create Corporation", script: "test:co-create" },
   // Delegation Engine (DE) module: Grant operator authorization
   { name: "DE: Grant Operator Authorization", script: "test:de-grant-auth" },
-  // Trust Registry (TR) module: All 5 operations (operator-signed)
-  { name: "TR: Create Trust Registry", script: "test:tr-create" },
-  { name: "TR: Add GF Document", script: "test:tr-add-gfd" },
-  { name: "TR: Increase Active GF Version", script: "test:tr-increase-gf-version" },
-  { name: "TR: Update Trust Registry", script: "test:tr-update" },
-  { name: "TR: Archive Trust Registry", script: "test:tr-archive" },
+  // Ecosystem (EC) module: Create + Update + Archive (operator-signed)
+  { name: "EC: Create Ecosystem", script: "test:ec-create" },
+  // Governance Framework (GF) — moved from verana.tr.v1 to verana.gf.v1
+  { name: "GF: Add Governance Framework Document", script: "test:gf-add-doc" },
+  { name: "GF: Increase Active GF Version", script: "test:gf-increase-version" },
+  { name: "EC: Update Ecosystem", script: "test:ec-update" },
+  { name: "EC: Archive Ecosystem", script: "test:ec-archive" },
   // Credential Schema (CS) module: Grant + all 3 operations (operator-signed)
   { name: "DE: Grant CS Operator Authorization", script: "test:de-grant-cs-auth" },
   { name: "CS: Create Credential Schema", script: "test:cs-create" },

@@ -11,7 +11,7 @@ import {
   MsgStartPermissionVP,
   MsgSetPermissionVPToValidated,
 } from "../../../src/codec/verana/perm/v1/tx";
-import { MsgCreateTrustRegistry } from "../../../src/codec/verana/tr/v1/tx";
+import { MsgCreateEcosystem } from "../../../src/codec/verana/ec/v1/tx";
 import { MsgCreateCredentialSchema, OptionalUInt32 } from "../../../src/codec/verana/cs/v1/tx";
 import { IssuerOnboardingMode, VerifierOnboardingMode, HolderOnboardingMode, PricingAssetType } from "../../../src/codec/verana/cs/v1/types";
 import { PermissionType, OptionalUInt64 } from "../../../src/codec/verana/perm/v1/types";
@@ -50,10 +50,9 @@ export async function createRootPermissionForTest(
       validationFees: 5,
       verificationFees: 5,
       issuanceFees: 5,
-      // [MOD-PERM-MSG-7-1] permission_type is mandatory on the wire (spec v4 draft 13).
-      // ECOSYSTEM is the grantor root used by downstream Self-Create flows in this test.
-      permissionType: PermissionType.ECOSYSTEM,
-      vsOperator: address,
+      // [MOD-PERM-MSG-7-3] perm.type is hardcoded to ECOSYSTEM by the handler
+      // and vs_operator is not set on root permissions — neither belongs on
+      // the wire for MsgCreateRootPermission.
     }),
   };
 
@@ -282,9 +281,9 @@ export async function createPermissionForTest(
 export async function createSchemaForTest(
   client: SigningStargateClient,
   address: string
-): Promise<{ schemaId: number; did: string; trustRegistryId: number }> {
+): Promise<{ schemaId: number; did: string; ecosystemId: number }> {
   // Generate schema JSON
-  function generateSimpleSchema(trustRegistryId: string): string {
+  function generateSimpleSchema(ecosystemId: string): string {
     return JSON.stringify({
       $id: `vpr:verana:VPR_CHAIN_ID/cs/v1/js/VPR_CREDENTIAL_SCHEMA_ID`,
       $schema: "https://json-schema.org/draft/2020-12/schema",
@@ -304,56 +303,56 @@ export async function createSchemaForTest(
     });
   }
 
-  // Create Trust Registry (spec draft 13: doc_url + doc_digest_sri mandatory)
+  // Create Ecosystem (v4-rc2: replaces MsgCreateTrustRegistry; `corporation`
+  // MUST be a registered MOD-CO policy_address per AUTHZ-CHECK-5).
   const did = generateUniqueDID();
-  const createTrMsg = {
-    typeUrl: typeUrls.MsgCreateTrustRegistry,
-    value: MsgCreateTrustRegistry.fromPartial({
+  const createEcMsg = {
+    typeUrl: typeUrls.MsgCreateEcosystem,
+    value: MsgCreateEcosystem.fromPartial({
       corporation: address,
       operator: "",
       did: did,
-      aka: "http://example-trust-registry.com",
       language: "en",
-      docUrl: "http://example-trust-registry.com/doc-v1",
+      docUrl: "http://example-ecosystem.com/doc-v1",
       docDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
     }),
   };
 
-  const createTrFee = await calculateFeeWithSimulation(client, address, [createTrMsg], "Creating TR for schema");
+  const createEcFee = await calculateFeeWithSimulation(client, address, [createEcMsg], "Creating EC for schema");
   // Use retry logic for consistency (matches frontend pattern)
-  const createTrResult = await signAndBroadcastWithRetry(client, address, [createTrMsg], createTrFee, "Creating TR for schema");
+  const createEcResult = await signAndBroadcastWithRetry(client, address, [createEcMsg], createEcFee, "Creating EC for schema");
 
-  if (createTrResult.code !== 0) {
-    throw new Error(`Failed to create Trust Registry: ${createTrResult.rawLog}`);
+  if (createEcResult.code !== 0) {
+    throw new Error(`Failed to create Ecosystem: ${createEcResult.rawLog}`);
   }
 
-  // Extract TR ID
-  let trId: number | undefined;
-  const trEvents = createTrResult.events || [];
-  for (const event of trEvents) {
-    if (event.type === "create_trust_registry" || event.type === "verana.tr.v1.EventCreateTrustRegistry") {
+  // Extract EC ID
+  let ecId: number | undefined;
+  const ecEvents = createEcResult.events || [];
+  for (const event of ecEvents) {
+    if (event.type === "create_ecosystem" || event.type === "verana.ec.v1.EventCreateEcosystem") {
       for (const attr of event.attributes) {
-        if (attr.key === "trust_registry_id" || attr.key === "id" || attr.key === "tr_id") {
-          trId = parseInt(attr.value, 10);
-          if (!isNaN(trId)) break;
+        if (attr.key === "ecosystem_id" || attr.key === "id") {
+          ecId = parseInt(attr.value, 10);
+          if (!isNaN(ecId)) break;
         }
       }
-      if (trId) break;
+      if (ecId) break;
     }
   }
 
-  if (!trId) {
-    throw new Error("Could not extract TR ID from events");
+  if (!ecId) {
+    throw new Error("Could not extract EC ID from events");
   }
 
-  // Wait for TR transaction to be confirmed and sequence updated
-  const trTxHash = createTrResult.transactionHash;
+  // Wait for EC transaction to be confirmed and sequence updated
+  const ecTxHash = createEcResult.transactionHash;
   const queryClient1 = await import("./client").then(m => m.createQueryClient());
   try {
     let found = false;
     for (let i = 0; i < 10; i++) {
       try {
-        const tx = await queryClient1.getTx(trTxHash);
+        const tx = await queryClient1.getTx(ecTxHash);
         if (tx) {
           found = true;
           break;
@@ -375,7 +374,7 @@ export async function createSchemaForTest(
   } finally {
     queryClient1.disconnect();
   }
-  
+
   // Force sequence refresh to ensure client cache is updated before creating CS
   await client.getSequence(address);
   await new Promise((resolve) => setTimeout(resolve, 500));
@@ -387,8 +386,8 @@ export async function createSchemaForTest(
     value: MsgCreateCredentialSchema.fromPartial({
       corporation: address,
       operator: "",
-      trId: trId,
-      jsonSchema: generateSimpleSchema(trId.toString()),
+      ecosystemId: ecId,
+      jsonSchema: generateSimpleSchema(ecId.toString()),
       issuerGrantorValidationValidityPeriod: { value: 0 } as OptionalUInt32,
       verifierGrantorValidationValidityPeriod: { value: 0 } as OptionalUInt32,
       issuerValidationValidityPeriod: { value: 0 } as OptionalUInt32,
@@ -467,12 +466,12 @@ export async function createSchemaForTest(
   // Force sequence refresh to ensure client cache is updated
   await client.getSequence(address);
 
-  // Save as active TR/CS so subsequent tests can reuse them
-  const { saveActiveTR, saveActiveCS } = await import("./journeyResults");
-  saveActiveTR(trId, did);
-  saveActiveCS(schemaId, trId, did);
+  // Save as active EC/CS so subsequent tests can reuse them
+  const { saveActiveEC, saveActiveCS } = await import("./journeyResults");
+  saveActiveEC(ecId, did);
+  saveActiveCS(schemaId, ecId, did);
 
-  return { schemaId, did, trustRegistryId: trId };
+  return { schemaId, did, ecosystemId: ecId };
 }
 
 // ============================================================
@@ -531,41 +530,41 @@ async function waitForTxConfirmation(
 }
 
 /**
- * Creates a Trust Registry using operator-signed pattern.
- * Returns the TR ID and DID.
+ * Creates an Ecosystem using operator-signed pattern (replaces TR-create).
+ * `corporation` MUST be the policy_address of a registered MOD-CO Corporation
+ * (AUTHZ-CHECK-5). Returns the EC ID and DID.
  */
-export async function createTRWithOperator(
+export async function createECWithOperator(
   client: SigningStargateClient,
   corporation: string,
   operator: string,
-): Promise<{ trId: number; did: string }> {
+): Promise<{ ecId: number; did: string }> {
   const did = generateUniqueDID();
   const msg = {
-    typeUrl: typeUrls.MsgCreateTrustRegistry,
-    value: MsgCreateTrustRegistry.fromPartial({
+    typeUrl: typeUrls.MsgCreateEcosystem,
+    value: MsgCreateEcosystem.fromPartial({
       corporation,
       operator,
       did,
-      aka: "http://perm-test-trust-registry.com",
       language: "en",
-      docUrl: "http://perm-test-trust-registry.com/doc-v1",
+      docUrl: "http://perm-test-ecosystem.com/doc-v1",
       docDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
     }),
   };
 
   const seqBefore = (await client.getSequence(operator)).sequence;
-  const fee = await calculateFeeWithSimulation(client, operator, [msg], "Creating TR for perm test");
-  const result = await signAndBroadcastWithRetry(client, operator, [msg], fee, "Creating TR for perm test");
+  const fee = await calculateFeeWithSimulation(client, operator, [msg], "Creating EC for perm test");
+  const result = await signAndBroadcastWithRetry(client, operator, [msg], fee, "Creating EC for perm test");
 
   if (result.code !== 0) {
-    throw new Error(`Failed to create TR: ${result.rawLog}`);
+    throw new Error(`Failed to create EC: ${result.rawLog}`);
   }
 
-  const trId = extractIdFromEvents(result.events || [], "create_trust_registry", ["trust_registry_id", "id", "tr_id"]);
-  if (!trId) throw new Error("Could not extract TR ID from events");
+  const ecId = extractIdFromEvents(result.events || [], "create_ecosystem", ["ecosystem_id", "id"]);
+  if (!ecId) throw new Error("Could not extract EC ID from events");
 
   await waitForTxConfirmation(client, result.transactionHash, operator, seqBefore);
-  return { trId, did };
+  return { ecId, did };
 }
 
 /**
@@ -576,7 +575,7 @@ export async function createCSWithOperator(
   client: SigningStargateClient,
   corporation: string,
   operator: string,
-  trId: number,
+  ecosystemId: number,
   mode: IssuerOnboardingMode,
 ): Promise<number> {
   const jsonSchema = JSON.stringify({
@@ -601,7 +600,7 @@ export async function createCSWithOperator(
     value: MsgCreateCredentialSchema.fromPartial({
       corporation,
       operator,
-      trId,
+      ecosystemId,
       jsonSchema,
       issuerGrantorValidationValidityPeriod: OptionalUInt32.fromPartial({ value: 0 }),
       verifierGrantorValidationValidityPeriod: OptionalUInt32.fromPartial({ value: 0 }),
@@ -659,9 +658,8 @@ export async function createRootPermWithOperator(
       validationFees: opts?.validationFees ?? 5,
       issuanceFees: opts?.issuanceFees ?? 5,
       verificationFees: opts?.verificationFees ?? 5,
-      // [MOD-PERM-MSG-7-1] spec v4 draft 13 mandates permission_type and vs_operator.
-      permissionType: PermissionType.ECOSYSTEM,
-      vsOperator: operator,
+      // [MOD-PERM-MSG-7-3] perm.type is hardcoded to ECOSYSTEM by the handler
+      // and vs_operator is not set on root permissions.
     }),
   };
 
@@ -689,20 +687,20 @@ export async function createPermPrerequisites(
   corporation: string,
   operator: string,
   mode: IssuerOnboardingMode = IssuerOnboardingMode.ISSUER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS,
-): Promise<{ trId: number; schemaId: number; rootPermId: number; did: string; effectiveFrom: Date }> {
-  console.log("  Creating TR...");
-  const { trId, did } = await createTRWithOperator(client, corporation, operator);
-  console.log(`  ✓ TR created (ID: ${trId})`);
+): Promise<{ ecId: number; schemaId: number; rootPermId: number; did: string; effectiveFrom: Date }> {
+  console.log("  Creating EC...");
+  const { ecId, did } = await createECWithOperator(client, corporation, operator);
+  console.log(`  ✓ EC created (ID: ${ecId})`);
 
   console.log("  Creating CS...");
-  const schemaId = await createCSWithOperator(client, corporation, operator, trId, mode);
+  const schemaId = await createCSWithOperator(client, corporation, operator, ecId, mode);
   console.log(`  ✓ CS created (ID: ${schemaId}, mode: ${mode === IssuerOnboardingMode.ISSUER_ONBOARDING_MODE_OPEN ? "OPEN" : mode === IssuerOnboardingMode.ISSUER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS ? "ECOSYSTEM" : "GRANTOR_VALIDATION"})`);
 
   console.log("  Creating root permission...");
   const { rootPermId, effectiveFrom } = await createRootPermWithOperator(client, corporation, operator, schemaId, did);
   console.log(`  ✓ Root permission created (ID: ${rootPermId})`);
 
-  return { trId, schemaId, rootPermId, did, effectiveFrom };
+  return { ecId, schemaId, rootPermId, did, effectiveFrom };
 }
 
 /**
