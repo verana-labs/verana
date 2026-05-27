@@ -2,9 +2,23 @@ package types
 
 import (
 	"cosmossdk.io/errors"
+	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	"github.com/cosmos/cosmos-sdk/x/group"
 )
+
+// UnpackInterfaces implements UnpackInterfacesMessage so the codec resolves
+// `decision_policy` (a google.protobuf.Any wrapping a group.DecisionPolicy)
+// when the transaction is decoded off the wire. Without this, the Any's
+// cached concrete value stays nil and x/group.CreateGroupWithPolicy aborts
+// with "request decision policy: expected <nil>, got <nil>: invalid type"
+// when MOD-CO passes the Any through. Mirrors x/group's
+// MsgCreateGroupWithPolicy.UnpackInterfaces exactly.
+func (m MsgCreateCorporation) UnpackInterfaces(unpacker cdctypes.AnyUnpacker) error {
+	var decisionPolicy group.DecisionPolicy
+	return unpacker.UnpackAny(m.DecisionPolicy, &decisionPolicy)
+}
 
 // ValidateBasic on MsgUpdateParams: authority must be a valid bech32 address.
 func (m *MsgUpdateParams) ValidateBasic() error {
