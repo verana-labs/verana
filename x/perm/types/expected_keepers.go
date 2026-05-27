@@ -7,7 +7,7 @@ import (
 	"cosmossdk.io/math"
 
 	credentialschematypes "github.com/verana-labs/verana/x/cs/types"
-	trustregistrytypes "github.com/verana-labs/verana/x/tr/types"
+	ectypes "github.com/verana-labs/verana/x/ec/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -37,10 +37,26 @@ type CredentialSchemaKeeper interface {
 	GetCredentialSchemaById(ctx sdk.Context, id uint64) (credentialschematypes.CredentialSchema, error)
 }
 
-// TrustRegistryKeeper defines the expected trust registry keeper
-type TrustRegistryKeeper interface {
-	GetTrustRegistry(ctx sdk.Context, id uint64) (trustregistrytypes.TrustRegistry, error)
+// EcosystemKeeper defines the expected ecosystem keeper.
+// Replaces the legacy TrustRegistryKeeper post-MOD-EC rename: x/perm needs to
+// read the Ecosystem row (ec.CorporationId) to authorize CredentialSchema
+// owners, and still needs trust-unit pricing for fee math.
+type EcosystemKeeper interface {
+	GetEcosystem(ctx context.Context, id uint64) (ectypes.Ecosystem, error)
 	GetTrustUnitPrice(ctx sdk.Context) uint64
+}
+
+// CorporationView is the read shape MOD-PERM needs about a Corporation
+// subject for AUTHZ-CHECK-5: turn the signing `corporation` policy_address
+// into the uint64 co.Id used to validate ec.CorporationId ownership.
+type CorporationView struct {
+	Id            uint64
+	PolicyAddress string
+}
+
+// CorporationKeeper backs AUTHZ-CHECK-5 for MOD-PERM messages.
+type CorporationKeeper interface {
+	ResolveByPolicyAddress(ctx context.Context, policyAddress string) (CorporationView, bool)
 }
 
 // TrustDepositKeeper defines the expected interface for the Trust Deposit module.

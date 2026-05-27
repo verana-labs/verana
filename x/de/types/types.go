@@ -13,12 +13,16 @@ import (
 // VSOA fee grants. Note: CreateOrUpdatePermissionSession is explicitly
 // excluded from operator authorization msg_types (see ValidateBasic).
 var VPRDelegableMsgTypes = map[string]bool{
-	// Trust Registry (TR)
-	"/verana.tr.v1.MsgCreateTrustRegistry":                      true,
-	"/verana.tr.v1.MsgAddGovernanceFrameworkDocument":           true,
-	"/verana.tr.v1.MsgIncreaseActiveGovernanceFrameworkVersion": true,
-	"/verana.tr.v1.MsgUpdateTrustRegistry":                      true,
-	"/verana.tr.v1.MsgArchiveTrustRegistry":                     true,
+	// Corporation (CO)
+	"/verana.co.v1.MsgCreateCorporation": true,
+	"/verana.co.v1.MsgUpdateCorporation": true,
+	// Ecosystem (EC) — renamed from Trust Registry (TR) in v4-rc2 (#305)
+	"/verana.ec.v1.MsgCreateEcosystem":  true,
+	"/verana.ec.v1.MsgUpdateEcosystem":  true,
+	"/verana.ec.v1.MsgArchiveEcosystem": true,
+	// Governance Framework (GF) — extracted from TR
+	"/verana.gf.v1.MsgAddGovernanceFrameworkDocument":           true,
+	"/verana.gf.v1.MsgIncreaseActiveGovernanceFrameworkVersion": true,
 	// Credential Schema (CS)
 	"/verana.cs.v1.MsgCreateCredentialSchema":  true,
 	"/verana.cs.v1.MsgUpdateCredentialSchema":  true,

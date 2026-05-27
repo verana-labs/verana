@@ -23,10 +23,10 @@ type EcosystemView struct {
 	ActiveVersion uint32
 }
 
-// EcosystemKeeper is the minimum surface MOD-GF needs for ecosystem-targeted GF ops.
-// Until issue #305 (TR→EC rename) lands, the x/tr keeper provides this via an
-// adapter that returns CorporationID=0 (interim — ecosystem-targeted MOD-GF calls
-// will fail the subject controller check until MOD-CO and the rename land).
+// EcosystemKeeper is the minimum surface MOD-GF needs for ecosystem-targeted
+// GF ops. Provided by x/ec via EcAsGFEcosystemKeeper after the TR→EC rename
+// (issue #305). `CorporationID` on the returned view is the real FK to the
+// controlling Corporation; subject-controller checks compare against it.
 type EcosystemKeeper interface {
 	GetEcosystemView(ctx context.Context, ecosystemID uint64) (EcosystemView, bool)
 	SetEcosystemActiveVersion(ctx context.Context, ecosystemID uint64, newVersion uint32) error

@@ -57,7 +57,7 @@ func RunTDReclaimYieldJourney(ctx context.Context, client cosmosclient.Client) e
 
 	fmt.Printf("  Group Policy:  %s\n", policyAddr)
 	fmt.Printf("  Operator:      %s\n", operatorAddr)
-	fmt.Printf("  TR ID (j304):  %s\n", setup304.TrustRegistryID)
+	fmt.Printf("  TR ID (j304):  %s\n", setup304.EcosystemID)
 	fmt.Printf("  Perm ID (j308): %s\n", setup308.PermissionID)
 	_ = setup301 // used for GroupID in saved results
 
@@ -224,7 +224,7 @@ func RunTDReclaimYieldJourney(ctx context.Context, client cosmosclient.Client) e
 
 	// Save results for downstream journeys
 	result := lib.JourneyResult{
-		TrustRegistryID: setup304.TrustRegistryID,
+		EcosystemID: setup304.EcosystemID,
 		SchemaID:        setup304.SchemaID,
 		DID:             setup304.DID,
 		PermissionID:    setup308.PermissionID,

@@ -16,7 +16,7 @@ import (
 	"github.com/verana-labs/verana/x/cs/types"
 )
 
-func setupMsgServer(t testing.TB) (*keeper.Keeper, types.MsgServer, *keepertest.MockTrustRegistryKeeper, context.Context) {
+func setupMsgServer(t testing.TB) (*keeper.Keeper, types.MsgServer, *keepertest.MockEcosystemKeeper, context.Context) {
 	k, mockTrk, ctx := keepertest.CredentialschemaKeeper(t)
 	return &k, keeper.NewMsgServerImpl(k), mockTrk, ctx
 }
@@ -29,7 +29,7 @@ func TestMsgServerCreateCredentialSchema(t *testing.T) {
 	validDid := "did:example:123456789abcdefghi"
 
 	// First create a trust registry with authority as controller
-	trID := mockTrk.CreateMockTrustRegistry(authority, validDid)
+	trID := mockTrk.CreateMockEcosystem(authority, validDid)
 
 	// Schema with placeholder $id (will be replaced with canonical $id)
 	validJsonSchemaWithPlaceholder := `{
@@ -265,7 +265,7 @@ func TestCanonicalIdInjection(t *testing.T) {
 	operator := sdk.AccAddress([]byte("test_operator_______")).String()
 	validDid := "did:example:123456789abcdefghi"
 
-	trID := mockTrk.CreateMockTrustRegistry(authority, validDid)
+	trID := mockTrk.CreateMockEcosystem(authority, validDid)
 
 	testCases := []struct {
 		name        string
@@ -384,7 +384,7 @@ func TestQueryCanonicalId(t *testing.T) {
 	operator := sdk.AccAddress([]byte("test_operator_______")).String()
 	validDid := "did:example:123456789abcdefghi"
 
-	trID := mockTrk.CreateMockTrustRegistry(authority, validDid)
+	trID := mockTrk.CreateMockEcosystem(authority, validDid)
 
 	schemaNoId := `{
   "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -466,7 +466,7 @@ func TestUpdateCredentialSchema(t *testing.T) {
 	operator := sdk.AccAddress([]byte("test_operator_______")).String()
 	validDid := "did:example:123456789abcdefghi"
 
-	trID := mockTrk.CreateMockTrustRegistry(authority, validDid)
+	trID := mockTrk.CreateMockEcosystem(authority, validDid)
 
 	validJsonSchema := `{
         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -509,7 +509,7 @@ func TestUpdateCredentialSchema(t *testing.T) {
 			name:          "unauthorized update - not controller",
 			msg:           keeper.CreateUpdateMsgWithValidityPeriods(sdk.AccAddress([]byte("wrong_authority_____")).String(), operator, schemaID.Id, 365, 365, 180, 180, 180),
 			expPass:       false,
-			errorContains: "corporation does not match the trust registry corporation",
+			errorContains: "does not control",
 		},
 		{
 			name:          "invalid validity period - exceeds maximum",
@@ -562,7 +562,7 @@ func TestArchiveCredentialSchema(t *testing.T) {
 	operator := sdk.AccAddress([]byte("test_operator_______")).String()
 	validDid := "did:example:123456789abcdefghi"
 
-	trID := mockTrk.CreateMockTrustRegistry(authority, validDid)
+	trID := mockTrk.CreateMockEcosystem(authority, validDid)
 
 	validJsonSchema := `{
         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -668,7 +668,7 @@ func TestArchiveCredentialSchema(t *testing.T) {
 				Archive:     true,
 			},
 			expPass:       false,
-			errorContains: "corporation does not match the trust registry corporation",
+			errorContains: "does not control",
 		},
 		{
 			// schema is already archived; archive=true again must fail

@@ -21,6 +21,7 @@ import (
 	// this line is used by starport scaffolding # 1
 
 	modulev1 "github.com/verana-labs/verana/api/verana/cs/module"
+	cokeeper "github.com/verana-labs/verana/x/co/keeper"
 	"github.com/verana-labs/verana/x/cs/keeper"
 	"github.com/verana-labs/verana/x/cs/types"
 )
@@ -170,8 +171,23 @@ func (am AppModule) IsAppModule() {}
 func init() {
 	appmodule.Register(
 		&modulev1.Module{},
-		appmodule.Provide(ProvideModule),
+		appmodule.Provide(
+			ProvideModule,
+			ProvideCorporationKeeperForCS,
+		),
 	)
+}
+
+// ProvideCorporationKeeperForCS supplies cstypes.CorporationKeeper from the
+// concrete x/co keeper for MOD-CS AUTHZ-CHECK-5. Required because cokeeper
+// does not satisfy the interface directly (the adapter wraps the
+// CorporationByPolicyAddr collection into the ResolveByPolicyAddress shape).
+//
+// cstypes.EcosystemKeeper is NOT wired here: x/ec keeper.GetEcosystem
+// structurally satisfies cstypes.EcosystemKeeper, so depinject auto-binds
+// the interface to the concrete eckeeper.Keeper provided by ec/module.
+func ProvideCorporationKeeperForCS(co cokeeper.Keeper) types.CorporationKeeper {
+	return keeper.NewCoAsCSCorporationKeeper(co)
 }
 
 type ModuleInputs struct {
@@ -182,10 +198,11 @@ type ModuleInputs struct {
 	Config       *modulev1.Module
 	Logger       log.Logger
 
-	BankKeeper          types.BankKeeper          `optional:"true"`
-	AccountKeeper       types.AccountKeeper       `optional:"true"`
-	TrustRegistryKeeper types.TrustRegistryKeeper
-	DelegationKeeper    types.DelegationKeeper
+	BankKeeper        types.BankKeeper    `optional:"true"`
+	AccountKeeper     types.AccountKeeper `optional:"true"`
+	EcosystemKeeper   types.EcosystemKeeper
+	CorporationKeeper types.CorporationKeeper
+	DelegationKeeper  types.DelegationKeeper
 }
 
 type ModuleOutputs struct {
@@ -207,7 +224,8 @@ func ProvideModule(in ModuleInputs) ModuleOutputs {
 		in.Logger,
 		authority.String(),
 		in.BankKeeper,
-		in.TrustRegistryKeeper,
+		in.EcosystemKeeper,
+		in.CorporationKeeper,
 		in.DelegationKeeper,
 	)
 	m := NewAppModule(

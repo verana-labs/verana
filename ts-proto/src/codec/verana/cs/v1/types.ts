@@ -256,10 +256,13 @@ export interface SchemaAuthorizationPolicy {
   version: number;
 }
 
-/** CredentialSchema defines the structure for a credential schema */
+/**
+ * CredentialSchema defines the structure for a credential schema.
+ * `ecosystem_id` is the v4-rc2 replacement for the legacy `tr_id` field (issue
+ * #305): the owning subject is now an Ecosystem, identified by its uint64 id.
+ */
 export interface CredentialSchema {
   id: number;
-  trId: number;
   created: Date | undefined;
   modified: Date | undefined;
   archived: Date | undefined;
@@ -275,6 +278,7 @@ export interface CredentialSchema {
   pricingAsset: string;
   digestAlgorithm: string;
   holderOnboardingMode: HolderOnboardingMode;
+  ecosystemId: number;
 }
 
 function createBaseSchemaAuthorizationPolicy(): SchemaAuthorizationPolicy {
@@ -485,7 +489,6 @@ export const SchemaAuthorizationPolicy = {
 function createBaseCredentialSchema(): CredentialSchema {
   return {
     id: 0,
-    trId: 0,
     created: undefined,
     modified: undefined,
     archived: undefined,
@@ -501,6 +504,7 @@ function createBaseCredentialSchema(): CredentialSchema {
     pricingAsset: "",
     digestAlgorithm: "",
     holderOnboardingMode: 0,
+    ecosystemId: 0,
   };
 }
 
@@ -508,9 +512,6 @@ export const CredentialSchema = {
   encode(message: CredentialSchema, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.id !== 0) {
       writer.uint32(8).uint64(message.id);
-    }
-    if (message.trId !== 0) {
-      writer.uint32(16).uint64(message.trId);
     }
     if (message.created !== undefined) {
       Timestamp.encode(toTimestamp(message.created), writer.uint32(26).fork()).ldelim();
@@ -557,6 +558,9 @@ export const CredentialSchema = {
     if (message.holderOnboardingMode !== 0) {
       writer.uint32(144).int32(message.holderOnboardingMode);
     }
+    if (message.ecosystemId !== 0) {
+      writer.uint32(152).uint64(message.ecosystemId);
+    }
     return writer;
   },
 
@@ -573,13 +577,6 @@ export const CredentialSchema = {
           }
 
           message.id = longToNumber(reader.uint64() as Long);
-          continue;
-        case 2:
-          if (tag !== 16) {
-            break;
-          }
-
-          message.trId = longToNumber(reader.uint64() as Long);
           continue;
         case 3:
           if (tag !== 26) {
@@ -686,6 +683,13 @@ export const CredentialSchema = {
 
           message.holderOnboardingMode = reader.int32() as any;
           continue;
+        case 19:
+          if (tag !== 152) {
+            break;
+          }
+
+          message.ecosystemId = longToNumber(reader.uint64() as Long);
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -698,7 +702,6 @@ export const CredentialSchema = {
   fromJSON(object: any): CredentialSchema {
     return {
       id: isSet(object.id) ? globalThis.Number(object.id) : 0,
-      trId: isSet(object.trId) ? globalThis.Number(object.trId) : 0,
       created: isSet(object.created) ? fromJsonTimestamp(object.created) : undefined,
       modified: isSet(object.modified) ? fromJsonTimestamp(object.modified) : undefined,
       archived: isSet(object.archived) ? fromJsonTimestamp(object.archived) : undefined,
@@ -730,6 +733,7 @@ export const CredentialSchema = {
       holderOnboardingMode: isSet(object.holderOnboardingMode)
         ? holderOnboardingModeFromJSON(object.holderOnboardingMode)
         : 0,
+      ecosystemId: isSet(object.ecosystemId) ? globalThis.Number(object.ecosystemId) : 0,
     };
   },
 
@@ -737,9 +741,6 @@ export const CredentialSchema = {
     const obj: any = {};
     if (message.id !== 0) {
       obj.id = Math.round(message.id);
-    }
-    if (message.trId !== 0) {
-      obj.trId = Math.round(message.trId);
     }
     if (message.created !== undefined) {
       obj.created = message.created.toISOString();
@@ -786,6 +787,9 @@ export const CredentialSchema = {
     if (message.holderOnboardingMode !== 0) {
       obj.holderOnboardingMode = holderOnboardingModeToJSON(message.holderOnboardingMode);
     }
+    if (message.ecosystemId !== 0) {
+      obj.ecosystemId = Math.round(message.ecosystemId);
+    }
     return obj;
   },
 
@@ -795,7 +799,6 @@ export const CredentialSchema = {
   fromPartial<I extends Exact<DeepPartial<CredentialSchema>, I>>(object: I): CredentialSchema {
     const message = createBaseCredentialSchema();
     message.id = object.id ?? 0;
-    message.trId = object.trId ?? 0;
     message.created = object.created ?? undefined;
     message.modified = object.modified ?? undefined;
     message.archived = object.archived ?? undefined;
@@ -811,6 +814,7 @@ export const CredentialSchema = {
     message.pricingAsset = object.pricingAsset ?? "";
     message.digestAlgorithm = object.digestAlgorithm ?? "";
     message.holderOnboardingMode = object.holderOnboardingMode ?? 0;
+    message.ecosystemId = object.ecosystemId ?? 0;
     return message;
   },
 };

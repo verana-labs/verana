@@ -19,11 +19,12 @@ import (
 	"github.com/stretchr/testify/require"
 
 	cstypes "github.com/verana-labs/verana/x/cs/types"
+	ectypes "github.com/verana-labs/verana/x/ec/types"
 	"github.com/verana-labs/verana/x/perm/keeper"
 	"github.com/verana-labs/verana/x/perm/types"
 )
 
-func PermissionKeeper(t testing.TB) (keeper.Keeper, *MockCredentialSchemaKeeper, *MockTrustRegistryKeeper, sdk.Context, *MockDelegationKeeper) {
+func PermissionKeeper(t testing.TB) (keeper.Keeper, *MockCredentialSchemaKeeper, *MockPermEcosystemKeeper, *MockPermCorporationKeeper, sdk.Context, *MockDelegationKeeper) {
 	storeKey := storetypes.NewKVStoreKey(types.StoreKey)
 
 	db := dbm.NewMemDB()
@@ -37,7 +38,8 @@ func PermissionKeeper(t testing.TB) (keeper.Keeper, *MockCredentialSchemaKeeper,
 
 	// Create mock keepers
 	csKeeper := NewMockCredentialSchemaKeeper()
-	trkKeeper := NewMockTrustRegistryKeeper()
+	ekKeeper := NewMockPermEcosystemKeeper()
+	coKeeper := NewMockPermCorporationKeeper(ekKeeper)
 	bankKeeper := NewMockBankKeeper()
 	mockTrustDepositKeeper := &MockTrustDepositKeeper{}
 	mockDelegationKeeper := &MockDelegationKeeper{}
@@ -48,7 +50,8 @@ func PermissionKeeper(t testing.TB) (keeper.Keeper, *MockCredentialSchemaKeeper,
 		log.NewNopLogger(),
 		authority.String(),
 		csKeeper,
-		trkKeeper,
+		ekKeeper,
+		coKeeper,
 		mockTrustDepositKeeper,
 		bankKeeper,
 		mockDelegationKeeper,
@@ -62,7 +65,82 @@ func PermissionKeeper(t testing.TB) (keeper.Keeper, *MockCredentialSchemaKeeper,
 		panic(err)
 	}
 
-	return k, csKeeper, trkKeeper, ctx, mockDelegationKeeper
+	return k, csKeeper, ekKeeper, coKeeper, ctx, mockDelegationKeeper
+}
+
+// MockPermEcosystemKeeper is a mock implementation of x/perm types.EcosystemKeeper.
+// Replaces the legacy MockTrustRegistryKeeper post-MOD-EC rename: stores
+// Ecosystem rows keyed by id and a per-mock map of policy_address →
+// CorporationView so the linked MockPermCorporationKeeper can resolve signers
+// back to a corp.id matching ec.CorporationId.
+type MockPermEcosystemKeeper struct {
+	ecosystems              map[uint64]ectypes.Ecosystem
+	trustUnitPrice          uint64
+	corporationByPolicyAddr map[string]types.CorporationView
+}
+
+func NewMockPermEcosystemKeeper() *MockPermEcosystemKeeper {
+	return &MockPermEcosystemKeeper{
+		ecosystems:              make(map[uint64]ectypes.Ecosystem),
+		trustUnitPrice:          1,
+		corporationByPolicyAddr: make(map[string]types.CorporationView),
+	}
+}
+
+func (k *MockPermEcosystemKeeper) GetTrustUnitPrice(ctx sdk.Context) uint64 {
+	return k.trustUnitPrice
+}
+
+func (k *MockPermEcosystemKeeper) GetEcosystem(ctx context.Context, id uint64) (ectypes.Ecosystem, error) {
+	if ec, ok := k.ecosystems[id]; ok {
+		return ec, nil
+	}
+	return ectypes.Ecosystem{}, ectypes.ErrEcosystemNotFound
+}
+
+// CreateMockEcosystem registers an Ecosystem owned by the given signing
+// `corporation` (a bech32 policy_address). Also wires the policy_address →
+// CorporationView mapping so the paired MockPermCorporationKeeper resolves
+// the signer to a corp.id matching ec.CorporationId.
+func (k *MockPermEcosystemKeeper) CreateMockEcosystem(corporation string, did string) uint64 {
+	id := uint64(len(k.ecosystems) + 1)
+	corpID := id
+	k.ecosystems[id] = ectypes.Ecosystem{
+		Id:            id,
+		Did:           did,
+		CorporationId: corpID,
+		ActiveVersion: 1,
+		Language:      "en",
+	}
+	k.corporationByPolicyAddr[corporation] = types.CorporationView{
+		Id:            corpID,
+		PolicyAddress: corporation,
+	}
+	return id
+}
+
+// MockPermCorporationKeeper resolves a signing policy_address to a
+// CorporationView; shares its backing map with MockPermEcosystemKeeper so
+// the (ec.CorporationId == co.Id) check passes for the same `corporation`
+// that registered the Ecosystem. Falls back to always-valid
+// CorporationView{Id: 1} when no mapping exists so legacy tests that don't
+// register a corporation still pass through ownership checks.
+type MockPermCorporationKeeper struct {
+	corporationByPolicyAddr map[string]types.CorporationView
+}
+
+func NewMockPermCorporationKeeper(ekKeeper *MockPermEcosystemKeeper) *MockPermCorporationKeeper {
+	return &MockPermCorporationKeeper{corporationByPolicyAddr: ekKeeper.corporationByPolicyAddr}
+}
+
+func (k *MockPermCorporationKeeper) ResolveByPolicyAddress(ctx context.Context, policyAddress string) (types.CorporationView, bool) {
+	if v, ok := k.corporationByPolicyAddr[policyAddress]; ok {
+		return v, true
+	}
+	// Distinct sentinel id for unknown addresses — never matches a
+	// CreateMockEcosystem row (which uses ids starting at 1). Lets
+	// "wrong signer" tests exercise the strict ownership mismatch.
+	return types.CorporationView{Id: 1 << 31, PolicyAddress: policyAddress}, true
 }
 
 type MockCredentialSchemaKeeper struct {
@@ -75,10 +153,10 @@ func NewMockCredentialSchemaKeeper() *MockCredentialSchemaKeeper {
 	}
 }
 
-func (k *MockCredentialSchemaKeeper) UpdateMockCredentialSchema(id uint64, trId uint64, issuerMode cstypes.IssuerOnboardingMode, verifierMode cstypes.VerifierOnboardingMode) {
+func (k *MockCredentialSchemaKeeper) UpdateMockCredentialSchema(id uint64, ecosystemID uint64, issuerMode cstypes.IssuerOnboardingMode, verifierMode cstypes.VerifierOnboardingMode) {
 	k.credentialSchemas[id] = cstypes.CredentialSchema{
 		Id:                     id,
-		TrId:                   trId,
+		EcosystemId:            ecosystemID,
 		IssuerOnboardingMode:   issuerMode,
 		VerifierOnboardingMode: verifierMode,
 	}

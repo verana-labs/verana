@@ -43,11 +43,11 @@ func main() {
 func runJourney(ctx context.Context, client cosmosclient.Client, journeyID int) error {
 	switch journeyID {
 	case 101:
-		// Trust Registry Operator Authorization Setup (Group + Fund)
-		return journeys.RunTrustRegistryAuthzSetupJourney(ctx, client)
+		// Ecosystem Operator Authorization Setup (Group + Fund)
+		return journeys.RunEcosystemAuthzSetupJourney(ctx, client)
 	case 102:
-		// Trust Registry Operations with Operator Authorization (fail-then-pass)
-		return journeys.RunTrustRegistryAuthzOperationsJourney(ctx, client)
+		// Ecosystem Operations with Operator Authorization (fail-then-pass)
+		return journeys.RunEcosystemAuthzOperationsJourney(ctx, client)
 	case 201:
 		// Credential Schema Operator Authorization Setup (Group + Fund)
 		return journeys.RunCredentialSchemaAuthzSetupJourney(ctx, client)
@@ -107,9 +107,9 @@ func runJourney(ctx context.Context, client cosmosclient.Client, journeyID int) 
 func printUsage() {
 	fmt.Println("Usage: verana-test-harness JOURNEY_ID")
 	fmt.Println("Available journeys:")
-	fmt.Println("\n  Trust Registry Authorization Journeys:")
-	fmt.Println("  101 - TR Operator Authorization Setup (Group + Fund)")
-	fmt.Println("  102 - TR Operations with Operator Authorization (fail-then-pass)")
+	fmt.Println("\n  Ecosystem Authorization Journeys:")
+	fmt.Println("  101 - EC Operator Authorization Setup (Group + Fund)")
+	fmt.Println("  102 - EC Operations with Operator Authorization (fail-then-pass)")
 	fmt.Println("\n  Credential Schema Authorization Journeys:")
 	fmt.Println("  201 - CS Operator Authorization Setup (Group + Fund)")
 	fmt.Println("  202 - CS Operations with Operator Authorization (fail-then-pass)")

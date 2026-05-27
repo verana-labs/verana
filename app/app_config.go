@@ -56,7 +56,7 @@ import (
 	credentialschemamodulev1 "github.com/verana-labs/verana/api/verana/cs/module"
 	permissionmodulev1 "github.com/verana-labs/verana/api/verana/perm/module"
 	trustdepositmodulev1 "github.com/verana-labs/verana/api/verana/td/module"
-	trustregistrymodulev1 "github.com/verana-labs/verana/api/verana/tr/module"
+	ecosystemmodulev1 "github.com/verana-labs/verana/api/verana/ec/module"
 	_ "github.com/verana-labs/verana/x/co/module"
 	comoduletypes "github.com/verana-labs/verana/x/co/types"
 	credentialschemamoduletypes "github.com/verana-labs/verana/x/cs/types"
@@ -68,7 +68,7 @@ import (
 	gfmoduletypes "github.com/verana-labs/verana/x/gf/types"
 	permissionmoduletypes "github.com/verana-labs/verana/x/perm/types"
 	trustdepositmoduletypes "github.com/verana-labs/verana/x/td/types"
-	trustregistrymoduletypes "github.com/verana-labs/verana/x/tr/types"
+	ecosystemmoduletypes "github.com/verana-labs/verana/x/ec/types"
 	_ "github.com/verana-labs/verana/x/xr/module"
 	xrmoduletypes "github.com/verana-labs/verana/x/xr/types"
 
@@ -113,7 +113,7 @@ var (
 		circuittypes.ModuleName,
 		protocolpooltypes.ModuleName,
 		// chain modules
-		trustregistrymoduletypes.ModuleName,
+		ecosystemmoduletypes.ModuleName,
 		comoduletypes.ModuleName,
 		gfmoduletypes.ModuleName,
 		credentialschemamoduletypes.ModuleName,
@@ -147,7 +147,7 @@ var (
 		icatypes.ModuleName,
 		ibcfeetypes.ModuleName,
 		// chain modules
-		trustregistrymoduletypes.ModuleName,
+		ecosystemmoduletypes.ModuleName,
 		comoduletypes.ModuleName,
 		gfmoduletypes.ModuleName,
 		credentialschemamoduletypes.ModuleName,
@@ -175,7 +175,7 @@ var (
 		icatypes.ModuleName,
 		ibcfeetypes.ModuleName,
 		// chain modules
-		trustregistrymoduletypes.ModuleName,
+		ecosystemmoduletypes.ModuleName,
 		comoduletypes.ModuleName,
 		gfmoduletypes.ModuleName,
 		credentialschemamoduletypes.ModuleName,
@@ -205,7 +205,7 @@ var (
 		{Account: ibctransfertypes.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner}},
 		{Account: ibcfeetypes.ModuleName},
 		{Account: icatypes.ModuleName},
-		{Account: trustregistrymoduletypes.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner}},
+		{Account: ecosystemmoduletypes.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner}},
 		{Account: trustdepositmoduletypes.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner}},
 		{Account: permissionmoduletypes.ModuleName},
 		{Account: protocolpooltypes.ModuleName},
@@ -351,8 +351,8 @@ var (
 				Config: appconfig.WrapAny(&protocolpoolmodulev1.Module{}),
 			},
 			{
-				Name:   trustregistrymoduletypes.ModuleName,
-				Config: appconfig.WrapAny(&trustregistrymodulev1.Module{}),
+				Name:   ecosystemmoduletypes.ModuleName,
+				Config: appconfig.WrapAny(&ecosystemmodulev1.Module{}),
 			},
 			{
 				Name:   comoduletypes.ModuleName,

@@ -1,0 +1,288 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "verana/ec/v1/tx.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "Msg"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/verana.ec.v1.Msg/ArchiveEcosystem": {
+      "post": {
+        "summary": "[MOD-ES-MSG-3] Archive/unarchive Ecosystem.",
+        "operationId": "Msg_ArchiveEcosystem",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.ec.v1.MsgArchiveEcosystemResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "MsgArchiveEcosystem implements MOD-ES-MSG-3. `archive` is a boolean toggle;\nsubmitting the current state is an idempotency abort.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.ec.v1.MsgArchiveEcosystem"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.ec.v1.Msg/CreateEcosystem": {
+      "post": {
+        "summary": "[MOD-ES-MSG-1] Create New Ecosystem.",
+        "operationId": "Msg_CreateEcosystem",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.ec.v1.MsgCreateEcosystemResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "MsgCreateEcosystem implements MOD-ES-MSG-1. Signed by `operator`;\nAUTHZ-CHECK-5 resolves the signing `corporation` policy_address to the\ncontrolling Corporation entry. Seeds v1 of the Ecosystem's Governance\nFramework via MOD-GF.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.ec.v1.MsgCreateEcosystem"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.ec.v1.Msg/UpdateEcosystem": {
+      "post": {
+        "summary": "[MOD-ES-MSG-2] Update Ecosystem (rotate did).",
+        "operationId": "Msg_UpdateEcosystem",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.ec.v1.MsgUpdateEcosystemResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "MsgUpdateEcosystem implements MOD-ES-MSG-2. Only `did` is mutable.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.ec.v1.MsgUpdateEcosystem"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.ec.v1.Msg/UpdateParams": {
+      "post": {
+        "summary": "UpdateParams defines a (governance) operation for updating the module\nparameters. The authority defaults to the x/gov module account.",
+        "operationId": "Msg_UpdateParams",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.ec.v1.MsgUpdateParamsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "MsgUpdateParams is the Msg/UpdateParams request type.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.ec.v1.MsgUpdateParams"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "google.protobuf.Any": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "google.rpc.Status": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/google.protobuf.Any"
+          }
+        }
+      }
+    },
+    "verana.ec.v1.MsgArchiveEcosystem": {
+      "type": "object",
+      "properties": {
+        "corporation": {
+          "type": "string"
+        },
+        "operator": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "archive": {
+          "type": "boolean"
+        }
+      },
+      "description": "MsgArchiveEcosystem implements MOD-ES-MSG-3. `archive` is a boolean toggle;\nsubmitting the current state is an idempotency abort."
+    },
+    "verana.ec.v1.MsgArchiveEcosystemResponse": {
+      "type": "object"
+    },
+    "verana.ec.v1.MsgCreateEcosystem": {
+      "type": "object",
+      "properties": {
+        "corporation": {
+          "type": "string"
+        },
+        "operator": {
+          "type": "string"
+        },
+        "did": {
+          "type": "string"
+        },
+        "language": {
+          "type": "string"
+        },
+        "doc_url": {
+          "type": "string"
+        },
+        "doc_digest_sri": {
+          "type": "string"
+        }
+      },
+      "description": "MsgCreateEcosystem implements MOD-ES-MSG-1. Signed by `operator`;\nAUTHZ-CHECK-5 resolves the signing `corporation` policy_address to the\ncontrolling Corporation entry. Seeds v1 of the Ecosystem's Governance\nFramework via MOD-GF."
+    },
+    "verana.ec.v1.MsgCreateEcosystemResponse": {
+      "type": "object",
+      "properties": {
+        "ecosystem_id": {
+          "type": "string",
+          "format": "uint64"
+        }
+      }
+    },
+    "verana.ec.v1.MsgUpdateEcosystem": {
+      "type": "object",
+      "properties": {
+        "corporation": {
+          "type": "string"
+        },
+        "operator": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "did": {
+          "type": "string"
+        }
+      },
+      "description": "MsgUpdateEcosystem implements MOD-ES-MSG-2. Only `did` is mutable."
+    },
+    "verana.ec.v1.MsgUpdateEcosystemResponse": {
+      "type": "object"
+    },
+    "verana.ec.v1.MsgUpdateParams": {
+      "type": "object",
+      "properties": {
+        "authority": {
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/definitions/verana.ec.v1.Params"
+        }
+      },
+      "description": "MsgUpdateParams is the Msg/UpdateParams request type."
+    },
+    "verana.ec.v1.MsgUpdateParamsResponse": {
+      "type": "object"
+    },
+    "verana.ec.v1.Params": {
+      "type": "object",
+      "properties": {
+        "trust_unit_price": {
+          "type": "string",
+          "format": "uint64"
+        }
+      },
+      "description": "Params defines the parameters for the module."
+    }
+  }
+}

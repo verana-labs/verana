@@ -138,7 +138,7 @@ func RunPermissionRepaySlashedTDJourney(ctx context.Context, client cosmosclient
 
 	// Save results
 	result := lib.JourneyResult{
-		TrustRegistryID: setup308.TrustRegistryID,
+		EcosystemID: setup308.EcosystemID,
 		SchemaID:        setup308.SchemaID,
 		DID:             setup308.DID,
 		PermissionID:    setup308.PermissionID,

@@ -30,8 +30,8 @@ func (k Keeper) ListCredentialSchemas(goCtx context.Context, req *types.QueryLis
 
 	var schemas []types.CredentialSchema
 	err := k.CredentialSchema.Walk(ctx, nil, func(key uint64, schema types.CredentialSchema) (bool, error) {
-		// Filter by trust registry if specified
-		if req.TrId != 0 && schema.TrId != req.TrId {
+		// Filter by ecosystem if specified
+		if req.EcosystemId != 0 && schema.EcosystemId != req.EcosystemId {
 			return false, nil
 		}
 

@@ -10,13 +10,9 @@ import (
 func (ms msgServer) validateCreateCredentialSchemaParams(ctx sdk.Context, msg *types.MsgCreateCredentialSchema) error {
 	params := ms.GetParams(ctx)
 
-	// Validate trust registry ownership - authority must be the controller
-	tr, err := ms.trustRegistryKeeper.GetTrustRegistry(ctx, msg.TrId)
-	if err != nil {
-		return fmt.Errorf("trust registry not found: %w", err)
-	}
-	if tr.Corporation != msg.Corporation {
-		return fmt.Errorf("corporation does not match the trust registry corporation")
+	// Validate ecosystem ownership - signing corporation must control the ecosystem
+	if err := ms.checkCreateSchemaOwnership(ctx, msg.EcosystemId, msg.Corporation); err != nil {
+		return err
 	}
 
 	// Check schema size
@@ -103,7 +99,7 @@ func (ms msgServer) executeCreateCredentialSchema(ctx sdk.Context, schemaID uint
 	// [MOD-CS-MSG-1-3] Create the credential schema
 	credentialSchema := types.CredentialSchema{
 		Id:                                      schemaID,
-		TrId:                                    msg.TrId,
+		EcosystemId:                             msg.EcosystemId,
 		Created:                                 ctx.BlockTime(),
 		Modified:                                ctx.BlockTime(),
 		JsonSchema:                              canonicalJsonSchema,
@@ -130,7 +126,7 @@ func (ms msgServer) executeCreateCredentialSchema(ctx sdk.Context, schemaID uint
 		sdk.NewEvent(
 			types.EventTypeCreateCredentialSchema,
 			sdk.NewAttribute(types.AttributeKeyId, fmt.Sprintf("%d", schemaID)),
-			sdk.NewAttribute(types.AttributeKeyTrId, fmt.Sprintf("%d", msg.TrId)),
+			sdk.NewAttribute(types.AttributeKeyEcosystemId, fmt.Sprintf("%d", msg.EcosystemId)),
 			sdk.NewAttribute(types.AttributeKeyCorporation, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
 		),

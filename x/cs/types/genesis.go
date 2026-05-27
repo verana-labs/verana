@@ -34,8 +34,8 @@ func (gs GenesisState) Validate() error {
 			return fmt.Errorf("credential schema at index %d has invalid ID 0", i)
 		}
 
-		if cs.TrId == 0 {
-			return fmt.Errorf("credential schema at index %d has invalid trust registry ID 0", i)
+		if cs.EcosystemId == 0 {
+			return fmt.Errorf("credential schema at index %d has invalid ecosystem_id 0", i)
 		}
 
 		if cs.Created.IsZero() {

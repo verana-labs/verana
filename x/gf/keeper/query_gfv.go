@@ -57,7 +57,7 @@ func (q querier) ListGovernanceFrameworkVersions(goCtx context.Context, req *typ
 	var subjectActiveVersion uint32
 	if req.ActiveOnly {
 		if hasEco {
-			eco, ok := q.ecosystemKeeper.GetEcosystemView(goCtx, req.EcosystemId)
+			eco, ok := q.ecosystemKeeper().GetEcosystemView(goCtx, req.EcosystemId)
 			if !ok {
 				return nil, status.Errorf(codes.NotFound, "ecosystem %d not found", req.EcosystemId)
 			}

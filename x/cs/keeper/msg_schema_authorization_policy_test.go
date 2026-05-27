@@ -31,7 +31,7 @@ func TestCreateSchemaAuthorizationPolicy_HappyPath(t *testing.T) {
 
 	corporation := sdk.AccAddress([]byte("corp_policy_________")).String()
 	operator := sdk.AccAddress([]byte("oper_policy_________")).String()
-	trID := mockTrk.CreateMockTrustRegistry(corporation, "did:example:happypath")
+	trID := mockTrk.CreateMockEcosystem(corporation, "did:example:happypath")
 
 	now := time.Now().UTC()
 	sdkCtx := sdk.UnwrapSDKContext(rawCtx).WithBlockTime(now)
@@ -77,7 +77,7 @@ func TestCreateSchemaAuthorizationPolicy_VersionIncrement(t *testing.T) {
 
 	corporation := sdk.AccAddress([]byte("corp_policy2________")).String()
 	operator := sdk.AccAddress([]byte("oper_policy2________")).String()
-	trID := mockTrk.CreateMockTrustRegistry(corporation, "did:example:version-inc")
+	trID := mockTrk.CreateMockEcosystem(corporation, "did:example:version-inc")
 
 	now := time.Now().UTC()
 	sdkCtx := sdk.UnwrapSDKContext(rawCtx).WithBlockTime(now)
@@ -153,7 +153,7 @@ func TestCreateSchemaAuthorizationPolicy_WrongCorporation(t *testing.T) {
 	corporation := sdk.AccAddress([]byte("corp_wrong__________")).String()
 	wrongCorp := sdk.AccAddress([]byte("wrong_corp__________")).String()
 	operator := sdk.AccAddress([]byte("oper_wrong__________")).String()
-	trID := mockTrk.CreateMockTrustRegistry(corporation, "did:example:wrongcorp")
+	trID := mockTrk.CreateMockEcosystem(corporation, "did:example:wrongcorp")
 
 	now := time.Now().UTC()
 	sdkCtx := sdk.UnwrapSDKContext(rawCtx).WithBlockTime(now)
@@ -174,7 +174,7 @@ func TestCreateSchemaAuthorizationPolicy_WrongCorporation(t *testing.T) {
 
 	resp, err := ms.CreateSchemaAuthorizationPolicy(goCtx, msg)
 	require.Error(t, err)
-	require.Contains(t, err.Error(), "corporation does not own the trust registry")
+	require.Contains(t, err.Error(), "does not control")
 	require.Nil(t, resp)
 
 	_ = k
@@ -186,7 +186,7 @@ func TestRevokeSchemaAuthorizationPolicy_HappyPath(t *testing.T) {
 
 	corporation := sdk.AccAddress([]byte("corp_revoke_________")).String()
 	operator := sdk.AccAddress([]byte("oper_revoke_________")).String()
-	trID := mockTrk.CreateMockTrustRegistry(corporation, "did:example:revoke")
+	trID := mockTrk.CreateMockEcosystem(corporation, "did:example:revoke")
 
 	now := time.Now().UTC()
 	sdkCtx := sdk.UnwrapSDKContext(rawCtx).WithBlockTime(now)
@@ -245,7 +245,7 @@ func TestRevokeSchemaAuthorizationPolicy_AlreadyRevoked(t *testing.T) {
 
 	corporation := sdk.AccAddress([]byte("corp_alrdy_revoked__")).String()
 	operator := sdk.AccAddress([]byte("oper_alrdy_revoked__")).String()
-	trID := mockTrk.CreateMockTrustRegistry(corporation, "did:example:already-revoked")
+	trID := mockTrk.CreateMockEcosystem(corporation, "did:example:already-revoked")
 
 	now := time.Now().UTC()
 	sdkCtx := sdk.UnwrapSDKContext(rawCtx).WithBlockTime(now)
@@ -301,7 +301,7 @@ func TestRevokeSchemaAuthorizationPolicy_NotFound(t *testing.T) {
 
 	corporation := sdk.AccAddress([]byte("corp_notfound2______")).String()
 	operator := sdk.AccAddress([]byte("oper_notfound2______")).String()
-	trID := mockTrk.CreateMockTrustRegistry(corporation, "did:example:notfound2")
+	trID := mockTrk.CreateMockEcosystem(corporation, "did:example:notfound2")
 
 	now := time.Now().UTC()
 	sdkCtx := sdk.UnwrapSDKContext(rawCtx).WithBlockTime(now)

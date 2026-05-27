@@ -38,7 +38,6 @@ func TestNewKeeper_PanicOnInvalidAuthority(t *testing.T) {
 			log.NewNopLogger(),
 			"not-a-bech32-address",
 			mockDelegation{},
-			&mockEcosystem{},
 		)
 	}, "NewKeeper must panic when authority is not a valid bech32 address")
 }

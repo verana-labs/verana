@@ -21,6 +21,16 @@ type corpKeeperRef struct {
 	K types.CorporationKeeper
 }
 
+// ecoKeeperRef mirrors corpKeeperRef for MOD-ES (cycle break per #305).
+// x/ec depends on x/gf (for CreateInitialGFVersionForEcosystem and
+// ListVersionsByEcosystem) AND x/gf depends on x/ec (for GetEcosystemView and
+// SetEcosystemActiveVersion). Resolved by injecting at construction time
+// in one direction (ec → gf via concrete keeper) and post-construction in
+// the other (gf.SetEcosystemKeeper(EcAsGFEcosystemKeeper{ec})).
+type ecoKeeperRef struct {
+	K types.EcosystemKeeper
+}
+
 type Keeper struct {
 	cdc          codec.BinaryCodec
 	storeService store.KVStoreService
@@ -36,7 +46,7 @@ type Keeper struct {
 	Counter                collections.Map[string, uint64]
 
 	delegationKeeper types.DelegationKeeper
-	ecosystemKeeper  types.EcosystemKeeper
+	ecoRef           *ecoKeeperRef
 	corpRef          *corpKeeperRef
 }
 
@@ -46,7 +56,6 @@ func NewKeeper(
 	logger log.Logger,
 	authority string,
 	delegationKeeper types.DelegationKeeper,
-	ecosystemKeeper types.EcosystemKeeper,
 ) Keeper {
 	if _, err := sdk.AccAddressFromBech32(authority); err != nil {
 		panic(fmt.Sprintf("invalid authority address: %s", authority))
@@ -66,7 +75,7 @@ func NewKeeper(
 		Counter:                collections.NewMap(sb, types.CounterKey, "counter", collections.StringKey, collections.Uint64Value),
 
 		delegationKeeper: delegationKeeper,
-		ecosystemKeeper:  ecosystemKeeper,
+		ecoRef:           &ecoKeeperRef{K: StubEcosystemKeeper{}},
 		corpRef:          &corpKeeperRef{K: StubCorporationKeeper{}},
 	}
 
@@ -86,9 +95,20 @@ func (k Keeper) SetCorporationKeeper(c types.CorporationKeeper) {
 	k.corpRef.K = c
 }
 
+// SetEcosystemKeeper mirrors SetCorporationKeeper: wires the real MOD-ES
+// keeper post-construction (cycle break for #305).
+func (k Keeper) SetEcosystemKeeper(e types.EcosystemKeeper) {
+	k.ecoRef.K = e
+}
+
 // corporationKeeper returns the wired CorporationKeeper (real or stub).
 func (k Keeper) corporationKeeper() types.CorporationKeeper {
 	return k.corpRef.K
+}
+
+// ecosystemKeeper returns the wired EcosystemKeeper (real or stub).
+func (k Keeper) ecosystemKeeper() types.EcosystemKeeper {
+	return k.ecoRef.K
 }
 
 func (k Keeper) GetAuthority() string { return k.authority }

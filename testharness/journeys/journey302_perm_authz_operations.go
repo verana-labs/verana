@@ -43,7 +43,7 @@ func RunPermissionAuthzOperationsJourney(ctx context.Context, client cosmosclien
 	// --- Prerequisite 1: Grant self-delegation for TR and CS creation ---
 	fmt.Println("\n--- Prerequisite 1: Grant operator self-delegation ---")
 	err := lib.GrantSelfDelegation(client, ctx, operatorAccount, []string{
-		"/verana.tr.v1.MsgCreateTrustRegistry",
+		"/verana.ec.v1.MsgCreateEcosystem",
 		"/verana.cs.v1.MsgCreateCredentialSchema",
 		"/verana.perm.v1.MsgSetPermissionVPToValidated",
 		"/verana.perm.v1.MsgCreateRootPermission",
@@ -58,10 +58,9 @@ func RunPermissionAuthzOperationsJourney(ctx context.Context, client cosmosclien
 	// --- Prerequisite 2: Create Trust Registry (controller = operatorAddr) ---
 	fmt.Println("\n--- Prerequisite 2: Create Trust Registry ---")
 	did := lib.GenerateUniqueDID(client, ctx)
-	trIDStr, err := lib.CreateTrustRegistry(
+	trIDStr, err := lib.CreateEcosystem(
 		client, ctx, operatorAccount,
 		did,
-		"http://perm-test-aka.com",
 		"https://perm-test.com/governance-framework.pdf",
 		"sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
 		"en",
@@ -77,7 +76,7 @@ func RunPermissionAuthzOperationsJourney(ctx context.Context, client cosmosclien
 	fmt.Println("\n--- Prerequisite 3: Create Credential Schema ---")
 	schemaData := lib.GenerateSimpleSchema(trIDStr)
 	csIDStr, err := lib.CreateCredentialSchema(client, ctx, operatorAccount, cschema.MsgCreateCredentialSchema{
-		TrId:                   trID,
+		EcosystemId:            trID,
 		JsonSchema:             schemaData,
 		IssuerOnboardingMode:   uint32(cschema.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS),
 		VerifierOnboardingMode: uint32(cschema.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS),
@@ -296,7 +295,7 @@ func RunPermissionAuthzOperationsJourney(ctx context.Context, client cosmosclien
 
 	// Save results
 	result := lib.JourneyResult{
-		TrustRegistryID: trIDStr,
+		EcosystemID: trIDStr,
 		SchemaID:        csIDStr,
 		DID:             did,
 		PermissionID:    permIDStr,

@@ -21,8 +21,9 @@ import (
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	protocolpooltypes "github.com/cosmos/cosmos-sdk/x/protocolpool/types"
 	detypes "github.com/verana-labs/verana/x/de/types"
+	ectypes "github.com/verana-labs/verana/x/ec/types"
+	gftypes "github.com/verana-labs/verana/x/gf/types"
 	tdtypes "github.com/verana-labs/verana/x/td/types"
-	trtypes "github.com/verana-labs/verana/x/tr/types"
 
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosaccount"
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
@@ -85,20 +86,19 @@ func GenerateUniqueDID(client cosmosclient.Client, ctx context.Context) string {
 	return did
 }
 
-// CreateNewTrustRegistry creates a new trust registry and returns its ID
-func CreateNewTrustRegistry(client cosmosclient.Client, ctx context.Context, account cosmosaccount.Account, did string) string {
-	trIdStr, err := CreateTrustRegistry(client,
+// CreateNewEcosystem creates a new ecosystem and returns its ID
+func CreateNewEcosystem(client cosmosclient.Client, ctx context.Context, account cosmosaccount.Account, did string) string {
+	ecosystemIDStr, err := CreateEcosystem(client,
 		ctx,
 		account,
 		did,
-		"http://example-aka.com",
 		"https://example.com/governance-framework.pdf",
 		"sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
 		"en")
 	if err != nil {
-		panic(fmt.Sprintf("Failed to create trust registry: %v", err))
+		panic(fmt.Sprintf("Failed to create ecosystem: %v", err))
 	}
-	return trIdStr
+	return ecosystemIDStr
 }
 
 // CreateSimpleCredentialSchema creates a credential schema and returns its ID
@@ -111,15 +111,15 @@ func CreateSimpleCredentialSchema(
 	issuerMode cschema.IssuerOnboardingMode,
 	verifierMode cschema.VerifierOnboardingMode,
 ) string {
-	trId, err := strconv.ParseUint(trustRegistryID, 10, 64)
+	ecosystemID, err := strconv.ParseUint(trustRegistryID, 10, 64)
 	if err != nil {
-		panic(fmt.Sprintf("Failed to parse trust registry ID: %v", err))
+		panic(fmt.Sprintf("Failed to parse ecosystem ID: %v", err))
 	}
 
 	// Create credential schema with default validity periods (0 = never expire).
 	// Spec draft 13: holder_onboarding_mode is mandatory.
 	csStrId, err := CreateCredentialSchema(client, ctx, account, cschema.MsgCreateCredentialSchema{
-		TrId:                   trId,
+		EcosystemId:            ecosystemID,
 		JsonSchema:             schemaData,
 		IssuerOnboardingMode:   uint32(issuerMode),
 		VerifierOnboardingMode: uint32(verifierMode),
@@ -710,12 +710,12 @@ func VerifyTrustDepositReclaimed(client cosmosclient.Client, ctx context.Context
 	return true
 }
 
-// AddGovernanceFrameworkDocument adds a new governance framework document to a trust registry
+// AddGovernanceFrameworkDocument adds a new governance framework document to an ecosystem
 func AddGovernanceFrameworkDocument(
 	client cosmosclient.Client,
 	ctx context.Context,
 	creator cosmosaccount.Account,
-	msg trtypes.MsgAddGovernanceFrameworkDocument,
+	msg gftypes.MsgAddGovernanceFrameworkDocument,
 ) (string, error) {
 	creatorAddr, err := creator.Address(addressPrefix)
 	if err != nil {
@@ -724,14 +724,14 @@ func AddGovernanceFrameworkDocument(
 
 	// Create the complete message with authority and operator addresses
 	// For v4 spec, authority and operator are both the creator's address
-	msgWithCreator := trtypes.MsgAddGovernanceFrameworkDocument{
-		Corporation: creatorAddr,
-		Operator:    creatorAddr,
-		TrId:        msg.TrId,
-		Language:    msg.Language,
-		Url:         msg.Url,
-		DigestSri:   msg.DigestSri,
-		Version:     msg.Version,
+	msgWithCreator := gftypes.MsgAddGovernanceFrameworkDocument{
+		Corporation:  creatorAddr,
+		Operator:     creatorAddr,
+		EcosystemId:  msg.EcosystemId,
+		DocLanguage:  msg.DocLanguage,
+		DocUrl:       msg.DocUrl,
+		DocDigestSri: msg.DocDigestSri,
+		Version:      msg.Version,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, creator, &msgWithCreator)
@@ -752,12 +752,12 @@ func AddGovernanceFrameworkDocument(
 	return "success", nil
 }
 
-// IncreaseActiveGovernanceFrameworkVersion increases the active version of a trust registry's governance framework
+// IncreaseActiveGovernanceFrameworkVersion increases the active version of an ecosystem's governance framework
 func IncreaseActiveGovernanceFrameworkVersion(
 	client cosmosclient.Client,
 	ctx context.Context,
 	creator cosmosaccount.Account,
-	msg trtypes.MsgIncreaseActiveGovernanceFrameworkVersion,
+	msg gftypes.MsgIncreaseActiveGovernanceFrameworkVersion,
 ) (string, error) {
 	creatorAddr, err := creator.Address(addressPrefix)
 	if err != nil {
@@ -766,10 +766,10 @@ func IncreaseActiveGovernanceFrameworkVersion(
 
 	// Create the complete message with authority and operator addresses
 	// For v4 spec, authority and operator are both the creator's address
-	msgWithCreator := trtypes.MsgIncreaseActiveGovernanceFrameworkVersion{
+	msgWithCreator := gftypes.MsgIncreaseActiveGovernanceFrameworkVersion{
 		Corporation: creatorAddr,
 		Operator:    creatorAddr,
-		TrId:        msg.TrId,
+		EcosystemId: msg.EcosystemId,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, creator, &msgWithCreator)
@@ -790,28 +790,28 @@ func IncreaseActiveGovernanceFrameworkVersion(
 	return "success", nil
 }
 
-// VerifyGovernanceFrameworkUpdate verifies that a trust registry's governance framework was updated correctly
+// VerifyGovernanceFrameworkUpdate verifies that an ecosystem's governance framework was updated correctly
 func VerifyGovernanceFrameworkUpdate(
 	client cosmosclient.Client,
 	ctx context.Context,
-	trustRegistryID uint64,
+	ecosystemID uint64,
 	expectedActiveVersion uint32,
 ) bool {
-	trustRegistry, err := QueryTrustRegistry(client, ctx, trustRegistryID)
+	ecosystem, err := QueryEcosystem(client, ctx, ecosystemID)
 	if err != nil {
 		fmt.Printf("❌ Governance framework update verification failed: %v\n", err)
 		return false
 	}
 
-	if trustRegistry.TrustRegistry.ActiveVersion != uint32(expectedActiveVersion) {
+	if ecosystem.Ecosystem.ActiveVersion != uint32(expectedActiveVersion) {
 		fmt.Printf("❌ Governance framework update verification failed: Expected active version %d, got %d\n",
-			expectedActiveVersion, trustRegistry.TrustRegistry.ActiveVersion)
+			expectedActiveVersion, ecosystem.Ecosystem.ActiveVersion)
 		return false
 	}
 
 	// Verify that versions array includes the new version
 	versionFound := false
-	for _, version := range trustRegistry.TrustRegistry.Versions {
+	for _, version := range ecosystem.Ecosystem.Versions {
 		if version.Version == uint32(expectedActiveVersion) {
 			versionFound = true
 			break
@@ -2420,14 +2420,13 @@ func GrantSelfDelegation(
 	return nil
 }
 
-// CreateTrustRegistryWithAuthority creates a trust registry where authority and operator are different.
-func CreateTrustRegistryWithAuthority(
+// CreateEcosystemWithAuthority creates an ecosystem where authority and operator are different.
+func CreateEcosystemWithAuthority(
 	client cosmosclient.Client,
 	ctx context.Context,
 	operatorAccount cosmosaccount.Account,
 	authority string,
 	did string,
-	aka string,
 	docURL string,
 	docHash string,
 	language string,
@@ -2437,11 +2436,10 @@ func CreateTrustRegistryWithAuthority(
 		return "", fmt.Errorf("failed to get operator address: %w", err)
 	}
 
-	msg := &trtypes.MsgCreateTrustRegistry{
+	msg := &ectypes.MsgCreateEcosystem{
 		Corporation:  authority,
 		Operator:     operatorAddr,
 		Did:          did,
-		Aka:          aka,
 		Language:     language,
 		DocUrl:       docURL,
 		DocDigestSri: docHash,
@@ -2449,14 +2447,14 @@ func CreateTrustRegistryWithAuthority(
 
 	txResp, err := client.BroadcastTx(ctx, operatorAccount, msg)
 	if err != nil {
-		return "", fmt.Errorf("failed to broadcast CreateTrustRegistry: %w", err)
+		return "", fmt.Errorf("failed to broadcast CreateEcosystem: %w", err)
 	}
 
-	fmt.Print("CreateTrustRegistryWithAuthority:\n\n")
+	fmt.Print("CreateEcosystemWithAuthority:\n\n")
 	fmt.Println(txResp)
 
 	if txResp.TxResponse.Code != 0 {
-		return "", fmt.Errorf("CreateTrustRegistry failed with code %d: %s",
+		return "", fmt.Errorf("CreateEcosystem failed with code %d: %s",
 			txResp.TxResponse.Code, txResp.TxResponse.RawLog)
 	}
 
@@ -2471,15 +2469,15 @@ func CreateTrustRegistryWithAuthority(
 	}
 
 	for _, event := range txResponse.Events {
-		if event.Type == "create_trust_registry" {
+		if event.Type == "create_ecosystem" {
 			for _, attr := range event.Attributes {
-				if attr.Key == "trust_registry_id" {
+				if attr.Key == "ecosystem_id" {
 					return attr.Value, nil
 				}
 			}
 		}
 	}
-	return "", fmt.Errorf("trust_registry_id not found in events")
+	return "", fmt.Errorf("ecosystem_id not found in events")
 }
 
 // AddGFDWithAuthority adds a governance framework document with separate authority/operator.
@@ -2488,7 +2486,7 @@ func AddGFDWithAuthority(
 	ctx context.Context,
 	operatorAccount cosmosaccount.Account,
 	authority string,
-	trID uint64,
+	ecosystemID uint64,
 	docLanguage string,
 	docURL string,
 	docHash string,
@@ -2499,14 +2497,14 @@ func AddGFDWithAuthority(
 		return fmt.Errorf("failed to get operator address: %w", err)
 	}
 
-	msg := &trtypes.MsgAddGovernanceFrameworkDocument{
-		Corporation: authority,
-		Operator:    operatorAddr,
-		TrId:        trID,
-		Language:    docLanguage,
-		Url:         docURL,
-		DigestSri:   docHash,
-		Version:     version,
+	msg := &gftypes.MsgAddGovernanceFrameworkDocument{
+		Corporation:  authority,
+		Operator:     operatorAddr,
+		EcosystemId:  ecosystemID,
+		DocLanguage:  docLanguage,
+		DocUrl:       docURL,
+		DocDigestSri: docHash,
+		Version:      version,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, operatorAccount, msg)
@@ -2531,17 +2529,17 @@ func IncreaseActiveGFVersionWithAuthority(
 	ctx context.Context,
 	operatorAccount cosmosaccount.Account,
 	authority string,
-	trID uint64,
+	ecosystemID uint64,
 ) error {
 	operatorAddr, err := operatorAccount.Address(addressPrefix)
 	if err != nil {
 		return fmt.Errorf("failed to get operator address: %w", err)
 	}
 
-	msg := &trtypes.MsgIncreaseActiveGovernanceFrameworkVersion{
+	msg := &gftypes.MsgIncreaseActiveGovernanceFrameworkVersion{
 		Corporation: authority,
 		Operator:    operatorAddr,
-		TrId:        trID,
+		EcosystemId: ecosystemID,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, operatorAccount, msg)
@@ -2560,52 +2558,50 @@ func IncreaseActiveGFVersionWithAuthority(
 	return nil
 }
 
-// UpdateTrustRegistryWithAuthority updates a trust registry with separate authority/operator.
-func UpdateTrustRegistryWithAuthority(
+// UpdateEcosystemWithAuthority updates an ecosystem with separate authority/operator.
+func UpdateEcosystemWithAuthority(
 	client cosmosclient.Client,
 	ctx context.Context,
 	operatorAccount cosmosaccount.Account,
 	authority string,
-	trID uint64,
+	ecosystemID uint64,
 	did string,
-	aka string,
 ) error {
 	operatorAddr, err := operatorAccount.Address(addressPrefix)
 	if err != nil {
 		return fmt.Errorf("failed to get operator address: %w", err)
 	}
 
-	msg := &trtypes.MsgUpdateTrustRegistry{
+	msg := &ectypes.MsgUpdateEcosystem{
 		Corporation: authority,
 		Operator:    operatorAddr,
-		TrId:        trID,
+		Id:          ecosystemID,
 		Did:         did,
-		Aka:         aka,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, operatorAccount, msg)
 	if err != nil {
-		return fmt.Errorf("failed to broadcast UpdateTrustRegistry: %w", err)
+		return fmt.Errorf("failed to broadcast UpdateEcosystem: %w", err)
 	}
 
-	fmt.Print("UpdateTrustRegistryWithAuthority:\n\n")
+	fmt.Print("UpdateEcosystemWithAuthority:\n\n")
 	fmt.Println(txResp)
 
 	if txResp.TxResponse.Code != 0 {
-		return fmt.Errorf("UpdateTrustRegistry failed with code %d: %s",
+		return fmt.Errorf("UpdateEcosystem failed with code %d: %s",
 			txResp.TxResponse.Code, txResp.TxResponse.RawLog)
 	}
 
 	return nil
 }
 
-// ArchiveTrustRegistryWithAuthority archives/unarchives a trust registry with separate authority/operator.
-func ArchiveTrustRegistryWithAuthority(
+// ArchiveEcosystemWithAuthority archives/unarchives an ecosystem with separate authority/operator.
+func ArchiveEcosystemWithAuthority(
 	client cosmosclient.Client,
 	ctx context.Context,
 	operatorAccount cosmosaccount.Account,
 	authority string,
-	trID uint64,
+	ecosystemID uint64,
 	archive bool,
 ) error {
 	operatorAddr, err := operatorAccount.Address(addressPrefix)
@@ -2613,23 +2609,23 @@ func ArchiveTrustRegistryWithAuthority(
 		return fmt.Errorf("failed to get operator address: %w", err)
 	}
 
-	msg := &trtypes.MsgArchiveTrustRegistry{
+	msg := &ectypes.MsgArchiveEcosystem{
 		Corporation: authority,
 		Operator:    operatorAddr,
-		TrId:        trID,
+		Id:          ecosystemID,
 		Archive:     archive,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, operatorAccount, msg)
 	if err != nil {
-		return fmt.Errorf("failed to broadcast ArchiveTrustRegistry: %w", err)
+		return fmt.Errorf("failed to broadcast ArchiveEcosystem: %w", err)
 	}
 
-	fmt.Print("ArchiveTrustRegistryWithAuthority:\n\n")
+	fmt.Print("ArchiveEcosystemWithAuthority:\n\n")
 	fmt.Println(txResp)
 
 	if txResp.TxResponse.Code != 0 {
-		return fmt.Errorf("ArchiveTrustRegistry failed with code %d: %s",
+		return fmt.Errorf("ArchiveEcosystem failed with code %d: %s",
 			txResp.TxResponse.Code, txResp.TxResponse.RawLog)
 	}
 
@@ -2642,7 +2638,7 @@ func CreateCredentialSchemaWithAuthority(
 	ctx context.Context,
 	operatorAccount cosmosaccount.Account,
 	authority string,
-	trID uint64,
+	ecosystemID uint64,
 	schemaData string,
 	issuerMode cschema.IssuerOnboardingMode,
 	verifierMode cschema.VerifierOnboardingMode,
@@ -2655,7 +2651,7 @@ func CreateCredentialSchemaWithAuthority(
 	msg := &cschema.MsgCreateCredentialSchema{
 		Corporation:                             authority,
 		Operator:                                operatorAddr,
-		TrId:                                    trID,
+		EcosystemId:                             ecosystemID,
 		JsonSchema:                              schemaData,
 		IssuerOnboardingMode:                    uint32(issuerMode),
 		VerifierOnboardingMode:                  uint32(verifierMode),

@@ -42,7 +42,7 @@ func RunPermissionRevokeJourney(ctx context.Context, client cosmosclient.Client)
 	// =========================================================================
 	fmt.Println("\n=== PREREQUISITE: Create new CS and root permission to revoke ===")
 
-	trID, _ := strconv.ParseUint(setup304.TrustRegistryID, 10, 64)
+	trID, _ := strconv.ParseUint(setup304.EcosystemID, 10, 64)
 
 	// Re-grant CreateCredentialSchema auth (may have been overwritten)
 	fmt.Println("\n--- Prerequisite 1: Re-grant CreateCredentialSchema auth ---")
@@ -59,7 +59,7 @@ func RunPermissionRevokeJourney(ctx context.Context, client cosmosclient.Client)
 
 	// Create a new CS on the same TR
 	fmt.Println("\n--- Prerequisite 2: Create new Credential Schema ---")
-	schemaData := lib.GenerateSimpleSchema(setup304.TrustRegistryID)
+	schemaData := lib.GenerateSimpleSchema(setup304.EcosystemID)
 	csIDStr, err := lib.CreateCredentialSchemaWithAuthority(
 		client, ctx, operatorAccount, policyAddr,
 		trID, schemaData,
@@ -202,7 +202,7 @@ func RunPermissionRevokeJourney(ctx context.Context, client cosmosclient.Client)
 
 	// Save results
 	result := lib.JourneyResult{
-		TrustRegistryID: setup304.TrustRegistryID,
+		EcosystemID: setup304.EcosystemID,
 		SchemaID:        setup304.SchemaID,
 		DID:             rootPermDID,
 		PermissionID:    strconv.FormatUint(permID, 10),

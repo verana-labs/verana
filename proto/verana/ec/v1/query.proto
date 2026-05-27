@@ -1,0 +1,70 @@
+syntax = "proto3";
+package verana.ec.v1;
+
+import "amino/amino.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "verana/ec/v1/params.proto";
+import "verana/ec/v1/types.proto";
+
+option go_package = "github.com/verana-labs/verana/x/ec/types";
+
+// Query defines the gRPC querier service.
+service Query {
+  // [MOD-ES-QRY-3] List Module Parameters.
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+    option (google.api.http).get = "/ec/v1/params";
+  }
+
+  // [MOD-ES-QRY-1] Get Ecosystem by id, with nested GF version + document data.
+  rpc GetEcosystem(QueryGetEcosystemRequest) returns (QueryGetEcosystemResponse) {
+    option (google.api.http).get = "/ec/v1/get";
+  }
+
+  // [MOD-ES-QRY-2] List Ecosystems, optionally filtered.
+  rpc ListEcosystems(QueryListEcosystemsRequest) returns (QueryListEcosystemsResponse) {
+    option (google.api.http).get = "/ec/v1/list";
+  }
+}
+
+message QueryParamsRequest {}
+
+message QueryParamsResponse {
+  Params params = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+}
+
+message QueryGetEcosystemRequest {
+  uint64 id = 1;
+  bool active_gf_only = 2;
+  string preferred_language = 3;
+}
+
+message QueryGetEcosystemResponse {
+  EcosystemWithVersions ecosystem = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+}
+
+message QueryListEcosystemsRequest {
+  uint64 corporation_id = 1;
+  google.protobuf.Timestamp modified_after = 2 [
+    (gogoproto.stdtime) = true,
+    (gogoproto.nullable) = true
+  ];
+  bool active_gf_only = 3;
+  string preferred_language = 4;
+  uint32 response_max_size = 5;
+}
+
+message QueryListEcosystemsResponse {
+  repeated EcosystemWithVersions ecosystems = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+}

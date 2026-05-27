@@ -44,13 +44,9 @@ func (ms msgServer) CreateSchemaAuthorizationPolicy(goCtx context.Context, msg *
 		return nil, fmt.Errorf("credential schema not found: %w", err)
 	}
 
-	// Check ownership via trust registry
-	tr, err := ms.trustRegistryKeeper.GetTrustRegistry(ctx, cs.TrId)
-	if err != nil {
-		return nil, fmt.Errorf("trust registry not found: %w", err)
-	}
-	if tr.Corporation != msg.Corporation {
-		return nil, fmt.Errorf("corporation does not own the trust registry for this credential schema")
+	// Check ownership via ecosystem
+	if err := ms.checkSchemaOwnership(ctx, cs, msg.Corporation); err != nil {
+		return nil, err
 	}
 
 	// Determine next version for this (schema_id, role) pair
@@ -116,12 +112,8 @@ func (ms msgServer) IncreaseActiveSchemaAuthorizationPolicyVersion(goCtx context
 	if err != nil {
 		return nil, fmt.Errorf("credential schema not found: %w", err)
 	}
-	tr, err := ms.trustRegistryKeeper.GetTrustRegistry(ctx, cs.TrId)
-	if err != nil {
-		return nil, fmt.Errorf("trust registry not found: %w", err)
-	}
-	if tr.Corporation != msg.Corporation {
-		return nil, fmt.Errorf("corporation does not own the trust registry for this credential schema")
+	if err := ms.checkSchemaOwnership(ctx, cs, msg.Corporation); err != nil {
+		return nil, err
 	}
 
 	// Get all policies for this (schema_id, role)
@@ -195,12 +187,8 @@ func (ms msgServer) RevokeSchemaAuthorizationPolicy(goCtx context.Context, msg *
 	if err != nil {
 		return nil, fmt.Errorf("credential schema not found: %w", err)
 	}
-	tr, err := ms.trustRegistryKeeper.GetTrustRegistry(ctx, cs.TrId)
-	if err != nil {
-		return nil, fmt.Errorf("trust registry not found: %w", err)
-	}
-	if tr.Corporation != msg.Corporation {
-		return nil, fmt.Errorf("corporation does not own the trust registry for this credential schema")
+	if err := ms.checkSchemaOwnership(ctx, cs, msg.Corporation); err != nil {
+		return nil, err
 	}
 
 	// Find the policy for (schema_id, role, version)

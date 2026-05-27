@@ -50,7 +50,7 @@ func GenerateSimpleSchema(trustRegistryID string) string {
 
 type JourneyResult struct {
 	// Journey 1 fields
-	TrustRegistryID  string
+	EcosystemID      string
 	SchemaID         string
 	RootPermissionID string
 	DID              string

@@ -1,0 +1,16 @@
+syntax = "proto3";
+package verana.ec.v1;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/verana-labs/verana/x/ec/types";
+
+// Params defines the parameters for the module.
+message Params {
+  option (amino.name) = "verana/x/ec/Params";
+  option (gogoproto.equal) = true;
+
+  reserved 1; // trust_registry_trust_deposit removed per spec (no trust deposit for EC operations)
+  uint64 trust_unit_price = 2;
+}

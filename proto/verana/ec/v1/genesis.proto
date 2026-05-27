@@ -1,0 +1,30 @@
+syntax = "proto3";
+package verana.ec.v1;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+import "verana/ec/v1/params.proto";
+import "verana/ec/v1/types.proto";
+
+option go_package = "github.com/verana-labs/verana/x/ec/types";
+
+// Counter defines an entity type and its current counter value.
+message Counter {
+  string entity_type = 1;
+  uint64 value = 2;
+}
+
+// GenesisState defines the ecosystem module's genesis state. GFV and GFD are
+// owned by x/gf and exported by that module's genesis — they MUST NOT live
+// here.
+message GenesisState {
+  Params params = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+
+  repeated Ecosystem ecosystems = 2 [(gogoproto.nullable) = false];
+
+  // counters keyed by entity_type. Only "ec" is meaningful for this module.
+  repeated Counter counters = 3 [(gogoproto.nullable) = false];
+}

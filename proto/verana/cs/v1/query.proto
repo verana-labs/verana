@@ -44,7 +44,7 @@ message QueryParamsResponse {
 }
 
 message QueryListCredentialSchemasRequest {
-  uint64 tr_id = 1; // optional
+  reserved 1; // tr_id removed in v4-rc2 (issue #305)
   google.protobuf.Timestamp modified_after = 2 [
     (gogoproto.stdtime) = true,
     (gogoproto.nullable) = true
@@ -54,6 +54,7 @@ message QueryListCredentialSchemasRequest {
   IssuerOnboardingMode issuer_onboarding_mode = 5;
   VerifierOnboardingMode verifier_onboarding_mode = 6;
   HolderOnboardingMode holder_onboarding_mode = 7;
+  uint64 ecosystem_id = 8; // optional filter (replaces tr_id)
 }
 
 message QueryListCredentialSchemasResponse {

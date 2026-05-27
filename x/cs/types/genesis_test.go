@@ -59,7 +59,7 @@ func TestGenesisState_Validate(t *testing.T) {
 	now := time.Now().UTC()
 	validSchema := types.CredentialSchema{
 		Id:                                      1,
-		TrId:                                    100,
+		EcosystemId:                                    100,
 		Created:                                 now.Add(-24 * time.Hour),
 		Modified:                                now.Add(-12 * time.Hour),
 		JsonSchema:                              validJsonSchema,
@@ -102,7 +102,7 @@ func TestGenesisState_Validate(t *testing.T) {
 					validSchema,
 					{
 						Id:                         1, // Duplicate ID
-						TrId:                       101,
+						EcosystemId:                       101,
 						Created:                    now.Add(-10 * time.Hour),
 						Modified:                   now.Add(-5 * time.Hour),
 						JsonSchema:                 validJsonSchema,
@@ -123,7 +123,7 @@ func TestGenesisState_Validate(t *testing.T) {
 				CredentialSchemas: []types.CredentialSchema{
 					{
 						Id:                         3,
-						TrId:                       101,
+						EcosystemId:                       101,
 						Created:                    now.Add(-10 * time.Hour),
 						Modified:                   now.Add(-5 * time.Hour),
 						JsonSchema:                 "", // Empty schema

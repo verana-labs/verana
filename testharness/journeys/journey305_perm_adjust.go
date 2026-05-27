@@ -207,7 +207,7 @@ func RunPermissionAdjustJourney(ctx context.Context, client cosmosclient.Client)
 
 	// Save results
 	result := lib.JourneyResult{
-		TrustRegistryID: setup304.TrustRegistryID,
+		EcosystemID: setup304.EcosystemID,
 		SchemaID:        setup304.SchemaID,
 		DID:             setup304.DID,
 		PermissionID:    setup304.PermissionID,

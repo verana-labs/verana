@@ -11,7 +11,7 @@ import (
 	_ "github.com/verana-labs/verana/x/td/module" // import for side-effects
 	_ "github.com/verana-labs/verana/x/co/module" // import for side-effects
 	_ "github.com/verana-labs/verana/x/gf/module" // import for side-effects
-	_ "github.com/verana-labs/verana/x/tr/module" // import for side-effects
+	_ "github.com/verana-labs/verana/x/ec/module" // import for side-effects
 	xrmodulekeeper "github.com/verana-labs/verana/x/xr/keeper"
 
 	upgradetypes "cosmossdk.io/x/upgrade/types"
@@ -107,8 +107,8 @@ import (
 	ibckeeper "github.com/cosmos/ibc-go/v8/modules/core/keeper"
 
 	comodulekeeper "github.com/verana-labs/verana/x/co/keeper"
+	ecmodulekeeper "github.com/verana-labs/verana/x/ec/keeper"
 	gfmodulekeeper "github.com/verana-labs/verana/x/gf/keeper"
-	trustregistrymodulekeeper "github.com/verana-labs/verana/x/tr/keeper"
 
 	credentialschemamodulekeeper "github.com/verana-labs/verana/x/cs/keeper"
 
@@ -207,7 +207,7 @@ type App struct {
 	ScopedICAHostKeeper       capabilitykeeper.ScopedKeeper
 	ScopedKeepers             map[string]capabilitykeeper.ScopedKeeper
 
-	TrustregistryKeeper    trustregistrymodulekeeper.Keeper
+	EcosystemKeeper        ecmodulekeeper.Keeper
 	CoKeeper               comodulekeeper.Keeper
 	GfKeeper               gfmodulekeeper.Keeper
 	CredentialschemaKeeper credentialschemamodulekeeper.Keeper
@@ -265,8 +265,8 @@ func (app *App) GetCredentialSchemaKeeper() credentialschemamodulekeeper.Keeper 
 	return app.CredentialschemaKeeper
 }
 
-func (app *App) GetTrustRegistryKeeper() trustregistrymodulekeeper.Keeper {
-	return app.TrustregistryKeeper
+func (app *App) GetEcosystemKeeper() ecmodulekeeper.Keeper {
+	return app.EcosystemKeeper
 }
 
 func (app *App) GetPermissionKeeper() permissionmodulekeeper.Keeper {
@@ -348,7 +348,7 @@ func New(
 		&app.GroupKeeper,
 		&app.CircuitBreakerKeeper,
 		&app.ProtocolPoolKeeper,
-		&app.TrustregistryKeeper,
+		&app.EcosystemKeeper,
 		&app.GfKeeper,
 		&app.CoKeeper,
 		&app.CredentialschemaKeeper,

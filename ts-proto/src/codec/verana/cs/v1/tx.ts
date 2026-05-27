@@ -41,7 +41,6 @@ export interface MsgCreateCredentialSchema {
   corporation: string;
   /** operator is the account authorized by the corporation to run this Msg */
   operator: string;
-  trId: number;
   jsonSchema: string;
   issuerGrantorValidationValidityPeriod: OptionalUInt32 | undefined;
   verifierGrantorValidationValidityPeriod: OptionalUInt32 | undefined;
@@ -54,6 +53,7 @@ export interface MsgCreateCredentialSchema {
   pricingAsset: string;
   digestAlgorithm: string;
   holderOnboardingMode: number;
+  ecosystemId: number;
 }
 
 export interface MsgCreateCredentialSchemaResponse {
@@ -261,7 +261,6 @@ function createBaseMsgCreateCredentialSchema(): MsgCreateCredentialSchema {
   return {
     corporation: "",
     operator: "",
-    trId: 0,
     jsonSchema: "",
     issuerGrantorValidationValidityPeriod: undefined,
     verifierGrantorValidationValidityPeriod: undefined,
@@ -274,6 +273,7 @@ function createBaseMsgCreateCredentialSchema(): MsgCreateCredentialSchema {
     pricingAsset: "",
     digestAlgorithm: "",
     holderOnboardingMode: 0,
+    ecosystemId: 0,
   };
 }
 
@@ -284,9 +284,6 @@ export const MsgCreateCredentialSchema = {
     }
     if (message.operator !== "") {
       writer.uint32(18).string(message.operator);
-    }
-    if (message.trId !== 0) {
-      writer.uint32(24).uint64(message.trId);
     }
     if (message.jsonSchema !== "") {
       writer.uint32(34).string(message.jsonSchema);
@@ -324,6 +321,9 @@ export const MsgCreateCredentialSchema = {
     if (message.holderOnboardingMode !== 0) {
       writer.uint32(120).uint32(message.holderOnboardingMode);
     }
+    if (message.ecosystemId !== 0) {
+      writer.uint32(128).uint64(message.ecosystemId);
+    }
     return writer;
   },
 
@@ -347,13 +347,6 @@ export const MsgCreateCredentialSchema = {
           }
 
           message.operator = reader.string();
-          continue;
-        case 3:
-          if (tag !== 24) {
-            break;
-          }
-
-          message.trId = longToNumber(reader.uint64() as Long);
           continue;
         case 4:
           if (tag !== 34) {
@@ -439,6 +432,13 @@ export const MsgCreateCredentialSchema = {
 
           message.holderOnboardingMode = reader.uint32();
           continue;
+        case 16:
+          if (tag !== 128) {
+            break;
+          }
+
+          message.ecosystemId = longToNumber(reader.uint64() as Long);
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -452,7 +452,6 @@ export const MsgCreateCredentialSchema = {
     return {
       corporation: isSet(object.corporation) ? globalThis.String(object.corporation) : "",
       operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
-      trId: isSet(object.trId) ? globalThis.Number(object.trId) : 0,
       jsonSchema: isSet(object.jsonSchema) ? globalThis.String(object.jsonSchema) : "",
       issuerGrantorValidationValidityPeriod: isSet(object.issuerGrantorValidationValidityPeriod)
         ? OptionalUInt32.fromJSON(object.issuerGrantorValidationValidityPeriod)
@@ -477,6 +476,7 @@ export const MsgCreateCredentialSchema = {
       pricingAsset: isSet(object.pricingAsset) ? globalThis.String(object.pricingAsset) : "",
       digestAlgorithm: isSet(object.digestAlgorithm) ? globalThis.String(object.digestAlgorithm) : "",
       holderOnboardingMode: isSet(object.holderOnboardingMode) ? globalThis.Number(object.holderOnboardingMode) : 0,
+      ecosystemId: isSet(object.ecosystemId) ? globalThis.Number(object.ecosystemId) : 0,
     };
   },
 
@@ -487,9 +487,6 @@ export const MsgCreateCredentialSchema = {
     }
     if (message.operator !== "") {
       obj.operator = message.operator;
-    }
-    if (message.trId !== 0) {
-      obj.trId = Math.round(message.trId);
     }
     if (message.jsonSchema !== "") {
       obj.jsonSchema = message.jsonSchema;
@@ -529,6 +526,9 @@ export const MsgCreateCredentialSchema = {
     if (message.holderOnboardingMode !== 0) {
       obj.holderOnboardingMode = Math.round(message.holderOnboardingMode);
     }
+    if (message.ecosystemId !== 0) {
+      obj.ecosystemId = Math.round(message.ecosystemId);
+    }
     return obj;
   },
 
@@ -539,7 +539,6 @@ export const MsgCreateCredentialSchema = {
     const message = createBaseMsgCreateCredentialSchema();
     message.corporation = object.corporation ?? "";
     message.operator = object.operator ?? "";
-    message.trId = object.trId ?? 0;
     message.jsonSchema = object.jsonSchema ?? "";
     message.issuerGrantorValidationValidityPeriod =
       (object.issuerGrantorValidationValidityPeriod !== undefined &&
@@ -569,6 +568,7 @@ export const MsgCreateCredentialSchema = {
     message.pricingAsset = object.pricingAsset ?? "";
     message.digestAlgorithm = object.digestAlgorithm ?? "";
     message.holderOnboardingMode = object.holderOnboardingMode ?? 0;
+    message.ecosystemId = object.ecosystemId ?? 0;
     return message;
   },
 };

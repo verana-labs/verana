@@ -23,9 +23,9 @@ import (
 
 	keepertest "github.com/verana-labs/verana/testutil/keeper"
 	cstypes "github.com/verana-labs/verana/x/cs/types"
+	ectypes "github.com/verana-labs/verana/x/ec/types"
 	"github.com/verana-labs/verana/x/perm/keeper"
 	"github.com/verana-labs/verana/x/perm/types"
-	trtypes "github.com/verana-labs/verana/x/tr/types"
 )
 
 // TrackingBankKeeper tracks all balance changes for verification
@@ -286,10 +286,10 @@ func NewTrackingCredentialSchemaKeeper() *TrackingCredentialSchemaKeeper {
 	}
 }
 
-func (k *TrackingCredentialSchemaKeeper) UpdateMockCredentialSchema(id uint64, trId uint64, issuerMode cstypes.IssuerOnboardingMode, verifierMode cstypes.VerifierOnboardingMode) {
+func (k *TrackingCredentialSchemaKeeper) UpdateMockCredentialSchema(id uint64, ecosystemID uint64, issuerMode cstypes.IssuerOnboardingMode, verifierMode cstypes.VerifierOnboardingMode) {
 	k.credentialSchemas[id] = cstypes.CredentialSchema{
 		Id:                     id,
-		TrId:                   trId,
+		EcosystemId:            ecosystemID,
 		IssuerOnboardingMode:   issuerMode,
 		VerifierOnboardingMode: verifierMode,
 	}
@@ -302,40 +302,75 @@ func (k *TrackingCredentialSchemaKeeper) GetCredentialSchemaById(ctx sdk.Context
 	return cstypes.CredentialSchema{}, cstypes.ErrCredentialSchemaNotFound
 }
 
-// TrackingTrustRegistryKeeper for test setup
-type TrackingTrustRegistryKeeper struct {
-	trustRegistries map[uint64]trtypes.TrustRegistry
-	trustUnitPrice  uint64
+// TrackingEcosystemKeeper for test setup (replaces legacy TrackingTrustRegistryKeeper
+// post-MOD-EC rename). Holds Ecosystem rows keyed by id and a per-mock map of
+// policy_address → CorporationView so the linked TrackingCorporationKeeper can
+// resolve signers back to a corp.id matching ec.CorporationId.
+type TrackingEcosystemKeeper struct {
+	ecosystems     map[uint64]ectypes.Ecosystem
+	trustUnitPrice uint64
+	// corporationByPolicyAddr is shared with TrackingCorporationKeeper so the
+	// signer→corp.id resolution mirrors the on-chain co_keeper.
+	corporationByPolicyAddr map[string]types.CorporationView
 }
 
-func NewTrackingTrustRegistryKeeper(trustUnitPrice uint64) *TrackingTrustRegistryKeeper {
-	return &TrackingTrustRegistryKeeper{
-		trustRegistries: make(map[uint64]trtypes.TrustRegistry),
-		trustUnitPrice:  trustUnitPrice,
+func NewTrackingEcosystemKeeper(trustUnitPrice uint64) *TrackingEcosystemKeeper {
+	return &TrackingEcosystemKeeper{
+		ecosystems:              make(map[uint64]ectypes.Ecosystem),
+		trustUnitPrice:          trustUnitPrice,
+		corporationByPolicyAddr: make(map[string]types.CorporationView),
 	}
 }
 
-func (k *TrackingTrustRegistryKeeper) GetTrustUnitPrice(ctx sdk.Context) uint64 {
+func (k *TrackingEcosystemKeeper) GetTrustUnitPrice(ctx sdk.Context) uint64 {
 	return k.trustUnitPrice
 }
 
-func (k *TrackingTrustRegistryKeeper) GetTrustRegistry(ctx sdk.Context, id uint64) (trtypes.TrustRegistry, error) {
-	if tr, ok := k.trustRegistries[id]; ok {
-		return tr, nil
+func (k *TrackingEcosystemKeeper) GetEcosystem(ctx context.Context, id uint64) (ectypes.Ecosystem, error) {
+	if ec, ok := k.ecosystems[id]; ok {
+		return ec, nil
 	}
-	return trtypes.TrustRegistry{}, trtypes.ErrTrustRegistryNotFound
+	return ectypes.Ecosystem{}, ectypes.ErrEcosystemNotFound
 }
 
-func (k *TrackingTrustRegistryKeeper) CreateMockTrustRegistry(creator string, did string) uint64 {
-	id := uint64(len(k.trustRegistries) + 1)
-	k.trustRegistries[id] = trtypes.TrustRegistry{
+// CreateMockEcosystem registers an Ecosystem owned by the given signing
+// `creator` (a bech32 policy_address). Also wires the policy_address →
+// CorporationView mapping so a TrackingCorporationKeeper built from this
+// keeper resolves the signer to a corp.id matching ec.CorporationId.
+func (k *TrackingEcosystemKeeper) CreateMockEcosystem(creator string, did string) uint64 {
+	id := uint64(len(k.ecosystems) + 1)
+	// Use the same numeric id for corp.id so callers don't need to thread a
+	// separate corporation id through tests.
+	corpID := id
+	k.ecosystems[id] = ectypes.Ecosystem{
 		Id:            id,
 		Did:           did,
-		Corporation:   creator,
+		CorporationId: corpID,
 		ActiveVersion: 1,
 		Language:      "en",
 	}
+	k.corporationByPolicyAddr[creator] = types.CorporationView{
+		Id:            corpID,
+		PolicyAddress: creator,
+	}
 	return id
+}
+
+// TrackingCorporationKeeper resolves a signing policy_address to a
+// CorporationView; shares its backing map with TrackingEcosystemKeeper so
+// the (ec.CorporationId == co.Id) check passes for the same `creator` that
+// registered the Ecosystem.
+type TrackingCorporationKeeper struct {
+	corporationByPolicyAddr map[string]types.CorporationView
+}
+
+func NewTrackingCorporationKeeper(ekKeeper *TrackingEcosystemKeeper) *TrackingCorporationKeeper {
+	return &TrackingCorporationKeeper{corporationByPolicyAddr: ekKeeper.corporationByPolicyAddr}
+}
+
+func (k *TrackingCorporationKeeper) ResolveByPolicyAddress(ctx context.Context, policyAddress string) (types.CorporationView, bool) {
+	v, ok := k.corporationByPolicyAddr[policyAddress]
+	return v, ok
 }
 
 // setupTrackingMsgServer creates msg server with tracking mocks
@@ -343,7 +378,7 @@ func setupTrackingMsgServer(t testing.TB, uaRate, wuaRate, tdRate string, trustU
 	keeper.Keeper,
 	types.MsgServer,
 	*TrackingCredentialSchemaKeeper,
-	*TrackingTrustRegistryKeeper,
+	*TrackingEcosystemKeeper,
 	*TrackingBankKeeper,
 	*TrackingTrustDepositKeeper,
 	sdk.Context,
@@ -361,7 +396,8 @@ func setupTrackingMsgServer(t testing.TB, uaRate, wuaRate, tdRate string, trustU
 
 	// Create tracking keepers
 	csKeeper := NewTrackingCredentialSchemaKeeper()
-	trkKeeper := NewTrackingTrustRegistryKeeper(trustUnitPrice)
+	ekKeeper := NewTrackingEcosystemKeeper(trustUnitPrice)
+	coKeeper := NewTrackingCorporationKeeper(ekKeeper)
 	bankKeeper := NewTrackingBankKeeper()
 	tdKeeper := NewTrackingTrustDepositKeeper(uaRate, wuaRate, tdRate, bankKeeper)
 
@@ -371,7 +407,8 @@ func setupTrackingMsgServer(t testing.TB, uaRate, wuaRate, tdRate string, trustU
 		log.NewNopLogger(),
 		authority.String(),
 		csKeeper,
-		trkKeeper,
+		ekKeeper,
+		coKeeper,
 		tdKeeper,
 		bankKeeper,
 		&keepertest.MockDelegationKeeper{}, // permissive mock for CSPS tests
@@ -387,7 +424,7 @@ func setupTrackingMsgServer(t testing.TB, uaRate, wuaRate, tdRate string, trustU
 		panic(err)
 	}
 
-	return k, keeper.NewMsgServerImpl(k), csKeeper, trkKeeper, bankKeeper, tdKeeper, ctx
+	return k, keeper.NewMsgServerImpl(k), csKeeper, ekKeeper, bankKeeper, tdKeeper, ctx
 
 }
 
@@ -432,7 +469,7 @@ func TestAgentRewardsDistribution(t *testing.T) {
 	bankKeeper.SetBalance(creator, initialBalance)
 
 	// Create trust registry
-	trID := trkKeeper.CreateMockTrustRegistry(ecosystem, validDid)
+	trID := trkKeeper.CreateMockEcosystem(ecosystem, validDid)
 
 	// Create credential schema with GRANTOR mode
 	csKeeper.UpdateMockCredentialSchema(1, trID,
@@ -705,7 +742,7 @@ func TestAgentRewardsWithZeroFees(t *testing.T) {
 	bankKeeper.SetBalance(creator, initialBalance)
 
 	// Create trust registry
-	trID := trkKeeper.CreateMockTrustRegistry(ecosystem, validDid)
+	trID := trkKeeper.CreateMockEcosystem(ecosystem, validDid)
 
 	// Create credential schema
 	csKeeper.UpdateMockCredentialSchema(1, trID,
@@ -823,7 +860,7 @@ func TestAgentRewardsWithDiscount(t *testing.T) {
 	bankKeeper.SetBalance(creator, initialBalance)
 
 	// Create trust registry
-	trID := trkKeeper.CreateMockTrustRegistry(ecosystem, validDid)
+	trID := trkKeeper.CreateMockEcosystem(ecosystem, validDid)
 
 	// Create credential schema
 	csKeeper.UpdateMockCredentialSchema(1, trID,

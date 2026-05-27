@@ -10,9 +10,9 @@ import (
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	govkeeper "github.com/cosmos/cosmos-sdk/x/gov/keeper"
 	credentialschemakeeper "github.com/verana-labs/verana/x/cs/keeper"
+	ecosystem "github.com/verana-labs/verana/x/ec/keeper"
 	permission "github.com/verana-labs/verana/x/perm/keeper"
 	trustdeposit "github.com/verana-labs/verana/x/td/keeper"
-	trustregistry "github.com/verana-labs/verana/x/tr/keeper"
 )
 
 type BaseAppParamManager interface {
@@ -21,7 +21,7 @@ type BaseAppParamManager interface {
 }
 
 type AppKeepers interface {
-	GetTrustRegistryKeeper() trustregistry.Keeper
+	GetEcosystemKeeper() ecosystem.Keeper
 	GetPermissionKeeper() permission.Keeper
 	GetTrustDepositKeeper() trustdeposit.Keeper
 	GetCredentialSchemaKeeper() credentialschemakeeper.Keeper

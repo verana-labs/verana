@@ -21,7 +21,7 @@ import (
 
 	"github.com/verana-labs/verana/x/cs/keeper"
 	"github.com/verana-labs/verana/x/cs/types"
-	trtypes "github.com/verana-labs/verana/x/tr/types"
+	ectypes "github.com/verana-labs/verana/x/ec/types"
 )
 
 // MockBankKeeper is a mock implementation of types.BankKeeper
@@ -67,45 +67,86 @@ func NewMockBankKeeper() *MockBankKeeper {
 	}
 }
 
-func (k *MockBankKeeper) SendCoinsFromAccountToModule(ctx context.Context, senderAddr sdk.AccAddress, recipientModule string, amt sdk.Coins) error {
+func (k *MockBankKeeper) SendCoinsFromAccountToModule(ctx context.Context, senderAddr sdk.AccAddress, recipientAddr string, amt sdk.Coins) error {
 	return nil
 }
 
-// MockTrustRegistryKeeper is a mock implementation of types.TrustRegistryKeeper
-type MockTrustRegistryKeeper struct {
-	trustRegistries map[uint64]trtypes.TrustRegistry
+// MockEcosystemKeeper is a mock implementation of types.EcosystemKeeper.
+// Replaces the legacy MockTrustRegistryKeeper post-MOD-EC rename: stores
+// Ecosystem rows keyed by id (instead of TrustRegistry rows) so tests can
+// exercise the cs.ecosystem_id → ec.CorporationId ownership check.
+type MockEcosystemKeeper struct {
+	ecosystems map[uint64]ectypes.Ecosystem
+	// corporationByPolicyAddr is shared with MockCorporationKeeper so the
+	// resolved co.Id matches ec.CorporationId for the same `creator`.
+	corporationByPolicyAddr map[string]types.CorporationView
 }
 
-func NewMockTrustRegistryKeeper() *MockTrustRegistryKeeper {
-	return &MockTrustRegistryKeeper{
-		trustRegistries: make(map[uint64]trtypes.TrustRegistry),
+func NewMockEcosystemKeeper() *MockEcosystemKeeper {
+	return &MockEcosystemKeeper{
+		ecosystems:              make(map[uint64]ectypes.Ecosystem),
+		corporationByPolicyAddr: make(map[string]types.CorporationView),
 	}
 }
 
-func (k *MockTrustRegistryKeeper) GetTrustUnitPrice(ctx sdk.Context) uint64 {
-	return 1
-}
-
-func (k *MockTrustRegistryKeeper) GetTrustRegistry(ctx sdk.Context, id uint64) (trtypes.TrustRegistry, error) {
-	if tr, ok := k.trustRegistries[id]; ok {
-		return tr, nil
+func (k *MockEcosystemKeeper) GetEcosystem(ctx context.Context, id uint64) (ectypes.Ecosystem, error) {
+	if ec, ok := k.ecosystems[id]; ok {
+		return ec, nil
 	}
-	return trtypes.TrustRegistry{}, trtypes.ErrTrustRegistryNotFound
+	return ectypes.Ecosystem{}, ectypes.ErrEcosystemNotFound
 }
 
-func (k *MockTrustRegistryKeeper) CreateMockTrustRegistry(corporation string, did string) uint64 {
-	id := uint64(len(k.trustRegistries) + 1)
-	k.trustRegistries[id] = trtypes.TrustRegistry{
+// CreateMockEcosystem registers an Ecosystem owned by the given signing
+// `corporation` (a bech32 policy_address). Also wires the policy_address →
+// CorporationView mapping so the paired MockCorporationKeeper resolves the
+// signer to a corp.id matching ec.CorporationId.
+func (k *MockEcosystemKeeper) CreateMockEcosystem(corporation string, did string) uint64 {
+	id := uint64(len(k.ecosystems) + 1)
+	// Use the same numeric id for corp.id so callers don't need to thread a
+	// separate corporation id through tests.
+	corpID := id
+	k.ecosystems[id] = ectypes.Ecosystem{
 		Id:            id,
 		Did:           did,
-		Corporation:   corporation,
+		CorporationId: corpID,
 		ActiveVersion: 1,
 		Language:      "en",
+	}
+	k.corporationByPolicyAddr[corporation] = types.CorporationView{
+		Id:            corpID,
+		PolicyAddress: corporation,
 	}
 	return id
 }
 
-func CredentialschemaKeeper(t testing.TB) (keeper.Keeper, *MockTrustRegistryKeeper, sdk.Context) {
+// MockCorporationKeeper resolves a signing policy_address to a
+// CorporationView; shares its backing map with MockEcosystemKeeper so
+// the (ec.CorporationId == co.Id) ownership check passes for the same
+// `corporation` that registered the Ecosystem.
+//
+// Unknown policy addresses get a *distinct* CorporationView with a high,
+// stable id (math.MaxInt32) that will never match a CreateMockEcosystem
+// row (those start at 1). This lets "wrong signer" tests exercise the
+// strict ownership-mismatch path without each test having to pre-register
+// every counterexample address.
+type MockCorporationKeeper struct {
+	corporationByPolicyAddr map[string]types.CorporationView
+}
+
+func NewMockCorporationKeeper(ekKeeper *MockEcosystemKeeper) *MockCorporationKeeper {
+	return &MockCorporationKeeper{corporationByPolicyAddr: ekKeeper.corporationByPolicyAddr}
+}
+
+const mockUnregisteredCorpID uint64 = 1 << 31
+
+func (k *MockCorporationKeeper) ResolveByPolicyAddress(ctx context.Context, policyAddress string) (types.CorporationView, bool) {
+	if v, ok := k.corporationByPolicyAddr[policyAddress]; ok {
+		return v, true
+	}
+	return types.CorporationView{Id: mockUnregisteredCorpID, PolicyAddress: policyAddress}, true
+}
+
+func CredentialschemaKeeper(t testing.TB) (keeper.Keeper, *MockEcosystemKeeper, sdk.Context) {
 	storeKey := storetypes.NewKVStoreKey(types.StoreKey)
 
 	db := dbm.NewMemDB()
@@ -119,7 +160,8 @@ func CredentialschemaKeeper(t testing.TB) (keeper.Keeper, *MockTrustRegistryKeep
 
 	// Create mock keepers
 	bankKeeper := NewMockBankKeeper()
-	trustRegistryKeeper := NewMockTrustRegistryKeeper()
+	ecosystemKeeper := NewMockEcosystemKeeper()
+	coKeeper := NewMockCorporationKeeper(ecosystemKeeper)
 	mockDelegationKeeper := &MockDelegationKeeper{}
 	k := keeper.NewKeeper(
 		cdc,
@@ -127,7 +169,8 @@ func CredentialschemaKeeper(t testing.TB) (keeper.Keeper, *MockTrustRegistryKeep
 		log.NewNopLogger(),
 		authority.String(),
 		bankKeeper,
-		trustRegistryKeeper,
+		ecosystemKeeper,
+		coKeeper,
 		mockDelegationKeeper,
 	)
 
@@ -138,5 +181,5 @@ func CredentialschemaKeeper(t testing.TB) (keeper.Keeper, *MockTrustRegistryKeep
 		panic(err)
 	}
 
-	return k, trustRegistryKeeper, ctx
+	return k, ecosystemKeeper, ctx
 }

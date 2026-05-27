@@ -123,14 +123,6 @@
         },
         "parameters": [
           {
-            "name": "tr_id",
-            "description": "optional",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "format": "uint64"
-          },
-          {
             "name": "modified_after",
             "in": "query",
             "required": false,
@@ -190,6 +182,14 @@
               "HOLDER_ONBOARDING_MODE_PERMISSIONLESS"
             ],
             "default": "HOLDER_ONBOARDING_MODE_UNSPECIFIED"
+          },
+          {
+            "name": "ecosystem_id",
+            "description": "optional filter (replaces tr_id)",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uint64"
           }
         ],
         "tags": [
@@ -231,10 +231,6 @@
       "type": "object",
       "properties": {
         "id": {
-          "type": "string",
-          "format": "uint64"
-        },
-        "tr_id": {
           "type": "string",
           "format": "uint64"
         },
@@ -290,9 +286,13 @@
         },
         "holder_onboarding_mode": {
           "$ref": "#/definitions/verana.cs.v1.HolderOnboardingMode"
+        },
+        "ecosystem_id": {
+          "type": "string",
+          "format": "uint64"
         }
       },
-      "title": "CredentialSchema defines the structure for a credential schema"
+      "description": "CredentialSchema defines the structure for a credential schema.\n`ecosystem_id` is the v4-rc2 replacement for the legacy `tr_id` field (issue\n#305): the owning subject is now an Ecosystem, identified by its uint64 id."
     },
     "verana.cs.v1.HolderOnboardingMode": {
       "type": "string",
