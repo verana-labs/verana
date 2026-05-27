@@ -45,7 +45,9 @@ message MsgUpdateParamsResponse {}
 // [MOD-GF-MSG-1] Adds (or replaces) a GovernanceFrameworkDocument for a draft
 // version owned by an Ecosystem or a Corporation.
 message MsgAddGovernanceFrameworkDocument {
-  option (cosmos.msg.v1.signer) = "corporation";
+  // Only `operator` signs — `corporation` is the addressed subject resolved
+  // via AUTHZ-CHECK-5 (matches MOD-CO / MOD-EC convention; operator must be
+  // pre-authorized by corporation via x/de delegation).
   option (cosmos.msg.v1.signer) = "operator";
   option (amino.name) = "verana/x/gf/MsgAddGovernanceFrameworkDocument";
 
@@ -71,7 +73,7 @@ message MsgAddGovernanceFrameworkDocumentResponse {}
 // [MOD-GF-MSG-2] Activates the next governance framework version for an
 // Ecosystem or Corporation owned by the signing corporation.
 message MsgIncreaseActiveGovernanceFrameworkVersion {
-  option (cosmos.msg.v1.signer) = "corporation";
+  // Only `operator` signs (matches MOD-CO / MOD-EC convention).
   option (cosmos.msg.v1.signer) = "operator";
   option (amino.name) = "verana/x/gf/MsgIncreaseActiveGovernanceFrameworkVersion";
 
