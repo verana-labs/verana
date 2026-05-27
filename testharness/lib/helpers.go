@@ -20,6 +20,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/group"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	protocolpooltypes "github.com/cosmos/cosmos-sdk/x/protocolpool/types"
+	cotypes "github.com/verana-labs/verana/x/co/types"
 	detypes "github.com/verana-labs/verana/x/de/types"
 	ectypes "github.com/verana-labs/verana/x/ec/types"
 	gftypes "github.com/verana-labs/verana/x/gf/types"
@@ -2168,6 +2169,98 @@ func CreateGroupWithPolicy(
 
 	fmt.Printf("✅ Created group ID: %d, policy address: %s\n", groupID, policyAddr)
 	return groupID, policyAddr, nil
+}
+
+// CreateCorporation atomically creates a group + group policy AND registers
+// the resulting policy_address as a MOD-CO Corporation. The resulting
+// policy_address is what MOD-ES AUTHZ-CHECK-5 accepts as a valid signing
+// `corporation` for downstream Msgs (MsgCreateEcosystem etc.).
+//
+// Returns (corporation_id, policy_address). corporation_id is the uint64 id
+// assigned to the new Corporation row (used for `ec.corporation_id` queries).
+func CreateCorporation(
+	client cosmosclient.Client,
+	ctx context.Context,
+	signer cosmosaccount.Account,
+	memberAddresses []string,
+	threshold string,
+	votingPeriod time.Duration,
+	did, language, docURL, docDigestSRI string,
+) (uint64, string, error) {
+	signerAddr, err := signer.Address(addressPrefix)
+	if err != nil {
+		return 0, "", fmt.Errorf("failed to get signer address: %w", err)
+	}
+
+	members := make([]cotypes.Member, len(memberAddresses))
+	for i, addr := range memberAddresses {
+		members[i] = cotypes.Member{
+			Address:  addr,
+			Weight:   "1",
+			Metadata: fmt.Sprintf("member_%d", i+1),
+		}
+	}
+
+	decisionPolicy := &group.ThresholdDecisionPolicy{
+		Threshold: threshold,
+		Windows:   &group.DecisionPolicyWindows{VotingPeriod: votingPeriod},
+	}
+	decisionPolicyAny, err := codectypes.NewAnyWithValue(decisionPolicy)
+	if err != nil {
+		return 0, "", fmt.Errorf("failed to wrap decision policy: %w", err)
+	}
+
+	msg := &cotypes.MsgCreateCorporation{
+		Signer:              signerAddr,
+		Members:             members,
+		GroupMetadata:       "testharness corporation",
+		GroupPolicyMetadata: "testharness threshold policy",
+		DecisionPolicy:      decisionPolicyAny,
+		Did:                 did,
+		Language:            language,
+		DocUrl:              docURL,
+		DocDigestSri:        docDigestSRI,
+	}
+
+	txResp, err := client.BroadcastTx(ctx, signer, msg)
+	if err != nil {
+		return 0, "", fmt.Errorf("failed to broadcast CreateCorporation: %w", err)
+	}
+	if txResp.TxResponse.Code != 0 {
+		return 0, "", fmt.Errorf("CreateCorporation failed with code %d: %s",
+			txResp.TxResponse.Code, txResp.TxResponse.RawLog)
+	}
+
+	// Extract corporation_id + policy_address from events.
+	var txResponse sdk.TxResponse
+	txResponseBytes, err := client.Context().Codec.MarshalJSON(txResp.TxResponse)
+	if err != nil {
+		return 0, "", fmt.Errorf("marshal tx response: %w", err)
+	}
+	if err := client.Context().Codec.UnmarshalJSON(txResponseBytes, &txResponse); err != nil {
+		return 0, "", fmt.Errorf("unmarshal tx response: %w", err)
+	}
+
+	var corpID uint64
+	var policyAddr string
+	for _, event := range txResponse.Events {
+		if event.Type == cotypes.EventTypeCreateCorporation {
+			for _, attr := range event.Attributes {
+				switch attr.Key {
+				case cotypes.AttributeKeyCorporationID:
+					corpID, _ = strconv.ParseUint(strings.Trim(attr.Value, "\""), 10, 64)
+				case cotypes.AttributeKeyPolicyAddress:
+					policyAddr = strings.Trim(attr.Value, "\"")
+				}
+			}
+		}
+	}
+	if corpID == 0 || policyAddr == "" {
+		return 0, "", fmt.Errorf("failed to extract corporation_id or policy_address from events")
+	}
+
+	fmt.Printf("✅ Created Corporation id=%d, policy=%s\n", corpID, policyAddr)
+	return corpID, policyAddr, nil
 }
 
 // SubmitGroupProposal submits a group proposal with the given messages.

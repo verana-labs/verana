@@ -58,21 +58,29 @@ func RunCredentialSchemaAuthzSetupJourney(ctx context.Context, client cosmosclie
 	fmt.Println("✅ Step 1: Funded all CS accounts with 50 VNA each")
 
 	// =========================================================================
-	// Step 2: Create group with 3 members, threshold=2, voting_period=60s
+	// Step 2: Create Corporation (group + policy + MOD-CO registration).
+	// CS msg handlers enforce ownership via co.ResolveByPolicyAddress, so the
+	// signing policy_address MUST be a registered Corporation.
 	// =========================================================================
-	fmt.Println("\n--- Step 2: Create group with policy ---")
+	fmt.Println("\n--- Step 2: Create Corporation (group + policy + MOD-CO registration) ---")
 
 	memberAddresses := []string{adminAddr, member1Addr, member2Addr}
-	groupID, policyAddr, err := lib.CreateGroupWithPolicy(
+	corporationDID := fmt.Sprintf("did:example:cs-corp-%d", time.Now().UnixNano())
+	_, policyAddr, err := lib.CreateCorporation(
 		client, ctx, adminAccount, memberAddresses,
 		"2",             // threshold
 		300*time.Second, // voting period
+		corporationDID,
+		"en",
+		"https://example.com/cs-corporation-cgf.pdf",
+		"sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
 	)
 	if err != nil {
 		return fmt.Errorf("step 2 failed: %w", err)
 	}
-	fmt.Printf("✅ Step 2: Created group ID: %d, policy address: %s\n", groupID, policyAddr)
-	waitForTx("CS group creation")
+	groupID := uint64(0) // testharness-internal placeholder; downstream journeys treat as opaque string
+	fmt.Printf("✅ Step 2: Registered Corporation with policy address %s\n", policyAddr)
+	waitForTx("CS corporation creation")
 
 	// =========================================================================
 	// Step 3: Fund the group policy address
