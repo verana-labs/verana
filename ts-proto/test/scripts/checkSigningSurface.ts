@@ -14,7 +14,9 @@ const registry = createVeranaRegistry();
 const amino = createVeranaAminoTypes() as any;
 
 const requiredMappings = [
-  "MsgCreateTrustRegistry",
+  "MsgCreateCorporation",
+  "MsgCreateEcosystem",
+  "MsgAddGovernanceFrameworkDocument",
   "MsgCreateCredentialSchema",
   "MsgSelfCreatePermission",
   "MsgReclaimTrustDepositYield",
@@ -35,7 +37,7 @@ const deMsg = MsgGrantOperatorAuthorization.fromPartial({
   corporation: "verana1authority0000000000000000000000000000000",
   operator: "verana1operator0000000000000000000000000000000",
   grantee: "verana1grantee00000000000000000000000000000000",
-  msgTypes: [veranaTypeUrls.MsgCreateTrustRegistry, veranaTypeUrls.MsgSelfCreatePermission],
+  msgTypes: [veranaTypeUrls.MsgCreateEcosystem, veranaTypeUrls.MsgSelfCreatePermission],
   expiration: new Date("2026-04-01T12:00:00.123Z"),
   authzSpendLimit: [{ denom: "uvna", amount: "42" }],
   authzSpendLimitPeriod: { seconds: 3600, nanos: 5 },
