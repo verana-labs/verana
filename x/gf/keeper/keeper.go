@@ -31,8 +31,8 @@ type Keeper struct {
 	Params                 collections.Item[types.Params]
 	GFVersion              collections.Map[uint64, types.GovernanceFrameworkVersion]
 	GFDocument             collections.Map[uint64, types.GovernanceFrameworkDocument]
-	GFVersionByEcosystem   collections.Map[collections.Pair[uint64, int32], uint64]
-	GFVersionByCorporation collections.Map[collections.Pair[uint64, int32], uint64]
+	GFVersionByEcosystem   collections.Map[collections.Pair[uint64, uint32], uint64]
+	GFVersionByCorporation collections.Map[collections.Pair[uint64, uint32], uint64]
 	Counter                collections.Map[string, uint64]
 
 	delegationKeeper types.DelegationKeeper
@@ -61,8 +61,8 @@ func NewKeeper(
 		Params:       collections.NewItem(sb, types.ParamsKey, "params", codec.CollValue[types.Params](cdc)),
 		GFVersion:    collections.NewMap(sb, types.GovernanceFrameworkVersionKey, "gf_version", collections.Uint64Key, codec.CollValue[types.GovernanceFrameworkVersion](cdc)),
 		GFDocument:   collections.NewMap(sb, types.GovernanceFrameworkDocumentKey, "gf_document", collections.Uint64Key, codec.CollValue[types.GovernanceFrameworkDocument](cdc)),
-		GFVersionByEcosystem:   collections.NewMap(sb, types.GFVersionByEcosystemKey, "gf_version_by_ecosystem", collections.PairKeyCodec(collections.Uint64Key, collections.Int32Key), collections.Uint64Value),
-		GFVersionByCorporation: collections.NewMap(sb, types.GFVersionByCorporationKey, "gf_version_by_corporation", collections.PairKeyCodec(collections.Uint64Key, collections.Int32Key), collections.Uint64Value),
+		GFVersionByEcosystem:   collections.NewMap(sb, types.GFVersionByEcosystemKey, "gf_version_by_ecosystem", collections.PairKeyCodec(collections.Uint64Key, collections.Uint32Key), collections.Uint64Value),
+		GFVersionByCorporation: collections.NewMap(sb, types.GFVersionByCorporationKey, "gf_version_by_corporation", collections.PairKeyCodec(collections.Uint64Key, collections.Uint32Key), collections.Uint64Value),
 		Counter:                collections.NewMap(sb, types.CounterKey, "counter", collections.StringKey, collections.Uint64Value),
 
 		delegationKeeper: delegationKeeper,

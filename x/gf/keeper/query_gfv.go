@@ -54,7 +54,7 @@ func (q querier) ListGovernanceFrameworkVersions(goCtx context.Context, req *typ
 
 	// Spec MOD-GF-QRY-2-1: active_only returns "only the entry corresponding to
 	// the subject's active_version" — resolve subject's active_version once.
-	var subjectActiveVersion int32
+	var subjectActiveVersion uint32
 	if req.ActiveOnly {
 		if hasEco {
 			eco, ok := q.ecosystemKeeper.GetEcosystemView(goCtx, req.EcosystemId)
@@ -73,7 +73,7 @@ func (q querier) ListGovernanceFrameworkVersions(goCtx context.Context, req *typ
 
 	var gfvIDs []uint64
 	if hasEco {
-		iter, err := q.GFVersionByEcosystem.Iterate(goCtx, collections.NewPrefixedPairRange[uint64, int32](req.EcosystemId))
+		iter, err := q.GFVersionByEcosystem.Iterate(goCtx, collections.NewPrefixedPairRange[uint64, uint32](req.EcosystemId))
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "iterate: %v", err)
 		}
@@ -86,7 +86,7 @@ func (q querier) ListGovernanceFrameworkVersions(goCtx context.Context, req *typ
 			gfvIDs = append(gfvIDs, id)
 		}
 	} else {
-		iter, err := q.GFVersionByCorporation.Iterate(goCtx, collections.NewPrefixedPairRange[uint64, int32](req.CorporationId))
+		iter, err := q.GFVersionByCorporation.Iterate(goCtx, collections.NewPrefixedPairRange[uint64, uint32](req.CorporationId))
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "iterate: %v", err)
 		}

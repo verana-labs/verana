@@ -23,11 +23,20 @@ func anyDecisionPolicy(t *testing.T) *cdctypes.Any {
 	return a
 }
 
+// Valid bech32 fixtures used by the keeper tests (deterministically generated).
+const (
+	tkSigner = "cosmos1hfyt5r4f3rnu5gqrgfwr4446zgn00gdj0nn7dx"
+	tkMember = "cosmos1jpjwc8r9y5xqpj7q3w9c2qhda0ednjcmxvtna4"
+	tkCorp   = "cosmos14wcc52lpsxwuxxhqjxrhvuumhm0xr6z247un93"
+	tkOp     = "cosmos1fvz0kp4jfseea3zyduu78dd5yqcwrarwtxthjn"
+	tkPolicy = "cosmos1uyy0v2yu28dayjljvwe5h8w6pa8l8mwlx6589y"
+)
+
 func validCreateMsg(t *testing.T) *types.MsgCreateCorporation {
 	t.Helper()
 	return &types.MsgCreateCorporation{
-		Signer:         "cosmos1signer",
-		Members:        []types.Member{{Address: "cosmos1m", Weight: "1"}},
+		Signer:         tkSigner,
+		Members:        []types.Member{{Address: tkMember, Weight: "1"}},
 		DecisionPolicy: anyDecisionPolicy(t),
 		Did:            "did:example:1",
 		Language:       "en",
@@ -37,7 +46,7 @@ func validCreateMsg(t *testing.T) *types.MsgCreateCorporation {
 }
 
 func TestCreateCorporation_Happy(t *testing.T) {
-	grp := &mockGroup{policy: "cosmos1policyaddr"}
+	grp := &mockGroup{policy: tkPolicy}
 	gf := &mockGF{}
 	k, ctx := keepertest.CoKeeper(t, &mockDelegation{}, grp, gf)
 	ms := keeper.NewMsgServerImpl(k)
@@ -46,14 +55,14 @@ func TestCreateCorporation_Happy(t *testing.T) {
 	resp, err := ms.CreateCorporation(ctx, msg)
 	require.NoError(t, err)
 	require.Equal(t, uint64(1), resp.CorporationId)
-	require.Equal(t, "cosmos1policyaddr", resp.PolicyAddress)
+	require.Equal(t, tkPolicy, resp.PolicyAddress)
 
 	// Group call shape: group_policy_as_admin and members converted correctly.
 	require.Equal(t, 1, grp.callsCnt)
 	require.True(t, grp.gotReq.GroupPolicyAsAdmin)
 	require.Equal(t, msg.Signer, grp.gotReq.Admin)
 	require.Len(t, grp.gotReq.Members, 1)
-	require.Equal(t, "cosmos1m", grp.gotReq.Members[0].Address)
+	require.Equal(t, tkMember, grp.gotReq.Members[0].Address)
 	require.Equal(t, "1", grp.gotReq.Members[0].Weight)
 
 	// GF seed called with the right args.
@@ -66,11 +75,11 @@ func TestCreateCorporation_Happy(t *testing.T) {
 	// Corporation persisted with active_version=1 and reverse indexes set.
 	co, err := k.Corporation.Get(ctx, 1)
 	require.NoError(t, err)
-	require.Equal(t, int32(1), co.ActiveVersion)
-	require.Equal(t, "cosmos1policyaddr", co.PolicyAddress)
+	require.Equal(t, uint32(1), co.ActiveVersion)
+	require.Equal(t, tkPolicy, co.PolicyAddress)
 	require.Equal(t, msg.Did, co.Did)
 
-	id, err := k.CorporationByPolicyAddr.Get(ctx, "cosmos1policyaddr")
+	id, err := k.CorporationByPolicyAddr.Get(ctx, tkPolicy)
 	require.NoError(t, err)
 	require.Equal(t, uint64(1), id)
 	id, err = k.CorporationByDID.Get(ctx, msg.Did)
@@ -111,7 +120,7 @@ func TestCreateCorporation_GroupFailureIsPropagated(t *testing.T) {
 }
 
 func TestCreateCorporation_DuplicatePolicyAddress(t *testing.T) {
-	grp := &mockGroup{policy: "cosmos1samepolicy"}
+	grp := &mockGroup{policy: tkPolicy}
 	gf := &mockGF{}
 	k, ctx := keepertest.CoKeeper(t, &mockDelegation{}, grp, gf)
 	ms := keeper.NewMsgServerImpl(k)
@@ -130,20 +139,43 @@ func TestCreateCorporation_DuplicatePolicyAddress(t *testing.T) {
 func TestCreateCorporation_DuplicateDID(t *testing.T) {
 	gf := &mockGF{}
 	// First call uses default policy, second call returns a different policy.
-	grp := &mockGroup{policy: "cosmos1policy_one"}
+	grp := &mockGroup{policy: tkPolicy}
 	k, ctx := keepertest.CoKeeper(t, &mockDelegation{}, grp, gf)
 	ms := keeper.NewMsgServerImpl(k)
 
 	_, err := ms.CreateCorporation(ctx, validCreateMsg(t))
 	require.NoError(t, err)
 
-	grp.policy = "cosmos1policy_two"
-	_, err = ms.CreateCorporation(ctx, validCreateMsg(t)) // same DID, different policy
+	grp.policy = "cosmos1z7z43tkdpkzddxw5t3krh8jjx8amghmhacdj6u" // policy-test-2
+	_, err = ms.CreateCorporation(ctx, validCreateMsg(t))      // same DID, different policy
 	require.ErrorIs(t, err, types.ErrDIDAlreadyExists)
 }
 
+// TestCreateCorporation_DIDConflictAbortsBeforeGroupCall pins the
+// precondition-first ordering: a duplicate-DID submission must short-circuit
+// without invoking x/group. This is the spec-mandated ordering and avoids
+// wasted group-creation work.
+func TestCreateCorporation_DIDConflictAbortsBeforeGroupCall(t *testing.T) {
+	grp := &mockGroup{policy: tkPolicy}
+	gf := &mockGF{}
+	k, ctx := keepertest.CoKeeper(t, &mockDelegation{}, grp, gf)
+	ms := keeper.NewMsgServerImpl(k)
+
+	// Seed one Corporation.
+	_, err := ms.CreateCorporation(ctx, validCreateMsg(t))
+	require.NoError(t, err)
+	require.Equal(t, 1, grp.callsCnt, "first call hit x/group")
+
+	// Second call with same DID — must abort with ErrDIDAlreadyExists BEFORE
+	// reaching x/group. callsCnt MUST stay at 1.
+	_, err = ms.CreateCorporation(ctx, validCreateMsg(t))
+	require.ErrorIs(t, err, types.ErrDIDAlreadyExists)
+	require.Equal(t, 1, grp.callsCnt, "x/group must not be called when did is already bound")
+	require.Equal(t, 1, gf.createCalls, "GF seed must not be called for the failed second attempt")
+}
+
 func TestCreateCorporation_GFSeedFailureBubblesUp(t *testing.T) {
-	grp := &mockGroup{policy: "cosmos1policy"}
+	grp := &mockGroup{policy: tkPolicy}
 	gf := &mockGF{createErr: errors.New("gf boom")}
 	k, ctx := keepertest.CoKeeper(t, &mockDelegation{}, grp, gf)
 	ms := keeper.NewMsgServerImpl(k)

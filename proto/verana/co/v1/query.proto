@@ -15,7 +15,7 @@ option go_package = "github.com/verana-labs/verana/x/co/types";
 service Query {
   // Params returns the total set of module parameters.
   rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
-    option (google.api.http).get = "/verana/co/v1/params";
+    option (google.api.http).get = "/co/v1/params";
   }
 
   // [MOD-CO-QRY-1] Get Corporation by id, with nested GF version + document data.

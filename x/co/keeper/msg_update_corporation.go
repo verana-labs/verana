@@ -28,7 +28,10 @@ func (ms msgServer) UpdateCorporation(goCtx context.Context, msg *types.MsgUpdat
 	}
 	co, err := ms.Corporation.Get(ctx, coID)
 	if err != nil {
-		return nil, errors.Wrapf(types.ErrCorporationNotFound, "id %d", coID)
+		// Should never happen: the reverse index just resolved this id but the
+		// primary table doesn't have it. This is a store-inconsistency, not a
+		// user-facing not-found.
+		return nil, fmt.Errorf("store inconsistency: corporation id %d resolved by index but missing from primary: %w", coID, err)
 	}
 
 	// AUTHZ-CHECK-1: operator must hold a delegation from the Corporation for

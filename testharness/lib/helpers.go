@@ -803,7 +803,7 @@ func VerifyGovernanceFrameworkUpdate(
 		return false
 	}
 
-	if trustRegistry.TrustRegistry.ActiveVersion != int32(expectedActiveVersion) {
+	if trustRegistry.TrustRegistry.ActiveVersion != uint32(expectedActiveVersion) {
 		fmt.Printf("❌ Governance framework update verification failed: Expected active version %d, got %d\n",
 			expectedActiveVersion, trustRegistry.TrustRegistry.ActiveVersion)
 		return false
@@ -812,7 +812,7 @@ func VerifyGovernanceFrameworkUpdate(
 	// Verify that versions array includes the new version
 	versionFound := false
 	for _, version := range trustRegistry.TrustRegistry.Versions {
-		if version.Version == int32(expectedActiveVersion) {
+		if version.Version == uint32(expectedActiveVersion) {
 			versionFound = true
 			break
 		}
@@ -2492,7 +2492,7 @@ func AddGFDWithAuthority(
 	docLanguage string,
 	docURL string,
 	docHash string,
-	version int32,
+	version uint32,
 ) error {
 	operatorAddr, err := operatorAccount.Address(addressPrefix)
 	if err != nil {

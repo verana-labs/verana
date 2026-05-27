@@ -76,7 +76,7 @@ func TestMsgServerCreateTrustRegistry(t *testing.T) {
 				require.Equal(t, tc.msg.Did, tr.Did)
 				// Verify corporation becomes the controller
 				require.Equal(t, tc.msg.Corporation, tr.Corporation)
-				require.Equal(t, int32(1), tr.ActiveVersion)
+				require.Equal(t, uint32(1), tr.ActiveVersion)
 				require.Equal(t, tc.msg.Language, tr.Language)
 			} else {
 				require.Error(t, err)
@@ -377,7 +377,7 @@ func TestMsgServerIncreaseActiveGovernanceFrameworkVersion(t *testing.T) {
 				// Verify version increase
 				tr, err := k.TrustRegistry.Get(ctx, tc.msg.TrId)
 				require.NoError(t, err)
-				require.Equal(t, int32(2), tr.ActiveVersion)
+				require.Equal(t, uint32(2), tr.ActiveVersion)
 			} else {
 				require.Error(t, err)
 				require.Nil(t, resp)

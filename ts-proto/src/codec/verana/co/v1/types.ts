@@ -69,7 +69,7 @@ export const Corporation = {
       writer.uint32(50).string(message.language);
     }
     if (message.activeVersion !== 0) {
-      writer.uint32(56).int32(message.activeVersion);
+      writer.uint32(56).uint32(message.activeVersion);
     }
     return writer;
   },
@@ -128,7 +128,7 @@ export const Corporation = {
             break;
           }
 
-          message.activeVersion = reader.int32();
+          message.activeVersion = reader.uint32();
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -227,7 +227,7 @@ export const CorporationWithGF = {
       writer.uint32(50).string(message.language);
     }
     if (message.activeVersion !== 0) {
-      writer.uint32(56).int32(message.activeVersion);
+      writer.uint32(56).uint32(message.activeVersion);
     }
     for (const v of message.versions) {
       GovernanceFrameworkVersionWithDocs.encode(v!, writer.uint32(66).fork()).ldelim();
@@ -289,7 +289,7 @@ export const CorporationWithGF = {
             break;
           }
 
-          message.activeVersion = reader.int32();
+          message.activeVersion = reader.uint32();
           continue;
         case 8:
           if (tag !== 66) {

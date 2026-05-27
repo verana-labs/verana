@@ -14,4 +14,5 @@ var (
 	ErrInvalidMembers            = errors.Register(ModuleName, 1108, "invalid members list")
 	ErrInvalidDID                = errors.Register(ModuleName, 1109, "invalid DID syntax")
 	ErrCorporationNotFound       = errors.Register(ModuleName, 1110, "corporation not found")
+	ErrInvalidTimestamp          = errors.Register(ModuleName, 1111, "invalid corporation timestamp")
 )

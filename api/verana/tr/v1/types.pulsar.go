@@ -150,8 +150,8 @@ func (x *fastReflection_TrustRegistry) Range(f func(protoreflect.FieldDescriptor
 			return
 		}
 	}
-	if x.ActiveVersion != int32(0) {
-		value := protoreflect.ValueOfInt32(x.ActiveVersion)
+	if x.ActiveVersion != uint32(0) {
+		value := protoreflect.ValueOfUint32(x.ActiveVersion)
 		if !f(fd_TrustRegistry_active_version, value) {
 			return
 		}
@@ -192,7 +192,7 @@ func (x *fastReflection_TrustRegistry) Has(fd protoreflect.FieldDescriptor) bool
 	case "verana.tr.v1.TrustRegistry.aka":
 		return x.Aka != ""
 	case "verana.tr.v1.TrustRegistry.active_version":
-		return x.ActiveVersion != int32(0)
+		return x.ActiveVersion != uint32(0)
 	case "verana.tr.v1.TrustRegistry.language":
 		return x.Language != ""
 	default:
@@ -226,7 +226,7 @@ func (x *fastReflection_TrustRegistry) Clear(fd protoreflect.FieldDescriptor) {
 	case "verana.tr.v1.TrustRegistry.aka":
 		x.Aka = ""
 	case "verana.tr.v1.TrustRegistry.active_version":
-		x.ActiveVersion = int32(0)
+		x.ActiveVersion = uint32(0)
 	case "verana.tr.v1.TrustRegistry.language":
 		x.Language = ""
 	default:
@@ -268,7 +268,7 @@ func (x *fastReflection_TrustRegistry) Get(descriptor protoreflect.FieldDescript
 		return protoreflect.ValueOfString(value)
 	case "verana.tr.v1.TrustRegistry.active_version":
 		value := x.ActiveVersion
-		return protoreflect.ValueOfInt32(value)
+		return protoreflect.ValueOfUint32(value)
 	case "verana.tr.v1.TrustRegistry.language":
 		value := x.Language
 		return protoreflect.ValueOfString(value)
@@ -307,7 +307,7 @@ func (x *fastReflection_TrustRegistry) Set(fd protoreflect.FieldDescriptor, valu
 	case "verana.tr.v1.TrustRegistry.aka":
 		x.Aka = value.Interface().(string)
 	case "verana.tr.v1.TrustRegistry.active_version":
-		x.ActiveVersion = int32(value.Int())
+		x.ActiveVersion = uint32(value.Uint())
 	case "verana.tr.v1.TrustRegistry.language":
 		x.Language = value.Interface().(string)
 	default:
@@ -388,7 +388,7 @@ func (x *fastReflection_TrustRegistry) NewField(fd protoreflect.FieldDescriptor)
 	case "verana.tr.v1.TrustRegistry.aka":
 		return protoreflect.ValueOfString("")
 	case "verana.tr.v1.TrustRegistry.active_version":
-		return protoreflect.ValueOfInt32(int32(0))
+		return protoreflect.ValueOfUint32(uint32(0))
 	case "verana.tr.v1.TrustRegistry.language":
 		return protoreflect.ValueOfString("")
 	default:
@@ -889,7 +889,7 @@ func (x *fastReflection_TrustRegistry) ProtoMethods() *protoiface.Methods {
 					}
 					b := dAtA[iNdEx]
 					iNdEx++
-					x.ActiveVersion |= int32(b&0x7F) << shift
+					x.ActiveVersion |= uint32(b&0x7F) << shift
 					if b < 0x80 {
 						break
 					}
@@ -1063,8 +1063,8 @@ func (x *fastReflection_GovernanceFrameworkVersion) Range(f func(protoreflect.Fi
 			return
 		}
 	}
-	if x.Version != int32(0) {
-		value := protoreflect.ValueOfInt32(x.Version)
+	if x.Version != uint32(0) {
+		value := protoreflect.ValueOfUint32(x.Version)
 		if !f(fd_GovernanceFrameworkVersion_version, value) {
 			return
 		}
@@ -1097,7 +1097,7 @@ func (x *fastReflection_GovernanceFrameworkVersion) Has(fd protoreflect.FieldDes
 	case "verana.tr.v1.GovernanceFrameworkVersion.created":
 		return x.Created != nil
 	case "verana.tr.v1.GovernanceFrameworkVersion.version":
-		return x.Version != int32(0)
+		return x.Version != uint32(0)
 	case "verana.tr.v1.GovernanceFrameworkVersion.active_since":
 		return x.ActiveSince != nil
 	default:
@@ -1123,7 +1123,7 @@ func (x *fastReflection_GovernanceFrameworkVersion) Clear(fd protoreflect.FieldD
 	case "verana.tr.v1.GovernanceFrameworkVersion.created":
 		x.Created = nil
 	case "verana.tr.v1.GovernanceFrameworkVersion.version":
-		x.Version = int32(0)
+		x.Version = uint32(0)
 	case "verana.tr.v1.GovernanceFrameworkVersion.active_since":
 		x.ActiveSince = nil
 	default:
@@ -1153,7 +1153,7 @@ func (x *fastReflection_GovernanceFrameworkVersion) Get(descriptor protoreflect.
 		return protoreflect.ValueOfMessage(value.ProtoReflect())
 	case "verana.tr.v1.GovernanceFrameworkVersion.version":
 		value := x.Version
-		return protoreflect.ValueOfInt32(value)
+		return protoreflect.ValueOfUint32(value)
 	case "verana.tr.v1.GovernanceFrameworkVersion.active_since":
 		value := x.ActiveSince
 		return protoreflect.ValueOfMessage(value.ProtoReflect())
@@ -1184,7 +1184,7 @@ func (x *fastReflection_GovernanceFrameworkVersion) Set(fd protoreflect.FieldDes
 	case "verana.tr.v1.GovernanceFrameworkVersion.created":
 		x.Created = value.Message().Interface().(*timestamppb.Timestamp)
 	case "verana.tr.v1.GovernanceFrameworkVersion.version":
-		x.Version = int32(value.Int())
+		x.Version = uint32(value.Uint())
 	case "verana.tr.v1.GovernanceFrameworkVersion.active_since":
 		x.ActiveSince = value.Message().Interface().(*timestamppb.Timestamp)
 	default:
@@ -1244,7 +1244,7 @@ func (x *fastReflection_GovernanceFrameworkVersion) NewField(fd protoreflect.Fie
 		m := new(timestamppb.Timestamp)
 		return protoreflect.ValueOfMessage(m.ProtoReflect())
 	case "verana.tr.v1.GovernanceFrameworkVersion.version":
-		return protoreflect.ValueOfInt32(int32(0))
+		return protoreflect.ValueOfUint32(uint32(0))
 	case "verana.tr.v1.GovernanceFrameworkVersion.active_since":
 		m := new(timestamppb.Timestamp)
 		return protoreflect.ValueOfMessage(m.ProtoReflect())
@@ -1543,7 +1543,7 @@ func (x *fastReflection_GovernanceFrameworkVersion) ProtoMethods() *protoiface.M
 					}
 					b := dAtA[iNdEx]
 					iNdEx++
-					x.Version |= int32(b&0x7F) << shift
+					x.Version |= uint32(b&0x7F) << shift
 					if b < 0x80 {
 						break
 					}
@@ -2497,8 +2497,8 @@ func (x *fastReflection_GovernanceFrameworkVersionWithDocs) Range(f func(protore
 			return
 		}
 	}
-	if x.Version != int32(0) {
-		value := protoreflect.ValueOfInt32(x.Version)
+	if x.Version != uint32(0) {
+		value := protoreflect.ValueOfUint32(x.Version)
 		if !f(fd_GovernanceFrameworkVersionWithDocs_version, value) {
 			return
 		}
@@ -2537,7 +2537,7 @@ func (x *fastReflection_GovernanceFrameworkVersionWithDocs) Has(fd protoreflect.
 	case "verana.tr.v1.GovernanceFrameworkVersionWithDocs.created":
 		return x.Created != nil
 	case "verana.tr.v1.GovernanceFrameworkVersionWithDocs.version":
-		return x.Version != int32(0)
+		return x.Version != uint32(0)
 	case "verana.tr.v1.GovernanceFrameworkVersionWithDocs.active_since":
 		return x.ActiveSince != nil
 	case "verana.tr.v1.GovernanceFrameworkVersionWithDocs.documents":
@@ -2565,7 +2565,7 @@ func (x *fastReflection_GovernanceFrameworkVersionWithDocs) Clear(fd protoreflec
 	case "verana.tr.v1.GovernanceFrameworkVersionWithDocs.created":
 		x.Created = nil
 	case "verana.tr.v1.GovernanceFrameworkVersionWithDocs.version":
-		x.Version = int32(0)
+		x.Version = uint32(0)
 	case "verana.tr.v1.GovernanceFrameworkVersionWithDocs.active_since":
 		x.ActiveSince = nil
 	case "verana.tr.v1.GovernanceFrameworkVersionWithDocs.documents":
@@ -2597,7 +2597,7 @@ func (x *fastReflection_GovernanceFrameworkVersionWithDocs) Get(descriptor proto
 		return protoreflect.ValueOfMessage(value.ProtoReflect())
 	case "verana.tr.v1.GovernanceFrameworkVersionWithDocs.version":
 		value := x.Version
-		return protoreflect.ValueOfInt32(value)
+		return protoreflect.ValueOfUint32(value)
 	case "verana.tr.v1.GovernanceFrameworkVersionWithDocs.active_since":
 		value := x.ActiveSince
 		return protoreflect.ValueOfMessage(value.ProtoReflect())
@@ -2634,7 +2634,7 @@ func (x *fastReflection_GovernanceFrameworkVersionWithDocs) Set(fd protoreflect.
 	case "verana.tr.v1.GovernanceFrameworkVersionWithDocs.created":
 		x.Created = value.Message().Interface().(*timestamppb.Timestamp)
 	case "verana.tr.v1.GovernanceFrameworkVersionWithDocs.version":
-		x.Version = int32(value.Int())
+		x.Version = uint32(value.Uint())
 	case "verana.tr.v1.GovernanceFrameworkVersionWithDocs.active_since":
 		x.ActiveSince = value.Message().Interface().(*timestamppb.Timestamp)
 	case "verana.tr.v1.GovernanceFrameworkVersionWithDocs.documents":
@@ -2704,7 +2704,7 @@ func (x *fastReflection_GovernanceFrameworkVersionWithDocs) NewField(fd protoref
 		m := new(timestamppb.Timestamp)
 		return protoreflect.ValueOfMessage(m.ProtoReflect())
 	case "verana.tr.v1.GovernanceFrameworkVersionWithDocs.version":
-		return protoreflect.ValueOfInt32(int32(0))
+		return protoreflect.ValueOfUint32(uint32(0))
 	case "verana.tr.v1.GovernanceFrameworkVersionWithDocs.active_since":
 		m := new(timestamppb.Timestamp)
 		return protoreflect.ValueOfMessage(m.ProtoReflect())
@@ -3028,7 +3028,7 @@ func (x *fastReflection_GovernanceFrameworkVersionWithDocs) ProtoMethods() *prot
 					}
 					b := dAtA[iNdEx]
 					iNdEx++
-					x.Version |= int32(b&0x7F) << shift
+					x.Version |= uint32(b&0x7F) << shift
 					if b < 0x80 {
 						break
 					}
@@ -3325,8 +3325,8 @@ func (x *fastReflection_TrustRegistryWithVersions) Range(f func(protoreflect.Fie
 			return
 		}
 	}
-	if x.ActiveVersion != int32(0) {
-		value := protoreflect.ValueOfInt32(x.ActiveVersion)
+	if x.ActiveVersion != uint32(0) {
+		value := protoreflect.ValueOfUint32(x.ActiveVersion)
 		if !f(fd_TrustRegistryWithVersions_active_version, value) {
 			return
 		}
@@ -3373,7 +3373,7 @@ func (x *fastReflection_TrustRegistryWithVersions) Has(fd protoreflect.FieldDesc
 	case "verana.tr.v1.TrustRegistryWithVersions.aka":
 		return x.Aka != ""
 	case "verana.tr.v1.TrustRegistryWithVersions.active_version":
-		return x.ActiveVersion != int32(0)
+		return x.ActiveVersion != uint32(0)
 	case "verana.tr.v1.TrustRegistryWithVersions.language":
 		return x.Language != ""
 	case "verana.tr.v1.TrustRegistryWithVersions.versions":
@@ -3409,7 +3409,7 @@ func (x *fastReflection_TrustRegistryWithVersions) Clear(fd protoreflect.FieldDe
 	case "verana.tr.v1.TrustRegistryWithVersions.aka":
 		x.Aka = ""
 	case "verana.tr.v1.TrustRegistryWithVersions.active_version":
-		x.ActiveVersion = int32(0)
+		x.ActiveVersion = uint32(0)
 	case "verana.tr.v1.TrustRegistryWithVersions.language":
 		x.Language = ""
 	case "verana.tr.v1.TrustRegistryWithVersions.versions":
@@ -3453,7 +3453,7 @@ func (x *fastReflection_TrustRegistryWithVersions) Get(descriptor protoreflect.F
 		return protoreflect.ValueOfString(value)
 	case "verana.tr.v1.TrustRegistryWithVersions.active_version":
 		value := x.ActiveVersion
-		return protoreflect.ValueOfInt32(value)
+		return protoreflect.ValueOfUint32(value)
 	case "verana.tr.v1.TrustRegistryWithVersions.language":
 		value := x.Language
 		return protoreflect.ValueOfString(value)
@@ -3498,7 +3498,7 @@ func (x *fastReflection_TrustRegistryWithVersions) Set(fd protoreflect.FieldDesc
 	case "verana.tr.v1.TrustRegistryWithVersions.aka":
 		x.Aka = value.Interface().(string)
 	case "verana.tr.v1.TrustRegistryWithVersions.active_version":
-		x.ActiveVersion = int32(value.Int())
+		x.ActiveVersion = uint32(value.Uint())
 	case "verana.tr.v1.TrustRegistryWithVersions.language":
 		x.Language = value.Interface().(string)
 	case "verana.tr.v1.TrustRegistryWithVersions.versions":
@@ -3589,7 +3589,7 @@ func (x *fastReflection_TrustRegistryWithVersions) NewField(fd protoreflect.Fiel
 	case "verana.tr.v1.TrustRegistryWithVersions.aka":
 		return protoreflect.ValueOfString("")
 	case "verana.tr.v1.TrustRegistryWithVersions.active_version":
-		return protoreflect.ValueOfInt32(int32(0))
+		return protoreflect.ValueOfUint32(uint32(0))
 	case "verana.tr.v1.TrustRegistryWithVersions.language":
 		return protoreflect.ValueOfString("")
 	case "verana.tr.v1.TrustRegistryWithVersions.versions":
@@ -4115,7 +4115,7 @@ func (x *fastReflection_TrustRegistryWithVersions) ProtoMethods() *protoiface.Me
 					}
 					b := dAtA[iNdEx]
 					iNdEx++
-					x.ActiveVersion |= int32(b&0x7F) << shift
+					x.ActiveVersion |= uint32(b&0x7F) << shift
 					if b < 0x80 {
 						break
 					}
@@ -4246,7 +4246,7 @@ type TrustRegistry struct {
 	Modified      *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=modified,proto3" json:"modified,omitempty"`
 	Archived      *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=archived,proto3" json:"archived,omitempty"`
 	Aka           string                 `protobuf:"bytes,8,opt,name=aka,proto3" json:"aka,omitempty"`
-	ActiveVersion int32                  `protobuf:"varint,9,opt,name=active_version,json=activeVersion,proto3" json:"active_version,omitempty"`
+	ActiveVersion uint32                 `protobuf:"varint,9,opt,name=active_version,json=activeVersion,proto3" json:"active_version,omitempty"`
 	Language      string                 `protobuf:"bytes,10,opt,name=language,proto3" json:"language,omitempty"`
 }
 
@@ -4319,7 +4319,7 @@ func (x *TrustRegistry) GetAka() string {
 	return ""
 }
 
-func (x *TrustRegistry) GetActiveVersion() int32 {
+func (x *TrustRegistry) GetActiveVersion() uint32 {
 	if x != nil {
 		return x.ActiveVersion
 	}
@@ -4341,7 +4341,7 @@ type GovernanceFrameworkVersion struct {
 	Id          uint64                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`                 // Changed from string to uint64
 	TrId        uint64                 `protobuf:"varint,2,opt,name=tr_id,json=trId,proto3" json:"tr_id,omitempty"` // Changed from tr_did to tr_id
 	Created     *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=created,proto3" json:"created,omitempty"`
-	Version     int32                  `protobuf:"varint,4,opt,name=version,proto3" json:"version,omitempty"`
+	Version     uint32                 `protobuf:"varint,4,opt,name=version,proto3" json:"version,omitempty"`
 	ActiveSince *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=active_since,json=activeSince,proto3" json:"active_since,omitempty"`
 }
 
@@ -4386,7 +4386,7 @@ func (x *GovernanceFrameworkVersion) GetCreated() *timestamppb.Timestamp {
 	return nil
 }
 
-func (x *GovernanceFrameworkVersion) GetVersion() int32 {
+func (x *GovernanceFrameworkVersion) GetVersion() uint32 {
 	if x != nil {
 		return x.Version
 	}
@@ -4484,7 +4484,7 @@ type GovernanceFrameworkVersionWithDocs struct {
 	Id          uint64                         `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	TrId        uint64                         `protobuf:"varint,2,opt,name=tr_id,json=trId,proto3" json:"tr_id,omitempty"`
 	Created     *timestamppb.Timestamp         `protobuf:"bytes,3,opt,name=created,proto3" json:"created,omitempty"`
-	Version     int32                          `protobuf:"varint,4,opt,name=version,proto3" json:"version,omitempty"`
+	Version     uint32                         `protobuf:"varint,4,opt,name=version,proto3" json:"version,omitempty"`
 	ActiveSince *timestamppb.Timestamp         `protobuf:"bytes,5,opt,name=active_since,json=activeSince,proto3" json:"active_since,omitempty"`
 	Documents   []*GovernanceFrameworkDocument `protobuf:"bytes,6,rep,name=documents,proto3" json:"documents,omitempty"`
 }
@@ -4530,7 +4530,7 @@ func (x *GovernanceFrameworkVersionWithDocs) GetCreated() *timestamppb.Timestamp
 	return nil
 }
 
-func (x *GovernanceFrameworkVersionWithDocs) GetVersion() int32 {
+func (x *GovernanceFrameworkVersionWithDocs) GetVersion() uint32 {
 	if x != nil {
 		return x.Version
 	}
@@ -4564,7 +4564,7 @@ type TrustRegistryWithVersions struct {
 	Modified      *timestamppb.Timestamp                `protobuf:"bytes,5,opt,name=modified,proto3" json:"modified,omitempty"`
 	Archived      *timestamppb.Timestamp                `protobuf:"bytes,6,opt,name=archived,proto3" json:"archived,omitempty"`
 	Aka           string                                `protobuf:"bytes,8,opt,name=aka,proto3" json:"aka,omitempty"`
-	ActiveVersion int32                                 `protobuf:"varint,9,opt,name=active_version,json=activeVersion,proto3" json:"active_version,omitempty"`
+	ActiveVersion uint32                                `protobuf:"varint,9,opt,name=active_version,json=activeVersion,proto3" json:"active_version,omitempty"`
 	Language      string                                `protobuf:"bytes,10,opt,name=language,proto3" json:"language,omitempty"`
 	Versions      []*GovernanceFrameworkVersionWithDocs `protobuf:"bytes,11,rep,name=versions,proto3" json:"versions,omitempty"`
 }
@@ -4638,7 +4638,7 @@ func (x *TrustRegistryWithVersions) GetAka() string {
 	return ""
 }
 
-func (x *TrustRegistryWithVersions) GetActiveVersion() int32 {
+func (x *TrustRegistryWithVersions) GetActiveVersion() uint32 {
 	if x != nil {
 		return x.ActiveVersion
 	}
@@ -4692,7 +4692,7 @@ var file_verana_tr_v1_types_proto_rawDesc = []byte{
 	0xde, 0x1f, 0x01, 0x90, 0xdf, 0x1f, 0x01, 0x52, 0x08, 0x61, 0x72, 0x63, 0x68, 0x69, 0x76, 0x65,
 	0x64, 0x12, 0x10, 0x0a, 0x03, 0x61, 0x6b, 0x61, 0x18, 0x08, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03,
 	0x61, 0x6b, 0x61, 0x12, 0x25, 0x0a, 0x0e, 0x61, 0x63, 0x74, 0x69, 0x76, 0x65, 0x5f, 0x76, 0x65,
-	0x72, 0x73, 0x69, 0x6f, 0x6e, 0x18, 0x09, 0x20, 0x01, 0x28, 0x05, 0x52, 0x0d, 0x61, 0x63, 0x74,
+	0x72, 0x73, 0x69, 0x6f, 0x6e, 0x18, 0x09, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x0d, 0x61, 0x63, 0x74,
 	0x69, 0x76, 0x65, 0x56, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x12, 0x1a, 0x0a, 0x08, 0x6c, 0x61,
 	0x6e, 0x67, 0x75, 0x61, 0x67, 0x65, 0x18, 0x0a, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x6c, 0x61,
 	0x6e, 0x67, 0x75, 0x61, 0x67, 0x65, 0x22, 0xe4, 0x01, 0x0a, 0x1a, 0x47, 0x6f, 0x76, 0x65, 0x72,
@@ -4704,7 +4704,7 @@ var file_verana_tr_v1_types_proto_rawDesc = []byte{
 	0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54, 0x69,
 	0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x42, 0x08, 0xc8, 0xde, 0x1f, 0x00, 0x90, 0xdf, 0x1f,
 	0x01, 0x52, 0x07, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x12, 0x18, 0x0a, 0x07, 0x76, 0x65,
-	0x72, 0x73, 0x69, 0x6f, 0x6e, 0x18, 0x04, 0x20, 0x01, 0x28, 0x05, 0x52, 0x07, 0x76, 0x65, 0x72,
+	0x72, 0x73, 0x69, 0x6f, 0x6e, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x07, 0x76, 0x65, 0x72,
 	0x73, 0x69, 0x6f, 0x6e, 0x12, 0x47, 0x0a, 0x0c, 0x61, 0x63, 0x74, 0x69, 0x76, 0x65, 0x5f, 0x73,
 	0x69, 0x6e, 0x63, 0x65, 0x18, 0x05, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f,
 	0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d,
@@ -4732,7 +4732,7 @@ var file_verana_tr_v1_types_proto_rawDesc = []byte{
 	0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66,
 	0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x42, 0x08, 0xc8, 0xde, 0x1f, 0x00,
 	0x90, 0xdf, 0x1f, 0x01, 0x52, 0x07, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x12, 0x18, 0x0a,
-	0x07, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x18, 0x04, 0x20, 0x01, 0x28, 0x05, 0x52, 0x07,
+	0x07, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x07,
 	0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x12, 0x47, 0x0a, 0x0c, 0x61, 0x63, 0x74, 0x69, 0x76,
 	0x65, 0x5f, 0x73, 0x69, 0x6e, 0x63, 0x65, 0x18, 0x05, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e,
 	0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e,
@@ -4765,7 +4765,7 @@ var file_verana_tr_v1_types_proto_rawDesc = []byte{
 	0x01, 0x90, 0xdf, 0x1f, 0x01, 0x52, 0x08, 0x61, 0x72, 0x63, 0x68, 0x69, 0x76, 0x65, 0x64, 0x12,
 	0x10, 0x0a, 0x03, 0x61, 0x6b, 0x61, 0x18, 0x08, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x61, 0x6b,
 	0x61, 0x12, 0x25, 0x0a, 0x0e, 0x61, 0x63, 0x74, 0x69, 0x76, 0x65, 0x5f, 0x76, 0x65, 0x72, 0x73,
-	0x69, 0x6f, 0x6e, 0x18, 0x09, 0x20, 0x01, 0x28, 0x05, 0x52, 0x0d, 0x61, 0x63, 0x74, 0x69, 0x76,
+	0x69, 0x6f, 0x6e, 0x18, 0x09, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x0d, 0x61, 0x63, 0x74, 0x69, 0x76,
 	0x65, 0x56, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x12, 0x1a, 0x0a, 0x08, 0x6c, 0x61, 0x6e, 0x67,
 	0x75, 0x61, 0x67, 0x65, 0x18, 0x0a, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x6c, 0x61, 0x6e, 0x67,
 	0x75, 0x61, 0x67, 0x65, 0x12, 0x52, 0x0a, 0x08, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x73,

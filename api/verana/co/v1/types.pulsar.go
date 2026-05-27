@@ -141,8 +141,8 @@ func (x *fastReflection_Corporation) Range(f func(protoreflect.FieldDescriptor, 
 			return
 		}
 	}
-	if x.ActiveVersion != int32(0) {
-		value := protoreflect.ValueOfInt32(x.ActiveVersion)
+	if x.ActiveVersion != uint32(0) {
+		value := protoreflect.ValueOfUint32(x.ActiveVersion)
 		if !f(fd_Corporation_active_version, value) {
 			return
 		}
@@ -175,7 +175,7 @@ func (x *fastReflection_Corporation) Has(fd protoreflect.FieldDescriptor) bool {
 	case "verana.co.v1.Corporation.language":
 		return x.Language != ""
 	case "verana.co.v1.Corporation.active_version":
-		return x.ActiveVersion != int32(0)
+		return x.ActiveVersion != uint32(0)
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.co.v1.Corporation"))
@@ -205,7 +205,7 @@ func (x *fastReflection_Corporation) Clear(fd protoreflect.FieldDescriptor) {
 	case "verana.co.v1.Corporation.language":
 		x.Language = ""
 	case "verana.co.v1.Corporation.active_version":
-		x.ActiveVersion = int32(0)
+		x.ActiveVersion = uint32(0)
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.co.v1.Corporation"))
@@ -242,7 +242,7 @@ func (x *fastReflection_Corporation) Get(descriptor protoreflect.FieldDescriptor
 		return protoreflect.ValueOfString(value)
 	case "verana.co.v1.Corporation.active_version":
 		value := x.ActiveVersion
-		return protoreflect.ValueOfInt32(value)
+		return protoreflect.ValueOfUint32(value)
 	default:
 		if descriptor.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.co.v1.Corporation"))
@@ -276,7 +276,7 @@ func (x *fastReflection_Corporation) Set(fd protoreflect.FieldDescriptor, value 
 	case "verana.co.v1.Corporation.language":
 		x.Language = value.Interface().(string)
 	case "verana.co.v1.Corporation.active_version":
-		x.ActiveVersion = int32(value.Int())
+		x.ActiveVersion = uint32(value.Uint())
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.co.v1.Corporation"))
@@ -345,7 +345,7 @@ func (x *fastReflection_Corporation) NewField(fd protoreflect.FieldDescriptor) p
 	case "verana.co.v1.Corporation.language":
 		return protoreflect.ValueOfString("")
 	case "verana.co.v1.Corporation.active_version":
-		return protoreflect.ValueOfInt32(int32(0))
+		return protoreflect.ValueOfUint32(uint32(0))
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.co.v1.Corporation"))
@@ -779,7 +779,7 @@ func (x *fastReflection_Corporation) ProtoMethods() *protoiface.Methods {
 					}
 					b := dAtA[iNdEx]
 					iNdEx++
-					x.ActiveVersion |= int32(b&0x7F) << shift
+					x.ActiveVersion |= uint32(b&0x7F) << shift
 					if b < 0x80 {
 						break
 					}
@@ -996,8 +996,8 @@ func (x *fastReflection_CorporationWithGF) Range(f func(protoreflect.FieldDescri
 			return
 		}
 	}
-	if x.ActiveVersion != int32(0) {
-		value := protoreflect.ValueOfInt32(x.ActiveVersion)
+	if x.ActiveVersion != uint32(0) {
+		value := protoreflect.ValueOfUint32(x.ActiveVersion)
 		if !f(fd_CorporationWithGF_active_version, value) {
 			return
 		}
@@ -1036,7 +1036,7 @@ func (x *fastReflection_CorporationWithGF) Has(fd protoreflect.FieldDescriptor) 
 	case "verana.co.v1.CorporationWithGF.language":
 		return x.Language != ""
 	case "verana.co.v1.CorporationWithGF.active_version":
-		return x.ActiveVersion != int32(0)
+		return x.ActiveVersion != uint32(0)
 	case "verana.co.v1.CorporationWithGF.versions":
 		return len(x.Versions) != 0
 	default:
@@ -1068,7 +1068,7 @@ func (x *fastReflection_CorporationWithGF) Clear(fd protoreflect.FieldDescriptor
 	case "verana.co.v1.CorporationWithGF.language":
 		x.Language = ""
 	case "verana.co.v1.CorporationWithGF.active_version":
-		x.ActiveVersion = int32(0)
+		x.ActiveVersion = uint32(0)
 	case "verana.co.v1.CorporationWithGF.versions":
 		x.Versions = nil
 	default:
@@ -1107,7 +1107,7 @@ func (x *fastReflection_CorporationWithGF) Get(descriptor protoreflect.FieldDesc
 		return protoreflect.ValueOfString(value)
 	case "verana.co.v1.CorporationWithGF.active_version":
 		value := x.ActiveVersion
-		return protoreflect.ValueOfInt32(value)
+		return protoreflect.ValueOfUint32(value)
 	case "verana.co.v1.CorporationWithGF.versions":
 		if len(x.Versions) == 0 {
 			return protoreflect.ValueOfList(&_CorporationWithGF_8_list{})
@@ -1147,7 +1147,7 @@ func (x *fastReflection_CorporationWithGF) Set(fd protoreflect.FieldDescriptor, 
 	case "verana.co.v1.CorporationWithGF.language":
 		x.Language = value.Interface().(string)
 	case "verana.co.v1.CorporationWithGF.active_version":
-		x.ActiveVersion = int32(value.Int())
+		x.ActiveVersion = uint32(value.Uint())
 	case "verana.co.v1.CorporationWithGF.versions":
 		lv := value.List()
 		clv := lv.(*_CorporationWithGF_8_list)
@@ -1226,7 +1226,7 @@ func (x *fastReflection_CorporationWithGF) NewField(fd protoreflect.FieldDescrip
 	case "verana.co.v1.CorporationWithGF.language":
 		return protoreflect.ValueOfString("")
 	case "verana.co.v1.CorporationWithGF.active_version":
-		return protoreflect.ValueOfInt32(int32(0))
+		return protoreflect.ValueOfUint32(uint32(0))
 	case "verana.co.v1.CorporationWithGF.versions":
 		list := []*v1.GovernanceFrameworkVersionWithDocs{}
 		return protoreflect.ValueOfList(&_CorporationWithGF_8_list{list: &list})
@@ -1685,7 +1685,7 @@ func (x *fastReflection_CorporationWithGF) ProtoMethods() *protoiface.Methods {
 					}
 					b := dAtA[iNdEx]
 					iNdEx++
-					x.ActiveVersion |= int32(b&0x7F) << shift
+					x.ActiveVersion |= uint32(b&0x7F) << shift
 					if b < 0x80 {
 						break
 					}
@@ -1787,7 +1787,7 @@ type Corporation struct {
 	Created       *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=created,proto3" json:"created,omitempty"`
 	Modified      *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=modified,proto3" json:"modified,omitempty"`
 	Language      string                 `protobuf:"bytes,6,opt,name=language,proto3" json:"language,omitempty"`
-	ActiveVersion int32                  `protobuf:"varint,7,opt,name=active_version,json=activeVersion,proto3" json:"active_version,omitempty"`
+	ActiveVersion uint32                 `protobuf:"varint,7,opt,name=active_version,json=activeVersion,proto3" json:"active_version,omitempty"`
 }
 
 func (x *Corporation) Reset() {
@@ -1852,7 +1852,7 @@ func (x *Corporation) GetLanguage() string {
 	return ""
 }
 
-func (x *Corporation) GetActiveVersion() int32 {
+func (x *Corporation) GetActiveVersion() uint32 {
 	if x != nil {
 		return x.ActiveVersion
 	}
@@ -1873,7 +1873,7 @@ type CorporationWithGF struct {
 	Created       *timestamppb.Timestamp                   `protobuf:"bytes,4,opt,name=created,proto3" json:"created,omitempty"`
 	Modified      *timestamppb.Timestamp                   `protobuf:"bytes,5,opt,name=modified,proto3" json:"modified,omitempty"`
 	Language      string                                   `protobuf:"bytes,6,opt,name=language,proto3" json:"language,omitempty"`
-	ActiveVersion int32                                    `protobuf:"varint,7,opt,name=active_version,json=activeVersion,proto3" json:"active_version,omitempty"`
+	ActiveVersion uint32                                   `protobuf:"varint,7,opt,name=active_version,json=activeVersion,proto3" json:"active_version,omitempty"`
 	Versions      []*v1.GovernanceFrameworkVersionWithDocs `protobuf:"bytes,8,rep,name=versions,proto3" json:"versions,omitempty"`
 }
 
@@ -1939,7 +1939,7 @@ func (x *CorporationWithGF) GetLanguage() string {
 	return ""
 }
 
-func (x *CorporationWithGF) GetActiveVersion() int32 {
+func (x *CorporationWithGF) GetActiveVersion() uint32 {
 	if x != nil {
 		return x.ActiveVersion
 	}
@@ -1985,7 +1985,7 @@ var file_verana_co_v1_types_proto_rawDesc = []byte{
 	0x64, 0x69, 0x66, 0x69, 0x65, 0x64, 0x12, 0x1a, 0x0a, 0x08, 0x6c, 0x61, 0x6e, 0x67, 0x75, 0x61,
 	0x67, 0x65, 0x18, 0x06, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x6c, 0x61, 0x6e, 0x67, 0x75, 0x61,
 	0x67, 0x65, 0x12, 0x25, 0x0a, 0x0e, 0x61, 0x63, 0x74, 0x69, 0x76, 0x65, 0x5f, 0x76, 0x65, 0x72,
-	0x73, 0x69, 0x6f, 0x6e, 0x18, 0x07, 0x20, 0x01, 0x28, 0x05, 0x52, 0x0d, 0x61, 0x63, 0x74, 0x69,
+	0x73, 0x69, 0x6f, 0x6e, 0x18, 0x07, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x0d, 0x61, 0x63, 0x74, 0x69,
 	0x76, 0x65, 0x56, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x22, 0x9e, 0x03, 0x0a, 0x11, 0x43, 0x6f,
 	0x72, 0x70, 0x6f, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x57, 0x69, 0x74, 0x68, 0x47, 0x46, 0x12,
 	0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04, 0x52, 0x02, 0x69, 0x64, 0x12,
@@ -2006,7 +2006,7 @@ var file_verana_co_v1_types_proto_rawDesc = []byte{
 	0x0a, 0x08, 0x6c, 0x61, 0x6e, 0x67, 0x75, 0x61, 0x67, 0x65, 0x18, 0x06, 0x20, 0x01, 0x28, 0x09,
 	0x52, 0x08, 0x6c, 0x61, 0x6e, 0x67, 0x75, 0x61, 0x67, 0x65, 0x12, 0x25, 0x0a, 0x0e, 0x61, 0x63,
 	0x74, 0x69, 0x76, 0x65, 0x5f, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x18, 0x07, 0x20, 0x01,
-	0x28, 0x05, 0x52, 0x0d, 0x61, 0x63, 0x74, 0x69, 0x76, 0x65, 0x56, 0x65, 0x72, 0x73, 0x69, 0x6f,
+	0x28, 0x0d, 0x52, 0x0d, 0x61, 0x63, 0x74, 0x69, 0x76, 0x65, 0x56, 0x65, 0x72, 0x73, 0x69, 0x6f,
 	0x6e, 0x12, 0x57, 0x0a, 0x08, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x73, 0x18, 0x08, 0x20,
 	0x03, 0x28, 0x0b, 0x32, 0x30, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x67, 0x66, 0x2e,
 	0x76, 0x31, 0x2e, 0x47, 0x6f, 0x76, 0x65, 0x72, 0x6e, 0x61, 0x6e, 0x63, 0x65, 0x46, 0x72, 0x61,

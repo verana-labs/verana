@@ -39,6 +39,6 @@ func (a GFKeeperAdapter) CreateInitialGFVersionForCorporation(ctx context.Contex
 	return a.k.CreateInitialGFVersionForCorporation(ctx, corpID, language, docURL, docDigestSRI)
 }
 
-func (a GFKeeperAdapter) ListVersionsByCorporation(ctx context.Context, corpID uint64, activeVersion int32, activeOnly bool, preferredLang string) ([]gftypes.GovernanceFrameworkVersionWithDocs, error) {
+func (a GFKeeperAdapter) ListVersionsByCorporation(ctx context.Context, corpID uint64, activeVersion uint32, activeOnly bool, preferredLang string) ([]gftypes.GovernanceFrameworkVersionWithDocs, error) {
 	return a.k.ListVersionsByCorporation(ctx, corpID, activeVersion, activeOnly, preferredLang)
 }

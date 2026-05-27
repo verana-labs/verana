@@ -15,20 +15,30 @@ import (
 //
 // Order of operations (atomic — any error rolls back the whole tx):
 //  1. ValidateBasic (signer, members, decision_policy, did, language, urls).
-//  2. Allocate x/group Group + GroupPolicy in one call (CreateGroupWithPolicy
+//  2. DID uniqueness precondition: msg.did MUST NOT collide with any existing
+//     Corporation. Checked before x/group work so a duplicate-DID submission
+//     fails fast without wasting group-creation cycles (spec: precondition
+//     checks precede execution).
+//  3. Allocate x/group Group + GroupPolicy in one call (CreateGroupWithPolicy
 //     with group_policy_as_admin=true). The returned group_policy_address is
 //     the on-chain identity of the Corporation.
-//  3. Uniqueness gates: policy_address MUST NOT already be bound; did MUST be
-//     globally unique. These are AUTHZ-CHECK-5 prerequisites; without them
-//     ResolveByPolicyAddress would have ambiguous resolution.
-//  4. Allocate co.id, persist Corporation + reverse indexes.
-//  5. Call gfKeeper.CreateInitialGFVersionForCorporation to seed v1 GF.
-//  6. Emit create_corporation event.
+//  4. policy_address uniqueness gate (defence-in-depth: x/group returns a
+//     deterministic address, so this should never fire in practice).
+//  5. Allocate co.id, persist Corporation + reverse indexes.
+//  6. Call gfKeeper.CreateInitialGFVersionForCorporation to seed v1 GF.
+//  7. Emit create_corporation event.
 func (ms msgServer) CreateCorporation(goCtx context.Context, msg *types.MsgCreateCorporation) (*types.MsgCreateCorporationResponse, error) {
 	if err := msg.ValidateBasic(); err != nil {
 		return nil, err
 	}
 	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	// DID uniqueness precondition — runs BEFORE x/group call.
+	if has, err := ms.CorporationByDID.Has(ctx, msg.Did); err != nil {
+		return nil, fmt.Errorf("check did uniqueness: %w", err)
+	} else if has {
+		return nil, errors.Wrap(types.ErrDIDAlreadyExists, msg.Did)
+	}
 
 	groupMembers := make([]group.MemberRequest, len(msg.Members))
 	for i, m := range msg.Members {
@@ -57,11 +67,6 @@ func (ms msgServer) CreateCorporation(goCtx context.Context, msg *types.MsgCreat
 		return nil, fmt.Errorf("check policy_address uniqueness: %w", err)
 	} else if has {
 		return nil, errors.Wrap(types.ErrPolicyAddressAlreadyBound, policyAddr)
-	}
-	if has, err := ms.CorporationByDID.Has(ctx, msg.Did); err != nil {
-		return nil, fmt.Errorf("check did uniqueness: %w", err)
-	} else if has {
-		return nil, errors.Wrap(types.ErrDIDAlreadyExists, msg.Did)
 	}
 
 	coID, err := ms.GetNextID(ctx, "co")

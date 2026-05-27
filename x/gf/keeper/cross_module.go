@@ -31,13 +31,14 @@ func (k Keeper) CreateInitialGFVersionForCorporation(
 	if corpID == 0 {
 		return cerrors.Wrap(types.ErrInvalidSubject, "corporation_id must be > 0")
 	}
-	if has, err := k.GFVersionByCorporation.Has(ctx, collections.Join(corpID, int32(1))); err != nil {
+	if has, err := k.GFVersionByCorporation.Has(ctx, collections.Join(corpID, uint32(1))); err != nil {
 		return fmt.Errorf("check existing gfv: %w", err)
 	} else if has {
 		return cerrors.Wrapf(types.ErrInvalidVersion, "initial GFV for corporation %d already exists", corpID)
 	}
 
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	now := sdkCtx.BlockTime()
 
 	gfvID, err := k.GetNextID(sdkCtx, "gfv")
 	if err != nil {
@@ -46,13 +47,14 @@ func (k Keeper) CreateInitialGFVersionForCorporation(
 	gfv := types.GovernanceFrameworkVersion{
 		Id:            gfvID,
 		CorporationId: corpID,
-		Created:       sdkCtx.BlockTime(),
+		Created:       now,
 		Version:       1,
+		ActiveSince:   now, // MOD-CO MSG-1 seed: v1 is born active per spec.
 	}
 	if err := k.GFVersion.Set(ctx, gfv.Id, gfv); err != nil {
 		return fmt.Errorf("persist gfv: %w", err)
 	}
-	if err := k.GFVersionByCorporation.Set(ctx, collections.Join(corpID, int32(1)), gfv.Id); err != nil {
+	if err := k.GFVersionByCorporation.Set(ctx, collections.Join(corpID, uint32(1)), gfv.Id); err != nil {
 		return fmt.Errorf("persist gfv corp index: %w", err)
 	}
 
@@ -63,7 +65,7 @@ func (k Keeper) CreateInitialGFVersionForCorporation(
 	gfd := types.GovernanceFrameworkDocument{
 		Id:        gfdID,
 		GfvId:     gfv.Id,
-		Created:   sdkCtx.BlockTime(),
+		Created:   now,
 		Language:  language,
 		Url:       docURL,
 		DigestSri: docDigestSRI,
@@ -95,7 +97,7 @@ func (k Keeper) CreateInitialGFVersionForCorporation(
 func (k Keeper) ListVersionsByCorporation(
 	ctx context.Context,
 	corpID uint64,
-	activeVersion int32,
+	activeVersion uint32,
 	activeOnly bool,
 	preferredLang string,
 ) ([]types.GovernanceFrameworkVersionWithDocs, error) {
@@ -104,7 +106,7 @@ func (k Keeper) ListVersionsByCorporation(
 	}
 
 	var gfvIDs []uint64
-	iter, err := k.GFVersionByCorporation.Iterate(ctx, collections.NewPrefixedPairRange[uint64, int32](corpID))
+	iter, err := k.GFVersionByCorporation.Iterate(ctx, collections.NewPrefixedPairRange[uint64, uint32](corpID))
 	if err != nil {
 		return nil, fmt.Errorf("iterate gfv index: %w", err)
 	}

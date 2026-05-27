@@ -20,8 +20,8 @@ func TestIncreaseActiveGovernanceFrameworkVersion(t *testing.T) {
 			view:  types.CorporationView{Id: 1, PolicyAddress: testCorp, Language: "en", ActiveVersion: 0},
 			found: true,
 		}
-		var newActive int32
-		corp.setFn = func(_ uint64, v int32) error { newActive = v; return nil }
+		var newActive uint32
+		corp.setFn = func(_ uint64, v uint32) error { newActive = v; return nil }
 
 		eco := &mockEcosystem{}
 		k, ctx := keepertest.GfKeeperWithDelegation(t, mockDelegation{}, eco, corp)
@@ -41,7 +41,7 @@ func TestIncreaseActiveGovernanceFrameworkVersion(t *testing.T) {
 			EcosystemId: 0,
 		})
 		require.NoError(t, err)
-		require.Equal(t, int32(1), newActive)
+		require.Equal(t, uint32(1), newActive)
 
 		// GFV active_since should now be set.
 		_ = k.GFVersion.Walk(ctx, nil, func(_ uint64, gfv types.GovernanceFrameworkVersion) (bool, error) {
@@ -157,7 +157,7 @@ func TestIncreaseActiveGovernanceFrameworkVersion(t *testing.T) {
 		corp := &mockCorporation{
 			view:  types.CorporationView{Id: 1, PolicyAddress: testCorp, Language: "en", ActiveVersion: 0},
 			found: true,
-			setFn: func(_ uint64, _ int32) error {
+			setFn: func(_ uint64, _ uint32) error {
 				return errors.New("forced setter failure")
 			},
 		}
@@ -184,7 +184,7 @@ func TestIncreaseActiveGovernanceFrameworkVersion(t *testing.T) {
 		eco := &mockEcosystem{
 			view:  types.EcosystemView{Id: 7, CorporationID: 1, Language: "en", ActiveVersion: 0},
 			found: true,
-			setFn: func(_ uint64, _ int32) error {
+			setFn: func(_ uint64, _ uint32) error {
 				return errors.New("forced eco setter failure")
 			},
 		}

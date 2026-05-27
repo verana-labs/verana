@@ -39,7 +39,7 @@ type adapterStubEco struct{}
 func (adapterStubEco) GetEcosystemView(_ context.Context, _ uint64) (gftypes.EcosystemView, bool) {
 	return gftypes.EcosystemView{}, false
 }
-func (adapterStubEco) SetEcosystemActiveVersion(_ context.Context, _ uint64, _ int32) error {
+func (adapterStubEco) SetEcosystemActiveVersion(_ context.Context, _ uint64, _ uint32) error {
 	return nil
 }
 
@@ -85,7 +85,7 @@ func TestGFKeeperAdapter_PassThrough(t *testing.T) {
 	versions, err := a.ListVersionsByCorporation(ctx, 42, 1, false, "")
 	require.NoError(t, err)
 	require.Len(t, versions, 1)
-	require.Equal(t, int32(1), versions[0].Version)
+	require.Equal(t, uint32(1), versions[0].Version)
 	require.Equal(t, uint64(42), versions[0].CorporationId)
 
 	versions, err = a.ListVersionsByCorporation(ctx, 42, 99, true, "")

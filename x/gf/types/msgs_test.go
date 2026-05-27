@@ -91,11 +91,8 @@ func TestMsgAddGovernanceFrameworkDocument_ValidateBasic(t *testing.T) {
 		m.Version = 0
 		require.ErrorIs(t, m.ValidateBasic(), types.ErrInvalidVersion)
 	})
-	t.Run("negative version", func(t *testing.T) {
-		m := valid
-		m.Version = -1
-		require.ErrorIs(t, m.ValidateBasic(), types.ErrInvalidVersion)
-	})
+	// Negative version is unrepresentable now that Version is uint32 — the
+	// type system enforces it at compile time, so no runtime test is needed.
 }
 
 func TestMsgIncreaseActiveGovernanceFrameworkVersion_ValidateBasic(t *testing.T) {

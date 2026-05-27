@@ -26,7 +26,7 @@ type (
 		TrustRegistry         collections.Map[uint64, types.TrustRegistry]
 		TrustRegistryDIDIndex collections.Map[string, uint64]                                          // Index for DID lookups
 		GFVersion             collections.Map[uint64, types.GovernanceFrameworkVersion]
-		GFVersionByTR         collections.Map[collections.Pair[uint64, int32], uint64]                 // Secondary index: (tr_id, version) -> gfv_id
+		GFVersionByTR         collections.Map[collections.Pair[uint64, uint32], uint64]                // Secondary index: (tr_id, version) -> gfv_id
 		GFDocument            collections.Map[uint64, types.GovernanceFrameworkDocument]
 		Counter               collections.Map[string, uint64]
 		// module references
@@ -56,7 +56,7 @@ func NewKeeper(
 		TrustRegistry:         collections.NewMap(sb, types.TrustRegistryKey, "trust_registry", collections.Uint64Key, codec.CollValue[types.TrustRegistry](cdc)),
 		TrustRegistryDIDIndex: collections.NewMap(sb, types.TrustRegistryDIDIndex, "trust_registry_did_index", collections.StringKey, collections.Uint64Value),
 		GFVersion:             collections.NewMap(sb, types.GovernanceFrameworkVersionKey, "gf_version", collections.Uint64Key, codec.CollValue[types.GovernanceFrameworkVersion](cdc)),
-		GFVersionByTR:         collections.NewMap(sb, types.GFVersionByTRKey, "gf_version_by_tr", collections.PairKeyCodec(collections.Uint64Key, collections.Int32Key), collections.Uint64Value),
+		GFVersionByTR:         collections.NewMap(sb, types.GFVersionByTRKey, "gf_version_by_tr", collections.PairKeyCodec(collections.Uint64Key, collections.Uint32Key), collections.Uint64Value),
 		GFDocument:            collections.NewMap(sb, types.GovernanceFrameworkDocumentKey, "gf_document", collections.Uint64Key, codec.CollValue[types.GovernanceFrameworkDocument](cdc)),
 		Counter:               collections.NewMap(sb, types.CounterKey, "counter", collections.StringKey, collections.Uint64Value),
 		delegationKeeper:      delegationKeeper,

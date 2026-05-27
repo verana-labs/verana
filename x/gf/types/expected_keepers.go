@@ -20,7 +20,7 @@ type EcosystemView struct {
 	Id            uint64
 	CorporationID uint64
 	Language      string
-	ActiveVersion int32
+	ActiveVersion uint32
 }
 
 // EcosystemKeeper is the minimum surface MOD-GF needs for ecosystem-targeted GF ops.
@@ -29,7 +29,7 @@ type EcosystemView struct {
 // will fail the subject controller check until MOD-CO and the rename land).
 type EcosystemKeeper interface {
 	GetEcosystemView(ctx context.Context, ecosystemID uint64) (EcosystemView, bool)
-	SetEcosystemActiveVersion(ctx context.Context, ecosystemID uint64, newVersion int32) error
+	SetEcosystemActiveVersion(ctx context.Context, ecosystemID uint64, newVersion uint32) error
 }
 
 // CorporationView is the read shape MOD-GF needs about a Corporation subject.
@@ -39,7 +39,7 @@ type CorporationView struct {
 	Id            uint64
 	PolicyAddress string
 	Language      string
-	ActiveVersion int32
+	ActiveVersion uint32
 }
 
 // CorporationKeeper is the minimum surface MOD-GF needs for:
@@ -56,5 +56,5 @@ type CorporationView struct {
 type CorporationKeeper interface {
 	ResolveByPolicyAddress(ctx context.Context, policyAddress string) (CorporationView, bool)
 	GetByID(ctx context.Context, corporationID uint64) (CorporationView, bool)
-	SetActiveVersion(ctx context.Context, corporationID uint64, newVersion int32) error
+	SetActiveVersion(ctx context.Context, corporationID uint64, newVersion uint32) error
 }

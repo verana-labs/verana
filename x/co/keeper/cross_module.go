@@ -52,7 +52,7 @@ func (a CoAsGFCorporationKeeper) GetByID(ctx context.Context, corporationID uint
 }
 
 // SetActiveVersion is called by MOD-GF MSG-2 (IncreaseActiveGovernanceFrameworkVersion).
-func (a CoAsGFCorporationKeeper) SetActiveVersion(ctx context.Context, corporationID uint64, newVersion int32) error {
+func (a CoAsGFCorporationKeeper) SetActiveVersion(ctx context.Context, corporationID uint64, newVersion uint32) error {
 	co, err := a.k.Corporation.Get(ctx, corporationID)
 	if err != nil {
 		return fmt.Errorf("corporation %d not found: %w", corporationID, err)

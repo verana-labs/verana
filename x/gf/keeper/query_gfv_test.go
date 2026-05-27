@@ -187,8 +187,8 @@ func TestQueryListGovernanceFrameworkVersions(t *testing.T) {
 		all, err := qs.ListGovernanceFrameworkVersions(ctx, &types.QueryListGovernanceFrameworkVersionsRequest{CorporationId: 1})
 		require.NoError(t, err)
 		require.Len(t, all.Versions, 2)
-		require.Equal(t, int32(1), all.Versions[0].Version)
-		require.Equal(t, int32(2), all.Versions[1].Version)
+		require.Equal(t, uint32(1), all.Versions[0].Version)
+		require.Equal(t, uint32(2), all.Versions[1].Version)
 
 		activeOnly, err := qs.ListGovernanceFrameworkVersions(ctx, &types.QueryListGovernanceFrameworkVersionsRequest{
 			CorporationId: 1,
@@ -196,6 +196,6 @@ func TestQueryListGovernanceFrameworkVersions(t *testing.T) {
 		})
 		require.NoError(t, err)
 		require.Len(t, activeOnly.Versions, 1)
-		require.Equal(t, int32(1), activeOnly.Versions[0].Version)
+		require.Equal(t, uint32(1), activeOnly.Versions[0].Version)
 	})
 }

@@ -10,8 +10,11 @@ import (
 	"github.com/verana-labs/verana/x/co/types"
 )
 
+// Additional bech32 fixture for the "second corporation" scenarios.
+const tkCorpB = "cosmos1lyfknrsmxhlr7rflvuz6x7jjjpnx4s5uywj78f" // corp-test-2
+
 func TestUpdateCorporation_Happy(t *testing.T) {
-	grp := &mockGroup{policy: "cosmos1corp"}
+	grp := &mockGroup{policy: tkPolicy}
 	gf := &mockGF{}
 	k, ctx := keepertest.CoKeeper(t, &mockDelegation{}, grp, gf)
 	ms := keeper.NewMsgServerImpl(k)
@@ -20,8 +23,8 @@ func TestUpdateCorporation_Happy(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = ms.UpdateCorporation(ctx, &types.MsgUpdateCorporation{
-		Corporation: "cosmos1corp",
-		Operator:    "cosmos1op",
+		Corporation: tkPolicy,
+		Operator:    tkOp,
 		Did:         "did:example:rotated",
 	})
 	require.NoError(t, err)
@@ -42,8 +45,8 @@ func TestUpdateCorporation_UnregisteredAccount(t *testing.T) {
 	k, ctx := keepertest.CoKeeper(t, &mockDelegation{}, &mockGroup{}, &mockGF{})
 	ms := keeper.NewMsgServerImpl(k)
 	_, err := ms.UpdateCorporation(ctx, &types.MsgUpdateCorporation{
-		Corporation: "cosmos1nobody",
-		Operator:    "cosmos1op",
+		Corporation: tkCorp, // valid bech32 but not registered
+		Operator:    tkOp,
 		Did:         "did:example:rotated",
 	})
 	require.ErrorIs(t, err, types.ErrCorporationNotRegistered)
@@ -51,7 +54,7 @@ func TestUpdateCorporation_UnregisteredAccount(t *testing.T) {
 
 func TestUpdateCorporation_DEDenies(t *testing.T) {
 	del := &mockDelegation{err: errAuthDenied}
-	grp := &mockGroup{policy: "cosmos1corp"}
+	grp := &mockGroup{policy: tkPolicy}
 	k, ctx := keepertest.CoKeeper(t, del, grp, &mockGF{})
 	ms := keeper.NewMsgServerImpl(k)
 
@@ -59,15 +62,15 @@ func TestUpdateCorporation_DEDenies(t *testing.T) {
 	require.NoError(t, err) // create doesn't go through DE
 
 	_, err = ms.UpdateCorporation(ctx, &types.MsgUpdateCorporation{
-		Corporation: "cosmos1corp",
-		Operator:    "cosmos1op",
+		Corporation: tkPolicy,
+		Operator:    tkOp,
 		Did:         "did:example:rotated",
 	})
 	require.ErrorIs(t, err, errAuthDenied)
 }
 
 func TestUpdateCorporation_NoopOnSameDID(t *testing.T) {
-	grp := &mockGroup{policy: "cosmos1corp"}
+	grp := &mockGroup{policy: tkPolicy}
 	del := &mockDelegation{}
 	k, ctx := keepertest.CoKeeper(t, del, grp, &mockGF{})
 	ms := keeper.NewMsgServerImpl(k)
@@ -76,8 +79,8 @@ func TestUpdateCorporation_NoopOnSameDID(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = ms.UpdateCorporation(ctx, &types.MsgUpdateCorporation{
-		Corporation: "cosmos1corp",
-		Operator:    "cosmos1op",
+		Corporation: tkPolicy,
+		Operator:    tkOp,
 		Did:         "did:example:1", // unchanged
 	})
 	require.NoError(t, err)
@@ -95,14 +98,14 @@ func TestUpdateCorporation_NoopOnSameDID(t *testing.T) {
 
 func TestUpdateCorporation_RejectsDIDAlreadyBoundElsewhere(t *testing.T) {
 	gf := &mockGF{}
-	grp := &mockGroup{policy: "cosmos1corp_a"}
+	grp := &mockGroup{policy: tkPolicy}
 	k, ctx := keepertest.CoKeeper(t, &mockDelegation{}, grp, gf)
 	ms := keeper.NewMsgServerImpl(k)
 
 	_, err := ms.CreateCorporation(ctx, validCreateMsg(t))
 	require.NoError(t, err)
 
-	grp.policy = "cosmos1corp_b"
+	grp.policy = tkCorpB
 	msg2 := validCreateMsg(t)
 	msg2.Did = "did:example:2"
 	_, err = ms.CreateCorporation(ctx, msg2)
@@ -110,8 +113,8 @@ func TestUpdateCorporation_RejectsDIDAlreadyBoundElsewhere(t *testing.T) {
 
 	// Try to rotate corp_a → corp_b's DID.
 	_, err = ms.UpdateCorporation(ctx, &types.MsgUpdateCorporation{
-		Corporation: "cosmos1corp_a",
-		Operator:    "cosmos1op",
+		Corporation: tkPolicy,
+		Operator:    tkOp,
 		Did:         "did:example:2",
 	})
 	require.ErrorIs(t, err, types.ErrDIDAlreadyExists)

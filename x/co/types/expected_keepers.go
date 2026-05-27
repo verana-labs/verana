@@ -38,5 +38,5 @@ type GroupKeeper interface {
 // concern.
 type GFKeeper interface {
 	CreateInitialGFVersionForCorporation(ctx context.Context, corpID uint64, language, docURL, docDigestSRI string) error
-	ListVersionsByCorporation(ctx context.Context, corpID uint64, activeVersion int32, activeOnly bool, preferredLang string) ([]gftypes.GovernanceFrameworkVersionWithDocs, error)
+	ListVersionsByCorporation(ctx context.Context, corpID uint64, activeVersion uint32, activeOnly bool, preferredLang string) ([]gftypes.GovernanceFrameworkVersionWithDocs, error)
 }

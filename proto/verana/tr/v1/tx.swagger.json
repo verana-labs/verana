@@ -271,7 +271,7 @@
         },
         "version": {
           "type": "integer",
-          "format": "int32",
+          "format": "int64",
           "title": "version is the targeted version (mandatory)"
         }
       },

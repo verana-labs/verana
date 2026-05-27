@@ -111,7 +111,7 @@
         ]
       }
     },
-    "/verana/co/v1/params": {
+    "/co/v1/params": {
       "get": {
         "summary": "Params returns the total set of module parameters.",
         "operationId": "Query_Params",
@@ -192,7 +192,7 @@
         },
         "active_version": {
           "type": "integer",
-          "format": "int32"
+          "format": "int64"
         },
         "versions": {
           "type": "array",
@@ -284,7 +284,7 @@
         },
         "version": {
           "type": "integer",
-          "format": "int32"
+          "format": "int64"
         },
         "active_since": {
           "type": "string",

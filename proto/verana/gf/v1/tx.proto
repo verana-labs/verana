@@ -63,7 +63,7 @@ message MsgAddGovernanceFrameworkDocument {
   // doc_digest_sri is the SRI digest of the document.
   string doc_digest_sri = 6;
   // version is the target governance framework version.
-  int32 version = 7;
+  uint32 version = 7;
 }
 
 message MsgAddGovernanceFrameworkDocumentResponse {}

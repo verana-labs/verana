@@ -65,7 +65,7 @@ type mockGF struct {
 	listErr   error
 	listArgs  struct {
 		corpID        uint64
-		activeVersion int32
+		activeVersion uint32
 		activeOnly    bool
 		preferredLang string
 	}
@@ -81,7 +81,7 @@ func (m *mockGF) CreateInitialGFVersionForCorporation(_ context.Context, corpID 
 	return m.createErr
 }
 
-func (m *mockGF) ListVersionsByCorporation(_ context.Context, corpID uint64, activeVersion int32, activeOnly bool, preferredLang string) ([]gftypes.GovernanceFrameworkVersionWithDocs, error) {
+func (m *mockGF) ListVersionsByCorporation(_ context.Context, corpID uint64, activeVersion uint32, activeOnly bool, preferredLang string) ([]gftypes.GovernanceFrameworkVersionWithDocs, error) {
 	m.listCalls++
 	m.listArgs.corpID = corpID
 	m.listArgs.activeVersion = activeVersion

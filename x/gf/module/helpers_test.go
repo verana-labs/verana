@@ -22,7 +22,7 @@ type stubEcosystemKeeper struct{}
 func (*stubEcosystemKeeper) GetEcosystemView(_ context.Context, _ uint64) (types.EcosystemView, bool) {
 	return types.EcosystemView{}, false
 }
-func (*stubEcosystemKeeper) SetEcosystemActiveVersion(_ context.Context, _ uint64, _ int32) error {
+func (*stubEcosystemKeeper) SetEcosystemActiveVersion(_ context.Context, _ uint64, _ uint32) error {
 	return nil
 }
 
@@ -34,6 +34,6 @@ func (*stubCorporationKeeper) ResolveByPolicyAddress(_ context.Context, _ string
 func (*stubCorporationKeeper) GetByID(_ context.Context, _ uint64) (types.CorporationView, bool) {
 	return types.CorporationView{}, false
 }
-func (*stubCorporationKeeper) SetActiveVersion(_ context.Context, _ uint64, _ int32) error {
+func (*stubCorporationKeeper) SetActiveVersion(_ context.Context, _ uint64, _ uint32) error {
 	return nil
 }

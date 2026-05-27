@@ -1,5 +1,9 @@
 package types
 
+import (
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+)
+
 func DefaultGenesis() *GenesisState {
 	return &GenesisState{
 		Params:       DefaultParams(),
@@ -7,9 +11,9 @@ func DefaultGenesis() *GenesisState {
 	}
 }
 
-// Validate performs basic genesis state validation. Enforces invariants that
-// the runtime keeper relies on: unique id, unique policy_address, unique did,
-// and valid language tag.
+// Validate performs basic genesis state validation. Enforces invariants the
+// runtime keeper relies on: unique id, unique policy_address, unique did,
+// non-zero & monotone timestamps, and valid language tag.
 func (gs GenesisState) Validate() error {
 	if err := gs.Params.Validate(); err != nil {
 		return err
@@ -27,7 +31,7 @@ func (gs GenesisState) Validate() error {
 		ids[co.Id] = struct{}{}
 
 		if co.PolicyAddress == "" {
-			return ErrPolicyAddressAlreadyBound.Wrap("policy_address is required")
+			return sdkerrors.ErrInvalidAddress.Wrap("policy_address is required")
 		}
 		if _, dup := addrs[co.PolicyAddress]; dup {
 			return ErrPolicyAddressAlreadyBound.Wrap(co.PolicyAddress)
@@ -44,6 +48,16 @@ func (gs GenesisState) Validate() error {
 
 		if !IsValidBCP47(co.Language) {
 			return ErrInvalidLanguage.Wrap(co.Language)
+		}
+
+		if co.Created.IsZero() {
+			return ErrInvalidTimestamp.Wrapf("corporation %d: created is required", co.Id)
+		}
+		if co.Modified.IsZero() {
+			return ErrInvalidTimestamp.Wrapf("corporation %d: modified is required", co.Id)
+		}
+		if co.Modified.Before(co.Created) {
+			return ErrInvalidTimestamp.Wrapf("corporation %d: modified (%s) is before created (%s)", co.Id, co.Modified, co.Created)
 		}
 	}
 	return nil

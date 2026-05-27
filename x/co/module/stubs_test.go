@@ -27,7 +27,7 @@ type stubGF struct{}
 func (stubGF) CreateInitialGFVersionForCorporation(_ context.Context, _ uint64, _, _, _ string) error {
 	return nil
 }
-func (stubGF) ListVersionsByCorporation(_ context.Context, _ uint64, _ int32, _ bool, _ string) ([]gftypes.GovernanceFrameworkVersionWithDocs, error) {
+func (stubGF) ListVersionsByCorporation(_ context.Context, _ uint64, _ uint32, _ bool, _ string) ([]gftypes.GovernanceFrameworkVersionWithDocs, error) {
 	return nil, nil
 }
 
@@ -44,7 +44,7 @@ type stubEcosystem struct{}
 func (stubEcosystem) GetEcosystemView(_ context.Context, _ uint64) (gftypes.EcosystemView, bool) {
 	return gftypes.EcosystemView{}, false
 }
-func (stubEcosystem) SetEcosystemActiveVersion(_ context.Context, _ uint64, _ int32) error {
+func (stubEcosystem) SetEcosystemActiveVersion(_ context.Context, _ uint64, _ uint32) error {
 	return nil
 }
 

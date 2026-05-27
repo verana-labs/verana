@@ -178,7 +178,7 @@
         },
         "version": {
           "type": "integer",
-          "format": "int32",
+          "format": "int64",
           "description": "version is the target governance framework version."
         }
       },

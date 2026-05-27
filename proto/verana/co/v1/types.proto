@@ -28,7 +28,7 @@ message Corporation {
     (amino.dont_omitempty) = true
   ];
   string language = 6;
-  int32 active_version = 7;
+  uint32 active_version = 7;
 }
 
 // CorporationWithGF is the query response shape including nested governance
@@ -49,7 +49,7 @@ message CorporationWithGF {
     (amino.dont_omitempty) = true
   ];
   string language = 6;
-  int32 active_version = 7;
+  uint32 active_version = 7;
   repeated verana.gf.v1.GovernanceFrameworkVersionWithDocs versions = 8 [
     (gogoproto.nullable) = false,
     (amino.dont_omitempty) = true

@@ -32,13 +32,13 @@ func (m mockDelegation) CheckOperatorAuthorization(_ context.Context, _, _, _ st
 type mockEcosystem struct {
 	view  types.EcosystemView
 	found bool
-	setFn func(uint64, int32) error
+	setFn func(uint64, uint32) error
 }
 
 func (m *mockEcosystem) GetEcosystemView(_ context.Context, _ uint64) (types.EcosystemView, bool) {
 	return m.view, m.found
 }
-func (m *mockEcosystem) SetEcosystemActiveVersion(_ context.Context, id uint64, v int32) error {
+func (m *mockEcosystem) SetEcosystemActiveVersion(_ context.Context, id uint64, v uint32) error {
 	if m.setFn != nil {
 		return m.setFn(id, v)
 	}
@@ -49,7 +49,7 @@ func (m *mockEcosystem) SetEcosystemActiveVersion(_ context.Context, id uint64, 
 type mockCorporation struct {
 	view  types.CorporationView
 	found bool
-	setFn func(uint64, int32) error
+	setFn func(uint64, uint32) error
 }
 
 func (m *mockCorporation) ResolveByPolicyAddress(_ context.Context, _ string) (types.CorporationView, bool) {
@@ -58,14 +58,14 @@ func (m *mockCorporation) ResolveByPolicyAddress(_ context.Context, _ string) (t
 func (m *mockCorporation) GetByID(_ context.Context, _ uint64) (types.CorporationView, bool) {
 	return m.view, m.found
 }
-func (m *mockCorporation) SetActiveVersion(_ context.Context, id uint64, v int32) error {
+func (m *mockCorporation) SetActiveVersion(_ context.Context, id uint64, v uint32) error {
 	if m.setFn != nil {
 		return m.setFn(id, v)
 	}
 	return nil
 }
 
-func validMsg(corp, op string, ecoID uint64, version int32) *types.MsgAddGovernanceFrameworkDocument {
+func validMsg(corp, op string, ecoID uint64, version uint32) *types.MsgAddGovernanceFrameworkDocument {
 	return &types.MsgAddGovernanceFrameworkDocument{
 		Corporation:  corp,
 		Operator:     op,
@@ -98,7 +98,7 @@ func TestAddGovernanceFrameworkDocument(t *testing.T) {
 			gfvCount++
 			require.Equal(t, uint64(1), gfv.CorporationId)
 			require.Zero(t, gfv.EcosystemId)
-			require.Equal(t, int32(1), gfv.Version)
+			require.Equal(t, uint32(1), gfv.Version)
 			require.True(t, gfv.ActiveSince.IsZero())
 			return false, nil
 		})
