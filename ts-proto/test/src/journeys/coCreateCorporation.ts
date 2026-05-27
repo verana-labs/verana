@@ -28,7 +28,7 @@ import {
 import { typeUrls } from "../helpers/registry";
 import { MsgCreateCorporation } from "../../../src/codec/verana/co/v1/tx";
 import { Any } from "../../../src/codec/google/protobuf/any";
-import { encodeThresholdDecisionPolicy } from "../helpers/groupDecisionPolicy";
+import { ThresholdDecisionPolicy } from "cosmjs-types/cosmos/group/v1/types";
 import { saveActiveCorporation } from "../helpers/journeyResults";
 
 const COOLUSER_MNEMONIC =
@@ -101,10 +101,19 @@ async function main() {
   // group, voting period 1s — adequate for end-to-end transactional tests).
   console.log("Step 3: Building MsgCreateCorporation...");
   const did = generateUniqueDID();
-  const decisionPolicyBytes = encodeThresholdDecisionPolicy({
-    threshold: "1",
-    votingPeriodSeconds: 1,
-  });
+  // Use cosmjs-types ThresholdDecisionPolicy directly (transitive dep via
+  // @cosmjs/stargate). The chain decodes `decision_policy.value` against its
+  // interface registry; using the canonical cosmos-sdk proto descriptor
+  // guarantees byte-for-byte match.
+  const decisionPolicyBytes = ThresholdDecisionPolicy.encode(
+    ThresholdDecisionPolicy.fromPartial({
+      threshold: "1",
+      windows: {
+        votingPeriod: { seconds: BigInt(1), nanos: 0 },
+        minExecutionPeriod: { seconds: BigInt(0), nanos: 0 },
+      },
+    }),
+  ).finish();
 
   const msg = {
     typeUrl: typeUrls.MsgCreateCorporation,
