@@ -2725,6 +2725,41 @@ func ArchiveEcosystemWithAuthority(
 	return nil
 }
 
+// UpdateCorporationWithAuthority rotates the DID of a corporation.
+func UpdateCorporationWithAuthority(
+	client cosmosclient.Client,
+	ctx context.Context,
+	operatorAccount cosmosaccount.Account,
+	authority string,
+	newDID string,
+) error {
+	operatorAddr, err := operatorAccount.Address(addressPrefix)
+	if err != nil {
+		return fmt.Errorf("failed to get operator address: %w", err)
+	}
+
+	msg := &cotypes.MsgUpdateCorporation{
+		Corporation: authority,
+		Operator:    operatorAddr,
+		Did:         newDID,
+	}
+
+	txResp, err := client.BroadcastTx(ctx, operatorAccount, msg)
+	if err != nil {
+		return fmt.Errorf("failed to broadcast UpdateCorporation: %w", err)
+	}
+
+	fmt.Print("UpdateCorporationWithAuthority:\n\n")
+	fmt.Println(txResp)
+
+	if txResp.TxResponse.Code != 0 {
+		return fmt.Errorf("UpdateCorporation failed with code %d: %s",
+			txResp.TxResponse.Code, txResp.TxResponse.RawLog)
+	}
+
+	return nil
+}
+
 // CreateCredentialSchemaWithAuthority creates a credential schema with separate authority/operator.
 func CreateCredentialSchemaWithAuthority(
 	client cosmosclient.Client,

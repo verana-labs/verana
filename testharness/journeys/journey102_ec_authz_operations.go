@@ -27,11 +27,11 @@ func expectAuthorizationError(stepName string, err error) error {
 	return fmt.Errorf("%s: unexpected error: %w", stepName, err)
 }
 
-// RunEcosystemAuthzOperationsJourney implements Journey 102: Test all TR operations with operator authorization
-// For each of the 5 TR message types: (a) try without auth → fail, (b) grant auth, (c) try with auth → succeed.
+// RunEcosystemAuthzOperationsJourney implements Journey 102: Test all ecosystem operations with operator authorization.
+// For each of the 5 EC message types: (a) try without auth → fail, (b) grant auth, (c) try with auth → succeed.
 // Depends on Journey 101 (setup) having been run first.
 func RunEcosystemAuthzOperationsJourney(ctx context.Context, client cosmosclient.Client) error {
-	fmt.Println("Starting Journey 102: TR Operations with Operator Authorization (fail-then-pass)")
+	fmt.Println("Starting Journey 102: EC Operations with Operator Authorization (fail-then-pass)")
 
 	// Load results from Journey 101
 	setup := lib.LoadJourneyResult("journey101")
@@ -62,7 +62,7 @@ func RunEcosystemAuthzOperationsJourney(ctx context.Context, client cosmosclient
 	if err := expectAuthorizationError("Step 1a", err); err != nil {
 		return err
 	}
-	waitForTx("CreateTR rejection")
+	waitForTx("CreateEcosystem rejection")
 
 	// 1b: Grant authorization for CreateEcosystem
 	fmt.Println("\n--- Step 1b: Grant operator auth for CreateEcosystem ---")
@@ -75,10 +75,10 @@ func RunEcosystemAuthzOperationsJourney(ctx context.Context, client cosmosclient
 		return fmt.Errorf("step 1b failed: %w", err)
 	}
 	fmt.Println("✅ Step 1b: Granted CreateEcosystem authorization")
-	waitForTx("grant CreateTR auth")
+	waitForTx("grant CreateEcosystem auth")
 
 	// 1c: Try WITH authorization (expect success)
-	fmt.Println("\n--- Step 1c: Operator creates trust registry with auth (expect success) ---")
+	fmt.Println("\n--- Step 1c: Operator creates ecosystem with auth (expect success) ---")
 	did = lib.GenerateUniqueDID(client, ctx)
 	trIDStr, err := lib.CreateEcosystemWithAuthority(
 		client, ctx, operatorAccount, policyAddr,
@@ -91,13 +91,13 @@ func RunEcosystemAuthzOperationsJourney(ctx context.Context, client cosmosclient
 		return fmt.Errorf("step 1c failed: %w", err)
 	}
 	trID, _ := strconv.ParseUint(trIDStr, 10, 64)
-	fmt.Printf("✅ Step 1c: Trust Registry created with ID: %d, DID: %s\n", trID, did)
-	waitForTx("TR creation")
+	fmt.Printf("✅ Step 1c: Ecosystem created with ID: %d, DID: %s\n", trID, did)
+	waitForTx("ecosystem creation")
 
-	// Verify TR creation
+	// Verify ecosystem creation
 	verified := lib.VerifyEcosystem(client, ctx, trID, did)
 	if !verified {
-		return fmt.Errorf("step 1c verification failed: trust registry not found or DID mismatch")
+		return fmt.Errorf("step 1c verification failed: ecosystem not found or DID mismatch")
 	}
 
 	// =========================================================================
@@ -197,8 +197,6 @@ func RunEcosystemAuthzOperationsJourney(ctx context.Context, client cosmosclient
 	// =========================================================================
 	fmt.Println("\n=== TEST 4: UpdateEcosystem ===")
 
-	// Spec v4-rc2: MsgUpdateEcosystem mutates the DID (mandatory
-	// parameter). Use a fresh DID for the update so we can verify the change.
 	updatedDid := fmt.Sprintf("%s-updated", did)
 
 	// 4a: Try WITHOUT authorization (expect failure)
@@ -210,7 +208,7 @@ func RunEcosystemAuthzOperationsJourney(ctx context.Context, client cosmosclient
 	if err := expectAuthorizationError("Step 4a", err); err != nil {
 		return err
 	}
-	waitForTx("UpdateTR rejection")
+	waitForTx("UpdateEcosystem rejection")
 
 	// 4b: Grant authorization for UpdateEcosystem
 	fmt.Println("\n--- Step 4b: Grant operator auth for UpdateEcosystem ---")
@@ -223,11 +221,10 @@ func RunEcosystemAuthzOperationsJourney(ctx context.Context, client cosmosclient
 		return fmt.Errorf("step 4b failed: %w", err)
 	}
 	fmt.Println("✅ Step 4b: Granted UpdateEcosystem authorization")
-	waitForTx("grant UpdateTR auth")
+	waitForTx("grant UpdateEcosystem auth")
 
-	// 4c: Try WITH authorization (expect success).
-	// Spec draft 13: did is mandatory and IS mutated.
-	fmt.Println("\n--- Step 4c: Operator updates trust registry with auth (expect success) ---")
+	// 4c: Try WITH authorization (expect success)
+	fmt.Println("\n--- Step 4c: Operator updates ecosystem with auth (expect success) ---")
 	err = lib.UpdateEcosystemWithAuthority(
 		client, ctx, operatorAccount, policyAddr,
 		trID, updatedDid,
@@ -235,13 +232,13 @@ func RunEcosystemAuthzOperationsJourney(ctx context.Context, client cosmosclient
 	if err != nil {
 		return fmt.Errorf("step 4c failed: %w", err)
 	}
-	fmt.Printf("✅ Step 4c: Updated trust registry did=%s\n", updatedDid)
-	waitForTx("UpdateTR success")
+	fmt.Printf("✅ Step 4c: Updated ecosystem did=%s\n", updatedDid)
+	waitForTx("UpdateEcosystem success")
 
 	// Verify update: DID is now the updated value.
 	verified = lib.VerifyEcosystem(client, ctx, trID, updatedDid)
 	if !verified {
-		return fmt.Errorf("step 4c verification failed: TR should now have updated DID %s", updatedDid)
+		return fmt.Errorf("step 4c verification failed: ecosystem should now have updated DID %s", updatedDid)
 	}
 
 	// =========================================================================
@@ -258,7 +255,7 @@ func RunEcosystemAuthzOperationsJourney(ctx context.Context, client cosmosclient
 	if err := expectAuthorizationError("Step 5a", err); err != nil {
 		return err
 	}
-	waitForTx("ArchiveTR rejection")
+	waitForTx("ArchiveEcosystem rejection")
 
 	// 5b: Grant authorization for ArchiveEcosystem
 	fmt.Println("\n--- Step 5b: Grant operator auth for ArchiveEcosystem ---")
@@ -271,10 +268,10 @@ func RunEcosystemAuthzOperationsJourney(ctx context.Context, client cosmosclient
 		return fmt.Errorf("step 5b failed: %w", err)
 	}
 	fmt.Println("✅ Step 5b: Granted ArchiveEcosystem authorization")
-	waitForTx("grant ArchiveTR auth")
+	waitForTx("grant ArchiveEcosystem auth")
 
 	// 5c: Try WITH authorization — archive (expect success)
-	fmt.Println("\n--- Step 5c: Operator archives trust registry with auth (expect success) ---")
+	fmt.Println("\n--- Step 5c: Operator archives ecosystem with auth (expect success) ---")
 	err = lib.ArchiveEcosystemWithAuthority(
 		client, ctx, operatorAccount, policyAddr,
 		trID, true,
@@ -282,8 +279,8 @@ func RunEcosystemAuthzOperationsJourney(ctx context.Context, client cosmosclient
 	if err != nil {
 		return fmt.Errorf("step 5c failed: %w", err)
 	}
-	fmt.Println("✅ Step 5c: Trust registry archived")
-	waitForTx("ArchiveTR success")
+	fmt.Println("✅ Step 5c: Ecosystem archived")
+	waitForTx("ArchiveEcosystem success")
 
 	// Verify archived state
 	trResp, err := lib.QueryEcosystem(client, ctx, trID)
@@ -291,38 +288,38 @@ func RunEcosystemAuthzOperationsJourney(ctx context.Context, client cosmosclient
 		return fmt.Errorf("step 5c verification query failed: %w", err)
 	}
 	if !trResp.Ecosystem.Archived {
-		return fmt.Errorf("step 5c verification failed: trust registry should be archived")
+		return fmt.Errorf("step 5c verification failed: ecosystem should be archived")
 	}
-	fmt.Println("✅ Step 5c: Verified trust registry is archived")
+	fmt.Println("✅ Step 5c: Verified ecosystem is archived")
 
-	// 5d: [MOD-TR-MSG-5-3] spec v4 draft 13: archive is bidirectional; archive=false unarchives.
-	fmt.Println("\n--- Step 5d: Operator unarchives trust registry (expect success) ---")
+	// 5d: [MOD-EC-MSG-5] archive is bidirectional; archive=false unarchives.
+	fmt.Println("\n--- Step 5d: Operator unarchives ecosystem (expect success) ---")
 	err = lib.ArchiveEcosystemWithAuthority(
 		client, ctx, operatorAccount, policyAddr,
 		trID, false,
 	)
 	if err != nil {
-		return fmt.Errorf("step 5d failed: expected unarchive to succeed per spec v4 draft 13: %w", err)
+		return fmt.Errorf("step 5d failed: expected unarchive to succeed: %w", err)
 	}
 	trResp, err = lib.QueryEcosystem(client, ctx, trID)
 	if err != nil {
 		return fmt.Errorf("step 5d verification query failed: %w", err)
 	}
 	if trResp.Ecosystem.Archived {
-		return fmt.Errorf("step 5d verification failed: trust registry should be unarchived")
+		return fmt.Errorf("step 5d verification failed: ecosystem should be unarchived")
 	}
-	fmt.Println("✅ Step 5d: Verified trust registry is unarchived per [MOD-TR-MSG-5-3]")
+	fmt.Println("✅ Step 5d: Verified ecosystem is unarchived per [MOD-EC-MSG-5]")
 
-	// 5e: [MOD-TR-MSG-5-2-1] unarchiving a non-archived TR must abort.
-	fmt.Println("\n--- Step 5e: Unarchive a non-archived TR (expect failure) ---")
+	// 5e: [MOD-EC-MSG-5] unarchiving a non-archived ecosystem must abort.
+	fmt.Println("\n--- Step 5e: Unarchive a non-archived ecosystem (expect failure) ---")
 	err = lib.ArchiveEcosystemWithAuthority(
 		client, ctx, operatorAccount, policyAddr,
 		trID, false,
 	)
 	if err == nil {
-		return fmt.Errorf("step 5e failed: expected rejection for unarchiving a non-archived TR")
+		return fmt.Errorf("step 5e failed: expected rejection for unarchiving a non-archived ecosystem")
 	}
-	fmt.Printf("✅ Step 5e: Correctly rejected unarchive on non-archived TR: %v\n", err)
+	fmt.Printf("✅ Step 5e: Correctly rejected unarchive on non-archived ecosystem: %v\n", err)
 
 	// =========================================================================
 	// TEST 6: Unauthorized operator (negative test)
@@ -347,7 +344,7 @@ func RunEcosystemAuthzOperationsJourney(ctx context.Context, client cosmosclient
 
 	fmt.Println("\n========================================")
 	fmt.Println("Journey 102 completed successfully! ✨")
-	fmt.Println("All 5 TR operations tested: fail without auth, pass with auth.")
+	fmt.Println("All 5 ecosystem operations tested: fail without auth, pass with auth.")
 	fmt.Println("========================================")
 
 	return nil

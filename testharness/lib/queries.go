@@ -9,8 +9,10 @@ import (
 
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
 
+	cotypes "github.com/verana-labs/verana/x/co/types"
 	cschema "github.com/verana-labs/verana/x/cs/types"
 	ectypes "github.com/verana-labs/verana/x/ec/types"
+	gftypes "github.com/verana-labs/verana/x/gf/types"
 )
 
 // QueryEcosystem gets an ecosystem by ID
@@ -21,10 +23,46 @@ func QueryEcosystem(client cosmosclient.Client, ctx context.Context, trID uint64
 	})
 }
 
-// ListTrustRegistries lists all ecosystems
+// ListTrustRegistries lists all ecosystems (kept for backward-compat; use ListEcosystems for new code).
 func ListTrustRegistries(client cosmosclient.Client, ctx context.Context, responseMaxSize uint32) (*ectypes.QueryListEcosystemsResponse, error) {
+	return ListEcosystems(client, ctx, 0, responseMaxSize)
+}
+
+// ListEcosystems lists ecosystems, optionally filtered by corporation.
+func ListEcosystems(client cosmosclient.Client, ctx context.Context, corporationID uint64, responseMaxSize uint32) (*ectypes.QueryListEcosystemsResponse, error) {
 	queryClient := ectypes.NewQueryClient(client.Context())
 	return queryClient.ListEcosystems(ctx, &ectypes.QueryListEcosystemsRequest{
+		CorporationId:   corporationID,
+		ResponseMaxSize: responseMaxSize,
+	})
+}
+
+// QueryCorporation fetches a corporation by its id.
+func QueryCorporation(client cosmosclient.Client, ctx context.Context, corpID uint64) (*cotypes.QueryGetCorporationResponse, error) {
+	qc := cotypes.NewQueryClient(client.Context())
+	return qc.GetCorporation(ctx, &cotypes.QueryGetCorporationRequest{CorporationId: corpID})
+}
+
+// ListCorporations lists corporations up to responseMaxSize results.
+func ListCorporations(client cosmosclient.Client, ctx context.Context, responseMaxSize uint32) (*cotypes.QueryListCorporationsResponse, error) {
+	qc := cotypes.NewQueryClient(client.Context())
+	return qc.ListCorporations(ctx, &cotypes.QueryListCorporationsRequest{ResponseMaxSize: responseMaxSize})
+}
+
+// QueryGFV fetches a GovernanceFrameworkVersion by its id.
+func QueryGFV(client cosmosclient.Client, ctx context.Context, gfvID uint64) (*gftypes.QueryGetGovernanceFrameworkVersionResponse, error) {
+	qc := gftypes.NewQueryClient(client.Context())
+	return qc.GetGovernanceFrameworkVersion(ctx, &gftypes.QueryGetGovernanceFrameworkVersionRequest{Id: gfvID})
+}
+
+// ListGFVs lists GovernanceFrameworkVersions for a corporation or ecosystem.
+// Exactly one of corporationID / ecosystemID must be non-zero.
+func ListGFVs(client cosmosclient.Client, ctx context.Context, corporationID, ecosystemID uint64, activeOnly bool, responseMaxSize uint32) (*gftypes.QueryListGovernanceFrameworkVersionsResponse, error) {
+	qc := gftypes.NewQueryClient(client.Context())
+	return qc.ListGovernanceFrameworkVersions(ctx, &gftypes.QueryListGovernanceFrameworkVersionsRequest{
+		CorporationId:   corporationID,
+		EcosystemId:     ecosystemID,
+		ActiveOnly:      activeOnly,
 		ResponseMaxSize: responseMaxSize,
 	})
 }
