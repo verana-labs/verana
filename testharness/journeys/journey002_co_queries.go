@@ -19,8 +19,6 @@ func RunCorpQueriesJourney(ctx context.Context, client cosmosclient.Client) erro
 	policyAddr := setup.GroupPolicyAddr
 	operatorAccount := lib.GetAccount(client, corpAOperator)
 	operatorAddr := setup.OperatorAddr
-	adminAccount := lib.GetAccount(client, corpAAdminName)
-	member1Account := lib.GetAccount(client, corpAMember1Name)
 
 	corpIDStr := setup.EcosystemID // reused field: stores the corporation ID for J001
 	var corpID uint64
@@ -87,12 +85,9 @@ func RunCorpQueriesJourney(ctx context.Context, client cosmosclient.Client) erro
 	fmt.Printf("✅ Step 3a: Correctly rejected unauthorized UpdateCorporation: %v\n", err)
 	waitForTx("UpdateCorporation rejection")
 
-	// Step 3b: Grant UpdateCorporation authz explicitly (corp_a_operator already has it from J001 bootstrap)
-	fmt.Println("\n--- Step 3b: Verify operator already has UpdateCorporation authz from J001 ---")
-	// We will skip re-granting since J001 bootstrapped it. Proceed to step 3c.
-	_ = adminAccount
-	_ = member1Account
-	fmt.Println("✅ Step 3b: UpdateCorporation authz already granted in Journey 001")
+	// Step 3b: UpdateCorporation authz was bootstrapped in J001 — no re-grant needed.
+	fmt.Println("\n--- Step 3b: UpdateCorporation authz already granted in Journey 001 ---")
+	fmt.Println("✅ Step 3b: Skipping re-grant; operator authz set in Journey 001")
 
 	// Step 3c: UpdateCorporation with authorized operator
 	fmt.Println("\n--- Step 3c: Authorized operator updates corporation DID ---")

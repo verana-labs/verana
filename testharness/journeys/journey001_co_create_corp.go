@@ -20,23 +20,9 @@ const (
 	corpAOperator    = "corp_a_operator"
 )
 
-var corpAMnemonics = map[string]string{
-	corpAAdminName:   "actual flesh poet ivory squeeze glide tornado engage fence symptom render seminar slush april lunar apart glide patrol april rescue bench blanket blouse",
-	corpAMember1Name: "galaxy coral push bronze medal moral olympic butter deputy glow trumpet symbol ocean blanket swear random pave lunar moral comfort robust vintage cactus",
-	corpAMember2Name: "pattern burden bronze twist harvest anchor junior venture orient ritual blanket anchor parade duty obtain rescue robust venture voyage rescue patrol pioneer brief",
-}
-
 func getOrCreateCorpAAccount(client cosmosclient.Client, name string) cosmosaccount.Account {
 	account, err := client.Account(name)
 	if err == nil {
-		return account
-	}
-	if mnemonic, ok := corpAMnemonics[name]; ok {
-		account, err = client.AccountRegistry.Import(name, mnemonic, "")
-		if err != nil {
-			panic(fmt.Sprintf("failed to import account %s: %v", name, err))
-		}
-		fmt.Printf("  Recovered account %s from mnemonic\n", name)
 		return account
 	}
 	account, _, err = client.AccountRegistry.Create(name)
