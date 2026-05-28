@@ -50,7 +50,7 @@ export const MsgArchiveEcosystemAminoConverter: AminoConverter = {
     corporation: corporation || undefined,
     operator: operator || undefined,
     id: u64ToStr(id as any),
-    archive: archive || undefined,
+    archive: archive,
   }),
   fromAmino: (value: any) =>
     MsgArchiveEcosystem.fromPartial({

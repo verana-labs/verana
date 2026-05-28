@@ -36,6 +36,20 @@ func TestArchiveEcosystem_Happy(t *testing.T) {
 	require.NoError(t, err)
 	require.True(t, ec.Archived)
 	require.Equal(t, bumpTime, ec.Modified)
+
+	var found bool
+	for _, e := range ctx.EventManager().Events() {
+		if e.Type == types.EventTypeArchiveEcosystem {
+			found = true
+			attrs := map[string]string{}
+			for _, a := range e.Attributes {
+				attrs[a.Key] = a.Value
+			}
+			require.Equal(t, "1", attrs[types.AttributeKeyEcosystemID])
+			require.Equal(t, "archived", attrs[types.AttributeKeyArchiveStatus])
+		}
+	}
+	require.True(t, found, "archive_ecosystem event must be emitted")
 }
 
 // TestArchiveEcosystem_UnarchiveHappy pins that archive=false on an archived
@@ -90,6 +104,47 @@ func TestArchiveEcosystem_IdempotencyAbortOnUnArchived(t *testing.T) {
 
 	_, err = ms.ArchiveEcosystem(ctx, &types.MsgArchiveEcosystem{Corporation: tkCorp, Operator: tkOp, Id: 1, Archive: false})
 	require.ErrorIs(t, err, types.ErrAlreadyInTargetArchiveState)
+}
+
+func TestArchiveEcosystem_AuthzDenied(t *testing.T) {
+	del := &mockDelegation{err: errAuthDenied}
+	co := newMockCorporation()
+	co.register(tkCorp, 1)
+	k, ctx := ecKeeper(t, del, co, &mockGF{})
+	ms := keeper.NewMsgServerImpl(k)
+	_, err := ms.ArchiveEcosystem(ctx, &types.MsgArchiveEcosystem{
+		Corporation: tkCorp,
+		Operator:    tkOp,
+		Id:          1,
+		Archive:     true,
+	})
+	require.ErrorIs(t, err, errAuthDenied)
+}
+
+func TestArchiveEcosystem_CorporationNotRegistered(t *testing.T) {
+	k, ctx := ecKeeper(t, &mockDelegation{}, newMockCorporation(), &mockGF{})
+	ms := keeper.NewMsgServerImpl(k)
+	_, err := ms.ArchiveEcosystem(ctx, &types.MsgArchiveEcosystem{
+		Corporation: tkCorp,
+		Operator:    tkOp,
+		Id:          1,
+		Archive:     true,
+	})
+	require.ErrorIs(t, err, types.ErrCorporationNotRegistered)
+}
+
+func TestArchiveEcosystem_EcosystemNotFound(t *testing.T) {
+	co := newMockCorporation()
+	co.register(tkCorp, 1)
+	k, ctx := ecKeeper(t, &mockDelegation{}, co, &mockGF{})
+	ms := keeper.NewMsgServerImpl(k)
+	_, err := ms.ArchiveEcosystem(ctx, &types.MsgArchiveEcosystem{
+		Corporation: tkCorp,
+		Operator:    tkOp,
+		Id:          999,
+		Archive:     true,
+	})
+	require.ErrorIs(t, err, types.ErrEcosystemNotFound)
 }
 
 func TestArchiveEcosystem_WrongCorporation(t *testing.T) {

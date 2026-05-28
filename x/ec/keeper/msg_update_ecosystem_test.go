@@ -36,6 +36,20 @@ func TestUpdateEcosystem_Happy(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "did:example:rotated", ec.Did)
 	require.Equal(t, bumpTime, ec.Modified)
+
+	var found bool
+	for _, e := range ctx.EventManager().Events() {
+		if e.Type == types.EventTypeUpdateEcosystem {
+			found = true
+			attrs := map[string]string{}
+			for _, a := range e.Attributes {
+				attrs[a.Key] = a.Value
+			}
+			require.Equal(t, "1", attrs[types.AttributeKeyEcosystemID])
+			require.Equal(t, "did:example:rotated", attrs[types.AttributeKeyDID])
+		}
+	}
+	require.True(t, found, "update_ecosystem event must be emitted")
 }
 
 // TestUpdateEcosystem_NoopOnSameDID pins the spec-deviation no-op branch
@@ -108,6 +122,33 @@ func TestUpdateEcosystem_WrongCorporation(t *testing.T) {
 		Did:         "did:example:rotated",
 	})
 	require.ErrorIs(t, err, types.ErrUnauthorizedOperator)
+}
+
+func TestUpdateEcosystem_AuthzDenied(t *testing.T) {
+	del := &mockDelegation{err: errAuthDenied}
+	co := newMockCorporation()
+	co.register(tkCorp, 1)
+	k, ctx := ecKeeper(t, del, co, &mockGF{})
+	ms := keeper.NewMsgServerImpl(k)
+	_, err := ms.UpdateEcosystem(ctx, &types.MsgUpdateEcosystem{
+		Corporation: tkCorp,
+		Operator:    tkOp,
+		Id:          1,
+		Did:         "did:example:any",
+	})
+	require.ErrorIs(t, err, errAuthDenied)
+}
+
+func TestUpdateEcosystem_CorporationNotRegistered(t *testing.T) {
+	k, ctx := ecKeeper(t, &mockDelegation{}, newMockCorporation(), &mockGF{})
+	ms := keeper.NewMsgServerImpl(k)
+	_, err := ms.UpdateEcosystem(ctx, &types.MsgUpdateEcosystem{
+		Corporation: tkCorp,
+		Operator:    tkOp,
+		Id:          1,
+		Did:         "did:example:any",
+	})
+	require.ErrorIs(t, err, types.ErrCorporationNotRegistered)
 }
 
 // TestUpdateEcosystem_DIDConflictWithOtherCorp pins MOD-ES-MSG-2-2-1:

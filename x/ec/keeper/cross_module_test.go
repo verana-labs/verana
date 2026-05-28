@@ -59,6 +59,14 @@ func TestEcAsGFEcosystemKeeper_SetEcosystemActiveVersion(t *testing.T) {
 	require.Equal(t, bumpTime, ec.Modified)
 }
 
+func TestEcAsGFEcosystemKeeper_SetEcosystemActiveVersion_NotFound(t *testing.T) {
+	k, ctx := ecKeeper(t, &mockDelegation{}, newMockCorporation(), &mockGF{})
+	adapter := keeper.NewEcAsGFEcosystemKeeper(k)
+	err := adapter.SetEcosystemActiveVersion(ctx, 999, 5)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "not found")
+}
+
 // Interface satisfaction is checked at compile time by the gftypes.EcosystemKeeper
 // alias inside cross_module.go; this test just exercises the construction path.
 var _ = types.AttributeKeyEcosystemID

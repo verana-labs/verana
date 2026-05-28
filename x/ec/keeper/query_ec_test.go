@@ -1,6 +1,7 @@
 package keeper_test
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -132,4 +133,144 @@ func TestListEcosystems_ResponseMaxSizeClamp(t *testing.T) {
 	qs := keeper.NewQueryServerImpl(k)
 	_, err := qs.ListEcosystems(ctx, &types.QueryListEcosystemsRequest{ResponseMaxSize: 2000})
 	require.Error(t, err, "response_max_size > 1024 must reject")
+}
+
+// TestListEcosystems_TruncatesToResponseMaxSize pins that response_max_size
+// caps results after sorting (not during Walk).
+func TestListEcosystems_TruncatesToResponseMaxSize(t *testing.T) {
+	co := newMockCorporation()
+	co.register(tkCorp, 1)
+	k, ctx := ecKeeper(t, &mockDelegation{}, co, &mockGF{})
+	ms := keeper.NewMsgServerImpl(k)
+	qs := keeper.NewQueryServerImpl(k)
+
+	for i := 1; i <= 5; i++ {
+		msg := validCreateMsg(t)
+		msg.Did = fmt.Sprintf("did:example:ec%d", i)
+		_, err := ms.CreateEcosystem(ctx, msg)
+		require.NoError(t, err)
+	}
+
+	resp, err := qs.ListEcosystems(ctx, &types.QueryListEcosystemsRequest{ResponseMaxSize: 3})
+	require.NoError(t, err)
+	require.Len(t, resp.Ecosystems, 3)
+	require.Equal(t, uint64(1), resp.Ecosystems[0].Id)
+	require.Equal(t, uint64(2), resp.Ecosystems[1].Id)
+	require.Equal(t, uint64(3), resp.Ecosystems[2].Id)
+}
+
+// TestListEcosystems_ModifiedAfterTruncatesNewest pins HIGH-1 fix: with
+// modified_after + response_max_size, the N most recently modified items
+// are returned (not the N items with lowest IDs).
+func TestListEcosystems_ModifiedAfterTruncatesNewest(t *testing.T) {
+	co := newMockCorporation()
+	co.register(tkCorp, 1)
+	k, ctx := ecKeeper(t, &mockDelegation{}, co, &mockGF{})
+	ms := keeper.NewMsgServerImpl(k)
+	qs := keeper.NewQueryServerImpl(k)
+
+	times := []time.Time{
+		time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC),
+		time.Date(2026, 6, 1, 0, 0, 0, 0, time.UTC),
+		time.Date(2026, 12, 1, 0, 0, 0, 0, time.UTC),
+	}
+	for i, tm := range times {
+		ctx = ctx.WithBlockTime(tm)
+		msg := validCreateMsg(t)
+		msg.Did = fmt.Sprintf("did:example:ec%d", i+1)
+		_, err := ms.CreateEcosystem(ctx, msg)
+		require.NoError(t, err)
+	}
+
+	epoch := time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC)
+	resp, err := qs.ListEcosystems(ctx, &types.QueryListEcosystemsRequest{
+		ModifiedAfter:   &epoch,
+		ResponseMaxSize: 2,
+	})
+	require.NoError(t, err)
+	require.Len(t, resp.Ecosystems, 2)
+	require.Equal(t, uint64(3), resp.Ecosystems[0].Id, "newest (ec3) must be first")
+	require.Equal(t, uint64(2), resp.Ecosystems[1].Id)
+}
+
+// TestListEcosystems_CombinedFilter pins corporation_id + modified_after together.
+func TestListEcosystems_CombinedFilter(t *testing.T) {
+	co := newMockCorporation()
+	co.register(tkCorp, 1)
+	co.register(tkCorpB, 2)
+	k, ctx := ecKeeper(t, &mockDelegation{}, co, &mockGF{})
+	ms := keeper.NewMsgServerImpl(k)
+	qs := keeper.NewQueryServerImpl(k)
+
+	t0 := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	t1 := time.Date(2026, 6, 1, 0, 0, 0, 0, time.UTC)
+
+	ctx = ctx.WithBlockTime(t0)
+	_, err := ms.CreateEcosystem(ctx, validCreateMsg(t)) // corp1, modified=t0
+
+	require.NoError(t, err)
+	ctx = ctx.WithBlockTime(t1)
+	msgB := validCreateMsg(t)
+	msgB.Corporation = tkCorpB
+	msgB.Did = "did:example:two"
+	_, err = ms.CreateEcosystem(ctx, msgB) // corp2, modified=t1
+	require.NoError(t, err)
+
+	// corp1 + modified_after=t0: corp1 was modified AT t0, not strictly after
+	resp, err := qs.ListEcosystems(ctx, &types.QueryListEcosystemsRequest{
+		CorporationId: 1,
+		ModifiedAfter: &t0,
+	})
+	require.NoError(t, err)
+	require.Empty(t, resp.Ecosystems, "corp1 modified at t0 not strictly after t0")
+
+	// corp2 + modified_after=t0: corp2 modified at t1 (after t0)
+	resp, err = qs.ListEcosystems(ctx, &types.QueryListEcosystemsRequest{
+		CorporationId: 2,
+		ModifiedAfter: &t0,
+	})
+	require.NoError(t, err)
+	require.Len(t, resp.Ecosystems, 1)
+	require.Equal(t, uint64(2), resp.Ecosystems[0].Id)
+}
+
+// TestGetEcosystem_GFKeeperError pins that a gfKeeper failure surfaces as
+// codes.Internal.
+func TestGetEcosystem_GFKeeperError(t *testing.T) {
+	co := newMockCorporation()
+	co.register(tkCorp, 1)
+	gf := &mockGF{listErr: errAuthDenied}
+	k, ctx := ecKeeper(t, &mockDelegation{}, co, gf)
+	ms := keeper.NewMsgServerImpl(k)
+	qs := keeper.NewQueryServerImpl(k)
+
+	_, err := ms.CreateEcosystem(ctx, validCreateMsg(t))
+	require.NoError(t, err)
+
+	_, err = qs.GetEcosystem(ctx, &types.QueryGetEcosystemRequest{Id: 1})
+	require.Error(t, err)
+}
+
+// TestListEcosystems_GFKeeperError pins buildWithVersions error propagation.
+func TestListEcosystems_GFKeeperError(t *testing.T) {
+	co := newMockCorporation()
+	co.register(tkCorp, 1)
+	gf := &mockGF{listErr: errAuthDenied}
+	k, ctx := ecKeeper(t, &mockDelegation{}, co, gf)
+	ms := keeper.NewMsgServerImpl(k)
+	qs := keeper.NewQueryServerImpl(k)
+
+	_, err := ms.CreateEcosystem(ctx, validCreateMsg(t))
+	require.NoError(t, err)
+
+	_, err = qs.ListEcosystems(ctx, &types.QueryListEcosystemsRequest{})
+	require.Error(t, err)
+}
+
+func TestParams_Happy(t *testing.T) {
+	k, ctx := ecKeeper(t, &mockDelegation{}, newMockCorporation(), &mockGF{})
+	qs := keeper.NewQueryServerImpl(k)
+	resp, err := qs.Params(ctx, &types.QueryParamsRequest{})
+	require.NoError(t, err)
+	require.Equal(t, types.DefaultParams(), resp.Params)
 }

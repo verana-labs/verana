@@ -65,7 +65,7 @@ func (qs queryServer) ListEcosystems(ctx context.Context, req *types.QueryListEc
 			return true, err
 		}
 		out = append(out, *ew)
-		return len(out) >= int(req.ResponseMaxSize), nil
+		return false, nil
 	})
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
@@ -75,6 +75,9 @@ func (qs queryServer) ListEcosystems(ctx context.Context, req *types.QueryListEc
 		sort.Slice(out, func(i, j int) bool { return out[i].Modified.After(out[j].Modified) })
 	} else {
 		sort.Slice(out, func(i, j int) bool { return out[i].Id < out[j].Id })
+	}
+	if len(out) > int(req.ResponseMaxSize) {
+		out = out[:int(req.ResponseMaxSize)]
 	}
 
 	return &types.QueryListEcosystemsResponse{Ecosystems: out}, nil

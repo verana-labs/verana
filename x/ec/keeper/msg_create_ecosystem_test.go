@@ -57,6 +57,23 @@ func TestCreateEcosystem_Happy(t *testing.T) {
 	require.Equal(t, uint64(1), gf.createArgs.ecID)
 	require.Equal(t, "en", gf.createArgs.language)
 	require.Equal(t, "https://example.com/ec.pdf", gf.createArgs.docURL)
+
+	// create_ecosystem event emitted with correct attributes.
+	var found bool
+	for _, e := range ctx.EventManager().Events() {
+		if e.Type == types.EventTypeCreateEcosystem {
+			found = true
+			attrs := map[string]string{}
+			for _, a := range e.Attributes {
+				attrs[a.Key] = a.Value
+			}
+			require.Equal(t, "1", attrs[types.AttributeKeyEcosystemID])
+			require.Equal(t, "1", attrs[types.AttributeKeyCorporationID])
+			require.Equal(t, "did:example:ec1", attrs[types.AttributeKeyDID])
+			require.Equal(t, "en", attrs[types.AttributeKeyLanguage])
+		}
+	}
+	require.True(t, found, "create_ecosystem event must be emitted")
 }
 
 func TestCreateEcosystem_ValidateBasicShortCircuits(t *testing.T) {

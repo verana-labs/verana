@@ -88,7 +88,7 @@ func (m *MsgArchiveEcosystem) ValidateBasic() error {
 // --- shared validators -----------------------------------------------------
 
 func isValidDID(did string) bool {
-	re := regexp.MustCompile(`^did:[a-zA-Z0-9-]+:[a-zA-Z0-9._:/%\-]+(#[^\s]*)?(\?[^\s]*)?$`)
+	re := regexp.MustCompile(`^did:[a-z0-9]+:[A-Za-z0-9._:/%\-]+(#[^\s]*)?(\?[^\s]*)?$`)
 	return re.MatchString(did)
 }
 
