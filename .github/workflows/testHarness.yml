@@ -7,16 +7,12 @@ on:
         description: 'Run test harness against K8s (requires KUBECONFIG secret)'
         type: boolean
         default: true
-  # PR + push triggers disabled during v4-rc2 spec rebase sequence.
-  # Journeys 302+ use a self-delegation shortcut that AUTHZ-CHECK-5 rejects;
-  # rewriting them to the group-proposal flow is tracked as follow-up.
-  # Re-enable after the journey suite is updated.
-  # pull_request:
-  #   branches:
-  #     - '**'
-  # push:
-  #   branches:
-  #     - main
+  pull_request:
+    branches:
+      - '**'
+  push:
+    branches:
+      - main
 
 jobs:
   test-harness:
