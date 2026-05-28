@@ -2439,11 +2439,12 @@ func GrantOperatorAuthorizationViaGroup(
 		MsgTypes:    msgTypes,
 	}
 
-	// Submit group proposal
+	// Cosmos SDK group MaxMetadataLen=255; keep title short.
+	title := fmt.Sprintf("Grant operator auth (%d msg types)", len(msgTypes))
 	proposalID, err := SubmitGroupProposal(
 		client, ctx, admin, policyAddr,
 		[]sdk.Msg{grantMsg},
-		fmt.Sprintf("Grant operator auth for %v", msgTypes),
+		title,
 		"Grant operator authorization via group proposal",
 	)
 	if err != nil {

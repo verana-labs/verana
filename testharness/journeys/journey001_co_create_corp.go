@@ -137,7 +137,7 @@ func RunCorpCreateJourney(ctx context.Context, client cosmosclient.Client) error
 	fmt.Println("\n--- Step 5: Bootstrap operator authz (Operator=empty → bypass AUTHZ-CHECK) ---")
 	err = lib.GrantOperatorAuthorizationViaGroup(
 		client, ctx, adminAccount, member1Account,
-		policyAddr, operatorAddr, "",
+		policyAddr, operatorAddr, operatorAddr,
 		[]string{
 			"/verana.ec.v1.MsgCreateEcosystem",
 			"/verana.ec.v1.MsgUpdateEcosystem",

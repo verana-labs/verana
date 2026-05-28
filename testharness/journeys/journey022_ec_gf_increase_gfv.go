@@ -78,9 +78,23 @@ func RunEcGFIncreaseGFVJourney(ctx context.Context, client cosmosclient.Client) 
 	fmt.Printf("✅ Step 3: Correctly rejected IncreaseGFV without next doc: %v\n", err)
 
 	// =========================================================================
-	// Step 4: AddGFD v4 French, then IncreaseGFV → v4
+	// Step 4: AddGFD v4 (en + fr), then IncreaseGFV → v4
 	// =========================================================================
-	fmt.Println("\n--- Step 4a: AddGFD v4 French ---")
+	fmt.Println("\n--- Step 4a: AddGFD v4 English (default language, required for IncreaseGFV) ---")
+	err = lib.AddGFDWithAuthority(
+		client, ctx, operatorAccount, policyAddr,
+		ecID, "en",
+		"https://example.com/ec-alpha-gf-v4-en.pdf",
+		"sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
+		4,
+	)
+	if err != nil {
+		return fmt.Errorf("step 4a AddGFD v4 en failed: %w", err)
+	}
+	fmt.Println("✅ Step 4a: Added ec-alpha GFD v4 (language=en)")
+	waitForTx("AddGFD v4 en ec-alpha")
+
+	fmt.Println("\n--- Step 4a-ii: AddGFD v4 French (additional translation) ---")
 	err = lib.AddGFDWithAuthority(
 		client, ctx, operatorAccount, policyAddr,
 		ecID, "fr",
@@ -89,8 +103,9 @@ func RunEcGFIncreaseGFVJourney(ctx context.Context, client cosmosclient.Client) 
 		4,
 	)
 	if err != nil {
-		return fmt.Errorf("step 4a AddGFD v4 failed: %w", err)
+		return fmt.Errorf("step 4a-ii AddGFD v4 fr failed: %w", err)
 	}
+	fmt.Println("✅ Step 4a-ii: Added ec-alpha GFD v4 (language=fr)")
 	waitForTx("AddGFD v4 fr ec-alpha")
 
 	fmt.Println("\n--- Step 4b: IncreaseGFV v3 → v4 ---")
