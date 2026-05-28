@@ -313,7 +313,7 @@ func isValidDID(did string) bool {
 	// DID validation regex following W3C DID specification
 	// Format: did:<method-name>:<method-specific-id>
 	// Method-specific-id can contain alphanumeric, dots, underscores, hyphens, colons, and slashes
-	didRegex := regexp.MustCompile(`^did:[a-zA-Z0-9]+:[a-zA-Z0-9._:/-]+$`)
+	didRegex := regexp.MustCompile(`^did:[a-zA-Z0-9]+:[a-zA-Z0-9._:/%\-]+$`)
 	return didRegex.MatchString(did)
 }
 
