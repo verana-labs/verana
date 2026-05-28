@@ -1,0 +1,58 @@
+syntax = "proto3";
+package verana.co.v1;
+
+import "amino/amino.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "verana/co/v1/params.proto";
+import "verana/co/v1/types.proto";
+
+option go_package = "github.com/verana-labs/verana/x/co/types";
+
+// Query defines the Query service.
+service Query {
+  // Params returns the total set of module parameters.
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+    option (google.api.http).get = "/co/v1/params";
+  }
+
+  // [MOD-CO-QRY-1] Get Corporation by id, with nested GF version + document data.
+  rpc GetCorporation(QueryGetCorporationRequest) returns (QueryGetCorporationResponse) {
+    option (google.api.http).get = "/co/v1/get";
+  }
+
+  // [MOD-CO-QRY-2] List Corporations, optionally filtered by modified_after,
+  // with nested GF data per corporation. Ordered by `modified` descending.
+  rpc ListCorporations(QueryListCorporationsRequest) returns (QueryListCorporationsResponse) {
+    option (google.api.http).get = "/co/v1/list";
+  }
+}
+
+message QueryParamsRequest {}
+
+message QueryParamsResponse {
+  Params params = 1 [(gogoproto.nullable) = false, (amino.dont_omitempty) = true];
+}
+
+message QueryGetCorporationRequest {
+  uint64 corporation_id = 1;
+  bool active_gf_only = 2;
+  string preferred_language = 3;
+}
+
+message QueryGetCorporationResponse {
+  CorporationWithGF corporation = 1 [(gogoproto.nullable) = false, (amino.dont_omitempty) = true];
+}
+
+message QueryListCorporationsRequest {
+  google.protobuf.Timestamp modified_after = 1 [(gogoproto.stdtime) = true];
+  bool active_gf_only = 2;
+  string preferred_language = 3;
+  uint32 response_max_size = 4;
+}
+
+message QueryListCorporationsResponse {
+  repeated CorporationWithGF corporations = 1 [(gogoproto.nullable) = false, (amino.dont_omitempty) = true];
+}

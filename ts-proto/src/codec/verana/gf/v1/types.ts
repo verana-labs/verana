@@ -71,7 +71,7 @@ export const GovernanceFrameworkVersion = {
       Timestamp.encode(toTimestamp(message.created), writer.uint32(34).fork()).ldelim();
     }
     if (message.version !== 0) {
-      writer.uint32(40).int32(message.version);
+      writer.uint32(40).uint32(message.version);
     }
     if (message.activeSince !== undefined) {
       Timestamp.encode(toTimestamp(message.activeSince), writer.uint32(50).fork()).ldelim();
@@ -119,7 +119,7 @@ export const GovernanceFrameworkVersion = {
             break;
           }
 
-          message.version = reader.int32();
+          message.version = reader.uint32();
           continue;
         case 6:
           if (tag !== 50) {
@@ -347,7 +347,7 @@ export const GovernanceFrameworkVersionWithDocs = {
       Timestamp.encode(toTimestamp(message.created), writer.uint32(34).fork()).ldelim();
     }
     if (message.version !== 0) {
-      writer.uint32(40).int32(message.version);
+      writer.uint32(40).uint32(message.version);
     }
     if (message.activeSince !== undefined) {
       Timestamp.encode(toTimestamp(message.activeSince), writer.uint32(50).fork()).ldelim();
@@ -398,7 +398,7 @@ export const GovernanceFrameworkVersionWithDocs = {
             break;
           }
 
-          message.version = reader.int32();
+          message.version = reader.uint32();
           continue;
         case 6:
           if (tag !== 50) {

@@ -25,7 +25,7 @@ message TrustRegistry {
     (gogoproto.stdtime) = true
   ];
   string aka = 8;
-  int32 active_version = 9;
+  uint32 active_version = 9;
   string language = 10;
 }
 
@@ -36,7 +36,7 @@ message GovernanceFrameworkVersion {
     (gogoproto.nullable) = false,
     (gogoproto.stdtime) = true
   ];
-  int32 version = 4;
+  uint32 version = 4;
   google.protobuf.Timestamp active_since = 5 [
     (gogoproto.nullable) = false,
     (gogoproto.stdtime) = true
@@ -63,7 +63,7 @@ message GovernanceFrameworkVersionWithDocs {
     (gogoproto.nullable) = false,
     (gogoproto.stdtime) = true
   ];
-  int32 version = 4;
+  uint32 version = 4;
   google.protobuf.Timestamp active_since = 5 [
     (gogoproto.nullable) = false,
     (gogoproto.stdtime) = true
@@ -89,7 +89,7 @@ message TrustRegistryWithVersions {
     (gogoproto.stdtime) = true
   ];
   string aka = 8;
-  int32 active_version = 9;
+  uint32 active_version = 9;
   string language = 10;
   repeated GovernanceFrameworkVersionWithDocs versions = 11 [(gogoproto.nullable) = false];
 }

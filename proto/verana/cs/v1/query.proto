@@ -15,7 +15,7 @@ option go_package = "github.com/verana-labs/verana/x/cs/types";
 service Query {
   // Parameters queries the parameters of the module.
   rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
-    option (google.api.http).get = "/verana/cs/v1/params";
+    option (google.api.http).get = "/cs/v1/params";
   }
   // ListCredentialSchemas queries a list of CredentialSchema items.
   rpc ListCredentialSchemas(QueryListCredentialSchemasRequest) returns (QueryListCredentialSchemasResponse) {

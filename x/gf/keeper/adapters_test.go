@@ -55,7 +55,7 @@ func TestTRAsEcosystemKeeper_GetEcosystemView_FoundReturnsZeroCorporationID(t *t
 	require.Equal(t, uint64(1), view.Id)
 	require.Equal(t, uint64(0), view.CorporationID, "interim adapter returns zero until MOD-CO resolver lands")
 	require.Equal(t, "en", view.Language)
-	require.Equal(t, int32(2), view.ActiveVersion)
+	require.Equal(t, uint32(2), view.ActiveVersion)
 }
 
 func TestTRAsEcosystemKeeper_SetEcosystemActiveVersion(t *testing.T) {
@@ -80,7 +80,7 @@ func TestTRAsEcosystemKeeper_SetEcosystemActiveVersion(t *testing.T) {
 
 	got, err := trK.TrustRegistry.Get(trCtx, 42)
 	require.NoError(t, err)
-	require.Equal(t, int32(5), got.ActiveVersion)
+	require.Equal(t, uint32(5), got.ActiveVersion)
 	require.Equal(t, newBlockTime, got.Modified, "adapter must bump tr.Modified to block time")
 }
 

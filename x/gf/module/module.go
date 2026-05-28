@@ -132,7 +132,6 @@ func init() {
 		&modulev1.Module{},
 		appmodule.Provide(ProvideModule),
 		appmodule.Provide(ProvideEcosystemKeeper),
-		appmodule.Provide(ProvideCorporationKeeper),
 	)
 }
 
@@ -143,12 +142,10 @@ func ProvideEcosystemKeeper(trk trkeeper.Keeper) types.EcosystemKeeper {
 	return keeper.NewTRAsEcosystemKeeper(trk)
 }
 
-// ProvideCorporationKeeper supplies a stub Corporation keeper. Replaced when
-// issue #303 (MOD-CO) lands; until then corporation-targeted GF calls abort
-// with ErrSubjectNotFound.
-func ProvideCorporationKeeper() types.CorporationKeeper {
-	return keeper.NewStubCorporationKeeper()
-}
+// CorporationKeeper is wired post-construction by MOD-CO's ProvideModule via
+// (keeper.Keeper).SetCorporationKeeper to break the MOD-GF ↔ MOD-CO depinject
+// cycle. The default ref points at StubCorporationKeeper, so any handler that
+// runs before wiring (none in normal flow) aborts cleanly with ErrSubjectNotFound.
 
 type ModuleInputs struct {
 	depinject.In
@@ -158,9 +155,8 @@ type ModuleInputs struct {
 	Config       *modulev1.Module
 	Logger       log.Logger
 
-	DelegationKeeper  types.DelegationKeeper
-	EcosystemKeeper   types.EcosystemKeeper
-	CorporationKeeper types.CorporationKeeper
+	DelegationKeeper types.DelegationKeeper
+	EcosystemKeeper  types.EcosystemKeeper
 }
 
 type ModuleOutputs struct {
@@ -182,7 +178,6 @@ func ProvideModule(in ModuleInputs) ModuleOutputs {
 		authority.String(),
 		in.DelegationKeeper,
 		in.EcosystemKeeper,
-		in.CorporationKeeper,
 	)
 	m := NewAppModule(in.Cdc, k)
 	return ModuleOutputs{GfKeeper: k, Module: m}

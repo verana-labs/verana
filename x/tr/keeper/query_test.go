@@ -129,7 +129,7 @@ func TestGetTrustRegistry(t *testing.T) {
 			check: func(t *testing.T, response *types.QueryGetTrustRegistryResponse) {
 				require.NotNil(t, response.TrustRegistry)
 				require.Len(t, response.TrustRegistry.Versions, 1)
-				require.Equal(t, int32(2), response.TrustRegistry.Versions[0].Version)
+				require.Equal(t, uint32(2), response.TrustRegistry.Versions[0].Version)
 				require.Len(t, response.TrustRegistry.Versions[0].Documents, 1)
 			},
 		},

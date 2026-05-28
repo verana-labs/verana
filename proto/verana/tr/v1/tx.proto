@@ -89,7 +89,7 @@ message MsgAddGovernanceFrameworkDocument {
   // digest_sri is the digest SRI of the document (mandatory)
   string digest_sri = 6;
   // version is the targeted version (mandatory)
-  int32 version = 7;
+  uint32 version = 7;
 }
 
 // MsgAddGovernanceFrameworkDocumentResponse defines the Msg/AddGovernanceFrameworkDocument response type.

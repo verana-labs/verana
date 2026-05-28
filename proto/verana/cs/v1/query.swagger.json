@@ -16,6 +16,29 @@
     "application/json"
   ],
   "paths": {
+    "/cs/v1/params": {
+      "get": {
+        "summary": "Parameters queries the parameters of the module.",
+        "operationId": "Query_Params",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.cs.v1.QueryParamsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "tags": [
+          "Query"
+        ]
+      }
+    },
     "/verana/cs/v1/get/{id}": {
       "get": {
         "summary": "GetCredentialSchema returns a credential schema by ID",
@@ -169,29 +192,6 @@
             "default": "HOLDER_ONBOARDING_MODE_UNSPECIFIED"
           }
         ],
-        "tags": [
-          "Query"
-        ]
-      }
-    },
-    "/verana/cs/v1/params": {
-      "get": {
-        "summary": "Parameters queries the parameters of the module.",
-        "operationId": "Query_Params",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/verana.cs.v1.QueryParamsResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/google.rpc.Status"
-            }
-          }
-        },
         "tags": [
           "Query"
         ]

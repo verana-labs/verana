@@ -45,7 +45,7 @@ func (a TRAsEcosystemKeeper) GetEcosystemView(ctx context.Context, id uint64) (g
 	}, true
 }
 
-func (a TRAsEcosystemKeeper) SetEcosystemActiveVersion(ctx context.Context, id uint64, newVersion int32) error {
+func (a TRAsEcosystemKeeper) SetEcosystemActiveVersion(ctx context.Context, id uint64, newVersion uint32) error {
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 	tr, err := a.k.GetTrustRegistry(sdkCtx, id)
 	if err != nil {
@@ -74,6 +74,6 @@ func (StubCorporationKeeper) GetByID(_ context.Context, _ uint64) (gftypes.Corpo
 	return gftypes.CorporationView{}, false
 }
 
-func (StubCorporationKeeper) SetActiveVersion(_ context.Context, _ uint64, _ int32) error {
+func (StubCorporationKeeper) SetActiveVersion(_ context.Context, _ uint64, _ uint32) error {
 	return errors.New("corporation keeper not wired yet (MOD-CO pending in issue #303)")
 }

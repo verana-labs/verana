@@ -215,7 +215,7 @@ export const MsgAddGovernanceFrameworkDocument = {
       writer.uint32(50).string(message.docDigestSri);
     }
     if (message.version !== 0) {
-      writer.uint32(56).int32(message.version);
+      writer.uint32(56).uint32(message.version);
     }
     return writer;
   },
@@ -274,7 +274,7 @@ export const MsgAddGovernanceFrameworkDocument = {
             break;
           }
 
-          message.version = reader.int32();
+          message.version = reader.uint32();
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {

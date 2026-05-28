@@ -142,7 +142,7 @@ func TestIntegration_OperatorCreatesTrustRegistry(t *testing.T) {
 	require.Equal(t, "did:example:integration-test-123", tr.Did)
 	require.Equal(t, groupAccount, tr.Corporation) // corporation is the controller
 	require.Equal(t, "en", tr.Language)
-	require.Equal(t, int32(1), tr.ActiveVersion)
+	require.Equal(t, uint32(1), tr.ActiveVersion)
 }
 
 // TestIntegration_UnauthorizedOperatorCannotCreateTrustRegistry verifies
@@ -486,7 +486,7 @@ func TestIntegration_OperatorIncreasesActiveGFVersion(t *testing.T) {
 	// Verify active version is now 2
 	tr, err := f.trKeeper.TrustRegistry.Get(f.ctx, trID)
 	require.NoError(t, err)
-	require.Equal(t, int32(2), tr.ActiveVersion)
+	require.Equal(t, uint32(2), tr.ActiveVersion)
 }
 
 // TestIntegration_UnauthorizedOperatorCannotIncreaseGFVersion verifies that an

@@ -1,0 +1,264 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "verana/co/v1/tx.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "Msg"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/verana.co.v1.Msg/CreateCorporation": {
+      "post": {
+        "summary": "[MOD-CO-MSG-1] Create New Corporation — atomically create an x/group\ngroup + group policy and register the resulting policy_address as a new\nCorporation VPR entry.",
+        "operationId": "Msg_CreateCorporation",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.co.v1.MsgCreateCorporationResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "MsgCreateCorporation — MOD-CO-MSG-1.\n\nSigner is the submitting account; no privilege required. Forwarded as the\n`admin` field of the underlying `MsgCreateGroupWithPolicy`. After execution,\nthe signer holds no ongoing admin privileges over the group, group policy,\nor Corporation — the group_policy_address becomes the admin of both the\ngroup and the group policy (`group_policy_as_admin` is hardcoded to `true`).",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.co.v1.MsgCreateCorporation"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.co.v1.Msg/UpdateCorporation": {
+      "post": {
+        "summary": "[MOD-CO-MSG-2] Update Corporation — rotate the DID of an existing\nCorporation. Signers: corporation (policy_address) + operator.",
+        "operationId": "Msg_UpdateCorporation",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.co.v1.MsgUpdateCorporationResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "MsgUpdateCorporation — MOD-CO-MSG-2. Rotates the DID of an existing\nCorporation. `language` is immutable and cannot be updated.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.co.v1.MsgUpdateCorporation"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.co.v1.Msg/UpdateParams": {
+      "post": {
+        "summary": "UpdateParams defines a (governance) operation for updating the module\nparameters. The authority defaults to the x/gov module account.",
+        "operationId": "Msg_UpdateParams",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.co.v1.MsgUpdateParamsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "MsgUpdateParams is the Msg/UpdateParams request type.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.co.v1.MsgUpdateParams"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "google.protobuf.Any": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string",
+          "description": "A URL/resource name that uniquely identifies the type of the serialized\nprotocol buffer message. This string must contain at least\none \"/\" character. The last segment of the URL's path must represent\nthe fully qualified name of the type (as in\n`path/google.protobuf.Duration`). The name should be in a canonical form\n(e.g., leading \".\" is not accepted).\n\nIn practice, teams usually precompile into the binary all types that they\nexpect it to use in the context of Any. However, for URLs which use the\nscheme `http`, `https`, or no scheme, one can optionally set up a type\nserver that maps type URLs to message definitions as follows:\n\n* If no scheme is provided, `https` is assumed.\n* An HTTP GET on the URL must yield a [google.protobuf.Type][]\n  value in binary format, or produce an error.\n* Applications are allowed to cache lookup results based on the\n  URL, or have them precompiled into a binary to avoid any\n  lookup. Therefore, binary compatibility needs to be preserved\n  on changes to types. (Use versioned type names to manage\n  breaking changes.)\n\nNote: this functionality is not currently available in the official\nprotobuf release, and it is not used for type URLs beginning with\ntype.googleapis.com. As of May 2023, there are no widely used type server\nimplementations and no plans to implement one.\n\nSchemes other than `http`, `https` (or the empty scheme) might be\nused with implementation specific semantics."
+        }
+      },
+      "additionalProperties": {},
+      "description": "`Any` contains an arbitrary serialized protocol buffer message along with a\nURL that describes the type of the serialized message.\n\nProtobuf library provides support to pack/unpack Any values in the form\nof utility functions or additional generated methods of the Any type.\n\nExample 1: Pack and unpack a message in C++.\n\n    Foo foo = ...;\n    Any any;\n    any.PackFrom(foo);\n    ...\n    if (any.UnpackTo(\u0026foo)) {\n      ...\n    }\n\nExample 2: Pack and unpack a message in Java.\n\n    Foo foo = ...;\n    Any any = Any.pack(foo);\n    ...\n    if (any.is(Foo.class)) {\n      foo = any.unpack(Foo.class);\n    }\n    // or ...\n    if (any.isSameTypeAs(Foo.getDefaultInstance())) {\n      foo = any.unpack(Foo.getDefaultInstance());\n    }\n\n Example 3: Pack and unpack a message in Python.\n\n    foo = Foo(...)\n    any = Any()\n    any.Pack(foo)\n    ...\n    if any.Is(Foo.DESCRIPTOR):\n      any.Unpack(foo)\n      ...\n\n Example 4: Pack and unpack a message in Go\n\n     foo := \u0026pb.Foo{...}\n     any, err := anypb.New(foo)\n     if err != nil {\n       ...\n     }\n     ...\n     foo := \u0026pb.Foo{}\n     if err := any.UnmarshalTo(foo); err != nil {\n       ...\n     }\n\nThe pack methods provided by protobuf library will by default use\n'type.googleapis.com/full.type.name' as the type URL and the unpack\nmethods only use the fully qualified type name after the last '/'\nin the type URL, for example \"foo.bar.com/x/y.z\" will yield type\nname \"y.z\".\n\nJSON\n====\nThe JSON representation of an `Any` value uses the regular\nrepresentation of the deserialized, embedded message, with an\nadditional field `@type` which contains the type URL. Example:\n\n    package google.profile;\n    message Person {\n      string first_name = 1;\n      string last_name = 2;\n    }\n\n    {\n      \"@type\": \"type.googleapis.com/google.profile.Person\",\n      \"firstName\": \u003cstring\u003e,\n      \"lastName\": \u003cstring\u003e\n    }\n\nIf the embedded message type is well-known and has a custom JSON\nrepresentation, that representation will be embedded adding a field\n`value` which holds the custom JSON in addition to the `@type`\nfield. Example (for message [google.protobuf.Duration][]):\n\n    {\n      \"@type\": \"type.googleapis.com/google.protobuf.Duration\",\n      \"value\": \"1.212s\"\n    }"
+    },
+    "google.rpc.Status": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/google.protobuf.Any"
+          }
+        }
+      }
+    },
+    "verana.co.v1.Member": {
+      "type": "object",
+      "properties": {
+        "address": {
+          "type": "string",
+          "description": "address is the bech32 address of the member."
+        },
+        "weight": {
+          "type": "string",
+          "description": "weight is the member's voting weight. MUST be a non-zero decimal string\nrepresenting a positive number (e.g. \"1\", \"10\")."
+        },
+        "metadata": {
+          "type": "string",
+          "description": "metadata is optional arbitrary metadata attached to the member."
+        }
+      },
+      "description": "Member is the MOD-CO-local mirror of cosmos.group.v1.MemberRequest. We don't\nimport the x/group proto directly because the buf cosmos-sdk dep pinned by\nthis repo predates the x/group proto export. The Go keeper converts this\ntype to the cosmos.group.v1.MemberRequest before calling x/group."
+    },
+    "verana.co.v1.MsgCreateCorporation": {
+      "type": "object",
+      "properties": {
+        "signer": {
+          "type": "string"
+        },
+        "members": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/verana.co.v1.Member"
+          },
+          "description": "members is the initial group membership list. MUST contain at least one."
+        },
+        "group_metadata": {
+          "type": "string"
+        },
+        "group_policy_metadata": {
+          "type": "string"
+        },
+        "decision_policy": {
+          "$ref": "#/definitions/google.protobuf.Any",
+          "description": "decision_policy must encode a cosmos.group.v1.ThresholdDecisionPolicy or\ncosmos.group.v1.PercentageDecisionPolicy. Passed through to x/group."
+        },
+        "did": {
+          "type": "string",
+          "description": "did is the DID of the new Corporation. MUST be globally unique."
+        },
+        "language": {
+          "type": "string",
+          "description": "language is the primary language tag (BCP 47)."
+        },
+        "doc_url": {
+          "type": "string",
+          "description": "doc_url is the URL of the v1 CGF document."
+        },
+        "doc_digest_sri": {
+          "type": "string",
+          "description": "doc_digest_sri is the digest_sri of the v1 CGF document."
+        }
+      },
+      "description": "MsgCreateCorporation — MOD-CO-MSG-1.\n\nSigner is the submitting account; no privilege required. Forwarded as the\n`admin` field of the underlying `MsgCreateGroupWithPolicy`. After execution,\nthe signer holds no ongoing admin privileges over the group, group policy,\nor Corporation — the group_policy_address becomes the admin of both the\ngroup and the group policy (`group_policy_as_admin` is hardcoded to `true`)."
+    },
+    "verana.co.v1.MsgCreateCorporationResponse": {
+      "type": "object",
+      "properties": {
+        "corporation_id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "policy_address": {
+          "type": "string"
+        }
+      }
+    },
+    "verana.co.v1.MsgUpdateCorporation": {
+      "type": "object",
+      "properties": {
+        "corporation": {
+          "type": "string"
+        },
+        "operator": {
+          "type": "string"
+        },
+        "did": {
+          "type": "string"
+        }
+      },
+      "description": "MsgUpdateCorporation — MOD-CO-MSG-2. Rotates the DID of an existing\nCorporation. `language` is immutable and cannot be updated."
+    },
+    "verana.co.v1.MsgUpdateCorporationResponse": {
+      "type": "object"
+    },
+    "verana.co.v1.MsgUpdateParams": {
+      "type": "object",
+      "properties": {
+        "authority": {
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/definitions/verana.co.v1.Params"
+        }
+      },
+      "description": "MsgUpdateParams is the Msg/UpdateParams request type."
+    },
+    "verana.co.v1.MsgUpdateParamsResponse": {
+      "type": "object"
+    },
+    "verana.co.v1.Params": {
+      "type": "object",
+      "description": "Params defines the parameters for the x/co module.\nThe module has no parameters at this time; the message is kept for forward\ncompatibility so that gov-proposed parameter changes can land without proto\nmigrations."
+    }
+  }
+}

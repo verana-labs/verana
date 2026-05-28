@@ -106,7 +106,7 @@ export const TrustRegistry = {
       writer.uint32(66).string(message.aka);
     }
     if (message.activeVersion !== 0) {
-      writer.uint32(72).int32(message.activeVersion);
+      writer.uint32(72).uint32(message.activeVersion);
     }
     if (message.language !== "") {
       writer.uint32(82).string(message.language);
@@ -175,7 +175,7 @@ export const TrustRegistry = {
             break;
           }
 
-          message.activeVersion = reader.int32();
+          message.activeVersion = reader.uint32();
           continue;
         case 10:
           if (tag !== 82) {
@@ -273,7 +273,7 @@ export const GovernanceFrameworkVersion = {
       Timestamp.encode(toTimestamp(message.created), writer.uint32(26).fork()).ldelim();
     }
     if (message.version !== 0) {
-      writer.uint32(32).int32(message.version);
+      writer.uint32(32).uint32(message.version);
     }
     if (message.activeSince !== undefined) {
       Timestamp.encode(toTimestamp(message.activeSince), writer.uint32(42).fork()).ldelim();
@@ -314,7 +314,7 @@ export const GovernanceFrameworkVersion = {
             break;
           }
 
-          message.version = reader.int32();
+          message.version = reader.uint32();
           continue;
         case 5:
           if (tag !== 42) {
@@ -526,7 +526,7 @@ export const GovernanceFrameworkVersionWithDocs = {
       Timestamp.encode(toTimestamp(message.created), writer.uint32(26).fork()).ldelim();
     }
     if (message.version !== 0) {
-      writer.uint32(32).int32(message.version);
+      writer.uint32(32).uint32(message.version);
     }
     if (message.activeSince !== undefined) {
       Timestamp.encode(toTimestamp(message.activeSince), writer.uint32(42).fork()).ldelim();
@@ -570,7 +570,7 @@ export const GovernanceFrameworkVersionWithDocs = {
             break;
           }
 
-          message.version = reader.int32();
+          message.version = reader.uint32();
           continue;
         case 5:
           if (tag !== 42) {
@@ -689,7 +689,7 @@ export const TrustRegistryWithVersions = {
       writer.uint32(66).string(message.aka);
     }
     if (message.activeVersion !== 0) {
-      writer.uint32(72).int32(message.activeVersion);
+      writer.uint32(72).uint32(message.activeVersion);
     }
     if (message.language !== "") {
       writer.uint32(82).string(message.language);
@@ -761,7 +761,7 @@ export const TrustRegistryWithVersions = {
             break;
           }
 
-          message.activeVersion = reader.int32();
+          message.activeVersion = reader.uint32();
           continue;
         case 10:
           if (tag !== 82) {

@@ -20,7 +20,7 @@ message GovernanceFrameworkVersion {
     (gogoproto.nullable) = false,
     (amino.dont_omitempty) = true
   ];
-  int32 version = 5;
+  uint32 version = 5;
   google.protobuf.Timestamp active_since = 6 [
     (gogoproto.stdtime) = true,
     (gogoproto.nullable) = false,
@@ -54,7 +54,7 @@ message GovernanceFrameworkVersionWithDocs {
     (gogoproto.nullable) = false,
     (amino.dont_omitempty) = true
   ];
-  int32 version = 5;
+  uint32 version = 5;
   google.protobuf.Timestamp active_since = 6 [
     (gogoproto.stdtime) = true,
     (gogoproto.nullable) = false,

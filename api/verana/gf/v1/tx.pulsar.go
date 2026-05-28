@@ -995,8 +995,8 @@ func (x *fastReflection_MsgAddGovernanceFrameworkDocument) Range(f func(protoref
 			return
 		}
 	}
-	if x.Version != int32(0) {
-		value := protoreflect.ValueOfInt32(x.Version)
+	if x.Version != uint32(0) {
+		value := protoreflect.ValueOfUint32(x.Version)
 		if !f(fd_MsgAddGovernanceFrameworkDocument_version, value) {
 			return
 		}
@@ -1029,7 +1029,7 @@ func (x *fastReflection_MsgAddGovernanceFrameworkDocument) Has(fd protoreflect.F
 	case "verana.gf.v1.MsgAddGovernanceFrameworkDocument.doc_digest_sri":
 		return x.DocDigestSri != ""
 	case "verana.gf.v1.MsgAddGovernanceFrameworkDocument.version":
-		return x.Version != int32(0)
+		return x.Version != uint32(0)
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.gf.v1.MsgAddGovernanceFrameworkDocument"))
@@ -1059,7 +1059,7 @@ func (x *fastReflection_MsgAddGovernanceFrameworkDocument) Clear(fd protoreflect
 	case "verana.gf.v1.MsgAddGovernanceFrameworkDocument.doc_digest_sri":
 		x.DocDigestSri = ""
 	case "verana.gf.v1.MsgAddGovernanceFrameworkDocument.version":
-		x.Version = int32(0)
+		x.Version = uint32(0)
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.gf.v1.MsgAddGovernanceFrameworkDocument"))
@@ -1096,7 +1096,7 @@ func (x *fastReflection_MsgAddGovernanceFrameworkDocument) Get(descriptor protor
 		return protoreflect.ValueOfString(value)
 	case "verana.gf.v1.MsgAddGovernanceFrameworkDocument.version":
 		value := x.Version
-		return protoreflect.ValueOfInt32(value)
+		return protoreflect.ValueOfUint32(value)
 	default:
 		if descriptor.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.gf.v1.MsgAddGovernanceFrameworkDocument"))
@@ -1130,7 +1130,7 @@ func (x *fastReflection_MsgAddGovernanceFrameworkDocument) Set(fd protoreflect.F
 	case "verana.gf.v1.MsgAddGovernanceFrameworkDocument.doc_digest_sri":
 		x.DocDigestSri = value.Interface().(string)
 	case "verana.gf.v1.MsgAddGovernanceFrameworkDocument.version":
-		x.Version = int32(value.Int())
+		x.Version = uint32(value.Uint())
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.gf.v1.MsgAddGovernanceFrameworkDocument"))
@@ -1191,7 +1191,7 @@ func (x *fastReflection_MsgAddGovernanceFrameworkDocument) NewField(fd protorefl
 	case "verana.gf.v1.MsgAddGovernanceFrameworkDocument.doc_digest_sri":
 		return protoreflect.ValueOfString("")
 	case "verana.gf.v1.MsgAddGovernanceFrameworkDocument.version":
-		return protoreflect.ValueOfInt32(int32(0))
+		return protoreflect.ValueOfUint32(uint32(0))
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.gf.v1.MsgAddGovernanceFrameworkDocument"))
@@ -1603,7 +1603,7 @@ func (x *fastReflection_MsgAddGovernanceFrameworkDocument) ProtoMethods() *proto
 					}
 					b := dAtA[iNdEx]
 					iNdEx++
-					x.Version |= int32(b&0x7F) << shift
+					x.Version |= uint32(b&0x7F) << shift
 					if b < 0x80 {
 						break
 					}
@@ -2994,7 +2994,7 @@ type MsgAddGovernanceFrameworkDocument struct {
 	// doc_digest_sri is the SRI digest of the document.
 	DocDigestSri string `protobuf:"bytes,6,opt,name=doc_digest_sri,json=docDigestSri,proto3" json:"doc_digest_sri,omitempty"`
 	// version is the target governance framework version.
-	Version int32 `protobuf:"varint,7,opt,name=version,proto3" json:"version,omitempty"`
+	Version uint32 `protobuf:"varint,7,opt,name=version,proto3" json:"version,omitempty"`
 }
 
 func (x *MsgAddGovernanceFrameworkDocument) Reset() {
@@ -3059,7 +3059,7 @@ func (x *MsgAddGovernanceFrameworkDocument) GetDocDigestSri() string {
 	return ""
 }
 
-func (x *MsgAddGovernanceFrameworkDocument) GetVersion() int32 {
+func (x *MsgAddGovernanceFrameworkDocument) GetVersion() uint32 {
 	if x != nil {
 		return x.Version
 	}
@@ -3219,7 +3219,7 @@ var file_verana_gf_v1_tx_proto_rawDesc = []byte{
 	0x63, 0x55, 0x72, 0x6c, 0x12, 0x24, 0x0a, 0x0e, 0x64, 0x6f, 0x63, 0x5f, 0x64, 0x69, 0x67, 0x65,
 	0x73, 0x74, 0x5f, 0x73, 0x72, 0x69, 0x18, 0x06, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0c, 0x64, 0x6f,
 	0x63, 0x44, 0x69, 0x67, 0x65, 0x73, 0x74, 0x53, 0x72, 0x69, 0x12, 0x18, 0x0a, 0x07, 0x76, 0x65,
-	0x72, 0x73, 0x69, 0x6f, 0x6e, 0x18, 0x07, 0x20, 0x01, 0x28, 0x05, 0x52, 0x07, 0x76, 0x65, 0x72,
+	0x72, 0x73, 0x69, 0x6f, 0x6e, 0x18, 0x07, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x07, 0x76, 0x65, 0x72,
 	0x73, 0x69, 0x6f, 0x6e, 0x3a, 0x4f, 0x82, 0xe7, 0xb0, 0x2a, 0x0b, 0x63, 0x6f, 0x72, 0x70, 0x6f,
 	0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x82, 0xe7, 0xb0, 0x2a, 0x08, 0x6f, 0x70, 0x65, 0x72, 0x61,
 	0x74, 0x6f, 0x72, 0x8a, 0xe7, 0xb0, 0x2a, 0x2d, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2f, 0x78,

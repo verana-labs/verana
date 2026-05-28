@@ -24,9 +24,9 @@ func (ms msgServer) validateAddGovernanceFrameworkDocumentParams(ctx sdk.Context
 
 	// Use secondary index to find the max version for this TR without a full table scan.
 	// Iterate the prefix (trId, *) in reverse to get the highest version first.
-	var maxVersion int32
+	var maxVersion uint32
 	var hasVersion bool
-	iter, err := ms.GFVersionByTR.Iterate(ctx, collections.NewPrefixedPairRange[uint64, int32](msg.TrId))
+	iter, err := ms.GFVersionByTR.Iterate(ctx, collections.NewPrefixedPairRange[uint64, uint32](msg.TrId))
 	if err != nil {
 		return fmt.Errorf("error iterating GFVersionByTR index: %w", err)
 	}

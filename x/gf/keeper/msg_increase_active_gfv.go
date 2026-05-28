@@ -73,7 +73,7 @@ func (ms msgServer) IncreaseActiveGovernanceFrameworkVersion(goCtx context.Conte
 			return nil, fmt.Errorf("update ecosystem active version: %w", err)
 		}
 	case subjectCorporation:
-		if err := ms.corporationKeeper.SetActiveVersion(ctx, sub.corporationID, nextVersion); err != nil {
+		if err := ms.corporationKeeper().SetActiveVersion(ctx, sub.corporationID, nextVersion); err != nil {
 			return nil, fmt.Errorf("update corporation active version: %w", err)
 		}
 	}

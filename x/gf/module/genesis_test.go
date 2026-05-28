@@ -80,14 +80,6 @@ func TestModule_ConsensusVersionAndBlockHooks(t *testing.T) {
 	require.NoError(t, mod.EndBlock(nil))
 }
 
-func TestProvideKeepers(t *testing.T) {
-	// ProvideCorporationKeeper has no inputs and returns the stub by construction.
-	corpK := gf.ProvideCorporationKeeper()
-	require.NotNil(t, corpK)
-	_, ok := corpK.ResolveByPolicyAddress(nil, "x")
-	require.False(t, ok, "stub must always return not-found")
-}
-
 func TestProvideEcosystemKeeper_WrapsTR(t *testing.T) {
 	// Verify the depinject provider wires the TR keeper into an
 	// EcosystemKeeper-compatible adapter.
@@ -107,13 +99,12 @@ func TestProvideModule_DefaultAuthority(t *testing.T) {
 	cdc := codec.NewProtoCodec(registry)
 
 	in := gf.ModuleInputs{
-		StoreService:      runtime.NewKVStoreService(storeKey),
-		Cdc:               cdc,
-		Config:            &modulev1.Module{}, // empty Authority → falls back to gov module addr
-		Logger:            log.NewNopLogger(),
-		DelegationKeeper:  stubDelegationKeeper{},
-		EcosystemKeeper:   &stubEcosystemKeeper{},
-		CorporationKeeper: &stubCorporationKeeper{},
+		StoreService:     runtime.NewKVStoreService(storeKey),
+		Cdc:              cdc,
+		Config:           &modulev1.Module{}, // empty Authority → falls back to gov module addr
+		Logger:           log.NewNopLogger(),
+		DelegationKeeper: stubDelegationKeeper{},
+		EcosystemKeeper:  &stubEcosystemKeeper{},
 	}
 	out := gf.ProvideModule(in)
 	require.NotNil(t, out.Module)
@@ -132,13 +123,12 @@ func TestProvideModule_CustomAuthority(t *testing.T) {
 	customAuth := authtypes.NewModuleAddress("custom").String()
 
 	in := gf.ModuleInputs{
-		StoreService:      runtime.NewKVStoreService(storeKey),
-		Cdc:               cdc,
-		Config:            &modulev1.Module{Authority: customAuth},
-		Logger:            log.NewNopLogger(),
-		DelegationKeeper:  stubDelegationKeeper{},
-		EcosystemKeeper:   &stubEcosystemKeeper{},
-		CorporationKeeper: &stubCorporationKeeper{},
+		StoreService:     runtime.NewKVStoreService(storeKey),
+		Cdc:              cdc,
+		Config:           &modulev1.Module{Authority: customAuth},
+		Logger:           log.NewNopLogger(),
+		DelegationKeeper: stubDelegationKeeper{},
+		EcosystemKeeper:  &stubEcosystemKeeper{},
 	}
 	out := gf.ProvideModule(in)
 	require.Equal(t, customAuth, out.GfKeeper.GetAuthority(), "explicit Authority must override gov default")
