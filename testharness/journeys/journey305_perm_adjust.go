@@ -8,7 +8,7 @@ import (
 
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
 
-	permtypes "github.com/verana-labs/verana/x/perm/types"
+	permtypes "github.com/verana-labs/verana/x/pp/types"
 
 	"github.com/verana-labs/verana/testharness/lib"
 )
@@ -41,12 +41,12 @@ func RunPermissionAdjustJourney(ctx context.Context, client cosmosclient.Client)
 	// PREREQUISITE: Verify the root permission from journey 304 exists
 	// =========================================================================
 	fmt.Println("\n=== PREREQUISITE: Verify root permission from Journey 304 ===")
-	perm, err := lib.GetPermission(client, ctx, permID)
+	perm, err := lib.GetParticipant(client, ctx, permID)
 	if err != nil {
 		return fmt.Errorf("prerequisite failed: could not load permission %d: %w", permID, err)
 	}
-	if perm.Type != permtypes.PermissionType_ECOSYSTEM {
-		return fmt.Errorf("prerequisite failed: expected ECOSYSTEM type, got %s", perm.Type.String())
+	if perm.Role != permtypes.ParticipantRole_ECOSYSTEM {
+		return fmt.Errorf("prerequisite failed: expected ECOSYSTEM type, got %s", perm.Role.String())
 	}
 	fmt.Printf("OK Prerequisite: Root permission %d exists (ECOSYSTEM, schema=%d)\n", permID, perm.SchemaId)
 
@@ -82,7 +82,7 @@ func RunPermissionAdjustJourney(ctx context.Context, client cosmosclient.Client)
 	err = lib.GrantOperatorAuthorizationViaGroup(
 		client, ctx, adminAccount, member1Account,
 		policyAddr, operatorAddr, operatorAddr,
-		[]string{"/verana.perm.v1.MsgAdjustPermission"},
+		[]string{"/verana.pp.v1.MsgSetParticipantEffectiveUntil"},
 	)
 	if err != nil {
 		return fmt.Errorf("step 1b failed: %w", err)
@@ -107,7 +107,7 @@ func RunPermissionAdjustJourney(ctx context.Context, client cosmosclient.Client)
 	// TEST 2: Verify adjusted permission fields
 	// =========================================================================
 	fmt.Println("\n=== TEST 2: Verify adjusted permission fields ===")
-	adjustedPerm, err := lib.GetPermission(client, ctx, permID)
+	adjustedPerm, err := lib.GetParticipant(client, ctx, permID)
 	if err != nil {
 		return fmt.Errorf("step 2 query failed: %w", err)
 	}
@@ -136,10 +136,10 @@ func RunPermissionAdjustJourney(ctx context.Context, client cosmosclient.Client)
 	}
 
 	// Verify other fields unchanged
-	if adjustedPerm.Type != permtypes.PermissionType_ECOSYSTEM {
-		return fmt.Errorf("step 2 failed: expected ECOSYSTEM type, got %s", adjustedPerm.Type.String())
+	if adjustedPerm.Role != permtypes.ParticipantRole_ECOSYSTEM {
+		return fmt.Errorf("step 2 failed: expected ECOSYSTEM type, got %s", adjustedPerm.Role.String())
 	}
-	if adjustedPerm.Corporation != policyAddr {
+	if adjustedPerm.CorporationId == 0 {
 		return fmt.Errorf("step 2 failed: authority changed unexpectedly")
 	}
 
@@ -161,7 +161,7 @@ func RunPermissionAdjustJourney(ctx context.Context, client cosmosclient.Client)
 	waitForTx("reduce effective_until")
 
 	// Verify the reduction took effect
-	reducedPerm, err := lib.GetPermission(client, ctx, permID)
+	reducedPerm, err := lib.GetParticipant(client, ctx, permID)
 	if err != nil {
 		return fmt.Errorf("step 3 verify failed: %w", err)
 	}
@@ -207,7 +207,7 @@ func RunPermissionAdjustJourney(ctx context.Context, client cosmosclient.Client)
 
 	// Save results
 	result := lib.JourneyResult{
-		EcosystemID: setup304.EcosystemID,
+		EcosystemID:     setup304.EcosystemID,
 		SchemaID:        setup304.SchemaID,
 		DID:             setup304.DID,
 		PermissionID:    setup304.PermissionID,

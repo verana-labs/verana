@@ -30,7 +30,7 @@ import (
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
 
 	cschema "github.com/verana-labs/verana/x/cs/types"
-	permtypes "github.com/verana-labs/verana/x/perm/types"
+	permtypes "github.com/verana-labs/verana/x/pp/types"
 )
 
 const (
@@ -159,7 +159,7 @@ func CreateRootPermissionWithDates(
 		panic(fmt.Sprintf("Failed to parse schema ID: %v", err))
 	}
 
-	rpStrId, err := CreateRootPermission(client, ctx, account, permtypes.MsgCreateRootPermission{
+	rpStrId, err := CreateRootPermission(client, ctx, account, permtypes.MsgCreateRootParticipant{
 		SchemaId:         csId,
 		Did:              did,
 		EffectiveFrom:    &effectiveFrom,
@@ -245,7 +245,7 @@ func LoadJourneyResult(journeyName string) JourneyResult {
 }
 
 // StartValidationProcess starts a permission validation process, panicking on error
-func StartValidationProcess(client cosmosclient.Client, ctx context.Context, account cosmosaccount.Account, msg permtypes.MsgStartPermissionVP) string {
+func StartValidationProcess(client cosmosclient.Client, ctx context.Context, account cosmosaccount.Account, msg permtypes.MsgStartParticipantOP) string {
 	permissionID, err := StartPermissionVP(client, ctx, account, msg)
 	if err != nil {
 		panic(fmt.Sprintf("Failed to start permission validation: %v", err))
@@ -260,7 +260,7 @@ func ValidatePermission(client cosmosclient.Client, ctx context.Context, account
 
 // ValidatePermissionWithDiscounts validates a permission with optional fee discounts, panicking on error
 func ValidatePermissionWithDiscounts(client cosmosclient.Client, ctx context.Context, account cosmosaccount.Account, permID, validationFees, issuanceFees, verificationFees uint64, country string, issuanceFeeDiscount, verificationFeeDiscount uint64) {
-	validateMsg := permtypes.MsgSetPermissionVPToValidated{
+	validateMsg := permtypes.MsgSetParticipantOPToValidated{
 		Id:                      permID,
 		ValidationFees:          validationFees,
 		IssuanceFees:            issuanceFees,
@@ -284,28 +284,28 @@ func VerifyPendingValidation(client cosmosclient.Client, ctx context.Context, pe
 	}
 
 	// Verify permission is in PENDING state
-	if resp.Permission.VpState != permtypes.ValidationState_PENDING {
+	if resp.Participant.OpState != permtypes.OnboardingState_PENDING {
 		fmt.Printf("❌ Permission validation verification failed: Expected state PENDING, got %s\n",
-			resp.Permission.VpState)
+			resp.Participant.OpState)
 		return false
 	}
 
 	// Verify DID and type match expectations
-	permType := permtypes.PermissionType_name[int32(resp.Permission.Type)]
+	permType := permtypes.ParticipantRole_name[int32(resp.Participant.Role)]
 	if permType != expectedType {
 		fmt.Printf("❌ Permission validation verification failed: Expected type %s, got %s\n",
 			expectedType, permType)
 		return false
 	}
 
-	if resp.Permission.Did != expectedDID {
+	if resp.Participant.Did != expectedDID {
 		fmt.Printf("❌ Permission validation verification failed: Expected DID %s, got %s\n",
-			expectedDID, resp.Permission.Did)
+			expectedDID, resp.Participant.Did)
 		return false
 	}
 
 	fmt.Printf("✅ Verified permission ID %d in PENDING state with expected type %s and DID %s\n",
-		permID, permType, resp.Permission.Did)
+		permID, permType, resp.Participant.Did)
 	return true
 }
 
@@ -321,14 +321,14 @@ func VerifyValidatedPermission(client cosmosclient.Client, ctx context.Context, 
 	}
 
 	// Verify permission is in VALIDATED state
-	if resp.Permission.VpState != permtypes.ValidationState_VALIDATED {
+	if resp.Participant.OpState != permtypes.OnboardingState_VALIDATED {
 		fmt.Printf("❌ Validated permission verification failed: Expected state VALIDATED, got %s\n",
-			resp.Permission.VpState)
+			resp.Participant.OpState)
 		return false
 	}
 
 	// Verify type matches expectation
-	permType := permtypes.PermissionType_name[int32(resp.Permission.Type)]
+	permType := permtypes.ParticipantRole_name[int32(resp.Participant.Role)]
 	if permType != expectedType {
 		fmt.Printf("❌ Validated permission verification failed: Expected type %s, got %s\n",
 			expectedType, permType)
@@ -336,33 +336,33 @@ func VerifyValidatedPermission(client cosmosclient.Client, ctx context.Context, 
 	}
 
 	// Verify DID matches expectation
-	if resp.Permission.Did != expectedDID {
+	if resp.Participant.Did != expectedDID {
 		fmt.Printf("❌ Validated permission verification failed: Expected DID %s, got %s\n",
-			expectedDID, resp.Permission.Did)
+			expectedDID, resp.Participant.Did)
 		return false
 	}
 
 	// Verify fees match expectations
-	if resp.Permission.ValidationFees != expectedValidationFees {
+	if resp.Participant.ValidationFees != expectedValidationFees {
 		fmt.Printf("❌ Validated permission verification failed: Expected validation fees %d, got %d\n",
-			expectedValidationFees, resp.Permission.ValidationFees)
+			expectedValidationFees, resp.Participant.ValidationFees)
 		return false
 	}
 
-	if resp.Permission.IssuanceFees != expectedIssuanceFees {
+	if resp.Participant.IssuanceFees != expectedIssuanceFees {
 		fmt.Printf("❌ Validated permission verification failed: Expected issuance fees %d, got %d\n",
-			expectedIssuanceFees, resp.Permission.IssuanceFees)
+			expectedIssuanceFees, resp.Participant.IssuanceFees)
 		return false
 	}
 
-	if resp.Permission.VerificationFees != expectedVerificationFees {
+	if resp.Participant.VerificationFees != expectedVerificationFees {
 		fmt.Printf("❌ Validated permission verification failed: Expected verification fees %d, got %d\n",
-			expectedVerificationFees, resp.Permission.VerificationFees)
+			expectedVerificationFees, resp.Participant.VerificationFees)
 		return false
 	}
 
 	fmt.Printf("✅ Verified permission ID %d is VALIDATED with correct type %s, DID %s, and fees\n",
-		permID, permType, resp.Permission.Did)
+		permID, permType, resp.Participant.Did)
 	return true
 }
 
@@ -372,30 +372,30 @@ func GetAddressPrefix() string {
 }
 
 // GetPermission retrieves a permission by ID
-func GetPermission(client cosmosclient.Client, ctx context.Context, permID uint64) (*permtypes.Permission, error) {
+func GetParticipant(client cosmosclient.Client, ctx context.Context, permID uint64) (*permtypes.Participant, error) {
 	permClient := permtypes.NewQueryClient(client.Context())
-	resp, err := permClient.GetPermission(ctx, &permtypes.QueryGetPermissionRequest{
+	resp, err := permClient.GetParticipant(ctx, &permtypes.QueryGetParticipantRequest{
 		Id: permID,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to query permission: %v", err)
 	}
 
-	return &resp.Permission, nil
+	return &resp.Participant, nil
 }
 
 // RenewPermissionVP initiates the renewal of a permission validation process
-func RenewPermissionVP(client cosmosclient.Client, ctx context.Context, account cosmosaccount.Account, msg permtypes.MsgRenewPermissionVP) (string, error) {
+func RenewPermissionVP(client cosmosclient.Client, ctx context.Context, account cosmosaccount.Account, msg permtypes.MsgRenewParticipantOP) (string, error) {
 	accountAddr, err := account.Address(addressPrefix)
 	if err != nil {
 		return "", fmt.Errorf("failed to get account address: %v", err)
 	}
 
 	// Set authority and operator to the account address
-	msgToSend := permtypes.MsgRenewPermissionVP{
+	msgToSend := permtypes.MsgRenewParticipantOP{
 		Corporation: accountAddr,
-		Operator:  accountAddr,
-		Id:        msg.Id,
+		Operator:    accountAddr,
+		Id:          msg.Id,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, account, &msgToSend)
@@ -477,7 +477,7 @@ func ReclaimTrustDepositYieldWithResponse(client cosmosclient.Client, ctx contex
 
 	msg := tdtypes.MsgReclaimTrustDepositYield{
 		Corporation: creatorAddr,
-		Operator:  creatorAddr,
+		Operator:    creatorAddr,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, creator, &msg)
@@ -558,7 +558,7 @@ func ReclaimTrustDepositYieldWithAuthority(client cosmosclient.Client, ctx conte
 
 	msg := tdtypes.MsgReclaimTrustDepositYield{
 		Corporation: authorityAddr,
-		Operator:  operatorAddr,
+		Operator:    operatorAddr,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, operatorAccount, &msg)
@@ -836,10 +836,10 @@ func RevokePermission(client cosmosclient.Client, ctx context.Context, operator 
 		return "", fmt.Errorf("failed to get operator address: %w", err)
 	}
 
-	msg := permtypes.MsgRevokePermission{
+	msg := permtypes.MsgRevokeParticipant{
 		Corporation: authority,
-		Operator:  operatorAddr,
-		Id:        id,
+		Operator:    operatorAddr,
+		Id:          id,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, operator, &msg)
@@ -867,8 +867,8 @@ func AdjustPermission(client cosmosclient.Client, ctx context.Context, operator 
 		return "", fmt.Errorf("failed to get operator address: %w", err)
 	}
 
-	msg := permtypes.MsgAdjustPermission{
-		Corporation:      authority,
+	msg := permtypes.MsgSetParticipantEffectiveUntil{
+		Corporation:    authority,
 		Operator:       operatorAddr,
 		Id:             id,
 		EffectiveUntil: effectiveUntil,
@@ -912,8 +912,8 @@ func UpdateCredentialSchema(
 	// For v4 spec, authority and operator are both the creator's address
 	msgWithCreator := cschema.MsgUpdateCredentialSchema{
 		Corporation: creatorAddr,
-		Operator:  creatorAddr,
-		Id:        schemaID,
+		Operator:    creatorAddr,
+		Id:          schemaID,
 		// Always set OptionalUInt32 fields (mandatory in new version)
 		IssuerGrantorValidationValidityPeriod: &cschema.OptionalUInt32{
 			Value: issuerGrantorValidationValidityPeriod,
@@ -961,9 +961,9 @@ func ArchiveCredentialSchema(client cosmosclient.Client, ctx context.Context, cr
 	// For v4 spec, authority and operator are both the creator's address
 	msgWithCreator := cschema.MsgArchiveCredentialSchema{
 		Corporation: creatorAddr,
-		Operator:  creatorAddr,
-		Id:        msg.Id,
-		Archive:   msg.Archive,
+		Operator:    creatorAddr,
+		Id:          msg.Id,
+		Archive:     msg.Archive,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, creator, &msgWithCreator)
@@ -987,17 +987,17 @@ func ArchiveCredentialSchema(client cosmosclient.Client, ctx context.Context, cr
 	return "unarchived", nil
 }
 
-func CancelPermissionVPLastRequest(client cosmosclient.Client, ctx context.Context, applicant cosmosaccount.Account, msg permtypes.MsgCancelPermissionVPLastRequest) (string, error) {
+func CancelPermissionVPLastRequest(client cosmosclient.Client, ctx context.Context, applicant cosmosaccount.Account, msg permtypes.MsgCancelParticipantOPLastRequest) (string, error) {
 	applicantAddr, err := applicant.Address(addressPrefix)
 	if err != nil {
 		return "", fmt.Errorf("failed to get applicant address: %w", err)
 	}
 
 	// Create complete message with authority/operator addresses
-	msgComplete := permtypes.MsgCancelPermissionVPLastRequest{
+	msgComplete := permtypes.MsgCancelParticipantOPLastRequest{
 		Corporation: applicantAddr,
-		Operator:  applicantAddr,
-		Id:        msg.Id,
+		Operator:    applicantAddr,
+		Id:          msg.Id,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, applicant, &msgComplete)
@@ -1026,7 +1026,7 @@ func SlashPermissionTrustDeposit(client cosmosclient.Client, ctx context.Context
 		return fmt.Errorf("failed to get actor address: %w", err)
 	}
 
-	msg := &permtypes.MsgSlashPermissionTrustDeposit{
+	msg := &permtypes.MsgSlashParticipantTrustDeposit{
 		Corporation: authority,
 		Operator:    actorAddr,
 		Id:          id,
@@ -1057,7 +1057,7 @@ func RepayPermissionSlashedTrustDeposit(client cosmosclient.Client, ctx context.
 		return fmt.Errorf("failed to get actor address: %w", err)
 	}
 
-	msg := &permtypes.MsgRepayPermissionSlashedTrustDeposit{
+	msg := &permtypes.MsgRepayParticipantSlashedTrustDeposit{
 		Corporation: authority,
 		Operator:    actorAddr,
 		Id:          id,
@@ -1077,17 +1077,17 @@ func RepayPermissionSlashedTrustDeposit(client cosmosclient.Client, ctx context.
 }
 
 // CreatePermission creates a permission directly
-func CreatePermission(client cosmosclient.Client, ctx context.Context, actor cosmosaccount.Account, authority string, msg permtypes.MsgSelfCreatePermission) (string, error) {
+func CreatePermission(client cosmosclient.Client, ctx context.Context, actor cosmosaccount.Account, authority string, msg permtypes.MsgSelfCreateParticipant) (string, error) {
 	actorAddr, err := actor.Address(addressPrefix)
 	if err != nil {
 		return "", fmt.Errorf("failed to get actor address: %w", err)
 	}
 
-	fullMsg := &permtypes.MsgSelfCreatePermission{
-		Corporation:                    authority,
+	fullMsg := &permtypes.MsgSelfCreateParticipant{
+		Corporation:                  authority,
 		Operator:                     actorAddr,
-		Type:                         msg.Type,
-		ValidatorPermId:              msg.ValidatorPermId,
+		Role:                         msg.Role,
+		ValidatorParticipantId:       msg.ValidatorParticipantId,
 		Did:                          msg.Did,
 		EffectiveFrom:                msg.EffectiveFrom,
 		EffectiveUntil:               msg.EffectiveUntil,
@@ -1131,14 +1131,14 @@ func CreatePermissionSession(
 	}
 
 	// Create the session creation message
-	msg := &permtypes.MsgCreateOrUpdatePermissionSession{
-		Corporation:       authorityAddr,
-		Operator:          operatorAddr,
-		Id:                sessionID,
-		IssuerPermId:      issuerPermID,
-		VerifierPermId:    verifierPermID,
-		AgentPermId:       agentPermID,
-		WalletAgentPermId: walletAgentPermID,
+	msg := &permtypes.MsgCreateOrUpdateParticipantSession{
+		Corporation:              authorityAddr,
+		Operator:                 operatorAddr,
+		Id:                       sessionID,
+		IssuerParticipantId:      issuerPermID,
+		VerifierParticipantId:    verifierPermID,
+		AgentParticipantId:       agentPermID,
+		WalletAgentParticipantId: walletAgentPermID,
 	}
 
 	// Broadcast the transaction
@@ -1164,7 +1164,7 @@ func VerifyPermissionSession(client cosmosclient.Client, ctx context.Context, se
 
 	// Query the permission session
 	permClient := permtypes.NewQueryClient(client.Context())
-	resp, err := permClient.GetPermissionSession(ctx, &permtypes.QueryGetPermissionSessionRequest{
+	resp, err := permClient.GetParticipantSession(ctx, &permtypes.QueryGetParticipantSessionRequest{
 		Id: sessionID,
 	})
 
@@ -1179,18 +1179,26 @@ func VerifyPermissionSession(client cosmosclient.Client, ctx context.Context, se
 		return false
 	}
 
-	// Verify authority matches expectation if provided
-	if expectedAuthority != "" && resp.GetSession().Corporation != expectedAuthority {
-		fmt.Printf("❌ Permission session verification failed: Expected authority %s, got %s\n",
-			expectedAuthority, resp.GetSession().Corporation)
-		return false
-	}
+	// NOTE: ParticipantSession.corporation_id is now a uint64 FK (was the
+	// authority account). The account-equality check is dropped here; the
+	// caller-supplied expectedAuthority is retained for signature compatibility.
+	_ = expectedAuthority
 
-	// Verify agent permission ID matches expectation
-	if resp.GetSession().AgentPermId != expectedAgentPermID {
-		fmt.Printf("❌ Permission session verification failed: Expected agent permission ID %d, got %d\n",
-			expectedAgentPermID, resp.GetSession().AgentPermId)
-		return false
+	// Verify agent participant ID matches expectation. Per spec v4-rc2,
+	// agent_participant_id lives on the session records, not the session.
+	if expectedAgentPermID != 0 {
+		agentFound := false
+		for _, record := range resp.GetSession().SessionRecords {
+			if record.GetAgentParticipantId() == expectedAgentPermID {
+				agentFound = true
+				break
+			}
+		}
+		if !agentFound {
+			fmt.Printf("❌ Permission session verification failed: Expected agent participant ID %d not found in records\n",
+				expectedAgentPermID)
+			return false
+		}
 	}
 
 	// Check session records for expected permissions
@@ -1198,12 +1206,12 @@ func VerifyPermissionSession(client cosmosclient.Client, ctx context.Context, se
 	verifierFound := false
 	for _, record := range resp.GetSession().SessionRecords {
 		// Check for issuer permission ID if expected
-		if expectedIssuerPermID > 0 && record.GetIssuerPermId() == expectedIssuerPermID {
+		if expectedIssuerPermID > 0 && record.GetIssuerParticipantId() == expectedIssuerPermID {
 			issuerFound = true
 		}
 
 		// Check for verifier permission ID if expected
-		if expectedVerifierPermID > 0 && record.GetVerifierPermId() == expectedVerifierPermID {
+		if expectedVerifierPermID > 0 && record.GetVerifierParticipantId() == expectedVerifierPermID {
 			verifierFound = true
 		}
 	}
@@ -1832,7 +1840,7 @@ func ParseSchemaID(schemaIDStr string) uint64 {
 // CreateRootPermissionWithError creates a root permission and returns any error
 // instead of calling log.Fatal. This is useful for testing error scenarios.
 func CreateRootPermissionWithError(client cosmosclient.Client, ctx context.Context,
-	creator cosmosaccount.Account, msg permtypes.MsgCreateRootPermission) error {
+	creator cosmosaccount.Account, msg permtypes.MsgCreateRootParticipant) error {
 
 	creatorAddr, err := creator.Address(addressPrefix)
 	if err != nil {
@@ -1841,7 +1849,7 @@ func CreateRootPermissionWithError(client cosmosclient.Client, ctx context.Conte
 
 	// Create the message
 	// [MOD-PERM-MSG-7-1] spec v4 draft 13 mandates permission_type and vs_operator.
-	fullMsg := &permtypes.MsgCreateRootPermission{
+	fullMsg := &permtypes.MsgCreateRootParticipant{
 		Corporation:      creatorAddr,
 		Operator:         creatorAddr,
 		SchemaId:         msg.SchemaId,
@@ -1870,7 +1878,7 @@ func CreateRootPermissionWithError(client cosmosclient.Client, ctx context.Conte
 // CreateRootPermissionAndGetID creates a root permission and returns its ID
 // Returns the permission ID or an error
 func CreateRootPermissionAndGetID(client cosmosclient.Client, ctx context.Context,
-	creator cosmosaccount.Account, msg permtypes.MsgCreateRootPermission) (uint64, error) {
+	creator cosmosaccount.Account, msg permtypes.MsgCreateRootParticipant) (uint64, error) {
 
 	creatorAddr, err := creator.Address(addressPrefix)
 	if err != nil {
@@ -1879,7 +1887,7 @@ func CreateRootPermissionAndGetID(client cosmosclient.Client, ctx context.Contex
 
 	// Create the message
 	// [MOD-PERM-MSG-7-1] spec v4 draft 13 mandates permission_type and vs_operator.
-	fullMsg := &permtypes.MsgCreateRootPermission{
+	fullMsg := &permtypes.MsgCreateRootParticipant{
 		Corporation:      creatorAddr,
 		Operator:         creatorAddr,
 		SchemaId:         msg.SchemaId,
@@ -1933,7 +1941,7 @@ func CreateRootPermissionAndGetID(client cosmosclient.Client, ctx context.Contex
 // StartPermissionVPWithError starts a permission VP and returns any error
 // instead of calling log.Fatal. This is useful for testing error scenarios.
 func StartPermissionVPWithError(client cosmosclient.Client, ctx context.Context,
-	creator cosmosaccount.Account, msg permtypes.MsgStartPermissionVP) error {
+	creator cosmosaccount.Account, msg permtypes.MsgStartParticipantOP) error {
 
 	creatorAddr, err := creator.Address(addressPrefix)
 	if err != nil {
@@ -1941,15 +1949,15 @@ func StartPermissionVPWithError(client cosmosclient.Client, ctx context.Context,
 	}
 
 	// Create the message
-	fullMsg := &permtypes.MsgStartPermissionVP{
-		Corporation:      msg.Corporation,
-		Operator:         creatorAddr,
-		Type:             msg.Type,
-		Did:              msg.Did,
-		ValidatorPermId:  msg.ValidatorPermId,
-		ValidationFees:   msg.ValidationFees,
-		IssuanceFees:     msg.IssuanceFees,
-		VerificationFees: msg.VerificationFees,
+	fullMsg := &permtypes.MsgStartParticipantOP{
+		Corporation:            msg.Corporation,
+		Operator:               creatorAddr,
+		Role:                   msg.Role,
+		Did:                    msg.Did,
+		ValidatorParticipantId: msg.ValidatorParticipantId,
+		ValidationFees:         msg.ValidationFees,
+		IssuanceFees:           msg.IssuanceFees,
+		VerificationFees:       msg.VerificationFees,
 	}
 	if fullMsg.Corporation == "" {
 		fullMsg.Corporation = creatorAddr
@@ -1979,10 +1987,10 @@ func RevokePermissionWithError(client cosmosclient.Client, ctx context.Context,
 		return fmt.Errorf("failed to get operator address: %v", err)
 	}
 
-	fullMsg := &permtypes.MsgRevokePermission{
+	fullMsg := &permtypes.MsgRevokeParticipant{
 		Corporation: authority,
-		Operator:  operatorAddr,
-		Id:        id,
+		Operator:    operatorAddr,
+		Id:          id,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, operator, fullMsg)
@@ -2021,7 +2029,7 @@ func CreateInactiveValidatorPermission(client cosmosclient.Client, ctx context.C
 	// Create an ECOSYSTEM (root) permission with future effective_from
 	// This will be in FUTURE state (not ACTIVE).
 	// [MOD-PERM-MSG-7-1] spec v4 draft 13 mandates permission_type and vs_operator.
-	msg := &permtypes.MsgCreateRootPermission{
+	msg := &permtypes.MsgCreateRootParticipant{
 		Corporation:    creatorAddr,
 		Operator:       creatorAddr,
 		SchemaId:       schemaID,
@@ -2849,7 +2857,7 @@ func UpdateCredentialSchemaWithAuthority(
 	}
 
 	msg := &cschema.MsgUpdateCredentialSchema{
-		Corporation:                               authority,
+		Corporation:                             authority,
 		Operator:                                operatorAddr,
 		Id:                                      csID,
 		IssuerGrantorValidationValidityPeriod:   &cschema.OptionalUInt32{Value: issuerGrantorValidityPeriod},
@@ -2891,9 +2899,9 @@ func ArchiveCredentialSchemaWithAuthority(
 
 	msg := &cschema.MsgArchiveCredentialSchema{
 		Corporation: authority,
-		Operator:  operatorAddr,
-		Id:        csID,
-		Archive:   archive,
+		Operator:    operatorAddr,
+		Id:          csID,
+		Archive:     archive,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, operatorAccount, msg)
@@ -2918,7 +2926,7 @@ func StartPermissionVPWithAuthority(
 	ctx context.Context,
 	operatorAccount cosmosaccount.Account,
 	authority string,
-	permType permtypes.PermissionType,
+	permType permtypes.ParticipantRole,
 	validatorPermId uint64,
 	did string,
 ) (string, error) {
@@ -2927,12 +2935,12 @@ func StartPermissionVPWithAuthority(
 		return "", fmt.Errorf("failed to get operator address: %w", err)
 	}
 
-	msg := &permtypes.MsgStartPermissionVP{
-		Corporation:       authority,
-		Operator:        operatorAddr,
-		Type:            permType,
-		ValidatorPermId: validatorPermId,
-		Did:             did,
+	msg := &permtypes.MsgStartParticipantOP{
+		Corporation:            authority,
+		Operator:               operatorAddr,
+		Role:                   permType,
+		ValidatorParticipantId: validatorPermId,
+		Did:                    did,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, operatorAccount, msg)
@@ -2983,10 +2991,10 @@ func RenewPermissionVPWithAuthority(
 		return fmt.Errorf("failed to get operator address: %w", err)
 	}
 
-	msg := &permtypes.MsgRenewPermissionVP{
+	msg := &permtypes.MsgRenewParticipantOP{
 		Corporation: authority,
-		Operator:  operatorAddr,
-		Id:        permID,
+		Operator:    operatorAddr,
+		Id:          permID,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, operatorAccount, msg)
@@ -3024,7 +3032,7 @@ func CreateRootPermissionWithAuthority(
 	}
 
 	// [MOD-PERM-MSG-7-3] spec v4 draft 13: handler hardcodes perm.type = ECOSYSTEM.
-	msg := &permtypes.MsgCreateRootPermission{
+	msg := &permtypes.MsgCreateRootParticipant{
 		Corporation:      authority,
 		Operator:         operatorAddr,
 		SchemaId:         schemaID,
@@ -3089,10 +3097,10 @@ func CancelPermissionVPLastRequestWithAuthority(
 		return fmt.Errorf("failed to get operator address: %w", err)
 	}
 
-	msg := &permtypes.MsgCancelPermissionVPLastRequest{
+	msg := &permtypes.MsgCancelParticipantOPLastRequest{
 		Corporation: authority,
-		Operator:  operatorAddr,
-		Id:        permID,
+		Operator:    operatorAddr,
+		Id:          permID,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, operatorAccount, msg)

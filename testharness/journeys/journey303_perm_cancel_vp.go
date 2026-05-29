@@ -7,7 +7,7 @@ import (
 
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
 
-	permtypes "github.com/verana-labs/verana/x/perm/types"
+	permtypes "github.com/verana-labs/verana/x/pp/types"
 
 	"github.com/verana-labs/verana/testharness/lib"
 )
@@ -40,12 +40,12 @@ func RunPermissionCancelVPJourney(ctx context.Context, client cosmosclient.Clien
 	// =========================================================================
 	fmt.Println("\n=== PREREQUISITE: Ensure permission is in PENDING state ===")
 
-	perm, err := lib.GetPermission(client, ctx, permID)
+	perm, err := lib.GetParticipant(client, ctx, permID)
 	if err != nil {
 		return fmt.Errorf("prerequisite failed: could not query permission: %w", err)
 	}
 
-	if perm.VpState == permtypes.ValidationState_VALIDATED {
+	if perm.OpState == permtypes.OnboardingState_VALIDATED {
 		fmt.Println("Permission is VALIDATED, renewing to get PENDING state...")
 		err = lib.RenewPermissionVPWithAuthority(client, ctx, operatorAccount, policyAddr, permID)
 		if err != nil {
@@ -53,14 +53,14 @@ func RunPermissionCancelVPJourney(ctx context.Context, client cosmosclient.Clien
 		}
 		waitForTx("renew permission for cancel test")
 
-		perm, err = lib.GetPermission(client, ctx, permID)
+		perm, err = lib.GetParticipant(client, ctx, permID)
 		if err != nil {
 			return fmt.Errorf("prerequisite verification failed: %w", err)
 		}
 	}
 
-	if perm.VpState != permtypes.ValidationState_PENDING {
-		return fmt.Errorf("prerequisite failed: expected PENDING state, got %s", perm.VpState.String())
+	if perm.OpState != permtypes.OnboardingState_PENDING {
+		return fmt.Errorf("prerequisite failed: expected PENDING state, got %s", perm.OpState.String())
 	}
 	fmt.Printf("OK Prerequisite: Permission %d is in PENDING state\n", permID)
 
@@ -84,7 +84,7 @@ func RunPermissionCancelVPJourney(ctx context.Context, client cosmosclient.Clien
 	err = lib.GrantOperatorAuthorizationViaGroup(
 		client, ctx, adminAccount, member1Account,
 		policyAddr, operatorAddr, operatorAddr,
-		[]string{"/verana.perm.v1.MsgCancelPermissionVPLastRequest"},
+		[]string{"/verana.pp.v1.MsgCancelParticipantOPLastRequest"},
 	)
 	if err != nil {
 		return fmt.Errorf("step 1b failed: %w", err)
@@ -104,32 +104,32 @@ func RunPermissionCancelVPJourney(ctx context.Context, client cosmosclient.Clien
 	waitForTx("CancelPermVP success")
 
 	// Verify the permission state transition
-	perm, err = lib.GetPermission(client, ctx, permID)
+	perm, err = lib.GetParticipant(client, ctx, permID)
 	if err != nil {
 		return fmt.Errorf("step 1c verification query failed: %w", err)
 	}
-	// [MOD-PERM-MSG-6-3] spec v4 draft 13: when vp_exp is null (never validated to expiration),
-	// cancel transitions vp_state to TERMINATED.
-	if perm.VpState != permtypes.ValidationState_TERMINATED {
-		return fmt.Errorf("step 1c verification failed: expected TERMINATED state (no vp_exp), got %s", perm.VpState.String())
+	// [MOD-PERM-MSG-6-3] spec v4 draft 13: when op_exp is null (never validated to expiration),
+	// cancel transitions op_state to TERMINATED.
+	if perm.OpState != permtypes.OnboardingState_TERMINATED {
+		return fmt.Errorf("step 1c verification failed: expected TERMINATED state (no op_exp), got %s", perm.OpState.String())
 	}
-	fmt.Printf("OK Step 1c: Verified permission is TERMINATED after cancel (no vp_exp set)\n")
+	fmt.Printf("OK Step 1c: Verified permission is TERMINATED after cancel (no op_exp set)\n")
 
-	// Verify fees were refunded (vp_current_fees and vp_current_deposit should be 0)
-	if perm.VpCurrentFees != 0 {
-		return fmt.Errorf("step 1c verification failed: expected vp_current_fees=0, got %d", perm.VpCurrentFees)
+	// Verify fees were refunded (op_current_fees and op_current_deposit should be 0)
+	if perm.OpCurrentFees != 0 {
+		return fmt.Errorf("step 1c verification failed: expected op_current_fees=0, got %d", perm.OpCurrentFees)
 	}
-	if perm.VpCurrentDeposit != 0 {
-		return fmt.Errorf("step 1c verification failed: expected vp_current_deposit=0, got %d", perm.VpCurrentDeposit)
+	if perm.OpCurrentDeposit != 0 {
+		return fmt.Errorf("step 1c verification failed: expected op_current_deposit=0, got %d", perm.OpCurrentDeposit)
 	}
-	fmt.Println("OK Step 1c: Verified vp_current_fees=0, vp_current_deposit=0 (fees refunded)")
+	fmt.Println("OK Step 1c: Verified op_current_fees=0, op_current_deposit=0 (fees refunded)")
 
 	// =========================================================================
 	// TEST 2: Unauthorized operator (negative test)
 	// =========================================================================
 	fmt.Println("\n=== TEST 2: Unauthorized operator (negative test) ===")
 
-	// Permission is now TERMINATED (no vp_exp). The unauthorized operator test
+	// Permission is now TERMINATED (no op_exp). The unauthorized operator test
 	// will still work because the AUTHZ-CHECK rejects before the state check.
 	fmt.Println("\n--- Step 2a: Unauthorized operator tries CancelPermissionVPLastRequest (expect failure) ---")
 	cooluser := lib.GetAccount(client, lib.COOLUSER_NAME)
@@ -143,7 +143,7 @@ func RunPermissionCancelVPJourney(ctx context.Context, client cosmosclient.Clien
 
 	// Save results
 	result := lib.JourneyResult{
-		EcosystemID: setup302.EcosystemID,
+		EcosystemID:     setup302.EcosystemID,
 		SchemaID:        setup302.SchemaID,
 		DID:             setup302.DID,
 		PermissionID:    setup302.PermissionID,

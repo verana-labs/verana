@@ -116,18 +116,18 @@ async function main() {
     typeUrls.MsgUpdateCredentialSchema,
     typeUrls.MsgArchiveCredentialSchema,
     // PERM messages
-    typeUrls.MsgCreateRootPermission,
-    typeUrls.MsgSelfCreatePermission,
-    typeUrls.MsgAdjustPermission,
-    typeUrls.MsgRevokePermission,
-    typeUrls.MsgStartPermissionVP,
-    typeUrls.MsgRenewPermissionVP,
-    typeUrls.MsgSetPermissionVPToValidated,
-    typeUrls.MsgCancelPermissionVPLastRequest,
-    // Note: MsgCreateOrUpdatePermissionSession is NOT DE-delegable
+    typeUrls.MsgCreateRootParticipant,
+    typeUrls.MsgSelfCreateParticipant,
+    typeUrls.MsgSetParticipantEffectiveUntil,
+    typeUrls.MsgRevokeParticipant,
+    typeUrls.MsgStartParticipantOP,
+    typeUrls.MsgRenewParticipantOP,
+    typeUrls.MsgSetParticipantOPToValidated,
+    typeUrls.MsgCancelParticipantOPLastRequest,
+    // Note: MsgCreateOrUpdateParticipantSession is NOT DE-delegable
     // It uses VS operator authorization (AUTHZ-CHECK-3) instead
-    typeUrls.MsgSlashPermissionTrustDeposit,
-    typeUrls.MsgRepayPermissionSlashedTrustDeposit,
+    typeUrls.MsgSlashParticipantTrustDeposit,
+    typeUrls.MsgRepayParticipantSlashedTrustDeposit,
   ];
 
   // Authority signs the grant directly (no operator for DE grant)

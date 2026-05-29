@@ -23,7 +23,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth/migrations/legacytx"
-	permtypes "github.com/verana-labs/verana/x/perm/types"
+	permtypes "github.com/verana-labs/verana/x/pp/types"
 )
 
 func main() {
@@ -35,11 +35,11 @@ func main() {
 	effectiveUntil := time.Date(2025, 12, 31, 0, 0, 0, 123000000, time.UTC)
 
 	address := "verana16mzeyu9l6kua2cdg9x0jk5g6e7h0kk8q6uadu4"
-	msg := &permtypes.MsgSelfCreatePermission{
+	msg := &permtypes.MsgSelfCreateParticipant{
 		Corporation:      address,
 		Operator:         address,
-		Type:             permtypes.PermissionType_VERIFIER,
-		ValidatorPermId:  1,
+		Role:             permtypes.ParticipantRole_VERIFIER,
+		ValidatorParticipantId:  1,
 		Did:              "did:verana:test:bench",
 		EffectiveFrom:    &effectiveFrom,
 		EffectiveUntil:   &effectiveUntil,
@@ -156,7 +156,7 @@ func buildClientSignBytes(address string, accountNumber, sequence uint64) []byte
 					"corporation":                       address,
 					"operator":                          address,
 					"type":                              2,
-					"validator_perm_id":                 "1",
+					"validator_participant_id":                 "1",
 					"did":                               "did:verana:test:bench",
 					"effective_from":                    "2025-01-01T00:00:00.123Z",
 					"effective_until":                   "2025-12-31T00:00:00.123Z",

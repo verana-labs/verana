@@ -131,10 +131,10 @@ func RunXrUpdateExchangeRateJourney(ctx context.Context, client cosmosclient.Cli
 	// Save results
 	// =========================================================================
 	result := lib.JourneyResult{
-		ExchangeRateID: setup601.ExchangeRateID,
-		GroupID:        setup301.GroupID,
+		ExchangeRateID:  setup601.ExchangeRateID,
+		GroupID:         setup301.GroupID,
 		GroupPolicyAddr: policyAddr,
-		OperatorAddr:   operatorAddr,
+		OperatorAddr:    operatorAddr,
 	}
 	lib.SaveJourneyResult("journey602", result)
 

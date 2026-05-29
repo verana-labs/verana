@@ -21,7 +21,7 @@ import {
   config,
 } from "../helpers/client";
 import { typeUrls } from "../helpers/registry";
-import { MsgSlashPermissionTrustDeposit } from "../../../src/codec/verana/perm/v1/tx";
+import { MsgSlashParticipantTrustDeposit } from "../../../src/codec/verana/pp/v1/tx";
 import { IssuerOnboardingMode, VerifierOnboardingMode } from "../../../src/codec/verana/cs/v1/types";
 import { getPermAuthzSetup, savePermSlashSetup } from "../helpers/journeyResults";
 import { createPermPrerequisites, createValidatedPermission } from "../helpers/permissionHelpers";
@@ -82,7 +82,7 @@ async function main() {
 
     // Step 5: Create validated ISSUER permission (VP lifecycle)
     console.log("Step 5: Creating validated ISSUER permission (Start VP + Validate)...");
-    const issuerPermId = await createValidatedPermission(
+    const issuerParticipantId = await createValidatedPermission(
       client,
       setup.authorityAddress,
       setup.operatorAddress,
@@ -90,19 +90,19 @@ async function main() {
       rootPermId,
       did,
     );
-    console.log(`  Validated ISSUER Permission ID: ${issuerPermId}`);
+    console.log(`  Validated ISSUER Permission ID: ${issuerParticipantId}`);
     console.log();
 
     // Step 6: Slash the trust deposit
-    console.log("Step 6: Slashing trust deposit (MsgSlashPermissionTrustDeposit)...");
+    console.log("Step 6: Slashing trust deposit (MsgSlashParticipantTrustDeposit)...");
     const slashAmount = 10;
 
     const msg = {
-      typeUrl: typeUrls.MsgSlashPermissionTrustDeposit,
-      value: MsgSlashPermissionTrustDeposit.fromPartial({
+      typeUrl: typeUrls.MsgSlashParticipantTrustDeposit,
+      value: MsgSlashParticipantTrustDeposit.fromPartial({
         corporation: setup.authorityAddress,
         operator: setup.operatorAddress,
-        id: issuerPermId,
+        id: issuerParticipantId,
         amount: slashAmount,
         // [MOD-PERM-MSG-12-1] reason is mandatory per spec v4 draft 13.
         reason: "ts-client journey slash",
@@ -121,10 +121,10 @@ async function main() {
     console.log(`  Tx Hash: ${result.transactionHash}`);
     console.log(`  Block: ${result.height}`);
     console.log(`  Gas: ${result.gasUsed}/${result.gasWanted}`);
-    console.log(`  Slashed Permission ID: ${issuerPermId}`);
+    console.log(`  Slashed Permission ID: ${issuerParticipantId}`);
     console.log(`  Slash Amount: ${slashAmount}`);
 
-    savePermSlashSetup(issuerPermId, schemaId);
+    savePermSlashSetup(issuerParticipantId, schemaId);
     console.log("  Saved perm-slash-setup");
   } catch (error: any) {
     console.log("ERROR!");

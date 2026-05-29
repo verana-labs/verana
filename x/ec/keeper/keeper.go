@@ -71,7 +71,7 @@ func NewKeeper(
 
 func (k Keeper) GetAuthority() string { return k.authority }
 
-// GetEcosystem is the read accessor consumed by x/cs and x/perm via their
+// GetEcosystem is the read accessor consumed by x/cs and x/pp via their
 // respective EcosystemKeeper interfaces (cs uses it to enforce the
 // ec.CorporationId ownership chain; perm uses it for the same plus the
 // schema-controller lookup).

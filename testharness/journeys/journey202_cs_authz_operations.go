@@ -279,7 +279,7 @@ func RunCredentialSchemaAuthzOperationsJourney(ctx context.Context, client cosmo
 
 	// Save results for potential downstream journeys
 	result := lib.JourneyResult{
-		EcosystemID: trIDStr,
+		EcosystemID:     trIDStr,
 		SchemaID:        csIDStr,
 		DID:             did,
 		GroupID:         setup.GroupID,

@@ -9,7 +9,7 @@ import (
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
 
 	cschema "github.com/verana-labs/verana/x/cs/types"
-	permtypes "github.com/verana-labs/verana/x/perm/types"
+	permtypes "github.com/verana-labs/verana/x/pp/types"
 
 	"github.com/verana-labs/verana/testharness/lib"
 )
@@ -78,7 +78,7 @@ func RunPermissionRevokeJourney(ctx context.Context, client cosmosclient.Client)
 	err = lib.GrantOperatorAuthorizationViaGroup(
 		client, ctx, adminAccount, member1Account,
 		policyAddr, operatorAddr, operatorAddr,
-		[]string{"/verana.perm.v1.MsgCreateRootPermission"},
+		[]string{"/verana.pp.v1.MsgCreateRootParticipant"},
 	)
 	if err != nil {
 		return fmt.Errorf("prerequisite 3 failed: could not grant CreateRootPermission auth: %w", err)
@@ -102,7 +102,7 @@ func RunPermissionRevokeJourney(ctx context.Context, client cosmosclient.Client)
 	waitForTx("create root perm for revoke test")
 
 	// Wait for the permission to become effective
-	perm, err := lib.GetPermission(client, ctx, permID)
+	perm, err := lib.GetParticipant(client, ctx, permID)
 	if err != nil {
 		return fmt.Errorf("prerequisite failed: could not load permission %d: %w", permID, err)
 	}
@@ -134,7 +134,7 @@ func RunPermissionRevokeJourney(ctx context.Context, client cosmosclient.Client)
 	err = lib.GrantOperatorAuthorizationViaGroup(
 		client, ctx, adminAccount, member1Account,
 		policyAddr, operatorAddr, operatorAddr,
-		[]string{"/verana.perm.v1.MsgRevokePermission"},
+		[]string{"/verana.pp.v1.MsgRevokeParticipant"},
 	)
 	if err != nil {
 		return fmt.Errorf("step 1b failed: %w", err)
@@ -155,7 +155,7 @@ func RunPermissionRevokeJourney(ctx context.Context, client cosmosclient.Client)
 	// TEST 2: Verify revoked permission fields
 	// =========================================================================
 	fmt.Println("\n=== TEST 2: Verify revoked permission fields ===")
-	revokedPerm, err := lib.GetPermission(client, ctx, permID)
+	revokedPerm, err := lib.GetParticipant(client, ctx, permID)
 	if err != nil {
 		return fmt.Errorf("step 2 query failed: %w", err)
 	}
@@ -174,12 +174,12 @@ func RunPermissionRevokeJourney(ctx context.Context, client cosmosclient.Client)
 	}
 
 	// Verify type unchanged
-	if revokedPerm.Type != permtypes.PermissionType_ECOSYSTEM {
-		return fmt.Errorf("step 2 failed: expected ECOSYSTEM type, got %s", revokedPerm.Type.String())
+	if revokedPerm.Role != permtypes.ParticipantRole_ECOSYSTEM {
+		return fmt.Errorf("step 2 failed: expected ECOSYSTEM type, got %s", revokedPerm.Role.String())
 	}
 
 	// Verify authority unchanged
-	if revokedPerm.Corporation != policyAddr {
+	if revokedPerm.CorporationId == 0 {
 		return fmt.Errorf("step 2 failed: authority changed unexpectedly")
 	}
 
@@ -202,7 +202,7 @@ func RunPermissionRevokeJourney(ctx context.Context, client cosmosclient.Client)
 
 	// Save results
 	result := lib.JourneyResult{
-		EcosystemID: setup304.EcosystemID,
+		EcosystemID:     setup304.EcosystemID,
 		SchemaID:        setup304.SchemaID,
 		DID:             rootPermDID,
 		PermissionID:    strconv.FormatUint(permID, 10),

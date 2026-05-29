@@ -21,8 +21,8 @@ import {
   config,
 } from "../helpers/client";
 import { typeUrls } from "../helpers/registry";
-import { MsgStartPermissionVP } from "../../../src/codec/verana/perm/v1/tx";
-import { PermissionType, OptionalUInt64 } from "../../../src/codec/verana/perm/v1/types";
+import { MsgStartParticipantOP } from "../../../src/codec/verana/pp/v1/tx";
+import { ParticipantRole, OptionalUInt64 } from "../../../src/codec/verana/pp/v1/types";
 import { getPermAuthzSetup, getPermRootSetup, savePermVPSetup } from "../helpers/journeyResults";
 import { extractIdFromEvents } from "../helpers/permissionHelpers";
 
@@ -75,14 +75,14 @@ async function main() {
     console.log();
 
     // Step 4: Start VP for ISSUER type
-    console.log("Step 4: Starting Permission VP (MsgStartPermissionVP)...");
+    console.log("Step 4: Starting Permission VP (MsgStartParticipantOP)...");
     const msg = {
-      typeUrl: typeUrls.MsgStartPermissionVP,
-      value: MsgStartPermissionVP.fromPartial({
+      typeUrl: typeUrls.MsgStartParticipantOP,
+      value: MsgStartParticipantOP.fromPartial({
         corporation: authzSetup.authorityAddress,
         operator: authzSetup.operatorAddress,
-        type: PermissionType.ISSUER,
-        validatorPermId: rootSetup.rootPermId,
+        role: ParticipantRole.ISSUER,
+        validatorParticipantId: rootSetup.rootPermId,
         did: rootSetup.did,
         validationFees: OptionalUInt64.fromPartial({ value: 5 }),
         issuanceFees: OptionalUInt64.fromPartial({ value: 5 }),

@@ -5,12 +5,12 @@ import { StargateClient } from "@cosmjs/stargate";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { MsgSelfCreatePermission } from "../../../../../src/codec/verana/perm/v1/tx";
-import { PermissionType } from "../../../../../src/codec/verana/perm/v1/types";
-import { MsgSelfCreatePermissionAminoConverter } from "../../../../../src/helpers/aminoConverters";
+import { MsgSelfCreateParticipant } from "../../../../../src/codec/verana/pp/v1/tx";
+import { ParticipantRole } from "../../../../../src/codec/verana/pp/v1/types";
+import { MsgSelfCreateParticipantAminoConverter } from "../../../../../src/helpers/aminoConverters";
 
 type AminoMsg = {
-  type: string;
+  role: string;
   value: Record<string, unknown>;
 };
 
@@ -32,11 +32,11 @@ function buildCreatePermissionMsgs(): { clientMsg: AminoMsg; serverMsg: AminoMsg
   const effectiveFrom = new Date("2025-01-01T00:00:00.123Z");
   const effectiveUntil = new Date("2025-12-31T00:00:00.123Z");
   const address = "verana16mzeyu9l6kua2cdg9x0jk5g6e7h0kk8q6uadu4";
-  const protoMsg = MsgSelfCreatePermission.fromPartial({
+  const protoMsg = MsgSelfCreateParticipant.fromPartial({
     corporation: address,
     operator: address,
-    type: PermissionType.VERIFIER,
-    validatorPermId: 1,
+    role: ParticipantRole.VERIFIER,
+    validatorParticipantId: 1,
     did: "did:verana:test:bench",
     effectiveFrom,
     effectiveUntil,
@@ -44,7 +44,7 @@ function buildCreatePermissionMsgs(): { clientMsg: AminoMsg; serverMsg: AminoMsg
     validationFees: 0,
   });
 
-  const serverValue = MsgSelfCreatePermissionAminoConverter.toAmino(protoMsg);
+  const serverValue = MsgSelfCreateParticipantAminoConverter.toAmino(protoMsg);
   const clientValue = {
     ...serverValue,
     verification_fees: "0",
@@ -53,8 +53,8 @@ function buildCreatePermissionMsgs(): { clientMsg: AminoMsg; serverMsg: AminoMsg
 
   return {
     // Use legacy amino type string to match the Go bench output.
-    serverMsg: { type: "/perm/v1/self-create-perm", value: serverValue },
-    clientMsg: { type: "/perm/v1/self-create-perm", value: clientValue },
+    serverMsg: { role: "/perm/v1/self-create-perm", value: serverValue },
+    clientMsg: { role: "/perm/v1/self-create-perm", value: clientValue },
   };
 }
 

@@ -7,7 +7,7 @@ import (
 	_ "github.com/verana-labs/verana/x/cs/module" // import for side-effects
 	demodulekeeper "github.com/verana-labs/verana/x/de/keeper"
 	dimodulekeeper "github.com/verana-labs/verana/x/di/keeper"
-	_ "github.com/verana-labs/verana/x/perm/module" // import for side-effects
+	_ "github.com/verana-labs/verana/x/pp/module" // import for side-effects
 	_ "github.com/verana-labs/verana/x/td/module" // import for side-effects
 	_ "github.com/verana-labs/verana/x/co/module" // import for side-effects
 	_ "github.com/verana-labs/verana/x/gf/module" // import for side-effects
@@ -112,7 +112,7 @@ import (
 
 	credentialschemamodulekeeper "github.com/verana-labs/verana/x/cs/keeper"
 
-	permissionmodulekeeper "github.com/verana-labs/verana/x/perm/keeper"
+	permissionmodulekeeper "github.com/verana-labs/verana/x/pp/keeper"
 	trustdepositmodulekeeper "github.com/verana-labs/verana/x/td/keeper"
 
 	// this line is used by starport scaffolding # stargate/app/moduleImport

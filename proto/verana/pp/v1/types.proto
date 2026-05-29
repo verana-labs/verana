@@ -1,0 +1,108 @@
+syntax = "proto3";
+package verana.pp.v1;
+
+import "amino/amino.proto";
+import "cosmos/base/v1beta1/coin.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/verana-labs/verana/x/pp/types";
+
+// Participant roles
+enum ParticipantRole {
+  UNSPECIFIED = 0;
+  ISSUER = 1;
+  VERIFIER = 2;
+  ISSUER_GRANTOR = 3;
+  VERIFIER_GRANTOR = 4;
+  ECOSYSTEM = 5;
+  HOLDER = 6;
+}
+
+// Participant onboarding-process states
+enum OnboardingState {
+  ONBOARDING_STATE_UNSPECIFIED = 0;
+  PENDING = 1;
+  VALIDATED = 2;
+  TERMINATED = 3;
+}
+
+message Participant {
+  // Field 5 was `string corporation` (account). Replaced by `corporation_id`
+  // (uint64 FK to Corporation.id) at field 43 per spec v4-rc2.
+  reserved 5;
+  reserved "corporation";
+  uint64 id = 1;
+  uint64 schema_id = 2;
+  ParticipantRole role = 3;
+  string did = 4;
+  google.protobuf.Timestamp created = 6 [(gogoproto.stdtime) = true];
+  google.protobuf.Timestamp adjusted = 8 [(gogoproto.stdtime) = true];
+  google.protobuf.Timestamp slashed = 10 [(gogoproto.stdtime) = true];
+  google.protobuf.Timestamp repaid = 12 [(gogoproto.stdtime) = true];
+  google.protobuf.Timestamp effective_from = 14 [(gogoproto.stdtime) = true];
+  google.protobuf.Timestamp effective_until = 15 [(gogoproto.stdtime) = true];
+  google.protobuf.Timestamp modified = 16 [(gogoproto.stdtime) = true];
+  uint64 validation_fees = 17;
+  uint64 issuance_fees = 18;
+  uint64 verification_fees = 19;
+  uint64 deposit = 20;
+  uint64 slashed_deposit = 21;
+  uint64 repaid_deposit = 22;
+  google.protobuf.Timestamp revoked = 23 [(gogoproto.stdtime) = true];
+  uint64 validator_participant_id = 26;
+  OnboardingState op_state = 27;
+  google.protobuf.Timestamp op_exp = 28 [(gogoproto.stdtime) = true];
+  google.protobuf.Timestamp op_last_state_change = 29 [(gogoproto.stdtime) = true];
+  uint64 op_validator_deposit = 30;
+  uint64 op_current_fees = 31;
+  uint64 op_current_deposit = 32;
+  string op_summary_digest = 33;
+  // TODO(spec v4): Fee discount should be LegacyDec in [0, 1] per spec.
+  // Currently scaled 0..10000 for compatibility; full migration deferred.
+  uint64 issuance_fee_discount = 35;
+  uint64 verification_fee_discount = 36;
+  // VS Operator fields (spec v4)
+  string vs_operator = 37 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  bool vs_operator_authz_enabled = 38;
+  repeated cosmos.base.v1beta1.Coin vs_operator_authz_spend_limit = 39 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (amino.dont_omitempty) = true
+  ];
+  bool vs_operator_authz_with_feegrant = 40;
+  repeated cosmos.base.v1beta1.Coin vs_operator_authz_fee_spend_limit = 41 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (amino.dont_omitempty) = true
+  ];
+  google.protobuf.Duration vs_operator_authz_spend_period = 42 [(gogoproto.stdduration) = true];
+  // corporation_id is the uint64 FK to Corporation.id (resolved from the
+  // signing corporation account via AUTHZ-CHECK-5). Replaces former field 5.
+  uint64 corporation_id = 43;
+}
+
+message ParticipantSession {
+  string id = 1;                                                              // UUID
+  uint64 corporation_id = 2;                                                  // uint64 FK to Corporation.id
+  string vs_operator = 3 [(cosmos_proto.scalar) = "cosmos.AddressString"];   // the VS operator account
+  google.protobuf.Timestamp created = 4 [(gogoproto.stdtime) = true];
+  google.protobuf.Timestamp modified = 5 [(gogoproto.stdtime) = true];
+  repeated ParticipantSessionRecord session_records = 6;
+}
+
+message ParticipantSessionRecord {
+  uint64 id = 1;                                                             // own uint64 id (key)
+  google.protobuf.Timestamp created = 2 [(gogoproto.stdtime) = true];
+  uint64 issuer_participant_id = 3;
+  uint64 verifier_participant_id = 4;
+  uint64 wallet_agent_participant_id = 5;
+  uint64 agent_participant_id = 6;
+}
+
+// OptionalUInt64 is a wrapper for optional uint64 values
+message OptionalUInt64 {
+  uint64 value = 1;
+}
