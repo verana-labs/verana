@@ -62,7 +62,7 @@ func TestGenesisImportExport(t *testing.T) {
 	now := time.Now().UTC()
 	schemaA := types.CredentialSchema{
 		Id:                                      1,
-		TrId:                                    100,
+		EcosystemId:                                    100,
 		Created:                                 now.Add(-24 * time.Hour),
 		Modified:                                now.Add(-12 * time.Hour),
 		JsonSchema:                              validJsonSchema,
@@ -81,7 +81,7 @@ func TestGenesisImportExport(t *testing.T) {
 
 	schemaB := types.CredentialSchema{
 		Id:                                      2,
-		TrId:                                    101,
+		EcosystemId:                                    101,
 		Created:                                 now.Add(-10 * time.Hour),
 		Modified:                                now.Add(-5 * time.Hour),
 		JsonSchema:                              validJsonSchema,
@@ -114,13 +114,13 @@ func TestGenesisImportExport(t *testing.T) {
 	schemaFromState1, err := k.CredentialSchema.Get(ctx, 1)
 	require.NoError(t, err)
 	require.Equal(t, schemaA.Id, schemaFromState1.Id)
-	require.Equal(t, schemaA.TrId, schemaFromState1.TrId)
+	require.Equal(t, schemaA.EcosystemId, schemaFromState1.EcosystemId)
 	require.Equal(t, schemaA.IssuerOnboardingMode, schemaFromState1.IssuerOnboardingMode)
 
 	schemaFromState2, err := k.CredentialSchema.Get(ctx, 2)
 	require.NoError(t, err)
 	require.Equal(t, schemaB.Id, schemaFromState2.Id)
-	require.Equal(t, schemaB.TrId, schemaFromState2.TrId)
+	require.Equal(t, schemaB.EcosystemId, schemaFromState2.EcosystemId)
 	require.Equal(t, schemaB.IssuerOnboardingMode, schemaFromState2.IssuerOnboardingMode)
 
 	// Verify counter was set correctly (to highest ID)
@@ -198,7 +198,7 @@ func TestGenesisValidation(t *testing.T) {
 	now := time.Now().UTC()
 	validSchema := types.CredentialSchema{
 		Id:                                      1,
-		TrId:                                    100,
+		EcosystemId:                                    100,
 		Created:                                 now.Add(-24 * time.Hour),
 		Modified:                                now.Add(-12 * time.Hour),
 		JsonSchema:                              validJsonSchema,
@@ -242,7 +242,7 @@ func TestGenesisValidation(t *testing.T) {
 					validSchema,
 					{
 						Id:                         1, // Same ID
-						TrId:                       101,
+						EcosystemId:                       101,
 						Created:                    now.Add(-10 * time.Hour),
 						Modified:                   now.Add(-5 * time.Hour),
 						JsonSchema:                 validJsonSchema,
@@ -264,7 +264,7 @@ func TestGenesisValidation(t *testing.T) {
 				CredentialSchemas: []types.CredentialSchema{
 					{
 						Id:                         0, // Invalid ID
-						TrId:                       101,
+						EcosystemId:                       101,
 						Created:                    now.Add(-10 * time.Hour),
 						Modified:                   now.Add(-5 * time.Hour),
 						JsonSchema:                 validJsonSchema,
@@ -286,7 +286,7 @@ func TestGenesisValidation(t *testing.T) {
 				CredentialSchemas: []types.CredentialSchema{
 					{
 						Id:                         3,
-						TrId:                       0, // Invalid TR ID
+						EcosystemId:                       0, // Invalid TR ID
 						Created:                    now.Add(-10 * time.Hour),
 						Modified:                   now.Add(-5 * time.Hour),
 						JsonSchema:                 validJsonSchema,
@@ -299,7 +299,7 @@ func TestGenesisValidation(t *testing.T) {
 				},
 			},
 			valid:    false,
-			errorMsg: "invalid trust registry ID 0",
+			errorMsg: "invalid ecosystem_id 0",
 		},
 		{
 			name: "invalid empty JSON schema",
@@ -308,7 +308,7 @@ func TestGenesisValidation(t *testing.T) {
 				CredentialSchemas: []types.CredentialSchema{
 					{
 						Id:                         3,
-						TrId:                       101,
+						EcosystemId:                       101,
 						Created:                    now.Add(-10 * time.Hour),
 						Modified:                   now.Add(-5 * time.Hour),
 						JsonSchema:                 "", // Empty schema
@@ -330,7 +330,7 @@ func TestGenesisValidation(t *testing.T) {
 				CredentialSchemas: []types.CredentialSchema{
 					{
 						Id:                         3,
-						TrId:                       101,
+						EcosystemId:                       101,
 						Created:                    now.Add(-10 * time.Hour),
 						Modified:                   now.Add(-5 * time.Hour),
 						JsonSchema:                 validJsonSchema,
@@ -352,7 +352,7 @@ func TestGenesisValidation(t *testing.T) {
 				CredentialSchemas: []types.CredentialSchema{
 					{
 						Id:                         3,
-						TrId:                       101,
+						EcosystemId:                       101,
 						Created:                    time.Time{}, // Zero time
 						Modified:                   now.Add(-5 * time.Hour),
 						JsonSchema:                 validJsonSchema,
@@ -374,7 +374,7 @@ func TestGenesisValidation(t *testing.T) {
 				CredentialSchemas: []types.CredentialSchema{
 					{
 						Id:                         3,
-						TrId:                       101,
+						EcosystemId:                       101,
 						Created:                    now, // More recent than modified
 						Modified:                   now.Add(-5 * time.Hour),
 						JsonSchema:                 validJsonSchema,
@@ -396,7 +396,7 @@ func TestGenesisValidation(t *testing.T) {
 				CredentialSchemas: []types.CredentialSchema{
 					{
 						Id:                                      3,
-						TrId:                                    101,
+						EcosystemId:                                    101,
 						Created:                                 now.Add(-10 * time.Hour),
 						Modified:                                now.Add(-5 * time.Hour),
 						JsonSchema:                              validJsonSchema,

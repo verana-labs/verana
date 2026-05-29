@@ -21,7 +21,6 @@ import (
 	modulev1 "github.com/verana-labs/verana/api/verana/gf/module/v1"
 	"github.com/verana-labs/verana/x/gf/keeper"
 	"github.com/verana-labs/verana/x/gf/types"
-	trkeeper "github.com/verana-labs/verana/x/tr/keeper"
 )
 
 var (
@@ -131,17 +130,10 @@ func init() {
 	appmodule.Register(
 		&modulev1.Module{},
 		appmodule.Provide(ProvideModule),
-		appmodule.Provide(ProvideEcosystemKeeper),
 	)
 }
 
-// ProvideEcosystemKeeper wraps the existing x/tr keeper as the
-// gftypes.EcosystemKeeper used by MOD-GF. Removed when issue #305 (TR→EC)
-// lands and the renamed EC keeper directly implements the interface.
-func ProvideEcosystemKeeper(trk trkeeper.Keeper) types.EcosystemKeeper {
-	return keeper.NewTRAsEcosystemKeeper(trk)
-}
-
+// EcosystemKeeper is supplied by x/ec/module via its own depinject Out.
 // CorporationKeeper is wired post-construction by MOD-CO's ProvideModule via
 // (keeper.Keeper).SetCorporationKeeper to break the MOD-GF ↔ MOD-CO depinject
 // cycle. The default ref points at StubCorporationKeeper, so any handler that
@@ -156,7 +148,6 @@ type ModuleInputs struct {
 	Logger       log.Logger
 
 	DelegationKeeper types.DelegationKeeper
-	EcosystemKeeper  types.EcosystemKeeper
 }
 
 type ModuleOutputs struct {
@@ -177,7 +168,6 @@ func ProvideModule(in ModuleInputs) ModuleOutputs {
 		in.Logger,
 		authority.String(),
 		in.DelegationKeeper,
-		in.EcosystemKeeper,
 	)
 	m := NewAppModule(in.Cdc, k)
 	return ModuleOutputs{GfKeeper: k, Module: m}

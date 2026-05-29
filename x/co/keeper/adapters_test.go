@@ -59,8 +59,8 @@ func newGFKeeperForAdapter(t *testing.T) (gfkeeper.Keeper, sdk.Context) {
 		log.NewNopLogger(),
 		authority,
 		adapterStubDel{},
-		adapterStubEco{},
 	)
+	gfk.SetEcosystemKeeper(adapterStubEco{})
 	ctx := sdk.NewContext(stateStore, cmtproto.Header{}, false, log.NewNopLogger())
 	return gfk, ctx
 }

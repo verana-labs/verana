@@ -35,14 +35,14 @@ export interface QueryParamsResponse {
 }
 
 export interface QueryListCredentialSchemasRequest {
-  /** optional */
-  trId: number;
   modifiedAfter: Date | undefined;
   responseMaxSize: number;
   onlyActive: boolean;
   issuerOnboardingMode: IssuerOnboardingMode;
   verifierOnboardingMode: VerifierOnboardingMode;
   holderOnboardingMode: HolderOnboardingMode;
+  /** optional filter (replaces tr_id) */
+  ecosystemId: number;
 }
 
 export interface QueryListCredentialSchemasResponse {
@@ -169,21 +169,18 @@ export const QueryParamsResponse = {
 
 function createBaseQueryListCredentialSchemasRequest(): QueryListCredentialSchemasRequest {
   return {
-    trId: 0,
     modifiedAfter: undefined,
     responseMaxSize: 0,
     onlyActive: false,
     issuerOnboardingMode: 0,
     verifierOnboardingMode: 0,
     holderOnboardingMode: 0,
+    ecosystemId: 0,
   };
 }
 
 export const QueryListCredentialSchemasRequest = {
   encode(message: QueryListCredentialSchemasRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.trId !== 0) {
-      writer.uint32(8).uint64(message.trId);
-    }
     if (message.modifiedAfter !== undefined) {
       Timestamp.encode(toTimestamp(message.modifiedAfter), writer.uint32(18).fork()).ldelim();
     }
@@ -202,6 +199,9 @@ export const QueryListCredentialSchemasRequest = {
     if (message.holderOnboardingMode !== 0) {
       writer.uint32(56).int32(message.holderOnboardingMode);
     }
+    if (message.ecosystemId !== 0) {
+      writer.uint32(64).uint64(message.ecosystemId);
+    }
     return writer;
   },
 
@@ -212,13 +212,6 @@ export const QueryListCredentialSchemasRequest = {
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
-        case 1:
-          if (tag !== 8) {
-            break;
-          }
-
-          message.trId = longToNumber(reader.uint64() as Long);
-          continue;
         case 2:
           if (tag !== 18) {
             break;
@@ -261,6 +254,13 @@ export const QueryListCredentialSchemasRequest = {
 
           message.holderOnboardingMode = reader.int32() as any;
           continue;
+        case 8:
+          if (tag !== 64) {
+            break;
+          }
+
+          message.ecosystemId = longToNumber(reader.uint64() as Long);
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -272,7 +272,6 @@ export const QueryListCredentialSchemasRequest = {
 
   fromJSON(object: any): QueryListCredentialSchemasRequest {
     return {
-      trId: isSet(object.trId) ? globalThis.Number(object.trId) : 0,
       modifiedAfter: isSet(object.modifiedAfter) ? fromJsonTimestamp(object.modifiedAfter) : undefined,
       responseMaxSize: isSet(object.responseMaxSize) ? globalThis.Number(object.responseMaxSize) : 0,
       onlyActive: isSet(object.onlyActive) ? globalThis.Boolean(object.onlyActive) : false,
@@ -285,14 +284,12 @@ export const QueryListCredentialSchemasRequest = {
       holderOnboardingMode: isSet(object.holderOnboardingMode)
         ? holderOnboardingModeFromJSON(object.holderOnboardingMode)
         : 0,
+      ecosystemId: isSet(object.ecosystemId) ? globalThis.Number(object.ecosystemId) : 0,
     };
   },
 
   toJSON(message: QueryListCredentialSchemasRequest): unknown {
     const obj: any = {};
-    if (message.trId !== 0) {
-      obj.trId = Math.round(message.trId);
-    }
     if (message.modifiedAfter !== undefined) {
       obj.modifiedAfter = message.modifiedAfter.toISOString();
     }
@@ -311,6 +308,9 @@ export const QueryListCredentialSchemasRequest = {
     if (message.holderOnboardingMode !== 0) {
       obj.holderOnboardingMode = holderOnboardingModeToJSON(message.holderOnboardingMode);
     }
+    if (message.ecosystemId !== 0) {
+      obj.ecosystemId = Math.round(message.ecosystemId);
+    }
     return obj;
   },
 
@@ -323,13 +323,13 @@ export const QueryListCredentialSchemasRequest = {
     object: I,
   ): QueryListCredentialSchemasRequest {
     const message = createBaseQueryListCredentialSchemasRequest();
-    message.trId = object.trId ?? 0;
     message.modifiedAfter = object.modifiedAfter ?? undefined;
     message.responseMaxSize = object.responseMaxSize ?? 0;
     message.onlyActive = object.onlyActive ?? false;
     message.issuerOnboardingMode = object.issuerOnboardingMode ?? 0;
     message.verifierOnboardingMode = object.verifierOnboardingMode ?? 0;
     message.holderOnboardingMode = object.holderOnboardingMode ?? 0;
+    message.ecosystemId = object.ecosystemId ?? 0;
     return message;
   },
 };

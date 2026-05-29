@@ -10,7 +10,9 @@ assert.equal(typeof signing.createVeranaRegistry, "function");
 assert.equal(typeof signing.createVeranaAminoTypes, "function");
 
 const requiredRegistry = [
-  "MsgCreateTrustRegistry",
+  "MsgCreateCorporation",
+  "MsgCreateEcosystem",
+  "MsgAddGovernanceFrameworkDocument",
   "MsgCreateCredentialSchema",
   "MsgSelfCreatePermission",
   "MsgReclaimTrustDepositYield",

@@ -21,6 +21,7 @@ import (
 	// this line is used by starport scaffolding # 1
 
 	modulev1 "github.com/verana-labs/verana/api/verana/perm/module"
+	cokeeper "github.com/verana-labs/verana/x/co/keeper"
 	"github.com/verana-labs/verana/x/perm/keeper"
 	"github.com/verana-labs/verana/x/perm/types"
 )
@@ -170,8 +171,22 @@ func (am AppModule) IsAppModule() {}
 func init() {
 	appmodule.Register(
 		&modulev1.Module{},
-		appmodule.Provide(ProvideModule),
+		appmodule.Provide(
+			ProvideModule,
+			ProvideCorporationKeeperForPerm,
+		),
 	)
+}
+
+// ProvideCorporationKeeperForPerm supplies permtypes.CorporationKeeper from
+// the concrete x/co keeper for MOD-PERM AUTHZ-CHECK-5. Required because
+// cokeeper does not satisfy ResolveByPolicyAddress directly.
+//
+// permtypes.EcosystemKeeper is NOT wired here: eckeeper.Keeper.GetEcosystem
+// + GetTrustUnitPrice structurally satisfy the interface so depinject
+// auto-binds.
+func ProvideCorporationKeeperForPerm(co cokeeper.Keeper) types.CorporationKeeper {
+	return keeper.NewCoAsPermCorporationKeeper(co)
 }
 
 type ModuleInputs struct {
@@ -185,7 +200,8 @@ type ModuleInputs struct {
 	AccountKeeper          types.AccountKeeper
 	BankKeeper             types.BankKeeper
 	CredentialSchemaKeeper types.CredentialSchemaKeeper
-	TrustRegistryKeeper    types.TrustRegistryKeeper
+	EcosystemKeeper        types.EcosystemKeeper
+	CorporationKeeper      types.CorporationKeeper
 	TrustDepositKeeper     types.TrustDepositKeeper
 	DelegationKeeper       types.DelegationKeeper
 	DigestKeeper           types.DigestKeeper
@@ -210,7 +226,8 @@ func ProvideModule(in ModuleInputs) ModuleOutputs {
 		in.Logger,
 		authority.String(),
 		in.CredentialSchemaKeeper,
-		in.TrustRegistryKeeper,
+		in.EcosystemKeeper,
+		in.CorporationKeeper,
 		in.TrustDepositKeeper,
 		in.BankKeeper,
 		in.DelegationKeeper,

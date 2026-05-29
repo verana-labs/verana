@@ -637,15 +637,17 @@ func (ms msgServer) validateCreateRootPermissionAuthority(ctx sdk.Context, msg *
 		return fmt.Errorf("credential schema not found: %w", err)
 	}
 
-	// Load trust registry
-	tr, err := ms.trustRegistryKeeper.GetTrustRegistry(ctx, cs.TrId)
+	// Load ecosystem and verify signing corporation controls it
+	ec, err := ms.ecosystemKeeper.GetEcosystem(ctx, cs.EcosystemId)
 	if err != nil {
-		return fmt.Errorf("trust registry not found: %w", err)
+		return fmt.Errorf("ecosystem not found: %w", err)
 	}
-
-	// corporation executing the method MUST be the trust registry corporation
-	if tr.Corporation != msg.Corporation {
-		return fmt.Errorf("corporation does not match the trust registry corporation")
+	co, ok := ms.coKeeper.ResolveByPolicyAddress(ctx, msg.Corporation)
+	if !ok {
+		return fmt.Errorf("signing corporation not registered")
+	}
+	if ec.CorporationId != co.Id {
+		return fmt.Errorf("corporation does not control the ecosystem")
 	}
 
 	return nil
@@ -1011,8 +1013,8 @@ func (ms msgServer) validateRevokePermissionAdvancedChecks(ctx sdk.Context, msg 
 		return nil
 	}
 
-	// Option #2: executed by TrustRegistry controller
-	if ms.checkTrustRegistryControllerOption(ctx, msg.Corporation, applicantPerm) {
+	// Option #2: executed by the controlling Ecosystem (post-MOD-EC rename, was: TrustRegistry controller)
+	if ms.checkEcosystemControllerOption(ctx, msg.Corporation, applicantPerm) {
 		return nil
 	}
 
@@ -1056,21 +1058,25 @@ func (ms msgServer) checkValidatorAncestorOption(ctx sdk.Context, authority stri
 }
 
 // Option #2: executed by TrustRegistry controller
-func (ms msgServer) checkTrustRegistryControllerOption(ctx sdk.Context, authority string, applicantPerm types.Permission) bool {
+func (ms msgServer) checkEcosystemControllerOption(ctx sdk.Context, authority string, applicantPerm types.Permission) bool {
 	// load CredentialSchema cs from applicant_perm.schema_id
 	cs, err := ms.credentialSchemaKeeper.GetCredentialSchemaById(ctx, applicantPerm.SchemaId)
 	if err != nil {
 		return false
 	}
 
-	// load TrustRegistry tr from cs.tr_id
-	tr, err := ms.trustRegistryKeeper.GetTrustRegistry(ctx, cs.TrId)
+	// load Ecosystem ec from cs.ecosystem_id
+	ec, err := ms.ecosystemKeeper.GetEcosystem(ctx, cs.EcosystemId)
 	if err != nil {
 		return false
 	}
 
-	// if the given address is the trust registry corporation, return true
-	return tr.Corporation == authority
+	// resolve the signing policy_address → co.Id and compare with ec.CorporationId
+	co, ok := ms.coKeeper.ResolveByPolicyAddress(ctx, authority)
+	if !ok {
+		return false
+	}
+	return ec.CorporationId == co.Id
 }
 
 // [MOD-PERM-MSG-9-3] Revoke Permission execution
@@ -1272,8 +1278,8 @@ func (ms msgServer) validateSlashPermissionValidatorPerms(ctx sdk.Context, msg *
 	if ms.checkValidatorAncestorOption(ctx, msg.Corporation, applicantPerm, now) {
 		return nil
 	}
-	// Option #2: executed by TrustRegistry controller
-	if ms.checkTrustRegistryControllerOption(ctx, msg.Corporation, applicantPerm) {
+	// Option #2: executed by the controlling Ecosystem (post-MOD-EC rename, was: TrustRegistry controller)
+	if ms.checkEcosystemControllerOption(ctx, msg.Corporation, applicantPerm) {
 		return nil
 	}
 	return fmt.Errorf("authority is not authorized to slash this permission")

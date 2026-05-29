@@ -69,7 +69,7 @@ func (ms msgServer) IncreaseActiveGovernanceFrameworkVersion(goCtx context.Conte
 
 	switch sub.kind {
 	case subjectEcosystem:
-		if err := ms.ecosystemKeeper.SetEcosystemActiveVersion(ctx, sub.ecosystemID, nextVersion); err != nil {
+		if err := ms.ecosystemKeeper().SetEcosystemActiveVersion(ctx, sub.ecosystemID, nextVersion); err != nil {
 			return nil, fmt.Errorf("update ecosystem active version: %w", err)
 		}
 	case subjectCorporation:

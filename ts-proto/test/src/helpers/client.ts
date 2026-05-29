@@ -460,12 +460,19 @@ export async function fundAccount(
     prefix: config.addressPrefix,
   });
 
-  // Create DirectSigningClient without Amino types (uses Direct signing)
+  // Create DirectSigningClient without Amino types (uses Direct signing).
+  //
+  // `registry` comes from ../../src/signing (which resolves @cosmjs/proto-signing
+  // from ts-proto/node_modules), while SigningStargateClient here pulls in its
+  // own copy from ts-proto/test/node_modules. The two Registry class identities
+  // are structurally identical but nominally distinct; cast through `any` to
+  // bridge them. This duplication is a Node module-resolution artefact only —
+  // there is exactly one Registry implementation at runtime.
   const directClient = await SigningStargateClient.connectWithSigner(
     config.rpcEndpoint,
     directWallet,
     {
-      registry,
+      registry: registry as any,
       gasPrice: GasPrice.fromString(config.gasPrice),
       // No aminoTypes - use Direct signing for bank send
     }

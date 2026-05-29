@@ -30,7 +30,8 @@ type (
 
 		// external keeper
 		credentialSchemaKeeper types.CredentialSchemaKeeper
-		trustRegistryKeeper    types.TrustRegistryKeeper
+		ecosystemKeeper        types.EcosystemKeeper
+		coKeeper               types.CorporationKeeper
 		trustDeposit           types.TrustDepositKeeper
 		bankKeeper             types.BankKeeper
 		delegationKeeper       types.DelegationKeeper
@@ -44,7 +45,8 @@ func NewKeeper(
 	logger log.Logger,
 	authority string,
 	credentialSchemaKeeper types.CredentialSchemaKeeper,
-	trustRegistryKeeper types.TrustRegistryKeeper,
+	ecosystemKeeper types.EcosystemKeeper,
+	coKeeper types.CorporationKeeper,
 	trustDeposit types.TrustDepositKeeper,
 	bankKeeper types.BankKeeper,
 	delegationKeeper types.DelegationKeeper,
@@ -65,7 +67,8 @@ func NewKeeper(
 		PermissionCounter:      collections.NewItem(sb, types.PermissionCounterKey, "permission_counter", collections.Uint64Value),
 		PermissionSession:      collections.NewMap(sb, types.PermissionSessionKey, "permission_session", collections.StringKey, codec.CollValue[types.PermissionSession](cdc)),
 		credentialSchemaKeeper: credentialSchemaKeeper,
-		trustRegistryKeeper:    trustRegistryKeeper,
+		ecosystemKeeper:        ecosystemKeeper,
+		coKeeper:               coKeeper,
 		trustDeposit:           trustDeposit,
 		bankKeeper:             bankKeeper,
 		delegationKeeper:       delegationKeeper,

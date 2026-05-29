@@ -51,7 +51,7 @@ func IsValidDigestSRI(s string) bool { return digestSRIRe.MatchString(s) }
 // didRe enforces a minimal subset of RFC 3986 + W3C DID Core syntax:
 // `did:` <method-name> `:` <method-specific-id>. Method name is one or more
 // lowercase letters/digits; method-specific-id is one or more allowed chars
-// (alphanumerics, `.`, `-`, `_`, `:`).
-var didRe = regexp.MustCompile(`^did:[a-z0-9]+:[A-Za-z0-9._:-]+$`)
+// (alphanumerics, `.`, `-`, `_`, `:`, `%` for percent-encoded chars e.g. did:webvh).
+var didRe = regexp.MustCompile(`^did:[a-z0-9]+:[A-Za-z0-9._:%-]+$`)
 
 func IsValidDID(s string) bool { return didRe.MatchString(s) }

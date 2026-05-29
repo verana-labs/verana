@@ -42,12 +42,39 @@ func main() {
 
 func runJourney(ctx context.Context, client cosmosclient.Client, journeyID int) error {
 	switch journeyID {
+	case 1:
+		// CreateCorporation (Corp A) + bootstrap operator authz
+		return journeys.RunCorpCreateJourney(ctx, client)
+	case 2:
+		// UpdateCorporation + CO queries
+		return journeys.RunCorpQueriesJourney(ctx, client)
+	case 3:
+		// Corp CGF AddGFD + IncreaseGFV + GF queries
+		return journeys.RunCorpCGFJourney(ctx, client)
+	case 20:
+		// CreateEcosystem (ec-alpha) + EC queries
+		return journeys.RunEcosystemCreateJourney(ctx, client)
+	case 21:
+		// EC AddGovernanceFrameworkDocument for ec-alpha
+		return journeys.RunEcGFAddGFDJourney(ctx, client)
+	case 22:
+		// EC IncreaseActiveGovernanceFrameworkVersion for ec-alpha
+		return journeys.RunEcGFIncreaseGFVJourney(ctx, client)
+	case 23:
+		// UpdateEcosystem for ec-alpha
+		return journeys.RunEcosystemUpdateJourney(ctx, client)
+	case 24:
+		// ArchiveEcosystem for ec-alpha (archive + unarchive)
+		return journeys.RunEcosystemArchiveJourney(ctx, client)
+	case 25:
+		// EC + GF query coverage
+		return journeys.RunEcosystemQueriesJourney(ctx, client)
 	case 101:
-		// Trust Registry Operator Authorization Setup (Group + Fund)
-		return journeys.RunTrustRegistryAuthzSetupJourney(ctx, client)
+		// Ecosystem Operator Authorization Setup (Group + Fund)
+		return journeys.RunEcosystemAuthzSetupJourney(ctx, client)
 	case 102:
-		// Trust Registry Operations with Operator Authorization (fail-then-pass)
-		return journeys.RunTrustRegistryAuthzOperationsJourney(ctx, client)
+		// Ecosystem Operations with Operator Authorization (fail-then-pass)
+		return journeys.RunEcosystemAuthzOperationsJourney(ctx, client)
 	case 201:
 		// Credential Schema Operator Authorization Setup (Group + Fund)
 		return journeys.RunCredentialSchemaAuthzSetupJourney(ctx, client)
@@ -107,9 +134,20 @@ func runJourney(ctx context.Context, client cosmosclient.Client, journeyID int) 
 func printUsage() {
 	fmt.Println("Usage: verana-test-harness JOURNEY_ID")
 	fmt.Println("Available journeys:")
-	fmt.Println("\n  Trust Registry Authorization Journeys:")
-	fmt.Println("  101 - TR Operator Authorization Setup (Group + Fund)")
-	fmt.Println("  102 - TR Operations with Operator Authorization (fail-then-pass)")
+	fmt.Println("\n  Corporation (CO) Journeys:")
+	fmt.Println("  1  - CreateCorporation (Corp A) + bootstrap operator authz")
+	fmt.Println("  2  - UpdateCorporation + CO queries")
+	fmt.Println("  3  - Corp CGF AddGFD + IncreaseGFV + GF queries")
+	fmt.Println("\n  Ecosystem (EC) Journeys:")
+	fmt.Println("  20 - CreateEcosystem (ec-alpha) + EC queries")
+	fmt.Println("  21 - EC AddGovernanceFrameworkDocument for ec-alpha")
+	fmt.Println("  22 - EC IncreaseActiveGovernanceFrameworkVersion for ec-alpha")
+	fmt.Println("  23 - UpdateEcosystem for ec-alpha")
+	fmt.Println("  24 - ArchiveEcosystem for ec-alpha (archive + unarchive)")
+	fmt.Println("  25 - EC + GF query coverage")
+	fmt.Println("\n  Ecosystem Authorization Journeys (legacy):")
+	fmt.Println("  101 - EC Operator Authorization Setup (Group + Fund)")
+	fmt.Println("  102 - EC Operations with Operator Authorization (fail-then-pass)")
 	fmt.Println("\n  Credential Schema Authorization Journeys:")
 	fmt.Println("  201 - CS Operator Authorization Setup (Group + Fund)")
 	fmt.Println("  202 - CS Operations with Operator Authorization (fail-then-pass)")

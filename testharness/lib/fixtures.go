@@ -50,7 +50,7 @@ func GenerateSimpleSchema(trustRegistryID string) string {
 
 type JourneyResult struct {
 	// Journey 1 fields
-	TrustRegistryID  string
+	EcosystemID      string
 	SchemaID         string
 	RootPermissionID string
 	DID              string
@@ -113,4 +113,9 @@ type JourneyResult struct {
 
 	// Journey 601 fields (XR Exchange Rate)
 	ExchangeRateID string
+
+	// Journey 001-007 fields (CO/GF dedicated journeys — Corp A)
+	// GroupID / GroupPolicyAddr / OperatorAddr are reused from Journey 101 fields above.
+	GFV2Id    string // GFV id for corp's own v2 governance framework version
+	EcAlphaId string // Ecosystem id created in Journey 020
 }

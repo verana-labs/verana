@@ -39,7 +39,7 @@ func RunPermissionSlashTDJourney(ctx context.Context, client cosmosclient.Client
 	fmt.Printf("  Group Policy: %s\n", policyAddr)
 	fmt.Printf("  Operator:     %s\n", operatorAddr)
 
-	trID, _ := strconv.ParseUint(setup304.TrustRegistryID, 10, 64)
+	trID, _ := strconv.ParseUint(setup304.EcosystemID, 10, 64)
 
 	// =========================================================================
 	// PREREQUISITES: Create a new CS + ECOSYSTEM root + ISSUER child perm
@@ -62,7 +62,7 @@ func RunPermissionSlashTDJourney(ctx context.Context, client cosmosclient.Client
 
 	// Create a new CS on the same TR
 	fmt.Println("\n--- Prerequisite 2: Create new Credential Schema ---")
-	schemaData := lib.GenerateSimpleSchema(setup304.TrustRegistryID)
+	schemaData := lib.GenerateSimpleSchema(setup304.EcosystemID)
 	csIDStr, err := lib.CreateCredentialSchemaWithAuthority(
 		client, ctx, operatorAccount, policyAddr,
 		trID, schemaData,
@@ -267,7 +267,7 @@ func RunPermissionSlashTDJourney(ctx context.Context, client cosmosclient.Client
 
 	// Save results
 	result := lib.JourneyResult{
-		TrustRegistryID: setup304.TrustRegistryID,
+		EcosystemID: setup304.EcosystemID,
 		SchemaID:        csIDStr,
 		DID:             rootPermDID,
 		PermissionID:    strconv.FormatUint(issuerPermID, 10),

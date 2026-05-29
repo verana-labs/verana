@@ -24,11 +24,11 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					Long: `List credential schemas with optional filters.
 Example:
 $ veranad query cs list-schemas
-$ veranad query cs list-schemas --tr_id 1 --modified_after 2024-01-01T00:00:00Z --response_max_size 100`,
+$ veranad query cs list-schemas --ecosystem_id 1 --modified_after 2024-01-01T00:00:00Z --response_max_size 100`,
 					FlagOptions: map[string]*autocliv1.FlagOptions{
-						"tr_id": {
-							Name:         "tr_id",
-							Usage:        "Filter by trust registry ID",
+						"ecosystem_id": {
+							Name:         "ecosystem_id",
+							Usage:        "Filter by ecosystem ID",
 							DefaultValue: "0",
 						},
 						"modified_after": {
@@ -83,14 +83,14 @@ $ veranad query cs schema 1`,
 				},
 				{
 					RpcMethod: "CreateCredentialSchema",
-					Use:       "create-credential-schema [tr-id] [json-schema] [issuer-mode] [verifier-mode] [holder-onboarding-mode] [pricing-asset-type] [pricing-asset] [digest-algorithm]",
+					Use:       "create-credential-schema [ecosystem-id] [json-schema] [issuer-mode] [verifier-mode] [holder-onboarding-mode] [pricing-asset-type] [pricing-asset] [digest-algorithm]",
 					Short:     "Create a new credential schema",
 					Long: `Create a new credential schema with the specified parameters. The JSON schema supports placeholder replacement:
 - VPR_CREDENTIAL_SCHEMA_ID: Replaced with the generated schema ID
 - VPR_CHAIN_ID: Replaced with the current chain ID
 
 Required Parameters:
-- tr-id: Trust registry ID (must be controlled by authority)
+- ecosystem-id: Ecosystem ID (must be controlled by authority)
 - json-schema: Path to JSON schema file or inline JSON string
 - issuer-mode: Permission management mode (1=OPEN, 2=GRANTOR_VALIDATION, 3=ECOSYSTEM)
 - verifier-mode: Permission management mode (same options as issuer-mode)
@@ -110,7 +110,7 @@ $ veranad tx cs create-credential-schema 1 schema.json 2 2 1 tu sha256 --issuer-
 $ veranad tx cs create-credential-schema 1 schema.json 2 2 2 uvna sha256`,
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{
-							ProtoField: "tr_id",
+							ProtoField: "ecosystem_id",
 						},
 						{
 							ProtoField: "json_schema",

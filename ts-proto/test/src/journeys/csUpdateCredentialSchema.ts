@@ -50,7 +50,7 @@ async function main() {
 
   console.log(`  CS Authority: ${setup.authorityAddress}`);
   console.log(`  CS ID:        ${activeCS.schemaId}`);
-  console.log(`  TR ID:        ${activeCS.trustRegistryId}`);
+  console.log(`  EC ID:        ${activeCS.ecosystemId}`);
   console.log();
 
   // Step 2: Create operator wallet and connect

@@ -2,8 +2,8 @@
  * Journey: CS Create Credential Schema (Operator-signed)
  *
  * The operator signs MsgCreateCredentialSchema on behalf of the CS authority.
- * First creates a Trust Registry (controller = CS authority) as a prerequisite,
- * then creates the Credential Schema under that TR.
+ * First creates an Ecosystem (controller = CS authority) as a prerequisite,
+ * then creates the Credential Schema under that Ecosystem.
  *
  * Requires: test:de-grant-cs-auth must be run first.
  *
@@ -21,7 +21,7 @@ import {
   config,
 } from "../helpers/client";
 import { typeUrls } from "../helpers/registry";
-import { MsgCreateTrustRegistry } from "../../../src/codec/verana/tr/v1/tx";
+import { MsgCreateEcosystem } from "../../../src/codec/verana/ec/v1/tx";
 import {
   MsgCreateCredentialSchema,
   OptionalUInt32,
@@ -32,7 +32,7 @@ import {
   HolderOnboardingMode,
   PricingAssetType,
 } from "../../../src/codec/verana/cs/v1/types";
-import { getCsAuthzSetup, saveCsActiveTR, saveActiveCS } from "../helpers/journeyResults";
+import { getCsAuthzSetup, saveCsActiveEC, saveActiveCS } from "../helpers/journeyResults";
 
 const COOLUSER_MNEMONIC =
   (process.env.MNEMONIC && process.env.MNEMONIC.trim()) ||
@@ -105,74 +105,75 @@ async function main() {
   }
   console.log();
 
-  // Step 4: Create Trust Registry (prerequisite — controller = CS authority)
-  console.log("Step 4: Creating Trust Registry (controller = CS authority)...");
-  const trDid = generateUniqueDID();
-  const trAka = "http://cs-ts-proto-test-trust-registry.com";
+  // Step 4: Create Ecosystem (prerequisite — controller = CS authority).
+  // The CS authority address here MUST be a registered MOD-CO policy_address
+  // (AUTHZ-CHECK-5). In this wire-level test, we pass it through verbatim;
+  // the live-chain CI run is responsible for the real Corporation setup.
+  console.log("Step 4: Creating Ecosystem (controller = CS authority)...");
+  const ecDid = generateUniqueDID();
 
-  const trMsg = {
-    typeUrl: typeUrls.MsgCreateTrustRegistry,
-    value: MsgCreateTrustRegistry.fromPartial({
+  const ecMsg = {
+    typeUrl: typeUrls.MsgCreateEcosystem,
+    value: MsgCreateEcosystem.fromPartial({
       corporation: setup.authorityAddress,
       operator: account.address,
-      did: trDid,
-      aka: trAka,
+      did: ecDid,
       language: "en",
-      docUrl: "http://cs-ts-proto-test-trust-registry.com/doc-v1",
+      docUrl: "http://cs-ts-proto-test-ecosystem.com/doc-v1",
       docDigestSri: "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
     }),
   };
 
   console.log(`  Authority: ${setup.authorityAddress}`);
   console.log(`  Operator:  ${account.address}`);
-  console.log(`  TR DID:    ${trDid}`);
+  console.log(`  EC DID:    ${ecDid}`);
   console.log();
 
-  let trId: number | undefined;
+  let ecId: number | undefined;
   try {
-    const trFee = await calculateFeeWithSimulation(
-      client, account.address, [trMsg],
-      "Creating Trust Registry for CS tests via operator",
+    const ecFee = await calculateFeeWithSimulation(
+      client, account.address, [ecMsg],
+      "Creating Ecosystem for CS tests via operator",
     );
-    console.log(`  Gas: ${trFee.gas}, Fee: ${trFee.amount[0].amount}${trFee.amount[0].denom}`);
+    console.log(`  Gas: ${ecFee.gas}, Fee: ${ecFee.amount[0].amount}${ecFee.amount[0].denom}`);
 
-    const trResult = await signAndBroadcastWithRetry(
-      client, account.address, [trMsg], trFee,
-      "Creating Trust Registry for CS tests via operator",
+    const ecResult = await signAndBroadcastWithRetry(
+      client, account.address, [ecMsg], ecFee,
+      "Creating Ecosystem for CS tests via operator",
     );
 
-    if (trResult.code === 0) {
-      console.log("  ✅ Trust Registry created!");
-      console.log(`  Tx Hash: ${trResult.transactionHash}`);
+    if (ecResult.code === 0) {
+      console.log("  ✅ Ecosystem created!");
+      console.log(`  Tx Hash: ${ecResult.transactionHash}`);
 
-      for (const event of (trResult.events || [])) {
-        if (event.type === "create_trust_registry" || event.type === "verana.tr.v1.EventCreateTrustRegistry") {
+      for (const event of (ecResult.events || [])) {
+        if (event.type === "create_ecosystem" || event.type === "verana.ec.v1.EventCreateEcosystem") {
           for (const attr of event.attributes) {
-            if (attr.key === "trust_registry_id" || attr.key === "id" || attr.key === "tr_id") {
-              trId = parseInt(attr.value, 10);
-              if (!isNaN(trId)) {
-                console.log(`  TR ID: ${trId}`);
+            if (attr.key === "ecosystem_id" || attr.key === "id") {
+              ecId = parseInt(attr.value, 10);
+              if (!isNaN(ecId)) {
+                console.log(`  EC ID: ${ecId}`);
               }
             }
           }
         }
       }
 
-      if (!trId) {
-        console.log("  ❌ Could not extract TR ID from events");
+      if (!ecId) {
+        console.log("  ❌ Could not extract EC ID from events");
         process.exit(1);
       }
 
-      saveCsActiveTR(trId);
-      console.log("  💾 Saved CS active TR");
+      saveCsActiveEC(ecId);
+      console.log("  💾 Saved CS active EC");
     } else {
-      console.log("  ❌ Trust Registry creation failed!");
-      console.log(`  Code: ${trResult.code}`);
-      console.log(`  Log:  ${trResult.rawLog}`);
+      console.log("  ❌ Ecosystem creation failed!");
+      console.log(`  Code: ${ecResult.code}`);
+      console.log(`  Log:  ${ecResult.rawLog}`);
       process.exit(1);
     }
   } catch (error: any) {
-    console.log("  ❌ ERROR creating Trust Registry!");
+    console.log("  ❌ ERROR creating Ecosystem!");
     console.error(error);
     process.exit(1);
   }
@@ -187,7 +188,7 @@ async function main() {
     value: MsgCreateCredentialSchema.fromPartial({
       corporation: setup.authorityAddress,
       operator: account.address,
-      trId: trId!,
+      ecosystemId: ecId!,
       jsonSchema: jsonSchema,
       issuerGrantorValidationValidityPeriod: OptionalUInt32.fromPartial({ value: 0 }),
       verifierGrantorValidationValidityPeriod: OptionalUInt32.fromPartial({ value: 0 }),
@@ -205,7 +206,7 @@ async function main() {
 
   console.log(`  Authority: ${setup.authorityAddress}`);
   console.log(`  Operator:  ${account.address}`);
-  console.log(`  TR ID:     ${trId}`);
+  console.log(`  EC ID:     ${ecId}`);
   console.log();
 
   try {
@@ -243,7 +244,7 @@ async function main() {
       }
 
       if (csId) {
-        saveActiveCS(csId, trId!, trDid);
+        saveActiveCS(csId, ecId!, ecDid);
         console.log("  💾 Saved active CS for subsequent journeys");
       }
     } else {

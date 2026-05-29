@@ -42,7 +42,7 @@ func RunPermissionCSPSJourney(ctx context.Context, client cosmosclient.Client) e
 	fmt.Printf("  Operator: %s\n", operatorAddr)
 	fmt.Printf("  VS Operator: %s\n", vsOperatorAddr)
 
-	trID, _ := strconv.ParseUint(setup302.TrustRegistryID, 10, 64)
+	trID, _ := strconv.ParseUint(setup302.EcosystemID, 10, 64)
 
 	// =========================================================================
 	// PREREQUISITES: All operations use operatorAddr as authority (self-delegation)
@@ -67,9 +67,9 @@ func RunPermissionCSPSJourney(ctx context.Context, client cosmosclient.Client) e
 
 	// --- Prerequisite 2: Create CS for ISSUER perm ---
 	fmt.Println("\n--- Prerequisite 2: Create Credential Schema (CS1) ---")
-	schemaData := lib.GenerateSimpleSchema(setup302.TrustRegistryID)
+	schemaData := lib.GenerateSimpleSchema(setup302.EcosystemID)
 	cs1IDStr, err := lib.CreateCredentialSchema(client, ctx, operatorAccount, cschema.MsgCreateCredentialSchema{
-		TrId:                                    trID,
+		EcosystemId:                             trID,
 		JsonSchema:                              schemaData,
 		IssuerOnboardingMode:                    uint32(cschema.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS),
 		VerifierOnboardingMode:                  uint32(cschema.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS),
@@ -155,9 +155,9 @@ func RunPermissionCSPSJourney(ctx context.Context, client cosmosclient.Client) e
 	// --- Prerequisite 6: Create CS2 + root2 + agent perm (authority=operatorAddr) ---
 	// Use a second CS to avoid overlap with the issuer perm on CS1
 	fmt.Println("\n--- Prerequisite 6: Create CS2 for agent perm ---")
-	schemaData2 := lib.GenerateSimpleSchema(setup302.TrustRegistryID)
+	schemaData2 := lib.GenerateSimpleSchema(setup302.EcosystemID)
 	cs2IDStr, err := lib.CreateCredentialSchema(client, ctx, operatorAccount, cschema.MsgCreateCredentialSchema{
-		TrId:                                    trID,
+		EcosystemId:                             trID,
 		JsonSchema:                              schemaData2,
 		IssuerOnboardingMode:                    uint32(cschema.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS),
 		VerifierOnboardingMode:                  uint32(cschema.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_ECOSYSTEM_VALIDATION_PROCESS),
@@ -239,10 +239,10 @@ func RunPermissionCSPSJourney(ctx context.Context, client cosmosclient.Client) e
 
 	sessionID := uuid.New().String()
 
-	// 1a: Unauthorized operator (tr_operator) tries CSPS (expect failure)
-	// Note: cooluser is the vs_operator (authorized), so we use tr_operator instead.
+	// 1a: Unauthorized operator (ec_operator) tries CSPS (expect failure)
+	// Note: cooluser is the vs_operator (authorized), so we use ec_operator instead.
 	fmt.Println("\n--- Step 1a: Unauthorized operator tries CSPS (expect failure) ---")
-	unauthorizedAccount := lib.GetAccount(client, trOperatorName)
+	unauthorizedAccount := lib.GetAccount(client, ecOperatorName)
 	err = lib.CreatePermissionSession(
 		client, ctx, unauthorizedAccount, operatorAddr,
 		sessionID, issuerPermID, 0, agentPermID, walletAgentPermID,
@@ -321,7 +321,7 @@ func RunPermissionCSPSJourney(ctx context.Context, client cosmosclient.Client) e
 
 	// Save results
 	result := lib.JourneyResult{
-		TrustRegistryID: setup302.TrustRegistryID,
+		EcosystemID: setup302.EcosystemID,
 		SchemaID:        cs1IDStr,
 		DID:             issuerDID,
 		PermissionID:    strconv.FormatUint(issuerPermID, 10),

@@ -24,7 +24,7 @@ import {
 } from "../helpers/client";
 import { typeUrls } from "../helpers/registry";
 import { MsgGrantOperatorAuthorization } from "../../../src/codec/verana/de/v1/tx";
-import { getTrAuthzSetup, savePermAuthzSetup } from "../helpers/journeyResults";
+import { getEcAuthzSetup, savePermAuthzSetup } from "../helpers/journeyResults";
 
 const COOLUSER_MNEMONIC =
   (process.env.MNEMONIC && process.env.MNEMONIC.trim()) ||
@@ -38,15 +38,15 @@ async function main() {
   console.log("=".repeat(60));
   console.log();
 
-  // Step 1: Load authority from TR authz setup
-  console.log("Step 1: Loading authority from TR authz setup...");
-  const trSetup = getTrAuthzSetup();
-  if (!trSetup) {
-    console.log("  No TR authz setup found. Run test:de-grant-auth first.");
+  // Step 1: Load authority (Corporation policy_address) from EC authz setup
+  console.log("Step 1: Loading authority from EC authz setup...");
+  const ecSetup = getEcAuthzSetup();
+  if (!ecSetup) {
+    console.log("  No EC authz setup found. Run test:de-grant-auth first.");
     process.exit(1);
   }
-  const authorityAddress = trSetup.authorityAddress;
-  console.log(`  Authority: ${authorityAddress}`);
+  const authorityAddress = ecSetup.authorityAddress;
+  console.log(`  Authority (corporation policy_address): ${authorityAddress}`);
   console.log();
 
   // Step 2: Create perm operator wallet
@@ -104,10 +104,11 @@ async function main() {
   console.log("Step 4: Granting operator authorization...");
 
   const allMsgTypes = [
-    // TR messages (for creating prerequisite TRs)
-    typeUrls.MsgCreateTrustRegistry,
-    typeUrls.MsgUpdateTrustRegistry,
-    typeUrls.MsgArchiveTrustRegistry,
+    // EC messages (for creating prerequisite Ecosystems)
+    typeUrls.MsgCreateEcosystem,
+    typeUrls.MsgUpdateEcosystem,
+    typeUrls.MsgArchiveEcosystem,
+    // GF messages (moved from verana.tr.v1 to verana.gf.v1 in v4-rc2)
     typeUrls.MsgAddGovernanceFrameworkDocument,
     typeUrls.MsgIncreaseActiveGovernanceFrameworkVersion,
     // CS messages (for creating prerequisite CSs)

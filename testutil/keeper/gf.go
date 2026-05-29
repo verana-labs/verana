@@ -46,8 +46,8 @@ func GfKeeperWithDelegation(
 		log.NewNopLogger(),
 		authority.String(),
 		del,
-		eco,
 	)
+	k.SetEcosystemKeeper(eco)
 	k.SetCorporationKeeper(corp)
 	ctx := sdk.NewContext(stateStore, cmtproto.Header{}, false, log.NewNopLogger())
 	if err := k.SetParams(ctx, types.DefaultParams()); err != nil {

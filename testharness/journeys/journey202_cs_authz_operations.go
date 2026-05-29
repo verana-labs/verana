@@ -36,25 +36,24 @@ func RunCredentialSchemaAuthzOperationsJourney(ctx context.Context, client cosmo
 	fmt.Println("\n=== PREREQUISITE: Create Trust Registry (controller = group policy) ===")
 
 	// Grant TR create authorization to the operator
-	fmt.Println("\n--- Prerequisite 1: Grant operator auth for CreateTrustRegistry ---")
+	fmt.Println("\n--- Prerequisite 1: Grant operator auth for CreateEcosystem ---")
 	err := lib.GrantOperatorAuthorizationViaGroup(
 		client, ctx, adminAccount, member1Account,
 		policyAddr, operatorAddr, operatorAddr,
-		[]string{"/verana.tr.v1.MsgCreateTrustRegistry"},
+		[]string{"/verana.ec.v1.MsgCreateEcosystem"},
 	)
 	if err != nil {
 		return fmt.Errorf("prerequisite 1 failed: %w", err)
 	}
-	fmt.Println("✅ Prerequisite 1: Granted CreateTrustRegistry authorization")
+	fmt.Println("✅ Prerequisite 1: Granted CreateEcosystem authorization")
 	waitForTx("grant TR create auth")
 
 	// Create TR with controller = policyAddr
 	fmt.Println("\n--- Prerequisite 2: Create Trust Registry with controller = group policy ---")
 	did := lib.GenerateUniqueDID(client, ctx)
-	trIDStr, err := lib.CreateTrustRegistryWithAuthority(
+	trIDStr, err := lib.CreateEcosystemWithAuthority(
 		client, ctx, operatorAccount, policyAddr,
 		did,
-		"http://cs-test-aka.com",
 		"https://cs-test.com/governance-framework.pdf",
 		"sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
 		"en",
@@ -67,7 +66,7 @@ func RunCredentialSchemaAuthzOperationsJourney(ctx context.Context, client cosmo
 	waitForTx("TR creation")
 
 	// Verify TR creation
-	verified := lib.VerifyTrustRegistry(client, ctx, trID, did)
+	verified := lib.VerifyEcosystem(client, ctx, trID, did)
 	if !verified {
 		return fmt.Errorf("prerequisite 2 verification failed: trust registry not found or DID mismatch")
 	}
@@ -280,7 +279,7 @@ func RunCredentialSchemaAuthzOperationsJourney(ctx context.Context, client cosmo
 
 	// Save results for potential downstream journeys
 	result := lib.JourneyResult{
-		TrustRegistryID: trIDStr,
+		EcosystemID: trIDStr,
 		SchemaID:        csIDStr,
 		DID:             did,
 		GroupID:         setup.GroupID,

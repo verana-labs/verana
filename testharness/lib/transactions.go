@@ -15,8 +15,8 @@ import (
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
 
 	cschema "github.com/verana-labs/verana/x/cs/types"
+	"github.com/verana-labs/verana/x/ec/types"
 	permtypes "github.com/verana-labs/verana/x/perm/types"
-	"github.com/verana-labs/verana/x/tr/types"
 )
 
 // SendBankTransaction sends tokens from one account to another
@@ -40,21 +40,20 @@ func SendBankTransaction(client cosmosclient.Client, ctx context.Context, fromAd
 	return nil
 }
 
-// CreateTrustRegistry creates a new trust registry.
-// Spec draft 13: MsgCreateTrustRegistry seeds the registry, an active v1
+// CreateEcosystem creates a new ecosystem.
+// Spec draft 13: MsgCreateEcosystem seeds the ecosystem, an active v1
 // governance framework version, AND the initial GF document from docURL +
-// docHash in the registry's default language.
-func CreateTrustRegistry(client cosmosclient.Client, ctx context.Context, creator cosmosaccount.Account, did, aka, docURL, docHash, language string) (string, error) {
+// docHash in the ecosystem's default language.
+func CreateEcosystem(client cosmosclient.Client, ctx context.Context, creator cosmosaccount.Account, did, docURL, docHash, language string) (string, error) {
 	addr, err := creator.Address(addressPrefix)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	msg := &types.MsgCreateTrustRegistry{
+	msg := &types.MsgCreateEcosystem{
 		Corporation:  addr,
 		Operator:     addr,
 		Did:          did,
-		Aka:          aka,
 		Language:     language,
 		DocUrl:       docURL,
 		DocDigestSri: docHash,
@@ -65,7 +64,7 @@ func CreateTrustRegistry(client cosmosclient.Client, ctx context.Context, creato
 		log.Fatal(err)
 	}
 
-	fmt.Print("MsgCreateTrustRegistry:\n\n")
+	fmt.Print("MsgCreateEcosystem:\n\n")
 	fmt.Println(txResp)
 
 	var txResponse sdk.TxResponse
@@ -79,10 +78,10 @@ func CreateTrustRegistry(client cosmosclient.Client, ctx context.Context, creato
 	}
 
 	for _, event := range txResponse.Events {
-		if event.Type == "create_trust_registry" {
+		if event.Type == "create_ecosystem" {
 			for _, attribute := range event.Attributes {
-				if attribute.Key == "trust_registry_id" {
-					fmt.Println("Created TrustRegistry ID:", attribute.Value)
+				if attribute.Key == "ecosystem_id" {
+					fmt.Println("Created Ecosystem ID:", attribute.Value)
 					return attribute.Value, nil
 				}
 			}
@@ -164,7 +163,7 @@ func CreateCredentialSchema(client cosmosclient.Client, ctx context.Context, cre
 	msg := &cschema.MsgCreateCredentialSchema{
 		Corporation: creatorAddr,
 		Operator:    creatorAddr,
-		TrId:        override.TrId,
+		EcosystemId: override.EcosystemId,
 		JsonSchema:  override.JsonSchema,
 	}
 

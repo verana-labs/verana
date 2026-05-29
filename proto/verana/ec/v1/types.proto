@@ -1,0 +1,60 @@
+syntax = "proto3";
+package verana.ec.v1;
+
+import "amino/amino.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "google/protobuf/timestamp.proto";
+import "verana/gf/v1/types.proto";
+
+option go_package = "github.com/verana-labs/verana/x/ec/types";
+
+// Ecosystem is the VPR-level entity introduced in spec v4-rc2 as the
+// replacement for the legacy Trust Registry concept. An Ecosystem is
+// identified by its uint64 `id` and controlled by the Corporation referenced
+// via `corporation_id`. Per-Ecosystem DID uniqueness is NOT enforced; the
+// `(did, corporation_id)` consistency invariant is enforced instead — see
+// MOD-ES-MSG-1-2-1 and MOD-ES-MSG-2-2-1.
+//
+// active_version is uint32 (spec literally says "int"); version numbers are
+// always >= 1 and this matches the MOD-GF version type.
+message Ecosystem {
+  uint64 id = 1;
+  string did = 2;
+  uint64 corporation_id = 3;
+  google.protobuf.Timestamp created = 4 [
+    (gogoproto.nullable) = false,
+    (gogoproto.stdtime) = true
+  ];
+  google.protobuf.Timestamp modified = 5 [
+    (gogoproto.nullable) = false,
+    (gogoproto.stdtime) = true
+  ];
+  bool archived = 6;
+  string language = 7;
+  uint32 active_version = 8;
+}
+
+// EcosystemWithVersions is the query response shape (MOD-ES-QRY-1 /
+// MOD-ES-QRY-2) including nested governance framework versions and documents
+// pulled from the x/gf module.
+message EcosystemWithVersions {
+  uint64 id = 1;
+  string did = 2;
+  uint64 corporation_id = 3;
+  google.protobuf.Timestamp created = 4 [
+    (gogoproto.nullable) = false,
+    (gogoproto.stdtime) = true
+  ];
+  google.protobuf.Timestamp modified = 5 [
+    (gogoproto.nullable) = false,
+    (gogoproto.stdtime) = true
+  ];
+  bool archived = 6;
+  string language = 7;
+  uint32 active_version = 8;
+  repeated verana.gf.v1.GovernanceFrameworkVersionWithDocs versions = 9 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+}

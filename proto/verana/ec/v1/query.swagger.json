@@ -1,0 +1,319 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "verana/ec/v1/query.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "Query"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/ec/v1/get": {
+      "get": {
+        "summary": "[MOD-ES-QRY-1] Get Ecosystem by id, with nested GF version + document data.",
+        "operationId": "Query_GetEcosystem",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.ec.v1.QueryGetEcosystemResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uint64"
+          },
+          {
+            "name": "active_gf_only",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "preferred_language",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Query"
+        ]
+      }
+    },
+    "/ec/v1/list": {
+      "get": {
+        "summary": "[MOD-ES-QRY-2] List Ecosystems, optionally filtered.",
+        "operationId": "Query_ListEcosystems",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.ec.v1.QueryListEcosystemsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "corporation_id",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uint64"
+          },
+          {
+            "name": "modified_after",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "active_gf_only",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "preferred_language",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "response_max_size",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "Query"
+        ]
+      }
+    },
+    "/ec/v1/params": {
+      "get": {
+        "summary": "[MOD-ES-QRY-3] List Module Parameters.",
+        "operationId": "Query_Params",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.ec.v1.QueryParamsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "tags": [
+          "Query"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "google.protobuf.Any": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "google.rpc.Status": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/google.protobuf.Any"
+          }
+        }
+      }
+    },
+    "verana.ec.v1.EcosystemWithVersions": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "did": {
+          "type": "string"
+        },
+        "corporation_id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "created": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "modified": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "archived": {
+          "type": "boolean"
+        },
+        "language": {
+          "type": "string"
+        },
+        "active_version": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "versions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/verana.gf.v1.GovernanceFrameworkVersionWithDocs"
+          }
+        }
+      },
+      "description": "EcosystemWithVersions is the query response shape (MOD-ES-QRY-1 /\nMOD-ES-QRY-2) including nested governance framework versions and documents\npulled from the x/gf module."
+    },
+    "verana.ec.v1.Params": {
+      "type": "object",
+      "properties": {
+        "trust_unit_price": {
+          "type": "string",
+          "format": "uint64"
+        }
+      },
+      "description": "Params defines the parameters for the module."
+    },
+    "verana.ec.v1.QueryGetEcosystemResponse": {
+      "type": "object",
+      "properties": {
+        "ecosystem": {
+          "$ref": "#/definitions/verana.ec.v1.EcosystemWithVersions"
+        }
+      }
+    },
+    "verana.ec.v1.QueryListEcosystemsResponse": {
+      "type": "object",
+      "properties": {
+        "ecosystems": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/verana.ec.v1.EcosystemWithVersions"
+          }
+        }
+      }
+    },
+    "verana.ec.v1.QueryParamsResponse": {
+      "type": "object",
+      "properties": {
+        "params": {
+          "$ref": "#/definitions/verana.ec.v1.Params"
+        }
+      }
+    },
+    "verana.gf.v1.GovernanceFrameworkDocument": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "gfv_id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "created": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "language": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "digest_sri": {
+          "type": "string"
+        }
+      },
+      "description": "GovernanceFrameworkDocument is a single (language, url, digest_sri) tuple\nattached to a GovernanceFrameworkVersion."
+    },
+    "verana.gf.v1.GovernanceFrameworkVersionWithDocs": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "ecosystem_id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "corporation_id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "created": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "active_since": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "documents": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/verana.gf.v1.GovernanceFrameworkDocument"
+          }
+        }
+      },
+      "description": "GovernanceFrameworkVersionWithDocs is the response shape for the query layer,\nreturning a version with its nested documents."
+    }
+  }
+}

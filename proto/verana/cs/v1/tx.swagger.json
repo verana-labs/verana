@@ -316,10 +316,6 @@
           "type": "string",
           "title": "operator is the account authorized by the corporation to run this Msg"
         },
-        "tr_id": {
-          "type": "string",
-          "format": "uint64"
-        },
         "json_schema": {
           "type": "string"
         },
@@ -359,6 +355,10 @@
         "holder_onboarding_mode": {
           "type": "integer",
           "format": "int64"
+        },
+        "ecosystem_id": {
+          "type": "string",
+          "format": "uint64"
         }
       },
       "title": "[MOD-CS-MSG-1] Create New Credential Schema"

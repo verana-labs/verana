@@ -55,7 +55,7 @@ func TestGrantFeeAllowance(t *testing.T) {
 	// authority represents a group policy account (see conventions above)
 	authority := sdk.AccAddress([]byte("test_authority______")).String()
 	grantee := sdk.AccAddress([]byte("test_grantee________")).String()
-	validMsgTypes := []string{"/verana.tr.v1.MsgCreateTrustRegistry"}
+	validMsgTypes := []string{"/verana.ec.v1.MsgCreateEcosystem"}
 	futureExp := ctx.BlockTime().Add(24 * time.Hour)
 	pastExp := ctx.BlockTime().Add(-1 * time.Hour)
 	validSpendLimit := sdk.NewCoins(sdk.NewInt64Coin("stake", 1000))
@@ -130,7 +130,7 @@ func TestGrantFeeAllowance(t *testing.T) {
 			name:        "Invalid: mix of valid and invalid msg types",
 			authority:   authority,
 			grantee:     grantee,
-			msgTypes:    []string{"/verana.tr.v1.MsgCreateTrustRegistry", "/cosmos.bank.v1beta1.MsgSend"},
+			msgTypes:    []string{"/verana.ec.v1.MsgCreateEcosystem", "/cosmos.bank.v1beta1.MsgSend"},
 			expectErr:   true,
 			errContains: "invalid or non-delegable message type",
 		},
@@ -166,7 +166,7 @@ func TestGrantFeeAllowance(t *testing.T) {
 			authority: authority,
 			grantee:   grantee,
 			msgTypes: []string{
-				"/verana.tr.v1.MsgCreateTrustRegistry",
+				"/verana.ec.v1.MsgCreateEcosystem",
 				"/verana.cs.v1.MsgCreateCredentialSchema",
 				"/verana.perm.v1.MsgSelfCreatePermission",
 			},
@@ -251,7 +251,7 @@ func TestGrantFeeAllowance_UpdateExisting(t *testing.T) {
 
 	authority := sdk.AccAddress([]byte("test_authority______")).String()
 	grantee := sdk.AccAddress([]byte("test_grantee________")).String()
-	msgTypes1 := []string{"/verana.tr.v1.MsgCreateTrustRegistry"}
+	msgTypes1 := []string{"/verana.ec.v1.MsgCreateEcosystem"}
 	msgTypes2 := []string{"/verana.cs.v1.MsgCreateCredentialSchema"}
 
 	// Create initial grant
@@ -299,7 +299,7 @@ func TestRevokeFeeAllowance(t *testing.T) {
 			grantee:   grantee,
 			setupFunc: func() {
 				err := k.GrantFeeAllowance(ctx, authority, grantee,
-					[]string{"/verana.tr.v1.MsgCreateTrustRegistry"}, nil, nil, nil)
+					[]string{"/verana.ec.v1.MsgCreateEcosystem"}, nil, nil, nil)
 				require.NoError(t, err)
 			},
 			expectErr:     false,
@@ -372,7 +372,7 @@ func TestMsgServerGrantOperatorAuthorization(t *testing.T) {
 	authority := sdk.AccAddress([]byte("test_authority______")).String()
 	grantee := sdk.AccAddress([]byte("test_grantee________")).String()
 	grantee2 := sdk.AccAddress([]byte("test_grantee2_______")).String()
-	validMsgTypes := []string{"/verana.tr.v1.MsgCreateTrustRegistry"}
+	validMsgTypes := []string{"/verana.ec.v1.MsgCreateEcosystem"}
 	futureExp := ctx.BlockTime().Add(24 * time.Hour)
 	pastExp := ctx.BlockTime().Add(-1 * time.Hour)
 	nowExp := ctx.BlockTime()
@@ -534,7 +534,7 @@ func TestMsgServerGrantOperatorAuthorization(t *testing.T) {
 				err := k.OperatorAuthorizations.Set(ctx, oaKey, types.OperatorAuthorization{
 					Corporation: authority,
 					Operator:  wrongTypeOp,
-					MsgTypes:  []string{"/verana.tr.v1.MsgCreateTrustRegistry"}, // wrong type
+					MsgTypes:  []string{"/verana.ec.v1.MsgCreateEcosystem"}, // wrong type
 				})
 				require.NoError(t, err)
 			},
@@ -554,7 +554,7 @@ func TestMsgServerGrantOperatorAuthorization(t *testing.T) {
 				Operator:  "",
 				Grantee:   grantee,
 				MsgTypes: []string{
-					"/verana.tr.v1.MsgCreateTrustRegistry",
+					"/verana.ec.v1.MsgCreateEcosystem",
 					"/verana.cs.v1.MsgCreateCredentialSchema",
 					"/verana.perm.v1.MsgSelfCreatePermission",
 				},
@@ -703,7 +703,7 @@ func TestMsgServerGrantOperatorAuthorization_WithFeegrant(t *testing.T) {
 
 	authority := sdk.AccAddress([]byte("test_authority______")).String()
 	grantee := sdk.AccAddress([]byte("test_grantee________")).String()
-	validMsgTypes := []string{"/verana.tr.v1.MsgCreateTrustRegistry"}
+	validMsgTypes := []string{"/verana.ec.v1.MsgCreateEcosystem"}
 
 	// Grant with feegrant = true
 	msg := &types.MsgGrantOperatorAuthorization{
@@ -747,7 +747,7 @@ func TestMsgServerGrantOperatorAuthorization_UpdateExisting(t *testing.T) {
 
 	authority := sdk.AccAddress([]byte("test_authority______")).String()
 	grantee := sdk.AccAddress([]byte("test_grantee________")).String()
-	msgTypes1 := []string{"/verana.tr.v1.MsgCreateTrustRegistry"}
+	msgTypes1 := []string{"/verana.ec.v1.MsgCreateEcosystem"}
 	msgTypes2 := []string{"/verana.cs.v1.MsgCreateCredentialSchema", "/verana.perm.v1.MsgSelfCreatePermission"}
 
 	// Create initial
@@ -785,7 +785,7 @@ func TestMsgServerRevokeOperatorAuthorization(t *testing.T) {
 	authority := sdk.AccAddress([]byte("test_authority______")).String()
 	grantee := sdk.AccAddress([]byte("test_grantee________")).String()
 	grantee2 := sdk.AccAddress([]byte("test_grantee2_______")).String()
-	validMsgTypes := []string{"/verana.tr.v1.MsgCreateTrustRegistry"}
+	validMsgTypes := []string{"/verana.ec.v1.MsgCreateEcosystem"}
 
 	testCases := []struct {
 		name        string
@@ -939,7 +939,7 @@ func TestMsgServerRevokeOperatorAuthorization_AlsoRevokesFeeGrant(t *testing.T) 
 
 	authority := sdk.AccAddress([]byte("test_authority______")).String()
 	grantee := sdk.AccAddress([]byte("test_grantee________")).String()
-	validMsgTypes := []string{"/verana.tr.v1.MsgCreateTrustRegistry"}
+	validMsgTypes := []string{"/verana.ec.v1.MsgCreateEcosystem"}
 
 	// First, grant operator authorization with feegrant
 	grantMsg := &types.MsgGrantOperatorAuthorization{
@@ -985,7 +985,7 @@ func TestMsgServerRevokeOperatorAuthorization_NoFeeGrant(t *testing.T) {
 
 	authority := sdk.AccAddress([]byte("test_authority______")).String()
 	grantee := sdk.AccAddress([]byte("test_grantee________")).String()
-	validMsgTypes := []string{"/verana.tr.v1.MsgCreateTrustRegistry"}
+	validMsgTypes := []string{"/verana.ec.v1.MsgCreateEcosystem"}
 
 	// Grant operator authorization without feegrant
 	grantMsg := &types.MsgGrantOperatorAuthorization{
@@ -1120,7 +1120,7 @@ func TestCheckOperatorAuthorization(t *testing.T) {
 				err := k.OperatorAuthorizations.Set(ctx, oaKey, types.OperatorAuthorization{
 					Corporation: authority,
 					Operator:  wrongOp,
-					MsgTypes:  []string{"/verana.tr.v1.MsgCreateTrustRegistry"},
+					MsgTypes:  []string{"/verana.ec.v1.MsgCreateEcosystem"},
 				})
 				require.NoError(t, err)
 			},
@@ -1139,7 +1139,7 @@ func TestCheckOperatorAuthorization(t *testing.T) {
 					Corporation: authority,
 					Operator:  multiOp,
 					MsgTypes: []string{
-						"/verana.tr.v1.MsgCreateTrustRegistry",
+						"/verana.ec.v1.MsgCreateEcosystem",
 						"/verana.de.v1.MsgGrantOperatorAuthorization",
 						"/verana.cs.v1.MsgCreateCredentialSchema",
 					},
@@ -1182,7 +1182,7 @@ func TestGrantThenRevokeOperatorAuthorization_E2E(t *testing.T) {
 	authority := sdk.AccAddress([]byte("test_authority______")).String()
 	grantee := sdk.AccAddress([]byte("test_grantee________")).String()
 	validMsgTypes := []string{
-		"/verana.tr.v1.MsgCreateTrustRegistry",
+		"/verana.ec.v1.MsgCreateEcosystem",
 		"/verana.cs.v1.MsgCreateCredentialSchema",
 	}
 
@@ -1240,7 +1240,7 @@ func TestMutualExclusivity_OAAndVSOA(t *testing.T) {
 
 	authority := sdk.AccAddress([]byte("test_authority______")).String()
 	grantee := sdk.AccAddress([]byte("test_grantee________")).String()
-	validMsgTypes := []string{"/verana.tr.v1.MsgCreateTrustRegistry"}
+	validMsgTypes := []string{"/verana.ec.v1.MsgCreateEcosystem"}
 
 	// First, create a VSOperatorAuthorization
 	vsKey := collections.Join(authority, grantee)
@@ -1279,7 +1279,7 @@ func TestMultipleGranteesForSameAuthority(t *testing.T) {
 	grantee1 := sdk.AccAddress([]byte("test_grantee1_______")).String()
 	grantee2 := sdk.AccAddress([]byte("test_grantee2_______")).String()
 	grantee3 := sdk.AccAddress([]byte("test_grantee3_______")).String()
-	msgTypes := []string{"/verana.tr.v1.MsgCreateTrustRegistry"}
+	msgTypes := []string{"/verana.ec.v1.MsgCreateEcosystem"}
 
 	// Grant to multiple grantees
 	for _, grantee := range []string{grantee1, grantee2, grantee3} {
@@ -1324,7 +1324,7 @@ func TestGrantRevokeReGrant_E2E(t *testing.T) {
 
 	authority := sdk.AccAddress([]byte("test_authority______")).String()
 	grantee := sdk.AccAddress([]byte("test_grantee________")).String()
-	msgTypes1 := []string{"/verana.tr.v1.MsgCreateTrustRegistry"}
+	msgTypes1 := []string{"/verana.ec.v1.MsgCreateEcosystem"}
 	msgTypes2 := []string{"/verana.cs.v1.MsgCreateCredentialSchema"}
 
 	// Grant
@@ -1363,7 +1363,7 @@ func TestAuthorityIsolation(t *testing.T) {
 	authority1 := sdk.AccAddress([]byte("test_authority1_____")).String()
 	authority2 := sdk.AccAddress([]byte("test_authority2_____")).String()
 	grantee := sdk.AccAddress([]byte("test_grantee________")).String()
-	msgTypes := []string{"/verana.tr.v1.MsgCreateTrustRegistry"}
+	msgTypes := []string{"/verana.ec.v1.MsgCreateEcosystem"}
 
 	// Grant from authority1
 	_, err := ms.GrantOperatorAuthorization(ctx, &types.MsgGrantOperatorAuthorization{
@@ -1420,7 +1420,7 @@ func TestOperatorRevokesOwnAuthorization(t *testing.T) {
 	authority := sdk.AccAddress([]byte("test_authority______")).String()
 	operator := sdk.AccAddress([]byte("test_operator_______")).String()
 	msgTypes := []string{
-		"/verana.tr.v1.MsgCreateTrustRegistry",
+		"/verana.ec.v1.MsgCreateEcosystem",
 		"/verana.de.v1.MsgRevokeOperatorAuthorization",
 	}
 
@@ -1492,7 +1492,7 @@ func TestRevokeFeeAllowance_DoubleRevoke(t *testing.T) {
 
 	// Create a fee grant
 	err := k.GrantFeeAllowance(ctx, authority, grantee,
-		[]string{"/verana.tr.v1.MsgCreateTrustRegistry"}, nil, nil, nil)
+		[]string{"/verana.ec.v1.MsgCreateEcosystem"}, nil, nil, nil)
 	require.NoError(t, err)
 
 	// First revoke
@@ -1514,7 +1514,7 @@ func TestGrantOperatorAuthorization_FeegrantFieldsStoredCorrectly(t *testing.T) 
 
 	authority := sdk.AccAddress([]byte("test_authority______")).String()
 	grantee := sdk.AccAddress([]byte("test_grantee________")).String()
-	validMsgTypes := []string{"/verana.tr.v1.MsgCreateTrustRegistry"}
+	validMsgTypes := []string{"/verana.ec.v1.MsgCreateEcosystem"}
 	futureExp := ctx.BlockTime().Add(24 * time.Hour)
 	spendLimit := sdk.NewCoins(sdk.NewInt64Coin("stake", 500))
 	period := 12 * time.Hour
@@ -1579,7 +1579,7 @@ func TestOperatorCannotSelfGrant(t *testing.T) {
 
 	// Attempt to grant the same operator (self) expanded msg_types — MUST fail.
 	allMsgTypes := []string{
-		"/verana.tr.v1.MsgCreateTrustRegistry",
+		"/verana.ec.v1.MsgCreateEcosystem",
 		"/verana.cs.v1.MsgCreateCredentialSchema",
 		"/verana.perm.v1.MsgSelfCreatePermission",
 		"/verana.de.v1.MsgGrantOperatorAuthorization",
@@ -1603,7 +1603,7 @@ func TestOperatorCannotSelfGrant(t *testing.T) {
 
 	// Confirm operator still lacks the msg types they tried to self-grant.
 	err = k.CheckOperatorAuthorization(ctx, authority, operator,
-		"/verana.tr.v1.MsgCreateTrustRegistry", ctx.BlockTime())
+		"/verana.ec.v1.MsgCreateEcosystem", ctx.BlockTime())
 	require.Error(t, err) // escalation blocked
 }
 
@@ -1634,7 +1634,7 @@ func TestBootstrapFlow_GroupProposalOnboardsFirstOperator(t *testing.T) {
 		"/verana.de.v1.MsgRevokeOperatorAuthorization",
 	}
 	trMsgTypes := []string{
-		"/verana.tr.v1.MsgCreateTrustRegistry",
+		"/verana.ec.v1.MsgCreateEcosystem",
 	}
 
 	// ---- Step 1: Group proposal onboards first operator ----
@@ -1673,7 +1673,7 @@ func TestBootstrapFlow_GroupProposalOnboardsFirstOperator(t *testing.T) {
 
 	// ---- Step 3: Second operator can use delegated msg type ----
 	err = k.CheckOperatorAuthorization(ctx, groupAccount, secondOperator,
-		"/verana.tr.v1.MsgCreateTrustRegistry", ctx.BlockTime())
+		"/verana.ec.v1.MsgCreateEcosystem", ctx.BlockTime())
 	require.NoError(t, err)
 
 	// But second operator CANNOT grant further operators (not in their msg_types)
@@ -1763,7 +1763,7 @@ func TestAddPermToVSOA(t *testing.T) {
 		err := k.OperatorAuthorizations.Set(ctx, oaKey, types.OperatorAuthorization{
 			Corporation: authority,
 			Operator:  vsOperator,
-			MsgTypes:  []string{"/verana.tr.v1.MsgCreateTrustRegistry"},
+			MsgTypes:  []string{"/verana.ec.v1.MsgCreateEcosystem"},
 		})
 		require.NoError(t, err)
 
@@ -1944,7 +1944,7 @@ func TestQueryListOperatorAuthorizations(t *testing.T) {
 
 	// Seed data
 	err := k.OperatorAuthorizations.Set(ctx, collections.Join(authority1, op1), types.OperatorAuthorization{
-		Corporation: authority1, Operator: op1, MsgTypes: []string{"/verana.tr.v1.MsgCreateTrustRegistry"},
+		Corporation: authority1, Operator: op1, MsgTypes: []string{"/verana.ec.v1.MsgCreateEcosystem"},
 	})
 	require.NoError(t, err)
 	err = k.OperatorAuthorizations.Set(ctx, collections.Join(authority1, op2), types.OperatorAuthorization{
@@ -1952,7 +1952,7 @@ func TestQueryListOperatorAuthorizations(t *testing.T) {
 	})
 	require.NoError(t, err)
 	err = k.OperatorAuthorizations.Set(ctx, collections.Join(authority2, op1), types.OperatorAuthorization{
-		Corporation: authority2, Operator: op1, MsgTypes: []string{"/verana.tr.v1.MsgCreateTrustRegistry"},
+		Corporation: authority2, Operator: op1, MsgTypes: []string{"/verana.ec.v1.MsgCreateEcosystem"},
 	})
 	require.NoError(t, err)
 

@@ -13,8 +13,8 @@ const JOURNEY_RESULTS_DIR = path.join(__dirname, "../../journey_results");
  * Journey result structure matching Go test harness
  */
 export interface JourneyResult {
-  // Journey 1: Trust Registry and Schema
-  trustRegistryId?: string;
+  // Journey 1: Ecosystem and Schema
+  ecosystemId?: string;
   schemaId?: string;
   rootPermissionId?: string;
   did?: string;
@@ -30,19 +30,23 @@ export interface JourneyResult {
   issuerGrantorPermId?: string;
   issuerDid?: string;
   verifierDid?: string;
-  
+
   // Create Permission prerequisites
   accountIndex?: string;
   accountAddress?: string;
   cooluserAddress?: string;
-  
+
   // Cancel Permission VP prerequisites
   validatorPermId?: string;
   applicantDid?: string;
 
-  // DE + TR authz setup
+  // DE + EC authz setup
   authorityAddress?: string;
   operatorAddress?: string;
+
+  // MOD-CO Corporation setup
+  corporationId?: string;
+  policyAddress?: string;
 
   // Effective-from timestamp for root permissions
   effectiveFrom?: string;
@@ -101,20 +105,19 @@ export function hasJourneyResult(journeyName: string): boolean {
 }
 
 /**
- * Gets the active TR and Schema from journey results
- * This is the standard TR/CS that tests should use
- * @returns The result with trustRegistryId and schemaId, or null if not found
+ * Gets the active Ecosystem and Schema from journey results
+ * This is the standard EC/CS that tests should use
+ * @returns The result with ecosystemId and schemaId, or null if not found
  */
-export function getActiveTRAndSchema(): { trustRegistryId: number; schemaId: number; did: string } | null {
-  // Load active TR and CS
-  const trResult = loadJourneyResult("active-tr");
+export function getActiveECAndSchema(): { ecosystemId: number; schemaId: number; did: string } | null {
+  const ecResult = loadJourneyResult("active-ec");
   const csResult = loadJourneyResult("active-cs");
 
-  if (trResult?.trustRegistryId && csResult?.schemaId && (trResult?.did || csResult?.did)) {
+  if (ecResult?.ecosystemId && csResult?.schemaId && (ecResult?.did || csResult?.did)) {
     return {
-      trustRegistryId: parseInt(trResult.trustRegistryId, 10),
+      ecosystemId: parseInt(ecResult.ecosystemId, 10),
       schemaId: parseInt(csResult.schemaId, 10),
-      did: trResult.did || csResult.did || "",
+      did: ecResult.did || csResult.did || "",
     };
   }
 
@@ -122,11 +125,11 @@ export function getActiveTRAndSchema(): { trustRegistryId: number; schemaId: num
 }
 
 /**
- * Saves the active Trust Registry (replaces any existing active TR)
+ * Saves the active Ecosystem (replaces any existing active EC)
  */
-export function saveActiveTR(trustRegistryId: number, did: string): void {
-  saveJourneyResult("active-tr", {
-    trustRegistryId: trustRegistryId.toString(),
+export function saveActiveEC(ecosystemId: number, did: string): void {
+  saveJourneyResult("active-ec", {
+    ecosystemId: ecosystemId.toString(),
     did: did,
   });
 }
@@ -134,23 +137,23 @@ export function saveActiveTR(trustRegistryId: number, did: string): void {
 /**
  * Saves the active Credential Schema (replaces any existing active CS)
  */
-export function saveActiveCS(schemaId: number, trustRegistryId: number, did: string): void {
+export function saveActiveCS(schemaId: number, ecosystemId: number, did: string): void {
   saveJourneyResult("active-cs", {
     schemaId: schemaId.toString(),
-    trustRegistryId: trustRegistryId.toString(),
+    ecosystemId: ecosystemId.toString(),
     did: did,
   });
 }
 
 /**
- * Gets the active Trust Registry
+ * Gets the active Ecosystem
  */
-export function getActiveTR(): { trustRegistryId: number; did: string } | null {
-  const trResult = loadJourneyResult("active-tr");
-  if (trResult?.trustRegistryId && trResult?.did) {
+export function getActiveEC(): { ecosystemId: number; did: string } | null {
+  const ecResult = loadJourneyResult("active-ec");
+  if (ecResult?.ecosystemId && ecResult?.did) {
     return {
-      trustRegistryId: parseInt(trResult.trustRegistryId, 10),
-      did: trResult.did,
+      ecosystemId: parseInt(ecResult.ecosystemId, 10),
+      did: ecResult.did,
     };
   }
   return null;
@@ -159,12 +162,12 @@ export function getActiveTR(): { trustRegistryId: number; did: string } | null {
 /**
  * Gets the active Credential Schema
  */
-export function getActiveCS(): { schemaId: number; trustRegistryId: number; did: string } | null {
+export function getActiveCS(): { schemaId: number; ecosystemId: number; did: string } | null {
   const csResult = loadJourneyResult("active-cs");
-  if (csResult?.schemaId && csResult?.trustRegistryId && csResult?.did) {
+  if (csResult?.schemaId && csResult?.ecosystemId && csResult?.did) {
     return {
       schemaId: parseInt(csResult.schemaId, 10),
-      trustRegistryId: parseInt(csResult.trustRegistryId, 10),
+      ecosystemId: parseInt(csResult.ecosystemId, 10),
       did: csResult.did,
     };
   }
@@ -172,29 +175,28 @@ export function getActiveCS(): { schemaId: number; trustRegistryId: number; did:
 }
 
 /**
- * Checks if a Trust Registry or Credential Schema is archived by querying the chain
+ * Checks if an Ecosystem is archived by querying the chain
  * This is used to determine if we should reuse saved results or create new ones
  */
-export async function isTrustRegistryArchived(
+export async function isEcosystemArchived(
   client: any,
-  trId: number
+  ecId: number
 ): Promise<boolean> {
   try {
-    // Query TR via LCD endpoint
     const lcdEndpoint = process.env.VERANA_LCD_ENDPOINT || "http://localhost:1317";
-    const response = await fetch(`${lcdEndpoint}/verana/tr/v1/trust_registry/${trId}`);
+    const response = await fetch(`${lcdEndpoint}/verana/ec/v1/ecosystem/${ecId}`);
 
     if (!response.ok) {
       // If not found, consider it as "needs creation"
       return true;
     }
 
-    const data = await response.json() as { trust_registry?: { archived?: string | null } };
-    // Check if archived field exists and is not null
-    return data.trust_registry?.archived != null;
+    // In v4-rc2 `archived` is a bool (was nullable timestamp).
+    const data = (await response.json()) as { ecosystem?: { archived?: boolean | null } };
+    return data.ecosystem?.archived === true;
   } catch (error) {
     // On error, assume it might be archived (safer to create new)
-    console.log(`  ⚠️  Could not check TR archive status: ${error}`);
+    console.log(`  ⚠️  Could not check EC archive status: ${error}`);
     return true;
   }
 }
@@ -267,24 +269,54 @@ export function getPermissionId(journeyName: string): number | null {
 }
 
 /**
- * Saves the TR authz setup (authority + operator addresses)
+ * Saves the EC authz setup (authority/corporation policy_address + operator).
+ *
+ * In v4-rc2 the "authority" is the policy_address of a registered Corporation
+ * (see AUTHZ-CHECK-5). We persist it under the legacy `authorityAddress` key
+ * for compatibility with existing consumers.
  */
-export function saveTrAuthzSetup(authorityAddress: string, operatorAddress: string): void {
-  saveJourneyResult("tr-authz-setup", {
+export function saveEcAuthzSetup(authorityAddress: string, operatorAddress: string): void {
+  saveJourneyResult("ec-authz-setup", {
     authorityAddress,
     operatorAddress,
   });
 }
 
 /**
- * Gets the TR authz setup (authority + operator addresses)
+ * Gets the EC authz setup (corporation policy_address + operator address).
  */
-export function getTrAuthzSetup(): { authorityAddress: string; operatorAddress: string } | null {
-  const result = loadJourneyResult("tr-authz-setup");
+export function getEcAuthzSetup(): { authorityAddress: string; operatorAddress: string } | null {
+  const result = loadJourneyResult("ec-authz-setup");
   if (result?.authorityAddress && result?.operatorAddress) {
     return {
       authorityAddress: result.authorityAddress,
       operatorAddress: result.operatorAddress,
+    };
+  }
+  return null;
+}
+
+/**
+ * Saves the active Corporation (id + policy_address) created via MOD-CO.
+ * Subsequent EC/GF/CS/PERM journeys use `policyAddress` as the signing
+ * `corporation` (AUTHZ-CHECK-5).
+ */
+export function saveActiveCorporation(corporationId: number, policyAddress: string): void {
+  saveJourneyResult("active-corporation", {
+    corporationId: corporationId.toString(),
+    policyAddress,
+  });
+}
+
+/**
+ * Gets the active Corporation (id + policy_address).
+ */
+export function getActiveCorporation(): { corporationId: number; policyAddress: string } | null {
+  const result = loadJourneyResult("active-corporation");
+  if (result?.corporationId && result?.policyAddress) {
+    return {
+      corporationId: parseInt(result.corporationId, 10),
+      policyAddress: result.policyAddress,
     };
   }
   return null;
@@ -315,22 +347,22 @@ export function getCsAuthzSetup(): { authorityAddress: string; operatorAddress: 
 }
 
 /**
- * Saves the active Trust Registry created for CS journeys
+ * Saves the active Ecosystem created for CS journeys
  */
-export function saveCsActiveTR(trustRegistryId: number): void {
-  saveJourneyResult("cs-active-tr", {
-    trustRegistryId: trustRegistryId.toString(),
+export function saveCsActiveEC(ecosystemId: number): void {
+  saveJourneyResult("cs-active-ec", {
+    ecosystemId: ecosystemId.toString(),
   });
 }
 
 /**
- * Gets the active Trust Registry created for CS journeys
+ * Gets the active Ecosystem created for CS journeys
  */
-export function getCsActiveTR(): { trustRegistryId: number } | null {
-  const result = loadJourneyResult("cs-active-tr");
-  if (result?.trustRegistryId) {
+export function getCsActiveEC(): { ecosystemId: number } | null {
+  const result = loadJourneyResult("cs-active-ec");
+  if (result?.ecosystemId) {
     return {
-      trustRegistryId: parseInt(result.trustRegistryId, 10),
+      ecosystemId: parseInt(result.ecosystemId, 10),
     };
   }
   return null;
@@ -365,11 +397,11 @@ export function getPermAuthzSetup(): { authorityAddress: string; operatorAddress
 }
 
 /**
- * Saves the PERM root setup (TR, CS, root permission, DID)
+ * Saves the PERM root setup (EC, CS, root permission, DID)
  */
-export function savePermRootSetup(trId: number, schemaId: number, rootPermId: number, did: string, effectiveFrom?: Date): void {
+export function savePermRootSetup(ecId: number, schemaId: number, rootPermId: number, did: string, effectiveFrom?: Date): void {
   saveJourneyResult("perm-root-setup", {
-    trustRegistryId: trId.toString(),
+    ecosystemId: ecId.toString(),
     schemaId: schemaId.toString(),
     rootPermissionId: rootPermId.toString(),
     did,
@@ -380,11 +412,11 @@ export function savePermRootSetup(trId: number, schemaId: number, rootPermId: nu
 /**
  * Gets the PERM root setup
  */
-export function getPermRootSetup(): { trId: number; schemaId: number; rootPermId: number; did: string; effectiveFrom?: Date } | null {
+export function getPermRootSetup(): { ecId: number; schemaId: number; rootPermId: number; did: string; effectiveFrom?: Date } | null {
   const result = loadJourneyResult("perm-root-setup");
-  if (result?.trustRegistryId && result?.schemaId && result?.rootPermissionId && result?.did) {
+  if (result?.ecosystemId && result?.schemaId && result?.rootPermissionId && result?.did) {
     return {
-      trId: parseInt(result.trustRegistryId, 10),
+      ecId: parseInt(result.ecosystemId, 10),
       schemaId: parseInt(result.schemaId, 10),
       rootPermId: parseInt(result.rootPermissionId, 10),
       did: result.did,

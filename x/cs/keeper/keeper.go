@@ -21,10 +21,11 @@ type (
 
 		// the address capable of executing a MsgUpdateParams message. Typically, this
 		// should be the x/gov module account.
-		authority           string
-		bankKeeper          types.BankKeeper
-		trustRegistryKeeper types.TrustRegistryKeeper
-		delegationKeeper    types.DelegationKeeper
+		authority        string
+		bankKeeper       types.BankKeeper
+		ecosystemKeeper  types.EcosystemKeeper
+		coKeeper         types.CorporationKeeper
+		delegationKeeper types.DelegationKeeper
 
 		// State management
 		Schema collections.Schema
@@ -41,7 +42,8 @@ func NewKeeper(
 	logger log.Logger,
 	authority string,
 	bankKeeper types.BankKeeper,
-	trustRegistryKeeper types.TrustRegistryKeeper,
+	ecosystemKeeper types.EcosystemKeeper,
+	coKeeper types.CorporationKeeper,
 	delegationKeeper types.DelegationKeeper,
 ) Keeper {
 	if _, err := sdk.AccAddressFromBech32(authority); err != nil {
@@ -51,13 +53,14 @@ func NewKeeper(
 	sb := collections.NewSchemaBuilder(storeService)
 
 	k := Keeper{
-		cdc:                 cdc,
-		storeService:        storeService,
-		logger:              logger,
-		authority:           authority,
-		bankKeeper:          bankKeeper,
-		trustRegistryKeeper: trustRegistryKeeper,
-		delegationKeeper:    delegationKeeper,
+		cdc:              cdc,
+		storeService:     storeService,
+		logger:           logger,
+		authority:        authority,
+		bankKeeper:       bankKeeper,
+		ecosystemKeeper:  ecosystemKeeper,
+		coKeeper:         coKeeper,
+		delegationKeeper: delegationKeeper,
 
 		// Initialize collections
 		CredentialSchema: collections.NewMap(
@@ -139,11 +142,11 @@ func (k Keeper) GetNextID(ctx sdk.Context, entityType string) (uint64, error) {
 	return nextID, nil
 }
 
-func CreateMsgWithValidityPeriods(authority string, operator string, trID uint64, jsonSchema string, issuerGrantor, verifierGrantor, issuer, verifier, holder uint32, issuerMode, verifierMode, holderMode uint32, pricingAssetType uint32, pricingAsset string, digestAlgorithm string) *types.MsgCreateCredentialSchema {
+func CreateMsgWithValidityPeriods(authority string, operator string, ecosystemID uint64, jsonSchema string, issuerGrantor, verifierGrantor, issuer, verifier, holder uint32, issuerMode, verifierMode, holderMode uint32, pricingAssetType uint32, pricingAsset string, digestAlgorithm string) *types.MsgCreateCredentialSchema {
 	msg := &types.MsgCreateCredentialSchema{
 		Corporation:                             authority,
 		Operator:                                operator,
-		TrId:                                    trID,
+		EcosystemId:                             ecosystemID,
 		JsonSchema:                              jsonSchema,
 		IssuerGrantorValidationValidityPeriod:   &types.OptionalUInt32{Value: issuerGrantor},
 		VerifierGrantorValidationValidityPeriod: &types.OptionalUInt32{Value: verifierGrantor},

@@ -89,13 +89,9 @@ func (ms msgServer) UpdateCredentialSchema(goCtx context.Context, msg *types.Msg
 		return nil, fmt.Errorf("cannot update an archived credential schema")
 	}
 
-	// [MOD-CS-MSG-2-2-1] Check trust registry authority
-	tr, err := ms.trustRegistryKeeper.GetTrustRegistry(ctx, cs.TrId)
-	if err != nil {
-		return nil, fmt.Errorf("trust registry not found: %w", err)
-	}
-	if tr.Corporation != msg.Corporation {
-		return nil, fmt.Errorf("corporation does not match the trust registry corporation")
+	// [MOD-CS-MSG-2-2-1] Check ecosystem authority
+	if err := ms.checkSchemaOwnership(ctx, cs, msg.Corporation); err != nil {
+		return nil, err
 	}
 
 	// Validate validity periods against params
@@ -130,7 +126,7 @@ func (ms msgServer) UpdateCredentialSchema(goCtx context.Context, msg *types.Msg
 		sdk.NewEvent(
 			types.EventTypeUpdateCredentialSchema,
 			sdk.NewAttribute(types.AttributeKeyId, strconv.FormatUint(msg.Id, 10)),
-			sdk.NewAttribute(types.AttributeKeyTrId, strconv.FormatUint(cs.TrId, 10)),
+			sdk.NewAttribute(types.AttributeKeyEcosystemId, strconv.FormatUint(cs.EcosystemId, 10)),
 			sdk.NewAttribute(types.AttributeKeyCorporation, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
 			sdk.NewAttribute(types.AttributeKeyIssuerGrantorValidationValidityPeriod, strconv.FormatUint(uint64(cs.IssuerGrantorValidationValidityPeriod), 10)),
@@ -202,13 +198,9 @@ func (ms msgServer) ArchiveCredentialSchema(goCtx context.Context, msg *types.Ms
 		return nil, fmt.Errorf("credential schema not found: %w", err)
 	}
 
-	// [MOD-CS-MSG-3-2-1] Check trust registry authority
-	tr, err := ms.trustRegistryKeeper.GetTrustRegistry(ctx, cs.TrId)
-	if err != nil {
-		return nil, fmt.Errorf("trust registry not found: %w", err)
-	}
-	if tr.Corporation != msg.Corporation {
-		return nil, fmt.Errorf("corporation does not match the trust registry corporation")
+	// [MOD-CS-MSG-3-2-1] Check ecosystem authority
+	if err := ms.checkSchemaOwnership(ctx, cs, msg.Corporation); err != nil {
+		return nil, err
 	}
 
 	// [MOD-CS-MSG-3] Spec v4 draft 13: archive is a bidirectional toggle.
@@ -238,7 +230,7 @@ func (ms msgServer) ArchiveCredentialSchema(goCtx context.Context, msg *types.Ms
 		sdk.NewEvent(
 			types.EventTypeArchiveCredentialSchema,
 			sdk.NewAttribute(types.AttributeKeyId, strconv.FormatUint(msg.Id, 10)),
-			sdk.NewAttribute(types.AttributeKeyTrId, strconv.FormatUint(cs.TrId, 10)),
+			sdk.NewAttribute(types.AttributeKeyEcosystemId, strconv.FormatUint(cs.EcosystemId, 10)),
 			sdk.NewAttribute(types.AttributeKeyCorporation, msg.Corporation),
 			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
 			sdk.NewAttribute(types.AttributeKeyArchiveStatus, archiveStatus),

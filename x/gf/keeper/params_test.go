@@ -41,8 +41,8 @@ func newFreshKeeperWithoutParams(t testing.TB) (gfkeeper.Keeper, sdk.Context) {
 		log.NewNopLogger(),
 		authority.String(),
 		mockDelegation{},
-		&mockEcosystem{},
 	)
+	k.SetEcosystemKeeper(&mockEcosystem{})
 	k.SetCorporationKeeper(&mockCorporation{})
 	ctx := sdk.NewContext(stateStore, cmtproto.Header{}, false, log.NewNopLogger())
 	return k, ctx

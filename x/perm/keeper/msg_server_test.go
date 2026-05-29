@@ -18,13 +18,13 @@ import (
 	"github.com/verana-labs/verana/x/perm/types"
 )
 
-func setupMsgServer(t testing.TB) (keeper.Keeper, types.MsgServer, *keepertest.MockCredentialSchemaKeeper, *keepertest.MockTrustRegistryKeeper, context.Context) {
-	k, csKeeper, trkKeeper, ctx, _ := keepertest.PermissionKeeper(t)
+func setupMsgServer(t testing.TB) (keeper.Keeper, types.MsgServer, *keepertest.MockCredentialSchemaKeeper, *keepertest.MockPermEcosystemKeeper, context.Context) {
+	k, csKeeper, trkKeeper, _, ctx, _ := keepertest.PermissionKeeper(t)
 	return k, keeper.NewMsgServerImpl(k), csKeeper, trkKeeper, ctx
 }
 
-func setupMsgServerWithDelegation(t testing.TB) (keeper.Keeper, types.MsgServer, *keepertest.MockCredentialSchemaKeeper, *keepertest.MockTrustRegistryKeeper, context.Context, *keepertest.MockDelegationKeeper) {
-	k, csKeeper, trkKeeper, ctx, delKeeper := keepertest.PermissionKeeper(t)
+func setupMsgServerWithDelegation(t testing.TB) (keeper.Keeper, types.MsgServer, *keepertest.MockCredentialSchemaKeeper, *keepertest.MockPermEcosystemKeeper, context.Context, *keepertest.MockDelegationKeeper) {
+	k, csKeeper, trkKeeper, _, ctx, delKeeper := keepertest.PermissionKeeper(t)
 	return k, keeper.NewMsgServerImpl(k), csKeeper, trkKeeper, ctx, delKeeper
 }
 
@@ -52,7 +52,7 @@ func TestStartPermissionVP(t *testing.T) {
 	validDid := "did:example:123456789abcdefghi"
 
 	// First create a trust registry for our credential schema
-	trID := trkKeeper.CreateMockTrustRegistry(creator, validDid)
+	trID := trkKeeper.CreateMockEcosystem(creator, validDid)
 
 	// Create mock credential schema with specific perm management modes
 	csKeeper.UpdateMockCredentialSchema(1, trID,
@@ -2270,7 +2270,7 @@ func TestMsgServerCreateRootPermission(t *testing.T) {
 	operator := authority
 	validDid := "did:example:123456789abcdefghi"
 
-	trID := trkKeeper.CreateMockTrustRegistry(authority, validDid)
+	trID := trkKeeper.CreateMockEcosystem(authority, validDid)
 	mockCsKeeper.UpdateMockCredentialSchema(1, trID,
 		cstypes.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS,
 		cstypes.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS)
@@ -3659,7 +3659,7 @@ func TestDiscountApplicationInFeeCalculation(t *testing.T) {
 
 // TestGetPermissionByID tests the GetPermissionByID function
 func TestGetPermissionByID(t *testing.T) {
-	k, _, _, ctx, _ := keepertest.PermissionKeeper(t)
+	k, _, _, _, ctx, _ := keepertest.PermissionKeeper(t)
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
 	creator := sdk.AccAddress([]byte("test_creator")).String()
@@ -3693,7 +3693,7 @@ func TestGetPermissionByID(t *testing.T) {
 
 // TestCreateAndUpdatePermission tests the CreatePermission and UpdatePermission functions
 func TestCreateAndUpdatePermission(t *testing.T) {
-	k, _, _, ctx, _ := keepertest.PermissionKeeper(t)
+	k, _, _, _, ctx, _ := keepertest.PermissionKeeper(t)
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
 	creator := sdk.AccAddress([]byte("test_creator")).String()
@@ -3747,7 +3747,7 @@ func TestQueryPermissions(t *testing.T) {
 	validDid := "did:example:123456789abcdefghi"
 
 	// Create a trust registry
-	trID := trkKeeper.CreateMockTrustRegistry(creator, validDid)
+	trID := trkKeeper.CreateMockEcosystem(creator, validDid)
 
 	// Create mock credential schema
 	csKeeper.UpdateMockCredentialSchema(1, trID,
@@ -3915,7 +3915,7 @@ func TestSlashPermissionTrustDeposit(t *testing.T) {
 
 	// Create trust registry with trControllerAddr as controller
 	validDid := "did:example:123456789abcdefghi"
-	trID := trkKeeper.CreateMockTrustRegistry(trControllerAddr, validDid)
+	trID := trkKeeper.CreateMockEcosystem(trControllerAddr, validDid)
 
 	// Create mock credential schema linked to the TR
 	csKeeper.UpdateMockCredentialSchema(1, trID,
@@ -4377,7 +4377,7 @@ func TestCreatePermission(t *testing.T) {
 	validDid := "did:example:123456789abcdefghi"
 	now := sdkCtx.BlockTime()
 
-	trID := trkKeeper.CreateMockTrustRegistry(authority, validDid)
+	trID := trkKeeper.CreateMockEcosystem(authority, validDid)
 	mockCsKeeper.UpdateMockCredentialSchema(1, trID,
 		cstypes.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_OPEN,
 		cstypes.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_OPEN)
@@ -4675,7 +4675,7 @@ func TestCreateRootPermission(t *testing.T) {
 	otherAddr := sdk.AccAddress([]byte("other_address_______")).String()
 
 	// Create trust registry where authority is the controller
-	trID := trkKeeper.CreateMockTrustRegistry(authority, validDid)
+	trID := trkKeeper.CreateMockEcosystem(authority, validDid)
 
 	// Create credential schema linked to the trust registry
 	csKeeper.UpdateMockCredentialSchema(1, trID,
@@ -4761,7 +4761,7 @@ func TestCreateRootPermission(t *testing.T) {
 				EffectiveUntil: &farFutureTime,
 			},
 			expectErr: true,
-			errMsg:    "corporation does not match the trust registry corporation",
+			errMsg:    "does not control",
 		},
 		// === Happy path [MOD-PERM-MSG-7-3] ===
 		{
@@ -4841,7 +4841,7 @@ func TestCreateRootPermission_OverlapChecks(t *testing.T) {
 	authority := sdk.AccAddress([]byte("test_authority______")).String()
 	operator := authority
 
-	trID := trkKeeper.CreateMockTrustRegistry(authority, validDid)
+	trID := trkKeeper.CreateMockEcosystem(authority, validDid)
 	csKeeper.UpdateMockCredentialSchema(1, trID,
 		cstypes.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS,
 		cstypes.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS)
@@ -5011,7 +5011,7 @@ func TestCreateRootPermission_AuthzCheck(t *testing.T) {
 	authority := sdk.AccAddress([]byte("test_authority______")).String()
 	operator := authority
 
-	trID := trkKeeper.CreateMockTrustRegistry(authority, validDid)
+	trID := trkKeeper.CreateMockEcosystem(authority, validDid)
 	csKeeper.UpdateMockCredentialSchema(1, trID,
 		cstypes.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS,
 		cstypes.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS)
@@ -5069,7 +5069,7 @@ func TestStartPermissionVP_ValidatorMustBeActive(t *testing.T) {
 	validDid := "did:example:123456789abcdefghi"
 
 	// Create trust registry
-	trID := trkKeeper.CreateMockTrustRegistry(creator, validDid)
+	trID := trkKeeper.CreateMockEcosystem(creator, validDid)
 
 	// Create mock credential schema
 	csKeeper.UpdateMockCredentialSchema(1, trID,
@@ -5361,7 +5361,7 @@ func TestStartPermissionVP_OverlapCheck(t *testing.T) {
 	creator := sdk.AccAddress([]byte("test_creator")).String()
 	validDid := "did:example:123456789abcdefghi"
 
-	trID := trkKeeper.CreateMockTrustRegistry(creator, validDid)
+	trID := trkKeeper.CreateMockEcosystem(creator, validDid)
 	csKeeper.UpdateMockCredentialSchema(1, trID,
 		cstypes.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS,
 		cstypes.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS)
@@ -5468,7 +5468,7 @@ func TestStartPermissionVP_AuthzCheck(t *testing.T) {
 	creator := sdk.AccAddress([]byte("test_creator")).String()
 	validDid := "did:example:123456789abcdefghi"
 
-	trID := trkKeeper.CreateMockTrustRegistry(creator, validDid)
+	trID := trkKeeper.CreateMockEcosystem(creator, validDid)
 	csKeeper.UpdateMockCredentialSchema(1, trID,
 		cstypes.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS,
 		cstypes.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS)
@@ -5535,7 +5535,7 @@ func TestStartPermissionVP_VsOperatorAndFields(t *testing.T) {
 	vsOperator := sdk.AccAddress([]byte("vs_operator_acct")).String()
 	validDid := "did:example:123456789abcdefghi"
 
-	trID := trkKeeper.CreateMockTrustRegistry(creator, validDid)
+	trID := trkKeeper.CreateMockEcosystem(creator, validDid)
 	csKeeper.UpdateMockCredentialSchema(1, trID,
 		cstypes.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS,
 		cstypes.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS)

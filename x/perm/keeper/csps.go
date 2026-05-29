@@ -222,7 +222,7 @@ func (ms msgServer) validateCreateOrUpdatePermissionSessionFees(ctx sdk.Context,
 	userAgentRewardRate := ms.trustDeposit.GetUserAgentRewardRate(ctx)
 	walletUserAgentRewardRate := ms.trustDeposit.GetWalletUserAgentRewardRate(ctx)
 	trustDepositRate := ms.trustDeposit.GetTrustDepositRate(ctx)
-	trustUnitPrice := ms.trustRegistryKeeper.GetTrustUnitPrice(ctx)
+	trustUnitPrice := ms.ecosystemKeeper.GetTrustUnitPrice(ctx)
 
 	// Calculate trust_fees = beneficiary_fees * (1 + user_agent_reward_rate + wallet_user_agent_reward_rate + trust_deposit_rate) * trust_unit_price
 	//
@@ -262,7 +262,7 @@ func (ms msgServer) validateCreateOrUpdatePermissionSessionFees(ctx sdk.Context,
 // [MOD-PERM-MSG-10-4] Create or Update Permission Session execution
 func (ms msgServer) executeCreateOrUpdatePermissionSession(ctx sdk.Context, msg *types.MsgCreateOrUpdatePermissionSession, foundPermSet []types.Permission, beneficiaryFees, trustFees uint64, now time.Time) error {
 	isVerification := msg.VerifierPermId != 0
-	trustUnitPrice := ms.trustRegistryKeeper.GetTrustUnitPrice(ctx)
+	trustUnitPrice := ms.ecosystemKeeper.GetTrustUnitPrice(ctx)
 	trustDepositRate := ms.trustDeposit.GetTrustDepositRate(ctx)
 	userAgentRewardRate := ms.trustDeposit.GetUserAgentRewardRate(ctx)
 	walletUserAgentRewardRate := ms.trustDeposit.GetWalletUserAgentRewardRate(ctx)

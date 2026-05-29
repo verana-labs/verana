@@ -96,7 +96,8 @@ message MsgCreateCorporationResponse {
 // MsgUpdateCorporation — MOD-CO-MSG-2. Rotates the DID of an existing
 // Corporation. `language` is immutable and cannot be updated.
 message MsgUpdateCorporation {
-  option (cosmos.msg.v1.signer) = "corporation";
+  // Only `operator` signs — `corporation` is the addressed subject resolved
+  // via AUTHZ-CHECK-5 (matches MOD-EC / MOD-GF convention).
   option (cosmos.msg.v1.signer) = "operator";
   option (amino.name) = "verana/x/co/MsgUpdateCorporation";
 

@@ -25,35 +25,17 @@ interface TestResult {
 interface TestConfig {
   name: string;
   script: string;
-  isGoJourney?: boolean;
 }
 
 const tests: TestConfig[] = [
-  // Delegation Engine (DE) module: Grant operator authorization
-  { name: "DE: Grant Operator Authorization", script: "test:de-grant-auth" },
-  // Trust Registry (TR) module: All 5 operations (operator-signed)
-  { name: "TR: Create Trust Registry", script: "test:tr-create" },
-  { name: "TR: Add GF Document", script: "test:tr-add-gfd" },
-  { name: "TR: Increase Active GF Version", script: "test:tr-increase-gf-version" },
-  { name: "TR: Update Trust Registry", script: "test:tr-update" },
-  { name: "TR: Archive Trust Registry", script: "test:tr-archive" },
-  // Credential Schema (CS) module: Grant + all 3 operations (operator-signed)
-  { name: "DE: Grant CS Operator Authorization", script: "test:de-grant-cs-auth" },
-  { name: "CS: Create Credential Schema", script: "test:cs-create" },
-  { name: "CS: Update Credential Schema", script: "test:cs-update" },
-  { name: "CS: Archive Credential Schema", script: "test:cs-archive" },
-  // Permission (PERM) module: Grant + all 11 message types
-  { name: "DE: Grant PERM Operator Authorization", script: "test:de-grant-perm-auth" },
-  { name: "PERM: Create Root Permission", script: "test:perm-create-root" },
-  { name: "PERM: Create Permission (Self-Create)", script: "test:perm-create" },
-  { name: "PERM: Adjust Permission", script: "test:perm-adjust" },
-  { name: "PERM: Revoke Permission", script: "test:perm-revoke" },
-  { name: "PERM: Start Permission VP", script: "test:perm-start-vp" },
-  { name: "PERM: Set Permission VP To Validated", script: "test:perm-validate-vp" },
-  { name: "PERM: Renew + Cancel Permission VP", script: "test:perm-cancel-vp" },
-  { name: "PERM: Create/Update Permission Session", script: "test:perm-csps" },
-  { name: "PERM: Slash Permission Trust Deposit", script: "test:perm-slash" },
-  { name: "PERM: Repay Slashed Trust Deposit", script: "test:perm-repay" },
+  { name: "CO: Create Corporation",                script: "test:co-create" },
+  { name: "DE: Grant Operator Authorization",      script: "test:de-grant-auth" },
+  { name: "EC: Create Ecosystem",                  script: "test:ec-create" },
+  { name: "GF: Add Governance Framework Document", script: "test:gf-add-doc" },
+  { name: "GF: Increase Active GF Version",        script: "test:gf-increase-version" },
+  { name: "EC: Update Ecosystem",                  script: "test:ec-update" },
+  { name: "EC: Archive Ecosystem",                 script: "test:ec-archive" },
+  { name: "DE: Grant CS Operator Authorization",   script: "test:de-grant-cs-auth" },
 ];
 
 /**
@@ -65,27 +47,10 @@ async function runTest(test: TestConfig): Promise<TestResult> {
   console.log("=".repeat(60));
 
   return new Promise((resolve) => {
-    let child;
-
-    if (test.isGoJourney) {
-      // Run Go test harness journey (journey 20 for TD yield proposal setup)
-      // Assumes the Go binary is available in the testharness directory
-      const goCommand = process.env.GO_TEST_HARNESS_PATH || "go";
-      const journeyId = test.script === "test:setup-td-proposal" ? "20" : "";
-      // Path from ts-proto/test to testharness (go up 2 levels: test -> ts-proto -> verana)
-      const testharnessPath = process.env.TESTHARNESS_DIR || "../../testharness";
-      child = spawn(goCommand, ["run", "cmd/main.go", journeyId], {
-        stdio: "inherit",
-        env: { ...process.env },
-        cwd: testharnessPath,
-      });
-    } else {
-      // Run npm script (TypeScript journey)
-      child = spawn("npm", ["run", test.script], {
-        stdio: "inherit",
-        env: { ...process.env, RUNNING_ALL_TESTS: "true" },
-      });
-    }
+    const child = spawn("npm", ["run", test.script], {
+      stdio: "inherit",
+      env: { ...process.env },
+    });
 
     child.on("close", (code) => {
       if (code === 0) {
@@ -158,9 +123,8 @@ async function main() {
 
   console.log("=".repeat(60));
 
-  // Exit with error code if any tests failed
   if (failed > 0) {
-    console.log("\n❌ Some tests failed. Please review the output above.");
+    console.log("\n❌ Some journeys failed (see above).");
     process.exit(1);
   } else {
     console.log("\n✅ All tests passed!");

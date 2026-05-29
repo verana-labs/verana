@@ -42,25 +42,24 @@ func RunPermissionCreateRootJourney(ctx context.Context, client cosmosclient.Cli
 	fmt.Println("\n=== PREREQUISITE 1: Create Trust Registry (controller = group policy) ===")
 
 	// Grant TR create authorization to the operator
-	fmt.Println("\n--- Prerequisite 1a: Grant operator auth for CreateTrustRegistry ---")
+	fmt.Println("\n--- Prerequisite 1a: Grant operator auth for CreateEcosystem ---")
 	err := lib.GrantOperatorAuthorizationViaGroup(
 		client, ctx, adminAccount, member1Account,
 		policyAddr, operatorAddr, operatorAddr,
-		[]string{"/verana.tr.v1.MsgCreateTrustRegistry"},
+		[]string{"/verana.ec.v1.MsgCreateEcosystem"},
 	)
 	if err != nil {
 		return fmt.Errorf("prerequisite 1a failed: %w", err)
 	}
-	fmt.Println("OK Prerequisite 1a: Granted CreateTrustRegistry authorization")
+	fmt.Println("OK Prerequisite 1a: Granted CreateEcosystem authorization")
 	waitForTx("grant TR create auth")
 
 	// Create TR with controller = policyAddr
 	fmt.Println("\n--- Prerequisite 1b: Create Trust Registry with controller = group policy ---")
 	did := lib.GenerateUniqueDID(client, ctx)
-	trIDStr, err := lib.CreateTrustRegistryWithAuthority(
+	trIDStr, err := lib.CreateEcosystemWithAuthority(
 		client, ctx, operatorAccount, policyAddr,
 		did,
-		"http://perm304-test-aka.com",
 		"https://perm304-test.com/governance-framework.pdf",
 		"sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
 		"en",
@@ -207,7 +206,7 @@ func RunPermissionCreateRootJourney(ctx context.Context, client cosmosclient.Cli
 
 	// Save results
 	result := lib.JourneyResult{
-		TrustRegistryID: trIDStr,
+		EcosystemID: trIDStr,
 		SchemaID:        csIDStr,
 		DID:             rootPermDID,
 		PermissionID:    strconv.FormatUint(permID, 10),

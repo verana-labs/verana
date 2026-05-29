@@ -33,7 +33,7 @@ func TestQueries(t *testing.T) {
 	// Create test schemas
 	schema1 := types.CredentialSchema{
 		Id:                                      1,
-		TrId:                                    1,
+		EcosystemId:                                    1,
 		Created:                                 time.Now().Add(-24 * time.Hour),
 		Modified:                                time.Now().Add(-24 * time.Hour),
 		JsonSchema:                              validJsonSchema,
@@ -49,7 +49,7 @@ func TestQueries(t *testing.T) {
 
 	schema2 := types.CredentialSchema{
 		Id:                                      2,
-		TrId:                                    1,
+		EcosystemId:                                    1,
 		Created:                                 time.Now(),
 		Modified:                                time.Now(),
 		JsonSchema:                              validJsonSchema,
@@ -84,7 +84,7 @@ func TestQueries(t *testing.T) {
 			{
 				name: "Filter By Trust Registry",
 				request: &types.QueryListCredentialSchemasRequest{
-					TrId:            1,
+					EcosystemId:            1,
 					ResponseMaxSize: 64,
 				},
 				expectedCount: 2,

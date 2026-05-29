@@ -7,7 +7,7 @@ import (
 
 	"github.com/cosmos/gogoproto/proto"
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
-	"github.com/verana-labs/verana/x/tr/types"
+	"github.com/verana-labs/verana/x/ec/types"
 )
 
 // PrettyJSON formats a proto message as indented JSON
@@ -25,8 +25,8 @@ func PrettyJSON(client cosmosclient.Client, protoObj proto.Message) string {
 }
 
 // IsDidUsed checks if a DID is already used in the registry
-func IsDidUsed(listRegs *types.QueryListTrustRegistriesResponse, did string) bool {
-	for _, reg := range listRegs.TrustRegistries {
+func IsDidUsed(listRegs *types.QueryListEcosystemsResponse, did string) bool {
+	for _, reg := range listRegs.Ecosystems {
 		if reg.Did == did {
 			return true
 		}

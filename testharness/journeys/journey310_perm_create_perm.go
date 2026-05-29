@@ -35,7 +35,7 @@ func RunPermissionCreatePermJourney(ctx context.Context, client cosmosclient.Cli
 	adminAccount := lib.GetAccount(client, permGroupAdminName)
 	member1Account := lib.GetAccount(client, permGroupMember1Name)
 
-	trID, _ := strconv.ParseUint(setup304.TrustRegistryID, 10, 64)
+	trID, _ := strconv.ParseUint(setup304.EcosystemID, 10, 64)
 
 	fmt.Printf("  Group Policy: %s\n", policyAddr)
 	fmt.Printf("  Operator:     %s\n", operatorAddr)
@@ -60,7 +60,7 @@ func RunPermissionCreatePermJourney(ctx context.Context, client cosmosclient.Cli
 
 	// Create a new CS with OPEN mode for both issuer and verifier
 	fmt.Println("\n--- Prerequisite 2: Create OPEN-mode Credential Schema ---")
-	schemaData := lib.GenerateSimpleSchema(setup304.TrustRegistryID)
+	schemaData := lib.GenerateSimpleSchema(setup304.EcosystemID)
 	csIDStr, err := lib.CreateCredentialSchemaWithAuthority(
 		client, ctx, operatorAccount, policyAddr,
 		trID, schemaData,
@@ -254,7 +254,7 @@ func RunPermissionCreatePermJourney(ctx context.Context, client cosmosclient.Cli
 
 	// Save results
 	result := lib.JourneyResult{
-		TrustRegistryID: setup304.TrustRegistryID,
+		EcosystemID: setup304.EcosystemID,
 		SchemaID:        csIDStr,
 		DID:             rootPermDID,
 		PermissionID:    strconv.FormatUint(rootPermID, 10),

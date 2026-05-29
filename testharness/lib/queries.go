@@ -9,22 +9,60 @@ import (
 
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
 
+	cotypes "github.com/verana-labs/verana/x/co/types"
 	cschema "github.com/verana-labs/verana/x/cs/types"
-	trtypes "github.com/verana-labs/verana/x/tr/types"
+	ectypes "github.com/verana-labs/verana/x/ec/types"
+	gftypes "github.com/verana-labs/verana/x/gf/types"
 )
 
-// QueryTrustRegistry gets a trust registry by ID
-func QueryTrustRegistry(client cosmosclient.Client, ctx context.Context, trID uint64) (*trtypes.QueryGetTrustRegistryResponse, error) {
-	queryClient := trtypes.NewQueryClient(client.Context())
-	return queryClient.GetTrustRegistry(ctx, &trtypes.QueryGetTrustRegistryRequest{
-		TrId: trID,
+// QueryEcosystem gets an ecosystem by ID
+func QueryEcosystem(client cosmosclient.Client, ctx context.Context, trID uint64) (*ectypes.QueryGetEcosystemResponse, error) {
+	queryClient := ectypes.NewQueryClient(client.Context())
+	return queryClient.GetEcosystem(ctx, &ectypes.QueryGetEcosystemRequest{
+		Id: trID,
 	})
 }
 
-// ListTrustRegistries lists all trust registries
-func ListTrustRegistries(client cosmosclient.Client, ctx context.Context, responseMaxSize uint32) (*trtypes.QueryListTrustRegistriesResponse, error) {
-	queryClient := trtypes.NewQueryClient(client.Context())
-	return queryClient.ListTrustRegistries(ctx, &trtypes.QueryListTrustRegistriesRequest{
+// ListTrustRegistries lists all ecosystems (kept for backward-compat; use ListEcosystems for new code).
+func ListTrustRegistries(client cosmosclient.Client, ctx context.Context, responseMaxSize uint32) (*ectypes.QueryListEcosystemsResponse, error) {
+	return ListEcosystems(client, ctx, 0, responseMaxSize)
+}
+
+// ListEcosystems lists ecosystems, optionally filtered by corporation.
+func ListEcosystems(client cosmosclient.Client, ctx context.Context, corporationID uint64, responseMaxSize uint32) (*ectypes.QueryListEcosystemsResponse, error) {
+	queryClient := ectypes.NewQueryClient(client.Context())
+	return queryClient.ListEcosystems(ctx, &ectypes.QueryListEcosystemsRequest{
+		CorporationId:   corporationID,
+		ResponseMaxSize: responseMaxSize,
+	})
+}
+
+// QueryCorporation fetches a corporation by its id.
+func QueryCorporation(client cosmosclient.Client, ctx context.Context, corpID uint64) (*cotypes.QueryGetCorporationResponse, error) {
+	qc := cotypes.NewQueryClient(client.Context())
+	return qc.GetCorporation(ctx, &cotypes.QueryGetCorporationRequest{CorporationId: corpID})
+}
+
+// ListCorporations lists corporations up to responseMaxSize results.
+func ListCorporations(client cosmosclient.Client, ctx context.Context, responseMaxSize uint32) (*cotypes.QueryListCorporationsResponse, error) {
+	qc := cotypes.NewQueryClient(client.Context())
+	return qc.ListCorporations(ctx, &cotypes.QueryListCorporationsRequest{ResponseMaxSize: responseMaxSize})
+}
+
+// QueryGFV fetches a GovernanceFrameworkVersion by its id.
+func QueryGFV(client cosmosclient.Client, ctx context.Context, gfvID uint64) (*gftypes.QueryGetGovernanceFrameworkVersionResponse, error) {
+	qc := gftypes.NewQueryClient(client.Context())
+	return qc.GetGovernanceFrameworkVersion(ctx, &gftypes.QueryGetGovernanceFrameworkVersionRequest{Id: gfvID})
+}
+
+// ListGFVs lists GovernanceFrameworkVersions for a corporation or ecosystem.
+// Exactly one of corporationID / ecosystemID must be non-zero.
+func ListGFVs(client cosmosclient.Client, ctx context.Context, corporationID, ecosystemID uint64, activeOnly bool, responseMaxSize uint32) (*gftypes.QueryListGovernanceFrameworkVersionsResponse, error) {
+	qc := gftypes.NewQueryClient(client.Context())
+	return qc.ListGovernanceFrameworkVersions(ctx, &gftypes.QueryListGovernanceFrameworkVersionsRequest{
+		CorporationId:   corporationID,
+		EcosystemId:     ecosystemID,
+		ActiveOnly:      activeOnly,
 		ResponseMaxSize: responseMaxSize,
 	})
 }
@@ -64,23 +102,23 @@ func ListPermissions(client cosmosclient.Client, ctx context.Context) ([]permtyp
 	return resp.Permissions, nil
 }
 
-// VerifyTrustRegistry verifies a trust registry exists with expected properties
-func VerifyTrustRegistry(client cosmosclient.Client, ctx context.Context, trID uint64, expectedDID string) bool {
-	resp, err := QueryTrustRegistry(client, ctx, trID)
+// VerifyEcosystem verifies an ecosystem exists with expected properties
+func VerifyEcosystem(client cosmosclient.Client, ctx context.Context, trID uint64, expectedDID string) bool {
+	resp, err := QueryEcosystem(client, ctx, trID)
 	if err != nil {
-		fmt.Printf("❌ Trust Registry verification failed: %v\n", err)
+		fmt.Printf("❌ Ecosystem verification failed: %v\n", err)
 		return false
 	}
 
 	// Verify DID matches what we expect
-	if resp.TrustRegistry.Did != expectedDID {
-		fmt.Printf("❌ Trust Registry verification failed: Expected DID %s, got %s\n",
-			expectedDID, resp.TrustRegistry.Did)
+	if resp.Ecosystem.Did != expectedDID {
+		fmt.Printf("❌ Ecosystem verification failed: Expected DID %s, got %s\n",
+			expectedDID, resp.Ecosystem.Did)
 		return false
 	}
 
-	fmt.Printf("✅ Verified Trust Registry ID %d exists with expected DID %s\n",
-		trID, resp.TrustRegistry.Did)
+	fmt.Printf("✅ Verified Ecosystem ID %d exists with expected DID %s\n",
+		trID, resp.Ecosystem.Did)
 	return true
 }
 
@@ -92,15 +130,15 @@ func VerifyCredentialSchema(client cosmosclient.Client, ctx context.Context, csI
 		return false
 	}
 
-	// Verify Trust Registry ID matches what we expect
-	if resp.Schema.TrId != expectedTrID {
-		fmt.Printf("❌ Credential Schema verification failed: Expected Trust Registry ID %d, got %d\n",
-			expectedTrID, resp.Schema.TrId)
+	// Verify Ecosystem ID matches what we expect
+	if resp.Schema.EcosystemId != expectedTrID {
+		fmt.Printf("❌ Credential Schema verification failed: Expected Ecosystem ID %d, got %d\n",
+			expectedTrID, resp.Schema.EcosystemId)
 		return false
 	}
 
-	fmt.Printf("✅ Verified Credential Schema ID %d exists with expected Trust Registry ID %d\n",
-		csID, resp.Schema.TrId)
+	fmt.Printf("✅ Verified Credential Schema ID %d exists with expected Ecosystem ID %d\n",
+		csID, resp.Schema.EcosystemId)
 	return true
 }
 
@@ -130,4 +168,3 @@ func VerifyPermission(client cosmosclient.Client, ctx context.Context, permID ui
 		permID, resp.Permission.SchemaId, permType)
 	return true
 }
-

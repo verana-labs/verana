@@ -39,7 +39,7 @@ func (k Keeper) resolveSubject(ctx context.Context, signingCorp string, ecosyste
 	}
 
 	if ecosystemID != 0 {
-		eco, ok := k.ecosystemKeeper.GetEcosystemView(ctx, ecosystemID)
+		eco, ok := k.ecosystemKeeper().GetEcosystemView(ctx, ecosystemID)
 		if !ok {
 			return resolvedSubject{}, cerrors.Wrapf(types.ErrSubjectNotFound, "ecosystem %d", ecosystemID)
 		}

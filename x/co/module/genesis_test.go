@@ -60,7 +60,7 @@ func TestAppModule_InitExportGenesis(t *testing.T) {
 		Logger:           log.NewNopLogger(),
 		DelegationKeeper: stubDelegation{},
 		GroupKeeper:      groupkeeper.Keeper{},
-		GFKeeper:         gfkeeper.NewKeeper(cdc, runtime.NewKVStoreService(gfStoreKey), log.NewNopLogger(), authority, stubGFDelegation{}, stubEcosystem{}),
+		GFKeeper:         gfkeeper.NewKeeper(cdc, runtime.NewKVStoreService(gfStoreKey), log.NewNopLogger(), authority, stubGFDelegation{}),
 	}
 	out := co.ProvideModule(in)
 	require.NotNil(t, out.Module)
@@ -87,7 +87,7 @@ func TestProvideModule_CustomAuthority(t *testing.T) {
 	cdc := codec.NewProtoCodec(codectypes.NewInterfaceRegistry())
 
 	authority := authtypes.NewModuleAddress(govtypes.ModuleName).String()
-	gfk := gfkeeper.NewKeeper(cdc, runtime.NewKVStoreService(gfStoreKey), log.NewNopLogger(), authority, stubGFDelegation{}, stubEcosystem{})
+	gfk := gfkeeper.NewKeeper(cdc, runtime.NewKVStoreService(gfStoreKey), log.NewNopLogger(), authority, stubGFDelegation{})
 
 	custom := authtypes.NewModuleAddress("custom").String()
 	out := co.ProvideModule(co.ModuleInputs{

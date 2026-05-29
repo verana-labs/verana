@@ -1,19 +1,27 @@
 /**
- * Journey: DE Grant Operator Authorization
+ * Journey: DE Grant Operator Authorization (EC + GF message types)
  *
- * This script grants operator authorization from an authority account to an
- * operator account for all 5 TR message types. The operator can then sign
- * TR messages on behalf of the authority.
+ * Grants operator authorization from the active Corporation (created by
+ * coCreateCorporation) to an operator account, covering all EC and GF
+ * message types. The operator can then sign EC/GF messages on behalf of
+ * the Corporation.
  *
- * Key insight: When operator is empty in MsgGrantOperatorAuthorization,
- * the AUTHZ-CHECK is skipped — the authority acts alone and signs directly.
+ * Flow: x/group proposal submitted by the sole group member (index 10),
+ * who votes YES with EXEC_TRY — proposal auto-executes since threshold=1.
+ *
+ * Signing: all messages use SIGN_MODE_LEGACY_AMINO_JSON. Group coordination
+ * (MsgSubmitProposal, MsgVote) amino converters are implemented in
+ * ts-proto/src/amino-converter/group.ts with recursive Any transcoding.
+ * MsgGrantOperatorAuthorization is the inner executed message and is
+ * amino-encoded as part of the proposal messages array.
+ *
+ * Requires: test:co-create must be run first.
  *
  * Usage:
  *   npm run test:de-grant-auth
  */
 
 import {
-  createWallet,
   createAccountFromMnemonic,
   createSigningClient,
   createQueryClient,
@@ -25,194 +33,222 @@ import {
 } from "../helpers/client";
 import { typeUrls } from "../helpers/registry";
 import { MsgGrantOperatorAuthorization } from "../../../src/codec/verana/de/v1/tx";
-import { saveTrAuthzSetup, saveActiveTR } from "../helpers/journeyResults";
+import { MsgSubmitProposal, MsgVote, Exec } from "cosmjs-types/cosmos/group/v1/tx";
+import { VoteOption } from "cosmjs-types/cosmos/group/v1/types";
+import { saveEcAuthzSetup, getActiveCorporation } from "../helpers/journeyResults";
 
-// Cooluser mnemonic (pre-funded in local chains)
 const COOLUSER_MNEMONIC =
   (process.env.MNEMONIC && process.env.MNEMONIC.trim()) ||
   "pink glory help gown abstract eight nice crazy forward ketchup skill cheese";
 
-// Derivation path indexes for authority and operator
-const AUTHORITY_INDEX = 10;
+// Signer (index 10) is the sole group member and acts as proposer + voter.
+// Operator (index 11) is the grantee.
+const SIGNER_INDEX = 10;
 const OPERATOR_INDEX = 11;
 
 async function main() {
   console.log("=".repeat(60));
-  console.log("Journey: DE Grant Operator Authorization (TypeScript Client)");
+  console.log("Journey: DE Grant Operator Authorization (EC + GF)");
   console.log("=".repeat(60));
   console.log();
 
-  // Step 1: Create authority and operator wallets
-  console.log("Step 1: Creating authority and operator wallets...");
-  const authorityWallet = await createAccountFromMnemonic(COOLUSER_MNEMONIC, AUTHORITY_INDEX);
-  const operatorWallet = await createAccountFromMnemonic(COOLUSER_MNEMONIC, OPERATOR_INDEX);
-  const cooluserWallet = await createWallet(COOLUSER_MNEMONIC);
-
-  const authorityAccount = await getAccountInfo(authorityWallet);
-  const operatorAccount = await getAccountInfo(operatorWallet);
-  const cooluserAccount = await getAccountInfo(cooluserWallet);
-
-  console.log(`  Cooluser:  ${cooluserAccount.address}`);
-  console.log(`  Authority: ${authorityAccount.address} (derivation index ${AUTHORITY_INDEX})`);
-  console.log(`  Operator:  ${operatorAccount.address} (derivation index ${OPERATOR_INDEX})`);
-  console.log();
-
-  // Step 2: Fund authority and operator from cooluser
-  console.log("Step 2: Funding authority and operator accounts...");
-  const fundAmount = "50000000uvna"; // 50 VNA
-
-  const fundAuthResult = await fundAccount(
-    COOLUSER_MNEMONIC,
-    cooluserAccount.address,
-    authorityAccount.address,
-    fundAmount,
-  );
-  if (fundAuthResult.code !== 0) {
-    console.log(`  ❌ Failed to fund authority: ${fundAuthResult.rawLog}`);
+  // Step 1: Load active Corporation policy_address (the v4-rc2 authority).
+  console.log("Step 1: Loading active Corporation...");
+  const corp = getActiveCorporation();
+  if (!corp) {
+    console.log("  ❌ No active corporation found. Run test:co-create first.");
     process.exit(1);
   }
-  console.log(`  ✓ Funded authority with ${fundAmount}`);
+  console.log(`  Corp ID:        ${corp.corporationId}`);
+  console.log(`  Policy Address: ${corp.policyAddress}`);
+  console.log();
 
-  // Wait for funding tx to be confirmed by polling for the tx hash
-  const queryClient = await createQueryClient();
-  console.log("  ⏳ Waiting for authority funding tx to confirm...");
-  for (let i = 0; i < 30; i++) {
-    try {
-      const tx = await queryClient.getTx(fundAuthResult.transactionHash);
-      if (tx) {
-        console.log(`  ✓ Authority funding confirmed at block ${tx.height}`);
-        break;
-      }
-    } catch {}
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-  }
+  // Step 2: Create wallets (both amino — SIGN_MODE_LEGACY_AMINO_JSON).
+  console.log("Step 2: Creating wallets...");
+  const signerWallet = await createAccountFromMnemonic(COOLUSER_MNEMONIC, SIGNER_INDEX);
+  const operatorWallet = await createAccountFromMnemonic(COOLUSER_MNEMONIC, OPERATOR_INDEX);
 
-  // Wait for cooluser sequence to advance before second fund tx
-  console.log("  ⏳ Waiting for cooluser sequence to advance...");
-  for (let i = 0; i < 30; i++) {
-    try {
-      const seq = await queryClient.getSequence(cooluserAccount.address);
-      if (seq.sequence >= 1) {
-        console.log(`  ✓ Cooluser sequence: ${seq.sequence}`);
-        break;
-      }
-    } catch {}
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-  }
+  const signerAccount = await getAccountInfo(signerWallet);
+  const operatorAccount = await getAccountInfo(operatorWallet);
+
+  console.log(`  Signer:   ${signerAccount.address} (derivation index ${SIGNER_INDEX}, SIGN_MODE_LEGACY_AMINO_JSON)`);
+  console.log(`  Operator: ${operatorAccount.address} (derivation index ${OPERATOR_INDEX})`);
+  console.log();
+
+  // Step 3: Fund operator (signer was already funded by test:co-create)
+  console.log("Step 3: Funding operator...");
+  const cooluserWallet = await createAccountFromMnemonic(COOLUSER_MNEMONIC, 0);
+  const cooluserAccount = await getAccountInfo(cooluserWallet);
 
   const fundOpResult = await fundAccount(
     COOLUSER_MNEMONIC,
     cooluserAccount.address,
     operatorAccount.address,
-    fundAmount,
+    "50000000uvna",
   );
   if (fundOpResult.code !== 0) {
     console.log(`  ❌ Failed to fund operator: ${fundOpResult.rawLog}`);
     process.exit(1);
   }
-  console.log(`  ✓ Funded operator with ${fundAmount}`);
+  console.log(`  ✓ Funded operator with 50 VNA`);
 
-  // Wait for operator funding tx to confirm
+  const qc1 = await createQueryClient();
   console.log("  ⏳ Waiting for operator funding tx to confirm...");
   for (let i = 0; i < 30; i++) {
     try {
-      const tx = await queryClient.getTx(fundOpResult.transactionHash);
-      if (tx) {
-        console.log(`  ✓ Operator funding confirmed at block ${tx.height}`);
-        break;
-      }
+      const tx = await qc1.getTx(fundOpResult.transactionHash);
+      if (tx) { console.log(`  ✓ Operator funding confirmed at block ${tx.height}`); break; }
     } catch {}
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((r) => setTimeout(r, 1000));
   }
-
-  // Verify authority account balance before proceeding
-  console.log("  ⏳ Verifying authority balance...");
-  for (let i = 0; i < 20; i++) {
-    const balance = await queryClient.getBalance(authorityAccount.address, config.denom);
-    if (BigInt(balance.amount) > 0) {
-      console.log(`  ✓ Authority balance: ${balance.amount}${balance.denom}`);
-      break;
-    }
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-  }
-  queryClient.disconnect();
+  qc1.disconnect();
   console.log();
 
-  // Step 3: Authority grants operator authorization for all 5 TR message types
-  console.log("Step 3: Granting operator authorization for all TR message types...");
+  // Step 4: Grant operator authorization via x/group proposal flow.
+  // The policy_address (corp.policyAddress) is both the group policy and the
+  // `corporation` field of MsgGrantOperatorAuthorization. Since the signer
+  // (index 10) is the sole group member with weight=1 and threshold=1, a single
+  // proposal + YES vote with EXEC_TRY executes immediately.
+  console.log("Step 4: Building MsgGrantOperatorAuthorization...");
 
-  const allTrMsgTypes = [
-    typeUrls.MsgCreateTrustRegistry,
-    typeUrls.MsgUpdateTrustRegistry,
-    typeUrls.MsgArchiveTrustRegistry,
+  const allMsgTypes = [
+    typeUrls.MsgCreateEcosystem,
+    typeUrls.MsgUpdateEcosystem,
+    typeUrls.MsgArchiveEcosystem,
     typeUrls.MsgAddGovernanceFrameworkDocument,
     typeUrls.MsgIncreaseActiveGovernanceFrameworkVersion,
   ];
 
   console.log("  Message types being authorized:");
-  for (const msgType of allTrMsgTypes) {
+  for (const msgType of allMsgTypes) {
     console.log(`    - ${msgType}`);
   }
+  console.log();
 
-  const client = await createSigningClient(authorityWallet);
-
-  const msg = {
-    typeUrl: typeUrls.MsgGrantOperatorAuthorization,
-    value: MsgGrantOperatorAuthorization.fromPartial({
-      corporation: authorityAccount.address,
-      operator: "", // empty — authority acts alone (AUTHZ-CHECK skipped)
+  // Encode MsgGrantOperatorAuthorization as raw bytes for the Any wrapper.
+  const innerMsgValue = MsgGrantOperatorAuthorization.encode(
+    MsgGrantOperatorAuthorization.fromPartial({
+      corporation: corp.policyAddress,
+      operator: "",
       grantee: operatorAccount.address,
-      msgTypes: allTrMsgTypes,
+      msgTypes: allMsgTypes,
       withFeegrant: false,
+    }),
+  ).finish();
+
+  const proposalMsg = {
+    typeUrl: "/cosmos.group.v1.MsgSubmitProposal",
+    value: MsgSubmitProposal.fromPartial({
+      groupPolicyAddress: corp.policyAddress,
+      proposers: [signerAccount.address],
+      metadata: "Grant EC+GF operator authz",
+      title: "Grant EC+GF operator authz",
+      summary: "Grant operator authorization for EC and GF message types",
+      messages: [{ typeUrl: typeUrls.MsgGrantOperatorAuthorization, value: innerMsgValue }],
+      exec: Exec.EXEC_UNSPECIFIED,
     }),
   };
 
+  const client = await createSigningClient(signerWallet);
+
   try {
-    const fee = await calculateFeeWithSimulation(
-      client,
-      authorityAccount.address,
-      [msg],
-      "Granting operator authorization for TR messages",
+    // Step 4a: Submit proposal
+    console.log("Step 4a: Submitting x/group proposal (SIGN_MODE_LEGACY_AMINO_JSON)...");
+    const proposalFee = await calculateFeeWithSimulation(
+      client, signerAccount.address, [proposalMsg], "Submit grant operator authz proposal",
     );
-    console.log(`  Calculated gas: ${fee.gas}, fee: ${fee.amount[0].amount}${fee.amount[0].denom}`);
+    console.log(`  Gas: ${proposalFee.gas}, Fee: ${proposalFee.amount[0].amount}${proposalFee.amount[0].denom}`);
 
-    const result = await signAndBroadcastWithRetry(
-      client,
-      authorityAccount.address,
-      [msg],
-      fee,
-      "Granting operator authorization for TR messages",
+    const proposalResult = await signAndBroadcastWithRetry(
+      client, signerAccount.address, [proposalMsg], proposalFee, "Submit grant operator authz proposal",
     );
 
-    console.log();
-    if (result.code === 0) {
-      console.log("✅ SUCCESS! Operator authorization granted successfully!");
-      console.log("=".repeat(60));
-      console.log(`  Transaction Hash: ${result.transactionHash}`);
-      console.log(`  Block Height: ${result.height}`);
-      console.log(`  Gas Used: ${result.gasUsed}/${result.gasWanted}`);
-
-      // Print events
-      const events = result.events || [];
-      for (const event of events) {
-        if (event.type.includes("grant") || event.type.includes("operator")) {
-          console.log(`  Event: ${event.type}`);
-          for (const attr of event.attributes) {
-            console.log(`    ${attr.key}: ${attr.value}`);
-          }
-        }
-      }
-
-      // Save setup for TR journeys
-      saveTrAuthzSetup(authorityAccount.address, operatorAccount.address);
-      console.log();
-      console.log("  💾 Saved authority and operator addresses for TR journeys");
-    } else {
-      console.log("❌ FAILED! Transaction failed.");
-      console.log(`  Error Code: ${result.code}`);
-      console.log(`  Raw Log: ${result.rawLog}`);
+    if (proposalResult.code !== 0) {
+      console.log(`❌ Proposal submission failed: ${proposalResult.rawLog}`);
       process.exit(1);
     }
+    console.log(`✅ Step 4a: Proposal submitted at block ${proposalResult.height}`);
+    console.log(`  Tx: ${proposalResult.transactionHash}`);
+
+    // Extract proposal_id from events
+    let proposalId: bigint | undefined;
+    for (const event of (proposalResult.events || [])) {
+      for (const attr of event.attributes) {
+        if (attr.key === "proposal_id") {
+          proposalId = BigInt(String(attr.value).replace(/"/g, ""));
+          break;
+        }
+      }
+      if (proposalId !== undefined) break;
+    }
+    if (proposalId === undefined) {
+      console.log("❌ Could not extract proposal_id from events");
+      console.log("Events:", JSON.stringify(proposalResult.events?.slice(0, 5), null, 2));
+      process.exit(1);
+    }
+    console.log(`  Proposal ID: ${proposalId}`);
+
+    // Wait for proposal tx to confirm
+    const qc2 = await createQueryClient();
+    for (let i = 0; i < 30; i++) {
+      try {
+        const tx = await qc2.getTx(proposalResult.transactionHash);
+        if (tx) { console.log(`  Proposal confirmed at block ${tx.height}`); break; }
+      } catch {}
+      await new Promise((r) => setTimeout(r, 1000));
+    }
+    qc2.disconnect();
+    console.log();
+
+    // Step 4b: Vote YES with EXEC_TRY — auto-executes (threshold=1, weight=1)
+    console.log("Step 4b: Voting YES on proposal (EXEC_TRY, SIGN_MODE_LEGACY_AMINO_JSON)...");
+    const voteMsg = {
+      typeUrl: "/cosmos.group.v1.MsgVote",
+      value: MsgVote.fromPartial({
+        proposalId,
+        voter: signerAccount.address,
+        option: VoteOption.VOTE_OPTION_YES,
+        exec: Exec.EXEC_TRY,
+        metadata: "",
+      }),
+    };
+
+    const voteFee = await calculateFeeWithSimulation(
+      client, signerAccount.address, [voteMsg], "Vote YES on grant proposal",
+    );
+    console.log(`  Gas: ${voteFee.gas}, Fee: ${voteFee.amount[0].amount}${voteFee.amount[0].denom}`);
+
+    const voteResult = await signAndBroadcastWithRetry(
+      client, signerAccount.address, [voteMsg], voteFee, "Vote YES on grant proposal",
+    );
+
+    if (voteResult.code !== 0) {
+      console.log(`❌ Vote failed: ${voteResult.rawLog}`);
+      process.exit(1);
+    }
+    console.log(`✅ Step 4b: Voted YES + executed at block ${voteResult.height}`);
+    console.log(`  Tx: ${voteResult.transactionHash}`);
+
+    // Wait for vote to confirm
+    const qc3 = await createQueryClient();
+    for (let i = 0; i < 30; i++) {
+      try {
+        const tx = await qc3.getTx(voteResult.transactionHash);
+        if (tx) { console.log(`  Vote confirmed at block ${tx.height}`); break; }
+      } catch {}
+      await new Promise((r) => setTimeout(r, 1000));
+    }
+    qc3.disconnect();
+
+    console.log();
+    console.log("✅ SUCCESS! Operator authorization granted via x/group proposal!");
+    console.log("=".repeat(60));
+    console.log(`  Proposal Tx: ${proposalResult.transactionHash}`);
+    console.log(`  Vote Tx:     ${voteResult.transactionHash}`);
+
+    saveEcAuthzSetup(corp.policyAddress, operatorAccount.address);
+    console.log("  💾 Saved EC authz setup (corporation + operator) for EC/GF journeys");
+
   } catch (error: any) {
     console.log("❌ ERROR! Transaction failed with exception:");
     console.error(error);

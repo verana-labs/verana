@@ -115,7 +115,7 @@ var _ sdk.Msg = &MsgCreateCredentialSchema{}
 func NewMsgCreateCredentialSchema(
 	authority string,
 	operator string,
-	trId uint64,
+	ecosystemId uint64,
 	jsonSchema string,
 	issuerGrantorValidationValidityPeriod uint32,
 	verifierGrantorValidationValidityPeriod uint32,
@@ -132,7 +132,7 @@ func NewMsgCreateCredentialSchema(
 	msg := &MsgCreateCredentialSchema{
 		Corporation:                             authority,
 		Operator:                                operator,
-		TrId:                                    trId,
+		EcosystemId:                             ecosystemId,
 		JsonSchema:                              jsonSchema,
 		IssuerGrantorValidationValidityPeriod:   &OptionalUInt32{Value: issuerGrantorValidationValidityPeriod},
 		VerifierGrantorValidationValidityPeriod: &OptionalUInt32{Value: verifierGrantorValidationValidityPeriod},
@@ -184,8 +184,8 @@ func (msg *MsgCreateCredentialSchema) ValidateBasic() error {
 	}
 
 	// Check mandatory parameters
-	if msg.TrId == 0 {
-		return errors.Wrap(sdkerrors.ErrInvalidRequest, "tr_id cannot be 0")
+	if msg.EcosystemId == 0 {
+		return errors.Wrap(sdkerrors.ErrInvalidRequest, "ecosystem_id cannot be 0")
 	}
 
 	// Validate JSON Schema (without ID since it will be generated later)

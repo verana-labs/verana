@@ -6,12 +6,13 @@
   "scripts": {
     "build": "tsc",
     "test:signing-surface": "npx tsx scripts/checkSigningSurface.ts",
+    "test:co-create": "npx tsx src/journeys/coCreateCorporation.ts",
     "test:de-grant-auth": "npx tsx src/journeys/deGrantOperatorAuthorization.ts",
-    "test:tr-create": "npx tsx src/journeys/trCreateTrustRegistry.ts",
-    "test:tr-add-gfd": "npx tsx src/journeys/trAddGovernanceFrameworkDocument.ts",
-    "test:tr-increase-gf-version": "npx tsx src/journeys/trIncreaseActiveGovernanceFrameworkVersion.ts",
-    "test:tr-update": "npx tsx src/journeys/trUpdateTrustRegistry.ts",
-    "test:tr-archive": "npx tsx src/journeys/trArchiveTrustRegistry.ts",
+    "test:ec-create": "npx tsx src/journeys/ecCreateEcosystem.ts",
+    "test:ec-update": "npx tsx src/journeys/ecUpdateEcosystem.ts",
+    "test:ec-archive": "npx tsx src/journeys/ecArchiveEcosystem.ts",
+    "test:gf-add-doc": "npx tsx src/journeys/gfAddGovernanceFrameworkDocument.ts",
+    "test:gf-increase-version": "npx tsx src/journeys/gfIncreaseActiveGovernanceFrameworkVersion.ts",
     "test:de-grant-cs-auth": "npx tsx src/journeys/deGrantCsOperatorAuthorization.ts",
     "test:cs-create": "npx tsx src/journeys/csCreateCredentialSchema.ts",
     "test:cs-update": "npx tsx src/journeys/csUpdateCredentialSchema.ts",
@@ -29,6 +30,7 @@
     "test:perm-repay": "npx tsx src/journeys/permRepayPermissionSlashedTrustDeposit.ts",
     "test:td-reclaim-yield": "npx tsx src/journeys/tdReclaimTrustDepositYield.ts",
     "test:td-repay-slashed": "npx tsx src/journeys/tdRepaySlashedTrustDeposit.ts",
+    "test:co-ec-gf": "npx tsx src/journeys/runCoEcGf.ts",
     "test:all": "npx tsx src/journeys/runAll.ts"
   },
   "dependencies": {

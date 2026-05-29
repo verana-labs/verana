@@ -143,7 +143,7 @@ func RunPermissionCancelVPJourney(ctx context.Context, client cosmosclient.Clien
 
 	// Save results
 	result := lib.JourneyResult{
-		TrustRegistryID: setup302.TrustRegistryID,
+		EcosystemID: setup302.EcosystemID,
 		SchemaID:        setup302.SchemaID,
 		DID:             setup302.DID,
 		PermissionID:    setup302.PermissionID,

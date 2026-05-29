@@ -9,7 +9,7 @@ const (
 
 	// Attribute keys
 	AttributeKeyId                                      = "credential_schema_id"
-	AttributeKeyTrId                                    = "trust_registry_id"
+	AttributeKeyEcosystemId                             = "ecosystem_id"
 	AttributeKeyCorporation                             = "corporation"
 	AttributeKeyOperator                                = "operator"
 	AttributeKeyTimestamp                               = "timestamp"

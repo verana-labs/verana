@@ -22,7 +22,7 @@ func TestGenesis(t *testing.T) {
 		NextPermissionId:   1,
 	}
 
-	k, _, _, ctx, _ := keepertest.PermissionKeeper(t)
+	k, _, _, _, ctx, _ := keepertest.PermissionKeeper(t)
 	permission.InitGenesis(ctx, k, genesisState)
 	got := permission.ExportGenesis(ctx, k)
 	require.NotNil(t, got)
@@ -37,7 +37,7 @@ func TestGenesis(t *testing.T) {
 }
 
 func TestDeterministicGenesis(t *testing.T) {
-	k, _, _, ctx, _ := keepertest.PermissionKeeper(t)
+	k, _, _, _, ctx, _ := keepertest.PermissionKeeper(t)
 
 	nowTime := time.Now()
 	futureTime := nowTime.Add(24 * time.Hour)
@@ -125,7 +125,7 @@ func TestDeterministicGenesis(t *testing.T) {
 	require.Equal(t, "test-session-id-2", exportedGenesis1.PermissionSessions[1].Id)
 
 	// Create a new keeper instance for the second test
-	k2, _, _, ctx2, _ := keepertest.PermissionKeeper(t)
+	k2, _, _, _, ctx2, _ := keepertest.PermissionKeeper(t)
 
 	// Insert in opposite order for the second test
 	require.NoError(t, k2.Permission.Set(ctx2, perm1.Id, perm1))
@@ -158,7 +158,7 @@ func TestDeterministicGenesis(t *testing.T) {
 }
 
 func TestGenesisImportExport(t *testing.T) {
-	k, _, _, ctx, _ := keepertest.PermissionKeeper(t)
+	k, _, _, _, ctx, _ := keepertest.PermissionKeeper(t)
 
 	// Create some test data
 	nowTime := time.Now()
@@ -253,7 +253,7 @@ func TestGenesisImportExport(t *testing.T) {
 	require.Len(t, genesisState.PermissionSessions, 2)
 
 	// Create a new keeper instance
-	k2, _, _, ctx2, _ := keepertest.PermissionKeeper(t)
+	k2, _, _, _, ctx2, _ := keepertest.PermissionKeeper(t)
 
 	// Initialize with the exported genesis state
 	permission.InitGenesis(ctx2, k2, *genesisState)

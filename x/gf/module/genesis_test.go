@@ -80,12 +80,14 @@ func TestModule_ConsensusVersionAndBlockHooks(t *testing.T) {
 	require.NoError(t, mod.EndBlock(nil))
 }
 
-func TestProvideEcosystemKeeper_WrapsTR(t *testing.T) {
-	// Verify the depinject provider wires the TR keeper into an
-	// EcosystemKeeper-compatible adapter.
-	trK, _ := keepertest.TrustregistryKeeper(t)
-	ek := gf.ProvideEcosystemKeeper(trK)
-	require.NotNil(t, ek)
+func TestGfKeeperWithDelegation_WiresEcosystemKeeper(t *testing.T) {
+	// Post MOD-EC rename: ProvideEcosystemKeeper was removed (x/ec now
+	// provides the EcosystemKeeper directly via its own depinject Out).
+	// Verify the test harness still wires an EcosystemKeeper into the gf
+	// keeper construction path.
+	k, _ := keepertest.GfKeeperWithDelegation(t,
+		stubDelegationKeeper{}, &stubEcosystemKeeper{}, &stubCorporationKeeper{})
+	require.NotNil(t, k)
 }
 
 func TestProvideModule_DefaultAuthority(t *testing.T) {
@@ -104,7 +106,6 @@ func TestProvideModule_DefaultAuthority(t *testing.T) {
 		Config:           &modulev1.Module{}, // empty Authority → falls back to gov module addr
 		Logger:           log.NewNopLogger(),
 		DelegationKeeper: stubDelegationKeeper{},
-		EcosystemKeeper:  &stubEcosystemKeeper{},
 	}
 	out := gf.ProvideModule(in)
 	require.NotNil(t, out.Module)
@@ -128,7 +129,6 @@ func TestProvideModule_CustomAuthority(t *testing.T) {
 		Config:           &modulev1.Module{Authority: customAuth},
 		Logger:           log.NewNopLogger(),
 		DelegationKeeper: stubDelegationKeeper{},
-		EcosystemKeeper:  &stubEcosystemKeeper{},
 	}
 	out := gf.ProvideModule(in)
 	require.Equal(t, customAuth, out.GfKeeper.GetAuthority(), "explicit Authority must override gov default")

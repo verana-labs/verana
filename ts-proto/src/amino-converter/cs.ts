@@ -23,7 +23,7 @@ export const MsgCreateCredentialSchemaAminoConverter: AminoConverter = {
   toAmino: (m: MsgCreateCredentialSchema) => clean({
     corporation: m.corporation ?? "",
     operator: m.operator ?? "",
-    tr_id: u64ToStr(m.trId),
+    ecosystem_id: u64ToStr(m.ecosystemId),
     json_schema: m.jsonSchema ?? "",
     issuer_grantor_validation_validity_period: toOptU32Amino(m.issuerGrantorValidationValidityPeriod),
     verifier_grantor_validation_validity_period: toOptU32Amino(m.verifierGrantorValidationValidityPeriod),
@@ -41,7 +41,7 @@ export const MsgCreateCredentialSchemaAminoConverter: AminoConverter = {
     MsgCreateCredentialSchema.fromPartial({
       corporation: a.corporation ?? "",
       operator: a.operator ?? "",
-      trId: strToU64(a.tr_id) != null ? Number(strToU64(a.tr_id)!.toString()) : 0,
+      ecosystemId: strToU64(a.ecosystem_id) != null ? Number(strToU64(a.ecosystem_id)!.toString()) : 0,
       jsonSchema: a.json_schema ?? "",
       issuerGrantorValidationValidityPeriod: fromOptU32Amino(a.issuer_grantor_validation_validity_period),
       verifierGrantorValidationValidityPeriod: fromOptU32Amino(a.verifier_grantor_validation_validity_period),

@@ -82,10 +82,12 @@ message SchemaAuthorizationPolicy {
   uint32 version = 10;
 }
 
-// CredentialSchema defines the structure for a credential schema
+// CredentialSchema defines the structure for a credential schema.
+// `ecosystem_id` is the v4-rc2 replacement for the legacy `tr_id` field (issue
+// #305): the owning subject is now an Ecosystem, identified by its uint64 id.
 message CredentialSchema {
   uint64 id = 1;
-  uint64 tr_id = 2;
+  reserved 2; // tr_id removed in v4-rc2
   google.protobuf.Timestamp created = 3 [
     (gogoproto.nullable) = false,
     (gogoproto.stdtime) = true
@@ -110,4 +112,5 @@ message CredentialSchema {
   string pricing_asset = 16;
   string digest_algorithm = 17;
   HolderOnboardingMode holder_onboarding_mode = 18;
+  uint64 ecosystem_id = 19;
 }

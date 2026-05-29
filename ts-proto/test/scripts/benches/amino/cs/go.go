@@ -31,7 +31,7 @@ func main() {
 	msg := &cstypes.MsgCreateCredentialSchema{
 		Corporation:                             address,
 		Operator:                                address,
-		TrId:                                    1,
+		EcosystemId:                             1,
 		JsonSchema:                              jsonSchema,
 		IssuerGrantorValidationValidityPeriod:   &cstypes.OptionalUInt32{Value: 0},
 		VerifierGrantorValidationValidityPeriod: &cstypes.OptionalUInt32{Value: 0},

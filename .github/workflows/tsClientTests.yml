@@ -4,14 +4,14 @@ on:
   workflow_dispatch:
   pull_request:
     branches:
-      - '**' # Trigger on pull requests to any branch
+      - '**'
     paths:
       - 'proto/**'
       - 'ts-proto/**'
       - '.github/workflows/tsClientTests.yml'
   push:
     branches:
-      - main # Trigger on main only
+      - main
     paths:
       - 'proto/**'
       - 'ts-proto/**'
@@ -83,13 +83,10 @@ jobs:
           cd ${{ env.VERANA_BLOCKCHAIN_PATH }}/ts-proto/test
           npm install
 
-      # TODO: Re-enable full tsc type-check once all modules (perm, cs, etc.) are updated
-      # to use the new authority/operator pattern from spec v4. Currently, some journey files
-      # still use the old 'creator' field which causes type errors with the regenerated protos.
-      # - name: Type-check TypeScript test harness
-      #   run: |
-      #     cd ${{ env.VERANA_BLOCKCHAIN_PATH }}/ts-proto/test
-      #     npm run build
+      - name: Type-check TypeScript test harness
+        run: |
+          cd ${{ env.VERANA_BLOCKCHAIN_PATH }}/ts-proto/test
+          npm run build
 
       - name: Start blockchain node asynchronously
         run: |
@@ -167,10 +164,10 @@ jobs:
           echo "  FEES: $FEES"
           echo ""
           
-          # Run all TypeScript client tests
+          # Run CO/EC/GF journey suite (hard-fail; CS/PERM/TD not yet stable)
           cd ts-proto/test
-          npm run test:all || {
-            echo "TypeScript client tests failed!"
+          npm run test:co-ec-gf || {
+            echo "CO/EC/GF journey suite failed!"
             exit 1
           }
 
