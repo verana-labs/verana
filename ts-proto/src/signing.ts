@@ -1,5 +1,5 @@
 import { GeneratedType, Registry } from "@cosmjs/proto-signing";
-import { AminoTypes, defaultRegistryTypes } from "@cosmjs/stargate";
+import { AminoTypes, defaultRegistryTypes, createDefaultAminoConverters } from "@cosmjs/stargate";
 import {
   MsgCreateCorporation,
   MsgUpdateCorporation,
@@ -171,6 +171,7 @@ export function createVeranaRegistry(): Registry {
 
 export function createVeranaAminoTypes(): AminoTypes {
   return new AminoTypes({
+    ...createDefaultAminoConverters(),
     [veranaTypeUrls.MsgCreateCorporation]: MsgCreateCorporationAminoConverter,
     [veranaTypeUrls.MsgUpdateCorporation]: MsgUpdateCorporationAminoConverter,
     [veranaTypeUrls.MsgCreateEcosystem]: MsgCreateEcosystemAminoConverter,

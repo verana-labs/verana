@@ -109,7 +109,7 @@ async function main() {
     ThresholdDecisionPolicy.fromPartial({
       threshold: "1",
       windows: {
-        votingPeriod: { seconds: BigInt(1), nanos: 0 },
+        votingPeriod: { seconds: BigInt(30), nanos: 0 },
         minExecutionPeriod: { seconds: BigInt(0), nanos: 0 },
       },
     }),
@@ -184,6 +184,30 @@ async function main() {
         console.log(`  Policy Address: ${policyAddress}`);
         saveActiveCorporation(corporationId, policyAddress);
         console.log("  💾 Saved active corporation for subsequent journeys");
+
+        // Fund the group policy address so it can act as inner message sender
+        // in x/group proposal execution (required by DE grant flow).
+        console.log("\n  Funding policy address with 50 VNA...");
+        const fundPolicyResult = await fundAccount(
+          COOLUSER_MNEMONIC,
+          cooluserAccount.address,
+          policyAddress,
+          "50000000uvna",
+        );
+        if (fundPolicyResult.code !== 0) {
+          console.log(`  ⚠️  Policy address funding failed: ${fundPolicyResult.rawLog}`);
+        } else {
+          console.log(`  ✓ Policy address funding tx: ${fundPolicyResult.transactionHash}`);
+          const pqc = await createQueryClient();
+          for (let i = 0; i < 30; i++) {
+            try {
+              const tx = await pqc.getTx(fundPolicyResult.transactionHash);
+              if (tx) { console.log(`  ✓ Policy address funded at block ${tx.height}`); break; }
+            } catch {}
+            await new Promise((r) => setTimeout(r, 1000));
+          }
+          pqc.disconnect();
+        }
       } else {
         console.log("  ⚠️  Could not extract corporation_id/policy_address from events");
         process.exit(1);

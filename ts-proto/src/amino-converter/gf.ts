@@ -10,7 +10,7 @@ import { clean, u64ToStr } from "./util/helpers";
 // signing corporation's own CGF; when set, the target is that Ecosystem.
 
 export const MsgAddGovernanceFrameworkDocumentAminoConverter: AminoConverter = {
-  aminoType: "verana/x/gf/MsgAddGovFrameworkDoc",
+  aminoType: "verana/x/gf/MsgAddGovernanceFrameworkDocument",
   toAmino: ({
     corporation,
     operator,
@@ -41,7 +41,7 @@ export const MsgAddGovernanceFrameworkDocumentAminoConverter: AminoConverter = {
 };
 
 export const MsgIncreaseActiveGovernanceFrameworkVersionAminoConverter: AminoConverter = {
-  aminoType: "verana/x/gf/MsgIncreaseActiveGovFWVer",
+  aminoType: "verana/x/gf/MsgIncreaseActiveGovernanceFrameworkVersion",
   toAmino: ({ corporation, operator, ecosystemId }: MsgIncreaseActiveGovernanceFrameworkVersion) => clean({
     corporation: corporation || undefined,
     operator: operator || undefined,

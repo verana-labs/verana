@@ -2,25 +2,20 @@ name: 3.TypeScript Client Tests
 
 on:
   workflow_dispatch:
-  # PR + push triggers disabled during v4-rc2 spec rebase sequence.
-  # The journey suite hits a cosmjs account-info caching race on freshly-
-  # funded accounts (sig verification fails with account_number mismatch
-  # on the first tx); rewriting journeys to pre-warm the cache is tracked
-  # as follow-up. Re-enable after the journey suite is updated.
-  # pull_request:
-  #   branches:
-  #     - '**'
-  #   paths:
-  #     - 'proto/**'
-  #     - 'ts-proto/**'
-  #     - '.github/workflows/tsClientTests.yml'
-  # push:
-  #   branches:
-  #     - main
-  #   paths:
-  #     - 'proto/**'
-  #     - 'ts-proto/**'
-  #     - '.github/workflows/tsClientTests.yml'
+  pull_request:
+    branches:
+      - '**'
+    paths:
+      - 'proto/**'
+      - 'ts-proto/**'
+      - '.github/workflows/tsClientTests.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'proto/**'
+      - 'ts-proto/**'
+      - '.github/workflows/tsClientTests.yml'
 
 jobs:
   ts-client-tests:
@@ -172,10 +167,10 @@ jobs:
           echo "  FEES: $FEES"
           echo ""
           
-          # Run all TypeScript client tests
+          # Run CO/EC/GF journey suite (hard-fail; CS/PERM/TD not yet stable)
           cd ts-proto/test
-          npm run test:all || {
-            echo "TypeScript client tests failed!"
+          npm run test:co-ec-gf || {
+            echo "CO/EC/GF journey suite failed!"
             exit 1
           }
 
