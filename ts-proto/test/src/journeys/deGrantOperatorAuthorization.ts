@@ -9,11 +9,11 @@
  * Flow: x/group proposal submitted by the sole group member (index 10),
  * who votes YES with EXEC_TRY — proposal auto-executes since threshold=1.
  *
- * Signing: group coordination (MsgSubmitProposal, MsgVote) uses
- * SIGN_MODE_DIRECT because CosmJS 0.32.4 ships no amino converters for
- * x/group messages. Verana-specific messages (MsgGrantOperatorAuthorization
- * as the inner executed message) are submitted via x/group and therefore
- * never directly signed by the client.
+ * Signing: all messages use SIGN_MODE_LEGACY_AMINO_JSON. Group coordination
+ * (MsgSubmitProposal, MsgVote) amino converters are implemented in
+ * ts-proto/src/amino-converter/group.ts with recursive Any transcoding.
+ * MsgGrantOperatorAuthorization is the inner executed message and is
+ * amino-encoded as part of the proposal messages array.
  *
  * Requires: test:co-create must be run first.
  *
@@ -22,7 +22,6 @@
  */
 
 import {
-  createDirectAccountFromMnemonic,
   createAccountFromMnemonic,
   createSigningClient,
   createQueryClient,
@@ -64,24 +63,22 @@ async function main() {
   console.log(`  Policy Address: ${corp.policyAddress}`);
   console.log();
 
-  // Step 2: Create wallets.
-  // Direct wallet (SIGN_MODE_DIRECT) for x/group coordination messages.
-  // Amino wallet for reference (operator funding via fundAccount uses its own wallet).
+  // Step 2: Create wallets (both amino — SIGN_MODE_LEGACY_AMINO_JSON).
   console.log("Step 2: Creating wallets...");
-  const signerDirectWallet = await createDirectAccountFromMnemonic(COOLUSER_MNEMONIC, SIGNER_INDEX);
+  const signerWallet = await createAccountFromMnemonic(COOLUSER_MNEMONIC, SIGNER_INDEX);
   const operatorWallet = await createAccountFromMnemonic(COOLUSER_MNEMONIC, OPERATOR_INDEX);
 
-  const signerAccount = await getAccountInfo(signerDirectWallet);
+  const signerAccount = await getAccountInfo(signerWallet);
   const operatorAccount = await getAccountInfo(operatorWallet);
 
-  console.log(`  Signer:   ${signerAccount.address} (derivation index ${SIGNER_INDEX}, SIGN_MODE_DIRECT)`);
+  console.log(`  Signer:   ${signerAccount.address} (derivation index ${SIGNER_INDEX}, SIGN_MODE_LEGACY_AMINO_JSON)`);
   console.log(`  Operator: ${operatorAccount.address} (derivation index ${OPERATOR_INDEX})`);
   console.log();
 
   // Step 3: Fund operator (signer was already funded by test:co-create)
   console.log("Step 3: Funding operator...");
-  const cooluserDirectWallet = await createDirectAccountFromMnemonic(COOLUSER_MNEMONIC, 0);
-  const cooluserAccount = await getAccountInfo(cooluserDirectWallet);
+  const cooluserWallet = await createAccountFromMnemonic(COOLUSER_MNEMONIC, 0);
+  const cooluserAccount = await getAccountInfo(cooluserWallet);
 
   const fundOpResult = await fundAccount(
     COOLUSER_MNEMONIC,
@@ -152,12 +149,11 @@ async function main() {
     }),
   };
 
-  // Use SIGN_MODE_DIRECT signing client for x/group messages.
-  const client = await createSigningClient(signerDirectWallet);
+  const client = await createSigningClient(signerWallet);
 
   try {
     // Step 4a: Submit proposal
-    console.log("Step 4a: Submitting x/group proposal (SIGN_MODE_DIRECT)...");
+    console.log("Step 4a: Submitting x/group proposal (SIGN_MODE_LEGACY_AMINO_JSON)...");
     const proposalFee = await calculateFeeWithSimulation(
       client, signerAccount.address, [proposalMsg], "Submit grant operator authz proposal",
     );
@@ -205,7 +201,7 @@ async function main() {
     console.log();
 
     // Step 4b: Vote YES with EXEC_TRY — auto-executes (threshold=1, weight=1)
-    console.log("Step 4b: Voting YES on proposal (EXEC_TRY, SIGN_MODE_DIRECT)...");
+    console.log("Step 4b: Voting YES on proposal (EXEC_TRY, SIGN_MODE_LEGACY_AMINO_JSON)...");
     const voteMsg = {
       typeUrl: "/cosmos.group.v1.MsgVote",
       value: MsgVote.fromPartial({

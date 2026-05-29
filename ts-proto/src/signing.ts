@@ -1,5 +1,6 @@
 import { GeneratedType, Registry } from "@cosmjs/proto-signing";
 import { AminoTypes, defaultRegistryTypes, createDefaultAminoConverters } from "@cosmjs/stargate";
+import { createGroupAminoConverters } from "./amino-converter/group";
 import {
   MsgCreateCorporation,
   MsgUpdateCorporation,
@@ -170,8 +171,12 @@ export function createVeranaRegistry(): Registry {
 }
 
 export function createVeranaAminoTypes(): AminoTypes {
-  return new AminoTypes({
+  const registry = createVeranaRegistry();
+  let aminoTypesRef: AminoTypes;
+  const groupConverters = createGroupAminoConverters(() => aminoTypesRef, registry);
+  aminoTypesRef = new AminoTypes({
     ...createDefaultAminoConverters(),
+    ...groupConverters,
     [veranaTypeUrls.MsgCreateCorporation]: MsgCreateCorporationAminoConverter,
     [veranaTypeUrls.MsgUpdateCorporation]: MsgUpdateCorporationAminoConverter,
     [veranaTypeUrls.MsgCreateEcosystem]: MsgCreateEcosystemAminoConverter,
@@ -203,4 +208,5 @@ export function createVeranaAminoTypes(): AminoTypes {
     [veranaTypeUrls.MsgUpdateExchangeRate]: MsgUpdateExchangeRateAminoConverter,
     [veranaTypeUrls.MsgSetExchangeRateState]: MsgSetExchangeRateStateAminoConverter,
   });
+  return aminoTypesRef;
 }
