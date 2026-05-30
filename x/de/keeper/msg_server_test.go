@@ -168,7 +168,7 @@ func TestGrantFeeAllowance(t *testing.T) {
 			msgTypes: []string{
 				"/verana.ec.v1.MsgCreateEcosystem",
 				"/verana.cs.v1.MsgCreateCredentialSchema",
-				"/verana.perm.v1.MsgSelfCreatePermission",
+				"/verana.pp.v1.MsgSelfCreateParticipant",
 			},
 			expectErr: false,
 		},
@@ -194,7 +194,7 @@ func TestGrantFeeAllowance(t *testing.T) {
 			name:      "Valid: CreateOrUpdatePermissionSession allowed for fee grants (VSOA)",
 			authority: authority,
 			grantee:   grantee,
-			msgTypes:  []string{"/verana.perm.v1.MsgCreateOrUpdatePermissionSession"},
+			msgTypes:  []string{"/verana.pp.v1.MsgCreateOrUpdateParticipantSession"},
 			expectErr: false,
 		},
 		{
@@ -556,7 +556,7 @@ func TestMsgServerGrantOperatorAuthorization(t *testing.T) {
 				MsgTypes: []string{
 					"/verana.ec.v1.MsgCreateEcosystem",
 					"/verana.cs.v1.MsgCreateCredentialSchema",
-					"/verana.perm.v1.MsgSelfCreatePermission",
+					"/verana.pp.v1.MsgSelfCreateParticipant",
 				},
 			},
 			expectErr: false,
@@ -748,7 +748,7 @@ func TestMsgServerGrantOperatorAuthorization_UpdateExisting(t *testing.T) {
 	authority := sdk.AccAddress([]byte("test_authority______")).String()
 	grantee := sdk.AccAddress([]byte("test_grantee________")).String()
 	msgTypes1 := []string{"/verana.ec.v1.MsgCreateEcosystem"}
-	msgTypes2 := []string{"/verana.cs.v1.MsgCreateCredentialSchema", "/verana.perm.v1.MsgSelfCreatePermission"}
+	msgTypes2 := []string{"/verana.cs.v1.MsgCreateCredentialSchema", "/verana.pp.v1.MsgSelfCreateParticipant"}
 
 	// Create initial
 	msg1 := &types.MsgGrantOperatorAuthorization{
@@ -1581,7 +1581,7 @@ func TestOperatorCannotSelfGrant(t *testing.T) {
 	allMsgTypes := []string{
 		"/verana.ec.v1.MsgCreateEcosystem",
 		"/verana.cs.v1.MsgCreateCredentialSchema",
-		"/verana.perm.v1.MsgSelfCreatePermission",
+		"/verana.pp.v1.MsgSelfCreateParticipant",
 		"/verana.de.v1.MsgGrantOperatorAuthorization",
 		"/verana.de.v1.MsgRevokeOperatorAuthorization",
 	}

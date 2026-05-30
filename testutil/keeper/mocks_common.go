@@ -8,7 +8,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// MockTrustDepositKeeper is a no-op mock satisfying x/cs / x/perm /
+// MockTrustDepositKeeper is a no-op mock satisfying x/cs / x/pp /
 // trustDeposit-consumer interfaces in test wiring. Extracted from the
 // pre-rename testutil/keeper/trustregistry.go.
 type MockTrustDepositKeeper struct{}

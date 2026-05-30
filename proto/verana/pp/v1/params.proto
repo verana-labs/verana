@@ -1,0 +1,15 @@
+syntax = "proto3";
+package verana.pp.v1;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/verana-labs/verana/x/pp/types";
+
+// Params defines the parameters for the module.
+message Params {
+  option (amino.name) = "verana/x/pp/Params";
+  option (gogoproto.equal) = true;
+
+  uint64 validation_term_requested_timeout_days = 1;
+}

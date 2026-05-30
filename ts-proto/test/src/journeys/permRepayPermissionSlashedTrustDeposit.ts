@@ -18,7 +18,7 @@ import {
   config,
 } from "../helpers/client";
 import { typeUrls } from "../helpers/registry";
-import { MsgRepayPermissionSlashedTrustDeposit } from "../../../src/codec/verana/perm/v1/tx";
+import { MsgRepayParticipantSlashedTrustDeposit } from "../../../src/codec/verana/pp/v1/tx";
 import { getPermAuthzSetup, getPermSlashSetup } from "../helpers/journeyResults";
 
 const COOLUSER_MNEMONIC =
@@ -55,10 +55,10 @@ async function main() {
 
   try {
     // Step 3: Repay the slashed trust deposit
-    console.log("Step 3: Repaying slashed trust deposit (MsgRepayPermissionSlashedTrustDeposit)...");
+    console.log("Step 3: Repaying slashed trust deposit (MsgRepayParticipantSlashedTrustDeposit)...");
     const msg = {
-      typeUrl: typeUrls.MsgRepayPermissionSlashedTrustDeposit,
-      value: MsgRepayPermissionSlashedTrustDeposit.fromPartial({
+      typeUrl: typeUrls.MsgRepayParticipantSlashedTrustDeposit,
+      value: MsgRepayParticipantSlashedTrustDeposit.fromPartial({
         corporation: authzSetup.authorityAddress,
         operator: authzSetup.operatorAddress,
         id: slashSetup.slashedPermId,

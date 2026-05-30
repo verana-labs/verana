@@ -6,15 +6,15 @@
 import { SigningStargateClient } from "@cosmjs/stargate";
 import { typeUrls } from "./registry";
 import {
-  MsgCreateRootPermission,
-  MsgSelfCreatePermission,
-  MsgStartPermissionVP,
-  MsgSetPermissionVPToValidated,
-} from "../../../src/codec/verana/perm/v1/tx";
+  MsgCreateRootParticipant,
+  MsgSelfCreateParticipant,
+  MsgStartParticipantOP,
+  MsgSetParticipantOPToValidated,
+} from "../../../src/codec/verana/pp/v1/tx";
 import { MsgCreateEcosystem } from "../../../src/codec/verana/ec/v1/tx";
 import { MsgCreateCredentialSchema, OptionalUInt32 } from "../../../src/codec/verana/cs/v1/tx";
 import { IssuerOnboardingMode, VerifierOnboardingMode, HolderOnboardingMode, PricingAssetType } from "../../../src/codec/verana/cs/v1/types";
-import { PermissionType, OptionalUInt64 } from "../../../src/codec/verana/perm/v1/types";
+import { ParticipantRole, OptionalUInt64 } from "../../../src/codec/verana/pp/v1/types";
 // Note: We use Date objects directly, not Timestamp objects
 import { calculateFeeWithSimulation, generateUniqueDID, signAndBroadcastWithRetry, waitForPermissionToBecomeEffective, createQueryClient } from "./client";
 
@@ -39,8 +39,8 @@ export async function createRootPermissionForTest(
   const effectiveUntil = new Date(effectiveFrom.getTime() + 360 * 24 * 60 * 60 * 1000); // 360 days from effectiveFrom
 
   const msg = {
-    typeUrl: typeUrls.MsgCreateRootPermission,
-    value: MsgCreateRootPermission.fromPartial({
+    typeUrl: typeUrls.MsgCreateRootParticipant,
+    value: MsgCreateRootParticipant.fromPartial({
       corporation: address,
       operator: "",
       schemaId: schemaId,
@@ -50,9 +50,9 @@ export async function createRootPermissionForTest(
       validationFees: 5,
       verificationFees: 5,
       issuanceFees: 5,
-      // [MOD-PERM-MSG-7-3] perm.type is hardcoded to ECOSYSTEM by the handler
+      // [MOD-PERM-MSG-7-3] perm.role is hardcoded to ECOSYSTEM by the handler
       // and vs_operator is not set on root permissions — neither belongs on
-      // the wire for MsgCreateRootPermission.
+      // the wire for MsgCreateRootParticipant.
     }),
   };
 
@@ -71,7 +71,7 @@ export async function createRootPermissionForTest(
     // Extract permission ID from events
     const events = result.events || [];
     for (const event of events) {
-      if (event.type === "create_root_permission" || event.type === "verana.perm.v1.EventCreateRootPermission") {
+      if (event.type === "create_root_permission" || event.type === "verana.pp.v1.EventCreateRootPermission") {
         for (const attr of event.attributes) {
           if (attr.key === "root_permission_id" || attr.key === "permission_id" || attr.key === "id") {
             const permId = parseInt(attr.value, 10);
@@ -150,7 +150,7 @@ export async function createPermissionForTest(
   address: string,
   schemaId: number,
   did: string,
-  type: PermissionType = PermissionType.ISSUER,
+  type: ParticipantRole = ParticipantRole.ISSUER,
   skipRoot: boolean = false
 ): Promise<number> {
   // First, create root (ecosystem) permission - REQUIRED before creating regular permissions
@@ -179,16 +179,16 @@ export async function createPermissionForTest(
 
   // VERIFIER permissions cannot have verification_fees or validation_fees (must be 0)
   // Only ISSUER permissions can have these fees
-  const verificationFees = type === PermissionType.ISSUER ? 1000 : 0;
-  const validationFees = type === PermissionType.ISSUER ? 1000 : 0;
+  const verificationFees = type === ParticipantRole.ISSUER ? 1000 : 0;
+  const validationFees = type === ParticipantRole.ISSUER ? 1000 : 0;
 
   const msg = {
-    typeUrl: typeUrls.MsgSelfCreatePermission,
-    value: MsgSelfCreatePermission.fromPartial({
+    typeUrl: typeUrls.MsgSelfCreateParticipant,
+    value: MsgSelfCreateParticipant.fromPartial({
       corporation: address,
       operator: "",
-      type: type,
-      validatorPermId: 0,
+      role: type,
+      validatorParticipantId: 0,
       did: did,
       effectiveFrom: effectiveFrom,
       effectiveUntil: effectiveUntil,
@@ -212,7 +212,7 @@ export async function createPermissionForTest(
     // Extract permission ID from events
     const events = result.events || [];
     for (const event of events) {
-      if (event.type === "create_permission" || event.type === "verana.perm.v1.EventCreatePermission") {
+      if (event.type === "create_permission" || event.type === "verana.pp.v1.EventCreatePermission") {
         for (const attr of event.attributes) {
           if (attr.key === "permission_id" || attr.key === "id") {
             const permId = parseInt(attr.value, 10);
@@ -289,14 +289,14 @@ export async function createSchemaForTest(
       $schema: "https://json-schema.org/draft/2020-12/schema",
       title: "ExampleCredential",
       description: "ExampleCredential using JsonSchema",
-      type: "object",
+      role: "object",
       properties: {
         credentialSubject: {
-          type: "object",
+          role: "object",
           properties: {
-            id: { type: "string", format: "uri" },
-            firstName: { type: "string", minLength: 0, maxLength: 256 },
-            lastName: { type: "string", minLength: 1, maxLength: 256 },
+            id: { role: "string", format: "uri" },
+            firstName: { role: "string", minLength: 0, maxLength: 256 },
+            lastName: { role: "string", minLength: 1, maxLength: 256 },
           },
         },
       },
@@ -583,13 +583,13 @@ export async function createCSWithOperator(
     $schema: "https://json-schema.org/draft/2020-12/schema",
     title: "PermTestCredential",
     description: "Credential schema for permission tests",
-    type: "object",
+    role: "object",
     properties: {
       credentialSubject: {
-        type: "object",
+        role: "object",
         properties: {
-          id: { type: "string", format: "uri" },
-          name: { type: "string", minLength: 1, maxLength: 256 },
+          id: { role: "string", format: "uri" },
+          name: { role: "string", minLength: 1, maxLength: 256 },
         },
       },
     },
@@ -647,8 +647,8 @@ export async function createRootPermWithOperator(
   const effectiveUntil = new Date(effectiveFrom.getTime() + 360 * 24 * 60 * 60 * 1000); // 360 days
 
   const msg = {
-    typeUrl: typeUrls.MsgCreateRootPermission,
-    value: MsgCreateRootPermission.fromPartial({
+    typeUrl: typeUrls.MsgCreateRootParticipant,
+    value: MsgCreateRootParticipant.fromPartial({
       corporation,
       operator,
       schemaId,
@@ -658,7 +658,7 @@ export async function createRootPermWithOperator(
       validationFees: opts?.validationFees ?? 5,
       issuanceFees: opts?.issuanceFees ?? 5,
       verificationFees: opts?.verificationFees ?? 5,
-      // [MOD-PERM-MSG-7-3] perm.type is hardcoded to ECOSYSTEM by the handler
+      // [MOD-PERM-MSG-7-3] perm.role is hardcoded to ECOSYSTEM by the handler
       // and vs_operator is not set on root permissions.
     }),
   };
@@ -717,12 +717,12 @@ export async function createValidatedPermission(
 ): Promise<number> {
   // Start VP
   const startMsg = {
-    typeUrl: typeUrls.MsgStartPermissionVP,
-    value: MsgStartPermissionVP.fromPartial({
+    typeUrl: typeUrls.MsgStartParticipantOP,
+    value: MsgStartParticipantOP.fromPartial({
       corporation,
       operator,
-      type: PermissionType.ISSUER,
-      validatorPermId: rootPermId,
+      role: ParticipantRole.ISSUER,
+      validatorParticipantId: rootPermId,
       did,
       validationFees: OptionalUInt64.fromPartial({ value: 5 }),
       issuanceFees: OptionalUInt64.fromPartial({ value: 5 }),
@@ -749,8 +749,8 @@ export async function createValidatedPermission(
   // Must be <= validator_perm.effective_until (root uses effectiveFrom + 360 days)
   const effectiveUntil = new Date(Date.now() + 300 * 24 * 60 * 60 * 1000); // 300 days
   const validateMsg = {
-    typeUrl: typeUrls.MsgSetPermissionVPToValidated,
-    value: MsgSetPermissionVPToValidated.fromPartial({
+    typeUrl: typeUrls.MsgSetParticipantOPToValidated,
+    value: MsgSetParticipantOPToValidated.fromPartial({
       corporation,
       operator,
       id: vpPermId,
@@ -758,7 +758,7 @@ export async function createValidatedPermission(
       validationFees: 5,
       issuanceFees: 5,
       verificationFees: 5,
-      vpSummaryDigest: "sha384-validationSummaryDigest123",
+      opSummaryDigest: "sha384-validationSummaryDigest123",
       issuanceFeeDiscount: 0,
       verificationFeeDiscount: 0,
     }),

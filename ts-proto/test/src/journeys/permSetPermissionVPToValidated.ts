@@ -18,7 +18,7 @@ import {
   config,
 } from "../helpers/client";
 import { typeUrls } from "../helpers/registry";
-import { MsgSetPermissionVPToValidated } from "../../../src/codec/verana/perm/v1/tx";
+import { MsgSetParticipantOPToValidated } from "../../../src/codec/verana/pp/v1/tx";
 import { getPermAuthzSetup, getPermVPSetup, saveJourneyResult } from "../helpers/journeyResults";
 
 const COOLUSER_MNEMONIC =
@@ -55,12 +55,12 @@ async function main() {
 
   try {
     // Step 3: Validate the VP
-    console.log("Step 3: Setting VP to validated (MsgSetPermissionVPToValidated)...");
+    console.log("Step 3: Setting VP to validated (MsgSetParticipantOPToValidated)...");
     const effectiveUntil = new Date(Date.now() + 300 * 24 * 60 * 60 * 1000); // 300 days (must be <= validator_perm.effective_until)
 
     const msg = {
-      typeUrl: typeUrls.MsgSetPermissionVPToValidated,
-      value: MsgSetPermissionVPToValidated.fromPartial({
+      typeUrl: typeUrls.MsgSetParticipantOPToValidated,
+      value: MsgSetParticipantOPToValidated.fromPartial({
         corporation: authzSetup.authorityAddress,
         operator: authzSetup.operatorAddress,
         id: vpSetup.vpPermId,
@@ -68,7 +68,7 @@ async function main() {
         validationFees: 5,
         issuanceFees: 5,
         verificationFees: 5,
-        vpSummaryDigest: "sha384-validationSummaryDigest123456",
+        opSummaryDigest: "sha384-validationSummaryDigest123456",
         issuanceFeeDiscount: 0,
         verificationFeeDiscount: 0,
       }),

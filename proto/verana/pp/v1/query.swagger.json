@@ -1,0 +1,631 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "verana/pp/v1/query.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "Query"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/verana/pp/v1/beneficiaries": {
+      "get": {
+        "operationId": "Query_FindBeneficiaries",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.pp.v1.QueryFindBeneficiariesResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "issuer_participant_id",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uint64"
+          },
+          {
+            "name": "verifier_participant_id",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uint64"
+          }
+        ],
+        "tags": [
+          "Query"
+        ]
+      }
+    },
+    "/verana/pp/v1/find_with_did": {
+      "get": {
+        "operationId": "Query_FindParticipantsWithDID",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.pp.v1.QueryFindParticipantsWithDIDResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "did",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "role",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "schema_id",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uint64"
+          },
+          {
+            "name": "when",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          }
+        ],
+        "tags": [
+          "Query"
+        ]
+      }
+    },
+    "/verana/pp/v1/get/{id}": {
+      "get": {
+        "operationId": "Query_GetParticipant",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.pp.v1.QueryGetParticipantResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "uint64"
+          }
+        ],
+        "tags": [
+          "Query"
+        ]
+      }
+    },
+    "/verana/pp/v1/get_session/{id}": {
+      "get": {
+        "operationId": "Query_GetParticipantSession",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.pp.v1.QueryGetParticipantSessionResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "description": "UUID",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Query"
+        ]
+      }
+    },
+    "/verana/pp/v1/list": {
+      "get": {
+        "operationId": "Query_ListParticipants",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.pp.v1.QueryListParticipantsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "modified_after",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "response_max_size",
+            "description": "Default 64, min 1, max 1024",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "Query"
+        ]
+      }
+    },
+    "/verana/pp/v1/list_session": {
+      "get": {
+        "operationId": "Query_ListParticipantSessions",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.pp.v1.QueryListParticipantSessionsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "modified_after",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "response_max_size",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "Query"
+        ]
+      }
+    },
+    "/verana/pp/v1/params": {
+      "get": {
+        "summary": "Parameters queries the parameters of the module.",
+        "operationId": "Query_Params",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.pp.v1.QueryParamsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "tags": [
+          "Query"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "cosmos.base.v1beta1.Coin": {
+      "type": "object",
+      "properties": {
+        "denom": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "string"
+        }
+      },
+      "description": "Coin defines a token with a denomination and an amount.\n\nNOTE: The amount field is an Int which implements the custom method\nsignatures required by gogoproto."
+    },
+    "google.protobuf.Any": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "google.rpc.Status": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/google.protobuf.Any"
+          }
+        }
+      }
+    },
+    "verana.pp.v1.OnboardingState": {
+      "type": "string",
+      "enum": [
+        "ONBOARDING_STATE_UNSPECIFIED",
+        "PENDING",
+        "VALIDATED",
+        "TERMINATED"
+      ],
+      "default": "ONBOARDING_STATE_UNSPECIFIED",
+      "title": "Participant onboarding-process states"
+    },
+    "verana.pp.v1.Params": {
+      "type": "object",
+      "properties": {
+        "validation_term_requested_timeout_days": {
+          "type": "string",
+          "format": "uint64"
+        }
+      },
+      "description": "Params defines the parameters for the module."
+    },
+    "verana.pp.v1.Participant": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "schema_id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "role": {
+          "$ref": "#/definitions/verana.pp.v1.ParticipantRole"
+        },
+        "did": {
+          "type": "string"
+        },
+        "created": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "adjusted": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "slashed": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "repaid": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "effective_from": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "effective_until": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "modified": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "validation_fees": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "issuance_fees": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "verification_fees": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "deposit": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "slashed_deposit": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "repaid_deposit": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "revoked": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "validator_participant_id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "op_state": {
+          "$ref": "#/definitions/verana.pp.v1.OnboardingState"
+        },
+        "op_exp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "op_last_state_change": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "op_validator_deposit": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "op_current_fees": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "op_current_deposit": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "op_summary_digest": {
+          "type": "string"
+        },
+        "issuance_fee_discount": {
+          "type": "string",
+          "format": "uint64",
+          "description": "TODO(spec v4): Fee discount should be LegacyDec in [0, 1] per spec.\nCurrently scaled 0..10000 for compatibility; full migration deferred."
+        },
+        "verification_fee_discount": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "vs_operator": {
+          "type": "string",
+          "title": "VS Operator fields (spec v4)"
+        },
+        "vs_operator_authz_enabled": {
+          "type": "boolean"
+        },
+        "vs_operator_authz_spend_limit": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
+          }
+        },
+        "vs_operator_authz_with_feegrant": {
+          "type": "boolean"
+        },
+        "vs_operator_authz_fee_spend_limit": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
+          }
+        },
+        "vs_operator_authz_spend_period": {
+          "type": "string"
+        },
+        "corporation_id": {
+          "type": "string",
+          "format": "uint64",
+          "description": "corporation_id is the uint64 FK to Corporation.id (resolved from the\nsigning corporation account via AUTHZ-CHECK-5). Replaces former field 5."
+        }
+      }
+    },
+    "verana.pp.v1.ParticipantRole": {
+      "type": "string",
+      "enum": [
+        "UNSPECIFIED",
+        "ISSUER",
+        "VERIFIER",
+        "ISSUER_GRANTOR",
+        "VERIFIER_GRANTOR",
+        "ECOSYSTEM",
+        "HOLDER"
+      ],
+      "default": "UNSPECIFIED",
+      "title": "Participant roles"
+    },
+    "verana.pp.v1.ParticipantSession": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "UUID"
+        },
+        "corporation_id": {
+          "type": "string",
+          "format": "uint64",
+          "title": "uint64 FK to Corporation.id"
+        },
+        "vs_operator": {
+          "type": "string",
+          "title": "the VS operator account"
+        },
+        "created": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "modified": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "session_records": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/verana.pp.v1.ParticipantSessionRecord"
+          }
+        }
+      }
+    },
+    "verana.pp.v1.ParticipantSessionRecord": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uint64",
+          "title": "own uint64 id (key)"
+        },
+        "created": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "issuer_participant_id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "verifier_participant_id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "wallet_agent_participant_id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "agent_participant_id": {
+          "type": "string",
+          "format": "uint64"
+        }
+      }
+    },
+    "verana.pp.v1.QueryFindBeneficiariesResponse": {
+      "type": "object",
+      "properties": {
+        "participants": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/verana.pp.v1.Participant"
+          }
+        }
+      }
+    },
+    "verana.pp.v1.QueryFindParticipantsWithDIDResponse": {
+      "type": "object",
+      "properties": {
+        "participants": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/verana.pp.v1.Participant"
+          }
+        }
+      }
+    },
+    "verana.pp.v1.QueryGetParticipantResponse": {
+      "type": "object",
+      "properties": {
+        "participant": {
+          "$ref": "#/definitions/verana.pp.v1.Participant"
+        }
+      }
+    },
+    "verana.pp.v1.QueryGetParticipantSessionResponse": {
+      "type": "object",
+      "properties": {
+        "session": {
+          "$ref": "#/definitions/verana.pp.v1.ParticipantSession"
+        }
+      }
+    },
+    "verana.pp.v1.QueryListParticipantSessionsResponse": {
+      "type": "object",
+      "properties": {
+        "sessions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/verana.pp.v1.ParticipantSession"
+          }
+        }
+      }
+    },
+    "verana.pp.v1.QueryListParticipantsResponse": {
+      "type": "object",
+      "properties": {
+        "participants": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/verana.pp.v1.Participant"
+          }
+        }
+      }
+    },
+    "verana.pp.v1.QueryParamsResponse": {
+      "type": "object",
+      "properties": {
+        "params": {
+          "$ref": "#/definitions/verana.pp.v1.Params",
+          "description": "params holds all the parameters of this module."
+        }
+      },
+      "description": "QueryParamsResponse is response type for the Query/Params RPC method."
+    }
+  }
+}

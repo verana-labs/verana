@@ -1,8 +1,8 @@
 /**
  * Journey: PERM Renew + Cancel Permission VP
  *
- * Renews a validated VP (MsgRenewPermissionVP), then cancels the
- * pending request (MsgCancelPermissionVPLastRequest).
+ * Renews a validated VP (MsgRenewParticipantOP), then cancels the
+ * pending request (MsgCancelParticipantOPLastRequest).
  * Tests both message types in one journey.
  *
  * Requires: test:perm-validate-vp must be run first.
@@ -20,7 +20,7 @@ import {
   config,
 } from "../helpers/client";
 import { typeUrls } from "../helpers/registry";
-import { MsgRenewPermissionVP, MsgCancelPermissionVPLastRequest } from "../../../src/codec/verana/perm/v1/tx";
+import { MsgRenewParticipantOP, MsgCancelParticipantOPLastRequest } from "../../../src/codec/verana/pp/v1/tx";
 import { getPermAuthzSetup, loadJourneyResult } from "../helpers/journeyResults";
 
 const COOLUSER_MNEMONIC =
@@ -58,10 +58,10 @@ async function main() {
 
   try {
     // Step 3: Renew the validated VP
-    console.log("Step 3: Renewing validated VP (MsgRenewPermissionVP)...");
+    console.log("Step 3: Renewing validated VP (MsgRenewParticipantOP)...");
     const renewMsg = {
-      typeUrl: typeUrls.MsgRenewPermissionVP,
-      value: MsgRenewPermissionVP.fromPartial({
+      typeUrl: typeUrls.MsgRenewParticipantOP,
+      value: MsgRenewParticipantOP.fromPartial({
         corporation: authzSetup.authorityAddress,
         operator: authzSetup.operatorAddress,
         id: permId,
@@ -80,10 +80,10 @@ async function main() {
     console.log();
 
     // Step 4: Cancel the pending VP request
-    console.log("Step 4: Cancelling VP last request (MsgCancelPermissionVPLastRequest)...");
+    console.log("Step 4: Cancelling VP last request (MsgCancelParticipantOPLastRequest)...");
     const cancelMsg = {
-      typeUrl: typeUrls.MsgCancelPermissionVPLastRequest,
-      value: MsgCancelPermissionVPLastRequest.fromPartial({
+      typeUrl: typeUrls.MsgCancelParticipantOPLastRequest,
+      value: MsgCancelParticipantOPLastRequest.fromPartial({
         corporation: authzSetup.authorityAddress,
         operator: authzSetup.operatorAddress,
         id: permId,

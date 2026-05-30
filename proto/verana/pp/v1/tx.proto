@@ -1,0 +1,289 @@
+syntax = "proto3";
+package verana.pp.v1;
+
+import "amino/amino.proto";
+import "cosmos/base/v1beta1/coin.proto";
+import "cosmos/msg/v1/msg.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
+import "verana/pp/v1/params.proto";
+import "verana/pp/v1/types.proto";
+
+option go_package = "github.com/verana-labs/verana/x/pp/types";
+
+// Msg defines the Msg service.
+service Msg {
+  option (cosmos.msg.v1.service) = true;
+
+  // UpdateParams defines a (governance) operation for updating the module
+  // parameters. The authority defaults to the x/gov module account.
+  rpc UpdateParams(MsgUpdateParams) returns (MsgUpdateParamsResponse);
+  rpc StartParticipantOP(MsgStartParticipantOP) returns (MsgStartParticipantOPResponse);
+  rpc RenewParticipantOP(MsgRenewParticipantOP) returns (MsgRenewParticipantOPResponse);
+  rpc SetParticipantOPToValidated(MsgSetParticipantOPToValidated) returns (MsgSetParticipantOPToValidatedResponse);
+  rpc CancelParticipantOPLastRequest(MsgCancelParticipantOPLastRequest) returns (MsgCancelParticipantOPLastRequestResponse);
+  rpc CreateRootParticipant(MsgCreateRootParticipant) returns (MsgCreateRootParticipantResponse);
+  rpc SetParticipantEffectiveUntil(MsgSetParticipantEffectiveUntil) returns (MsgSetParticipantEffectiveUntilResponse);
+  rpc RevokeParticipant(MsgRevokeParticipant) returns (MsgRevokeParticipantResponse);
+  rpc CreateOrUpdateParticipantSession(MsgCreateOrUpdateParticipantSession) returns (MsgCreateOrUpdateParticipantSessionResponse);
+  rpc SlashParticipantTrustDeposit(MsgSlashParticipantTrustDeposit) returns (MsgSlashParticipantTrustDepositResponse);
+  rpc RepayParticipantSlashedTrustDeposit(MsgRepayParticipantSlashedTrustDeposit) returns (MsgRepayParticipantSlashedTrustDepositResponse);
+  // [MOD-PP-MSG-14] Self Create Participant (OPEN mode)
+  rpc SelfCreateParticipant(MsgSelfCreateParticipant) returns (MsgSelfCreateParticipantResponse);
+}
+
+// MsgUpdateParams is the Msg/UpdateParams request type.
+message MsgUpdateParams {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "verana/x/pp/MsgUpdateParams";
+
+  // authority is the address that controls the module (defaults to x/gov unless overwritten).
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // params defines the module parameters to update.
+  //
+  // NOTE: All parameters must be supplied.
+  Params params = 2 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+}
+
+// MsgUpdateParamsResponse defines the response structure for executing a
+// MsgUpdateParams message.
+message MsgUpdateParamsResponse {}
+
+// MsgStartParticipantOP represents a message to start a participant onboarding process
+message MsgStartParticipantOP {
+  option (cosmos.msg.v1.signer) = "operator";
+  option (amino.name) = "verana/x/pp/MsgStartParticipantOP";
+
+  // corporation is the group account on whose behalf this message is executed
+  string corporation = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // operator is the account authorized by the corporation to run this Msg
+  string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  ParticipantRole role = 3;
+  uint64 validator_participant_id = 4;
+  string did = 5; // mandatory: MUST conform to DID Syntax
+  OptionalUInt64 validation_fees = 6 [(gogoproto.nullable) = true];
+  OptionalUInt64 issuance_fees = 7 [(gogoproto.nullable) = true];
+  OptionalUInt64 verification_fees = 8 [(gogoproto.nullable) = true];
+  // vs_operator: the account of the Verifiable Service (optional)
+  string vs_operator = 9 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  bool vs_operator_authz_enabled = 10;
+  repeated cosmos.base.v1beta1.Coin vs_operator_authz_spend_limit = 11 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (amino.dont_omitempty) = true
+  ];
+  bool vs_operator_authz_with_feegrant = 12;
+  repeated cosmos.base.v1beta1.Coin vs_operator_authz_fee_spend_limit = 13 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (amino.dont_omitempty) = true
+  ];
+  google.protobuf.Duration vs_operator_authz_spend_period = 14 [(gogoproto.stdduration) = true];
+}
+
+// MsgStartParticipantOPResponse defines the Msg/StartParticipantOP response type
+message MsgStartParticipantOPResponse {
+  uint64 participant_id = 1;
+}
+
+// MsgRenewParticipantOP represents a message to renew a participant onboarding process
+message MsgRenewParticipantOP {
+  option (cosmos.msg.v1.signer) = "operator";
+  option (amino.name) = "verana/x/pp/MsgRenewParticipantOP";
+
+  // [MOD-PP-MSG-2-1] Spec v4 parameters: corporation, operator, id.
+  string corporation = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  uint64 id = 3; // ID of the participant to renew
+}
+
+// MsgRenewParticipantOPResponse defines the Msg/RenewParticipantOP response type
+message MsgRenewParticipantOPResponse {}
+
+// MsgSetParticipantOPToValidated represents a message to set a participant onboarding process to validated state
+message MsgSetParticipantOPToValidated {
+  option (cosmos.msg.v1.signer) = "operator";
+  option (amino.name) = "verana/x/pp/MsgSetPartOPValidated";
+
+  // corporation is the group account on whose behalf this message is executed
+  string corporation = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // operator is the account authorized by the corporation to run this Msg
+  string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  uint64 id = 3;
+  google.protobuf.Timestamp effective_until = 4 [
+    (gogoproto.stdtime) = true,
+    (gogoproto.nullable) = true
+  ];
+  uint64 validation_fees = 5;
+  uint64 issuance_fees = 6;
+  uint64 verification_fees = 7;
+  string op_summary_digest = 8;
+  // Fee discount fields (scaled: 0 = 0.0, 10000 = 1.0, range 0-10000)
+  // Default to 0 (no discount), maximum 10000 (100% discount)
+  uint64 issuance_fee_discount = 9; // Issuance fee discount (mandatory, default 0)
+  uint64 verification_fee_discount = 10; // Verification fee discount (mandatory, default 0)
+}
+
+// MsgSetParticipantOPToValidatedResponse defines the Msg/SetParticipantOPToValidated response type
+message MsgSetParticipantOPToValidatedResponse {}
+
+message MsgCancelParticipantOPLastRequest {
+  option (cosmos.msg.v1.signer) = "operator";
+  option (amino.name) = "verana/x/pp/MsgCancelPartOPLastReq";
+
+  // corporation is the group account on whose behalf this message is executed
+  string corporation = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // operator is the account authorized by the corporation to run this Msg
+  string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  uint64 id = 3; // Participant ID
+}
+
+message MsgCancelParticipantOPLastRequestResponse {}
+
+message MsgCreateRootParticipant {
+  option (cosmos.msg.v1.signer) = "operator";
+  option (amino.name) = "verana/x/pp/MsgCreateRootParticipant";
+
+  // [MOD-PP-MSG-7-1] Spec v4 parameters.
+  // participant.role is hardcoded to ECOSYSTEM by the handler per [MOD-PP-MSG-7-3];
+  // vs_operator is not set on root participants.
+  string corporation = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  uint64 schema_id = 3;
+  string did = 4;
+  google.protobuf.Timestamp effective_from = 5 [
+    (gogoproto.stdtime) = true,
+    (gogoproto.nullable) = true
+  ];
+  google.protobuf.Timestamp effective_until = 6 [
+    (gogoproto.stdtime) = true,
+    (gogoproto.nullable) = true
+  ];
+  uint64 validation_fees = 7;
+  uint64 issuance_fees = 8;
+  uint64 verification_fees = 9;
+}
+
+message MsgCreateRootParticipantResponse {
+  uint64 id = 1; // ID of the created participant
+}
+
+message MsgSetParticipantEffectiveUntil {
+  option (cosmos.msg.v1.signer) = "operator";
+  option (amino.name) = "verana/x/pp/MsgSetPartEffectiveUntil";
+
+  string corporation = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  uint64 id = 3; // Participant ID
+  google.protobuf.Timestamp effective_until = 4 [
+    (gogoproto.stdtime) = true,
+    (gogoproto.nullable) = true
+  ];
+}
+
+message MsgSetParticipantEffectiveUntilResponse {}
+
+message MsgRevokeParticipant {
+  option (cosmos.msg.v1.signer) = "operator";
+  option (amino.name) = "verana/x/pp/MsgRevokeParticipant";
+
+  string corporation = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  uint64 id = 3; // Participant ID
+}
+
+message MsgRevokeParticipantResponse {}
+
+message MsgCreateOrUpdateParticipantSession {
+  option (cosmos.msg.v1.signer) = "operator";
+  option (amino.name) = "verana/x/pp/MsgCreateOrUpdatePartSess";
+
+  // corporation is the group account on whose behalf this message is executed
+  string corporation = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // operator is the account authorized by the corporation to run this Msg (vs_operator)
+  string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string id = 3; // UUID (mandatory)
+  uint64 issuer_participant_id = 4; // optional: issuer participant id
+  uint64 verifier_participant_id = 5; // optional: verifier participant id
+  uint64 agent_participant_id = 6; // mandatory: agent credential issuer participant id
+  uint64 wallet_agent_participant_id = 7; // mandatory: wallet credential issuer participant id
+  string digest = 8; // optional: digest derived from an issued or verified credential
+}
+
+message MsgCreateOrUpdateParticipantSessionResponse {
+  string id = 1;
+}
+
+message MsgSlashParticipantTrustDeposit {
+  option (cosmos.msg.v1.signer) = "operator";
+  option (amino.name) = "verana/x/pp/MsgSlashParticipantTD";
+
+  // corporation is the group account on whose behalf this message is executed
+  string corporation = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // operator is the account authorized by the corporation to run this Msg
+  string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  uint64 id = 3;
+  uint64 amount = 4;
+  // [MOD-PP-MSG-12-1] reason for the slash (mandatory per spec v4)
+  string reason = 5;
+}
+
+message MsgSlashParticipantTrustDepositResponse {}
+
+message MsgRepayParticipantSlashedTrustDeposit {
+  option (cosmos.msg.v1.signer) = "operator";
+  option (amino.name) = "verana/x/pp/MsgRepayPartSlashedTD";
+
+  string corporation = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  uint64 id = 3;
+  uint64 amount = 4;
+}
+
+message MsgRepayParticipantSlashedTrustDepositResponse {}
+
+message MsgSelfCreateParticipant {
+  option (cosmos.msg.v1.signer) = "operator";
+  option (amino.name) = "verana/x/pp/MsgSelfCreateParticipant";
+
+  string corporation = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  ParticipantRole role = 3;
+  uint64 validator_participant_id = 4;
+  string did = 5;
+  google.protobuf.Timestamp effective_from = 6 [
+    (gogoproto.stdtime) = true,
+    (gogoproto.nullable) = true
+  ];
+  google.protobuf.Timestamp effective_until = 7 [
+    (gogoproto.stdtime) = true,
+    (gogoproto.nullable) = true
+  ];
+  uint64 verification_fees = 8;
+  uint64 validation_fees = 9;
+  // vs_operator: the account of the Verifiable Service (optional)
+  string vs_operator = 10 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  bool vs_operator_authz_enabled = 11;
+  repeated cosmos.base.v1beta1.Coin vs_operator_authz_spend_limit = 12 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (amino.dont_omitempty) = true
+  ];
+  bool vs_operator_authz_with_feegrant = 13;
+  repeated cosmos.base.v1beta1.Coin vs_operator_authz_fee_spend_limit = 14 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (amino.dont_omitempty) = true
+  ];
+  google.protobuf.Duration vs_operator_authz_spend_period = 15 [(gogoproto.stdduration) = true];
+}
+
+message MsgSelfCreateParticipantResponse {
+  uint64 id = 1;
+}

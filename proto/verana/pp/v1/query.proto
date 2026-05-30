@@ -1,0 +1,115 @@
+syntax = "proto3";
+package verana.pp.v1;
+
+import "amino/amino.proto";
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "verana/pp/v1/params.proto";
+import "verana/pp/v1/types.proto";
+
+option go_package = "github.com/verana-labs/verana/x/pp/types";
+
+// Query defines the gRPC querier service.
+service Query {
+  // Parameters queries the parameters of the module.
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+    option (google.api.http).get = "/verana/pp/v1/params";
+  }
+  rpc ListParticipants(QueryListParticipantsRequest) returns (QueryListParticipantsResponse) {
+    option (google.api.http).get = "/verana/pp/v1/list";
+  }
+  rpc GetParticipant(QueryGetParticipantRequest) returns (QueryGetParticipantResponse) {
+    option (google.api.http).get = "/verana/pp/v1/get/{id}";
+  }
+  rpc GetParticipantSession(QueryGetParticipantSessionRequest) returns (QueryGetParticipantSessionResponse) {
+    option (google.api.http).get = "/verana/pp/v1/get_session/{id}";
+  }
+  rpc ListParticipantSessions(QueryListParticipantSessionsRequest) returns (QueryListParticipantSessionsResponse) {
+    option (google.api.http).get = "/verana/pp/v1/list_session";
+  }
+  rpc FindParticipantsWithDID(QueryFindParticipantsWithDIDRequest) returns (QueryFindParticipantsWithDIDResponse) {
+    option (google.api.http).get = "/verana/pp/v1/find_with_did";
+  }
+  rpc FindBeneficiaries(QueryFindBeneficiariesRequest) returns (QueryFindBeneficiariesResponse) {
+    option (google.api.http).get = "/verana/pp/v1/beneficiaries";
+  }
+}
+
+// QueryParamsRequest is request type for the Query/Params RPC method.
+message QueryParamsRequest {}
+
+// QueryParamsResponse is response type for the Query/Params RPC method.
+message QueryParamsResponse {
+  // params holds all the parameters of this module.
+  Params params = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+}
+
+message QueryListParticipantsRequest {
+  google.protobuf.Timestamp modified_after = 1 [
+    (gogoproto.stdtime) = true,
+    (gogoproto.nullable) = true
+  ];
+  uint32 response_max_size = 2; // Default 64, min 1, max 1024
+}
+
+message QueryListParticipantsResponse {
+  repeated Participant participants = 1 [(gogoproto.nullable) = false];
+}
+
+message QueryGetParticipantRequest {
+  uint64 id = 1;
+}
+
+message QueryGetParticipantResponse {
+  Participant participant = 1 [(gogoproto.nullable) = false];
+}
+
+message QueryGetParticipantSessionRequest {
+  string id = 1; // UUID
+}
+
+message QueryGetParticipantSessionResponse {
+  ParticipantSession session = 1;
+}
+
+message QueryListParticipantSessionsRequest {
+  google.protobuf.Timestamp modified_after = 1 [
+    (gogoproto.stdtime) = true,
+    (gogoproto.nullable) = true
+  ];
+  uint32 response_max_size = 2;
+}
+
+message QueryListParticipantSessionsResponse {
+  repeated ParticipantSession sessions = 1 [(gogoproto.nullable) = false];
+}
+
+message QueryFindParticipantsWithDIDRequest {
+  string did = 1;
+  uint32 role = 2;
+  uint64 schema_id = 3;
+  reserved 4;
+  reserved "country";
+  google.protobuf.Timestamp when = 5 [
+    (gogoproto.stdtime) = true,
+    (gogoproto.nullable) = true
+  ];
+}
+
+message QueryFindParticipantsWithDIDResponse {
+  repeated Participant participants = 1 [(gogoproto.nullable) = false];
+}
+
+message QueryFindBeneficiariesRequest {
+  uint64 issuer_participant_id = 1;
+  uint64 verifier_participant_id = 2;
+}
+
+message QueryFindBeneficiariesResponse {
+  repeated Participant participants = 1 [(gogoproto.nullable) = false];
+}

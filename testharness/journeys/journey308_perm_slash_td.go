@@ -10,7 +10,7 @@ import (
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
 
 	cschema "github.com/verana-labs/verana/x/cs/types"
-	permtypes "github.com/verana-labs/verana/x/perm/types"
+	permtypes "github.com/verana-labs/verana/x/pp/types"
 
 	"github.com/verana-labs/verana/testharness/lib"
 )
@@ -81,7 +81,7 @@ func RunPermissionSlashTDJourney(ctx context.Context, client cosmosclient.Client
 	err = lib.GrantOperatorAuthorizationViaGroup(
 		client, ctx, adminAccount, member1Account,
 		policyAddr, operatorAddr, operatorAddr,
-		[]string{"/verana.perm.v1.MsgCreateRootPermission"},
+		[]string{"/verana.pp.v1.MsgCreateRootParticipant"},
 	)
 	if err != nil {
 		return fmt.Errorf("prerequisite 3 failed: could not grant CreateRootPermission auth: %w", err)
@@ -115,8 +115,8 @@ func RunPermissionSlashTDJourney(ctx context.Context, client cosmosclient.Client
 		client, ctx, adminAccount, member1Account,
 		policyAddr, operatorAddr, operatorAddr,
 		[]string{
-			"/verana.perm.v1.MsgStartPermissionVP",
-			"/verana.perm.v1.MsgSetPermissionVPToValidated",
+			"/verana.pp.v1.MsgStartParticipantOP",
+			"/verana.pp.v1.MsgSetParticipantOPToValidated",
 		},
 	)
 	if err != nil {
@@ -138,11 +138,11 @@ func RunPermissionSlashTDJourney(ctx context.Context, client cosmosclient.Client
 	// Create ISSUER child permission (via start VP + validate)
 	fmt.Println("\n--- Prerequisite 6: Start ISSUER permission VP ---")
 	issuerDID := lib.GenerateUniqueDID(client, ctx)
-	issuerPermIDStr, err := lib.StartPermissionVP(client, ctx, operatorAccount, permtypes.MsgStartPermissionVP{
-		Corporation:       policyAddr,
-		Type:            permtypes.PermissionType_ISSUER,
-		ValidatorPermId: rootPermID,
-		Did:             issuerDID,
+	issuerPermIDStr, err := lib.StartPermissionVP(client, ctx, operatorAccount, permtypes.MsgStartParticipantOP{
+		Corporation:            policyAddr,
+		Role:                   permtypes.ParticipantRole_ISSUER,
+		ValidatorParticipantId: rootPermID,
+		Did:                    issuerDID,
 	})
 	if err != nil {
 		return fmt.Errorf("prerequisite 6 failed: could not start ISSUER perm VP: %w", err)
@@ -153,9 +153,9 @@ func RunPermissionSlashTDJourney(ctx context.Context, client cosmosclient.Client
 
 	// Validate the ISSUER perm
 	fmt.Println("\n--- Prerequisite 7: Validate ISSUER permission ---")
-	_, err = lib.SetPermissionVPToValidated(client, ctx, operatorAccount, permtypes.MsgSetPermissionVPToValidated{
+	_, err = lib.SetPermissionVPToValidated(client, ctx, operatorAccount, permtypes.MsgSetParticipantOPToValidated{
 		Corporation: policyAddr,
-		Id:        issuerPermID,
+		Id:          issuerPermID,
 	})
 	if err != nil {
 		return fmt.Errorf("prerequisite 7 failed: could not validate ISSUER perm: %w", err)
@@ -164,11 +164,11 @@ func RunPermissionSlashTDJourney(ctx context.Context, client cosmosclient.Client
 	waitForTx("validate issuer perm")
 
 	// Verify deposit exists on the ISSUER perm
-	issuerPerm, err := lib.GetPermission(client, ctx, issuerPermID)
+	issuerPerm, err := lib.GetParticipant(client, ctx, issuerPermID)
 	if err != nil {
 		return fmt.Errorf("prerequisite verification failed: could not load ISSUER perm: %w", err)
 	}
-	fmt.Printf("  ISSUER perm deposit: %d, authority: %s\n", issuerPerm.Deposit, issuerPerm.Corporation)
+	fmt.Printf("  ISSUER perm deposit: %d, authority: %d\n", issuerPerm.Deposit, issuerPerm.CorporationId)
 
 	// =========================================================================
 	// TEST 1: SlashPermissionTrustDeposit (fail without auth, grant auth, succeed)
@@ -192,7 +192,7 @@ func RunPermissionSlashTDJourney(ctx context.Context, client cosmosclient.Client
 	err = lib.GrantOperatorAuthorizationViaGroup(
 		client, ctx, adminAccount, member1Account,
 		policyAddr, operatorAddr, operatorAddr,
-		[]string{"/verana.perm.v1.MsgSlashPermissionTrustDeposit"},
+		[]string{"/verana.pp.v1.MsgSlashParticipantTrustDeposit"},
 	)
 	if err != nil {
 		return fmt.Errorf("step 1b failed: %w", err)
@@ -213,7 +213,7 @@ func RunPermissionSlashTDJourney(ctx context.Context, client cosmosclient.Client
 	// TEST 2: Verify slashed permission fields
 	// =========================================================================
 	fmt.Println("\n=== TEST 2: Verify slashed permission fields ===")
-	slashedPerm, err := lib.GetPermission(client, ctx, issuerPermID)
+	slashedPerm, err := lib.GetParticipant(client, ctx, issuerPermID)
 	if err != nil {
 		return fmt.Errorf("step 2 query failed: %w", err)
 	}
@@ -267,7 +267,7 @@ func RunPermissionSlashTDJourney(ctx context.Context, client cosmosclient.Client
 
 	// Save results
 	result := lib.JourneyResult{
-		EcosystemID: setup304.EcosystemID,
+		EcosystemID:     setup304.EcosystemID,
 		SchemaID:        csIDStr,
 		DID:             rootPermDID,
 		PermissionID:    strconv.FormatUint(issuerPermID, 10),

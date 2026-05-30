@@ -28,17 +28,17 @@ var VPRDelegableMsgTypes = map[string]bool{
 	"/verana.cs.v1.MsgUpdateCredentialSchema":  true,
 	"/verana.cs.v1.MsgArchiveCredentialSchema": true,
 	// Permission (PERM) - CreateOrUpdatePermissionSession included for VSOA fee grants
-	"/verana.perm.v1.MsgStartPermissionVP":                  true,
-	"/verana.perm.v1.MsgRenewPermissionVP":                  true,
-	"/verana.perm.v1.MsgSetPermissionVPToValidated":         true,
-	"/verana.perm.v1.MsgCancelPermissionVPLastRequest":      true,
-	"/verana.perm.v1.MsgCreateRootPermission":               true,
-	"/verana.perm.v1.MsgAdjustPermission":                   true,
-	"/verana.perm.v1.MsgRevokePermission":                   true,
-	"/verana.perm.v1.MsgSlashPermissionTrustDeposit":        true,
-	"/verana.perm.v1.MsgRepayPermissionSlashedTrustDeposit": true,
-	"/verana.perm.v1.MsgSelfCreatePermission":               true,
-	"/verana.perm.v1.MsgCreateOrUpdatePermissionSession":    true,
+	"/verana.pp.v1.MsgStartParticipantOP":                  true,
+	"/verana.pp.v1.MsgRenewParticipantOP":                  true,
+	"/verana.pp.v1.MsgSetParticipantOPToValidated":         true,
+	"/verana.pp.v1.MsgCancelParticipantOPLastRequest":      true,
+	"/verana.pp.v1.MsgCreateRootParticipant":               true,
+	"/verana.pp.v1.MsgSetParticipantEffectiveUntil":                   true,
+	"/verana.pp.v1.MsgRevokeParticipant":                   true,
+	"/verana.pp.v1.MsgSlashParticipantTrustDeposit":        true,
+	"/verana.pp.v1.MsgRepayParticipantSlashedTrustDeposit": true,
+	"/verana.pp.v1.MsgSelfCreateParticipant":               true,
+	"/verana.pp.v1.MsgCreateOrUpdateParticipantSession":    true,
 	// Trust Deposit (TD)
 	"/verana.td.v1.MsgReclaimTrustDepositYield": true,
 	"/verana.td.v1.MsgRepaySlashedTrustDeposit": true,
@@ -51,10 +51,10 @@ var VPRDelegableMsgTypes = map[string]bool{
 	"/verana.xr.v1.MsgUpdateExchangeRate": true,
 }
 
-// MsgCreateOrUpdatePermissionSessionTypeURL is the type URL for
-// MsgCreateOrUpdatePermissionSession. Used to exclude it from operator
+// MsgCreateOrUpdateParticipantSessionTypeURL is the type URL for
+// MsgCreateOrUpdateParticipantSession. Used to exclude it from operator
 // authorization msg_types while still allowing it in VSOA fee grants.
-const MsgCreateOrUpdatePermissionSessionTypeURL = "/verana.perm.v1.MsgCreateOrUpdatePermissionSession"
+const MsgCreateOrUpdateParticipantSessionTypeURL = "/verana.pp.v1.MsgCreateOrUpdateParticipantSession"
 
 // ValidateBasic performs stateless validation on MsgGrantOperatorAuthorization.
 func (msg *MsgGrantOperatorAuthorization) ValidateBasic() error {
@@ -83,7 +83,7 @@ func (msg *MsgGrantOperatorAuthorization) ValidateBasic() error {
 		if !VPRDelegableMsgTypes[mt] {
 			return fmt.Errorf("msg_type %s is not a VPR delegable message type", mt)
 		}
-		if mt == MsgCreateOrUpdatePermissionSessionTypeURL {
+		if mt == MsgCreateOrUpdateParticipantSessionTypeURL {
 			return fmt.Errorf("msg_type %s is not allowed in operator authorization", mt)
 		}
 	}

@@ -16,7 +16,7 @@ import (
 
 	cschema "github.com/verana-labs/verana/x/cs/types"
 	"github.com/verana-labs/verana/x/ec/types"
-	permtypes "github.com/verana-labs/verana/x/perm/types"
+	permtypes "github.com/verana-labs/verana/x/pp/types"
 )
 
 // SendBankTransaction sends tokens from one account to another
@@ -235,7 +235,7 @@ func CreateCredentialSchema(client cosmosclient.Client, ctx context.Context, cre
 }
 
 // CreateRootPermission creates a root permission
-func CreateRootPermission(client cosmosclient.Client, ctx context.Context, creator cosmosaccount.Account, override permtypes.MsgCreateRootPermission) (string, error) {
+func CreateRootPermission(client cosmosclient.Client, ctx context.Context, creator cosmosaccount.Account, override permtypes.MsgCreateRootParticipant) (string, error) {
 	creatorAddr, err := creator.Address(addressPrefix)
 	if err != nil {
 		log.Fatal(err)
@@ -243,7 +243,7 @@ func CreateRootPermission(client cosmosclient.Client, ctx context.Context, creat
 
 	// [MOD-PERM-MSG-7-3] spec v4 draft 13: handler hardcodes perm.type = ECOSYSTEM.
 	_ = creatorAddr
-	msg := &permtypes.MsgCreateRootPermission{
+	msg := &permtypes.MsgCreateRootParticipant{
 		Corporation:      creatorAddr,
 		Operator:         creatorAddr,
 		SchemaId:         override.SchemaId,
@@ -287,18 +287,18 @@ func CreateRootPermission(client cosmosclient.Client, ctx context.Context, creat
 }
 
 // StartPermissionVP starts a permission validation process
-func StartPermissionVP(client cosmosclient.Client, ctx context.Context, creator cosmosaccount.Account, override permtypes.MsgStartPermissionVP) (string, error) {
+func StartPermissionVP(client cosmosclient.Client, ctx context.Context, creator cosmosaccount.Account, override permtypes.MsgStartParticipantOP) (string, error) {
 	creatorAddr, err := creator.Address(addressPrefix)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	msg := &permtypes.MsgStartPermissionVP{
+	msg := &permtypes.MsgStartParticipantOP{
 		Corporation:                  override.Corporation,
 		Operator:                     creatorAddr,
-		Type:                         override.Type,
+		Role:                         override.Role,
 		Did:                          override.Did,
-		ValidatorPermId:              override.ValidatorPermId,
+		ValidatorParticipantId:       override.ValidatorParticipantId,
 		ValidationFees:               override.ValidationFees,
 		IssuanceFees:                 override.IssuanceFees,
 		VerificationFees:             override.VerificationFees,
@@ -345,20 +345,20 @@ func StartPermissionVP(client cosmosclient.Client, ctx context.Context, creator 
 }
 
 // SetPermissionVPToValidated sets a permission validation process to validated
-func SetPermissionVPToValidated(client cosmosclient.Client, ctx context.Context, creator cosmosaccount.Account, override permtypes.MsgSetPermissionVPToValidated) (string, error) {
+func SetPermissionVPToValidated(client cosmosclient.Client, ctx context.Context, creator cosmosaccount.Account, override permtypes.MsgSetParticipantOPToValidated) (string, error) {
 	creatorAddr, err := creator.Address(addressPrefix)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	msg := &permtypes.MsgSetPermissionVPToValidated{
+	msg := &permtypes.MsgSetParticipantOPToValidated{
 		Corporation:             override.Corporation,
 		Operator:                creatorAddr,
 		Id:                      override.Id,
 		ValidationFees:          override.ValidationFees,
 		IssuanceFees:            override.IssuanceFees,
 		VerificationFees:        override.VerificationFees,
-		VpSummaryDigest:         override.VpSummaryDigest,
+		OpSummaryDigest:         override.OpSummaryDigest,
 		IssuanceFeeDiscount:     override.IssuanceFeeDiscount,
 		VerificationFeeDiscount: override.VerificationFeeDiscount,
 	}

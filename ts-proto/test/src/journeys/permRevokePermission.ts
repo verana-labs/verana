@@ -21,7 +21,7 @@ import {
   config,
 } from "../helpers/client";
 import { typeUrls } from "../helpers/registry";
-import { MsgRevokePermission } from "../../../src/codec/verana/perm/v1/tx";
+import { MsgRevokeParticipant } from "../../../src/codec/verana/pp/v1/tx";
 import { IssuerOnboardingMode, VerifierOnboardingMode } from "../../../src/codec/verana/cs/v1/types";
 import { getPermAuthzSetup } from "../helpers/journeyResults";
 import { createPermPrerequisites } from "../helpers/permissionHelpers";
@@ -81,10 +81,10 @@ async function main() {
     console.log();
 
     // Step 5: Revoke the root permission
-    console.log("Step 5: Revoking root permission (MsgRevokePermission)...");
+    console.log("Step 5: Revoking root permission (MsgRevokeParticipant)...");
     const msg = {
-      typeUrl: typeUrls.MsgRevokePermission,
-      value: MsgRevokePermission.fromPartial({
+      typeUrl: typeUrls.MsgRevokeParticipant,
+      value: MsgRevokeParticipant.fromPartial({
         corporation: setup.authorityAddress,
         operator: setup.operatorAddress,
         id: rootPermId,

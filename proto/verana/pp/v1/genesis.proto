@@ -1,0 +1,27 @@
+syntax = "proto3";
+package verana.pp.v1;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+import "verana/pp/v1/params.proto";
+import "verana/pp/v1/types.proto";
+
+option go_package = "github.com/verana-labs/verana/x/pp/types";
+
+// GenesisState defines the participant module's genesis state.
+message GenesisState {
+  // params defines all the parameters of the module.
+  Params params = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+
+  // participants is a list of all Participant objects
+  repeated Participant participants = 2 [(gogoproto.nullable) = false];
+
+  // participant_sessions is a list of all ParticipantSession objects
+  repeated ParticipantSession participant_sessions = 3 [(gogoproto.nullable) = false];
+
+  // next_participant_id is the next auto-increment ID to be assigned to a new participant
+  uint64 next_participant_id = 4;
+}

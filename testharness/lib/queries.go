@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	permtypes "github.com/verana-labs/verana/x/perm/types"
+	permtypes "github.com/verana-labs/verana/x/pp/types"
 
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
 
@@ -85,21 +85,21 @@ func QueryCredentialSchema(client cosmosclient.Client, ctx context.Context, csID
 }
 
 // QueryPermission queries for a permission by ID
-func QueryPermission(client cosmosclient.Client, ctx context.Context, permID uint64) (*permtypes.QueryGetPermissionResponse, error) {
+func QueryPermission(client cosmosclient.Client, ctx context.Context, permID uint64) (*permtypes.QueryGetParticipantResponse, error) {
 	permQueryClient := permtypes.NewQueryClient(client.Context())
-	return permQueryClient.GetPermission(ctx, &permtypes.QueryGetPermissionRequest{Id: permID})
+	return permQueryClient.GetParticipant(ctx, &permtypes.QueryGetParticipantRequest{Id: permID})
 }
 
 // ListPermissions lists all permissions
-func ListPermissions(client cosmosclient.Client, ctx context.Context) ([]permtypes.Permission, error) {
+func ListParticipants(client cosmosclient.Client, ctx context.Context) ([]permtypes.Participant, error) {
 	permQueryClient := permtypes.NewQueryClient(client.Context())
-	resp, err := permQueryClient.ListPermissions(ctx, &permtypes.QueryListPermissionsRequest{
+	resp, err := permQueryClient.ListParticipants(ctx, &permtypes.QueryListParticipantsRequest{
 		ResponseMaxSize: 1024,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return resp.Permissions, nil
+	return resp.Participants, nil
 }
 
 // VerifyEcosystem verifies an ecosystem exists with expected properties
@@ -151,13 +151,13 @@ func VerifyPermission(client cosmosclient.Client, ctx context.Context, permID ui
 	}
 
 	// Verify Schema ID and permission type match what we expect
-	if resp.Permission.SchemaId != expectedSchemaID {
+	if resp.Participant.SchemaId != expectedSchemaID {
 		fmt.Printf("❌ Permission verification failed: Expected Schema ID %d, got %d\n",
-			expectedSchemaID, resp.Permission.SchemaId)
+			expectedSchemaID, resp.Participant.SchemaId)
 		return false
 	}
 
-	permType := permtypes.PermissionType_name[int32(resp.Permission.Type)]
+	permType := permtypes.ParticipantRole_name[int32(resp.Participant.Role)]
 	if permType != expectedType {
 		fmt.Printf("❌ Permission verification failed: Expected type %s, got %s\n",
 			expectedType, permType)
@@ -165,6 +165,6 @@ func VerifyPermission(client cosmosclient.Client, ctx context.Context, permID ui
 	}
 
 	fmt.Printf("✅ Verified Permission ID %d exists with expected Schema ID %d and type %s\n",
-		permID, resp.Permission.SchemaId, permType)
+		permID, resp.Participant.SchemaId, permType)
 	return true
 }
