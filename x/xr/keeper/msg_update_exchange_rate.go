@@ -25,6 +25,11 @@ func (ms msgServer) UpdateExchangeRate(ctx context.Context, msg *types.MsgUpdate
 		return nil, errorsmod.Wrapf(types.ErrInvalidSigner, "authorization check failed: %s", err)
 	}
 
+	// [AUTHZ-CHECK-5] Signing authority account MUST be a registered Corporation.
+	if _, err := ms.coKeeper.ResolveCorporationByPolicyAddress(ctx, msg.Authority); err != nil {
+		return nil, err
+	}
+
 	// Load ExchangeRate by id
 	xr, err := ms.ExchangeRates.Get(ctx, msg.Id)
 	if err != nil {

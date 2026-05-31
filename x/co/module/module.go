@@ -22,6 +22,7 @@ import (
 	modulev1 "github.com/verana-labs/verana/api/verana/co/module/v1"
 	cokeeper "github.com/verana-labs/verana/x/co/keeper"
 	"github.com/verana-labs/verana/x/co/types"
+	dekeeper "github.com/verana-labs/verana/x/de/keeper"
 	gfkeeper "github.com/verana-labs/verana/x/gf/keeper"
 )
 
@@ -147,6 +148,7 @@ type ModuleInputs struct {
 	DelegationKeeper types.DelegationKeeper
 	GroupKeeper      groupkeeper.Keeper
 	GFKeeper         gfkeeper.Keeper
+	DeKeeper         dekeeper.Keeper
 }
 
 type ModuleOutputs struct {
@@ -176,6 +178,11 @@ func ProvideModule(in ModuleInputs) ModuleOutputs {
 	// copies, so this propagates to the msg server and query server that
 	// RegisterServices instantiates downstream.
 	in.GFKeeper.SetCorporationKeeper(cokeeper.NewCoAsGFCorporationKeeper(k))
+
+	// Cycle break (#308): MOD-CO depends on MOD-DE's DelegationKeeper for
+	// AUTHZ-CHECK-1, and MOD-DE needs MOD-CO for AUTHZ-CHECK-5. Wire MOD-CO into
+	// MOD-DE post-construction via the shared *corpKeeperRef.
+	in.DeKeeper.SetCorporationKeeper(cokeeper.NewCoAsDeCorporationKeeper(k))
 
 	m := NewAppModule(in.Cdc, k)
 	return ModuleOutputs{CoKeeper: k, Module: m}

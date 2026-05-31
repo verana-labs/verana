@@ -13,15 +13,35 @@ import (
 	moduletestutil "github.com/cosmos/cosmos-sdk/types/module/testutil"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
+	cotypes "github.com/verana-labs/verana/x/co/types"
 	"github.com/verana-labs/verana/x/de/keeper"
 	module "github.com/verana-labs/verana/x/de/module"
 	"github.com/verana-labs/verana/x/de/types"
 )
 
+// mockCorpKeeper backs AUTHZ-CHECK-5 in MOD-DE tests. It resolves any signing
+// account by default (permissive); add an address to unregistered to exercise
+// the ErrCorporationNotRegistered abort path.
+type mockCorpKeeper struct {
+	unregistered map[string]bool
+}
+
+func newMockCorpKeeper() *mockCorpKeeper {
+	return &mockCorpKeeper{unregistered: map[string]bool{}}
+}
+
+func (m *mockCorpKeeper) ResolveCorporationByPolicyAddress(_ context.Context, addr string) (types.CorporationView, error) {
+	if m.unregistered[addr] {
+		return types.CorporationView{}, cotypes.ErrCorporationNotRegistered
+	}
+	return types.CorporationView{Id: 1, PolicyAddress: addr}, nil
+}
+
 type fixture struct {
 	ctx          context.Context
 	keeper       keeper.Keeper
 	addressCodec address.Codec
+	corpKeeper   *mockCorpKeeper
 }
 
 func initFixture(t *testing.T) *fixture {
@@ -43,6 +63,11 @@ func initFixture(t *testing.T) *fixture {
 		authority,
 	)
 
+	// AUTHZ-CHECK-5: wire a permissive corporation keeper (the app wires the real
+	// MOD-CO keeper post-construction via the depinject cycle break).
+	corpKeeper := newMockCorpKeeper()
+	k.SetCorporationKeeper(corpKeeper)
+
 	// Initialize params
 	if err := k.Params.Set(ctx, types.DefaultParams()); err != nil {
 		t.Fatalf("failed to set params: %v", err)
@@ -52,5 +77,6 @@ func initFixture(t *testing.T) *fixture {
 		ctx:          ctx,
 		keeper:       k,
 		addressCodec: addressCodec,
+		corpKeeper:   corpKeeper,
 	}
 }

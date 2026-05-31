@@ -18,9 +18,29 @@ import (
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/stretchr/testify/require"
 
+	cotypes "github.com/verana-labs/verana/x/co/types"
 	"github.com/verana-labs/verana/x/td/keeper"
 	"github.com/verana-labs/verana/x/td/types"
 )
+
+// MockTDCorporationKeeper backs AUTHZ-CHECK-5 in MOD-TD tests. It resolves any
+// signing account by default (permissive) so pre-existing positive-path tests
+// pass; add an address to Unregistered to exercise the
+// ErrCorporationNotRegistered abort path.
+type MockTDCorporationKeeper struct {
+	Unregistered map[string]bool
+}
+
+func NewMockTDCorporationKeeper() *MockTDCorporationKeeper {
+	return &MockTDCorporationKeeper{Unregistered: map[string]bool{}}
+}
+
+func (m *MockTDCorporationKeeper) ResolveCorporationByPolicyAddress(_ context.Context, addr string) (types.CorporationView, error) {
+	if m.Unregistered[addr] {
+		return types.CorporationView{}, cotypes.ErrCorporationNotRegistered
+	}
+	return types.CorporationView{Id: 1, PolicyAddress: addr}, nil
+}
 
 // MockMintKeeper is a mock implementation of types.MintKeeper
 type MockMintKeeper struct{}
@@ -57,6 +77,7 @@ func TrustdepositKeeper(t testing.TB) (keeper.Keeper, sdk.Context) {
 		bankKeeper,
 		mintKeeper,
 		delegationKeeper,
+		NewMockTDCorporationKeeper(),
 	)
 
 	ctx := sdk.NewContext(stateStore, cmtproto.Header{}, false, log.NewNopLogger())
@@ -94,6 +115,7 @@ func TrustdepositKeeperWithDelegation(t testing.TB) (keeper.Keeper, sdk.Context,
 		bankKeeper,
 		mintKeeper,
 		delegationKeeper,
+		NewMockTDCorporationKeeper(),
 	)
 
 	ctx := sdk.NewContext(stateStore, cmtproto.Header{}, false, log.NewNopLogger())
@@ -103,4 +125,40 @@ func TrustdepositKeeperWithDelegation(t testing.TB) (keeper.Keeper, sdk.Context,
 	}
 
 	return k, ctx, delegationKeeper
+}
+
+// TrustdepositKeeperWithCorp creates a keeper exposing the AUTHZ-CHECK-5
+// CorporationKeeper mock so a test can mark a signing account unregistered and
+// assert the ErrCorporationNotRegistered abort path.
+func TrustdepositKeeperWithCorp(t testing.TB) (keeper.Keeper, sdk.Context, *MockDelegationKeeper, *MockTDCorporationKeeper) {
+	storeKey := storetypes.NewKVStoreKey(types.StoreKey)
+
+	db := dbm.NewMemDB()
+	stateStore := store.NewCommitMultiStore(db, log.NewNopLogger(), metrics.NewNoOpMetrics())
+	stateStore.MountStoreWithDB(storeKey, storetypes.StoreTypeIAVL, db)
+	require.NoError(t, stateStore.LoadLatestVersion())
+
+	registry := codectypes.NewInterfaceRegistry()
+	cdc := codec.NewProtoCodec(registry)
+	authority := authtypes.NewModuleAddress(govtypes.ModuleName)
+	delegationKeeper := &MockDelegationKeeper{}
+	coKeeper := NewMockTDCorporationKeeper()
+
+	k := keeper.NewKeeper(
+		cdc,
+		runtime.NewKVStoreService(storeKey),
+		log.NewNopLogger(),
+		authority.String(),
+		NewMockBankKeeper(),
+		NewMockMintKeeper(),
+		delegationKeeper,
+		coKeeper,
+	)
+
+	ctx := sdk.NewContext(stateStore, cmtproto.Header{}, false, log.NewNopLogger())
+	if err := k.SetParams(ctx, types.DefaultParams()); err != nil {
+		panic(err)
+	}
+
+	return k, ctx, delegationKeeper, coKeeper
 }

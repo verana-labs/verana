@@ -25,3 +25,19 @@ type ParamSubspace interface {
 	Get(context.Context, []byte, interface{})
 	Set(context.Context, []byte, interface{})
 }
+
+// CorporationView is the read shape MOD-DE needs about a Corporation subject
+// for AUTHZ-CHECK-5: the signing `corporation` policy_address resolved to its id.
+type CorporationView struct {
+	Id            uint64
+	PolicyAddress string
+}
+
+// CorporationKeeper backs AUTHZ-CHECK-5 for MOD-DE's delegable Grant/Revoke
+// messages: resolve the signing `corporation` policy_address to its registered
+// Corporation, or abort with ErrCorporationNotRegistered (referencing
+// MOD-CO-MSG-1). Wired post-construction via Keeper.SetCorporationKeeper to
+// break the MOD-DE ↔ MOD-CO depinject cycle.
+type CorporationKeeper interface {
+	ResolveCorporationByPolicyAddress(ctx context.Context, policyAddress string) (CorporationView, error)
+}

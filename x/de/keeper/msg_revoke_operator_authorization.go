@@ -29,6 +29,11 @@ func (ms msgServer) RevokeOperatorAuthorization(goCtx context.Context, msg *type
 		return nil, err
 	}
 
+	// [AUTHZ-CHECK-5] Signing corporation account MUST be a registered Corporation.
+	if _, err := ms.corporationKeeper().ResolveCorporationByPolicyAddress(ctx, msg.Corporation); err != nil {
+		return nil, err
+	}
+
 	// An Authorization entry MUST exist for this (authority, grantee)
 	oaKey := collections.Join(msg.Corporation, msg.Grantee)
 	hasOA, err := ms.OperatorAuthorizations.Has(ctx, oaKey)

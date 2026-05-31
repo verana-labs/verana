@@ -30,6 +30,7 @@ type (
 		bankKeeper       types.BankKeeper
 		mintKeeper       types.MintKeeper
 		delegationKeeper types.DelegationKeeper
+		coKeeper         types.CorporationKeeper
 	}
 )
 
@@ -41,6 +42,7 @@ func NewKeeper(
 	bankKeeper types.BankKeeper,
 	mintKeeper types.MintKeeper,
 	delegationKeeper types.DelegationKeeper,
+	coKeeper types.CorporationKeeper,
 ) Keeper {
 	sb := collections.NewSchemaBuilder(storeService)
 
@@ -58,6 +60,7 @@ func NewKeeper(
 		bankKeeper:       bankKeeper,
 		mintKeeper:       mintKeeper,
 		delegationKeeper: delegationKeeper,
+		coKeeper:         coKeeper,
 	}
 }
 

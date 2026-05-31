@@ -9,6 +9,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
+	cokeeper "github.com/verana-labs/verana/x/co/keeper"
 	"github.com/verana-labs/verana/x/xr/keeper"
 	"github.com/verana-labs/verana/x/xr/types"
 )
@@ -21,8 +22,17 @@ func (AppModule) IsOnePerModuleType() {}
 func init() {
 	appconfig.Register(
 		&types.Module{},
-		appconfig.Provide(ProvideModule),
+		appconfig.Provide(
+			ProvideModule,
+			ProvideCorporationKeeperForXR,
+		),
 	)
+}
+
+// ProvideCorporationKeeperForXR supplies xrtypes.CorporationKeeper for MOD-XR
+// AUTHZ-CHECK-5, sourced from the concrete x/co keeper.
+func ProvideCorporationKeeperForXR(co cokeeper.Keeper) types.CorporationKeeper {
+	return keeper.NewCoAsXRCorporationKeeper(co)
 }
 
 type ModuleInputs struct {
@@ -33,9 +43,10 @@ type ModuleInputs struct {
 	Cdc          codec.Codec
 	AddressCodec address.Codec
 
-	AuthKeeper       types.AuthKeeper
-	BankKeeper       types.BankKeeper
-	DelegationKeeper types.DelegationKeeper
+	AuthKeeper        types.AuthKeeper
+	BankKeeper        types.BankKeeper
+	DelegationKeeper  types.DelegationKeeper
+	CorporationKeeper types.CorporationKeeper
 }
 
 type ModuleOutputs struct {
@@ -57,6 +68,7 @@ func ProvideModule(in ModuleInputs) ModuleOutputs {
 		in.AddressCodec,
 		authority,
 		in.DelegationKeeper,
+		in.CorporationKeeper,
 	)
 	m := NewAppModule(in.Cdc, k, in.AuthKeeper, in.BankKeeper)
 

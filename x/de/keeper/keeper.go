@@ -28,6 +28,10 @@ type Keeper struct {
 	OperatorAuthorizationUsage collections.Map[collections.Pair[string, string], types.OperatorAuthorizationUsage]
 	FeeGrants                  collections.Map[collections.Pair[string, string], types.FeeGrant]
 	VSOperatorAuthorizations   collections.Map[collections.Pair[string, string], types.VSOperatorAuthorization]
+
+	// corpRef backs AUTHZ-CHECK-5; wired post-construction via
+	// SetCorporationKeeper to break the MOD-DE ↔ MOD-CO cycle (#308).
+	corpRef *corpKeeperRef
 }
 
 func NewKeeper(
@@ -50,6 +54,7 @@ func NewKeeper(
 		cdc:          cdc,
 		addressCodec: addressCodec,
 		authority:    authority,
+		corpRef:      &corpKeeperRef{K: StubCorporationKeeper{}},
 
 		Params: collections.NewItem(sb, types.ParamsKey, "params", codec.CollValue[types.Params](cdc)),
 		OperatorAuthorizations: collections.NewMap(sb, types.OperatorAuthorizationKey, "operator_authorization",
@@ -74,6 +79,20 @@ func NewKeeper(
 // GetAuthority returns the module's authority.
 func (k Keeper) GetAuthority() []byte {
 	return k.authority
+}
+
+// SetCorporationKeeper wires the real MOD-CO keeper after both keepers exist.
+// The receiver is by-value because the inner *corpKeeperRef is shared by all
+// keeper copies (msg server, query server, etc.). MUST be called once during
+// app init before any handler runs (cycle break for #308).
+func (k Keeper) SetCorporationKeeper(c types.CorporationKeeper) {
+	k.corpRef.K = c
+}
+
+// corporationKeeper returns the wired CorporationKeeper (real or stub) used by
+// AUTHZ-CHECK-5 on delegable MOD-DE messages.
+func (k Keeper) corporationKeeper() types.CorporationKeeper {
+	return k.corpRef.K
 }
 
 // AddPermToVSOA adds a permission ID to the VSOperatorAuthorization for the

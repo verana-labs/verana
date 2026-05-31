@@ -27,6 +27,20 @@ type DelegationKeeper interface {
 	CheckOperatorAuthorization(ctx context.Context, authority string, operator string, msgTypeURL string, now time.Time) error
 }
 
+// CorporationView is the read shape MOD-DI needs about a Corporation subject
+// for AUTHZ-CHECK-5: the signing `authority` policy_address resolved to its id.
+type CorporationView struct {
+	Id            uint64
+	PolicyAddress string
+}
+
+// CorporationKeeper backs AUTHZ-CHECK-5 for MOD-DI's delegable MsgStoreDigest:
+// resolve the signing `authority` policy_address to its registered Corporation,
+// or abort with ErrCorporationNotRegistered (referencing MOD-CO-MSG-1).
+type CorporationKeeper interface {
+	ResolveCorporationByPolicyAddress(ctx context.Context, policyAddress string) (CorporationView, error)
+}
+
 // ParamSubspace defines the expected Subspace interface for parameters.
 type ParamSubspace interface {
 	Get(context.Context, []byte, interface{})
