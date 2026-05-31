@@ -75,6 +75,9 @@ func runJourney(ctx context.Context, client cosmosclient.Client, journeyID int) 
 	case 102:
 		// Ecosystem Operations with Operator Authorization (fail-then-pass)
 		return journeys.RunEcosystemAuthzOperationsJourney(ctx, client)
+	case 110:
+		// AUTHZ-CHECK-5 negative: delegable Msg from an unregistered corporation
+		return journeys.RunAuthzCheck5UnregisteredJourney(ctx, client)
 	case 201:
 		// Credential Schema Operator Authorization Setup (Group + Fund)
 		return journeys.RunCredentialSchemaAuthzSetupJourney(ctx, client)
