@@ -8,6 +8,7 @@
 import * as _m0 from "protobufjs/minimal";
 import { Params } from "./params";
 import { OperatorAuthorization, VSOperatorAuthorization } from "./types";
+import Long = require("long");
 
 export const protobufPackage = "verana.de.v1";
 
@@ -26,8 +27,8 @@ export interface QueryParamsResponse {
  * Query/ListOperatorAuthorizations RPC method.
  */
 export interface QueryListOperatorAuthorizationsRequest {
-  /** corporation filters by the corporation group that granted the authorization. */
-  corporation: string;
+  /** corporation_id filters by the corporation that granted the authorization. */
+  corporationId: number;
   /** operator filters by the operator account that received the authorization. */
   operator: string;
   /** response_max_size limits the number of results. Must be 1-1024, defaults to 64. */
@@ -47,8 +48,8 @@ export interface QueryListOperatorAuthorizationsResponse {
  * Query/ListVSOperatorAuthorizations RPC method.
  */
 export interface QueryListVSOperatorAuthorizationsRequest {
-  /** corporation filters by the corporation group that granted the authorization. */
-  corporation: string;
+  /** corporation_id filters by the corporation that granted the authorization. */
+  corporationId: number;
   /** vs_operator filters by the VS operator account. */
   vsOperator: string;
   /** response_max_size limits the number of results. Must be 1-1024, defaults to 64. */
@@ -61,6 +62,40 @@ export interface QueryListVSOperatorAuthorizationsRequest {
  */
 export interface QueryListVSOperatorAuthorizationsResponse {
   vsOperatorAuthorizations: VSOperatorAuthorization[];
+}
+
+/**
+ * QueryGetOperatorAuthorizationRequest is the request type for the
+ * Query/GetOperatorAuthorization RPC method.
+ */
+export interface QueryGetOperatorAuthorizationRequest {
+  /** id is the OperatorAuthorization id to fetch. */
+  id: number;
+}
+
+/**
+ * QueryGetOperatorAuthorizationResponse is the response type for the
+ * Query/GetOperatorAuthorization RPC method.
+ */
+export interface QueryGetOperatorAuthorizationResponse {
+  operatorAuthorization: OperatorAuthorization | undefined;
+}
+
+/**
+ * QueryGetVSOperatorAuthorizationRequest is the request type for the
+ * Query/GetVSOperatorAuthorization RPC method.
+ */
+export interface QueryGetVSOperatorAuthorizationRequest {
+  /** id is the VSOperatorAuthorization id to fetch. */
+  id: number;
+}
+
+/**
+ * QueryGetVSOperatorAuthorizationResponse is the response type for the
+ * Query/GetVSOperatorAuthorization RPC method.
+ */
+export interface QueryGetVSOperatorAuthorizationResponse {
+  vsOperatorAuthorization: VSOperatorAuthorization | undefined;
 }
 
 function createBaseQueryParamsRequest(): QueryParamsRequest {
@@ -166,13 +201,13 @@ export const QueryParamsResponse = {
 };
 
 function createBaseQueryListOperatorAuthorizationsRequest(): QueryListOperatorAuthorizationsRequest {
-  return { corporation: "", operator: "", responseMaxSize: 0 };
+  return { corporationId: 0, operator: "", responseMaxSize: 0 };
 }
 
 export const QueryListOperatorAuthorizationsRequest = {
   encode(message: QueryListOperatorAuthorizationsRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.corporation !== "") {
-      writer.uint32(10).string(message.corporation);
+    if (message.corporationId !== 0) {
+      writer.uint32(8).uint64(message.corporationId);
     }
     if (message.operator !== "") {
       writer.uint32(18).string(message.operator);
@@ -191,11 +226,11 @@ export const QueryListOperatorAuthorizationsRequest = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          if (tag !== 10) {
+          if (tag !== 8) {
             break;
           }
 
-          message.corporation = reader.string();
+          message.corporationId = longToNumber(reader.uint64() as Long);
           continue;
         case 2:
           if (tag !== 18) {
@@ -222,7 +257,7 @@ export const QueryListOperatorAuthorizationsRequest = {
 
   fromJSON(object: any): QueryListOperatorAuthorizationsRequest {
     return {
-      corporation: isSet(object.corporation) ? globalThis.String(object.corporation) : "",
+      corporationId: isSet(object.corporationId) ? globalThis.Number(object.corporationId) : 0,
       operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
       responseMaxSize: isSet(object.responseMaxSize) ? globalThis.Number(object.responseMaxSize) : 0,
     };
@@ -230,8 +265,8 @@ export const QueryListOperatorAuthorizationsRequest = {
 
   toJSON(message: QueryListOperatorAuthorizationsRequest): unknown {
     const obj: any = {};
-    if (message.corporation !== "") {
-      obj.corporation = message.corporation;
+    if (message.corporationId !== 0) {
+      obj.corporationId = Math.round(message.corporationId);
     }
     if (message.operator !== "") {
       obj.operator = message.operator;
@@ -251,7 +286,7 @@ export const QueryListOperatorAuthorizationsRequest = {
     object: I,
   ): QueryListOperatorAuthorizationsRequest {
     const message = createBaseQueryListOperatorAuthorizationsRequest();
-    message.corporation = object.corporation ?? "";
+    message.corporationId = object.corporationId ?? 0;
     message.operator = object.operator ?? "";
     message.responseMaxSize = object.responseMaxSize ?? 0;
     return message;
@@ -325,13 +360,13 @@ export const QueryListOperatorAuthorizationsResponse = {
 };
 
 function createBaseQueryListVSOperatorAuthorizationsRequest(): QueryListVSOperatorAuthorizationsRequest {
-  return { corporation: "", vsOperator: "", responseMaxSize: 0 };
+  return { corporationId: 0, vsOperator: "", responseMaxSize: 0 };
 }
 
 export const QueryListVSOperatorAuthorizationsRequest = {
   encode(message: QueryListVSOperatorAuthorizationsRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.corporation !== "") {
-      writer.uint32(10).string(message.corporation);
+    if (message.corporationId !== 0) {
+      writer.uint32(8).uint64(message.corporationId);
     }
     if (message.vsOperator !== "") {
       writer.uint32(18).string(message.vsOperator);
@@ -350,11 +385,11 @@ export const QueryListVSOperatorAuthorizationsRequest = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          if (tag !== 10) {
+          if (tag !== 8) {
             break;
           }
 
-          message.corporation = reader.string();
+          message.corporationId = longToNumber(reader.uint64() as Long);
           continue;
         case 2:
           if (tag !== 18) {
@@ -381,7 +416,7 @@ export const QueryListVSOperatorAuthorizationsRequest = {
 
   fromJSON(object: any): QueryListVSOperatorAuthorizationsRequest {
     return {
-      corporation: isSet(object.corporation) ? globalThis.String(object.corporation) : "",
+      corporationId: isSet(object.corporationId) ? globalThis.Number(object.corporationId) : 0,
       vsOperator: isSet(object.vsOperator) ? globalThis.String(object.vsOperator) : "",
       responseMaxSize: isSet(object.responseMaxSize) ? globalThis.Number(object.responseMaxSize) : 0,
     };
@@ -389,8 +424,8 @@ export const QueryListVSOperatorAuthorizationsRequest = {
 
   toJSON(message: QueryListVSOperatorAuthorizationsRequest): unknown {
     const obj: any = {};
-    if (message.corporation !== "") {
-      obj.corporation = message.corporation;
+    if (message.corporationId !== 0) {
+      obj.corporationId = Math.round(message.corporationId);
     }
     if (message.vsOperator !== "") {
       obj.vsOperator = message.vsOperator;
@@ -410,7 +445,7 @@ export const QueryListVSOperatorAuthorizationsRequest = {
     object: I,
   ): QueryListVSOperatorAuthorizationsRequest {
     const message = createBaseQueryListVSOperatorAuthorizationsRequest();
-    message.corporation = object.corporation ?? "";
+    message.corporationId = object.corporationId ?? 0;
     message.vsOperator = object.vsOperator ?? "";
     message.responseMaxSize = object.responseMaxSize ?? 0;
     return message;
@@ -483,6 +518,264 @@ export const QueryListVSOperatorAuthorizationsResponse = {
   },
 };
 
+function createBaseQueryGetOperatorAuthorizationRequest(): QueryGetOperatorAuthorizationRequest {
+  return { id: 0 };
+}
+
+export const QueryGetOperatorAuthorizationRequest = {
+  encode(message: QueryGetOperatorAuthorizationRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.id !== 0) {
+      writer.uint32(8).uint64(message.id);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryGetOperatorAuthorizationRequest {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryGetOperatorAuthorizationRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 8) {
+            break;
+          }
+
+          message.id = longToNumber(reader.uint64() as Long);
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryGetOperatorAuthorizationRequest {
+    return { id: isSet(object.id) ? globalThis.Number(object.id) : 0 };
+  },
+
+  toJSON(message: QueryGetOperatorAuthorizationRequest): unknown {
+    const obj: any = {};
+    if (message.id !== 0) {
+      obj.id = Math.round(message.id);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<QueryGetOperatorAuthorizationRequest>, I>>(
+    base?: I,
+  ): QueryGetOperatorAuthorizationRequest {
+    return QueryGetOperatorAuthorizationRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<QueryGetOperatorAuthorizationRequest>, I>>(
+    object: I,
+  ): QueryGetOperatorAuthorizationRequest {
+    const message = createBaseQueryGetOperatorAuthorizationRequest();
+    message.id = object.id ?? 0;
+    return message;
+  },
+};
+
+function createBaseQueryGetOperatorAuthorizationResponse(): QueryGetOperatorAuthorizationResponse {
+  return { operatorAuthorization: undefined };
+}
+
+export const QueryGetOperatorAuthorizationResponse = {
+  encode(message: QueryGetOperatorAuthorizationResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.operatorAuthorization !== undefined) {
+      OperatorAuthorization.encode(message.operatorAuthorization, writer.uint32(10).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryGetOperatorAuthorizationResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryGetOperatorAuthorizationResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.operatorAuthorization = OperatorAuthorization.decode(reader, reader.uint32());
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryGetOperatorAuthorizationResponse {
+    return {
+      operatorAuthorization: isSet(object.operatorAuthorization)
+        ? OperatorAuthorization.fromJSON(object.operatorAuthorization)
+        : undefined,
+    };
+  },
+
+  toJSON(message: QueryGetOperatorAuthorizationResponse): unknown {
+    const obj: any = {};
+    if (message.operatorAuthorization !== undefined) {
+      obj.operatorAuthorization = OperatorAuthorization.toJSON(message.operatorAuthorization);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<QueryGetOperatorAuthorizationResponse>, I>>(
+    base?: I,
+  ): QueryGetOperatorAuthorizationResponse {
+    return QueryGetOperatorAuthorizationResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<QueryGetOperatorAuthorizationResponse>, I>>(
+    object: I,
+  ): QueryGetOperatorAuthorizationResponse {
+    const message = createBaseQueryGetOperatorAuthorizationResponse();
+    message.operatorAuthorization =
+      (object.operatorAuthorization !== undefined && object.operatorAuthorization !== null)
+        ? OperatorAuthorization.fromPartial(object.operatorAuthorization)
+        : undefined;
+    return message;
+  },
+};
+
+function createBaseQueryGetVSOperatorAuthorizationRequest(): QueryGetVSOperatorAuthorizationRequest {
+  return { id: 0 };
+}
+
+export const QueryGetVSOperatorAuthorizationRequest = {
+  encode(message: QueryGetVSOperatorAuthorizationRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.id !== 0) {
+      writer.uint32(8).uint64(message.id);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryGetVSOperatorAuthorizationRequest {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryGetVSOperatorAuthorizationRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 8) {
+            break;
+          }
+
+          message.id = longToNumber(reader.uint64() as Long);
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryGetVSOperatorAuthorizationRequest {
+    return { id: isSet(object.id) ? globalThis.Number(object.id) : 0 };
+  },
+
+  toJSON(message: QueryGetVSOperatorAuthorizationRequest): unknown {
+    const obj: any = {};
+    if (message.id !== 0) {
+      obj.id = Math.round(message.id);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<QueryGetVSOperatorAuthorizationRequest>, I>>(
+    base?: I,
+  ): QueryGetVSOperatorAuthorizationRequest {
+    return QueryGetVSOperatorAuthorizationRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<QueryGetVSOperatorAuthorizationRequest>, I>>(
+    object: I,
+  ): QueryGetVSOperatorAuthorizationRequest {
+    const message = createBaseQueryGetVSOperatorAuthorizationRequest();
+    message.id = object.id ?? 0;
+    return message;
+  },
+};
+
+function createBaseQueryGetVSOperatorAuthorizationResponse(): QueryGetVSOperatorAuthorizationResponse {
+  return { vsOperatorAuthorization: undefined };
+}
+
+export const QueryGetVSOperatorAuthorizationResponse = {
+  encode(message: QueryGetVSOperatorAuthorizationResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.vsOperatorAuthorization !== undefined) {
+      VSOperatorAuthorization.encode(message.vsOperatorAuthorization, writer.uint32(10).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryGetVSOperatorAuthorizationResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryGetVSOperatorAuthorizationResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.vsOperatorAuthorization = VSOperatorAuthorization.decode(reader, reader.uint32());
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryGetVSOperatorAuthorizationResponse {
+    return {
+      vsOperatorAuthorization: isSet(object.vsOperatorAuthorization)
+        ? VSOperatorAuthorization.fromJSON(object.vsOperatorAuthorization)
+        : undefined,
+    };
+  },
+
+  toJSON(message: QueryGetVSOperatorAuthorizationResponse): unknown {
+    const obj: any = {};
+    if (message.vsOperatorAuthorization !== undefined) {
+      obj.vsOperatorAuthorization = VSOperatorAuthorization.toJSON(message.vsOperatorAuthorization);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<QueryGetVSOperatorAuthorizationResponse>, I>>(
+    base?: I,
+  ): QueryGetVSOperatorAuthorizationResponse {
+    return QueryGetVSOperatorAuthorizationResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<QueryGetVSOperatorAuthorizationResponse>, I>>(
+    object: I,
+  ): QueryGetVSOperatorAuthorizationResponse {
+    const message = createBaseQueryGetVSOperatorAuthorizationResponse();
+    message.vsOperatorAuthorization =
+      (object.vsOperatorAuthorization !== undefined && object.vsOperatorAuthorization !== null)
+        ? VSOperatorAuthorization.fromPartial(object.vsOperatorAuthorization)
+        : undefined;
+    return message;
+  },
+};
+
 /** Query defines the gRPC querier service. */
 export interface Query {
   /** Parameters queries the parameters of the module. */
@@ -495,6 +788,14 @@ export interface Query {
   ListVSOperatorAuthorizations(
     request: QueryListVSOperatorAuthorizationsRequest,
   ): Promise<QueryListVSOperatorAuthorizationsResponse>;
+  /** [MOD-DE-QRY-3] GetOperatorAuthorization returns a single OperatorAuthorization by id. */
+  GetOperatorAuthorization(
+    request: QueryGetOperatorAuthorizationRequest,
+  ): Promise<QueryGetOperatorAuthorizationResponse>;
+  /** [MOD-DE-QRY-4] GetVSOperatorAuthorization returns a single VSOperatorAuthorization by id. */
+  GetVSOperatorAuthorization(
+    request: QueryGetVSOperatorAuthorizationRequest,
+  ): Promise<QueryGetVSOperatorAuthorizationResponse>;
 }
 
 export const QueryServiceName = "verana.de.v1.Query";
@@ -507,6 +808,8 @@ export class QueryClientImpl implements Query {
     this.Params = this.Params.bind(this);
     this.ListOperatorAuthorizations = this.ListOperatorAuthorizations.bind(this);
     this.ListVSOperatorAuthorizations = this.ListVSOperatorAuthorizations.bind(this);
+    this.GetOperatorAuthorization = this.GetOperatorAuthorization.bind(this);
+    this.GetVSOperatorAuthorization = this.GetVSOperatorAuthorization.bind(this);
   }
   Params(request: QueryParamsRequest): Promise<QueryParamsResponse> {
     const data = QueryParamsRequest.encode(request).finish();
@@ -529,6 +832,22 @@ export class QueryClientImpl implements Query {
     const promise = this.rpc.request(this.service, "ListVSOperatorAuthorizations", data);
     return promise.then((data) => QueryListVSOperatorAuthorizationsResponse.decode(_m0.Reader.create(data)));
   }
+
+  GetOperatorAuthorization(
+    request: QueryGetOperatorAuthorizationRequest,
+  ): Promise<QueryGetOperatorAuthorizationResponse> {
+    const data = QueryGetOperatorAuthorizationRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "GetOperatorAuthorization", data);
+    return promise.then((data) => QueryGetOperatorAuthorizationResponse.decode(_m0.Reader.create(data)));
+  }
+
+  GetVSOperatorAuthorization(
+    request: QueryGetVSOperatorAuthorizationRequest,
+  ): Promise<QueryGetVSOperatorAuthorizationResponse> {
+    const data = QueryGetVSOperatorAuthorizationRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "GetVSOperatorAuthorization", data);
+    return promise.then((data) => QueryGetVSOperatorAuthorizationResponse.decode(_m0.Reader.create(data)));
+  }
 }
 
 interface Rpc {
@@ -546,6 +865,21 @@ export type DeepPartial<T> = T extends Builtin ? T
 type KeysOfUnion<T> = T extends T ? keyof T : never;
 export type Exact<P, I extends P> = P extends Builtin ? P
   : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
+
+function longToNumber(long: Long): number {
+  if (long.gt(globalThis.Number.MAX_SAFE_INTEGER)) {
+    throw new globalThis.Error("Value is larger than Number.MAX_SAFE_INTEGER");
+  }
+  if (long.lt(globalThis.Number.MIN_SAFE_INTEGER)) {
+    throw new globalThis.Error("Value is smaller than Number.MIN_SAFE_INTEGER");
+  }
+  return long.toNumber();
+}
+
+if (_m0.util.Long !== Long) {
+  _m0.util.Long = Long as any;
+  _m0.configure();
+}
 
 function isSet(value: any): boolean {
   return value !== null && value !== undefined;

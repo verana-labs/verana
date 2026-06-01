@@ -2,14 +2,13 @@ package keeper
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"strconv"
 
 	"cosmossdk.io/collections"
 	"cosmossdk.io/core/address"
 	corestore "cosmossdk.io/core/store"
 	"github.com/cosmos/cosmos-sdk/codec"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/verana-labs/verana/x/de/types"
 )
@@ -22,12 +21,27 @@ type Keeper struct {
 	// Typically, this should be the x/gov module account.
 	authority []byte
 
-	Schema                     collections.Schema
-	Params                     collections.Item[types.Params]
-	OperatorAuthorizations     collections.Map[collections.Pair[string, string], types.OperatorAuthorization]
-	OperatorAuthorizationUsage collections.Map[collections.Pair[string, string], types.OperatorAuthorizationUsage]
-	FeeGrants                  collections.Map[collections.Pair[string, string], types.FeeGrant]
-	VSOperatorAuthorizations   collections.Map[collections.Pair[string, string], types.VSOperatorAuthorization]
+	Schema collections.Schema
+	Params collections.Item[types.Params]
+
+	// OperatorAuthorization: keyed by its own uint64 id; (corporation_id,
+	// operator) is a unique secondary index. Usage is the AUTHZ-CHECK-1 spend
+	// ledger keyed by the parent OperatorAuthorization id.
+	OperatorAuthorizations        collections.Map[uint64, types.OperatorAuthorization]
+	OperatorAuthorizationByCorpOp collections.Map[collections.Pair[uint64, string], uint64]
+	OperatorAuthorizationSeq      collections.Sequence
+	OperatorAuthorizationUsage    collections.Map[uint64, types.OperatorAuthorizationUsage]
+
+	// FeeGrant: composite key (grantor_corporation_id, grantee).
+	FeeGrants collections.Map[collections.Pair[uint64, string], types.FeeGrant]
+
+	// VSOperatorAuthorization: keyed by its own uint64 id; (corporation_id,
+	// vs_operator) is a unique secondary index; participant_id -> vsoa.id is a
+	// tertiary index for global participant_id uniqueness and MSG-6 / MSG-9.
+	VSOperatorAuthorizations collections.Map[uint64, types.VSOperatorAuthorization]
+	VSOAByCorpOp             collections.Map[collections.Pair[uint64, string], uint64]
+	VSOAByParticipant        collections.Map[uint64, uint64]
+	VSOASeq                  collections.Sequence
 
 	// corpRef backs AUTHZ-CHECK-5; wired post-construction via
 	// SetCorporationKeeper to break the MOD-DE ↔ MOD-CO cycle (#308).
@@ -47,7 +61,7 @@ func NewKeeper(
 
 	sb := collections.NewSchemaBuilder(storeService)
 
-	pairKeyCodec := collections.PairKeyCodec(collections.StringKey, collections.StringKey)
+	corpOpKeyCodec := collections.PairKeyCodec(collections.Uint64Key, collections.StringKey)
 
 	k := Keeper{
 		storeService: storeService,
@@ -57,14 +71,25 @@ func NewKeeper(
 		corpRef:      &corpKeeperRef{K: StubCorporationKeeper{}},
 
 		Params: collections.NewItem(sb, types.ParamsKey, "params", codec.CollValue[types.Params](cdc)),
+
 		OperatorAuthorizations: collections.NewMap(sb, types.OperatorAuthorizationKey, "operator_authorization",
-			pairKeyCodec, codec.CollValue[types.OperatorAuthorization](cdc)),
+			collections.Uint64Key, codec.CollValue[types.OperatorAuthorization](cdc)),
+		OperatorAuthorizationByCorpOp: collections.NewMap(sb, types.OperatorAuthorizationByCorpOpKey, "operator_authorization_by_corp_op",
+			corpOpKeyCodec, collections.Uint64Value),
+		OperatorAuthorizationSeq: collections.NewSequence(sb, types.OperatorAuthorizationSeqKey, "operator_authorization_seq"),
 		OperatorAuthorizationUsage: collections.NewMap(sb, types.OperatorAuthorizationUsageKey, "operator_authorization_usage",
-			pairKeyCodec, codec.CollValue[types.OperatorAuthorizationUsage](cdc)),
+			collections.Uint64Key, codec.CollValue[types.OperatorAuthorizationUsage](cdc)),
+
 		FeeGrants: collections.NewMap(sb, types.FeeGrantKey, "fee_grant",
-			pairKeyCodec, codec.CollValue[types.FeeGrant](cdc)),
+			corpOpKeyCodec, codec.CollValue[types.FeeGrant](cdc)),
+
 		VSOperatorAuthorizations: collections.NewMap(sb, types.VSOperatorAuthorizationKey, "vs_operator_authorization",
-			pairKeyCodec, codec.CollValue[types.VSOperatorAuthorization](cdc)),
+			collections.Uint64Key, codec.CollValue[types.VSOperatorAuthorization](cdc)),
+		VSOAByCorpOp: collections.NewMap(sb, types.VSOAByCorpOpKey, "vsoa_by_corp_op",
+			corpOpKeyCodec, collections.Uint64Value),
+		VSOAByParticipant: collections.NewMap(sb, types.VSOAByParticipantKey, "vsoa_by_participant",
+			collections.Uint64Key, collections.Uint64Value),
+		VSOASeq: collections.NewSequence(sb, types.VSOASeqKey, "vsoa_seq"),
 	}
 
 	schema, err := sb.Build()
@@ -95,134 +120,56 @@ func (k Keeper) corporationKeeper() types.CorporationKeeper {
 	return k.corpRef.K
 }
 
-// AddPermToVSOA adds a permission ID to the VSOperatorAuthorization for the
-// given (authority, vsOperator) pair, creating the entry if it doesn't exist.
-// It also checks mutual exclusivity: an OperatorAuthorization must NOT exist
-// for the same pair. [MOD-DE-MSG-5 storage]
-func (k Keeper) AddPermToVSOA(ctx context.Context, authority, vsOperator string, permID uint64) error {
-	sdkCtx := sdk.UnwrapSDKContext(ctx)
-
-	// Mutual exclusivity check
-	oaKey := collections.Join(authority, vsOperator)
-	hasOA, err := k.OperatorAuthorizations.Has(sdkCtx, oaKey)
+// nextOperatorAuthorizationID returns a fresh, 1-based OperatorAuthorization id.
+func (k Keeper) nextOperatorAuthorizationID(ctx context.Context) (uint64, error) {
+	n, err := k.OperatorAuthorizationSeq.Next(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to check OperatorAuthorization: %w", err)
+		return 0, err
 	}
-	if hasOA {
-		return types.ErrOperatorAuthzExistsMutex
-	}
-
-	vsKey := collections.Join(authority, vsOperator)
-	vsoa, err := k.VSOperatorAuthorizations.Get(sdkCtx, vsKey)
-	if err != nil {
-		vsoa = types.VSOperatorAuthorization{
-			Corporation: authority,
-			VsOperator:  vsOperator,
-			Permissions: []uint64{},
-		}
-	}
-
-	// Avoid duplicates
-	for _, pid := range vsoa.Permissions {
-		if pid == permID {
-			return nil // already present
-		}
-	}
-	vsoa.Permissions = append(vsoa.Permissions, permID)
-
-	if err := k.VSOperatorAuthorizations.Set(sdkCtx, vsKey, vsoa); err != nil {
-		return fmt.Errorf("failed to set VSOperatorAuthorization: %w", err)
-	}
-
-	// Emit event
-	sdkCtx.EventManager().EmitEvent(
-		sdk.NewEvent(
-			types.EventTypeGrantVSOperatorAuthorization,
-			sdk.NewAttribute(types.AttributeKeyCorporation, authority),
-			sdk.NewAttribute(types.AttributeKeyVsOperator, vsOperator),
-			sdk.NewAttribute(types.AttributeKeyPermissionID, strconv.FormatUint(permID, 10)),
-			sdk.NewAttribute(types.AttributeKeyTimestamp, sdkCtx.BlockTime().String()),
-		),
-	)
-
-	return nil
+	return n + 1, nil
 }
 
-// RemovePermFromVSOA removes a permission ID from the VSOperatorAuthorization.
-// If no permissions remain, the entry is deleted. Returns the remaining permission IDs.
-// [MOD-DE-MSG-6 storage]
-func (k Keeper) RemovePermFromVSOA(ctx context.Context, authority, vsOperator string, permID uint64) ([]uint64, error) {
-	sdkCtx := sdk.UnwrapSDKContext(ctx)
-
-	vsKey := collections.Join(authority, vsOperator)
-	vsoa, err := k.VSOperatorAuthorizations.Get(sdkCtx, vsKey)
+// nextVSOAID returns a fresh, 1-based VSOperatorAuthorization id.
+func (k Keeper) nextVSOAID(ctx context.Context) (uint64, error) {
+	n, err := k.VSOASeq.Next(ctx)
 	if err != nil {
-		return nil, nil // doesn't exist, nothing to do
+		return 0, err
 	}
-
-	newPerms := make([]uint64, 0, len(vsoa.Permissions))
-	for _, pid := range vsoa.Permissions {
-		if pid != permID {
-			newPerms = append(newPerms, pid)
-		}
-	}
-	vsoa.Permissions = newPerms
-
-	if len(vsoa.Permissions) == 0 {
-		if err := k.VSOperatorAuthorizations.Remove(sdkCtx, vsKey); err != nil {
-			return nil, fmt.Errorf("failed to remove VSOperatorAuthorization: %w", err)
-		}
-	} else {
-		if err := k.VSOperatorAuthorizations.Set(sdkCtx, vsKey, vsoa); err != nil {
-			return nil, fmt.Errorf("failed to update VSOperatorAuthorization: %w", err)
-		}
-	}
-
-	// Emit event
-	sdkCtx.EventManager().EmitEvent(
-		sdk.NewEvent(
-			types.EventTypeRevokeVSOperatorAuthorization,
-			sdk.NewAttribute(types.AttributeKeyCorporation, authority),
-			sdk.NewAttribute(types.AttributeKeyVsOperator, vsOperator),
-			sdk.NewAttribute(types.AttributeKeyPermissionID, strconv.FormatUint(permID, 10)),
-			sdk.NewAttribute(types.AttributeKeyTimestamp, sdkCtx.BlockTime().String()),
-		),
-	)
-
-	return newPerms, nil
+	return n + 1, nil
 }
 
-// HasOperatorAuthorization checks if an OperatorAuthorization exists for the given pair.
-// Used by the perm module for mutual exclusivity checks in [MOD-DE-MSG-5].
-func (k Keeper) HasOperatorAuthorization(ctx context.Context, authority, operator string) (bool, error) {
-	sdkCtx := sdk.UnwrapSDKContext(ctx)
-	key := collections.Join(authority, operator)
-	return k.OperatorAuthorizations.Has(sdkCtx, key)
+// getOperatorAuthorizationByCorpOp loads the OperatorAuthorization indexed by
+// the (corporation_id, operator) secondary index. Returns found=false when no
+// entry exists.
+func (k Keeper) getOperatorAuthorizationByCorpOp(ctx context.Context, corporationID uint64, operator string) (types.OperatorAuthorization, bool, error) {
+	id, err := k.OperatorAuthorizationByCorpOp.Get(ctx, collections.Join(corporationID, operator))
+	if err != nil {
+		if errors.Is(err, collections.ErrNotFound) {
+			return types.OperatorAuthorization{}, false, nil
+		}
+		return types.OperatorAuthorization{}, false, err
+	}
+	oa, err := k.OperatorAuthorizations.Get(ctx, id)
+	if err != nil {
+		return types.OperatorAuthorization{}, false, err
+	}
+	return oa, true, nil
 }
 
-// CheckVSOperatorAuthorization checks if a VS operator is authorized to act on behalf of the authority.
-// [AUTHZ-CHECK-3]
-func (k Keeper) CheckVSOperatorAuthorization(ctx context.Context, authority, vsOperator string) error {
-	sdkCtx := sdk.UnwrapSDKContext(ctx)
-	vsKey := collections.Join(authority, vsOperator)
-	has, err := k.VSOperatorAuthorizations.Has(sdkCtx, vsKey)
+// getVSOAByCorpOp loads the VSOperatorAuthorization indexed by the
+// (corporation_id, vs_operator) secondary index. Returns found=false when no
+// entry exists.
+func (k Keeper) getVSOAByCorpOp(ctx context.Context, corporationID uint64, vsOperator string) (types.VSOperatorAuthorization, bool, error) {
+	id, err := k.VSOAByCorpOp.Get(ctx, collections.Join(corporationID, vsOperator))
 	if err != nil {
-		return fmt.Errorf("failed to check VS operator authorization: %w", err)
+		if errors.Is(err, collections.ErrNotFound) {
+			return types.VSOperatorAuthorization{}, false, nil
+		}
+		return types.VSOperatorAuthorization{}, false, err
 	}
-	if !has {
-		return fmt.Errorf("VS operator %s is not authorized for authority %s", vsOperator, authority)
-	}
-	return nil
-}
-
-// GetVSOAPermissions returns the permission IDs for a VSOperatorAuthorization.
-// Returns nil if the VSOA doesn't exist.
-func (k Keeper) GetVSOAPermissions(ctx context.Context, authority, vsOperator string) ([]uint64, error) {
-	sdkCtx := sdk.UnwrapSDKContext(ctx)
-	vsKey := collections.Join(authority, vsOperator)
-	vsoa, err := k.VSOperatorAuthorizations.Get(sdkCtx, vsKey)
+	vsoa, err := k.VSOperatorAuthorizations.Get(ctx, id)
 	if err != nil {
-		return nil, nil
+		return types.VSOperatorAuthorization{}, false, err
 	}
-	return vsoa.Permissions, nil
+	return vsoa, true, nil
 }

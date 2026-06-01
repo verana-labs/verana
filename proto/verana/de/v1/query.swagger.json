@@ -59,11 +59,12 @@
         },
         "parameters": [
           {
-            "name": "corporation",
-            "description": "corporation filters by the corporation group that granted the authorization.",
+            "name": "corporation_id",
+            "description": "corporation_id filters by the corporation that granted the authorization.",
             "in": "query",
             "required": false,
-            "type": "string"
+            "type": "string",
+            "format": "uint64"
           },
           {
             "name": "operator",
@@ -79,6 +80,39 @@
             "required": false,
             "type": "integer",
             "format": "int64"
+          }
+        ],
+        "tags": [
+          "Query"
+        ]
+      }
+    },
+    "/verana/de/v1/operator-authorizations/{id}": {
+      "get": {
+        "summary": "[MOD-DE-QRY-3] GetOperatorAuthorization returns a single OperatorAuthorization by id.",
+        "operationId": "Query_GetOperatorAuthorization",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.de.v1.QueryGetOperatorAuthorizationResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "description": "id is the OperatorAuthorization id to fetch.",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "uint64"
           }
         ],
         "tags": [
@@ -106,11 +140,12 @@
         },
         "parameters": [
           {
-            "name": "corporation",
-            "description": "corporation filters by the corporation group that granted the authorization.",
+            "name": "corporation_id",
+            "description": "corporation_id filters by the corporation that granted the authorization.",
             "in": "query",
             "required": false,
-            "type": "string"
+            "type": "string",
+            "format": "uint64"
           },
           {
             "name": "vs_operator",
@@ -126,6 +161,39 @@
             "required": false,
             "type": "integer",
             "format": "int64"
+          }
+        ],
+        "tags": [
+          "Query"
+        ]
+      }
+    },
+    "/verana/de/v1/vs-operator-authorizations/{id}": {
+      "get": {
+        "summary": "[MOD-DE-QRY-4] GetVSOperatorAuthorization returns a single VSOperatorAuthorization by id.",
+        "operationId": "Query_GetVSOperatorAuthorization",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.de.v1.QueryGetVSOperatorAuthorizationResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "description": "id is the VSOperatorAuthorization id to fetch.",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "uint64"
           }
         ],
         "tags": [
@@ -309,6 +377,24 @@
         }
       },
       "description": "ParticipantAuthorizationRecord is a per-participant VS-operator authorization\nnested inside a VSOperatorAuthorization. Keyed by participant_id, which is\nglobally unique across all records of all VSOperatorAuthorizations."
+    },
+    "verana.de.v1.QueryGetOperatorAuthorizationResponse": {
+      "type": "object",
+      "properties": {
+        "operator_authorization": {
+          "$ref": "#/definitions/verana.de.v1.OperatorAuthorization"
+        }
+      },
+      "description": "QueryGetOperatorAuthorizationResponse is the response type for the\nQuery/GetOperatorAuthorization RPC method."
+    },
+    "verana.de.v1.QueryGetVSOperatorAuthorizationResponse": {
+      "type": "object",
+      "properties": {
+        "vs_operator_authorization": {
+          "$ref": "#/definitions/verana.de.v1.VSOperatorAuthorization"
+        }
+      },
+      "description": "QueryGetVSOperatorAuthorizationResponse is the response type for the\nQuery/GetVSOperatorAuthorization RPC method."
     },
     "verana.de.v1.QueryListOperatorAuthorizationsResponse": {
       "type": "object",

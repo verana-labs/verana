@@ -12,19 +12,17 @@ import (
 	"github.com/verana-labs/verana/x/de/types"
 )
 
-// CheckOperatorAuthorization implements [AUTHZ-CHECK-1] without a spend
-// amount. It verifies existence, expiration, and msg_type membership but does
-// NOT touch the spend-limit ledger. Legacy entry point — callers that have
-// no meaningful spend amount (e.g. pure control-plane messages like
-// MsgArchiveTrustRegistry) continue to use this.
+// CheckOperatorAuthorization implements [AUTHZ-CHECK-1] without a spend amount.
+// It verifies existence, expiration, and msg_type membership but does NOT touch
+// the spend-limit ledger. Legacy entry point — callers with no meaningful spend
+// amount continue to use this.
 //
 // If operator is empty, the corporation is acting alone (e.g. via group
 // proposal) and the check is skipped.
 //
-// Checks performed:
-//  1. OperatorAuthorization must exist for (corporation, operator)
-//  2. If expiration is set, it must be in the future
-//  3. The requested msgTypeURL must be in the authorization's msg_types
+// The `corporation` argument is the signing corporation account (policy_address)
+// and is resolved to its co.id via AUTHZ-CHECK-5 before the (corporation_id,
+// operator) index lookup.
 func (k Keeper) CheckOperatorAuthorization(
 	ctx context.Context,
 	corporation string,
@@ -37,22 +35,8 @@ func (k Keeper) CheckOperatorAuthorization(
 }
 
 // CheckOperatorAuthorizationWithSpend implements the full [AUTHZ-CHECK-1]
-// contract including the spend_limit / period-reset invariant:
-//
-//	"If oauthz.spend_limit is set, the remaining balance MUST be sufficient
-//	 for the operation. After successful execution, the consumed amount MUST
-//	 be deducted from the remaining balance. If oauthz.period is set and the
-//	 current period has elapsed since the last reset, the remaining balance
-//	 MUST be reset to oauthz.spend_limit before evaluating the check above."
-//
-// Callers that actually consume funds (bank transfers, trust deposit
-// adjustments) should use this variant and pass the total coin amount they
-// intend to move. The remaining balance is decremented atomically with the
-// check, so callers only need to invoke it once per (authority, operator,
-// msg type) tuple.
-//
-// When spend is zero or the authorization has no spend_limit configured, the
-// extra ledger work is skipped and behavior matches CheckOperatorAuthorization.
+// contract including the spend_limit / period-reset invariant. The spend ledger
+// is keyed by the parent OperatorAuthorization id.
 func (k Keeper) CheckOperatorAuthorizationWithSpend(
 	ctx context.Context,
 	corporation string,
@@ -74,19 +58,17 @@ func (k Keeper) CheckOperatorAuthorizationWithSpend(
 		return nil
 	}
 
-	// Load (or initialize) the usage record for this (corporation, operator) tuple.
-	key := collections.Join(corporation, operator)
-	usage, err := k.OperatorAuthorizationUsage.Get(ctx, key)
+	// Load (or initialize) the usage record keyed by the OperatorAuthorization id.
+	usage, err := k.OperatorAuthorizationUsage.Get(ctx, oa.Id)
 	if err != nil {
 		if !errors.Is(err, collections.ErrNotFound) {
 			return fmt.Errorf("failed to read usage ledger: %w", err)
 		}
 		// First use — seed remaining at spend_limit with last_reset = now.
 		usage = types.OperatorAuthorizationUsage{
-			Corporation: corporation,
-			Operator:    operator,
-			Remaining:   oa.SpendLimit,
-			LastReset:   now,
+			OperatorAuthorizationId: oa.Id,
+			Remaining:               oa.SpendLimit,
+			LastReset:               now,
 		}
 	}
 
@@ -106,16 +88,16 @@ func (k Keeper) CheckOperatorAuthorizationWithSpend(
 
 	// Debit remaining atomically with the check.
 	usage.Remaining = usage.Remaining.Sub(spend...)
-	if err := k.OperatorAuthorizationUsage.Set(ctx, key, usage); err != nil {
+	if err := k.OperatorAuthorizationUsage.Set(ctx, oa.Id, usage); err != nil {
 		return fmt.Errorf("failed to update authorization usage: %w", err)
 	}
 
 	return nil
 }
 
-// checkOperatorAuthorizationCore performs the expiration + msg_type checks
-// and returns the loaded OperatorAuthorization so spend-limit enforcement can
-// use it without a second keeper lookup.
+// checkOperatorAuthorizationCore performs the expiration + msg_type checks and
+// returns the loaded OperatorAuthorization so spend-limit enforcement can use it
+// without a second keeper lookup.
 func (k Keeper) checkOperatorAuthorizationCore(
 	ctx context.Context,
 	corporation string,
@@ -128,20 +110,29 @@ func (k Keeper) checkOperatorAuthorizationCore(
 		return types.OperatorAuthorization{}, nil
 	}
 
-	// 1. Load OperatorAuthorization
-	key := collections.Join(corporation, operator)
-	oa, err := k.OperatorAuthorizations.Get(ctx, key)
+	// Resolve the signing corporation account to its co.id (AUTHZ-CHECK-5). An
+	// unregistered corporation cannot have granted any authorization.
+	co, err := k.corporationKeeper().ResolveCorporationByPolicyAddress(ctx, corporation)
 	if err != nil {
 		return types.OperatorAuthorization{}, types.ErrAuthzNotFound
 	}
 
-	// 2. Check expiration: expired when now >= expiration (i.e. expiration is not strictly after now).
+	// 1. Load OperatorAuthorization via the (corporation_id, operator) index.
+	oa, found, err := k.getOperatorAuthorizationByCorpOp(ctx, co.Id, operator)
+	if err != nil {
+		return types.OperatorAuthorization{}, err
+	}
+	if !found {
+		return types.OperatorAuthorization{}, types.ErrAuthzNotFound
+	}
+
+	// 2. Check expiration: expired when now >= expiration.
 	if oa.Expiration != nil && !oa.Expiration.After(now) {
 		return types.OperatorAuthorization{}, types.ErrAuthzExpired
 	}
 
-	// 3. Check that the requested msg type is authorized
-	found := false
+	// 3. Check that the requested msg type is authorized.
+	found = false
 	for _, mt := range oa.MsgTypes {
 		if mt == msgTypeURL {
 			found = true

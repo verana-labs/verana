@@ -20,4 +20,7 @@ var (
 	ErrOperatorAuthzNotFound    = errors.Register(ModuleName, 1109, "operator authorization not found for this corporation/grantee pair")
 	ErrOperatorAuthzExistsMutex = errors.Register(ModuleName, 1110, "OperatorAuthorization already exists for this corporation/vs_operator pair; mutual exclusivity violated")
 	ErrInvalidResponseMaxSize   = errors.Register(ModuleName, 1111, "response_max_size must be between 1 and 1024")
+	ErrParticipantRecordExists  = errors.Register(ModuleName, 1112, "a ParticipantAuthorizationRecord already exists for this participant_id; must be globally unique")
+	ErrVSOAOtherCorporation     = errors.Register(ModuleName, 1113, "vs_operator already has a VSOperatorAuthorization from a different corporation; single-corp constraint violated")
+	ErrVSOperatorAuthzNotFound  = errors.Register(ModuleName, 1114, "VS operator authorization not found")
 )

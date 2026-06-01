@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
 
 	"cosmossdk.io/collections"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -16,9 +17,9 @@ func (ms msgServer) GrantOperatorAuthorization(goCtx context.Context, msg *types
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	now := ctx.BlockTime()
 
-	// [MOD-DE-MSG-3-2] Basic checks (stateful)
+	// [MOD-DE-MSG-3-2] Basic checks (stateful).
 
-	// [AUTHZ-CHECK-1] Verify operator authorization for this (authority, operator) pair
+	// [AUTHZ-CHECK-1] Verify operator authorization for this (corporation, operator) pair.
 	if err := ms.CheckOperatorAuthorization(
 		ctx,
 		msg.Corporation,
@@ -29,40 +30,33 @@ func (ms msgServer) GrantOperatorAuthorization(goCtx context.Context, msg *types
 		return nil, err
 	}
 
-	// [AUTHZ-CHECK-5] Signing corporation account MUST be a registered Corporation.
-	if _, err := ms.corporationKeeper().ResolveCorporationByPolicyAddress(ctx, msg.Corporation); err != nil {
+	// [AUTHZ-CHECK-5] Signing corporation account MUST be a registered Corporation;
+	// resolve it to co.id.
+	co, err := ms.corporationKeeper().ResolveCorporationByPolicyAddress(ctx, msg.Corporation)
+	if err != nil {
 		return nil, err
 	}
 
-	// [MOD-DE-MSG-3] Self-grant privilege escalation guard.
-	// An operator invoking this method cannot grant itself (or expand its own
-	// delegation) new msg_types — that would bypass the corporation's intent.
-	// Self-grants are only permitted via a group proposal (operator == "").
-	// Without this guard, an operator holding only
-	// [MsgGrantOperatorAuthorization] authorization could call Grant with
-	// grantee = self and msg_types = [anything], escalating to full delegation.
+	// [MOD-DE-MSG-3] Self-grant privilege escalation guard. An operator invoking
+	// this method cannot grant itself new msg_types. Self-grants are only
+	// permitted via a group proposal (operator == "").
 	if msg.Operator != "" && msg.Grantee == msg.Operator {
 		return nil, fmt.Errorf("operator cannot grant authorization to itself; use a group proposal")
 	}
 
-	// Expiration must be in the future if specified
+	// Expiration must be in the future if specified.
 	if msg.Expiration != nil && !msg.Expiration.After(now) {
 		return nil, types.ErrExpirationInPast
 	}
 
-	// [MOD-DE-MSG-3-2] authz_spend_limit_period must be valid if authz_spend_limit is set
+	// authz_spend_limit_period must be valid if authz_spend_limit is set.
 	if len(msg.AuthzSpendLimit) > 0 && msg.AuthzSpendLimitPeriod != nil && *msg.AuthzSpendLimitPeriod <= 0 {
 		return nil, fmt.Errorf("authz_spend_limit_period must be a positive duration")
 	}
 
-	// Check mutual exclusivity: VSOperatorAuthorization must NOT exist for
-	// this authority/grantee pair.
-	// TODO(MOD-DE-MSG-5): The reverse check must also be enforced — when granting
-	// a VSOperatorAuthorization, verify that no OperatorAuthorization exists for
-	// the same (authority, grantee) pair. Implement this in the
-	// GrantVSOperatorAuthorization handler.
-	vsKey := collections.Join(msg.Corporation, msg.Grantee)
-	hasVSOA, err := ms.VSOperatorAuthorizations.Has(ctx, vsKey)
+	// Mutual exclusivity: a VSOperatorAuthorization MUST NOT exist for
+	// (corporation_id, grantee).
+	hasVSOA, err := ms.VSOAByCorpOp.Has(ctx, collections.Join(co.Id, msg.Grantee))
 	if err != nil {
 		return nil, fmt.Errorf("failed to check VSOperatorAuthorization: %w", err)
 	}
@@ -70,40 +64,55 @@ func (ms msgServer) GrantOperatorAuthorization(goCtx context.Context, msg *types
 		return nil, types.ErrVSOperatorAuthzExists
 	}
 
-	// [MOD-DE-MSG-3-4] Execution
+	// [MOD-DE-MSG-3-4] Execution.
 
-	// 1. Create or update OperatorAuthorization
-	oaKey := collections.Join(msg.Corporation, msg.Grantee)
-
-	// Reset spend ledger when re-granting so new limit takes effect from zero
-	if err := ms.Keeper.OperatorAuthorizationUsage.Remove(ctx, oaKey); err != nil && !errors.Is(err, collections.ErrNotFound) {
-		return nil, fmt.Errorf("failed to reset usage ledger: %w", err)
+	// 1. Lookup existing OperatorAuthorization by (co.id, grantee): preserve id
+	// on in-place update, allocate a fresh one otherwise.
+	existing, found, err := ms.getOperatorAuthorizationByCorpOp(ctx, co.Id, msg.Grantee)
+	if err != nil {
+		return nil, err
+	}
+	var oaID uint64
+	if found {
+		oaID = existing.Id
+	} else {
+		oaID, err = ms.nextOperatorAuthorizationID(ctx)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	oa := types.OperatorAuthorization{
-		Corporation:  msg.Corporation,
-		Operator:     msg.Grantee,
-		MsgTypes:     msg.MsgTypes,
-		SpendLimit:   msg.AuthzSpendLimit,
-		Expiration:   msg.Expiration,
-		Period:       msg.AuthzSpendLimitPeriod,
+		Id:            oaID,
+		CorporationId: co.Id,
+		Operator:      msg.Grantee,
+		MsgTypes:      msg.MsgTypes,
+		SpendLimit:    msg.AuthzSpendLimit,
 		FeeSpendLimit: msg.FeeSpendLimit,
+		Expiration:    msg.Expiration,
+		Period:        msg.AuthzSpendLimitPeriod,
 	}
-	if err := ms.OperatorAuthorizations.Set(ctx, oaKey, oa); err != nil {
+	if err := ms.OperatorAuthorizations.Set(ctx, oaID, oa); err != nil {
 		return nil, fmt.Errorf("failed to set OperatorAuthorization: %w", err)
 	}
+	if err := ms.OperatorAuthorizationByCorpOp.Set(ctx, collections.Join(co.Id, msg.Grantee), oaID); err != nil {
+		return nil, fmt.Errorf("failed to set OperatorAuthorization index: %w", err)
+	}
 
-	// 2. Handle fee grant
+	// Reset spend ledger when re-granting so a new limit takes effect from zero.
+	if err := ms.OperatorAuthorizationUsage.Remove(ctx, oaID); err != nil && !errors.Is(err, collections.ErrNotFound) {
+		return nil, fmt.Errorf("failed to reset usage ledger: %w", err)
+	}
+
+	// 2. Handle fee grant.
 	if !msg.WithFeegrant {
-		// Revoke any existing fee grant
-		if err := ms.RevokeFeeAllowance(ctx, msg.Corporation, msg.Grantee); err != nil {
+		if err := ms.RevokeFeeAllowance(ctx, co.Id, msg.Grantee); err != nil {
 			return nil, fmt.Errorf("failed to revoke fee allowance: %w", err)
 		}
 	} else {
-		// Grant fee allowance
 		if err := ms.GrantFeeAllowance(
 			ctx,
-			msg.Corporation,
+			co.Id,
 			msg.Grantee,
 			msg.MsgTypes,
 			msg.Expiration,
@@ -114,11 +123,12 @@ func (ms msgServer) GrantOperatorAuthorization(goCtx context.Context, msg *types
 		}
 	}
 
-	// 3. Emit events
+	// 3. Emit events.
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeGrantOperatorAuthorization,
-			sdk.NewAttribute(types.AttributeKeyCorporation, msg.Corporation),
+			sdk.NewAttribute(types.AttributeKeyAuthzID, strconv.FormatUint(oaID, 10)),
+			sdk.NewAttribute(types.AttributeKeyCorporationID, strconv.FormatUint(co.Id, 10)),
 			sdk.NewAttribute(types.AttributeKeyGrantee, msg.Grantee),
 			sdk.NewAttribute(types.AttributeKeyWithFeegrant, fmt.Sprintf("%t", msg.WithFeegrant)),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),

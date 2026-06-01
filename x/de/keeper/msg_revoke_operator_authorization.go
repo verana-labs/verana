@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
 
 	"cosmossdk.io/collections"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -16,9 +17,9 @@ func (ms msgServer) RevokeOperatorAuthorization(goCtx context.Context, msg *type
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	now := ctx.BlockTime()
 
-	// [MOD-DE-MSG-4-2] Basic checks (stateful)
+	// [MOD-DE-MSG-4-2] Basic checks (stateful).
 
-	// [AUTHZ-CHECK-1] Verify operator authorization for this (authority, operator) pair
+	// [AUTHZ-CHECK-1] Verify operator authorization for this (corporation, operator) pair.
 	if err := ms.CheckOperatorAuthorization(
 		ctx,
 		msg.Corporation,
@@ -29,43 +30,46 @@ func (ms msgServer) RevokeOperatorAuthorization(goCtx context.Context, msg *type
 		return nil, err
 	}
 
-	// [AUTHZ-CHECK-5] Signing corporation account MUST be a registered Corporation.
-	if _, err := ms.corporationKeeper().ResolveCorporationByPolicyAddress(ctx, msg.Corporation); err != nil {
+	// [AUTHZ-CHECK-5] Signing corporation account MUST be a registered Corporation;
+	// resolve it to co.id.
+	co, err := ms.corporationKeeper().ResolveCorporationByPolicyAddress(ctx, msg.Corporation)
+	if err != nil {
 		return nil, err
 	}
 
-	// An Authorization entry MUST exist for this (authority, grantee)
-	oaKey := collections.Join(msg.Corporation, msg.Grantee)
-	hasOA, err := ms.OperatorAuthorizations.Has(ctx, oaKey)
+	// An OperatorAuthorization MUST exist for (co.id, grantee).
+	existing, found, err := ms.getOperatorAuthorizationByCorpOp(ctx, co.Id, msg.Grantee)
 	if err != nil {
-		return nil, fmt.Errorf("failed to check OperatorAuthorization: %w", err)
+		return nil, err
 	}
-	if !hasOA {
+	if !found {
 		return nil, types.ErrOperatorAuthzNotFound
 	}
 
-	// [MOD-DE-MSG-4-4] Execution
+	// [MOD-DE-MSG-4-4] Execution.
 
-	// 1. Delete Authorization entry for this (authority, grantee)
-	if err := ms.OperatorAuthorizations.Remove(ctx, oaKey); err != nil {
+	// 1. Delete the OperatorAuthorization, its secondary index, and usage ledger.
+	if err := ms.OperatorAuthorizations.Remove(ctx, existing.Id); err != nil {
 		return nil, fmt.Errorf("failed to remove OperatorAuthorization: %w", err)
 	}
-
-	// Clear usage ledger so re-grants start fresh
-	if err := ms.Keeper.OperatorAuthorizationUsage.Remove(ctx, oaKey); err != nil && !errors.Is(err, collections.ErrNotFound) {
+	if err := ms.OperatorAuthorizationByCorpOp.Remove(ctx, collections.Join(co.Id, msg.Grantee)); err != nil {
+		return nil, fmt.Errorf("failed to remove OperatorAuthorization index: %w", err)
+	}
+	if err := ms.OperatorAuthorizationUsage.Remove(ctx, existing.Id); err != nil && !errors.Is(err, collections.ErrNotFound) {
 		return nil, fmt.Errorf("failed to clear usage ledger: %w", err)
 	}
 
-	// 2. Revoke Fee Allowance (authority, grantee)
-	if err := ms.RevokeFeeAllowance(ctx, msg.Corporation, msg.Grantee); err != nil {
+	// 2. Revoke Fee Allowance for (co.id, grantee).
+	if err := ms.RevokeFeeAllowance(ctx, co.Id, msg.Grantee); err != nil {
 		return nil, fmt.Errorf("failed to revoke fee allowance: %w", err)
 	}
 
-	// 3. Emit events
+	// 3. Emit events.
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeRevokeOperatorAuthorization,
-			sdk.NewAttribute(types.AttributeKeyCorporation, msg.Corporation),
+			sdk.NewAttribute(types.AttributeKeyAuthzID, strconv.FormatUint(existing.Id, 10)),
+			sdk.NewAttribute(types.AttributeKeyCorporationID, strconv.FormatUint(co.Id, 10)),
 			sdk.NewAttribute(types.AttributeKeyGrantee, msg.Grantee),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, now.String()),
 		),

@@ -810,7 +810,7 @@ func (x *fastReflection_QueryParamsResponse) ProtoMethods() *protoiface.Methods 
 
 var (
 	md_QueryListOperatorAuthorizationsRequest                   protoreflect.MessageDescriptor
-	fd_QueryListOperatorAuthorizationsRequest_corporation       protoreflect.FieldDescriptor
+	fd_QueryListOperatorAuthorizationsRequest_corporation_id    protoreflect.FieldDescriptor
 	fd_QueryListOperatorAuthorizationsRequest_operator          protoreflect.FieldDescriptor
 	fd_QueryListOperatorAuthorizationsRequest_response_max_size protoreflect.FieldDescriptor
 )
@@ -818,7 +818,7 @@ var (
 func init() {
 	file_verana_de_v1_query_proto_init()
 	md_QueryListOperatorAuthorizationsRequest = File_verana_de_v1_query_proto.Messages().ByName("QueryListOperatorAuthorizationsRequest")
-	fd_QueryListOperatorAuthorizationsRequest_corporation = md_QueryListOperatorAuthorizationsRequest.Fields().ByName("corporation")
+	fd_QueryListOperatorAuthorizationsRequest_corporation_id = md_QueryListOperatorAuthorizationsRequest.Fields().ByName("corporation_id")
 	fd_QueryListOperatorAuthorizationsRequest_operator = md_QueryListOperatorAuthorizationsRequest.Fields().ByName("operator")
 	fd_QueryListOperatorAuthorizationsRequest_response_max_size = md_QueryListOperatorAuthorizationsRequest.Fields().ByName("response_max_size")
 }
@@ -888,9 +888,9 @@ func (x *fastReflection_QueryListOperatorAuthorizationsRequest) Interface() prot
 // While iterating, mutating operations may only be performed
 // on the current field descriptor.
 func (x *fastReflection_QueryListOperatorAuthorizationsRequest) Range(f func(protoreflect.FieldDescriptor, protoreflect.Value) bool) {
-	if x.Corporation != "" {
-		value := protoreflect.ValueOfString(x.Corporation)
-		if !f(fd_QueryListOperatorAuthorizationsRequest_corporation, value) {
+	if x.CorporationId != uint64(0) {
+		value := protoreflect.ValueOfUint64(x.CorporationId)
+		if !f(fd_QueryListOperatorAuthorizationsRequest_corporation_id, value) {
 			return
 		}
 	}
@@ -921,8 +921,8 @@ func (x *fastReflection_QueryListOperatorAuthorizationsRequest) Range(f func(pro
 // a repeated field is populated if it is non-empty.
 func (x *fastReflection_QueryListOperatorAuthorizationsRequest) Has(fd protoreflect.FieldDescriptor) bool {
 	switch fd.FullName() {
-	case "verana.de.v1.QueryListOperatorAuthorizationsRequest.corporation":
-		return x.Corporation != ""
+	case "verana.de.v1.QueryListOperatorAuthorizationsRequest.corporation_id":
+		return x.CorporationId != uint64(0)
 	case "verana.de.v1.QueryListOperatorAuthorizationsRequest.operator":
 		return x.Operator != ""
 	case "verana.de.v1.QueryListOperatorAuthorizationsRequest.response_max_size":
@@ -943,8 +943,8 @@ func (x *fastReflection_QueryListOperatorAuthorizationsRequest) Has(fd protorefl
 // Clear is a mutating operation and unsafe for concurrent use.
 func (x *fastReflection_QueryListOperatorAuthorizationsRequest) Clear(fd protoreflect.FieldDescriptor) {
 	switch fd.FullName() {
-	case "verana.de.v1.QueryListOperatorAuthorizationsRequest.corporation":
-		x.Corporation = ""
+	case "verana.de.v1.QueryListOperatorAuthorizationsRequest.corporation_id":
+		x.CorporationId = uint64(0)
 	case "verana.de.v1.QueryListOperatorAuthorizationsRequest.operator":
 		x.Operator = ""
 	case "verana.de.v1.QueryListOperatorAuthorizationsRequest.response_max_size":
@@ -965,9 +965,9 @@ func (x *fastReflection_QueryListOperatorAuthorizationsRequest) Clear(fd protore
 // of the value; to obtain a mutable reference, use Mutable.
 func (x *fastReflection_QueryListOperatorAuthorizationsRequest) Get(descriptor protoreflect.FieldDescriptor) protoreflect.Value {
 	switch descriptor.FullName() {
-	case "verana.de.v1.QueryListOperatorAuthorizationsRequest.corporation":
-		value := x.Corporation
-		return protoreflect.ValueOfString(value)
+	case "verana.de.v1.QueryListOperatorAuthorizationsRequest.corporation_id":
+		value := x.CorporationId
+		return protoreflect.ValueOfUint64(value)
 	case "verana.de.v1.QueryListOperatorAuthorizationsRequest.operator":
 		value := x.Operator
 		return protoreflect.ValueOfString(value)
@@ -994,8 +994,8 @@ func (x *fastReflection_QueryListOperatorAuthorizationsRequest) Get(descriptor p
 // Set is a mutating operation and unsafe for concurrent use.
 func (x *fastReflection_QueryListOperatorAuthorizationsRequest) Set(fd protoreflect.FieldDescriptor, value protoreflect.Value) {
 	switch fd.FullName() {
-	case "verana.de.v1.QueryListOperatorAuthorizationsRequest.corporation":
-		x.Corporation = value.Interface().(string)
+	case "verana.de.v1.QueryListOperatorAuthorizationsRequest.corporation_id":
+		x.CorporationId = value.Uint()
 	case "verana.de.v1.QueryListOperatorAuthorizationsRequest.operator":
 		x.Operator = value.Interface().(string)
 	case "verana.de.v1.QueryListOperatorAuthorizationsRequest.response_max_size":
@@ -1020,8 +1020,8 @@ func (x *fastReflection_QueryListOperatorAuthorizationsRequest) Set(fd protorefl
 // Mutable is a mutating operation and unsafe for concurrent use.
 func (x *fastReflection_QueryListOperatorAuthorizationsRequest) Mutable(fd protoreflect.FieldDescriptor) protoreflect.Value {
 	switch fd.FullName() {
-	case "verana.de.v1.QueryListOperatorAuthorizationsRequest.corporation":
-		panic(fmt.Errorf("field corporation of message verana.de.v1.QueryListOperatorAuthorizationsRequest is not mutable"))
+	case "verana.de.v1.QueryListOperatorAuthorizationsRequest.corporation_id":
+		panic(fmt.Errorf("field corporation_id of message verana.de.v1.QueryListOperatorAuthorizationsRequest is not mutable"))
 	case "verana.de.v1.QueryListOperatorAuthorizationsRequest.operator":
 		panic(fmt.Errorf("field operator of message verana.de.v1.QueryListOperatorAuthorizationsRequest is not mutable"))
 	case "verana.de.v1.QueryListOperatorAuthorizationsRequest.response_max_size":
@@ -1039,8 +1039,8 @@ func (x *fastReflection_QueryListOperatorAuthorizationsRequest) Mutable(fd proto
 // For lists, maps, and messages, this returns a new, empty, mutable value.
 func (x *fastReflection_QueryListOperatorAuthorizationsRequest) NewField(fd protoreflect.FieldDescriptor) protoreflect.Value {
 	switch fd.FullName() {
-	case "verana.de.v1.QueryListOperatorAuthorizationsRequest.corporation":
-		return protoreflect.ValueOfString("")
+	case "verana.de.v1.QueryListOperatorAuthorizationsRequest.corporation_id":
+		return protoreflect.ValueOfUint64(uint64(0))
 	case "verana.de.v1.QueryListOperatorAuthorizationsRequest.operator":
 		return protoreflect.ValueOfString("")
 	case "verana.de.v1.QueryListOperatorAuthorizationsRequest.response_max_size":
@@ -1114,9 +1114,8 @@ func (x *fastReflection_QueryListOperatorAuthorizationsRequest) ProtoMethods() *
 		var n int
 		var l int
 		_ = l
-		l = len(x.Corporation)
-		if l > 0 {
-			n += 1 + l + runtime.Sov(uint64(l))
+		if x.CorporationId != 0 {
+			n += 1 + runtime.Sov(uint64(x.CorporationId))
 		}
 		l = len(x.Operator)
 		if l > 0 {
@@ -1166,12 +1165,10 @@ func (x *fastReflection_QueryListOperatorAuthorizationsRequest) ProtoMethods() *
 			i--
 			dAtA[i] = 0x12
 		}
-		if len(x.Corporation) > 0 {
-			i -= len(x.Corporation)
-			copy(dAtA[i:], x.Corporation)
-			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Corporation)))
+		if x.CorporationId != 0 {
+			i = runtime.EncodeVarint(dAtA, i, uint64(x.CorporationId))
 			i--
-			dAtA[i] = 0xa
+			dAtA[i] = 0x8
 		}
 		if input.Buf != nil {
 			input.Buf = append(input.Buf, dAtA...)
@@ -1223,10 +1220,10 @@ func (x *fastReflection_QueryListOperatorAuthorizationsRequest) ProtoMethods() *
 			}
 			switch fieldNum {
 			case 1:
-				if wireType != 2 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Corporation", wireType)
+				if wireType != 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field CorporationId", wireType)
 				}
-				var stringLen uint64
+				x.CorporationId = 0
 				for shift := uint(0); ; shift += 7 {
 					if shift >= 64 {
 						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
@@ -1236,24 +1233,11 @@ func (x *fastReflection_QueryListOperatorAuthorizationsRequest) ProtoMethods() *
 					}
 					b := dAtA[iNdEx]
 					iNdEx++
-					stringLen |= uint64(b&0x7F) << shift
+					x.CorporationId |= uint64(b&0x7F) << shift
 					if b < 0x80 {
 						break
 					}
 				}
-				intStringLen := int(stringLen)
-				if intStringLen < 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
-				}
-				postIndex := iNdEx + intStringLen
-				if postIndex < 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
-				}
-				if postIndex > l {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
-				}
-				x.Corporation = string(dAtA[iNdEx:postIndex])
-				iNdEx = postIndex
 			case 2:
 				if wireType != 2 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Operator", wireType)
@@ -1836,7 +1820,7 @@ func (x *fastReflection_QueryListOperatorAuthorizationsResponse) ProtoMethods() 
 
 var (
 	md_QueryListVSOperatorAuthorizationsRequest                   protoreflect.MessageDescriptor
-	fd_QueryListVSOperatorAuthorizationsRequest_corporation       protoreflect.FieldDescriptor
+	fd_QueryListVSOperatorAuthorizationsRequest_corporation_id    protoreflect.FieldDescriptor
 	fd_QueryListVSOperatorAuthorizationsRequest_vs_operator       protoreflect.FieldDescriptor
 	fd_QueryListVSOperatorAuthorizationsRequest_response_max_size protoreflect.FieldDescriptor
 )
@@ -1844,7 +1828,7 @@ var (
 func init() {
 	file_verana_de_v1_query_proto_init()
 	md_QueryListVSOperatorAuthorizationsRequest = File_verana_de_v1_query_proto.Messages().ByName("QueryListVSOperatorAuthorizationsRequest")
-	fd_QueryListVSOperatorAuthorizationsRequest_corporation = md_QueryListVSOperatorAuthorizationsRequest.Fields().ByName("corporation")
+	fd_QueryListVSOperatorAuthorizationsRequest_corporation_id = md_QueryListVSOperatorAuthorizationsRequest.Fields().ByName("corporation_id")
 	fd_QueryListVSOperatorAuthorizationsRequest_vs_operator = md_QueryListVSOperatorAuthorizationsRequest.Fields().ByName("vs_operator")
 	fd_QueryListVSOperatorAuthorizationsRequest_response_max_size = md_QueryListVSOperatorAuthorizationsRequest.Fields().ByName("response_max_size")
 }
@@ -1914,9 +1898,9 @@ func (x *fastReflection_QueryListVSOperatorAuthorizationsRequest) Interface() pr
 // While iterating, mutating operations may only be performed
 // on the current field descriptor.
 func (x *fastReflection_QueryListVSOperatorAuthorizationsRequest) Range(f func(protoreflect.FieldDescriptor, protoreflect.Value) bool) {
-	if x.Corporation != "" {
-		value := protoreflect.ValueOfString(x.Corporation)
-		if !f(fd_QueryListVSOperatorAuthorizationsRequest_corporation, value) {
+	if x.CorporationId != uint64(0) {
+		value := protoreflect.ValueOfUint64(x.CorporationId)
+		if !f(fd_QueryListVSOperatorAuthorizationsRequest_corporation_id, value) {
 			return
 		}
 	}
@@ -1947,8 +1931,8 @@ func (x *fastReflection_QueryListVSOperatorAuthorizationsRequest) Range(f func(p
 // a repeated field is populated if it is non-empty.
 func (x *fastReflection_QueryListVSOperatorAuthorizationsRequest) Has(fd protoreflect.FieldDescriptor) bool {
 	switch fd.FullName() {
-	case "verana.de.v1.QueryListVSOperatorAuthorizationsRequest.corporation":
-		return x.Corporation != ""
+	case "verana.de.v1.QueryListVSOperatorAuthorizationsRequest.corporation_id":
+		return x.CorporationId != uint64(0)
 	case "verana.de.v1.QueryListVSOperatorAuthorizationsRequest.vs_operator":
 		return x.VsOperator != ""
 	case "verana.de.v1.QueryListVSOperatorAuthorizationsRequest.response_max_size":
@@ -1969,8 +1953,8 @@ func (x *fastReflection_QueryListVSOperatorAuthorizationsRequest) Has(fd protore
 // Clear is a mutating operation and unsafe for concurrent use.
 func (x *fastReflection_QueryListVSOperatorAuthorizationsRequest) Clear(fd protoreflect.FieldDescriptor) {
 	switch fd.FullName() {
-	case "verana.de.v1.QueryListVSOperatorAuthorizationsRequest.corporation":
-		x.Corporation = ""
+	case "verana.de.v1.QueryListVSOperatorAuthorizationsRequest.corporation_id":
+		x.CorporationId = uint64(0)
 	case "verana.de.v1.QueryListVSOperatorAuthorizationsRequest.vs_operator":
 		x.VsOperator = ""
 	case "verana.de.v1.QueryListVSOperatorAuthorizationsRequest.response_max_size":
@@ -1991,9 +1975,9 @@ func (x *fastReflection_QueryListVSOperatorAuthorizationsRequest) Clear(fd proto
 // of the value; to obtain a mutable reference, use Mutable.
 func (x *fastReflection_QueryListVSOperatorAuthorizationsRequest) Get(descriptor protoreflect.FieldDescriptor) protoreflect.Value {
 	switch descriptor.FullName() {
-	case "verana.de.v1.QueryListVSOperatorAuthorizationsRequest.corporation":
-		value := x.Corporation
-		return protoreflect.ValueOfString(value)
+	case "verana.de.v1.QueryListVSOperatorAuthorizationsRequest.corporation_id":
+		value := x.CorporationId
+		return protoreflect.ValueOfUint64(value)
 	case "verana.de.v1.QueryListVSOperatorAuthorizationsRequest.vs_operator":
 		value := x.VsOperator
 		return protoreflect.ValueOfString(value)
@@ -2020,8 +2004,8 @@ func (x *fastReflection_QueryListVSOperatorAuthorizationsRequest) Get(descriptor
 // Set is a mutating operation and unsafe for concurrent use.
 func (x *fastReflection_QueryListVSOperatorAuthorizationsRequest) Set(fd protoreflect.FieldDescriptor, value protoreflect.Value) {
 	switch fd.FullName() {
-	case "verana.de.v1.QueryListVSOperatorAuthorizationsRequest.corporation":
-		x.Corporation = value.Interface().(string)
+	case "verana.de.v1.QueryListVSOperatorAuthorizationsRequest.corporation_id":
+		x.CorporationId = value.Uint()
 	case "verana.de.v1.QueryListVSOperatorAuthorizationsRequest.vs_operator":
 		x.VsOperator = value.Interface().(string)
 	case "verana.de.v1.QueryListVSOperatorAuthorizationsRequest.response_max_size":
@@ -2046,8 +2030,8 @@ func (x *fastReflection_QueryListVSOperatorAuthorizationsRequest) Set(fd protore
 // Mutable is a mutating operation and unsafe for concurrent use.
 func (x *fastReflection_QueryListVSOperatorAuthorizationsRequest) Mutable(fd protoreflect.FieldDescriptor) protoreflect.Value {
 	switch fd.FullName() {
-	case "verana.de.v1.QueryListVSOperatorAuthorizationsRequest.corporation":
-		panic(fmt.Errorf("field corporation of message verana.de.v1.QueryListVSOperatorAuthorizationsRequest is not mutable"))
+	case "verana.de.v1.QueryListVSOperatorAuthorizationsRequest.corporation_id":
+		panic(fmt.Errorf("field corporation_id of message verana.de.v1.QueryListVSOperatorAuthorizationsRequest is not mutable"))
 	case "verana.de.v1.QueryListVSOperatorAuthorizationsRequest.vs_operator":
 		panic(fmt.Errorf("field vs_operator of message verana.de.v1.QueryListVSOperatorAuthorizationsRequest is not mutable"))
 	case "verana.de.v1.QueryListVSOperatorAuthorizationsRequest.response_max_size":
@@ -2065,8 +2049,8 @@ func (x *fastReflection_QueryListVSOperatorAuthorizationsRequest) Mutable(fd pro
 // For lists, maps, and messages, this returns a new, empty, mutable value.
 func (x *fastReflection_QueryListVSOperatorAuthorizationsRequest) NewField(fd protoreflect.FieldDescriptor) protoreflect.Value {
 	switch fd.FullName() {
-	case "verana.de.v1.QueryListVSOperatorAuthorizationsRequest.corporation":
-		return protoreflect.ValueOfString("")
+	case "verana.de.v1.QueryListVSOperatorAuthorizationsRequest.corporation_id":
+		return protoreflect.ValueOfUint64(uint64(0))
 	case "verana.de.v1.QueryListVSOperatorAuthorizationsRequest.vs_operator":
 		return protoreflect.ValueOfString("")
 	case "verana.de.v1.QueryListVSOperatorAuthorizationsRequest.response_max_size":
@@ -2140,9 +2124,8 @@ func (x *fastReflection_QueryListVSOperatorAuthorizationsRequest) ProtoMethods()
 		var n int
 		var l int
 		_ = l
-		l = len(x.Corporation)
-		if l > 0 {
-			n += 1 + l + runtime.Sov(uint64(l))
+		if x.CorporationId != 0 {
+			n += 1 + runtime.Sov(uint64(x.CorporationId))
 		}
 		l = len(x.VsOperator)
 		if l > 0 {
@@ -2192,12 +2175,10 @@ func (x *fastReflection_QueryListVSOperatorAuthorizationsRequest) ProtoMethods()
 			i--
 			dAtA[i] = 0x12
 		}
-		if len(x.Corporation) > 0 {
-			i -= len(x.Corporation)
-			copy(dAtA[i:], x.Corporation)
-			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Corporation)))
+		if x.CorporationId != 0 {
+			i = runtime.EncodeVarint(dAtA, i, uint64(x.CorporationId))
 			i--
-			dAtA[i] = 0xa
+			dAtA[i] = 0x8
 		}
 		if input.Buf != nil {
 			input.Buf = append(input.Buf, dAtA...)
@@ -2249,10 +2230,10 @@ func (x *fastReflection_QueryListVSOperatorAuthorizationsRequest) ProtoMethods()
 			}
 			switch fieldNum {
 			case 1:
-				if wireType != 2 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Corporation", wireType)
+				if wireType != 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field CorporationId", wireType)
 				}
-				var stringLen uint64
+				x.CorporationId = 0
 				for shift := uint(0); ; shift += 7 {
 					if shift >= 64 {
 						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
@@ -2262,24 +2243,11 @@ func (x *fastReflection_QueryListVSOperatorAuthorizationsRequest) ProtoMethods()
 					}
 					b := dAtA[iNdEx]
 					iNdEx++
-					stringLen |= uint64(b&0x7F) << shift
+					x.CorporationId |= uint64(b&0x7F) << shift
 					if b < 0x80 {
 						break
 					}
 				}
-				intStringLen := int(stringLen)
-				if intStringLen < 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
-				}
-				postIndex := iNdEx + intStringLen
-				if postIndex < 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
-				}
-				if postIndex > l {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
-				}
-				x.Corporation = string(dAtA[iNdEx:postIndex])
-				iNdEx = postIndex
 			case 2:
 				if wireType != 2 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field VsOperator", wireType)
@@ -2860,6 +2828,1684 @@ func (x *fastReflection_QueryListVSOperatorAuthorizationsResponse) ProtoMethods(
 	}
 }
 
+var (
+	md_QueryGetOperatorAuthorizationRequest    protoreflect.MessageDescriptor
+	fd_QueryGetOperatorAuthorizationRequest_id protoreflect.FieldDescriptor
+)
+
+func init() {
+	file_verana_de_v1_query_proto_init()
+	md_QueryGetOperatorAuthorizationRequest = File_verana_de_v1_query_proto.Messages().ByName("QueryGetOperatorAuthorizationRequest")
+	fd_QueryGetOperatorAuthorizationRequest_id = md_QueryGetOperatorAuthorizationRequest.Fields().ByName("id")
+}
+
+var _ protoreflect.Message = (*fastReflection_QueryGetOperatorAuthorizationRequest)(nil)
+
+type fastReflection_QueryGetOperatorAuthorizationRequest QueryGetOperatorAuthorizationRequest
+
+func (x *QueryGetOperatorAuthorizationRequest) ProtoReflect() protoreflect.Message {
+	return (*fastReflection_QueryGetOperatorAuthorizationRequest)(x)
+}
+
+func (x *QueryGetOperatorAuthorizationRequest) slowProtoReflect() protoreflect.Message {
+	mi := &file_verana_de_v1_query_proto_msgTypes[6]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+var _fastReflection_QueryGetOperatorAuthorizationRequest_messageType fastReflection_QueryGetOperatorAuthorizationRequest_messageType
+var _ protoreflect.MessageType = fastReflection_QueryGetOperatorAuthorizationRequest_messageType{}
+
+type fastReflection_QueryGetOperatorAuthorizationRequest_messageType struct{}
+
+func (x fastReflection_QueryGetOperatorAuthorizationRequest_messageType) Zero() protoreflect.Message {
+	return (*fastReflection_QueryGetOperatorAuthorizationRequest)(nil)
+}
+func (x fastReflection_QueryGetOperatorAuthorizationRequest_messageType) New() protoreflect.Message {
+	return new(fastReflection_QueryGetOperatorAuthorizationRequest)
+}
+func (x fastReflection_QueryGetOperatorAuthorizationRequest_messageType) Descriptor() protoreflect.MessageDescriptor {
+	return md_QueryGetOperatorAuthorizationRequest
+}
+
+// Descriptor returns message descriptor, which contains only the protobuf
+// type information for the message.
+func (x *fastReflection_QueryGetOperatorAuthorizationRequest) Descriptor() protoreflect.MessageDescriptor {
+	return md_QueryGetOperatorAuthorizationRequest
+}
+
+// Type returns the message type, which encapsulates both Go and protobuf
+// type information. If the Go type information is not needed,
+// it is recommended that the message descriptor be used instead.
+func (x *fastReflection_QueryGetOperatorAuthorizationRequest) Type() protoreflect.MessageType {
+	return _fastReflection_QueryGetOperatorAuthorizationRequest_messageType
+}
+
+// New returns a newly allocated and mutable empty message.
+func (x *fastReflection_QueryGetOperatorAuthorizationRequest) New() protoreflect.Message {
+	return new(fastReflection_QueryGetOperatorAuthorizationRequest)
+}
+
+// Interface unwraps the message reflection interface and
+// returns the underlying ProtoMessage interface.
+func (x *fastReflection_QueryGetOperatorAuthorizationRequest) Interface() protoreflect.ProtoMessage {
+	return (*QueryGetOperatorAuthorizationRequest)(x)
+}
+
+// Range iterates over every populated field in an undefined order,
+// calling f for each field descriptor and value encountered.
+// Range returns immediately if f returns false.
+// While iterating, mutating operations may only be performed
+// on the current field descriptor.
+func (x *fastReflection_QueryGetOperatorAuthorizationRequest) Range(f func(protoreflect.FieldDescriptor, protoreflect.Value) bool) {
+	if x.Id != uint64(0) {
+		value := protoreflect.ValueOfUint64(x.Id)
+		if !f(fd_QueryGetOperatorAuthorizationRequest_id, value) {
+			return
+		}
+	}
+}
+
+// Has reports whether a field is populated.
+//
+// Some fields have the property of nullability where it is possible to
+// distinguish between the default value of a field and whether the field
+// was explicitly populated with the default value. Singular message fields,
+// member fields of a oneof, and proto2 scalar fields are nullable. Such
+// fields are populated only if explicitly set.
+//
+// In other cases (aside from the nullable cases above),
+// a proto3 scalar field is populated if it contains a non-zero value, and
+// a repeated field is populated if it is non-empty.
+func (x *fastReflection_QueryGetOperatorAuthorizationRequest) Has(fd protoreflect.FieldDescriptor) bool {
+	switch fd.FullName() {
+	case "verana.de.v1.QueryGetOperatorAuthorizationRequest.id":
+		return x.Id != uint64(0)
+	default:
+		if fd.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.de.v1.QueryGetOperatorAuthorizationRequest"))
+		}
+		panic(fmt.Errorf("message verana.de.v1.QueryGetOperatorAuthorizationRequest does not contain field %s", fd.FullName()))
+	}
+}
+
+// Clear clears the field such that a subsequent Has call reports false.
+//
+// Clearing an extension field clears both the extension type and value
+// associated with the given field number.
+//
+// Clear is a mutating operation and unsafe for concurrent use.
+func (x *fastReflection_QueryGetOperatorAuthorizationRequest) Clear(fd protoreflect.FieldDescriptor) {
+	switch fd.FullName() {
+	case "verana.de.v1.QueryGetOperatorAuthorizationRequest.id":
+		x.Id = uint64(0)
+	default:
+		if fd.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.de.v1.QueryGetOperatorAuthorizationRequest"))
+		}
+		panic(fmt.Errorf("message verana.de.v1.QueryGetOperatorAuthorizationRequest does not contain field %s", fd.FullName()))
+	}
+}
+
+// Get retrieves the value for a field.
+//
+// For unpopulated scalars, it returns the default value, where
+// the default value of a bytes scalar is guaranteed to be a copy.
+// For unpopulated composite types, it returns an empty, read-only view
+// of the value; to obtain a mutable reference, use Mutable.
+func (x *fastReflection_QueryGetOperatorAuthorizationRequest) Get(descriptor protoreflect.FieldDescriptor) protoreflect.Value {
+	switch descriptor.FullName() {
+	case "verana.de.v1.QueryGetOperatorAuthorizationRequest.id":
+		value := x.Id
+		return protoreflect.ValueOfUint64(value)
+	default:
+		if descriptor.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.de.v1.QueryGetOperatorAuthorizationRequest"))
+		}
+		panic(fmt.Errorf("message verana.de.v1.QueryGetOperatorAuthorizationRequest does not contain field %s", descriptor.FullName()))
+	}
+}
+
+// Set stores the value for a field.
+//
+// For a field belonging to a oneof, it implicitly clears any other field
+// that may be currently set within the same oneof.
+// For extension fields, it implicitly stores the provided ExtensionType.
+// When setting a composite type, it is unspecified whether the stored value
+// aliases the source's memory in any way. If the composite value is an
+// empty, read-only value, then it panics.
+//
+// Set is a mutating operation and unsafe for concurrent use.
+func (x *fastReflection_QueryGetOperatorAuthorizationRequest) Set(fd protoreflect.FieldDescriptor, value protoreflect.Value) {
+	switch fd.FullName() {
+	case "verana.de.v1.QueryGetOperatorAuthorizationRequest.id":
+		x.Id = value.Uint()
+	default:
+		if fd.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.de.v1.QueryGetOperatorAuthorizationRequest"))
+		}
+		panic(fmt.Errorf("message verana.de.v1.QueryGetOperatorAuthorizationRequest does not contain field %s", fd.FullName()))
+	}
+}
+
+// Mutable returns a mutable reference to a composite type.
+//
+// If the field is unpopulated, it may allocate a composite value.
+// For a field belonging to a oneof, it implicitly clears any other field
+// that may be currently set within the same oneof.
+// For extension fields, it implicitly stores the provided ExtensionType
+// if not already stored.
+// It panics if the field does not contain a composite type.
+//
+// Mutable is a mutating operation and unsafe for concurrent use.
+func (x *fastReflection_QueryGetOperatorAuthorizationRequest) Mutable(fd protoreflect.FieldDescriptor) protoreflect.Value {
+	switch fd.FullName() {
+	case "verana.de.v1.QueryGetOperatorAuthorizationRequest.id":
+		panic(fmt.Errorf("field id of message verana.de.v1.QueryGetOperatorAuthorizationRequest is not mutable"))
+	default:
+		if fd.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.de.v1.QueryGetOperatorAuthorizationRequest"))
+		}
+		panic(fmt.Errorf("message verana.de.v1.QueryGetOperatorAuthorizationRequest does not contain field %s", fd.FullName()))
+	}
+}
+
+// NewField returns a new value that is assignable to the field
+// for the given descriptor. For scalars, this returns the default value.
+// For lists, maps, and messages, this returns a new, empty, mutable value.
+func (x *fastReflection_QueryGetOperatorAuthorizationRequest) NewField(fd protoreflect.FieldDescriptor) protoreflect.Value {
+	switch fd.FullName() {
+	case "verana.de.v1.QueryGetOperatorAuthorizationRequest.id":
+		return protoreflect.ValueOfUint64(uint64(0))
+	default:
+		if fd.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.de.v1.QueryGetOperatorAuthorizationRequest"))
+		}
+		panic(fmt.Errorf("message verana.de.v1.QueryGetOperatorAuthorizationRequest does not contain field %s", fd.FullName()))
+	}
+}
+
+// WhichOneof reports which field within the oneof is populated,
+// returning nil if none are populated.
+// It panics if the oneof descriptor does not belong to this message.
+func (x *fastReflection_QueryGetOperatorAuthorizationRequest) WhichOneof(d protoreflect.OneofDescriptor) protoreflect.FieldDescriptor {
+	switch d.FullName() {
+	default:
+		panic(fmt.Errorf("%s is not a oneof field in verana.de.v1.QueryGetOperatorAuthorizationRequest", d.FullName()))
+	}
+	panic("unreachable")
+}
+
+// GetUnknown retrieves the entire list of unknown fields.
+// The caller may only mutate the contents of the RawFields
+// if the mutated bytes are stored back into the message with SetUnknown.
+func (x *fastReflection_QueryGetOperatorAuthorizationRequest) GetUnknown() protoreflect.RawFields {
+	return x.unknownFields
+}
+
+// SetUnknown stores an entire list of unknown fields.
+// The raw fields must be syntactically valid according to the wire format.
+// An implementation may panic if this is not the case.
+// Once stored, the caller must not mutate the content of the RawFields.
+// An empty RawFields may be passed to clear the fields.
+//
+// SetUnknown is a mutating operation and unsafe for concurrent use.
+func (x *fastReflection_QueryGetOperatorAuthorizationRequest) SetUnknown(fields protoreflect.RawFields) {
+	x.unknownFields = fields
+}
+
+// IsValid reports whether the message is valid.
+//
+// An invalid message is an empty, read-only value.
+//
+// An invalid message often corresponds to a nil pointer of the concrete
+// message type, but the details are implementation dependent.
+// Validity is not part of the protobuf data model, and may not
+// be preserved in marshaling or other operations.
+func (x *fastReflection_QueryGetOperatorAuthorizationRequest) IsValid() bool {
+	return x != nil
+}
+
+// ProtoMethods returns optional fastReflectionFeature-path implementations of various operations.
+// This method may return nil.
+//
+// The returned methods type is identical to
+// "google.golang.org/protobuf/runtime/protoiface".Methods.
+// Consult the protoiface package documentation for details.
+func (x *fastReflection_QueryGetOperatorAuthorizationRequest) ProtoMethods() *protoiface.Methods {
+	size := func(input protoiface.SizeInput) protoiface.SizeOutput {
+		x := input.Message.Interface().(*QueryGetOperatorAuthorizationRequest)
+		if x == nil {
+			return protoiface.SizeOutput{
+				NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+				Size:              0,
+			}
+		}
+		options := runtime.SizeInputToOptions(input)
+		_ = options
+		var n int
+		var l int
+		_ = l
+		if x.Id != 0 {
+			n += 1 + runtime.Sov(uint64(x.Id))
+		}
+		if x.unknownFields != nil {
+			n += len(x.unknownFields)
+		}
+		return protoiface.SizeOutput{
+			NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+			Size:              n,
+		}
+	}
+
+	marshal := func(input protoiface.MarshalInput) (protoiface.MarshalOutput, error) {
+		x := input.Message.Interface().(*QueryGetOperatorAuthorizationRequest)
+		if x == nil {
+			return protoiface.MarshalOutput{
+				NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+				Buf:               input.Buf,
+			}, nil
+		}
+		options := runtime.MarshalInputToOptions(input)
+		_ = options
+		size := options.Size(x)
+		dAtA := make([]byte, size)
+		i := len(dAtA)
+		_ = i
+		var l int
+		_ = l
+		if x.unknownFields != nil {
+			i -= len(x.unknownFields)
+			copy(dAtA[i:], x.unknownFields)
+		}
+		if x.Id != 0 {
+			i = runtime.EncodeVarint(dAtA, i, uint64(x.Id))
+			i--
+			dAtA[i] = 0x8
+		}
+		if input.Buf != nil {
+			input.Buf = append(input.Buf, dAtA...)
+		} else {
+			input.Buf = dAtA
+		}
+		return protoiface.MarshalOutput{
+			NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+			Buf:               input.Buf,
+		}, nil
+	}
+	unmarshal := func(input protoiface.UnmarshalInput) (protoiface.UnmarshalOutput, error) {
+		x := input.Message.Interface().(*QueryGetOperatorAuthorizationRequest)
+		if x == nil {
+			return protoiface.UnmarshalOutput{
+				NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+				Flags:             input.Flags,
+			}, nil
+		}
+		options := runtime.UnmarshalInputToOptions(input)
+		_ = options
+		dAtA := input.Buf
+		l := len(dAtA)
+		iNdEx := 0
+		for iNdEx < l {
+			preIndex := iNdEx
+			var wire uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				wire |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			fieldNum := int32(wire >> 3)
+			wireType := int(wire & 0x7)
+			if wireType == 4 {
+				return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: QueryGetOperatorAuthorizationRequest: wiretype end group for non-group")
+			}
+			if fieldNum <= 0 {
+				return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: QueryGetOperatorAuthorizationRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+			}
+			switch fieldNum {
+			case 1:
+				if wireType != 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Id", wireType)
+				}
+				x.Id = 0
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					x.Id |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+			default:
+				iNdEx = preIndex
+				skippy, err := runtime.Skip(dAtA[iNdEx:])
+				if err != nil {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, err
+				}
+				if (skippy < 0) || (iNdEx+skippy) < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if (iNdEx + skippy) > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				if !options.DiscardUnknown {
+					x.unknownFields = append(x.unknownFields, dAtA[iNdEx:iNdEx+skippy]...)
+				}
+				iNdEx += skippy
+			}
+		}
+
+		if iNdEx > l {
+			return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+		}
+		return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, nil
+	}
+	return &protoiface.Methods{
+		NoUnkeyedLiterals: struct{}{},
+		Flags:             protoiface.SupportMarshalDeterministic | protoiface.SupportUnmarshalDiscardUnknown,
+		Size:              size,
+		Marshal:           marshal,
+		Unmarshal:         unmarshal,
+		Merge:             nil,
+		CheckInitialized:  nil,
+	}
+}
+
+var (
+	md_QueryGetOperatorAuthorizationResponse                        protoreflect.MessageDescriptor
+	fd_QueryGetOperatorAuthorizationResponse_operator_authorization protoreflect.FieldDescriptor
+)
+
+func init() {
+	file_verana_de_v1_query_proto_init()
+	md_QueryGetOperatorAuthorizationResponse = File_verana_de_v1_query_proto.Messages().ByName("QueryGetOperatorAuthorizationResponse")
+	fd_QueryGetOperatorAuthorizationResponse_operator_authorization = md_QueryGetOperatorAuthorizationResponse.Fields().ByName("operator_authorization")
+}
+
+var _ protoreflect.Message = (*fastReflection_QueryGetOperatorAuthorizationResponse)(nil)
+
+type fastReflection_QueryGetOperatorAuthorizationResponse QueryGetOperatorAuthorizationResponse
+
+func (x *QueryGetOperatorAuthorizationResponse) ProtoReflect() protoreflect.Message {
+	return (*fastReflection_QueryGetOperatorAuthorizationResponse)(x)
+}
+
+func (x *QueryGetOperatorAuthorizationResponse) slowProtoReflect() protoreflect.Message {
+	mi := &file_verana_de_v1_query_proto_msgTypes[7]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+var _fastReflection_QueryGetOperatorAuthorizationResponse_messageType fastReflection_QueryGetOperatorAuthorizationResponse_messageType
+var _ protoreflect.MessageType = fastReflection_QueryGetOperatorAuthorizationResponse_messageType{}
+
+type fastReflection_QueryGetOperatorAuthorizationResponse_messageType struct{}
+
+func (x fastReflection_QueryGetOperatorAuthorizationResponse_messageType) Zero() protoreflect.Message {
+	return (*fastReflection_QueryGetOperatorAuthorizationResponse)(nil)
+}
+func (x fastReflection_QueryGetOperatorAuthorizationResponse_messageType) New() protoreflect.Message {
+	return new(fastReflection_QueryGetOperatorAuthorizationResponse)
+}
+func (x fastReflection_QueryGetOperatorAuthorizationResponse_messageType) Descriptor() protoreflect.MessageDescriptor {
+	return md_QueryGetOperatorAuthorizationResponse
+}
+
+// Descriptor returns message descriptor, which contains only the protobuf
+// type information for the message.
+func (x *fastReflection_QueryGetOperatorAuthorizationResponse) Descriptor() protoreflect.MessageDescriptor {
+	return md_QueryGetOperatorAuthorizationResponse
+}
+
+// Type returns the message type, which encapsulates both Go and protobuf
+// type information. If the Go type information is not needed,
+// it is recommended that the message descriptor be used instead.
+func (x *fastReflection_QueryGetOperatorAuthorizationResponse) Type() protoreflect.MessageType {
+	return _fastReflection_QueryGetOperatorAuthorizationResponse_messageType
+}
+
+// New returns a newly allocated and mutable empty message.
+func (x *fastReflection_QueryGetOperatorAuthorizationResponse) New() protoreflect.Message {
+	return new(fastReflection_QueryGetOperatorAuthorizationResponse)
+}
+
+// Interface unwraps the message reflection interface and
+// returns the underlying ProtoMessage interface.
+func (x *fastReflection_QueryGetOperatorAuthorizationResponse) Interface() protoreflect.ProtoMessage {
+	return (*QueryGetOperatorAuthorizationResponse)(x)
+}
+
+// Range iterates over every populated field in an undefined order,
+// calling f for each field descriptor and value encountered.
+// Range returns immediately if f returns false.
+// While iterating, mutating operations may only be performed
+// on the current field descriptor.
+func (x *fastReflection_QueryGetOperatorAuthorizationResponse) Range(f func(protoreflect.FieldDescriptor, protoreflect.Value) bool) {
+	if x.OperatorAuthorization != nil {
+		value := protoreflect.ValueOfMessage(x.OperatorAuthorization.ProtoReflect())
+		if !f(fd_QueryGetOperatorAuthorizationResponse_operator_authorization, value) {
+			return
+		}
+	}
+}
+
+// Has reports whether a field is populated.
+//
+// Some fields have the property of nullability where it is possible to
+// distinguish between the default value of a field and whether the field
+// was explicitly populated with the default value. Singular message fields,
+// member fields of a oneof, and proto2 scalar fields are nullable. Such
+// fields are populated only if explicitly set.
+//
+// In other cases (aside from the nullable cases above),
+// a proto3 scalar field is populated if it contains a non-zero value, and
+// a repeated field is populated if it is non-empty.
+func (x *fastReflection_QueryGetOperatorAuthorizationResponse) Has(fd protoreflect.FieldDescriptor) bool {
+	switch fd.FullName() {
+	case "verana.de.v1.QueryGetOperatorAuthorizationResponse.operator_authorization":
+		return x.OperatorAuthorization != nil
+	default:
+		if fd.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.de.v1.QueryGetOperatorAuthorizationResponse"))
+		}
+		panic(fmt.Errorf("message verana.de.v1.QueryGetOperatorAuthorizationResponse does not contain field %s", fd.FullName()))
+	}
+}
+
+// Clear clears the field such that a subsequent Has call reports false.
+//
+// Clearing an extension field clears both the extension type and value
+// associated with the given field number.
+//
+// Clear is a mutating operation and unsafe for concurrent use.
+func (x *fastReflection_QueryGetOperatorAuthorizationResponse) Clear(fd protoreflect.FieldDescriptor) {
+	switch fd.FullName() {
+	case "verana.de.v1.QueryGetOperatorAuthorizationResponse.operator_authorization":
+		x.OperatorAuthorization = nil
+	default:
+		if fd.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.de.v1.QueryGetOperatorAuthorizationResponse"))
+		}
+		panic(fmt.Errorf("message verana.de.v1.QueryGetOperatorAuthorizationResponse does not contain field %s", fd.FullName()))
+	}
+}
+
+// Get retrieves the value for a field.
+//
+// For unpopulated scalars, it returns the default value, where
+// the default value of a bytes scalar is guaranteed to be a copy.
+// For unpopulated composite types, it returns an empty, read-only view
+// of the value; to obtain a mutable reference, use Mutable.
+func (x *fastReflection_QueryGetOperatorAuthorizationResponse) Get(descriptor protoreflect.FieldDescriptor) protoreflect.Value {
+	switch descriptor.FullName() {
+	case "verana.de.v1.QueryGetOperatorAuthorizationResponse.operator_authorization":
+		value := x.OperatorAuthorization
+		return protoreflect.ValueOfMessage(value.ProtoReflect())
+	default:
+		if descriptor.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.de.v1.QueryGetOperatorAuthorizationResponse"))
+		}
+		panic(fmt.Errorf("message verana.de.v1.QueryGetOperatorAuthorizationResponse does not contain field %s", descriptor.FullName()))
+	}
+}
+
+// Set stores the value for a field.
+//
+// For a field belonging to a oneof, it implicitly clears any other field
+// that may be currently set within the same oneof.
+// For extension fields, it implicitly stores the provided ExtensionType.
+// When setting a composite type, it is unspecified whether the stored value
+// aliases the source's memory in any way. If the composite value is an
+// empty, read-only value, then it panics.
+//
+// Set is a mutating operation and unsafe for concurrent use.
+func (x *fastReflection_QueryGetOperatorAuthorizationResponse) Set(fd protoreflect.FieldDescriptor, value protoreflect.Value) {
+	switch fd.FullName() {
+	case "verana.de.v1.QueryGetOperatorAuthorizationResponse.operator_authorization":
+		x.OperatorAuthorization = value.Message().Interface().(*OperatorAuthorization)
+	default:
+		if fd.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.de.v1.QueryGetOperatorAuthorizationResponse"))
+		}
+		panic(fmt.Errorf("message verana.de.v1.QueryGetOperatorAuthorizationResponse does not contain field %s", fd.FullName()))
+	}
+}
+
+// Mutable returns a mutable reference to a composite type.
+//
+// If the field is unpopulated, it may allocate a composite value.
+// For a field belonging to a oneof, it implicitly clears any other field
+// that may be currently set within the same oneof.
+// For extension fields, it implicitly stores the provided ExtensionType
+// if not already stored.
+// It panics if the field does not contain a composite type.
+//
+// Mutable is a mutating operation and unsafe for concurrent use.
+func (x *fastReflection_QueryGetOperatorAuthorizationResponse) Mutable(fd protoreflect.FieldDescriptor) protoreflect.Value {
+	switch fd.FullName() {
+	case "verana.de.v1.QueryGetOperatorAuthorizationResponse.operator_authorization":
+		if x.OperatorAuthorization == nil {
+			x.OperatorAuthorization = new(OperatorAuthorization)
+		}
+		return protoreflect.ValueOfMessage(x.OperatorAuthorization.ProtoReflect())
+	default:
+		if fd.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.de.v1.QueryGetOperatorAuthorizationResponse"))
+		}
+		panic(fmt.Errorf("message verana.de.v1.QueryGetOperatorAuthorizationResponse does not contain field %s", fd.FullName()))
+	}
+}
+
+// NewField returns a new value that is assignable to the field
+// for the given descriptor. For scalars, this returns the default value.
+// For lists, maps, and messages, this returns a new, empty, mutable value.
+func (x *fastReflection_QueryGetOperatorAuthorizationResponse) NewField(fd protoreflect.FieldDescriptor) protoreflect.Value {
+	switch fd.FullName() {
+	case "verana.de.v1.QueryGetOperatorAuthorizationResponse.operator_authorization":
+		m := new(OperatorAuthorization)
+		return protoreflect.ValueOfMessage(m.ProtoReflect())
+	default:
+		if fd.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.de.v1.QueryGetOperatorAuthorizationResponse"))
+		}
+		panic(fmt.Errorf("message verana.de.v1.QueryGetOperatorAuthorizationResponse does not contain field %s", fd.FullName()))
+	}
+}
+
+// WhichOneof reports which field within the oneof is populated,
+// returning nil if none are populated.
+// It panics if the oneof descriptor does not belong to this message.
+func (x *fastReflection_QueryGetOperatorAuthorizationResponse) WhichOneof(d protoreflect.OneofDescriptor) protoreflect.FieldDescriptor {
+	switch d.FullName() {
+	default:
+		panic(fmt.Errorf("%s is not a oneof field in verana.de.v1.QueryGetOperatorAuthorizationResponse", d.FullName()))
+	}
+	panic("unreachable")
+}
+
+// GetUnknown retrieves the entire list of unknown fields.
+// The caller may only mutate the contents of the RawFields
+// if the mutated bytes are stored back into the message with SetUnknown.
+func (x *fastReflection_QueryGetOperatorAuthorizationResponse) GetUnknown() protoreflect.RawFields {
+	return x.unknownFields
+}
+
+// SetUnknown stores an entire list of unknown fields.
+// The raw fields must be syntactically valid according to the wire format.
+// An implementation may panic if this is not the case.
+// Once stored, the caller must not mutate the content of the RawFields.
+// An empty RawFields may be passed to clear the fields.
+//
+// SetUnknown is a mutating operation and unsafe for concurrent use.
+func (x *fastReflection_QueryGetOperatorAuthorizationResponse) SetUnknown(fields protoreflect.RawFields) {
+	x.unknownFields = fields
+}
+
+// IsValid reports whether the message is valid.
+//
+// An invalid message is an empty, read-only value.
+//
+// An invalid message often corresponds to a nil pointer of the concrete
+// message type, but the details are implementation dependent.
+// Validity is not part of the protobuf data model, and may not
+// be preserved in marshaling or other operations.
+func (x *fastReflection_QueryGetOperatorAuthorizationResponse) IsValid() bool {
+	return x != nil
+}
+
+// ProtoMethods returns optional fastReflectionFeature-path implementations of various operations.
+// This method may return nil.
+//
+// The returned methods type is identical to
+// "google.golang.org/protobuf/runtime/protoiface".Methods.
+// Consult the protoiface package documentation for details.
+func (x *fastReflection_QueryGetOperatorAuthorizationResponse) ProtoMethods() *protoiface.Methods {
+	size := func(input protoiface.SizeInput) protoiface.SizeOutput {
+		x := input.Message.Interface().(*QueryGetOperatorAuthorizationResponse)
+		if x == nil {
+			return protoiface.SizeOutput{
+				NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+				Size:              0,
+			}
+		}
+		options := runtime.SizeInputToOptions(input)
+		_ = options
+		var n int
+		var l int
+		_ = l
+		if x.OperatorAuthorization != nil {
+			l = options.Size(x.OperatorAuthorization)
+			n += 1 + l + runtime.Sov(uint64(l))
+		}
+		if x.unknownFields != nil {
+			n += len(x.unknownFields)
+		}
+		return protoiface.SizeOutput{
+			NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+			Size:              n,
+		}
+	}
+
+	marshal := func(input protoiface.MarshalInput) (protoiface.MarshalOutput, error) {
+		x := input.Message.Interface().(*QueryGetOperatorAuthorizationResponse)
+		if x == nil {
+			return protoiface.MarshalOutput{
+				NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+				Buf:               input.Buf,
+			}, nil
+		}
+		options := runtime.MarshalInputToOptions(input)
+		_ = options
+		size := options.Size(x)
+		dAtA := make([]byte, size)
+		i := len(dAtA)
+		_ = i
+		var l int
+		_ = l
+		if x.unknownFields != nil {
+			i -= len(x.unknownFields)
+			copy(dAtA[i:], x.unknownFields)
+		}
+		if x.OperatorAuthorization != nil {
+			encoded, err := options.Marshal(x.OperatorAuthorization)
+			if err != nil {
+				return protoiface.MarshalOutput{
+					NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+					Buf:               input.Buf,
+				}, err
+			}
+			i -= len(encoded)
+			copy(dAtA[i:], encoded)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(encoded)))
+			i--
+			dAtA[i] = 0xa
+		}
+		if input.Buf != nil {
+			input.Buf = append(input.Buf, dAtA...)
+		} else {
+			input.Buf = dAtA
+		}
+		return protoiface.MarshalOutput{
+			NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+			Buf:               input.Buf,
+		}, nil
+	}
+	unmarshal := func(input protoiface.UnmarshalInput) (protoiface.UnmarshalOutput, error) {
+		x := input.Message.Interface().(*QueryGetOperatorAuthorizationResponse)
+		if x == nil {
+			return protoiface.UnmarshalOutput{
+				NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+				Flags:             input.Flags,
+			}, nil
+		}
+		options := runtime.UnmarshalInputToOptions(input)
+		_ = options
+		dAtA := input.Buf
+		l := len(dAtA)
+		iNdEx := 0
+		for iNdEx < l {
+			preIndex := iNdEx
+			var wire uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				wire |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			fieldNum := int32(wire >> 3)
+			wireType := int(wire & 0x7)
+			if wireType == 4 {
+				return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: QueryGetOperatorAuthorizationResponse: wiretype end group for non-group")
+			}
+			if fieldNum <= 0 {
+				return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: QueryGetOperatorAuthorizationResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+			}
+			switch fieldNum {
+			case 1:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field OperatorAuthorization", wireType)
+				}
+				var msglen int
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					msglen |= int(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				if msglen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + msglen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				if x.OperatorAuthorization == nil {
+					x.OperatorAuthorization = &OperatorAuthorization{}
+				}
+				if err := options.Unmarshal(dAtA[iNdEx:postIndex], x.OperatorAuthorization); err != nil {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, err
+				}
+				iNdEx = postIndex
+			default:
+				iNdEx = preIndex
+				skippy, err := runtime.Skip(dAtA[iNdEx:])
+				if err != nil {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, err
+				}
+				if (skippy < 0) || (iNdEx+skippy) < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if (iNdEx + skippy) > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				if !options.DiscardUnknown {
+					x.unknownFields = append(x.unknownFields, dAtA[iNdEx:iNdEx+skippy]...)
+				}
+				iNdEx += skippy
+			}
+		}
+
+		if iNdEx > l {
+			return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+		}
+		return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, nil
+	}
+	return &protoiface.Methods{
+		NoUnkeyedLiterals: struct{}{},
+		Flags:             protoiface.SupportMarshalDeterministic | protoiface.SupportUnmarshalDiscardUnknown,
+		Size:              size,
+		Marshal:           marshal,
+		Unmarshal:         unmarshal,
+		Merge:             nil,
+		CheckInitialized:  nil,
+	}
+}
+
+var (
+	md_QueryGetVSOperatorAuthorizationRequest    protoreflect.MessageDescriptor
+	fd_QueryGetVSOperatorAuthorizationRequest_id protoreflect.FieldDescriptor
+)
+
+func init() {
+	file_verana_de_v1_query_proto_init()
+	md_QueryGetVSOperatorAuthorizationRequest = File_verana_de_v1_query_proto.Messages().ByName("QueryGetVSOperatorAuthorizationRequest")
+	fd_QueryGetVSOperatorAuthorizationRequest_id = md_QueryGetVSOperatorAuthorizationRequest.Fields().ByName("id")
+}
+
+var _ protoreflect.Message = (*fastReflection_QueryGetVSOperatorAuthorizationRequest)(nil)
+
+type fastReflection_QueryGetVSOperatorAuthorizationRequest QueryGetVSOperatorAuthorizationRequest
+
+func (x *QueryGetVSOperatorAuthorizationRequest) ProtoReflect() protoreflect.Message {
+	return (*fastReflection_QueryGetVSOperatorAuthorizationRequest)(x)
+}
+
+func (x *QueryGetVSOperatorAuthorizationRequest) slowProtoReflect() protoreflect.Message {
+	mi := &file_verana_de_v1_query_proto_msgTypes[8]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+var _fastReflection_QueryGetVSOperatorAuthorizationRequest_messageType fastReflection_QueryGetVSOperatorAuthorizationRequest_messageType
+var _ protoreflect.MessageType = fastReflection_QueryGetVSOperatorAuthorizationRequest_messageType{}
+
+type fastReflection_QueryGetVSOperatorAuthorizationRequest_messageType struct{}
+
+func (x fastReflection_QueryGetVSOperatorAuthorizationRequest_messageType) Zero() protoreflect.Message {
+	return (*fastReflection_QueryGetVSOperatorAuthorizationRequest)(nil)
+}
+func (x fastReflection_QueryGetVSOperatorAuthorizationRequest_messageType) New() protoreflect.Message {
+	return new(fastReflection_QueryGetVSOperatorAuthorizationRequest)
+}
+func (x fastReflection_QueryGetVSOperatorAuthorizationRequest_messageType) Descriptor() protoreflect.MessageDescriptor {
+	return md_QueryGetVSOperatorAuthorizationRequest
+}
+
+// Descriptor returns message descriptor, which contains only the protobuf
+// type information for the message.
+func (x *fastReflection_QueryGetVSOperatorAuthorizationRequest) Descriptor() protoreflect.MessageDescriptor {
+	return md_QueryGetVSOperatorAuthorizationRequest
+}
+
+// Type returns the message type, which encapsulates both Go and protobuf
+// type information. If the Go type information is not needed,
+// it is recommended that the message descriptor be used instead.
+func (x *fastReflection_QueryGetVSOperatorAuthorizationRequest) Type() protoreflect.MessageType {
+	return _fastReflection_QueryGetVSOperatorAuthorizationRequest_messageType
+}
+
+// New returns a newly allocated and mutable empty message.
+func (x *fastReflection_QueryGetVSOperatorAuthorizationRequest) New() protoreflect.Message {
+	return new(fastReflection_QueryGetVSOperatorAuthorizationRequest)
+}
+
+// Interface unwraps the message reflection interface and
+// returns the underlying ProtoMessage interface.
+func (x *fastReflection_QueryGetVSOperatorAuthorizationRequest) Interface() protoreflect.ProtoMessage {
+	return (*QueryGetVSOperatorAuthorizationRequest)(x)
+}
+
+// Range iterates over every populated field in an undefined order,
+// calling f for each field descriptor and value encountered.
+// Range returns immediately if f returns false.
+// While iterating, mutating operations may only be performed
+// on the current field descriptor.
+func (x *fastReflection_QueryGetVSOperatorAuthorizationRequest) Range(f func(protoreflect.FieldDescriptor, protoreflect.Value) bool) {
+	if x.Id != uint64(0) {
+		value := protoreflect.ValueOfUint64(x.Id)
+		if !f(fd_QueryGetVSOperatorAuthorizationRequest_id, value) {
+			return
+		}
+	}
+}
+
+// Has reports whether a field is populated.
+//
+// Some fields have the property of nullability where it is possible to
+// distinguish between the default value of a field and whether the field
+// was explicitly populated with the default value. Singular message fields,
+// member fields of a oneof, and proto2 scalar fields are nullable. Such
+// fields are populated only if explicitly set.
+//
+// In other cases (aside from the nullable cases above),
+// a proto3 scalar field is populated if it contains a non-zero value, and
+// a repeated field is populated if it is non-empty.
+func (x *fastReflection_QueryGetVSOperatorAuthorizationRequest) Has(fd protoreflect.FieldDescriptor) bool {
+	switch fd.FullName() {
+	case "verana.de.v1.QueryGetVSOperatorAuthorizationRequest.id":
+		return x.Id != uint64(0)
+	default:
+		if fd.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.de.v1.QueryGetVSOperatorAuthorizationRequest"))
+		}
+		panic(fmt.Errorf("message verana.de.v1.QueryGetVSOperatorAuthorizationRequest does not contain field %s", fd.FullName()))
+	}
+}
+
+// Clear clears the field such that a subsequent Has call reports false.
+//
+// Clearing an extension field clears both the extension type and value
+// associated with the given field number.
+//
+// Clear is a mutating operation and unsafe for concurrent use.
+func (x *fastReflection_QueryGetVSOperatorAuthorizationRequest) Clear(fd protoreflect.FieldDescriptor) {
+	switch fd.FullName() {
+	case "verana.de.v1.QueryGetVSOperatorAuthorizationRequest.id":
+		x.Id = uint64(0)
+	default:
+		if fd.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.de.v1.QueryGetVSOperatorAuthorizationRequest"))
+		}
+		panic(fmt.Errorf("message verana.de.v1.QueryGetVSOperatorAuthorizationRequest does not contain field %s", fd.FullName()))
+	}
+}
+
+// Get retrieves the value for a field.
+//
+// For unpopulated scalars, it returns the default value, where
+// the default value of a bytes scalar is guaranteed to be a copy.
+// For unpopulated composite types, it returns an empty, read-only view
+// of the value; to obtain a mutable reference, use Mutable.
+func (x *fastReflection_QueryGetVSOperatorAuthorizationRequest) Get(descriptor protoreflect.FieldDescriptor) protoreflect.Value {
+	switch descriptor.FullName() {
+	case "verana.de.v1.QueryGetVSOperatorAuthorizationRequest.id":
+		value := x.Id
+		return protoreflect.ValueOfUint64(value)
+	default:
+		if descriptor.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.de.v1.QueryGetVSOperatorAuthorizationRequest"))
+		}
+		panic(fmt.Errorf("message verana.de.v1.QueryGetVSOperatorAuthorizationRequest does not contain field %s", descriptor.FullName()))
+	}
+}
+
+// Set stores the value for a field.
+//
+// For a field belonging to a oneof, it implicitly clears any other field
+// that may be currently set within the same oneof.
+// For extension fields, it implicitly stores the provided ExtensionType.
+// When setting a composite type, it is unspecified whether the stored value
+// aliases the source's memory in any way. If the composite value is an
+// empty, read-only value, then it panics.
+//
+// Set is a mutating operation and unsafe for concurrent use.
+func (x *fastReflection_QueryGetVSOperatorAuthorizationRequest) Set(fd protoreflect.FieldDescriptor, value protoreflect.Value) {
+	switch fd.FullName() {
+	case "verana.de.v1.QueryGetVSOperatorAuthorizationRequest.id":
+		x.Id = value.Uint()
+	default:
+		if fd.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.de.v1.QueryGetVSOperatorAuthorizationRequest"))
+		}
+		panic(fmt.Errorf("message verana.de.v1.QueryGetVSOperatorAuthorizationRequest does not contain field %s", fd.FullName()))
+	}
+}
+
+// Mutable returns a mutable reference to a composite type.
+//
+// If the field is unpopulated, it may allocate a composite value.
+// For a field belonging to a oneof, it implicitly clears any other field
+// that may be currently set within the same oneof.
+// For extension fields, it implicitly stores the provided ExtensionType
+// if not already stored.
+// It panics if the field does not contain a composite type.
+//
+// Mutable is a mutating operation and unsafe for concurrent use.
+func (x *fastReflection_QueryGetVSOperatorAuthorizationRequest) Mutable(fd protoreflect.FieldDescriptor) protoreflect.Value {
+	switch fd.FullName() {
+	case "verana.de.v1.QueryGetVSOperatorAuthorizationRequest.id":
+		panic(fmt.Errorf("field id of message verana.de.v1.QueryGetVSOperatorAuthorizationRequest is not mutable"))
+	default:
+		if fd.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.de.v1.QueryGetVSOperatorAuthorizationRequest"))
+		}
+		panic(fmt.Errorf("message verana.de.v1.QueryGetVSOperatorAuthorizationRequest does not contain field %s", fd.FullName()))
+	}
+}
+
+// NewField returns a new value that is assignable to the field
+// for the given descriptor. For scalars, this returns the default value.
+// For lists, maps, and messages, this returns a new, empty, mutable value.
+func (x *fastReflection_QueryGetVSOperatorAuthorizationRequest) NewField(fd protoreflect.FieldDescriptor) protoreflect.Value {
+	switch fd.FullName() {
+	case "verana.de.v1.QueryGetVSOperatorAuthorizationRequest.id":
+		return protoreflect.ValueOfUint64(uint64(0))
+	default:
+		if fd.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.de.v1.QueryGetVSOperatorAuthorizationRequest"))
+		}
+		panic(fmt.Errorf("message verana.de.v1.QueryGetVSOperatorAuthorizationRequest does not contain field %s", fd.FullName()))
+	}
+}
+
+// WhichOneof reports which field within the oneof is populated,
+// returning nil if none are populated.
+// It panics if the oneof descriptor does not belong to this message.
+func (x *fastReflection_QueryGetVSOperatorAuthorizationRequest) WhichOneof(d protoreflect.OneofDescriptor) protoreflect.FieldDescriptor {
+	switch d.FullName() {
+	default:
+		panic(fmt.Errorf("%s is not a oneof field in verana.de.v1.QueryGetVSOperatorAuthorizationRequest", d.FullName()))
+	}
+	panic("unreachable")
+}
+
+// GetUnknown retrieves the entire list of unknown fields.
+// The caller may only mutate the contents of the RawFields
+// if the mutated bytes are stored back into the message with SetUnknown.
+func (x *fastReflection_QueryGetVSOperatorAuthorizationRequest) GetUnknown() protoreflect.RawFields {
+	return x.unknownFields
+}
+
+// SetUnknown stores an entire list of unknown fields.
+// The raw fields must be syntactically valid according to the wire format.
+// An implementation may panic if this is not the case.
+// Once stored, the caller must not mutate the content of the RawFields.
+// An empty RawFields may be passed to clear the fields.
+//
+// SetUnknown is a mutating operation and unsafe for concurrent use.
+func (x *fastReflection_QueryGetVSOperatorAuthorizationRequest) SetUnknown(fields protoreflect.RawFields) {
+	x.unknownFields = fields
+}
+
+// IsValid reports whether the message is valid.
+//
+// An invalid message is an empty, read-only value.
+//
+// An invalid message often corresponds to a nil pointer of the concrete
+// message type, but the details are implementation dependent.
+// Validity is not part of the protobuf data model, and may not
+// be preserved in marshaling or other operations.
+func (x *fastReflection_QueryGetVSOperatorAuthorizationRequest) IsValid() bool {
+	return x != nil
+}
+
+// ProtoMethods returns optional fastReflectionFeature-path implementations of various operations.
+// This method may return nil.
+//
+// The returned methods type is identical to
+// "google.golang.org/protobuf/runtime/protoiface".Methods.
+// Consult the protoiface package documentation for details.
+func (x *fastReflection_QueryGetVSOperatorAuthorizationRequest) ProtoMethods() *protoiface.Methods {
+	size := func(input protoiface.SizeInput) protoiface.SizeOutput {
+		x := input.Message.Interface().(*QueryGetVSOperatorAuthorizationRequest)
+		if x == nil {
+			return protoiface.SizeOutput{
+				NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+				Size:              0,
+			}
+		}
+		options := runtime.SizeInputToOptions(input)
+		_ = options
+		var n int
+		var l int
+		_ = l
+		if x.Id != 0 {
+			n += 1 + runtime.Sov(uint64(x.Id))
+		}
+		if x.unknownFields != nil {
+			n += len(x.unknownFields)
+		}
+		return protoiface.SizeOutput{
+			NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+			Size:              n,
+		}
+	}
+
+	marshal := func(input protoiface.MarshalInput) (protoiface.MarshalOutput, error) {
+		x := input.Message.Interface().(*QueryGetVSOperatorAuthorizationRequest)
+		if x == nil {
+			return protoiface.MarshalOutput{
+				NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+				Buf:               input.Buf,
+			}, nil
+		}
+		options := runtime.MarshalInputToOptions(input)
+		_ = options
+		size := options.Size(x)
+		dAtA := make([]byte, size)
+		i := len(dAtA)
+		_ = i
+		var l int
+		_ = l
+		if x.unknownFields != nil {
+			i -= len(x.unknownFields)
+			copy(dAtA[i:], x.unknownFields)
+		}
+		if x.Id != 0 {
+			i = runtime.EncodeVarint(dAtA, i, uint64(x.Id))
+			i--
+			dAtA[i] = 0x8
+		}
+		if input.Buf != nil {
+			input.Buf = append(input.Buf, dAtA...)
+		} else {
+			input.Buf = dAtA
+		}
+		return protoiface.MarshalOutput{
+			NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+			Buf:               input.Buf,
+		}, nil
+	}
+	unmarshal := func(input protoiface.UnmarshalInput) (protoiface.UnmarshalOutput, error) {
+		x := input.Message.Interface().(*QueryGetVSOperatorAuthorizationRequest)
+		if x == nil {
+			return protoiface.UnmarshalOutput{
+				NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+				Flags:             input.Flags,
+			}, nil
+		}
+		options := runtime.UnmarshalInputToOptions(input)
+		_ = options
+		dAtA := input.Buf
+		l := len(dAtA)
+		iNdEx := 0
+		for iNdEx < l {
+			preIndex := iNdEx
+			var wire uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				wire |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			fieldNum := int32(wire >> 3)
+			wireType := int(wire & 0x7)
+			if wireType == 4 {
+				return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: QueryGetVSOperatorAuthorizationRequest: wiretype end group for non-group")
+			}
+			if fieldNum <= 0 {
+				return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: QueryGetVSOperatorAuthorizationRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+			}
+			switch fieldNum {
+			case 1:
+				if wireType != 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Id", wireType)
+				}
+				x.Id = 0
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					x.Id |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+			default:
+				iNdEx = preIndex
+				skippy, err := runtime.Skip(dAtA[iNdEx:])
+				if err != nil {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, err
+				}
+				if (skippy < 0) || (iNdEx+skippy) < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if (iNdEx + skippy) > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				if !options.DiscardUnknown {
+					x.unknownFields = append(x.unknownFields, dAtA[iNdEx:iNdEx+skippy]...)
+				}
+				iNdEx += skippy
+			}
+		}
+
+		if iNdEx > l {
+			return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+		}
+		return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, nil
+	}
+	return &protoiface.Methods{
+		NoUnkeyedLiterals: struct{}{},
+		Flags:             protoiface.SupportMarshalDeterministic | protoiface.SupportUnmarshalDiscardUnknown,
+		Size:              size,
+		Marshal:           marshal,
+		Unmarshal:         unmarshal,
+		Merge:             nil,
+		CheckInitialized:  nil,
+	}
+}
+
+var (
+	md_QueryGetVSOperatorAuthorizationResponse                           protoreflect.MessageDescriptor
+	fd_QueryGetVSOperatorAuthorizationResponse_vs_operator_authorization protoreflect.FieldDescriptor
+)
+
+func init() {
+	file_verana_de_v1_query_proto_init()
+	md_QueryGetVSOperatorAuthorizationResponse = File_verana_de_v1_query_proto.Messages().ByName("QueryGetVSOperatorAuthorizationResponse")
+	fd_QueryGetVSOperatorAuthorizationResponse_vs_operator_authorization = md_QueryGetVSOperatorAuthorizationResponse.Fields().ByName("vs_operator_authorization")
+}
+
+var _ protoreflect.Message = (*fastReflection_QueryGetVSOperatorAuthorizationResponse)(nil)
+
+type fastReflection_QueryGetVSOperatorAuthorizationResponse QueryGetVSOperatorAuthorizationResponse
+
+func (x *QueryGetVSOperatorAuthorizationResponse) ProtoReflect() protoreflect.Message {
+	return (*fastReflection_QueryGetVSOperatorAuthorizationResponse)(x)
+}
+
+func (x *QueryGetVSOperatorAuthorizationResponse) slowProtoReflect() protoreflect.Message {
+	mi := &file_verana_de_v1_query_proto_msgTypes[9]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+var _fastReflection_QueryGetVSOperatorAuthorizationResponse_messageType fastReflection_QueryGetVSOperatorAuthorizationResponse_messageType
+var _ protoreflect.MessageType = fastReflection_QueryGetVSOperatorAuthorizationResponse_messageType{}
+
+type fastReflection_QueryGetVSOperatorAuthorizationResponse_messageType struct{}
+
+func (x fastReflection_QueryGetVSOperatorAuthorizationResponse_messageType) Zero() protoreflect.Message {
+	return (*fastReflection_QueryGetVSOperatorAuthorizationResponse)(nil)
+}
+func (x fastReflection_QueryGetVSOperatorAuthorizationResponse_messageType) New() protoreflect.Message {
+	return new(fastReflection_QueryGetVSOperatorAuthorizationResponse)
+}
+func (x fastReflection_QueryGetVSOperatorAuthorizationResponse_messageType) Descriptor() protoreflect.MessageDescriptor {
+	return md_QueryGetVSOperatorAuthorizationResponse
+}
+
+// Descriptor returns message descriptor, which contains only the protobuf
+// type information for the message.
+func (x *fastReflection_QueryGetVSOperatorAuthorizationResponse) Descriptor() protoreflect.MessageDescriptor {
+	return md_QueryGetVSOperatorAuthorizationResponse
+}
+
+// Type returns the message type, which encapsulates both Go and protobuf
+// type information. If the Go type information is not needed,
+// it is recommended that the message descriptor be used instead.
+func (x *fastReflection_QueryGetVSOperatorAuthorizationResponse) Type() protoreflect.MessageType {
+	return _fastReflection_QueryGetVSOperatorAuthorizationResponse_messageType
+}
+
+// New returns a newly allocated and mutable empty message.
+func (x *fastReflection_QueryGetVSOperatorAuthorizationResponse) New() protoreflect.Message {
+	return new(fastReflection_QueryGetVSOperatorAuthorizationResponse)
+}
+
+// Interface unwraps the message reflection interface and
+// returns the underlying ProtoMessage interface.
+func (x *fastReflection_QueryGetVSOperatorAuthorizationResponse) Interface() protoreflect.ProtoMessage {
+	return (*QueryGetVSOperatorAuthorizationResponse)(x)
+}
+
+// Range iterates over every populated field in an undefined order,
+// calling f for each field descriptor and value encountered.
+// Range returns immediately if f returns false.
+// While iterating, mutating operations may only be performed
+// on the current field descriptor.
+func (x *fastReflection_QueryGetVSOperatorAuthorizationResponse) Range(f func(protoreflect.FieldDescriptor, protoreflect.Value) bool) {
+	if x.VsOperatorAuthorization != nil {
+		value := protoreflect.ValueOfMessage(x.VsOperatorAuthorization.ProtoReflect())
+		if !f(fd_QueryGetVSOperatorAuthorizationResponse_vs_operator_authorization, value) {
+			return
+		}
+	}
+}
+
+// Has reports whether a field is populated.
+//
+// Some fields have the property of nullability where it is possible to
+// distinguish between the default value of a field and whether the field
+// was explicitly populated with the default value. Singular message fields,
+// member fields of a oneof, and proto2 scalar fields are nullable. Such
+// fields are populated only if explicitly set.
+//
+// In other cases (aside from the nullable cases above),
+// a proto3 scalar field is populated if it contains a non-zero value, and
+// a repeated field is populated if it is non-empty.
+func (x *fastReflection_QueryGetVSOperatorAuthorizationResponse) Has(fd protoreflect.FieldDescriptor) bool {
+	switch fd.FullName() {
+	case "verana.de.v1.QueryGetVSOperatorAuthorizationResponse.vs_operator_authorization":
+		return x.VsOperatorAuthorization != nil
+	default:
+		if fd.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.de.v1.QueryGetVSOperatorAuthorizationResponse"))
+		}
+		panic(fmt.Errorf("message verana.de.v1.QueryGetVSOperatorAuthorizationResponse does not contain field %s", fd.FullName()))
+	}
+}
+
+// Clear clears the field such that a subsequent Has call reports false.
+//
+// Clearing an extension field clears both the extension type and value
+// associated with the given field number.
+//
+// Clear is a mutating operation and unsafe for concurrent use.
+func (x *fastReflection_QueryGetVSOperatorAuthorizationResponse) Clear(fd protoreflect.FieldDescriptor) {
+	switch fd.FullName() {
+	case "verana.de.v1.QueryGetVSOperatorAuthorizationResponse.vs_operator_authorization":
+		x.VsOperatorAuthorization = nil
+	default:
+		if fd.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.de.v1.QueryGetVSOperatorAuthorizationResponse"))
+		}
+		panic(fmt.Errorf("message verana.de.v1.QueryGetVSOperatorAuthorizationResponse does not contain field %s", fd.FullName()))
+	}
+}
+
+// Get retrieves the value for a field.
+//
+// For unpopulated scalars, it returns the default value, where
+// the default value of a bytes scalar is guaranteed to be a copy.
+// For unpopulated composite types, it returns an empty, read-only view
+// of the value; to obtain a mutable reference, use Mutable.
+func (x *fastReflection_QueryGetVSOperatorAuthorizationResponse) Get(descriptor protoreflect.FieldDescriptor) protoreflect.Value {
+	switch descriptor.FullName() {
+	case "verana.de.v1.QueryGetVSOperatorAuthorizationResponse.vs_operator_authorization":
+		value := x.VsOperatorAuthorization
+		return protoreflect.ValueOfMessage(value.ProtoReflect())
+	default:
+		if descriptor.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.de.v1.QueryGetVSOperatorAuthorizationResponse"))
+		}
+		panic(fmt.Errorf("message verana.de.v1.QueryGetVSOperatorAuthorizationResponse does not contain field %s", descriptor.FullName()))
+	}
+}
+
+// Set stores the value for a field.
+//
+// For a field belonging to a oneof, it implicitly clears any other field
+// that may be currently set within the same oneof.
+// For extension fields, it implicitly stores the provided ExtensionType.
+// When setting a composite type, it is unspecified whether the stored value
+// aliases the source's memory in any way. If the composite value is an
+// empty, read-only value, then it panics.
+//
+// Set is a mutating operation and unsafe for concurrent use.
+func (x *fastReflection_QueryGetVSOperatorAuthorizationResponse) Set(fd protoreflect.FieldDescriptor, value protoreflect.Value) {
+	switch fd.FullName() {
+	case "verana.de.v1.QueryGetVSOperatorAuthorizationResponse.vs_operator_authorization":
+		x.VsOperatorAuthorization = value.Message().Interface().(*VSOperatorAuthorization)
+	default:
+		if fd.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.de.v1.QueryGetVSOperatorAuthorizationResponse"))
+		}
+		panic(fmt.Errorf("message verana.de.v1.QueryGetVSOperatorAuthorizationResponse does not contain field %s", fd.FullName()))
+	}
+}
+
+// Mutable returns a mutable reference to a composite type.
+//
+// If the field is unpopulated, it may allocate a composite value.
+// For a field belonging to a oneof, it implicitly clears any other field
+// that may be currently set within the same oneof.
+// For extension fields, it implicitly stores the provided ExtensionType
+// if not already stored.
+// It panics if the field does not contain a composite type.
+//
+// Mutable is a mutating operation and unsafe for concurrent use.
+func (x *fastReflection_QueryGetVSOperatorAuthorizationResponse) Mutable(fd protoreflect.FieldDescriptor) protoreflect.Value {
+	switch fd.FullName() {
+	case "verana.de.v1.QueryGetVSOperatorAuthorizationResponse.vs_operator_authorization":
+		if x.VsOperatorAuthorization == nil {
+			x.VsOperatorAuthorization = new(VSOperatorAuthorization)
+		}
+		return protoreflect.ValueOfMessage(x.VsOperatorAuthorization.ProtoReflect())
+	default:
+		if fd.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.de.v1.QueryGetVSOperatorAuthorizationResponse"))
+		}
+		panic(fmt.Errorf("message verana.de.v1.QueryGetVSOperatorAuthorizationResponse does not contain field %s", fd.FullName()))
+	}
+}
+
+// NewField returns a new value that is assignable to the field
+// for the given descriptor. For scalars, this returns the default value.
+// For lists, maps, and messages, this returns a new, empty, mutable value.
+func (x *fastReflection_QueryGetVSOperatorAuthorizationResponse) NewField(fd protoreflect.FieldDescriptor) protoreflect.Value {
+	switch fd.FullName() {
+	case "verana.de.v1.QueryGetVSOperatorAuthorizationResponse.vs_operator_authorization":
+		m := new(VSOperatorAuthorization)
+		return protoreflect.ValueOfMessage(m.ProtoReflect())
+	default:
+		if fd.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.de.v1.QueryGetVSOperatorAuthorizationResponse"))
+		}
+		panic(fmt.Errorf("message verana.de.v1.QueryGetVSOperatorAuthorizationResponse does not contain field %s", fd.FullName()))
+	}
+}
+
+// WhichOneof reports which field within the oneof is populated,
+// returning nil if none are populated.
+// It panics if the oneof descriptor does not belong to this message.
+func (x *fastReflection_QueryGetVSOperatorAuthorizationResponse) WhichOneof(d protoreflect.OneofDescriptor) protoreflect.FieldDescriptor {
+	switch d.FullName() {
+	default:
+		panic(fmt.Errorf("%s is not a oneof field in verana.de.v1.QueryGetVSOperatorAuthorizationResponse", d.FullName()))
+	}
+	panic("unreachable")
+}
+
+// GetUnknown retrieves the entire list of unknown fields.
+// The caller may only mutate the contents of the RawFields
+// if the mutated bytes are stored back into the message with SetUnknown.
+func (x *fastReflection_QueryGetVSOperatorAuthorizationResponse) GetUnknown() protoreflect.RawFields {
+	return x.unknownFields
+}
+
+// SetUnknown stores an entire list of unknown fields.
+// The raw fields must be syntactically valid according to the wire format.
+// An implementation may panic if this is not the case.
+// Once stored, the caller must not mutate the content of the RawFields.
+// An empty RawFields may be passed to clear the fields.
+//
+// SetUnknown is a mutating operation and unsafe for concurrent use.
+func (x *fastReflection_QueryGetVSOperatorAuthorizationResponse) SetUnknown(fields protoreflect.RawFields) {
+	x.unknownFields = fields
+}
+
+// IsValid reports whether the message is valid.
+//
+// An invalid message is an empty, read-only value.
+//
+// An invalid message often corresponds to a nil pointer of the concrete
+// message type, but the details are implementation dependent.
+// Validity is not part of the protobuf data model, and may not
+// be preserved in marshaling or other operations.
+func (x *fastReflection_QueryGetVSOperatorAuthorizationResponse) IsValid() bool {
+	return x != nil
+}
+
+// ProtoMethods returns optional fastReflectionFeature-path implementations of various operations.
+// This method may return nil.
+//
+// The returned methods type is identical to
+// "google.golang.org/protobuf/runtime/protoiface".Methods.
+// Consult the protoiface package documentation for details.
+func (x *fastReflection_QueryGetVSOperatorAuthorizationResponse) ProtoMethods() *protoiface.Methods {
+	size := func(input protoiface.SizeInput) protoiface.SizeOutput {
+		x := input.Message.Interface().(*QueryGetVSOperatorAuthorizationResponse)
+		if x == nil {
+			return protoiface.SizeOutput{
+				NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+				Size:              0,
+			}
+		}
+		options := runtime.SizeInputToOptions(input)
+		_ = options
+		var n int
+		var l int
+		_ = l
+		if x.VsOperatorAuthorization != nil {
+			l = options.Size(x.VsOperatorAuthorization)
+			n += 1 + l + runtime.Sov(uint64(l))
+		}
+		if x.unknownFields != nil {
+			n += len(x.unknownFields)
+		}
+		return protoiface.SizeOutput{
+			NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+			Size:              n,
+		}
+	}
+
+	marshal := func(input protoiface.MarshalInput) (protoiface.MarshalOutput, error) {
+		x := input.Message.Interface().(*QueryGetVSOperatorAuthorizationResponse)
+		if x == nil {
+			return protoiface.MarshalOutput{
+				NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+				Buf:               input.Buf,
+			}, nil
+		}
+		options := runtime.MarshalInputToOptions(input)
+		_ = options
+		size := options.Size(x)
+		dAtA := make([]byte, size)
+		i := len(dAtA)
+		_ = i
+		var l int
+		_ = l
+		if x.unknownFields != nil {
+			i -= len(x.unknownFields)
+			copy(dAtA[i:], x.unknownFields)
+		}
+		if x.VsOperatorAuthorization != nil {
+			encoded, err := options.Marshal(x.VsOperatorAuthorization)
+			if err != nil {
+				return protoiface.MarshalOutput{
+					NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+					Buf:               input.Buf,
+				}, err
+			}
+			i -= len(encoded)
+			copy(dAtA[i:], encoded)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(encoded)))
+			i--
+			dAtA[i] = 0xa
+		}
+		if input.Buf != nil {
+			input.Buf = append(input.Buf, dAtA...)
+		} else {
+			input.Buf = dAtA
+		}
+		return protoiface.MarshalOutput{
+			NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+			Buf:               input.Buf,
+		}, nil
+	}
+	unmarshal := func(input protoiface.UnmarshalInput) (protoiface.UnmarshalOutput, error) {
+		x := input.Message.Interface().(*QueryGetVSOperatorAuthorizationResponse)
+		if x == nil {
+			return protoiface.UnmarshalOutput{
+				NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+				Flags:             input.Flags,
+			}, nil
+		}
+		options := runtime.UnmarshalInputToOptions(input)
+		_ = options
+		dAtA := input.Buf
+		l := len(dAtA)
+		iNdEx := 0
+		for iNdEx < l {
+			preIndex := iNdEx
+			var wire uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				wire |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			fieldNum := int32(wire >> 3)
+			wireType := int(wire & 0x7)
+			if wireType == 4 {
+				return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: QueryGetVSOperatorAuthorizationResponse: wiretype end group for non-group")
+			}
+			if fieldNum <= 0 {
+				return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: QueryGetVSOperatorAuthorizationResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+			}
+			switch fieldNum {
+			case 1:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field VsOperatorAuthorization", wireType)
+				}
+				var msglen int
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					msglen |= int(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				if msglen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + msglen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				if x.VsOperatorAuthorization == nil {
+					x.VsOperatorAuthorization = &VSOperatorAuthorization{}
+				}
+				if err := options.Unmarshal(dAtA[iNdEx:postIndex], x.VsOperatorAuthorization); err != nil {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, err
+				}
+				iNdEx = postIndex
+			default:
+				iNdEx = preIndex
+				skippy, err := runtime.Skip(dAtA[iNdEx:])
+				if err != nil {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, err
+				}
+				if (skippy < 0) || (iNdEx+skippy) < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if (iNdEx + skippy) > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				if !options.DiscardUnknown {
+					x.unknownFields = append(x.unknownFields, dAtA[iNdEx:iNdEx+skippy]...)
+				}
+				iNdEx += skippy
+			}
+		}
+
+		if iNdEx > l {
+			return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+		}
+		return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, nil
+	}
+	return &protoiface.Methods{
+		NoUnkeyedLiterals: struct{}{},
+		Flags:             protoiface.SupportMarshalDeterministic | protoiface.SupportUnmarshalDiscardUnknown,
+		Size:              size,
+		Marshal:           marshal,
+		Unmarshal:         unmarshal,
+		Merge:             nil,
+		CheckInitialized:  nil,
+	}
+}
+
 // Code generated by protoc-gen-go. DO NOT EDIT.
 // versions:
 // 	protoc-gen-go v1.27.0
@@ -2944,8 +4590,8 @@ type QueryListOperatorAuthorizationsRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	// corporation filters by the corporation group that granted the authorization.
-	Corporation string `protobuf:"bytes,1,opt,name=corporation,proto3" json:"corporation,omitempty"`
+	// corporation_id filters by the corporation that granted the authorization.
+	CorporationId uint64 `protobuf:"varint,1,opt,name=corporation_id,json=corporationId,proto3" json:"corporation_id,omitempty"`
 	// operator filters by the operator account that received the authorization.
 	Operator string `protobuf:"bytes,2,opt,name=operator,proto3" json:"operator,omitempty"`
 	// response_max_size limits the number of results. Must be 1-1024, defaults to 64.
@@ -2972,11 +4618,11 @@ func (*QueryListOperatorAuthorizationsRequest) Descriptor() ([]byte, []int) {
 	return file_verana_de_v1_query_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *QueryListOperatorAuthorizationsRequest) GetCorporation() string {
+func (x *QueryListOperatorAuthorizationsRequest) GetCorporationId() uint64 {
 	if x != nil {
-		return x.Corporation
+		return x.CorporationId
 	}
-	return ""
+	return 0
 }
 
 func (x *QueryListOperatorAuthorizationsRequest) GetOperator() string {
@@ -3037,8 +4683,8 @@ type QueryListVSOperatorAuthorizationsRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	// corporation filters by the corporation group that granted the authorization.
-	Corporation string `protobuf:"bytes,1,opt,name=corporation,proto3" json:"corporation,omitempty"`
+	// corporation_id filters by the corporation that granted the authorization.
+	CorporationId uint64 `protobuf:"varint,1,opt,name=corporation_id,json=corporationId,proto3" json:"corporation_id,omitempty"`
 	// vs_operator filters by the VS operator account.
 	VsOperator string `protobuf:"bytes,2,opt,name=vs_operator,json=vsOperator,proto3" json:"vs_operator,omitempty"`
 	// response_max_size limits the number of results. Must be 1-1024, defaults to 64.
@@ -3065,11 +4711,11 @@ func (*QueryListVSOperatorAuthorizationsRequest) Descriptor() ([]byte, []int) {
 	return file_verana_de_v1_query_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *QueryListVSOperatorAuthorizationsRequest) GetCorporation() string {
+func (x *QueryListVSOperatorAuthorizationsRequest) GetCorporationId() uint64 {
 	if x != nil {
-		return x.Corporation
+		return x.CorporationId
 	}
-	return ""
+	return 0
 }
 
 func (x *QueryListVSOperatorAuthorizationsRequest) GetVsOperator() string {
@@ -3123,6 +4769,156 @@ func (x *QueryListVSOperatorAuthorizationsResponse) GetVsOperatorAuthorizations(
 	return nil
 }
 
+// QueryGetOperatorAuthorizationRequest is the request type for the
+// Query/GetOperatorAuthorization RPC method.
+type QueryGetOperatorAuthorizationRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// id is the OperatorAuthorization id to fetch.
+	Id uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+}
+
+func (x *QueryGetOperatorAuthorizationRequest) Reset() {
+	*x = QueryGetOperatorAuthorizationRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_verana_de_v1_query_proto_msgTypes[6]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *QueryGetOperatorAuthorizationRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*QueryGetOperatorAuthorizationRequest) ProtoMessage() {}
+
+// Deprecated: Use QueryGetOperatorAuthorizationRequest.ProtoReflect.Descriptor instead.
+func (*QueryGetOperatorAuthorizationRequest) Descriptor() ([]byte, []int) {
+	return file_verana_de_v1_query_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *QueryGetOperatorAuthorizationRequest) GetId() uint64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+// QueryGetOperatorAuthorizationResponse is the response type for the
+// Query/GetOperatorAuthorization RPC method.
+type QueryGetOperatorAuthorizationResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	OperatorAuthorization *OperatorAuthorization `protobuf:"bytes,1,opt,name=operator_authorization,json=operatorAuthorization,proto3" json:"operator_authorization,omitempty"`
+}
+
+func (x *QueryGetOperatorAuthorizationResponse) Reset() {
+	*x = QueryGetOperatorAuthorizationResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_verana_de_v1_query_proto_msgTypes[7]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *QueryGetOperatorAuthorizationResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*QueryGetOperatorAuthorizationResponse) ProtoMessage() {}
+
+// Deprecated: Use QueryGetOperatorAuthorizationResponse.ProtoReflect.Descriptor instead.
+func (*QueryGetOperatorAuthorizationResponse) Descriptor() ([]byte, []int) {
+	return file_verana_de_v1_query_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *QueryGetOperatorAuthorizationResponse) GetOperatorAuthorization() *OperatorAuthorization {
+	if x != nil {
+		return x.OperatorAuthorization
+	}
+	return nil
+}
+
+// QueryGetVSOperatorAuthorizationRequest is the request type for the
+// Query/GetVSOperatorAuthorization RPC method.
+type QueryGetVSOperatorAuthorizationRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// id is the VSOperatorAuthorization id to fetch.
+	Id uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+}
+
+func (x *QueryGetVSOperatorAuthorizationRequest) Reset() {
+	*x = QueryGetVSOperatorAuthorizationRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_verana_de_v1_query_proto_msgTypes[8]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *QueryGetVSOperatorAuthorizationRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*QueryGetVSOperatorAuthorizationRequest) ProtoMessage() {}
+
+// Deprecated: Use QueryGetVSOperatorAuthorizationRequest.ProtoReflect.Descriptor instead.
+func (*QueryGetVSOperatorAuthorizationRequest) Descriptor() ([]byte, []int) {
+	return file_verana_de_v1_query_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *QueryGetVSOperatorAuthorizationRequest) GetId() uint64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+// QueryGetVSOperatorAuthorizationResponse is the response type for the
+// Query/GetVSOperatorAuthorization RPC method.
+type QueryGetVSOperatorAuthorizationResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	VsOperatorAuthorization *VSOperatorAuthorization `protobuf:"bytes,1,opt,name=vs_operator_authorization,json=vsOperatorAuthorization,proto3" json:"vs_operator_authorization,omitempty"`
+}
+
+func (x *QueryGetVSOperatorAuthorizationResponse) Reset() {
+	*x = QueryGetVSOperatorAuthorizationResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_verana_de_v1_query_proto_msgTypes[9]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *QueryGetVSOperatorAuthorizationResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*QueryGetVSOperatorAuthorizationResponse) ProtoMessage() {}
+
+// Deprecated: Use QueryGetVSOperatorAuthorizationResponse.ProtoReflect.Descriptor instead.
+func (*QueryGetVSOperatorAuthorizationResponse) Descriptor() ([]byte, []int) {
+	return file_verana_de_v1_query_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *QueryGetVSOperatorAuthorizationResponse) GetVsOperatorAuthorization() *VSOperatorAuthorization {
+	if x != nil {
+		return x.VsOperatorAuthorization
+	}
+	return nil
+}
+
 var File_verana_de_v1_query_proto protoreflect.FileDescriptor
 
 var file_verana_de_v1_query_proto_rawDesc = []byte{
@@ -3147,94 +4943,140 @@ var file_verana_de_v1_query_proto_rawDesc = []byte{
 	0x6d, 0x73, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x14, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e,
 	0x61, 0x2e, 0x64, 0x65, 0x2e, 0x76, 0x31, 0x2e, 0x50, 0x61, 0x72, 0x61, 0x6d, 0x73, 0x42, 0x09,
 	0xc8, 0xde, 0x1f, 0x00, 0xa8, 0xe7, 0xb0, 0x2a, 0x01, 0x52, 0x06, 0x70, 0x61, 0x72, 0x61, 0x6d,
-	0x73, 0x22, 0xc6, 0x01, 0x0a, 0x26, 0x51, 0x75, 0x65, 0x72, 0x79, 0x4c, 0x69, 0x73, 0x74, 0x4f,
+	0x73, 0x22, 0xb1, 0x01, 0x0a, 0x26, 0x51, 0x75, 0x65, 0x72, 0x79, 0x4c, 0x69, 0x73, 0x74, 0x4f,
 	0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x41, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x61,
-	0x74, 0x69, 0x6f, 0x6e, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x3a, 0x0a, 0x0b,
-	0x63, 0x6f, 0x72, 0x70, 0x6f, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28,
-	0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64,
-	0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x0b, 0x63, 0x6f, 0x72,
-	0x70, 0x6f, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x34, 0x0a, 0x08, 0x6f, 0x70, 0x65, 0x72,
-	0x61, 0x74, 0x6f, 0x72, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14,
-	0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74,
-	0x72, 0x69, 0x6e, 0x67, 0x52, 0x08, 0x6f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x12, 0x2a,
-	0x0a, 0x11, 0x72, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x5f, 0x6d, 0x61, 0x78, 0x5f, 0x73,
-	0x69, 0x7a, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x0f, 0x72, 0x65, 0x73, 0x70, 0x6f,
-	0x6e, 0x73, 0x65, 0x4d, 0x61, 0x78, 0x53, 0x69, 0x7a, 0x65, 0x22, 0x8d, 0x01, 0x0a, 0x27, 0x51,
-	0x75, 0x65, 0x72, 0x79, 0x4c, 0x69, 0x73, 0x74, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72,
-	0x41, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x52, 0x65,
-	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x62, 0x0a, 0x17, 0x6f, 0x70, 0x65, 0x72, 0x61, 0x74,
-	0x6f, 0x72, 0x5f, 0x61, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e,
-	0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x23, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61,
-	0x2e, 0x64, 0x65, 0x2e, 0x76, 0x31, 0x2e, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x41,
-	0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x42, 0x04, 0xc8, 0xde,
-	0x1f, 0x00, 0x52, 0x16, 0x6f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x41, 0x75, 0x74, 0x68,
-	0x6f, 0x72, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x22, 0xcd, 0x01, 0x0a, 0x28, 0x51,
-	0x75, 0x65, 0x72, 0x79, 0x4c, 0x69, 0x73, 0x74, 0x56, 0x53, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74,
-	0x6f, 0x72, 0x41, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x73,
-	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x3a, 0x0a, 0x0b, 0x63, 0x6f, 0x72, 0x70, 0x6f,
-	0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4,
-	0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73,
-	0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x0b, 0x63, 0x6f, 0x72, 0x70, 0x6f, 0x72, 0x61, 0x74,
-	0x69, 0x6f, 0x6e, 0x12, 0x39, 0x0a, 0x0b, 0x76, 0x73, 0x5f, 0x6f, 0x70, 0x65, 0x72, 0x61, 0x74,
-	0x6f, 0x72, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f,
-	0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69,
-	0x6e, 0x67, 0x52, 0x0a, 0x76, 0x73, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x12, 0x2a,
-	0x0a, 0x11, 0x72, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x5f, 0x6d, 0x61, 0x78, 0x5f, 0x73,
-	0x69, 0x7a, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x0f, 0x72, 0x65, 0x73, 0x70, 0x6f,
-	0x6e, 0x73, 0x65, 0x4d, 0x61, 0x78, 0x53, 0x69, 0x7a, 0x65, 0x22, 0x96, 0x01, 0x0a, 0x29, 0x51,
-	0x75, 0x65, 0x72, 0x79, 0x4c, 0x69, 0x73, 0x74, 0x56, 0x53, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74,
-	0x6f, 0x72, 0x41, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x73,
-	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x69, 0x0a, 0x1a, 0x76, 0x73, 0x5f, 0x6f,
-	0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x5f, 0x61, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a,
-	0x61, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x25, 0x2e, 0x76,
-	0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x64, 0x65, 0x2e, 0x76, 0x31, 0x2e, 0x56, 0x53, 0x4f, 0x70,
-	0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x41, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x61, 0x74,
-	0x69, 0x6f, 0x6e, 0x42, 0x04, 0xc8, 0xde, 0x1f, 0x00, 0x52, 0x18, 0x76, 0x73, 0x4f, 0x70, 0x65,
-	0x72, 0x61, 0x74, 0x6f, 0x72, 0x41, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x61, 0x74, 0x69,
-	0x6f, 0x6e, 0x73, 0x32, 0xff, 0x03, 0x0a, 0x05, 0x51, 0x75, 0x65, 0x72, 0x79, 0x12, 0x77, 0x0a,
-	0x06, 0x50, 0x61, 0x72, 0x61, 0x6d, 0x73, 0x12, 0x20, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61,
-	0x2e, 0x64, 0x65, 0x2e, 0x76, 0x31, 0x2e, 0x51, 0x75, 0x65, 0x72, 0x79, 0x50, 0x61, 0x72, 0x61,
-	0x6d, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x21, 0x2e, 0x76, 0x65, 0x72, 0x61,
-	0x6e, 0x61, 0x2e, 0x64, 0x65, 0x2e, 0x76, 0x31, 0x2e, 0x51, 0x75, 0x65, 0x72, 0x79, 0x50, 0x61,
-	0x72, 0x61, 0x6d, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x28, 0x82, 0xd3,
-	0xe4, 0x93, 0x02, 0x22, 0x12, 0x20, 0x2f, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2d, 0x6c, 0x61,
-	0x62, 0x73, 0x2f, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2f, 0x64, 0x65, 0x2f, 0x76, 0x31, 0x2f,
-	0x70, 0x61, 0x72, 0x61, 0x6d, 0x73, 0x12, 0xb8, 0x01, 0x0a, 0x1a, 0x4c, 0x69, 0x73, 0x74, 0x4f,
+	0x74, 0x69, 0x6f, 0x6e, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x25, 0x0a, 0x0e,
+	0x63, 0x6f, 0x72, 0x70, 0x6f, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x69, 0x64, 0x18, 0x01,
+	0x20, 0x01, 0x28, 0x04, 0x52, 0x0d, 0x63, 0x6f, 0x72, 0x70, 0x6f, 0x72, 0x61, 0x74, 0x69, 0x6f,
+	0x6e, 0x49, 0x64, 0x12, 0x34, 0x0a, 0x08, 0x6f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x18,
+	0x02, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f,
+	0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x52,
+	0x08, 0x6f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x12, 0x2a, 0x0a, 0x11, 0x72, 0x65, 0x73,
+	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x5f, 0x6d, 0x61, 0x78, 0x5f, 0x73, 0x69, 0x7a, 0x65, 0x18, 0x03,
+	0x20, 0x01, 0x28, 0x0d, 0x52, 0x0f, 0x72, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x4d, 0x61,
+	0x78, 0x53, 0x69, 0x7a, 0x65, 0x22, 0x8d, 0x01, 0x0a, 0x27, 0x51, 0x75, 0x65, 0x72, 0x79, 0x4c,
+	0x69, 0x73, 0x74, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x41, 0x75, 0x74, 0x68, 0x6f,
+	0x72, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
+	0x65, 0x12, 0x62, 0x0a, 0x17, 0x6f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x5f, 0x61, 0x75,
+	0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x18, 0x01, 0x20, 0x03,
+	0x28, 0x0b, 0x32, 0x23, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x64, 0x65, 0x2e, 0x76,
+	0x31, 0x2e, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x41, 0x75, 0x74, 0x68, 0x6f, 0x72,
+	0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x42, 0x04, 0xc8, 0xde, 0x1f, 0x00, 0x52, 0x16, 0x6f,
 	0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x41, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x61,
-	0x74, 0x69, 0x6f, 0x6e, 0x73, 0x12, 0x34, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x64,
-	0x65, 0x2e, 0x76, 0x31, 0x2e, 0x51, 0x75, 0x65, 0x72, 0x79, 0x4c, 0x69, 0x73, 0x74, 0x4f, 0x70,
-	0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x41, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x61, 0x74,
-	0x69, 0x6f, 0x6e, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x35, 0x2e, 0x76, 0x65,
-	0x72, 0x61, 0x6e, 0x61, 0x2e, 0x64, 0x65, 0x2e, 0x76, 0x31, 0x2e, 0x51, 0x75, 0x65, 0x72, 0x79,
-	0x4c, 0x69, 0x73, 0x74, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x41, 0x75, 0x74, 0x68,
-	0x6f, 0x72, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
-	0x73, 0x65, 0x22, 0x2d, 0x82, 0xd3, 0xe4, 0x93, 0x02, 0x27, 0x12, 0x25, 0x2f, 0x76, 0x65, 0x72,
-	0x61, 0x6e, 0x61, 0x2f, 0x64, 0x65, 0x2f, 0x76, 0x31, 0x2f, 0x6f, 0x70, 0x65, 0x72, 0x61, 0x74,
-	0x6f, 0x72, 0x2d, 0x61, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e,
-	0x73, 0x12, 0xc1, 0x01, 0x0a, 0x1c, 0x4c, 0x69, 0x73, 0x74, 0x56, 0x53, 0x4f, 0x70, 0x65, 0x72,
-	0x61, 0x74, 0x6f, 0x72, 0x41, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f,
-	0x6e, 0x73, 0x12, 0x36, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x64, 0x65, 0x2e, 0x76,
-	0x31, 0x2e, 0x51, 0x75, 0x65, 0x72, 0x79, 0x4c, 0x69, 0x73, 0x74, 0x56, 0x53, 0x4f, 0x70, 0x65,
-	0x72, 0x61, 0x74, 0x6f, 0x72, 0x41, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x61, 0x74, 0x69,
-	0x6f, 0x6e, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x37, 0x2e, 0x76, 0x65, 0x72,
-	0x61, 0x6e, 0x61, 0x2e, 0x64, 0x65, 0x2e, 0x76, 0x31, 0x2e, 0x51, 0x75, 0x65, 0x72, 0x79, 0x4c,
+	0x74, 0x69, 0x6f, 0x6e, 0x73, 0x22, 0xb8, 0x01, 0x0a, 0x28, 0x51, 0x75, 0x65, 0x72, 0x79, 0x4c,
 	0x69, 0x73, 0x74, 0x56, 0x53, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x41, 0x75, 0x74,
-	0x68, 0x6f, 0x72, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f,
-	0x6e, 0x73, 0x65, 0x22, 0x30, 0x82, 0xd3, 0xe4, 0x93, 0x02, 0x2a, 0x12, 0x28, 0x2f, 0x76, 0x65,
-	0x72, 0x61, 0x6e, 0x61, 0x2f, 0x64, 0x65, 0x2f, 0x76, 0x31, 0x2f, 0x76, 0x73, 0x2d, 0x6f, 0x70,
-	0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x2d, 0x61, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x61,
-	0x74, 0x69, 0x6f, 0x6e, 0x73, 0x42, 0xa5, 0x01, 0x0a, 0x10, 0x63, 0x6f, 0x6d, 0x2e, 0x76, 0x65,
-	0x72, 0x61, 0x6e, 0x61, 0x2e, 0x64, 0x65, 0x2e, 0x76, 0x31, 0x42, 0x0a, 0x51, 0x75, 0x65, 0x72,
-	0x79, 0x50, 0x72, 0x6f, 0x74, 0x6f, 0x50, 0x01, 0x5a, 0x33, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62,
-	0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2d, 0x6c, 0x61, 0x62, 0x73,
-	0x2f, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x76, 0x65, 0x72, 0x61,
-	0x6e, 0x61, 0x2f, 0x64, 0x65, 0x2f, 0x76, 0x31, 0x3b, 0x64, 0x65, 0x76, 0x31, 0xa2, 0x02, 0x03,
-	0x56, 0x44, 0x58, 0xaa, 0x02, 0x0c, 0x56, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x44, 0x65, 0x2e,
-	0x56, 0x31, 0xca, 0x02, 0x0c, 0x56, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x5c, 0x44, 0x65, 0x5c, 0x56,
-	0x31, 0xe2, 0x02, 0x18, 0x56, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x5c, 0x44, 0x65, 0x5c, 0x56, 0x31,
-	0x5c, 0x47, 0x50, 0x42, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0xea, 0x02, 0x0e, 0x56,
-	0x65, 0x72, 0x61, 0x6e, 0x61, 0x3a, 0x3a, 0x44, 0x65, 0x3a, 0x3a, 0x56, 0x31, 0x62, 0x06, 0x70,
-	0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x68, 0x6f, 0x72, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65,
+	0x73, 0x74, 0x12, 0x25, 0x0a, 0x0e, 0x63, 0x6f, 0x72, 0x70, 0x6f, 0x72, 0x61, 0x74, 0x69, 0x6f,
+	0x6e, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04, 0x52, 0x0d, 0x63, 0x6f, 0x72, 0x70,
+	0x6f, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x49, 0x64, 0x12, 0x39, 0x0a, 0x0b, 0x76, 0x73, 0x5f,
+	0x6f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18,
+	0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65,
+	0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x0a, 0x76, 0x73, 0x4f, 0x70, 0x65, 0x72,
+	0x61, 0x74, 0x6f, 0x72, 0x12, 0x2a, 0x0a, 0x11, 0x72, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
+	0x5f, 0x6d, 0x61, 0x78, 0x5f, 0x73, 0x69, 0x7a, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0d, 0x52,
+	0x0f, 0x72, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x4d, 0x61, 0x78, 0x53, 0x69, 0x7a, 0x65,
+	0x22, 0x96, 0x01, 0x0a, 0x29, 0x51, 0x75, 0x65, 0x72, 0x79, 0x4c, 0x69, 0x73, 0x74, 0x56, 0x53,
+	0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x41, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a,
+	0x61, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x69,
+	0x0a, 0x1a, 0x76, 0x73, 0x5f, 0x6f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x5f, 0x61, 0x75,
+	0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x18, 0x01, 0x20, 0x03,
+	0x28, 0x0b, 0x32, 0x25, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x64, 0x65, 0x2e, 0x76,
+	0x31, 0x2e, 0x56, 0x53, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x41, 0x75, 0x74, 0x68,
+	0x6f, 0x72, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x42, 0x04, 0xc8, 0xde, 0x1f, 0x00, 0x52,
+	0x18, 0x76, 0x73, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x41, 0x75, 0x74, 0x68, 0x6f,
+	0x72, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x22, 0x36, 0x0a, 0x24, 0x51, 0x75, 0x65,
+	0x72, 0x79, 0x47, 0x65, 0x74, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x41, 0x75, 0x74,
+	0x68, 0x6f, 0x72, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
+	0x74, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04, 0x52, 0x02, 0x69,
+	0x64, 0x22, 0x89, 0x01, 0x0a, 0x25, 0x51, 0x75, 0x65, 0x72, 0x79, 0x47, 0x65, 0x74, 0x4f, 0x70,
+	0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x41, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x61, 0x74,
+	0x69, 0x6f, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x60, 0x0a, 0x16, 0x6f,
+	0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x5f, 0x61, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a,
+	0x61, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x23, 0x2e, 0x76, 0x65,
+	0x72, 0x61, 0x6e, 0x61, 0x2e, 0x64, 0x65, 0x2e, 0x76, 0x31, 0x2e, 0x4f, 0x70, 0x65, 0x72, 0x61,
+	0x74, 0x6f, 0x72, 0x41, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e,
+	0x42, 0x04, 0xc8, 0xde, 0x1f, 0x00, 0x52, 0x15, 0x6f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72,
+	0x41, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x22, 0x38, 0x0a,
+	0x26, 0x51, 0x75, 0x65, 0x72, 0x79, 0x47, 0x65, 0x74, 0x56, 0x53, 0x4f, 0x70, 0x65, 0x72, 0x61,
+	0x74, 0x6f, 0x72, 0x41, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e,
+	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x04, 0x52, 0x02, 0x69, 0x64, 0x22, 0x92, 0x01, 0x0a, 0x27, 0x51, 0x75, 0x65, 0x72,
+	0x79, 0x47, 0x65, 0x74, 0x56, 0x53, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x41, 0x75,
+	0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x6f,
+	0x6e, 0x73, 0x65, 0x12, 0x67, 0x0a, 0x19, 0x76, 0x73, 0x5f, 0x6f, 0x70, 0x65, 0x72, 0x61, 0x74,
+	0x6f, 0x72, 0x5f, 0x61, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x25, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e,
+	0x64, 0x65, 0x2e, 0x76, 0x31, 0x2e, 0x56, 0x53, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72,
+	0x41, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x42, 0x04, 0xc8,
+	0xde, 0x1f, 0x00, 0x52, 0x17, 0x76, 0x73, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x41,
+	0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x32, 0xfc, 0x06, 0x0a,
+	0x05, 0x51, 0x75, 0x65, 0x72, 0x79, 0x12, 0x77, 0x0a, 0x06, 0x50, 0x61, 0x72, 0x61, 0x6d, 0x73,
+	0x12, 0x20, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x64, 0x65, 0x2e, 0x76, 0x31, 0x2e,
+	0x51, 0x75, 0x65, 0x72, 0x79, 0x50, 0x61, 0x72, 0x61, 0x6d, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65,
+	0x73, 0x74, 0x1a, 0x21, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x64, 0x65, 0x2e, 0x76,
+	0x31, 0x2e, 0x51, 0x75, 0x65, 0x72, 0x79, 0x50, 0x61, 0x72, 0x61, 0x6d, 0x73, 0x52, 0x65, 0x73,
+	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x28, 0x82, 0xd3, 0xe4, 0x93, 0x02, 0x22, 0x12, 0x20, 0x2f,
+	0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2d, 0x6c, 0x61, 0x62, 0x73, 0x2f, 0x76, 0x65, 0x72, 0x61,
+	0x6e, 0x61, 0x2f, 0x64, 0x65, 0x2f, 0x76, 0x31, 0x2f, 0x70, 0x61, 0x72, 0x61, 0x6d, 0x73, 0x12,
+	0xb8, 0x01, 0x0a, 0x1a, 0x4c, 0x69, 0x73, 0x74, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72,
+	0x41, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x12, 0x34,
+	0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x64, 0x65, 0x2e, 0x76, 0x31, 0x2e, 0x51, 0x75,
+	0x65, 0x72, 0x79, 0x4c, 0x69, 0x73, 0x74, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x41,
+	0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x52, 0x65, 0x71,
+	0x75, 0x65, 0x73, 0x74, 0x1a, 0x35, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x64, 0x65,
+	0x2e, 0x76, 0x31, 0x2e, 0x51, 0x75, 0x65, 0x72, 0x79, 0x4c, 0x69, 0x73, 0x74, 0x4f, 0x70, 0x65,
+	0x72, 0x61, 0x74, 0x6f, 0x72, 0x41, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x61, 0x74, 0x69,
+	0x6f, 0x6e, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x2d, 0x82, 0xd3, 0xe4,
+	0x93, 0x02, 0x27, 0x12, 0x25, 0x2f, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2f, 0x64, 0x65, 0x2f,
+	0x76, 0x31, 0x2f, 0x6f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x2d, 0x61, 0x75, 0x74, 0x68,
+	0x6f, 0x72, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x12, 0xc1, 0x01, 0x0a, 0x1c, 0x4c,
+	0x69, 0x73, 0x74, 0x56, 0x53, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x41, 0x75, 0x74,
+	0x68, 0x6f, 0x72, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x12, 0x36, 0x2e, 0x76, 0x65,
+	0x72, 0x61, 0x6e, 0x61, 0x2e, 0x64, 0x65, 0x2e, 0x76, 0x31, 0x2e, 0x51, 0x75, 0x65, 0x72, 0x79,
+	0x4c, 0x69, 0x73, 0x74, 0x56, 0x53, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x41, 0x75,
+	0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x52, 0x65, 0x71, 0x75,
+	0x65, 0x73, 0x74, 0x1a, 0x37, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x64, 0x65, 0x2e,
+	0x76, 0x31, 0x2e, 0x51, 0x75, 0x65, 0x72, 0x79, 0x4c, 0x69, 0x73, 0x74, 0x56, 0x53, 0x4f, 0x70,
+	0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x41, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x61, 0x74,
+	0x69, 0x6f, 0x6e, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x30, 0x82, 0xd3,
+	0xe4, 0x93, 0x02, 0x2a, 0x12, 0x28, 0x2f, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2f, 0x64, 0x65,
+	0x2f, 0x76, 0x31, 0x2f, 0x76, 0x73, 0x2d, 0x6f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x2d,
+	0x61, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x12, 0xb7,
+	0x01, 0x0a, 0x18, 0x47, 0x65, 0x74, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x41, 0x75,
+	0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x32, 0x2e, 0x76, 0x65,
+	0x72, 0x61, 0x6e, 0x61, 0x2e, 0x64, 0x65, 0x2e, 0x76, 0x31, 0x2e, 0x51, 0x75, 0x65, 0x72, 0x79,
+	0x47, 0x65, 0x74, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x41, 0x75, 0x74, 0x68, 0x6f,
+	0x72, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a,
+	0x33, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x64, 0x65, 0x2e, 0x76, 0x31, 0x2e, 0x51,
+	0x75, 0x65, 0x72, 0x79, 0x47, 0x65, 0x74, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x41,
+	0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x73, 0x70,
+	0x6f, 0x6e, 0x73, 0x65, 0x22, 0x32, 0x82, 0xd3, 0xe4, 0x93, 0x02, 0x2c, 0x12, 0x2a, 0x2f, 0x76,
+	0x65, 0x72, 0x61, 0x6e, 0x61, 0x2f, 0x64, 0x65, 0x2f, 0x76, 0x31, 0x2f, 0x6f, 0x70, 0x65, 0x72,
+	0x61, 0x74, 0x6f, 0x72, 0x2d, 0x61, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x61, 0x74, 0x69,
+	0x6f, 0x6e, 0x73, 0x2f, 0x7b, 0x69, 0x64, 0x7d, 0x12, 0xc0, 0x01, 0x0a, 0x1a, 0x47, 0x65, 0x74,
+	0x56, 0x53, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x41, 0x75, 0x74, 0x68, 0x6f, 0x72,
+	0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x34, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61,
+	0x2e, 0x64, 0x65, 0x2e, 0x76, 0x31, 0x2e, 0x51, 0x75, 0x65, 0x72, 0x79, 0x47, 0x65, 0x74, 0x56,
+	0x53, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x41, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69,
+	0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x35, 0x2e,
+	0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x64, 0x65, 0x2e, 0x76, 0x31, 0x2e, 0x51, 0x75, 0x65,
+	0x72, 0x79, 0x47, 0x65, 0x74, 0x56, 0x53, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x41,
+	0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x73, 0x70,
+	0x6f, 0x6e, 0x73, 0x65, 0x22, 0x35, 0x82, 0xd3, 0xe4, 0x93, 0x02, 0x2f, 0x12, 0x2d, 0x2f, 0x76,
+	0x65, 0x72, 0x61, 0x6e, 0x61, 0x2f, 0x64, 0x65, 0x2f, 0x76, 0x31, 0x2f, 0x76, 0x73, 0x2d, 0x6f,
+	0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x2d, 0x61, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a,
+	0x61, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x2f, 0x7b, 0x69, 0x64, 0x7d, 0x42, 0xa5, 0x01, 0x0a, 0x10,
+	0x63, 0x6f, 0x6d, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x64, 0x65, 0x2e, 0x76, 0x31,
+	0x42, 0x0a, 0x51, 0x75, 0x65, 0x72, 0x79, 0x50, 0x72, 0x6f, 0x74, 0x6f, 0x50, 0x01, 0x5a, 0x33,
+	0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x76, 0x65, 0x72, 0x61, 0x6e,
+	0x61, 0x2d, 0x6c, 0x61, 0x62, 0x73, 0x2f, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2f, 0x61, 0x70,
+	0x69, 0x2f, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2f, 0x64, 0x65, 0x2f, 0x76, 0x31, 0x3b, 0x64,
+	0x65, 0x76, 0x31, 0xa2, 0x02, 0x03, 0x56, 0x44, 0x58, 0xaa, 0x02, 0x0c, 0x56, 0x65, 0x72, 0x61,
+	0x6e, 0x61, 0x2e, 0x44, 0x65, 0x2e, 0x56, 0x31, 0xca, 0x02, 0x0c, 0x56, 0x65, 0x72, 0x61, 0x6e,
+	0x61, 0x5c, 0x44, 0x65, 0x5c, 0x56, 0x31, 0xe2, 0x02, 0x18, 0x56, 0x65, 0x72, 0x61, 0x6e, 0x61,
+	0x5c, 0x44, 0x65, 0x5c, 0x56, 0x31, 0x5c, 0x47, 0x50, 0x42, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61,
+	0x74, 0x61, 0xea, 0x02, 0x0e, 0x56, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x3a, 0x3a, 0x44, 0x65, 0x3a,
+	0x3a, 0x56, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -3249,7 +5091,7 @@ func file_verana_de_v1_query_proto_rawDescGZIP() []byte {
 	return file_verana_de_v1_query_proto_rawDescData
 }
 
-var file_verana_de_v1_query_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_verana_de_v1_query_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_verana_de_v1_query_proto_goTypes = []interface{}{
 	(*QueryParamsRequest)(nil),                        // 0: verana.de.v1.QueryParamsRequest
 	(*QueryParamsResponse)(nil),                       // 1: verana.de.v1.QueryParamsResponse
@@ -3257,25 +5099,35 @@ var file_verana_de_v1_query_proto_goTypes = []interface{}{
 	(*QueryListOperatorAuthorizationsResponse)(nil),   // 3: verana.de.v1.QueryListOperatorAuthorizationsResponse
 	(*QueryListVSOperatorAuthorizationsRequest)(nil),  // 4: verana.de.v1.QueryListVSOperatorAuthorizationsRequest
 	(*QueryListVSOperatorAuthorizationsResponse)(nil), // 5: verana.de.v1.QueryListVSOperatorAuthorizationsResponse
-	(*Params)(nil),                  // 6: verana.de.v1.Params
-	(*OperatorAuthorization)(nil),   // 7: verana.de.v1.OperatorAuthorization
-	(*VSOperatorAuthorization)(nil), // 8: verana.de.v1.VSOperatorAuthorization
+	(*QueryGetOperatorAuthorizationRequest)(nil),      // 6: verana.de.v1.QueryGetOperatorAuthorizationRequest
+	(*QueryGetOperatorAuthorizationResponse)(nil),     // 7: verana.de.v1.QueryGetOperatorAuthorizationResponse
+	(*QueryGetVSOperatorAuthorizationRequest)(nil),    // 8: verana.de.v1.QueryGetVSOperatorAuthorizationRequest
+	(*QueryGetVSOperatorAuthorizationResponse)(nil),   // 9: verana.de.v1.QueryGetVSOperatorAuthorizationResponse
+	(*Params)(nil),                  // 10: verana.de.v1.Params
+	(*OperatorAuthorization)(nil),   // 11: verana.de.v1.OperatorAuthorization
+	(*VSOperatorAuthorization)(nil), // 12: verana.de.v1.VSOperatorAuthorization
 }
 var file_verana_de_v1_query_proto_depIdxs = []int32{
-	6, // 0: verana.de.v1.QueryParamsResponse.params:type_name -> verana.de.v1.Params
-	7, // 1: verana.de.v1.QueryListOperatorAuthorizationsResponse.operator_authorizations:type_name -> verana.de.v1.OperatorAuthorization
-	8, // 2: verana.de.v1.QueryListVSOperatorAuthorizationsResponse.vs_operator_authorizations:type_name -> verana.de.v1.VSOperatorAuthorization
-	0, // 3: verana.de.v1.Query.Params:input_type -> verana.de.v1.QueryParamsRequest
-	2, // 4: verana.de.v1.Query.ListOperatorAuthorizations:input_type -> verana.de.v1.QueryListOperatorAuthorizationsRequest
-	4, // 5: verana.de.v1.Query.ListVSOperatorAuthorizations:input_type -> verana.de.v1.QueryListVSOperatorAuthorizationsRequest
-	1, // 6: verana.de.v1.Query.Params:output_type -> verana.de.v1.QueryParamsResponse
-	3, // 7: verana.de.v1.Query.ListOperatorAuthorizations:output_type -> verana.de.v1.QueryListOperatorAuthorizationsResponse
-	5, // 8: verana.de.v1.Query.ListVSOperatorAuthorizations:output_type -> verana.de.v1.QueryListVSOperatorAuthorizationsResponse
-	6, // [6:9] is the sub-list for method output_type
-	3, // [3:6] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	10, // 0: verana.de.v1.QueryParamsResponse.params:type_name -> verana.de.v1.Params
+	11, // 1: verana.de.v1.QueryListOperatorAuthorizationsResponse.operator_authorizations:type_name -> verana.de.v1.OperatorAuthorization
+	12, // 2: verana.de.v1.QueryListVSOperatorAuthorizationsResponse.vs_operator_authorizations:type_name -> verana.de.v1.VSOperatorAuthorization
+	11, // 3: verana.de.v1.QueryGetOperatorAuthorizationResponse.operator_authorization:type_name -> verana.de.v1.OperatorAuthorization
+	12, // 4: verana.de.v1.QueryGetVSOperatorAuthorizationResponse.vs_operator_authorization:type_name -> verana.de.v1.VSOperatorAuthorization
+	0,  // 5: verana.de.v1.Query.Params:input_type -> verana.de.v1.QueryParamsRequest
+	2,  // 6: verana.de.v1.Query.ListOperatorAuthorizations:input_type -> verana.de.v1.QueryListOperatorAuthorizationsRequest
+	4,  // 7: verana.de.v1.Query.ListVSOperatorAuthorizations:input_type -> verana.de.v1.QueryListVSOperatorAuthorizationsRequest
+	6,  // 8: verana.de.v1.Query.GetOperatorAuthorization:input_type -> verana.de.v1.QueryGetOperatorAuthorizationRequest
+	8,  // 9: verana.de.v1.Query.GetVSOperatorAuthorization:input_type -> verana.de.v1.QueryGetVSOperatorAuthorizationRequest
+	1,  // 10: verana.de.v1.Query.Params:output_type -> verana.de.v1.QueryParamsResponse
+	3,  // 11: verana.de.v1.Query.ListOperatorAuthorizations:output_type -> verana.de.v1.QueryListOperatorAuthorizationsResponse
+	5,  // 12: verana.de.v1.Query.ListVSOperatorAuthorizations:output_type -> verana.de.v1.QueryListVSOperatorAuthorizationsResponse
+	7,  // 13: verana.de.v1.Query.GetOperatorAuthorization:output_type -> verana.de.v1.QueryGetOperatorAuthorizationResponse
+	9,  // 14: verana.de.v1.Query.GetVSOperatorAuthorization:output_type -> verana.de.v1.QueryGetVSOperatorAuthorizationResponse
+	10, // [10:15] is the sub-list for method output_type
+	5,  // [5:10] is the sub-list for method input_type
+	5,  // [5:5] is the sub-list for extension type_name
+	5,  // [5:5] is the sub-list for extension extendee
+	0,  // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_verana_de_v1_query_proto_init() }
@@ -3358,6 +5210,54 @@ func file_verana_de_v1_query_proto_init() {
 				return nil
 			}
 		}
+		file_verana_de_v1_query_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*QueryGetOperatorAuthorizationRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_verana_de_v1_query_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*QueryGetOperatorAuthorizationResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_verana_de_v1_query_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*QueryGetVSOperatorAuthorizationRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_verana_de_v1_query_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*QueryGetVSOperatorAuthorizationResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -3365,7 +5265,7 @@ func file_verana_de_v1_query_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_verana_de_v1_query_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
