@@ -31,24 +31,36 @@ var _ = time.Kitchen
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
+// OperatorAuthorization is the operator-delegation record. Per spec v4-rc2 it is
+// keyed by its own uint64 id; (corporation_id, operator) is a unique secondary
+// index.
 type OperatorAuthorization struct {
-	// corporation is the group granting the authorization.
-	Corporation string `protobuf:"bytes,1,opt,name=corporation,proto3" json:"corporation,omitempty"`
+	// id is the own uint64 key of this OperatorAuthorization.
+	Id uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	// corporation_id is the id of the corporation granting the authorization. The
+	// (corporation_id, operator) tuple MUST be unique.
+	CorporationId uint64 `protobuf:"varint,2,opt,name=corporation_id,json=corporationId,proto3" json:"corporation_id,omitempty"`
 	// operator is the account receiving the authorization.
-	Operator string `protobuf:"bytes,2,opt,name=operator,proto3" json:"operator,omitempty"`
+	Operator string `protobuf:"bytes,3,opt,name=operator,proto3" json:"operator,omitempty"`
 	// msg_types is the list of module message types this authorization applies to.
-	MsgTypes []string `protobuf:"bytes,3,rep,name=msg_types,json=msgTypes,proto3" json:"msg_types,omitempty"`
-	// spend_limit is the maximum amount of funds that the grantee is allowed to
-	// spend as a direct consequence of executing authorized messages.
-	SpendLimit github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,4,rep,name=spend_limit,json=spendLimit,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"spend_limit"`
+	MsgTypes []string `protobuf:"bytes,4,rep,name=msg_types,json=msgTypes,proto3" json:"msg_types,omitempty"`
+	// spend_limit is the maximum amount of funds the grantee is allowed to spend.
+	SpendLimit github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,5,rep,name=spend_limit,json=spendLimit,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"spend_limit"`
+	// remaining_spend is the runtime balance for spend_limit. Present iff
+	// spend_limit is set.
+	RemainingSpend github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,6,rep,name=remaining_spend,json=remainingSpend,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"remaining_spend"`
 	// fee_spend_limit is the maximum total amount of fees that can be paid using
 	// this authorization.
-	FeeSpendLimit github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,5,rep,name=fee_spend_limit,json=feeSpendLimit,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"fee_spend_limit"`
+	FeeSpendLimit github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,7,rep,name=fee_spend_limit,json=feeSpendLimit,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"fee_spend_limit"`
+	// remaining_fee_spend is the runtime balance for fee_spend_limit. Present iff
+	// fee_spend_limit is set.
+	RemainingFeeSpend github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,8,rep,name=remaining_fee_spend,json=remainingFeeSpend,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"remaining_fee_spend"`
 	// expiration is the timestamp after which the authorization is no longer
 	// valid.
-	Expiration *time.Time `protobuf:"bytes,6,opt,name=expiration,proto3,stdtime" json:"expiration,omitempty"`
-	// period is the reset period for spend_limit and fee_spend_limit.
-	Period *time.Duration `protobuf:"bytes,7,opt,name=period,proto3,stdduration" json:"period,omitempty"`
+	Expiration *time.Time `protobuf:"bytes,9,opt,name=expiration,proto3,stdtime" json:"expiration,omitempty"`
+	// period is the reset period for spend_limit and fee_spend_limit. If set,
+	// expiration MUST also be set.
+	Period *time.Duration `protobuf:"bytes,10,opt,name=period,proto3,stdduration" json:"period,omitempty"`
 }
 
 func (m *OperatorAuthorization) Reset()         { *m = OperatorAuthorization{} }
@@ -84,11 +96,18 @@ func (m *OperatorAuthorization) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_OperatorAuthorization proto.InternalMessageInfo
 
-func (m *OperatorAuthorization) GetCorporation() string {
+func (m *OperatorAuthorization) GetId() uint64 {
 	if m != nil {
-		return m.Corporation
+		return m.Id
 	}
-	return ""
+	return 0
+}
+
+func (m *OperatorAuthorization) GetCorporationId() uint64 {
+	if m != nil {
+		return m.CorporationId
+	}
+	return 0
 }
 
 func (m *OperatorAuthorization) GetOperator() string {
@@ -112,9 +131,23 @@ func (m *OperatorAuthorization) GetSpendLimit() github_com_cosmos_cosmos_sdk_typ
 	return nil
 }
 
+func (m *OperatorAuthorization) GetRemainingSpend() github_com_cosmos_cosmos_sdk_types.Coins {
+	if m != nil {
+		return m.RemainingSpend
+	}
+	return nil
+}
+
 func (m *OperatorAuthorization) GetFeeSpendLimit() github_com_cosmos_cosmos_sdk_types.Coins {
 	if m != nil {
 		return m.FeeSpendLimit
+	}
+	return nil
+}
+
+func (m *OperatorAuthorization) GetRemainingFeeSpend() github_com_cosmos_cosmos_sdk_types.Coins {
+	if m != nil {
+		return m.RemainingFeeSpend
 	}
 	return nil
 }
@@ -133,29 +166,23 @@ func (m *OperatorAuthorization) GetPeriod() *time.Duration {
 	return nil
 }
 
-// OperatorAuthorizationUsage tracks per-authorization spend consumption so
-// spec [AUTHZ-CHECK-1] can enforce the spend_limit / period-reset invariant:
+// OperatorAuthorizationUsage tracks per-authorization spend consumption so spec
+// [AUTHZ-CHECK-1] can enforce the spend_limit / period-reset invariant. Keyed by
+// the parent OperatorAuthorization id.
 //
-//	"If oauthz.spend_limit is set, the remaining balance MUST be sufficient
-//	 for the operation. After successful execution, the consumed amount MUST
-//	 be deducted from the remaining balance. If oauthz.period is set and the
-//	 current period has elapsed since the last reset, the remaining balance
-//	 MUST be reset to oauthz.spend_limit before evaluating the check above."
-//
-// Stored in the DE module keyed by (corporation, operator) just like the
-// parent OperatorAuthorization record.
+// TODO(spec v4): the spec folds the runtime balance into OperatorAuthorization
+// (remaining_spend / remaining_fee_spend). This separate ledger is retained to
+// keep AUTHZ-CHECK-1 reset semantics unchanged (out of scope for the v4-rc2 VSOA
+// rebase); unify when AUTHZ-CHECK-1 is aligned to the spec.
 type OperatorAuthorizationUsage struct {
-	// corporation is the group that granted the authorization.
-	Corporation string `protobuf:"bytes,1,opt,name=corporation,proto3" json:"corporation,omitempty"`
-	// operator is the account holding the authorization.
-	Operator string `protobuf:"bytes,2,opt,name=operator,proto3" json:"operator,omitempty"`
+	// operator_authorization_id is the id of the parent OperatorAuthorization.
+	OperatorAuthorizationId uint64 `protobuf:"varint,1,opt,name=operator_authorization_id,json=operatorAuthorizationId,proto3" json:"operator_authorization_id,omitempty"`
 	// remaining is the balance still available inside the current period.
 	// Decremented on each successful execution that consumed funds.
-	Remaining github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,3,rep,name=remaining,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"remaining"`
-	// last_reset is the timestamp at which `remaining` was last refilled to
-	// the parent authorization's spend_limit. Zero when no period has elapsed
-	// since grant time.
-	LastReset time.Time `protobuf:"bytes,4,opt,name=last_reset,json=lastReset,proto3,stdtime" json:"last_reset"`
+	Remaining github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,2,rep,name=remaining,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"remaining"`
+	// last_reset is the timestamp at which `remaining` was last refilled to the
+	// parent authorization's spend_limit.
+	LastReset time.Time `protobuf:"bytes,3,opt,name=last_reset,json=lastReset,proto3,stdtime" json:"last_reset"`
 }
 
 func (m *OperatorAuthorizationUsage) Reset()         { *m = OperatorAuthorizationUsage{} }
@@ -191,18 +218,11 @@ func (m *OperatorAuthorizationUsage) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_OperatorAuthorizationUsage proto.InternalMessageInfo
 
-func (m *OperatorAuthorizationUsage) GetCorporation() string {
+func (m *OperatorAuthorizationUsage) GetOperatorAuthorizationId() uint64 {
 	if m != nil {
-		return m.Corporation
+		return m.OperatorAuthorizationId
 	}
-	return ""
-}
-
-func (m *OperatorAuthorizationUsage) GetOperator() string {
-	if m != nil {
-		return m.Operator
-	}
-	return ""
+	return 0
 }
 
 func (m *OperatorAuthorizationUsage) GetRemaining() github_com_cosmos_cosmos_sdk_types.Coins {
@@ -219,21 +239,27 @@ func (m *OperatorAuthorizationUsage) GetLastReset() time.Time {
 	return time.Time{}
 }
 
+// FeeGrant is the chain-level fee allowance, keyed by the composite
+// (grantor_corporation_id, grantee).
 type FeeGrant struct {
-	// grantor is the authority group granting the fee allowance.
-	Grantor string `protobuf:"bytes,1,opt,name=grantor,proto3" json:"grantor,omitempty"`
+	// grantor_corporation_id is the id of the corporation granting the fee
+	// allowance. Together with grantee it forms the composite key.
+	GrantorCorporationId uint64 `protobuf:"varint,1,opt,name=grantor_corporation_id,json=grantorCorporationId,proto3" json:"grantor_corporation_id,omitempty"`
 	// grantee is the account that receives the fee grant from grantor.
 	Grantee string `protobuf:"bytes,2,opt,name=grantee,proto3" json:"grantee,omitempty"`
 	// msg_types is the list of VPR delegable message types for which the fee
 	// allowance applies.
 	MsgTypes []string `protobuf:"bytes,3,rep,name=msg_types,json=msgTypes,proto3" json:"msg_types,omitempty"`
-	// spend_limit is the maximum amount of fees that can be spent using this
-	// grant.
+	// spend_limit is the maximum amount of fees that can be spent using this grant.
 	SpendLimit github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,4,rep,name=spend_limit,json=spendLimit,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"spend_limit"`
+	// remaining_spend is the runtime balance for spend_limit. Present iff
+	// spend_limit is set.
+	RemainingSpend github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,5,rep,name=remaining_spend,json=remainingSpend,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"remaining_spend"`
 	// expiration is the timestamp after which the fee grant is no longer valid.
-	Expiration *time.Time `protobuf:"bytes,5,opt,name=expiration,proto3,stdtime" json:"expiration,omitempty"`
-	// period is the reset period for spend_limit.
-	Period *time.Duration `protobuf:"bytes,6,opt,name=period,proto3,stdduration" json:"period,omitempty"`
+	Expiration *time.Time `protobuf:"bytes,6,opt,name=expiration,proto3,stdtime" json:"expiration,omitempty"`
+	// period is the reset period for spend_limit. If set, expiration MUST also be
+	// set.
+	Period *time.Duration `protobuf:"bytes,7,opt,name=period,proto3,stdduration" json:"period,omitempty"`
 }
 
 func (m *FeeGrant) Reset()         { *m = FeeGrant{} }
@@ -269,11 +295,11 @@ func (m *FeeGrant) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_FeeGrant proto.InternalMessageInfo
 
-func (m *FeeGrant) GetGrantor() string {
+func (m *FeeGrant) GetGrantorCorporationId() uint64 {
 	if m != nil {
-		return m.Grantor
+		return m.GrantorCorporationId
 	}
-	return ""
+	return 0
 }
 
 func (m *FeeGrant) GetGrantee() string {
@@ -297,6 +323,13 @@ func (m *FeeGrant) GetSpendLimit() github_com_cosmos_cosmos_sdk_types.Coins {
 	return nil
 }
 
+func (m *FeeGrant) GetRemainingSpend() github_com_cosmos_cosmos_sdk_types.Coins {
+	if m != nil {
+		return m.RemainingSpend
+	}
+	return nil
+}
+
 func (m *FeeGrant) GetExpiration() *time.Time {
 	if m != nil {
 		return m.Expiration
@@ -311,21 +344,154 @@ func (m *FeeGrant) GetPeriod() *time.Duration {
 	return nil
 }
 
+// ParticipantAuthorizationRecord is a per-participant VS-operator authorization
+// nested inside a VSOperatorAuthorization. Keyed by participant_id, which is
+// globally unique across all records of all VSOperatorAuthorizations.
+type ParticipantAuthorizationRecord struct {
+	// participant_id is the id of the Participant this record applies to. Globally
+	// unique across all ParticipantAuthorizationRecord entries.
+	ParticipantId uint64 `protobuf:"varint,1,opt,name=participant_id,json=participantId,proto3" json:"participant_id,omitempty"`
+	// msg_types is the list of delegable message types the vs_operator is
+	// authorized for on behalf of corporation. Mandatory, frozen at create.
+	MsgTypes []string `protobuf:"bytes,2,rep,name=msg_types,json=msgTypes,proto3" json:"msg_types,omitempty"`
+	// spend_limit is the maximum amount the vs_operator is allowed to spend.
+	SpendLimit github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,3,rep,name=spend_limit,json=spendLimit,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"spend_limit"`
+	// remaining_spend is the runtime balance for spend_limit. Present iff
+	// spend_limit is set.
+	RemainingSpend github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,4,rep,name=remaining_spend,json=remainingSpend,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"remaining_spend"`
+	// fee_spend_limit is the maximum total amount of transaction fees that can be
+	// spent by vs_operator.
+	FeeSpendLimit github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,5,rep,name=fee_spend_limit,json=feeSpendLimit,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"fee_spend_limit"`
+	// remaining_fee_spend is the runtime balance for fee_spend_limit. Present iff
+	// fee_spend_limit is set.
+	RemainingFeeSpend github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,6,rep,name=remaining_fee_spend,json=remainingFeeSpend,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"remaining_fee_spend"`
+	// with_feegrant indicates the corporation pays the transaction fees for
+	// vs_operator.
+	WithFeegrant bool `protobuf:"varint,7,opt,name=with_feegrant,json=withFeegrant,proto3" json:"with_feegrant,omitempty"`
+	// expiration is the authorization window boundary. A record created before
+	// validation is disabled with expiration = now().
+	Expiration *time.Time `protobuf:"bytes,8,opt,name=expiration,proto3,stdtime" json:"expiration,omitempty"`
+	// period is the reset period for spend_limit and fee_spend_limit.
+	Period *time.Duration `protobuf:"bytes,9,opt,name=period,proto3,stdduration" json:"period,omitempty"`
+}
+
+func (m *ParticipantAuthorizationRecord) Reset()         { *m = ParticipantAuthorizationRecord{} }
+func (m *ParticipantAuthorizationRecord) String() string { return proto.CompactTextString(m) }
+func (*ParticipantAuthorizationRecord) ProtoMessage()    {}
+func (*ParticipantAuthorizationRecord) Descriptor() ([]byte, []int) {
+	return fileDescriptor_ceceb116c414c04d, []int{3}
+}
+func (m *ParticipantAuthorizationRecord) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ParticipantAuthorizationRecord) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ParticipantAuthorizationRecord.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ParticipantAuthorizationRecord) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ParticipantAuthorizationRecord.Merge(m, src)
+}
+func (m *ParticipantAuthorizationRecord) XXX_Size() int {
+	return m.Size()
+}
+func (m *ParticipantAuthorizationRecord) XXX_DiscardUnknown() {
+	xxx_messageInfo_ParticipantAuthorizationRecord.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ParticipantAuthorizationRecord proto.InternalMessageInfo
+
+func (m *ParticipantAuthorizationRecord) GetParticipantId() uint64 {
+	if m != nil {
+		return m.ParticipantId
+	}
+	return 0
+}
+
+func (m *ParticipantAuthorizationRecord) GetMsgTypes() []string {
+	if m != nil {
+		return m.MsgTypes
+	}
+	return nil
+}
+
+func (m *ParticipantAuthorizationRecord) GetSpendLimit() github_com_cosmos_cosmos_sdk_types.Coins {
+	if m != nil {
+		return m.SpendLimit
+	}
+	return nil
+}
+
+func (m *ParticipantAuthorizationRecord) GetRemainingSpend() github_com_cosmos_cosmos_sdk_types.Coins {
+	if m != nil {
+		return m.RemainingSpend
+	}
+	return nil
+}
+
+func (m *ParticipantAuthorizationRecord) GetFeeSpendLimit() github_com_cosmos_cosmos_sdk_types.Coins {
+	if m != nil {
+		return m.FeeSpendLimit
+	}
+	return nil
+}
+
+func (m *ParticipantAuthorizationRecord) GetRemainingFeeSpend() github_com_cosmos_cosmos_sdk_types.Coins {
+	if m != nil {
+		return m.RemainingFeeSpend
+	}
+	return nil
+}
+
+func (m *ParticipantAuthorizationRecord) GetWithFeegrant() bool {
+	if m != nil {
+		return m.WithFeegrant
+	}
+	return false
+}
+
+func (m *ParticipantAuthorizationRecord) GetExpiration() *time.Time {
+	if m != nil {
+		return m.Expiration
+	}
+	return nil
+}
+
+func (m *ParticipantAuthorizationRecord) GetPeriod() *time.Duration {
+	if m != nil {
+		return m.Period
+	}
+	return nil
+}
+
+// VSOperatorAuthorization is the VS-operator delegation, keyed by its own uint64
+// id; (corporation_id, vs_operator) is a unique secondary index. The entry
+// exists iff it has at least one record.
 type VSOperatorAuthorization struct {
-	// corporation is the group granting the authorization.
-	Corporation string `protobuf:"bytes,1,opt,name=corporation,proto3" json:"corporation,omitempty"`
+	// id is the own uint64 key of this VSOperatorAuthorization.
+	Id uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	// corporation_id is the id of the corporation granting the authorization. The
+	// (corporation_id, vs_operator) tuple MUST be unique.
+	CorporationId uint64 `protobuf:"varint,2,opt,name=corporation_id,json=corporationId,proto3" json:"corporation_id,omitempty"`
 	// vs_operator is the operator account receiving the authorization.
-	VsOperator string `protobuf:"bytes,2,opt,name=vs_operator,json=vsOperator,proto3" json:"vs_operator,omitempty"`
-	// permissions is the list of permission ids for which this authorization is
-	// granted.
-	Permissions []uint64 `protobuf:"varint,3,rep,packed,name=permissions,proto3" json:"permissions,omitempty"`
+	VsOperator string `protobuf:"bytes,3,opt,name=vs_operator,json=vsOperator,proto3" json:"vs_operator,omitempty"`
+	// records is the list of per-participant authorization records granted to
+	// vs_operator by corporation_id.
+	Records []ParticipantAuthorizationRecord `protobuf:"bytes,4,rep,name=records,proto3" json:"records"`
 }
 
 func (m *VSOperatorAuthorization) Reset()         { *m = VSOperatorAuthorization{} }
 func (m *VSOperatorAuthorization) String() string { return proto.CompactTextString(m) }
 func (*VSOperatorAuthorization) ProtoMessage()    {}
 func (*VSOperatorAuthorization) Descriptor() ([]byte, []int) {
-	return fileDescriptor_ceceb116c414c04d, []int{3}
+	return fileDescriptor_ceceb116c414c04d, []int{4}
 }
 func (m *VSOperatorAuthorization) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -354,11 +520,18 @@ func (m *VSOperatorAuthorization) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_VSOperatorAuthorization proto.InternalMessageInfo
 
-func (m *VSOperatorAuthorization) GetCorporation() string {
+func (m *VSOperatorAuthorization) GetId() uint64 {
 	if m != nil {
-		return m.Corporation
+		return m.Id
 	}
-	return ""
+	return 0
+}
+
+func (m *VSOperatorAuthorization) GetCorporationId() uint64 {
+	if m != nil {
+		return m.CorporationId
+	}
+	return 0
 }
 
 func (m *VSOperatorAuthorization) GetVsOperator() string {
@@ -368,9 +541,9 @@ func (m *VSOperatorAuthorization) GetVsOperator() string {
 	return ""
 }
 
-func (m *VSOperatorAuthorization) GetPermissions() []uint64 {
+func (m *VSOperatorAuthorization) GetRecords() []ParticipantAuthorizationRecord {
 	if m != nil {
-		return m.Permissions
+		return m.Records
 	}
 	return nil
 }
@@ -379,50 +552,65 @@ func init() {
 	proto.RegisterType((*OperatorAuthorization)(nil), "verana.de.v1.OperatorAuthorization")
 	proto.RegisterType((*OperatorAuthorizationUsage)(nil), "verana.de.v1.OperatorAuthorizationUsage")
 	proto.RegisterType((*FeeGrant)(nil), "verana.de.v1.FeeGrant")
+	proto.RegisterType((*ParticipantAuthorizationRecord)(nil), "verana.de.v1.ParticipantAuthorizationRecord")
 	proto.RegisterType((*VSOperatorAuthorization)(nil), "verana.de.v1.VSOperatorAuthorization")
 }
 
 func init() { proto.RegisterFile("verana/de/v1/types.proto", fileDescriptor_ceceb116c414c04d) }
 
 var fileDescriptor_ceceb116c414c04d = []byte{
-	// 588 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xcc, 0x55, 0x3f, 0x6f, 0xd3, 0x4e,
-	0x18, 0x8e, 0xdb, 0x34, 0x4d, 0xce, 0xbf, 0x9f, 0x90, 0xac, 0x22, 0x9c, 0x20, 0x39, 0x51, 0xa6,
-	0x2c, 0xb1, 0x49, 0x40, 0x42, 0x30, 0x51, 0x17, 0xc1, 0x82, 0x84, 0xe4, 0x14, 0x06, 0x16, 0xeb,
-	0x1c, 0xbf, 0xb9, 0x9e, 0x88, 0x7d, 0xd6, 0xdd, 0x25, 0x2a, 0xcc, 0x7c, 0x80, 0x8e, 0x7c, 0x06,
-	0x46, 0xc4, 0xcc, 0xdc, 0xb1, 0x62, 0x62, 0xa2, 0x28, 0xf9, 0x12, 0x8c, 0xe8, 0xec, 0x73, 0x1b,
-	0xfe, 0x48, 0x01, 0x11, 0x09, 0xa6, 0xdc, 0x7b, 0xef, 0xf3, 0x3c, 0xaf, 0xf5, 0xbc, 0x4f, 0x6c,
-	0x64, 0xcf, 0x81, 0xe3, 0x14, 0x7b, 0x31, 0x78, 0xf3, 0x81, 0x27, 0x5f, 0x64, 0x20, 0xdc, 0x8c,
-	0x33, 0xc9, 0xac, 0xff, 0x8a, 0x8e, 0x1b, 0x83, 0x3b, 0x1f, 0xb4, 0x9c, 0x31, 0x13, 0x09, 0x13,
-	0x5e, 0x84, 0x85, 0x42, 0x46, 0x20, 0xf1, 0xc0, 0x1b, 0x33, 0x9a, 0x16, 0xe8, 0x56, 0xb3, 0xe8,
-	0x87, 0x79, 0xe5, 0x15, 0x85, 0x6e, 0xed, 0x11, 0x46, 0x58, 0x71, 0xaf, 0x4e, 0xfa, 0xd6, 0x21,
-	0x8c, 0x91, 0x29, 0x78, 0x79, 0x15, 0xcd, 0x26, 0x5e, 0x3c, 0xe3, 0x58, 0x52, 0x56, 0x0a, 0xb6,
-	0xbf, 0xef, 0x4b, 0x9a, 0x80, 0x90, 0x38, 0xc9, 0x0a, 0x40, 0xf7, 0x55, 0x15, 0x5d, 0x7d, 0x9c,
-	0x01, 0xc7, 0x92, 0xf1, 0xfd, 0x99, 0x3c, 0x62, 0x9c, 0xbe, 0xcc, 0x05, 0xac, 0xbb, 0xc8, 0x1c,
-	0x33, 0x9e, 0xb1, 0x42, 0xcf, 0x36, 0x3a, 0x46, 0xaf, 0xe1, 0xdb, 0x1f, 0xde, 0xf5, 0xf7, 0xf4,
-	0x73, 0xed, 0xc7, 0x31, 0x07, 0x21, 0x46, 0x92, 0xd3, 0x94, 0x04, 0xab, 0x60, 0xeb, 0x16, 0xaa,
-	0x33, 0x2d, 0x6a, 0x6f, 0xad, 0x21, 0x5e, 0x20, 0xad, 0xeb, 0xa8, 0x91, 0x08, 0x12, 0xe6, 0xf6,
-	0xd9, 0xdb, 0x9d, 0xed, 0x5e, 0x23, 0xa8, 0x27, 0x82, 0x1c, 0xaa, 0xda, 0x9a, 0x22, 0x53, 0x64,
-	0x90, 0xc6, 0xe1, 0x94, 0x26, 0x54, 0xda, 0xd5, 0xce, 0x76, 0xcf, 0x1c, 0x36, 0x5d, 0x2d, 0xa9,
-	0x0c, 0x75, 0xb5, 0xa1, 0xee, 0x01, 0xa3, 0xa9, 0x7f, 0xe3, 0xf4, 0x53, 0xbb, 0xf2, 0xe6, 0xbc,
-	0xdd, 0x23, 0x54, 0x1e, 0xcd, 0x22, 0x77, 0xcc, 0x12, 0x6d, 0xa8, 0xfe, 0xe9, 0x8b, 0xf8, 0xb9,
-	0x5e, 0x95, 0x22, 0x88, 0x00, 0xe5, 0xfa, 0x8f, 0x94, 0xbc, 0x25, 0xd0, 0x95, 0x09, 0x40, 0xb8,
-	0x3a, 0x71, 0x67, 0xf3, 0x13, 0xff, 0x9f, 0x00, 0x8c, 0x2e, 0x87, 0xde, 0x43, 0x08, 0x8e, 0x33,
-	0xaa, 0x0d, 0xaf, 0x75, 0x8c, 0x9e, 0x39, 0x6c, 0xb9, 0xc5, 0x06, 0xdd, 0x72, 0x83, 0xee, 0x61,
-	0xb9, 0x41, 0xbf, 0x7a, 0x72, 0xde, 0x36, 0x82, 0x15, 0x8e, 0x75, 0x1b, 0xd5, 0x32, 0xe0, 0x94,
-	0xc5, 0xf6, 0x6e, 0xce, 0x6e, 0xfe, 0xc0, 0xbe, 0xaf, 0xf3, 0xe1, 0x57, 0x5f, 0x2b, 0xb2, 0x86,
-	0x77, 0xdf, 0x6f, 0xa1, 0xd6, 0x4f, 0x63, 0xf0, 0x44, 0x60, 0x02, 0x7f, 0x21, 0x0b, 0x14, 0x35,
-	0x38, 0x24, 0x98, 0xa6, 0x34, 0x25, 0x79, 0x16, 0x36, 0x6c, 0xfd, 0xa5, 0xba, 0x75, 0x80, 0xd0,
-	0x14, 0x0b, 0x19, 0x72, 0x10, 0xa0, 0x82, 0xb5, 0xce, 0xf6, 0xba, 0x1a, 0x96, 0x5b, 0xdf, 0x50,
-	0xbc, 0x40, 0xd1, 0xba, 0x5f, 0xb6, 0x50, 0xfd, 0x01, 0xc0, 0x43, 0x8e, 0x53, 0x69, 0x0d, 0xd1,
-	0x2e, 0x51, 0x07, 0xc6, 0xd7, 0x5a, 0x55, 0x02, 0x2f, 0x38, 0x00, 0x6b, 0x5d, 0x2a, 0x81, 0xff,
-	0xd2, 0x1f, 0xe6, 0xdb, 0xec, 0xee, 0xfc, 0x51, 0x76, 0x6b, 0xbf, 0x97, 0xdd, 0xb7, 0x06, 0xba,
-	0xf6, 0x74, 0xb4, 0xf9, 0x97, 0xd8, 0x1d, 0x64, 0xce, 0x45, 0xf8, 0xcb, 0xd9, 0x45, 0x73, 0x51,
-	0x3e, 0x83, 0xd5, 0x41, 0x66, 0x06, 0x3c, 0xa1, 0x42, 0x50, 0x96, 0x16, 0xab, 0xa9, 0x06, 0xab,
-	0x57, 0xbe, 0x7f, 0xba, 0x70, 0x8c, 0xb3, 0x85, 0x63, 0x7c, 0x5e, 0x38, 0xc6, 0xc9, 0xd2, 0xa9,
-	0x9c, 0x2d, 0x9d, 0xca, 0xc7, 0xa5, 0x53, 0x79, 0xb6, 0xea, 0x7f, 0xf1, 0xf1, 0xe8, 0x4f, 0x71,
-	0x24, 0xf4, 0xd9, 0x3b, 0x56, 0x1f, 0x99, 0x7c, 0x0b, 0x51, 0x2d, 0x77, 0xe6, 0xe6, 0xd7, 0x00,
-	0x00, 0x00, 0xff, 0xff, 0x21, 0xa7, 0x9e, 0x30, 0x7e, 0x06, 0x00, 0x00,
+	// 802 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xc4, 0x56, 0x4d, 0x4f, 0xdb, 0x48,
+	0x18, 0x8e, 0xf3, 0x9d, 0x09, 0x01, 0xad, 0x97, 0x5d, 0x9c, 0xac, 0xe4, 0x44, 0x59, 0xad, 0x94,
+	0xc3, 0x62, 0x2f, 0x2c, 0xd2, 0x6a, 0x7b, 0x2a, 0xa1, 0xa2, 0x42, 0x42, 0x6a, 0xe5, 0xd0, 0x1e,
+	0x7a, 0xb1, 0x26, 0xf1, 0x60, 0x46, 0x8d, 0x3d, 0xd6, 0xcc, 0x24, 0xa5, 0xed, 0x9f, 0xe0, 0xd8,
+	0x5b, 0xef, 0x3d, 0xf7, 0x47, 0x70, 0x44, 0x3d, 0x55, 0x3d, 0x94, 0x0a, 0x7e, 0x42, 0x4f, 0x3d,
+	0xb5, 0x9a, 0xf1, 0x24, 0x71, 0x28, 0x8a, 0x8a, 0x48, 0xe1, 0x84, 0xe7, 0xfd, 0x7a, 0x98, 0xf7,
+	0x7d, 0xde, 0x27, 0x03, 0x8c, 0x21, 0xa2, 0x30, 0x84, 0xb6, 0x87, 0xec, 0xe1, 0x9a, 0xcd, 0x9f,
+	0x47, 0x88, 0x59, 0x11, 0x25, 0x9c, 0xe8, 0x0b, 0xb1, 0xc7, 0xf2, 0x90, 0x35, 0x5c, 0xab, 0x99,
+	0x3d, 0xc2, 0x02, 0xc2, 0xec, 0x2e, 0x64, 0x22, 0xb2, 0x8b, 0x38, 0x5c, 0xb3, 0x7b, 0x04, 0x87,
+	0x71, 0x74, 0xad, 0x1a, 0xfb, 0x5d, 0x79, 0xb2, 0xe3, 0x83, 0x72, 0x2d, 0xfb, 0xc4, 0x27, 0xb1,
+	0x5d, 0x7c, 0x29, 0xab, 0xe9, 0x13, 0xe2, 0xf7, 0x91, 0x2d, 0x4f, 0xdd, 0xc1, 0xbe, 0xed, 0x0d,
+	0x28, 0xe4, 0x98, 0x8c, 0x0a, 0xd6, 0x2f, 0xfa, 0x39, 0x0e, 0x10, 0xe3, 0x30, 0x88, 0xe2, 0x80,
+	0xe6, 0xd7, 0x1c, 0xf8, 0xed, 0x41, 0x84, 0x28, 0xe4, 0x84, 0x6e, 0x0e, 0xf8, 0x01, 0xa1, 0xf8,
+	0x85, 0x2c, 0xa0, 0x2f, 0x82, 0x34, 0xf6, 0x0c, 0xad, 0xa1, 0xb5, 0xb2, 0x4e, 0x1a, 0x7b, 0xfa,
+	0x5f, 0x60, 0xb1, 0x47, 0x68, 0x44, 0xe2, 0xfa, 0x2e, 0xf6, 0x8c, 0xb4, 0xf4, 0x55, 0x12, 0xd6,
+	0x1d, 0x4f, 0xdf, 0x00, 0x45, 0xa2, 0xea, 0x19, 0x99, 0x86, 0xd6, 0x2a, 0xb5, 0x8d, 0x77, 0x6f,
+	0x57, 0x97, 0xd5, 0x5d, 0x36, 0x3d, 0x8f, 0x22, 0xc6, 0x3a, 0x9c, 0xe2, 0xd0, 0x77, 0xc6, 0x91,
+	0xfa, 0x1f, 0xa0, 0x14, 0x30, 0xdf, 0x95, 0x9d, 0x33, 0xb2, 0x8d, 0x4c, 0xab, 0xe4, 0x14, 0x03,
+	0xe6, 0xef, 0x89, 0xb3, 0xde, 0x07, 0x65, 0x16, 0xa1, 0xd0, 0x73, 0xfb, 0x38, 0xc0, 0xdc, 0xc8,
+	0x35, 0x32, 0xad, 0xf2, 0x7a, 0xd5, 0x52, 0x25, 0x45, 0x2f, 0x2d, 0xd5, 0x4b, 0x6b, 0x8b, 0xe0,
+	0xb0, 0xfd, 0xcf, 0xf1, 0xc7, 0x7a, 0xea, 0xcd, 0x69, 0xbd, 0xe5, 0x63, 0x7e, 0x30, 0xe8, 0x5a,
+	0x3d, 0x12, 0xa8, 0x5e, 0xaa, 0x3f, 0xab, 0xcc, 0x7b, 0xaa, 0xa6, 0x24, 0x12, 0x98, 0x03, 0x64,
+	0xfd, 0x5d, 0x51, 0x5e, 0xe7, 0x60, 0x89, 0xa2, 0x00, 0xe2, 0x10, 0x87, 0xbe, 0x2b, 0xed, 0x46,
+	0x7e, 0xfe, 0x88, 0x8b, 0x63, 0x8c, 0x8e, 0x80, 0xd0, 0x19, 0x58, 0xda, 0x47, 0xc8, 0x4d, 0xde,
+	0xb3, 0x30, 0x7f, 0xd4, 0xca, 0x3e, 0x42, 0x9d, 0xc9, 0x55, 0x5f, 0x82, 0x5f, 0x27, 0x57, 0x1d,
+	0xc3, 0x1b, 0xc5, 0xf9, 0x03, 0xff, 0x32, 0xc6, 0xd9, 0x56, 0xff, 0x81, 0x7e, 0x17, 0x00, 0x74,
+	0x18, 0xe1, 0x98, 0x38, 0x46, 0xa9, 0xa1, 0xb5, 0xca, 0xeb, 0x35, 0x2b, 0xe6, 0xab, 0x35, 0xe2,
+	0xab, 0xb5, 0x37, 0xe2, 0x6b, 0x3b, 0x7b, 0x74, 0x5a, 0xd7, 0x9c, 0x44, 0x8e, 0xfe, 0x1f, 0xc8,
+	0x47, 0x88, 0x62, 0xe2, 0x19, 0x40, 0x66, 0x57, 0xbf, 0xcb, 0xbe, 0xa7, 0xb6, 0xa1, 0x9d, 0x7d,
+	0x25, 0x92, 0x55, 0xb8, 0x53, 0x4e, 0x50, 0xb6, 0xf9, 0x3a, 0x0d, 0x6a, 0x97, 0x6e, 0xc0, 0x23,
+	0x06, 0x7d, 0xa4, 0xdf, 0x01, 0xd5, 0x11, 0x4b, 0x5d, 0x98, 0x74, 0xbb, 0xe3, 0xed, 0x58, 0x21,
+	0x97, 0xa5, 0xef, 0x78, 0x3a, 0x06, 0xa5, 0xf1, 0xbd, 0x8d, 0xf4, 0xfc, 0xbb, 0x3a, 0xa9, 0xae,
+	0x6f, 0x01, 0xd0, 0x87, 0x8c, 0xbb, 0x14, 0x31, 0xc4, 0xe5, 0xe2, 0xcd, 0xee, 0x66, 0x51, 0x80,
+	0xc9, 0x8e, 0x96, 0x44, 0x9e, 0x23, 0xd2, 0xa6, 0xfa, 0x32, 0x59, 0xce, 0xe6, 0x97, 0x0c, 0x28,
+	0x6e, 0x23, 0x74, 0x9f, 0xc2, 0x90, 0xeb, 0x1b, 0xe0, 0x77, 0x5f, 0x7c, 0x10, 0xea, 0x5e, 0x90,
+	0x83, 0xb8, 0x19, 0xcb, 0xca, 0xbb, 0x35, 0xa5, 0x0a, 0xeb, 0xa0, 0x20, 0xed, 0x08, 0x49, 0xd5,
+	0x98, 0x25, 0x0a, 0xa3, 0xc0, 0x69, 0x4d, 0xc8, 0xcc, 0xd6, 0x84, 0xec, 0x8d, 0x6b, 0x42, 0xee,
+	0xe7, 0x6b, 0xc2, 0xf4, 0x86, 0xe4, 0xaf, 0xb5, 0x21, 0x85, 0xab, 0x6d, 0x48, 0x41, 0x4d, 0xb1,
+	0xf9, 0x21, 0x07, 0xcc, 0x87, 0x90, 0x72, 0xdc, 0xc3, 0x11, 0x0c, 0xf9, 0x14, 0xc3, 0x1d, 0xd4,
+	0x23, 0x54, 0xfe, 0x30, 0x44, 0x93, 0x88, 0x09, 0x13, 0x2a, 0x09, 0xeb, 0x8e, 0x37, 0x3d, 0xce,
+	0xf4, 0xec, 0x71, 0x66, 0x6e, 0x7c, 0x9c, 0xd9, 0x5b, 0x91, 0xf8, 0xdc, 0x6d, 0x49, 0x7c, 0xfe,
+	0x46, 0x24, 0xfe, 0x4f, 0x50, 0x79, 0x86, 0xf9, 0x81, 0xc0, 0x95, 0x7c, 0x92, 0x2c, 0x2c, 0x3a,
+	0x0b, 0xc2, 0xb8, 0xad, 0x6c, 0x17, 0x58, 0x5e, 0xbc, 0x16, 0xcb, 0x4b, 0x57, 0x62, 0x79, 0xf3,
+	0xb3, 0x06, 0x56, 0x1e, 0x77, 0xe6, 0xfa, 0xfc, 0xf9, 0x1f, 0x94, 0x87, 0xcc, 0xfd, 0xe1, 0x17,
+	0x10, 0x18, 0xb2, 0x11, 0xbc, 0xbe, 0x0b, 0x0a, 0x54, 0x6e, 0x14, 0x53, 0x6c, 0xfc, 0xdb, 0x4a,
+	0x3e, 0x1e, 0xad, 0xd9, 0x6b, 0xd8, 0xce, 0x8a, 0x89, 0x39, 0xa3, 0x12, 0xd3, 0x5a, 0x5e, 0x8e,
+	0x10, 0x0d, 0x30, 0x63, 0x98, 0x84, 0xac, 0xdd, 0x3e, 0x3e, 0x33, 0xb5, 0x93, 0x33, 0x53, 0xfb,
+	0x74, 0x66, 0x6a, 0x47, 0xe7, 0x66, 0xea, 0xe4, 0xdc, 0x4c, 0xbd, 0x3f, 0x37, 0x53, 0x4f, 0x92,
+	0xc3, 0x8e, 0xa1, 0x57, 0xfb, 0xb0, 0xcb, 0xd4, 0xb7, 0x7d, 0x28, 0xde, 0xb7, 0x72, 0xe4, 0xdd,
+	0xbc, 0x6c, 0xed, 0xbf, 0xdf, 0x02, 0x00, 0x00, 0xff, 0xff, 0xd5, 0x7b, 0xef, 0x8f, 0xf9, 0x0a,
+	0x00, 0x00,
 }
 
 func (m *OperatorAuthorization) Marshal() (dAtA []byte, err error) {
@@ -453,7 +641,7 @@ func (m *OperatorAuthorization) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i -= n1
 		i = encodeVarintTypes(dAtA, i, uint64(n1))
 		i--
-		dAtA[i] = 0x3a
+		dAtA[i] = 0x52
 	}
 	if m.Expiration != nil {
 		n2, err2 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(*m.Expiration, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(*m.Expiration):])
@@ -463,12 +651,187 @@ func (m *OperatorAuthorization) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i -= n2
 		i = encodeVarintTypes(dAtA, i, uint64(n2))
 		i--
-		dAtA[i] = 0x32
+		dAtA[i] = 0x4a
+	}
+	if len(m.RemainingFeeSpend) > 0 {
+		for iNdEx := len(m.RemainingFeeSpend) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.RemainingFeeSpend[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTypes(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x42
+		}
 	}
 	if len(m.FeeSpendLimit) > 0 {
 		for iNdEx := len(m.FeeSpendLimit) - 1; iNdEx >= 0; iNdEx-- {
 			{
 				size, err := m.FeeSpendLimit[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTypes(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x3a
+		}
+	}
+	if len(m.RemainingSpend) > 0 {
+		for iNdEx := len(m.RemainingSpend) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.RemainingSpend[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTypes(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x32
+		}
+	}
+	if len(m.SpendLimit) > 0 {
+		for iNdEx := len(m.SpendLimit) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.SpendLimit[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTypes(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x2a
+		}
+	}
+	if len(m.MsgTypes) > 0 {
+		for iNdEx := len(m.MsgTypes) - 1; iNdEx >= 0; iNdEx-- {
+			i -= len(m.MsgTypes[iNdEx])
+			copy(dAtA[i:], m.MsgTypes[iNdEx])
+			i = encodeVarintTypes(dAtA, i, uint64(len(m.MsgTypes[iNdEx])))
+			i--
+			dAtA[i] = 0x22
+		}
+	}
+	if len(m.Operator) > 0 {
+		i -= len(m.Operator)
+		copy(dAtA[i:], m.Operator)
+		i = encodeVarintTypes(dAtA, i, uint64(len(m.Operator)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if m.CorporationId != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.CorporationId))
+		i--
+		dAtA[i] = 0x10
+	}
+	if m.Id != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.Id))
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *OperatorAuthorizationUsage) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *OperatorAuthorizationUsage) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *OperatorAuthorizationUsage) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	n3, err3 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(m.LastReset, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(m.LastReset):])
+	if err3 != nil {
+		return 0, err3
+	}
+	i -= n3
+	i = encodeVarintTypes(dAtA, i, uint64(n3))
+	i--
+	dAtA[i] = 0x1a
+	if len(m.Remaining) > 0 {
+		for iNdEx := len(m.Remaining) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Remaining[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTypes(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x12
+		}
+	}
+	if m.OperatorAuthorizationId != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.OperatorAuthorizationId))
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *FeeGrant) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *FeeGrant) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *FeeGrant) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Period != nil {
+		n4, err4 := github_com_cosmos_gogoproto_types.StdDurationMarshalTo(*m.Period, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdDuration(*m.Period):])
+		if err4 != nil {
+			return 0, err4
+		}
+		i -= n4
+		i = encodeVarintTypes(dAtA, i, uint64(n4))
+		i--
+		dAtA[i] = 0x3a
+	}
+	if m.Expiration != nil {
+		n5, err5 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(*m.Expiration, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(*m.Expiration):])
+		if err5 != nil {
+			return 0, err5
+		}
+		i -= n5
+		i = encodeVarintTypes(dAtA, i, uint64(n5))
+		i--
+		dAtA[i] = 0x32
+	}
+	if len(m.RemainingSpend) > 0 {
+		for iNdEx := len(m.RemainingSpend) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.RemainingSpend[iNdEx].MarshalToSizedBuffer(dAtA[:i])
 				if err != nil {
 					return 0, err
 				}
@@ -502,24 +865,22 @@ func (m *OperatorAuthorization) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 			dAtA[i] = 0x1a
 		}
 	}
-	if len(m.Operator) > 0 {
-		i -= len(m.Operator)
-		copy(dAtA[i:], m.Operator)
-		i = encodeVarintTypes(dAtA, i, uint64(len(m.Operator)))
+	if len(m.Grantee) > 0 {
+		i -= len(m.Grantee)
+		copy(dAtA[i:], m.Grantee)
+		i = encodeVarintTypes(dAtA, i, uint64(len(m.Grantee)))
 		i--
 		dAtA[i] = 0x12
 	}
-	if len(m.Corporation) > 0 {
-		i -= len(m.Corporation)
-		copy(dAtA[i:], m.Corporation)
-		i = encodeVarintTypes(dAtA, i, uint64(len(m.Corporation)))
+	if m.GrantorCorporationId != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.GrantorCorporationId))
 		i--
-		dAtA[i] = 0xa
+		dAtA[i] = 0x8
 	}
 	return len(dAtA) - i, nil
 }
 
-func (m *OperatorAuthorizationUsage) Marshal() (dAtA []byte, err error) {
+func (m *ParticipantAuthorizationRecord) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -529,28 +890,50 @@ func (m *OperatorAuthorizationUsage) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *OperatorAuthorizationUsage) MarshalTo(dAtA []byte) (int, error) {
+func (m *ParticipantAuthorizationRecord) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *OperatorAuthorizationUsage) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *ParticipantAuthorizationRecord) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
-	n3, err3 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(m.LastReset, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(m.LastReset):])
-	if err3 != nil {
-		return 0, err3
+	if m.Period != nil {
+		n6, err6 := github_com_cosmos_gogoproto_types.StdDurationMarshalTo(*m.Period, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdDuration(*m.Period):])
+		if err6 != nil {
+			return 0, err6
+		}
+		i -= n6
+		i = encodeVarintTypes(dAtA, i, uint64(n6))
+		i--
+		dAtA[i] = 0x4a
 	}
-	i -= n3
-	i = encodeVarintTypes(dAtA, i, uint64(n3))
-	i--
-	dAtA[i] = 0x22
-	if len(m.Remaining) > 0 {
-		for iNdEx := len(m.Remaining) - 1; iNdEx >= 0; iNdEx-- {
+	if m.Expiration != nil {
+		n7, err7 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(*m.Expiration, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(*m.Expiration):])
+		if err7 != nil {
+			return 0, err7
+		}
+		i -= n7
+		i = encodeVarintTypes(dAtA, i, uint64(n7))
+		i--
+		dAtA[i] = 0x42
+	}
+	if m.WithFeegrant {
+		i--
+		if m.WithFeegrant {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x38
+	}
+	if len(m.RemainingFeeSpend) > 0 {
+		for iNdEx := len(m.RemainingFeeSpend) - 1; iNdEx >= 0; iNdEx-- {
 			{
-				size, err := m.Remaining[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				size, err := m.RemainingFeeSpend[iNdEx].MarshalToSizedBuffer(dAtA[:i])
 				if err != nil {
 					return 0, err
 				}
@@ -558,65 +941,36 @@ func (m *OperatorAuthorizationUsage) MarshalToSizedBuffer(dAtA []byte) (int, err
 				i = encodeVarintTypes(dAtA, i, uint64(size))
 			}
 			i--
-			dAtA[i] = 0x1a
+			dAtA[i] = 0x32
 		}
 	}
-	if len(m.Operator) > 0 {
-		i -= len(m.Operator)
-		copy(dAtA[i:], m.Operator)
-		i = encodeVarintTypes(dAtA, i, uint64(len(m.Operator)))
-		i--
-		dAtA[i] = 0x12
-	}
-	if len(m.Corporation) > 0 {
-		i -= len(m.Corporation)
-		copy(dAtA[i:], m.Corporation)
-		i = encodeVarintTypes(dAtA, i, uint64(len(m.Corporation)))
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *FeeGrant) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *FeeGrant) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *FeeGrant) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if m.Period != nil {
-		n4, err4 := github_com_cosmos_gogoproto_types.StdDurationMarshalTo(*m.Period, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdDuration(*m.Period):])
-		if err4 != nil {
-			return 0, err4
+	if len(m.FeeSpendLimit) > 0 {
+		for iNdEx := len(m.FeeSpendLimit) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.FeeSpendLimit[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTypes(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x2a
 		}
-		i -= n4
-		i = encodeVarintTypes(dAtA, i, uint64(n4))
-		i--
-		dAtA[i] = 0x32
 	}
-	if m.Expiration != nil {
-		n5, err5 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(*m.Expiration, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(*m.Expiration):])
-		if err5 != nil {
-			return 0, err5
+	if len(m.RemainingSpend) > 0 {
+		for iNdEx := len(m.RemainingSpend) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.RemainingSpend[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTypes(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x22
 		}
-		i -= n5
-		i = encodeVarintTypes(dAtA, i, uint64(n5))
-		i--
-		dAtA[i] = 0x2a
 	}
 	if len(m.SpendLimit) > 0 {
 		for iNdEx := len(m.SpendLimit) - 1; iNdEx >= 0; iNdEx-- {
@@ -629,7 +983,7 @@ func (m *FeeGrant) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 				i = encodeVarintTypes(dAtA, i, uint64(size))
 			}
 			i--
-			dAtA[i] = 0x22
+			dAtA[i] = 0x1a
 		}
 	}
 	if len(m.MsgTypes) > 0 {
@@ -638,22 +992,13 @@ func (m *FeeGrant) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 			copy(dAtA[i:], m.MsgTypes[iNdEx])
 			i = encodeVarintTypes(dAtA, i, uint64(len(m.MsgTypes[iNdEx])))
 			i--
-			dAtA[i] = 0x1a
+			dAtA[i] = 0x12
 		}
 	}
-	if len(m.Grantee) > 0 {
-		i -= len(m.Grantee)
-		copy(dAtA[i:], m.Grantee)
-		i = encodeVarintTypes(dAtA, i, uint64(len(m.Grantee)))
+	if m.ParticipantId != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.ParticipantId))
 		i--
-		dAtA[i] = 0x12
-	}
-	if len(m.Grantor) > 0 {
-		i -= len(m.Grantor)
-		copy(dAtA[i:], m.Grantor)
-		i = encodeVarintTypes(dAtA, i, uint64(len(m.Grantor)))
-		i--
-		dAtA[i] = 0xa
+		dAtA[i] = 0x8
 	}
 	return len(dAtA) - i, nil
 }
@@ -678,37 +1023,36 @@ func (m *VSOperatorAuthorization) MarshalToSizedBuffer(dAtA []byte) (int, error)
 	_ = i
 	var l int
 	_ = l
-	if len(m.Permissions) > 0 {
-		dAtA7 := make([]byte, len(m.Permissions)*10)
-		var j6 int
-		for _, num := range m.Permissions {
-			for num >= 1<<7 {
-				dAtA7[j6] = uint8(uint64(num)&0x7f | 0x80)
-				num >>= 7
-				j6++
+	if len(m.Records) > 0 {
+		for iNdEx := len(m.Records) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Records[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTypes(dAtA, i, uint64(size))
 			}
-			dAtA7[j6] = uint8(num)
-			j6++
+			i--
+			dAtA[i] = 0x22
 		}
-		i -= j6
-		copy(dAtA[i:], dAtA7[:j6])
-		i = encodeVarintTypes(dAtA, i, uint64(j6))
-		i--
-		dAtA[i] = 0x1a
 	}
 	if len(m.VsOperator) > 0 {
 		i -= len(m.VsOperator)
 		copy(dAtA[i:], m.VsOperator)
 		i = encodeVarintTypes(dAtA, i, uint64(len(m.VsOperator)))
 		i--
-		dAtA[i] = 0x12
+		dAtA[i] = 0x1a
 	}
-	if len(m.Corporation) > 0 {
-		i -= len(m.Corporation)
-		copy(dAtA[i:], m.Corporation)
-		i = encodeVarintTypes(dAtA, i, uint64(len(m.Corporation)))
+	if m.CorporationId != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.CorporationId))
 		i--
-		dAtA[i] = 0xa
+		dAtA[i] = 0x10
+	}
+	if m.Id != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.Id))
+		i--
+		dAtA[i] = 0x8
 	}
 	return len(dAtA) - i, nil
 }
@@ -730,9 +1074,11 @@ func (m *OperatorAuthorization) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.Corporation)
-	if l > 0 {
-		n += 1 + l + sovTypes(uint64(l))
+	if m.Id != 0 {
+		n += 1 + sovTypes(uint64(m.Id))
+	}
+	if m.CorporationId != 0 {
+		n += 1 + sovTypes(uint64(m.CorporationId))
 	}
 	l = len(m.Operator)
 	if l > 0 {
@@ -750,8 +1096,20 @@ func (m *OperatorAuthorization) Size() (n int) {
 			n += 1 + l + sovTypes(uint64(l))
 		}
 	}
+	if len(m.RemainingSpend) > 0 {
+		for _, e := range m.RemainingSpend {
+			l = e.Size()
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
 	if len(m.FeeSpendLimit) > 0 {
 		for _, e := range m.FeeSpendLimit {
+			l = e.Size()
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	if len(m.RemainingFeeSpend) > 0 {
+		for _, e := range m.RemainingFeeSpend {
 			l = e.Size()
 			n += 1 + l + sovTypes(uint64(l))
 		}
@@ -773,13 +1131,8 @@ func (m *OperatorAuthorizationUsage) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.Corporation)
-	if l > 0 {
-		n += 1 + l + sovTypes(uint64(l))
-	}
-	l = len(m.Operator)
-	if l > 0 {
-		n += 1 + l + sovTypes(uint64(l))
+	if m.OperatorAuthorizationId != 0 {
+		n += 1 + sovTypes(uint64(m.OperatorAuthorizationId))
 	}
 	if len(m.Remaining) > 0 {
 		for _, e := range m.Remaining {
@@ -798,9 +1151,8 @@ func (m *FeeGrant) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.Grantor)
-	if l > 0 {
-		n += 1 + l + sovTypes(uint64(l))
+	if m.GrantorCorporationId != 0 {
+		n += 1 + sovTypes(uint64(m.GrantorCorporationId))
 	}
 	l = len(m.Grantee)
 	if l > 0 {
@@ -817,6 +1169,65 @@ func (m *FeeGrant) Size() (n int) {
 			l = e.Size()
 			n += 1 + l + sovTypes(uint64(l))
 		}
+	}
+	if len(m.RemainingSpend) > 0 {
+		for _, e := range m.RemainingSpend {
+			l = e.Size()
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	if m.Expiration != nil {
+		l = github_com_cosmos_gogoproto_types.SizeOfStdTime(*m.Expiration)
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	if m.Period != nil {
+		l = github_com_cosmos_gogoproto_types.SizeOfStdDuration(*m.Period)
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+
+func (m *ParticipantAuthorizationRecord) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.ParticipantId != 0 {
+		n += 1 + sovTypes(uint64(m.ParticipantId))
+	}
+	if len(m.MsgTypes) > 0 {
+		for _, s := range m.MsgTypes {
+			l = len(s)
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	if len(m.SpendLimit) > 0 {
+		for _, e := range m.SpendLimit {
+			l = e.Size()
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	if len(m.RemainingSpend) > 0 {
+		for _, e := range m.RemainingSpend {
+			l = e.Size()
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	if len(m.FeeSpendLimit) > 0 {
+		for _, e := range m.FeeSpendLimit {
+			l = e.Size()
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	if len(m.RemainingFeeSpend) > 0 {
+		for _, e := range m.RemainingFeeSpend {
+			l = e.Size()
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	if m.WithFeegrant {
+		n += 2
 	}
 	if m.Expiration != nil {
 		l = github_com_cosmos_gogoproto_types.SizeOfStdTime(*m.Expiration)
@@ -835,20 +1246,21 @@ func (m *VSOperatorAuthorization) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.Corporation)
-	if l > 0 {
-		n += 1 + l + sovTypes(uint64(l))
+	if m.Id != 0 {
+		n += 1 + sovTypes(uint64(m.Id))
+	}
+	if m.CorporationId != 0 {
+		n += 1 + sovTypes(uint64(m.CorporationId))
 	}
 	l = len(m.VsOperator)
 	if l > 0 {
 		n += 1 + l + sovTypes(uint64(l))
 	}
-	if len(m.Permissions) > 0 {
-		l = 0
-		for _, e := range m.Permissions {
-			l += sovTypes(uint64(e))
+	if len(m.Records) > 0 {
+		for _, e := range m.Records {
+			l = e.Size()
+			n += 1 + l + sovTypes(uint64(l))
 		}
-		n += 1 + sovTypes(uint64(l)) + l
 	}
 	return n
 }
@@ -889,10 +1301,10 @@ func (m *OperatorAuthorization) Unmarshal(dAtA []byte) error {
 		}
 		switch fieldNum {
 		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Corporation", wireType)
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Id", wireType)
 			}
-			var stringLen uint64
+			m.Id = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowTypes
@@ -902,25 +1314,31 @@ func (m *OperatorAuthorization) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
+				m.Id |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthTypes
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Corporation = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
 		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CorporationId", wireType)
+			}
+			m.CorporationId = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.CorporationId |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 3:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Operator", wireType)
 			}
@@ -952,7 +1370,7 @@ func (m *OperatorAuthorization) Unmarshal(dAtA []byte) error {
 			}
 			m.Operator = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
-		case 3:
+		case 4:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field MsgTypes", wireType)
 			}
@@ -984,7 +1402,7 @@ func (m *OperatorAuthorization) Unmarshal(dAtA []byte) error {
 			}
 			m.MsgTypes = append(m.MsgTypes, string(dAtA[iNdEx:postIndex]))
 			iNdEx = postIndex
-		case 4:
+		case 5:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field SpendLimit", wireType)
 			}
@@ -1018,7 +1436,41 @@ func (m *OperatorAuthorization) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
-		case 5:
+		case 6:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field RemainingSpend", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.RemainingSpend = append(m.RemainingSpend, types.Coin{})
+			if err := m.RemainingSpend[len(m.RemainingSpend)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 7:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field FeeSpendLimit", wireType)
 			}
@@ -1052,7 +1504,41 @@ func (m *OperatorAuthorization) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
-		case 6:
+		case 8:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field RemainingFeeSpend", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.RemainingFeeSpend = append(m.RemainingFeeSpend, types.Coin{})
+			if err := m.RemainingFeeSpend[len(m.RemainingFeeSpend)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 9:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Expiration", wireType)
 			}
@@ -1088,7 +1574,7 @@ func (m *OperatorAuthorization) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
-		case 7:
+		case 10:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Period", wireType)
 			}
@@ -1175,10 +1661,10 @@ func (m *OperatorAuthorizationUsage) Unmarshal(dAtA []byte) error {
 		}
 		switch fieldNum {
 		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Corporation", wireType)
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field OperatorAuthorizationId", wireType)
 			}
-			var stringLen uint64
+			m.OperatorAuthorizationId = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowTypes
@@ -1188,57 +1674,12 @@ func (m *OperatorAuthorizationUsage) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
+				m.OperatorAuthorizationId |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthTypes
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Corporation = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
 		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Operator", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTypes
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthTypes
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Operator = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 3:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Remaining", wireType)
 			}
@@ -1272,7 +1713,7 @@ func (m *OperatorAuthorizationUsage) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
-		case 4:
+		case 3:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field LastReset", wireType)
 			}
@@ -1356,10 +1797,10 @@ func (m *FeeGrant) Unmarshal(dAtA []byte) error {
 		}
 		switch fieldNum {
 		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Grantor", wireType)
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field GrantorCorporationId", wireType)
 			}
-			var stringLen uint64
+			m.GrantorCorporationId = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowTypes
@@ -1369,24 +1810,11 @@ func (m *FeeGrant) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
+				m.GrantorCorporationId |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthTypes
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Grantor = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Grantee", wireType)
@@ -1487,6 +1915,40 @@ func (m *FeeGrant) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 5:
 			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field RemainingSpend", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.RemainingSpend = append(m.RemainingSpend, types.Coin{})
+			if err := m.RemainingSpend[len(m.RemainingSpend)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 6:
+			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Expiration", wireType)
 			}
 			var msglen int
@@ -1521,7 +1983,336 @@ func (m *FeeGrant) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
+		case 7:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Period", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Period == nil {
+				m.Period = new(time.Duration)
+			}
+			if err := github_com_cosmos_gogoproto_types.StdDurationUnmarshal(m.Period, dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTypes(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ParticipantAuthorizationRecord) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTypes
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ParticipantAuthorizationRecord: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ParticipantAuthorizationRecord: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ParticipantId", wireType)
+			}
+			m.ParticipantId = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.ParticipantId |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field MsgTypes", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.MsgTypes = append(m.MsgTypes, string(dAtA[iNdEx:postIndex]))
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field SpendLimit", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.SpendLimit = append(m.SpendLimit, types.Coin{})
+			if err := m.SpendLimit[len(m.SpendLimit)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field RemainingSpend", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.RemainingSpend = append(m.RemainingSpend, types.Coin{})
+			if err := m.RemainingSpend[len(m.RemainingSpend)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field FeeSpendLimit", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.FeeSpendLimit = append(m.FeeSpendLimit, types.Coin{})
+			if err := m.FeeSpendLimit[len(m.FeeSpendLimit)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
 		case 6:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field RemainingFeeSpend", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.RemainingFeeSpend = append(m.RemainingFeeSpend, types.Coin{})
+			if err := m.RemainingFeeSpend[len(m.RemainingFeeSpend)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 7:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field WithFeegrant", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.WithFeegrant = bool(v != 0)
+		case 8:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Expiration", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Expiration == nil {
+				m.Expiration = new(time.Time)
+			}
+			if err := github_com_cosmos_gogoproto_types.StdTimeUnmarshal(m.Expiration, dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 9:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Period", wireType)
 			}
@@ -1608,10 +2399,10 @@ func (m *VSOperatorAuthorization) Unmarshal(dAtA []byte) error {
 		}
 		switch fieldNum {
 		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Corporation", wireType)
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Id", wireType)
 			}
-			var stringLen uint64
+			m.Id = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowTypes
@@ -1621,25 +2412,31 @@ func (m *VSOperatorAuthorization) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
+				m.Id |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthTypes
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Corporation = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
 		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CorporationId", wireType)
+			}
+			m.CorporationId = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.CorporationId |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 3:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field VsOperator", wireType)
 			}
@@ -1671,82 +2468,40 @@ func (m *VSOperatorAuthorization) Unmarshal(dAtA []byte) error {
 			}
 			m.VsOperator = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
-		case 3:
-			if wireType == 0 {
-				var v uint64
-				for shift := uint(0); ; shift += 7 {
-					if shift >= 64 {
-						return ErrIntOverflowTypes
-					}
-					if iNdEx >= l {
-						return io.ErrUnexpectedEOF
-					}
-					b := dAtA[iNdEx]
-					iNdEx++
-					v |= uint64(b&0x7F) << shift
-					if b < 0x80 {
-						break
-					}
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Records", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
 				}
-				m.Permissions = append(m.Permissions, v)
-			} else if wireType == 2 {
-				var packedLen int
-				for shift := uint(0); ; shift += 7 {
-					if shift >= 64 {
-						return ErrIntOverflowTypes
-					}
-					if iNdEx >= l {
-						return io.ErrUnexpectedEOF
-					}
-					b := dAtA[iNdEx]
-					iNdEx++
-					packedLen |= int(b&0x7F) << shift
-					if b < 0x80 {
-						break
-					}
-				}
-				if packedLen < 0 {
-					return ErrInvalidLengthTypes
-				}
-				postIndex := iNdEx + packedLen
-				if postIndex < 0 {
-					return ErrInvalidLengthTypes
-				}
-				if postIndex > l {
+				if iNdEx >= l {
 					return io.ErrUnexpectedEOF
 				}
-				var elementCount int
-				var count int
-				for _, integer := range dAtA[iNdEx:postIndex] {
-					if integer < 128 {
-						count++
-					}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
 				}
-				elementCount = count
-				if elementCount != 0 && len(m.Permissions) == 0 {
-					m.Permissions = make([]uint64, 0, elementCount)
-				}
-				for iNdEx < postIndex {
-					var v uint64
-					for shift := uint(0); ; shift += 7 {
-						if shift >= 64 {
-							return ErrIntOverflowTypes
-						}
-						if iNdEx >= l {
-							return io.ErrUnexpectedEOF
-						}
-						b := dAtA[iNdEx]
-						iNdEx++
-						v |= uint64(b&0x7F) << shift
-						if b < 0x80 {
-							break
-						}
-					}
-					m.Permissions = append(m.Permissions, v)
-				}
-			} else {
-				return fmt.Errorf("proto: wrong wireType = %d for field Permissions", wireType)
 			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Records = append(m.Records, ParticipantAuthorizationRecord{})
+			if err := m.Records[len(m.Records)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipTypes(dAtA[iNdEx:])

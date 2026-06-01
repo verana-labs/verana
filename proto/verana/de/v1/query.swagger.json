@@ -178,9 +178,15 @@
     "verana.de.v1.OperatorAuthorization": {
       "type": "object",
       "properties": {
-        "corporation": {
+        "id": {
           "type": "string",
-          "description": "corporation is the group granting the authorization."
+          "format": "uint64",
+          "description": "id is the own uint64 key of this OperatorAuthorization."
+        },
+        "corporation_id": {
+          "type": "string",
+          "format": "uint64",
+          "description": "corporation_id is the id of the corporation granting the authorization. The\n(corporation_id, operator) tuple MUST be unique."
         },
         "operator": {
           "type": "string",
@@ -199,7 +205,15 @@
             "type": "object",
             "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
           },
-          "description": "spend_limit is the maximum amount of funds that the grantee is allowed to\nspend as a direct consequence of executing authorized messages."
+          "description": "spend_limit is the maximum amount of funds the grantee is allowed to spend."
+        },
+        "remaining_spend": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
+          },
+          "description": "remaining_spend is the runtime balance for spend_limit. Present iff\nspend_limit is set."
         },
         "fee_spend_limit": {
           "type": "array",
@@ -209,6 +223,14 @@
           },
           "description": "fee_spend_limit is the maximum total amount of fees that can be paid using\nthis authorization."
         },
+        "remaining_fee_spend": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
+          },
+          "description": "remaining_fee_spend is the runtime balance for fee_spend_limit. Present iff\nfee_spend_limit is set."
+        },
         "expiration": {
           "type": "string",
           "format": "date-time",
@@ -216,13 +238,77 @@
         },
         "period": {
           "type": "string",
-          "description": "period is the reset period for spend_limit and fee_spend_limit."
+          "description": "period is the reset period for spend_limit and fee_spend_limit. If set,\nexpiration MUST also be set."
         }
-      }
+      },
+      "description": "OperatorAuthorization is the operator-delegation record. Per spec v4-rc2 it is\nkeyed by its own uint64 id; (corporation_id, operator) is a unique secondary\nindex."
     },
     "verana.de.v1.Params": {
       "type": "object",
       "description": "Params defines the parameters for the module."
+    },
+    "verana.de.v1.ParticipantAuthorizationRecord": {
+      "type": "object",
+      "properties": {
+        "participant_id": {
+          "type": "string",
+          "format": "uint64",
+          "description": "participant_id is the id of the Participant this record applies to. Globally\nunique across all ParticipantAuthorizationRecord entries."
+        },
+        "msg_types": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "msg_types is the list of delegable message types the vs_operator is\nauthorized for on behalf of corporation. Mandatory, frozen at create."
+        },
+        "spend_limit": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
+          },
+          "description": "spend_limit is the maximum amount the vs_operator is allowed to spend."
+        },
+        "remaining_spend": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
+          },
+          "description": "remaining_spend is the runtime balance for spend_limit. Present iff\nspend_limit is set."
+        },
+        "fee_spend_limit": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
+          },
+          "description": "fee_spend_limit is the maximum total amount of transaction fees that can be\nspent by vs_operator."
+        },
+        "remaining_fee_spend": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
+          },
+          "description": "remaining_fee_spend is the runtime balance for fee_spend_limit. Present iff\nfee_spend_limit is set."
+        },
+        "with_feegrant": {
+          "type": "boolean",
+          "description": "with_feegrant indicates the corporation pays the transaction fees for\nvs_operator."
+        },
+        "expiration": {
+          "type": "string",
+          "format": "date-time",
+          "description": "expiration is the authorization window boundary. A record created before\nvalidation is disabled with expiration = now()."
+        },
+        "period": {
+          "type": "string",
+          "description": "period is the reset period for spend_limit and fee_spend_limit."
+        }
+      },
+      "description": "ParticipantAuthorizationRecord is a per-participant VS-operator authorization\nnested inside a VSOperatorAuthorization. Keyed by participant_id, which is\nglobally unique across all records of all VSOperatorAuthorizations."
     },
     "verana.de.v1.QueryListOperatorAuthorizationsResponse": {
       "type": "object",
@@ -263,23 +349,30 @@
     "verana.de.v1.VSOperatorAuthorization": {
       "type": "object",
       "properties": {
-        "corporation": {
+        "id": {
           "type": "string",
-          "description": "corporation is the group granting the authorization."
+          "format": "uint64",
+          "description": "id is the own uint64 key of this VSOperatorAuthorization."
+        },
+        "corporation_id": {
+          "type": "string",
+          "format": "uint64",
+          "description": "corporation_id is the id of the corporation granting the authorization. The\n(corporation_id, vs_operator) tuple MUST be unique."
         },
         "vs_operator": {
           "type": "string",
           "description": "vs_operator is the operator account receiving the authorization."
         },
-        "permissions": {
+        "records": {
           "type": "array",
           "items": {
-            "type": "string",
-            "format": "uint64"
+            "type": "object",
+            "$ref": "#/definitions/verana.de.v1.ParticipantAuthorizationRecord"
           },
-          "description": "permissions is the list of permission ids for which this authorization is\ngranted."
+          "description": "records is the list of per-participant authorization records granted to\nvs_operator by corporation_id."
         }
-      }
+      },
+      "description": "VSOperatorAuthorization is the VS-operator delegation, keyed by its own uint64\nid; (corporation_id, vs_operator) is a unique secondary index. The entry\nexists iff it has at least one record."
     }
   }
 }

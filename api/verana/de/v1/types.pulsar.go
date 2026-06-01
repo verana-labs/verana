@@ -17,56 +17,10 @@ import (
 	sync "sync"
 )
 
-var _ protoreflect.List = (*_OperatorAuthorization_3_list)(nil)
-
-type _OperatorAuthorization_3_list struct {
-	list *[]string
-}
-
-func (x *_OperatorAuthorization_3_list) Len() int {
-	if x.list == nil {
-		return 0
-	}
-	return len(*x.list)
-}
-
-func (x *_OperatorAuthorization_3_list) Get(i int) protoreflect.Value {
-	return protoreflect.ValueOfString((*x.list)[i])
-}
-
-func (x *_OperatorAuthorization_3_list) Set(i int, value protoreflect.Value) {
-	valueUnwrapped := value.String()
-	concreteValue := valueUnwrapped
-	(*x.list)[i] = concreteValue
-}
-
-func (x *_OperatorAuthorization_3_list) Append(value protoreflect.Value) {
-	valueUnwrapped := value.String()
-	concreteValue := valueUnwrapped
-	*x.list = append(*x.list, concreteValue)
-}
-
-func (x *_OperatorAuthorization_3_list) AppendMutable() protoreflect.Value {
-	panic(fmt.Errorf("AppendMutable can not be called on message OperatorAuthorization at list field MsgTypes as it is not of Message kind"))
-}
-
-func (x *_OperatorAuthorization_3_list) Truncate(n int) {
-	*x.list = (*x.list)[:n]
-}
-
-func (x *_OperatorAuthorization_3_list) NewElement() protoreflect.Value {
-	v := ""
-	return protoreflect.ValueOfString(v)
-}
-
-func (x *_OperatorAuthorization_3_list) IsValid() bool {
-	return x.list != nil
-}
-
 var _ protoreflect.List = (*_OperatorAuthorization_4_list)(nil)
 
 type _OperatorAuthorization_4_list struct {
-	list *[]*v1beta1.Coin
+	list *[]string
 }
 
 func (x *_OperatorAuthorization_4_list) Len() int {
@@ -77,37 +31,32 @@ func (x *_OperatorAuthorization_4_list) Len() int {
 }
 
 func (x *_OperatorAuthorization_4_list) Get(i int) protoreflect.Value {
-	return protoreflect.ValueOfMessage((*x.list)[i].ProtoReflect())
+	return protoreflect.ValueOfString((*x.list)[i])
 }
 
 func (x *_OperatorAuthorization_4_list) Set(i int, value protoreflect.Value) {
-	valueUnwrapped := value.Message()
-	concreteValue := valueUnwrapped.Interface().(*v1beta1.Coin)
+	valueUnwrapped := value.String()
+	concreteValue := valueUnwrapped
 	(*x.list)[i] = concreteValue
 }
 
 func (x *_OperatorAuthorization_4_list) Append(value protoreflect.Value) {
-	valueUnwrapped := value.Message()
-	concreteValue := valueUnwrapped.Interface().(*v1beta1.Coin)
+	valueUnwrapped := value.String()
+	concreteValue := valueUnwrapped
 	*x.list = append(*x.list, concreteValue)
 }
 
 func (x *_OperatorAuthorization_4_list) AppendMutable() protoreflect.Value {
-	v := new(v1beta1.Coin)
-	*x.list = append(*x.list, v)
-	return protoreflect.ValueOfMessage(v.ProtoReflect())
+	panic(fmt.Errorf("AppendMutable can not be called on message OperatorAuthorization at list field MsgTypes as it is not of Message kind"))
 }
 
 func (x *_OperatorAuthorization_4_list) Truncate(n int) {
-	for i := n; i < len(*x.list); i++ {
-		(*x.list)[i] = nil
-	}
 	*x.list = (*x.list)[:n]
 }
 
 func (x *_OperatorAuthorization_4_list) NewElement() protoreflect.Value {
-	v := new(v1beta1.Coin)
-	return protoreflect.ValueOfMessage(v.ProtoReflect())
+	v := ""
+	return protoreflect.ValueOfString(v)
 }
 
 func (x *_OperatorAuthorization_4_list) IsValid() bool {
@@ -165,25 +114,184 @@ func (x *_OperatorAuthorization_5_list) IsValid() bool {
 	return x.list != nil
 }
 
+var _ protoreflect.List = (*_OperatorAuthorization_6_list)(nil)
+
+type _OperatorAuthorization_6_list struct {
+	list *[]*v1beta1.Coin
+}
+
+func (x *_OperatorAuthorization_6_list) Len() int {
+	if x.list == nil {
+		return 0
+	}
+	return len(*x.list)
+}
+
+func (x *_OperatorAuthorization_6_list) Get(i int) protoreflect.Value {
+	return protoreflect.ValueOfMessage((*x.list)[i].ProtoReflect())
+}
+
+func (x *_OperatorAuthorization_6_list) Set(i int, value protoreflect.Value) {
+	valueUnwrapped := value.Message()
+	concreteValue := valueUnwrapped.Interface().(*v1beta1.Coin)
+	(*x.list)[i] = concreteValue
+}
+
+func (x *_OperatorAuthorization_6_list) Append(value protoreflect.Value) {
+	valueUnwrapped := value.Message()
+	concreteValue := valueUnwrapped.Interface().(*v1beta1.Coin)
+	*x.list = append(*x.list, concreteValue)
+}
+
+func (x *_OperatorAuthorization_6_list) AppendMutable() protoreflect.Value {
+	v := new(v1beta1.Coin)
+	*x.list = append(*x.list, v)
+	return protoreflect.ValueOfMessage(v.ProtoReflect())
+}
+
+func (x *_OperatorAuthorization_6_list) Truncate(n int) {
+	for i := n; i < len(*x.list); i++ {
+		(*x.list)[i] = nil
+	}
+	*x.list = (*x.list)[:n]
+}
+
+func (x *_OperatorAuthorization_6_list) NewElement() protoreflect.Value {
+	v := new(v1beta1.Coin)
+	return protoreflect.ValueOfMessage(v.ProtoReflect())
+}
+
+func (x *_OperatorAuthorization_6_list) IsValid() bool {
+	return x.list != nil
+}
+
+var _ protoreflect.List = (*_OperatorAuthorization_7_list)(nil)
+
+type _OperatorAuthorization_7_list struct {
+	list *[]*v1beta1.Coin
+}
+
+func (x *_OperatorAuthorization_7_list) Len() int {
+	if x.list == nil {
+		return 0
+	}
+	return len(*x.list)
+}
+
+func (x *_OperatorAuthorization_7_list) Get(i int) protoreflect.Value {
+	return protoreflect.ValueOfMessage((*x.list)[i].ProtoReflect())
+}
+
+func (x *_OperatorAuthorization_7_list) Set(i int, value protoreflect.Value) {
+	valueUnwrapped := value.Message()
+	concreteValue := valueUnwrapped.Interface().(*v1beta1.Coin)
+	(*x.list)[i] = concreteValue
+}
+
+func (x *_OperatorAuthorization_7_list) Append(value protoreflect.Value) {
+	valueUnwrapped := value.Message()
+	concreteValue := valueUnwrapped.Interface().(*v1beta1.Coin)
+	*x.list = append(*x.list, concreteValue)
+}
+
+func (x *_OperatorAuthorization_7_list) AppendMutable() protoreflect.Value {
+	v := new(v1beta1.Coin)
+	*x.list = append(*x.list, v)
+	return protoreflect.ValueOfMessage(v.ProtoReflect())
+}
+
+func (x *_OperatorAuthorization_7_list) Truncate(n int) {
+	for i := n; i < len(*x.list); i++ {
+		(*x.list)[i] = nil
+	}
+	*x.list = (*x.list)[:n]
+}
+
+func (x *_OperatorAuthorization_7_list) NewElement() protoreflect.Value {
+	v := new(v1beta1.Coin)
+	return protoreflect.ValueOfMessage(v.ProtoReflect())
+}
+
+func (x *_OperatorAuthorization_7_list) IsValid() bool {
+	return x.list != nil
+}
+
+var _ protoreflect.List = (*_OperatorAuthorization_8_list)(nil)
+
+type _OperatorAuthorization_8_list struct {
+	list *[]*v1beta1.Coin
+}
+
+func (x *_OperatorAuthorization_8_list) Len() int {
+	if x.list == nil {
+		return 0
+	}
+	return len(*x.list)
+}
+
+func (x *_OperatorAuthorization_8_list) Get(i int) protoreflect.Value {
+	return protoreflect.ValueOfMessage((*x.list)[i].ProtoReflect())
+}
+
+func (x *_OperatorAuthorization_8_list) Set(i int, value protoreflect.Value) {
+	valueUnwrapped := value.Message()
+	concreteValue := valueUnwrapped.Interface().(*v1beta1.Coin)
+	(*x.list)[i] = concreteValue
+}
+
+func (x *_OperatorAuthorization_8_list) Append(value protoreflect.Value) {
+	valueUnwrapped := value.Message()
+	concreteValue := valueUnwrapped.Interface().(*v1beta1.Coin)
+	*x.list = append(*x.list, concreteValue)
+}
+
+func (x *_OperatorAuthorization_8_list) AppendMutable() protoreflect.Value {
+	v := new(v1beta1.Coin)
+	*x.list = append(*x.list, v)
+	return protoreflect.ValueOfMessage(v.ProtoReflect())
+}
+
+func (x *_OperatorAuthorization_8_list) Truncate(n int) {
+	for i := n; i < len(*x.list); i++ {
+		(*x.list)[i] = nil
+	}
+	*x.list = (*x.list)[:n]
+}
+
+func (x *_OperatorAuthorization_8_list) NewElement() protoreflect.Value {
+	v := new(v1beta1.Coin)
+	return protoreflect.ValueOfMessage(v.ProtoReflect())
+}
+
+func (x *_OperatorAuthorization_8_list) IsValid() bool {
+	return x.list != nil
+}
+
 var (
-	md_OperatorAuthorization                 protoreflect.MessageDescriptor
-	fd_OperatorAuthorization_corporation     protoreflect.FieldDescriptor
-	fd_OperatorAuthorization_operator        protoreflect.FieldDescriptor
-	fd_OperatorAuthorization_msg_types       protoreflect.FieldDescriptor
-	fd_OperatorAuthorization_spend_limit     protoreflect.FieldDescriptor
-	fd_OperatorAuthorization_fee_spend_limit protoreflect.FieldDescriptor
-	fd_OperatorAuthorization_expiration      protoreflect.FieldDescriptor
-	fd_OperatorAuthorization_period          protoreflect.FieldDescriptor
+	md_OperatorAuthorization                     protoreflect.MessageDescriptor
+	fd_OperatorAuthorization_id                  protoreflect.FieldDescriptor
+	fd_OperatorAuthorization_corporation_id      protoreflect.FieldDescriptor
+	fd_OperatorAuthorization_operator            protoreflect.FieldDescriptor
+	fd_OperatorAuthorization_msg_types           protoreflect.FieldDescriptor
+	fd_OperatorAuthorization_spend_limit         protoreflect.FieldDescriptor
+	fd_OperatorAuthorization_remaining_spend     protoreflect.FieldDescriptor
+	fd_OperatorAuthorization_fee_spend_limit     protoreflect.FieldDescriptor
+	fd_OperatorAuthorization_remaining_fee_spend protoreflect.FieldDescriptor
+	fd_OperatorAuthorization_expiration          protoreflect.FieldDescriptor
+	fd_OperatorAuthorization_period              protoreflect.FieldDescriptor
 )
 
 func init() {
 	file_verana_de_v1_types_proto_init()
 	md_OperatorAuthorization = File_verana_de_v1_types_proto.Messages().ByName("OperatorAuthorization")
-	fd_OperatorAuthorization_corporation = md_OperatorAuthorization.Fields().ByName("corporation")
+	fd_OperatorAuthorization_id = md_OperatorAuthorization.Fields().ByName("id")
+	fd_OperatorAuthorization_corporation_id = md_OperatorAuthorization.Fields().ByName("corporation_id")
 	fd_OperatorAuthorization_operator = md_OperatorAuthorization.Fields().ByName("operator")
 	fd_OperatorAuthorization_msg_types = md_OperatorAuthorization.Fields().ByName("msg_types")
 	fd_OperatorAuthorization_spend_limit = md_OperatorAuthorization.Fields().ByName("spend_limit")
+	fd_OperatorAuthorization_remaining_spend = md_OperatorAuthorization.Fields().ByName("remaining_spend")
 	fd_OperatorAuthorization_fee_spend_limit = md_OperatorAuthorization.Fields().ByName("fee_spend_limit")
+	fd_OperatorAuthorization_remaining_fee_spend = md_OperatorAuthorization.Fields().ByName("remaining_fee_spend")
 	fd_OperatorAuthorization_expiration = md_OperatorAuthorization.Fields().ByName("expiration")
 	fd_OperatorAuthorization_period = md_OperatorAuthorization.Fields().ByName("period")
 }
@@ -253,9 +361,15 @@ func (x *fastReflection_OperatorAuthorization) Interface() protoreflect.ProtoMes
 // While iterating, mutating operations may only be performed
 // on the current field descriptor.
 func (x *fastReflection_OperatorAuthorization) Range(f func(protoreflect.FieldDescriptor, protoreflect.Value) bool) {
-	if x.Corporation != "" {
-		value := protoreflect.ValueOfString(x.Corporation)
-		if !f(fd_OperatorAuthorization_corporation, value) {
+	if x.Id != uint64(0) {
+		value := protoreflect.ValueOfUint64(x.Id)
+		if !f(fd_OperatorAuthorization_id, value) {
+			return
+		}
+	}
+	if x.CorporationId != uint64(0) {
+		value := protoreflect.ValueOfUint64(x.CorporationId)
+		if !f(fd_OperatorAuthorization_corporation_id, value) {
 			return
 		}
 	}
@@ -266,20 +380,32 @@ func (x *fastReflection_OperatorAuthorization) Range(f func(protoreflect.FieldDe
 		}
 	}
 	if len(x.MsgTypes) != 0 {
-		value := protoreflect.ValueOfList(&_OperatorAuthorization_3_list{list: &x.MsgTypes})
+		value := protoreflect.ValueOfList(&_OperatorAuthorization_4_list{list: &x.MsgTypes})
 		if !f(fd_OperatorAuthorization_msg_types, value) {
 			return
 		}
 	}
 	if len(x.SpendLimit) != 0 {
-		value := protoreflect.ValueOfList(&_OperatorAuthorization_4_list{list: &x.SpendLimit})
+		value := protoreflect.ValueOfList(&_OperatorAuthorization_5_list{list: &x.SpendLimit})
 		if !f(fd_OperatorAuthorization_spend_limit, value) {
 			return
 		}
 	}
+	if len(x.RemainingSpend) != 0 {
+		value := protoreflect.ValueOfList(&_OperatorAuthorization_6_list{list: &x.RemainingSpend})
+		if !f(fd_OperatorAuthorization_remaining_spend, value) {
+			return
+		}
+	}
 	if len(x.FeeSpendLimit) != 0 {
-		value := protoreflect.ValueOfList(&_OperatorAuthorization_5_list{list: &x.FeeSpendLimit})
+		value := protoreflect.ValueOfList(&_OperatorAuthorization_7_list{list: &x.FeeSpendLimit})
 		if !f(fd_OperatorAuthorization_fee_spend_limit, value) {
+			return
+		}
+	}
+	if len(x.RemainingFeeSpend) != 0 {
+		value := protoreflect.ValueOfList(&_OperatorAuthorization_8_list{list: &x.RemainingFeeSpend})
+		if !f(fd_OperatorAuthorization_remaining_fee_spend, value) {
 			return
 		}
 	}
@@ -310,16 +436,22 @@ func (x *fastReflection_OperatorAuthorization) Range(f func(protoreflect.FieldDe
 // a repeated field is populated if it is non-empty.
 func (x *fastReflection_OperatorAuthorization) Has(fd protoreflect.FieldDescriptor) bool {
 	switch fd.FullName() {
-	case "verana.de.v1.OperatorAuthorization.corporation":
-		return x.Corporation != ""
+	case "verana.de.v1.OperatorAuthorization.id":
+		return x.Id != uint64(0)
+	case "verana.de.v1.OperatorAuthorization.corporation_id":
+		return x.CorporationId != uint64(0)
 	case "verana.de.v1.OperatorAuthorization.operator":
 		return x.Operator != ""
 	case "verana.de.v1.OperatorAuthorization.msg_types":
 		return len(x.MsgTypes) != 0
 	case "verana.de.v1.OperatorAuthorization.spend_limit":
 		return len(x.SpendLimit) != 0
+	case "verana.de.v1.OperatorAuthorization.remaining_spend":
+		return len(x.RemainingSpend) != 0
 	case "verana.de.v1.OperatorAuthorization.fee_spend_limit":
 		return len(x.FeeSpendLimit) != 0
+	case "verana.de.v1.OperatorAuthorization.remaining_fee_spend":
+		return len(x.RemainingFeeSpend) != 0
 	case "verana.de.v1.OperatorAuthorization.expiration":
 		return x.Expiration != nil
 	case "verana.de.v1.OperatorAuthorization.period":
@@ -340,16 +472,22 @@ func (x *fastReflection_OperatorAuthorization) Has(fd protoreflect.FieldDescript
 // Clear is a mutating operation and unsafe for concurrent use.
 func (x *fastReflection_OperatorAuthorization) Clear(fd protoreflect.FieldDescriptor) {
 	switch fd.FullName() {
-	case "verana.de.v1.OperatorAuthorization.corporation":
-		x.Corporation = ""
+	case "verana.de.v1.OperatorAuthorization.id":
+		x.Id = uint64(0)
+	case "verana.de.v1.OperatorAuthorization.corporation_id":
+		x.CorporationId = uint64(0)
 	case "verana.de.v1.OperatorAuthorization.operator":
 		x.Operator = ""
 	case "verana.de.v1.OperatorAuthorization.msg_types":
 		x.MsgTypes = nil
 	case "verana.de.v1.OperatorAuthorization.spend_limit":
 		x.SpendLimit = nil
+	case "verana.de.v1.OperatorAuthorization.remaining_spend":
+		x.RemainingSpend = nil
 	case "verana.de.v1.OperatorAuthorization.fee_spend_limit":
 		x.FeeSpendLimit = nil
+	case "verana.de.v1.OperatorAuthorization.remaining_fee_spend":
+		x.RemainingFeeSpend = nil
 	case "verana.de.v1.OperatorAuthorization.expiration":
 		x.Expiration = nil
 	case "verana.de.v1.OperatorAuthorization.period":
@@ -370,29 +508,44 @@ func (x *fastReflection_OperatorAuthorization) Clear(fd protoreflect.FieldDescri
 // of the value; to obtain a mutable reference, use Mutable.
 func (x *fastReflection_OperatorAuthorization) Get(descriptor protoreflect.FieldDescriptor) protoreflect.Value {
 	switch descriptor.FullName() {
-	case "verana.de.v1.OperatorAuthorization.corporation":
-		value := x.Corporation
-		return protoreflect.ValueOfString(value)
+	case "verana.de.v1.OperatorAuthorization.id":
+		value := x.Id
+		return protoreflect.ValueOfUint64(value)
+	case "verana.de.v1.OperatorAuthorization.corporation_id":
+		value := x.CorporationId
+		return protoreflect.ValueOfUint64(value)
 	case "verana.de.v1.OperatorAuthorization.operator":
 		value := x.Operator
 		return protoreflect.ValueOfString(value)
 	case "verana.de.v1.OperatorAuthorization.msg_types":
 		if len(x.MsgTypes) == 0 {
-			return protoreflect.ValueOfList(&_OperatorAuthorization_3_list{})
+			return protoreflect.ValueOfList(&_OperatorAuthorization_4_list{})
 		}
-		listValue := &_OperatorAuthorization_3_list{list: &x.MsgTypes}
+		listValue := &_OperatorAuthorization_4_list{list: &x.MsgTypes}
 		return protoreflect.ValueOfList(listValue)
 	case "verana.de.v1.OperatorAuthorization.spend_limit":
 		if len(x.SpendLimit) == 0 {
-			return protoreflect.ValueOfList(&_OperatorAuthorization_4_list{})
+			return protoreflect.ValueOfList(&_OperatorAuthorization_5_list{})
 		}
-		listValue := &_OperatorAuthorization_4_list{list: &x.SpendLimit}
+		listValue := &_OperatorAuthorization_5_list{list: &x.SpendLimit}
+		return protoreflect.ValueOfList(listValue)
+	case "verana.de.v1.OperatorAuthorization.remaining_spend":
+		if len(x.RemainingSpend) == 0 {
+			return protoreflect.ValueOfList(&_OperatorAuthorization_6_list{})
+		}
+		listValue := &_OperatorAuthorization_6_list{list: &x.RemainingSpend}
 		return protoreflect.ValueOfList(listValue)
 	case "verana.de.v1.OperatorAuthorization.fee_spend_limit":
 		if len(x.FeeSpendLimit) == 0 {
-			return protoreflect.ValueOfList(&_OperatorAuthorization_5_list{})
+			return protoreflect.ValueOfList(&_OperatorAuthorization_7_list{})
 		}
-		listValue := &_OperatorAuthorization_5_list{list: &x.FeeSpendLimit}
+		listValue := &_OperatorAuthorization_7_list{list: &x.FeeSpendLimit}
+		return protoreflect.ValueOfList(listValue)
+	case "verana.de.v1.OperatorAuthorization.remaining_fee_spend":
+		if len(x.RemainingFeeSpend) == 0 {
+			return protoreflect.ValueOfList(&_OperatorAuthorization_8_list{})
+		}
+		listValue := &_OperatorAuthorization_8_list{list: &x.RemainingFeeSpend}
 		return protoreflect.ValueOfList(listValue)
 	case "verana.de.v1.OperatorAuthorization.expiration":
 		value := x.Expiration
@@ -420,22 +573,32 @@ func (x *fastReflection_OperatorAuthorization) Get(descriptor protoreflect.Field
 // Set is a mutating operation and unsafe for concurrent use.
 func (x *fastReflection_OperatorAuthorization) Set(fd protoreflect.FieldDescriptor, value protoreflect.Value) {
 	switch fd.FullName() {
-	case "verana.de.v1.OperatorAuthorization.corporation":
-		x.Corporation = value.Interface().(string)
+	case "verana.de.v1.OperatorAuthorization.id":
+		x.Id = value.Uint()
+	case "verana.de.v1.OperatorAuthorization.corporation_id":
+		x.CorporationId = value.Uint()
 	case "verana.de.v1.OperatorAuthorization.operator":
 		x.Operator = value.Interface().(string)
 	case "verana.de.v1.OperatorAuthorization.msg_types":
 		lv := value.List()
-		clv := lv.(*_OperatorAuthorization_3_list)
+		clv := lv.(*_OperatorAuthorization_4_list)
 		x.MsgTypes = *clv.list
 	case "verana.de.v1.OperatorAuthorization.spend_limit":
 		lv := value.List()
-		clv := lv.(*_OperatorAuthorization_4_list)
+		clv := lv.(*_OperatorAuthorization_5_list)
 		x.SpendLimit = *clv.list
+	case "verana.de.v1.OperatorAuthorization.remaining_spend":
+		lv := value.List()
+		clv := lv.(*_OperatorAuthorization_6_list)
+		x.RemainingSpend = *clv.list
 	case "verana.de.v1.OperatorAuthorization.fee_spend_limit":
 		lv := value.List()
-		clv := lv.(*_OperatorAuthorization_5_list)
+		clv := lv.(*_OperatorAuthorization_7_list)
 		x.FeeSpendLimit = *clv.list
+	case "verana.de.v1.OperatorAuthorization.remaining_fee_spend":
+		lv := value.List()
+		clv := lv.(*_OperatorAuthorization_8_list)
+		x.RemainingFeeSpend = *clv.list
 	case "verana.de.v1.OperatorAuthorization.expiration":
 		x.Expiration = value.Message().Interface().(*timestamppb.Timestamp)
 	case "verana.de.v1.OperatorAuthorization.period":
@@ -464,19 +627,31 @@ func (x *fastReflection_OperatorAuthorization) Mutable(fd protoreflect.FieldDesc
 		if x.MsgTypes == nil {
 			x.MsgTypes = []string{}
 		}
-		value := &_OperatorAuthorization_3_list{list: &x.MsgTypes}
+		value := &_OperatorAuthorization_4_list{list: &x.MsgTypes}
 		return protoreflect.ValueOfList(value)
 	case "verana.de.v1.OperatorAuthorization.spend_limit":
 		if x.SpendLimit == nil {
 			x.SpendLimit = []*v1beta1.Coin{}
 		}
-		value := &_OperatorAuthorization_4_list{list: &x.SpendLimit}
+		value := &_OperatorAuthorization_5_list{list: &x.SpendLimit}
+		return protoreflect.ValueOfList(value)
+	case "verana.de.v1.OperatorAuthorization.remaining_spend":
+		if x.RemainingSpend == nil {
+			x.RemainingSpend = []*v1beta1.Coin{}
+		}
+		value := &_OperatorAuthorization_6_list{list: &x.RemainingSpend}
 		return protoreflect.ValueOfList(value)
 	case "verana.de.v1.OperatorAuthorization.fee_spend_limit":
 		if x.FeeSpendLimit == nil {
 			x.FeeSpendLimit = []*v1beta1.Coin{}
 		}
-		value := &_OperatorAuthorization_5_list{list: &x.FeeSpendLimit}
+		value := &_OperatorAuthorization_7_list{list: &x.FeeSpendLimit}
+		return protoreflect.ValueOfList(value)
+	case "verana.de.v1.OperatorAuthorization.remaining_fee_spend":
+		if x.RemainingFeeSpend == nil {
+			x.RemainingFeeSpend = []*v1beta1.Coin{}
+		}
+		value := &_OperatorAuthorization_8_list{list: &x.RemainingFeeSpend}
 		return protoreflect.ValueOfList(value)
 	case "verana.de.v1.OperatorAuthorization.expiration":
 		if x.Expiration == nil {
@@ -488,8 +663,10 @@ func (x *fastReflection_OperatorAuthorization) Mutable(fd protoreflect.FieldDesc
 			x.Period = new(durationpb.Duration)
 		}
 		return protoreflect.ValueOfMessage(x.Period.ProtoReflect())
-	case "verana.de.v1.OperatorAuthorization.corporation":
-		panic(fmt.Errorf("field corporation of message verana.de.v1.OperatorAuthorization is not mutable"))
+	case "verana.de.v1.OperatorAuthorization.id":
+		panic(fmt.Errorf("field id of message verana.de.v1.OperatorAuthorization is not mutable"))
+	case "verana.de.v1.OperatorAuthorization.corporation_id":
+		panic(fmt.Errorf("field corporation_id of message verana.de.v1.OperatorAuthorization is not mutable"))
 	case "verana.de.v1.OperatorAuthorization.operator":
 		panic(fmt.Errorf("field operator of message verana.de.v1.OperatorAuthorization is not mutable"))
 	default:
@@ -505,19 +682,27 @@ func (x *fastReflection_OperatorAuthorization) Mutable(fd protoreflect.FieldDesc
 // For lists, maps, and messages, this returns a new, empty, mutable value.
 func (x *fastReflection_OperatorAuthorization) NewField(fd protoreflect.FieldDescriptor) protoreflect.Value {
 	switch fd.FullName() {
-	case "verana.de.v1.OperatorAuthorization.corporation":
-		return protoreflect.ValueOfString("")
+	case "verana.de.v1.OperatorAuthorization.id":
+		return protoreflect.ValueOfUint64(uint64(0))
+	case "verana.de.v1.OperatorAuthorization.corporation_id":
+		return protoreflect.ValueOfUint64(uint64(0))
 	case "verana.de.v1.OperatorAuthorization.operator":
 		return protoreflect.ValueOfString("")
 	case "verana.de.v1.OperatorAuthorization.msg_types":
 		list := []string{}
-		return protoreflect.ValueOfList(&_OperatorAuthorization_3_list{list: &list})
+		return protoreflect.ValueOfList(&_OperatorAuthorization_4_list{list: &list})
 	case "verana.de.v1.OperatorAuthorization.spend_limit":
 		list := []*v1beta1.Coin{}
-		return protoreflect.ValueOfList(&_OperatorAuthorization_4_list{list: &list})
+		return protoreflect.ValueOfList(&_OperatorAuthorization_5_list{list: &list})
+	case "verana.de.v1.OperatorAuthorization.remaining_spend":
+		list := []*v1beta1.Coin{}
+		return protoreflect.ValueOfList(&_OperatorAuthorization_6_list{list: &list})
 	case "verana.de.v1.OperatorAuthorization.fee_spend_limit":
 		list := []*v1beta1.Coin{}
-		return protoreflect.ValueOfList(&_OperatorAuthorization_5_list{list: &list})
+		return protoreflect.ValueOfList(&_OperatorAuthorization_7_list{list: &list})
+	case "verana.de.v1.OperatorAuthorization.remaining_fee_spend":
+		list := []*v1beta1.Coin{}
+		return protoreflect.ValueOfList(&_OperatorAuthorization_8_list{list: &list})
 	case "verana.de.v1.OperatorAuthorization.expiration":
 		m := new(timestamppb.Timestamp)
 		return protoreflect.ValueOfMessage(m.ProtoReflect())
@@ -593,9 +778,11 @@ func (x *fastReflection_OperatorAuthorization) ProtoMethods() *protoiface.Method
 		var n int
 		var l int
 		_ = l
-		l = len(x.Corporation)
-		if l > 0 {
-			n += 1 + l + runtime.Sov(uint64(l))
+		if x.Id != 0 {
+			n += 1 + runtime.Sov(uint64(x.Id))
+		}
+		if x.CorporationId != 0 {
+			n += 1 + runtime.Sov(uint64(x.CorporationId))
 		}
 		l = len(x.Operator)
 		if l > 0 {
@@ -613,8 +800,20 @@ func (x *fastReflection_OperatorAuthorization) ProtoMethods() *protoiface.Method
 				n += 1 + l + runtime.Sov(uint64(l))
 			}
 		}
+		if len(x.RemainingSpend) > 0 {
+			for _, e := range x.RemainingSpend {
+				l = options.Size(e)
+				n += 1 + l + runtime.Sov(uint64(l))
+			}
+		}
 		if len(x.FeeSpendLimit) > 0 {
 			for _, e := range x.FeeSpendLimit {
+				l = options.Size(e)
+				n += 1 + l + runtime.Sov(uint64(l))
+			}
+		}
+		if len(x.RemainingFeeSpend) > 0 {
+			for _, e := range x.RemainingFeeSpend {
 				l = options.Size(e)
 				n += 1 + l + runtime.Sov(uint64(l))
 			}
@@ -668,7 +867,7 @@ func (x *fastReflection_OperatorAuthorization) ProtoMethods() *protoiface.Method
 			copy(dAtA[i:], encoded)
 			i = runtime.EncodeVarint(dAtA, i, uint64(len(encoded)))
 			i--
-			dAtA[i] = 0x3a
+			dAtA[i] = 0x52
 		}
 		if x.Expiration != nil {
 			encoded, err := options.Marshal(x.Expiration)
@@ -682,7 +881,23 @@ func (x *fastReflection_OperatorAuthorization) ProtoMethods() *protoiface.Method
 			copy(dAtA[i:], encoded)
 			i = runtime.EncodeVarint(dAtA, i, uint64(len(encoded)))
 			i--
-			dAtA[i] = 0x32
+			dAtA[i] = 0x4a
+		}
+		if len(x.RemainingFeeSpend) > 0 {
+			for iNdEx := len(x.RemainingFeeSpend) - 1; iNdEx >= 0; iNdEx-- {
+				encoded, err := options.Marshal(x.RemainingFeeSpend[iNdEx])
+				if err != nil {
+					return protoiface.MarshalOutput{
+						NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+						Buf:               input.Buf,
+					}, err
+				}
+				i -= len(encoded)
+				copy(dAtA[i:], encoded)
+				i = runtime.EncodeVarint(dAtA, i, uint64(len(encoded)))
+				i--
+				dAtA[i] = 0x42
+			}
 		}
 		if len(x.FeeSpendLimit) > 0 {
 			for iNdEx := len(x.FeeSpendLimit) - 1; iNdEx >= 0; iNdEx-- {
@@ -697,7 +912,23 @@ func (x *fastReflection_OperatorAuthorization) ProtoMethods() *protoiface.Method
 				copy(dAtA[i:], encoded)
 				i = runtime.EncodeVarint(dAtA, i, uint64(len(encoded)))
 				i--
-				dAtA[i] = 0x2a
+				dAtA[i] = 0x3a
+			}
+		}
+		if len(x.RemainingSpend) > 0 {
+			for iNdEx := len(x.RemainingSpend) - 1; iNdEx >= 0; iNdEx-- {
+				encoded, err := options.Marshal(x.RemainingSpend[iNdEx])
+				if err != nil {
+					return protoiface.MarshalOutput{
+						NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+						Buf:               input.Buf,
+					}, err
+				}
+				i -= len(encoded)
+				copy(dAtA[i:], encoded)
+				i = runtime.EncodeVarint(dAtA, i, uint64(len(encoded)))
+				i--
+				dAtA[i] = 0x32
 			}
 		}
 		if len(x.SpendLimit) > 0 {
@@ -713,7 +944,7 @@ func (x *fastReflection_OperatorAuthorization) ProtoMethods() *protoiface.Method
 				copy(dAtA[i:], encoded)
 				i = runtime.EncodeVarint(dAtA, i, uint64(len(encoded)))
 				i--
-				dAtA[i] = 0x22
+				dAtA[i] = 0x2a
 			}
 		}
 		if len(x.MsgTypes) > 0 {
@@ -722,7 +953,7 @@ func (x *fastReflection_OperatorAuthorization) ProtoMethods() *protoiface.Method
 				copy(dAtA[i:], x.MsgTypes[iNdEx])
 				i = runtime.EncodeVarint(dAtA, i, uint64(len(x.MsgTypes[iNdEx])))
 				i--
-				dAtA[i] = 0x1a
+				dAtA[i] = 0x22
 			}
 		}
 		if len(x.Operator) > 0 {
@@ -730,14 +961,17 @@ func (x *fastReflection_OperatorAuthorization) ProtoMethods() *protoiface.Method
 			copy(dAtA[i:], x.Operator)
 			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Operator)))
 			i--
-			dAtA[i] = 0x12
+			dAtA[i] = 0x1a
 		}
-		if len(x.Corporation) > 0 {
-			i -= len(x.Corporation)
-			copy(dAtA[i:], x.Corporation)
-			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Corporation)))
+		if x.CorporationId != 0 {
+			i = runtime.EncodeVarint(dAtA, i, uint64(x.CorporationId))
 			i--
-			dAtA[i] = 0xa
+			dAtA[i] = 0x10
+		}
+		if x.Id != 0 {
+			i = runtime.EncodeVarint(dAtA, i, uint64(x.Id))
+			i--
+			dAtA[i] = 0x8
 		}
 		if input.Buf != nil {
 			input.Buf = append(input.Buf, dAtA...)
@@ -789,10 +1023,10 @@ func (x *fastReflection_OperatorAuthorization) ProtoMethods() *protoiface.Method
 			}
 			switch fieldNum {
 			case 1:
-				if wireType != 2 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Corporation", wireType)
+				if wireType != 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Id", wireType)
 				}
-				var stringLen uint64
+				x.Id = 0
 				for shift := uint(0); ; shift += 7 {
 					if shift >= 64 {
 						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
@@ -802,25 +1036,31 @@ func (x *fastReflection_OperatorAuthorization) ProtoMethods() *protoiface.Method
 					}
 					b := dAtA[iNdEx]
 					iNdEx++
-					stringLen |= uint64(b&0x7F) << shift
+					x.Id |= uint64(b&0x7F) << shift
 					if b < 0x80 {
 						break
 					}
 				}
-				intStringLen := int(stringLen)
-				if intStringLen < 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
-				}
-				postIndex := iNdEx + intStringLen
-				if postIndex < 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
-				}
-				if postIndex > l {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
-				}
-				x.Corporation = string(dAtA[iNdEx:postIndex])
-				iNdEx = postIndex
 			case 2:
+				if wireType != 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field CorporationId", wireType)
+				}
+				x.CorporationId = 0
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					x.CorporationId |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+			case 3:
 				if wireType != 2 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Operator", wireType)
 				}
@@ -852,7 +1092,7 @@ func (x *fastReflection_OperatorAuthorization) ProtoMethods() *protoiface.Method
 				}
 				x.Operator = string(dAtA[iNdEx:postIndex])
 				iNdEx = postIndex
-			case 3:
+			case 4:
 				if wireType != 2 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field MsgTypes", wireType)
 				}
@@ -884,7 +1124,7 @@ func (x *fastReflection_OperatorAuthorization) ProtoMethods() *protoiface.Method
 				}
 				x.MsgTypes = append(x.MsgTypes, string(dAtA[iNdEx:postIndex]))
 				iNdEx = postIndex
-			case 4:
+			case 5:
 				if wireType != 2 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field SpendLimit", wireType)
 				}
@@ -918,7 +1158,41 @@ func (x *fastReflection_OperatorAuthorization) ProtoMethods() *protoiface.Method
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, err
 				}
 				iNdEx = postIndex
-			case 5:
+			case 6:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field RemainingSpend", wireType)
+				}
+				var msglen int
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					msglen |= int(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				if msglen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + msglen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				x.RemainingSpend = append(x.RemainingSpend, &v1beta1.Coin{})
+				if err := options.Unmarshal(dAtA[iNdEx:postIndex], x.RemainingSpend[len(x.RemainingSpend)-1]); err != nil {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, err
+				}
+				iNdEx = postIndex
+			case 7:
 				if wireType != 2 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field FeeSpendLimit", wireType)
 				}
@@ -952,7 +1226,41 @@ func (x *fastReflection_OperatorAuthorization) ProtoMethods() *protoiface.Method
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, err
 				}
 				iNdEx = postIndex
-			case 6:
+			case 8:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field RemainingFeeSpend", wireType)
+				}
+				var msglen int
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					msglen |= int(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				if msglen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + msglen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				x.RemainingFeeSpend = append(x.RemainingFeeSpend, &v1beta1.Coin{})
+				if err := options.Unmarshal(dAtA[iNdEx:postIndex], x.RemainingFeeSpend[len(x.RemainingFeeSpend)-1]); err != nil {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, err
+				}
+				iNdEx = postIndex
+			case 9:
 				if wireType != 2 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Expiration", wireType)
 				}
@@ -988,7 +1296,7 @@ func (x *fastReflection_OperatorAuthorization) ProtoMethods() *protoiface.Method
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, err
 				}
 				iNdEx = postIndex
-			case 7:
+			case 10:
 				if wireType != 2 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Period", wireType)
 				}
@@ -1059,70 +1367,68 @@ func (x *fastReflection_OperatorAuthorization) ProtoMethods() *protoiface.Method
 	}
 }
 
-var _ protoreflect.List = (*_OperatorAuthorizationUsage_3_list)(nil)
+var _ protoreflect.List = (*_OperatorAuthorizationUsage_2_list)(nil)
 
-type _OperatorAuthorizationUsage_3_list struct {
+type _OperatorAuthorizationUsage_2_list struct {
 	list *[]*v1beta1.Coin
 }
 
-func (x *_OperatorAuthorizationUsage_3_list) Len() int {
+func (x *_OperatorAuthorizationUsage_2_list) Len() int {
 	if x.list == nil {
 		return 0
 	}
 	return len(*x.list)
 }
 
-func (x *_OperatorAuthorizationUsage_3_list) Get(i int) protoreflect.Value {
+func (x *_OperatorAuthorizationUsage_2_list) Get(i int) protoreflect.Value {
 	return protoreflect.ValueOfMessage((*x.list)[i].ProtoReflect())
 }
 
-func (x *_OperatorAuthorizationUsage_3_list) Set(i int, value protoreflect.Value) {
+func (x *_OperatorAuthorizationUsage_2_list) Set(i int, value protoreflect.Value) {
 	valueUnwrapped := value.Message()
 	concreteValue := valueUnwrapped.Interface().(*v1beta1.Coin)
 	(*x.list)[i] = concreteValue
 }
 
-func (x *_OperatorAuthorizationUsage_3_list) Append(value protoreflect.Value) {
+func (x *_OperatorAuthorizationUsage_2_list) Append(value protoreflect.Value) {
 	valueUnwrapped := value.Message()
 	concreteValue := valueUnwrapped.Interface().(*v1beta1.Coin)
 	*x.list = append(*x.list, concreteValue)
 }
 
-func (x *_OperatorAuthorizationUsage_3_list) AppendMutable() protoreflect.Value {
+func (x *_OperatorAuthorizationUsage_2_list) AppendMutable() protoreflect.Value {
 	v := new(v1beta1.Coin)
 	*x.list = append(*x.list, v)
 	return protoreflect.ValueOfMessage(v.ProtoReflect())
 }
 
-func (x *_OperatorAuthorizationUsage_3_list) Truncate(n int) {
+func (x *_OperatorAuthorizationUsage_2_list) Truncate(n int) {
 	for i := n; i < len(*x.list); i++ {
 		(*x.list)[i] = nil
 	}
 	*x.list = (*x.list)[:n]
 }
 
-func (x *_OperatorAuthorizationUsage_3_list) NewElement() protoreflect.Value {
+func (x *_OperatorAuthorizationUsage_2_list) NewElement() protoreflect.Value {
 	v := new(v1beta1.Coin)
 	return protoreflect.ValueOfMessage(v.ProtoReflect())
 }
 
-func (x *_OperatorAuthorizationUsage_3_list) IsValid() bool {
+func (x *_OperatorAuthorizationUsage_2_list) IsValid() bool {
 	return x.list != nil
 }
 
 var (
-	md_OperatorAuthorizationUsage             protoreflect.MessageDescriptor
-	fd_OperatorAuthorizationUsage_corporation protoreflect.FieldDescriptor
-	fd_OperatorAuthorizationUsage_operator    protoreflect.FieldDescriptor
-	fd_OperatorAuthorizationUsage_remaining   protoreflect.FieldDescriptor
-	fd_OperatorAuthorizationUsage_last_reset  protoreflect.FieldDescriptor
+	md_OperatorAuthorizationUsage                           protoreflect.MessageDescriptor
+	fd_OperatorAuthorizationUsage_operator_authorization_id protoreflect.FieldDescriptor
+	fd_OperatorAuthorizationUsage_remaining                 protoreflect.FieldDescriptor
+	fd_OperatorAuthorizationUsage_last_reset                protoreflect.FieldDescriptor
 )
 
 func init() {
 	file_verana_de_v1_types_proto_init()
 	md_OperatorAuthorizationUsage = File_verana_de_v1_types_proto.Messages().ByName("OperatorAuthorizationUsage")
-	fd_OperatorAuthorizationUsage_corporation = md_OperatorAuthorizationUsage.Fields().ByName("corporation")
-	fd_OperatorAuthorizationUsage_operator = md_OperatorAuthorizationUsage.Fields().ByName("operator")
+	fd_OperatorAuthorizationUsage_operator_authorization_id = md_OperatorAuthorizationUsage.Fields().ByName("operator_authorization_id")
 	fd_OperatorAuthorizationUsage_remaining = md_OperatorAuthorizationUsage.Fields().ByName("remaining")
 	fd_OperatorAuthorizationUsage_last_reset = md_OperatorAuthorizationUsage.Fields().ByName("last_reset")
 }
@@ -1192,20 +1498,14 @@ func (x *fastReflection_OperatorAuthorizationUsage) Interface() protoreflect.Pro
 // While iterating, mutating operations may only be performed
 // on the current field descriptor.
 func (x *fastReflection_OperatorAuthorizationUsage) Range(f func(protoreflect.FieldDescriptor, protoreflect.Value) bool) {
-	if x.Corporation != "" {
-		value := protoreflect.ValueOfString(x.Corporation)
-		if !f(fd_OperatorAuthorizationUsage_corporation, value) {
-			return
-		}
-	}
-	if x.Operator != "" {
-		value := protoreflect.ValueOfString(x.Operator)
-		if !f(fd_OperatorAuthorizationUsage_operator, value) {
+	if x.OperatorAuthorizationId != uint64(0) {
+		value := protoreflect.ValueOfUint64(x.OperatorAuthorizationId)
+		if !f(fd_OperatorAuthorizationUsage_operator_authorization_id, value) {
 			return
 		}
 	}
 	if len(x.Remaining) != 0 {
-		value := protoreflect.ValueOfList(&_OperatorAuthorizationUsage_3_list{list: &x.Remaining})
+		value := protoreflect.ValueOfList(&_OperatorAuthorizationUsage_2_list{list: &x.Remaining})
 		if !f(fd_OperatorAuthorizationUsage_remaining, value) {
 			return
 		}
@@ -1231,10 +1531,8 @@ func (x *fastReflection_OperatorAuthorizationUsage) Range(f func(protoreflect.Fi
 // a repeated field is populated if it is non-empty.
 func (x *fastReflection_OperatorAuthorizationUsage) Has(fd protoreflect.FieldDescriptor) bool {
 	switch fd.FullName() {
-	case "verana.de.v1.OperatorAuthorizationUsage.corporation":
-		return x.Corporation != ""
-	case "verana.de.v1.OperatorAuthorizationUsage.operator":
-		return x.Operator != ""
+	case "verana.de.v1.OperatorAuthorizationUsage.operator_authorization_id":
+		return x.OperatorAuthorizationId != uint64(0)
 	case "verana.de.v1.OperatorAuthorizationUsage.remaining":
 		return len(x.Remaining) != 0
 	case "verana.de.v1.OperatorAuthorizationUsage.last_reset":
@@ -1255,10 +1553,8 @@ func (x *fastReflection_OperatorAuthorizationUsage) Has(fd protoreflect.FieldDes
 // Clear is a mutating operation and unsafe for concurrent use.
 func (x *fastReflection_OperatorAuthorizationUsage) Clear(fd protoreflect.FieldDescriptor) {
 	switch fd.FullName() {
-	case "verana.de.v1.OperatorAuthorizationUsage.corporation":
-		x.Corporation = ""
-	case "verana.de.v1.OperatorAuthorizationUsage.operator":
-		x.Operator = ""
+	case "verana.de.v1.OperatorAuthorizationUsage.operator_authorization_id":
+		x.OperatorAuthorizationId = uint64(0)
 	case "verana.de.v1.OperatorAuthorizationUsage.remaining":
 		x.Remaining = nil
 	case "verana.de.v1.OperatorAuthorizationUsage.last_reset":
@@ -1279,17 +1575,14 @@ func (x *fastReflection_OperatorAuthorizationUsage) Clear(fd protoreflect.FieldD
 // of the value; to obtain a mutable reference, use Mutable.
 func (x *fastReflection_OperatorAuthorizationUsage) Get(descriptor protoreflect.FieldDescriptor) protoreflect.Value {
 	switch descriptor.FullName() {
-	case "verana.de.v1.OperatorAuthorizationUsage.corporation":
-		value := x.Corporation
-		return protoreflect.ValueOfString(value)
-	case "verana.de.v1.OperatorAuthorizationUsage.operator":
-		value := x.Operator
-		return protoreflect.ValueOfString(value)
+	case "verana.de.v1.OperatorAuthorizationUsage.operator_authorization_id":
+		value := x.OperatorAuthorizationId
+		return protoreflect.ValueOfUint64(value)
 	case "verana.de.v1.OperatorAuthorizationUsage.remaining":
 		if len(x.Remaining) == 0 {
-			return protoreflect.ValueOfList(&_OperatorAuthorizationUsage_3_list{})
+			return protoreflect.ValueOfList(&_OperatorAuthorizationUsage_2_list{})
 		}
-		listValue := &_OperatorAuthorizationUsage_3_list{list: &x.Remaining}
+		listValue := &_OperatorAuthorizationUsage_2_list{list: &x.Remaining}
 		return protoreflect.ValueOfList(listValue)
 	case "verana.de.v1.OperatorAuthorizationUsage.last_reset":
 		value := x.LastReset
@@ -1314,13 +1607,11 @@ func (x *fastReflection_OperatorAuthorizationUsage) Get(descriptor protoreflect.
 // Set is a mutating operation and unsafe for concurrent use.
 func (x *fastReflection_OperatorAuthorizationUsage) Set(fd protoreflect.FieldDescriptor, value protoreflect.Value) {
 	switch fd.FullName() {
-	case "verana.de.v1.OperatorAuthorizationUsage.corporation":
-		x.Corporation = value.Interface().(string)
-	case "verana.de.v1.OperatorAuthorizationUsage.operator":
-		x.Operator = value.Interface().(string)
+	case "verana.de.v1.OperatorAuthorizationUsage.operator_authorization_id":
+		x.OperatorAuthorizationId = value.Uint()
 	case "verana.de.v1.OperatorAuthorizationUsage.remaining":
 		lv := value.List()
-		clv := lv.(*_OperatorAuthorizationUsage_3_list)
+		clv := lv.(*_OperatorAuthorizationUsage_2_list)
 		x.Remaining = *clv.list
 	case "verana.de.v1.OperatorAuthorizationUsage.last_reset":
 		x.LastReset = value.Message().Interface().(*timestamppb.Timestamp)
@@ -1348,17 +1639,15 @@ func (x *fastReflection_OperatorAuthorizationUsage) Mutable(fd protoreflect.Fiel
 		if x.Remaining == nil {
 			x.Remaining = []*v1beta1.Coin{}
 		}
-		value := &_OperatorAuthorizationUsage_3_list{list: &x.Remaining}
+		value := &_OperatorAuthorizationUsage_2_list{list: &x.Remaining}
 		return protoreflect.ValueOfList(value)
 	case "verana.de.v1.OperatorAuthorizationUsage.last_reset":
 		if x.LastReset == nil {
 			x.LastReset = new(timestamppb.Timestamp)
 		}
 		return protoreflect.ValueOfMessage(x.LastReset.ProtoReflect())
-	case "verana.de.v1.OperatorAuthorizationUsage.corporation":
-		panic(fmt.Errorf("field corporation of message verana.de.v1.OperatorAuthorizationUsage is not mutable"))
-	case "verana.de.v1.OperatorAuthorizationUsage.operator":
-		panic(fmt.Errorf("field operator of message verana.de.v1.OperatorAuthorizationUsage is not mutable"))
+	case "verana.de.v1.OperatorAuthorizationUsage.operator_authorization_id":
+		panic(fmt.Errorf("field operator_authorization_id of message verana.de.v1.OperatorAuthorizationUsage is not mutable"))
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.de.v1.OperatorAuthorizationUsage"))
@@ -1372,13 +1661,11 @@ func (x *fastReflection_OperatorAuthorizationUsage) Mutable(fd protoreflect.Fiel
 // For lists, maps, and messages, this returns a new, empty, mutable value.
 func (x *fastReflection_OperatorAuthorizationUsage) NewField(fd protoreflect.FieldDescriptor) protoreflect.Value {
 	switch fd.FullName() {
-	case "verana.de.v1.OperatorAuthorizationUsage.corporation":
-		return protoreflect.ValueOfString("")
-	case "verana.de.v1.OperatorAuthorizationUsage.operator":
-		return protoreflect.ValueOfString("")
+	case "verana.de.v1.OperatorAuthorizationUsage.operator_authorization_id":
+		return protoreflect.ValueOfUint64(uint64(0))
 	case "verana.de.v1.OperatorAuthorizationUsage.remaining":
 		list := []*v1beta1.Coin{}
-		return protoreflect.ValueOfList(&_OperatorAuthorizationUsage_3_list{list: &list})
+		return protoreflect.ValueOfList(&_OperatorAuthorizationUsage_2_list{list: &list})
 	case "verana.de.v1.OperatorAuthorizationUsage.last_reset":
 		m := new(timestamppb.Timestamp)
 		return protoreflect.ValueOfMessage(m.ProtoReflect())
@@ -1451,13 +1738,8 @@ func (x *fastReflection_OperatorAuthorizationUsage) ProtoMethods() *protoiface.M
 		var n int
 		var l int
 		_ = l
-		l = len(x.Corporation)
-		if l > 0 {
-			n += 1 + l + runtime.Sov(uint64(l))
-		}
-		l = len(x.Operator)
-		if l > 0 {
-			n += 1 + l + runtime.Sov(uint64(l))
+		if x.OperatorAuthorizationId != 0 {
+			n += 1 + runtime.Sov(uint64(x.OperatorAuthorizationId))
 		}
 		if len(x.Remaining) > 0 {
 			for _, e := range x.Remaining {
@@ -1510,7 +1792,7 @@ func (x *fastReflection_OperatorAuthorizationUsage) ProtoMethods() *protoiface.M
 			copy(dAtA[i:], encoded)
 			i = runtime.EncodeVarint(dAtA, i, uint64(len(encoded)))
 			i--
-			dAtA[i] = 0x22
+			dAtA[i] = 0x1a
 		}
 		if len(x.Remaining) > 0 {
 			for iNdEx := len(x.Remaining) - 1; iNdEx >= 0; iNdEx-- {
@@ -1525,22 +1807,13 @@ func (x *fastReflection_OperatorAuthorizationUsage) ProtoMethods() *protoiface.M
 				copy(dAtA[i:], encoded)
 				i = runtime.EncodeVarint(dAtA, i, uint64(len(encoded)))
 				i--
-				dAtA[i] = 0x1a
+				dAtA[i] = 0x12
 			}
 		}
-		if len(x.Operator) > 0 {
-			i -= len(x.Operator)
-			copy(dAtA[i:], x.Operator)
-			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Operator)))
+		if x.OperatorAuthorizationId != 0 {
+			i = runtime.EncodeVarint(dAtA, i, uint64(x.OperatorAuthorizationId))
 			i--
-			dAtA[i] = 0x12
-		}
-		if len(x.Corporation) > 0 {
-			i -= len(x.Corporation)
-			copy(dAtA[i:], x.Corporation)
-			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Corporation)))
-			i--
-			dAtA[i] = 0xa
+			dAtA[i] = 0x8
 		}
 		if input.Buf != nil {
 			input.Buf = append(input.Buf, dAtA...)
@@ -1592,10 +1865,10 @@ func (x *fastReflection_OperatorAuthorizationUsage) ProtoMethods() *protoiface.M
 			}
 			switch fieldNum {
 			case 1:
-				if wireType != 2 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Corporation", wireType)
+				if wireType != 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field OperatorAuthorizationId", wireType)
 				}
-				var stringLen uint64
+				x.OperatorAuthorizationId = 0
 				for shift := uint(0); ; shift += 7 {
 					if shift >= 64 {
 						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
@@ -1605,57 +1878,12 @@ func (x *fastReflection_OperatorAuthorizationUsage) ProtoMethods() *protoiface.M
 					}
 					b := dAtA[iNdEx]
 					iNdEx++
-					stringLen |= uint64(b&0x7F) << shift
+					x.OperatorAuthorizationId |= uint64(b&0x7F) << shift
 					if b < 0x80 {
 						break
 					}
 				}
-				intStringLen := int(stringLen)
-				if intStringLen < 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
-				}
-				postIndex := iNdEx + intStringLen
-				if postIndex < 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
-				}
-				if postIndex > l {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
-				}
-				x.Corporation = string(dAtA[iNdEx:postIndex])
-				iNdEx = postIndex
 			case 2:
-				if wireType != 2 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Operator", wireType)
-				}
-				var stringLen uint64
-				for shift := uint(0); ; shift += 7 {
-					if shift >= 64 {
-						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
-					}
-					if iNdEx >= l {
-						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
-					}
-					b := dAtA[iNdEx]
-					iNdEx++
-					stringLen |= uint64(b&0x7F) << shift
-					if b < 0x80 {
-						break
-					}
-				}
-				intStringLen := int(stringLen)
-				if intStringLen < 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
-				}
-				postIndex := iNdEx + intStringLen
-				if postIndex < 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
-				}
-				if postIndex > l {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
-				}
-				x.Operator = string(dAtA[iNdEx:postIndex])
-				iNdEx = postIndex
-			case 3:
 				if wireType != 2 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Remaining", wireType)
 				}
@@ -1689,7 +1917,7 @@ func (x *fastReflection_OperatorAuthorizationUsage) ProtoMethods() *protoiface.M
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, err
 				}
 				iNdEx = postIndex
-			case 4:
+			case 3:
 				if wireType != 2 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field LastReset", wireType)
 				}
@@ -1857,23 +2085,76 @@ func (x *_FeeGrant_4_list) IsValid() bool {
 	return x.list != nil
 }
 
+var _ protoreflect.List = (*_FeeGrant_5_list)(nil)
+
+type _FeeGrant_5_list struct {
+	list *[]*v1beta1.Coin
+}
+
+func (x *_FeeGrant_5_list) Len() int {
+	if x.list == nil {
+		return 0
+	}
+	return len(*x.list)
+}
+
+func (x *_FeeGrant_5_list) Get(i int) protoreflect.Value {
+	return protoreflect.ValueOfMessage((*x.list)[i].ProtoReflect())
+}
+
+func (x *_FeeGrant_5_list) Set(i int, value protoreflect.Value) {
+	valueUnwrapped := value.Message()
+	concreteValue := valueUnwrapped.Interface().(*v1beta1.Coin)
+	(*x.list)[i] = concreteValue
+}
+
+func (x *_FeeGrant_5_list) Append(value protoreflect.Value) {
+	valueUnwrapped := value.Message()
+	concreteValue := valueUnwrapped.Interface().(*v1beta1.Coin)
+	*x.list = append(*x.list, concreteValue)
+}
+
+func (x *_FeeGrant_5_list) AppendMutable() protoreflect.Value {
+	v := new(v1beta1.Coin)
+	*x.list = append(*x.list, v)
+	return protoreflect.ValueOfMessage(v.ProtoReflect())
+}
+
+func (x *_FeeGrant_5_list) Truncate(n int) {
+	for i := n; i < len(*x.list); i++ {
+		(*x.list)[i] = nil
+	}
+	*x.list = (*x.list)[:n]
+}
+
+func (x *_FeeGrant_5_list) NewElement() protoreflect.Value {
+	v := new(v1beta1.Coin)
+	return protoreflect.ValueOfMessage(v.ProtoReflect())
+}
+
+func (x *_FeeGrant_5_list) IsValid() bool {
+	return x.list != nil
+}
+
 var (
-	md_FeeGrant             protoreflect.MessageDescriptor
-	fd_FeeGrant_grantor     protoreflect.FieldDescriptor
-	fd_FeeGrant_grantee     protoreflect.FieldDescriptor
-	fd_FeeGrant_msg_types   protoreflect.FieldDescriptor
-	fd_FeeGrant_spend_limit protoreflect.FieldDescriptor
-	fd_FeeGrant_expiration  protoreflect.FieldDescriptor
-	fd_FeeGrant_period      protoreflect.FieldDescriptor
+	md_FeeGrant                        protoreflect.MessageDescriptor
+	fd_FeeGrant_grantor_corporation_id protoreflect.FieldDescriptor
+	fd_FeeGrant_grantee                protoreflect.FieldDescriptor
+	fd_FeeGrant_msg_types              protoreflect.FieldDescriptor
+	fd_FeeGrant_spend_limit            protoreflect.FieldDescriptor
+	fd_FeeGrant_remaining_spend        protoreflect.FieldDescriptor
+	fd_FeeGrant_expiration             protoreflect.FieldDescriptor
+	fd_FeeGrant_period                 protoreflect.FieldDescriptor
 )
 
 func init() {
 	file_verana_de_v1_types_proto_init()
 	md_FeeGrant = File_verana_de_v1_types_proto.Messages().ByName("FeeGrant")
-	fd_FeeGrant_grantor = md_FeeGrant.Fields().ByName("grantor")
+	fd_FeeGrant_grantor_corporation_id = md_FeeGrant.Fields().ByName("grantor_corporation_id")
 	fd_FeeGrant_grantee = md_FeeGrant.Fields().ByName("grantee")
 	fd_FeeGrant_msg_types = md_FeeGrant.Fields().ByName("msg_types")
 	fd_FeeGrant_spend_limit = md_FeeGrant.Fields().ByName("spend_limit")
+	fd_FeeGrant_remaining_spend = md_FeeGrant.Fields().ByName("remaining_spend")
 	fd_FeeGrant_expiration = md_FeeGrant.Fields().ByName("expiration")
 	fd_FeeGrant_period = md_FeeGrant.Fields().ByName("period")
 }
@@ -1943,9 +2224,9 @@ func (x *fastReflection_FeeGrant) Interface() protoreflect.ProtoMessage {
 // While iterating, mutating operations may only be performed
 // on the current field descriptor.
 func (x *fastReflection_FeeGrant) Range(f func(protoreflect.FieldDescriptor, protoreflect.Value) bool) {
-	if x.Grantor != "" {
-		value := protoreflect.ValueOfString(x.Grantor)
-		if !f(fd_FeeGrant_grantor, value) {
+	if x.GrantorCorporationId != uint64(0) {
+		value := protoreflect.ValueOfUint64(x.GrantorCorporationId)
+		if !f(fd_FeeGrant_grantor_corporation_id, value) {
 			return
 		}
 	}
@@ -1964,6 +2245,12 @@ func (x *fastReflection_FeeGrant) Range(f func(protoreflect.FieldDescriptor, pro
 	if len(x.SpendLimit) != 0 {
 		value := protoreflect.ValueOfList(&_FeeGrant_4_list{list: &x.SpendLimit})
 		if !f(fd_FeeGrant_spend_limit, value) {
+			return
+		}
+	}
+	if len(x.RemainingSpend) != 0 {
+		value := protoreflect.ValueOfList(&_FeeGrant_5_list{list: &x.RemainingSpend})
+		if !f(fd_FeeGrant_remaining_spend, value) {
 			return
 		}
 	}
@@ -1994,14 +2281,16 @@ func (x *fastReflection_FeeGrant) Range(f func(protoreflect.FieldDescriptor, pro
 // a repeated field is populated if it is non-empty.
 func (x *fastReflection_FeeGrant) Has(fd protoreflect.FieldDescriptor) bool {
 	switch fd.FullName() {
-	case "verana.de.v1.FeeGrant.grantor":
-		return x.Grantor != ""
+	case "verana.de.v1.FeeGrant.grantor_corporation_id":
+		return x.GrantorCorporationId != uint64(0)
 	case "verana.de.v1.FeeGrant.grantee":
 		return x.Grantee != ""
 	case "verana.de.v1.FeeGrant.msg_types":
 		return len(x.MsgTypes) != 0
 	case "verana.de.v1.FeeGrant.spend_limit":
 		return len(x.SpendLimit) != 0
+	case "verana.de.v1.FeeGrant.remaining_spend":
+		return len(x.RemainingSpend) != 0
 	case "verana.de.v1.FeeGrant.expiration":
 		return x.Expiration != nil
 	case "verana.de.v1.FeeGrant.period":
@@ -2022,14 +2311,16 @@ func (x *fastReflection_FeeGrant) Has(fd protoreflect.FieldDescriptor) bool {
 // Clear is a mutating operation and unsafe for concurrent use.
 func (x *fastReflection_FeeGrant) Clear(fd protoreflect.FieldDescriptor) {
 	switch fd.FullName() {
-	case "verana.de.v1.FeeGrant.grantor":
-		x.Grantor = ""
+	case "verana.de.v1.FeeGrant.grantor_corporation_id":
+		x.GrantorCorporationId = uint64(0)
 	case "verana.de.v1.FeeGrant.grantee":
 		x.Grantee = ""
 	case "verana.de.v1.FeeGrant.msg_types":
 		x.MsgTypes = nil
 	case "verana.de.v1.FeeGrant.spend_limit":
 		x.SpendLimit = nil
+	case "verana.de.v1.FeeGrant.remaining_spend":
+		x.RemainingSpend = nil
 	case "verana.de.v1.FeeGrant.expiration":
 		x.Expiration = nil
 	case "verana.de.v1.FeeGrant.period":
@@ -2050,9 +2341,9 @@ func (x *fastReflection_FeeGrant) Clear(fd protoreflect.FieldDescriptor) {
 // of the value; to obtain a mutable reference, use Mutable.
 func (x *fastReflection_FeeGrant) Get(descriptor protoreflect.FieldDescriptor) protoreflect.Value {
 	switch descriptor.FullName() {
-	case "verana.de.v1.FeeGrant.grantor":
-		value := x.Grantor
-		return protoreflect.ValueOfString(value)
+	case "verana.de.v1.FeeGrant.grantor_corporation_id":
+		value := x.GrantorCorporationId
+		return protoreflect.ValueOfUint64(value)
 	case "verana.de.v1.FeeGrant.grantee":
 		value := x.Grantee
 		return protoreflect.ValueOfString(value)
@@ -2067,6 +2358,12 @@ func (x *fastReflection_FeeGrant) Get(descriptor protoreflect.FieldDescriptor) p
 			return protoreflect.ValueOfList(&_FeeGrant_4_list{})
 		}
 		listValue := &_FeeGrant_4_list{list: &x.SpendLimit}
+		return protoreflect.ValueOfList(listValue)
+	case "verana.de.v1.FeeGrant.remaining_spend":
+		if len(x.RemainingSpend) == 0 {
+			return protoreflect.ValueOfList(&_FeeGrant_5_list{})
+		}
+		listValue := &_FeeGrant_5_list{list: &x.RemainingSpend}
 		return protoreflect.ValueOfList(listValue)
 	case "verana.de.v1.FeeGrant.expiration":
 		value := x.Expiration
@@ -2094,8 +2391,8 @@ func (x *fastReflection_FeeGrant) Get(descriptor protoreflect.FieldDescriptor) p
 // Set is a mutating operation and unsafe for concurrent use.
 func (x *fastReflection_FeeGrant) Set(fd protoreflect.FieldDescriptor, value protoreflect.Value) {
 	switch fd.FullName() {
-	case "verana.de.v1.FeeGrant.grantor":
-		x.Grantor = value.Interface().(string)
+	case "verana.de.v1.FeeGrant.grantor_corporation_id":
+		x.GrantorCorporationId = value.Uint()
 	case "verana.de.v1.FeeGrant.grantee":
 		x.Grantee = value.Interface().(string)
 	case "verana.de.v1.FeeGrant.msg_types":
@@ -2106,6 +2403,10 @@ func (x *fastReflection_FeeGrant) Set(fd protoreflect.FieldDescriptor, value pro
 		lv := value.List()
 		clv := lv.(*_FeeGrant_4_list)
 		x.SpendLimit = *clv.list
+	case "verana.de.v1.FeeGrant.remaining_spend":
+		lv := value.List()
+		clv := lv.(*_FeeGrant_5_list)
+		x.RemainingSpend = *clv.list
 	case "verana.de.v1.FeeGrant.expiration":
 		x.Expiration = value.Message().Interface().(*timestamppb.Timestamp)
 	case "verana.de.v1.FeeGrant.period":
@@ -2142,6 +2443,12 @@ func (x *fastReflection_FeeGrant) Mutable(fd protoreflect.FieldDescriptor) proto
 		}
 		value := &_FeeGrant_4_list{list: &x.SpendLimit}
 		return protoreflect.ValueOfList(value)
+	case "verana.de.v1.FeeGrant.remaining_spend":
+		if x.RemainingSpend == nil {
+			x.RemainingSpend = []*v1beta1.Coin{}
+		}
+		value := &_FeeGrant_5_list{list: &x.RemainingSpend}
+		return protoreflect.ValueOfList(value)
 	case "verana.de.v1.FeeGrant.expiration":
 		if x.Expiration == nil {
 			x.Expiration = new(timestamppb.Timestamp)
@@ -2152,8 +2459,8 @@ func (x *fastReflection_FeeGrant) Mutable(fd protoreflect.FieldDescriptor) proto
 			x.Period = new(durationpb.Duration)
 		}
 		return protoreflect.ValueOfMessage(x.Period.ProtoReflect())
-	case "verana.de.v1.FeeGrant.grantor":
-		panic(fmt.Errorf("field grantor of message verana.de.v1.FeeGrant is not mutable"))
+	case "verana.de.v1.FeeGrant.grantor_corporation_id":
+		panic(fmt.Errorf("field grantor_corporation_id of message verana.de.v1.FeeGrant is not mutable"))
 	case "verana.de.v1.FeeGrant.grantee":
 		panic(fmt.Errorf("field grantee of message verana.de.v1.FeeGrant is not mutable"))
 	default:
@@ -2169,8 +2476,8 @@ func (x *fastReflection_FeeGrant) Mutable(fd protoreflect.FieldDescriptor) proto
 // For lists, maps, and messages, this returns a new, empty, mutable value.
 func (x *fastReflection_FeeGrant) NewField(fd protoreflect.FieldDescriptor) protoreflect.Value {
 	switch fd.FullName() {
-	case "verana.de.v1.FeeGrant.grantor":
-		return protoreflect.ValueOfString("")
+	case "verana.de.v1.FeeGrant.grantor_corporation_id":
+		return protoreflect.ValueOfUint64(uint64(0))
 	case "verana.de.v1.FeeGrant.grantee":
 		return protoreflect.ValueOfString("")
 	case "verana.de.v1.FeeGrant.msg_types":
@@ -2179,6 +2486,9 @@ func (x *fastReflection_FeeGrant) NewField(fd protoreflect.FieldDescriptor) prot
 	case "verana.de.v1.FeeGrant.spend_limit":
 		list := []*v1beta1.Coin{}
 		return protoreflect.ValueOfList(&_FeeGrant_4_list{list: &list})
+	case "verana.de.v1.FeeGrant.remaining_spend":
+		list := []*v1beta1.Coin{}
+		return protoreflect.ValueOfList(&_FeeGrant_5_list{list: &list})
 	case "verana.de.v1.FeeGrant.expiration":
 		m := new(timestamppb.Timestamp)
 		return protoreflect.ValueOfMessage(m.ProtoReflect())
@@ -2254,9 +2564,8 @@ func (x *fastReflection_FeeGrant) ProtoMethods() *protoiface.Methods {
 		var n int
 		var l int
 		_ = l
-		l = len(x.Grantor)
-		if l > 0 {
-			n += 1 + l + runtime.Sov(uint64(l))
+		if x.GrantorCorporationId != 0 {
+			n += 1 + runtime.Sov(uint64(x.GrantorCorporationId))
 		}
 		l = len(x.Grantee)
 		if l > 0 {
@@ -2270,6 +2579,12 @@ func (x *fastReflection_FeeGrant) ProtoMethods() *protoiface.Methods {
 		}
 		if len(x.SpendLimit) > 0 {
 			for _, e := range x.SpendLimit {
+				l = options.Size(e)
+				n += 1 + l + runtime.Sov(uint64(l))
+			}
+		}
+		if len(x.RemainingSpend) > 0 {
+			for _, e := range x.RemainingSpend {
 				l = options.Size(e)
 				n += 1 + l + runtime.Sov(uint64(l))
 			}
@@ -2323,7 +2638,7 @@ func (x *fastReflection_FeeGrant) ProtoMethods() *protoiface.Methods {
 			copy(dAtA[i:], encoded)
 			i = runtime.EncodeVarint(dAtA, i, uint64(len(encoded)))
 			i--
-			dAtA[i] = 0x32
+			dAtA[i] = 0x3a
 		}
 		if x.Expiration != nil {
 			encoded, err := options.Marshal(x.Expiration)
@@ -2337,7 +2652,23 @@ func (x *fastReflection_FeeGrant) ProtoMethods() *protoiface.Methods {
 			copy(dAtA[i:], encoded)
 			i = runtime.EncodeVarint(dAtA, i, uint64(len(encoded)))
 			i--
-			dAtA[i] = 0x2a
+			dAtA[i] = 0x32
+		}
+		if len(x.RemainingSpend) > 0 {
+			for iNdEx := len(x.RemainingSpend) - 1; iNdEx >= 0; iNdEx-- {
+				encoded, err := options.Marshal(x.RemainingSpend[iNdEx])
+				if err != nil {
+					return protoiface.MarshalOutput{
+						NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+						Buf:               input.Buf,
+					}, err
+				}
+				i -= len(encoded)
+				copy(dAtA[i:], encoded)
+				i = runtime.EncodeVarint(dAtA, i, uint64(len(encoded)))
+				i--
+				dAtA[i] = 0x2a
+			}
 		}
 		if len(x.SpendLimit) > 0 {
 			for iNdEx := len(x.SpendLimit) - 1; iNdEx >= 0; iNdEx-- {
@@ -2371,12 +2702,10 @@ func (x *fastReflection_FeeGrant) ProtoMethods() *protoiface.Methods {
 			i--
 			dAtA[i] = 0x12
 		}
-		if len(x.Grantor) > 0 {
-			i -= len(x.Grantor)
-			copy(dAtA[i:], x.Grantor)
-			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Grantor)))
+		if x.GrantorCorporationId != 0 {
+			i = runtime.EncodeVarint(dAtA, i, uint64(x.GrantorCorporationId))
 			i--
-			dAtA[i] = 0xa
+			dAtA[i] = 0x8
 		}
 		if input.Buf != nil {
 			input.Buf = append(input.Buf, dAtA...)
@@ -2428,10 +2757,10 @@ func (x *fastReflection_FeeGrant) ProtoMethods() *protoiface.Methods {
 			}
 			switch fieldNum {
 			case 1:
-				if wireType != 2 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Grantor", wireType)
+				if wireType != 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field GrantorCorporationId", wireType)
 				}
-				var stringLen uint64
+				x.GrantorCorporationId = 0
 				for shift := uint(0); ; shift += 7 {
 					if shift >= 64 {
 						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
@@ -2441,24 +2770,11 @@ func (x *fastReflection_FeeGrant) ProtoMethods() *protoiface.Methods {
 					}
 					b := dAtA[iNdEx]
 					iNdEx++
-					stringLen |= uint64(b&0x7F) << shift
+					x.GrantorCorporationId |= uint64(b&0x7F) << shift
 					if b < 0x80 {
 						break
 					}
 				}
-				intStringLen := int(stringLen)
-				if intStringLen < 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
-				}
-				postIndex := iNdEx + intStringLen
-				if postIndex < 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
-				}
-				if postIndex > l {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
-				}
-				x.Grantor = string(dAtA[iNdEx:postIndex])
-				iNdEx = postIndex
 			case 2:
 				if wireType != 2 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Grantee", wireType)
@@ -2559,6 +2875,40 @@ func (x *fastReflection_FeeGrant) ProtoMethods() *protoiface.Methods {
 				iNdEx = postIndex
 			case 5:
 				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field RemainingSpend", wireType)
+				}
+				var msglen int
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					msglen |= int(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				if msglen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + msglen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				x.RemainingSpend = append(x.RemainingSpend, &v1beta1.Coin{})
+				if err := options.Unmarshal(dAtA[iNdEx:postIndex], x.RemainingSpend[len(x.RemainingSpend)-1]); err != nil {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, err
+				}
+				iNdEx = postIndex
+			case 6:
+				if wireType != 2 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Expiration", wireType)
 				}
 				var msglen int
@@ -2593,7 +2943,7 @@ func (x *fastReflection_FeeGrant) ProtoMethods() *protoiface.Methods {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, err
 				}
 				iNdEx = postIndex
-			case 6:
+			case 7:
 				if wireType != 2 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Period", wireType)
 				}
@@ -2664,65 +3014,1364 @@ func (x *fastReflection_FeeGrant) ProtoMethods() *protoiface.Methods {
 	}
 }
 
-var _ protoreflect.List = (*_VSOperatorAuthorization_3_list)(nil)
+var _ protoreflect.List = (*_ParticipantAuthorizationRecord_2_list)(nil)
 
-type _VSOperatorAuthorization_3_list struct {
-	list *[]uint64
+type _ParticipantAuthorizationRecord_2_list struct {
+	list *[]string
 }
 
-func (x *_VSOperatorAuthorization_3_list) Len() int {
+func (x *_ParticipantAuthorizationRecord_2_list) Len() int {
 	if x.list == nil {
 		return 0
 	}
 	return len(*x.list)
 }
 
-func (x *_VSOperatorAuthorization_3_list) Get(i int) protoreflect.Value {
-	return protoreflect.ValueOfUint64((*x.list)[i])
+func (x *_ParticipantAuthorizationRecord_2_list) Get(i int) protoreflect.Value {
+	return protoreflect.ValueOfString((*x.list)[i])
 }
 
-func (x *_VSOperatorAuthorization_3_list) Set(i int, value protoreflect.Value) {
-	valueUnwrapped := value.Uint()
+func (x *_ParticipantAuthorizationRecord_2_list) Set(i int, value protoreflect.Value) {
+	valueUnwrapped := value.String()
 	concreteValue := valueUnwrapped
 	(*x.list)[i] = concreteValue
 }
 
-func (x *_VSOperatorAuthorization_3_list) Append(value protoreflect.Value) {
-	valueUnwrapped := value.Uint()
+func (x *_ParticipantAuthorizationRecord_2_list) Append(value protoreflect.Value) {
+	valueUnwrapped := value.String()
 	concreteValue := valueUnwrapped
 	*x.list = append(*x.list, concreteValue)
 }
 
-func (x *_VSOperatorAuthorization_3_list) AppendMutable() protoreflect.Value {
-	panic(fmt.Errorf("AppendMutable can not be called on message VSOperatorAuthorization at list field Permissions as it is not of Message kind"))
+func (x *_ParticipantAuthorizationRecord_2_list) AppendMutable() protoreflect.Value {
+	panic(fmt.Errorf("AppendMutable can not be called on message ParticipantAuthorizationRecord at list field MsgTypes as it is not of Message kind"))
 }
 
-func (x *_VSOperatorAuthorization_3_list) Truncate(n int) {
+func (x *_ParticipantAuthorizationRecord_2_list) Truncate(n int) {
 	*x.list = (*x.list)[:n]
 }
 
-func (x *_VSOperatorAuthorization_3_list) NewElement() protoreflect.Value {
-	v := uint64(0)
-	return protoreflect.ValueOfUint64(v)
+func (x *_ParticipantAuthorizationRecord_2_list) NewElement() protoreflect.Value {
+	v := ""
+	return protoreflect.ValueOfString(v)
 }
 
-func (x *_VSOperatorAuthorization_3_list) IsValid() bool {
+func (x *_ParticipantAuthorizationRecord_2_list) IsValid() bool {
+	return x.list != nil
+}
+
+var _ protoreflect.List = (*_ParticipantAuthorizationRecord_3_list)(nil)
+
+type _ParticipantAuthorizationRecord_3_list struct {
+	list *[]*v1beta1.Coin
+}
+
+func (x *_ParticipantAuthorizationRecord_3_list) Len() int {
+	if x.list == nil {
+		return 0
+	}
+	return len(*x.list)
+}
+
+func (x *_ParticipantAuthorizationRecord_3_list) Get(i int) protoreflect.Value {
+	return protoreflect.ValueOfMessage((*x.list)[i].ProtoReflect())
+}
+
+func (x *_ParticipantAuthorizationRecord_3_list) Set(i int, value protoreflect.Value) {
+	valueUnwrapped := value.Message()
+	concreteValue := valueUnwrapped.Interface().(*v1beta1.Coin)
+	(*x.list)[i] = concreteValue
+}
+
+func (x *_ParticipantAuthorizationRecord_3_list) Append(value protoreflect.Value) {
+	valueUnwrapped := value.Message()
+	concreteValue := valueUnwrapped.Interface().(*v1beta1.Coin)
+	*x.list = append(*x.list, concreteValue)
+}
+
+func (x *_ParticipantAuthorizationRecord_3_list) AppendMutable() protoreflect.Value {
+	v := new(v1beta1.Coin)
+	*x.list = append(*x.list, v)
+	return protoreflect.ValueOfMessage(v.ProtoReflect())
+}
+
+func (x *_ParticipantAuthorizationRecord_3_list) Truncate(n int) {
+	for i := n; i < len(*x.list); i++ {
+		(*x.list)[i] = nil
+	}
+	*x.list = (*x.list)[:n]
+}
+
+func (x *_ParticipantAuthorizationRecord_3_list) NewElement() protoreflect.Value {
+	v := new(v1beta1.Coin)
+	return protoreflect.ValueOfMessage(v.ProtoReflect())
+}
+
+func (x *_ParticipantAuthorizationRecord_3_list) IsValid() bool {
+	return x.list != nil
+}
+
+var _ protoreflect.List = (*_ParticipantAuthorizationRecord_4_list)(nil)
+
+type _ParticipantAuthorizationRecord_4_list struct {
+	list *[]*v1beta1.Coin
+}
+
+func (x *_ParticipantAuthorizationRecord_4_list) Len() int {
+	if x.list == nil {
+		return 0
+	}
+	return len(*x.list)
+}
+
+func (x *_ParticipantAuthorizationRecord_4_list) Get(i int) protoreflect.Value {
+	return protoreflect.ValueOfMessage((*x.list)[i].ProtoReflect())
+}
+
+func (x *_ParticipantAuthorizationRecord_4_list) Set(i int, value protoreflect.Value) {
+	valueUnwrapped := value.Message()
+	concreteValue := valueUnwrapped.Interface().(*v1beta1.Coin)
+	(*x.list)[i] = concreteValue
+}
+
+func (x *_ParticipantAuthorizationRecord_4_list) Append(value protoreflect.Value) {
+	valueUnwrapped := value.Message()
+	concreteValue := valueUnwrapped.Interface().(*v1beta1.Coin)
+	*x.list = append(*x.list, concreteValue)
+}
+
+func (x *_ParticipantAuthorizationRecord_4_list) AppendMutable() protoreflect.Value {
+	v := new(v1beta1.Coin)
+	*x.list = append(*x.list, v)
+	return protoreflect.ValueOfMessage(v.ProtoReflect())
+}
+
+func (x *_ParticipantAuthorizationRecord_4_list) Truncate(n int) {
+	for i := n; i < len(*x.list); i++ {
+		(*x.list)[i] = nil
+	}
+	*x.list = (*x.list)[:n]
+}
+
+func (x *_ParticipantAuthorizationRecord_4_list) NewElement() protoreflect.Value {
+	v := new(v1beta1.Coin)
+	return protoreflect.ValueOfMessage(v.ProtoReflect())
+}
+
+func (x *_ParticipantAuthorizationRecord_4_list) IsValid() bool {
+	return x.list != nil
+}
+
+var _ protoreflect.List = (*_ParticipantAuthorizationRecord_5_list)(nil)
+
+type _ParticipantAuthorizationRecord_5_list struct {
+	list *[]*v1beta1.Coin
+}
+
+func (x *_ParticipantAuthorizationRecord_5_list) Len() int {
+	if x.list == nil {
+		return 0
+	}
+	return len(*x.list)
+}
+
+func (x *_ParticipantAuthorizationRecord_5_list) Get(i int) protoreflect.Value {
+	return protoreflect.ValueOfMessage((*x.list)[i].ProtoReflect())
+}
+
+func (x *_ParticipantAuthorizationRecord_5_list) Set(i int, value protoreflect.Value) {
+	valueUnwrapped := value.Message()
+	concreteValue := valueUnwrapped.Interface().(*v1beta1.Coin)
+	(*x.list)[i] = concreteValue
+}
+
+func (x *_ParticipantAuthorizationRecord_5_list) Append(value protoreflect.Value) {
+	valueUnwrapped := value.Message()
+	concreteValue := valueUnwrapped.Interface().(*v1beta1.Coin)
+	*x.list = append(*x.list, concreteValue)
+}
+
+func (x *_ParticipantAuthorizationRecord_5_list) AppendMutable() protoreflect.Value {
+	v := new(v1beta1.Coin)
+	*x.list = append(*x.list, v)
+	return protoreflect.ValueOfMessage(v.ProtoReflect())
+}
+
+func (x *_ParticipantAuthorizationRecord_5_list) Truncate(n int) {
+	for i := n; i < len(*x.list); i++ {
+		(*x.list)[i] = nil
+	}
+	*x.list = (*x.list)[:n]
+}
+
+func (x *_ParticipantAuthorizationRecord_5_list) NewElement() protoreflect.Value {
+	v := new(v1beta1.Coin)
+	return protoreflect.ValueOfMessage(v.ProtoReflect())
+}
+
+func (x *_ParticipantAuthorizationRecord_5_list) IsValid() bool {
+	return x.list != nil
+}
+
+var _ protoreflect.List = (*_ParticipantAuthorizationRecord_6_list)(nil)
+
+type _ParticipantAuthorizationRecord_6_list struct {
+	list *[]*v1beta1.Coin
+}
+
+func (x *_ParticipantAuthorizationRecord_6_list) Len() int {
+	if x.list == nil {
+		return 0
+	}
+	return len(*x.list)
+}
+
+func (x *_ParticipantAuthorizationRecord_6_list) Get(i int) protoreflect.Value {
+	return protoreflect.ValueOfMessage((*x.list)[i].ProtoReflect())
+}
+
+func (x *_ParticipantAuthorizationRecord_6_list) Set(i int, value protoreflect.Value) {
+	valueUnwrapped := value.Message()
+	concreteValue := valueUnwrapped.Interface().(*v1beta1.Coin)
+	(*x.list)[i] = concreteValue
+}
+
+func (x *_ParticipantAuthorizationRecord_6_list) Append(value protoreflect.Value) {
+	valueUnwrapped := value.Message()
+	concreteValue := valueUnwrapped.Interface().(*v1beta1.Coin)
+	*x.list = append(*x.list, concreteValue)
+}
+
+func (x *_ParticipantAuthorizationRecord_6_list) AppendMutable() protoreflect.Value {
+	v := new(v1beta1.Coin)
+	*x.list = append(*x.list, v)
+	return protoreflect.ValueOfMessage(v.ProtoReflect())
+}
+
+func (x *_ParticipantAuthorizationRecord_6_list) Truncate(n int) {
+	for i := n; i < len(*x.list); i++ {
+		(*x.list)[i] = nil
+	}
+	*x.list = (*x.list)[:n]
+}
+
+func (x *_ParticipantAuthorizationRecord_6_list) NewElement() protoreflect.Value {
+	v := new(v1beta1.Coin)
+	return protoreflect.ValueOfMessage(v.ProtoReflect())
+}
+
+func (x *_ParticipantAuthorizationRecord_6_list) IsValid() bool {
 	return x.list != nil
 }
 
 var (
-	md_VSOperatorAuthorization             protoreflect.MessageDescriptor
-	fd_VSOperatorAuthorization_corporation protoreflect.FieldDescriptor
-	fd_VSOperatorAuthorization_vs_operator protoreflect.FieldDescriptor
-	fd_VSOperatorAuthorization_permissions protoreflect.FieldDescriptor
+	md_ParticipantAuthorizationRecord                     protoreflect.MessageDescriptor
+	fd_ParticipantAuthorizationRecord_participant_id      protoreflect.FieldDescriptor
+	fd_ParticipantAuthorizationRecord_msg_types           protoreflect.FieldDescriptor
+	fd_ParticipantAuthorizationRecord_spend_limit         protoreflect.FieldDescriptor
+	fd_ParticipantAuthorizationRecord_remaining_spend     protoreflect.FieldDescriptor
+	fd_ParticipantAuthorizationRecord_fee_spend_limit     protoreflect.FieldDescriptor
+	fd_ParticipantAuthorizationRecord_remaining_fee_spend protoreflect.FieldDescriptor
+	fd_ParticipantAuthorizationRecord_with_feegrant       protoreflect.FieldDescriptor
+	fd_ParticipantAuthorizationRecord_expiration          protoreflect.FieldDescriptor
+	fd_ParticipantAuthorizationRecord_period              protoreflect.FieldDescriptor
+)
+
+func init() {
+	file_verana_de_v1_types_proto_init()
+	md_ParticipantAuthorizationRecord = File_verana_de_v1_types_proto.Messages().ByName("ParticipantAuthorizationRecord")
+	fd_ParticipantAuthorizationRecord_participant_id = md_ParticipantAuthorizationRecord.Fields().ByName("participant_id")
+	fd_ParticipantAuthorizationRecord_msg_types = md_ParticipantAuthorizationRecord.Fields().ByName("msg_types")
+	fd_ParticipantAuthorizationRecord_spend_limit = md_ParticipantAuthorizationRecord.Fields().ByName("spend_limit")
+	fd_ParticipantAuthorizationRecord_remaining_spend = md_ParticipantAuthorizationRecord.Fields().ByName("remaining_spend")
+	fd_ParticipantAuthorizationRecord_fee_spend_limit = md_ParticipantAuthorizationRecord.Fields().ByName("fee_spend_limit")
+	fd_ParticipantAuthorizationRecord_remaining_fee_spend = md_ParticipantAuthorizationRecord.Fields().ByName("remaining_fee_spend")
+	fd_ParticipantAuthorizationRecord_with_feegrant = md_ParticipantAuthorizationRecord.Fields().ByName("with_feegrant")
+	fd_ParticipantAuthorizationRecord_expiration = md_ParticipantAuthorizationRecord.Fields().ByName("expiration")
+	fd_ParticipantAuthorizationRecord_period = md_ParticipantAuthorizationRecord.Fields().ByName("period")
+}
+
+var _ protoreflect.Message = (*fastReflection_ParticipantAuthorizationRecord)(nil)
+
+type fastReflection_ParticipantAuthorizationRecord ParticipantAuthorizationRecord
+
+func (x *ParticipantAuthorizationRecord) ProtoReflect() protoreflect.Message {
+	return (*fastReflection_ParticipantAuthorizationRecord)(x)
+}
+
+func (x *ParticipantAuthorizationRecord) slowProtoReflect() protoreflect.Message {
+	mi := &file_verana_de_v1_types_proto_msgTypes[3]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+var _fastReflection_ParticipantAuthorizationRecord_messageType fastReflection_ParticipantAuthorizationRecord_messageType
+var _ protoreflect.MessageType = fastReflection_ParticipantAuthorizationRecord_messageType{}
+
+type fastReflection_ParticipantAuthorizationRecord_messageType struct{}
+
+func (x fastReflection_ParticipantAuthorizationRecord_messageType) Zero() protoreflect.Message {
+	return (*fastReflection_ParticipantAuthorizationRecord)(nil)
+}
+func (x fastReflection_ParticipantAuthorizationRecord_messageType) New() protoreflect.Message {
+	return new(fastReflection_ParticipantAuthorizationRecord)
+}
+func (x fastReflection_ParticipantAuthorizationRecord_messageType) Descriptor() protoreflect.MessageDescriptor {
+	return md_ParticipantAuthorizationRecord
+}
+
+// Descriptor returns message descriptor, which contains only the protobuf
+// type information for the message.
+func (x *fastReflection_ParticipantAuthorizationRecord) Descriptor() protoreflect.MessageDescriptor {
+	return md_ParticipantAuthorizationRecord
+}
+
+// Type returns the message type, which encapsulates both Go and protobuf
+// type information. If the Go type information is not needed,
+// it is recommended that the message descriptor be used instead.
+func (x *fastReflection_ParticipantAuthorizationRecord) Type() protoreflect.MessageType {
+	return _fastReflection_ParticipantAuthorizationRecord_messageType
+}
+
+// New returns a newly allocated and mutable empty message.
+func (x *fastReflection_ParticipantAuthorizationRecord) New() protoreflect.Message {
+	return new(fastReflection_ParticipantAuthorizationRecord)
+}
+
+// Interface unwraps the message reflection interface and
+// returns the underlying ProtoMessage interface.
+func (x *fastReflection_ParticipantAuthorizationRecord) Interface() protoreflect.ProtoMessage {
+	return (*ParticipantAuthorizationRecord)(x)
+}
+
+// Range iterates over every populated field in an undefined order,
+// calling f for each field descriptor and value encountered.
+// Range returns immediately if f returns false.
+// While iterating, mutating operations may only be performed
+// on the current field descriptor.
+func (x *fastReflection_ParticipantAuthorizationRecord) Range(f func(protoreflect.FieldDescriptor, protoreflect.Value) bool) {
+	if x.ParticipantId != uint64(0) {
+		value := protoreflect.ValueOfUint64(x.ParticipantId)
+		if !f(fd_ParticipantAuthorizationRecord_participant_id, value) {
+			return
+		}
+	}
+	if len(x.MsgTypes) != 0 {
+		value := protoreflect.ValueOfList(&_ParticipantAuthorizationRecord_2_list{list: &x.MsgTypes})
+		if !f(fd_ParticipantAuthorizationRecord_msg_types, value) {
+			return
+		}
+	}
+	if len(x.SpendLimit) != 0 {
+		value := protoreflect.ValueOfList(&_ParticipantAuthorizationRecord_3_list{list: &x.SpendLimit})
+		if !f(fd_ParticipantAuthorizationRecord_spend_limit, value) {
+			return
+		}
+	}
+	if len(x.RemainingSpend) != 0 {
+		value := protoreflect.ValueOfList(&_ParticipantAuthorizationRecord_4_list{list: &x.RemainingSpend})
+		if !f(fd_ParticipantAuthorizationRecord_remaining_spend, value) {
+			return
+		}
+	}
+	if len(x.FeeSpendLimit) != 0 {
+		value := protoreflect.ValueOfList(&_ParticipantAuthorizationRecord_5_list{list: &x.FeeSpendLimit})
+		if !f(fd_ParticipantAuthorizationRecord_fee_spend_limit, value) {
+			return
+		}
+	}
+	if len(x.RemainingFeeSpend) != 0 {
+		value := protoreflect.ValueOfList(&_ParticipantAuthorizationRecord_6_list{list: &x.RemainingFeeSpend})
+		if !f(fd_ParticipantAuthorizationRecord_remaining_fee_spend, value) {
+			return
+		}
+	}
+	if x.WithFeegrant != false {
+		value := protoreflect.ValueOfBool(x.WithFeegrant)
+		if !f(fd_ParticipantAuthorizationRecord_with_feegrant, value) {
+			return
+		}
+	}
+	if x.Expiration != nil {
+		value := protoreflect.ValueOfMessage(x.Expiration.ProtoReflect())
+		if !f(fd_ParticipantAuthorizationRecord_expiration, value) {
+			return
+		}
+	}
+	if x.Period != nil {
+		value := protoreflect.ValueOfMessage(x.Period.ProtoReflect())
+		if !f(fd_ParticipantAuthorizationRecord_period, value) {
+			return
+		}
+	}
+}
+
+// Has reports whether a field is populated.
+//
+// Some fields have the property of nullability where it is possible to
+// distinguish between the default value of a field and whether the field
+// was explicitly populated with the default value. Singular message fields,
+// member fields of a oneof, and proto2 scalar fields are nullable. Such
+// fields are populated only if explicitly set.
+//
+// In other cases (aside from the nullable cases above),
+// a proto3 scalar field is populated if it contains a non-zero value, and
+// a repeated field is populated if it is non-empty.
+func (x *fastReflection_ParticipantAuthorizationRecord) Has(fd protoreflect.FieldDescriptor) bool {
+	switch fd.FullName() {
+	case "verana.de.v1.ParticipantAuthorizationRecord.participant_id":
+		return x.ParticipantId != uint64(0)
+	case "verana.de.v1.ParticipantAuthorizationRecord.msg_types":
+		return len(x.MsgTypes) != 0
+	case "verana.de.v1.ParticipantAuthorizationRecord.spend_limit":
+		return len(x.SpendLimit) != 0
+	case "verana.de.v1.ParticipantAuthorizationRecord.remaining_spend":
+		return len(x.RemainingSpend) != 0
+	case "verana.de.v1.ParticipantAuthorizationRecord.fee_spend_limit":
+		return len(x.FeeSpendLimit) != 0
+	case "verana.de.v1.ParticipantAuthorizationRecord.remaining_fee_spend":
+		return len(x.RemainingFeeSpend) != 0
+	case "verana.de.v1.ParticipantAuthorizationRecord.with_feegrant":
+		return x.WithFeegrant != false
+	case "verana.de.v1.ParticipantAuthorizationRecord.expiration":
+		return x.Expiration != nil
+	case "verana.de.v1.ParticipantAuthorizationRecord.period":
+		return x.Period != nil
+	default:
+		if fd.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.de.v1.ParticipantAuthorizationRecord"))
+		}
+		panic(fmt.Errorf("message verana.de.v1.ParticipantAuthorizationRecord does not contain field %s", fd.FullName()))
+	}
+}
+
+// Clear clears the field such that a subsequent Has call reports false.
+//
+// Clearing an extension field clears both the extension type and value
+// associated with the given field number.
+//
+// Clear is a mutating operation and unsafe for concurrent use.
+func (x *fastReflection_ParticipantAuthorizationRecord) Clear(fd protoreflect.FieldDescriptor) {
+	switch fd.FullName() {
+	case "verana.de.v1.ParticipantAuthorizationRecord.participant_id":
+		x.ParticipantId = uint64(0)
+	case "verana.de.v1.ParticipantAuthorizationRecord.msg_types":
+		x.MsgTypes = nil
+	case "verana.de.v1.ParticipantAuthorizationRecord.spend_limit":
+		x.SpendLimit = nil
+	case "verana.de.v1.ParticipantAuthorizationRecord.remaining_spend":
+		x.RemainingSpend = nil
+	case "verana.de.v1.ParticipantAuthorizationRecord.fee_spend_limit":
+		x.FeeSpendLimit = nil
+	case "verana.de.v1.ParticipantAuthorizationRecord.remaining_fee_spend":
+		x.RemainingFeeSpend = nil
+	case "verana.de.v1.ParticipantAuthorizationRecord.with_feegrant":
+		x.WithFeegrant = false
+	case "verana.de.v1.ParticipantAuthorizationRecord.expiration":
+		x.Expiration = nil
+	case "verana.de.v1.ParticipantAuthorizationRecord.period":
+		x.Period = nil
+	default:
+		if fd.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.de.v1.ParticipantAuthorizationRecord"))
+		}
+		panic(fmt.Errorf("message verana.de.v1.ParticipantAuthorizationRecord does not contain field %s", fd.FullName()))
+	}
+}
+
+// Get retrieves the value for a field.
+//
+// For unpopulated scalars, it returns the default value, where
+// the default value of a bytes scalar is guaranteed to be a copy.
+// For unpopulated composite types, it returns an empty, read-only view
+// of the value; to obtain a mutable reference, use Mutable.
+func (x *fastReflection_ParticipantAuthorizationRecord) Get(descriptor protoreflect.FieldDescriptor) protoreflect.Value {
+	switch descriptor.FullName() {
+	case "verana.de.v1.ParticipantAuthorizationRecord.participant_id":
+		value := x.ParticipantId
+		return protoreflect.ValueOfUint64(value)
+	case "verana.de.v1.ParticipantAuthorizationRecord.msg_types":
+		if len(x.MsgTypes) == 0 {
+			return protoreflect.ValueOfList(&_ParticipantAuthorizationRecord_2_list{})
+		}
+		listValue := &_ParticipantAuthorizationRecord_2_list{list: &x.MsgTypes}
+		return protoreflect.ValueOfList(listValue)
+	case "verana.de.v1.ParticipantAuthorizationRecord.spend_limit":
+		if len(x.SpendLimit) == 0 {
+			return protoreflect.ValueOfList(&_ParticipantAuthorizationRecord_3_list{})
+		}
+		listValue := &_ParticipantAuthorizationRecord_3_list{list: &x.SpendLimit}
+		return protoreflect.ValueOfList(listValue)
+	case "verana.de.v1.ParticipantAuthorizationRecord.remaining_spend":
+		if len(x.RemainingSpend) == 0 {
+			return protoreflect.ValueOfList(&_ParticipantAuthorizationRecord_4_list{})
+		}
+		listValue := &_ParticipantAuthorizationRecord_4_list{list: &x.RemainingSpend}
+		return protoreflect.ValueOfList(listValue)
+	case "verana.de.v1.ParticipantAuthorizationRecord.fee_spend_limit":
+		if len(x.FeeSpendLimit) == 0 {
+			return protoreflect.ValueOfList(&_ParticipantAuthorizationRecord_5_list{})
+		}
+		listValue := &_ParticipantAuthorizationRecord_5_list{list: &x.FeeSpendLimit}
+		return protoreflect.ValueOfList(listValue)
+	case "verana.de.v1.ParticipantAuthorizationRecord.remaining_fee_spend":
+		if len(x.RemainingFeeSpend) == 0 {
+			return protoreflect.ValueOfList(&_ParticipantAuthorizationRecord_6_list{})
+		}
+		listValue := &_ParticipantAuthorizationRecord_6_list{list: &x.RemainingFeeSpend}
+		return protoreflect.ValueOfList(listValue)
+	case "verana.de.v1.ParticipantAuthorizationRecord.with_feegrant":
+		value := x.WithFeegrant
+		return protoreflect.ValueOfBool(value)
+	case "verana.de.v1.ParticipantAuthorizationRecord.expiration":
+		value := x.Expiration
+		return protoreflect.ValueOfMessage(value.ProtoReflect())
+	case "verana.de.v1.ParticipantAuthorizationRecord.period":
+		value := x.Period
+		return protoreflect.ValueOfMessage(value.ProtoReflect())
+	default:
+		if descriptor.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.de.v1.ParticipantAuthorizationRecord"))
+		}
+		panic(fmt.Errorf("message verana.de.v1.ParticipantAuthorizationRecord does not contain field %s", descriptor.FullName()))
+	}
+}
+
+// Set stores the value for a field.
+//
+// For a field belonging to a oneof, it implicitly clears any other field
+// that may be currently set within the same oneof.
+// For extension fields, it implicitly stores the provided ExtensionType.
+// When setting a composite type, it is unspecified whether the stored value
+// aliases the source's memory in any way. If the composite value is an
+// empty, read-only value, then it panics.
+//
+// Set is a mutating operation and unsafe for concurrent use.
+func (x *fastReflection_ParticipantAuthorizationRecord) Set(fd protoreflect.FieldDescriptor, value protoreflect.Value) {
+	switch fd.FullName() {
+	case "verana.de.v1.ParticipantAuthorizationRecord.participant_id":
+		x.ParticipantId = value.Uint()
+	case "verana.de.v1.ParticipantAuthorizationRecord.msg_types":
+		lv := value.List()
+		clv := lv.(*_ParticipantAuthorizationRecord_2_list)
+		x.MsgTypes = *clv.list
+	case "verana.de.v1.ParticipantAuthorizationRecord.spend_limit":
+		lv := value.List()
+		clv := lv.(*_ParticipantAuthorizationRecord_3_list)
+		x.SpendLimit = *clv.list
+	case "verana.de.v1.ParticipantAuthorizationRecord.remaining_spend":
+		lv := value.List()
+		clv := lv.(*_ParticipantAuthorizationRecord_4_list)
+		x.RemainingSpend = *clv.list
+	case "verana.de.v1.ParticipantAuthorizationRecord.fee_spend_limit":
+		lv := value.List()
+		clv := lv.(*_ParticipantAuthorizationRecord_5_list)
+		x.FeeSpendLimit = *clv.list
+	case "verana.de.v1.ParticipantAuthorizationRecord.remaining_fee_spend":
+		lv := value.List()
+		clv := lv.(*_ParticipantAuthorizationRecord_6_list)
+		x.RemainingFeeSpend = *clv.list
+	case "verana.de.v1.ParticipantAuthorizationRecord.with_feegrant":
+		x.WithFeegrant = value.Bool()
+	case "verana.de.v1.ParticipantAuthorizationRecord.expiration":
+		x.Expiration = value.Message().Interface().(*timestamppb.Timestamp)
+	case "verana.de.v1.ParticipantAuthorizationRecord.period":
+		x.Period = value.Message().Interface().(*durationpb.Duration)
+	default:
+		if fd.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.de.v1.ParticipantAuthorizationRecord"))
+		}
+		panic(fmt.Errorf("message verana.de.v1.ParticipantAuthorizationRecord does not contain field %s", fd.FullName()))
+	}
+}
+
+// Mutable returns a mutable reference to a composite type.
+//
+// If the field is unpopulated, it may allocate a composite value.
+// For a field belonging to a oneof, it implicitly clears any other field
+// that may be currently set within the same oneof.
+// For extension fields, it implicitly stores the provided ExtensionType
+// if not already stored.
+// It panics if the field does not contain a composite type.
+//
+// Mutable is a mutating operation and unsafe for concurrent use.
+func (x *fastReflection_ParticipantAuthorizationRecord) Mutable(fd protoreflect.FieldDescriptor) protoreflect.Value {
+	switch fd.FullName() {
+	case "verana.de.v1.ParticipantAuthorizationRecord.msg_types":
+		if x.MsgTypes == nil {
+			x.MsgTypes = []string{}
+		}
+		value := &_ParticipantAuthorizationRecord_2_list{list: &x.MsgTypes}
+		return protoreflect.ValueOfList(value)
+	case "verana.de.v1.ParticipantAuthorizationRecord.spend_limit":
+		if x.SpendLimit == nil {
+			x.SpendLimit = []*v1beta1.Coin{}
+		}
+		value := &_ParticipantAuthorizationRecord_3_list{list: &x.SpendLimit}
+		return protoreflect.ValueOfList(value)
+	case "verana.de.v1.ParticipantAuthorizationRecord.remaining_spend":
+		if x.RemainingSpend == nil {
+			x.RemainingSpend = []*v1beta1.Coin{}
+		}
+		value := &_ParticipantAuthorizationRecord_4_list{list: &x.RemainingSpend}
+		return protoreflect.ValueOfList(value)
+	case "verana.de.v1.ParticipantAuthorizationRecord.fee_spend_limit":
+		if x.FeeSpendLimit == nil {
+			x.FeeSpendLimit = []*v1beta1.Coin{}
+		}
+		value := &_ParticipantAuthorizationRecord_5_list{list: &x.FeeSpendLimit}
+		return protoreflect.ValueOfList(value)
+	case "verana.de.v1.ParticipantAuthorizationRecord.remaining_fee_spend":
+		if x.RemainingFeeSpend == nil {
+			x.RemainingFeeSpend = []*v1beta1.Coin{}
+		}
+		value := &_ParticipantAuthorizationRecord_6_list{list: &x.RemainingFeeSpend}
+		return protoreflect.ValueOfList(value)
+	case "verana.de.v1.ParticipantAuthorizationRecord.expiration":
+		if x.Expiration == nil {
+			x.Expiration = new(timestamppb.Timestamp)
+		}
+		return protoreflect.ValueOfMessage(x.Expiration.ProtoReflect())
+	case "verana.de.v1.ParticipantAuthorizationRecord.period":
+		if x.Period == nil {
+			x.Period = new(durationpb.Duration)
+		}
+		return protoreflect.ValueOfMessage(x.Period.ProtoReflect())
+	case "verana.de.v1.ParticipantAuthorizationRecord.participant_id":
+		panic(fmt.Errorf("field participant_id of message verana.de.v1.ParticipantAuthorizationRecord is not mutable"))
+	case "verana.de.v1.ParticipantAuthorizationRecord.with_feegrant":
+		panic(fmt.Errorf("field with_feegrant of message verana.de.v1.ParticipantAuthorizationRecord is not mutable"))
+	default:
+		if fd.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.de.v1.ParticipantAuthorizationRecord"))
+		}
+		panic(fmt.Errorf("message verana.de.v1.ParticipantAuthorizationRecord does not contain field %s", fd.FullName()))
+	}
+}
+
+// NewField returns a new value that is assignable to the field
+// for the given descriptor. For scalars, this returns the default value.
+// For lists, maps, and messages, this returns a new, empty, mutable value.
+func (x *fastReflection_ParticipantAuthorizationRecord) NewField(fd protoreflect.FieldDescriptor) protoreflect.Value {
+	switch fd.FullName() {
+	case "verana.de.v1.ParticipantAuthorizationRecord.participant_id":
+		return protoreflect.ValueOfUint64(uint64(0))
+	case "verana.de.v1.ParticipantAuthorizationRecord.msg_types":
+		list := []string{}
+		return protoreflect.ValueOfList(&_ParticipantAuthorizationRecord_2_list{list: &list})
+	case "verana.de.v1.ParticipantAuthorizationRecord.spend_limit":
+		list := []*v1beta1.Coin{}
+		return protoreflect.ValueOfList(&_ParticipantAuthorizationRecord_3_list{list: &list})
+	case "verana.de.v1.ParticipantAuthorizationRecord.remaining_spend":
+		list := []*v1beta1.Coin{}
+		return protoreflect.ValueOfList(&_ParticipantAuthorizationRecord_4_list{list: &list})
+	case "verana.de.v1.ParticipantAuthorizationRecord.fee_spend_limit":
+		list := []*v1beta1.Coin{}
+		return protoreflect.ValueOfList(&_ParticipantAuthorizationRecord_5_list{list: &list})
+	case "verana.de.v1.ParticipantAuthorizationRecord.remaining_fee_spend":
+		list := []*v1beta1.Coin{}
+		return protoreflect.ValueOfList(&_ParticipantAuthorizationRecord_6_list{list: &list})
+	case "verana.de.v1.ParticipantAuthorizationRecord.with_feegrant":
+		return protoreflect.ValueOfBool(false)
+	case "verana.de.v1.ParticipantAuthorizationRecord.expiration":
+		m := new(timestamppb.Timestamp)
+		return protoreflect.ValueOfMessage(m.ProtoReflect())
+	case "verana.de.v1.ParticipantAuthorizationRecord.period":
+		m := new(durationpb.Duration)
+		return protoreflect.ValueOfMessage(m.ProtoReflect())
+	default:
+		if fd.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.de.v1.ParticipantAuthorizationRecord"))
+		}
+		panic(fmt.Errorf("message verana.de.v1.ParticipantAuthorizationRecord does not contain field %s", fd.FullName()))
+	}
+}
+
+// WhichOneof reports which field within the oneof is populated,
+// returning nil if none are populated.
+// It panics if the oneof descriptor does not belong to this message.
+func (x *fastReflection_ParticipantAuthorizationRecord) WhichOneof(d protoreflect.OneofDescriptor) protoreflect.FieldDescriptor {
+	switch d.FullName() {
+	default:
+		panic(fmt.Errorf("%s is not a oneof field in verana.de.v1.ParticipantAuthorizationRecord", d.FullName()))
+	}
+	panic("unreachable")
+}
+
+// GetUnknown retrieves the entire list of unknown fields.
+// The caller may only mutate the contents of the RawFields
+// if the mutated bytes are stored back into the message with SetUnknown.
+func (x *fastReflection_ParticipantAuthorizationRecord) GetUnknown() protoreflect.RawFields {
+	return x.unknownFields
+}
+
+// SetUnknown stores an entire list of unknown fields.
+// The raw fields must be syntactically valid according to the wire format.
+// An implementation may panic if this is not the case.
+// Once stored, the caller must not mutate the content of the RawFields.
+// An empty RawFields may be passed to clear the fields.
+//
+// SetUnknown is a mutating operation and unsafe for concurrent use.
+func (x *fastReflection_ParticipantAuthorizationRecord) SetUnknown(fields protoreflect.RawFields) {
+	x.unknownFields = fields
+}
+
+// IsValid reports whether the message is valid.
+//
+// An invalid message is an empty, read-only value.
+//
+// An invalid message often corresponds to a nil pointer of the concrete
+// message type, but the details are implementation dependent.
+// Validity is not part of the protobuf data model, and may not
+// be preserved in marshaling or other operations.
+func (x *fastReflection_ParticipantAuthorizationRecord) IsValid() bool {
+	return x != nil
+}
+
+// ProtoMethods returns optional fastReflectionFeature-path implementations of various operations.
+// This method may return nil.
+//
+// The returned methods type is identical to
+// "google.golang.org/protobuf/runtime/protoiface".Methods.
+// Consult the protoiface package documentation for details.
+func (x *fastReflection_ParticipantAuthorizationRecord) ProtoMethods() *protoiface.Methods {
+	size := func(input protoiface.SizeInput) protoiface.SizeOutput {
+		x := input.Message.Interface().(*ParticipantAuthorizationRecord)
+		if x == nil {
+			return protoiface.SizeOutput{
+				NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+				Size:              0,
+			}
+		}
+		options := runtime.SizeInputToOptions(input)
+		_ = options
+		var n int
+		var l int
+		_ = l
+		if x.ParticipantId != 0 {
+			n += 1 + runtime.Sov(uint64(x.ParticipantId))
+		}
+		if len(x.MsgTypes) > 0 {
+			for _, s := range x.MsgTypes {
+				l = len(s)
+				n += 1 + l + runtime.Sov(uint64(l))
+			}
+		}
+		if len(x.SpendLimit) > 0 {
+			for _, e := range x.SpendLimit {
+				l = options.Size(e)
+				n += 1 + l + runtime.Sov(uint64(l))
+			}
+		}
+		if len(x.RemainingSpend) > 0 {
+			for _, e := range x.RemainingSpend {
+				l = options.Size(e)
+				n += 1 + l + runtime.Sov(uint64(l))
+			}
+		}
+		if len(x.FeeSpendLimit) > 0 {
+			for _, e := range x.FeeSpendLimit {
+				l = options.Size(e)
+				n += 1 + l + runtime.Sov(uint64(l))
+			}
+		}
+		if len(x.RemainingFeeSpend) > 0 {
+			for _, e := range x.RemainingFeeSpend {
+				l = options.Size(e)
+				n += 1 + l + runtime.Sov(uint64(l))
+			}
+		}
+		if x.WithFeegrant {
+			n += 2
+		}
+		if x.Expiration != nil {
+			l = options.Size(x.Expiration)
+			n += 1 + l + runtime.Sov(uint64(l))
+		}
+		if x.Period != nil {
+			l = options.Size(x.Period)
+			n += 1 + l + runtime.Sov(uint64(l))
+		}
+		if x.unknownFields != nil {
+			n += len(x.unknownFields)
+		}
+		return protoiface.SizeOutput{
+			NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+			Size:              n,
+		}
+	}
+
+	marshal := func(input protoiface.MarshalInput) (protoiface.MarshalOutput, error) {
+		x := input.Message.Interface().(*ParticipantAuthorizationRecord)
+		if x == nil {
+			return protoiface.MarshalOutput{
+				NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+				Buf:               input.Buf,
+			}, nil
+		}
+		options := runtime.MarshalInputToOptions(input)
+		_ = options
+		size := options.Size(x)
+		dAtA := make([]byte, size)
+		i := len(dAtA)
+		_ = i
+		var l int
+		_ = l
+		if x.unknownFields != nil {
+			i -= len(x.unknownFields)
+			copy(dAtA[i:], x.unknownFields)
+		}
+		if x.Period != nil {
+			encoded, err := options.Marshal(x.Period)
+			if err != nil {
+				return protoiface.MarshalOutput{
+					NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+					Buf:               input.Buf,
+				}, err
+			}
+			i -= len(encoded)
+			copy(dAtA[i:], encoded)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(encoded)))
+			i--
+			dAtA[i] = 0x4a
+		}
+		if x.Expiration != nil {
+			encoded, err := options.Marshal(x.Expiration)
+			if err != nil {
+				return protoiface.MarshalOutput{
+					NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+					Buf:               input.Buf,
+				}, err
+			}
+			i -= len(encoded)
+			copy(dAtA[i:], encoded)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(encoded)))
+			i--
+			dAtA[i] = 0x42
+		}
+		if x.WithFeegrant {
+			i--
+			if x.WithFeegrant {
+				dAtA[i] = 1
+			} else {
+				dAtA[i] = 0
+			}
+			i--
+			dAtA[i] = 0x38
+		}
+		if len(x.RemainingFeeSpend) > 0 {
+			for iNdEx := len(x.RemainingFeeSpend) - 1; iNdEx >= 0; iNdEx-- {
+				encoded, err := options.Marshal(x.RemainingFeeSpend[iNdEx])
+				if err != nil {
+					return protoiface.MarshalOutput{
+						NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+						Buf:               input.Buf,
+					}, err
+				}
+				i -= len(encoded)
+				copy(dAtA[i:], encoded)
+				i = runtime.EncodeVarint(dAtA, i, uint64(len(encoded)))
+				i--
+				dAtA[i] = 0x32
+			}
+		}
+		if len(x.FeeSpendLimit) > 0 {
+			for iNdEx := len(x.FeeSpendLimit) - 1; iNdEx >= 0; iNdEx-- {
+				encoded, err := options.Marshal(x.FeeSpendLimit[iNdEx])
+				if err != nil {
+					return protoiface.MarshalOutput{
+						NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+						Buf:               input.Buf,
+					}, err
+				}
+				i -= len(encoded)
+				copy(dAtA[i:], encoded)
+				i = runtime.EncodeVarint(dAtA, i, uint64(len(encoded)))
+				i--
+				dAtA[i] = 0x2a
+			}
+		}
+		if len(x.RemainingSpend) > 0 {
+			for iNdEx := len(x.RemainingSpend) - 1; iNdEx >= 0; iNdEx-- {
+				encoded, err := options.Marshal(x.RemainingSpend[iNdEx])
+				if err != nil {
+					return protoiface.MarshalOutput{
+						NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+						Buf:               input.Buf,
+					}, err
+				}
+				i -= len(encoded)
+				copy(dAtA[i:], encoded)
+				i = runtime.EncodeVarint(dAtA, i, uint64(len(encoded)))
+				i--
+				dAtA[i] = 0x22
+			}
+		}
+		if len(x.SpendLimit) > 0 {
+			for iNdEx := len(x.SpendLimit) - 1; iNdEx >= 0; iNdEx-- {
+				encoded, err := options.Marshal(x.SpendLimit[iNdEx])
+				if err != nil {
+					return protoiface.MarshalOutput{
+						NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+						Buf:               input.Buf,
+					}, err
+				}
+				i -= len(encoded)
+				copy(dAtA[i:], encoded)
+				i = runtime.EncodeVarint(dAtA, i, uint64(len(encoded)))
+				i--
+				dAtA[i] = 0x1a
+			}
+		}
+		if len(x.MsgTypes) > 0 {
+			for iNdEx := len(x.MsgTypes) - 1; iNdEx >= 0; iNdEx-- {
+				i -= len(x.MsgTypes[iNdEx])
+				copy(dAtA[i:], x.MsgTypes[iNdEx])
+				i = runtime.EncodeVarint(dAtA, i, uint64(len(x.MsgTypes[iNdEx])))
+				i--
+				dAtA[i] = 0x12
+			}
+		}
+		if x.ParticipantId != 0 {
+			i = runtime.EncodeVarint(dAtA, i, uint64(x.ParticipantId))
+			i--
+			dAtA[i] = 0x8
+		}
+		if input.Buf != nil {
+			input.Buf = append(input.Buf, dAtA...)
+		} else {
+			input.Buf = dAtA
+		}
+		return protoiface.MarshalOutput{
+			NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+			Buf:               input.Buf,
+		}, nil
+	}
+	unmarshal := func(input protoiface.UnmarshalInput) (protoiface.UnmarshalOutput, error) {
+		x := input.Message.Interface().(*ParticipantAuthorizationRecord)
+		if x == nil {
+			return protoiface.UnmarshalOutput{
+				NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+				Flags:             input.Flags,
+			}, nil
+		}
+		options := runtime.UnmarshalInputToOptions(input)
+		_ = options
+		dAtA := input.Buf
+		l := len(dAtA)
+		iNdEx := 0
+		for iNdEx < l {
+			preIndex := iNdEx
+			var wire uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				wire |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			fieldNum := int32(wire >> 3)
+			wireType := int(wire & 0x7)
+			if wireType == 4 {
+				return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: ParticipantAuthorizationRecord: wiretype end group for non-group")
+			}
+			if fieldNum <= 0 {
+				return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: ParticipantAuthorizationRecord: illegal tag %d (wire type %d)", fieldNum, wire)
+			}
+			switch fieldNum {
+			case 1:
+				if wireType != 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field ParticipantId", wireType)
+				}
+				x.ParticipantId = 0
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					x.ParticipantId |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+			case 2:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field MsgTypes", wireType)
+				}
+				var stringLen uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					stringLen |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				intStringLen := int(stringLen)
+				if intStringLen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + intStringLen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				x.MsgTypes = append(x.MsgTypes, string(dAtA[iNdEx:postIndex]))
+				iNdEx = postIndex
+			case 3:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field SpendLimit", wireType)
+				}
+				var msglen int
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					msglen |= int(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				if msglen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + msglen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				x.SpendLimit = append(x.SpendLimit, &v1beta1.Coin{})
+				if err := options.Unmarshal(dAtA[iNdEx:postIndex], x.SpendLimit[len(x.SpendLimit)-1]); err != nil {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, err
+				}
+				iNdEx = postIndex
+			case 4:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field RemainingSpend", wireType)
+				}
+				var msglen int
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					msglen |= int(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				if msglen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + msglen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				x.RemainingSpend = append(x.RemainingSpend, &v1beta1.Coin{})
+				if err := options.Unmarshal(dAtA[iNdEx:postIndex], x.RemainingSpend[len(x.RemainingSpend)-1]); err != nil {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, err
+				}
+				iNdEx = postIndex
+			case 5:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field FeeSpendLimit", wireType)
+				}
+				var msglen int
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					msglen |= int(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				if msglen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + msglen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				x.FeeSpendLimit = append(x.FeeSpendLimit, &v1beta1.Coin{})
+				if err := options.Unmarshal(dAtA[iNdEx:postIndex], x.FeeSpendLimit[len(x.FeeSpendLimit)-1]); err != nil {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, err
+				}
+				iNdEx = postIndex
+			case 6:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field RemainingFeeSpend", wireType)
+				}
+				var msglen int
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					msglen |= int(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				if msglen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + msglen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				x.RemainingFeeSpend = append(x.RemainingFeeSpend, &v1beta1.Coin{})
+				if err := options.Unmarshal(dAtA[iNdEx:postIndex], x.RemainingFeeSpend[len(x.RemainingFeeSpend)-1]); err != nil {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, err
+				}
+				iNdEx = postIndex
+			case 7:
+				if wireType != 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field WithFeegrant", wireType)
+				}
+				var v int
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					v |= int(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				x.WithFeegrant = bool(v != 0)
+			case 8:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Expiration", wireType)
+				}
+				var msglen int
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					msglen |= int(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				if msglen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + msglen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				if x.Expiration == nil {
+					x.Expiration = &timestamppb.Timestamp{}
+				}
+				if err := options.Unmarshal(dAtA[iNdEx:postIndex], x.Expiration); err != nil {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, err
+				}
+				iNdEx = postIndex
+			case 9:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Period", wireType)
+				}
+				var msglen int
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					msglen |= int(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				if msglen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + msglen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				if x.Period == nil {
+					x.Period = &durationpb.Duration{}
+				}
+				if err := options.Unmarshal(dAtA[iNdEx:postIndex], x.Period); err != nil {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, err
+				}
+				iNdEx = postIndex
+			default:
+				iNdEx = preIndex
+				skippy, err := runtime.Skip(dAtA[iNdEx:])
+				if err != nil {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, err
+				}
+				if (skippy < 0) || (iNdEx+skippy) < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if (iNdEx + skippy) > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				if !options.DiscardUnknown {
+					x.unknownFields = append(x.unknownFields, dAtA[iNdEx:iNdEx+skippy]...)
+				}
+				iNdEx += skippy
+			}
+		}
+
+		if iNdEx > l {
+			return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+		}
+		return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, nil
+	}
+	return &protoiface.Methods{
+		NoUnkeyedLiterals: struct{}{},
+		Flags:             protoiface.SupportMarshalDeterministic | protoiface.SupportUnmarshalDiscardUnknown,
+		Size:              size,
+		Marshal:           marshal,
+		Unmarshal:         unmarshal,
+		Merge:             nil,
+		CheckInitialized:  nil,
+	}
+}
+
+var _ protoreflect.List = (*_VSOperatorAuthorization_4_list)(nil)
+
+type _VSOperatorAuthorization_4_list struct {
+	list *[]*ParticipantAuthorizationRecord
+}
+
+func (x *_VSOperatorAuthorization_4_list) Len() int {
+	if x.list == nil {
+		return 0
+	}
+	return len(*x.list)
+}
+
+func (x *_VSOperatorAuthorization_4_list) Get(i int) protoreflect.Value {
+	return protoreflect.ValueOfMessage((*x.list)[i].ProtoReflect())
+}
+
+func (x *_VSOperatorAuthorization_4_list) Set(i int, value protoreflect.Value) {
+	valueUnwrapped := value.Message()
+	concreteValue := valueUnwrapped.Interface().(*ParticipantAuthorizationRecord)
+	(*x.list)[i] = concreteValue
+}
+
+func (x *_VSOperatorAuthorization_4_list) Append(value protoreflect.Value) {
+	valueUnwrapped := value.Message()
+	concreteValue := valueUnwrapped.Interface().(*ParticipantAuthorizationRecord)
+	*x.list = append(*x.list, concreteValue)
+}
+
+func (x *_VSOperatorAuthorization_4_list) AppendMutable() protoreflect.Value {
+	v := new(ParticipantAuthorizationRecord)
+	*x.list = append(*x.list, v)
+	return protoreflect.ValueOfMessage(v.ProtoReflect())
+}
+
+func (x *_VSOperatorAuthorization_4_list) Truncate(n int) {
+	for i := n; i < len(*x.list); i++ {
+		(*x.list)[i] = nil
+	}
+	*x.list = (*x.list)[:n]
+}
+
+func (x *_VSOperatorAuthorization_4_list) NewElement() protoreflect.Value {
+	v := new(ParticipantAuthorizationRecord)
+	return protoreflect.ValueOfMessage(v.ProtoReflect())
+}
+
+func (x *_VSOperatorAuthorization_4_list) IsValid() bool {
+	return x.list != nil
+}
+
+var (
+	md_VSOperatorAuthorization                protoreflect.MessageDescriptor
+	fd_VSOperatorAuthorization_id             protoreflect.FieldDescriptor
+	fd_VSOperatorAuthorization_corporation_id protoreflect.FieldDescriptor
+	fd_VSOperatorAuthorization_vs_operator    protoreflect.FieldDescriptor
+	fd_VSOperatorAuthorization_records        protoreflect.FieldDescriptor
 )
 
 func init() {
 	file_verana_de_v1_types_proto_init()
 	md_VSOperatorAuthorization = File_verana_de_v1_types_proto.Messages().ByName("VSOperatorAuthorization")
-	fd_VSOperatorAuthorization_corporation = md_VSOperatorAuthorization.Fields().ByName("corporation")
+	fd_VSOperatorAuthorization_id = md_VSOperatorAuthorization.Fields().ByName("id")
+	fd_VSOperatorAuthorization_corporation_id = md_VSOperatorAuthorization.Fields().ByName("corporation_id")
 	fd_VSOperatorAuthorization_vs_operator = md_VSOperatorAuthorization.Fields().ByName("vs_operator")
-	fd_VSOperatorAuthorization_permissions = md_VSOperatorAuthorization.Fields().ByName("permissions")
+	fd_VSOperatorAuthorization_records = md_VSOperatorAuthorization.Fields().ByName("records")
 }
 
 var _ protoreflect.Message = (*fastReflection_VSOperatorAuthorization)(nil)
@@ -2734,7 +4383,7 @@ func (x *VSOperatorAuthorization) ProtoReflect() protoreflect.Message {
 }
 
 func (x *VSOperatorAuthorization) slowProtoReflect() protoreflect.Message {
-	mi := &file_verana_de_v1_types_proto_msgTypes[3]
+	mi := &file_verana_de_v1_types_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2790,9 +4439,15 @@ func (x *fastReflection_VSOperatorAuthorization) Interface() protoreflect.ProtoM
 // While iterating, mutating operations may only be performed
 // on the current field descriptor.
 func (x *fastReflection_VSOperatorAuthorization) Range(f func(protoreflect.FieldDescriptor, protoreflect.Value) bool) {
-	if x.Corporation != "" {
-		value := protoreflect.ValueOfString(x.Corporation)
-		if !f(fd_VSOperatorAuthorization_corporation, value) {
+	if x.Id != uint64(0) {
+		value := protoreflect.ValueOfUint64(x.Id)
+		if !f(fd_VSOperatorAuthorization_id, value) {
+			return
+		}
+	}
+	if x.CorporationId != uint64(0) {
+		value := protoreflect.ValueOfUint64(x.CorporationId)
+		if !f(fd_VSOperatorAuthorization_corporation_id, value) {
 			return
 		}
 	}
@@ -2802,9 +4457,9 @@ func (x *fastReflection_VSOperatorAuthorization) Range(f func(protoreflect.Field
 			return
 		}
 	}
-	if len(x.Permissions) != 0 {
-		value := protoreflect.ValueOfList(&_VSOperatorAuthorization_3_list{list: &x.Permissions})
-		if !f(fd_VSOperatorAuthorization_permissions, value) {
+	if len(x.Records) != 0 {
+		value := protoreflect.ValueOfList(&_VSOperatorAuthorization_4_list{list: &x.Records})
+		if !f(fd_VSOperatorAuthorization_records, value) {
 			return
 		}
 	}
@@ -2823,12 +4478,14 @@ func (x *fastReflection_VSOperatorAuthorization) Range(f func(protoreflect.Field
 // a repeated field is populated if it is non-empty.
 func (x *fastReflection_VSOperatorAuthorization) Has(fd protoreflect.FieldDescriptor) bool {
 	switch fd.FullName() {
-	case "verana.de.v1.VSOperatorAuthorization.corporation":
-		return x.Corporation != ""
+	case "verana.de.v1.VSOperatorAuthorization.id":
+		return x.Id != uint64(0)
+	case "verana.de.v1.VSOperatorAuthorization.corporation_id":
+		return x.CorporationId != uint64(0)
 	case "verana.de.v1.VSOperatorAuthorization.vs_operator":
 		return x.VsOperator != ""
-	case "verana.de.v1.VSOperatorAuthorization.permissions":
-		return len(x.Permissions) != 0
+	case "verana.de.v1.VSOperatorAuthorization.records":
+		return len(x.Records) != 0
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.de.v1.VSOperatorAuthorization"))
@@ -2845,12 +4502,14 @@ func (x *fastReflection_VSOperatorAuthorization) Has(fd protoreflect.FieldDescri
 // Clear is a mutating operation and unsafe for concurrent use.
 func (x *fastReflection_VSOperatorAuthorization) Clear(fd protoreflect.FieldDescriptor) {
 	switch fd.FullName() {
-	case "verana.de.v1.VSOperatorAuthorization.corporation":
-		x.Corporation = ""
+	case "verana.de.v1.VSOperatorAuthorization.id":
+		x.Id = uint64(0)
+	case "verana.de.v1.VSOperatorAuthorization.corporation_id":
+		x.CorporationId = uint64(0)
 	case "verana.de.v1.VSOperatorAuthorization.vs_operator":
 		x.VsOperator = ""
-	case "verana.de.v1.VSOperatorAuthorization.permissions":
-		x.Permissions = nil
+	case "verana.de.v1.VSOperatorAuthorization.records":
+		x.Records = nil
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.de.v1.VSOperatorAuthorization"))
@@ -2867,17 +4526,20 @@ func (x *fastReflection_VSOperatorAuthorization) Clear(fd protoreflect.FieldDesc
 // of the value; to obtain a mutable reference, use Mutable.
 func (x *fastReflection_VSOperatorAuthorization) Get(descriptor protoreflect.FieldDescriptor) protoreflect.Value {
 	switch descriptor.FullName() {
-	case "verana.de.v1.VSOperatorAuthorization.corporation":
-		value := x.Corporation
-		return protoreflect.ValueOfString(value)
+	case "verana.de.v1.VSOperatorAuthorization.id":
+		value := x.Id
+		return protoreflect.ValueOfUint64(value)
+	case "verana.de.v1.VSOperatorAuthorization.corporation_id":
+		value := x.CorporationId
+		return protoreflect.ValueOfUint64(value)
 	case "verana.de.v1.VSOperatorAuthorization.vs_operator":
 		value := x.VsOperator
 		return protoreflect.ValueOfString(value)
-	case "verana.de.v1.VSOperatorAuthorization.permissions":
-		if len(x.Permissions) == 0 {
-			return protoreflect.ValueOfList(&_VSOperatorAuthorization_3_list{})
+	case "verana.de.v1.VSOperatorAuthorization.records":
+		if len(x.Records) == 0 {
+			return protoreflect.ValueOfList(&_VSOperatorAuthorization_4_list{})
 		}
-		listValue := &_VSOperatorAuthorization_3_list{list: &x.Permissions}
+		listValue := &_VSOperatorAuthorization_4_list{list: &x.Records}
 		return protoreflect.ValueOfList(listValue)
 	default:
 		if descriptor.IsExtension() {
@@ -2899,14 +4561,16 @@ func (x *fastReflection_VSOperatorAuthorization) Get(descriptor protoreflect.Fie
 // Set is a mutating operation and unsafe for concurrent use.
 func (x *fastReflection_VSOperatorAuthorization) Set(fd protoreflect.FieldDescriptor, value protoreflect.Value) {
 	switch fd.FullName() {
-	case "verana.de.v1.VSOperatorAuthorization.corporation":
-		x.Corporation = value.Interface().(string)
+	case "verana.de.v1.VSOperatorAuthorization.id":
+		x.Id = value.Uint()
+	case "verana.de.v1.VSOperatorAuthorization.corporation_id":
+		x.CorporationId = value.Uint()
 	case "verana.de.v1.VSOperatorAuthorization.vs_operator":
 		x.VsOperator = value.Interface().(string)
-	case "verana.de.v1.VSOperatorAuthorization.permissions":
+	case "verana.de.v1.VSOperatorAuthorization.records":
 		lv := value.List()
-		clv := lv.(*_VSOperatorAuthorization_3_list)
-		x.Permissions = *clv.list
+		clv := lv.(*_VSOperatorAuthorization_4_list)
+		x.Records = *clv.list
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.de.v1.VSOperatorAuthorization"))
@@ -2927,14 +4591,16 @@ func (x *fastReflection_VSOperatorAuthorization) Set(fd protoreflect.FieldDescri
 // Mutable is a mutating operation and unsafe for concurrent use.
 func (x *fastReflection_VSOperatorAuthorization) Mutable(fd protoreflect.FieldDescriptor) protoreflect.Value {
 	switch fd.FullName() {
-	case "verana.de.v1.VSOperatorAuthorization.permissions":
-		if x.Permissions == nil {
-			x.Permissions = []uint64{}
+	case "verana.de.v1.VSOperatorAuthorization.records":
+		if x.Records == nil {
+			x.Records = []*ParticipantAuthorizationRecord{}
 		}
-		value := &_VSOperatorAuthorization_3_list{list: &x.Permissions}
+		value := &_VSOperatorAuthorization_4_list{list: &x.Records}
 		return protoreflect.ValueOfList(value)
-	case "verana.de.v1.VSOperatorAuthorization.corporation":
-		panic(fmt.Errorf("field corporation of message verana.de.v1.VSOperatorAuthorization is not mutable"))
+	case "verana.de.v1.VSOperatorAuthorization.id":
+		panic(fmt.Errorf("field id of message verana.de.v1.VSOperatorAuthorization is not mutable"))
+	case "verana.de.v1.VSOperatorAuthorization.corporation_id":
+		panic(fmt.Errorf("field corporation_id of message verana.de.v1.VSOperatorAuthorization is not mutable"))
 	case "verana.de.v1.VSOperatorAuthorization.vs_operator":
 		panic(fmt.Errorf("field vs_operator of message verana.de.v1.VSOperatorAuthorization is not mutable"))
 	default:
@@ -2950,13 +4616,15 @@ func (x *fastReflection_VSOperatorAuthorization) Mutable(fd protoreflect.FieldDe
 // For lists, maps, and messages, this returns a new, empty, mutable value.
 func (x *fastReflection_VSOperatorAuthorization) NewField(fd protoreflect.FieldDescriptor) protoreflect.Value {
 	switch fd.FullName() {
-	case "verana.de.v1.VSOperatorAuthorization.corporation":
-		return protoreflect.ValueOfString("")
+	case "verana.de.v1.VSOperatorAuthorization.id":
+		return protoreflect.ValueOfUint64(uint64(0))
+	case "verana.de.v1.VSOperatorAuthorization.corporation_id":
+		return protoreflect.ValueOfUint64(uint64(0))
 	case "verana.de.v1.VSOperatorAuthorization.vs_operator":
 		return protoreflect.ValueOfString("")
-	case "verana.de.v1.VSOperatorAuthorization.permissions":
-		list := []uint64{}
-		return protoreflect.ValueOfList(&_VSOperatorAuthorization_3_list{list: &list})
+	case "verana.de.v1.VSOperatorAuthorization.records":
+		list := []*ParticipantAuthorizationRecord{}
+		return protoreflect.ValueOfList(&_VSOperatorAuthorization_4_list{list: &list})
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.de.v1.VSOperatorAuthorization"))
@@ -3026,20 +4694,21 @@ func (x *fastReflection_VSOperatorAuthorization) ProtoMethods() *protoiface.Meth
 		var n int
 		var l int
 		_ = l
-		l = len(x.Corporation)
-		if l > 0 {
-			n += 1 + l + runtime.Sov(uint64(l))
+		if x.Id != 0 {
+			n += 1 + runtime.Sov(uint64(x.Id))
+		}
+		if x.CorporationId != 0 {
+			n += 1 + runtime.Sov(uint64(x.CorporationId))
 		}
 		l = len(x.VsOperator)
 		if l > 0 {
 			n += 1 + l + runtime.Sov(uint64(l))
 		}
-		if len(x.Permissions) > 0 {
-			l = 0
-			for _, e := range x.Permissions {
-				l += runtime.Sov(uint64(e))
+		if len(x.Records) > 0 {
+			for _, e := range x.Records {
+				l = options.Size(e)
+				n += 1 + l + runtime.Sov(uint64(l))
 			}
-			n += 1 + runtime.Sov(uint64(l)) + l
 		}
 		if x.unknownFields != nil {
 			n += len(x.unknownFields)
@@ -3070,39 +4739,38 @@ func (x *fastReflection_VSOperatorAuthorization) ProtoMethods() *protoiface.Meth
 			i -= len(x.unknownFields)
 			copy(dAtA[i:], x.unknownFields)
 		}
-		if len(x.Permissions) > 0 {
-			var pksize2 int
-			for _, num := range x.Permissions {
-				pksize2 += runtime.Sov(uint64(num))
-			}
-			i -= pksize2
-			j1 := i
-			for _, num := range x.Permissions {
-				for num >= 1<<7 {
-					dAtA[j1] = uint8(uint64(num)&0x7f | 0x80)
-					num >>= 7
-					j1++
+		if len(x.Records) > 0 {
+			for iNdEx := len(x.Records) - 1; iNdEx >= 0; iNdEx-- {
+				encoded, err := options.Marshal(x.Records[iNdEx])
+				if err != nil {
+					return protoiface.MarshalOutput{
+						NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+						Buf:               input.Buf,
+					}, err
 				}
-				dAtA[j1] = uint8(num)
-				j1++
+				i -= len(encoded)
+				copy(dAtA[i:], encoded)
+				i = runtime.EncodeVarint(dAtA, i, uint64(len(encoded)))
+				i--
+				dAtA[i] = 0x22
 			}
-			i = runtime.EncodeVarint(dAtA, i, uint64(pksize2))
-			i--
-			dAtA[i] = 0x1a
 		}
 		if len(x.VsOperator) > 0 {
 			i -= len(x.VsOperator)
 			copy(dAtA[i:], x.VsOperator)
 			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.VsOperator)))
 			i--
-			dAtA[i] = 0x12
+			dAtA[i] = 0x1a
 		}
-		if len(x.Corporation) > 0 {
-			i -= len(x.Corporation)
-			copy(dAtA[i:], x.Corporation)
-			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Corporation)))
+		if x.CorporationId != 0 {
+			i = runtime.EncodeVarint(dAtA, i, uint64(x.CorporationId))
 			i--
-			dAtA[i] = 0xa
+			dAtA[i] = 0x10
+		}
+		if x.Id != 0 {
+			i = runtime.EncodeVarint(dAtA, i, uint64(x.Id))
+			i--
+			dAtA[i] = 0x8
 		}
 		if input.Buf != nil {
 			input.Buf = append(input.Buf, dAtA...)
@@ -3154,10 +4822,10 @@ func (x *fastReflection_VSOperatorAuthorization) ProtoMethods() *protoiface.Meth
 			}
 			switch fieldNum {
 			case 1:
-				if wireType != 2 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Corporation", wireType)
+				if wireType != 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Id", wireType)
 				}
-				var stringLen uint64
+				x.Id = 0
 				for shift := uint(0); ; shift += 7 {
 					if shift >= 64 {
 						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
@@ -3167,25 +4835,31 @@ func (x *fastReflection_VSOperatorAuthorization) ProtoMethods() *protoiface.Meth
 					}
 					b := dAtA[iNdEx]
 					iNdEx++
-					stringLen |= uint64(b&0x7F) << shift
+					x.Id |= uint64(b&0x7F) << shift
 					if b < 0x80 {
 						break
 					}
 				}
-				intStringLen := int(stringLen)
-				if intStringLen < 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
-				}
-				postIndex := iNdEx + intStringLen
-				if postIndex < 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
-				}
-				if postIndex > l {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
-				}
-				x.Corporation = string(dAtA[iNdEx:postIndex])
-				iNdEx = postIndex
 			case 2:
+				if wireType != 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field CorporationId", wireType)
+				}
+				x.CorporationId = 0
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					x.CorporationId |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+			case 3:
 				if wireType != 2 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field VsOperator", wireType)
 				}
@@ -3217,82 +4891,40 @@ func (x *fastReflection_VSOperatorAuthorization) ProtoMethods() *protoiface.Meth
 				}
 				x.VsOperator = string(dAtA[iNdEx:postIndex])
 				iNdEx = postIndex
-			case 3:
-				if wireType == 0 {
-					var v uint64
-					for shift := uint(0); ; shift += 7 {
-						if shift >= 64 {
-							return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
-						}
-						if iNdEx >= l {
-							return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
-						}
-						b := dAtA[iNdEx]
-						iNdEx++
-						v |= uint64(b&0x7F) << shift
-						if b < 0x80 {
-							break
-						}
+			case 4:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Records", wireType)
+				}
+				var msglen int
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
 					}
-					x.Permissions = append(x.Permissions, v)
-				} else if wireType == 2 {
-					var packedLen int
-					for shift := uint(0); ; shift += 7 {
-						if shift >= 64 {
-							return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
-						}
-						if iNdEx >= l {
-							return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
-						}
-						b := dAtA[iNdEx]
-						iNdEx++
-						packedLen |= int(b&0x7F) << shift
-						if b < 0x80 {
-							break
-						}
-					}
-					if packedLen < 0 {
-						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
-					}
-					postIndex := iNdEx + packedLen
-					if postIndex < 0 {
-						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
-					}
-					if postIndex > l {
+					if iNdEx >= l {
 						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
 					}
-					var elementCount int
-					var count int
-					for _, integer := range dAtA[iNdEx:postIndex] {
-						if integer < 128 {
-							count++
-						}
+					b := dAtA[iNdEx]
+					iNdEx++
+					msglen |= int(b&0x7F) << shift
+					if b < 0x80 {
+						break
 					}
-					elementCount = count
-					if elementCount != 0 && len(x.Permissions) == 0 {
-						x.Permissions = make([]uint64, 0, elementCount)
-					}
-					for iNdEx < postIndex {
-						var v uint64
-						for shift := uint(0); ; shift += 7 {
-							if shift >= 64 {
-								return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
-							}
-							if iNdEx >= l {
-								return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
-							}
-							b := dAtA[iNdEx]
-							iNdEx++
-							v |= uint64(b&0x7F) << shift
-							if b < 0x80 {
-								break
-							}
-						}
-						x.Permissions = append(x.Permissions, v)
-					}
-				} else {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Permissions", wireType)
 				}
+				if msglen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + msglen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				x.Records = append(x.Records, &ParticipantAuthorizationRecord{})
+				if err := options.Unmarshal(dAtA[iNdEx:postIndex], x.Records[len(x.Records)-1]); err != nil {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, err
+				}
+				iNdEx = postIndex
 			default:
 				iNdEx = preIndex
 				skippy, err := runtime.Skip(dAtA[iNdEx:])
@@ -3341,28 +4973,40 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// OperatorAuthorization is the operator-delegation record. Per spec v4-rc2 it is
+// keyed by its own uint64 id; (corporation_id, operator) is a unique secondary
+// index.
 type OperatorAuthorization struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	// corporation is the group granting the authorization.
-	Corporation string `protobuf:"bytes,1,opt,name=corporation,proto3" json:"corporation,omitempty"`
+	// id is the own uint64 key of this OperatorAuthorization.
+	Id uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	// corporation_id is the id of the corporation granting the authorization. The
+	// (corporation_id, operator) tuple MUST be unique.
+	CorporationId uint64 `protobuf:"varint,2,opt,name=corporation_id,json=corporationId,proto3" json:"corporation_id,omitempty"`
 	// operator is the account receiving the authorization.
-	Operator string `protobuf:"bytes,2,opt,name=operator,proto3" json:"operator,omitempty"`
+	Operator string `protobuf:"bytes,3,opt,name=operator,proto3" json:"operator,omitempty"`
 	// msg_types is the list of module message types this authorization applies to.
-	MsgTypes []string `protobuf:"bytes,3,rep,name=msg_types,json=msgTypes,proto3" json:"msg_types,omitempty"`
-	// spend_limit is the maximum amount of funds that the grantee is allowed to
-	// spend as a direct consequence of executing authorized messages.
-	SpendLimit []*v1beta1.Coin `protobuf:"bytes,4,rep,name=spend_limit,json=spendLimit,proto3" json:"spend_limit,omitempty"`
+	MsgTypes []string `protobuf:"bytes,4,rep,name=msg_types,json=msgTypes,proto3" json:"msg_types,omitempty"`
+	// spend_limit is the maximum amount of funds the grantee is allowed to spend.
+	SpendLimit []*v1beta1.Coin `protobuf:"bytes,5,rep,name=spend_limit,json=spendLimit,proto3" json:"spend_limit,omitempty"`
+	// remaining_spend is the runtime balance for spend_limit. Present iff
+	// spend_limit is set.
+	RemainingSpend []*v1beta1.Coin `protobuf:"bytes,6,rep,name=remaining_spend,json=remainingSpend,proto3" json:"remaining_spend,omitempty"`
 	// fee_spend_limit is the maximum total amount of fees that can be paid using
 	// this authorization.
-	FeeSpendLimit []*v1beta1.Coin `protobuf:"bytes,5,rep,name=fee_spend_limit,json=feeSpendLimit,proto3" json:"fee_spend_limit,omitempty"`
+	FeeSpendLimit []*v1beta1.Coin `protobuf:"bytes,7,rep,name=fee_spend_limit,json=feeSpendLimit,proto3" json:"fee_spend_limit,omitempty"`
+	// remaining_fee_spend is the runtime balance for fee_spend_limit. Present iff
+	// fee_spend_limit is set.
+	RemainingFeeSpend []*v1beta1.Coin `protobuf:"bytes,8,rep,name=remaining_fee_spend,json=remainingFeeSpend,proto3" json:"remaining_fee_spend,omitempty"`
 	// expiration is the timestamp after which the authorization is no longer
 	// valid.
-	Expiration *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=expiration,proto3" json:"expiration,omitempty"`
-	// period is the reset period for spend_limit and fee_spend_limit.
-	Period *durationpb.Duration `protobuf:"bytes,7,opt,name=period,proto3" json:"period,omitempty"`
+	Expiration *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=expiration,proto3" json:"expiration,omitempty"`
+	// period is the reset period for spend_limit and fee_spend_limit. If set,
+	// expiration MUST also be set.
+	Period *durationpb.Duration `protobuf:"bytes,10,opt,name=period,proto3" json:"period,omitempty"`
 }
 
 func (x *OperatorAuthorization) Reset() {
@@ -3385,11 +5029,18 @@ func (*OperatorAuthorization) Descriptor() ([]byte, []int) {
 	return file_verana_de_v1_types_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *OperatorAuthorization) GetCorporation() string {
+func (x *OperatorAuthorization) GetId() uint64 {
 	if x != nil {
-		return x.Corporation
+		return x.Id
 	}
-	return ""
+	return 0
+}
+
+func (x *OperatorAuthorization) GetCorporationId() uint64 {
+	if x != nil {
+		return x.CorporationId
+	}
+	return 0
 }
 
 func (x *OperatorAuthorization) GetOperator() string {
@@ -3413,9 +5064,23 @@ func (x *OperatorAuthorization) GetSpendLimit() []*v1beta1.Coin {
 	return nil
 }
 
+func (x *OperatorAuthorization) GetRemainingSpend() []*v1beta1.Coin {
+	if x != nil {
+		return x.RemainingSpend
+	}
+	return nil
+}
+
 func (x *OperatorAuthorization) GetFeeSpendLimit() []*v1beta1.Coin {
 	if x != nil {
 		return x.FeeSpendLimit
+	}
+	return nil
+}
+
+func (x *OperatorAuthorization) GetRemainingFeeSpend() []*v1beta1.Coin {
+	if x != nil {
+		return x.RemainingFeeSpend
 	}
 	return nil
 }
@@ -3434,33 +5099,27 @@ func (x *OperatorAuthorization) GetPeriod() *durationpb.Duration {
 	return nil
 }
 
-// OperatorAuthorizationUsage tracks per-authorization spend consumption so
-// spec [AUTHZ-CHECK-1] can enforce the spend_limit / period-reset invariant:
+// OperatorAuthorizationUsage tracks per-authorization spend consumption so spec
+// [AUTHZ-CHECK-1] can enforce the spend_limit / period-reset invariant. Keyed by
+// the parent OperatorAuthorization id.
 //
-//	"If oauthz.spend_limit is set, the remaining balance MUST be sufficient
-//	 for the operation. After successful execution, the consumed amount MUST
-//	 be deducted from the remaining balance. If oauthz.period is set and the
-//	 current period has elapsed since the last reset, the remaining balance
-//	 MUST be reset to oauthz.spend_limit before evaluating the check above."
-//
-// Stored in the DE module keyed by (corporation, operator) just like the
-// parent OperatorAuthorization record.
+// TODO(spec v4): the spec folds the runtime balance into OperatorAuthorization
+// (remaining_spend / remaining_fee_spend). This separate ledger is retained to
+// keep AUTHZ-CHECK-1 reset semantics unchanged (out of scope for the v4-rc2 VSOA
+// rebase); unify when AUTHZ-CHECK-1 is aligned to the spec.
 type OperatorAuthorizationUsage struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	// corporation is the group that granted the authorization.
-	Corporation string `protobuf:"bytes,1,opt,name=corporation,proto3" json:"corporation,omitempty"`
-	// operator is the account holding the authorization.
-	Operator string `protobuf:"bytes,2,opt,name=operator,proto3" json:"operator,omitempty"`
+	// operator_authorization_id is the id of the parent OperatorAuthorization.
+	OperatorAuthorizationId uint64 `protobuf:"varint,1,opt,name=operator_authorization_id,json=operatorAuthorizationId,proto3" json:"operator_authorization_id,omitempty"`
 	// remaining is the balance still available inside the current period.
 	// Decremented on each successful execution that consumed funds.
-	Remaining []*v1beta1.Coin `protobuf:"bytes,3,rep,name=remaining,proto3" json:"remaining,omitempty"`
-	// last_reset is the timestamp at which `remaining` was last refilled to
-	// the parent authorization's spend_limit. Zero when no period has elapsed
-	// since grant time.
-	LastReset *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=last_reset,json=lastReset,proto3" json:"last_reset,omitempty"`
+	Remaining []*v1beta1.Coin `protobuf:"bytes,2,rep,name=remaining,proto3" json:"remaining,omitempty"`
+	// last_reset is the timestamp at which `remaining` was last refilled to the
+	// parent authorization's spend_limit.
+	LastReset *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=last_reset,json=lastReset,proto3" json:"last_reset,omitempty"`
 }
 
 func (x *OperatorAuthorizationUsage) Reset() {
@@ -3483,18 +5142,11 @@ func (*OperatorAuthorizationUsage) Descriptor() ([]byte, []int) {
 	return file_verana_de_v1_types_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *OperatorAuthorizationUsage) GetCorporation() string {
+func (x *OperatorAuthorizationUsage) GetOperatorAuthorizationId() uint64 {
 	if x != nil {
-		return x.Corporation
+		return x.OperatorAuthorizationId
 	}
-	return ""
-}
-
-func (x *OperatorAuthorizationUsage) GetOperator() string {
-	if x != nil {
-		return x.Operator
-	}
-	return ""
+	return 0
 }
 
 func (x *OperatorAuthorizationUsage) GetRemaining() []*v1beta1.Coin {
@@ -3511,25 +5163,31 @@ func (x *OperatorAuthorizationUsage) GetLastReset() *timestamppb.Timestamp {
 	return nil
 }
 
+// FeeGrant is the chain-level fee allowance, keyed by the composite
+// (grantor_corporation_id, grantee).
 type FeeGrant struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	// grantor is the authority group granting the fee allowance.
-	Grantor string `protobuf:"bytes,1,opt,name=grantor,proto3" json:"grantor,omitempty"`
+	// grantor_corporation_id is the id of the corporation granting the fee
+	// allowance. Together with grantee it forms the composite key.
+	GrantorCorporationId uint64 `protobuf:"varint,1,opt,name=grantor_corporation_id,json=grantorCorporationId,proto3" json:"grantor_corporation_id,omitempty"`
 	// grantee is the account that receives the fee grant from grantor.
 	Grantee string `protobuf:"bytes,2,opt,name=grantee,proto3" json:"grantee,omitempty"`
 	// msg_types is the list of VPR delegable message types for which the fee
 	// allowance applies.
 	MsgTypes []string `protobuf:"bytes,3,rep,name=msg_types,json=msgTypes,proto3" json:"msg_types,omitempty"`
-	// spend_limit is the maximum amount of fees that can be spent using this
-	// grant.
+	// spend_limit is the maximum amount of fees that can be spent using this grant.
 	SpendLimit []*v1beta1.Coin `protobuf:"bytes,4,rep,name=spend_limit,json=spendLimit,proto3" json:"spend_limit,omitempty"`
+	// remaining_spend is the runtime balance for spend_limit. Present iff
+	// spend_limit is set.
+	RemainingSpend []*v1beta1.Coin `protobuf:"bytes,5,rep,name=remaining_spend,json=remainingSpend,proto3" json:"remaining_spend,omitempty"`
 	// expiration is the timestamp after which the fee grant is no longer valid.
-	Expiration *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=expiration,proto3" json:"expiration,omitempty"`
-	// period is the reset period for spend_limit.
-	Period *durationpb.Duration `protobuf:"bytes,6,opt,name=period,proto3" json:"period,omitempty"`
+	Expiration *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=expiration,proto3" json:"expiration,omitempty"`
+	// period is the reset period for spend_limit. If set, expiration MUST also be
+	// set.
+	Period *durationpb.Duration `protobuf:"bytes,7,opt,name=period,proto3" json:"period,omitempty"`
 }
 
 func (x *FeeGrant) Reset() {
@@ -3552,11 +5210,11 @@ func (*FeeGrant) Descriptor() ([]byte, []int) {
 	return file_verana_de_v1_types_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *FeeGrant) GetGrantor() string {
+func (x *FeeGrant) GetGrantorCorporationId() uint64 {
 	if x != nil {
-		return x.Grantor
+		return x.GrantorCorporationId
 	}
-	return ""
+	return 0
 }
 
 func (x *FeeGrant) GetGrantee() string {
@@ -3580,6 +5238,13 @@ func (x *FeeGrant) GetSpendLimit() []*v1beta1.Coin {
 	return nil
 }
 
+func (x *FeeGrant) GetRemainingSpend() []*v1beta1.Coin {
+	if x != nil {
+		return x.RemainingSpend
+	}
+	return nil
+}
+
 func (x *FeeGrant) GetExpiration() *timestamppb.Timestamp {
 	if x != nil {
 		return x.Expiration
@@ -3594,24 +5259,148 @@ func (x *FeeGrant) GetPeriod() *durationpb.Duration {
 	return nil
 }
 
+// ParticipantAuthorizationRecord is a per-participant VS-operator authorization
+// nested inside a VSOperatorAuthorization. Keyed by participant_id, which is
+// globally unique across all records of all VSOperatorAuthorizations.
+type ParticipantAuthorizationRecord struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// participant_id is the id of the Participant this record applies to. Globally
+	// unique across all ParticipantAuthorizationRecord entries.
+	ParticipantId uint64 `protobuf:"varint,1,opt,name=participant_id,json=participantId,proto3" json:"participant_id,omitempty"`
+	// msg_types is the list of delegable message types the vs_operator is
+	// authorized for on behalf of corporation. Mandatory, frozen at create.
+	MsgTypes []string `protobuf:"bytes,2,rep,name=msg_types,json=msgTypes,proto3" json:"msg_types,omitempty"`
+	// spend_limit is the maximum amount the vs_operator is allowed to spend.
+	SpendLimit []*v1beta1.Coin `protobuf:"bytes,3,rep,name=spend_limit,json=spendLimit,proto3" json:"spend_limit,omitempty"`
+	// remaining_spend is the runtime balance for spend_limit. Present iff
+	// spend_limit is set.
+	RemainingSpend []*v1beta1.Coin `protobuf:"bytes,4,rep,name=remaining_spend,json=remainingSpend,proto3" json:"remaining_spend,omitempty"`
+	// fee_spend_limit is the maximum total amount of transaction fees that can be
+	// spent by vs_operator.
+	FeeSpendLimit []*v1beta1.Coin `protobuf:"bytes,5,rep,name=fee_spend_limit,json=feeSpendLimit,proto3" json:"fee_spend_limit,omitempty"`
+	// remaining_fee_spend is the runtime balance for fee_spend_limit. Present iff
+	// fee_spend_limit is set.
+	RemainingFeeSpend []*v1beta1.Coin `protobuf:"bytes,6,rep,name=remaining_fee_spend,json=remainingFeeSpend,proto3" json:"remaining_fee_spend,omitempty"`
+	// with_feegrant indicates the corporation pays the transaction fees for
+	// vs_operator.
+	WithFeegrant bool `protobuf:"varint,7,opt,name=with_feegrant,json=withFeegrant,proto3" json:"with_feegrant,omitempty"`
+	// expiration is the authorization window boundary. A record created before
+	// validation is disabled with expiration = now().
+	Expiration *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=expiration,proto3" json:"expiration,omitempty"`
+	// period is the reset period for spend_limit and fee_spend_limit.
+	Period *durationpb.Duration `protobuf:"bytes,9,opt,name=period,proto3" json:"period,omitempty"`
+}
+
+func (x *ParticipantAuthorizationRecord) Reset() {
+	*x = ParticipantAuthorizationRecord{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_verana_de_v1_types_proto_msgTypes[3]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ParticipantAuthorizationRecord) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ParticipantAuthorizationRecord) ProtoMessage() {}
+
+// Deprecated: Use ParticipantAuthorizationRecord.ProtoReflect.Descriptor instead.
+func (*ParticipantAuthorizationRecord) Descriptor() ([]byte, []int) {
+	return file_verana_de_v1_types_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *ParticipantAuthorizationRecord) GetParticipantId() uint64 {
+	if x != nil {
+		return x.ParticipantId
+	}
+	return 0
+}
+
+func (x *ParticipantAuthorizationRecord) GetMsgTypes() []string {
+	if x != nil {
+		return x.MsgTypes
+	}
+	return nil
+}
+
+func (x *ParticipantAuthorizationRecord) GetSpendLimit() []*v1beta1.Coin {
+	if x != nil {
+		return x.SpendLimit
+	}
+	return nil
+}
+
+func (x *ParticipantAuthorizationRecord) GetRemainingSpend() []*v1beta1.Coin {
+	if x != nil {
+		return x.RemainingSpend
+	}
+	return nil
+}
+
+func (x *ParticipantAuthorizationRecord) GetFeeSpendLimit() []*v1beta1.Coin {
+	if x != nil {
+		return x.FeeSpendLimit
+	}
+	return nil
+}
+
+func (x *ParticipantAuthorizationRecord) GetRemainingFeeSpend() []*v1beta1.Coin {
+	if x != nil {
+		return x.RemainingFeeSpend
+	}
+	return nil
+}
+
+func (x *ParticipantAuthorizationRecord) GetWithFeegrant() bool {
+	if x != nil {
+		return x.WithFeegrant
+	}
+	return false
+}
+
+func (x *ParticipantAuthorizationRecord) GetExpiration() *timestamppb.Timestamp {
+	if x != nil {
+		return x.Expiration
+	}
+	return nil
+}
+
+func (x *ParticipantAuthorizationRecord) GetPeriod() *durationpb.Duration {
+	if x != nil {
+		return x.Period
+	}
+	return nil
+}
+
+// VSOperatorAuthorization is the VS-operator delegation, keyed by its own uint64
+// id; (corporation_id, vs_operator) is a unique secondary index. The entry
+// exists iff it has at least one record.
 type VSOperatorAuthorization struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	// corporation is the group granting the authorization.
-	Corporation string `protobuf:"bytes,1,opt,name=corporation,proto3" json:"corporation,omitempty"`
+	// id is the own uint64 key of this VSOperatorAuthorization.
+	Id uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	// corporation_id is the id of the corporation granting the authorization. The
+	// (corporation_id, vs_operator) tuple MUST be unique.
+	CorporationId uint64 `protobuf:"varint,2,opt,name=corporation_id,json=corporationId,proto3" json:"corporation_id,omitempty"`
 	// vs_operator is the operator account receiving the authorization.
-	VsOperator string `protobuf:"bytes,2,opt,name=vs_operator,json=vsOperator,proto3" json:"vs_operator,omitempty"`
-	// permissions is the list of permission ids for which this authorization is
-	// granted.
-	Permissions []uint64 `protobuf:"varint,3,rep,packed,name=permissions,proto3" json:"permissions,omitempty"`
+	VsOperator string `protobuf:"bytes,3,opt,name=vs_operator,json=vsOperator,proto3" json:"vs_operator,omitempty"`
+	// records is the list of per-participant authorization records granted to
+	// vs_operator by corporation_id.
+	Records []*ParticipantAuthorizationRecord `protobuf:"bytes,4,rep,name=records,proto3" json:"records,omitempty"`
 }
 
 func (x *VSOperatorAuthorization) Reset() {
 	*x = VSOperatorAuthorization{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_verana_de_v1_types_proto_msgTypes[3]
+		mi := &file_verana_de_v1_types_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -3625,14 +5414,21 @@ func (*VSOperatorAuthorization) ProtoMessage() {}
 
 // Deprecated: Use VSOperatorAuthorization.ProtoReflect.Descriptor instead.
 func (*VSOperatorAuthorization) Descriptor() ([]byte, []int) {
-	return file_verana_de_v1_types_proto_rawDescGZIP(), []int{3}
+	return file_verana_de_v1_types_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *VSOperatorAuthorization) GetCorporation() string {
+func (x *VSOperatorAuthorization) GetId() uint64 {
 	if x != nil {
-		return x.Corporation
+		return x.Id
 	}
-	return ""
+	return 0
+}
+
+func (x *VSOperatorAuthorization) GetCorporationId() uint64 {
+	if x != nil {
+		return x.CorporationId
+	}
+	return 0
 }
 
 func (x *VSOperatorAuthorization) GetVsOperator() string {
@@ -3642,9 +5438,9 @@ func (x *VSOperatorAuthorization) GetVsOperator() string {
 	return ""
 }
 
-func (x *VSOperatorAuthorization) GetPermissions() []uint64 {
+func (x *VSOperatorAuthorization) GetRecords() []*ParticipantAuthorizationRecord {
 	if x != nil {
-		return x.Permissions
+		return x.Records
 	}
 	return nil
 }
@@ -3663,32 +5459,97 @@ var file_verana_de_v1_types_proto_rawDesc = []byte{
 	0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2f, 0x64, 0x75, 0x72, 0x61, 0x74,
 	0x69, 0x6f, 0x6e, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x1a, 0x1f, 0x67, 0x6f, 0x6f, 0x67, 0x6c,
 	0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2f, 0x74, 0x69, 0x6d, 0x65, 0x73,
-	0x74, 0x61, 0x6d, 0x70, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x84, 0x04, 0x0a, 0x15, 0x4f,
+	0x74, 0x61, 0x6d, 0x70, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0xff, 0x05, 0x0a, 0x15, 0x4f,
 	0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x41, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x61,
-	0x74, 0x69, 0x6f, 0x6e, 0x12, 0x3a, 0x0a, 0x0b, 0x63, 0x6f, 0x72, 0x70, 0x6f, 0x72, 0x61, 0x74,
-	0x69, 0x6f, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63,
-	0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72,
-	0x69, 0x6e, 0x67, 0x52, 0x0b, 0x63, 0x6f, 0x72, 0x70, 0x6f, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e,
-	0x12, 0x34, 0x0a, 0x08, 0x6f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x18, 0x02, 0x20, 0x01,
-	0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41,
-	0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x08, 0x6f, 0x70,
-	0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x12, 0x1b, 0x0a, 0x09, 0x6d, 0x73, 0x67, 0x5f, 0x74, 0x79,
-	0x70, 0x65, 0x73, 0x18, 0x03, 0x20, 0x03, 0x28, 0x09, 0x52, 0x08, 0x6d, 0x73, 0x67, 0x54, 0x79,
-	0x70, 0x65, 0x73, 0x12, 0x6c, 0x0a, 0x0b, 0x73, 0x70, 0x65, 0x6e, 0x64, 0x5f, 0x6c, 0x69, 0x6d,
-	0x69, 0x74, 0x18, 0x04, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x19, 0x2e, 0x63, 0x6f, 0x73, 0x6d, 0x6f,
-	0x73, 0x2e, 0x62, 0x61, 0x73, 0x65, 0x2e, 0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x2e, 0x43,
-	0x6f, 0x69, 0x6e, 0x42, 0x30, 0xc8, 0xde, 0x1f, 0x00, 0xaa, 0xdf, 0x1f, 0x28, 0x67, 0x69, 0x74,
-	0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2f, 0x63,
-	0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2d, 0x73, 0x64, 0x6b, 0x2f, 0x74, 0x79, 0x70, 0x65, 0x73, 0x2e,
-	0x43, 0x6f, 0x69, 0x6e, 0x73, 0x52, 0x0a, 0x73, 0x70, 0x65, 0x6e, 0x64, 0x4c, 0x69, 0x6d, 0x69,
-	0x74, 0x12, 0x73, 0x0a, 0x0f, 0x66, 0x65, 0x65, 0x5f, 0x73, 0x70, 0x65, 0x6e, 0x64, 0x5f, 0x6c,
-	0x69, 0x6d, 0x69, 0x74, 0x18, 0x05, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x19, 0x2e, 0x63, 0x6f, 0x73,
+	0x74, 0x69, 0x6f, 0x6e, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04,
+	0x52, 0x02, 0x69, 0x64, 0x12, 0x25, 0x0a, 0x0e, 0x63, 0x6f, 0x72, 0x70, 0x6f, 0x72, 0x61, 0x74,
+	0x69, 0x6f, 0x6e, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x04, 0x52, 0x0d, 0x63, 0x6f,
+	0x72, 0x70, 0x6f, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x49, 0x64, 0x12, 0x34, 0x0a, 0x08, 0x6f,
+	0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2,
+	0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73,
+	0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x08, 0x6f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f,
+	0x72, 0x12, 0x1b, 0x0a, 0x09, 0x6d, 0x73, 0x67, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x73, 0x18, 0x04,
+	0x20, 0x03, 0x28, 0x09, 0x52, 0x08, 0x6d, 0x73, 0x67, 0x54, 0x79, 0x70, 0x65, 0x73, 0x12, 0x6c,
+	0x0a, 0x0b, 0x73, 0x70, 0x65, 0x6e, 0x64, 0x5f, 0x6c, 0x69, 0x6d, 0x69, 0x74, 0x18, 0x05, 0x20,
+	0x03, 0x28, 0x0b, 0x32, 0x19, 0x2e, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x62, 0x61, 0x73,
+	0x65, 0x2e, 0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x2e, 0x43, 0x6f, 0x69, 0x6e, 0x42, 0x30,
+	0xc8, 0xde, 0x1f, 0x00, 0xaa, 0xdf, 0x1f, 0x28, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63,
+	0x6f, 0x6d, 0x2f, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2f, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73,
+	0x2d, 0x73, 0x64, 0x6b, 0x2f, 0x74, 0x79, 0x70, 0x65, 0x73, 0x2e, 0x43, 0x6f, 0x69, 0x6e, 0x73,
+	0x52, 0x0a, 0x73, 0x70, 0x65, 0x6e, 0x64, 0x4c, 0x69, 0x6d, 0x69, 0x74, 0x12, 0x74, 0x0a, 0x0f,
+	0x72, 0x65, 0x6d, 0x61, 0x69, 0x6e, 0x69, 0x6e, 0x67, 0x5f, 0x73, 0x70, 0x65, 0x6e, 0x64, 0x18,
+	0x06, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x19, 0x2e, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x62,
+	0x61, 0x73, 0x65, 0x2e, 0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x2e, 0x43, 0x6f, 0x69, 0x6e,
+	0x42, 0x30, 0xc8, 0xde, 0x1f, 0x00, 0xaa, 0xdf, 0x1f, 0x28, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62,
+	0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2f, 0x63, 0x6f, 0x73, 0x6d,
+	0x6f, 0x73, 0x2d, 0x73, 0x64, 0x6b, 0x2f, 0x74, 0x79, 0x70, 0x65, 0x73, 0x2e, 0x43, 0x6f, 0x69,
+	0x6e, 0x73, 0x52, 0x0e, 0x72, 0x65, 0x6d, 0x61, 0x69, 0x6e, 0x69, 0x6e, 0x67, 0x53, 0x70, 0x65,
+	0x6e, 0x64, 0x12, 0x73, 0x0a, 0x0f, 0x66, 0x65, 0x65, 0x5f, 0x73, 0x70, 0x65, 0x6e, 0x64, 0x5f,
+	0x6c, 0x69, 0x6d, 0x69, 0x74, 0x18, 0x07, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x19, 0x2e, 0x63, 0x6f,
+	0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x62, 0x61, 0x73, 0x65, 0x2e, 0x76, 0x31, 0x62, 0x65, 0x74, 0x61,
+	0x31, 0x2e, 0x43, 0x6f, 0x69, 0x6e, 0x42, 0x30, 0xc8, 0xde, 0x1f, 0x00, 0xaa, 0xdf, 0x1f, 0x28,
+	0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x63, 0x6f, 0x73, 0x6d, 0x6f,
+	0x73, 0x2f, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2d, 0x73, 0x64, 0x6b, 0x2f, 0x74, 0x79, 0x70,
+	0x65, 0x73, 0x2e, 0x43, 0x6f, 0x69, 0x6e, 0x73, 0x52, 0x0d, 0x66, 0x65, 0x65, 0x53, 0x70, 0x65,
+	0x6e, 0x64, 0x4c, 0x69, 0x6d, 0x69, 0x74, 0x12, 0x7b, 0x0a, 0x13, 0x72, 0x65, 0x6d, 0x61, 0x69,
+	0x6e, 0x69, 0x6e, 0x67, 0x5f, 0x66, 0x65, 0x65, 0x5f, 0x73, 0x70, 0x65, 0x6e, 0x64, 0x18, 0x08,
+	0x20, 0x03, 0x28, 0x0b, 0x32, 0x19, 0x2e, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x62, 0x61,
+	0x73, 0x65, 0x2e, 0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x2e, 0x43, 0x6f, 0x69, 0x6e, 0x42,
+	0x30, 0xc8, 0xde, 0x1f, 0x00, 0xaa, 0xdf, 0x1f, 0x28, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e,
+	0x63, 0x6f, 0x6d, 0x2f, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2f, 0x63, 0x6f, 0x73, 0x6d, 0x6f,
+	0x73, 0x2d, 0x73, 0x64, 0x6b, 0x2f, 0x74, 0x79, 0x70, 0x65, 0x73, 0x2e, 0x43, 0x6f, 0x69, 0x6e,
+	0x73, 0x52, 0x11, 0x72, 0x65, 0x6d, 0x61, 0x69, 0x6e, 0x69, 0x6e, 0x67, 0x46, 0x65, 0x65, 0x53,
+	0x70, 0x65, 0x6e, 0x64, 0x12, 0x40, 0x0a, 0x0a, 0x65, 0x78, 0x70, 0x69, 0x72, 0x61, 0x74, 0x69,
+	0x6f, 0x6e, 0x18, 0x09, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c,
+	0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73,
+	0x74, 0x61, 0x6d, 0x70, 0x42, 0x04, 0x90, 0xdf, 0x1f, 0x01, 0x52, 0x0a, 0x65, 0x78, 0x70, 0x69,
+	0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x37, 0x0a, 0x06, 0x70, 0x65, 0x72, 0x69, 0x6f, 0x64,
+	0x18, 0x0a, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x19, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e,
+	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x44, 0x75, 0x72, 0x61, 0x74, 0x69, 0x6f,
+	0x6e, 0x42, 0x04, 0x98, 0xdf, 0x1f, 0x01, 0x52, 0x06, 0x70, 0x65, 0x72, 0x69, 0x6f, 0x64, 0x52,
+	0x0b, 0x63, 0x6f, 0x72, 0x70, 0x6f, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x22, 0x9f, 0x02, 0x0a,
+	0x1a, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x41, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69,
+	0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x55, 0x73, 0x61, 0x67, 0x65, 0x12, 0x3a, 0x0a, 0x19, 0x6f,
+	0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x5f, 0x61, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a,
+	0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04, 0x52, 0x17,
+	0x6f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x41, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a,
+	0x61, 0x74, 0x69, 0x6f, 0x6e, 0x49, 0x64, 0x12, 0x69, 0x0a, 0x09, 0x72, 0x65, 0x6d, 0x61, 0x69,
+	0x6e, 0x69, 0x6e, 0x67, 0x18, 0x02, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x19, 0x2e, 0x63, 0x6f, 0x73,
 	0x6d, 0x6f, 0x73, 0x2e, 0x62, 0x61, 0x73, 0x65, 0x2e, 0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31,
 	0x2e, 0x43, 0x6f, 0x69, 0x6e, 0x42, 0x30, 0xc8, 0xde, 0x1f, 0x00, 0xaa, 0xdf, 0x1f, 0x28, 0x67,
 	0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73,
 	0x2f, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2d, 0x73, 0x64, 0x6b, 0x2f, 0x74, 0x79, 0x70, 0x65,
-	0x73, 0x2e, 0x43, 0x6f, 0x69, 0x6e, 0x73, 0x52, 0x0d, 0x66, 0x65, 0x65, 0x53, 0x70, 0x65, 0x6e,
-	0x64, 0x4c, 0x69, 0x6d, 0x69, 0x74, 0x12, 0x40, 0x0a, 0x0a, 0x65, 0x78, 0x70, 0x69, 0x72, 0x61,
+	0x73, 0x2e, 0x43, 0x6f, 0x69, 0x6e, 0x73, 0x52, 0x09, 0x72, 0x65, 0x6d, 0x61, 0x69, 0x6e, 0x69,
+	0x6e, 0x67, 0x12, 0x43, 0x0a, 0x0a, 0x6c, 0x61, 0x73, 0x74, 0x5f, 0x72, 0x65, 0x73, 0x65, 0x74,
+	0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e,
+	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61,
+	0x6d, 0x70, 0x42, 0x08, 0xc8, 0xde, 0x1f, 0x00, 0x90, 0xdf, 0x1f, 0x01, 0x52, 0x09, 0x6c, 0x61,
+	0x73, 0x74, 0x52, 0x65, 0x73, 0x65, 0x74, 0x52, 0x0b, 0x63, 0x6f, 0x72, 0x70, 0x6f, 0x72, 0x61,
+	0x74, 0x69, 0x6f, 0x6e, 0x52, 0x08, 0x6f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x22, 0xf9,
+	0x03, 0x0a, 0x08, 0x46, 0x65, 0x65, 0x47, 0x72, 0x61, 0x6e, 0x74, 0x12, 0x34, 0x0a, 0x16, 0x67,
+	0x72, 0x61, 0x6e, 0x74, 0x6f, 0x72, 0x5f, 0x63, 0x6f, 0x72, 0x70, 0x6f, 0x72, 0x61, 0x74, 0x69,
+	0x6f, 0x6e, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04, 0x52, 0x14, 0x67, 0x72, 0x61,
+	0x6e, 0x74, 0x6f, 0x72, 0x43, 0x6f, 0x72, 0x70, 0x6f, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x49,
+	0x64, 0x12, 0x32, 0x0a, 0x07, 0x67, 0x72, 0x61, 0x6e, 0x74, 0x65, 0x65, 0x18, 0x02, 0x20, 0x01,
+	0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41,
+	0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x07, 0x67, 0x72,
+	0x61, 0x6e, 0x74, 0x65, 0x65, 0x12, 0x1b, 0x0a, 0x09, 0x6d, 0x73, 0x67, 0x5f, 0x74, 0x79, 0x70,
+	0x65, 0x73, 0x18, 0x03, 0x20, 0x03, 0x28, 0x09, 0x52, 0x08, 0x6d, 0x73, 0x67, 0x54, 0x79, 0x70,
+	0x65, 0x73, 0x12, 0x6c, 0x0a, 0x0b, 0x73, 0x70, 0x65, 0x6e, 0x64, 0x5f, 0x6c, 0x69, 0x6d, 0x69,
+	0x74, 0x18, 0x04, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x19, 0x2e, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73,
+	0x2e, 0x62, 0x61, 0x73, 0x65, 0x2e, 0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x2e, 0x43, 0x6f,
+	0x69, 0x6e, 0x42, 0x30, 0xc8, 0xde, 0x1f, 0x00, 0xaa, 0xdf, 0x1f, 0x28, 0x67, 0x69, 0x74, 0x68,
+	0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2f, 0x63, 0x6f,
+	0x73, 0x6d, 0x6f, 0x73, 0x2d, 0x73, 0x64, 0x6b, 0x2f, 0x74, 0x79, 0x70, 0x65, 0x73, 0x2e, 0x43,
+	0x6f, 0x69, 0x6e, 0x73, 0x52, 0x0a, 0x73, 0x70, 0x65, 0x6e, 0x64, 0x4c, 0x69, 0x6d, 0x69, 0x74,
+	0x12, 0x74, 0x0a, 0x0f, 0x72, 0x65, 0x6d, 0x61, 0x69, 0x6e, 0x69, 0x6e, 0x67, 0x5f, 0x73, 0x70,
+	0x65, 0x6e, 0x64, 0x18, 0x05, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x19, 0x2e, 0x63, 0x6f, 0x73, 0x6d,
+	0x6f, 0x73, 0x2e, 0x62, 0x61, 0x73, 0x65, 0x2e, 0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x2e,
+	0x43, 0x6f, 0x69, 0x6e, 0x42, 0x30, 0xc8, 0xde, 0x1f, 0x00, 0xaa, 0xdf, 0x1f, 0x28, 0x67, 0x69,
+	0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2f,
+	0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2d, 0x73, 0x64, 0x6b, 0x2f, 0x74, 0x79, 0x70, 0x65, 0x73,
+	0x2e, 0x43, 0x6f, 0x69, 0x6e, 0x73, 0x52, 0x0e, 0x72, 0x65, 0x6d, 0x61, 0x69, 0x6e, 0x69, 0x6e,
+	0x67, 0x53, 0x70, 0x65, 0x6e, 0x64, 0x12, 0x40, 0x0a, 0x0a, 0x65, 0x78, 0x70, 0x69, 0x72, 0x61,
 	0x74, 0x69, 0x6f, 0x6e, 0x18, 0x06, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f,
 	0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d,
 	0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x42, 0x04, 0x90, 0xdf, 0x1f, 0x01, 0x52, 0x0a, 0x65, 0x78,
@@ -3696,73 +5557,79 @@ var file_verana_de_v1_types_proto_rawDesc = []byte{
 	0x6f, 0x64, 0x18, 0x07, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x19, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c,
 	0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x44, 0x75, 0x72, 0x61, 0x74,
 	0x69, 0x6f, 0x6e, 0x42, 0x04, 0x98, 0xdf, 0x1f, 0x01, 0x52, 0x06, 0x70, 0x65, 0x72, 0x69, 0x6f,
-	0x64, 0x22, 0xbe, 0x02, 0x0a, 0x1a, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x41, 0x75,
-	0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x55, 0x73, 0x61, 0x67, 0x65,
-	0x12, 0x3a, 0x0a, 0x0b, 0x63, 0x6f, 0x72, 0x70, 0x6f, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x18,
-	0x01, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f,
-	0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x52,
-	0x0b, 0x63, 0x6f, 0x72, 0x70, 0x6f, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x34, 0x0a, 0x08,
-	0x6f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18,
-	0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65,
-	0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x08, 0x6f, 0x70, 0x65, 0x72, 0x61, 0x74,
-	0x6f, 0x72, 0x12, 0x69, 0x0a, 0x09, 0x72, 0x65, 0x6d, 0x61, 0x69, 0x6e, 0x69, 0x6e, 0x67, 0x18,
-	0x03, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x19, 0x2e, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x62,
-	0x61, 0x73, 0x65, 0x2e, 0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x2e, 0x43, 0x6f, 0x69, 0x6e,
-	0x42, 0x30, 0xc8, 0xde, 0x1f, 0x00, 0xaa, 0xdf, 0x1f, 0x28, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62,
-	0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2f, 0x63, 0x6f, 0x73, 0x6d,
-	0x6f, 0x73, 0x2d, 0x73, 0x64, 0x6b, 0x2f, 0x74, 0x79, 0x70, 0x65, 0x73, 0x2e, 0x43, 0x6f, 0x69,
-	0x6e, 0x73, 0x52, 0x09, 0x72, 0x65, 0x6d, 0x61, 0x69, 0x6e, 0x69, 0x6e, 0x67, 0x12, 0x43, 0x0a,
-	0x0a, 0x6c, 0x61, 0x73, 0x74, 0x5f, 0x72, 0x65, 0x73, 0x65, 0x74, 0x18, 0x04, 0x20, 0x01, 0x28,
-	0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f,
-	0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x42, 0x08, 0xc8,
-	0xde, 0x1f, 0x00, 0x90, 0xdf, 0x1f, 0x01, 0x52, 0x09, 0x6c, 0x61, 0x73, 0x74, 0x52, 0x65, 0x73,
-	0x65, 0x74, 0x22, 0xf8, 0x02, 0x0a, 0x08, 0x46, 0x65, 0x65, 0x47, 0x72, 0x61, 0x6e, 0x74, 0x12,
-	0x32, 0x0a, 0x07, 0x67, 0x72, 0x61, 0x6e, 0x74, 0x6f, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09,
-	0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64,
-	0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x07, 0x67, 0x72, 0x61, 0x6e,
-	0x74, 0x6f, 0x72, 0x12, 0x32, 0x0a, 0x07, 0x67, 0x72, 0x61, 0x6e, 0x74, 0x65, 0x65, 0x18, 0x02,
-	0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73,
-	0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x07,
-	0x67, 0x72, 0x61, 0x6e, 0x74, 0x65, 0x65, 0x12, 0x1b, 0x0a, 0x09, 0x6d, 0x73, 0x67, 0x5f, 0x74,
-	0x79, 0x70, 0x65, 0x73, 0x18, 0x03, 0x20, 0x03, 0x28, 0x09, 0x52, 0x08, 0x6d, 0x73, 0x67, 0x54,
-	0x79, 0x70, 0x65, 0x73, 0x12, 0x6c, 0x0a, 0x0b, 0x73, 0x70, 0x65, 0x6e, 0x64, 0x5f, 0x6c, 0x69,
-	0x6d, 0x69, 0x74, 0x18, 0x04, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x19, 0x2e, 0x63, 0x6f, 0x73, 0x6d,
-	0x6f, 0x73, 0x2e, 0x62, 0x61, 0x73, 0x65, 0x2e, 0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x2e,
-	0x43, 0x6f, 0x69, 0x6e, 0x42, 0x30, 0xc8, 0xde, 0x1f, 0x00, 0xaa, 0xdf, 0x1f, 0x28, 0x67, 0x69,
-	0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2f,
-	0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2d, 0x73, 0x64, 0x6b, 0x2f, 0x74, 0x79, 0x70, 0x65, 0x73,
-	0x2e, 0x43, 0x6f, 0x69, 0x6e, 0x73, 0x52, 0x0a, 0x73, 0x70, 0x65, 0x6e, 0x64, 0x4c, 0x69, 0x6d,
-	0x69, 0x74, 0x12, 0x40, 0x0a, 0x0a, 0x65, 0x78, 0x70, 0x69, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e,
-	0x18, 0x05, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e,
-	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61,
-	0x6d, 0x70, 0x42, 0x04, 0x90, 0xdf, 0x1f, 0x01, 0x52, 0x0a, 0x65, 0x78, 0x70, 0x69, 0x72, 0x61,
-	0x74, 0x69, 0x6f, 0x6e, 0x12, 0x37, 0x0a, 0x06, 0x70, 0x65, 0x72, 0x69, 0x6f, 0x64, 0x18, 0x06,
-	0x20, 0x01, 0x28, 0x0b, 0x32, 0x19, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72,
-	0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x44, 0x75, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x42,
-	0x04, 0x98, 0xdf, 0x1f, 0x01, 0x52, 0x06, 0x70, 0x65, 0x72, 0x69, 0x6f, 0x64, 0x22, 0xb2, 0x01,
-	0x0a, 0x17, 0x56, 0x53, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x41, 0x75, 0x74, 0x68,
-	0x6f, 0x72, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x3a, 0x0a, 0x0b, 0x63, 0x6f, 0x72,
-	0x70, 0x6f, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18,
-	0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65,
-	0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x0b, 0x63, 0x6f, 0x72, 0x70, 0x6f, 0x72,
-	0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x39, 0x0a, 0x0b, 0x76, 0x73, 0x5f, 0x6f, 0x70, 0x65, 0x72,
-	0x61, 0x74, 0x6f, 0x72, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14,
-	0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74,
-	0x72, 0x69, 0x6e, 0x67, 0x52, 0x0a, 0x76, 0x73, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72,
-	0x12, 0x20, 0x0a, 0x0b, 0x70, 0x65, 0x72, 0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x73, 0x18,
-	0x03, 0x20, 0x03, 0x28, 0x04, 0x52, 0x0b, 0x70, 0x65, 0x72, 0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f,
-	0x6e, 0x73, 0x42, 0xa5, 0x01, 0x0a, 0x10, 0x63, 0x6f, 0x6d, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e,
-	0x61, 0x2e, 0x64, 0x65, 0x2e, 0x76, 0x31, 0x42, 0x0a, 0x54, 0x79, 0x70, 0x65, 0x73, 0x50, 0x72,
-	0x6f, 0x74, 0x6f, 0x50, 0x01, 0x5a, 0x33, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f,
-	0x6d, 0x2f, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2d, 0x6c, 0x61, 0x62, 0x73, 0x2f, 0x76, 0x65,
-	0x72, 0x61, 0x6e, 0x61, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2f,
-	0x64, 0x65, 0x2f, 0x76, 0x31, 0x3b, 0x64, 0x65, 0x76, 0x31, 0xa2, 0x02, 0x03, 0x56, 0x44, 0x58,
-	0xaa, 0x02, 0x0c, 0x56, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x44, 0x65, 0x2e, 0x56, 0x31, 0xca,
-	0x02, 0x0c, 0x56, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x5c, 0x44, 0x65, 0x5c, 0x56, 0x31, 0xe2, 0x02,
-	0x18, 0x56, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x5c, 0x44, 0x65, 0x5c, 0x56, 0x31, 0x5c, 0x47, 0x50,
-	0x42, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0xea, 0x02, 0x0e, 0x56, 0x65, 0x72, 0x61,
-	0x6e, 0x61, 0x3a, 0x3a, 0x44, 0x65, 0x3a, 0x3a, 0x56, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x33,
+	0x64, 0x52, 0x07, 0x67, 0x72, 0x61, 0x6e, 0x74, 0x6f, 0x72, 0x22, 0xda, 0x05, 0x0a, 0x1e, 0x50,
+	0x61, 0x72, 0x74, 0x69, 0x63, 0x69, 0x70, 0x61, 0x6e, 0x74, 0x41, 0x75, 0x74, 0x68, 0x6f, 0x72,
+	0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x63, 0x6f, 0x72, 0x64, 0x12, 0x25, 0x0a,
+	0x0e, 0x70, 0x61, 0x72, 0x74, 0x69, 0x63, 0x69, 0x70, 0x61, 0x6e, 0x74, 0x5f, 0x69, 0x64, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x04, 0x52, 0x0d, 0x70, 0x61, 0x72, 0x74, 0x69, 0x63, 0x69, 0x70, 0x61,
+	0x6e, 0x74, 0x49, 0x64, 0x12, 0x1b, 0x0a, 0x09, 0x6d, 0x73, 0x67, 0x5f, 0x74, 0x79, 0x70, 0x65,
+	0x73, 0x18, 0x02, 0x20, 0x03, 0x28, 0x09, 0x52, 0x08, 0x6d, 0x73, 0x67, 0x54, 0x79, 0x70, 0x65,
+	0x73, 0x12, 0x6c, 0x0a, 0x0b, 0x73, 0x70, 0x65, 0x6e, 0x64, 0x5f, 0x6c, 0x69, 0x6d, 0x69, 0x74,
+	0x18, 0x03, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x19, 0x2e, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e,
+	0x62, 0x61, 0x73, 0x65, 0x2e, 0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x2e, 0x43, 0x6f, 0x69,
+	0x6e, 0x42, 0x30, 0xc8, 0xde, 0x1f, 0x00, 0xaa, 0xdf, 0x1f, 0x28, 0x67, 0x69, 0x74, 0x68, 0x75,
+	0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2f, 0x63, 0x6f, 0x73,
+	0x6d, 0x6f, 0x73, 0x2d, 0x73, 0x64, 0x6b, 0x2f, 0x74, 0x79, 0x70, 0x65, 0x73, 0x2e, 0x43, 0x6f,
+	0x69, 0x6e, 0x73, 0x52, 0x0a, 0x73, 0x70, 0x65, 0x6e, 0x64, 0x4c, 0x69, 0x6d, 0x69, 0x74, 0x12,
+	0x74, 0x0a, 0x0f, 0x72, 0x65, 0x6d, 0x61, 0x69, 0x6e, 0x69, 0x6e, 0x67, 0x5f, 0x73, 0x70, 0x65,
+	0x6e, 0x64, 0x18, 0x04, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x19, 0x2e, 0x63, 0x6f, 0x73, 0x6d, 0x6f,
+	0x73, 0x2e, 0x62, 0x61, 0x73, 0x65, 0x2e, 0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x2e, 0x43,
+	0x6f, 0x69, 0x6e, 0x42, 0x30, 0xc8, 0xde, 0x1f, 0x00, 0xaa, 0xdf, 0x1f, 0x28, 0x67, 0x69, 0x74,
+	0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2f, 0x63,
+	0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2d, 0x73, 0x64, 0x6b, 0x2f, 0x74, 0x79, 0x70, 0x65, 0x73, 0x2e,
+	0x43, 0x6f, 0x69, 0x6e, 0x73, 0x52, 0x0e, 0x72, 0x65, 0x6d, 0x61, 0x69, 0x6e, 0x69, 0x6e, 0x67,
+	0x53, 0x70, 0x65, 0x6e, 0x64, 0x12, 0x73, 0x0a, 0x0f, 0x66, 0x65, 0x65, 0x5f, 0x73, 0x70, 0x65,
+	0x6e, 0x64, 0x5f, 0x6c, 0x69, 0x6d, 0x69, 0x74, 0x18, 0x05, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x19,
+	0x2e, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x62, 0x61, 0x73, 0x65, 0x2e, 0x76, 0x31, 0x62,
+	0x65, 0x74, 0x61, 0x31, 0x2e, 0x43, 0x6f, 0x69, 0x6e, 0x42, 0x30, 0xc8, 0xde, 0x1f, 0x00, 0xaa,
+	0xdf, 0x1f, 0x28, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x63, 0x6f,
+	0x73, 0x6d, 0x6f, 0x73, 0x2f, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2d, 0x73, 0x64, 0x6b, 0x2f,
+	0x74, 0x79, 0x70, 0x65, 0x73, 0x2e, 0x43, 0x6f, 0x69, 0x6e, 0x73, 0x52, 0x0d, 0x66, 0x65, 0x65,
+	0x53, 0x70, 0x65, 0x6e, 0x64, 0x4c, 0x69, 0x6d, 0x69, 0x74, 0x12, 0x7b, 0x0a, 0x13, 0x72, 0x65,
+	0x6d, 0x61, 0x69, 0x6e, 0x69, 0x6e, 0x67, 0x5f, 0x66, 0x65, 0x65, 0x5f, 0x73, 0x70, 0x65, 0x6e,
+	0x64, 0x18, 0x06, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x19, 0x2e, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73,
+	0x2e, 0x62, 0x61, 0x73, 0x65, 0x2e, 0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x2e, 0x43, 0x6f,
+	0x69, 0x6e, 0x42, 0x30, 0xc8, 0xde, 0x1f, 0x00, 0xaa, 0xdf, 0x1f, 0x28, 0x67, 0x69, 0x74, 0x68,
+	0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2f, 0x63, 0x6f,
+	0x73, 0x6d, 0x6f, 0x73, 0x2d, 0x73, 0x64, 0x6b, 0x2f, 0x74, 0x79, 0x70, 0x65, 0x73, 0x2e, 0x43,
+	0x6f, 0x69, 0x6e, 0x73, 0x52, 0x11, 0x72, 0x65, 0x6d, 0x61, 0x69, 0x6e, 0x69, 0x6e, 0x67, 0x46,
+	0x65, 0x65, 0x53, 0x70, 0x65, 0x6e, 0x64, 0x12, 0x23, 0x0a, 0x0d, 0x77, 0x69, 0x74, 0x68, 0x5f,
+	0x66, 0x65, 0x65, 0x67, 0x72, 0x61, 0x6e, 0x74, 0x18, 0x07, 0x20, 0x01, 0x28, 0x08, 0x52, 0x0c,
+	0x77, 0x69, 0x74, 0x68, 0x46, 0x65, 0x65, 0x67, 0x72, 0x61, 0x6e, 0x74, 0x12, 0x40, 0x0a, 0x0a,
+	0x65, 0x78, 0x70, 0x69, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x08, 0x20, 0x01, 0x28, 0x0b,
+	0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62,
+	0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x42, 0x04, 0x90, 0xdf,
+	0x1f, 0x01, 0x52, 0x0a, 0x65, 0x78, 0x70, 0x69, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x37,
+	0x0a, 0x06, 0x70, 0x65, 0x72, 0x69, 0x6f, 0x64, 0x18, 0x09, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x19,
+	0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66,
+	0x2e, 0x44, 0x75, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x42, 0x04, 0x98, 0xdf, 0x1f, 0x01, 0x52,
+	0x06, 0x70, 0x65, 0x72, 0x69, 0x6f, 0x64, 0x22, 0xf3, 0x01, 0x0a, 0x17, 0x56, 0x53, 0x4f, 0x70,
+	0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x41, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x61, 0x74,
+	0x69, 0x6f, 0x6e, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04, 0x52,
+	0x02, 0x69, 0x64, 0x12, 0x25, 0x0a, 0x0e, 0x63, 0x6f, 0x72, 0x70, 0x6f, 0x72, 0x61, 0x74, 0x69,
+	0x6f, 0x6e, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x04, 0x52, 0x0d, 0x63, 0x6f, 0x72,
+	0x70, 0x6f, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x49, 0x64, 0x12, 0x39, 0x0a, 0x0b, 0x76, 0x73,
+	0x5f, 0x6f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x42,
+	0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72,
+	0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x0a, 0x76, 0x73, 0x4f, 0x70, 0x65,
+	0x72, 0x61, 0x74, 0x6f, 0x72, 0x12, 0x4c, 0x0a, 0x07, 0x72, 0x65, 0x63, 0x6f, 0x72, 0x64, 0x73,
+	0x18, 0x04, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x2c, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e,
+	0x64, 0x65, 0x2e, 0x76, 0x31, 0x2e, 0x50, 0x61, 0x72, 0x74, 0x69, 0x63, 0x69, 0x70, 0x61, 0x6e,
+	0x74, 0x41, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65,
+	0x63, 0x6f, 0x72, 0x64, 0x42, 0x04, 0xc8, 0xde, 0x1f, 0x00, 0x52, 0x07, 0x72, 0x65, 0x63, 0x6f,
+	0x72, 0x64, 0x73, 0x52, 0x0b, 0x63, 0x6f, 0x72, 0x70, 0x6f, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e,
+	0x52, 0x0b, 0x70, 0x65, 0x72, 0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x73, 0x42, 0xa5, 0x01,
+	0x0a, 0x10, 0x63, 0x6f, 0x6d, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x64, 0x65, 0x2e,
+	0x76, 0x31, 0x42, 0x0a, 0x54, 0x79, 0x70, 0x65, 0x73, 0x50, 0x72, 0x6f, 0x74, 0x6f, 0x50, 0x01,
+	0x5a, 0x33, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x76, 0x65, 0x72,
+	0x61, 0x6e, 0x61, 0x2d, 0x6c, 0x61, 0x62, 0x73, 0x2f, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2f,
+	0x61, 0x70, 0x69, 0x2f, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2f, 0x64, 0x65, 0x2f, 0x76, 0x31,
+	0x3b, 0x64, 0x65, 0x76, 0x31, 0xa2, 0x02, 0x03, 0x56, 0x44, 0x58, 0xaa, 0x02, 0x0c, 0x56, 0x65,
+	0x72, 0x61, 0x6e, 0x61, 0x2e, 0x44, 0x65, 0x2e, 0x56, 0x31, 0xca, 0x02, 0x0c, 0x56, 0x65, 0x72,
+	0x61, 0x6e, 0x61, 0x5c, 0x44, 0x65, 0x5c, 0x56, 0x31, 0xe2, 0x02, 0x18, 0x56, 0x65, 0x72, 0x61,
+	0x6e, 0x61, 0x5c, 0x44, 0x65, 0x5c, 0x56, 0x31, 0x5c, 0x47, 0x50, 0x42, 0x4d, 0x65, 0x74, 0x61,
+	0x64, 0x61, 0x74, 0x61, 0xea, 0x02, 0x0e, 0x56, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x3a, 0x3a, 0x44,
+	0x65, 0x3a, 0x3a, 0x56, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -3777,31 +5644,42 @@ func file_verana_de_v1_types_proto_rawDescGZIP() []byte {
 	return file_verana_de_v1_types_proto_rawDescData
 }
 
-var file_verana_de_v1_types_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_verana_de_v1_types_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_verana_de_v1_types_proto_goTypes = []interface{}{
-	(*OperatorAuthorization)(nil),      // 0: verana.de.v1.OperatorAuthorization
-	(*OperatorAuthorizationUsage)(nil), // 1: verana.de.v1.OperatorAuthorizationUsage
-	(*FeeGrant)(nil),                   // 2: verana.de.v1.FeeGrant
-	(*VSOperatorAuthorization)(nil),    // 3: verana.de.v1.VSOperatorAuthorization
-	(*v1beta1.Coin)(nil),               // 4: cosmos.base.v1beta1.Coin
-	(*timestamppb.Timestamp)(nil),      // 5: google.protobuf.Timestamp
-	(*durationpb.Duration)(nil),        // 6: google.protobuf.Duration
+	(*OperatorAuthorization)(nil),          // 0: verana.de.v1.OperatorAuthorization
+	(*OperatorAuthorizationUsage)(nil),     // 1: verana.de.v1.OperatorAuthorizationUsage
+	(*FeeGrant)(nil),                       // 2: verana.de.v1.FeeGrant
+	(*ParticipantAuthorizationRecord)(nil), // 3: verana.de.v1.ParticipantAuthorizationRecord
+	(*VSOperatorAuthorization)(nil),        // 4: verana.de.v1.VSOperatorAuthorization
+	(*v1beta1.Coin)(nil),                   // 5: cosmos.base.v1beta1.Coin
+	(*timestamppb.Timestamp)(nil),          // 6: google.protobuf.Timestamp
+	(*durationpb.Duration)(nil),            // 7: google.protobuf.Duration
 }
 var file_verana_de_v1_types_proto_depIdxs = []int32{
-	4, // 0: verana.de.v1.OperatorAuthorization.spend_limit:type_name -> cosmos.base.v1beta1.Coin
-	4, // 1: verana.de.v1.OperatorAuthorization.fee_spend_limit:type_name -> cosmos.base.v1beta1.Coin
-	5, // 2: verana.de.v1.OperatorAuthorization.expiration:type_name -> google.protobuf.Timestamp
-	6, // 3: verana.de.v1.OperatorAuthorization.period:type_name -> google.protobuf.Duration
-	4, // 4: verana.de.v1.OperatorAuthorizationUsage.remaining:type_name -> cosmos.base.v1beta1.Coin
-	5, // 5: verana.de.v1.OperatorAuthorizationUsage.last_reset:type_name -> google.protobuf.Timestamp
-	4, // 6: verana.de.v1.FeeGrant.spend_limit:type_name -> cosmos.base.v1beta1.Coin
-	5, // 7: verana.de.v1.FeeGrant.expiration:type_name -> google.protobuf.Timestamp
-	6, // 8: verana.de.v1.FeeGrant.period:type_name -> google.protobuf.Duration
-	9, // [9:9] is the sub-list for method output_type
-	9, // [9:9] is the sub-list for method input_type
-	9, // [9:9] is the sub-list for extension type_name
-	9, // [9:9] is the sub-list for extension extendee
-	0, // [0:9] is the sub-list for field type_name
+	5,  // 0: verana.de.v1.OperatorAuthorization.spend_limit:type_name -> cosmos.base.v1beta1.Coin
+	5,  // 1: verana.de.v1.OperatorAuthorization.remaining_spend:type_name -> cosmos.base.v1beta1.Coin
+	5,  // 2: verana.de.v1.OperatorAuthorization.fee_spend_limit:type_name -> cosmos.base.v1beta1.Coin
+	5,  // 3: verana.de.v1.OperatorAuthorization.remaining_fee_spend:type_name -> cosmos.base.v1beta1.Coin
+	6,  // 4: verana.de.v1.OperatorAuthorization.expiration:type_name -> google.protobuf.Timestamp
+	7,  // 5: verana.de.v1.OperatorAuthorization.period:type_name -> google.protobuf.Duration
+	5,  // 6: verana.de.v1.OperatorAuthorizationUsage.remaining:type_name -> cosmos.base.v1beta1.Coin
+	6,  // 7: verana.de.v1.OperatorAuthorizationUsage.last_reset:type_name -> google.protobuf.Timestamp
+	5,  // 8: verana.de.v1.FeeGrant.spend_limit:type_name -> cosmos.base.v1beta1.Coin
+	5,  // 9: verana.de.v1.FeeGrant.remaining_spend:type_name -> cosmos.base.v1beta1.Coin
+	6,  // 10: verana.de.v1.FeeGrant.expiration:type_name -> google.protobuf.Timestamp
+	7,  // 11: verana.de.v1.FeeGrant.period:type_name -> google.protobuf.Duration
+	5,  // 12: verana.de.v1.ParticipantAuthorizationRecord.spend_limit:type_name -> cosmos.base.v1beta1.Coin
+	5,  // 13: verana.de.v1.ParticipantAuthorizationRecord.remaining_spend:type_name -> cosmos.base.v1beta1.Coin
+	5,  // 14: verana.de.v1.ParticipantAuthorizationRecord.fee_spend_limit:type_name -> cosmos.base.v1beta1.Coin
+	5,  // 15: verana.de.v1.ParticipantAuthorizationRecord.remaining_fee_spend:type_name -> cosmos.base.v1beta1.Coin
+	6,  // 16: verana.de.v1.ParticipantAuthorizationRecord.expiration:type_name -> google.protobuf.Timestamp
+	7,  // 17: verana.de.v1.ParticipantAuthorizationRecord.period:type_name -> google.protobuf.Duration
+	3,  // 18: verana.de.v1.VSOperatorAuthorization.records:type_name -> verana.de.v1.ParticipantAuthorizationRecord
+	19, // [19:19] is the sub-list for method output_type
+	19, // [19:19] is the sub-list for method input_type
+	19, // [19:19] is the sub-list for extension type_name
+	19, // [19:19] is the sub-list for extension extendee
+	0,  // [0:19] is the sub-list for field type_name
 }
 
 func init() { file_verana_de_v1_types_proto_init() }
@@ -3847,6 +5725,18 @@ func file_verana_de_v1_types_proto_init() {
 			}
 		}
 		file_verana_de_v1_types_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ParticipantAuthorizationRecord); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_verana_de_v1_types_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*VSOperatorAuthorization); i {
 			case 0:
 				return &v.state
@@ -3865,7 +5755,7 @@ func file_verana_de_v1_types_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_verana_de_v1_types_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

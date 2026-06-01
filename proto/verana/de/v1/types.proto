@@ -9,89 +9,175 @@ import "google/protobuf/timestamp.proto";
 
 option go_package = "github.com/verana-labs/verana/x/de/types";
 
+// OperatorAuthorization is the operator-delegation record. Per spec v4-rc2 it is
+// keyed by its own uint64 id; (corporation_id, operator) is a unique secondary
+// index.
 message OperatorAuthorization {
-  // corporation is the group granting the authorization.
-  string corporation = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // Field 1 was `string corporation` (account). Replaced by `corporation_id`
+  // (uint64 FK to Corporation.id) per spec v4-rc2.
+  reserved "corporation";
+
+  // id is the own uint64 key of this OperatorAuthorization.
+  uint64 id = 1;
+  // corporation_id is the id of the corporation granting the authorization. The
+  // (corporation_id, operator) tuple MUST be unique.
+  uint64 corporation_id = 2;
   // operator is the account receiving the authorization.
-  string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string operator = 3 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   // msg_types is the list of module message types this authorization applies to.
-  repeated string msg_types = 3;
-  // spend_limit is the maximum amount of funds that the grantee is allowed to
-  // spend as a direct consequence of executing authorized messages.
-  repeated cosmos.base.v1beta1.Coin spend_limit = 4 [
+  repeated string msg_types = 4;
+  // spend_limit is the maximum amount of funds the grantee is allowed to spend.
+  repeated cosmos.base.v1beta1.Coin spend_limit = 5 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+  // remaining_spend is the runtime balance for spend_limit. Present iff
+  // spend_limit is set.
+  repeated cosmos.base.v1beta1.Coin remaining_spend = 6 [
     (gogoproto.nullable) = false,
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
   ];
   // fee_spend_limit is the maximum total amount of fees that can be paid using
   // this authorization.
-  repeated cosmos.base.v1beta1.Coin fee_spend_limit = 5 [
+  repeated cosmos.base.v1beta1.Coin fee_spend_limit = 7 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+  // remaining_fee_spend is the runtime balance for fee_spend_limit. Present iff
+  // fee_spend_limit is set.
+  repeated cosmos.base.v1beta1.Coin remaining_fee_spend = 8 [
     (gogoproto.nullable) = false,
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
   ];
   // expiration is the timestamp after which the authorization is no longer
   // valid.
-  google.protobuf.Timestamp expiration = 6 [(gogoproto.stdtime) = true];
-  // period is the reset period for spend_limit and fee_spend_limit.
-  google.protobuf.Duration period = 7 [(gogoproto.stdduration) = true];
+  google.protobuf.Timestamp expiration = 9 [(gogoproto.stdtime) = true];
+  // period is the reset period for spend_limit and fee_spend_limit. If set,
+  // expiration MUST also be set.
+  google.protobuf.Duration period = 10 [(gogoproto.stdduration) = true];
 }
 
-// OperatorAuthorizationUsage tracks per-authorization spend consumption so
-// spec [AUTHZ-CHECK-1] can enforce the spend_limit / period-reset invariant:
+// OperatorAuthorizationUsage tracks per-authorization spend consumption so spec
+// [AUTHZ-CHECK-1] can enforce the spend_limit / period-reset invariant. Keyed by
+// the parent OperatorAuthorization id.
 //
-//   "If oauthz.spend_limit is set, the remaining balance MUST be sufficient
-//    for the operation. After successful execution, the consumed amount MUST
-//    be deducted from the remaining balance. If oauthz.period is set and the
-//    current period has elapsed since the last reset, the remaining balance
-//    MUST be reset to oauthz.spend_limit before evaluating the check above."
-//
-// Stored in the DE module keyed by (corporation, operator) just like the
-// parent OperatorAuthorization record.
+// TODO(spec v4): the spec folds the runtime balance into OperatorAuthorization
+// (remaining_spend / remaining_fee_spend). This separate ledger is retained to
+// keep AUTHZ-CHECK-1 reset semantics unchanged (out of scope for the v4-rc2 VSOA
+// rebase); unify when AUTHZ-CHECK-1 is aligned to the spec.
 message OperatorAuthorizationUsage {
-  // corporation is the group that granted the authorization.
-  string corporation = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  // operator is the account holding the authorization.
-  string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // Fields 1 (`corporation`) and 2 (`operator`) (accounts) were replaced by
+  // operator_authorization_id (the parent's uint64 key) per spec v4-rc2.
+  reserved "corporation", "operator";
+
+  // operator_authorization_id is the id of the parent OperatorAuthorization.
+  uint64 operator_authorization_id = 1;
   // remaining is the balance still available inside the current period.
   // Decremented on each successful execution that consumed funds.
-  repeated cosmos.base.v1beta1.Coin remaining = 3 [
+  repeated cosmos.base.v1beta1.Coin remaining = 2 [
     (gogoproto.nullable) = false,
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
   ];
-  // last_reset is the timestamp at which `remaining` was last refilled to
-  // the parent authorization's spend_limit. Zero when no period has elapsed
-  // since grant time.
-  google.protobuf.Timestamp last_reset = 4 [
+  // last_reset is the timestamp at which `remaining` was last refilled to the
+  // parent authorization's spend_limit.
+  google.protobuf.Timestamp last_reset = 3 [
     (gogoproto.stdtime) = true,
     (gogoproto.nullable) = false
   ];
 }
 
+// FeeGrant is the chain-level fee allowance, keyed by the composite
+// (grantor_corporation_id, grantee).
 message FeeGrant {
-  // grantor is the authority group granting the fee allowance.
-  string grantor = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // Field 1 was `string grantor` (account). Replaced by
+  // `grantor_corporation_id` (uint64) per spec v4-rc2.
+  reserved "grantor";
+
+  // grantor_corporation_id is the id of the corporation granting the fee
+  // allowance. Together with grantee it forms the composite key.
+  uint64 grantor_corporation_id = 1;
   // grantee is the account that receives the fee grant from grantor.
   string grantee = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   // msg_types is the list of VPR delegable message types for which the fee
   // allowance applies.
   repeated string msg_types = 3;
-  // spend_limit is the maximum amount of fees that can be spent using this
-  // grant.
+  // spend_limit is the maximum amount of fees that can be spent using this grant.
   repeated cosmos.base.v1beta1.Coin spend_limit = 4 [
     (gogoproto.nullable) = false,
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
   ];
+  // remaining_spend is the runtime balance for spend_limit. Present iff
+  // spend_limit is set.
+  repeated cosmos.base.v1beta1.Coin remaining_spend = 5 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
   // expiration is the timestamp after which the fee grant is no longer valid.
-  google.protobuf.Timestamp expiration = 5 [(gogoproto.stdtime) = true];
-  // period is the reset period for spend_limit.
-  google.protobuf.Duration period = 6 [(gogoproto.stdduration) = true];
+  google.protobuf.Timestamp expiration = 6 [(gogoproto.stdtime) = true];
+  // period is the reset period for spend_limit. If set, expiration MUST also be
+  // set.
+  google.protobuf.Duration period = 7 [(gogoproto.stdduration) = true];
 }
 
+// ParticipantAuthorizationRecord is a per-participant VS-operator authorization
+// nested inside a VSOperatorAuthorization. Keyed by participant_id, which is
+// globally unique across all records of all VSOperatorAuthorizations.
+message ParticipantAuthorizationRecord {
+  // participant_id is the id of the Participant this record applies to. Globally
+  // unique across all ParticipantAuthorizationRecord entries.
+  uint64 participant_id = 1;
+  // msg_types is the list of delegable message types the vs_operator is
+  // authorized for on behalf of corporation. Mandatory, frozen at create.
+  repeated string msg_types = 2;
+  // spend_limit is the maximum amount the vs_operator is allowed to spend.
+  repeated cosmos.base.v1beta1.Coin spend_limit = 3 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+  // remaining_spend is the runtime balance for spend_limit. Present iff
+  // spend_limit is set.
+  repeated cosmos.base.v1beta1.Coin remaining_spend = 4 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+  // fee_spend_limit is the maximum total amount of transaction fees that can be
+  // spent by vs_operator.
+  repeated cosmos.base.v1beta1.Coin fee_spend_limit = 5 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+  // remaining_fee_spend is the runtime balance for fee_spend_limit. Present iff
+  // fee_spend_limit is set.
+  repeated cosmos.base.v1beta1.Coin remaining_fee_spend = 6 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+  // with_feegrant indicates the corporation pays the transaction fees for
+  // vs_operator.
+  bool with_feegrant = 7;
+  // expiration is the authorization window boundary. A record created before
+  // validation is disabled with expiration = now().
+  google.protobuf.Timestamp expiration = 8 [(gogoproto.stdtime) = true];
+  // period is the reset period for spend_limit and fee_spend_limit.
+  google.protobuf.Duration period = 9 [(gogoproto.stdduration) = true];
+}
+
+// VSOperatorAuthorization is the VS-operator delegation, keyed by its own uint64
+// id; (corporation_id, vs_operator) is a unique secondary index. The entry
+// exists iff it has at least one record.
 message VSOperatorAuthorization {
-  // corporation is the group granting the authorization.
-  string corporation = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // Field 1 (`string corporation`) and field 3 (`repeated uint64 permissions`)
+  // were replaced by corporation_id and records per spec v4-rc2.
+  reserved "corporation", "permissions";
+
+  // id is the own uint64 key of this VSOperatorAuthorization.
+  uint64 id = 1;
+  // corporation_id is the id of the corporation granting the authorization. The
+  // (corporation_id, vs_operator) tuple MUST be unique.
+  uint64 corporation_id = 2;
   // vs_operator is the operator account receiving the authorization.
-  string vs_operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  // permissions is the list of permission ids for which this authorization is
-  // granted.
-  repeated uint64 permissions = 3;
+  string vs_operator = 3 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // records is the list of per-participant authorization records granted to
+  // vs_operator by corporation_id.
+  repeated ParticipantAuthorizationRecord records = 4 [(gogoproto.nullable) = false];
 }
