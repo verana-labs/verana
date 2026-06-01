@@ -23,4 +23,5 @@ var (
 	ErrParticipantRecordExists  = errors.Register(ModuleName, 1112, "a ParticipantAuthorizationRecord already exists for this participant_id; must be globally unique")
 	ErrVSOAOtherCorporation     = errors.Register(ModuleName, 1113, "vs_operator already has a VSOperatorAuthorization from a different corporation; single-corp constraint violated")
 	ErrVSOperatorAuthzNotFound  = errors.Register(ModuleName, 1114, "VS operator authorization not found")
+	ErrVSOFeegrantNotEnabled    = errors.Register(ModuleName, 1115, "VS operator authorization record does not enable fee grant")
 )
