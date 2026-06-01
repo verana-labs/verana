@@ -7,6 +7,7 @@ import (
 	"cosmossdk.io/math"
 
 	credentialschematypes "github.com/verana-labs/verana/x/cs/types"
+	detypes "github.com/verana-labs/verana/x/de/types"
 	ectypes "github.com/verana-labs/verana/x/ec/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -82,19 +83,21 @@ type DigestKeeper interface {
 	StoreDigestModuleCall(ctx context.Context, authority, digest, digestAlgorithm string) error
 }
 
-// DelegationKeeper defines the expected interface for the Delegation Engine (DE) module.
-// Used to perform [AUTHZ-CHECK] for (authority, operator) pairs.
+// DelegationKeeper defines the expected interface for the Delegation Engine (DE)
+// module per spec v4-rc2. The caller resolves the signing corporation account to
+// its co.id (via AUTHZ-CHECK-5) before invoking the VSOA lifecycle / check
+// methods, which take corporation_id (uint64).
 type DelegationKeeper interface {
+	// [AUTHZ-CHECK-1] operator-delegation check (corporation account + operator).
 	CheckOperatorAuthorization(ctx context.Context, authority string, operator string, msgTypeURL string, now time.Time) error
-	// CheckVSOperatorAuthorization checks if a VS operator is authorized to act on behalf of the authority.
-	// [AUTHZ-CHECK-3] A VSOperatorAuthorization entry must exist where authority and vs_operator match.
-	CheckVSOperatorAuthorization(ctx context.Context, authority string, vsOperator string) error
-	// VSOA CRUD methods (storage in DE, orchestration in Participant)
-	AddPermToVSOA(ctx context.Context, authority, vsOperator string, participantID uint64) error
-	RemovePermFromVSOA(ctx context.Context, authority, vsOperator string, participantID uint64) ([]uint64, error)
-	GetVSOAPermissions(ctx context.Context, authority, vsOperator string) ([]uint64, error)
-	HasOperatorAuthorization(ctx context.Context, authority, operator string) (bool, error)
-	// Fee grant methods
-	GrantFeeAllowance(ctx context.Context, authority string, grantee string, msgTypes []string, expiration *time.Time, spendLimit sdk.Coins, period *time.Duration) error
-	RevokeFeeAllowance(ctx context.Context, authority string, grantee string) error
+	// [AUTHZ-CHECK-3] record-based VS operator authorization check on a participant.
+	CheckVSOperatorAuthorizationOnParticipant(ctx context.Context, corporationID uint64, operator string, participantID uint64, msgType string) error
+	// [AUTHZ-CHECK-4] record-based VS operator fee grant check.
+	CheckVSOperatorFeeGrant(ctx context.Context, participantID uint64) error
+	// [MOD-DE-MSG-5] grant a VS operator authorization record (module call).
+	GrantVSOperatorAuthorization(ctx context.Context, corporationID uint64, vsOperator string, record detypes.ParticipantAuthorizationRecord) error
+	// [MOD-DE-MSG-6] revoke a VS operator authorization record by participant id.
+	RevokeVSOperatorAuthorization(ctx context.Context, participantID uint64) error
+	// [MOD-DE-MSG-9] update a record's expiration by participant id.
+	UpdateVSOperatorAuthorizationExpiration(ctx context.Context, participantID uint64, newExpiration time.Time) error
 }

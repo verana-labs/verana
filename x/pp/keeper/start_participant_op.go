@@ -6,6 +6,7 @@ import (
 	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	credentialschematypes "github.com/verana-labs/verana/x/cs/types"
+	detypes "github.com/verana-labs/verana/x/de/types"
 	"github.com/verana-labs/verana/x/pp/types"
 )
 
@@ -171,16 +172,28 @@ func (ms msgServer) executeStartParticipantVP(ctx sdk.Context, msg *types.MsgSta
 		OpCurrentDeposit:             validationTrustDepositInDenom,    // applicant_participant.op_current_deposit
 		OpSummaryDigest:              "",                               // applicant_participant.op_summary_digest: null
 		OpValidatorDeposit:           0,                                // applicant_participant.op_validator_deposit: 0
-		VsOperatorAuthzEnabled:       msg.VsOperatorAuthzEnabled,       // applicant_participant.vs_operator_authz_enabled
-		VsOperatorAuthzSpendLimit:    msg.VsOperatorAuthzSpendLimit,    // applicant_participant.vs_operator_authz_spend_limit
-		VsOperatorAuthzWithFeegrant:  msg.VsOperatorAuthzWithFeegrant,  // applicant_participant.vs_operator_authz_with_feegrant
-		VsOperatorAuthzFeeSpendLimit: msg.VsOperatorAuthzFeeSpendLimit, // applicant_participant.vs_operator_authz_fee_spend_limit
-		VsOperatorAuthzSpendPeriod:   msg.VsOperatorAuthzSpendPeriod,   // applicant_participant.vs_operator_authz_spend_period
 	}
 
 	id, err := ms.Keeper.CreateParticipant(ctx, applicantParticipant)
 	if err != nil {
 		return 0, fmt.Errorf("failed to create participant: %w", err)
+	}
+
+	// [MOD-PP-MSG-1-3] If VSOA params provided, create a DISABLED record (expiration
+	// = now) via [MOD-DE-MSG-5]; it is activated at validation time by [MOD-DE-MSG-9].
+	if len(msg.VsOperatorAuthzMsgTypes) > 0 {
+		record := detypes.ParticipantAuthorizationRecord{
+			ParticipantId: id,
+			MsgTypes:      msg.VsOperatorAuthzMsgTypes,
+			SpendLimit:    msg.VsOperatorAuthzSpendLimit,
+			FeeSpendLimit: msg.VsOperatorAuthzFeeSpendLimit,
+			WithFeegrant:  msg.VsOperatorAuthzWithFeegrant,
+			Period:        msg.VsOperatorAuthzPeriod,
+			Expiration:    &now, // disabled until validation
+		}
+		if err := ms.delegationKeeper.GrantVSOperatorAuthorization(ctx, corporationId, msg.VsOperator, record); err != nil {
+			return 0, fmt.Errorf("failed to grant VS operator authorization: %w", err)
+		}
 	}
 
 	return id, nil

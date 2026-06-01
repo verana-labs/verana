@@ -10,6 +10,61 @@ import (
 	"github.com/verana-labs/verana/util/validation"
 )
 
+// VSOA per-role permitted msg_types (spec v4-rc2 MOD-PP-MSG-1/7/14).
+const (
+	MsgSetParticipantOPToValidatedTypeURL      = "/verana.pp.v1.MsgSetParticipantOPToValidated"
+	MsgCreateOrUpdateParticipantSessionTypeURL = "/verana.pp.v1.MsgCreateOrUpdateParticipantSession"
+	// MsgTriggerResolverTypeURL is the HOLDER-permitted msg type. The resolver
+	// trigger message is a spec placeholder not yet implemented in this codebase.
+	MsgTriggerResolverTypeURL = "/verana.pp.v1.MsgTriggerResolver"
+)
+
+// vsoaPermittedMsgTypes returns the set of msg_types a vs_operator may be granted
+// for the given participant role, or nil if the role cannot be granted VSOA.
+func vsoaPermittedMsgTypes(role ParticipantRole) map[string]bool {
+	switch role {
+	case ParticipantRole_HOLDER:
+		return map[string]bool{MsgTriggerResolverTypeURL: true}
+	case ParticipantRole_ISSUER:
+		return map[string]bool{
+			MsgCreateOrUpdateParticipantSessionTypeURL: true,
+			MsgSetParticipantOPToValidatedTypeURL:      true,
+		}
+	case ParticipantRole_VERIFIER:
+		return map[string]bool{MsgCreateOrUpdateParticipantSessionTypeURL: true}
+	case ParticipantRole_ISSUER_GRANTOR, ParticipantRole_VERIFIER_GRANTOR:
+		return map[string]bool{MsgSetParticipantOPToValidatedTypeURL: true}
+	default:
+		return nil
+	}
+}
+
+// validateVSOperatorAuthz validates the VSOA parameter block on a create message.
+// If any vs_operator_authz_* parameter is set, vs_operator_authz_msg_types MUST be
+// non-empty, vs_operator MUST be set, and every msg_type MUST be permitted for the
+// role per the spec whitelist.
+func validateVSOperatorAuthz(role ParticipantRole, vsOperator string, msgTypes []string, anyParamSet bool) error {
+	if !anyParamSet {
+		return nil
+	}
+	if len(msgTypes) == 0 {
+		return fmt.Errorf("vs_operator_authz_msg_types is required when any vs_operator_authz_* param is set")
+	}
+	if vsOperator == "" {
+		return fmt.Errorf("vs_operator is required when vs_operator_authz_* params are set")
+	}
+	allowed := vsoaPermittedMsgTypes(role)
+	if allowed == nil {
+		return fmt.Errorf("role %s cannot be granted vs_operator authorization", role.String())
+	}
+	for _, mt := range msgTypes {
+		if !allowed[mt] {
+			return fmt.Errorf("msg_type %s is not permitted for role %s", mt, role.String())
+		}
+	}
+	return nil
+}
+
 func (msg *MsgStartParticipantOP) ValidateBasic() error {
 	// [MOD-PP-MSG-1-2-1] authority (group): signature must be verified
 	if _, err := sdk.AccAddressFromBech32(msg.Corporation); err != nil {
@@ -49,26 +104,21 @@ func (msg *MsgStartParticipantOP) ValidateBasic() error {
 		return fmt.Errorf("invalid DID format")
 	}
 
-	// [MOD-PP-MSG-1-2-1] vs_operator_authz_enabled: if true, vs_operator MUST NOT be null
-	if msg.VsOperatorAuthzEnabled && msg.VsOperator == "" {
-		return fmt.Errorf("vs_operator is required when vs_operator_authz_enabled is true")
-	}
-
-	// [MOD-PP-MSG-1-2-1] vs_operator_authz_with_feegrant: if true, vs_operator MUST NOT be null
-	if msg.VsOperatorAuthzWithFeegrant && msg.VsOperator == "" {
-		return fmt.Errorf("vs_operator is required when vs_operator_authz_with_feegrant is true")
-	}
-
-	// [MOD-PP-MSG-1-2-1] vs_operator_authz_spend_period: if not null, vs_operator MUST NOT be null
-	if msg.VsOperatorAuthzSpendPeriod != nil && msg.VsOperator == "" {
-		return fmt.Errorf("vs_operator is required when vs_operator_authz_spend_period is set")
-	}
-
 	// Validate vs_operator address if provided
 	if msg.VsOperator != "" {
 		if _, err := sdk.AccAddressFromBech32(msg.VsOperator); err != nil {
 			return fmt.Errorf("invalid vs_operator address: %w", err)
 		}
+	}
+
+	// [MOD-PP-MSG-1-2-1] VSOA params: per-role whitelist + presence rules.
+	anyParam := len(msg.VsOperatorAuthzMsgTypes) > 0 ||
+		len(msg.VsOperatorAuthzSpendLimit) > 0 ||
+		msg.VsOperatorAuthzWithFeegrant ||
+		len(msg.VsOperatorAuthzFeeSpendLimit) > 0 ||
+		msg.VsOperatorAuthzPeriod != nil
+	if err := validateVSOperatorAuthz(ParticipantRole(msg.Role), msg.VsOperator, msg.VsOperatorAuthzMsgTypes, anyParam); err != nil {
+		return err
 	}
 
 	return nil
@@ -176,6 +226,32 @@ func (msg *MsgCreateRootParticipant) ValidateBasic() error {
 	// did, if specified, MUST conform to the DID Syntax
 	if !validation.IsValidDID(msg.Did) {
 		return fmt.Errorf("invalid DID format")
+	}
+
+	// [MOD-PP-MSG-7-2-1] VSOA params: msg_types MUST be a subset of
+	// [SetParticipantOPToValidated]; vs_operator required if any param set.
+	anyParam := len(msg.VsOperatorAuthzMsgTypes) > 0 ||
+		len(msg.VsOperatorAuthzSpendLimit) > 0 ||
+		msg.VsOperatorAuthzWithFeegrant ||
+		len(msg.VsOperatorAuthzFeeSpendLimit) > 0 ||
+		msg.VsOperatorAuthzPeriod != nil
+	if anyParam {
+		if len(msg.VsOperatorAuthzMsgTypes) == 0 {
+			return fmt.Errorf("vs_operator_authz_msg_types is required when any vs_operator_authz_* param is set")
+		}
+		if msg.VsOperator == "" {
+			return fmt.Errorf("vs_operator is required when vs_operator_authz_* params are set")
+		}
+		for _, mt := range msg.VsOperatorAuthzMsgTypes {
+			if mt != MsgSetParticipantOPToValidatedTypeURL {
+				return fmt.Errorf("msg_type %s is not permitted for root participant (only SetParticipantOPToValidated)", mt)
+			}
+		}
+	}
+	if msg.VsOperator != "" {
+		if _, err := sdk.AccAddressFromBech32(msg.VsOperator); err != nil {
+			return fmt.Errorf("invalid vs_operator address: %w", err)
+		}
 	}
 
 	// Note: Time-based validations are moved to the main function
@@ -346,26 +422,21 @@ func (msg *MsgSelfCreateParticipant) ValidateBasic() error {
 		return sdkerrors.ErrInvalidRequest.Wrap("invalid DID syntax")
 	}
 
-	// vs_operator_authz_enabled: if true, vs_operator MUST NOT be null
-	if msg.VsOperatorAuthzEnabled && msg.VsOperator == "" {
-		return fmt.Errorf("vs_operator is required when vs_operator_authz_enabled is true")
-	}
-
-	// vs_operator_authz_with_feegrant: if true, vs_operator MUST NOT be null
-	if msg.VsOperatorAuthzWithFeegrant && msg.VsOperator == "" {
-		return fmt.Errorf("vs_operator is required when vs_operator_authz_with_feegrant is true")
-	}
-
-	// vs_operator_authz_spend_period: if not null, vs_operator MUST NOT be null
-	if msg.VsOperatorAuthzSpendPeriod != nil && msg.VsOperator == "" {
-		return fmt.Errorf("vs_operator is required when vs_operator_authz_spend_period is set")
-	}
-
 	// Validate vs_operator address if provided
 	if msg.VsOperator != "" {
 		if _, err := sdk.AccAddressFromBech32(msg.VsOperator); err != nil {
 			return fmt.Errorf("invalid vs_operator address: %w", err)
 		}
+	}
+
+	// [MOD-PP-MSG-14-2-1] VSOA params: per-role whitelist + presence rules.
+	anyParam := len(msg.VsOperatorAuthzMsgTypes) > 0 ||
+		len(msg.VsOperatorAuthzSpendLimit) > 0 ||
+		msg.VsOperatorAuthzWithFeegrant ||
+		len(msg.VsOperatorAuthzFeeSpendLimit) > 0 ||
+		msg.VsOperatorAuthzPeriod != nil
+	if err := validateVSOperatorAuthz(msg.Role, msg.VsOperator, msg.VsOperatorAuthzMsgTypes, anyParam); err != nil {
+		return err
 	}
 
 	return nil

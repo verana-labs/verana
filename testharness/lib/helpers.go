@@ -1094,11 +1094,11 @@ func CreatePermission(client cosmosclient.Client, ctx context.Context, actor cos
 		VerificationFees:             msg.VerificationFees,
 		ValidationFees:               msg.ValidationFees,
 		VsOperator:                   msg.VsOperator,
-		VsOperatorAuthzEnabled:       msg.VsOperatorAuthzEnabled,
+		VsOperatorAuthzMsgTypes:      msg.VsOperatorAuthzMsgTypes,
 		VsOperatorAuthzSpendLimit:    msg.VsOperatorAuthzSpendLimit,
 		VsOperatorAuthzWithFeegrant:  msg.VsOperatorAuthzWithFeegrant,
 		VsOperatorAuthzFeeSpendLimit: msg.VsOperatorAuthzFeeSpendLimit,
-		VsOperatorAuthzSpendPeriod:   msg.VsOperatorAuthzSpendPeriod,
+		VsOperatorAuthzPeriod:        msg.VsOperatorAuthzPeriod,
 	}
 
 	txResp, err := client.BroadcastTx(ctx, actor, fullMsg)

@@ -197,12 +197,11 @@ func (ms msgServer) executeSetParticipantVPToValidated(
 		return nil, fmt.Errorf("failed to update participant: %w", err)
 	}
 
-	// [MOD-PP-MSG-3-3] If applicant_participant.type is ISSUER or VERIFIER and vs_operator_authz_enabled:
-	// Grant VS Operator Authorization
-	if (applicantParticipant.Role == types.ParticipantRole_ISSUER || applicantParticipant.Role == types.ParticipantRole_VERIFIER) &&
-		applicantParticipant.VsOperatorAuthzEnabled {
-		if err := ms.grantVSOperatorAuthorization(ctx, applicantParticipant); err != nil {
-			return nil, fmt.Errorf("failed to grant VS operator authorization: %w", err)
+	// [MOD-PP-MSG-3-3] Activate any disabled VSOA record by syncing its expiration
+	// to the participant's effective_until via [MOD-DE-MSG-9]. No-op if no record.
+	if applicantParticipant.EffectiveUntil != nil {
+		if err := ms.delegationKeeper.UpdateVSOperatorAuthorizationExpiration(ctx, applicantParticipant.Id, *applicantParticipant.EffectiveUntil); err != nil {
+			return nil, fmt.Errorf("failed to update VS operator authorization expiration: %w", err)
 		}
 	}
 
@@ -226,44 +225,3 @@ func (ms msgServer) executeSetParticipantVPToValidated(
 	return &types.MsgSetParticipantOPToValidatedResponse{}, nil
 }
 
-// grantVSOperatorAuthorization implements [MOD-DE-MSG-5] orchestration.
-// Called by: SetParticipantOPToValidated, SetParticipantEffectiveUntil, SelfCreateParticipant.
-// VSOA storage is in DE module; this method handles the business logic.
-func (ms msgServer) grantVSOperatorAuthorization(ctx sdk.Context, participant types.Participant) error {
-	if participant.VsOperator == "" {
-		return nil
-	}
-	if ms.delegationKeeper == nil {
-		return fmt.Errorf("delegation keeper is required for VS operator authorization")
-	}
-
-	// [MOD-DE-MSG-5-2] Basic checks: authority and vs_operator already validated by caller
-
-	corpAcct, err := ms.corpAccountFromID(ctx, participant.CorporationId)
-	if err != nil {
-		return err
-	}
-
-	// Add participant to VSOA (DE handles mutual exclusivity check internally)
-	if err := ms.delegationKeeper.AddPermToVSOA(ctx, corpAcct, participant.VsOperator, participant.Id); err != nil {
-		return fmt.Errorf("failed to grant VS operator authorization: %w", err)
-	}
-
-	// [MOD-DE-MSG-5-4] Handle feegrant
-	if participant.VsOperatorAuthzWithFeegrant {
-		expiration, err := ms.computeVSOAFeegrantExpiration(ctx, corpAcct, participant.VsOperator)
-		if err != nil {
-			return fmt.Errorf("failed to compute feegrant expiration: %w", err)
-		}
-
-		// Only grant if expiration is nil (no limit) or in the future
-		if expiration == nil || expiration.After(ctx.BlockTime()) {
-			msgTypes := []string{"/verana.pp.v1.MsgCreateOrUpdateParticipantSession"}
-			if err := ms.delegationKeeper.GrantFeeAllowance(ctx, corpAcct, participant.VsOperator, msgTypes, expiration, nil, nil); err != nil {
-				return fmt.Errorf("failed to grant fee allowance: %w", err)
-			}
-		}
-	}
-
-	return nil
-}

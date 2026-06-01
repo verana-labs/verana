@@ -120,8 +120,8 @@ func RunPermissionCSPSJourney(ctx context.Context, client cosmosclient.Client) e
 		Role:                   permtypes.ParticipantRole_ISSUER,
 		ValidatorParticipantId: rootPermID,
 		Did:                    issuerDID,
-		VsOperator:             vsOperatorAddr,
-		VsOperatorAuthzEnabled: true,
+		VsOperator:              vsOperatorAddr,
+		VsOperatorAuthzMsgTypes: []string{permtypes.MsgCreateOrUpdateParticipantSessionTypeURL},
 	})
 	if err != nil {
 		return fmt.Errorf("prerequisite 4 failed: could not start issuer perm VP: %w", err)
@@ -149,8 +149,7 @@ func RunPermissionCSPSJourney(ctx context.Context, client cosmosclient.Client) e
 	if issuerPerm.OpState != permtypes.OnboardingState_VALIDATED {
 		return fmt.Errorf("prerequisite verification failed: expected VALIDATED, got %s", issuerPerm.OpState.String())
 	}
-	fmt.Printf("  Verified: ISSUER perm is VALIDATED, vs_operator=%s, vs_operator_authz_enabled=%v\n",
-		issuerPerm.VsOperator, issuerPerm.VsOperatorAuthzEnabled)
+	fmt.Printf("  Verified: ISSUER perm is VALIDATED, vs_operator=%s\n", issuerPerm.VsOperator)
 
 	// --- Prerequisite 6: Create CS2 + root2 + agent perm (authority=operatorAddr) ---
 	// Use a second CS to avoid overlap with the issuer perm on CS1

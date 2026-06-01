@@ -303,11 +303,11 @@ func StartPermissionVP(client cosmosclient.Client, ctx context.Context, creator 
 		IssuanceFees:                 override.IssuanceFees,
 		VerificationFees:             override.VerificationFees,
 		VsOperator:                   override.VsOperator,
-		VsOperatorAuthzEnabled:       override.VsOperatorAuthzEnabled,
+		VsOperatorAuthzMsgTypes:      override.VsOperatorAuthzMsgTypes,
 		VsOperatorAuthzSpendLimit:    override.VsOperatorAuthzSpendLimit,
 		VsOperatorAuthzWithFeegrant:  override.VsOperatorAuthzWithFeegrant,
 		VsOperatorAuthzFeeSpendLimit: override.VsOperatorAuthzFeeSpendLimit,
-		VsOperatorAuthzSpendPeriod:   override.VsOperatorAuthzSpendPeriod,
+		VsOperatorAuthzPeriod:        override.VsOperatorAuthzPeriod,
 	}
 	if msg.Corporation == "" {
 		msg.Corporation = creatorAddr
