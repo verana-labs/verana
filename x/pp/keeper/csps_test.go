@@ -544,7 +544,6 @@ func TestAgentRewardsDistribution(t *testing.T) {
 		OpState:                types.OnboardingState_VALIDATED,
 		EffectiveFrom:          &pastTime,
 		VsOperator:             creator,
-		VsOperatorAuthzEnabled: true,
 	}
 	issuerParticipantID, err := k.CreateParticipant(sdkCtx, issuerParticipant)
 	require.NoError(t, err)
@@ -800,7 +799,6 @@ func TestAgentRewardsWithZeroFees(t *testing.T) {
 		OpState:                types.OnboardingState_VALIDATED,
 		EffectiveFrom:          &pastTime,
 		VsOperator:             creator,
-		VsOperatorAuthzEnabled: true,
 	}
 	issuerParticipantID, err := k.CreateParticipant(sdkCtx, issuerParticipant)
 	require.NoError(t, err)
@@ -920,7 +918,6 @@ func TestAgentRewardsWithDiscount(t *testing.T) {
 		IssuanceFeeDiscount:    5000, // 50% discount (per Issue #94)
 		EffectiveFrom:          &pastTime,
 		VsOperator:             creator,
-		VsOperatorAuthzEnabled: true,
 	}
 	issuerParticipantID, err := k.CreateParticipant(sdkCtx, issuerParticipant)
 	require.NoError(t, err)
