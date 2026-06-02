@@ -85,12 +85,27 @@ echo "************************ Running test-harness journey 301 ****************
 echo "*****************************************************************************************"
 go run cmd/main.go 301
 
-# Journeys 302-310 rely on the legacy "operator self-delegation shortcut"
-# where a regular wallet acts as the `corporation` field. Under spec v4-rc2
-# (issue #305) AUTHZ-CHECK-5 requires `corporation` to be the policy_address
-# of a registered MOD-CO Corporation, so the shortcut no longer works — those
-# journeys need to be rewritten to use the j301 group + group-proposal flow.
-# Tracked as follow-up; not part of the TR→EC rename PR.
+# Journeys 302, 304, 307 rewritten for spec v4-rc2 AUTHZ-CHECK-5: the operator
+# acts on behalf of journey301's registered Corporation (policy_address) via a
+# group-granted operator authorization + the *WithAuthority helpers. Validated
+# live (journey307 exercises the full VSOA record lifecycle + CSPS).
 echo "*****************************************************************************************"
-echo "******** Journeys 302-310 SKIPPED — pending rewrite for AUTHZ-CHECK-5 (see PR) **********"
+echo "************************ Running test-harness journey 302 *******************************"
+echo "*****************************************************************************************"
+go run cmd/main.go 302
+
+echo "*****************************************************************************************"
+echo "************************ Running test-harness journey 304 *******************************"
+echo "*****************************************************************************************"
+go run cmd/main.go 304
+
+echo "*****************************************************************************************"
+echo "********************* Running test-harness journey 307 (VSOA CSPS) **********************"
+echo "*****************************************************************************************"
+go run cmd/main.go 307
+
+# Journeys 303/305/306/308/309/310 still use the legacy self-delegation shortcut
+# and need the same AUTHZ-CHECK-5 corp-routing rewrite (tracked in #316).
+echo "*****************************************************************************************"
+echo "**** Journeys 303/305/306/308/309/310 SKIPPED — pending AUTHZ-CHECK-5 rewrite (#316) ****"
 echo "*****************************************************************************************"
