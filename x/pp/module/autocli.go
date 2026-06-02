@@ -166,10 +166,9 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 							Usage:        "Optional Verifiable Service operator account address",
 							DefaultValue: "",
 						},
-						"vs_operator_authz_enabled": {
-							Name:         "vs-operator-authz-enabled",
-							Usage:        "Enable authz grant for vs_operator",
-							DefaultValue: "false",
+						"vs_operator_authz_msg_types": {
+							Name:  "vs-operator-authz-msg-types",
+							Usage: "Delegable msg types granted to vs_operator (presence triggers a VSOA record)",
 						},
 						"vs_operator_authz_with_feegrant": {
 							Name:         "vs-operator-authz-with-feegrant",
