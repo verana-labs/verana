@@ -2,7 +2,7 @@
  * Journey: PERM Create Permission (Self-Create, OPEN mode)
  *
  * Creates a new OPEN-mode CS, root permission, waits for effectiveness,
- * then creates a child ISSUER permission via MsgSelfCreatePermission.
+ * then creates a child ISSUER permission via MsgSelfCreateParticipant.
  *
  * Requires: test:de-grant-perm-auth must be run first.
  *
@@ -21,8 +21,8 @@ import {
   config,
 } from "../helpers/client";
 import { typeUrls } from "../helpers/registry";
-import { MsgSelfCreatePermission } from "../../../src/codec/verana/perm/v1/tx";
-import { PermissionType } from "../../../src/codec/verana/perm/v1/types";
+import { MsgSelfCreateParticipant } from "../../../src/codec/verana/pp/v1/tx";
+import { ParticipantRole } from "../../../src/codec/verana/pp/v1/types";
 import { IssuerOnboardingMode, VerifierOnboardingMode } from "../../../src/codec/verana/cs/v1/types";
 import { getPermAuthzSetup, saveJourneyResult } from "../helpers/journeyResults";
 import { createPermPrerequisites, extractIdFromEvents } from "../helpers/permissionHelpers";
@@ -83,18 +83,18 @@ async function main() {
     console.log();
 
     // Step 5: Create child ISSUER permission
-    console.log("Step 5: Creating child ISSUER permission (MsgSelfCreatePermission)...");
+    console.log("Step 5: Creating child ISSUER permission (MsgSelfCreateParticipant)...");
     const childEffectiveFrom = new Date(Date.now() + 30000); // 30s in future
     // Must be <= validator_perm.effective_until (root uses effectiveFrom + 360 days)
     const childEffectiveUntil = new Date(childEffectiveFrom.getTime() + 300 * 24 * 60 * 60 * 1000);
 
     const msg = {
-      typeUrl: typeUrls.MsgSelfCreatePermission,
-      value: MsgSelfCreatePermission.fromPartial({
+      typeUrl: typeUrls.MsgSelfCreateParticipant,
+      value: MsgSelfCreateParticipant.fromPartial({
         corporation: setup.authorityAddress,
         operator: setup.operatorAddress,
-        type: PermissionType.ISSUER,
-        validatorPermId: rootPermId,
+        role: ParticipantRole.ISSUER,
+        validatorParticipantId: rootPermId,
         did,
         effectiveFrom: childEffectiveFrom,
         effectiveUntil: childEffectiveUntil,

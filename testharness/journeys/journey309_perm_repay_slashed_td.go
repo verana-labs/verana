@@ -39,7 +39,7 @@ func RunPermissionRepaySlashedTDJourney(ctx context.Context, client cosmosclient
 	fmt.Printf("  Slashed Perm: %d\n", issuerPermID)
 
 	// Verify the perm is slashed from journey 308
-	slashedPerm, err := lib.GetPermission(client, ctx, issuerPermID)
+	slashedPerm, err := lib.GetParticipant(client, ctx, issuerPermID)
 	if err != nil {
 		return fmt.Errorf("could not load slashed perm from journey 308: %w", err)
 	}
@@ -67,7 +67,7 @@ func RunPermissionRepaySlashedTDJourney(ctx context.Context, client cosmosclient
 	err = lib.GrantOperatorAuthorizationViaGroup(
 		client, ctx, adminAccount, member1Account,
 		policyAddr, operatorAddr, operatorAddr,
-		[]string{"/verana.perm.v1.MsgRepayPermissionSlashedTrustDeposit"},
+		[]string{"/verana.pp.v1.MsgRepayParticipantSlashedTrustDeposit"},
 	)
 	if err != nil {
 		return fmt.Errorf("step 1b failed: %w", err)
@@ -88,7 +88,7 @@ func RunPermissionRepaySlashedTDJourney(ctx context.Context, client cosmosclient
 	// TEST 2: Verify repaid permission fields
 	// =========================================================================
 	fmt.Println("\n=== TEST 2: Verify repaid permission fields ===")
-	repaidPerm, err := lib.GetPermission(client, ctx, issuerPermID)
+	repaidPerm, err := lib.GetParticipant(client, ctx, issuerPermID)
 	if err != nil {
 		return fmt.Errorf("step 2 query failed: %w", err)
 	}
@@ -138,7 +138,7 @@ func RunPermissionRepaySlashedTDJourney(ctx context.Context, client cosmosclient
 
 	// Save results
 	result := lib.JourneyResult{
-		EcosystemID: setup308.EcosystemID,
+		EcosystemID:     setup308.EcosystemID,
 		SchemaID:        setup308.SchemaID,
 		DID:             setup308.DID,
 		PermissionID:    setup308.PermissionID,

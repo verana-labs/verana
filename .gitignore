@@ -40,3 +40,8 @@ ts-proto/test/out/
 
 # Compiled binaries in ts-proto
 ts-proto/cmd
+
+# Agent / planning scratch (never commit)
+docs/superpowers/
+.worktrees/
+.claude-agents/audit/

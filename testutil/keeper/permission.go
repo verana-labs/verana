@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"hash/fnv"
 	"testing"
 
 	"cosmossdk.io/log"
@@ -20,8 +21,8 @@ import (
 
 	cstypes "github.com/verana-labs/verana/x/cs/types"
 	ectypes "github.com/verana-labs/verana/x/ec/types"
-	"github.com/verana-labs/verana/x/perm/keeper"
-	"github.com/verana-labs/verana/x/perm/types"
+	"github.com/verana-labs/verana/x/pp/keeper"
+	"github.com/verana-labs/verana/x/pp/types"
 )
 
 func PermissionKeeper(t testing.TB) (keeper.Keeper, *MockCredentialSchemaKeeper, *MockPermEcosystemKeeper, *MockPermCorporationKeeper, sdk.Context, *MockDelegationKeeper) {
@@ -68,7 +69,7 @@ func PermissionKeeper(t testing.TB) (keeper.Keeper, *MockCredentialSchemaKeeper,
 	return k, csKeeper, ekKeeper, coKeeper, ctx, mockDelegationKeeper
 }
 
-// MockPermEcosystemKeeper is a mock implementation of x/perm types.EcosystemKeeper.
+// MockPermEcosystemKeeper is a mock implementation of x/pp types.EcosystemKeeper.
 // Replaces the legacy MockTrustRegistryKeeper post-MOD-EC rename: stores
 // Ecosystem rows keyed by id and a per-mock map of policy_address →
 // CorporationView so the linked MockPermCorporationKeeper can resolve signers
@@ -119,6 +120,19 @@ func (k *MockPermEcosystemKeeper) CreateMockEcosystem(corporation string, did st
 	return id
 }
 
+// RegisterCorp maps a policy_address to a Corporation id (idempotent). Lets
+// tests that set Participant.corporation_id directly have it reversed back to
+// an account by MockPermCorporationKeeper.ResolveByID for fund-flows. Ids start
+// above the ecosystem-id range to avoid collisions.
+func (k *MockPermEcosystemKeeper) RegisterCorp(addr string) uint64 {
+	if v, ok := k.corporationByPolicyAddr[addr]; ok {
+		return v.Id
+	}
+	id := uint64(100000 + len(k.corporationByPolicyAddr) + 1)
+	k.corporationByPolicyAddr[addr] = types.CorporationView{Id: id, PolicyAddress: addr}
+	return id
+}
+
 // MockPermCorporationKeeper resolves a signing policy_address to a
 // CorporationView; shares its backing map with MockPermEcosystemKeeper so
 // the (ec.CorporationId == co.Id) check passes for the same `corporation`
@@ -127,20 +141,45 @@ func (k *MockPermEcosystemKeeper) CreateMockEcosystem(corporation string, did st
 // register a corporation still pass through ownership checks.
 type MockPermCorporationKeeper struct {
 	corporationByPolicyAddr map[string]types.CorporationView
+	policyAddrByID          map[uint64]string
 }
 
 func NewMockPermCorporationKeeper(ekKeeper *MockPermEcosystemKeeper) *MockPermCorporationKeeper {
-	return &MockPermCorporationKeeper{corporationByPolicyAddr: ekKeeper.corporationByPolicyAddr}
+	return &MockPermCorporationKeeper{
+		corporationByPolicyAddr: ekKeeper.corporationByPolicyAddr,
+		policyAddrByID:          make(map[uint64]string),
+	}
 }
 
 func (k *MockPermCorporationKeeper) ResolveByPolicyAddress(ctx context.Context, policyAddress string) (types.CorporationView, bool) {
 	if v, ok := k.corporationByPolicyAddr[policyAddress]; ok {
+		k.policyAddrByID[v.Id] = policyAddress
 		return v, true
 	}
-	// Distinct sentinel id for unknown addresses — never matches a
-	// CreateMockEcosystem row (which uses ids starting at 1). Lets
-	// "wrong signer" tests exercise the strict ownership mismatch.
-	return types.CorporationView{Id: 1 << 31, PolicyAddress: policyAddress}, true
+	// Distinct, deterministic sentinel id per unknown address — never matches a
+	// CreateMockEcosystem row (which uses small ids starting at 1) thanks to the
+	// high bit, yet stays distinct across addresses so overlap checks treat
+	// different corporations as different. Lets "wrong signer" tests still see a
+	// strict ownership mismatch.
+	h := fnv.New64a()
+	_, _ = h.Write([]byte(policyAddress))
+	id := h.Sum64() | (uint64(1) << 62)
+	v := types.CorporationView{Id: id, PolicyAddress: policyAddress}
+	k.policyAddrByID[v.Id] = policyAddress
+	return v, true
+}
+
+// ResolveByID reverses corporation_id → policy_address for fund-flow helpers.
+func (k *MockPermCorporationKeeper) ResolveByID(ctx context.Context, id uint64) (types.CorporationView, bool) {
+	for addr, v := range k.corporationByPolicyAddr {
+		if v.Id == id {
+			return types.CorporationView{Id: id, PolicyAddress: addr}, true
+		}
+	}
+	if addr, ok := k.policyAddrByID[id]; ok {
+		return types.CorporationView{Id: id, PolicyAddress: addr}, true
+	}
+	return types.CorporationView{}, false
 }
 
 type MockCredentialSchemaKeeper struct {

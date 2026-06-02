@@ -1,0 +1,930 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "verana/pp/v1/tx.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "Msg"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/verana.pp.v1.Msg/CancelParticipantOPLastRequest": {
+      "post": {
+        "operationId": "Msg_CancelParticipantOPLastRequest",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.pp.v1.MsgCancelParticipantOPLastRequestResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.pp.v1.MsgCancelParticipantOPLastRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.pp.v1.Msg/CreateOrUpdateParticipantSession": {
+      "post": {
+        "operationId": "Msg_CreateOrUpdateParticipantSession",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.pp.v1.MsgCreateOrUpdateParticipantSessionResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.pp.v1.MsgCreateOrUpdateParticipantSession"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.pp.v1.Msg/CreateRootParticipant": {
+      "post": {
+        "operationId": "Msg_CreateRootParticipant",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.pp.v1.MsgCreateRootParticipantResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.pp.v1.MsgCreateRootParticipant"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.pp.v1.Msg/RenewParticipantOP": {
+      "post": {
+        "operationId": "Msg_RenewParticipantOP",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.pp.v1.MsgRenewParticipantOPResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.pp.v1.MsgRenewParticipantOP"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.pp.v1.Msg/RepayParticipantSlashedTrustDeposit": {
+      "post": {
+        "operationId": "Msg_RepayParticipantSlashedTrustDeposit",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.pp.v1.MsgRepayParticipantSlashedTrustDepositResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.pp.v1.MsgRepayParticipantSlashedTrustDeposit"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.pp.v1.Msg/RevokeParticipant": {
+      "post": {
+        "operationId": "Msg_RevokeParticipant",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.pp.v1.MsgRevokeParticipantResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.pp.v1.MsgRevokeParticipant"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.pp.v1.Msg/SelfCreateParticipant": {
+      "post": {
+        "summary": "[MOD-PP-MSG-14] Self Create Participant (OPEN mode)",
+        "operationId": "Msg_SelfCreateParticipant",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.pp.v1.MsgSelfCreateParticipantResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.pp.v1.MsgSelfCreateParticipant"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.pp.v1.Msg/SetParticipantEffectiveUntil": {
+      "post": {
+        "operationId": "Msg_SetParticipantEffectiveUntil",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.pp.v1.MsgSetParticipantEffectiveUntilResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.pp.v1.MsgSetParticipantEffectiveUntil"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.pp.v1.Msg/SetParticipantOPToValidated": {
+      "post": {
+        "operationId": "Msg_SetParticipantOPToValidated",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.pp.v1.MsgSetParticipantOPToValidatedResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.pp.v1.MsgSetParticipantOPToValidated"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.pp.v1.Msg/SlashParticipantTrustDeposit": {
+      "post": {
+        "operationId": "Msg_SlashParticipantTrustDeposit",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.pp.v1.MsgSlashParticipantTrustDepositResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.pp.v1.MsgSlashParticipantTrustDeposit"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.pp.v1.Msg/StartParticipantOP": {
+      "post": {
+        "operationId": "Msg_StartParticipantOP",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.pp.v1.MsgStartParticipantOPResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.pp.v1.MsgStartParticipantOP"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.pp.v1.Msg/UpdateParams": {
+      "post": {
+        "summary": "UpdateParams defines a (governance) operation for updating the module\nparameters. The authority defaults to the x/gov module account.",
+        "operationId": "Msg_UpdateParams",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.pp.v1.MsgUpdateParamsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "MsgUpdateParams is the Msg/UpdateParams request type.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.pp.v1.MsgUpdateParams"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "cosmos.base.v1beta1.Coin": {
+      "type": "object",
+      "properties": {
+        "denom": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "string"
+        }
+      },
+      "description": "Coin defines a token with a denomination and an amount.\n\nNOTE: The amount field is an Int which implements the custom method\nsignatures required by gogoproto."
+    },
+    "google.protobuf.Any": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "google.rpc.Status": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/google.protobuf.Any"
+          }
+        }
+      }
+    },
+    "verana.pp.v1.MsgCancelParticipantOPLastRequest": {
+      "type": "object",
+      "properties": {
+        "corporation": {
+          "type": "string",
+          "title": "corporation is the group account on whose behalf this message is executed"
+        },
+        "operator": {
+          "type": "string",
+          "title": "operator is the account authorized by the corporation to run this Msg"
+        },
+        "id": {
+          "type": "string",
+          "format": "uint64",
+          "title": "Participant ID"
+        }
+      }
+    },
+    "verana.pp.v1.MsgCancelParticipantOPLastRequestResponse": {
+      "type": "object"
+    },
+    "verana.pp.v1.MsgCreateOrUpdateParticipantSession": {
+      "type": "object",
+      "properties": {
+        "corporation": {
+          "type": "string",
+          "title": "corporation is the group account on whose behalf this message is executed"
+        },
+        "operator": {
+          "type": "string",
+          "title": "operator is the account authorized by the corporation to run this Msg (vs_operator)"
+        },
+        "id": {
+          "type": "string",
+          "title": "UUID (mandatory)"
+        },
+        "issuer_participant_id": {
+          "type": "string",
+          "format": "uint64",
+          "title": "optional: issuer participant id"
+        },
+        "verifier_participant_id": {
+          "type": "string",
+          "format": "uint64",
+          "title": "optional: verifier participant id"
+        },
+        "agent_participant_id": {
+          "type": "string",
+          "format": "uint64",
+          "title": "mandatory: agent credential issuer participant id"
+        },
+        "wallet_agent_participant_id": {
+          "type": "string",
+          "format": "uint64",
+          "title": "mandatory: wallet credential issuer participant id"
+        },
+        "digest": {
+          "type": "string",
+          "title": "optional: digest derived from an issued or verified credential"
+        }
+      }
+    },
+    "verana.pp.v1.MsgCreateOrUpdateParticipantSessionResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      }
+    },
+    "verana.pp.v1.MsgCreateRootParticipant": {
+      "type": "object",
+      "properties": {
+        "corporation": {
+          "type": "string",
+          "description": "[MOD-PP-MSG-7-1] Spec v4 parameters.\nparticipant.role is hardcoded to ECOSYSTEM by the handler per [MOD-PP-MSG-7-3];\nvs_operator is not set on root participants."
+        },
+        "operator": {
+          "type": "string"
+        },
+        "schema_id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "did": {
+          "type": "string"
+        },
+        "effective_from": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "effective_until": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "validation_fees": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "issuance_fees": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "verification_fees": {
+          "type": "string",
+          "format": "uint64"
+        }
+      }
+    },
+    "verana.pp.v1.MsgCreateRootParticipantResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uint64",
+          "title": "ID of the created participant"
+        }
+      }
+    },
+    "verana.pp.v1.MsgRenewParticipantOP": {
+      "type": "object",
+      "properties": {
+        "corporation": {
+          "type": "string",
+          "description": "[MOD-PP-MSG-2-1] Spec v4 parameters: corporation, operator, id."
+        },
+        "operator": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string",
+          "format": "uint64",
+          "title": "ID of the participant to renew"
+        }
+      },
+      "title": "MsgRenewParticipantOP represents a message to renew a participant onboarding process"
+    },
+    "verana.pp.v1.MsgRenewParticipantOPResponse": {
+      "type": "object",
+      "title": "MsgRenewParticipantOPResponse defines the Msg/RenewParticipantOP response type"
+    },
+    "verana.pp.v1.MsgRepayParticipantSlashedTrustDeposit": {
+      "type": "object",
+      "properties": {
+        "corporation": {
+          "type": "string"
+        },
+        "operator": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "amount": {
+          "type": "string",
+          "format": "uint64"
+        }
+      }
+    },
+    "verana.pp.v1.MsgRepayParticipantSlashedTrustDepositResponse": {
+      "type": "object"
+    },
+    "verana.pp.v1.MsgRevokeParticipant": {
+      "type": "object",
+      "properties": {
+        "corporation": {
+          "type": "string"
+        },
+        "operator": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string",
+          "format": "uint64",
+          "title": "Participant ID"
+        }
+      }
+    },
+    "verana.pp.v1.MsgRevokeParticipantResponse": {
+      "type": "object"
+    },
+    "verana.pp.v1.MsgSelfCreateParticipant": {
+      "type": "object",
+      "properties": {
+        "corporation": {
+          "type": "string"
+        },
+        "operator": {
+          "type": "string"
+        },
+        "role": {
+          "$ref": "#/definitions/verana.pp.v1.ParticipantRole"
+        },
+        "validator_participant_id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "did": {
+          "type": "string"
+        },
+        "effective_from": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "effective_until": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "verification_fees": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "validation_fees": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "vs_operator": {
+          "type": "string",
+          "title": "vs_operator: the account of the Verifiable Service (optional)"
+        },
+        "vs_operator_authz_enabled": {
+          "type": "boolean"
+        },
+        "vs_operator_authz_spend_limit": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
+          }
+        },
+        "vs_operator_authz_with_feegrant": {
+          "type": "boolean"
+        },
+        "vs_operator_authz_fee_spend_limit": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
+          }
+        },
+        "vs_operator_authz_spend_period": {
+          "type": "string"
+        }
+      }
+    },
+    "verana.pp.v1.MsgSelfCreateParticipantResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uint64"
+        }
+      }
+    },
+    "verana.pp.v1.MsgSetParticipantEffectiveUntil": {
+      "type": "object",
+      "properties": {
+        "corporation": {
+          "type": "string"
+        },
+        "operator": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string",
+          "format": "uint64",
+          "title": "Participant ID"
+        },
+        "effective_until": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "verana.pp.v1.MsgSetParticipantEffectiveUntilResponse": {
+      "type": "object"
+    },
+    "verana.pp.v1.MsgSetParticipantOPToValidated": {
+      "type": "object",
+      "properties": {
+        "corporation": {
+          "type": "string",
+          "title": "corporation is the group account on whose behalf this message is executed"
+        },
+        "operator": {
+          "type": "string",
+          "title": "operator is the account authorized by the corporation to run this Msg"
+        },
+        "id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "effective_until": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "validation_fees": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "issuance_fees": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "verification_fees": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "op_summary_digest": {
+          "type": "string"
+        },
+        "issuance_fee_discount": {
+          "type": "string",
+          "format": "uint64",
+          "description": "Issuance fee discount (mandatory, default 0)",
+          "title": "Fee discount fields (scaled: 0 = 0.0, 10000 = 1.0, range 0-10000)\nDefault to 0 (no discount), maximum 10000 (100% discount)"
+        },
+        "verification_fee_discount": {
+          "type": "string",
+          "format": "uint64",
+          "title": "Verification fee discount (mandatory, default 0)"
+        }
+      },
+      "title": "MsgSetParticipantOPToValidated represents a message to set a participant onboarding process to validated state"
+    },
+    "verana.pp.v1.MsgSetParticipantOPToValidatedResponse": {
+      "type": "object",
+      "title": "MsgSetParticipantOPToValidatedResponse defines the Msg/SetParticipantOPToValidated response type"
+    },
+    "verana.pp.v1.MsgSlashParticipantTrustDeposit": {
+      "type": "object",
+      "properties": {
+        "corporation": {
+          "type": "string",
+          "title": "corporation is the group account on whose behalf this message is executed"
+        },
+        "operator": {
+          "type": "string",
+          "title": "operator is the account authorized by the corporation to run this Msg"
+        },
+        "id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "amount": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "reason": {
+          "type": "string",
+          "title": "[MOD-PP-MSG-12-1] reason for the slash (mandatory per spec v4)"
+        }
+      }
+    },
+    "verana.pp.v1.MsgSlashParticipantTrustDepositResponse": {
+      "type": "object"
+    },
+    "verana.pp.v1.MsgStartParticipantOP": {
+      "type": "object",
+      "properties": {
+        "corporation": {
+          "type": "string",
+          "title": "corporation is the group account on whose behalf this message is executed"
+        },
+        "operator": {
+          "type": "string",
+          "title": "operator is the account authorized by the corporation to run this Msg"
+        },
+        "role": {
+          "$ref": "#/definitions/verana.pp.v1.ParticipantRole"
+        },
+        "validator_participant_id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "did": {
+          "type": "string",
+          "title": "mandatory: MUST conform to DID Syntax"
+        },
+        "validation_fees": {
+          "$ref": "#/definitions/verana.pp.v1.OptionalUInt64"
+        },
+        "issuance_fees": {
+          "$ref": "#/definitions/verana.pp.v1.OptionalUInt64"
+        },
+        "verification_fees": {
+          "$ref": "#/definitions/verana.pp.v1.OptionalUInt64"
+        },
+        "vs_operator": {
+          "type": "string",
+          "title": "vs_operator: the account of the Verifiable Service (optional)"
+        },
+        "vs_operator_authz_enabled": {
+          "type": "boolean"
+        },
+        "vs_operator_authz_spend_limit": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
+          }
+        },
+        "vs_operator_authz_with_feegrant": {
+          "type": "boolean"
+        },
+        "vs_operator_authz_fee_spend_limit": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
+          }
+        },
+        "vs_operator_authz_spend_period": {
+          "type": "string"
+        }
+      },
+      "title": "MsgStartParticipantOP represents a message to start a participant onboarding process"
+    },
+    "verana.pp.v1.MsgStartParticipantOPResponse": {
+      "type": "object",
+      "properties": {
+        "participant_id": {
+          "type": "string",
+          "format": "uint64"
+        }
+      },
+      "title": "MsgStartParticipantOPResponse defines the Msg/StartParticipantOP response type"
+    },
+    "verana.pp.v1.MsgUpdateParams": {
+      "type": "object",
+      "properties": {
+        "authority": {
+          "type": "string",
+          "description": "authority is the address that controls the module (defaults to x/gov unless overwritten)."
+        },
+        "params": {
+          "$ref": "#/definitions/verana.pp.v1.Params",
+          "description": "params defines the module parameters to update.\n\nNOTE: All parameters must be supplied."
+        }
+      },
+      "description": "MsgUpdateParams is the Msg/UpdateParams request type."
+    },
+    "verana.pp.v1.MsgUpdateParamsResponse": {
+      "type": "object",
+      "description": "MsgUpdateParamsResponse defines the response structure for executing a\nMsgUpdateParams message."
+    },
+    "verana.pp.v1.OptionalUInt64": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "string",
+          "format": "uint64"
+        }
+      },
+      "title": "OptionalUInt64 is a wrapper for optional uint64 values"
+    },
+    "verana.pp.v1.Params": {
+      "type": "object",
+      "properties": {
+        "validation_term_requested_timeout_days": {
+          "type": "string",
+          "format": "uint64"
+        }
+      },
+      "description": "Params defines the parameters for the module."
+    },
+    "verana.pp.v1.ParticipantRole": {
+      "type": "string",
+      "enum": [
+        "UNSPECIFIED",
+        "ISSUER",
+        "VERIFIER",
+        "ISSUER_GRANTOR",
+        "VERIFIER_GRANTOR",
+        "ECOSYSTEM",
+        "HOLDER"
+      ],
+      "default": "UNSPECIFIED",
+      "title": "Participant roles"
+    }
+  }
+}

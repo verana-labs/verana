@@ -11,7 +11,7 @@ import (
 	govkeeper "github.com/cosmos/cosmos-sdk/x/gov/keeper"
 	credentialschemakeeper "github.com/verana-labs/verana/x/cs/keeper"
 	ecosystem "github.com/verana-labs/verana/x/ec/keeper"
-	permission "github.com/verana-labs/verana/x/perm/keeper"
+	permission "github.com/verana-labs/verana/x/pp/keeper"
 	trustdeposit "github.com/verana-labs/verana/x/td/keeper"
 )
 

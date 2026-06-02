@@ -54,7 +54,7 @@ import (
 	"google.golang.org/protobuf/types/known/durationpb"
 
 	credentialschemamodulev1 "github.com/verana-labs/verana/api/verana/cs/module"
-	permissionmodulev1 "github.com/verana-labs/verana/api/verana/perm/module"
+	permissionmodulev1 "github.com/verana-labs/verana/api/verana/pp/module"
 	trustdepositmodulev1 "github.com/verana-labs/verana/api/verana/td/module"
 	ecosystemmodulev1 "github.com/verana-labs/verana/api/verana/ec/module"
 	_ "github.com/verana-labs/verana/x/co/module"
@@ -66,7 +66,7 @@ import (
 	dimoduletypes "github.com/verana-labs/verana/x/di/types"
 	_ "github.com/verana-labs/verana/x/gf/module"
 	gfmoduletypes "github.com/verana-labs/verana/x/gf/types"
-	permissionmoduletypes "github.com/verana-labs/verana/x/perm/types"
+	permissionmoduletypes "github.com/verana-labs/verana/x/pp/types"
 	trustdepositmoduletypes "github.com/verana-labs/verana/x/td/types"
 	ecosystemmoduletypes "github.com/verana-labs/verana/x/ec/types"
 	_ "github.com/verana-labs/verana/x/xr/module"

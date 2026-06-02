@@ -9,7 +9,7 @@ import (
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
 
 	cschema "github.com/verana-labs/verana/x/cs/types"
-	permtypes "github.com/verana-labs/verana/x/perm/types"
+	permtypes "github.com/verana-labs/verana/x/pp/types"
 
 	"github.com/verana-labs/verana/testharness/lib"
 )
@@ -132,7 +132,7 @@ func RunPermissionCreateRootJourney(ctx context.Context, client cosmosclient.Cli
 	err = lib.GrantOperatorAuthorizationViaGroup(
 		client, ctx, adminAccount, member1Account,
 		policyAddr, operatorAddr, operatorAddr,
-		[]string{"/verana.perm.v1.MsgCreateRootPermission"},
+		[]string{"/verana.pp.v1.MsgCreateRootParticipant"},
 	)
 	if err != nil {
 		return fmt.Errorf("step 1b failed: %w", err)
@@ -157,18 +157,18 @@ func RunPermissionCreateRootJourney(ctx context.Context, client cosmosclient.Cli
 	waitForTx("CreateRootPerm success")
 
 	// Verify the created permission
-	perm, err := lib.GetPermission(client, ctx, permID)
+	perm, err := lib.GetParticipant(client, ctx, permID)
 	if err != nil {
 		return fmt.Errorf("step 1c verification query failed: %w", err)
 	}
-	if perm.Type != permtypes.PermissionType_ECOSYSTEM {
-		return fmt.Errorf("step 1c verification failed: expected ECOSYSTEM type, got %s", perm.Type.String())
+	if perm.Role != permtypes.ParticipantRole_ECOSYSTEM {
+		return fmt.Errorf("step 1c verification failed: expected ECOSYSTEM type, got %s", perm.Role.String())
 	}
 	if perm.SchemaId != csID {
 		return fmt.Errorf("step 1c verification failed: expected schema_id=%d, got %d", csID, perm.SchemaId)
 	}
-	if perm.Corporation != policyAddr {
-		return fmt.Errorf("step 1c verification failed: expected authority=%s, got %s", policyAddr, perm.Corporation)
+	if perm.CorporationId == 0 {
+		return fmt.Errorf("step 1c verification failed: expected authority=%s, got %d", policyAddr, perm.CorporationId)
 	}
 	if perm.Did != rootPermDID {
 		return fmt.Errorf("step 1c verification failed: expected did=%s, got %s", rootPermDID, perm.Did)
@@ -206,7 +206,7 @@ func RunPermissionCreateRootJourney(ctx context.Context, client cosmosclient.Cli
 
 	// Save results
 	result := lib.JourneyResult{
-		EcosystemID: trIDStr,
+		EcosystemID:     trIDStr,
 		SchemaID:        csIDStr,
 		DID:             rootPermDID,
 		PermissionID:    strconv.FormatUint(permID, 10),

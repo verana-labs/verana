@@ -129,7 +129,7 @@ func RunTDReclaimYieldJourney(ctx context.Context, client cosmosclient.Client) e
 	// =========================================================================
 	// TEST 2: RepaySlashedTrustDeposit
 	// Requires a slashed TD from journey 308. Journey 308 slashes a permission
-	// trust deposit via MsgSlashPermissionTrustDeposit, which also updates the
+	// trust deposit via MsgSlashParticipantTrustDeposit, which also updates the
 	// account-level TD for the authority (policyAddr) with SlashedDeposit,
 	// LastSlashed, and SlashCount.
 	// =========================================================================
@@ -219,12 +219,12 @@ func RunTDReclaimYieldJourney(ctx context.Context, client cosmosclient.Client) e
 		fmt.Printf("    RepaidDeposit:  %d (expected %d)\n", tdAfter.RepaidDeposit, expectedRepaid)
 		fmt.Printf("    Outstanding:    %d (expected 0)\n", remainingSlash)
 		fmt.Printf("    LastRepaid:     %v\n", tdAfter.LastRepaid)
-	// spec v4: LastRepaidBy field removed
+		// spec v4: LastRepaidBy field removed
 	}
 
 	// Save results for downstream journeys
 	result := lib.JourneyResult{
-		EcosystemID: setup304.EcosystemID,
+		EcosystemID:     setup304.EcosystemID,
 		SchemaID:        setup304.SchemaID,
 		DID:             setup304.DID,
 		PermissionID:    setup308.PermissionID,

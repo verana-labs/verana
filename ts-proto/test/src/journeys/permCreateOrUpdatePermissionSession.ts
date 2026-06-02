@@ -27,11 +27,11 @@ import {
 } from "../helpers/client";
 import { typeUrls } from "../helpers/registry";
 import {
-  MsgStartPermissionVP,
-  MsgSetPermissionVPToValidated,
-  MsgCreateOrUpdatePermissionSession,
-} from "../../../src/codec/verana/perm/v1/tx";
-import { PermissionType, OptionalUInt64 } from "../../../src/codec/verana/perm/v1/types";
+  MsgStartParticipantOP,
+  MsgSetParticipantOPToValidated,
+  MsgCreateOrUpdateParticipantSession,
+} from "../../../src/codec/verana/pp/v1/tx";
+import { ParticipantRole, OptionalUInt64 } from "../../../src/codec/verana/pp/v1/types";
 import { IssuerOnboardingMode, VerifierOnboardingMode } from "../../../src/codec/verana/cs/v1/types";
 import { getPermAuthzSetup } from "../helpers/journeyResults";
 import { createPermPrerequisites, extractIdFromEvents } from "../helpers/permissionHelpers";
@@ -99,12 +99,12 @@ async function main() {
     console.log(`  VS Operator: ${vsOperatorAccount.address}`);
 
     const startMsg = {
-      typeUrl: typeUrls.MsgStartPermissionVP,
-      value: MsgStartPermissionVP.fromPartial({
+      typeUrl: typeUrls.MsgStartParticipantOP,
+      value: MsgStartParticipantOP.fromPartial({
         corporation: setup.authorityAddress,
         operator: setup.operatorAddress,
-        type: PermissionType.ISSUER,
-        validatorPermId: rootPermId,
+        role: ParticipantRole.ISSUER,
+        validatorParticipantId: rootPermId,
         did,
         validationFees: OptionalUInt64.fromPartial({ value: 5 }),
         issuanceFees: OptionalUInt64.fromPartial({ value: 5 }),
@@ -121,24 +121,24 @@ async function main() {
       throw new Error(`Failed to start VP: ${startResult.rawLog}`);
     }
 
-    const issuerPermId = extractIdFromEvents(startResult.events || [], "start_permission_vp", ["permission_id", "id"]);
-    if (!issuerPermId) throw new Error("Could not extract ISSUER perm ID");
-    console.log(`  ISSUER Permission ID: ${issuerPermId}`);
+    const issuerParticipantId = extractIdFromEvents(startResult.events || [], "start_permission_vp", ["permission_id", "id"]);
+    if (!issuerParticipantId) throw new Error("Could not extract ISSUER perm ID");
+    console.log(`  ISSUER Permission ID: ${issuerParticipantId}`);
 
     // Step 6: Validate the VP
     console.log("Step 6: Validating VP...");
     const effectiveUntil = new Date(Date.now() + 300 * 24 * 60 * 60 * 1000);
     const validateMsg = {
-      typeUrl: typeUrls.MsgSetPermissionVPToValidated,
-      value: MsgSetPermissionVPToValidated.fromPartial({
+      typeUrl: typeUrls.MsgSetParticipantOPToValidated,
+      value: MsgSetParticipantOPToValidated.fromPartial({
         corporation: setup.authorityAddress,
         operator: setup.operatorAddress,
-        id: issuerPermId,
+        id: issuerParticipantId,
         effectiveUntil,
         validationFees: 5,
         issuanceFees: 5,
         verificationFees: 5,
-        vpSummaryDigest: "sha384-cspsValidationDigest",
+        opSummaryDigest: "sha384-cspsValidationDigest",
         issuanceFeeDiscount: 0,
         verificationFeeDiscount: 0,
       }),
@@ -169,20 +169,20 @@ async function main() {
     await new Promise(resolve => setTimeout(resolve, 5000));
 
     // Step 7: Create Permission Session (signed by vs_operator)
-    console.log("Step 7: Creating permission session (MsgCreateOrUpdatePermissionSession)...");
+    console.log("Step 7: Creating permission session (MsgCreateOrUpdateParticipantSession)...");
     const vsClient = await createSigningClient(vsOperatorWallet);
     const sessionId = crypto.randomUUID();
 
     const cspsMsg = {
-      typeUrl: typeUrls.MsgCreateOrUpdatePermissionSession,
-      value: MsgCreateOrUpdatePermissionSession.fromPartial({
+      typeUrl: typeUrls.MsgCreateOrUpdateParticipantSession,
+      value: MsgCreateOrUpdateParticipantSession.fromPartial({
         corporation: setup.authorityAddress,
         operator: vsOperatorAccount.address,
         id: sessionId,
-        issuerPermId: issuerPermId,
-        verifierPermId: 0,
-        agentPermId: issuerPermId,
-        walletAgentPermId: issuerPermId,
+        issuerParticipantId: issuerParticipantId,
+        verifierParticipantId: 0,
+        agentParticipantId: issuerParticipantId,
+        walletAgentParticipantId: issuerParticipantId,
         digest: "sha384-sessionDigest123",
       }),
     };
@@ -205,15 +205,15 @@ async function main() {
     console.log();
     console.log("Step 8: Updating permission session...");
     const updateMsg = {
-      typeUrl: typeUrls.MsgCreateOrUpdatePermissionSession,
-      value: MsgCreateOrUpdatePermissionSession.fromPartial({
+      typeUrl: typeUrls.MsgCreateOrUpdateParticipantSession,
+      value: MsgCreateOrUpdateParticipantSession.fromPartial({
         corporation: setup.authorityAddress,
         operator: vsOperatorAccount.address,
         id: sessionId,
-        issuerPermId: issuerPermId,
-        verifierPermId: 0,
-        agentPermId: issuerPermId,
-        walletAgentPermId: issuerPermId,
+        issuerParticipantId: issuerParticipantId,
+        verifierParticipantId: 0,
+        agentParticipantId: issuerParticipantId,
+        walletAgentParticipantId: issuerParticipantId,
         digest: "sha384-updatedSessionDigest456",
       }),
     };

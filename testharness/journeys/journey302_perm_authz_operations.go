@@ -9,7 +9,7 @@ import (
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
 
 	cschema "github.com/verana-labs/verana/x/cs/types"
-	permtypes "github.com/verana-labs/verana/x/perm/types"
+	permtypes "github.com/verana-labs/verana/x/pp/types"
 
 	"github.com/verana-labs/verana/testharness/lib"
 )
@@ -45,9 +45,9 @@ func RunPermissionAuthzOperationsJourney(ctx context.Context, client cosmosclien
 	err := lib.GrantSelfDelegation(client, ctx, operatorAccount, []string{
 		"/verana.ec.v1.MsgCreateEcosystem",
 		"/verana.cs.v1.MsgCreateCredentialSchema",
-		"/verana.perm.v1.MsgSetPermissionVPToValidated",
-		"/verana.perm.v1.MsgCreateRootPermission",
-		"/verana.perm.v1.MsgAdjustPermission",
+		"/verana.pp.v1.MsgSetParticipantOPToValidated",
+		"/verana.pp.v1.MsgCreateRootParticipant",
+		"/verana.pp.v1.MsgSetParticipantEffectiveUntil",
 	})
 	if err != nil {
 		return fmt.Errorf("prerequisite 1 failed: %w", err)
@@ -98,7 +98,7 @@ func RunPermissionAuthzOperationsJourney(ctx context.Context, client cosmosclien
 	rootPermDID := lib.GenerateUniqueDID(client, ctx)
 	effectiveFrom := time.Now().Add(10 * time.Second)
 	effectiveUntil := effectiveFrom.Add(360 * 24 * time.Hour)
-	rootPermIDStr, err := lib.CreateRootPermission(client, ctx, operatorAccount, permtypes.MsgCreateRootPermission{
+	rootPermIDStr, err := lib.CreateRootPermission(client, ctx, operatorAccount, permtypes.MsgCreateRootParticipant{
 		SchemaId:       csID,
 		Did:            rootPermDID,
 		EffectiveFrom:  &effectiveFrom,
@@ -114,12 +114,12 @@ func RunPermissionAuthzOperationsJourney(ctx context.Context, client cosmosclien
 	waitForTx("Root perm creation")
 
 	// Verify root permission
-	rootPerm, err := lib.GetPermission(client, ctx, rootPermID)
+	rootPerm, err := lib.GetParticipant(client, ctx, rootPermID)
 	if err != nil {
 		return fmt.Errorf("prerequisite 4 verification failed: %w", err)
 	}
-	fmt.Printf("  Root Permission type: %s, schema_id: %d, vp_state: %s\n",
-		rootPerm.Type.String(), rootPerm.SchemaId, rootPerm.VpState.String())
+	fmt.Printf("  Root Permission type: %s, schema_id: %d, op_state: %s\n",
+		rootPerm.Role.String(), rootPerm.SchemaId, rootPerm.OpState.String())
 
 	// =========================================================================
 	// TEST 1: StartPermissionVP
@@ -132,7 +132,7 @@ func RunPermissionAuthzOperationsJourney(ctx context.Context, client cosmosclien
 	fmt.Println("\n--- Step 1a: Operator tries StartPermissionVP without auth (expect failure) ---")
 	_, err = lib.StartPermissionVPWithAuthority(
 		client, ctx, operatorAccount, policyAddr,
-		permtypes.PermissionType_ISSUER_GRANTOR,
+		permtypes.ParticipantRole_ISSUER_GRANTOR,
 		rootPermID,
 		startPermDID,
 	)
@@ -146,7 +146,7 @@ func RunPermissionAuthzOperationsJourney(ctx context.Context, client cosmosclien
 	err = lib.GrantOperatorAuthorizationViaGroup(
 		client, ctx, adminAccount, member1Account,
 		policyAddr, operatorAddr, operatorAddr,
-		[]string{"/verana.perm.v1.MsgStartPermissionVP"},
+		[]string{"/verana.pp.v1.MsgStartParticipantOP"},
 	)
 	if err != nil {
 		return fmt.Errorf("step 1b failed: %w", err)
@@ -158,7 +158,7 @@ func RunPermissionAuthzOperationsJourney(ctx context.Context, client cosmosclien
 	fmt.Println("\n--- Step 1c: Operator starts permission VP with auth (expect success) ---")
 	permIDStr, err := lib.StartPermissionVPWithAuthority(
 		client, ctx, operatorAccount, policyAddr,
-		permtypes.PermissionType_ISSUER_GRANTOR,
+		permtypes.ParticipantRole_ISSUER_GRANTOR,
 		rootPermID,
 		startPermDID,
 	)
@@ -170,17 +170,17 @@ func RunPermissionAuthzOperationsJourney(ctx context.Context, client cosmosclien
 	waitForTx("StartPermVP success")
 
 	// Verify the permission was created in PENDING state
-	perm, err := lib.GetPermission(client, ctx, permID)
+	perm, err := lib.GetParticipant(client, ctx, permID)
 	if err != nil {
 		return fmt.Errorf("step 1c verification query failed: %w", err)
 	}
-	if perm.VpState != permtypes.ValidationState_PENDING {
-		return fmt.Errorf("step 1c verification failed: expected PENDING state, got %s", perm.VpState.String())
+	if perm.OpState != permtypes.OnboardingState_PENDING {
+		return fmt.Errorf("step 1c verification failed: expected PENDING state, got %s", perm.OpState.String())
 	}
-	if perm.Corporation != policyAddr {
-		return fmt.Errorf("step 1c verification failed: expected authority=%s, got %s", policyAddr, perm.Corporation)
+	if perm.CorporationId == 0 {
+		return fmt.Errorf("step 1c verification failed: expected authority=%s, got %d", policyAddr, perm.CorporationId)
 	}
-	fmt.Printf("OK Step 1c: Verified permission is PENDING, authority=%s\n", perm.Corporation)
+	fmt.Printf("OK Step 1c: Verified permission is PENDING, authority=%d\n", perm.CorporationId)
 
 	// =========================================================================
 	// TEST 2: RenewPermissionVP
@@ -190,8 +190,8 @@ func RunPermissionAuthzOperationsJourney(ctx context.Context, client cosmosclien
 	fmt.Println("\n=== TEST 2: RenewPermissionVP ===")
 
 	// 2-prereq: Validate the permission (set to VALIDATED state)
-	fmt.Println("\n--- Step 2-prereq: Validate the permission (set vp_state=VALIDATED) ---")
-	_, err = lib.SetPermissionVPToValidated(client, ctx, operatorAccount, permtypes.MsgSetPermissionVPToValidated{
+	fmt.Println("\n--- Step 2-prereq: Validate the permission (set op_state=VALIDATED) ---")
+	_, err = lib.SetPermissionVPToValidated(client, ctx, operatorAccount, permtypes.MsgSetParticipantOPToValidated{
 		Id:             permID,
 		ValidationFees: 0,
 		IssuanceFees:   0,
@@ -202,12 +202,12 @@ func RunPermissionAuthzOperationsJourney(ctx context.Context, client cosmosclien
 	waitForTx("SetPermissionVPToValidated")
 
 	// Verify the permission is now VALIDATED
-	perm, err = lib.GetPermission(client, ctx, permID)
+	perm, err = lib.GetParticipant(client, ctx, permID)
 	if err != nil {
 		return fmt.Errorf("step 2-prereq verification failed: %w", err)
 	}
-	if perm.VpState != permtypes.ValidationState_VALIDATED {
-		return fmt.Errorf("step 2-prereq verification failed: expected VALIDATED state, got %s", perm.VpState.String())
+	if perm.OpState != permtypes.OnboardingState_VALIDATED {
+		return fmt.Errorf("step 2-prereq verification failed: expected VALIDATED state, got %s", perm.OpState.String())
 	}
 	fmt.Printf("OK Step 2-prereq: Permission is now VALIDATED\n")
 
@@ -227,7 +227,7 @@ func RunPermissionAuthzOperationsJourney(ctx context.Context, client cosmosclien
 	err = lib.GrantOperatorAuthorizationViaGroup(
 		client, ctx, adminAccount, member1Account,
 		policyAddr, operatorAddr, operatorAddr,
-		[]string{"/verana.perm.v1.MsgRenewPermissionVP"},
+		[]string{"/verana.pp.v1.MsgRenewParticipantOP"},
 	)
 	if err != nil {
 		return fmt.Errorf("step 2b failed: %w", err)
@@ -248,12 +248,12 @@ func RunPermissionAuthzOperationsJourney(ctx context.Context, client cosmosclien
 	waitForTx("RenewPermVP success")
 
 	// Verify the permission is back to PENDING state
-	perm, err = lib.GetPermission(client, ctx, permID)
+	perm, err = lib.GetParticipant(client, ctx, permID)
 	if err != nil {
 		return fmt.Errorf("step 2c verification query failed: %w", err)
 	}
-	if perm.VpState != permtypes.ValidationState_PENDING {
-		return fmt.Errorf("step 2c verification failed: expected PENDING state after renewal, got %s", perm.VpState.String())
+	if perm.OpState != permtypes.OnboardingState_PENDING {
+		return fmt.Errorf("step 2c verification failed: expected PENDING state after renewal, got %s", perm.OpState.String())
 	}
 	fmt.Printf("OK Step 2c: Verified permission is PENDING after renewal\n")
 
@@ -263,7 +263,7 @@ func RunPermissionAuthzOperationsJourney(ctx context.Context, client cosmosclien
 	fmt.Println("\n=== TEST 3: Unauthorized operator (negative test) ===")
 
 	// First, validate the permission again so we can test renewal rejection
-	_, err = lib.SetPermissionVPToValidated(client, ctx, operatorAccount, permtypes.MsgSetPermissionVPToValidated{
+	_, err = lib.SetPermissionVPToValidated(client, ctx, operatorAccount, permtypes.MsgSetParticipantOPToValidated{
 		Id: permID,
 	})
 	if err != nil {
@@ -276,7 +276,7 @@ func RunPermissionAuthzOperationsJourney(ctx context.Context, client cosmosclien
 	unauthorizedDID := lib.GenerateUniqueDID(client, ctx)
 	_, err = lib.StartPermissionVPWithAuthority(
 		client, ctx, cooluser, policyAddr,
-		permtypes.PermissionType_ISSUER_GRANTOR,
+		permtypes.ParticipantRole_ISSUER_GRANTOR,
 		rootPermID,
 		unauthorizedDID,
 	)
@@ -295,7 +295,7 @@ func RunPermissionAuthzOperationsJourney(ctx context.Context, client cosmosclien
 
 	// Save results
 	result := lib.JourneyResult{
-		EcosystemID: trIDStr,
+		EcosystemID:     trIDStr,
 		SchemaID:        csIDStr,
 		DID:             did,
 		PermissionID:    permIDStr,

@@ -21,7 +21,7 @@ import {
   config,
 } from "../helpers/client";
 import { typeUrls } from "../helpers/registry";
-import { MsgAdjustPermission } from "../../../src/codec/verana/perm/v1/tx";
+import { MsgSetParticipantEffectiveUntil } from "../../../src/codec/verana/pp/v1/tx";
 import { getPermAuthzSetup, getPermRootSetup } from "../helpers/journeyResults";
 
 const COOLUSER_MNEMONIC =
@@ -75,12 +75,12 @@ async function main() {
     console.log();
 
     // Step 4: Adjust permission — extend effective_until
-    console.log("Step 4: Adjusting root permission (MsgAdjustPermission)...");
+    console.log("Step 4: Adjusting root permission (MsgSetParticipantEffectiveUntil)...");
     const newEffectiveUntil = new Date(Date.now() + 720 * 24 * 60 * 60 * 1000); // 720 days from now
 
     const msg = {
-      typeUrl: typeUrls.MsgAdjustPermission,
-      value: MsgAdjustPermission.fromPartial({
+      typeUrl: typeUrls.MsgSetParticipantEffectiveUntil,
+      value: MsgSetParticipantEffectiveUntil.fromPartial({
         corporation: authzSetup.authorityAddress,
         operator: authzSetup.operatorAddress,
         id: rootSetup.rootPermId,

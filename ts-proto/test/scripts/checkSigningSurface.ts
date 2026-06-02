@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import { createVeranaAminoTypes, createVeranaRegistry, veranaTypeUrls } from "../../src/signing";
 import { MsgGrantOperatorAuthorization } from "../../src/codec/verana/de/v1/tx";
 import { MsgStoreDigest } from "../../src/codec/verana/di/v1/tx";
-import { MsgSelfCreatePermission, MsgStartPermissionVP } from "../../src/codec/verana/perm/v1/tx";
-import { PermissionType } from "../../src/codec/verana/perm/v1/types";
+import { MsgSelfCreateParticipant, MsgStartParticipantOP } from "../../src/codec/verana/pp/v1/tx";
+import { ParticipantRole } from "../../src/codec/verana/pp/v1/types";
 import {
   MsgCreateExchangeRate,
   MsgSetExchangeRateState,
@@ -18,7 +18,7 @@ const requiredMappings = [
   "MsgCreateEcosystem",
   "MsgAddGovernanceFrameworkDocument",
   "MsgCreateCredentialSchema",
-  "MsgSelfCreatePermission",
+  "MsgSelfCreateParticipant",
   "MsgReclaimTrustDepositYield",
   "MsgGrantOperatorAuthorization",
   "MsgStoreDigest",
@@ -37,7 +37,7 @@ const deMsg = MsgGrantOperatorAuthorization.fromPartial({
   corporation: "verana1authority0000000000000000000000000000000",
   operator: "verana1operator0000000000000000000000000000000",
   grantee: "verana1grantee00000000000000000000000000000000",
-  msgTypes: [veranaTypeUrls.MsgCreateEcosystem, veranaTypeUrls.MsgSelfCreatePermission],
+  msgTypes: [veranaTypeUrls.MsgCreateEcosystem, veranaTypeUrls.MsgSelfCreateParticipant],
   expiration: new Date("2026-04-01T12:00:00.123Z"),
   authzSpendLimit: [{ denom: "uvna", amount: "42" }],
   authzSpendLimitPeriod: { seconds: 3600, nanos: 5 },
@@ -98,12 +98,12 @@ const xrSetStateRoundTrip = xrSetStateConverter.fromAmino(xrSetStateConverter.to
 assert.equal(xrSetStateRoundTrip.id, 12);
 assert.equal(xrSetStateRoundTrip.state, false);
 
-const permConverter = amino.register[veranaTypeUrls.MsgSelfCreatePermission];
-const permMsg = MsgSelfCreatePermission.fromPartial({
+const permConverter = amino.register[veranaTypeUrls.MsgSelfCreateParticipant];
+const permMsg = MsgSelfCreateParticipant.fromPartial({
   corporation: "verana1authority0000000000000000000000000000000",
   operator: "verana1operator0000000000000000000000000000000",
-  type: PermissionType.VERIFIER,
-  validatorPermId: 17,
+  role: ParticipantRole.VERIFIER,
+  validatorParticipantId: 17,
   did: "did:verana:test:perm",
   verificationFees: 0,
   validationFees: 0,
@@ -118,12 +118,12 @@ const permRoundTrip = permConverter.fromAmino(permConverter.toAmino(permMsg));
 assert.equal(permRoundTrip.vsOperatorAuthzSpendPeriod?.seconds, 5400);
 assert.equal(permRoundTrip.vsOperatorAuthzSpendPeriod?.nanos, 11);
 
-const startVpConverter = amino.register[veranaTypeUrls.MsgStartPermissionVP];
-const startVpMsg = MsgStartPermissionVP.fromPartial({
+const startVpConverter = amino.register[veranaTypeUrls.MsgStartParticipantOP];
+const startVpMsg = MsgStartParticipantOP.fromPartial({
   corporation: "verana1authority0000000000000000000000000000000",
   operator: "verana1operator0000000000000000000000000000000",
-  type: PermissionType.VALIDATOR,
-  validatorPermId: 21,
+  role: ParticipantRole.VALIDATOR,
+  validatorParticipantId: 21,
   did: "did:verana:test:vp",
   validationFees: { value: 100 },
   issuanceFees: { value: 200 },

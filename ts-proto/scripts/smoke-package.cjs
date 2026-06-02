@@ -14,7 +14,7 @@ const requiredRegistry = [
   "MsgCreateEcosystem",
   "MsgAddGovernanceFrameworkDocument",
   "MsgCreateCredentialSchema",
-  "MsgSelfCreatePermission",
+  "MsgSelfCreateParticipant",
   "MsgReclaimTrustDepositYield",
   "MsgGrantOperatorAuthorization",
   "MsgStoreDigest",

@@ -10,7 +10,7 @@ import (
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
 
 	cschema "github.com/verana-labs/verana/x/cs/types"
-	permtypes "github.com/verana-labs/verana/x/perm/types"
+	permtypes "github.com/verana-labs/verana/x/pp/types"
 
 	"github.com/verana-labs/verana/testharness/lib"
 )
@@ -55,9 +55,9 @@ func RunPermissionCSPSJourney(ctx context.Context, client cosmosclient.Client) e
 	fmt.Println("\n--- Prerequisite 1: Grant self-delegation ---")
 	err := lib.GrantSelfDelegation(client, ctx, operatorAccount, []string{
 		"/verana.cs.v1.MsgCreateCredentialSchema",
-		"/verana.perm.v1.MsgSetPermissionVPToValidated",
-		"/verana.perm.v1.MsgCreateRootPermission",
-		"/verana.perm.v1.MsgStartPermissionVP",
+		"/verana.pp.v1.MsgSetParticipantOPToValidated",
+		"/verana.pp.v1.MsgCreateRootParticipant",
+		"/verana.pp.v1.MsgStartParticipantOP",
 	})
 	if err != nil {
 		return fmt.Errorf("prerequisite 1 failed: %w", err)
@@ -95,7 +95,7 @@ func RunPermissionCSPSJourney(ctx context.Context, client cosmosclient.Client) e
 	rootPermDID := lib.GenerateUniqueDID(client, ctx)
 	effectiveFrom := time.Now().Add(5 * time.Second)
 	effectiveUntil := effectiveFrom.Add(360 * 24 * time.Hour)
-	rootPermIDStr, err := lib.CreateRootPermission(client, ctx, operatorAccount, permtypes.MsgCreateRootPermission{
+	rootPermIDStr, err := lib.CreateRootPermission(client, ctx, operatorAccount, permtypes.MsgCreateRootParticipant{
 		SchemaId:       cs1ID,
 		Did:            rootPermDID,
 		EffectiveFrom:  &effectiveFrom,
@@ -115,10 +115,10 @@ func RunPermissionCSPSJourney(ctx context.Context, client cosmosclient.Client) e
 	// --- Prerequisite 4: Create ISSUER perm with vs_operator (authority=operatorAddr) ---
 	fmt.Println("\n--- Prerequisite 4: Create ISSUER perm with vs_operator ---")
 	issuerDID := lib.GenerateUniqueDID(client, ctx)
-	issuerPermIDStr, err := lib.StartPermissionVP(client, ctx, operatorAccount, permtypes.MsgStartPermissionVP{
+	issuerPermIDStr, err := lib.StartPermissionVP(client, ctx, operatorAccount, permtypes.MsgStartParticipantOP{
 		// Authority defaults to operatorAddr
-		Type:                   permtypes.PermissionType_ISSUER,
-		ValidatorPermId:        rootPermID,
+		Role:                   permtypes.ParticipantRole_ISSUER,
+		ValidatorParticipantId: rootPermID,
 		Did:                    issuerDID,
 		VsOperator:             vsOperatorAddr,
 		VsOperatorAuthzEnabled: true,
@@ -132,7 +132,7 @@ func RunPermissionCSPSJourney(ctx context.Context, client cosmosclient.Client) e
 
 	// --- Prerequisite 5: Validate ISSUER perm (grants VS operator auth) ---
 	fmt.Println("\n--- Prerequisite 5: Validate ISSUER perm (grants VS operator auth) ---")
-	_, err = lib.SetPermissionVPToValidated(client, ctx, operatorAccount, permtypes.MsgSetPermissionVPToValidated{
+	_, err = lib.SetPermissionVPToValidated(client, ctx, operatorAccount, permtypes.MsgSetParticipantOPToValidated{
 		Id: issuerPermID,
 	})
 	if err != nil {
@@ -142,12 +142,12 @@ func RunPermissionCSPSJourney(ctx context.Context, client cosmosclient.Client) e
 	waitForTx("validate issuer perm")
 
 	// Verify issuer perm is VALIDATED
-	issuerPerm, err := lib.GetPermission(client, ctx, issuerPermID)
+	issuerPerm, err := lib.GetParticipant(client, ctx, issuerPermID)
 	if err != nil {
 		return fmt.Errorf("prerequisite verification failed: %w", err)
 	}
-	if issuerPerm.VpState != permtypes.ValidationState_VALIDATED {
-		return fmt.Errorf("prerequisite verification failed: expected VALIDATED, got %s", issuerPerm.VpState.String())
+	if issuerPerm.OpState != permtypes.OnboardingState_VALIDATED {
+		return fmt.Errorf("prerequisite verification failed: expected VALIDATED, got %s", issuerPerm.OpState.String())
 	}
 	fmt.Printf("  Verified: ISSUER perm is VALIDATED, vs_operator=%s, vs_operator_authz_enabled=%v\n",
 		issuerPerm.VsOperator, issuerPerm.VsOperatorAuthzEnabled)
@@ -182,7 +182,7 @@ func RunPermissionCSPSJourney(ctx context.Context, client cosmosclient.Client) e
 	rootPerm2DID := lib.GenerateUniqueDID(client, ctx)
 	effectiveFrom2 := time.Now().Add(5 * time.Second)
 	effectiveUntil2 := effectiveFrom2.Add(360 * 24 * time.Hour)
-	rootPerm2IDStr, err := lib.CreateRootPermission(client, ctx, operatorAccount, permtypes.MsgCreateRootPermission{
+	rootPerm2IDStr, err := lib.CreateRootPermission(client, ctx, operatorAccount, permtypes.MsgCreateRootParticipant{
 		SchemaId:       cs2ID,
 		Did:            rootPerm2DID,
 		EffectiveFrom:  &effectiveFrom2,
@@ -201,10 +201,10 @@ func RunPermissionCSPSJourney(ctx context.Context, client cosmosclient.Client) e
 
 	fmt.Println("\n--- Prerequisite 6c: Create agent ISSUER perm on CS2 ---")
 	agentDID := lib.GenerateUniqueDID(client, ctx)
-	agentPermIDStr, err := lib.StartPermissionVP(client, ctx, operatorAccount, permtypes.MsgStartPermissionVP{
-		Type:            permtypes.PermissionType_ISSUER,
-		ValidatorPermId: rootPerm2ID,
-		Did:             agentDID,
+	agentPermIDStr, err := lib.StartPermissionVP(client, ctx, operatorAccount, permtypes.MsgStartParticipantOP{
+		Role:                   permtypes.ParticipantRole_ISSUER,
+		ValidatorParticipantId: rootPerm2ID,
+		Did:                    agentDID,
 	})
 	if err != nil {
 		return fmt.Errorf("prerequisite 6c failed: could not start agent perm VP: %w", err)
@@ -214,7 +214,7 @@ func RunPermissionCSPSJourney(ctx context.Context, client cosmosclient.Client) e
 	waitForTx("agent perm start")
 
 	fmt.Println("\n--- Prerequisite 6d: Validate agent perm ---")
-	_, err = lib.SetPermissionVPToValidated(client, ctx, operatorAccount, permtypes.MsgSetPermissionVPToValidated{
+	_, err = lib.SetPermissionVPToValidated(client, ctx, operatorAccount, permtypes.MsgSetParticipantOPToValidated{
 		Id: agentPermID,
 	})
 	if err != nil {
@@ -321,7 +321,7 @@ func RunPermissionCSPSJourney(ctx context.Context, client cosmosclient.Client) e
 
 	// Save results
 	result := lib.JourneyResult{
-		EcosystemID: setup302.EcosystemID,
+		EcosystemID:     setup302.EcosystemID,
 		SchemaID:        cs1IDStr,
 		DID:             issuerDID,
 		PermissionID:    strconv.FormatUint(issuerPermID, 10),
