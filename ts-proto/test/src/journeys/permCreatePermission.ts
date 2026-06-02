@@ -101,7 +101,6 @@ async function main() {
         validationFees: 5,
         verificationFees: 5,
         vsOperator: "",
-        vsOperatorAuthzEnabled: false,
       }),
     };
 
@@ -112,7 +111,7 @@ async function main() {
       throw new Error(`Failed to create permission: ${result.rawLog}`);
     }
 
-    const childPermId = extractIdFromEvents(result.events || [], "create_permission", ["permission_id", "id"]);
+    const childPermId = extractIdFromEvents(result.events || [], "create_permission", ["participant_id", "id"]);
 
     console.log();
     console.log("SUCCESS! Child ISSUER permission created!");

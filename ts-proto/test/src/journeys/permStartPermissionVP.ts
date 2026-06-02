@@ -88,7 +88,6 @@ async function main() {
         issuanceFees: OptionalUInt64.fromPartial({ value: 5 }),
         verificationFees: OptionalUInt64.fromPartial({ value: 5 }),
         vsOperator: "",
-        vsOperatorAuthzEnabled: false,
       }),
     };
 
@@ -99,7 +98,7 @@ async function main() {
       throw new Error(`Failed to start VP: ${result.rawLog}`);
     }
 
-    const vpPermId = extractIdFromEvents(result.events || [], "start_permission_vp", ["permission_id", "id"]);
+    const vpPermId = extractIdFromEvents(result.events || [], "start_participant_op", ["participant_id", "id"]);
 
     console.log();
     console.log("SUCCESS! Permission VP started!");

@@ -110,7 +110,9 @@ async function main() {
         issuanceFees: OptionalUInt64.fromPartial({ value: 5 }),
         verificationFees: OptionalUInt64.fromPartial({ value: 5 }),
         vsOperator: vsOperatorAccount.address,
-        vsOperatorAuthzEnabled: true,
+        // Spec v4-rc2: presence of msg_types (not a boolean flag) triggers the
+        // VSOA record; the vs_operator is authorized to run CSPS on behalf.
+        vsOperatorAuthzMsgTypes: [typeUrls.MsgCreateOrUpdateParticipantSession],
       }),
     };
 
@@ -121,7 +123,7 @@ async function main() {
       throw new Error(`Failed to start VP: ${startResult.rawLog}`);
     }
 
-    const issuerParticipantId = extractIdFromEvents(startResult.events || [], "start_permission_vp", ["permission_id", "id"]);
+    const issuerParticipantId = extractIdFromEvents(startResult.events || [], "start_participant_op", ["participant_id", "id"]);
     if (!issuerParticipantId) throw new Error("Could not extract ISSUER perm ID");
     console.log(`  ISSUER Permission ID: ${issuerParticipantId}`);
 

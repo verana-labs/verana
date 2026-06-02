@@ -71,9 +71,9 @@ export async function createRootPermissionForTest(
     // Extract permission ID from events
     const events = result.events || [];
     for (const event of events) {
-      if (event.type === "create_root_permission" || event.type === "verana.pp.v1.EventCreateRootPermission") {
+      if (event.type === "create_root_participant" || event.type === "verana.pp.v1.EventCreateRootPermission") {
         for (const attr of event.attributes) {
-          if (attr.key === "root_permission_id" || attr.key === "permission_id" || attr.key === "id") {
+          if (attr.key === "root_participant_id" || attr.key === "participant_id" || attr.key === "id") {
             const permId = parseInt(attr.value, 10);
             if (!isNaN(permId)) {
               // Wait for transaction to be included in a block and sequence to be updated
@@ -214,7 +214,7 @@ export async function createPermissionForTest(
     for (const event of events) {
       if (event.type === "create_permission" || event.type === "verana.pp.v1.EventCreatePermission") {
         for (const attr of event.attributes) {
-          if (attr.key === "permission_id" || attr.key === "id") {
+          if (attr.key === "participant_id" || attr.key === "id") {
             const permId = parseInt(attr.value, 10);
             if (!isNaN(permId)) {
               // Wait for transaction to be included in a block and sequence to be updated
@@ -671,7 +671,7 @@ export async function createRootPermWithOperator(
     throw new Error(`Failed to create root permission: ${result.rawLog}`);
   }
 
-  const rootPermId = extractIdFromEvents(result.events || [], "create_root_permission", ["root_permission_id", "permission_id", "id"]);
+  const rootPermId = extractIdFromEvents(result.events || [], "create_root_participant", ["root_participant_id", "participant_id", "id"]);
   if (!rootPermId) throw new Error("Could not extract root permission ID from events");
 
   await waitForTxConfirmation(client, result.transactionHash, operator, seqBefore);
@@ -728,7 +728,6 @@ export async function createValidatedPermission(
       issuanceFees: OptionalUInt64.fromPartial({ value: 5 }),
       verificationFees: OptionalUInt64.fromPartial({ value: 5 }),
       vsOperator: "",
-      vsOperatorAuthzEnabled: false,
     }),
   };
 
@@ -740,7 +739,7 @@ export async function createValidatedPermission(
     throw new Error(`Failed to start VP: ${startResult.rawLog}`);
   }
 
-  const vpPermId = extractIdFromEvents(startResult.events || [], "start_permission_vp", ["permission_id", "id"]);
+  const vpPermId = extractIdFromEvents(startResult.events || [], "start_participant_op", ["participant_id", "id"]);
   if (!vpPermId) throw new Error("Could not extract VP permission ID from events");
 
   await waitForTxConfirmation(client, startResult.transactionHash, operator, seqBefore1);
