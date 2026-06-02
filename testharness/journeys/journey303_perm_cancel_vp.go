@@ -45,6 +45,18 @@ func RunPermissionCancelVPJourney(ctx context.Context, client cosmosclient.Clien
 		return fmt.Errorf("prerequisite failed: could not query permission: %w", err)
 	}
 
+	// Grant the operator Renew authz from the Corporation so the prereq renew
+	// works regardless of what prior journeys left in the shared operator
+	// authorization (MSG-3 grants replace in place).
+	if err := lib.GrantOperatorAuthorizationViaGroup(
+		client, ctx, adminAccount, member1Account,
+		policyAddr, operatorAddr, operatorAddr,
+		[]string{"/verana.pp.v1.MsgRenewParticipantOP"},
+	); err != nil {
+		return fmt.Errorf("prerequisite failed: could not grant renew authz: %w", err)
+	}
+	waitForTx("grant renew authz for cancel prereq")
+
 	if perm.OpState == permtypes.OnboardingState_VALIDATED {
 		fmt.Println("Permission is VALIDATED, renewing to get PENDING state...")
 		err = lib.RenewPermissionVPWithAuthority(client, ctx, operatorAccount, policyAddr, permID)

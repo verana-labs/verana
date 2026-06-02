@@ -85,27 +85,13 @@ echo "************************ Running test-harness journey 301 ****************
 echo "*****************************************************************************************"
 go run cmd/main.go 301
 
-# Journeys 302, 304, 307 rewritten for spec v4-rc2 AUTHZ-CHECK-5: the operator
-# acts on behalf of journey301's registered Corporation (policy_address) via a
-# group-granted operator authorization + the *WithAuthority helpers. Validated
-# live (journey307 exercises the full VSOA record lifecycle + CSPS).
-echo "*****************************************************************************************"
-echo "************************ Running test-harness journey 302 *******************************"
-echo "*****************************************************************************************"
-go run cmd/main.go 302
-
-echo "*****************************************************************************************"
-echo "************************ Running test-harness journey 304 *******************************"
-echo "*****************************************************************************************"
-go run cmd/main.go 304
-
-echo "*****************************************************************************************"
-echo "********************* Running test-harness journey 307 (VSOA CSPS) **********************"
-echo "*****************************************************************************************"
-go run cmd/main.go 307
-
-# Journeys 303/305/306/308/309/310 still use the legacy self-delegation shortcut
-# and need the same AUTHZ-CHECK-5 corp-routing rewrite (tracked in #316).
-echo "*****************************************************************************************"
-echo "**** Journeys 303/305/306/308/309/310 SKIPPED — pending AUTHZ-CHECK-5 rewrite (#316) ****"
-echo "*****************************************************************************************"
+# Journeys 302-310 rewritten for spec v4-rc2 AUTHZ-CHECK-5: the operator acts on
+# behalf of journey301's registered Corporation (policy_address) via group-granted
+# operator authorization + the *WithAuthority helpers. All validated live in natural
+# order; journey307 exercises the full VSOA record lifecycle + CSPS (AUTHZ-CHECK-3).
+for J in 302 303 304 305 306 307 308 309 310; do
+  echo "*****************************************************************************************"
+  echo "************************ Running test-harness journey $J *********************************"
+  echo "*****************************************************************************************"
+  go run cmd/main.go "$J"
+done
