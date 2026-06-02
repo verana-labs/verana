@@ -108,15 +108,16 @@ const permMsg = MsgSelfCreateParticipant.fromPartial({
   verificationFees: 0,
   validationFees: 0,
   vsOperator: "verana1vsoperator0000000000000000000000000000",
-  vsOperatorAuthzEnabled: true,
+  vsOperatorAuthzMsgTypes: ["/verana.pp.v1.MsgCreateOrUpdateParticipantSession"],
   vsOperatorAuthzSpendLimit: [{ denom: "uvna", amount: "15" }],
   vsOperatorAuthzWithFeegrant: true,
   vsOperatorAuthzFeeSpendLimit: [{ denom: "uvna", amount: "5" }],
-  vsOperatorAuthzSpendPeriod: { seconds: 5400, nanos: 11 },
+  vsOperatorAuthzPeriod: { seconds: 5400, nanos: 11 },
 });
 const permRoundTrip = permConverter.fromAmino(permConverter.toAmino(permMsg));
-assert.equal(permRoundTrip.vsOperatorAuthzSpendPeriod?.seconds, 5400);
-assert.equal(permRoundTrip.vsOperatorAuthzSpendPeriod?.nanos, 11);
+assert.equal(permRoundTrip.vsOperatorAuthzMsgTypes?.[0], "/verana.pp.v1.MsgCreateOrUpdateParticipantSession");
+assert.equal(permRoundTrip.vsOperatorAuthzPeriod?.seconds, 5400);
+assert.equal(permRoundTrip.vsOperatorAuthzPeriod?.nanos, 11);
 
 const startVpConverter = amino.register[veranaTypeUrls.MsgStartParticipantOP];
 const startVpMsg = MsgStartParticipantOP.fromPartial({
@@ -128,13 +129,13 @@ const startVpMsg = MsgStartParticipantOP.fromPartial({
   validationFees: { value: 100 },
   issuanceFees: { value: 200 },
   verificationFees: { value: 300 },
-  vsOperatorAuthzSpendPeriod: { seconds: 900, nanos: 2 },
+  vsOperatorAuthzPeriod: { seconds: 900, nanos: 2 },
 });
 const startVpRoundTrip = startVpConverter.fromAmino(startVpConverter.toAmino(startVpMsg));
 assert.equal(startVpRoundTrip.validationFees?.value, 100);
 assert.equal(startVpRoundTrip.issuanceFees?.value, 200);
 assert.equal(startVpRoundTrip.verificationFees?.value, 300);
-assert.equal(startVpRoundTrip.vsOperatorAuthzSpendPeriod?.seconds, 900);
-assert.equal(startVpRoundTrip.vsOperatorAuthzSpendPeriod?.nanos, 2);
+assert.equal(startVpRoundTrip.vsOperatorAuthzPeriod?.seconds, 900);
+assert.equal(startVpRoundTrip.vsOperatorAuthzPeriod?.nanos, 2);
 
 console.log("signing surface check passed");
