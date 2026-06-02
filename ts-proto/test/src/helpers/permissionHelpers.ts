@@ -289,14 +289,14 @@ export async function createSchemaForTest(
       $schema: "https://json-schema.org/draft/2020-12/schema",
       title: "ExampleCredential",
       description: "ExampleCredential using JsonSchema",
-      role: "object",
+      type: "object",
       properties: {
         credentialSubject: {
-          role: "object",
+          type: "object",
           properties: {
-            id: { role: "string", format: "uri" },
-            firstName: { role: "string", minLength: 0, maxLength: 256 },
-            lastName: { role: "string", minLength: 1, maxLength: 256 },
+            id: { type: "string", format: "uri" },
+            firstName: { type: "string", minLength: 0, maxLength: 256 },
+            lastName: { type: "string", minLength: 1, maxLength: 256 },
           },
         },
       },
@@ -583,13 +583,13 @@ export async function createCSWithOperator(
     $schema: "https://json-schema.org/draft/2020-12/schema",
     title: "PermTestCredential",
     description: "Credential schema for permission tests",
-    role: "object",
+    type: "object",
     properties: {
       credentialSubject: {
-        role: "object",
+        type: "object",
         properties: {
-          id: { role: "string", format: "uri" },
-          name: { role: "string", minLength: 1, maxLength: 256 },
+          id: { type: "string", format: "uri" },
+          name: { type: "string", minLength: 1, maxLength: 256 },
         },
       },
     },
