@@ -130,10 +130,15 @@ func RunPermissionCSPSJourney(ctx context.Context, client cosmosclient.Client) e
 	fmt.Printf("OK Prerequisite 4: ISSUER perm started with ID: %d (vs_operator=%s)\n", issuerPermID, vsOperatorAddr)
 	waitForTx("issuer perm start")
 
-	// --- Prerequisite 5: Validate ISSUER perm (grants VS operator auth) ---
-	fmt.Println("\n--- Prerequisite 5: Validate ISSUER perm (grants VS operator auth) ---")
+	// --- Prerequisite 5: Validate ISSUER perm (activates the VSOA record) ---
+	// Spec v4-rc2: the disabled record created at MSG-1 is activated at MSG-3 by
+	// setting record.expiration = effective_until (via MOD-DE-MSG-9). Without an
+	// effective_until the record stays disabled and AUTHZ-CHECK-3 would reject CSPS.
+	fmt.Println("\n--- Prerequisite 5: Validate ISSUER perm (activates VS operator auth) ---")
+	issuerEffUntil := time.Now().Add(365 * 24 * time.Hour)
 	_, err = lib.SetPermissionVPToValidated(client, ctx, operatorAccount, permtypes.MsgSetParticipantOPToValidated{
-		Id: issuerPermID,
+		Id:             issuerPermID,
+		EffectiveUntil: &issuerEffUntil,
 	})
 	if err != nil {
 		return fmt.Errorf("prerequisite 5 failed: could not validate issuer perm: %w", err)
