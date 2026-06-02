@@ -36,6 +36,10 @@ const tests: TestConfig[] = [
   { name: "EC: Update Ecosystem",                  script: "test:ec-update" },
   { name: "EC: Archive Ecosystem",                 script: "test:ec-archive" },
   { name: "DE: Grant CS Operator Authorization",   script: "test:de-grant-cs-auth" },
+  // VSOA path (spec v4-rc2), SIGN_MODE_DIRECT: grant PERM operator authz via the
+  // corp group proposal, then exercise the VSOA record lifecycle + CSPS.
+  { name: "DE: Grant PERM Operator Authorization", script: "test:de-grant-perm-auth" },
+  { name: "PERM: CSPS (VSOA record + AUTHZ-CHECK-3)", script: "test:perm-csps" },
 ];
 
 /**
