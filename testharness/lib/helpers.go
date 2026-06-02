@@ -1922,9 +1922,9 @@ func CreateRootPermissionAndGetID(client cosmosclient.Client, ctx context.Contex
 	}
 
 	for _, event := range txResponse.Events {
-		if event.Type == "create_root_permission" {
+		if event.Type == "create_root_participant" {
 			for _, attribute := range event.Attributes {
-				if attribute.Key == "root_permission_id" {
+				if attribute.Key == "root_participant_id" {
 					permID, parseErr := strconv.ParseUint(attribute.Value, 10, 64)
 					if parseErr != nil {
 						return 0, fmt.Errorf("failed to parse permission ID: %v", parseErr)
@@ -2060,9 +2060,9 @@ func CreateInactiveValidatorPermission(client cosmosclient.Client, ctx context.C
 	}
 
 	for _, event := range txResponse.Events {
-		if event.Type == "create_root_permission" {
+		if event.Type == "create_root_participant" {
 			for _, attribute := range event.Attributes {
-				if attribute.Key == "root_permission_id" {
+				if attribute.Key == "root_participant_id" {
 					permID, parseErr := strconv.ParseUint(attribute.Value, 10, 64)
 					if parseErr != nil {
 						return 0, fmt.Errorf("failed to parse permission ID: %v", parseErr)
@@ -2967,9 +2967,9 @@ func StartPermissionVPWithAuthority(
 	}
 
 	for _, event := range txResponse.Events {
-		if event.Type == "start_permission_vp" {
+		if event.Type == "start_participant_op" {
 			for _, attr := range event.Attributes {
-				if attr.Key == "permission_id" {
+				if attr.Key == "participant_id" {
 					return attr.Value, nil
 				}
 			}
@@ -3069,9 +3069,9 @@ func CreateRootPermissionWithAuthority(
 	}
 
 	for _, event := range txResponse.Events {
-		if event.Type == "create_root_permission" {
+		if event.Type == "create_root_participant" {
 			for _, attribute := range event.Attributes {
-				if attribute.Key == "root_permission_id" {
+				if attribute.Key == "root_participant_id" {
 					permID, parseErr := strconv.ParseUint(attribute.Value, 10, 64)
 					if parseErr != nil {
 						return 0, fmt.Errorf("failed to parse permission ID: %v", parseErr)

@@ -274,9 +274,9 @@ func CreateRootPermission(client cosmosclient.Client, ctx context.Context, creat
 	}
 
 	for _, event := range txResponse.Events {
-		if event.Type == "create_root_permission" {
+		if event.Type == "create_root_participant" {
 			for _, attribute := range event.Attributes {
-				if attribute.Key == "root_permission_id" {
+				if attribute.Key == "root_participant_id" {
 					fmt.Println("Created permission ID:", attribute.Value)
 					return attribute.Value, nil
 				}
@@ -332,9 +332,9 @@ func StartPermissionVP(client cosmosclient.Client, ctx context.Context, creator 
 	}
 
 	for _, event := range txResponse.Events {
-		if event.Type == "start_permission_vp" {
+		if event.Type == "start_participant_op" {
 			for _, attribute := range event.Attributes {
-				if attribute.Key == "permission_id" {
+				if attribute.Key == "participant_id" {
 					fmt.Println("start permission ID:", attribute.Value)
 					return attribute.Value, nil
 				}

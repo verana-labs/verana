@@ -40,26 +40,34 @@ func RunPermissionAuthzOperationsJourney(ctx context.Context, client cosmosclien
 	// =========================================================================
 	fmt.Println("\n=== PREREQUISITES: Create TR, CS, Root Permission ===")
 
-	// --- Prerequisite 1: Grant self-delegation for TR and CS creation ---
-	fmt.Println("\n--- Prerequisite 1: Grant operator self-delegation ---")
-	err := lib.GrantSelfDelegation(client, ctx, operatorAccount, []string{
+	// --- Prerequisite 1: Grant operator authorization from the Corporation ---
+	// Spec v4 (AUTHZ-CHECK-5): the operator acts on behalf of the registered
+	// Corporation (policyAddr); authz is granted by the corp's group, not via
+	// self-delegation (a plain account is not a registered Corporation). Grants
+	// are in-place replacements, so each later test grant re-includes this set.
+	prereqMsgTypes := []string{
 		"/verana.ec.v1.MsgCreateEcosystem",
 		"/verana.cs.v1.MsgCreateCredentialSchema",
 		"/verana.pp.v1.MsgSetParticipantOPToValidated",
 		"/verana.pp.v1.MsgCreateRootParticipant",
 		"/verana.pp.v1.MsgSetParticipantEffectiveUntil",
-	})
+	}
+	fmt.Println("\n--- Prerequisite 1: Grant operator authz via the Corporation group ---")
+	err := lib.GrantOperatorAuthorizationViaGroup(
+		client, ctx, adminAccount, member1Account,
+		policyAddr, operatorAddr, operatorAddr, prereqMsgTypes,
+	)
 	if err != nil {
 		return fmt.Errorf("prerequisite 1 failed: %w", err)
 	}
-	fmt.Println("OK Prerequisite 1: Granted self-delegation for TR, CS, and SetPermissionVPToValidated")
-	waitForTx("self-delegation")
+	fmt.Println("OK Prerequisite 1: Granted operator authz from Corporation for prereq operations")
+	waitForTx("operator authz grant")
 
 	// --- Prerequisite 2: Create Trust Registry (controller = operatorAddr) ---
 	fmt.Println("\n--- Prerequisite 2: Create Trust Registry ---")
 	did := lib.GenerateUniqueDID(client, ctx)
-	trIDStr, err := lib.CreateEcosystem(
-		client, ctx, operatorAccount,
+	trIDStr, err := lib.CreateEcosystemWithAuthority(
+		client, ctx, operatorAccount, policyAddr,
 		did,
 		"https://perm-test.com/governance-framework.pdf",
 		"sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26",
@@ -75,16 +83,12 @@ func RunPermissionAuthzOperationsJourney(ctx context.Context, client cosmosclien
 	// --- Prerequisite 3: Create Credential Schema with GRANTOR_VALIDATION modes ---
 	fmt.Println("\n--- Prerequisite 3: Create Credential Schema ---")
 	schemaData := lib.GenerateSimpleSchema(trIDStr)
-	csIDStr, err := lib.CreateCredentialSchema(client, ctx, operatorAccount, cschema.MsgCreateCredentialSchema{
-		EcosystemId:            trID,
-		JsonSchema:             schemaData,
-		IssuerOnboardingMode:   uint32(cschema.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS),
-		VerifierOnboardingMode: uint32(cschema.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS),
-		HolderOnboardingMode:   uint32(cschema.HolderOnboardingMode_HOLDER_ONBOARDING_MODE_PERMISSIONLESS),
-		PricingAssetType:       uint32(cschema.PricingAssetType_TU),
-		PricingAsset:           "tu",
-		DigestAlgorithm:        "sha256",
-	})
+	csIDStr, err := lib.CreateCredentialSchemaWithAuthority(
+		client, ctx, operatorAccount, policyAddr,
+		trID, schemaData,
+		cschema.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS,
+		cschema.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS,
+	)
 	if err != nil {
 		return fmt.Errorf("prerequisite 3 failed: %w", err)
 	}
@@ -98,18 +102,13 @@ func RunPermissionAuthzOperationsJourney(ctx context.Context, client cosmosclien
 	rootPermDID := lib.GenerateUniqueDID(client, ctx)
 	effectiveFrom := time.Now().Add(10 * time.Second)
 	effectiveUntil := effectiveFrom.Add(360 * 24 * time.Hour)
-	rootPermIDStr, err := lib.CreateRootPermission(client, ctx, operatorAccount, permtypes.MsgCreateRootParticipant{
-		SchemaId:       csID,
-		Did:            rootPermDID,
-		EffectiveFrom:  &effectiveFrom,
-		EffectiveUntil: &effectiveUntil,
-		ValidationFees: 0,
-		IssuanceFees:   0,
-	})
+	rootPermID, err := lib.CreateRootPermissionWithAuthority(
+		client, ctx, operatorAccount, policyAddr,
+		csID, rootPermDID, &effectiveFrom, &effectiveUntil, 0, 0, 0,
+	)
 	if err != nil {
 		return fmt.Errorf("prerequisite 4 failed: %w", err)
 	}
-	rootPermID, _ := strconv.ParseUint(rootPermIDStr, 10, 64)
 	fmt.Printf("OK Prerequisite 4: Root Permission created with ID: %d\n", rootPermID)
 	waitForTx("Root perm creation")
 
@@ -146,7 +145,7 @@ func RunPermissionAuthzOperationsJourney(ctx context.Context, client cosmosclien
 	err = lib.GrantOperatorAuthorizationViaGroup(
 		client, ctx, adminAccount, member1Account,
 		policyAddr, operatorAddr, operatorAddr,
-		[]string{"/verana.pp.v1.MsgStartParticipantOP"},
+		append(append([]string{}, prereqMsgTypes...), "/verana.pp.v1.MsgStartParticipantOP"),
 	)
 	if err != nil {
 		return fmt.Errorf("step 1b failed: %w", err)
@@ -192,6 +191,7 @@ func RunPermissionAuthzOperationsJourney(ctx context.Context, client cosmosclien
 	// 2-prereq: Validate the permission (set to VALIDATED state)
 	fmt.Println("\n--- Step 2-prereq: Validate the permission (set op_state=VALIDATED) ---")
 	_, err = lib.SetPermissionVPToValidated(client, ctx, operatorAccount, permtypes.MsgSetParticipantOPToValidated{
+		Corporation:    policyAddr,
 		Id:             permID,
 		ValidationFees: 0,
 		IssuanceFees:   0,
@@ -227,7 +227,7 @@ func RunPermissionAuthzOperationsJourney(ctx context.Context, client cosmosclien
 	err = lib.GrantOperatorAuthorizationViaGroup(
 		client, ctx, adminAccount, member1Account,
 		policyAddr, operatorAddr, operatorAddr,
-		[]string{"/verana.pp.v1.MsgRenewParticipantOP"},
+		append(append([]string{}, prereqMsgTypes...), "/verana.pp.v1.MsgStartParticipantOP", "/verana.pp.v1.MsgRenewParticipantOP"),
 	)
 	if err != nil {
 		return fmt.Errorf("step 2b failed: %w", err)
@@ -264,7 +264,8 @@ func RunPermissionAuthzOperationsJourney(ctx context.Context, client cosmosclien
 
 	// First, validate the permission again so we can test renewal rejection
 	_, err = lib.SetPermissionVPToValidated(client, ctx, operatorAccount, permtypes.MsgSetParticipantOPToValidated{
-		Id: permID,
+		Corporation: policyAddr,
+		Id:          permID,
 	})
 	if err != nil {
 		return fmt.Errorf("step 3-prereq failed: %w", err)
