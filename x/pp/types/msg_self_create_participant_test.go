@@ -2,6 +2,7 @@ package types_test
 
 import (
 	"testing"
+	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
@@ -42,6 +43,16 @@ func TestMsgSelfCreateParticipant_ValidateBasic(t *testing.T) {
 		{"validator_participant_id = 0", func(m *types.MsgSelfCreateParticipant) { m.ValidatorParticipantId = 0 }, "validator_participant_id is mandatory"},
 		{"empty did", func(m *types.MsgSelfCreateParticipant) { m.Did = "" }, "did is mandatory"},
 		{"malformed did", func(m *types.MsgSelfCreateParticipant) { m.Did = "nope" }, "invalid DID syntax"},
+		{"vsoa params without effective_until", func(m *types.MsgSelfCreateParticipant) {
+			m.VsOperator = validAddr
+			m.VsOperatorAuthzMsgTypes = []string{types.MsgCreateOrUpdateParticipantSessionTypeURL}
+		}, "effective_until is required"},
+		{"vsoa params with effective_until", func(m *types.MsgSelfCreateParticipant) {
+			m.VsOperator = validAddr
+			m.VsOperatorAuthzMsgTypes = []string{types.MsgCreateOrUpdateParticipantSessionTypeURL}
+			exp := time.Unix(2000000000, 0).UTC()
+			m.EffectiveUntil = &exp
+		}, ""},
 	}
 
 	for _, tc := range tests {
