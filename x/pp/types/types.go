@@ -7,6 +7,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/google/uuid"
+	"github.com/verana-labs/verana/util/validation"
 )
 
 func (msg *MsgStartParticipantOP) ValidateBasic() error {
@@ -44,7 +45,7 @@ func (msg *MsgStartParticipantOP) ValidateBasic() error {
 	if msg.Did == "" {
 		return fmt.Errorf("did is required")
 	}
-	if !isValidDID(msg.Did) {
+	if !validation.IsValidDID(msg.Did) {
 		return fmt.Errorf("invalid DID format")
 	}
 
@@ -76,14 +77,6 @@ func (msg *MsgStartParticipantOP) ValidateBasic() error {
 func isValidCountryCode(code string) bool {
 	// Basic check for ISO 3166-1 alpha-2 format
 	match, _ := regexp.MatchString(`^[A-Z]{2}$`, code)
-	return match
-}
-
-func isValidDID(did string) bool {
-	// DID validation regex following W3C DID specification
-	// Format: did:<method-name>:<method-specific-id>
-	// Method-specific-id can contain alphanumeric, dots, underscores, hyphens, colons, and slashes
-	match, _ := regexp.MatchString(`^did:[a-zA-Z0-9]+:[a-zA-Z0-9._:/-]+$`, did)
 	return match
 }
 
@@ -124,7 +117,7 @@ func (msg *MsgSetParticipantOPToValidated) ValidateBasic() error {
 	}
 
 	// Validate digest SRI format if provided (optional)
-	if msg.OpSummaryDigest != "" && !isValidDigestSRI(msg.OpSummaryDigest) {
+	if msg.OpSummaryDigest != "" && !validation.IsValidDigestSRI(msg.OpSummaryDigest) {
 		return fmt.Errorf("invalid op_summary_digest format")
 	}
 
@@ -138,19 +131,6 @@ func (msg *MsgSetParticipantOPToValidated) ValidateBasic() error {
 	}
 
 	return nil
-}
-
-// Add this helper function for digest SRI validation
-func isValidDigestSRI(digestSRI string) bool {
-	// Validate digest SRI format: algorithm-hash
-	// Example: sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26
-	if digestSRI == "" {
-		return true // Empty is valid (optional)
-	}
-
-	// Simple regex for digest SRI format validation
-	matched, _ := regexp.MatchString(`^[a-z0-9]+-[A-Za-z0-9+/]+=*$`, digestSRI)
-	return matched
 }
 
 // ValidateBasic for MsgConfirmPermissionVPTermination
@@ -194,7 +174,7 @@ func (msg *MsgCreateRootParticipant) ValidateBasic() error {
 	}
 
 	// did, if specified, MUST conform to the DID Syntax
-	if !isValidDID(msg.Did) {
+	if !validation.IsValidDID(msg.Did) {
 		return fmt.Errorf("invalid DID format")
 	}
 
@@ -280,7 +260,7 @@ func (msg *MsgCreateOrUpdateParticipantSession) ValidateBasic() error {
 	}
 
 	// Validate digest SRI format if provided
-	if msg.Digest != "" && !isValidDigestSRI(msg.Digest) {
+	if msg.Digest != "" && !validation.IsValidDigestSRI(msg.Digest) {
 		return sdkerrors.ErrInvalidRequest.Wrap("invalid digest format")
 	}
 
@@ -362,7 +342,7 @@ func (msg *MsgSelfCreateParticipant) ValidateBasic() error {
 	if msg.Did == "" {
 		return sdkerrors.ErrInvalidRequest.Wrap("did is mandatory")
 	}
-	if !isValidDID(msg.Did) {
+	if !validation.IsValidDID(msg.Did) {
 		return sdkerrors.ErrInvalidRequest.Wrap("invalid DID syntax")
 	}
 

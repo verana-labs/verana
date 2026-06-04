@@ -4,12 +4,12 @@ import (
 	"context"
 	errors2 "errors"
 	"fmt"
-	"regexp"
 	"sort"
 	"time"
 
 	"cosmossdk.io/collections"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/verana-labs/verana/util/validation"
 	credentialschematypes "github.com/verana-labs/verana/x/cs/types"
 	"github.com/verana-labs/verana/x/pp/types"
 	"google.golang.org/grpc/codes"
@@ -161,7 +161,7 @@ func (k Keeper) FindParticipantsWithDID(goCtx context.Context, req *types.QueryF
 	if req.Did == "" {
 		return nil, status.Error(codes.InvalidArgument, "DID is required")
 	}
-	if !isValidDID(req.Did) {
+	if !validation.IsValidDID(req.Did) {
 		return nil, status.Error(codes.InvalidArgument, "invalid DID format")
 	}
 
@@ -307,14 +307,6 @@ func isPermissionValidAtTime(perm types.Participant, when time.Time) bool {
 
 	// At this point, permission is ACTIVE
 	return true
-}
-
-func isValidDID(did string) bool {
-	// DID validation regex following W3C DID specification
-	// Format: did:<method-name>:<method-specific-id>
-	// Method-specific-id can contain alphanumeric, dots, underscores, hyphens, colons, and slashes
-	didRegex := regexp.MustCompile(`^did:[a-zA-Z0-9]+:[a-zA-Z0-9._:/%\-]+$`)
-	return didRegex.MatchString(did)
 }
 
 func (k Keeper) FindBeneficiaries(goCtx context.Context, req *types.QueryFindBeneficiariesRequest) (*types.QueryFindBeneficiariesResponse, error) {

@@ -58,24 +58,5 @@ func TestIsValidURL(t *testing.T) {
 	}
 }
 
-func TestIsValidDigestSRI(t *testing.T) {
-	cases := []struct {
-		name string
-		in   string
-		want bool
-	}{
-		{"empty", "", false},
-		{"no algo prefix", "abcdef==", false},
-		{"unsupported algo", "md5-abcdef==", false},
-		{"sha256 valid", "sha256-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26", true},
-		{"sha384 valid", "sha384-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26", true},
-		{"sha512 valid", "sha512-MzNNbQTWCSUSi0bbz7dbua+RcENv7C6FvlmYJ1Y+I727HsPOHdzwELMYO9Mz68M26", true},
-		{"sha384 with bad chars", "sha384-!@#$%^&*()", false},
-		{"sha384 empty body", "sha384-", false},
-	}
-	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			require.Equal(t, c.want, types.IsValidDigestSRI(c.in), "input: %q", c.in)
-		})
-	}
-}
+// DigestSRI validation now lives in util/validation; see
+// util/validation/validation_test.go for its table-driven tests.
