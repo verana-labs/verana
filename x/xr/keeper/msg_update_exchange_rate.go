@@ -21,7 +21,7 @@ func (ms msgServer) UpdateExchangeRate(ctx context.Context, msg *types.MsgUpdate
 	now := sdkCtx.BlockTime()
 
 	// Authorization check: verify operator is authorized by authority
-	if err := ms.delegationKeeper.CheckOperatorAuthorization(ctx, msg.Authority, msg.Operator, "/verana.xr.v1.Msg/UpdateExchangeRate", now); err != nil {
+	if err := ms.delegationKeeper.CheckOperatorAuthorization(ctx, msg.Authority, msg.Operator, "/verana.xr.v1.MsgUpdateExchangeRate", now); err != nil {
 		return nil, errorsmod.Wrapf(types.ErrInvalidSigner, "authorization check failed: %s", err)
 	}
 
