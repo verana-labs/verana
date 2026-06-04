@@ -9,7 +9,7 @@ import (
 
 	keepertest "github.com/verana-labs/verana/testutil/keeper"
 	"github.com/verana-labs/verana/testutil/nullify"
-	permission "github.com/verana-labs/verana/x/pp/module"
+	participant "github.com/verana-labs/verana/x/pp/module"
 	"github.com/verana-labs/verana/x/pp/types"
 )
 
@@ -22,9 +22,9 @@ func TestGenesis(t *testing.T) {
 		NextParticipantId:   1,
 	}
 
-	k, _, _, _, ctx, _ := keepertest.PermissionKeeper(t)
-	permission.InitGenesis(ctx, k, genesisState)
-	got := permission.ExportGenesis(ctx, k)
+	k, _, _, _, ctx, _ := keepertest.ParticipantKeeper(t)
+	participant.InitGenesis(ctx, k, genesisState)
+	got := participant.ExportGenesis(ctx, k)
 	require.NotNil(t, got)
 
 	nullify.Fill(&genesisState)
@@ -37,14 +37,14 @@ func TestGenesis(t *testing.T) {
 }
 
 func TestDeterministicGenesis(t *testing.T) {
-	k, _, _, _, ctx, _ := keepertest.PermissionKeeper(t)
+	k, _, _, _, ctx, _ := keepertest.ParticipantKeeper(t)
 
 	nowTime := time.Now()
 	futureTime := nowTime.Add(24 * time.Hour)
 	creatorAddr := sdk.AccAddress([]byte("test_creator")).String()
 
-	// Create test permissions in random order
-	perm2 := types.Participant{
+	// Create test participants in random order
+	participant2 := types.Participant{
 		Id:                     2,
 		Role:                   types.ParticipantRole_ISSUER,
 		Did:                    "did:example:67890",
@@ -57,7 +57,7 @@ func TestDeterministicGenesis(t *testing.T) {
 		EffectiveUntil:         &futureTime,
 	}
 
-	perm1 := types.Participant{
+	participant1 := types.Participant{
 		Id:             1,
 		Role:           types.ParticipantRole_ECOSYSTEM,
 		Did:            "did:example:12345",
@@ -70,8 +70,8 @@ func TestDeterministicGenesis(t *testing.T) {
 	}
 
 	// Insert in reverse order
-	require.NoError(t, k.Participant.Set(ctx, perm2.Id, perm2))
-	require.NoError(t, k.Participant.Set(ctx, perm1.Id, perm1))
+	require.NoError(t, k.Participant.Set(ctx, participant2.Id, participant2))
+	require.NoError(t, k.Participant.Set(ctx, participant1.Id, participant1))
 	require.NoError(t, k.ParticipantCounter.Set(ctx, 3))
 
 	// Create test sessions in random order
@@ -108,13 +108,13 @@ func TestDeterministicGenesis(t *testing.T) {
 	require.NoError(t, k.ParticipantSession.Set(ctx, session1.Id, session1))
 
 	// Export genesis
-	exportedGenesis1 := permission.ExportGenesis(ctx, k)
+	exportedGenesis1 := participant.ExportGenesis(ctx, k)
 
 	// First export should have deterministic ordering
 	require.Len(t, exportedGenesis1.Participants, 2)
 	require.Len(t, exportedGenesis1.ParticipantSessions, 2)
 
-	// Check if permissions are sorted by ID
+	// Check if participants are sorted by ID
 	require.Equal(t, uint64(1), exportedGenesis1.Participants[0].Id)
 	require.Equal(t, uint64(2), exportedGenesis1.Participants[1].Id)
 
@@ -123,11 +123,11 @@ func TestDeterministicGenesis(t *testing.T) {
 	require.Equal(t, "test-session-id-2", exportedGenesis1.ParticipantSessions[1].Id)
 
 	// Create a new keeper instance for the second test
-	k2, _, _, _, ctx2, _ := keepertest.PermissionKeeper(t)
+	k2, _, _, _, ctx2, _ := keepertest.ParticipantKeeper(t)
 
 	// Insert in opposite order for the second test
-	require.NoError(t, k2.Participant.Set(ctx2, perm1.Id, perm1))
-	require.NoError(t, k2.Participant.Set(ctx2, perm2.Id, perm2))
+	require.NoError(t, k2.Participant.Set(ctx2, participant1.Id, participant1))
+	require.NoError(t, k2.Participant.Set(ctx2, participant2.Id, participant2))
 	require.NoError(t, k2.ParticipantCounter.Set(ctx2, 3))
 
 	// Insert sessions in opposite order
@@ -135,13 +135,13 @@ func TestDeterministicGenesis(t *testing.T) {
 	require.NoError(t, k2.ParticipantSession.Set(ctx2, session2.Id, session2))
 
 	// Export genesis again
-	exportedGenesis2 := permission.ExportGenesis(ctx2, k2)
+	exportedGenesis2 := participant.ExportGenesis(ctx2, k2)
 
 	// Second export should have same deterministic ordering despite different insertion order
 	require.Len(t, exportedGenesis2.Participants, 2)
 	require.Len(t, exportedGenesis2.ParticipantSessions, 2)
 
-	// Check if permissions are sorted by ID
+	// Check if participants are sorted by ID
 	require.Equal(t, uint64(1), exportedGenesis2.Participants[0].Id)
 	require.Equal(t, uint64(2), exportedGenesis2.Participants[1].Id)
 
@@ -156,15 +156,15 @@ func TestDeterministicGenesis(t *testing.T) {
 }
 
 func TestGenesisImportExport(t *testing.T) {
-	k, _, _, _, ctx, _ := keepertest.PermissionKeeper(t)
+	k, _, _, _, ctx, _ := keepertest.ParticipantKeeper(t)
 
 	// Create some test data
 	nowTime := time.Now()
 	futureTime := nowTime.Add(24 * time.Hour)
 	creatorAddr := sdk.AccAddress([]byte("test_creator")).String()
 
-	// Create test permissions
-	perm1 := types.Participant{
+	// Create test participants
+	participant1 := types.Participant{
 		Id:             1,
 		Role:           types.ParticipantRole_ECOSYSTEM,
 		Did:            "did:example:12345",
@@ -176,7 +176,7 @@ func TestGenesisImportExport(t *testing.T) {
 		EffectiveUntil: &futureTime,
 	}
 
-	perm2 := types.Participant{
+	participant2 := types.Participant{
 		Id:                     2,
 		Role:                   types.ParticipantRole_ISSUER,
 		Did:                    "did:example:67890",
@@ -189,7 +189,7 @@ func TestGenesisImportExport(t *testing.T) {
 		ValidatorParticipantId: 1,
 	}
 
-	perm3 := types.Participant{
+	participant3 := types.Participant{
 		Id:                     3,
 		Role:                   types.ParticipantRole_VERIFIER,
 		Did:                    "did:example:verifier",
@@ -202,12 +202,12 @@ func TestGenesisImportExport(t *testing.T) {
 		ValidatorParticipantId: 1,
 	}
 
-	require.NoError(t, k.Participant.Set(ctx, perm1.Id, perm1))
-	require.NoError(t, k.Participant.Set(ctx, perm2.Id, perm2))
-	require.NoError(t, k.Participant.Set(ctx, perm3.Id, perm3))
+	require.NoError(t, k.Participant.Set(ctx, participant1.Id, participant1))
+	require.NoError(t, k.Participant.Set(ctx, participant2.Id, participant2))
+	require.NoError(t, k.Participant.Set(ctx, participant3.Id, participant3))
 	require.NoError(t, k.ParticipantCounter.Set(ctx, 4))
 
-	// Create test perm sessions
+	// Create test participant sessions
 	session1 := types.ParticipantSession{
 		Id:            "test-session-id-1",
 		CorporationId: uint64(1),
@@ -241,7 +241,7 @@ func TestGenesisImportExport(t *testing.T) {
 	require.NoError(t, k.ParticipantSession.Set(ctx, session2.Id, session2))
 
 	// Export genesis state
-	genesisState := permission.ExportGenesis(ctx, k)
+	genesisState := participant.ExportGenesis(ctx, k)
 
 	// Verify exported data
 	require.Equal(t, uint64(4), genesisState.NextParticipantId)
@@ -249,27 +249,27 @@ func TestGenesisImportExport(t *testing.T) {
 	require.Len(t, genesisState.ParticipantSessions, 2)
 
 	// Create a new keeper instance
-	k2, _, _, _, ctx2, _ := keepertest.PermissionKeeper(t)
+	k2, _, _, _, ctx2, _ := keepertest.ParticipantKeeper(t)
 
 	// Initialize with the exported genesis state
-	permission.InitGenesis(ctx2, k2, *genesisState)
+	participant.InitGenesis(ctx2, k2, *genesisState)
 
 	// Verify all data was imported correctly
-	perm1Get, err := k2.Participant.Get(ctx2, 1)
+	participant1Get, err := k2.Participant.Get(ctx2, 1)
 	require.NoError(t, err)
-	require.Equal(t, perm1.Id, perm1Get.Id)
-	require.Equal(t, perm1.Did, perm1Get.Did)
-	require.Equal(t, perm1.Role, perm1Get.Role)
+	require.Equal(t, participant1.Id, participant1Get.Id)
+	require.Equal(t, participant1.Did, participant1Get.Did)
+	require.Equal(t, participant1.Role, participant1Get.Role)
 
-	perm2Get, err := k2.Participant.Get(ctx2, 2)
+	participant2Get, err := k2.Participant.Get(ctx2, 2)
 	require.NoError(t, err)
-	require.Equal(t, perm2.Id, perm2Get.Id)
-	require.Equal(t, perm2.ValidatorParticipantId, perm2Get.ValidatorParticipantId)
+	require.Equal(t, participant2.Id, participant2Get.Id)
+	require.Equal(t, participant2.ValidatorParticipantId, participant2Get.ValidatorParticipantId)
 
-	perm3Get, err := k2.Participant.Get(ctx2, 3)
+	participant3Get, err := k2.Participant.Get(ctx2, 3)
 	require.NoError(t, err)
-	require.Equal(t, perm3.Id, perm3Get.Id)
-	require.Equal(t, perm3.CorporationId, perm3Get.CorporationId)
+	require.Equal(t, participant3.Id, participant3Get.Id)
+	require.Equal(t, participant3.CorporationId, participant3Get.CorporationId)
 
 	counter, err := k2.ParticipantCounter.Get(ctx2)
 	require.NoError(t, err)
@@ -286,7 +286,7 @@ func TestGenesisImportExport(t *testing.T) {
 	require.Equal(t, session2.SessionRecords[0].WalletAgentParticipantId, session2Get.SessionRecords[0].WalletAgentParticipantId)
 
 	// Export from the new keeper and verify it matches the original export
-	exportedState2 := permission.ExportGenesis(ctx2, k2)
+	exportedState2 := participant.ExportGenesis(ctx2, k2)
 
 	// Both states should be identical
 	nullify.Fill(genesisState)
@@ -305,7 +305,7 @@ func TestGenesisValidation(t *testing.T) {
 		expectedErr  string
 	}{
 		{
-			name: "duplicate perm IDs",
+			name: "duplicate participant IDs",
 			genesisState: types.GenesisState{
 				Params: types.DefaultParams(),
 				Participants: []types.Participant{
@@ -329,10 +329,10 @@ func TestGenesisValidation(t *testing.T) {
 				},
 				NextParticipantId: 2,
 			},
-			expectedErr: "duplicate perm ID found: 1",
+			expectedErr: "duplicate participant ID found: 1",
 		},
 		{
-			name: "next perm ID too low",
+			name: "next participant ID too low",
 			genesisState: types.GenesisState{
 				Params: types.DefaultParams(),
 				Participants: []types.Participant{
@@ -349,10 +349,10 @@ func TestGenesisValidation(t *testing.T) {
 				},
 				NextParticipantId: 3, // Should be > 5
 			},
-			expectedErr: "next_permission_id (3) must be greater than the maximum perm ID (5)",
+			expectedErr: "next_participant_id (3) must be greater than the maximum participant ID (5)",
 		},
 		{
-			name: "missing required perm field",
+			name: "missing required participant field",
 			genesisState: types.GenesisState{
 				Params: types.DefaultParams(),
 				Participants: []types.Participant{
@@ -387,7 +387,7 @@ func TestGenesisValidation(t *testing.T) {
 				},
 				NextParticipantId: 3,
 			},
-			expectedErr: "validator perm ID 999 not found for perm ID 2",
+			expectedErr: "validator participant ID 999 not found for participant ID 2",
 		},
 	}
 

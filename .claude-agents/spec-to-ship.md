@@ -44,7 +44,7 @@ After each message completes (commit done), print:
 
 Extract:
 1. **Spec ref**: e.g., `[MOD-TD-MSG-6]`
-2. **Module**: Detect from prefix (`MOD-TD-` → `td`, `MOD-PERM-` → `perm`, `MOD-DE-` → `de`, etc.)
+2. **Module**: Detect from prefix (`MOD-TD-` → `td`, `MOD-PP-` → `pp`, `MOD-DE-` → `de`, etc.)
 3. **Message/Query name**: Derive from spec title
 4. **Type**: External Msg / Internal Keeper Method / Query
 5. **Parameters**: List with types and (Signer) annotations

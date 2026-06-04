@@ -10,7 +10,7 @@ import (
 )
 
 // TestMsgCreateRootParticipant_ValidateBasic exercises every mandatory-field
-// rejection per spec [MOD-PERM-MSG-7-1] and [MOD-PERM-MSG-7-2-1]. Every case
+// rejection per spec [MOD-PP-MSG-7-1] and [MOD-PP-MSG-7-2-1]. Every case
 // starts from a valid baseline and mutates exactly one field. This pattern
 // surfaces the "field omitted, proto3 zero value" bug class that the Mohammad
 // devnet report (2026-04-23) uncovered.

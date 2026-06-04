@@ -14,7 +14,7 @@ func TestGenesisState_Validate(t *testing.T) {
 	futureTime := nowTime.Add(24 * time.Hour)
 	creatorAddr := sdk.AccAddress([]byte("test_creator")).String()
 
-	validPerm1 := types.Participant{
+	validParticipant1 := types.Participant{
 		Id:                1,
 		Role:              types.ParticipantRole_ECOSYSTEM,
 		Did:               "did:example:12345",
@@ -28,7 +28,7 @@ func TestGenesisState_Validate(t *testing.T) {
 		EffectiveUntil:    &futureTime,
 	}
 
-	validPerm2 := types.Participant{
+	validParticipant2 := types.Participant{
 		Id:                     2,
 		Role:                   types.ParticipantRole_ISSUER,
 		Did:                    "did:example:67890",
@@ -71,10 +71,10 @@ func TestGenesisState_Validate(t *testing.T) {
 			valid:    true,
 		},
 		{
-			desc: "valid genesis state with permissions and sessions",
+			desc: "valid genesis state with participants and sessions",
 			genState: &types.GenesisState{
 				Params:              types.DefaultParams(),
-				Participants:        []types.Participant{validPerm1, validPerm2},
+				Participants:        []types.Participant{validParticipant1, validParticipant2},
 				ParticipantSessions: []types.ParticipantSession{validSession},
 				NextParticipantId:   3,
 			},
@@ -94,18 +94,18 @@ func TestGenesisState_Validate(t *testing.T) {
 			errorString: "validation term requested timeout days must be positive",
 		},
 		{
-			desc: "duplicate perm IDs",
+			desc: "duplicate participant IDs",
 			genState: &types.GenesisState{
 				Params:              types.DefaultParams(),
-				Participants:        []types.Participant{validPerm1, validPerm1}, // Duplicate ID
+				Participants:        []types.Participant{validParticipant1, validParticipant1}, // Duplicate ID
 				ParticipantSessions: []types.ParticipantSession{},
 				NextParticipantId:   3,
 			},
 			valid:       false,
-			errorString: "duplicate perm ID",
+			errorString: "duplicate participant ID",
 		},
 		{
-			desc: "missing perm ID",
+			desc: "missing participant ID",
 			genState: &types.GenesisState{
 				Params: types.DefaultParams(),
 				Participants: []types.Participant{
@@ -121,7 +121,7 @@ func TestGenesisState_Validate(t *testing.T) {
 				NextParticipantId:   1,
 			},
 			valid:       false,
-			errorString: "perm ID cannot be 0",
+			errorString: "participant ID cannot be 0",
 		},
 		{
 			desc: "invalid validator reference",
@@ -144,24 +144,24 @@ func TestGenesisState_Validate(t *testing.T) {
 				NextParticipantId:   2,
 			},
 			valid:       false,
-			errorString: "validator perm ID 999 not found",
+			errorString: "validator participant ID 999 not found",
 		},
 		{
-			desc: "next perm ID too low",
+			desc: "next participant ID too low",
 			genState: &types.GenesisState{
 				Params:              types.DefaultParams(),
-				Participants:        []types.Participant{validPerm1, validPerm2},
+				Participants:        []types.Participant{validParticipant1, validParticipant2},
 				ParticipantSessions: []types.ParticipantSession{},
 				NextParticipantId:   1, // Should be > 2
 			},
 			valid:       false,
-			errorString: "next_permission_id (1) must be greater than",
+			errorString: "next_participant_id (1) must be greater than",
 		},
 		{
 			desc: "missing session reference",
 			genState: &types.GenesisState{
 				Params:       types.DefaultParams(),
-				Participants: []types.Participant{validPerm1},
+				Participants: []types.Participant{validParticipant1},
 				ParticipantSessions: []types.ParticipantSession{
 					{
 						Id:            "test-session-id",

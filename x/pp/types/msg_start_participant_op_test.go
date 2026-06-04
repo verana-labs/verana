@@ -10,9 +10,9 @@ import (
 )
 
 // TestMsgStartParticipantOP_ValidateBasic exercises the mandatory fields and
-// enum whitelist per spec [MOD-PERM-MSG-1-1] and [MOD-PERM-MSG-1-2-1]. Valid
+// enum whitelist per spec [MOD-PP-MSG-1-1] and [MOD-PP-MSG-1-2-1]. Valid
 // `type` values are {ISSUER_GRANTOR, VERIFIER_GRANTOR, ISSUER, VERIFIER, HOLDER}.
-// UNSPECIFIED and ECOSYSTEM MUST be rejected because root perms are only created
+// UNSPECIFIED and ECOSYSTEM MUST be rejected because root participants are only created
 // via MsgCreateRootParticipant, never via StartParticipantOP.
 func TestMsgStartParticipantOP_ValidateBasic(t *testing.T) {
 	validAddr := sdk.AccAddress([]byte("test_address________")).String()
@@ -38,9 +38,9 @@ func TestMsgStartParticipantOP_ValidateBasic(t *testing.T) {
 		{"valid ISSUER_GRANTOR", func(m *types.MsgStartParticipantOP) { m.Role = types.ParticipantRole_ISSUER_GRANTOR }, ""},
 		{"valid VERIFIER_GRANTOR", func(m *types.MsgStartParticipantOP) { m.Role = types.ParticipantRole_VERIFIER_GRANTOR }, ""},
 		{"valid HOLDER", func(m *types.MsgStartParticipantOP) { m.Role = types.ParticipantRole_HOLDER }, ""},
-		{"type UNSPECIFIED rejected", func(m *types.MsgStartParticipantOP) { m.Role = types.ParticipantRole_UNSPECIFIED }, "perm type must be one of"},
-		{"type ECOSYSTEM rejected", func(m *types.MsgStartParticipantOP) { m.Role = types.ParticipantRole_ECOSYSTEM }, "perm type must be one of"},
-		{"validator_participant_id = 0", func(m *types.MsgStartParticipantOP) { m.ValidatorParticipantId = 0 }, "validator perm ID cannot be 0"},
+		{"type UNSPECIFIED rejected", func(m *types.MsgStartParticipantOP) { m.Role = types.ParticipantRole_UNSPECIFIED }, "participant type must be one of"},
+		{"type ECOSYSTEM rejected", func(m *types.MsgStartParticipantOP) { m.Role = types.ParticipantRole_ECOSYSTEM }, "participant type must be one of"},
+		{"validator_participant_id = 0", func(m *types.MsgStartParticipantOP) { m.ValidatorParticipantId = 0 }, "validator participant ID cannot be 0"},
 		{"empty did", func(m *types.MsgStartParticipantOP) { m.Did = "" }, "did is required"},
 		{"malformed did", func(m *types.MsgStartParticipantOP) { m.Did = "garbage" }, "invalid DID format"},
 	}

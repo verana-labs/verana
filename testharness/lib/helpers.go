@@ -1019,7 +1019,7 @@ func CancelPermissionVPLastRequest(client cosmosclient.Client, ctx context.Conte
 }
 
 // SlashPermissionTrustDeposit slashes a permission's trust deposit.
-// [MOD-PERM-MSG-12-1] reason is mandatory per spec v4 draft 13.
+// [MOD-PP-MSG-12-1] reason is mandatory per spec v4 draft 13.
 func SlashPermissionTrustDeposit(client cosmosclient.Client, ctx context.Context, actor cosmosaccount.Account, authority string, id uint64, amount uint64, reason string) error {
 	actorAddr, err := actor.Address(addressPrefix)
 	if err != nil {
@@ -1848,7 +1848,7 @@ func CreateRootPermissionWithError(client cosmosclient.Client, ctx context.Conte
 	}
 
 	// Create the message
-	// [MOD-PERM-MSG-7-1] spec v4 draft 13 mandates permission_type and vs_operator.
+	// [MOD-PP-MSG-7-1] spec v4 draft 13 mandates permission_type and vs_operator.
 	fullMsg := &permtypes.MsgCreateRootParticipant{
 		Corporation:      creatorAddr,
 		Operator:         creatorAddr,
@@ -1886,7 +1886,7 @@ func CreateRootPermissionAndGetID(client cosmosclient.Client, ctx context.Contex
 	}
 
 	// Create the message
-	// [MOD-PERM-MSG-7-1] spec v4 draft 13 mandates permission_type and vs_operator.
+	// [MOD-PP-MSG-7-1] spec v4 draft 13 mandates permission_type and vs_operator.
 	fullMsg := &permtypes.MsgCreateRootParticipant{
 		Corporation:      creatorAddr,
 		Operator:         creatorAddr,
@@ -2028,7 +2028,7 @@ func CreateInactiveValidatorPermission(client cosmosclient.Client, ctx context.C
 
 	// Create an ECOSYSTEM (root) permission with future effective_from
 	// This will be in FUTURE state (not ACTIVE).
-	// [MOD-PERM-MSG-7-1] spec v4 draft 13 mandates permission_type and vs_operator.
+	// [MOD-PP-MSG-7-1] spec v4 draft 13 mandates permission_type and vs_operator.
 	msg := &permtypes.MsgCreateRootParticipant{
 		Corporation:    creatorAddr,
 		Operator:       creatorAddr,
@@ -3031,7 +3031,7 @@ func CreateRootPermissionWithAuthority(
 		return 0, fmt.Errorf("failed to get operator address: %w", err)
 	}
 
-	// [MOD-PERM-MSG-7-3] spec v4 draft 13: handler hardcodes perm.type = ECOSYSTEM.
+	// [MOD-PP-MSG-7-3] spec v4 draft 13: handler hardcodes perm.type = ECOSYSTEM.
 	msg := &permtypes.MsgCreateRootParticipant{
 		Corporation:      authority,
 		Operator:         operatorAddr,

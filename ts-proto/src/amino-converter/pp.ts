@@ -26,7 +26,7 @@ import {
 
 export const MsgCreateRootParticipantAminoConverter: AminoConverter = {
   aminoType: "verana/x/pp/MsgCreateRootParticipant",
-  // [MOD-PERM-MSG-7-3] spec v4 draft 13: perm.role is hardcoded to ECOSYSTEM;
+  // [MOD-PP-MSG-7-3] spec v4 draft 13: perm.role is hardcoded to ECOSYSTEM;
   // vs_operator is not set on root permissions.
   toAmino: (m: MsgCreateRootParticipant) => clean({
     corporation: m.corporation ?? "",
@@ -124,7 +124,7 @@ export const MsgStartParticipantOPAminoConverter: AminoConverter = {
 
 export const MsgRenewParticipantOPAminoConverter: AminoConverter = {
   aminoType: "verana/x/pp/MsgRenewParticipantOP",
-  // [MOD-PERM-MSG-2-1] spec v4 draft 13 parameters: corporation, operator, id.
+  // [MOD-PP-MSG-2-1] spec v4 draft 13 parameters: corporation, operator, id.
   toAmino: (m: MsgRenewParticipantOP) => clean({
     corporation: m.corporation ?? "",
     operator: m.operator ?? "",
@@ -215,7 +215,7 @@ export const MsgCreateOrUpdateParticipantSessionAminoConverter: AminoConverter =
 
 export const MsgSlashParticipantTrustDepositAminoConverter: AminoConverter = {
   aminoType: "verana/x/pp/MsgSlashParticipantTD",
-  // [MOD-PERM-MSG-12-1] spec v4 draft 13 adds mandatory reason.
+  // [MOD-PP-MSG-12-1] spec v4 draft 13 adds mandatory reason.
   toAmino: (m: MsgSlashParticipantTrustDeposit) => clean({
     corporation: m.corporation ?? "",
     operator: m.operator ?? "",

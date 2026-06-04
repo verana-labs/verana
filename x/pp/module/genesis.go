@@ -29,23 +29,23 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 		panic(err)
 	}
 
-	// Import all permissions
-	for _, perm := range genState.Participants {
-		if err := k.Participant.Set(ctx, perm.Id, perm); err != nil {
-			panic(fmt.Errorf("failed to set perm: %w", err))
+	// Import all participants
+	for _, participant := range genState.Participants {
+		if err := k.Participant.Set(ctx, participant.Id, participant); err != nil {
+			panic(fmt.Errorf("failed to set participant: %w", err))
 		}
 	}
 
-	// Import all perm sessions
+	// Import all participant sessions
 	for _, session := range genState.ParticipantSessions {
 		if err := k.ParticipantSession.Set(ctx, session.Id, session); err != nil {
-			panic(fmt.Errorf("failed to set perm session: %w", err))
+			panic(fmt.Errorf("failed to set participant session: %w", err))
 		}
 	}
 
-	// Set the permissions counter
+	// Set the participants counter
 	if err := k.ParticipantCounter.Set(ctx, genState.NextParticipantId); err != nil {
-		panic(fmt.Errorf("failed to set perm counter: %w", err))
+		panic(fmt.Errorf("failed to set participant counter: %w", err))
 	}
 }
 
@@ -56,29 +56,29 @@ func ExportGenesis(ctx sdk.Context, k keeper.Keeper) *types.GenesisState {
 	// Export module parameters
 	genesis.Params = k.GetParams(ctx)
 
-	// Export all permissions
-	permissions := []types.Participant{}
-	if err := k.Participant.Walk(ctx, nil, func(id uint64, perm types.Participant) (bool, error) {
-		permissions = append(permissions, perm)
+	// Export all participants
+	participants := []types.Participant{}
+	if err := k.Participant.Walk(ctx, nil, func(id uint64, participant types.Participant) (bool, error) {
+		participants = append(participants, participant)
 		return false, nil
 	}); err != nil {
-		panic(fmt.Errorf("failed to export permissions: %w", err))
+		panic(fmt.Errorf("failed to export participants: %w", err))
 	}
 
-	// Sort permissions by ID for deterministic output
-	sort.Slice(permissions, func(i, j int) bool {
-		return permissions[i].Id < permissions[j].Id
+	// Sort participants by ID for deterministic output
+	sort.Slice(participants, func(i, j int) bool {
+		return participants[i].Id < participants[j].Id
 	})
 
-	genesis.Participants = permissions
+	genesis.Participants = participants
 
-	// Export all perm sessions
+	// Export all participant sessions
 	sessions := []types.ParticipantSession{}
 	if err := k.ParticipantSession.Walk(ctx, nil, func(id string, session types.ParticipantSession) (bool, error) {
 		sessions = append(sessions, session)
 		return false, nil
 	}); err != nil {
-		panic(fmt.Errorf("failed to export perm sessions: %w", err))
+		panic(fmt.Errorf("failed to export participant sessions: %w", err))
 	}
 
 	// Sort sessions by ID for deterministic output
@@ -88,13 +88,13 @@ func ExportGenesis(ctx sdk.Context, k keeper.Keeper) *types.GenesisState {
 
 	genesis.ParticipantSessions = sessions
 
-	// Export perm counter
+	// Export participant counter
 	nextId, err := k.ParticipantCounter.Get(ctx)
 	if err != nil && !errors.Is(err, collections.ErrNotFound) {
-		panic(fmt.Errorf("failed to get perm counter: %w", err))
+		panic(fmt.Errorf("failed to get participant counter: %w", err))
 	}
 
-	// In case of no permissions, set next ID to 1
+	// In case of no participants, set next ID to 1
 	if errors.Is(err, collections.ErrNotFound) {
 		nextId = 1
 	}

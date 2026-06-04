@@ -17,7 +17,7 @@ Before writing any code, classify the work:
 | Spec prefix | Module | Go package | Proto package |
 |---|---|---|---|
 | `MOD-TD-` | `td` | `x/td` | `verana.td.v1` |
-| `MOD-PERM-` | `perm` | `x/perm` | `verana.perm.v1` |
+| `MOD-PP-` | `pp` | `x/pp` | `verana.pp.v1` |
 | `MOD-CS-` | `cs` | `x/cs` | `verana.cs.v1` |
 | `MOD-TR-` | `tr` | `x/tr` | `verana.tr.v1` |
 | `MOD-DE-` | `de` | `x/de` | `verana.de.v1` |

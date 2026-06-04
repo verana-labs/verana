@@ -9,13 +9,13 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/simulation"
 
 	"github.com/verana-labs/verana/testutil/sample"
-	permissionsimulation "github.com/verana-labs/verana/x/pp/simulation"
+	participantsimulation "github.com/verana-labs/verana/x/pp/simulation"
 	"github.com/verana-labs/verana/x/pp/types"
 )
 
 // avoid unused import issue
 var (
-	_ = permissionsimulation.FindAccount
+	_ = participantsimulation.FindAccount
 	_ = rand.Rand{}
 	_ = sample.AccAddress
 	_ = sdk.AccAddress{}
@@ -32,11 +32,11 @@ func (AppModule) GenerateGenesisState(simState *module.SimulationState) {
 	for i, acc := range simState.Accounts {
 		accs[i] = acc.Address.String()
 	}
-	permissionGenesis := types.GenesisState{
+	participantGenesis := types.GenesisState{
 		Params: types.DefaultParams(),
 		// this line is used by starport scaffolding # simapp/module/genesisState
 	}
-	simState.GenState[types.ModuleName] = simState.Cdc.MustMarshalJSON(&permissionGenesis)
+	simState.GenState[types.ModuleName] = simState.Cdc.MustMarshalJSON(&participantGenesis)
 }
 
 // RegisterStoreDecoder registers a decoder.

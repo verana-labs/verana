@@ -241,7 +241,7 @@ func CreateRootPermission(client cosmosclient.Client, ctx context.Context, creat
 		log.Fatal(err)
 	}
 
-	// [MOD-PERM-MSG-7-3] spec v4 draft 13: handler hardcodes perm.type = ECOSYSTEM.
+	// [MOD-PP-MSG-7-3] spec v4 draft 13: handler hardcodes perm.type = ECOSYSTEM.
 	_ = creatorAddr
 	msg := &permtypes.MsgCreateRootParticipant{
 		Corporation:      creatorAddr,

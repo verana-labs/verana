@@ -11,23 +11,23 @@ import (
 )
 
 func (msg *MsgStartParticipantOP) ValidateBasic() error {
-	// [MOD-PERM-MSG-1-2-1] authority (group): signature must be verified
+	// [MOD-PP-MSG-1-2-1] authority (group): signature must be verified
 	if _, err := sdk.AccAddressFromBech32(msg.Corporation); err != nil {
 		return fmt.Errorf("invalid corporation address: %w", err)
 	}
 
-	// [MOD-PERM-MSG-1-2-1] operator (account): signature must be verified
+	// [MOD-PP-MSG-1-2-1] operator (account): signature must be verified
 	if _, err := sdk.AccAddressFromBech32(msg.Operator); err != nil {
 		return fmt.Errorf("invalid operator address: %w", err)
 	}
 
 	if msg.ValidatorParticipantId == 0 {
-		return fmt.Errorf("validator perm ID cannot be 0")
+		return fmt.Errorf("validator participant ID cannot be 0")
 	}
 
-	// [MOD-PERM-MSG-1-2-1] type MUST be a valid ParticipantRole:
+	// [MOD-PP-MSG-1-2-1] type MUST be a valid ParticipantRole:
 	// ISSUER_GRANTOR, VERIFIER_GRANTOR, ISSUER, VERIFIER, HOLDER.
-	// ECOSYSTEM (5) is explicitly excluded — root permissions are only
+	// ECOSYSTEM (5) is explicitly excluded — root participants are only
 	// created via MsgCreateRootParticipant, never via StartParticipantOP.
 	pt := ParticipantRole(msg.Role)
 	switch pt {
@@ -38,10 +38,10 @@ func (msg *MsgStartParticipantOP) ValidateBasic() error {
 		ParticipantRole_HOLDER:
 		// ok
 	default:
-		return fmt.Errorf("perm type must be one of ISSUER, VERIFIER, ISSUER_GRANTOR, VERIFIER_GRANTOR, HOLDER (got %s)", pt.String())
+		return fmt.Errorf("participant type must be one of ISSUER, VERIFIER, ISSUER_GRANTOR, VERIFIER_GRANTOR, HOLDER (got %s)", pt.String())
 	}
 
-	// [MOD-PERM-MSG-1-1] did is required and MUST conform to DID Syntax
+	// [MOD-PP-MSG-1-1] did is required and MUST conform to DID Syntax
 	if msg.Did == "" {
 		return fmt.Errorf("did is required")
 	}
@@ -49,17 +49,17 @@ func (msg *MsgStartParticipantOP) ValidateBasic() error {
 		return fmt.Errorf("invalid DID format")
 	}
 
-	// [MOD-PERM-MSG-1-2-1] vs_operator_authz_enabled: if true, vs_operator MUST NOT be null
+	// [MOD-PP-MSG-1-2-1] vs_operator_authz_enabled: if true, vs_operator MUST NOT be null
 	if msg.VsOperatorAuthzEnabled && msg.VsOperator == "" {
 		return fmt.Errorf("vs_operator is required when vs_operator_authz_enabled is true")
 	}
 
-	// [MOD-PERM-MSG-1-2-1] vs_operator_authz_with_feegrant: if true, vs_operator MUST NOT be null
+	// [MOD-PP-MSG-1-2-1] vs_operator_authz_with_feegrant: if true, vs_operator MUST NOT be null
 	if msg.VsOperatorAuthzWithFeegrant && msg.VsOperator == "" {
 		return fmt.Errorf("vs_operator is required when vs_operator_authz_with_feegrant is true")
 	}
 
-	// [MOD-PERM-MSG-1-2-1] vs_operator_authz_spend_period: if not null, vs_operator MUST NOT be null
+	// [MOD-PP-MSG-1-2-1] vs_operator_authz_spend_period: if not null, vs_operator MUST NOT be null
 	if msg.VsOperatorAuthzSpendPeriod != nil && msg.VsOperator == "" {
 		return fmt.Errorf("vs_operator is required when vs_operator_authz_spend_period is set")
 	}
@@ -81,19 +81,19 @@ func isValidCountryCode(code string) bool {
 }
 
 func (msg *MsgRenewParticipantOP) ValidateBasic() error {
-	// [MOD-PERM-MSG-2-2-1] authority (group): signature must be verified
+	// [MOD-PP-MSG-2-2-1] authority (group): signature must be verified
 	if _, err := sdk.AccAddressFromBech32(msg.Corporation); err != nil {
 		return fmt.Errorf("invalid corporation address: %w", err)
 	}
 
-	// [MOD-PERM-MSG-2-2-1] operator (account): signature must be verified
+	// [MOD-PP-MSG-2-2-1] operator (account): signature must be verified
 	if _, err := sdk.AccAddressFromBech32(msg.Operator); err != nil {
 		return fmt.Errorf("invalid operator address: %w", err)
 	}
 
-	// Validate perm ID
+	// Validate participant ID
 	if msg.Id == 0 {
-		return fmt.Errorf("perm ID cannot be 0")
+		return fmt.Errorf("participant ID cannot be 0")
 	}
 
 	return nil
@@ -101,19 +101,19 @@ func (msg *MsgRenewParticipantOP) ValidateBasic() error {
 
 // ValidateBasic for MsgSetParticipantOPToValidated
 func (msg *MsgSetParticipantOPToValidated) ValidateBasic() error {
-	// [MOD-PERM-MSG-3-2-1] authority (group): signature must be verified
+	// [MOD-PP-MSG-3-2-1] authority (group): signature must be verified
 	if _, err := sdk.AccAddressFromBech32(msg.Corporation); err != nil {
 		return fmt.Errorf("invalid corporation address: %w", err)
 	}
 
-	// [MOD-PERM-MSG-3-2-1] operator (account): signature must be verified
+	// [MOD-PP-MSG-3-2-1] operator (account): signature must be verified
 	if _, err := sdk.AccAddressFromBech32(msg.Operator); err != nil {
 		return fmt.Errorf("invalid operator address: %w", err)
 	}
 
-	// Validate perm ID
+	// Validate participant ID
 	if msg.Id == 0 {
-		return fmt.Errorf("perm ID cannot be 0")
+		return fmt.Errorf("participant ID cannot be 0")
 	}
 
 	// Validate digest SRI format if provided (optional)
@@ -133,7 +133,7 @@ func (msg *MsgSetParticipantOPToValidated) ValidateBasic() error {
 	return nil
 }
 
-// ValidateBasic for MsgConfirmPermissionVPTermination
+// ValidateBasic for MsgConfirmParticipantVPTermination
 func (msg *MsgCancelParticipantOPLastRequest) ValidateBasic() error {
 	// Validate authority address
 	if _, err := sdk.AccAddressFromBech32(msg.Corporation); err != nil {
@@ -145,9 +145,9 @@ func (msg *MsgCancelParticipantOPLastRequest) ValidateBasic() error {
 		return fmt.Errorf("invalid operator address: %w", err)
 	}
 
-	// Validate perm ID
+	// Validate participant ID
 	if msg.Id == 0 {
-		return fmt.Errorf("perm ID cannot be 0")
+		return fmt.Errorf("participant ID cannot be 0")
 	}
 
 	return nil
@@ -198,7 +198,7 @@ func (msg *MsgSetParticipantEffectiveUntil) ValidateBasic() error {
 	// if a mandatory parameter is not present, transaction MUST abort
 	// id MUST be a valid uint64
 	if msg.Id == 0 {
-		return fmt.Errorf("permission ID cannot be 0")
+		return fmt.Errorf("participant ID cannot be 0")
 	}
 
 	// effective_until is mandatory according to spec
@@ -220,21 +220,21 @@ func (msg *MsgRevokeParticipant) ValidateBasic() error {
 		return fmt.Errorf("invalid operator address: %w", err)
 	}
 
-	// Validate perm ID
+	// Validate participant ID
 	if msg.Id == 0 {
-		return fmt.Errorf("perm ID cannot be 0")
+		return fmt.Errorf("participant ID cannot be 0")
 	}
 
 	return nil
 }
 
 func (msg *MsgCreateOrUpdateParticipantSession) ValidateBasic() error {
-	// [MOD-PERM-MSG-10-2] authority (group): signature must be verified
+	// [MOD-PP-MSG-10-2] authority (group): signature must be verified
 	if _, err := sdk.AccAddressFromBech32(msg.Corporation); err != nil {
 		return fmt.Errorf("invalid corporation address: %w", err)
 	}
 
-	// [MOD-PERM-MSG-10-2] operator (account): signature must be verified
+	// [MOD-PP-MSG-10-2] operator (account): signature must be verified
 	if _, err := sdk.AccAddressFromBech32(msg.Operator); err != nil {
 		return fmt.Errorf("invalid operator address: %w", err)
 	}
@@ -244,19 +244,19 @@ func (msg *MsgCreateOrUpdateParticipantSession) ValidateBasic() error {
 		return sdkerrors.ErrInvalidRequest.Wrap("invalid session ID: must be valid UUID")
 	}
 
-	// if issuer_perm_id is null AND verifier_perm_id is null, MUST abort
+	// if issuer_participant_id is null AND verifier_participant_id is null, MUST abort
 	if msg.IssuerParticipantId == 0 && msg.VerifierParticipantId == 0 {
-		return sdkerrors.ErrInvalidRequest.Wrap("at least one of issuer_perm_id or verifier_perm_id must be provided")
+		return sdkerrors.ErrInvalidRequest.Wrap("at least one of issuer_participant_id or verifier_participant_id must be provided")
 	}
 
-	// agent_perm_id is mandatory
+	// agent_participant_id is mandatory
 	if msg.AgentParticipantId == 0 {
-		return sdkerrors.ErrInvalidRequest.Wrap("agent_perm_id is mandatory")
+		return sdkerrors.ErrInvalidRequest.Wrap("agent_participant_id is mandatory")
 	}
 
-	// wallet_agent_perm_id is mandatory
+	// wallet_agent_participant_id is mandatory
 	if msg.WalletAgentParticipantId == 0 {
-		return sdkerrors.ErrInvalidRequest.Wrap("wallet_agent_perm_id is mandatory")
+		return sdkerrors.ErrInvalidRequest.Wrap("wallet_agent_participant_id is mandatory")
 	}
 
 	// Validate digest SRI format if provided
@@ -268,12 +268,12 @@ func (msg *MsgCreateOrUpdateParticipantSession) ValidateBasic() error {
 }
 
 func (msg *MsgSlashParticipantTrustDeposit) ValidateBasic() error {
-	// [MOD-PERM-MSG-12-2-1] authority (group): signature must be verified
+	// [MOD-PP-MSG-12-2-1] authority (group): signature must be verified
 	if _, err := sdk.AccAddressFromBech32(msg.Corporation); err != nil {
 		return fmt.Errorf("invalid corporation address: %w", err)
 	}
 
-	// [MOD-PERM-MSG-12-2-1] operator (account): signature must be verified
+	// [MOD-PP-MSG-12-2-1] operator (account): signature must be verified
 	if _, err := sdk.AccAddressFromBech32(msg.Operator); err != nil {
 		return fmt.Errorf("invalid operator address: %w", err)
 	}
@@ -287,7 +287,7 @@ func (msg *MsgSlashParticipantTrustDeposit) ValidateBasic() error {
 	if msg.Amount == 0 {
 		return sdkerrors.ErrInvalidRequest.Wrap("amount must be greater than 0")
 	}
-	// [MOD-PERM-MSG-12-1] reason is mandatory per spec v4 draft 13
+	// [MOD-PP-MSG-12-1] reason is mandatory per spec v4 draft 13
 	if msg.Reason == "" {
 		return sdkerrors.ErrInvalidRequest.Wrap("reason is required")
 	}
@@ -295,17 +295,17 @@ func (msg *MsgSlashParticipantTrustDeposit) ValidateBasic() error {
 }
 
 func (msg *MsgRepayParticipantSlashedTrustDeposit) ValidateBasic() error {
-	// [MOD-PERM-MSG-13-2-1] authority (group): signature must be verified
+	// [MOD-PP-MSG-13-2-1] authority (group): signature must be verified
 	if _, err := sdk.AccAddressFromBech32(msg.Corporation); err != nil {
 		return fmt.Errorf("invalid corporation address: %w", err)
 	}
 
-	// [MOD-PERM-MSG-13-2-1] operator (account): signature must be verified
+	// [MOD-PP-MSG-13-2-1] operator (account): signature must be verified
 	if _, err := sdk.AccAddressFromBech32(msg.Operator); err != nil {
 		return fmt.Errorf("invalid operator address: %w", err)
 	}
 
-	// [MOD-PERM-MSG-13-2-1] id MUST be a valid uint64
+	// [MOD-PP-MSG-13-2-1] id MUST be a valid uint64
 	if msg.Id == 0 {
 		return sdkerrors.ErrInvalidRequest.Wrap("id must be a valid uint64")
 	}
@@ -318,12 +318,12 @@ func (msg *MsgRepayParticipantSlashedTrustDeposit) ValidateBasic() error {
 }
 
 func (msg *MsgSelfCreateParticipant) ValidateBasic() error {
-	// [MOD-PERM-MSG-14-2-1] corporation (group): signature must be verified
+	// [MOD-PP-MSG-14-2-1] corporation (group): signature must be verified
 	if _, err := sdk.AccAddressFromBech32(msg.Corporation); err != nil {
 		return fmt.Errorf("invalid corporation address: %w", err)
 	}
 
-	// [MOD-PERM-MSG-14-2-1] operator (account): signature must be verified
+	// [MOD-PP-MSG-14-2-1] operator (account): signature must be verified
 	if _, err := sdk.AccAddressFromBech32(msg.Operator); err != nil {
 		return fmt.Errorf("invalid operator address: %w", err)
 	}
