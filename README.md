@@ -4,7 +4,7 @@
 [![GoDoc](https://img.shields.io/badge/godoc-reference-blue?style=flat-square&logo=go)](https://pkg.go.dev/github.com/verana-labs/verana)
 [![Go Report Card](https://goreportcard.com/badge/github.com/verana-labs/verana?style=flat-square)](https://goreportcard.com/report/github.com/verana-labs/verana)
 [![Version](https://img.shields.io/github/tag/verana-labs/verana.svg?style=flat-square)](https://github.com/verana-labs/verana/releases/latest)
-[![License: Apache-2.0](https://img.shields.io/github/license/verana-labs/verana.svg?style=flat-square)](https://github.com/verana-labs/verana/blob/main/LICENSE)
+[![License: AGPL-3.0](https://img.shields.io/github/license/verana-labs/verana.svg?style=flat-square)](https://github.com/verana-labs/verana/blob/main/LICENSE)
 [![Discord](https://badgen.net/badge/icon/discord?icon=discord&label)](https://discord.com/invite/edjaFn252q)
 
 Verana Blockchain is a Verifiable Public Registry (VPR) providing foundational infrastructure for decentralized trust ecosystems. As a sovereign Layer 1 appchain built on the Cosmos SDK, Verana enables trustless verification of credentials and services across ecosystems through a standardized trust registry framework.
@@ -82,7 +82,7 @@ While Verana can run on lower-spec hardware, you may experience reduced performa
 
 ## Prerequisites
 
-- **Go 1.22+** ([Installation Guide](https://golang.org/doc/install))
+- **Go 1.23+** ([Installation Guide](https://golang.org/doc/install))
 - **Docker** (optional, for local multi-validator network)
 - **jq** (optional, for JSON parsing in scripts)
 
@@ -330,4 +330,4 @@ Contributing guidelines will be available in the repository once the project rea
 
 ## License
 
-This project is licensed under the Apache-2.0 License - see the LICENSE file for details.
+This project is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0) - see the LICENSE file for details.
