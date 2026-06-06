@@ -28,7 +28,7 @@ GO_VERSION := $(shell go version | sed 's/go version go//' | cut -d' ' -f1)
 GO_MAJOR_VERSION := $(shell echo $(GO_VERSION) | cut -d. -f1)
 GO_MINOR_VERSION := $(shell echo $(GO_VERSION) | cut -d. -f2)
 GO_MINIMUM_MAJOR_VERSION := 1
-GO_MINIMUM_MINOR_VERSION := 22
+GO_MINIMUM_MINOR_VERSION := 23
 
 export GO111MODULE = on
 
