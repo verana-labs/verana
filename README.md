@@ -4,25 +4,70 @@
 [![GoDoc](https://img.shields.io/badge/godoc-reference-blue?style=flat-square&logo=go)](https://pkg.go.dev/github.com/verana-labs/verana)
 [![Go Report Card](https://goreportcard.com/badge/github.com/verana-labs/verana?style=flat-square)](https://goreportcard.com/report/github.com/verana-labs/verana)
 [![Version](https://img.shields.io/github/tag/verana-labs/verana.svg?style=flat-square)](https://github.com/verana-labs/verana/releases/latest)
-[![License: Apache-2.0](https://img.shields.io/github/license/verana-labs/verana.svg?style=flat-square)](https://github.com/verana-labs/verana/blob/main/LICENSE)
+[![License: AGPL-3.0](https://img.shields.io/github/license/verana-labs/verana.svg?style=flat-square)](https://github.com/verana-labs/verana/blob/main/LICENSE)
 [![Discord](https://badgen.net/badge/icon/discord?icon=discord&label)](https://discord.com/invite/edjaFn252q)
 
 Verana Blockchain is a Verifiable Public Registry (VPR) providing foundational infrastructure for decentralized trust ecosystems. As a sovereign Layer 1 appchain built on the Cosmos SDK, Verana enables trustless verification of credentials and services across ecosystems through a standardized trust registry framework.
 
-Verana serves as a public registry of registries, allowing organizations to create and manage their own trust registries with defined credential schemas, roles for issuers, verifiers, and grantors, and custom business models. The platform facilitates trust resolution, enabling applications to validate roles and permissions in real time through a standardized API.
+Verana serves as a public registry of registries, allowing organizations to create and manage their own ecosystems with defined credential schemas, roles for issuers, verifiers, and grantors, and custom business models. The platform facilitates trust resolution, enabling applications to validate roles and permissions in real time through a standardized API.
 
-Key features include:
+Key capabilities:
 
-- **Trust Registry Management**: Create and control trust registries for different ecosystems
-- **Credential Schema Management**: Define credential schemas with custom issuance and verification policies
-- **Role-Based Permissions**: Grant and manage permissions for issuers, verifiers, and grantors
-- **Tokenized Business Model**: Built-in economic incentives for trust ecosystem participants
-- **DID Directory**: Public directory of service identifiers for better service discovery
-- **Trust Resolution API**: Standard API supporting the Trust Registry Query Protocol (TRQP)
+- **Ecosystem Management**: Create and govern trust ecosystems, a public registry of registries, across trust domains
+- **Corporation & Governance Framework**: Register on-chain corporations and publish versioned governance framework documents
+- **Credential Schemas**: Define credential schemas with custom issuance and verification policies
+- **Participant Roles & Permissions**: Manage issuer, verifier, and grantor roles and their permissions
+- **Delegated Operations**: Authorize operators to execute messages on behalf of an authority (AUTHZ-CHECK delegation)
+- **Tokenized Trust Deposit**: Built-in economic incentives, yield, and slashing for ecosystem participants
+- **Supporting Registries**: On-chain exchange-rate and content-digest primitives
+- **Trust Resolution (roadmap)**: Standard API supporting the Trust Registry Query Protocol (TRQP)
 
 Verana is designed to bridge the gap between centralized trust models and the decentralized web, enabling trustworthy digital interactions across ecosystems while preserving privacy and sovereignty.
 
 For frontend transaction signing debugging, see the Amino sign bench notes in `ts-proto/test/README.md`.
+
+## Modules
+
+Verana is composed of the following Cosmos SDK modules (spec v4-rc2):
+
+| Module | Path | Spec | Responsibility |
+|--------|------|------|----------------|
+| Ecosystem | `x/ec` | MOD-EC | Trust ecosystems; a registry of registries (formerly Trust Registry) |
+| Corporation | `x/co` | MOD-CO | On-chain corporations that own ecosystems and govern via group policies |
+| Governance Framework | `x/gf` | MOD-GF | Governance framework documents and versioning |
+| Credential Schema | `x/cs` | MOD-CS | Credential schema definitions with issuance/verification policies |
+| Participant | `x/pp` | MOD-PP | Participant roles and permissions: issuer, verifier, grantor (formerly Permission) |
+| Delegation | `x/de` | MOD-DE | Operator authorizations that delegate message execution (AUTHZ-CHECK) |
+| Trust Deposit | `x/td` | MOD-TD | Economic trust deposits, yield, and slashing |
+| Exchange Rate | `x/xr` | MOD-XR | Token/credit exchange-rate management |
+| Digest | `x/di` | MOD-DI | Content digest registry |
+
+## ⚠️ Devnet Status (Temporary)
+
+> **This section is temporary.** It reflects module readiness for the current devnet
+> bring-up against spec v4-rc2 and will be removed as the remaining v4-rc2 PRs merge.
+
+All nine modules are wired into the chain, so every transaction is submittable on devnet.
+What differs is how far each module has been aligned with the v4-rc2 entity model:
+
+**Built to the v4-rc2 entity model (current devnet focus)**
+
+- **Ecosystem** (`x/ec`): create, update, and archive ecosystems; attach governance framework documents
+- **Corporation** (`x/co`): create and update corporations
+- **Governance Framework** (`x/gf`): add governance framework documents and promote active versions
+- **Delegation** (`x/de`): grant and revoke operator authorizations (authz bootstrap only)
+
+**Implemented but predating v4-rc2, under active rework (use with caution)**
+
+- **Credential Schema** (`x/cs`)
+- **Participant** (`x/pp`, formerly Permission)
+- **Trust Deposit** (`x/td`)
+- **Digest** (`x/di`)
+- **Exchange Rate** (`x/xr`)
+
+These predate the v4-rc2 entity rename and are being reworked and re-journeyed
+(issues #308-#316, #329). Once that lands, this section is removed and the modules fold
+into the descriptions above.
 
 ## System Requirements
 
@@ -37,7 +82,7 @@ While Verana can run on lower-spec hardware, you may experience reduced performa
 
 ## Prerequisites
 
-- **Go 1.22+** ([Installation Guide](https://golang.org/doc/install))
+- **Go 1.23+** ([Installation Guide](https://golang.org/doc/install))
 - **Docker** (optional, for local multi-validator network)
 - **jq** (optional, for JSON parsing in scripts)
 
@@ -285,4 +330,4 @@ Contributing guidelines will be available in the repository once the project rea
 
 ## License
 
-This project is licensed under the Apache-2.0 License - see the LICENSE file for details.
+This project is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0) - see the LICENSE file for details.
