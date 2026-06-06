@@ -29,6 +29,11 @@ func (ms msgServer) GrantOperatorAuthorization(goCtx context.Context, msg *types
 		return nil, err
 	}
 
+	// [AUTHZ-CHECK-5] Signing corporation account MUST be a registered Corporation.
+	if _, err := ms.corporationKeeper().ResolveCorporationByPolicyAddress(ctx, msg.Corporation); err != nil {
+		return nil, err
+	}
+
 	// [MOD-DE-MSG-3] Self-grant privilege escalation guard.
 	// An operator invoking this method cannot grant itself (or expand its own
 	// delegation) new msg_types — that would bypass the corporation's intent.

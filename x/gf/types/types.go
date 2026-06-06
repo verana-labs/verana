@@ -2,7 +2,6 @@ package types
 
 import (
 	"net/url"
-	"regexp"
 	"strings"
 )
 
@@ -43,7 +42,3 @@ func IsValidURL(s string) bool {
 	}
 	return u.Scheme != "" && u.Host != ""
 }
-
-var digestSRIRe = regexp.MustCompile(`^(sha256|sha384|sha512)-[A-Za-z0-9+/=]+$`)
-
-func IsValidDigestSRI(s string) bool { return digestSRIRe.MatchString(s) }

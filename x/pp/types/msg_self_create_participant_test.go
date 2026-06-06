@@ -10,8 +10,8 @@ import (
 )
 
 // TestMsgSelfCreateParticipant_ValidateBasic exercises the mandatory fields
-// and the narrow enum whitelist per spec [MOD-PERM-MSG-14-1] and
-// [MOD-PERM-MSG-14-2-1]. Valid `type` values are ISSUER or VERIFIER ONLY;
+// and the narrow enum whitelist per spec [MOD-PP-MSG-14-1] and
+// [MOD-PP-MSG-14-2-1]. Valid `type` values are ISSUER or VERIFIER ONLY;
 // all other enum values MUST be rejected.
 func TestMsgSelfCreateParticipant_ValidateBasic(t *testing.T) {
 	validAddr := sdk.AccAddress([]byte("test_address________")).String()

@@ -501,8 +501,8 @@ func TestAgentRewardsDistribution(t *testing.T) {
 	now := sdkCtx.BlockTime()
 	pastTime := now.Add(-1 * time.Hour) // Set effective_from to past to make it ACTIVE
 
-	// Create ECOSYSTEM permission (fees: 100)
-	ecosystemPerm := types.Participant{
+	// Create ECOSYSTEM participant (fees: 100)
+	ecosystemParticipant := types.Participant{
 		SchemaId:      1,
 		Role:          types.ParticipantRole_ECOSYSTEM,
 		CorporationId: trkKeeper.RegisterCorp(ecosystem),
@@ -513,70 +513,70 @@ func TestAgentRewardsDistribution(t *testing.T) {
 		IssuanceFees:  100, // Ecosystem charges 100 trust units for issuance
 		EffectiveFrom: &pastTime,
 	}
-	ecosystemPermID, err := k.CreatePermission(sdkCtx, ecosystemPerm)
+	ecosystemParticipantID, err := k.CreateParticipant(sdkCtx, ecosystemParticipant)
 	require.NoError(t, err)
 
-	// Create ISSUER_GRANTOR permission (fees: 50)
-	grantorPerm := types.Participant{
+	// Create ISSUER_GRANTOR participant (fees: 50)
+	grantorParticipant := types.Participant{
 		SchemaId:               1,
 		Role:                   types.ParticipantRole_ISSUER_GRANTOR,
 		CorporationId:          trkKeeper.RegisterCorp(grantor),
 		Created:                &now,
 		Adjusted:               &now,
 		Modified:               &now,
-		ValidatorParticipantId: ecosystemPermID,
+		ValidatorParticipantId: ecosystemParticipantID,
 		OpState:                types.OnboardingState_VALIDATED,
 		IssuanceFees:           50, // Grantor charges 50 trust units
 		EffectiveFrom:          &pastTime,
 	}
-	grantorPermID, err := k.CreatePermission(sdkCtx, grantorPerm)
+	grantorParticipantID, err := k.CreateParticipant(sdkCtx, grantorParticipant)
 	require.NoError(t, err)
 
-	// Create ISSUER permission (the executor)
-	issuerPerm := types.Participant{
+	// Create ISSUER participant (the executor)
+	issuerParticipant := types.Participant{
 		SchemaId:               1,
 		Role:                   types.ParticipantRole_ISSUER,
 		CorporationId:          trkKeeper.RegisterCorp(creator),
 		Created:                &now,
 		Adjusted:               &now,
 		Modified:               &now,
-		ValidatorParticipantId: grantorPermID,
+		ValidatorParticipantId: grantorParticipantID,
 		OpState:                types.OnboardingState_VALIDATED,
 		EffectiveFrom:          &pastTime,
 		VsOperator:             creator,
 		VsOperatorAuthzEnabled: true,
 	}
-	issuerPermID, err := k.CreatePermission(sdkCtx, issuerPerm)
+	issuerParticipantID, err := k.CreateParticipant(sdkCtx, issuerParticipant)
 	require.NoError(t, err)
 
-	// Create agent permission (User Agent)
-	agentPerm := types.Participant{
+	// Create agent participant (User Agent)
+	agentParticipant := types.Participant{
 		SchemaId:               1,
 		Role:                   types.ParticipantRole_ISSUER,
 		CorporationId:          trkKeeper.RegisterCorp(agent),
 		Created:                &now,
 		Adjusted:               &now,
 		Modified:               &now,
-		ValidatorParticipantId: issuerPermID,
+		ValidatorParticipantId: issuerParticipantID,
 		OpState:                types.OnboardingState_VALIDATED,
 		EffectiveFrom:          &pastTime,
 	}
-	agentPermID, err := k.CreatePermission(sdkCtx, agentPerm)
+	agentParticipantID, err := k.CreateParticipant(sdkCtx, agentParticipant)
 	require.NoError(t, err)
 
-	// Create wallet agent permission (Wallet User Agent)
-	walletAgentPerm := types.Participant{
+	// Create wallet agent participant (Wallet User Agent)
+	walletAgentParticipant := types.Participant{
 		SchemaId:               1,
 		Role:                   types.ParticipantRole_ISSUER,
 		CorporationId:          trkKeeper.RegisterCorp(walletAgent),
 		Created:                &now,
 		Adjusted:               &now,
 		Modified:               &now,
-		ValidatorParticipantId: issuerPermID,
+		ValidatorParticipantId: issuerParticipantID,
 		OpState:                types.OnboardingState_VALIDATED,
 		EffectiveFrom:          &pastTime,
 	}
-	walletAgentPermID, err := k.CreatePermission(sdkCtx, walletAgentPerm)
+	walletAgentParticipantID, err := k.CreateParticipant(sdkCtx, walletAgentParticipant)
 	require.NoError(t, err)
 
 	// ==================== Execute CreateOrUpdateParticipantSession ====================
@@ -584,10 +584,10 @@ func TestAgentRewardsDistribution(t *testing.T) {
 		Corporation:              creator,
 		Operator:                 creator,
 		Id:                       uuid.New().String(),
-		IssuerParticipantId:      issuerPermID,
+		IssuerParticipantId:      issuerParticipantID,
 		VerifierParticipantId:    0,
-		AgentParticipantId:       agentPermID,
-		WalletAgentParticipantId: walletAgentPermID,
+		AgentParticipantId:       agentParticipantID,
+		WalletAgentParticipantId: walletAgentParticipantID,
 	}
 
 	resp, err := ms.CreateOrUpdateParticipantSession(ctx, msg)
@@ -606,9 +606,9 @@ func TestAgentRewardsDistribution(t *testing.T) {
 	tdRate := math.LegacyMustNewDecFromStr("0.2")
 
 	// For each beneficiary (ecosystem and grantor):
-	// perm_total_trust_fees = fees * trust_unit_price
-	// user_agent_reward accumulates = perm_total_trust_fees * ua_rate
-	// wallet_user_agent_reward accumulates = perm_total_trust_fees * wua_rate
+	// participant_total_trust_fees = fees * trust_unit_price
+	// user_agent_reward accumulates = participant_total_trust_fees * ua_rate
+	// wallet_user_agent_reward accumulates = participant_total_trust_fees * wua_rate
 
 	// Ecosystem: 100 * 1 = 100
 	ecosystemTrustFees := math.LegacyNewDec(100)
@@ -716,24 +716,24 @@ func TestAgentRewardsDistribution(t *testing.T) {
 		t.Logf("Total distributed: %d", totalDistributed)
 	})
 
-	t.Run("Verify permission deposits updated", func(t *testing.T) {
-		// Check that executor permission deposit is updated
-		updatedIssuerPerm, err := k.GetParticipantByID(sdkCtx, issuerPermID)
+	t.Run("Verify participant deposits updated", func(t *testing.T) {
+		// Check that executor participant deposit is updated
+		updatedIssuerParticipant, err := k.GetParticipantByID(sdkCtx, issuerParticipantID)
 		require.NoError(t, err)
 		expectedIssuerDeposit := uint64(ecosystemToTD + grantorToTD)
-		require.Equal(t, expectedIssuerDeposit, updatedIssuerPerm.Deposit,
-			"Issuer permission deposit should be updated")
+		require.Equal(t, expectedIssuerDeposit, updatedIssuerParticipant.Deposit,
+			"Issuer participant deposit should be updated")
 
-		// Check agent permission deposits
-		updatedAgentPerm, err := k.GetParticipantByID(sdkCtx, agentPermID)
+		// Check agent participant deposits
+		updatedAgentParticipant, err := k.GetParticipantByID(sdkCtx, agentParticipantID)
 		require.NoError(t, err)
-		require.Equal(t, uint64(uaToTD), updatedAgentPerm.Deposit,
-			"Agent permission deposit should be updated")
+		require.Equal(t, uint64(uaToTD), updatedAgentParticipant.Deposit,
+			"Agent participant deposit should be updated")
 
-		updatedWalletAgentPerm, err := k.GetParticipantByID(sdkCtx, walletAgentPermID)
+		updatedWalletAgentParticipant, err := k.GetParticipantByID(sdkCtx, walletAgentParticipantID)
 		require.NoError(t, err)
-		require.Equal(t, uint64(wuaToTD), updatedWalletAgentPerm.Deposit,
-			"Wallet agent permission deposit should be updated")
+		require.Equal(t, uint64(wuaToTD), updatedWalletAgentParticipant.Deposit,
+			"Wallet agent participant deposit should be updated")
 	})
 }
 
@@ -774,8 +774,8 @@ func TestAgentRewardsWithZeroFees(t *testing.T) {
 	now := sdkCtx.BlockTime()
 	pastTime := now.Add(-1 * time.Hour) // Set effective_from to past to make it ACTIVE
 
-	// Create permissions with ZERO fees
-	ecosystemPerm := types.Participant{
+	// Create participants with ZERO fees
+	ecosystemParticipant := types.Participant{
 		SchemaId:      1,
 		Role:          types.ParticipantRole_ECOSYSTEM,
 		CorporationId: trkKeeper.RegisterCorp(ecosystem),
@@ -786,63 +786,63 @@ func TestAgentRewardsWithZeroFees(t *testing.T) {
 		IssuanceFees:  0, // Zero fees
 		EffectiveFrom: &pastTime,
 	}
-	ecosystemPermID, err := k.CreatePermission(sdkCtx, ecosystemPerm)
+	ecosystemParticipantID, err := k.CreateParticipant(sdkCtx, ecosystemParticipant)
 	require.NoError(t, err)
 
-	issuerPerm := types.Participant{
+	issuerParticipant := types.Participant{
 		SchemaId:               1,
 		Role:                   types.ParticipantRole_ISSUER,
 		CorporationId:          trkKeeper.RegisterCorp(creator),
 		Created:                &now,
 		Adjusted:               &now,
 		Modified:               &now,
-		ValidatorParticipantId: ecosystemPermID,
+		ValidatorParticipantId: ecosystemParticipantID,
 		OpState:                types.OnboardingState_VALIDATED,
 		EffectiveFrom:          &pastTime,
 		VsOperator:             creator,
 		VsOperatorAuthzEnabled: true,
 	}
-	issuerPermID, err := k.CreatePermission(sdkCtx, issuerPerm)
+	issuerParticipantID, err := k.CreateParticipant(sdkCtx, issuerParticipant)
 	require.NoError(t, err)
 
-	agentPerm := types.Participant{
+	agentParticipant := types.Participant{
 		SchemaId:               1,
 		Role:                   types.ParticipantRole_ISSUER,
 		CorporationId:          trkKeeper.RegisterCorp(agent),
 		Created:                &now,
 		Adjusted:               &now,
 		Modified:               &now,
-		ValidatorParticipantId: issuerPermID,
+		ValidatorParticipantId: issuerParticipantID,
 		OpState:                types.OnboardingState_VALIDATED,
 		EffectiveFrom:          &pastTime,
 	}
-	agentPermID, err := k.CreatePermission(sdkCtx, agentPerm)
+	agentParticipantID, err := k.CreateParticipant(sdkCtx, agentParticipant)
 
 	require.NoError(t, err)
 
-	// Create wallet agent permission
-	walletAgentPerm := types.Participant{
+	// Create wallet agent participant
+	walletAgentParticipant := types.Participant{
 		SchemaId:               1,
 		Role:                   types.ParticipantRole_ISSUER,
 		CorporationId:          trkKeeper.RegisterCorp(walletAgent),
 		Created:                &now,
 		Adjusted:               &now,
 		Modified:               &now,
-		ValidatorParticipantId: issuerPermID,
+		ValidatorParticipantId: issuerParticipantID,
 		OpState:                types.OnboardingState_VALIDATED,
 		EffectiveFrom:          &pastTime,
 	}
-	walletAgentPermID, err := k.CreatePermission(sdkCtx, walletAgentPerm)
+	walletAgentParticipantID, err := k.CreateParticipant(sdkCtx, walletAgentParticipant)
 	require.NoError(t, err)
 
 	msg := &types.MsgCreateOrUpdateParticipantSession{
 		Corporation:              creator,
 		Operator:                 creator,
 		Id:                       uuid.New().String(),
-		IssuerParticipantId:      issuerPermID,
+		IssuerParticipantId:      issuerParticipantID,
 		VerifierParticipantId:    0,
-		AgentParticipantId:       agentPermID,
-		WalletAgentParticipantId: walletAgentPermID,
+		AgentParticipantId:       agentParticipantID,
+		WalletAgentParticipantId: walletAgentParticipantID,
 	}
 
 	resp, err := ms.CreateOrUpdateParticipantSession(ctx, msg)
@@ -892,8 +892,8 @@ func TestAgentRewardsWithDiscount(t *testing.T) {
 	now := sdkCtx.BlockTime()
 	pastTime := now.Add(-1 * time.Hour) // Set effective_from to past to make it ACTIVE
 
-	// Create ecosystem permission with 100 fees
-	ecosystemPerm := types.Participant{
+	// Create ecosystem participant with 100 fees
+	ecosystemParticipant := types.Participant{
 		SchemaId:      1,
 		Role:          types.ParticipantRole_ECOSYSTEM,
 		CorporationId: trkKeeper.RegisterCorp(ecosystem),
@@ -904,65 +904,65 @@ func TestAgentRewardsWithDiscount(t *testing.T) {
 		IssuanceFees:  100,
 		EffectiveFrom: &pastTime,
 	}
-	ecosystemPermID, err := k.CreatePermission(sdkCtx, ecosystemPerm)
+	ecosystemParticipantID, err := k.CreateParticipant(sdkCtx, ecosystemParticipant)
 	require.NoError(t, err)
 
-	// Create issuer permission with 50% discount (per Issue #94: use discount instead of exemption)
-	issuerPerm := types.Participant{
+	// Create issuer participant with 50% discount (per Issue #94: use discount instead of exemption)
+	issuerParticipant := types.Participant{
 		SchemaId:               1,
 		Role:                   types.ParticipantRole_ISSUER,
 		CorporationId:          trkKeeper.RegisterCorp(creator),
 		Created:                &now,
 		Adjusted:               &now,
 		Modified:               &now,
-		ValidatorParticipantId: ecosystemPermID,
+		ValidatorParticipantId: ecosystemParticipantID,
 		OpState:                types.OnboardingState_VALIDATED,
 		IssuanceFeeDiscount:    5000, // 50% discount (per Issue #94)
 		EffectiveFrom:          &pastTime,
 		VsOperator:             creator,
 		VsOperatorAuthzEnabled: true,
 	}
-	issuerPermID, err := k.CreatePermission(sdkCtx, issuerPerm)
+	issuerParticipantID, err := k.CreateParticipant(sdkCtx, issuerParticipant)
 	require.NoError(t, err)
 
-	agentPerm := types.Participant{
+	agentParticipant := types.Participant{
 		SchemaId:               1,
 		Role:                   types.ParticipantRole_ISSUER,
 		CorporationId:          trkKeeper.RegisterCorp(agent),
 		Created:                &now,
 		Adjusted:               &now,
 		Modified:               &now,
-		ValidatorParticipantId: issuerPermID,
+		ValidatorParticipantId: issuerParticipantID,
 		OpState:                types.OnboardingState_VALIDATED,
 		EffectiveFrom:          &pastTime,
 	}
-	agentPermID, err := k.CreatePermission(sdkCtx, agentPerm)
+	agentParticipantID, err := k.CreateParticipant(sdkCtx, agentParticipant)
 
 	require.NoError(t, err)
 
-	// Create wallet agent permission
-	walletAgentPerm := types.Participant{
+	// Create wallet agent participant
+	walletAgentParticipant := types.Participant{
 		SchemaId:               1,
 		Role:                   types.ParticipantRole_ISSUER,
 		CorporationId:          trkKeeper.RegisterCorp(walletAgent),
 		Created:                &now,
 		Adjusted:               &now,
 		Modified:               &now,
-		ValidatorParticipantId: issuerPermID,
+		ValidatorParticipantId: issuerParticipantID,
 		OpState:                types.OnboardingState_VALIDATED,
 		EffectiveFrom:          &pastTime,
 	}
-	walletAgentPermID, err := k.CreatePermission(sdkCtx, walletAgentPerm)
+	walletAgentParticipantID, err := k.CreateParticipant(sdkCtx, walletAgentParticipant)
 	require.NoError(t, err)
 
 	msg := &types.MsgCreateOrUpdateParticipantSession{
 		Corporation:              creator,
 		Operator:                 creator,
 		Id:                       uuid.New().String(),
-		IssuerParticipantId:      issuerPermID,
+		IssuerParticipantId:      issuerParticipantID,
 		VerifierParticipantId:    0,
-		AgentParticipantId:       agentPermID,
-		WalletAgentParticipantId: walletAgentPermID,
+		AgentParticipantId:       agentParticipantID,
+		WalletAgentParticipantId: walletAgentParticipantID,
 	}
 
 	resp, err := ms.CreateOrUpdateParticipantSession(ctx, msg)
@@ -971,7 +971,7 @@ func TestAgentRewardsWithDiscount(t *testing.T) {
 
 	// With 50% discount on 100 fees:
 	// discounted_fees = 100 * (1 - 0.5) = 50
-	// perm_total_trust_fees = 50 * 1 = 50
+	// participant_total_trust_fees = 50 * 1 = 50
 	// to_td = 50 * 0.2 = 10
 	// to_account = 50 - 10 = 40
 	// user_agent_reward = 50 * 0.1 = 5

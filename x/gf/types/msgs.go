@@ -3,6 +3,8 @@ package types
 import (
 	"cosmossdk.io/errors"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+
+	"github.com/verana-labs/verana/util/validation"
 )
 
 // ValidateBasic on MsgUpdateParams: authority must be present.
@@ -36,7 +38,7 @@ func (m *MsgAddGovernanceFrameworkDocument) ValidateBasic() error {
 	if m.DocDigestSri == "" {
 		return errors.Wrap(ErrInvalidDigestSRI, "doc_digest_sri is required")
 	}
-	if !IsValidDigestSRI(m.DocDigestSri) {
+	if !validation.IsValidDigestSRI(m.DocDigestSri) {
 		return errors.Wrap(ErrInvalidDigestSRI, m.DocDigestSri)
 	}
 	if m.Version < 1 {

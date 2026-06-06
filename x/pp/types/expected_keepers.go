@@ -46,7 +46,7 @@ type EcosystemKeeper interface {
 	GetTrustUnitPrice(ctx sdk.Context) uint64
 }
 
-// CorporationView is the read shape MOD-PERM needs about a Corporation
+// CorporationView is the read shape MOD-PP needs about a Corporation
 // subject for AUTHZ-CHECK-5: turn the signing `corporation` policy_address
 // into the uint64 co.Id used to validate ec.CorporationId ownership.
 type CorporationView struct {
@@ -74,8 +74,8 @@ type TrustDepositKeeper interface {
 }
 
 // DigestKeeper defines the expected interface for the Digest (DI) module.
-// Used by [MOD-PERM-MSG-10] to persist credential digests discovered during
-// permission-session creation. Called keeper-to-keeper (no signer check) per
+// Used by [MOD-PP-MSG-10] to persist credential digests discovered during
+// participant-session creation. Called keeper-to-keeper (no signer check) per
 // spec [MOD-DI-MSG-1] header: "This method can be called directly by Create
 // or Update Participant Session module with no checks."
 type DigestKeeper interface {
@@ -89,9 +89,9 @@ type DelegationKeeper interface {
 	// CheckVSOperatorAuthorization checks if a VS operator is authorized to act on behalf of the authority.
 	// [AUTHZ-CHECK-3] A VSOperatorAuthorization entry must exist where authority and vs_operator match.
 	CheckVSOperatorAuthorization(ctx context.Context, authority string, vsOperator string) error
-	// VSOA CRUD methods (storage in DE, orchestration in Perm)
-	AddPermToVSOA(ctx context.Context, authority, vsOperator string, permID uint64) error
-	RemovePermFromVSOA(ctx context.Context, authority, vsOperator string, permID uint64) ([]uint64, error)
+	// VSOA CRUD methods (storage in DE, orchestration in Participant)
+	AddPermToVSOA(ctx context.Context, authority, vsOperator string, participantID uint64) error
+	RemovePermFromVSOA(ctx context.Context, authority, vsOperator string, participantID uint64) ([]uint64, error)
 	GetVSOAPermissions(ctx context.Context, authority, vsOperator string) ([]uint64, error)
 	HasOperatorAuthorization(ctx context.Context, authority, operator string) (bool, error)
 	// Fee grant methods

@@ -8,6 +8,7 @@
     "test:signing-surface": "npx tsx scripts/checkSigningSurface.ts",
     "test:co-create": "npx tsx src/journeys/coCreateCorporation.ts",
     "test:de-grant-auth": "npx tsx src/journeys/deGrantOperatorAuthorization.ts",
+    "test:authz-check5": "npx tsx src/journeys/authzCheck5Unregistered.ts",
     "test:ec-create": "npx tsx src/journeys/ecCreateEcosystem.ts",
     "test:ec-update": "npx tsx src/journeys/ecUpdateEcosystem.ts",
     "test:ec-archive": "npx tsx src/journeys/ecArchiveEcosystem.ts",

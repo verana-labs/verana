@@ -6,6 +6,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/x/group"
+	"github.com/verana-labs/verana/util/validation"
 )
 
 // UnpackInterfaces implements UnpackInterfacesMessage so the codec resolves
@@ -59,7 +60,7 @@ func (m *MsgCreateCorporation) ValidateBasic() error {
 	if m.Did == "" {
 		return errors.Wrap(ErrInvalidDID, "did is required")
 	}
-	if !IsValidDID(m.Did) {
+	if !validation.IsValidDID(m.Did) {
 		return errors.Wrap(ErrInvalidDID, m.Did)
 	}
 	if m.Language == "" {
@@ -77,7 +78,7 @@ func (m *MsgCreateCorporation) ValidateBasic() error {
 	if m.DocDigestSri == "" {
 		return errors.Wrap(ErrInvalidDigestSRI, "doc_digest_sri is required")
 	}
-	if !IsValidDigestSRI(m.DocDigestSri) {
+	if !validation.IsValidDigestSRI(m.DocDigestSri) {
 		return errors.Wrap(ErrInvalidDigestSRI, m.DocDigestSri)
 	}
 	return nil
@@ -100,7 +101,7 @@ func (m *MsgUpdateCorporation) ValidateBasic() error {
 	if m.Did == "" {
 		return errors.Wrap(ErrInvalidDID, "did is required")
 	}
-	if !IsValidDID(m.Did) {
+	if !validation.IsValidDID(m.Did) {
 		return errors.Wrap(ErrInvalidDID, m.Did)
 	}
 	return nil

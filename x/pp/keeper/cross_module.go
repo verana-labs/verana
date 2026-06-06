@@ -11,35 +11,35 @@ import (
 	"github.com/verana-labs/verana/x/pp/types"
 )
 
-// EcAsPermEcosystemKeeper adapts x/ec keeper to permtypes.EcosystemKeeper,
+// EcAsParticipantEcosystemKeeper adapts x/ec keeper to participanttypes.EcosystemKeeper,
 // supplying both GetEcosystem (for ownership checks) and GetTrustUnitPrice
 // (for fee math).
-type EcAsPermEcosystemKeeper struct {
+type EcAsParticipantEcosystemKeeper struct {
 	k eckeeper.Keeper
 }
 
-func NewEcAsPermEcosystemKeeper(k eckeeper.Keeper) types.EcosystemKeeper {
-	return EcAsPermEcosystemKeeper{k: k}
+func NewEcAsParticipantEcosystemKeeper(k eckeeper.Keeper) types.EcosystemKeeper {
+	return EcAsParticipantEcosystemKeeper{k: k}
 }
 
-func (a EcAsPermEcosystemKeeper) GetEcosystem(ctx context.Context, id uint64) (ectypes.Ecosystem, error) {
+func (a EcAsParticipantEcosystemKeeper) GetEcosystem(ctx context.Context, id uint64) (ectypes.Ecosystem, error) {
 	return a.k.GetEcosystem(ctx, id)
 }
 
-func (a EcAsPermEcosystemKeeper) GetTrustUnitPrice(ctx sdk.Context) uint64 {
+func (a EcAsParticipantEcosystemKeeper) GetTrustUnitPrice(ctx sdk.Context) uint64 {
 	return a.k.GetTrustUnitPrice(ctx)
 }
 
-// CoAsPermCorporationKeeper adapts x/co keeper to permtypes.CorporationKeeper.
-type CoAsPermCorporationKeeper struct {
+// CoAsParticipantCorporationKeeper adapts x/co keeper to participanttypes.CorporationKeeper.
+type CoAsParticipantCorporationKeeper struct {
 	k cokeeper.Keeper
 }
 
-func NewCoAsPermCorporationKeeper(k cokeeper.Keeper) types.CorporationKeeper {
-	return CoAsPermCorporationKeeper{k: k}
+func NewCoAsParticipantCorporationKeeper(k cokeeper.Keeper) types.CorporationKeeper {
+	return CoAsParticipantCorporationKeeper{k: k}
 }
 
-func (a CoAsPermCorporationKeeper) ResolveByPolicyAddress(ctx context.Context, policyAddress string) (types.CorporationView, bool) {
+func (a CoAsParticipantCorporationKeeper) ResolveByPolicyAddress(ctx context.Context, policyAddress string) (types.CorporationView, bool) {
 	coID, err := a.k.CorporationByPolicyAddr.Get(ctx, policyAddress)
 	if err != nil {
 		return types.CorporationView{}, false
@@ -47,7 +47,7 @@ func (a CoAsPermCorporationKeeper) ResolveByPolicyAddress(ctx context.Context, p
 	return types.CorporationView{Id: coID, PolicyAddress: policyAddress}, true
 }
 
-func (a CoAsPermCorporationKeeper) ResolveByID(ctx context.Context, id uint64) (types.CorporationView, bool) {
+func (a CoAsParticipantCorporationKeeper) ResolveByID(ctx context.Context, id uint64) (types.CorporationView, bool) {
 	co, err := a.k.Corporation.Get(ctx, id)
 	if err != nil {
 		return types.CorporationView{}, false

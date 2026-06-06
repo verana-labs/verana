@@ -32,12 +32,14 @@ func initFixtureWithMock(t *testing.T, mock *keepertest.MockDelegationKeeper) *f
 
 	authority := authtypes.NewModuleAddress(types.GovModuleName)
 
+	corpKeeper := newMockCorpKeeper()
 	k := keeper.NewKeeper(
 		storeService,
 		encCfg.Codec,
 		addrCodec,
 		authority,
 		mock,
+		corpKeeper,
 	)
 
 	if err := k.Params.Set(ctx, types.DefaultParams()); err != nil {
@@ -48,6 +50,7 @@ func initFixtureWithMock(t *testing.T, mock *keepertest.MockDelegationKeeper) *f
 		ctx:          ctx,
 		keeper:       k,
 		addressCodec: addrCodec,
+		corpKeeper:   corpKeeper,
 	}
 }
 

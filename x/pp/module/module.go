@@ -173,20 +173,20 @@ func init() {
 		&modulev1.Module{},
 		appmodule.Provide(
 			ProvideModule,
-			ProvideCorporationKeeperForPerm,
+			ProvideCorporationKeeperForParticipant,
 		),
 	)
 }
 
-// ProvideCorporationKeeperForPerm supplies permtypes.CorporationKeeper from
-// the concrete x/co keeper for MOD-PERM AUTHZ-CHECK-5. Required because
+// ProvideCorporationKeeperForParticipant supplies participanttypes.CorporationKeeper from
+// the concrete x/co keeper for MOD-PP AUTHZ-CHECK-5. Required because
 // cokeeper does not satisfy ResolveByPolicyAddress directly.
 //
-// permtypes.EcosystemKeeper is NOT wired here: eckeeper.Keeper.GetEcosystem
+// participanttypes.EcosystemKeeper is NOT wired here: eckeeper.Keeper.GetEcosystem
 // + GetTrustUnitPrice structurally satisfy the interface so depinject
 // auto-binds.
-func ProvideCorporationKeeperForPerm(co cokeeper.Keeper) types.CorporationKeeper {
-	return keeper.NewCoAsPermCorporationKeeper(co)
+func ProvideCorporationKeeperForParticipant(co cokeeper.Keeper) types.CorporationKeeper {
+	return keeper.NewCoAsParticipantCorporationKeeper(co)
 }
 
 type ModuleInputs struct {
@@ -210,8 +210,8 @@ type ModuleInputs struct {
 type ModuleOutputs struct {
 	depinject.Out
 
-	PermissionKeeper keeper.Keeper
-	Module           appmodule.AppModule
+	ParticipantKeeper keeper.Keeper
+	Module            appmodule.AppModule
 }
 
 func ProvideModule(in ModuleInputs) ModuleOutputs {
@@ -240,5 +240,5 @@ func ProvideModule(in ModuleInputs) ModuleOutputs {
 		in.BankKeeper,
 	)
 
-	return ModuleOutputs{PermissionKeeper: k, Module: m}
+	return ModuleOutputs{ParticipantKeeper: k, Module: m}
 }

@@ -38,24 +38,5 @@ func TestIsValidURL(t *testing.T) {
 	require.False(t, types.IsValidURL("https://"))
 }
 
-func TestIsValidDigestSRI(t *testing.T) {
-	require.True(t, types.IsValidDigestSRI("sha256-abc+/="))
-	require.True(t, types.IsValidDigestSRI("sha384-Zm9vYg=="))
-	require.True(t, types.IsValidDigestSRI("sha512-aGVsbG8="))
-	require.False(t, types.IsValidDigestSRI(""))
-	require.False(t, types.IsValidDigestSRI("md5-deadbeef"))
-	require.False(t, types.IsValidDigestSRI("sha256:abc")) // wrong separator
-	require.False(t, types.IsValidDigestSRI("sha256-!@#"))
-}
-
-func TestIsValidDID(t *testing.T) {
-	require.True(t, types.IsValidDID("did:example:123"))
-	require.True(t, types.IsValidDID("did:web:example.com:user:alice"))
-	require.True(t, types.IsValidDID("did:key:zABCdef-_."))
-	require.False(t, types.IsValidDID(""))
-	require.False(t, types.IsValidDID("not-a-did"))
-	require.False(t, types.IsValidDID("did::missing-method"))
-	require.False(t, types.IsValidDID("did:Example:upper"))   // method must be lowercase
-	require.False(t, types.IsValidDID("did:example:"))        // empty method-specific-id
-	require.False(t, types.IsValidDID("did:example:ab cd"))   // whitespace
-}
+// DID and DigestSRI validation now live in util/validation; see
+// util/validation/validation_test.go for their table-driven tests.

@@ -19,9 +19,9 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 				},
 				{
 					RpcMethod: "ListParticipants",
-					Use:       "list-permissions",
-					Short:     "List all permissions",
-					Long:      "List all permissions with optional filtering by modified time and pagination",
+					Use:       "list-participants",
+					Short:     "List all participants",
+					Long:      "List all participants with optional filtering by modified time and pagination",
 					FlagOptions: map[string]*autocliv1.FlagOptions{
 						"modified_after": {
 							Name:         "modified-after",
@@ -37,9 +37,9 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 				},
 				{
 					RpcMethod: "GetParticipant",
-					Use:       "get-perm [id]",
-					Short:     "Get perm by ID",
-					Long:      "Get detailed information about a perm by its ID",
+					Use:       "get-participant [id]",
+					Short:     "Get participant by ID",
+					Long:      "Get detailed information about a participant by its ID",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{
 							ProtoField: "id",
@@ -48,9 +48,9 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 				},
 				{
 					RpcMethod: "GetParticipantSession",
-					Use:       "get-perm-session [id]",
-					Short:     "Get perm session by ID",
-					Long:      "Get details about a specific perm session by its ID",
+					Use:       "get-participant-session [id]",
+					Short:     "Get participant session by ID",
+					Long:      "Get details about a specific participant session by its ID",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{
 							ProtoField: "id",
@@ -59,9 +59,9 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 				},
 				{
 					RpcMethod: "ListParticipantSessions",
-					Use:       "list-perm-sessions",
-					Short:     "List perm sessions",
-					Long:      "List all perm sessions with optional filtering and pagination",
+					Use:       "list-participant-sessions",
+					Short:     "List participant sessions",
+					Long:      "List all participant sessions with optional filtering and pagination",
 					FlagOptions: map[string]*autocliv1.FlagOptions{
 						"modified_after": {
 							Name:         "modified-after",
@@ -78,8 +78,8 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 				{
 					RpcMethod: "FindParticipantsWithDID",
 					Use:       "find-participants-with-did [did] [role] [schema-id]",
-					Short:     "Find permissions with DID",
-					Long:      "Find permissions matching the specified DID, type, and schema ID with optional filtering by timestamp",
+					Short:     "Find participants with DID",
+					Long:      "Find participants matching the specified DID, type, and schema ID with optional filtering by timestamp",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{ProtoField: "did"},
 						{ProtoField: "role"},
@@ -96,18 +96,18 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 				{
 					RpcMethod: "FindBeneficiaries",
 					Use:       "find-beneficiaries",
-					Short:     "Find beneficiary permissions in the permission tree",
-					Long:      "Find beneficiary permissions by traversing the permission tree for issuer and/or verifier permissions. At least one of issuer-perm-id or verifier-perm-id must be provided.",
+					Short:     "Find beneficiary participants in the participant tree",
+					Long:      "Find beneficiary participants by traversing the participant tree for issuer and/or verifier participants. At least one of issuer-participant-id or verifier-participant-id must be provided.",
 					FlagOptions: map[string]*autocliv1.FlagOptions{
 						"issuer_participant_id": {
-							Name:         "issuer-perm-id",
+							Name:         "issuer-participant-id",
 							DefaultValue: "0",
-							Usage:        "ID of the issuer permission",
+							Usage:        "ID of the issuer participant",
 						},
 						"verifier_participant_id": {
-							Name:         "verifier-perm-id",
+							Name:         "verifier-participant-id",
 							DefaultValue: "0",
-							Usage:        "ID of the verifier permission",
+							Usage:        "ID of the verifier participant",
 						},
 					},
 				},
@@ -125,11 +125,11 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 				{
 					RpcMethod: "StartParticipantOP",
 					Use:       "start-participant-op [role] [validator-participant-id] [did]",
-					Short:     "Start a new perm validation process",
-					Long: `Start a new perm validation process with the specified parameters:
+					Short:     "Start a new participant validation process",
+					Long: `Start a new participant validation process with the specified parameters:
 - type: Participant type (issuer, verifier, issuer-grantor, verifier-grantor, ecosystem, holder)
-- validator-perm-id: ID of the validator perm
-- did: DID for this perm (mandatory, must conform to DID syntax)`,
+- validator-participant-id: ID of the validator participant
+- did: DID for this participant (mandatory, must conform to DID syntax)`,
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{
 							ProtoField: "role",
@@ -181,9 +181,9 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 				{
 					RpcMethod: "RenewParticipantOP",
 					Use:       "renew-participant-op [id]",
-					Short:     "Renew a perm validation process",
-					Long: `Renew a perm validation process for an existing perm:
-- id: ID of the perm to renew`,
+					Short:     "Renew a participant validation process",
+					Long: `Renew a participant validation process for an existing participant:
+- id: ID of the participant to renew`,
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{
 							ProtoField: "id",
@@ -199,15 +199,15 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 				{
 					RpcMethod: "SetParticipantOPToValidated",
 					Use:       "set-participant-op-validated [id]",
-					Short:     "Set perm validation process to validated state",
-					Long: `Set a perm validation process to validated state.
+					Short:     "Set participant validation process to validated state",
+					Long: `Set a participant validation process to validated state.
 
-Requires authority/operator authorization. The authority must be the validator perm's authority.
+Requires authority/operator authorization. The authority must be the validator participant's authority.
 
 Parameters:
-- id: ID of the perm to validate
+- id: ID of the participant to validate
 - authority: Group account (corporation) on whose behalf this message is executed
-- effective-until: Optional timestamp until when this perm is effective (RFC3339 format)
+- effective-until: Optional timestamp until when this participant is effective (RFC3339 format)
 - validation-fees: Validation fees (mandatory, 0 for no fees)
 - issuance-fees: Issuance fees (mandatory, 0 for no fees)
 - verification-fees: Verification fees (mandatory, 0 for no fees)
@@ -226,7 +226,7 @@ Parameters:
 						},
 						"effective_until": {
 							Name:         "effective-until",
-							Usage:        "Timestamp until when this perm is effective (RFC3339)",
+							Usage:        "Timestamp until when this participant is effective (RFC3339)",
 							DefaultValue: "",
 						},
 						"validation_fees": {
@@ -265,8 +265,8 @@ Parameters:
 				{
 					RpcMethod: "CancelParticipantOPLastRequest",
 					Use:       "cancel-participant-op-request [id]",
-					Short:     "Cancel a pending perm VP request",
-					Long:      "Cancel a pending perm VP request. Can only be executed by the perm authority and only when the perm is in PENDING state.",
+					Short:     "Cancel a pending participant VP request",
+					Long:      "Cancel a pending participant VP request. Can only be executed by the participant authority and only when the participant is in PENDING state.",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{
 							ProtoField: "id",
@@ -282,8 +282,8 @@ Parameters:
 				{
 					RpcMethod: "CreateRootParticipant",
 					Use:       "create-root-participant [schema-id] [did] [validation-fees] [issuance-fees] [verification-fees]",
-					Short:     "Create a new root perm for a credential schema",
-					Long:      "Create a new root perm for a credential schema. Can only be executed by the trust registry controller.",
+					Short:     "Create a new root participant for a credential schema",
+					Long:      "Create a new root participant for a credential schema. Can only be executed by the trust registry controller.",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{
 							ProtoField: "schema_id",
@@ -309,20 +309,20 @@ Parameters:
 						"effective_from": {
 							Name:         "effective-from",
 							DefaultValue: "",
-							Usage:        "Timestamp (RFC3339) from when the perm is effective (mandatory, must be in the future)",
+							Usage:        "Timestamp (RFC3339) from when the participant is effective (mandatory, must be in the future)",
 						},
 						"effective_until": {
 							Name:         "effective-until",
 							DefaultValue: "",
-							Usage:        "Optional timestamp (RFC3339) until when the perm is effective",
+							Usage:        "Optional timestamp (RFC3339) until when the participant is effective",
 						},
 					},
 				},
 				{
 					RpcMethod: "SetParticipantEffectiveUntil",
 					Use:       "set-participant-effective-until [id] [effective-until]",
-					Short:     "Adjust a permission's effective duration",
-					Long:      "Adjust a permission's effective duration. Can be executed by the authority (for ECOSYSTEM or self-created permissions) or by the validator (for VP managed permissions).",
+					Short:     "Adjust a participant's effective duration",
+					Long:      "Adjust a participant's effective duration. Can be executed by the authority (for ECOSYSTEM or self-created participants) or by the validator (for VP managed participants).",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{
 							ProtoField: "id",
@@ -341,8 +341,8 @@ Parameters:
 				{
 					RpcMethod: "RevokeParticipant",
 					Use:       "revoke-participant [id]",
-					Short:     "Revoke a permission",
-					Long:      "Revoke a permission. Can be executed by the permission authority, a validator ancestor, or the trust registry controller.",
+					Short:     "Revoke a participant",
+					Long:      "Revoke a participant. Can be executed by the participant authority, a validator ancestor, or the trust registry controller.",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{
 							ProtoField: "id",
@@ -357,9 +357,9 @@ Parameters:
 				},
 				{
 					RpcMethod: "CreateOrUpdateParticipantSession",
-					Use:       "create-or-update-perm-session [id] [agent-perm-id] [wallet-agent-perm-id]",
-					Short:     "Create or update a permission session",
-					Long:      "Create or update a permission session for credential exchange operations. At least one of issuer-perm-id or verifier-perm-id must be provided.",
+					Use:       "create-or-update-participant-session [id] [agent-participant-id] [wallet-agent-participant-id]",
+					Short:     "Create or update a participant session",
+					Long:      "Create or update a participant session for credential exchange operations. At least one of issuer-participant-id or verifier-participant-id must be provided.",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{
 							ProtoField: "id",
@@ -377,13 +377,13 @@ Parameters:
 							Usage:        "The group policy address (corporation) on whose behalf this message is executed",
 						},
 						"issuer_participant_id": {
-							Name:         "issuer-perm-id",
-							Usage:        "ID of the issuer permission",
+							Name:         "issuer-participant-id",
+							Usage:        "ID of the issuer participant",
 							DefaultValue: "0",
 						},
 						"verifier_participant_id": {
-							Name:         "verifier-perm-id",
-							Usage:        "ID of the verifier permission",
+							Name:         "verifier-participant-id",
+							Usage:        "ID of the verifier participant",
 							DefaultValue: "0",
 						},
 						"digest": {
@@ -396,8 +396,8 @@ Parameters:
 				{
 					RpcMethod: "SlashParticipantTrustDeposit",
 					Use:       "slash-participant-td [id] [amount] [reason]",
-					Short:     "Slash a permission's trust deposit",
-					Long:      "Slash a permission's trust deposit. Requires a non-empty reason per [MOD-PERM-MSG-12-1].",
+					Short:     "Slash a participant's trust deposit",
+					Long:      "Slash a participant's trust deposit. Requires a non-empty reason per [MOD-PP-MSG-12-1].",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{
 							ProtoField: "id",
@@ -419,15 +419,15 @@ Parameters:
 				{
 					RpcMethod: "RepayParticipantSlashedTrustDeposit",
 					Use:       "repay-participant-slashed-td [id] [amount] --corporation [corporation]",
-					Short:     "Repay a slashed perm's trust deposit",
-					Long: `Repay a portion or all of the slashed trust deposit of a perm. Can only be called by the authority that owns the permission.
-The specified amount will be credited to the perm authority's trust deposit.
-Note: This does not make the slashed perm reusable - a new perm must be requested.
+					Short:     "Repay a slashed participant's trust deposit",
+					Long: `Repay a portion or all of the slashed trust deposit of a participant. Can only be called by the authority that owns the participant.
+The specified amount will be credited to the participant authority's trust deposit.
+Note: This does not make the slashed participant reusable - a new participant must be requested.
 
 Parameters:
-- id: ID of the perm with slashed deposit to repay
+- id: ID of the participant with slashed deposit to repay
 - amount: Amount to repay (must be positive and not exceed outstanding slashed amount)
-- authority: The group policy address (corporation) that owns the permission`,
+- authority: The group policy address (corporation) that owns the participant`,
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{
 							ProtoField: "id",
@@ -446,8 +446,8 @@ Parameters:
 				{
 					RpcMethod: "SelfCreateParticipant",
 					Use:       "self-create-participant [role] [validator-participant-id] [did] --corporation [corporation]",
-					Short:     "Self-create a new permission for open schemas",
-					Long:      "Self-create a new ISSUER or VERIFIER permission for schemas with OPEN management mode.",
+					Short:     "Self-create a new participant for open schemas",
+					Long:      "Self-create a new ISSUER or VERIFIER participant for schemas with OPEN management mode.",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{
 							ProtoField: "role",

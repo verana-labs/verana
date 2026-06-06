@@ -6,6 +6,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	detypes "github.com/verana-labs/verana/x/de/types"
 	gftypes "github.com/verana-labs/verana/x/gf/types"
 )
 
@@ -49,6 +50,29 @@ func (a CoAsGFCorporationKeeper) GetByID(ctx context.Context, corporationID uint
 		Language:      co.Language,
 		ActiveVersion: co.ActiveVersion,
 	}, true
+}
+
+// CoAsDeCorporationKeeper adapts the MOD-CO keeper to MOD-DE's CorporationKeeper
+// interface. Wired post-construction via deKeeper.SetCorporationKeeper to break
+// the MOD-DE ↔ MOD-CO depinject cycle (MOD-CO depends on MOD-DE's
+// DelegationKeeper for AUTHZ-CHECK-1).
+type CoAsDeCorporationKeeper struct {
+	k Keeper
+}
+
+func NewCoAsDeCorporationKeeper(k Keeper) detypes.CorporationKeeper {
+	return CoAsDeCorporationKeeper{k: k}
+}
+
+// ResolveCorporationByPolicyAddress backs MOD-DE AUTHZ-CHECK-5, routing through
+// the canonical resolver so an unregistered signer aborts with
+// ErrCorporationNotRegistered (referencing MOD-CO-MSG-1).
+func (a CoAsDeCorporationKeeper) ResolveCorporationByPolicyAddress(ctx context.Context, policyAddress string) (detypes.CorporationView, error) {
+	co, err := a.k.ResolveCorporationByPolicyAddress(ctx, policyAddress)
+	if err != nil {
+		return detypes.CorporationView{}, err
+	}
+	return detypes.CorporationView{Id: co.Id, PolicyAddress: co.PolicyAddress}, nil
 }
 
 // SetActiveVersion is called by MOD-GF MSG-2 (IncreaseActiveGovernanceFrameworkVersion).

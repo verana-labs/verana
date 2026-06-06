@@ -10,8 +10,8 @@ import (
 )
 
 // TestMsgRenewParticipantOP_ValidateBasic exercises the three spec-defined
-// parameters per [MOD-PERM-MSG-2-1] and [MOD-PERM-MSG-2-2-1]: corporation,
-// operator, id. No permission_type is validated because the spec does not
+// parameters per [MOD-PP-MSG-2-1] and [MOD-PP-MSG-2-2-1]: corporation,
+// operator, id. No participant_type is validated because the spec does not
 // include it as a parameter.
 func TestMsgRenewParticipantOP_ValidateBasic(t *testing.T) {
 	validAddr := sdk.AccAddress([]byte("test_address________")).String()
@@ -33,7 +33,7 @@ func TestMsgRenewParticipantOP_ValidateBasic(t *testing.T) {
 		{"empty corporation", func(m *types.MsgRenewParticipantOP) { m.Corporation = "" }, "invalid corporation address"},
 		{"invalid corporation bech32", func(m *types.MsgRenewParticipantOP) { m.Corporation = "not-bech32" }, "invalid corporation address"},
 		{"empty operator", func(m *types.MsgRenewParticipantOP) { m.Operator = "" }, "invalid operator address"},
-		{"id = 0", func(m *types.MsgRenewParticipantOP) { m.Id = 0 }, "perm ID cannot be 0"},
+		{"id = 0", func(m *types.MsgRenewParticipantOP) { m.Id = 0 }, "participant ID cannot be 0"},
 	}
 
 	for _, tc := range tests {

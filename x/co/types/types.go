@@ -2,7 +2,6 @@ package types
 
 import (
 	"net/url"
-	"regexp"
 	"strings"
 )
 
@@ -43,15 +42,3 @@ func IsValidURL(s string) bool {
 	}
 	return u.Scheme != "" && u.Host != ""
 }
-
-var digestSRIRe = regexp.MustCompile(`^(sha256|sha384|sha512)-[A-Za-z0-9+/=]+$`)
-
-func IsValidDigestSRI(s string) bool { return digestSRIRe.MatchString(s) }
-
-// didRe enforces a minimal subset of RFC 3986 + W3C DID Core syntax:
-// `did:` <method-name> `:` <method-specific-id>. Method name is one or more
-// lowercase letters/digits; method-specific-id is one or more allowed chars
-// (alphanumerics, `.`, `-`, `_`, `:`, `%` for percent-encoded chars e.g. did:webvh).
-var didRe = regexp.MustCompile(`^did:[a-z0-9]+:[A-Za-z0-9._:%-]+$`)
-
-func IsValidDID(s string) bool { return didRe.MatchString(s) }

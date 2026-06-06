@@ -2,6 +2,8 @@ package types
 
 import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+
+	"github.com/verana-labs/verana/util/validation"
 )
 
 func DefaultGenesis() *GenesisState {
@@ -38,7 +40,7 @@ func (gs GenesisState) Validate() error {
 		}
 		addrs[co.PolicyAddress] = struct{}{}
 
-		if co.Did == "" || !IsValidDID(co.Did) {
+		if co.Did == "" || !validation.IsValidDID(co.Did) {
 			return ErrInvalidDID.Wrap(co.Did)
 		}
 		if _, dup := dids[co.Did]; dup {

@@ -2,11 +2,11 @@ package types
 
 import (
 	"net/url"
-	"regexp"
 
 	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	"github.com/verana-labs/verana/util/validation"
 )
 
 // MsgCreateEcosystem.ValidateBasic implements MOD-ES-MSG-1-2-1 stateless
@@ -22,7 +22,7 @@ func (m *MsgCreateEcosystem) ValidateBasic() error {
 	if m.Did == "" {
 		return errors.Wrap(ErrInvalidDID, "did is required")
 	}
-	if !isValidDID(m.Did) {
+	if !validation.IsValidDID(m.Did) {
 		return errors.Wrap(ErrInvalidDID, "did syntax invalid")
 	}
 	if m.Language == "" {
@@ -40,7 +40,7 @@ func (m *MsgCreateEcosystem) ValidateBasic() error {
 	if m.DocDigestSri == "" {
 		return errors.Wrap(ErrInvalidDigestSRI, "doc_digest_sri is required")
 	}
-	if !isValidDigestSRI(m.DocDigestSri) {
+	if !validation.IsValidDigestSRI(m.DocDigestSri) {
 		return errors.Wrap(ErrInvalidDigestSRI, "doc_digest_sri must be a valid SRI")
 	}
 	return nil
@@ -61,7 +61,7 @@ func (m *MsgUpdateEcosystem) ValidateBasic() error {
 	if m.Did == "" {
 		return errors.Wrap(ErrInvalidDID, "did is required")
 	}
-	if !isValidDID(m.Did) {
+	if !validation.IsValidDID(m.Did) {
 		return errors.Wrap(ErrInvalidDID, "did syntax invalid")
 	}
 	return nil
@@ -87,20 +87,10 @@ func (m *MsgArchiveEcosystem) ValidateBasic() error {
 
 // --- shared validators -----------------------------------------------------
 
-func isValidDID(did string) bool {
-	re := regexp.MustCompile(`^did:[a-z0-9]+:[A-Za-z0-9._:/%\-]+(#[^\s]*)?(\?[^\s]*)?$`)
-	return re.MatchString(did)
-}
-
 func isValidHTTPURL(s string) bool {
 	u, err := url.ParseRequestURI(s)
 	if err != nil {
 		return false
 	}
 	return u.Scheme == "http" || u.Scheme == "https"
-}
-
-func isValidDigestSRI(s string) bool {
-	re := regexp.MustCompile(`^(sha256|sha384|sha512)-[A-Za-z0-9+/]+[=]{0,2}$`)
-	return re.MatchString(s)
 }

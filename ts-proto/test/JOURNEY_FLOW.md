@@ -123,65 +123,65 @@ All PERM journeys use operator-signed transactions (authority=index 10, operator
 - **Script**: `test:perm-create-root`
 - **File**: `permCreateRootPermission.ts`
 - **Prerequisites**: PERM authorization
-- **Transactions**: Create TR, CS (GRANTOR_VALIDATION), Root Permission (MOD-PERM-MSG-7)
+- **Transactions**: Create TR, CS (GRANTOR_VALIDATION), Root Permission (MOD-PP-MSG-7)
 - **Outputs**: perm-root-setup
 
 #### PERM: Create Permission (Self-Create)
 - **Script**: `test:perm-create`
 - **File**: `permCreatePermission.ts`
 - **Prerequisites**: PERM authorization
-- **Transactions**: Create OPEN CS + Root, then MsgCreatePermission (MOD-PERM-MSG-14)
+- **Transactions**: Create OPEN CS + Root, then MsgCreatePermission (MOD-PP-MSG-14)
 
 #### PERM: Adjust Permission
 - **Script**: `test:perm-adjust`
 - **File**: `permAdjustPermission.ts`
 - **Prerequisites**: Root permission (effective)
-- **Transactions**: MsgAdjustPermission (MOD-PERM-MSG-8)
+- **Transactions**: MsgAdjustPermission (MOD-PP-MSG-8)
 
 #### PERM: Revoke Permission
 - **Script**: `test:perm-revoke`
 - **File**: `permRevokePermission.ts`
 - **Prerequisites**: PERM authorization (creates fresh)
-- **Transactions**: Fresh root + MsgRevokePermission (MOD-PERM-MSG-9)
+- **Transactions**: Fresh root + MsgRevokePermission (MOD-PP-MSG-9)
 
 #### PERM: Start Permission VP
 - **Script**: `test:perm-start-vp`
 - **File**: `permStartPermissionVP.ts`
 - **Prerequisites**: Root permission (effective)
-- **Transactions**: MsgStartPermissionVP (MOD-PERM-MSG-1)
+- **Transactions**: MsgStartPermissionVP (MOD-PP-MSG-1)
 - **Outputs**: perm-vp-setup
 
 #### PERM: Set Permission VP To Validated
 - **Script**: `test:perm-validate-vp`
 - **File**: `permSetPermissionVPToValidated.ts`
 - **Prerequisites**: VP from Start VP
-- **Transactions**: MsgSetPermissionVPToValidated (MOD-PERM-MSG-2)
+- **Transactions**: MsgSetPermissionVPToValidated (MOD-PP-MSG-2)
 - **Outputs**: perm-validated-setup
 
 #### PERM: Renew + Cancel Permission VP
 - **Script**: `test:perm-cancel-vp`
 - **File**: `permCancelPermissionVPLastRequest.ts`
 - **Prerequisites**: Validated VP
-- **Transactions**: MsgRenewPermissionVP (MOD-PERM-MSG-3) + MsgCancelPermissionVPLastRequest (MOD-PERM-MSG-6)
+- **Transactions**: MsgRenewPermissionVP (MOD-PP-MSG-3) + MsgCancelPermissionVPLastRequest (MOD-PP-MSG-6)
 
 #### PERM: Create/Update Permission Session
 - **Script**: `test:perm-csps`
 - **File**: `permCreateOrUpdatePermissionSession.ts`
 - **Prerequisites**: PERM authorization (creates fresh chain)
-- **Transactions**: Full VP chain + MsgCreateOrUpdatePermissionSession (MOD-PERM-MSG-10) x2
+- **Transactions**: Full VP chain + MsgCreateOrUpdatePermissionSession (MOD-PP-MSG-10) x2
 
 #### PERM: Slash Permission Trust Deposit
 - **Script**: `test:perm-slash`
 - **File**: `permSlashPermissionTrustDeposit.ts`
 - **Prerequisites**: PERM authorization (creates fresh chain)
-- **Transactions**: Full VP chain + MsgSlashPermissionTrustDeposit (MOD-PERM-MSG-11)
+- **Transactions**: Full VP chain + MsgSlashPermissionTrustDeposit (MOD-PP-MSG-11)
 - **Outputs**: perm-slash-setup
 
 #### PERM: Repay Slashed Trust Deposit
 - **Script**: `test:perm-repay`
 - **File**: `permRepayPermissionSlashedTrustDeposit.ts`
 - **Prerequisites**: Slashed permission from Slash journey
-- **Transactions**: MsgRepayPermissionSlashedTrustDeposit (MOD-PERM-MSG-12)
+- **Transactions**: MsgRepayPermissionSlashedTrustDeposit (MOD-PP-MSG-12)
 
 ---
 
@@ -228,4 +228,4 @@ The `runAll.ts` script runs all 21 tests sequentially:
 - [Verana VPR Specification](https://verana-labs.github.io/verifiable-trust-vpr-spec/)
 - MOD-TR-MSG-1 through MOD-TR-MSG-5: Trust Registry messages
 - MOD-CS-MSG-1 through MOD-CS-MSG-3: Credential Schema messages
-- MOD-PERM-MSG-1 through MOD-PERM-MSG-14: Permission messages
+- MOD-PP-MSG-1 through MOD-PP-MSG-14: Permission messages

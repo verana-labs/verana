@@ -2,6 +2,8 @@ package types
 
 import (
 	"cosmossdk.io/errors"
+
+	"github.com/verana-labs/verana/util/validation"
 )
 
 // DefaultGenesis returns the default genesis state.
@@ -46,7 +48,7 @@ func (gs GenesisState) Validate() error {
 		if ec.Did == "" {
 			return errors.Wrapf(ErrInvalidDID, "ecosystem %d: did is required", ec.Id)
 		}
-		if !isValidDID(ec.Did) {
+		if !validation.IsValidDID(ec.Did) {
 			return errors.Wrapf(ErrInvalidDID, "ecosystem %d: did syntax invalid", ec.Id)
 		}
 		if ec.Language == "" {

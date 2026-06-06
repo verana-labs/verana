@@ -19,9 +19,13 @@ import (
 	groupkeeper "github.com/cosmos/cosmos-sdk/x/group/keeper"
 	"github.com/stretchr/testify/require"
 
+	addresscodec "github.com/cosmos/cosmos-sdk/codec/address"
+
 	modulev1 "github.com/verana-labs/verana/api/verana/co/module/v1"
 	co "github.com/verana-labs/verana/x/co/module"
 	"github.com/verana-labs/verana/x/co/types"
+	dekeeper "github.com/verana-labs/verana/x/de/keeper"
+	detypes "github.com/verana-labs/verana/x/de/types"
 	gfkeeper "github.com/verana-labs/verana/x/gf/keeper"
 	gftypes "github.com/verana-labs/verana/x/gf/types"
 )
@@ -52,6 +56,14 @@ func TestAppModule_InitExportGenesis(t *testing.T) {
 	gfStateStore.MountStoreWithDB(gfStoreKey, storetypes.StoreTypeIAVL, db)
 	require.NoError(t, gfStateStore.LoadLatestVersion())
 
+	// Build a DE keeper too: MOD-CO wires it post-construction via the #308
+	// cycle break (in.DeKeeper.SetCorporationKeeper), so it must be a real keeper.
+	deStoreKey := storetypes.NewKVStoreKey(detypes.StoreKey)
+	deStateStore := store.NewCommitMultiStore(db, log.NewNopLogger(), metrics.NewNoOpMetrics())
+	deStateStore.MountStoreWithDB(deStoreKey, storetypes.StoreTypeIAVL, db)
+	require.NoError(t, deStateStore.LoadLatestVersion())
+	addrCodec := addresscodec.NewBech32Codec(sdk.GetConfig().GetBech32AccountAddrPrefix())
+
 	authority := authtypes.NewModuleAddress(govtypes.ModuleName).String()
 	in := co.ModuleInputs{
 		StoreService:     runtime.NewKVStoreService(storeKey),
@@ -61,6 +73,7 @@ func TestAppModule_InitExportGenesis(t *testing.T) {
 		DelegationKeeper: stubDelegation{},
 		GroupKeeper:      groupkeeper.Keeper{},
 		GFKeeper:         gfkeeper.NewKeeper(cdc, runtime.NewKVStoreService(gfStoreKey), log.NewNopLogger(), authority, stubGFDelegation{}),
+		DeKeeper:         dekeeper.NewKeeper(runtime.NewKVStoreService(deStoreKey), cdc, addrCodec, authtypes.NewModuleAddress(govtypes.ModuleName)),
 	}
 	out := co.ProvideModule(in)
 	require.NotNil(t, out.Module)
@@ -79,15 +92,19 @@ func TestAppModule_InitExportGenesis(t *testing.T) {
 func TestProvideModule_CustomAuthority(t *testing.T) {
 	storeKey := storetypes.NewKVStoreKey(types.StoreKey)
 	gfStoreKey := storetypes.NewKVStoreKey(gftypes.StoreKey)
+	deStoreKey := storetypes.NewKVStoreKey(detypes.StoreKey)
 	db := dbm.NewMemDB()
 	stateStore := store.NewCommitMultiStore(db, log.NewNopLogger(), metrics.NewNoOpMetrics())
 	stateStore.MountStoreWithDB(storeKey, storetypes.StoreTypeIAVL, db)
 	stateStore.MountStoreWithDB(gfStoreKey, storetypes.StoreTypeIAVL, db)
+	stateStore.MountStoreWithDB(deStoreKey, storetypes.StoreTypeIAVL, db)
 	require.NoError(t, stateStore.LoadLatestVersion())
 	cdc := codec.NewProtoCodec(codectypes.NewInterfaceRegistry())
 
 	authority := authtypes.NewModuleAddress(govtypes.ModuleName).String()
 	gfk := gfkeeper.NewKeeper(cdc, runtime.NewKVStoreService(gfStoreKey), log.NewNopLogger(), authority, stubGFDelegation{})
+	addrCodec := addresscodec.NewBech32Codec(sdk.GetConfig().GetBech32AccountAddrPrefix())
+	dek := dekeeper.NewKeeper(runtime.NewKVStoreService(deStoreKey), cdc, addrCodec, authtypes.NewModuleAddress(govtypes.ModuleName))
 
 	custom := authtypes.NewModuleAddress("custom").String()
 	out := co.ProvideModule(co.ModuleInputs{
@@ -98,6 +115,7 @@ func TestProvideModule_CustomAuthority(t *testing.T) {
 		DelegationKeeper: stubDelegation{},
 		GroupKeeper:      groupkeeper.Keeper{},
 		GFKeeper:         gfk,
+		DeKeeper:         dek,
 	})
 	require.Equal(t, custom, out.CoKeeper.GetAuthority(), "explicit Authority must override gov default")
 }

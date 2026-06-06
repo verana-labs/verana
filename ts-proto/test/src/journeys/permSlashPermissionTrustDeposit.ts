@@ -104,7 +104,7 @@ async function main() {
         operator: setup.operatorAddress,
         id: issuerParticipantId,
         amount: slashAmount,
-        // [MOD-PERM-MSG-12-1] reason is mandatory per spec v4 draft 13.
+        // [MOD-PP-MSG-12-1] reason is mandatory per spec v4 draft 13.
         reason: "ts-client journey slash",
       }),
     };

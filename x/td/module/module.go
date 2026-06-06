@@ -23,6 +23,7 @@ import (
 	// this line is used by starport scaffolding # 1
 
 	modulev1 "github.com/verana-labs/verana/api/verana/td/module"
+	cokeeper "github.com/verana-labs/verana/x/co/keeper"
 	"github.com/verana-labs/verana/x/td/keeper"
 	"github.com/verana-labs/verana/x/td/types"
 )
@@ -178,8 +179,17 @@ func (am AppModule) IsAppModule() {}
 func init() {
 	appmodule.Register(
 		&modulev1.Module{},
-		appmodule.Provide(ProvideModule),
+		appmodule.Provide(
+			ProvideModule,
+			ProvideCorporationKeeperForTD,
+		),
 	)
+}
+
+// ProvideCorporationKeeperForTD supplies tdtypes.CorporationKeeper for MOD-TD
+// AUTHZ-CHECK-5, sourced from the concrete x/co keeper.
+func ProvideCorporationKeeperForTD(co cokeeper.Keeper) types.CorporationKeeper {
+	return keeper.NewCoAsTDCorporationKeeper(co)
 }
 
 type ModuleInputs struct {
@@ -190,10 +200,11 @@ type ModuleInputs struct {
 	Config       *modulev1.Module
 	Logger       log.Logger
 
-	AccountKeeper    types.AccountKeeper
-	BankKeeper       types.BankKeeper
-	MintKeeper       mintkeeper.Keeper
-	DelegationKeeper types.DelegationKeeper
+	AccountKeeper     types.AccountKeeper
+	BankKeeper        types.BankKeeper
+	MintKeeper        mintkeeper.Keeper
+	DelegationKeeper  types.DelegationKeeper
+	CorporationKeeper types.CorporationKeeper
 }
 
 type ModuleOutputs struct {
@@ -234,6 +245,7 @@ func ProvideModule(in ModuleInputs) ModuleOutputs {
 		in.BankKeeper,
 		mintAdapter,
 		in.DelegationKeeper,
+		in.CorporationKeeper,
 	)
 	m := NewAppModule(
 		in.Cdc,

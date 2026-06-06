@@ -3,8 +3,10 @@ package keeper
 import (
 	"fmt"
 
+	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	cotypes "github.com/verana-labs/verana/x/co/types"
 	"github.com/verana-labs/verana/x/cs/types"
 )
 
@@ -20,7 +22,9 @@ func (k Keeper) checkSchemaOwnership(ctx sdk.Context, cs types.CredentialSchema,
 	}
 	co, ok := k.coKeeper.ResolveByPolicyAddress(ctx, signingCorp)
 	if !ok {
-		return fmt.Errorf("signing corporation %s is not registered", signingCorp)
+		// AUTHZ-CHECK-5: signing account is not the policy_address of any Corporation.
+		return errors.Wrapf(cotypes.ErrCorporationNotRegistered,
+			"signing account %s has not been registered as the policy_address of a Corporation (see MOD-CO-MSG-1)", signingCorp)
 	}
 	if ec.CorporationId != co.Id {
 		return fmt.Errorf("corporation %d does not control the ecosystem (%d) that owns this credential schema", co.Id, ec.CorporationId)
@@ -38,7 +42,9 @@ func (k Keeper) checkCreateSchemaOwnership(ctx sdk.Context, ecosystemID uint64, 
 	}
 	co, ok := k.coKeeper.ResolveByPolicyAddress(ctx, signingCorp)
 	if !ok {
-		return fmt.Errorf("signing corporation %s is not registered", signingCorp)
+		// AUTHZ-CHECK-5: signing account is not the policy_address of any Corporation.
+		return errors.Wrapf(cotypes.ErrCorporationNotRegistered,
+			"signing account %s has not been registered as the policy_address of a Corporation (see MOD-CO-MSG-1)", signingCorp)
 	}
 	if ec.CorporationId != co.Id {
 		return fmt.Errorf("corporation %d does not control ecosystem %d", co.Id, ec.CorporationId)

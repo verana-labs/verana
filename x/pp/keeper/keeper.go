@@ -63,9 +63,9 @@ func NewKeeper(
 		storeService:           storeService,
 		authority:              authority,
 		logger:                 logger,
-		Participant:            collections.NewMap(sb, types.ParticipantKey, "perm", collections.Uint64Key, codec.CollValue[types.Participant](cdc)),
+		Participant:            collections.NewMap(sb, types.ParticipantKey, "participant", collections.Uint64Key, codec.CollValue[types.Participant](cdc)),
 		ParticipantCounter:     collections.NewItem(sb, types.ParticipantCounterKey, "participant_counter", collections.Uint64Value),
-		ParticipantSession:     collections.NewMap(sb, types.ParticipantSessionKey, "permission_session", collections.StringKey, codec.CollValue[types.ParticipantSession](cdc)),
+		ParticipantSession:     collections.NewMap(sb, types.ParticipantSessionKey, "participant_session", collections.StringKey, codec.CollValue[types.ParticipantSession](cdc)),
 		credentialSchemaKeeper: credentialSchemaKeeper,
 		ecosystemKeeper:        ecosystemKeeper,
 		coKeeper:               coKeeper,
@@ -90,22 +90,22 @@ func (k Keeper) GetParticipantByID(ctx sdk.Context, id uint64) (types.Participan
 	return k.Participant.Get(ctx, id)
 }
 
-// CreatePermission creates a new perm and returns its ID
-func (k Keeper) CreatePermission(ctx sdk.Context, perm types.Participant) (uint64, error) {
-	id, err := k.getNextPermissionID(ctx)
+// CreateParticipant creates a new participant and returns its ID
+func (k Keeper) CreateParticipant(ctx sdk.Context, participant types.Participant) (uint64, error) {
+	id, err := k.getNextParticipantID(ctx)
 	if err != nil {
 		return 0, err
 	}
-	perm.Id = id
-	if err := k.Participant.Set(ctx, id, perm); err != nil {
+	participant.Id = id
+	if err := k.Participant.Set(ctx, id, participant); err != nil {
 		return 0, err
 	}
 
 	return id, nil
 }
 
-// getNextPermissionID gets the next available perm ID
-func (k Keeper) getNextPermissionID(ctx sdk.Context) (uint64, error) {
+// getNextParticipantID gets the next available participant ID
+func (k Keeper) getNextParticipantID(ctx sdk.Context) (uint64, error) {
 	id, err := k.ParticipantCounter.Get(ctx)
 	if err != nil {
 		id = 0
@@ -114,61 +114,61 @@ func (k Keeper) getNextPermissionID(ctx sdk.Context) (uint64, error) {
 	nextID := id + 1
 	err = k.ParticipantCounter.Set(ctx, nextID)
 	if err != nil {
-		return 0, fmt.Errorf("failed to set perm counter: %w", err)
+		return 0, fmt.Errorf("failed to set participant counter: %w", err)
 	}
 
 	return nextID, nil
 }
 
-func (k Keeper) UpdatePermission(ctx sdk.Context, perm types.Participant) error {
-	return k.Participant.Set(ctx, perm.Id, perm)
+func (k Keeper) UpdateParticipant(ctx sdk.Context, participant types.Participant) error {
+	return k.Participant.Set(ctx, participant.Id, participant)
 }
 
-// IsValidPermission checks if a perm is valid for a given time
-// A valid perm (ACTIVE state):
+// IsValidParticipant checks if a participant is valid for a given time
+// A valid participant (ACTIVE state):
 // - Is currently effective (effective_from must be set and effective_from ≤ now < effective_until)
 // - Is not revoked
 // - Is not slashed
 // - Is not repaid
-// According to the spec, if validator permission is INACTIVE (not valid), it must abort.
+// According to the spec, if validator participant is INACTIVE (not valid), it must abort.
 // INACTIVE means: effective_from is null OR effective_from equals now() exactly (not before).
-func IsValidPermission(perm types.Participant, checkTime time.Time) error {
-	// Check if perm is repaid (REPAID state)
-	if perm.Repaid != nil {
-		return fmt.Errorf("perm is repaid since %v", perm.Repaid)
+func IsValidParticipant(participant types.Participant, checkTime time.Time) error {
+	// Check if participant is repaid (REPAID state)
+	if participant.Repaid != nil {
+		return fmt.Errorf("participant is repaid since %v", participant.Repaid)
 	}
 
-	// Check if perm is slashed (SLASHED state)
-	if perm.Slashed != nil {
-		return fmt.Errorf("perm is slashed since %v", perm.Slashed)
+	// Check if participant is slashed (SLASHED state)
+	if participant.Slashed != nil {
+		return fmt.Errorf("participant is slashed since %v", participant.Slashed)
 	}
 
-	// Check if perm is revoked (REVOKED state)
-	// Spec: "else if `revoked` is lower than now(), => `perm_state` is `REVOKED`"
-	// This means revoked < now(), so we check checkTime.After(*perm.Revoked)
-	if perm.Revoked != nil && checkTime.After(*perm.Revoked) {
-		return fmt.Errorf("perm is revoked since %v", perm.Revoked)
+	// Check if participant is revoked (REVOKED state)
+	// Spec: "else if `revoked` is lower than now(), => `participant_state` is `REVOKED`"
+	// This means revoked < now(), so we check checkTime.After(*participant.Revoked)
+	if participant.Revoked != nil && checkTime.After(*participant.Revoked) {
+		return fmt.Errorf("participant is revoked since %v", participant.Revoked)
 	}
 
-	// Check if perm is expired (EXPIRED state)
-	if perm.EffectiveUntil != nil && !checkTime.Before(*perm.EffectiveUntil) {
-		return fmt.Errorf("perm expired: ended at %v", perm.EffectiveUntil)
+	// Check if participant is expired (EXPIRED state)
+	if participant.EffectiveUntil != nil && !checkTime.Before(*participant.EffectiveUntil) {
+		return fmt.Errorf("participant expired: ended at %v", participant.EffectiveUntil)
 	}
 
-	// Check if perm is in FUTURE state (effective_from is after now)
-	if perm.EffectiveFrom != nil && checkTime.Before(*perm.EffectiveFrom) {
-		return fmt.Errorf("perm not yet effective: begins at %v", perm.EffectiveFrom)
+	// Check if participant is in FUTURE state (effective_from is after now)
+	if participant.EffectiveFrom != nil && checkTime.Before(*participant.EffectiveFrom) {
+		return fmt.Errorf("participant not yet effective: begins at %v", participant.EffectiveFrom)
 	}
 
-	// Check if perm is INACTIVE (effective_from is null OR equals now exactly)
+	// Check if participant is INACTIVE (effective_from is null OR equals now exactly)
 	// For ACTIVE state, effective_from must be set and must be before or equal to now
-	if perm.EffectiveFrom == nil {
-		return fmt.Errorf("perm is INACTIVE: effective_from is null")
+	if participant.EffectiveFrom == nil {
+		return fmt.Errorf("participant is INACTIVE: effective_from is null")
 	}
 
 	// At this point, effective_from is set and checkTime is not before it
 	// This means effective_from <= now, which is required for ACTIVE state
-	// The permission is valid (ACTIVE)
+	// The participant is valid (ACTIVE)
 
 	return nil
 }

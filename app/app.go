@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"io"
 
+	_ "github.com/verana-labs/verana/x/co/module" // import for side-effects
 	_ "github.com/verana-labs/verana/x/cs/module" // import for side-effects
 	demodulekeeper "github.com/verana-labs/verana/x/de/keeper"
 	dimodulekeeper "github.com/verana-labs/verana/x/di/keeper"
+	_ "github.com/verana-labs/verana/x/ec/module" // import for side-effects
+	_ "github.com/verana-labs/verana/x/gf/module" // import for side-effects
 	_ "github.com/verana-labs/verana/x/pp/module" // import for side-effects
 	_ "github.com/verana-labs/verana/x/td/module" // import for side-effects
-	_ "github.com/verana-labs/verana/x/co/module" // import for side-effects
-	_ "github.com/verana-labs/verana/x/gf/module" // import for side-effects
-	_ "github.com/verana-labs/verana/x/ec/module" // import for side-effects
 	xrmodulekeeper "github.com/verana-labs/verana/x/xr/keeper"
 
 	upgradetypes "cosmossdk.io/x/upgrade/types"
@@ -112,7 +112,7 @@ import (
 
 	credentialschemamodulekeeper "github.com/verana-labs/verana/x/cs/keeper"
 
-	permissionmodulekeeper "github.com/verana-labs/verana/x/pp/keeper"
+	participantmodulekeeper "github.com/verana-labs/verana/x/pp/keeper"
 	trustdepositmodulekeeper "github.com/verana-labs/verana/x/td/keeper"
 
 	// this line is used by starport scaffolding # stargate/app/moduleImport
@@ -211,7 +211,7 @@ type App struct {
 	CoKeeper               comodulekeeper.Keeper
 	GfKeeper               gfmodulekeeper.Keeper
 	CredentialschemaKeeper credentialschemamodulekeeper.Keeper
-	PermissionKeeper       permissionmodulekeeper.Keeper
+	ParticipantKeeper      participantmodulekeeper.Keeper
 	TrustdepositKeeper     trustdepositmodulekeeper.Keeper
 	DeKeeper               demodulekeeper.Keeper
 	DiKeeper               dimodulekeeper.Keeper
@@ -269,8 +269,8 @@ func (app *App) GetEcosystemKeeper() ecmodulekeeper.Keeper {
 	return app.EcosystemKeeper
 }
 
-func (app *App) GetPermissionKeeper() permissionmodulekeeper.Keeper {
-	return app.PermissionKeeper
+func (app *App) GetParticipantKeeper() participantmodulekeeper.Keeper {
+	return app.ParticipantKeeper
 }
 
 func (app *App) GetTrustDepositKeeper() trustdepositmodulekeeper.Keeper {
@@ -352,7 +352,7 @@ func New(
 		&app.GfKeeper,
 		&app.CoKeeper,
 		&app.CredentialschemaKeeper,
-		&app.PermissionKeeper,
+		&app.ParticipantKeeper,
 		&app.TrustdepositKeeper,
 		&app.DeKeeper,
 		&app.DiKeeper,

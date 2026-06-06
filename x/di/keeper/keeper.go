@@ -21,6 +21,7 @@ type Keeper struct {
 
 	// module references
 	delegationKeeper types.DelegationKeeper
+	coKeeper         types.CorporationKeeper
 
 	Schema  collections.Schema
 	Params  collections.Item[types.Params]
@@ -33,6 +34,7 @@ func NewKeeper(
 	addressCodec address.Codec,
 	authority []byte,
 	delegationKeeper types.DelegationKeeper,
+	coKeeper types.CorporationKeeper,
 ) Keeper {
 	if _, err := addressCodec.BytesToString(authority); err != nil {
 		panic(fmt.Sprintf("invalid authority address %s: %s", authority, err))
@@ -46,6 +48,7 @@ func NewKeeper(
 		addressCodec:     addressCodec,
 		authority:        authority,
 		delegationKeeper: delegationKeeper,
+		coKeeper:         coKeeper,
 
 		Params:  collections.NewItem(sb, types.ParamsKey, "params", codec.CollValue[types.Params](cdc)),
 		Digests: collections.NewMap(sb, types.DigestsKey, "digests", collections.StringKey, codec.CollValue[types.Digest](cdc)),

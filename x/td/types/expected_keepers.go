@@ -42,3 +42,17 @@ type MintKeeper interface {
 type DelegationKeeper interface {
 	CheckOperatorAuthorization(ctx context.Context, authority string, operator string, msgTypeURL string, now time.Time) error
 }
+
+// CorporationView is the read shape MOD-TD needs about a Corporation subject
+// for AUTHZ-CHECK-5: the signing corporation policy_address resolved to its id.
+type CorporationView struct {
+	Id            uint64
+	PolicyAddress string
+}
+
+// CorporationKeeper backs AUTHZ-CHECK-5 for MOD-TD delegable messages: resolve
+// the signing `corporation` policy_address to its registered Corporation, or
+// abort with ErrCorporationNotRegistered (referencing MOD-CO-MSG-1).
+type CorporationKeeper interface {
+	ResolveCorporationByPolicyAddress(ctx context.Context, policyAddress string) (CorporationView, error)
+}

@@ -54,9 +54,9 @@ import (
 	"google.golang.org/protobuf/types/known/durationpb"
 
 	credentialschemamodulev1 "github.com/verana-labs/verana/api/verana/cs/module"
-	permissionmodulev1 "github.com/verana-labs/verana/api/verana/pp/module"
-	trustdepositmodulev1 "github.com/verana-labs/verana/api/verana/td/module"
 	ecosystemmodulev1 "github.com/verana-labs/verana/api/verana/ec/module"
+	participantmodulev1 "github.com/verana-labs/verana/api/verana/pp/module"
+	trustdepositmodulev1 "github.com/verana-labs/verana/api/verana/td/module"
 	_ "github.com/verana-labs/verana/x/co/module"
 	comoduletypes "github.com/verana-labs/verana/x/co/types"
 	credentialschemamoduletypes "github.com/verana-labs/verana/x/cs/types"
@@ -64,11 +64,11 @@ import (
 	demoduletypes "github.com/verana-labs/verana/x/de/types"
 	_ "github.com/verana-labs/verana/x/di/module"
 	dimoduletypes "github.com/verana-labs/verana/x/di/types"
+	ecosystemmoduletypes "github.com/verana-labs/verana/x/ec/types"
 	_ "github.com/verana-labs/verana/x/gf/module"
 	gfmoduletypes "github.com/verana-labs/verana/x/gf/types"
-	permissionmoduletypes "github.com/verana-labs/verana/x/pp/types"
+	participantmoduletypes "github.com/verana-labs/verana/x/pp/types"
 	trustdepositmoduletypes "github.com/verana-labs/verana/x/td/types"
-	ecosystemmoduletypes "github.com/verana-labs/verana/x/ec/types"
 	_ "github.com/verana-labs/verana/x/xr/module"
 	xrmoduletypes "github.com/verana-labs/verana/x/xr/types"
 
@@ -117,7 +117,7 @@ var (
 		comoduletypes.ModuleName,
 		gfmoduletypes.ModuleName,
 		credentialschemamoduletypes.ModuleName,
-		permissionmoduletypes.ModuleName,
+		participantmoduletypes.ModuleName,
 		trustdepositmoduletypes.ModuleName,
 		demoduletypes.ModuleName,
 		dimoduletypes.ModuleName,
@@ -151,7 +151,7 @@ var (
 		comoduletypes.ModuleName,
 		gfmoduletypes.ModuleName,
 		credentialschemamoduletypes.ModuleName,
-		permissionmoduletypes.ModuleName,
+		participantmoduletypes.ModuleName,
 		trustdepositmoduletypes.ModuleName,
 		demoduletypes.ModuleName,
 		dimoduletypes.ModuleName,
@@ -179,7 +179,7 @@ var (
 		comoduletypes.ModuleName,
 		gfmoduletypes.ModuleName,
 		credentialschemamoduletypes.ModuleName,
-		permissionmoduletypes.ModuleName,
+		participantmoduletypes.ModuleName,
 		trustdepositmoduletypes.ModuleName,
 		demoduletypes.ModuleName,
 		dimoduletypes.ModuleName,
@@ -207,7 +207,7 @@ var (
 		{Account: icatypes.ModuleName},
 		{Account: ecosystemmoduletypes.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner}},
 		{Account: trustdepositmoduletypes.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner}},
-		{Account: permissionmoduletypes.ModuleName},
+		{Account: participantmoduletypes.ModuleName},
 		{Account: protocolpooltypes.ModuleName},
 		{Account: protocolpooltypes.ProtocolPoolEscrowAccount},
 		{Account: trustdepositmoduletypes.YieldIntermediatePool},
@@ -367,8 +367,8 @@ var (
 				Config: appconfig.WrapAny(&credentialschemamodulev1.Module{}),
 			},
 			{
-				Name:   permissionmoduletypes.ModuleName,
-				Config: appconfig.WrapAny(&permissionmodulev1.Module{}),
+				Name:   participantmoduletypes.ModuleName,
+				Config: appconfig.WrapAny(&participantmodulev1.Module{}),
 			},
 			{
 				Name:   trustdepositmoduletypes.ModuleName,

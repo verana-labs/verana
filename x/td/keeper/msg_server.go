@@ -41,6 +41,11 @@ func (ms msgServer) ReclaimTrustDepositYield(goCtx context.Context, msg *types.M
 		return nil, fmt.Errorf("authorization check failed: %w", err)
 	}
 
+	// [AUTHZ-CHECK-5] Signing corporation account MUST be a registered Corporation.
+	if _, err := ms.Keeper.coKeeper.ResolveCorporationByPolicyAddress(ctx, msg.Corporation); err != nil {
+		return nil, err
+	}
+
 	// [MOD-TD-MSG-2-2-1] Load TrustDeposit entry
 	td, err := ms.Keeper.TrustDeposit.Get(ctx, account)
 	if err != nil {
@@ -214,6 +219,11 @@ func (ms msgServer) RepaySlashedTrustDeposit(goCtx context.Context, msg *types.M
 		ctx.BlockTime(),
 	); err != nil {
 		return nil, fmt.Errorf("authorization check failed: %w", err)
+	}
+
+	// [AUTHZ-CHECK-5] Signing corporation account MUST be a registered Corporation.
+	if _, err := ms.Keeper.coKeeper.ResolveCorporationByPolicyAddress(ctx, msg.Corporation); err != nil {
+		return nil, err
 	}
 
 	// [MOD-TD-MSG-6-2-1] Load TrustDeposit entry for corporation (must exist)

@@ -32,6 +32,11 @@ func (ms msgServer) StoreDigest(goCtx context.Context, msg *types.MsgStoreDigest
 		return nil, fmt.Errorf("authorization check failed: %w", err)
 	}
 
+	// [AUTHZ-CHECK-5] Signing authority account MUST be a registered Corporation.
+	if _, err := ms.coKeeper.ResolveCorporationByPolicyAddress(ctx, msg.Authority); err != nil {
+		return nil, err
+	}
+
 	// [MOD-DI-MSG-1-3] Execution — prevent duplicate (would overwrite created timestamp)
 	if has, _ := ms.Keeper.Digests.Has(ctx, msg.Digest); has {
 		return nil, errorsmod.Wrap(types.ErrDigestAlreadyExists, msg.Digest)

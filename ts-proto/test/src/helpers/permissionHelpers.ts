@@ -50,7 +50,7 @@ export async function createRootPermissionForTest(
       validationFees: 5,
       verificationFees: 5,
       issuanceFees: 5,
-      // [MOD-PERM-MSG-7-3] perm.role is hardcoded to ECOSYSTEM by the handler
+      // [MOD-PP-MSG-7-3] perm.role is hardcoded to ECOSYSTEM by the handler
       // and vs_operator is not set on root permissions — neither belongs on
       // the wire for MsgCreateRootParticipant.
     }),
@@ -658,7 +658,7 @@ export async function createRootPermWithOperator(
       validationFees: opts?.validationFees ?? 5,
       issuanceFees: opts?.issuanceFees ?? 5,
       verificationFees: opts?.verificationFees ?? 5,
-      // [MOD-PERM-MSG-7-3] perm.role is hardcoded to ECOSYSTEM by the handler
+      // [MOD-PP-MSG-7-3] perm.role is hardcoded to ECOSYSTEM by the handler
       // and vs_operator is not set on root permissions.
     }),
   };
