@@ -4365,6 +4365,41 @@ func TestRepayParticipantSlashedTrustDeposit(t *testing.T) {
 		require.Contains(t, err.Error(), "no slashed timestamp")
 		require.Nil(t, resp)
 	})
+
+	t.Run("Invalid - amount exceeds outstanding slashed deposit", func(t *testing.T) {
+		// Fresh participant slashed by 400; repaying 500 exceeds the outstanding 400.
+		p := types.Participant{
+			SchemaId:               1,
+			Role:                   types.ParticipantRole_ISSUER,
+			CorporationId:          trkKeeper.RegisterCorp(authority),
+			Created:                &now,
+			Modified:               &now,
+			ValidatorParticipantId: validatorParticipantID,
+			OpState:                types.OnboardingState_VALIDATED,
+			Deposit:                1000,
+			EffectiveFrom:          &pastTime,
+		}
+		pid, err := k.CreateParticipant(sdkCtx, p)
+		require.NoError(t, err)
+
+		_, err = ms.SlashParticipantTrustDeposit(ctx, &types.MsgSlashParticipantTrustDeposit{
+			Corporation: validatorAddr,
+			Operator:    validatorAddr,
+			Id:          pid,
+			Amount:      400,
+		})
+		require.NoError(t, err)
+
+		resp, err := ms.RepayParticipantSlashedTrustDeposit(ctx, &types.MsgRepayParticipantSlashedTrustDeposit{
+			Corporation: authority,
+			Operator:    operator,
+			Id:          pid,
+			Amount:      500,
+		})
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "exceeds outstanding")
+		require.Nil(t, resp)
+	})
 }
 
 func TestCreateParticipant(t *testing.T) {
