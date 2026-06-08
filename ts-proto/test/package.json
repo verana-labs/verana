@@ -25,6 +25,7 @@
     "test:perm-revoke": "npx tsx src/journeys/permRevokePermission.ts",
     "test:perm-start-vp": "npx tsx src/journeys/permStartPermissionVP.ts",
     "test:perm-validate-vp": "npx tsx src/journeys/permSetPermissionVPToValidated.ts",
+    "test:perm-renew": "npx tsx src/journeys/permRenewPermissionVP.ts",
     "test:perm-cancel-vp": "npx tsx src/journeys/permCancelPermissionVPLastRequest.ts",
     "test:perm-csps": "npx tsx src/journeys/permCreateOrUpdatePermissionSession.ts",
     "test:perm-slash": "npx tsx src/journeys/permSlashPermissionTrustDeposit.ts",

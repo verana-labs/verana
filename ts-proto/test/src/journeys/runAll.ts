@@ -28,6 +28,7 @@ interface TestConfig {
 }
 
 const tests: TestConfig[] = [
+  // Bootstrap: corporation, ecosystem, governance framework, operator authz.
   { name: "CO: Create Corporation",                script: "test:co-create" },
   { name: "DE: Grant Operator Authorization",      script: "test:de-grant-auth" },
   { name: "EC: Create Ecosystem",                  script: "test:ec-create" },
@@ -35,11 +36,19 @@ const tests: TestConfig[] = [
   { name: "GF: Increase Active GF Version",        script: "test:gf-increase-version" },
   { name: "EC: Update Ecosystem",                  script: "test:ec-update" },
   { name: "EC: Archive Ecosystem",                 script: "test:ec-archive" },
-  { name: "DE: Grant CS Operator Authorization",   script: "test:de-grant-cs-auth" },
-  // VSOA path (spec v4-rc2), SIGN_MODE_DIRECT: grant PERM operator authz via the
-  // corp group proposal, then exercise the VSOA record lifecycle + CSPS.
   { name: "DE: Grant PERM Operator Authorization", script: "test:de-grant-perm-auth" },
-  { name: "PERM: CSPS (VSOA record + AUTHZ-CHECK-3)", script: "test:perm-csps" },
+  // PERM module — every participant transaction, all in SIGN_MODE_LEGACY_AMINO_JSON.
+  { name: "PERM: Create Root Participant",            script: "test:perm-create-root" },
+  { name: "PERM: Start Participant OP",               script: "test:perm-start-vp" },
+  { name: "PERM: Set Participant OP To Validated",    script: "test:perm-validate-vp" },
+  { name: "PERM: Renew Participant OP",               script: "test:perm-renew" },
+  { name: "PERM: Cancel Participant OP Last Request", script: "test:perm-cancel-vp" },
+  { name: "PERM: Set Participant Effective Until",    script: "test:perm-adjust" },
+  { name: "PERM: Revoke Participant",                 script: "test:perm-revoke" },
+  { name: "PERM: Create/Update Participant Session",  script: "test:perm-csps" },
+  { name: "PERM: Self Create Participant",            script: "test:perm-create" },
+  { name: "PERM: Slash Participant Trust Deposit",    script: "test:perm-slash" },
+  { name: "PERM: Repay Slashed Trust Deposit",        script: "test:perm-repay" },
 ];
 
 /**
