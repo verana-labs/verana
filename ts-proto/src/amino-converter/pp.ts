@@ -163,8 +163,8 @@ export const MsgSetParticipantOPToValidatedAminoConverter: AminoConverter = {
     issuance_fees: u64ToStr(m.issuanceFees),
     verification_fees: u64ToStr(m.verificationFees),
     op_summary_digest: m.opSummaryDigest ?? "",
-    issuance_fee_discount: u64ToStr(m.issuanceFeeDiscount),
-    verification_fee_discount: u64ToStr(m.verificationFeeDiscount),
+    issuance_fee_discount: u64ToStrIfNonZero(m.issuanceFeeDiscount),
+    verification_fee_discount: u64ToStrIfNonZero(m.verificationFeeDiscount),
   }),
   fromAmino: (a: any): MsgSetParticipantOPToValidated =>
     MsgSetParticipantOPToValidated.fromPartial({
@@ -206,11 +206,11 @@ export const MsgCreateOrUpdateParticipantSessionAminoConverter: AminoConverter =
     corporation: m.corporation ?? "",
     operator: m.operator ?? "",
     id: m.id ?? "",
-    issuer_participant_id: u64ToStr(m.issuerParticipantId),
-    verifier_participant_id: u64ToStr(m.verifierParticipantId),
+    issuer_participant_id: u64ToStrIfNonZero(m.issuerParticipantId),
+    verifier_participant_id: u64ToStrIfNonZero(m.verifierParticipantId),
     agent_participant_id: u64ToStr(m.agentParticipantId),
     wallet_agent_participant_id: u64ToStr(m.walletAgentParticipantId),
-    digest: m.digest ?? undefined,
+    digest: m.digest || undefined,
   }),
   fromAmino: (a: any): MsgCreateOrUpdateParticipantSession =>
     MsgCreateOrUpdateParticipantSession.fromPartial({

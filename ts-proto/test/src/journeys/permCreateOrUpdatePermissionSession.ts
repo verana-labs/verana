@@ -14,7 +14,7 @@
  */
 
 import {
-  createDirectAccountFromMnemonic,
+  createAccountFromMnemonic,
   createSigningClient,
   getAccountInfo,
   calculateFeeWithSimulation,
@@ -61,7 +61,7 @@ async function main() {
 
   // Step 2: Connect operator
   console.log("Step 2: Setting up operator wallet...");
-  const wallet = await createDirectAccountFromMnemonic(COOLUSER_MNEMONIC, OPERATOR_INDEX);
+  const wallet = await createAccountFromMnemonic(COOLUSER_MNEMONIC, OPERATOR_INDEX);
   const account = await getAccountInfo(wallet);
   const client = await createSigningClient(wallet);
   console.log(`  Connected as ${account.address}`);
@@ -94,7 +94,7 @@ async function main() {
     // Use a distinct vs_operator account (derivation index 16) to avoid mutual
     // exclusivity conflict with the OperatorAuthorization for setup.operatorAddress.
     console.log("Step 5: Starting VP with vs_operator enabled...");
-    const vsOperatorWallet = await createDirectAccountFromMnemonic(COOLUSER_MNEMONIC, 16);
+    const vsOperatorWallet = await createAccountFromMnemonic(COOLUSER_MNEMONIC, 16);
     const vsOperatorAccount = await getAccountInfo(vsOperatorWallet);
     console.log(`  VS Operator: ${vsOperatorAccount.address}`);
 
