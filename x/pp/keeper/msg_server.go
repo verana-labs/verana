@@ -741,6 +741,11 @@ func (ms msgServer) executeCreateRootParticipant(ctx sdk.Context, msg *types.Msg
 	if err != nil {
 		return 0, err
 	}
+	// [MOD-PP-MSG-7-2-1] (did, corporation_id) consistency: did MUST NOT already
+	// be controlled by a different corporation.
+	if err := ms.assertDIDCorporationConsistent(ctx, msg.Did, corporationId); err != nil {
+		return 0, err
+	}
 	participant := types.Participant{
 		SchemaId:         msg.SchemaId,
 		Modified:         &now,
@@ -1582,6 +1587,11 @@ func (ms msgServer) SelfCreateParticipant(goCtx context.Context, msg *types.MsgS
 	// [MOD-PP-MSG-14-3] Execution
 	corporationId, err := ms.corpIDFromAccount(ctx, msg.Corporation)
 	if err != nil {
+		return nil, err
+	}
+	// [MOD-PP-MSG-14-2-1] (did, corporation_id) consistency: did MUST NOT already
+	// be controlled by a different corporation.
+	if err := ms.assertDIDCorporationConsistent(ctx, msg.Did, corporationId); err != nil {
 		return nil, err
 	}
 	participant := types.Participant{

@@ -152,6 +152,12 @@ func (ms msgServer) executeStartParticipantVP(ctx sdk.Context, msg *types.MsgSta
 		return 0, err
 	}
 
+	// [MOD-PP-MSG-1-2-1] (did, corporation_id) consistency: did MUST NOT already
+	// be controlled by a different corporation.
+	if err := ms.assertDIDCorporationConsistent(ctx, msg.Did, corporationId); err != nil {
+		return 0, err
+	}
+
 	// [MOD-PP-MSG-1-3] Create and persist new participant entry
 	applicantParticipant := types.Participant{
 		CorporationId:                corporationId,                   // applicant_participant.corporation_id

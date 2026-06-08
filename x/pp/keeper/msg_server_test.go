@@ -134,7 +134,7 @@ func TestStartParticipantVP(t *testing.T) {
 				Operator:               creator2,
 				Role:                   types.ParticipantRole_ISSUER,
 				ValidatorParticipantId: validatorParticipantID,
-				Did:                    validDid,
+				Did:                    "did:example:start-fees-optional",
 				ValidationFees:         &types.OptionalUInt64{Value: 100},
 				IssuanceFees:           &types.OptionalUInt64{Value: 50},
 				VerificationFees:       &types.OptionalUInt64{Value: 25},
@@ -152,7 +152,7 @@ func TestStartParticipantVP(t *testing.T) {
 				Operator:               creator3,
 				Role:                   types.ParticipantRole_ISSUER,
 				ValidatorParticipantId: validatorParticipantID,
-				Did:                    validDid,
+				Did:                    "did:example:start-fees-partial",
 				ValidationFees:         &types.OptionalUInt64{Value: 75},
 			},
 			err:                      "",
@@ -168,7 +168,7 @@ func TestStartParticipantVP(t *testing.T) {
 				Operator:               creator4,
 				Role:                   types.ParticipantRole_ISSUER,
 				ValidatorParticipantId: validatorParticipantID,
-				Did:                    validDid,
+				Did:                    "did:example:start-fees-zero",
 				ValidationFees:         &types.OptionalUInt64{Value: 0},
 				IssuanceFees:           &types.OptionalUInt64{Value: 0},
 				VerificationFees:       &types.OptionalUInt64{Value: 0},
@@ -5421,7 +5421,7 @@ func TestStartParticipantVP_OverlapCheck(t *testing.T) {
 			Operator:               otherCreator,
 			Role:                   types.ParticipantRole_ISSUER,
 			ValidatorParticipantId: validatorParticipantID,
-			Did:                    validDid,
+			Did:                    "did:example:overlap-other-authority",
 		}
 		resp3, err := ms.StartParticipantOP(ctx, msg3)
 		require.NoError(t, err)
