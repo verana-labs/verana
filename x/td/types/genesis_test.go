@@ -5,16 +5,11 @@ import (
 
 	"cosmossdk.io/math"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 	"github.com/verana-labs/verana/x/td/types"
 )
 
 func TestGenesisState_Validate(t *testing.T) {
-	// Setup valid addresses for testing
-	validAddr1 := sdk.AccAddress([]byte("test_address1")).String()
-	validAddr2 := sdk.AccAddress([]byte("test_address2")).String()
-
 	// Create a custom invalid param for testing
 	invalidParams := types.DefaultParams()
 	invalidShareValue, _ := math.LegacyNewDecFromStr("0.0") // Zero is invalid
@@ -36,16 +31,16 @@ func TestGenesisState_Validate(t *testing.T) {
 				Params: types.DefaultParams(),
 				TrustDeposits: []types.TrustDepositRecord{
 					{
-						Corporation: validAddr1,
-						Share:     math.LegacyNewDec(100),
-						Deposit:   1000,
-						Claimable: 500,
+						CorporationId: 1,
+						Share:         math.LegacyNewDec(100),
+						Deposit:       1000,
+						Refunded:      500,
 					},
 					{
-						Corporation: validAddr2,
-						Share:     math.LegacyNewDec(200),
-						Deposit:   2000,
-						Claimable: 1000,
+						CorporationId: 2,
+						Share:         math.LegacyNewDec(200),
+						Deposit:       2000,
+						Refunded:      1000,
 					},
 				},
 			},
@@ -60,51 +55,51 @@ func TestGenesisState_Validate(t *testing.T) {
 			valid: false,
 		},
 		{
-			desc: "invalid account address",
+			desc: "invalid corporation_id (zero)",
 			genState: &types.GenesisState{
 				Params: types.DefaultParams(),
 				TrustDeposits: []types.TrustDepositRecord{
 					{
-						Corporation: "invalid_address", // Invalid: not a valid bech32 address
-						Share:       math.LegacyNewDec(100),
-						Deposit:     1000,
-						Claimable:   500,
+						CorporationId: 0, // Invalid: zero corporation_id
+						Share:         math.LegacyNewDec(100),
+						Deposit:       1000,
+						Refunded:      500,
 					},
 				},
 			},
 			valid: false,
 		},
 		{
-			desc: "duplicate account",
+			desc: "duplicate corporation_id",
 			genState: &types.GenesisState{
 				Params: types.DefaultParams(),
 				TrustDeposits: []types.TrustDepositRecord{
 					{
-						Corporation: validAddr1,
-						Share:     math.LegacyNewDec(100),
-						Deposit:   1000,
-						Claimable: 500,
+						CorporationId: 1,
+						Share:         math.LegacyNewDec(100),
+						Deposit:       1000,
+						Refunded:      500,
 					},
 					{
-						Corporation: validAddr1, // Duplicate account
-						Share:     math.LegacyNewDec(200),
-						Deposit:   2000,
-						Claimable: 1000,
+						CorporationId: 1, // Duplicate corporation_id
+						Share:         math.LegacyNewDec(200),
+						Deposit:       2000,
+						Refunded:      1000,
 					},
 				},
 			},
 			valid: false,
 		},
 		{
-			desc: "claimable exceeds amount",
+			desc: "refunded exceeds deposit",
 			genState: &types.GenesisState{
 				Params: types.DefaultParams(),
 				TrustDeposits: []types.TrustDepositRecord{
 					{
-						Corporation: validAddr1,
-						Share:     math.LegacyNewDec(100),
-						Deposit:   1000,
-						Claimable: 1500, // Invalid: claimable > deposit
+						CorporationId: 1,
+						Share:         math.LegacyNewDec(100),
+						Deposit:       1000,
+						Refunded:      1500, // Invalid: refunded > deposit
 					},
 				},
 			},
