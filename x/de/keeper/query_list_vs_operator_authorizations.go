@@ -3,8 +3,6 @@ package keeper
 import (
 	"context"
 
-	"cosmossdk.io/collections"
-
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -27,9 +25,9 @@ func (q queryServer) ListVSOperatorAuthorizations(ctx context.Context, req *type
 	// [MOD-DE-QRY-2-3] Walk through all VS operator authorizations and apply filters
 	var results []types.VSOperatorAuthorization
 
-	err := q.k.VSOperatorAuthorizations.Walk(ctx, nil, func(key collections.Pair[string, string], vsoa types.VSOperatorAuthorization) (bool, error) {
-		// Filter by authority if specified
-		if req.Corporation != "" && vsoa.Corporation != req.Corporation {
+	err := q.k.VSOperatorAuthorizations.Walk(ctx, nil, func(_ uint64, vsoa types.VSOperatorAuthorization) (bool, error) {
+		// Filter by corporation_id if specified
+		if req.CorporationId != 0 && vsoa.CorporationId != req.CorporationId {
 			return false, nil
 		}
 		// Filter by vs_operator if specified

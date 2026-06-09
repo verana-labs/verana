@@ -520,7 +520,7 @@
       "properties": {
         "corporation": {
           "type": "string",
-          "description": "[MOD-PP-MSG-7-1] Spec v4 parameters.\nparticipant.role is hardcoded to ECOSYSTEM by the handler per [MOD-PP-MSG-7-3];\nvs_operator is not set on root participants."
+          "description": "[MOD-PP-MSG-7-1] Spec v4-rc2 parameters.\nparticipant.role is hardcoded to ECOSYSTEM by the handler per [MOD-PP-MSG-7-3]."
         },
         "operator": {
           "type": "string"
@@ -551,6 +551,37 @@
         "verification_fees": {
           "type": "string",
           "format": "uint64"
+        },
+        "vs_operator": {
+          "type": "string",
+          "description": "vs_operator: the account of the Verifiable Service (optional, spec v4-rc2)."
+        },
+        "vs_operator_authz_msg_types": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "vs_operator_authz_msg_types: presence triggers VSOA record creation; MUST be a\nsubset of [SetParticipantOPToValidated] for root participants."
+        },
+        "vs_operator_authz_spend_limit": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
+          }
+        },
+        "vs_operator_authz_with_feegrant": {
+          "type": "boolean"
+        },
+        "vs_operator_authz_fee_spend_limit": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
+          }
+        },
+        "vs_operator_authz_period": {
+          "type": "string"
         }
       }
     },
@@ -666,8 +697,11 @@
           "type": "string",
           "title": "vs_operator: the account of the Verifiable Service (optional)"
         },
-        "vs_operator_authz_enabled": {
-          "type": "boolean"
+        "vs_operator_authz_msg_types": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         },
         "vs_operator_authz_spend_limit": {
           "type": "array",
@@ -686,7 +720,7 @@
             "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
           }
         },
-        "vs_operator_authz_spend_period": {
+        "vs_operator_authz_period": {
           "type": "string"
         }
       }
@@ -838,8 +872,11 @@
           "type": "string",
           "title": "vs_operator: the account of the Verifiable Service (optional)"
         },
-        "vs_operator_authz_enabled": {
-          "type": "boolean"
+        "vs_operator_authz_msg_types": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         },
         "vs_operator_authz_spend_limit": {
           "type": "array",
@@ -858,7 +895,7 @@
             "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
           }
         },
-        "vs_operator_authz_spend_period": {
+        "vs_operator_authz_period": {
           "type": "string"
         }
       },

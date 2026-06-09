@@ -85,12 +85,13 @@ echo "************************ Running test-harness journey 301 ****************
 echo "*****************************************************************************************"
 go run cmd/main.go 301
 
-# Journeys 302-310 rely on the legacy "operator self-delegation shortcut"
-# where a regular wallet acts as the `corporation` field. Under spec v4-rc2
-# (issue #305) AUTHZ-CHECK-5 requires `corporation` to be the policy_address
-# of a registered MOD-CO Corporation, so the shortcut no longer works — those
-# journeys need to be rewritten to use the j301 group + group-proposal flow.
-# Tracked as follow-up; not part of the TR→EC rename PR.
-echo "*****************************************************************************************"
-echo "******** Journeys 302-310 SKIPPED — pending rewrite for AUTHZ-CHECK-5 (see PR) **********"
-echo "*****************************************************************************************"
+# Journeys 302-310 rewritten for spec v4-rc2 AUTHZ-CHECK-5: the operator acts on
+# behalf of journey301's registered Corporation (policy_address) via group-granted
+# operator authorization + the *WithAuthority helpers. All validated live in natural
+# order; journey307 exercises the full VSOA record lifecycle + CSPS (AUTHZ-CHECK-3).
+for J in 302 303 304 305 306 307 308 309 310; do
+  echo "*****************************************************************************************"
+  echo "************************ Running test-harness journey $J *********************************"
+  echo "*****************************************************************************************"
+  go run cmd/main.go "$J"
+done

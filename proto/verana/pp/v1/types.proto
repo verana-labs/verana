@@ -1,11 +1,8 @@
 syntax = "proto3";
 package verana.pp.v1;
 
-import "amino/amino.proto";
-import "cosmos/base/v1beta1/coin.proto";
 import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
-import "google/protobuf/duration.proto";
 import "google/protobuf/timestamp.proto";
 
 option go_package = "github.com/verana-labs/verana/x/pp/types";
@@ -64,21 +61,14 @@ message Participant {
   // Currently scaled 0..10000 for compatibility; full migration deferred.
   uint64 issuance_fee_discount = 35;
   uint64 verification_fee_discount = 36;
-  // VS Operator fields (spec v4)
+  // vs_operator is the VS operator account (spec v4-rc2, still used). The former
+  // per-permission VS-operator-authz config (fields 38-42) moved into the DE
+  // module's VSOperatorAuthorization.records[] per spec v4-rc2.
   string vs_operator = 37 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  bool vs_operator_authz_enabled = 38;
-  repeated cosmos.base.v1beta1.Coin vs_operator_authz_spend_limit = 39 [
-    (gogoproto.nullable) = false,
-    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
-    (amino.dont_omitempty) = true
-  ];
-  bool vs_operator_authz_with_feegrant = 40;
-  repeated cosmos.base.v1beta1.Coin vs_operator_authz_fee_spend_limit = 41 [
-    (gogoproto.nullable) = false,
-    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
-    (amino.dont_omitempty) = true
-  ];
-  google.protobuf.Duration vs_operator_authz_spend_period = 42 [(gogoproto.stdduration) = true];
+  reserved 38, 39, 40, 41, 42;
+  reserved "vs_operator_authz_enabled", "vs_operator_authz_spend_limit",
+    "vs_operator_authz_with_feegrant", "vs_operator_authz_fee_spend_limit",
+    "vs_operator_authz_spend_period";
   // corporation_id is the uint64 FK to Corporation.id (resolved from the
   // signing corporation account via AUTHZ-CHECK-5). Replaces former field 5.
   uint64 corporation_id = 43;

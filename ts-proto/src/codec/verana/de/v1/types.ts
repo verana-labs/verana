@@ -13,26 +13,155 @@ import Long = require("long");
 
 export const protobufPackage = "verana.de.v1";
 
+/**
+ * OperatorAuthorization is the operator-delegation record. Per spec v4-rc2 it is
+ * keyed by its own uint64 id; (corporation_id, operator) is a unique secondary
+ * index.
+ */
 export interface OperatorAuthorization {
-  /** corporation is the group granting the authorization. */
-  corporation: string;
+  /** id is the own uint64 key of this OperatorAuthorization. */
+  id: number;
+  /**
+   * corporation_id is the id of the corporation granting the authorization. The
+   * (corporation_id, operator) tuple MUST be unique.
+   */
+  corporationId: number;
   /** operator is the account receiving the authorization. */
   operator: string;
   /** msg_types is the list of module message types this authorization applies to. */
   msgTypes: string[];
-  /**
-   * spend_limit is the maximum amount of funds that the grantee is allowed to
-   * spend as a direct consequence of executing authorized messages.
-   */
+  /** spend_limit is the maximum amount of funds the grantee is allowed to spend. */
   spendLimit: Coin[];
+  /**
+   * remaining_spend is the runtime balance for spend_limit. Present iff
+   * spend_limit is set.
+   */
+  remainingSpend: Coin[];
   /**
    * fee_spend_limit is the maximum total amount of fees that can be paid using
    * this authorization.
    */
   feeSpendLimit: Coin[];
   /**
+   * remaining_fee_spend is the runtime balance for fee_spend_limit. Present iff
+   * fee_spend_limit is set.
+   */
+  remainingFeeSpend: Coin[];
+  /**
    * expiration is the timestamp after which the authorization is no longer
    * valid.
+   */
+  expiration:
+    | Date
+    | undefined;
+  /**
+   * period is the reset period for spend_limit and fee_spend_limit. If set,
+   * expiration MUST also be set.
+   */
+  period: Duration | undefined;
+}
+
+/**
+ * OperatorAuthorizationUsage tracks per-authorization spend consumption so spec
+ * [AUTHZ-CHECK-1] can enforce the spend_limit / period-reset invariant. Keyed by
+ * the parent OperatorAuthorization id.
+ *
+ * TODO(spec v4): the spec folds the runtime balance into OperatorAuthorization
+ * (remaining_spend / remaining_fee_spend). This separate ledger is retained to
+ * keep AUTHZ-CHECK-1 reset semantics unchanged (out of scope for the v4-rc2 VSOA
+ * rebase); unify when AUTHZ-CHECK-1 is aligned to the spec.
+ */
+export interface OperatorAuthorizationUsage {
+  /** operator_authorization_id is the id of the parent OperatorAuthorization. */
+  operatorAuthorizationId: number;
+  /**
+   * remaining is the balance still available inside the current period.
+   * Decremented on each successful execution that consumed funds.
+   */
+  remaining: Coin[];
+  /**
+   * last_reset is the timestamp at which `remaining` was last refilled to the
+   * parent authorization's spend_limit.
+   */
+  lastReset: Date | undefined;
+}
+
+/**
+ * FeeGrant is the chain-level fee allowance, keyed by the composite
+ * (grantor_corporation_id, grantee).
+ */
+export interface FeeGrant {
+  /**
+   * grantor_corporation_id is the id of the corporation granting the fee
+   * allowance. Together with grantee it forms the composite key.
+   */
+  grantorCorporationId: number;
+  /** grantee is the account that receives the fee grant from grantor. */
+  grantee: string;
+  /**
+   * msg_types is the list of VPR delegable message types for which the fee
+   * allowance applies.
+   */
+  msgTypes: string[];
+  /** spend_limit is the maximum amount of fees that can be spent using this grant. */
+  spendLimit: Coin[];
+  /**
+   * remaining_spend is the runtime balance for spend_limit. Present iff
+   * spend_limit is set.
+   */
+  remainingSpend: Coin[];
+  /** expiration is the timestamp after which the fee grant is no longer valid. */
+  expiration:
+    | Date
+    | undefined;
+  /**
+   * period is the reset period for spend_limit. If set, expiration MUST also be
+   * set.
+   */
+  period: Duration | undefined;
+}
+
+/**
+ * ParticipantAuthorizationRecord is a per-participant VS-operator authorization
+ * nested inside a VSOperatorAuthorization. Keyed by participant_id, which is
+ * globally unique across all records of all VSOperatorAuthorizations.
+ */
+export interface ParticipantAuthorizationRecord {
+  /**
+   * participant_id is the id of the Participant this record applies to. Globally
+   * unique across all ParticipantAuthorizationRecord entries.
+   */
+  participantId: number;
+  /**
+   * msg_types is the list of delegable message types the vs_operator is
+   * authorized for on behalf of corporation. Mandatory, frozen at create.
+   */
+  msgTypes: string[];
+  /** spend_limit is the maximum amount the vs_operator is allowed to spend. */
+  spendLimit: Coin[];
+  /**
+   * remaining_spend is the runtime balance for spend_limit. Present iff
+   * spend_limit is set.
+   */
+  remainingSpend: Coin[];
+  /**
+   * fee_spend_limit is the maximum total amount of transaction fees that can be
+   * spent by vs_operator.
+   */
+  feeSpendLimit: Coin[];
+  /**
+   * remaining_fee_spend is the runtime balance for fee_spend_limit. Present iff
+   * fee_spend_limit is set.
+   */
+  remainingFeeSpend: Coin[];
+  /**
+   * with_feegrant indicates the corporation pays the transaction fees for
+   * vs_operator.
+   */
+  withFeegrant: boolean;
+  /**
+   * expiration is the authorization window boundary. A record created before
+   * validation is disabled with expiration = now().
    */
   expiration:
     | Date
@@ -42,78 +171,37 @@ export interface OperatorAuthorization {
 }
 
 /**
- * OperatorAuthorizationUsage tracks per-authorization spend consumption so
- * spec [AUTHZ-CHECK-1] can enforce the spend_limit / period-reset invariant:
- *
- *   "If oauthz.spend_limit is set, the remaining balance MUST be sufficient
- *    for the operation. After successful execution, the consumed amount MUST
- *    be deducted from the remaining balance. If oauthz.period is set and the
- *    current period has elapsed since the last reset, the remaining balance
- *    MUST be reset to oauthz.spend_limit before evaluating the check above."
- *
- * Stored in the DE module keyed by (corporation, operator) just like the
- * parent OperatorAuthorization record.
+ * VSOperatorAuthorization is the VS-operator delegation, keyed by its own uint64
+ * id; (corporation_id, vs_operator) is a unique secondary index. The entry
+ * exists iff it has at least one record.
  */
-export interface OperatorAuthorizationUsage {
-  /** corporation is the group that granted the authorization. */
-  corporation: string;
-  /** operator is the account holding the authorization. */
-  operator: string;
-  /**
-   * remaining is the balance still available inside the current period.
-   * Decremented on each successful execution that consumed funds.
-   */
-  remaining: Coin[];
-  /**
-   * last_reset is the timestamp at which `remaining` was last refilled to
-   * the parent authorization's spend_limit. Zero when no period has elapsed
-   * since grant time.
-   */
-  lastReset: Date | undefined;
-}
-
-export interface FeeGrant {
-  /** grantor is the authority group granting the fee allowance. */
-  grantor: string;
-  /** grantee is the account that receives the fee grant from grantor. */
-  grantee: string;
-  /**
-   * msg_types is the list of VPR delegable message types for which the fee
-   * allowance applies.
-   */
-  msgTypes: string[];
-  /**
-   * spend_limit is the maximum amount of fees that can be spent using this
-   * grant.
-   */
-  spendLimit: Coin[];
-  /** expiration is the timestamp after which the fee grant is no longer valid. */
-  expiration:
-    | Date
-    | undefined;
-  /** period is the reset period for spend_limit. */
-  period: Duration | undefined;
-}
-
 export interface VSOperatorAuthorization {
-  /** corporation is the group granting the authorization. */
-  corporation: string;
+  /** id is the own uint64 key of this VSOperatorAuthorization. */
+  id: number;
+  /**
+   * corporation_id is the id of the corporation granting the authorization. The
+   * (corporation_id, vs_operator) tuple MUST be unique.
+   */
+  corporationId: number;
   /** vs_operator is the operator account receiving the authorization. */
   vsOperator: string;
   /**
-   * permissions is the list of permission ids for which this authorization is
-   * granted.
+   * records is the list of per-participant authorization records granted to
+   * vs_operator by corporation_id.
    */
-  permissions: number[];
+  records: ParticipantAuthorizationRecord[];
 }
 
 function createBaseOperatorAuthorization(): OperatorAuthorization {
   return {
-    corporation: "",
+    id: 0,
+    corporationId: 0,
     operator: "",
     msgTypes: [],
     spendLimit: [],
+    remainingSpend: [],
     feeSpendLimit: [],
+    remainingFeeSpend: [],
     expiration: undefined,
     period: undefined,
   };
@@ -121,26 +209,35 @@ function createBaseOperatorAuthorization(): OperatorAuthorization {
 
 export const OperatorAuthorization = {
   encode(message: OperatorAuthorization, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.corporation !== "") {
-      writer.uint32(10).string(message.corporation);
+    if (message.id !== 0) {
+      writer.uint32(8).uint64(message.id);
+    }
+    if (message.corporationId !== 0) {
+      writer.uint32(16).uint64(message.corporationId);
     }
     if (message.operator !== "") {
-      writer.uint32(18).string(message.operator);
+      writer.uint32(26).string(message.operator);
     }
     for (const v of message.msgTypes) {
-      writer.uint32(26).string(v!);
+      writer.uint32(34).string(v!);
     }
     for (const v of message.spendLimit) {
-      Coin.encode(v!, writer.uint32(34).fork()).ldelim();
-    }
-    for (const v of message.feeSpendLimit) {
       Coin.encode(v!, writer.uint32(42).fork()).ldelim();
     }
+    for (const v of message.remainingSpend) {
+      Coin.encode(v!, writer.uint32(50).fork()).ldelim();
+    }
+    for (const v of message.feeSpendLimit) {
+      Coin.encode(v!, writer.uint32(58).fork()).ldelim();
+    }
+    for (const v of message.remainingFeeSpend) {
+      Coin.encode(v!, writer.uint32(66).fork()).ldelim();
+    }
     if (message.expiration !== undefined) {
-      Timestamp.encode(toTimestamp(message.expiration), writer.uint32(50).fork()).ldelim();
+      Timestamp.encode(toTimestamp(message.expiration), writer.uint32(74).fork()).ldelim();
     }
     if (message.period !== undefined) {
-      Duration.encode(message.period, writer.uint32(58).fork()).ldelim();
+      Duration.encode(message.period, writer.uint32(82).fork()).ldelim();
     }
     return writer;
   },
@@ -153,49 +250,70 @@ export const OperatorAuthorization = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          if (tag !== 10) {
+          if (tag !== 8) {
             break;
           }
 
-          message.corporation = reader.string();
+          message.id = longToNumber(reader.uint64() as Long);
           continue;
         case 2:
-          if (tag !== 18) {
+          if (tag !== 16) {
             break;
           }
 
-          message.operator = reader.string();
+          message.corporationId = longToNumber(reader.uint64() as Long);
           continue;
         case 3:
           if (tag !== 26) {
             break;
           }
 
-          message.msgTypes.push(reader.string());
+          message.operator = reader.string();
           continue;
         case 4:
           if (tag !== 34) {
             break;
           }
 
-          message.spendLimit.push(Coin.decode(reader, reader.uint32()));
+          message.msgTypes.push(reader.string());
           continue;
         case 5:
           if (tag !== 42) {
             break;
           }
 
-          message.feeSpendLimit.push(Coin.decode(reader, reader.uint32()));
+          message.spendLimit.push(Coin.decode(reader, reader.uint32()));
           continue;
         case 6:
           if (tag !== 50) {
             break;
           }
 
-          message.expiration = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
+          message.remainingSpend.push(Coin.decode(reader, reader.uint32()));
           continue;
         case 7:
           if (tag !== 58) {
+            break;
+          }
+
+          message.feeSpendLimit.push(Coin.decode(reader, reader.uint32()));
+          continue;
+        case 8:
+          if (tag !== 66) {
+            break;
+          }
+
+          message.remainingFeeSpend.push(Coin.decode(reader, reader.uint32()));
+          continue;
+        case 9:
+          if (tag !== 74) {
+            break;
+          }
+
+          message.expiration = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
+          continue;
+        case 10:
+          if (tag !== 82) {
             break;
           }
 
@@ -212,14 +330,21 @@ export const OperatorAuthorization = {
 
   fromJSON(object: any): OperatorAuthorization {
     return {
-      corporation: isSet(object.corporation) ? globalThis.String(object.corporation) : "",
+      id: isSet(object.id) ? globalThis.Number(object.id) : 0,
+      corporationId: isSet(object.corporationId) ? globalThis.Number(object.corporationId) : 0,
       operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
       msgTypes: globalThis.Array.isArray(object?.msgTypes) ? object.msgTypes.map((e: any) => globalThis.String(e)) : [],
       spendLimit: globalThis.Array.isArray(object?.spendLimit)
         ? object.spendLimit.map((e: any) => Coin.fromJSON(e))
         : [],
+      remainingSpend: globalThis.Array.isArray(object?.remainingSpend)
+        ? object.remainingSpend.map((e: any) => Coin.fromJSON(e))
+        : [],
       feeSpendLimit: globalThis.Array.isArray(object?.feeSpendLimit)
         ? object.feeSpendLimit.map((e: any) => Coin.fromJSON(e))
+        : [],
+      remainingFeeSpend: globalThis.Array.isArray(object?.remainingFeeSpend)
+        ? object.remainingFeeSpend.map((e: any) => Coin.fromJSON(e))
         : [],
       expiration: isSet(object.expiration) ? fromJsonTimestamp(object.expiration) : undefined,
       period: isSet(object.period) ? Duration.fromJSON(object.period) : undefined,
@@ -228,8 +353,11 @@ export const OperatorAuthorization = {
 
   toJSON(message: OperatorAuthorization): unknown {
     const obj: any = {};
-    if (message.corporation !== "") {
-      obj.corporation = message.corporation;
+    if (message.id !== 0) {
+      obj.id = Math.round(message.id);
+    }
+    if (message.corporationId !== 0) {
+      obj.corporationId = Math.round(message.corporationId);
     }
     if (message.operator !== "") {
       obj.operator = message.operator;
@@ -240,8 +368,14 @@ export const OperatorAuthorization = {
     if (message.spendLimit?.length) {
       obj.spendLimit = message.spendLimit.map((e) => Coin.toJSON(e));
     }
+    if (message.remainingSpend?.length) {
+      obj.remainingSpend = message.remainingSpend.map((e) => Coin.toJSON(e));
+    }
     if (message.feeSpendLimit?.length) {
       obj.feeSpendLimit = message.feeSpendLimit.map((e) => Coin.toJSON(e));
+    }
+    if (message.remainingFeeSpend?.length) {
+      obj.remainingFeeSpend = message.remainingFeeSpend.map((e) => Coin.toJSON(e));
     }
     if (message.expiration !== undefined) {
       obj.expiration = message.expiration.toISOString();
@@ -257,11 +391,14 @@ export const OperatorAuthorization = {
   },
   fromPartial<I extends Exact<DeepPartial<OperatorAuthorization>, I>>(object: I): OperatorAuthorization {
     const message = createBaseOperatorAuthorization();
-    message.corporation = object.corporation ?? "";
+    message.id = object.id ?? 0;
+    message.corporationId = object.corporationId ?? 0;
     message.operator = object.operator ?? "";
     message.msgTypes = object.msgTypes?.map((e) => e) || [];
     message.spendLimit = object.spendLimit?.map((e) => Coin.fromPartial(e)) || [];
+    message.remainingSpend = object.remainingSpend?.map((e) => Coin.fromPartial(e)) || [];
     message.feeSpendLimit = object.feeSpendLimit?.map((e) => Coin.fromPartial(e)) || [];
+    message.remainingFeeSpend = object.remainingFeeSpend?.map((e) => Coin.fromPartial(e)) || [];
     message.expiration = object.expiration ?? undefined;
     message.period = (object.period !== undefined && object.period !== null)
       ? Duration.fromPartial(object.period)
@@ -271,22 +408,19 @@ export const OperatorAuthorization = {
 };
 
 function createBaseOperatorAuthorizationUsage(): OperatorAuthorizationUsage {
-  return { corporation: "", operator: "", remaining: [], lastReset: undefined };
+  return { operatorAuthorizationId: 0, remaining: [], lastReset: undefined };
 }
 
 export const OperatorAuthorizationUsage = {
   encode(message: OperatorAuthorizationUsage, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.corporation !== "") {
-      writer.uint32(10).string(message.corporation);
-    }
-    if (message.operator !== "") {
-      writer.uint32(18).string(message.operator);
+    if (message.operatorAuthorizationId !== 0) {
+      writer.uint32(8).uint64(message.operatorAuthorizationId);
     }
     for (const v of message.remaining) {
-      Coin.encode(v!, writer.uint32(26).fork()).ldelim();
+      Coin.encode(v!, writer.uint32(18).fork()).ldelim();
     }
     if (message.lastReset !== undefined) {
-      Timestamp.encode(toTimestamp(message.lastReset), writer.uint32(34).fork()).ldelim();
+      Timestamp.encode(toTimestamp(message.lastReset), writer.uint32(26).fork()).ldelim();
     }
     return writer;
   },
@@ -299,28 +433,21 @@ export const OperatorAuthorizationUsage = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          if (tag !== 10) {
+          if (tag !== 8) {
             break;
           }
 
-          message.corporation = reader.string();
+          message.operatorAuthorizationId = longToNumber(reader.uint64() as Long);
           continue;
         case 2:
           if (tag !== 18) {
             break;
           }
 
-          message.operator = reader.string();
+          message.remaining.push(Coin.decode(reader, reader.uint32()));
           continue;
         case 3:
           if (tag !== 26) {
-            break;
-          }
-
-          message.remaining.push(Coin.decode(reader, reader.uint32()));
-          continue;
-        case 4:
-          if (tag !== 34) {
             break;
           }
 
@@ -337,8 +464,9 @@ export const OperatorAuthorizationUsage = {
 
   fromJSON(object: any): OperatorAuthorizationUsage {
     return {
-      corporation: isSet(object.corporation) ? globalThis.String(object.corporation) : "",
-      operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
+      operatorAuthorizationId: isSet(object.operatorAuthorizationId)
+        ? globalThis.Number(object.operatorAuthorizationId)
+        : 0,
       remaining: globalThis.Array.isArray(object?.remaining) ? object.remaining.map((e: any) => Coin.fromJSON(e)) : [],
       lastReset: isSet(object.lastReset) ? fromJsonTimestamp(object.lastReset) : undefined,
     };
@@ -346,11 +474,8 @@ export const OperatorAuthorizationUsage = {
 
   toJSON(message: OperatorAuthorizationUsage): unknown {
     const obj: any = {};
-    if (message.corporation !== "") {
-      obj.corporation = message.corporation;
-    }
-    if (message.operator !== "") {
-      obj.operator = message.operator;
+    if (message.operatorAuthorizationId !== 0) {
+      obj.operatorAuthorizationId = Math.round(message.operatorAuthorizationId);
     }
     if (message.remaining?.length) {
       obj.remaining = message.remaining.map((e) => Coin.toJSON(e));
@@ -366,8 +491,7 @@ export const OperatorAuthorizationUsage = {
   },
   fromPartial<I extends Exact<DeepPartial<OperatorAuthorizationUsage>, I>>(object: I): OperatorAuthorizationUsage {
     const message = createBaseOperatorAuthorizationUsage();
-    message.corporation = object.corporation ?? "";
-    message.operator = object.operator ?? "";
+    message.operatorAuthorizationId = object.operatorAuthorizationId ?? 0;
     message.remaining = object.remaining?.map((e) => Coin.fromPartial(e)) || [];
     message.lastReset = object.lastReset ?? undefined;
     return message;
@@ -375,13 +499,21 @@ export const OperatorAuthorizationUsage = {
 };
 
 function createBaseFeeGrant(): FeeGrant {
-  return { grantor: "", grantee: "", msgTypes: [], spendLimit: [], expiration: undefined, period: undefined };
+  return {
+    grantorCorporationId: 0,
+    grantee: "",
+    msgTypes: [],
+    spendLimit: [],
+    remainingSpend: [],
+    expiration: undefined,
+    period: undefined,
+  };
 }
 
 export const FeeGrant = {
   encode(message: FeeGrant, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.grantor !== "") {
-      writer.uint32(10).string(message.grantor);
+    if (message.grantorCorporationId !== 0) {
+      writer.uint32(8).uint64(message.grantorCorporationId);
     }
     if (message.grantee !== "") {
       writer.uint32(18).string(message.grantee);
@@ -392,11 +524,14 @@ export const FeeGrant = {
     for (const v of message.spendLimit) {
       Coin.encode(v!, writer.uint32(34).fork()).ldelim();
     }
+    for (const v of message.remainingSpend) {
+      Coin.encode(v!, writer.uint32(42).fork()).ldelim();
+    }
     if (message.expiration !== undefined) {
-      Timestamp.encode(toTimestamp(message.expiration), writer.uint32(42).fork()).ldelim();
+      Timestamp.encode(toTimestamp(message.expiration), writer.uint32(50).fork()).ldelim();
     }
     if (message.period !== undefined) {
-      Duration.encode(message.period, writer.uint32(50).fork()).ldelim();
+      Duration.encode(message.period, writer.uint32(58).fork()).ldelim();
     }
     return writer;
   },
@@ -409,11 +544,11 @@ export const FeeGrant = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          if (tag !== 10) {
+          if (tag !== 8) {
             break;
           }
 
-          message.grantor = reader.string();
+          message.grantorCorporationId = longToNumber(reader.uint64() as Long);
           continue;
         case 2:
           if (tag !== 18) {
@@ -441,10 +576,17 @@ export const FeeGrant = {
             break;
           }
 
-          message.expiration = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
+          message.remainingSpend.push(Coin.decode(reader, reader.uint32()));
           continue;
         case 6:
           if (tag !== 50) {
+            break;
+          }
+
+          message.expiration = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
+          continue;
+        case 7:
+          if (tag !== 58) {
             break;
           }
 
@@ -461,11 +603,14 @@ export const FeeGrant = {
 
   fromJSON(object: any): FeeGrant {
     return {
-      grantor: isSet(object.grantor) ? globalThis.String(object.grantor) : "",
+      grantorCorporationId: isSet(object.grantorCorporationId) ? globalThis.Number(object.grantorCorporationId) : 0,
       grantee: isSet(object.grantee) ? globalThis.String(object.grantee) : "",
       msgTypes: globalThis.Array.isArray(object?.msgTypes) ? object.msgTypes.map((e: any) => globalThis.String(e)) : [],
       spendLimit: globalThis.Array.isArray(object?.spendLimit)
         ? object.spendLimit.map((e: any) => Coin.fromJSON(e))
+        : [],
+      remainingSpend: globalThis.Array.isArray(object?.remainingSpend)
+        ? object.remainingSpend.map((e: any) => Coin.fromJSON(e))
         : [],
       expiration: isSet(object.expiration) ? fromJsonTimestamp(object.expiration) : undefined,
       period: isSet(object.period) ? Duration.fromJSON(object.period) : undefined,
@@ -474,8 +619,8 @@ export const FeeGrant = {
 
   toJSON(message: FeeGrant): unknown {
     const obj: any = {};
-    if (message.grantor !== "") {
-      obj.grantor = message.grantor;
+    if (message.grantorCorporationId !== 0) {
+      obj.grantorCorporationId = Math.round(message.grantorCorporationId);
     }
     if (message.grantee !== "") {
       obj.grantee = message.grantee;
@@ -485,6 +630,9 @@ export const FeeGrant = {
     }
     if (message.spendLimit?.length) {
       obj.spendLimit = message.spendLimit.map((e) => Coin.toJSON(e));
+    }
+    if (message.remainingSpend?.length) {
+      obj.remainingSpend = message.remainingSpend.map((e) => Coin.toJSON(e));
     }
     if (message.expiration !== undefined) {
       obj.expiration = message.expiration.toISOString();
@@ -500,10 +648,212 @@ export const FeeGrant = {
   },
   fromPartial<I extends Exact<DeepPartial<FeeGrant>, I>>(object: I): FeeGrant {
     const message = createBaseFeeGrant();
-    message.grantor = object.grantor ?? "";
+    message.grantorCorporationId = object.grantorCorporationId ?? 0;
     message.grantee = object.grantee ?? "";
     message.msgTypes = object.msgTypes?.map((e) => e) || [];
     message.spendLimit = object.spendLimit?.map((e) => Coin.fromPartial(e)) || [];
+    message.remainingSpend = object.remainingSpend?.map((e) => Coin.fromPartial(e)) || [];
+    message.expiration = object.expiration ?? undefined;
+    message.period = (object.period !== undefined && object.period !== null)
+      ? Duration.fromPartial(object.period)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseParticipantAuthorizationRecord(): ParticipantAuthorizationRecord {
+  return {
+    participantId: 0,
+    msgTypes: [],
+    spendLimit: [],
+    remainingSpend: [],
+    feeSpendLimit: [],
+    remainingFeeSpend: [],
+    withFeegrant: false,
+    expiration: undefined,
+    period: undefined,
+  };
+}
+
+export const ParticipantAuthorizationRecord = {
+  encode(message: ParticipantAuthorizationRecord, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.participantId !== 0) {
+      writer.uint32(8).uint64(message.participantId);
+    }
+    for (const v of message.msgTypes) {
+      writer.uint32(18).string(v!);
+    }
+    for (const v of message.spendLimit) {
+      Coin.encode(v!, writer.uint32(26).fork()).ldelim();
+    }
+    for (const v of message.remainingSpend) {
+      Coin.encode(v!, writer.uint32(34).fork()).ldelim();
+    }
+    for (const v of message.feeSpendLimit) {
+      Coin.encode(v!, writer.uint32(42).fork()).ldelim();
+    }
+    for (const v of message.remainingFeeSpend) {
+      Coin.encode(v!, writer.uint32(50).fork()).ldelim();
+    }
+    if (message.withFeegrant !== false) {
+      writer.uint32(56).bool(message.withFeegrant);
+    }
+    if (message.expiration !== undefined) {
+      Timestamp.encode(toTimestamp(message.expiration), writer.uint32(66).fork()).ldelim();
+    }
+    if (message.period !== undefined) {
+      Duration.encode(message.period, writer.uint32(74).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): ParticipantAuthorizationRecord {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseParticipantAuthorizationRecord();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 8) {
+            break;
+          }
+
+          message.participantId = longToNumber(reader.uint64() as Long);
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.msgTypes.push(reader.string());
+          continue;
+        case 3:
+          if (tag !== 26) {
+            break;
+          }
+
+          message.spendLimit.push(Coin.decode(reader, reader.uint32()));
+          continue;
+        case 4:
+          if (tag !== 34) {
+            break;
+          }
+
+          message.remainingSpend.push(Coin.decode(reader, reader.uint32()));
+          continue;
+        case 5:
+          if (tag !== 42) {
+            break;
+          }
+
+          message.feeSpendLimit.push(Coin.decode(reader, reader.uint32()));
+          continue;
+        case 6:
+          if (tag !== 50) {
+            break;
+          }
+
+          message.remainingFeeSpend.push(Coin.decode(reader, reader.uint32()));
+          continue;
+        case 7:
+          if (tag !== 56) {
+            break;
+          }
+
+          message.withFeegrant = reader.bool();
+          continue;
+        case 8:
+          if (tag !== 66) {
+            break;
+          }
+
+          message.expiration = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
+          continue;
+        case 9:
+          if (tag !== 74) {
+            break;
+          }
+
+          message.period = Duration.decode(reader, reader.uint32());
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): ParticipantAuthorizationRecord {
+    return {
+      participantId: isSet(object.participantId) ? globalThis.Number(object.participantId) : 0,
+      msgTypes: globalThis.Array.isArray(object?.msgTypes) ? object.msgTypes.map((e: any) => globalThis.String(e)) : [],
+      spendLimit: globalThis.Array.isArray(object?.spendLimit)
+        ? object.spendLimit.map((e: any) => Coin.fromJSON(e))
+        : [],
+      remainingSpend: globalThis.Array.isArray(object?.remainingSpend)
+        ? object.remainingSpend.map((e: any) => Coin.fromJSON(e))
+        : [],
+      feeSpendLimit: globalThis.Array.isArray(object?.feeSpendLimit)
+        ? object.feeSpendLimit.map((e: any) => Coin.fromJSON(e))
+        : [],
+      remainingFeeSpend: globalThis.Array.isArray(object?.remainingFeeSpend)
+        ? object.remainingFeeSpend.map((e: any) => Coin.fromJSON(e))
+        : [],
+      withFeegrant: isSet(object.withFeegrant) ? globalThis.Boolean(object.withFeegrant) : false,
+      expiration: isSet(object.expiration) ? fromJsonTimestamp(object.expiration) : undefined,
+      period: isSet(object.period) ? Duration.fromJSON(object.period) : undefined,
+    };
+  },
+
+  toJSON(message: ParticipantAuthorizationRecord): unknown {
+    const obj: any = {};
+    if (message.participantId !== 0) {
+      obj.participantId = Math.round(message.participantId);
+    }
+    if (message.msgTypes?.length) {
+      obj.msgTypes = message.msgTypes;
+    }
+    if (message.spendLimit?.length) {
+      obj.spendLimit = message.spendLimit.map((e) => Coin.toJSON(e));
+    }
+    if (message.remainingSpend?.length) {
+      obj.remainingSpend = message.remainingSpend.map((e) => Coin.toJSON(e));
+    }
+    if (message.feeSpendLimit?.length) {
+      obj.feeSpendLimit = message.feeSpendLimit.map((e) => Coin.toJSON(e));
+    }
+    if (message.remainingFeeSpend?.length) {
+      obj.remainingFeeSpend = message.remainingFeeSpend.map((e) => Coin.toJSON(e));
+    }
+    if (message.withFeegrant !== false) {
+      obj.withFeegrant = message.withFeegrant;
+    }
+    if (message.expiration !== undefined) {
+      obj.expiration = message.expiration.toISOString();
+    }
+    if (message.period !== undefined) {
+      obj.period = Duration.toJSON(message.period);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<ParticipantAuthorizationRecord>, I>>(base?: I): ParticipantAuthorizationRecord {
+    return ParticipantAuthorizationRecord.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<ParticipantAuthorizationRecord>, I>>(
+    object: I,
+  ): ParticipantAuthorizationRecord {
+    const message = createBaseParticipantAuthorizationRecord();
+    message.participantId = object.participantId ?? 0;
+    message.msgTypes = object.msgTypes?.map((e) => e) || [];
+    message.spendLimit = object.spendLimit?.map((e) => Coin.fromPartial(e)) || [];
+    message.remainingSpend = object.remainingSpend?.map((e) => Coin.fromPartial(e)) || [];
+    message.feeSpendLimit = object.feeSpendLimit?.map((e) => Coin.fromPartial(e)) || [];
+    message.remainingFeeSpend = object.remainingFeeSpend?.map((e) => Coin.fromPartial(e)) || [];
+    message.withFeegrant = object.withFeegrant ?? false;
     message.expiration = object.expiration ?? undefined;
     message.period = (object.period !== undefined && object.period !== null)
       ? Duration.fromPartial(object.period)
@@ -513,22 +863,23 @@ export const FeeGrant = {
 };
 
 function createBaseVSOperatorAuthorization(): VSOperatorAuthorization {
-  return { corporation: "", vsOperator: "", permissions: [] };
+  return { id: 0, corporationId: 0, vsOperator: "", records: [] };
 }
 
 export const VSOperatorAuthorization = {
   encode(message: VSOperatorAuthorization, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.corporation !== "") {
-      writer.uint32(10).string(message.corporation);
+    if (message.id !== 0) {
+      writer.uint32(8).uint64(message.id);
+    }
+    if (message.corporationId !== 0) {
+      writer.uint32(16).uint64(message.corporationId);
     }
     if (message.vsOperator !== "") {
-      writer.uint32(18).string(message.vsOperator);
+      writer.uint32(26).string(message.vsOperator);
     }
-    writer.uint32(26).fork();
-    for (const v of message.permissions) {
-      writer.uint64(v);
+    for (const v of message.records) {
+      ParticipantAuthorizationRecord.encode(v!, writer.uint32(34).fork()).ldelim();
     }
-    writer.ldelim();
     return writer;
   },
 
@@ -540,36 +891,33 @@ export const VSOperatorAuthorization = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          if (tag !== 10) {
+          if (tag !== 8) {
             break;
           }
 
-          message.corporation = reader.string();
+          message.id = longToNumber(reader.uint64() as Long);
           continue;
         case 2:
-          if (tag !== 18) {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.corporationId = longToNumber(reader.uint64() as Long);
+          continue;
+        case 3:
+          if (tag !== 26) {
             break;
           }
 
           message.vsOperator = reader.string();
           continue;
-        case 3:
-          if (tag === 24) {
-            message.permissions.push(longToNumber(reader.uint64() as Long));
-
-            continue;
+        case 4:
+          if (tag !== 34) {
+            break;
           }
 
-          if (tag === 26) {
-            const end2 = reader.uint32() + reader.pos;
-            while (reader.pos < end2) {
-              message.permissions.push(longToNumber(reader.uint64() as Long));
-            }
-
-            continue;
-          }
-
-          break;
+          message.records.push(ParticipantAuthorizationRecord.decode(reader, reader.uint32()));
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -581,24 +929,28 @@ export const VSOperatorAuthorization = {
 
   fromJSON(object: any): VSOperatorAuthorization {
     return {
-      corporation: isSet(object.corporation) ? globalThis.String(object.corporation) : "",
+      id: isSet(object.id) ? globalThis.Number(object.id) : 0,
+      corporationId: isSet(object.corporationId) ? globalThis.Number(object.corporationId) : 0,
       vsOperator: isSet(object.vsOperator) ? globalThis.String(object.vsOperator) : "",
-      permissions: globalThis.Array.isArray(object?.permissions)
-        ? object.permissions.map((e: any) => globalThis.Number(e))
+      records: globalThis.Array.isArray(object?.records)
+        ? object.records.map((e: any) => ParticipantAuthorizationRecord.fromJSON(e))
         : [],
     };
   },
 
   toJSON(message: VSOperatorAuthorization): unknown {
     const obj: any = {};
-    if (message.corporation !== "") {
-      obj.corporation = message.corporation;
+    if (message.id !== 0) {
+      obj.id = Math.round(message.id);
+    }
+    if (message.corporationId !== 0) {
+      obj.corporationId = Math.round(message.corporationId);
     }
     if (message.vsOperator !== "") {
       obj.vsOperator = message.vsOperator;
     }
-    if (message.permissions?.length) {
-      obj.permissions = message.permissions.map((e) => Math.round(e));
+    if (message.records?.length) {
+      obj.records = message.records.map((e) => ParticipantAuthorizationRecord.toJSON(e));
     }
     return obj;
   },
@@ -608,9 +960,10 @@ export const VSOperatorAuthorization = {
   },
   fromPartial<I extends Exact<DeepPartial<VSOperatorAuthorization>, I>>(object: I): VSOperatorAuthorization {
     const message = createBaseVSOperatorAuthorization();
-    message.corporation = object.corporation ?? "";
+    message.id = object.id ?? 0;
+    message.corporationId = object.corporationId ?? 0;
     message.vsOperator = object.vsOperator ?? "";
-    message.permissions = object.permissions?.map((e) => e) || [];
+    message.records = object.records?.map((e) => ParticipantAuthorizationRecord.fromPartial(e)) || [];
     return message;
   },
 };

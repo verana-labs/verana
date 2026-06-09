@@ -25,12 +25,16 @@ import {
 import { typeUrls } from "../helpers/registry";
 import { MsgGrantOperatorAuthorization } from "../../../src/codec/verana/de/v1/tx";
 import { getEcAuthzSetup, savePermAuthzSetup } from "../helpers/journeyResults";
+import { MsgSubmitProposal, MsgVote, Exec } from "cosmjs-types/cosmos/group/v1/tx";
+import { VoteOption } from "cosmjs-types/cosmos/group/v1/types";
 
 const COOLUSER_MNEMONIC =
   (process.env.MNEMONIC && process.env.MNEMONIC.trim()) ||
   "pink glory help gown abstract eight nice crazy forward ketchup skill cheese";
 
 const OPERATOR_INDEX = 15;
+// Corp group member (proposer/voter) — matches co-create's SIGNER_INDEX.
+const SIGNER_INDEX = 10;
 
 async function main() {
   console.log("=".repeat(60));
@@ -130,58 +134,86 @@ async function main() {
     typeUrls.MsgRepayParticipantSlashedTrustDeposit,
   ];
 
-  // Authority signs the grant directly (no operator for DE grant)
-  const authorityWallet = await createAccountFromMnemonic(COOLUSER_MNEMONIC, 10);
-  const client = await createSigningClient(authorityWallet);
+  // The corporation policy_address cannot sign directly; the corp's sole group
+  // member (SIGNER_INDEX, matching co-create) submits an x/group proposal carrying
+  // the inner MsgGrantOperatorAuthorization (operator="" = corporation acts alone)
+  // and votes YES with EXEC_TRY so the policy executes it (threshold=1, weight=1).
+  const signerWallet = await createAccountFromMnemonic(COOLUSER_MNEMONIC, SIGNER_INDEX);
+  const signerAccount = await getAccountInfo(signerWallet);
+  const client = await createSigningClient(signerWallet);
 
-  const msg = {
-    typeUrl: typeUrls.MsgGrantOperatorAuthorization,
-    value: MsgGrantOperatorAuthorization.fromPartial({
+  const innerMsgValue = MsgGrantOperatorAuthorization.encode(
+    MsgGrantOperatorAuthorization.fromPartial({
       corporation: authorityAddress,
-      operator: "", // authority acts alone
+      operator: "",
       grantee: operatorAccount.address,
       msgTypes: allMsgTypes,
       withFeegrant: false,
     }),
+  ).finish();
+
+  const proposalMsg = {
+    typeUrl: "/cosmos.group.v1.MsgSubmitProposal",
+    value: MsgSubmitProposal.fromPartial({
+      groupPolicyAddress: authorityAddress,
+      proposers: [signerAccount.address],
+      metadata: "Grant PERM operator authz",
+      title: "Grant PERM operator authz",
+      summary: "Grant operator authorization for PERM/EC/GF/CS message types",
+      messages: [{ typeUrl: typeUrls.MsgGrantOperatorAuthorization, value: innerMsgValue }],
+      exec: Exec.EXEC_UNSPECIFIED,
+    }),
   };
 
   try {
-    const fee = await calculateFeeWithSimulation(
-      client, authorityAddress, [msg],
-      "Granting PERM operator authorization",
-    );
-    console.log(`  Gas: ${fee.gas}, Fee: ${fee.amount[0].amount}${fee.amount[0].denom}`);
-
-    const result = await signAndBroadcastWithRetry(
-      client, authorityAddress, [msg], fee,
-      "Granting PERM operator authorization",
-    );
-
-    if (result.code === 0) {
-      console.log();
-      console.log("SUCCESS! PERM operator authorization granted!");
-      console.log(`  Tx Hash: ${result.transactionHash}`);
-      console.log(`  Block: ${result.height}`);
-      console.log(`  Gas: ${result.gasUsed}/${result.gasWanted}`);
-      console.log(`  Authorized ${allMsgTypes.length} message types`);
-
-      savePermAuthzSetup(authorityAddress, operatorAccount.address);
-      console.log("  Saved perm-authz-setup");
-    } else {
-      console.log("FAILED!");
-      console.log(`  Code: ${result.code}`);
-      console.log(`  Log: ${result.rawLog}`);
+    // 4a: submit proposal
+    const proposalFee = await calculateFeeWithSimulation(client, signerAccount.address, [proposalMsg], "Submit PERM grant proposal");
+    const proposalResult = await signAndBroadcastWithRetry(client, signerAccount.address, [proposalMsg], proposalFee, "Submit PERM grant proposal");
+    if (proposalResult.code !== 0) {
+      if (String(proposalResult.rawLog).includes("already exists")) {
+        savePermAuthzSetup(authorityAddress, operatorAccount.address);
+        console.log("  Authorization already exists; saved setup.");
+        client.disconnect();
+        console.log("=".repeat(60));
+        return;
+      }
+      console.log(`FAILED proposal: ${proposalResult.rawLog}`);
       process.exit(1);
     }
+    let proposalId: bigint | undefined;
+    for (const event of (proposalResult.events || [])) {
+      for (const attr of event.attributes) {
+        if (attr.key === "proposal_id") { proposalId = BigInt(String(attr.value).replace(/"/g, "")); break; }
+      }
+      if (proposalId !== undefined) break;
+    }
+    if (proposalId === undefined) { console.log("Could not extract proposal_id"); process.exit(1); }
+    console.log(`  Proposal ID: ${proposalId}`);
+    const qc2 = await createQueryClient();
+    for (let i = 0; i < 30; i++) { try { if (await qc2.getTx(proposalResult.transactionHash)) break; } catch {} await new Promise((r) => setTimeout(r, 1000)); }
+    qc2.disconnect();
+
+    // 4b: vote YES with EXEC_TRY (auto-executes)
+    const voteMsg = {
+      typeUrl: "/cosmos.group.v1.MsgVote",
+      value: MsgVote.fromPartial({ proposalId, voter: signerAccount.address, option: VoteOption.VOTE_OPTION_YES, exec: Exec.EXEC_TRY, metadata: "" }),
+    };
+    const voteFee = await calculateFeeWithSimulation(client, signerAccount.address, [voteMsg], "Vote YES PERM grant");
+    const voteResult = await signAndBroadcastWithRetry(client, signerAccount.address, [voteMsg], voteFee, "Vote YES PERM grant");
+    if (voteResult.code !== 0) { console.log(`FAILED vote: ${voteResult.rawLog}`); process.exit(1); }
+    console.log(`  Voted YES + executed at block ${voteResult.height}; authorized ${allMsgTypes.length} msg types`);
+    const qc3 = await createQueryClient();
+    for (let i = 0; i < 30; i++) { try { if (await qc3.getTx(voteResult.transactionHash)) break; } catch {} await new Promise((r) => setTimeout(r, 1000)); }
+    qc3.disconnect();
+
+    savePermAuthzSetup(authorityAddress, operatorAccount.address);
+    console.log("  Saved perm-authz-setup");
   } catch (error: any) {
     const errorMsg = error?.message || String(error);
-    // If authorization already exists (from a previous run on same chain), save setup and continue
     if (errorMsg.includes("already exists") || errorMsg.includes("mutual exclusivity")) {
-      console.log("  Authorization already exists on chain (from previous run). Saving setup and continuing.");
+      console.log("  Authorization already exists on chain. Saving setup and continuing.");
       savePermAuthzSetup(authorityAddress, operatorAccount.address);
-      console.log("  Saved perm-authz-setup");
     } else {
-      console.log("ERROR!");
       console.error(error);
       process.exit(1);
     }

@@ -27,6 +27,16 @@ service Query {
   rpc ListVSOperatorAuthorizations(QueryListVSOperatorAuthorizationsRequest) returns (QueryListVSOperatorAuthorizationsResponse) {
     option (google.api.http).get = "/verana/de/v1/vs-operator-authorizations";
   }
+
+  // [MOD-DE-QRY-3] GetOperatorAuthorization returns a single OperatorAuthorization by id.
+  rpc GetOperatorAuthorization(QueryGetOperatorAuthorizationRequest) returns (QueryGetOperatorAuthorizationResponse) {
+    option (google.api.http).get = "/verana/de/v1/operator-authorizations/{id}";
+  }
+
+  // [MOD-DE-QRY-4] GetVSOperatorAuthorization returns a single VSOperatorAuthorization by id.
+  rpc GetVSOperatorAuthorization(QueryGetVSOperatorAuthorizationRequest) returns (QueryGetVSOperatorAuthorizationResponse) {
+    option (google.api.http).get = "/verana/de/v1/vs-operator-authorizations/{id}";
+  }
 }
 
 // QueryParamsRequest is request type for the Query/Params RPC method.
@@ -44,8 +54,8 @@ message QueryParamsResponse {
 // QueryListOperatorAuthorizationsRequest is the request type for the
 // Query/ListOperatorAuthorizations RPC method.
 message QueryListOperatorAuthorizationsRequest {
-  // corporation filters by the corporation group that granted the authorization.
-  string corporation = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // corporation_id filters by the corporation that granted the authorization.
+  uint64 corporation_id = 1;
   // operator filters by the operator account that received the authorization.
   string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   // response_max_size limits the number of results. Must be 1-1024, defaults to 64.
@@ -61,8 +71,8 @@ message QueryListOperatorAuthorizationsResponse {
 // QueryListVSOperatorAuthorizationsRequest is the request type for the
 // Query/ListVSOperatorAuthorizations RPC method.
 message QueryListVSOperatorAuthorizationsRequest {
-  // corporation filters by the corporation group that granted the authorization.
-  string corporation = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // corporation_id filters by the corporation that granted the authorization.
+  uint64 corporation_id = 1;
   // vs_operator filters by the VS operator account.
   string vs_operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   // response_max_size limits the number of results. Must be 1-1024, defaults to 64.
@@ -73,4 +83,30 @@ message QueryListVSOperatorAuthorizationsRequest {
 // Query/ListVSOperatorAuthorizations RPC method.
 message QueryListVSOperatorAuthorizationsResponse {
   repeated VSOperatorAuthorization vs_operator_authorizations = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryGetOperatorAuthorizationRequest is the request type for the
+// Query/GetOperatorAuthorization RPC method.
+message QueryGetOperatorAuthorizationRequest {
+  // id is the OperatorAuthorization id to fetch.
+  uint64 id = 1;
+}
+
+// QueryGetOperatorAuthorizationResponse is the response type for the
+// Query/GetOperatorAuthorization RPC method.
+message QueryGetOperatorAuthorizationResponse {
+  OperatorAuthorization operator_authorization = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryGetVSOperatorAuthorizationRequest is the request type for the
+// Query/GetVSOperatorAuthorization RPC method.
+message QueryGetVSOperatorAuthorizationRequest {
+  // id is the VSOperatorAuthorization id to fetch.
+  uint64 id = 1;
+}
+
+// QueryGetVSOperatorAuthorizationResponse is the response type for the
+// Query/GetVSOperatorAuthorization RPC method.
+message QueryGetVSOperatorAuthorizationResponse {
+  VSOperatorAuthorization vs_operator_authorization = 1 [(gogoproto.nullable) = false];
 }

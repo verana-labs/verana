@@ -7,6 +7,7 @@ import (
 	"time"
 
 	credentialschematypes "github.com/verana-labs/verana/x/cs/types"
+	detypes "github.com/verana-labs/verana/x/de/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/verana-labs/verana/x/pp/types"
@@ -512,10 +513,20 @@ func (ms msgServer) executeCancelParticipantVPLastRequest(ctx sdk.Context, parti
 	// [MOD-PP-MSG-6-3] spec v4 draft 13:
 	//   if op_exp is null (validation never completed), set op_state to TERMINATED
 	//   else set op_state to VALIDATED.
-	if participant.OpExp == nil {
+	terminated := participant.OpExp == nil
+	if terminated {
 		participant.OpState = types.OnboardingState_TERMINATED
 	} else {
 		participant.OpState = types.OnboardingState_VALIDATED
+	}
+
+	// [MOD-PP-MSG-6-3] Only when the result is TERMINATED, revoke any disabled VSOA
+	// record created at MSG-1 via [MOD-DE-MSG-6]. No-op if no record exists. If the
+	// result is VALIDATED, the existing record keeps its previous expiration.
+	if terminated {
+		if err := ms.revokeVSOperatorAuthorization(ctx, participant); err != nil {
+			return err
+		}
 	}
 
 	// Handle current fees if any
@@ -730,12 +741,18 @@ func (ms msgServer) executeCreateRootParticipant(ctx sdk.Context, msg *types.Msg
 	if err != nil {
 		return 0, err
 	}
+	// [MOD-PP-MSG-7-2-1] (did, corporation_id) consistency: did MUST NOT already
+	// be controlled by a different corporation.
+	if err := ms.assertDIDCorporationConsistent(ctx, msg.Did, corporationId); err != nil {
+		return 0, err
+	}
 	participant := types.Participant{
 		SchemaId:         msg.SchemaId,
 		Modified:         &now,
 		Role:             types.ParticipantRole_ECOSYSTEM,
 		Did:              msg.Did,
 		CorporationId:    corporationId,
+		VsOperator:       msg.VsOperator,
 		Created:          &now,
 		EffectiveFrom:    msg.EffectiveFrom,
 		EffectiveUntil:   msg.EffectiveUntil,
@@ -748,6 +765,23 @@ func (ms msgServer) executeCreateRootParticipant(ctx sdk.Context, msg *types.Msg
 	id, err := ms.Keeper.CreateParticipant(ctx, participant)
 	if err != nil {
 		return 0, fmt.Errorf("failed to create participant: %w", err)
+	}
+
+	// [MOD-PP-MSG-7-3] If VSOA params provided, create an ACTIVE record
+	// (expiration = effective_until) via [MOD-DE-MSG-5].
+	if len(msg.VsOperatorAuthzMsgTypes) > 0 {
+		record := detypes.ParticipantAuthorizationRecord{
+			ParticipantId: id,
+			MsgTypes:      msg.VsOperatorAuthzMsgTypes,
+			SpendLimit:    msg.VsOperatorAuthzSpendLimit,
+			FeeSpendLimit: msg.VsOperatorAuthzFeeSpendLimit,
+			WithFeegrant:  msg.VsOperatorAuthzWithFeegrant,
+			Period:        msg.VsOperatorAuthzPeriod,
+			Expiration:    msg.EffectiveUntil, // active immediately
+		}
+		if err := ms.delegationKeeper.GrantVSOperatorAuthorization(ctx, corporationId, msg.VsOperator, record); err != nil {
+			return 0, fmt.Errorf("failed to grant VS operator authorization: %w", err)
+		}
 	}
 
 	return id, nil
@@ -792,12 +826,11 @@ func (ms msgServer) SetParticipantEffectiveUntil(goCtx context.Context, msg *typ
 		return nil, fmt.Errorf("failed to adjust participant: %w", err)
 	}
 
-	// [MOD-PP-MSG-8-3] If applicant_participant.type is ISSUER or VERIFIER and vs_operator_authz_enabled:
-	// Grant VS Operator Authorization
-	if (applicantParticipant.Role == types.ParticipantRole_ISSUER || applicantParticipant.Role == types.ParticipantRole_VERIFIER) &&
-		applicantParticipant.VsOperatorAuthzEnabled {
-		if err := ms.grantVSOperatorAuthorization(ctx, applicantParticipant); err != nil {
-			return nil, fmt.Errorf("failed to grant VS operator authorization: %w", err)
+	// [MOD-PP-MSG-8-3] Sync any VSOA record expiration to the new effective_until
+	// via [MOD-DE-MSG-9]. No-op if no record exists.
+	if applicantParticipant.EffectiveUntil != nil {
+		if err := ms.delegationKeeper.UpdateVSOperatorAuthorizationExpiration(ctx, applicantParticipant.Id, *applicantParticipant.EffectiveUntil); err != nil {
+			return nil, fmt.Errorf("failed to update VS operator authorization expiration: %w", err)
 		}
 	}
 
@@ -1146,50 +1179,17 @@ func (ms msgServer) executeRevokeParticipant(ctx sdk.Context, participant types.
 }
 
 // revokeVSOperatorAuthorization implements [MOD-DE-MSG-6] orchestration.
-// Called by: RevokeParticipant, SlashParticipantTrustDeposit.
-// VSOA storage is in DE module; this method handles the business logic.
+// Called by: CancelParticipantOPLastRequest (TERMINATED), RevokeParticipant,
+// SlashParticipantTrustDeposit. The DE keeper removes the record by participant
+// id and recomputes the chain-level fee allowance (MSG-5-5); a no-op if no
+// record exists.
 func (ms msgServer) revokeVSOperatorAuthorization(ctx sdk.Context, participant types.Participant) error {
-	if participant.VsOperator == "" {
-		return nil
-	}
 	if ms.delegationKeeper == nil {
 		return fmt.Errorf("delegation keeper is required for VS operator authorization")
 	}
-
-	corpAcct, err := ms.corpAccountFromID(ctx, participant.CorporationId)
-	if err != nil {
-		return err
-	}
-
-	// [MOD-DE-MSG-6-4] Remove participant from VSOA
-	remainingParticipants, err := ms.delegationKeeper.RemovePermFromVSOA(ctx, corpAcct, participant.VsOperator, participant.Id)
-	if err != nil {
+	if err := ms.delegationKeeper.RevokeVSOperatorAuthorization(ctx, participant.Id); err != nil {
 		return fmt.Errorf("failed to revoke VS operator authorization: %w", err)
 	}
-
-	// Handle feegrant recalculation
-	if participant.VsOperatorAuthzWithFeegrant {
-		if len(remainingParticipants) == 0 {
-			// No more participants — revoke fee allowance
-			if err := ms.delegationKeeper.RevokeFeeAllowance(ctx, corpAcct, participant.VsOperator); err != nil {
-				return fmt.Errorf("failed to revoke fee allowance: %w", err)
-			}
-		} else {
-			// Recalculate feegrant expiration from remaining participants
-			expiration, err := ms.computeVSOAFeegrantExpiration(ctx, corpAcct, participant.VsOperator)
-			if err != nil {
-				return fmt.Errorf("failed to compute feegrant expiration: %w", err)
-			}
-
-			if expiration == nil || expiration.After(ctx.BlockTime()) {
-				msgTypes := []string{"/verana.pp.v1.MsgCreateOrUpdateParticipantSession"}
-				if err := ms.delegationKeeper.GrantFeeAllowance(ctx, corpAcct, participant.VsOperator, msgTypes, expiration, nil, nil); err != nil {
-					return fmt.Errorf("failed to update fee allowance: %w", err)
-				}
-			}
-		}
-	}
-
 	return nil
 }
 
@@ -1589,6 +1589,11 @@ func (ms msgServer) SelfCreateParticipant(goCtx context.Context, msg *types.MsgS
 	if err != nil {
 		return nil, err
 	}
+	// [MOD-PP-MSG-14-2-1] (did, corporation_id) consistency: did MUST NOT already
+	// be controlled by a different corporation.
+	if err := ms.assertDIDCorporationConsistent(ctx, msg.Did, corporationId); err != nil {
+		return nil, err
+	}
 	participant := types.Participant{
 		ValidatorParticipantId:       msg.ValidatorParticipantId,
 		SchemaId:                     validatorParticipant.SchemaId,
@@ -1600,15 +1605,10 @@ func (ms msgServer) SelfCreateParticipant(goCtx context.Context, msg *types.MsgS
 		Created:                      &now,
 		EffectiveFrom:                effectiveFrom,
 		EffectiveUntil:               msg.EffectiveUntil,
-		ValidationFees:               0,
-		IssuanceFees:                 0,
-		VerificationFees:             0,
-		Deposit:                      0,
-		VsOperatorAuthzEnabled:       msg.VsOperatorAuthzEnabled,
-		VsOperatorAuthzSpendLimit:    msg.VsOperatorAuthzSpendLimit,
-		VsOperatorAuthzWithFeegrant:  msg.VsOperatorAuthzWithFeegrant,
-		VsOperatorAuthzFeeSpendLimit: msg.VsOperatorAuthzFeeSpendLimit,
-		VsOperatorAuthzSpendPeriod:   msg.VsOperatorAuthzSpendPeriod,
+		ValidationFees:   0,
+		IssuanceFees:     0,
+		VerificationFees: 0,
+		Deposit:          0,
 	}
 
 	// Set fees only for ISSUER participants as per spec
@@ -1622,10 +1622,19 @@ func (ms msgServer) SelfCreateParticipant(goCtx context.Context, msg *types.MsgS
 		return nil, fmt.Errorf("failed to create participant: %w", err)
 	}
 
-	// Grant VS Operator Authorization if vs_operator_authz_enabled
-	if participant.VsOperatorAuthzEnabled {
-		participant.Id = id
-		if err := ms.grantVSOperatorAuthorization(ctx, participant); err != nil {
+	// [MOD-PP-MSG-14-3] OPEN mode: participant is VALIDATED immediately, so create
+	// an ACTIVE record (expiration = effective_until) via [MOD-DE-MSG-5].
+	if len(msg.VsOperatorAuthzMsgTypes) > 0 {
+		record := detypes.ParticipantAuthorizationRecord{
+			ParticipantId: id,
+			MsgTypes:      msg.VsOperatorAuthzMsgTypes,
+			SpendLimit:    msg.VsOperatorAuthzSpendLimit,
+			FeeSpendLimit: msg.VsOperatorAuthzFeeSpendLimit,
+			WithFeegrant:  msg.VsOperatorAuthzWithFeegrant,
+			Period:        msg.VsOperatorAuthzPeriod,
+			Expiration:    msg.EffectiveUntil, // active immediately
+		}
+		if err := ms.delegationKeeper.GrantVSOperatorAuthorization(ctx, corporationId, msg.VsOperator, record); err != nil {
 			return nil, fmt.Errorf("failed to grant VS operator authorization: %w", err)
 		}
 	}

@@ -2,6 +2,7 @@ package de
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -22,7 +23,71 @@ func (am AppModule) GetQueryCmd() *cobra.Command {
 
 	cmd.AddCommand(CmdListOperatorAuthorizations())
 	cmd.AddCommand(CmdListVSOperatorAuthorizations())
+	cmd.AddCommand(CmdGetOperatorAuthorization())
+	cmd.AddCommand(CmdGetVSOperatorAuthorization())
 
+	return cmd
+}
+
+// CmdGetOperatorAuthorization returns a cobra command for the
+// [MOD-DE-QRY-3] GetOperatorAuthorization query.
+func CmdGetOperatorAuthorization() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "get-operator-authorization [id]",
+		Short: "Get an operator authorization by id",
+		Long:  "[MOD-DE-QRY-3] Get a single operator authorization by its id.",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			id, err := strconv.ParseUint(args[0], 10, 64)
+			if err != nil {
+				return fmt.Errorf("invalid id: %w", err)
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+			res, err := queryClient.GetOperatorAuthorization(cmd.Context(), &types.QueryGetOperatorAuthorizationRequest{Id: id})
+			if err != nil {
+				return err
+			}
+			return clientCtx.PrintProto(res)
+		},
+	}
+	flags.AddQueryFlagsToCmd(cmd)
+	return cmd
+}
+
+// CmdGetVSOperatorAuthorization returns a cobra command for the
+// [MOD-DE-QRY-4] GetVSOperatorAuthorization query.
+func CmdGetVSOperatorAuthorization() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "get-vs-operator-authorization [id]",
+		Short: "Get a VS operator authorization by id",
+		Long:  "[MOD-DE-QRY-4] Get a single VS operator authorization (with its records) by its id.",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			id, err := strconv.ParseUint(args[0], 10, 64)
+			if err != nil {
+				return fmt.Errorf("invalid id: %w", err)
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+			res, err := queryClient.GetVSOperatorAuthorization(cmd.Context(), &types.QueryGetVSOperatorAuthorizationRequest{Id: id})
+			if err != nil {
+				return err
+			}
+			return clientCtx.PrintProto(res)
+		},
+	}
+	flags.AddQueryFlagsToCmd(cmd)
 	return cmd
 }
 
@@ -39,14 +104,14 @@ func CmdListOperatorAuthorizations() *cobra.Command {
 				return err
 			}
 
-			corporation, _ := cmd.Flags().GetString("corporation")
+			corporationID, _ := cmd.Flags().GetUint64("corporation-id")
 			operator, _ := cmd.Flags().GetString("operator")
 			limit, _ := cmd.Flags().GetUint32("limit")
 
 			queryClient := types.NewQueryClient(clientCtx)
 
 			res, err := queryClient.ListOperatorAuthorizations(cmd.Context(), &types.QueryListOperatorAuthorizationsRequest{
-				Corporation:     corporation,
+				CorporationId:   corporationID,
 				Operator:        operator,
 				ResponseMaxSize: limit,
 			})
@@ -58,7 +123,7 @@ func CmdListOperatorAuthorizations() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().String("corporation", "", "filter by the corporation group that granted the authorization")
+	cmd.Flags().Uint64("corporation-id", 0, "filter by the corporation id that granted the authorization")
 	cmd.Flags().String("operator", "", "filter by the operator account that received the authorization")
 	cmd.Flags().Uint32("limit", 64, "maximum number of results (1-1024, default 64)")
 
@@ -80,14 +145,14 @@ func CmdListVSOperatorAuthorizations() *cobra.Command {
 				return err
 			}
 
-			corporation, _ := cmd.Flags().GetString("corporation")
+			corporationID, _ := cmd.Flags().GetUint64("corporation-id")
 			vsOperator, _ := cmd.Flags().GetString("vs-operator")
 			limit, _ := cmd.Flags().GetUint32("limit")
 
 			queryClient := types.NewQueryClient(clientCtx)
 
 			res, err := queryClient.ListVSOperatorAuthorizations(cmd.Context(), &types.QueryListVSOperatorAuthorizationsRequest{
-				Corporation:     corporation,
+				CorporationId:   corporationID,
 				VsOperator:      vsOperator,
 				ResponseMaxSize: limit,
 			})
@@ -99,7 +164,7 @@ func CmdListVSOperatorAuthorizations() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().String("corporation", "", "filter by the corporation group that granted the authorization")
+	cmd.Flags().Uint64("corporation-id", 0, "filter by the corporation id that granted the authorization")
 	cmd.Flags().String("vs-operator", "", "filter by the VS operator account")
 	cmd.Flags().Uint32("limit", 64, "maximum number of results (1-1024, default 64)")
 

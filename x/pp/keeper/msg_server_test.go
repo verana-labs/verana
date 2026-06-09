@@ -134,7 +134,7 @@ func TestStartParticipantVP(t *testing.T) {
 				Operator:               creator2,
 				Role:                   types.ParticipantRole_ISSUER,
 				ValidatorParticipantId: validatorParticipantID,
-				Did:                    validDid,
+				Did:                    "did:example:start-fees-optional",
 				ValidationFees:         &types.OptionalUInt64{Value: 100},
 				IssuanceFees:           &types.OptionalUInt64{Value: 50},
 				VerificationFees:       &types.OptionalUInt64{Value: 25},
@@ -152,7 +152,7 @@ func TestStartParticipantVP(t *testing.T) {
 				Operator:               creator3,
 				Role:                   types.ParticipantRole_ISSUER,
 				ValidatorParticipantId: validatorParticipantID,
-				Did:                    validDid,
+				Did:                    "did:example:start-fees-partial",
 				ValidationFees:         &types.OptionalUInt64{Value: 75},
 			},
 			err:                      "",
@@ -168,7 +168,7 @@ func TestStartParticipantVP(t *testing.T) {
 				Operator:               creator4,
 				Role:                   types.ParticipantRole_ISSUER,
 				ValidatorParticipantId: validatorParticipantID,
-				Did:                    validDid,
+				Did:                    "did:example:start-fees-zero",
 				ValidationFees:         &types.OptionalUInt64{Value: 0},
 				IssuanceFees:           &types.OptionalUInt64{Value: 0},
 				VerificationFees:       &types.OptionalUInt64{Value: 0},
@@ -3138,13 +3138,11 @@ func TestCreateOrUpdateParticipantSession(t *testing.T) {
 	trustParticipantID, err := k.CreateParticipant(sdkCtx, trustParticipant)
 	require.NoError(t, err)
 
-	// Create issuer participant with VsOperator and VsOperatorAuthzEnabled
 	issuerParticipant := types.Participant{
 		SchemaId:               1,
 		Role:                   types.ParticipantRole_ISSUER,
 		CorporationId:          trkKeeper.RegisterCorp(authority),
 		VsOperator:             operator,
-		VsOperatorAuthzEnabled: true,
 		Created:                &now,
 		Adjusted:               &now,
 		Modified:               &now,
@@ -3155,13 +3153,11 @@ func TestCreateOrUpdateParticipantSession(t *testing.T) {
 	issuerParticipantID, err := k.CreateParticipant(sdkCtx, issuerParticipant)
 	require.NoError(t, err)
 
-	// Create issuer participant with VsOperatorAuthzEnabled = false
 	issuerParticipantNoAuthz := types.Participant{
 		SchemaId:               1,
 		Role:                   types.ParticipantRole_ISSUER,
 		CorporationId:          trkKeeper.RegisterCorp(authority),
 		VsOperator:             operator,
-		VsOperatorAuthzEnabled: false,
 		Created:                &now,
 		Adjusted:               &now,
 		Modified:               &now,
@@ -3178,7 +3174,6 @@ func TestCreateOrUpdateParticipantSession(t *testing.T) {
 		Role:                   types.ParticipantRole_ISSUER,
 		CorporationId:          trkKeeper.RegisterCorp(authority),
 		VsOperator:             otherOperator,
-		VsOperatorAuthzEnabled: true,
 		Created:                &now,
 		Adjusted:               &now,
 		Modified:               &now,
@@ -3195,7 +3190,6 @@ func TestCreateOrUpdateParticipantSession(t *testing.T) {
 		Role:                   types.ParticipantRole_ISSUER,
 		CorporationId:          trkKeeper.RegisterCorp(otherAuthority),
 		VsOperator:             operator,
-		VsOperatorAuthzEnabled: true,
 		Created:                &now,
 		Adjusted:               &now,
 		Modified:               &now,
@@ -3212,7 +3206,6 @@ func TestCreateOrUpdateParticipantSession(t *testing.T) {
 		Role:                   types.ParticipantRole_VERIFIER,
 		CorporationId:          trkKeeper.RegisterCorp(authority),
 		VsOperator:             operator,
-		VsOperatorAuthzEnabled: true,
 		Created:                &now,
 		Adjusted:               &now,
 		Modified:               &now,
@@ -3373,7 +3366,7 @@ func TestCreateOrUpdateParticipantSession(t *testing.T) {
 			errMessage: "issuer participant authority does not match authority",
 		},
 		{
-			name: "VS operator authz not enabled",
+			name: "VS operator authz check fails on participant",
 			msg: &types.MsgCreateOrUpdateParticipantSession{
 				Corporation:              authority,
 				Operator:                 operator,
@@ -3383,8 +3376,9 @@ func TestCreateOrUpdateParticipantSession(t *testing.T) {
 				AgentParticipantId:       agentParticipantID,
 				WalletAgentParticipantId: walletAgentParticipantID,
 			},
+			setupErr:   fmt.Errorf("no VSOA record for participant"),
 			expectErr:  true,
-			errMessage: "VS operator authorization is not enabled for participant",
+			errMessage: "VS operator authorization check failed",
 		},
 		{
 			name: "Agent participant not found",
@@ -3527,7 +3521,6 @@ func TestDiscountApplicationInFeeCalculation(t *testing.T) {
 		Role:                   types.ParticipantRole_ISSUER,
 		CorporationId:          trkKeeper.RegisterCorp(authority),
 		VsOperator:             operator,
-		VsOperatorAuthzEnabled: true,
 		Created:                &now,
 		Adjusted:               &now,
 		Modified:               &now,
@@ -3585,7 +3578,6 @@ func TestDiscountApplicationInFeeCalculation(t *testing.T) {
 			Role:                   types.ParticipantRole_ISSUER,
 			CorporationId:          trkKeeper.RegisterCorp(authority),
 			VsOperator:             operator,
-			VsOperatorAuthzEnabled: true,
 			Created:                &now,
 			Adjusted:               &now,
 			Modified:               &now,
@@ -3636,7 +3628,6 @@ func TestDiscountApplicationInFeeCalculation(t *testing.T) {
 			Role:                   types.ParticipantRole_ISSUER,
 			CorporationId:          trkKeeper.RegisterCorp(authority),
 			VsOperator:             operator,
-			VsOperatorAuthzEnabled: true,
 			Created:                &now,
 			Adjusted:               &now,
 			Modified:               &now,
@@ -3964,7 +3955,6 @@ func TestSlashParticipantTrustDeposit(t *testing.T) {
 		Deposit:                1000,
 		EffectiveFrom:          &pastTime,
 		VsOperator:             operator,
-		VsOperatorAuthzEnabled: true,
 	}
 	applicantParticipantID, err := k.CreateParticipant(sdkCtx, applicantParticipant)
 	require.NoError(t, err)
@@ -3981,7 +3971,6 @@ func TestSlashParticipantTrustDeposit(t *testing.T) {
 		Deposit:                500,
 		EffectiveFrom:          &pastTime,
 		VsOperator:             operator,
-		VsOperatorAuthzEnabled: true,
 	}
 	verifierParticipantID, err := k.CreateParticipant(sdkCtx, verifierParticipant)
 	require.NoError(t, err)
@@ -4374,6 +4363,41 @@ func TestRepayParticipantSlashedTrustDeposit(t *testing.T) {
 		})
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "no slashed timestamp")
+		require.Nil(t, resp)
+	})
+
+	t.Run("Invalid - amount exceeds outstanding slashed deposit", func(t *testing.T) {
+		// Fresh participant slashed by 400; repaying 500 exceeds the outstanding 400.
+		p := types.Participant{
+			SchemaId:               1,
+			Role:                   types.ParticipantRole_ISSUER,
+			CorporationId:          trkKeeper.RegisterCorp(authority),
+			Created:                &now,
+			Modified:               &now,
+			ValidatorParticipantId: validatorParticipantID,
+			OpState:                types.OnboardingState_VALIDATED,
+			Deposit:                1000,
+			EffectiveFrom:          &pastTime,
+		}
+		pid, err := k.CreateParticipant(sdkCtx, p)
+		require.NoError(t, err)
+
+		_, err = ms.SlashParticipantTrustDeposit(ctx, &types.MsgSlashParticipantTrustDeposit{
+			Corporation: validatorAddr,
+			Operator:    validatorAddr,
+			Id:          pid,
+			Amount:      400,
+		})
+		require.NoError(t, err)
+
+		resp, err := ms.RepayParticipantSlashedTrustDeposit(ctx, &types.MsgRepayParticipantSlashedTrustDeposit{
+			Corporation: authority,
+			Operator:    operator,
+			Id:          pid,
+			Amount:      500,
+		})
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "exceeds outstanding")
 		require.Nil(t, resp)
 	})
 }
@@ -5432,7 +5456,7 @@ func TestStartParticipantVP_OverlapCheck(t *testing.T) {
 			Operator:               otherCreator,
 			Role:                   types.ParticipantRole_ISSUER,
 			ValidatorParticipantId: validatorParticipantID,
-			Did:                    validDid,
+			Did:                    "did:example:overlap-other-authority",
 		}
 		resp3, err := ms.StartParticipantOP(ctx, msg3)
 		require.NoError(t, err)
@@ -5579,7 +5603,6 @@ func TestStartParticipantVP_VsOperatorAndFields(t *testing.T) {
 			ValidatorParticipantId: validatorParticipantID,
 			Did:                    validDid,
 			VsOperator:             vsOperator,
-			VsOperatorAuthzEnabled: true,
 		}
 		resp, err := ms.StartParticipantOP(ctx, msg)
 		require.NoError(t, err)
@@ -5590,8 +5613,7 @@ func TestStartParticipantVP_VsOperatorAndFields(t *testing.T) {
 		require.Equal(t, validDid, participant.Did, "DID should be stored")
 		require.NotZero(t, participant.CorporationId, "Corporation should be set")
 		require.Equal(t, vsOperator, participant.VsOperator, "VsOperator should be stored")
-		require.True(t, participant.VsOperatorAuthzEnabled, "VsOperatorAuthzEnabled should be true")
-		require.Equal(t, uint64(1), participant.SchemaId, "SchemaId should be derived from validator participant")
+		require.Equal(t, uint64(1), participant.SchemaId, "SchemaId should be derived from validator perm")
 		require.Equal(t, types.OnboardingState_PENDING, participant.OpState)
 	})
 
@@ -5710,643 +5732,124 @@ func TestStartParticipantVP_VsOperatorAndFields(t *testing.T) {
 }
 
 // =============================================================================
-// VSOA Grant / Revoke Tests (MSG-5 / MSG-6)
+// VSOA wiring (spec v4-rc2): MSG-1 creates a disabled record via MOD-DE-MSG-5;
+// MSG-3 activates it via MOD-DE-MSG-9. These assert the new DelegationKeeper.
 // =============================================================================
 
-// TestVSOA_GrantWithFeegrant verifies that when SetParticipantOPToValidated is
-// called for an ISSUER participant with VsOperatorAuthzEnabled=true and
-// VsOperatorAuthzWithFeegrant=true, both AddPermToVSOA and GrantFeeAllowance
-// are invoked on the delegation keeper.
-func TestVSOA_GrantWithFeegrant(t *testing.T) {
+func vsoaValidator(t *testing.T, k keeper.Keeper, sdkCtx sdk.Context, trkKeeper interface{ RegisterCorp(string) uint64 }, corp string, now, past time.Time) uint64 {
+	t.Helper()
+	id, err := k.CreateParticipant(sdkCtx, types.Participant{
+		SchemaId:      1,
+		Role:          types.ParticipantRole_ISSUER_GRANTOR,
+		CorporationId: trkKeeper.RegisterCorp(corp),
+		Created:       &now,
+		Modified:      &now,
+		OpState:       types.OnboardingState_VALIDATED,
+		EffectiveFrom: &past,
+	})
+	require.NoError(t, err)
+	return id
+}
+
+func TestVSOA_StartParticipantOPGrantsDisabledRecord(t *testing.T) {
 	k, ms, csKeeper, trkKeeper, ctx, delKeeper := setupMsgServerWithDelegation(t)
-	_ = trkKeeper
-	sdkCtx := sdk.UnwrapSDKContext(ctx)
-
-	blockTime := time.Date(2024, 6, 1, 0, 0, 0, 0, time.UTC)
-	sdkCtx = sdkCtx.WithBlockTime(blockTime)
+	sdkCtx := sdk.UnwrapSDKContext(ctx).WithBlockTime(time.Date(2024, 6, 1, 0, 0, 0, 0, time.UTC))
 	ctx = sdk.WrapSDKContext(sdkCtx)
+	now := sdkCtx.BlockTime()
+	past := now.Add(-1 * time.Hour)
 
-	validatorAddr := sdk.AccAddress([]byte("test_validator______")).String()
-	applicantAddr := sdk.AccAddress([]byte("test_applicant______")).String()
-	vsOperator := sdk.AccAddress([]byte("test_vs_operator____")).String()
-
+	creator := sdk.AccAddress([]byte("vsoa_creator________")).String()
+	vsOperator := sdk.AccAddress([]byte("vsoa_vs_operator____")).String()
 	csKeeper.CreateMockCredentialSchema(1,
 		cstypes.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS,
 		cstypes.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS)
-
-	now := sdkCtx.BlockTime()
-	pastTime := now.Add(-1 * time.Hour)
-	futureTime := now.Add(365 * 24 * time.Hour)
-
-	// Create active ISSUER_GRANTOR validator participant
-	validatorParticipantID, err := k.CreateParticipant(sdkCtx, types.Participant{
-		SchemaId:      1,
-		Role:          types.ParticipantRole_ISSUER_GRANTOR,
-		CorporationId: trkKeeper.RegisterCorp(validatorAddr),
-		Created:       &now,
-		Adjusted:      &now,
-		Modified:      &now,
-		OpState:       types.OnboardingState_VALIDATED,
-		EffectiveFrom: &pastTime,
-	})
-	require.NoError(t, err)
-
-	// Create PENDING ISSUER participant with VSOA fields
-	applicantParticipantID, err := k.CreateParticipant(sdkCtx, types.Participant{
-		SchemaId:                    1,
-		Role:                        types.ParticipantRole_ISSUER,
-		CorporationId:               trkKeeper.RegisterCorp(applicantAddr),
-		Created:                     &now,
-		Adjusted:                    &now,
-		Modified:                    &now,
-		ValidatorParticipantId:      validatorParticipantID,
-		OpState:                     types.OnboardingState_PENDING,
-		VsOperator:                  vsOperator,
-		VsOperatorAuthzEnabled:      true,
-		VsOperatorAuthzWithFeegrant: true,
-	})
-	require.NoError(t, err)
-
-	// Configure mock: GetVSOAPermissions returns the participant we just added
-	delKeeper.GetVSOAPermissionsResult = []uint64{applicantParticipantID}
-
+	validatorPermID := vsoaValidator(t, k, sdkCtx, trkKeeper, creator, now, past)
 	delKeeper.Reset()
 
-	resp, err := ms.SetParticipantOPToValidated(ctx, &types.MsgSetParticipantOPToValidated{
+	resp, err := ms.StartParticipantOP(ctx, &types.MsgStartParticipantOP{
+		Corporation:             creator,
+		Operator:                creator,
+		Role:                    types.ParticipantRole_ISSUER,
+		ValidatorParticipantId:  validatorPermID,
+		Did:                     "did:example:vsoa-issuer",
+		VsOperator:              vsOperator,
+		VsOperatorAuthzMsgTypes: []string{types.MsgCreateOrUpdateParticipantSessionTypeURL},
+	})
+	require.NoError(t, err)
+
+	require.Len(t, delKeeper.GrantVSOACalls, 1)
+	require.Equal(t, vsOperator, delKeeper.GrantVSOACalls[0].VsOperator)
+	require.Equal(t, resp.ParticipantId, delKeeper.GrantVSOACalls[0].Record.ParticipantId)
+	require.NotNil(t, delKeeper.GrantVSOACalls[0].Record.Expiration)
+	require.True(t, delKeeper.GrantVSOACalls[0].Record.Expiration.Equal(now), "record created disabled (expiration == now)")
+}
+
+func TestVSOA_StartParticipantOPSkipsWithoutMsgTypes(t *testing.T) {
+	k, ms, csKeeper, trkKeeper, ctx, delKeeper := setupMsgServerWithDelegation(t)
+	sdkCtx := sdk.UnwrapSDKContext(ctx).WithBlockTime(time.Date(2024, 6, 1, 0, 0, 0, 0, time.UTC))
+	ctx = sdk.WrapSDKContext(sdkCtx)
+	now := sdkCtx.BlockTime()
+	past := now.Add(-1 * time.Hour)
+
+	creator := sdk.AccAddress([]byte("vsoa_creator2_______")).String()
+	csKeeper.CreateMockCredentialSchema(1,
+		cstypes.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS,
+		cstypes.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS)
+	validatorPermID := vsoaValidator(t, k, sdkCtx, trkKeeper, creator, now, past)
+	delKeeper.Reset()
+
+	_, err := ms.StartParticipantOP(ctx, &types.MsgStartParticipantOP{
+		Corporation:            creator,
+		Operator:               creator,
+		Role:                   types.ParticipantRole_ISSUER,
+		ValidatorParticipantId: validatorPermID,
+		Did:                    "did:example:vsoa-issuer2",
+	})
+	require.NoError(t, err)
+	require.Len(t, delKeeper.GrantVSOACalls, 0)
+}
+
+func TestVSOA_ValidatedUpdatesExpiration(t *testing.T) {
+	k, ms, csKeeper, trkKeeper, ctx, delKeeper := setupMsgServerWithDelegation(t)
+	sdkCtx := sdk.UnwrapSDKContext(ctx).WithBlockTime(time.Date(2024, 6, 1, 0, 0, 0, 0, time.UTC))
+	ctx = sdk.WrapSDKContext(sdkCtx)
+	now := sdkCtx.BlockTime()
+	past := now.Add(-1 * time.Hour)
+	future := now.Add(365 * 24 * time.Hour)
+
+	validatorAddr := sdk.AccAddress([]byte("vsoa_validator______")).String()
+	applicantAddr := sdk.AccAddress([]byte("vsoa_applicant______")).String()
+	vsOperator := sdk.AccAddress([]byte("vsoa_vsop___________")).String()
+	csKeeper.CreateMockCredentialSchema(1,
+		cstypes.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS,
+		cstypes.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS)
+	validatorPermID := vsoaValidator(t, k, sdkCtx, trkKeeper, validatorAddr, now, past)
+	applicantPermID, err := k.CreateParticipant(sdkCtx, types.Participant{
+		SchemaId:               1,
+		Role:                   types.ParticipantRole_ISSUER,
+		CorporationId:          trkKeeper.RegisterCorp(applicantAddr),
+		Created:                &now,
+		Modified:               &now,
+		ValidatorParticipantId: validatorPermID,
+		OpState:                types.OnboardingState_PENDING,
+		VsOperator:             vsOperator,
+	})
+	require.NoError(t, err)
+	delKeeper.Reset()
+
+	_, err = ms.SetParticipantOPToValidated(ctx, &types.MsgSetParticipantOPToValidated{
 		Corporation:      validatorAddr,
 		Operator:         validatorAddr,
-		Id:               applicantParticipantID,
+		Id:               applicantPermID,
 		ValidationFees:   10,
 		IssuanceFees:     5,
 		VerificationFees: 3,
-		EffectiveUntil:   &futureTime,
+		EffectiveUntil:   &future,
 		OpSummaryDigest:  "sha384-validDigest",
 	})
 	require.NoError(t, err)
-	require.NotNil(t, resp)
 
-	// Verify AddPermToVSOA was called
-	require.Len(t, delKeeper.AddPermToVSOACalls, 1)
-	require.Equal(t, applicantAddr, delKeeper.AddPermToVSOACalls[0].Authority)
-	require.Equal(t, vsOperator, delKeeper.AddPermToVSOACalls[0].VsOperator)
-	require.Equal(t, applicantParticipantID, delKeeper.AddPermToVSOACalls[0].PermID)
-
-	// Verify GrantFeeAllowance was called (feegrant enabled)
-	require.Len(t, delKeeper.GrantFeeAllowanceCalls, 1)
-	require.Equal(t, applicantAddr, delKeeper.GrantFeeAllowanceCalls[0].Authority)
-	require.Equal(t, vsOperator, delKeeper.GrantFeeAllowanceCalls[0].Grantee)
-}
-
-// TestVSOA_GrantWithoutFeegrant verifies that when VsOperatorAuthzEnabled=true
-// but VsOperatorAuthzWithFeegrant=false, AddPermToVSOA is called but
-// GrantFeeAllowance is NOT called.
-func TestVSOA_GrantWithoutFeegrant(t *testing.T) {
-	k, ms, csKeeper, trkKeeper, ctx, delKeeper := setupMsgServerWithDelegation(t)
-	_ = trkKeeper
-	sdkCtx := sdk.UnwrapSDKContext(ctx)
-
-	blockTime := time.Date(2024, 6, 1, 0, 0, 0, 0, time.UTC)
-	sdkCtx = sdkCtx.WithBlockTime(blockTime)
-	ctx = sdk.WrapSDKContext(sdkCtx)
-
-	validatorAddr := sdk.AccAddress([]byte("test_validator______")).String()
-	applicantAddr := sdk.AccAddress([]byte("test_applicant______")).String()
-	vsOperator := sdk.AccAddress([]byte("test_vs_operator____")).String()
-
-	csKeeper.CreateMockCredentialSchema(1,
-		cstypes.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS,
-		cstypes.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS)
-
-	now := sdkCtx.BlockTime()
-	pastTime := now.Add(-1 * time.Hour)
-	futureTime := now.Add(365 * 24 * time.Hour)
-
-	validatorParticipantID, err := k.CreateParticipant(sdkCtx, types.Participant{
-		SchemaId:      1,
-		Role:          types.ParticipantRole_ISSUER_GRANTOR,
-		CorporationId: trkKeeper.RegisterCorp(validatorAddr),
-		Created:       &now,
-		Adjusted:      &now,
-		Modified:      &now,
-		OpState:       types.OnboardingState_VALIDATED,
-		EffectiveFrom: &pastTime,
-	})
-	require.NoError(t, err)
-
-	applicantParticipantID, err := k.CreateParticipant(sdkCtx, types.Participant{
-		SchemaId:                    1,
-		Role:                        types.ParticipantRole_ISSUER,
-		CorporationId:               trkKeeper.RegisterCorp(applicantAddr),
-		Created:                     &now,
-		Adjusted:                    &now,
-		Modified:                    &now,
-		ValidatorParticipantId:      validatorParticipantID,
-		OpState:                     types.OnboardingState_PENDING,
-		VsOperator:                  vsOperator,
-		VsOperatorAuthzEnabled:      true,
-		VsOperatorAuthzWithFeegrant: false, // feegrant disabled
-	})
-	require.NoError(t, err)
-
-	delKeeper.Reset()
-
-	resp, err := ms.SetParticipantOPToValidated(ctx, &types.MsgSetParticipantOPToValidated{
-		Corporation:      validatorAddr,
-		Operator:         validatorAddr,
-		Id:               applicantParticipantID,
-		ValidationFees:   10,
-		IssuanceFees:     5,
-		VerificationFees: 3,
-		EffectiveUntil:   &futureTime,
-		OpSummaryDigest:  "sha384-validDigest",
-	})
-	require.NoError(t, err)
-	require.NotNil(t, resp)
-
-	// AddPermToVSOA should be called
-	require.Len(t, delKeeper.AddPermToVSOACalls, 1)
-
-	// GrantFeeAllowance should NOT be called
-	require.Len(t, delKeeper.GrantFeeAllowanceCalls, 0)
-}
-
-// TestVSOA_GrantSkipsWhenVsOperatorEmpty verifies early return when
-// the participant has no VsOperator set.
-func TestVSOA_GrantSkipsWhenVsOperatorEmpty(t *testing.T) {
-	k, ms, csKeeper, trkKeeper, ctx, delKeeper := setupMsgServerWithDelegation(t)
-	_ = trkKeeper
-	sdkCtx := sdk.UnwrapSDKContext(ctx)
-
-	blockTime := time.Date(2024, 6, 1, 0, 0, 0, 0, time.UTC)
-	sdkCtx = sdkCtx.WithBlockTime(blockTime)
-	ctx = sdk.WrapSDKContext(sdkCtx)
-
-	validatorAddr := sdk.AccAddress([]byte("test_validator______")).String()
-	applicantAddr := sdk.AccAddress([]byte("test_applicant______")).String()
-
-	csKeeper.CreateMockCredentialSchema(1,
-		cstypes.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS,
-		cstypes.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS)
-
-	now := sdkCtx.BlockTime()
-	pastTime := now.Add(-1 * time.Hour)
-	futureTime := now.Add(365 * 24 * time.Hour)
-
-	validatorParticipantID, err := k.CreateParticipant(sdkCtx, types.Participant{
-		SchemaId:      1,
-		Role:          types.ParticipantRole_ISSUER_GRANTOR,
-		CorporationId: trkKeeper.RegisterCorp(validatorAddr),
-		Created:       &now,
-		Adjusted:      &now,
-		Modified:      &now,
-		OpState:       types.OnboardingState_VALIDATED,
-		EffectiveFrom: &pastTime,
-	})
-	require.NoError(t, err)
-
-	applicantParticipantID, err := k.CreateParticipant(sdkCtx, types.Participant{
-		SchemaId:                    1,
-		Role:                        types.ParticipantRole_ISSUER,
-		CorporationId:               trkKeeper.RegisterCorp(applicantAddr),
-		Created:                     &now,
-		Adjusted:                    &now,
-		Modified:                    &now,
-		ValidatorParticipantId:      validatorParticipantID,
-		OpState:                     types.OnboardingState_PENDING,
-		VsOperator:                  "", // empty — should skip
-		VsOperatorAuthzEnabled:      true,
-		VsOperatorAuthzWithFeegrant: true,
-	})
-	require.NoError(t, err)
-
-	delKeeper.Reset()
-
-	resp, err := ms.SetParticipantOPToValidated(ctx, &types.MsgSetParticipantOPToValidated{
-		Corporation:      validatorAddr,
-		Operator:         validatorAddr,
-		Id:               applicantParticipantID,
-		ValidationFees:   10,
-		IssuanceFees:     5,
-		VerificationFees: 3,
-		EffectiveUntil:   &futureTime,
-		OpSummaryDigest:  "sha384-validDigest",
-	})
-	require.NoError(t, err)
-	require.NotNil(t, resp)
-
-	// Neither AddPermToVSOA nor GrantFeeAllowance should be called
-	require.Len(t, delKeeper.AddPermToVSOACalls, 0)
-	require.Len(t, delKeeper.GrantFeeAllowanceCalls, 0)
-}
-
-// TestVSOA_GrantSkipsWhenNotEnabled verifies early return when
-// VsOperatorAuthzEnabled is false (even if VsOperator is set).
-func TestVSOA_GrantSkipsWhenNotEnabled(t *testing.T) {
-	k, ms, csKeeper, trkKeeper, ctx, delKeeper := setupMsgServerWithDelegation(t)
-	_ = trkKeeper
-	sdkCtx := sdk.UnwrapSDKContext(ctx)
-
-	blockTime := time.Date(2024, 6, 1, 0, 0, 0, 0, time.UTC)
-	sdkCtx = sdkCtx.WithBlockTime(blockTime)
-	ctx = sdk.WrapSDKContext(sdkCtx)
-
-	validatorAddr := sdk.AccAddress([]byte("test_validator______")).String()
-	applicantAddr := sdk.AccAddress([]byte("test_applicant______")).String()
-	vsOperator := sdk.AccAddress([]byte("test_vs_operator____")).String()
-
-	csKeeper.CreateMockCredentialSchema(1,
-		cstypes.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS,
-		cstypes.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS)
-
-	now := sdkCtx.BlockTime()
-	pastTime := now.Add(-1 * time.Hour)
-	futureTime := now.Add(365 * 24 * time.Hour)
-
-	validatorParticipantID, err := k.CreateParticipant(sdkCtx, types.Participant{
-		SchemaId:      1,
-		Role:          types.ParticipantRole_ISSUER_GRANTOR,
-		CorporationId: trkKeeper.RegisterCorp(validatorAddr),
-		Created:       &now,
-		Adjusted:      &now,
-		Modified:      &now,
-		OpState:       types.OnboardingState_VALIDATED,
-		EffectiveFrom: &pastTime,
-	})
-	require.NoError(t, err)
-
-	applicantParticipantID, err := k.CreateParticipant(sdkCtx, types.Participant{
-		SchemaId:                    1,
-		Role:                        types.ParticipantRole_ISSUER,
-		CorporationId:               trkKeeper.RegisterCorp(applicantAddr),
-		Created:                     &now,
-		Adjusted:                    &now,
-		Modified:                    &now,
-		ValidatorParticipantId:      validatorParticipantID,
-		OpState:                     types.OnboardingState_PENDING,
-		VsOperator:                  vsOperator,
-		VsOperatorAuthzEnabled:      false, // not enabled
-		VsOperatorAuthzWithFeegrant: true,
-	})
-	require.NoError(t, err)
-
-	delKeeper.Reset()
-
-	resp, err := ms.SetParticipantOPToValidated(ctx, &types.MsgSetParticipantOPToValidated{
-		Corporation:      validatorAddr,
-		Operator:         validatorAddr,
-		Id:               applicantParticipantID,
-		ValidationFees:   10,
-		IssuanceFees:     5,
-		VerificationFees: 3,
-		EffectiveUntil:   &futureTime,
-		OpSummaryDigest:  "sha384-validDigest",
-	})
-	require.NoError(t, err)
-	require.NotNil(t, resp)
-
-	// Grant path should be skipped entirely
-	require.Len(t, delKeeper.AddPermToVSOACalls, 0)
-	require.Len(t, delKeeper.GrantFeeAllowanceCalls, 0)
-}
-
-// TestVSOA_RevokeRemovesAndRevokesFeegrantWhenLastParticipant verifies that when
-// RevokeParticipant is called on the last participant in a VSOA, RemovePermFromVSOA
-// is called and RevokeFeeAllowance is called (feegrant fully revoked).
-func TestVSOA_RevokeRemovesAndRevokesFeegrantWhenLastParticipant(t *testing.T) {
-	k, ms, csKeeper, trkKeeper, ctx, delKeeper := setupMsgServerWithDelegation(t)
-	_ = trkKeeper
-	sdkCtx := sdk.UnwrapSDKContext(ctx)
-
-	blockTime := time.Date(2024, 6, 1, 0, 0, 0, 0, time.UTC)
-	sdkCtx = sdkCtx.WithBlockTime(blockTime)
-	ctx = sdk.WrapSDKContext(sdkCtx)
-
-	authority := sdk.AccAddress([]byte("test_authority______")).String()
-	vsOperator := sdk.AccAddress([]byte("test_vs_operator____")).String()
-
-	csKeeper.CreateMockCredentialSchema(1,
-		cstypes.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS,
-		cstypes.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS)
-
-	now := sdkCtx.BlockTime()
-	pastTime := now.Add(-1 * time.Hour)
-	futureTime := now.Add(365 * 24 * time.Hour)
-
-	// Create an active ISSUER participant with VSOA fields
-	participantID, err := k.CreateParticipant(sdkCtx, types.Participant{
-		SchemaId:                    1,
-		Role:                        types.ParticipantRole_ISSUER,
-		CorporationId:               trkKeeper.RegisterCorp(authority),
-		Created:                     &now,
-		Adjusted:                    &now,
-		Modified:                    &now,
-		OpState:                     types.OnboardingState_VALIDATED,
-		EffectiveFrom:               &pastTime,
-		EffectiveUntil:              &futureTime,
-		VsOperator:                  vsOperator,
-		VsOperatorAuthzEnabled:      true,
-		VsOperatorAuthzWithFeegrant: true,
-	})
-	require.NoError(t, err)
-
-	// Configure mock: RemovePermFromVSOA returns empty slice (no remaining participants)
-	delKeeper.RemovePermFromVSOARemainingPerms = []uint64{}
-
-	delKeeper.Reset()
-
-	_, err = ms.RevokeParticipant(ctx, &types.MsgRevokeParticipant{
-		Corporation: authority,
-		Operator:    authority,
-		Id:          participantID,
-	})
-	require.NoError(t, err)
-
-	// Verify RemovePermFromVSOA was called
-	require.Len(t, delKeeper.RemovePermFromVSOACalls, 1)
-	require.Equal(t, authority, delKeeper.RemovePermFromVSOACalls[0].Authority)
-	require.Equal(t, vsOperator, delKeeper.RemovePermFromVSOACalls[0].VsOperator)
-	require.Equal(t, participantID, delKeeper.RemovePermFromVSOACalls[0].PermID)
-
-	// Verify RevokeFeeAllowance was called (last participant, so full revoke)
-	require.Len(t, delKeeper.RevokeFeeAllowanceCalls, 1)
-	require.Equal(t, authority, delKeeper.RevokeFeeAllowanceCalls[0].Authority)
-	require.Equal(t, vsOperator, delKeeper.RevokeFeeAllowanceCalls[0].Grantee)
-
-	// GrantFeeAllowance should NOT be called (we revoke, not recalculate)
-	require.Len(t, delKeeper.GrantFeeAllowanceCalls, 0)
-}
-
-// TestVSOA_RevokeRecalculatesFeegrantWhenOtherParticipantsRemain verifies that when
-// RevokeParticipant is called but other participants remain in the VSOA, the feegrant
-// is recalculated (GrantFeeAllowance called with new expiry) rather than revoked.
-func TestVSOA_RevokeRecalculatesFeegrantWhenOtherParticipantsRemain(t *testing.T) {
-	k, ms, csKeeper, trkKeeper, ctx, delKeeper := setupMsgServerWithDelegation(t)
-	_ = trkKeeper
-	sdkCtx := sdk.UnwrapSDKContext(ctx)
-
-	blockTime := time.Date(2024, 6, 1, 0, 0, 0, 0, time.UTC)
-	sdkCtx = sdkCtx.WithBlockTime(blockTime)
-	ctx = sdk.WrapSDKContext(sdkCtx)
-
-	authority := sdk.AccAddress([]byte("test_authority______")).String()
-	vsOperator := sdk.AccAddress([]byte("test_vs_operator____")).String()
-
-	csKeeper.CreateMockCredentialSchema(1,
-		cstypes.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS,
-		cstypes.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS)
-
-	now := sdkCtx.BlockTime()
-	pastTime := now.Add(-1 * time.Hour)
-	futureTime1 := now.Add(365 * 24 * time.Hour)
-	futureTime2 := now.Add(730 * 24 * time.Hour) // 2 years out
-
-	// Create active ISSUER participant #1 (the one we will revoke)
-	participantID1, err := k.CreateParticipant(sdkCtx, types.Participant{
-		SchemaId:                    1,
-		Role:                        types.ParticipantRole_ISSUER,
-		CorporationId:               trkKeeper.RegisterCorp(authority),
-		Created:                     &now,
-		Adjusted:                    &now,
-		Modified:                    &now,
-		OpState:                     types.OnboardingState_VALIDATED,
-		EffectiveFrom:               &pastTime,
-		EffectiveUntil:              &futureTime1,
-		VsOperator:                  vsOperator,
-		VsOperatorAuthzEnabled:      true,
-		VsOperatorAuthzWithFeegrant: true,
-	})
-	require.NoError(t, err)
-
-	// Create active ISSUER participant #2 (remains in VSOA after revoke)
-	participantID2, err := k.CreateParticipant(sdkCtx, types.Participant{
-		SchemaId:                    1,
-		Role:                        types.ParticipantRole_ISSUER,
-		CorporationId:               trkKeeper.RegisterCorp(authority),
-		Created:                     &now,
-		Adjusted:                    &now,
-		Modified:                    &now,
-		OpState:                     types.OnboardingState_VALIDATED,
-		EffectiveFrom:               &pastTime,
-		EffectiveUntil:              &futureTime2,
-		VsOperator:                  vsOperator,
-		VsOperatorAuthzEnabled:      true,
-		VsOperatorAuthzWithFeegrant: true,
-	})
-	require.NoError(t, err)
-
-	// Configure mock: RemovePermFromVSOA returns remaining participant IDs
-	delKeeper.RemovePermFromVSOARemainingPerms = []uint64{participantID2}
-	// GetVSOAPermissions also returns remaining participant IDs (used by computeVSOAFeegrantExpiration)
-	delKeeper.GetVSOAPermissionsResult = []uint64{participantID2}
-
-	delKeeper.Reset()
-
-	_, err = ms.RevokeParticipant(ctx, &types.MsgRevokeParticipant{
-		Corporation: authority,
-		Operator:    authority,
-		Id:          participantID1,
-	})
-	require.NoError(t, err)
-
-	// RemovePermFromVSOA should be called
-	require.Len(t, delKeeper.RemovePermFromVSOACalls, 1)
-
-	// RevokeFeeAllowance should NOT be called (other participants remain)
-	require.Len(t, delKeeper.RevokeFeeAllowanceCalls, 0)
-
-	// GrantFeeAllowance should be called with recalculated expiration
-	require.Len(t, delKeeper.GrantFeeAllowanceCalls, 1)
-	require.Equal(t, authority, delKeeper.GrantFeeAllowanceCalls[0].Authority)
-	require.Equal(t, vsOperator, delKeeper.GrantFeeAllowanceCalls[0].Grantee)
-	// The expiration should be futureTime2 (the farthest remaining participant)
-	require.NotNil(t, delKeeper.GrantFeeAllowanceCalls[0].Expiration)
-	require.Equal(t, futureTime2.Unix(), delKeeper.GrantFeeAllowanceCalls[0].Expiration.Unix())
-}
-
-// TestVSOA_ComputeFeegrantExpirationReturnsNilForUnlimited verifies that when
-// any remaining participant has no effective_until (unlimited), the feegrant expiration
-// is nil (unlimited).
-func TestVSOA_ComputeFeegrantExpirationReturnsNilForUnlimited(t *testing.T) {
-	k, ms, csKeeper, trkKeeper, ctx, delKeeper := setupMsgServerWithDelegation(t)
-	_ = trkKeeper
-	sdkCtx := sdk.UnwrapSDKContext(ctx)
-
-	blockTime := time.Date(2024, 6, 1, 0, 0, 0, 0, time.UTC)
-	sdkCtx = sdkCtx.WithBlockTime(blockTime)
-	ctx = sdk.WrapSDKContext(sdkCtx)
-
-	authority := sdk.AccAddress([]byte("test_authority______")).String()
-	vsOperator := sdk.AccAddress([]byte("test_vs_operator____")).String()
-
-	csKeeper.CreateMockCredentialSchema(1,
-		cstypes.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS,
-		cstypes.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS)
-
-	now := sdkCtx.BlockTime()
-	pastTime := now.Add(-1 * time.Hour)
-	futureTime := now.Add(365 * 24 * time.Hour)
-
-	// Participant #1: the one we will revoke (has expiry)
-	participantID1, err := k.CreateParticipant(sdkCtx, types.Participant{
-		SchemaId:                    1,
-		Role:                        types.ParticipantRole_ISSUER,
-		CorporationId:               trkKeeper.RegisterCorp(authority),
-		Created:                     &now,
-		Adjusted:                    &now,
-		Modified:                    &now,
-		OpState:                     types.OnboardingState_VALIDATED,
-		EffectiveFrom:               &pastTime,
-		EffectiveUntil:              &futureTime,
-		VsOperator:                  vsOperator,
-		VsOperatorAuthzEnabled:      true,
-		VsOperatorAuthzWithFeegrant: true,
-	})
-	require.NoError(t, err)
-
-	// Participant #2: remaining participant with NO effective_until (unlimited)
-	participantID2, err := k.CreateParticipant(sdkCtx, types.Participant{
-		SchemaId:                    1,
-		Role:                        types.ParticipantRole_ISSUER,
-		CorporationId:               trkKeeper.RegisterCorp(authority),
-		Created:                     &now,
-		Adjusted:                    &now,
-		Modified:                    &now,
-		OpState:                     types.OnboardingState_VALIDATED,
-		EffectiveFrom:               &pastTime,
-		EffectiveUntil:              nil, // unlimited
-		VsOperator:                  vsOperator,
-		VsOperatorAuthzEnabled:      true,
-		VsOperatorAuthzWithFeegrant: true,
-	})
-	require.NoError(t, err)
-
-	// Configure mock
-	delKeeper.RemovePermFromVSOARemainingPerms = []uint64{participantID2}
-	delKeeper.GetVSOAPermissionsResult = []uint64{participantID2}
-
-	delKeeper.Reset()
-
-	_, err = ms.RevokeParticipant(ctx, &types.MsgRevokeParticipant{
-		Corporation: authority,
-		Operator:    authority,
-		Id:          participantID1,
-	})
-	require.NoError(t, err)
-
-	// GrantFeeAllowance should be called with nil expiration (unlimited)
-	require.Len(t, delKeeper.GrantFeeAllowanceCalls, 1)
-	require.Nil(t, delKeeper.GrantFeeAllowanceCalls[0].Expiration)
-}
-
-// TestVSOA_ComputeFeegrantExpirationReturnsMaxExpiry verifies that when
-// multiple remaining participants have different effective_until values, the feegrant
-// expiration is set to the farthest (maximum) value.
-func TestVSOA_ComputeFeegrantExpirationReturnsMaxExpiry(t *testing.T) {
-	k, ms, csKeeper, trkKeeper, ctx, delKeeper := setupMsgServerWithDelegation(t)
-	_ = trkKeeper
-	sdkCtx := sdk.UnwrapSDKContext(ctx)
-
-	blockTime := time.Date(2024, 6, 1, 0, 0, 0, 0, time.UTC)
-	sdkCtx = sdkCtx.WithBlockTime(blockTime)
-	ctx = sdk.WrapSDKContext(sdkCtx)
-
-	authority := sdk.AccAddress([]byte("test_authority______")).String()
-	vsOperator := sdk.AccAddress([]byte("test_vs_operator____")).String()
-
-	csKeeper.CreateMockCredentialSchema(1,
-		cstypes.IssuerOnboardingMode_ISSUER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS,
-		cstypes.VerifierOnboardingMode_VERIFIER_ONBOARDING_MODE_GRANTOR_VALIDATION_PROCESS)
-
-	now := sdkCtx.BlockTime()
-	pastTime := now.Add(-1 * time.Hour)
-	futureTime1 := now.Add(100 * 24 * time.Hour) // ~100 days
-	futureTime2 := now.Add(200 * 24 * time.Hour) // ~200 days
-	futureTime3 := now.Add(500 * 24 * time.Hour) // ~500 days (max)
-	futureTimeRevoked := now.Add(365 * 24 * time.Hour)
-
-	// Participant #1: the one we will revoke
-	participantID1, err := k.CreateParticipant(sdkCtx, types.Participant{
-		SchemaId:                    1,
-		Role:                        types.ParticipantRole_ISSUER,
-		CorporationId:               trkKeeper.RegisterCorp(authority),
-		Created:                     &now,
-		Adjusted:                    &now,
-		Modified:                    &now,
-		OpState:                     types.OnboardingState_VALIDATED,
-		EffectiveFrom:               &pastTime,
-		EffectiveUntil:              &futureTimeRevoked,
-		VsOperator:                  vsOperator,
-		VsOperatorAuthzEnabled:      true,
-		VsOperatorAuthzWithFeegrant: true,
-	})
-	require.NoError(t, err)
-
-	// Participant #2: remaining, expires in 100 days
-	participantID2, err := k.CreateParticipant(sdkCtx, types.Participant{
-		SchemaId:                    1,
-		Role:                        types.ParticipantRole_ISSUER,
-		CorporationId:               trkKeeper.RegisterCorp(authority),
-		Created:                     &now,
-		Adjusted:                    &now,
-		Modified:                    &now,
-		OpState:                     types.OnboardingState_VALIDATED,
-		EffectiveFrom:               &pastTime,
-		EffectiveUntil:              &futureTime1,
-		VsOperator:                  vsOperator,
-		VsOperatorAuthzEnabled:      true,
-		VsOperatorAuthzWithFeegrant: true,
-	})
-	require.NoError(t, err)
-
-	// Participant #3: remaining, expires in 200 days
-	participantID3, err := k.CreateParticipant(sdkCtx, types.Participant{
-		SchemaId:                    1,
-		Role:                        types.ParticipantRole_ISSUER,
-		CorporationId:               trkKeeper.RegisterCorp(authority),
-		Created:                     &now,
-		Adjusted:                    &now,
-		Modified:                    &now,
-		OpState:                     types.OnboardingState_VALIDATED,
-		EffectiveFrom:               &pastTime,
-		EffectiveUntil:              &futureTime2,
-		VsOperator:                  vsOperator,
-		VsOperatorAuthzEnabled:      true,
-		VsOperatorAuthzWithFeegrant: true,
-	})
-	require.NoError(t, err)
-
-	// Participant #4: remaining, expires in 500 days (the max)
-	participantID4, err := k.CreateParticipant(sdkCtx, types.Participant{
-		SchemaId:                    1,
-		Role:                        types.ParticipantRole_ISSUER,
-		CorporationId:               trkKeeper.RegisterCorp(authority),
-		Created:                     &now,
-		Adjusted:                    &now,
-		Modified:                    &now,
-		OpState:                     types.OnboardingState_VALIDATED,
-		EffectiveFrom:               &pastTime,
-		EffectiveUntil:              &futureTime3,
-		VsOperator:                  vsOperator,
-		VsOperatorAuthzEnabled:      true,
-		VsOperatorAuthzWithFeegrant: true,
-	})
-	require.NoError(t, err)
-
-	// Configure mock
-	delKeeper.RemovePermFromVSOARemainingPerms = []uint64{participantID2, participantID3, participantID4}
-	delKeeper.GetVSOAPermissionsResult = []uint64{participantID2, participantID3, participantID4}
-
-	delKeeper.Reset()
-
-	_, err = ms.RevokeParticipant(ctx, &types.MsgRevokeParticipant{
-		Corporation: authority,
-		Operator:    authority,
-		Id:          participantID1,
-	})
-	require.NoError(t, err)
-
-	// GrantFeeAllowance should be called with the maximum expiry (500 days)
-	require.Len(t, delKeeper.GrantFeeAllowanceCalls, 1)
-	require.NotNil(t, delKeeper.GrantFeeAllowanceCalls[0].Expiration)
-	require.Equal(t, futureTime3.Unix(), delKeeper.GrantFeeAllowanceCalls[0].Expiration.Unix())
+	require.Len(t, delKeeper.UpdateVSOACalls, 1)
+	require.Equal(t, applicantPermID, delKeeper.UpdateVSOACalls[0].ParticipantID)
+	require.True(t, delKeeper.UpdateVSOACalls[0].NewExpiration.Equal(future))
 }

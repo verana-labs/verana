@@ -26,8 +26,7 @@ import {
 
 export const MsgCreateRootParticipantAminoConverter: AminoConverter = {
   aminoType: "verana/x/pp/MsgCreateRootParticipant",
-  // [MOD-PP-MSG-7-3] spec v4 draft 13: perm.role is hardcoded to ECOSYSTEM;
-  // vs_operator is not set on root permissions.
+  // [MOD-PP-MSG-7-3] spec v4 draft 13: perm.role is hardcoded to ECOSYSTEM.
   toAmino: (m: MsgCreateRootParticipant) => clean({
     corporation: m.corporation ?? "",
     operator: m.operator ?? "",
@@ -38,6 +37,15 @@ export const MsgCreateRootParticipantAminoConverter: AminoConverter = {
     validation_fees: u64ToStr(m.validationFees),
     issuance_fees: u64ToStr(m.issuanceFees),
     verification_fees: u64ToStr(m.verificationFees),
+    // VSOA params (proto fields 10-15). The chain's aminojson encodes empty
+    // dont_omitempty Coin arrays as `null` (NOT []) and omits empty plain
+    // repeated/scalar fields. The sign bytes must match exactly.
+    vs_operator: m.vsOperator || undefined,
+    vs_operator_authz_msg_types: m.vsOperatorAuthzMsgTypes?.length ? m.vsOperatorAuthzMsgTypes : undefined,
+    vs_operator_authz_spend_limit: m.vsOperatorAuthzSpendLimit?.length ? m.vsOperatorAuthzSpendLimit : null,
+    vs_operator_authz_with_feegrant: m.vsOperatorAuthzWithFeegrant || undefined,
+    vs_operator_authz_fee_spend_limit: m.vsOperatorAuthzFeeSpendLimit?.length ? m.vsOperatorAuthzFeeSpendLimit : null,
+    vs_operator_authz_period: durationToAmino(m.vsOperatorAuthzPeriod),
   }),
   fromAmino: (a: any): MsgCreateRootParticipant =>
     MsgCreateRootParticipant.fromPartial({
@@ -50,6 +58,12 @@ export const MsgCreateRootParticipantAminoConverter: AminoConverter = {
       validationFees: strToU64(a.validation_fees) != null ? Number(strToU64(a.validation_fees)!.toString()) : 0,
       issuanceFees: strToU64(a.issuance_fees) != null ? Number(strToU64(a.issuance_fees)!.toString()) : 0,
       verificationFees: strToU64(a.verification_fees) != null ? Number(strToU64(a.verification_fees)!.toString()) : 0,
+      vsOperator: a.vs_operator ?? "",
+      vsOperatorAuthzMsgTypes: a.vs_operator_authz_msg_types ?? [],
+      vsOperatorAuthzSpendLimit: a.vs_operator_authz_spend_limit ?? [],
+      vsOperatorAuthzWithFeegrant: a.vs_operator_authz_with_feegrant ?? false,
+      vsOperatorAuthzFeeSpendLimit: a.vs_operator_authz_fee_spend_limit ?? [],
+      vsOperatorAuthzPeriod: aminoToDuration(a.vs_operator_authz_period),
     }),
 };
 
@@ -97,11 +111,11 @@ export const MsgStartParticipantOPAminoConverter: AminoConverter = {
     issuance_fees: m.issuanceFees ? { value: u64ToStr(m.issuanceFees.value) } : undefined,
     verification_fees: m.verificationFees ? { value: u64ToStr(m.verificationFees.value) } : undefined,
     vs_operator: m.vsOperator || undefined,
-    vs_operator_authz_enabled: m.vsOperatorAuthzEnabled || undefined,
-    vs_operator_authz_spend_limit: m.vsOperatorAuthzSpendLimit ?? [],
+    vs_operator_authz_msg_types: m.vsOperatorAuthzMsgTypes?.length ? m.vsOperatorAuthzMsgTypes : undefined,
+    vs_operator_authz_spend_limit: m.vsOperatorAuthzSpendLimit?.length ? m.vsOperatorAuthzSpendLimit : null,
     vs_operator_authz_with_feegrant: m.vsOperatorAuthzWithFeegrant || undefined,
-    vs_operator_authz_fee_spend_limit: m.vsOperatorAuthzFeeSpendLimit ?? [],
-    vs_operator_authz_spend_period: durationToAmino(m.vsOperatorAuthzSpendPeriod),
+    vs_operator_authz_fee_spend_limit: m.vsOperatorAuthzFeeSpendLimit?.length ? m.vsOperatorAuthzFeeSpendLimit : null,
+    vs_operator_authz_period: durationToAmino(m.vsOperatorAuthzPeriod),
   }),
   fromAmino: (a: any): MsgStartParticipantOP =>
     MsgStartParticipantOP.fromPartial({
@@ -114,11 +128,11 @@ export const MsgStartParticipantOPAminoConverter: AminoConverter = {
       issuanceFees: a.issuance_fees ? { value: Number(a.issuance_fees.value ?? a.issuance_fees) } : undefined,
       verificationFees: a.verification_fees ? { value: Number(a.verification_fees.value ?? a.verification_fees) } : undefined,
       vsOperator: a.vs_operator ?? "",
-      vsOperatorAuthzEnabled: a.vs_operator_authz_enabled ?? false,
+      vsOperatorAuthzMsgTypes: a.vs_operator_authz_msg_types ?? [],
       vsOperatorAuthzSpendLimit: a.vs_operator_authz_spend_limit ?? [],
       vsOperatorAuthzWithFeegrant: a.vs_operator_authz_with_feegrant ?? false,
       vsOperatorAuthzFeeSpendLimit: a.vs_operator_authz_fee_spend_limit ?? [],
-      vsOperatorAuthzSpendPeriod: aminoToDuration(a.vs_operator_authz_spend_period),
+      vsOperatorAuthzPeriod: aminoToDuration(a.vs_operator_authz_period),
     }),
 };
 
@@ -149,8 +163,8 @@ export const MsgSetParticipantOPToValidatedAminoConverter: AminoConverter = {
     issuance_fees: u64ToStr(m.issuanceFees),
     verification_fees: u64ToStr(m.verificationFees),
     op_summary_digest: m.opSummaryDigest ?? "",
-    issuance_fee_discount: u64ToStr(m.issuanceFeeDiscount),
-    verification_fee_discount: u64ToStr(m.verificationFeeDiscount),
+    issuance_fee_discount: u64ToStrIfNonZero(m.issuanceFeeDiscount),
+    verification_fee_discount: u64ToStrIfNonZero(m.verificationFeeDiscount),
   }),
   fromAmino: (a: any): MsgSetParticipantOPToValidated =>
     MsgSetParticipantOPToValidated.fromPartial({
@@ -192,11 +206,11 @@ export const MsgCreateOrUpdateParticipantSessionAminoConverter: AminoConverter =
     corporation: m.corporation ?? "",
     operator: m.operator ?? "",
     id: m.id ?? "",
-    issuer_participant_id: u64ToStr(m.issuerParticipantId),
-    verifier_participant_id: u64ToStr(m.verifierParticipantId),
+    issuer_participant_id: u64ToStrIfNonZero(m.issuerParticipantId),
+    verifier_participant_id: u64ToStrIfNonZero(m.verifierParticipantId),
     agent_participant_id: u64ToStr(m.agentParticipantId),
     wallet_agent_participant_id: u64ToStr(m.walletAgentParticipantId),
-    digest: m.digest ?? undefined,
+    digest: m.digest || undefined,
   }),
   fromAmino: (a: any): MsgCreateOrUpdateParticipantSession =>
     MsgCreateOrUpdateParticipantSession.fromPartial({
@@ -239,12 +253,14 @@ export const MsgRepayParticipantSlashedTrustDepositAminoConverter: AminoConverte
     corporation: m.corporation ?? "",
     operator: m.operator ?? "",
     id: u64ToStr(m.id),
+    amount: u64ToStrIfNonZero(m.amount),
   }),
   fromAmino: (a: any): MsgRepayParticipantSlashedTrustDeposit =>
     MsgRepayParticipantSlashedTrustDeposit.fromPartial({
       corporation: a.corporation ?? "",
       operator: a.operator ?? "",
       id: strToU64(a.id) != null ? Number(strToU64(a.id)!.toString()) : 0,
+      amount: strToU64(a.amount) != null ? Number(strToU64(a.amount)!.toString()) : 0,
     }),
 };
 
@@ -261,11 +277,11 @@ export const MsgSelfCreateParticipantAminoConverter: AminoConverter = {
     verification_fees: u64ToStrIfNonZero(m.verificationFees),
     validation_fees: u64ToStrIfNonZero(m.validationFees),
     vs_operator: m.vsOperator || undefined,
-    vs_operator_authz_enabled: m.vsOperatorAuthzEnabled || undefined,
-    vs_operator_authz_spend_limit: m.vsOperatorAuthzSpendLimit ?? [],
+    vs_operator_authz_msg_types: m.vsOperatorAuthzMsgTypes?.length ? m.vsOperatorAuthzMsgTypes : undefined,
+    vs_operator_authz_spend_limit: m.vsOperatorAuthzSpendLimit?.length ? m.vsOperatorAuthzSpendLimit : null,
     vs_operator_authz_with_feegrant: m.vsOperatorAuthzWithFeegrant || undefined,
-    vs_operator_authz_fee_spend_limit: m.vsOperatorAuthzFeeSpendLimit ?? [],
-    vs_operator_authz_spend_period: durationToAmino(m.vsOperatorAuthzSpendPeriod),
+    vs_operator_authz_fee_spend_limit: m.vsOperatorAuthzFeeSpendLimit?.length ? m.vsOperatorAuthzFeeSpendLimit : null,
+    vs_operator_authz_period: durationToAmino(m.vsOperatorAuthzPeriod),
   }),
   fromAmino: (a: any): MsgSelfCreateParticipant =>
     MsgSelfCreateParticipant.fromPartial({
@@ -279,10 +295,10 @@ export const MsgSelfCreateParticipantAminoConverter: AminoConverter = {
       verificationFees: strToU64(a.verification_fees) != null ? Number(strToU64(a.verification_fees)!.toString()) : 0,
       validationFees: strToU64(a.validation_fees) != null ? Number(strToU64(a.validation_fees)!.toString()) : 0,
       vsOperator: a.vs_operator ?? "",
-      vsOperatorAuthzEnabled: a.vs_operator_authz_enabled ?? false,
+      vsOperatorAuthzMsgTypes: a.vs_operator_authz_msg_types ?? [],
       vsOperatorAuthzSpendLimit: a.vs_operator_authz_spend_limit ?? [],
       vsOperatorAuthzWithFeegrant: a.vs_operator_authz_with_feegrant ?? false,
       vsOperatorAuthzFeeSpendLimit: a.vs_operator_authz_fee_spend_limit ?? [],
-      vsOperatorAuthzSpendPeriod: aminoToDuration(a.vs_operator_authz_spend_period),
+      vsOperatorAuthzPeriod: aminoToDuration(a.vs_operator_authz_period),
     }),
 };

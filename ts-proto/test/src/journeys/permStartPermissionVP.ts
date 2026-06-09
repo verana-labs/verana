@@ -11,7 +11,7 @@
  */
 
 import {
-  createDirectAccountFromMnemonic,
+  createAccountFromMnemonic,
   createSigningClient,
   getAccountInfo,
   calculateFeeWithSimulation,
@@ -54,7 +54,7 @@ async function main() {
 
   // Step 2: Connect operator
   console.log("Step 2: Setting up operator wallet...");
-  const wallet = await createDirectAccountFromMnemonic(COOLUSER_MNEMONIC, OPERATOR_INDEX);
+  const wallet = await createAccountFromMnemonic(COOLUSER_MNEMONIC, OPERATOR_INDEX);
   const account = await getAccountInfo(wallet);
   const client = await createSigningClient(wallet);
   console.log(`  Connected as ${account.address}`);
@@ -88,7 +88,6 @@ async function main() {
         issuanceFees: OptionalUInt64.fromPartial({ value: 5 }),
         verificationFees: OptionalUInt64.fromPartial({ value: 5 }),
         vsOperator: "",
-        vsOperatorAuthzEnabled: false,
       }),
     };
 
@@ -99,7 +98,7 @@ async function main() {
       throw new Error(`Failed to start VP: ${result.rawLog}`);
     }
 
-    const vpPermId = extractIdFromEvents(result.events || [], "start_permission_vp", ["permission_id", "id"]);
+    const vpPermId = extractIdFromEvents(result.events || [], "start_participant_op", ["participant_id", "id"]);
 
     console.log();
     console.log("SUCCESS! Permission VP started!");

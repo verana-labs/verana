@@ -18,13 +18,34 @@ const (
 var (
 	// ParamsKey is the prefix to retrieve all Params
 	ParamsKey = collections.NewPrefix("p_de")
-	// OperatorAuthorizationKey is the prefix for OperatorAuthorization storage
+
+	// OperatorAuthorizationKey is the prefix for OperatorAuthorization storage,
+	// keyed by its own uint64 id (spec v4-rc2).
 	OperatorAuthorizationKey = collections.NewPrefix("oa_de")
+	// OperatorAuthorizationByCorpOpKey is the secondary index
+	// (corporation_id, operator) -> OperatorAuthorization.id.
+	OperatorAuthorizationByCorpOpKey = collections.NewPrefix("oa_corpop_de")
+	// OperatorAuthorizationSeqKey backs the OperatorAuthorization id counter.
+	OperatorAuthorizationSeqKey = collections.NewPrefix("oa_seq_de")
+
 	// OperatorAuthorizationUsageKey is the prefix for OperatorAuthorizationUsage
-	// storage — per-authorization spend-limit ledger for [AUTHZ-CHECK-1].
+	// storage — per-authorization spend-limit ledger for [AUTHZ-CHECK-1], keyed
+	// by the parent OperatorAuthorization id.
 	OperatorAuthorizationUsageKey = collections.NewPrefix("oau_de")
-	// FeeGrantKey is the prefix for FeeGrant storage
+
+	// FeeGrantKey is the prefix for FeeGrant storage, keyed by the composite
+	// (grantor_corporation_id, grantee).
 	FeeGrantKey = collections.NewPrefix("fg_de")
-	// VSOperatorAuthorizationKey is the prefix for VSOperatorAuthorization storage
+
+	// VSOperatorAuthorizationKey is the prefix for VSOperatorAuthorization
+	// storage, keyed by its own uint64 id (spec v4-rc2).
 	VSOperatorAuthorizationKey = collections.NewPrefix("vsoa_de")
+	// VSOAByCorpOpKey is the secondary index
+	// (corporation_id, vs_operator) -> VSOperatorAuthorization.id.
+	VSOAByCorpOpKey = collections.NewPrefix("vsoa_corpop_de")
+	// VSOAByParticipantKey is the tertiary index participant_id -> vsoa.id, used
+	// for global participant_id uniqueness and MSG-6 / MSG-9 lookups.
+	VSOAByParticipantKey = collections.NewPrefix("vsoa_part_de")
+	// VSOASeqKey backs the VSOperatorAuthorization id counter.
+	VSOASeqKey = collections.NewPrefix("vsoa_seq_de")
 )

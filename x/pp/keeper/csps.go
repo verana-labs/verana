@@ -128,21 +128,24 @@ func (ms msgServer) validateCreateOrUpdateParticipantSessionPreconditions(ctx sd
 		primaryParticipant = issuerParticipant
 	}
 
-	// [AUTHZ-CHECK-3] MUST pass for this (authority, operator, participant) tuple
+	// [AUTHZ-CHECK-3] MUST pass for the primary participant. Resolve co.id once and
+	// run the record-based check; the record's existence + msg_type membership now
+	// encodes whether the VS operator is authorized.
 	if ms.delegationKeeper == nil {
 		return fmt.Errorf("delegation keeper is required for VS operator authorization")
 	}
-	if err := ms.delegationKeeper.CheckVSOperatorAuthorization(
+	primaryCorpID, err := ms.corpIDFromAccount(ctx, msg.Corporation)
+	if err != nil {
+		return err
+	}
+	if err := ms.delegationKeeper.CheckVSOperatorAuthorizationOnParticipant(
 		ctx,
-		msg.Corporation,
+		primaryCorpID,
 		msg.Operator,
+		primaryParticipant.Id,
+		types.MsgCreateOrUpdateParticipantSessionTypeURL,
 	); err != nil {
 		return fmt.Errorf("VS operator authorization check failed: %w", err)
-	}
-
-	// Check that participant.vs_operator_authz_enabled is true
-	if !primaryParticipant.VsOperatorAuthzEnabled {
-		return fmt.Errorf("VS operator authorization is not enabled for participant %d", primaryParticipant.Id)
 	}
 
 	// agent: Load agent_participant from agent_participant_id

@@ -6,8 +6,6 @@
 
 /* eslint-disable */
 import * as _m0 from "protobufjs/minimal";
-import { Coin } from "../../../cosmos/base/v1beta1/coin";
-import { Duration } from "../../../google/protobuf/duration";
 import { Timestamp } from "../../../google/protobuf/timestamp";
 import Long = require("long");
 
@@ -156,15 +154,12 @@ export interface Participant {
    */
   issuanceFeeDiscount: number;
   verificationFeeDiscount: number;
-  /** VS Operator fields (spec v4) */
+  /**
+   * vs_operator is the VS operator account (spec v4-rc2, still used). The former
+   * per-permission VS-operator-authz config (fields 38-42) moved into the DE
+   * module's VSOperatorAuthorization.records[] per spec v4-rc2.
+   */
   vsOperator: string;
-  vsOperatorAuthzEnabled: boolean;
-  vsOperatorAuthzSpendLimit: Coin[];
-  vsOperatorAuthzWithFeegrant: boolean;
-  vsOperatorAuthzFeeSpendLimit: Coin[];
-  vsOperatorAuthzSpendPeriod:
-    | Duration
-    | undefined;
   /**
    * corporation_id is the uint64 FK to Corporation.id (resolved from the
    * signing corporation account via AUTHZ-CHECK-5). Replaces former field 5.
@@ -230,11 +225,6 @@ function createBaseParticipant(): Participant {
     issuanceFeeDiscount: 0,
     verificationFeeDiscount: 0,
     vsOperator: "",
-    vsOperatorAuthzEnabled: false,
-    vsOperatorAuthzSpendLimit: [],
-    vsOperatorAuthzWithFeegrant: false,
-    vsOperatorAuthzFeeSpendLimit: [],
-    vsOperatorAuthzSpendPeriod: undefined,
     corporationId: 0,
   };
 }
@@ -327,21 +317,6 @@ export const Participant = {
     }
     if (message.vsOperator !== "") {
       writer.uint32(298).string(message.vsOperator);
-    }
-    if (message.vsOperatorAuthzEnabled !== false) {
-      writer.uint32(304).bool(message.vsOperatorAuthzEnabled);
-    }
-    for (const v of message.vsOperatorAuthzSpendLimit) {
-      Coin.encode(v!, writer.uint32(314).fork()).ldelim();
-    }
-    if (message.vsOperatorAuthzWithFeegrant !== false) {
-      writer.uint32(320).bool(message.vsOperatorAuthzWithFeegrant);
-    }
-    for (const v of message.vsOperatorAuthzFeeSpendLimit) {
-      Coin.encode(v!, writer.uint32(330).fork()).ldelim();
-    }
-    if (message.vsOperatorAuthzSpendPeriod !== undefined) {
-      Duration.encode(message.vsOperatorAuthzSpendPeriod, writer.uint32(338).fork()).ldelim();
     }
     if (message.corporationId !== 0) {
       writer.uint32(344).uint64(message.corporationId);
@@ -559,41 +534,6 @@ export const Participant = {
 
           message.vsOperator = reader.string();
           continue;
-        case 38:
-          if (tag !== 304) {
-            break;
-          }
-
-          message.vsOperatorAuthzEnabled = reader.bool();
-          continue;
-        case 39:
-          if (tag !== 314) {
-            break;
-          }
-
-          message.vsOperatorAuthzSpendLimit.push(Coin.decode(reader, reader.uint32()));
-          continue;
-        case 40:
-          if (tag !== 320) {
-            break;
-          }
-
-          message.vsOperatorAuthzWithFeegrant = reader.bool();
-          continue;
-        case 41:
-          if (tag !== 330) {
-            break;
-          }
-
-          message.vsOperatorAuthzFeeSpendLimit.push(Coin.decode(reader, reader.uint32()));
-          continue;
-        case 42:
-          if (tag !== 338) {
-            break;
-          }
-
-          message.vsOperatorAuthzSpendPeriod = Duration.decode(reader, reader.uint32());
-          continue;
         case 43:
           if (tag !== 344) {
             break;
@@ -645,21 +585,6 @@ export const Participant = {
         ? globalThis.Number(object.verificationFeeDiscount)
         : 0,
       vsOperator: isSet(object.vsOperator) ? globalThis.String(object.vsOperator) : "",
-      vsOperatorAuthzEnabled: isSet(object.vsOperatorAuthzEnabled)
-        ? globalThis.Boolean(object.vsOperatorAuthzEnabled)
-        : false,
-      vsOperatorAuthzSpendLimit: globalThis.Array.isArray(object?.vsOperatorAuthzSpendLimit)
-        ? object.vsOperatorAuthzSpendLimit.map((e: any) => Coin.fromJSON(e))
-        : [],
-      vsOperatorAuthzWithFeegrant: isSet(object.vsOperatorAuthzWithFeegrant)
-        ? globalThis.Boolean(object.vsOperatorAuthzWithFeegrant)
-        : false,
-      vsOperatorAuthzFeeSpendLimit: globalThis.Array.isArray(object?.vsOperatorAuthzFeeSpendLimit)
-        ? object.vsOperatorAuthzFeeSpendLimit.map((e: any) => Coin.fromJSON(e))
-        : [],
-      vsOperatorAuthzSpendPeriod: isSet(object.vsOperatorAuthzSpendPeriod)
-        ? Duration.fromJSON(object.vsOperatorAuthzSpendPeriod)
-        : undefined,
       corporationId: isSet(object.corporationId) ? globalThis.Number(object.corporationId) : 0,
     };
   },
@@ -753,21 +678,6 @@ export const Participant = {
     if (message.vsOperator !== "") {
       obj.vsOperator = message.vsOperator;
     }
-    if (message.vsOperatorAuthzEnabled !== false) {
-      obj.vsOperatorAuthzEnabled = message.vsOperatorAuthzEnabled;
-    }
-    if (message.vsOperatorAuthzSpendLimit?.length) {
-      obj.vsOperatorAuthzSpendLimit = message.vsOperatorAuthzSpendLimit.map((e) => Coin.toJSON(e));
-    }
-    if (message.vsOperatorAuthzWithFeegrant !== false) {
-      obj.vsOperatorAuthzWithFeegrant = message.vsOperatorAuthzWithFeegrant;
-    }
-    if (message.vsOperatorAuthzFeeSpendLimit?.length) {
-      obj.vsOperatorAuthzFeeSpendLimit = message.vsOperatorAuthzFeeSpendLimit.map((e) => Coin.toJSON(e));
-    }
-    if (message.vsOperatorAuthzSpendPeriod !== undefined) {
-      obj.vsOperatorAuthzSpendPeriod = Duration.toJSON(message.vsOperatorAuthzSpendPeriod);
-    }
     if (message.corporationId !== 0) {
       obj.corporationId = Math.round(message.corporationId);
     }
@@ -808,14 +718,6 @@ export const Participant = {
     message.issuanceFeeDiscount = object.issuanceFeeDiscount ?? 0;
     message.verificationFeeDiscount = object.verificationFeeDiscount ?? 0;
     message.vsOperator = object.vsOperator ?? "";
-    message.vsOperatorAuthzEnabled = object.vsOperatorAuthzEnabled ?? false;
-    message.vsOperatorAuthzSpendLimit = object.vsOperatorAuthzSpendLimit?.map((e) => Coin.fromPartial(e)) || [];
-    message.vsOperatorAuthzWithFeegrant = object.vsOperatorAuthzWithFeegrant ?? false;
-    message.vsOperatorAuthzFeeSpendLimit = object.vsOperatorAuthzFeeSpendLimit?.map((e) => Coin.fromPartial(e)) || [];
-    message.vsOperatorAuthzSpendPeriod =
-      (object.vsOperatorAuthzSpendPeriod !== undefined && object.vsOperatorAuthzSpendPeriod !== null)
-        ? Duration.fromPartial(object.vsOperatorAuthzSpendPeriod)
-        : undefined;
     message.corporationId = object.corporationId ?? 0;
     return message;
   },

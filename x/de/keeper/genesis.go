@@ -16,31 +16,57 @@ func (k Keeper) InitGenesis(ctx context.Context, genState types.GenesisState) er
 		return err
 	}
 
+	var maxOAID uint64
 	for _, oa := range genState.OperatorAuthorizations {
-		key := collections.Join(oa.Corporation, oa.Operator)
-		if err := k.OperatorAuthorizations.Set(ctx, key, oa); err != nil {
+		if err := k.OperatorAuthorizations.Set(ctx, oa.Id, oa); err != nil {
 			return fmt.Errorf("failed to set operator authorization: %w", err)
+		}
+		if err := k.OperatorAuthorizationByCorpOp.Set(ctx, collections.Join(oa.CorporationId, oa.Operator), oa.Id); err != nil {
+			return fmt.Errorf("failed to set operator authorization index: %w", err)
+		}
+		if oa.Id > maxOAID {
+			maxOAID = oa.Id
+		}
+	}
+	if maxOAID > 0 {
+		if err := k.OperatorAuthorizationSeq.Set(ctx, maxOAID); err != nil {
+			return fmt.Errorf("failed to seed operator authorization sequence: %w", err)
+		}
+	}
+
+	for _, usage := range genState.OperatorAuthorizationUsages {
+		if err := k.OperatorAuthorizationUsage.Set(ctx, usage.OperatorAuthorizationId, usage); err != nil {
+			return fmt.Errorf("failed to set operator authorization usage: %w", err)
 		}
 	}
 
 	for _, fg := range genState.FeeGrants {
-		key := collections.Join(fg.Grantor, fg.Grantee)
+		key := collections.Join(fg.GrantorCorporationId, fg.Grantee)
 		if err := k.FeeGrants.Set(ctx, key, fg); err != nil {
 			return fmt.Errorf("failed to set fee grant: %w", err)
 		}
 	}
 
+	var maxVSOAID uint64
 	for _, vsoa := range genState.VsOperatorAuthorizations {
-		key := collections.Join(vsoa.Corporation, vsoa.VsOperator)
-		if err := k.VSOperatorAuthorizations.Set(ctx, key, vsoa); err != nil {
+		if err := k.VSOperatorAuthorizations.Set(ctx, vsoa.Id, vsoa); err != nil {
 			return fmt.Errorf("failed to set vs operator authorization: %w", err)
 		}
+		if err := k.VSOAByCorpOp.Set(ctx, collections.Join(vsoa.CorporationId, vsoa.VsOperator), vsoa.Id); err != nil {
+			return fmt.Errorf("failed to set vs operator authorization index: %w", err)
+		}
+		for _, rec := range vsoa.Records {
+			if err := k.VSOAByParticipant.Set(ctx, rec.ParticipantId, vsoa.Id); err != nil {
+				return fmt.Errorf("failed to set participant index: %w", err)
+			}
+		}
+		if vsoa.Id > maxVSOAID {
+			maxVSOAID = vsoa.Id
+		}
 	}
-
-	for _, usage := range genState.OperatorAuthorizationUsages {
-		key := collections.Join(usage.Corporation, usage.Operator)
-		if err := k.OperatorAuthorizationUsage.Set(ctx, key, usage); err != nil {
-			return fmt.Errorf("failed to set operator authorization usage: %w", err)
+	if maxVSOAID > 0 {
+		if err := k.VSOASeq.Set(ctx, maxVSOAID); err != nil {
+			return fmt.Errorf("failed to seed vs operator authorization sequence: %w", err)
 		}
 	}
 
@@ -57,69 +83,56 @@ func (k Keeper) ExportGenesis(ctx context.Context) (*types.GenesisState, error) 
 		return nil, err
 	}
 
-	// Export operator authorizations
+	// Operator authorizations (keyed by id).
 	oaList := []types.OperatorAuthorization{}
-	if err := k.OperatorAuthorizations.Walk(ctx, nil, func(key collections.Pair[string, string], val types.OperatorAuthorization) (bool, error) {
+	if err := k.OperatorAuthorizations.Walk(ctx, nil, func(_ uint64, val types.OperatorAuthorization) (bool, error) {
 		oaList = append(oaList, val)
 		return false, nil
 	}); err != nil {
 		return nil, fmt.Errorf("failed to export operator authorizations: %w", err)
 	}
-	sort.Slice(oaList, func(i, j int) bool {
-		if oaList[i].Corporation != oaList[j].Corporation {
-			return oaList[i].Corporation < oaList[j].Corporation
-		}
-		return oaList[i].Operator < oaList[j].Operator
-	})
+	sort.Slice(oaList, func(i, j int) bool { return oaList[i].Id < oaList[j].Id })
 	genesis.OperatorAuthorizations = oaList
 
-	// Export fee grants
-	fgList := []types.FeeGrant{}
-	if err := k.FeeGrants.Walk(ctx, nil, func(key collections.Pair[string, string], val types.FeeGrant) (bool, error) {
-		fgList = append(fgList, val)
-		return false, nil
-	}); err != nil {
-		return nil, fmt.Errorf("failed to export fee grants: %w", err)
-	}
-	sort.Slice(fgList, func(i, j int) bool {
-		if fgList[i].Grantor != fgList[j].Grantor {
-			return fgList[i].Grantor < fgList[j].Grantor
-		}
-		return fgList[i].Grantee < fgList[j].Grantee
-	})
-	genesis.FeeGrants = fgList
-
-	// Export VS operator authorizations
-	vsoaList := []types.VSOperatorAuthorization{}
-	if err := k.VSOperatorAuthorizations.Walk(ctx, nil, func(key collections.Pair[string, string], val types.VSOperatorAuthorization) (bool, error) {
-		vsoaList = append(vsoaList, val)
-		return false, nil
-	}); err != nil {
-		return nil, fmt.Errorf("failed to export vs operator authorizations: %w", err)
-	}
-	sort.Slice(vsoaList, func(i, j int) bool {
-		if vsoaList[i].Corporation != vsoaList[j].Corporation {
-			return vsoaList[i].Corporation < vsoaList[j].Corporation
-		}
-		return vsoaList[i].VsOperator < vsoaList[j].VsOperator
-	})
-	genesis.VsOperatorAuthorizations = vsoaList
-
-	// Export operator authorization usages
+	// Operator authorization usages (keyed by operator_authorization_id).
 	usageList := []types.OperatorAuthorizationUsage{}
-	if err := k.OperatorAuthorizationUsage.Walk(ctx, nil, func(key collections.Pair[string, string], val types.OperatorAuthorizationUsage) (bool, error) {
+	if err := k.OperatorAuthorizationUsage.Walk(ctx, nil, func(_ uint64, val types.OperatorAuthorizationUsage) (bool, error) {
 		usageList = append(usageList, val)
 		return false, nil
 	}); err != nil {
 		return nil, fmt.Errorf("failed to export operator authorization usages: %w", err)
 	}
 	sort.Slice(usageList, func(i, j int) bool {
-		if usageList[i].Corporation != usageList[j].Corporation {
-			return usageList[i].Corporation < usageList[j].Corporation
-		}
-		return usageList[i].Operator < usageList[j].Operator
+		return usageList[i].OperatorAuthorizationId < usageList[j].OperatorAuthorizationId
 	})
 	genesis.OperatorAuthorizationUsages = usageList
+
+	// Fee grants (composite key).
+	fgList := []types.FeeGrant{}
+	if err := k.FeeGrants.Walk(ctx, nil, func(_ collections.Pair[uint64, string], val types.FeeGrant) (bool, error) {
+		fgList = append(fgList, val)
+		return false, nil
+	}); err != nil {
+		return nil, fmt.Errorf("failed to export fee grants: %w", err)
+	}
+	sort.Slice(fgList, func(i, j int) bool {
+		if fgList[i].GrantorCorporationId != fgList[j].GrantorCorporationId {
+			return fgList[i].GrantorCorporationId < fgList[j].GrantorCorporationId
+		}
+		return fgList[i].Grantee < fgList[j].Grantee
+	})
+	genesis.FeeGrants = fgList
+
+	// VS operator authorizations (keyed by id).
+	vsoaList := []types.VSOperatorAuthorization{}
+	if err := k.VSOperatorAuthorizations.Walk(ctx, nil, func(_ uint64, val types.VSOperatorAuthorization) (bool, error) {
+		vsoaList = append(vsoaList, val)
+		return false, nil
+	}); err != nil {
+		return nil, fmt.Errorf("failed to export vs operator authorizations: %w", err)
+	}
+	sort.Slice(vsoaList, func(i, j int) bool { return vsoaList[i].Id < vsoaList[j].Id })
+	genesis.VsOperatorAuthorizations = vsoaList
 
 	return genesis, nil
 }

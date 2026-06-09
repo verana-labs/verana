@@ -51,11 +51,11 @@ export interface MsgStartParticipantOP {
     | undefined;
   /** vs_operator: the account of the Verifiable Service (optional) */
   vsOperator: string;
-  vsOperatorAuthzEnabled: boolean;
+  vsOperatorAuthzMsgTypes: string[];
   vsOperatorAuthzSpendLimit: Coin[];
   vsOperatorAuthzWithFeegrant: boolean;
   vsOperatorAuthzFeeSpendLimit: Coin[];
-  vsOperatorAuthzSpendPeriod: Duration | undefined;
+  vsOperatorAuthzPeriod: Duration | undefined;
 }
 
 /** MsgStartParticipantOPResponse defines the Msg/StartParticipantOP response type */
@@ -115,9 +115,8 @@ export interface MsgCancelParticipantOPLastRequestResponse {
 
 export interface MsgCreateRootParticipant {
   /**
-   * [MOD-PP-MSG-7-1] Spec v4 parameters.
-   * participant.role is hardcoded to ECOSYSTEM by the handler per [MOD-PP-MSG-7-3];
-   * vs_operator is not set on root participants.
+   * [MOD-PP-MSG-7-1] Spec v4-rc2 parameters.
+   * participant.role is hardcoded to ECOSYSTEM by the handler per [MOD-PP-MSG-7-3].
    */
   corporation: string;
   operator: string;
@@ -128,6 +127,17 @@ export interface MsgCreateRootParticipant {
   validationFees: number;
   issuanceFees: number;
   verificationFees: number;
+  /** vs_operator: the account of the Verifiable Service (optional, spec v4-rc2). */
+  vsOperator: string;
+  /**
+   * vs_operator_authz_msg_types: presence triggers VSOA record creation; MUST be a
+   * subset of [SetParticipantOPToValidated] for root participants.
+   */
+  vsOperatorAuthzMsgTypes: string[];
+  vsOperatorAuthzSpendLimit: Coin[];
+  vsOperatorAuthzWithFeegrant: boolean;
+  vsOperatorAuthzFeeSpendLimit: Coin[];
+  vsOperatorAuthzPeriod: Duration | undefined;
 }
 
 export interface MsgCreateRootParticipantResponse {
@@ -215,11 +225,11 @@ export interface MsgSelfCreateParticipant {
   validationFees: number;
   /** vs_operator: the account of the Verifiable Service (optional) */
   vsOperator: string;
-  vsOperatorAuthzEnabled: boolean;
+  vsOperatorAuthzMsgTypes: string[];
   vsOperatorAuthzSpendLimit: Coin[];
   vsOperatorAuthzWithFeegrant: boolean;
   vsOperatorAuthzFeeSpendLimit: Coin[];
-  vsOperatorAuthzSpendPeriod: Duration | undefined;
+  vsOperatorAuthzPeriod: Duration | undefined;
 }
 
 export interface MsgSelfCreateParticipantResponse {
@@ -356,11 +366,11 @@ function createBaseMsgStartParticipantOP(): MsgStartParticipantOP {
     issuanceFees: undefined,
     verificationFees: undefined,
     vsOperator: "",
-    vsOperatorAuthzEnabled: false,
+    vsOperatorAuthzMsgTypes: [],
     vsOperatorAuthzSpendLimit: [],
     vsOperatorAuthzWithFeegrant: false,
     vsOperatorAuthzFeeSpendLimit: [],
-    vsOperatorAuthzSpendPeriod: undefined,
+    vsOperatorAuthzPeriod: undefined,
   };
 }
 
@@ -393,8 +403,8 @@ export const MsgStartParticipantOP = {
     if (message.vsOperator !== "") {
       writer.uint32(74).string(message.vsOperator);
     }
-    if (message.vsOperatorAuthzEnabled !== false) {
-      writer.uint32(80).bool(message.vsOperatorAuthzEnabled);
+    for (const v of message.vsOperatorAuthzMsgTypes) {
+      writer.uint32(122).string(v!);
     }
     for (const v of message.vsOperatorAuthzSpendLimit) {
       Coin.encode(v!, writer.uint32(90).fork()).ldelim();
@@ -405,8 +415,8 @@ export const MsgStartParticipantOP = {
     for (const v of message.vsOperatorAuthzFeeSpendLimit) {
       Coin.encode(v!, writer.uint32(106).fork()).ldelim();
     }
-    if (message.vsOperatorAuthzSpendPeriod !== undefined) {
-      Duration.encode(message.vsOperatorAuthzSpendPeriod, writer.uint32(114).fork()).ldelim();
+    if (message.vsOperatorAuthzPeriod !== undefined) {
+      Duration.encode(message.vsOperatorAuthzPeriod, writer.uint32(114).fork()).ldelim();
     }
     return writer;
   },
@@ -481,12 +491,12 @@ export const MsgStartParticipantOP = {
 
           message.vsOperator = reader.string();
           continue;
-        case 10:
-          if (tag !== 80) {
+        case 15:
+          if (tag !== 122) {
             break;
           }
 
-          message.vsOperatorAuthzEnabled = reader.bool();
+          message.vsOperatorAuthzMsgTypes.push(reader.string());
           continue;
         case 11:
           if (tag !== 90) {
@@ -514,7 +524,7 @@ export const MsgStartParticipantOP = {
             break;
           }
 
-          message.vsOperatorAuthzSpendPeriod = Duration.decode(reader, reader.uint32());
+          message.vsOperatorAuthzPeriod = Duration.decode(reader, reader.uint32());
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -538,9 +548,9 @@ export const MsgStartParticipantOP = {
       issuanceFees: isSet(object.issuanceFees) ? OptionalUInt64.fromJSON(object.issuanceFees) : undefined,
       verificationFees: isSet(object.verificationFees) ? OptionalUInt64.fromJSON(object.verificationFees) : undefined,
       vsOperator: isSet(object.vsOperator) ? globalThis.String(object.vsOperator) : "",
-      vsOperatorAuthzEnabled: isSet(object.vsOperatorAuthzEnabled)
-        ? globalThis.Boolean(object.vsOperatorAuthzEnabled)
-        : false,
+      vsOperatorAuthzMsgTypes: globalThis.Array.isArray(object?.vsOperatorAuthzMsgTypes)
+        ? object.vsOperatorAuthzMsgTypes.map((e: any) => globalThis.String(e))
+        : [],
       vsOperatorAuthzSpendLimit: globalThis.Array.isArray(object?.vsOperatorAuthzSpendLimit)
         ? object.vsOperatorAuthzSpendLimit.map((e: any) => Coin.fromJSON(e))
         : [],
@@ -550,8 +560,8 @@ export const MsgStartParticipantOP = {
       vsOperatorAuthzFeeSpendLimit: globalThis.Array.isArray(object?.vsOperatorAuthzFeeSpendLimit)
         ? object.vsOperatorAuthzFeeSpendLimit.map((e: any) => Coin.fromJSON(e))
         : [],
-      vsOperatorAuthzSpendPeriod: isSet(object.vsOperatorAuthzSpendPeriod)
-        ? Duration.fromJSON(object.vsOperatorAuthzSpendPeriod)
+      vsOperatorAuthzPeriod: isSet(object.vsOperatorAuthzPeriod)
+        ? Duration.fromJSON(object.vsOperatorAuthzPeriod)
         : undefined,
     };
   },
@@ -585,8 +595,8 @@ export const MsgStartParticipantOP = {
     if (message.vsOperator !== "") {
       obj.vsOperator = message.vsOperator;
     }
-    if (message.vsOperatorAuthzEnabled !== false) {
-      obj.vsOperatorAuthzEnabled = message.vsOperatorAuthzEnabled;
+    if (message.vsOperatorAuthzMsgTypes?.length) {
+      obj.vsOperatorAuthzMsgTypes = message.vsOperatorAuthzMsgTypes;
     }
     if (message.vsOperatorAuthzSpendLimit?.length) {
       obj.vsOperatorAuthzSpendLimit = message.vsOperatorAuthzSpendLimit.map((e) => Coin.toJSON(e));
@@ -597,8 +607,8 @@ export const MsgStartParticipantOP = {
     if (message.vsOperatorAuthzFeeSpendLimit?.length) {
       obj.vsOperatorAuthzFeeSpendLimit = message.vsOperatorAuthzFeeSpendLimit.map((e) => Coin.toJSON(e));
     }
-    if (message.vsOperatorAuthzSpendPeriod !== undefined) {
-      obj.vsOperatorAuthzSpendPeriod = Duration.toJSON(message.vsOperatorAuthzSpendPeriod);
+    if (message.vsOperatorAuthzPeriod !== undefined) {
+      obj.vsOperatorAuthzPeriod = Duration.toJSON(message.vsOperatorAuthzPeriod);
     }
     return obj;
   },
@@ -623,13 +633,13 @@ export const MsgStartParticipantOP = {
       ? OptionalUInt64.fromPartial(object.verificationFees)
       : undefined;
     message.vsOperator = object.vsOperator ?? "";
-    message.vsOperatorAuthzEnabled = object.vsOperatorAuthzEnabled ?? false;
+    message.vsOperatorAuthzMsgTypes = object.vsOperatorAuthzMsgTypes?.map((e) => e) || [];
     message.vsOperatorAuthzSpendLimit = object.vsOperatorAuthzSpendLimit?.map((e) => Coin.fromPartial(e)) || [];
     message.vsOperatorAuthzWithFeegrant = object.vsOperatorAuthzWithFeegrant ?? false;
     message.vsOperatorAuthzFeeSpendLimit = object.vsOperatorAuthzFeeSpendLimit?.map((e) => Coin.fromPartial(e)) || [];
-    message.vsOperatorAuthzSpendPeriod =
-      (object.vsOperatorAuthzSpendPeriod !== undefined && object.vsOperatorAuthzSpendPeriod !== null)
-        ? Duration.fromPartial(object.vsOperatorAuthzSpendPeriod)
+    message.vsOperatorAuthzPeriod =
+      (object.vsOperatorAuthzPeriod !== undefined && object.vsOperatorAuthzPeriod !== null)
+        ? Duration.fromPartial(object.vsOperatorAuthzPeriod)
         : undefined;
     return message;
   },
@@ -1233,6 +1243,12 @@ function createBaseMsgCreateRootParticipant(): MsgCreateRootParticipant {
     validationFees: 0,
     issuanceFees: 0,
     verificationFees: 0,
+    vsOperator: "",
+    vsOperatorAuthzMsgTypes: [],
+    vsOperatorAuthzSpendLimit: [],
+    vsOperatorAuthzWithFeegrant: false,
+    vsOperatorAuthzFeeSpendLimit: [],
+    vsOperatorAuthzPeriod: undefined,
   };
 }
 
@@ -1264,6 +1280,24 @@ export const MsgCreateRootParticipant = {
     }
     if (message.verificationFees !== 0) {
       writer.uint32(72).uint64(message.verificationFees);
+    }
+    if (message.vsOperator !== "") {
+      writer.uint32(82).string(message.vsOperator);
+    }
+    for (const v of message.vsOperatorAuthzMsgTypes) {
+      writer.uint32(90).string(v!);
+    }
+    for (const v of message.vsOperatorAuthzSpendLimit) {
+      Coin.encode(v!, writer.uint32(98).fork()).ldelim();
+    }
+    if (message.vsOperatorAuthzWithFeegrant !== false) {
+      writer.uint32(104).bool(message.vsOperatorAuthzWithFeegrant);
+    }
+    for (const v of message.vsOperatorAuthzFeeSpendLimit) {
+      Coin.encode(v!, writer.uint32(114).fork()).ldelim();
+    }
+    if (message.vsOperatorAuthzPeriod !== undefined) {
+      Duration.encode(message.vsOperatorAuthzPeriod, writer.uint32(122).fork()).ldelim();
     }
     return writer;
   },
@@ -1338,6 +1372,48 @@ export const MsgCreateRootParticipant = {
 
           message.verificationFees = longToNumber(reader.uint64() as Long);
           continue;
+        case 10:
+          if (tag !== 82) {
+            break;
+          }
+
+          message.vsOperator = reader.string();
+          continue;
+        case 11:
+          if (tag !== 90) {
+            break;
+          }
+
+          message.vsOperatorAuthzMsgTypes.push(reader.string());
+          continue;
+        case 12:
+          if (tag !== 98) {
+            break;
+          }
+
+          message.vsOperatorAuthzSpendLimit.push(Coin.decode(reader, reader.uint32()));
+          continue;
+        case 13:
+          if (tag !== 104) {
+            break;
+          }
+
+          message.vsOperatorAuthzWithFeegrant = reader.bool();
+          continue;
+        case 14:
+          if (tag !== 114) {
+            break;
+          }
+
+          message.vsOperatorAuthzFeeSpendLimit.push(Coin.decode(reader, reader.uint32()));
+          continue;
+        case 15:
+          if (tag !== 122) {
+            break;
+          }
+
+          message.vsOperatorAuthzPeriod = Duration.decode(reader, reader.uint32());
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -1358,6 +1434,22 @@ export const MsgCreateRootParticipant = {
       validationFees: isSet(object.validationFees) ? globalThis.Number(object.validationFees) : 0,
       issuanceFees: isSet(object.issuanceFees) ? globalThis.Number(object.issuanceFees) : 0,
       verificationFees: isSet(object.verificationFees) ? globalThis.Number(object.verificationFees) : 0,
+      vsOperator: isSet(object.vsOperator) ? globalThis.String(object.vsOperator) : "",
+      vsOperatorAuthzMsgTypes: globalThis.Array.isArray(object?.vsOperatorAuthzMsgTypes)
+        ? object.vsOperatorAuthzMsgTypes.map((e: any) => globalThis.String(e))
+        : [],
+      vsOperatorAuthzSpendLimit: globalThis.Array.isArray(object?.vsOperatorAuthzSpendLimit)
+        ? object.vsOperatorAuthzSpendLimit.map((e: any) => Coin.fromJSON(e))
+        : [],
+      vsOperatorAuthzWithFeegrant: isSet(object.vsOperatorAuthzWithFeegrant)
+        ? globalThis.Boolean(object.vsOperatorAuthzWithFeegrant)
+        : false,
+      vsOperatorAuthzFeeSpendLimit: globalThis.Array.isArray(object?.vsOperatorAuthzFeeSpendLimit)
+        ? object.vsOperatorAuthzFeeSpendLimit.map((e: any) => Coin.fromJSON(e))
+        : [],
+      vsOperatorAuthzPeriod: isSet(object.vsOperatorAuthzPeriod)
+        ? Duration.fromJSON(object.vsOperatorAuthzPeriod)
+        : undefined,
     };
   },
 
@@ -1390,6 +1482,24 @@ export const MsgCreateRootParticipant = {
     if (message.verificationFees !== 0) {
       obj.verificationFees = Math.round(message.verificationFees);
     }
+    if (message.vsOperator !== "") {
+      obj.vsOperator = message.vsOperator;
+    }
+    if (message.vsOperatorAuthzMsgTypes?.length) {
+      obj.vsOperatorAuthzMsgTypes = message.vsOperatorAuthzMsgTypes;
+    }
+    if (message.vsOperatorAuthzSpendLimit?.length) {
+      obj.vsOperatorAuthzSpendLimit = message.vsOperatorAuthzSpendLimit.map((e) => Coin.toJSON(e));
+    }
+    if (message.vsOperatorAuthzWithFeegrant !== false) {
+      obj.vsOperatorAuthzWithFeegrant = message.vsOperatorAuthzWithFeegrant;
+    }
+    if (message.vsOperatorAuthzFeeSpendLimit?.length) {
+      obj.vsOperatorAuthzFeeSpendLimit = message.vsOperatorAuthzFeeSpendLimit.map((e) => Coin.toJSON(e));
+    }
+    if (message.vsOperatorAuthzPeriod !== undefined) {
+      obj.vsOperatorAuthzPeriod = Duration.toJSON(message.vsOperatorAuthzPeriod);
+    }
     return obj;
   },
 
@@ -1407,6 +1517,15 @@ export const MsgCreateRootParticipant = {
     message.validationFees = object.validationFees ?? 0;
     message.issuanceFees = object.issuanceFees ?? 0;
     message.verificationFees = object.verificationFees ?? 0;
+    message.vsOperator = object.vsOperator ?? "";
+    message.vsOperatorAuthzMsgTypes = object.vsOperatorAuthzMsgTypes?.map((e) => e) || [];
+    message.vsOperatorAuthzSpendLimit = object.vsOperatorAuthzSpendLimit?.map((e) => Coin.fromPartial(e)) || [];
+    message.vsOperatorAuthzWithFeegrant = object.vsOperatorAuthzWithFeegrant ?? false;
+    message.vsOperatorAuthzFeeSpendLimit = object.vsOperatorAuthzFeeSpendLimit?.map((e) => Coin.fromPartial(e)) || [];
+    message.vsOperatorAuthzPeriod =
+      (object.vsOperatorAuthzPeriod !== undefined && object.vsOperatorAuthzPeriod !== null)
+        ? Duration.fromPartial(object.vsOperatorAuthzPeriod)
+        : undefined;
     return message;
   },
 };
@@ -2332,11 +2451,11 @@ function createBaseMsgSelfCreateParticipant(): MsgSelfCreateParticipant {
     verificationFees: 0,
     validationFees: 0,
     vsOperator: "",
-    vsOperatorAuthzEnabled: false,
+    vsOperatorAuthzMsgTypes: [],
     vsOperatorAuthzSpendLimit: [],
     vsOperatorAuthzWithFeegrant: false,
     vsOperatorAuthzFeeSpendLimit: [],
-    vsOperatorAuthzSpendPeriod: undefined,
+    vsOperatorAuthzPeriod: undefined,
   };
 }
 
@@ -2372,8 +2491,8 @@ export const MsgSelfCreateParticipant = {
     if (message.vsOperator !== "") {
       writer.uint32(82).string(message.vsOperator);
     }
-    if (message.vsOperatorAuthzEnabled !== false) {
-      writer.uint32(88).bool(message.vsOperatorAuthzEnabled);
+    for (const v of message.vsOperatorAuthzMsgTypes) {
+      writer.uint32(130).string(v!);
     }
     for (const v of message.vsOperatorAuthzSpendLimit) {
       Coin.encode(v!, writer.uint32(98).fork()).ldelim();
@@ -2384,8 +2503,8 @@ export const MsgSelfCreateParticipant = {
     for (const v of message.vsOperatorAuthzFeeSpendLimit) {
       Coin.encode(v!, writer.uint32(114).fork()).ldelim();
     }
-    if (message.vsOperatorAuthzSpendPeriod !== undefined) {
-      Duration.encode(message.vsOperatorAuthzSpendPeriod, writer.uint32(122).fork()).ldelim();
+    if (message.vsOperatorAuthzPeriod !== undefined) {
+      Duration.encode(message.vsOperatorAuthzPeriod, writer.uint32(122).fork()).ldelim();
     }
     return writer;
   },
@@ -2467,12 +2586,12 @@ export const MsgSelfCreateParticipant = {
 
           message.vsOperator = reader.string();
           continue;
-        case 11:
-          if (tag !== 88) {
+        case 16:
+          if (tag !== 130) {
             break;
           }
 
-          message.vsOperatorAuthzEnabled = reader.bool();
+          message.vsOperatorAuthzMsgTypes.push(reader.string());
           continue;
         case 12:
           if (tag !== 98) {
@@ -2500,7 +2619,7 @@ export const MsgSelfCreateParticipant = {
             break;
           }
 
-          message.vsOperatorAuthzSpendPeriod = Duration.decode(reader, reader.uint32());
+          message.vsOperatorAuthzPeriod = Duration.decode(reader, reader.uint32());
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -2525,9 +2644,9 @@ export const MsgSelfCreateParticipant = {
       verificationFees: isSet(object.verificationFees) ? globalThis.Number(object.verificationFees) : 0,
       validationFees: isSet(object.validationFees) ? globalThis.Number(object.validationFees) : 0,
       vsOperator: isSet(object.vsOperator) ? globalThis.String(object.vsOperator) : "",
-      vsOperatorAuthzEnabled: isSet(object.vsOperatorAuthzEnabled)
-        ? globalThis.Boolean(object.vsOperatorAuthzEnabled)
-        : false,
+      vsOperatorAuthzMsgTypes: globalThis.Array.isArray(object?.vsOperatorAuthzMsgTypes)
+        ? object.vsOperatorAuthzMsgTypes.map((e: any) => globalThis.String(e))
+        : [],
       vsOperatorAuthzSpendLimit: globalThis.Array.isArray(object?.vsOperatorAuthzSpendLimit)
         ? object.vsOperatorAuthzSpendLimit.map((e: any) => Coin.fromJSON(e))
         : [],
@@ -2537,8 +2656,8 @@ export const MsgSelfCreateParticipant = {
       vsOperatorAuthzFeeSpendLimit: globalThis.Array.isArray(object?.vsOperatorAuthzFeeSpendLimit)
         ? object.vsOperatorAuthzFeeSpendLimit.map((e: any) => Coin.fromJSON(e))
         : [],
-      vsOperatorAuthzSpendPeriod: isSet(object.vsOperatorAuthzSpendPeriod)
-        ? Duration.fromJSON(object.vsOperatorAuthzSpendPeriod)
+      vsOperatorAuthzPeriod: isSet(object.vsOperatorAuthzPeriod)
+        ? Duration.fromJSON(object.vsOperatorAuthzPeriod)
         : undefined,
     };
   },
@@ -2575,8 +2694,8 @@ export const MsgSelfCreateParticipant = {
     if (message.vsOperator !== "") {
       obj.vsOperator = message.vsOperator;
     }
-    if (message.vsOperatorAuthzEnabled !== false) {
-      obj.vsOperatorAuthzEnabled = message.vsOperatorAuthzEnabled;
+    if (message.vsOperatorAuthzMsgTypes?.length) {
+      obj.vsOperatorAuthzMsgTypes = message.vsOperatorAuthzMsgTypes;
     }
     if (message.vsOperatorAuthzSpendLimit?.length) {
       obj.vsOperatorAuthzSpendLimit = message.vsOperatorAuthzSpendLimit.map((e) => Coin.toJSON(e));
@@ -2587,8 +2706,8 @@ export const MsgSelfCreateParticipant = {
     if (message.vsOperatorAuthzFeeSpendLimit?.length) {
       obj.vsOperatorAuthzFeeSpendLimit = message.vsOperatorAuthzFeeSpendLimit.map((e) => Coin.toJSON(e));
     }
-    if (message.vsOperatorAuthzSpendPeriod !== undefined) {
-      obj.vsOperatorAuthzSpendPeriod = Duration.toJSON(message.vsOperatorAuthzSpendPeriod);
+    if (message.vsOperatorAuthzPeriod !== undefined) {
+      obj.vsOperatorAuthzPeriod = Duration.toJSON(message.vsOperatorAuthzPeriod);
     }
     return obj;
   },
@@ -2608,13 +2727,13 @@ export const MsgSelfCreateParticipant = {
     message.verificationFees = object.verificationFees ?? 0;
     message.validationFees = object.validationFees ?? 0;
     message.vsOperator = object.vsOperator ?? "";
-    message.vsOperatorAuthzEnabled = object.vsOperatorAuthzEnabled ?? false;
+    message.vsOperatorAuthzMsgTypes = object.vsOperatorAuthzMsgTypes?.map((e) => e) || [];
     message.vsOperatorAuthzSpendLimit = object.vsOperatorAuthzSpendLimit?.map((e) => Coin.fromPartial(e)) || [];
     message.vsOperatorAuthzWithFeegrant = object.vsOperatorAuthzWithFeegrant ?? false;
     message.vsOperatorAuthzFeeSpendLimit = object.vsOperatorAuthzFeeSpendLimit?.map((e) => Coin.fromPartial(e)) || [];
-    message.vsOperatorAuthzSpendPeriod =
-      (object.vsOperatorAuthzSpendPeriod !== undefined && object.vsOperatorAuthzSpendPeriod !== null)
-        ? Duration.fromPartial(object.vsOperatorAuthzSpendPeriod)
+    message.vsOperatorAuthzPeriod =
+      (object.vsOperatorAuthzPeriod !== undefined && object.vsOperatorAuthzPeriod !== null)
+        ? Duration.fromPartial(object.vsOperatorAuthzPeriod)
         : undefined;
     return message;
   },

@@ -6,6 +6,8 @@ import (
 
 	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	detypes "github.com/verana-labs/verana/x/de/types"
 )
 
 // MockTrustDepositKeeper is a no-op mock satisfying x/cs / x/pp /
@@ -48,83 +50,51 @@ func (m *MockTrustDepositKeeper) BurnEcosystemSlashedTrustDeposit(_ sdk.Context,
 type MockDelegationKeeper struct {
 	ErrToReturn error
 
-	RemovePermFromVSOARemainingPerms []uint64
-	GetVSOAPermissionsResult         []uint64
-
-	AddPermToVSOACalls      []AddPermToVSOACall
-	RemovePermFromVSOACalls []RemovePermFromVSOACall
-	GrantFeeAllowanceCalls  []GrantFeeAllowanceCall
-	RevokeFeeAllowanceCalls []RevokeFeeAllowanceCall
+	GrantVSOACalls  []GrantVSOACall
+	RevokeVSOACalls []uint64 // participant ids
+	UpdateVSOACalls []UpdateVSOACall
 }
 
-type AddPermToVSOACall struct {
-	Authority, VsOperator string
-	PermID                uint64
+type GrantVSOACall struct {
+	CorporationID uint64
+	VsOperator    string
+	Record        detypes.ParticipantAuthorizationRecord
 }
 
-type RemovePermFromVSOACall struct {
-	Authority, VsOperator string
-	PermID                uint64
-}
-
-type GrantFeeAllowanceCall struct {
-	Authority, Grantee string
-	MsgTypes           []string
-	Expiration         *time.Time
-	SpendLimit         sdk.Coins
-	Period             *time.Duration
-}
-
-type RevokeFeeAllowanceCall struct {
-	Authority, Grantee string
+type UpdateVSOACall struct {
+	ParticipantID uint64
+	NewExpiration time.Time
 }
 
 func (m *MockDelegationKeeper) Reset() {
-	m.AddPermToVSOACalls = nil
-	m.RemovePermFromVSOACalls = nil
-	m.GrantFeeAllowanceCalls = nil
-	m.RevokeFeeAllowanceCalls = nil
+	m.GrantVSOACalls = nil
+	m.RevokeVSOACalls = nil
+	m.UpdateVSOACalls = nil
 }
 
 func (m *MockDelegationKeeper) CheckOperatorAuthorization(_ context.Context, _, _, _ string, _ time.Time) error {
 	return m.ErrToReturn
 }
 
-func (m *MockDelegationKeeper) CheckVSOperatorAuthorization(_ context.Context, _, _ string) error {
+func (m *MockDelegationKeeper) CheckVSOperatorAuthorizationOnParticipant(_ context.Context, _ uint64, _ string, _ uint64, _ string) error {
 	return m.ErrToReturn
 }
 
-func (m *MockDelegationKeeper) AddPermToVSOA(_ context.Context, authority, vsOperator string, permID uint64) error {
-	m.AddPermToVSOACalls = append(m.AddPermToVSOACalls, AddPermToVSOACall{Authority: authority, VsOperator: vsOperator, PermID: permID})
+func (m *MockDelegationKeeper) CheckVSOperatorFeeGrant(_ context.Context, _ uint64) error {
 	return m.ErrToReturn
 }
 
-func (m *MockDelegationKeeper) RemovePermFromVSOA(_ context.Context, authority, vsOperator string, permID uint64) ([]uint64, error) {
-	m.RemovePermFromVSOACalls = append(m.RemovePermFromVSOACalls, RemovePermFromVSOACall{Authority: authority, VsOperator: vsOperator, PermID: permID})
-	return m.RemovePermFromVSOARemainingPerms, m.ErrToReturn
-}
-
-func (m *MockDelegationKeeper) GetVSOAPermissions(_ context.Context, _, _ string) ([]uint64, error) {
-	return m.GetVSOAPermissionsResult, m.ErrToReturn
-}
-
-func (m *MockDelegationKeeper) HasOperatorAuthorization(_ context.Context, _, _ string) (bool, error) {
-	return false, m.ErrToReturn
-}
-
-func (m *MockDelegationKeeper) GrantFeeAllowance(_ context.Context, authority string, grantee string, msgTypes []string, expiration *time.Time, spendLimit sdk.Coins, period *time.Duration) error {
-	m.GrantFeeAllowanceCalls = append(m.GrantFeeAllowanceCalls, GrantFeeAllowanceCall{
-		Authority:  authority,
-		Grantee:    grantee,
-		MsgTypes:   msgTypes,
-		Expiration: expiration,
-		SpendLimit: spendLimit,
-		Period:     period,
-	})
+func (m *MockDelegationKeeper) GrantVSOperatorAuthorization(_ context.Context, corporationID uint64, vsOperator string, record detypes.ParticipantAuthorizationRecord) error {
+	m.GrantVSOACalls = append(m.GrantVSOACalls, GrantVSOACall{CorporationID: corporationID, VsOperator: vsOperator, Record: record})
 	return m.ErrToReturn
 }
 
-func (m *MockDelegationKeeper) RevokeFeeAllowance(_ context.Context, authority, grantee string) error {
-	m.RevokeFeeAllowanceCalls = append(m.RevokeFeeAllowanceCalls, RevokeFeeAllowanceCall{Authority: authority, Grantee: grantee})
+func (m *MockDelegationKeeper) RevokeVSOperatorAuthorization(_ context.Context, participantID uint64) error {
+	m.RevokeVSOACalls = append(m.RevokeVSOACalls, participantID)
+	return m.ErrToReturn
+}
+
+func (m *MockDelegationKeeper) UpdateVSOperatorAuthorizationExpiration(_ context.Context, participantID uint64, newExpiration time.Time) error {
+	m.UpdateVSOACalls = append(m.UpdateVSOACalls, UpdateVSOACall{ParticipantID: participantID, NewExpiration: newExpiration})
 	return m.ErrToReturn
 }
