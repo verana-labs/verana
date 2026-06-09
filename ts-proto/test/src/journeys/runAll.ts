@@ -31,11 +31,17 @@ const tests: TestConfig[] = [
   // Bootstrap: corporation, ecosystem, governance framework, operator authz.
   { name: "CO: Create Corporation",                script: "test:co-create" },
   { name: "DE: Grant Operator Authorization",      script: "test:de-grant-auth" },
+  { name: "CO: Update Corporation",                script: "test:co-update" },
+  { name: "DE: Revoke Operator Authorization",     script: "test:de-revoke-auth" },
   { name: "EC: Create Ecosystem",                  script: "test:ec-create" },
   { name: "GF: Add Governance Framework Document", script: "test:gf-add-doc" },
   { name: "GF: Increase Active GF Version",        script: "test:gf-increase-version" },
   { name: "EC: Update Ecosystem",                  script: "test:ec-update" },
   { name: "EC: Archive Ecosystem",                 script: "test:ec-archive" },
+  // CS chain: authz -> create schema -> schema authorization policy (create/increase/revoke)
+  { name: "DE: Grant CS Operator Authorization",   script: "test:de-grant-cs-auth" },
+  { name: "CS: Create Credential Schema",          script: "test:cs-create" },
+  { name: "CS: Schema Authorization Policy",       script: "test:cs-policy" },
   { name: "DE: Grant PERM Operator Authorization", script: "test:de-grant-perm-auth" },
   // PERM module — every participant transaction, all in SIGN_MODE_LEGACY_AMINO_JSON.
   { name: "PERM: Create Root Participant",            script: "test:perm-create-root" },
@@ -49,6 +55,7 @@ const tests: TestConfig[] = [
   { name: "PERM: Self Create Participant",            script: "test:perm-create" },
   { name: "PERM: Slash Participant Trust Deposit",    script: "test:perm-slash" },
   { name: "PERM: Repay Slashed Trust Deposit",        script: "test:perm-repay" },
+  { name: "TD: Slash Trust Deposit (governance)",     script: "test:td-slash" },
   { name: "XR: ExchangeRateAuthorization (gov+operator amino)", script: "test:xr-authz" },
 ];
 
