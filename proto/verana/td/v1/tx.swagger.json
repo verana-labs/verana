@@ -231,9 +231,10 @@
           "type": "string",
           "description": "authority is the address that controls the module (defaults to x/gov unless overwritten)."
         },
-        "corporation": {
+        "corporation_id": {
           "type": "string",
-          "title": "corporation is the address of the corporation whose trust deposit will be slashed"
+          "format": "uint64",
+          "title": "corporation_id is the registered Corporation id whose trust deposit will be slashed"
         },
         "deposit": {
           "type": "string",

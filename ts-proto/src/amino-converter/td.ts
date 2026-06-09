@@ -4,6 +4,7 @@ import {
   MsgRepaySlashedTrustDeposit,
   MsgSlashTrustDeposit,
 } from "../codec/verana/td/v1/tx";
+import { strToU64, u64ToStrIfNonZero } from "./util/helpers";
 
 export const MsgReclaimTrustDepositYieldAminoConverter: AminoConverter = {
   aminoType: "verana/x/td/MsgReclaimTrustDepositYield",
@@ -36,17 +37,17 @@ export const MsgRepaySlashedTrustDepositAminoConverter: AminoConverter = {
 
 export const MsgSlashTrustDepositAminoConverter: AminoConverter = {
   aminoType: "verana/x/td/MsgSlashTrustDeposit",
-  // [MOD-TD-MSG-5-1] spec v4 draft 13 adds mandatory reason.
-  toAmino: ({ authority, corporation, deposit, reason }: MsgSlashTrustDeposit) => ({
+  // [MOD-TD-MSG-5] v4-rc3: target corporation_id (uint64); reason mandatory.
+  toAmino: ({ authority, corporationId, deposit, reason }: MsgSlashTrustDeposit) => ({
     authority,
-    corporation,
+    corporation_id: u64ToStrIfNonZero(corporationId),
     deposit,
     reason,
   }),
   fromAmino: (value: any) =>
     MsgSlashTrustDeposit.fromPartial({
       authority: value.authority,
-      corporation: value.corporation,
+      corporationId: strToU64(value.corporation_id) != null ? Number(strToU64(value.corporation_id)!.toString()) : 0,
       deposit: value.deposit,
       reason: value.reason,
     }),

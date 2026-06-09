@@ -16,9 +16,9 @@ import (
 	"github.com/verana-labs/verana/x/td/types"
 )
 
-func setupMsgServer(t testing.TB) (keeper.Keeper, types.MsgServer, context.Context) {
-	k, ctx := keepertest.TrustdepositKeeper(t)
-	return k, keeper.NewMsgServerImpl(k), ctx
+func setupMsgServer(t testing.TB) (keeper.Keeper, types.MsgServer, context.Context, *keepertest.MockTDCorporationKeeper) {
+	k, ctx, _, coKeeper := keepertest.TrustdepositKeeperWithCorp(t)
+	return k, keeper.NewMsgServerImpl(k), ctx, coKeeper
 }
 
 func TestMsgServer(t *testing.T) {

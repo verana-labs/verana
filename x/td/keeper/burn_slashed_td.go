@@ -19,8 +19,14 @@ func (k Keeper) BurnEcosystemSlashedTrustDeposit(ctx sdk.Context, account string
 		return fmt.Errorf("deposit must be greater than 0")
 	}
 
+	// Resolve the account to its corporation_id (the storage key).
+	corpID, err := k.resolveCorporationID(ctx, account)
+	if err != nil {
+		return err
+	}
+
 	// Load existing TrustDeposit entry (must exist)
-	td, err := k.TrustDeposit.Get(ctx, account)
+	td, err := k.TrustDeposit.Get(ctx, corpID)
 	if err != nil {
 		return fmt.Errorf("trust deposit entry not found for account %s: %w", account, err)
 	}
@@ -31,14 +37,14 @@ func (k Keeper) BurnEcosystemSlashedTrustDeposit(ctx sdk.Context, account string
 	}
 
 	// [MOD-TD-MSG-7-3] Execution
-	if err := k.executeBurnEcosystemSlashedTrustDeposit(ctx, account, td, amount); err != nil {
+	if err := k.executeBurnEcosystemSlashedTrustDeposit(ctx, corpID, account, td, amount); err != nil {
 		return fmt.Errorf("failed to execute burn ecosystem slashed trust deposit: %w", err)
 	}
 
 	return nil
 }
 
-func (k Keeper) executeBurnEcosystemSlashedTrustDeposit(ctx sdk.Context, account string, td types.TrustDeposit, amount uint64) error {
+func (k Keeper) executeBurnEcosystemSlashedTrustDeposit(ctx sdk.Context, corpID uint64, account string, td types.TrustDeposit, amount uint64) error {
 	// Get trust deposit share value from params
 	params := k.GetParams(ctx)
 	trustDepositShareValue := params.TrustDepositShareValue
@@ -65,7 +71,7 @@ func (k Keeper) executeBurnEcosystemSlashedTrustDeposit(ctx sdk.Context, account
 
 	// Save updated trust deposit entry BEFORE burning coins to ensure atomicity —
 	// if Set fails, no coins have been burned yet.
-	if err := k.TrustDeposit.Set(ctx, account, td); err != nil {
+	if err := k.TrustDeposit.Set(ctx, corpID, td); err != nil {
 		return fmt.Errorf("failed to update trust deposit entry: %w", err)
 	}
 
@@ -79,6 +85,7 @@ func (k Keeper) executeBurnEcosystemSlashedTrustDeposit(ctx sdk.Context, account
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeBurnEcosystemSlashedTrustDeposit,
+			sdk.NewAttribute(types.AttributeKeyCorporationID, strconv.FormatUint(corpID, 10)),
 			sdk.NewAttribute(types.AttributeKeyAccount, account),
 			sdk.NewAttribute(types.AttributeKeyAmount, strconv.FormatUint(amount, 10)),
 			sdk.NewAttribute(types.AttributeKeyNewAmount, strconv.FormatUint(td.Deposit, 10)),

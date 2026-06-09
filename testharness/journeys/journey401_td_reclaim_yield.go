@@ -118,9 +118,9 @@ func RunTDReclaimYieldJourney(ctx context.Context, client cosmosclient.Client) e
 		fmt.Printf("  Step 1d: Could not query TD for policy address (may not have a deposit): %s\n", err.Error())
 	} else {
 		fmt.Printf("OK Step 1d: TD state for policy address:\n")
-		fmt.Printf("    Account:        %s\n", td.Corporation)
+		fmt.Printf("    CorporationId:  %d\n", td.CorporationId)
 		fmt.Printf("    Amount:         %d\n", td.Deposit)
-		fmt.Printf("    Claimable:      %d\n", td.Claimable)
+		fmt.Printf("    Refunded:       %d\n", td.Refunded)
 		fmt.Printf("    SlashedDeposit: %d\n", td.SlashedDeposit)
 		fmt.Printf("    RepaidDeposit:  %d\n", td.RepaidDeposit)
 		fmt.Printf("    SlashCount:     %d\n", td.SlashCount)

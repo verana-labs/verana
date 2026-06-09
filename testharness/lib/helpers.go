@@ -424,14 +424,20 @@ func GetTrustDepositAtHeight(client cosmosclient.Client, ctx context.Context, ac
 		return nil, fmt.Errorf("failed to get account address: %v", err)
 	}
 
+	// Trust deposits are keyed by corporation_id; resolve the account first.
+	corpID, err := ResolveCorporationIDByAddress(client, ctx, creatorAddr)
+	if err != nil {
+		return nil, fmt.Errorf("failed to resolve corporation_id for %s: %v", creatorAddr, err)
+	}
+
 	tdClient := tdtypes.NewQueryClient(client.Context())
 	req := &tdtypes.QueryGetTrustDepositRequest{
-		Corporation: creatorAddr,
+		CorporationId: corpID,
 	}
 
 	// For height-specific queries, we need to use command line with --height flag
 	if height > 0 {
-		cmd := exec.Command("veranad", "q", "td", "get-trust-deposit", creatorAddr, "--height", fmt.Sprintf("%d", height), "-o", "json")
+		cmd := exec.Command("veranad", "q", "td", "get-trust-deposit", fmt.Sprintf("%d", corpID), "--height", fmt.Sprintf("%d", height), "-o", "json")
 		output, err := cmd.Output()
 		if err != nil {
 			return nil, fmt.Errorf("failed to query trust deposit at height %d: %v", height, err)
@@ -684,12 +690,12 @@ func VerifyTrustDepositClaimable(client cosmosclient.Client, ctx context.Context
 		return false
 	}
 
-	if initialDeposit > 0 && trustDeposit.Claimable == 0 {
+	if initialDeposit > 0 && trustDeposit.Refunded == 0 {
 		fmt.Printf("❌ Trust deposit verification failed: Initial deposit was %d but claimable deposit is 0\n", initialDeposit)
 		return false
 	}
 
-	fmt.Printf("✅ Verified trust deposit is claimable: %d\n", trustDeposit.Claimable)
+	fmt.Printf("✅ Verified trust deposit is claimable: %d\n", trustDeposit.Refunded)
 	return true
 }
 
@@ -701,13 +707,13 @@ func VerifyTrustDepositReclaimed(client cosmosclient.Client, ctx context.Context
 		return false
 	}
 
-	if trustDeposit.Claimable >= beforeClaimable {
+	if trustDeposit.Refunded >= beforeClaimable {
 		fmt.Printf("❌ Trust deposit reclaim verification failed: Claimable amount not reduced. Before: %d, After: %d\n",
-			beforeClaimable, trustDeposit.Claimable)
+			beforeClaimable, trustDeposit.Refunded)
 		return false
 	}
 
-	fmt.Printf("✅ Verified trust deposit was successfully reclaimed. New claimable amount: %d\n", trustDeposit.Claimable)
+	fmt.Printf("✅ Verified trust deposit was successfully reclaimed. New claimable amount: %d\n", trustDeposit.Refunded)
 	return true
 }
 
@@ -1383,16 +1389,22 @@ func SubmitSlashTrustDepositProposal(
 		return 0, fmt.Errorf("failed to get proposer address: %w", err)
 	}
 
+	// Trust deposits are keyed by corporation_id; resolve the account to slash.
+	corpID, err := ResolveCorporationIDByAddress(client, ctx, accountToSlash)
+	if err != nil {
+		return 0, fmt.Errorf("failed to resolve corporation_id for %s: %w", accountToSlash, err)
+	}
+
 	// Create the slash trust deposit message
 	reason := summary
 	if reason == "" {
 		reason = title
 	}
 	slashMsg := &tdtypes.MsgSlashTrustDeposit{
-		Authority:   authority,
-		Corporation: accountToSlash,
-		Deposit:     math.NewIntFromUint64(slashAmount),
-		Reason:      reason,
+		Authority:     authority,
+		CorporationId: corpID,
+		Deposit:       math.NewIntFromUint64(slashAmount),
+		Reason:        reason,
 	}
 
 	// Wrap in Any

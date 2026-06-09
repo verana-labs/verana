@@ -8,20 +8,9 @@ import (
 	"github.com/verana-labs/verana/x/td/types"
 )
 
-// AdjustTrustDeposit modifies the trust deposit for an account by the specified amount.
-// If augend is positive, it increases the trust deposit.
-// If augend is negative, it decreases the trust deposit and increases the claimable amount.
-//
-// The function follows the specification [MOD-TD-MSG-1] from the Verana blockchain specs.
-//
-// Parameters:
-// - ctx: The SDK context
-// - account: The account address as a Bech32 string
-// - augend: The amount to adjust (positive for increase, negative for decrease)
-// - reason: A human-readable string describing why the adjustment is being made (emitted in events)
-//
-// Returns:
-// - error: If the operation fails
+// AdjustTrustDeposit adjusts a corporation's trust deposit. `account` is the
+// corporation policy_address: it is used for bank transfers and resolved to the
+// corporation_id, which is the trust deposit record key.
 func (k Keeper) AdjustTrustDeposit(ctx sdk.Context, account string, augend int64, reason string) error {
 	// Basic validation
 	if account == "" {
@@ -35,12 +24,18 @@ func (k Keeper) AdjustTrustDeposit(ctx sdk.Context, account string, augend int64
 		return fmt.Errorf("augend must be non-zero")
 	}
 
+	// Resolve the account to its corporation_id (the storage key).
+	corpID, err := k.resolveCorporationID(ctx, account)
+	if err != nil {
+		return err
+	}
+
 	// Get global share value parameter
 	params := k.GetParams(ctx)
 	shareValue := params.TrustDepositShareValue
 
 	// Load existing trust deposit if it exists
-	td, err := k.TrustDeposit.Get(ctx, account)
+	td, err := k.TrustDeposit.Get(ctx, corpID)
 
 	if err != nil {
 		// If trust deposit doesn't exist and trying to decrease, abort
@@ -52,14 +47,14 @@ func (k Keeper) AdjustTrustDeposit(ctx sdk.Context, account string, augend int64
 		augendShare := k.AmountToShare(uint64(augend), shareValue)
 
 		td = types.TrustDeposit{
-			Corporation: account,
-			Deposit:     uint64(augend),
-			Share:       augendShare,
-			Claimable:   0,
+			CorporationId: corpID,
+			Deposit:       uint64(augend),
+			Share:         augendShare,
+			Refunded:      0,
 		}
 
 		// Save new trust deposit BEFORE bank transfer
-		err := k.TrustDeposit.Set(ctx, account, td)
+		err := k.TrustDeposit.Set(ctx, corpID, td)
 		if err != nil {
 			return fmt.Errorf("failed to save trust deposit: %w", err)
 		}
@@ -78,6 +73,7 @@ func (k Keeper) AdjustTrustDeposit(ctx sdk.Context, account string, augend int64
 		ctx.EventManager().EmitEvents(sdk.Events{
 			sdk.NewEvent(
 				types.EventTypeAdjustTrustDeposit,
+				sdk.NewAttribute(types.AttributeKeyCorporationID, strconv.FormatUint(corpID, 10)),
 				sdk.NewAttribute(types.AttributeKeyAccount, account),
 				sdk.NewAttribute(types.AttributeKeyAugend, strconv.FormatInt(augend, 10)),
 				sdk.NewAttribute(types.AttributeKeyAdjustmentType, "increase"),
@@ -98,7 +94,7 @@ func (k Keeper) AdjustTrustDeposit(ctx sdk.Context, account string, augend int64
 
 	// Convert uint fields to int64 for calculations
 	deposit := int64(td.Deposit)
-	claimable := int64(td.Claimable)
+	refunded := int64(td.Refunded)
 	// share stays as td.Share (math.LegacyDec)
 
 	// Track how much needs to be transferred from account to module
@@ -106,24 +102,25 @@ func (k Keeper) AdjustTrustDeposit(ctx sdk.Context, account string, augend int64
 
 	if augend > 0 {
 		// Handle positive adjustment (increase)
-		if claimable > 0 {
-			if claimable >= augend {
-				// Can cover from claimable amount — no bank transfer needed
-				claimable -= augend
+		if refunded > 0 {
+			if refunded >= augend {
+				// Can cover from refunded amount — no bank transfer needed
+				refunded -= augend
 			} else {
 				// Need to transfer additional funds
-				neededDeposit := augend - claimable
+				neededDeposit := augend - refunded
 				transferAmount = neededDeposit
 
-				// Calculate missing_augend_share = (augend - td.claimable) / GlobalVariables.trust_deposit_share_value
+				// Calculate missing_augend_share = (augend - td.refunded) / GlobalVariables.trust_deposit_share_value
+				// computed BEFORE refunded is zeroed (spec commit 90679a9).
 				missingShare := k.AmountToShare(uint64(neededDeposit), shareValue)
 
 				deposit += neededDeposit
 				td.Share = td.Share.Add(missingShare)
-				claimable = 0
+				refunded = 0
 			}
 		} else {
-			// No claimable amount, need to transfer full amount
+			// No refunded amount, need to transfer full amount
 			transferAmount = augend
 
 			// Calculate augend_share = augend / GlobalVariables.trust_deposit_share_value
@@ -136,32 +133,32 @@ func (k Keeper) AdjustTrustDeposit(ctx sdk.Context, account string, augend int64
 		// Handle negative adjustment (decrease)
 		absAugend := -augend
 
-		// if augend is negative and td.claimable - augend > td.deposit transaction MUST abort
-		if claimable+absAugend > deposit {
-			return fmt.Errorf("claimable after adjustment would exceed deposit: %d > %d", claimable+absAugend, deposit)
+		// if augend is negative and td.refunded - augend > td.deposit transaction MUST abort
+		if refunded+absAugend > deposit {
+			return fmt.Errorf("refunded after adjustment would exceed deposit: %d > %d", refunded+absAugend, deposit)
 		}
 
-		// Since augend is negative, we add absAugend to claimable
-		// This implements "set td.claimable to td.claimable - augend" when augend is negative
-		claimable += absAugend
+		// Since augend is negative, we add absAugend to refunded
+		// This implements "set td.refunded to td.refunded - augend" when augend is negative
+		refunded += absAugend
 	}
 
 	// Convert back to uint for storage and ensure no negative values
 	if deposit < 0 {
 		return fmt.Errorf("deposit cannot be negative after adjustment: %d", deposit)
 	}
-	if claimable < 0 {
-		return fmt.Errorf("claimable amount cannot be negative after adjustment: %d", claimable)
+	if refunded < 0 {
+		return fmt.Errorf("refunded amount cannot be negative after adjustment: %d", refunded)
 	}
 	if td.Share.IsNegative() {
 		return fmt.Errorf("share cannot be negative after adjustment: %s", td.Share.String())
 	}
 
 	td.Deposit = uint64(deposit)
-	td.Claimable = uint64(claimable)
+	td.Refunded = uint64(refunded)
 
 	// Save updated trust deposit BEFORE bank transfer
-	err = k.TrustDeposit.Set(ctx, account, td)
+	err = k.TrustDeposit.Set(ctx, corpID, td)
 	if err != nil {
 		return fmt.Errorf("failed to save trust deposit: %w", err)
 	}
@@ -187,12 +184,13 @@ func (k Keeper) AdjustTrustDeposit(ctx sdk.Context, account string, augend int64
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeAdjustTrustDeposit,
+			sdk.NewAttribute(types.AttributeKeyCorporationID, strconv.FormatUint(corpID, 10)),
 			sdk.NewAttribute(types.AttributeKeyAccount, account),
 			sdk.NewAttribute(types.AttributeKeyAugend, strconv.FormatInt(augend, 10)),
 			sdk.NewAttribute(types.AttributeKeyAdjustmentType, adjustmentType),
 			sdk.NewAttribute(types.AttributeKeyNewAmount, strconv.FormatUint(td.Deposit, 10)),
 			sdk.NewAttribute(types.AttributeKeyNewShare, td.Share.String()),
-			sdk.NewAttribute(types.AttributeKeyNewClaimable, strconv.FormatUint(td.Claimable, 10)),
+			sdk.NewAttribute(types.AttributeKeyNewRefunded, strconv.FormatUint(td.Refunded, 10)),
 			sdk.NewAttribute(types.AttributeKeyReason, reason),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),
 		),
@@ -203,7 +201,7 @@ func (k Keeper) AdjustTrustDeposit(ctx sdk.Context, account string, augend int64
 
 // AdjustTrustDepositOnBehalf increases the trust deposit of `account` using funds from `funder`.
 // Unlike AdjustTrustDeposit, this transfers coins directly from the funder to the TD module,
-// bypassing the claimable recycling logic. This is used when a third party (e.g., a fee payer)
+// bypassing the refunded recycling logic. This is used when a third party (e.g., a fee payer)
 // funds another account's trust deposit increase during CSPS fee distribution.
 //
 // Only positive amounts are supported (increase only).
@@ -215,8 +213,14 @@ func (k Keeper) AdjustTrustDepositOnBehalf(ctx sdk.Context, account string, fund
 		return fmt.Errorf("account cannot be empty")
 	}
 
+	// Resolve the account to its corporation_id (the storage key).
+	corpID, err := k.resolveCorporationID(ctx, account)
+	if err != nil {
+		return err
+	}
+
 	// Check if account has an existing TD with unrepaid slash
-	td, err := k.TrustDeposit.Get(ctx, account)
+	td, err := k.TrustDeposit.Get(ctx, corpID)
 	exists := err == nil
 	if exists && td.SlashedDeposit > 0 && td.RepaidDeposit < td.SlashedDeposit {
 		return fmt.Errorf("trust deposit has been slashed and not repaid")
@@ -231,10 +235,10 @@ func (k Keeper) AdjustTrustDepositOnBehalf(ctx sdk.Context, account string, fund
 	// Load or create trust deposit for account
 	if !exists {
 		td = types.TrustDeposit{
-			Corporation: account,
-			Deposit:     uint64(amount),
-			Share:       augendShare,
-			Claimable:   0,
+			CorporationId: corpID,
+			Deposit:       uint64(amount),
+			Share:         augendShare,
+			Refunded:      0,
 		}
 	} else {
 		td.Deposit += uint64(amount)
@@ -242,7 +246,7 @@ func (k Keeper) AdjustTrustDepositOnBehalf(ctx sdk.Context, account string, fund
 	}
 
 	// Save trust deposit BEFORE bank transfer
-	if err := k.TrustDeposit.Set(ctx, account, td); err != nil {
+	if err := k.TrustDeposit.Set(ctx, corpID, td); err != nil {
 		return fmt.Errorf("failed to save trust deposit: %w", err)
 	}
 
@@ -259,6 +263,7 @@ func (k Keeper) AdjustTrustDepositOnBehalf(ctx sdk.Context, account string, fund
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeAdjustTrustDeposit,
+			sdk.NewAttribute(types.AttributeKeyCorporationID, strconv.FormatUint(corpID, 10)),
 			sdk.NewAttribute(types.AttributeKeyAccount, account),
 			sdk.NewAttribute(types.AttributeKeyAugend, strconv.FormatInt(amount, 10)),
 			sdk.NewAttribute(types.AttributeKeyAdjustmentType, "increase_on_behalf"),

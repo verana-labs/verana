@@ -22,10 +22,12 @@ export interface GenesisState {
 
 /** TrustDepositRecord defines a trust deposit entry for genesis state */
 export interface TrustDepositRecord {
-  corporation: string;
   share: string;
   deposit: number;
-  claimable: number;
+  /** corporation_id is the registered Corporation id that owns this trust deposit. */
+  corporationId: number;
+  /** refunded is the amount eligible to be recycled/reclaimed (was "claimable"). */
+  refunded: number;
 }
 
 function createBaseGenesisState(): GenesisState {
@@ -122,22 +124,22 @@ export const GenesisState = {
 };
 
 function createBaseTrustDepositRecord(): TrustDepositRecord {
-  return { corporation: "", share: "", deposit: 0, claimable: 0 };
+  return { share: "", deposit: 0, corporationId: 0, refunded: 0 };
 }
 
 export const TrustDepositRecord = {
   encode(message: TrustDepositRecord, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.corporation !== "") {
-      writer.uint32(10).string(message.corporation);
-    }
     if (message.share !== "") {
       writer.uint32(18).string(message.share);
     }
     if (message.deposit !== 0) {
       writer.uint32(24).uint64(message.deposit);
     }
-    if (message.claimable !== 0) {
-      writer.uint32(32).uint64(message.claimable);
+    if (message.corporationId !== 0) {
+      writer.uint32(40).uint64(message.corporationId);
+    }
+    if (message.refunded !== 0) {
+      writer.uint32(48).uint64(message.refunded);
     }
     return writer;
   },
@@ -149,13 +151,6 @@ export const TrustDepositRecord = {
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
-        case 1:
-          if (tag !== 10) {
-            break;
-          }
-
-          message.corporation = reader.string();
-          continue;
         case 2:
           if (tag !== 18) {
             break;
@@ -170,12 +165,19 @@ export const TrustDepositRecord = {
 
           message.deposit = longToNumber(reader.uint64() as Long);
           continue;
-        case 4:
-          if (tag !== 32) {
+        case 5:
+          if (tag !== 40) {
             break;
           }
 
-          message.claimable = longToNumber(reader.uint64() as Long);
+          message.corporationId = longToNumber(reader.uint64() as Long);
+          continue;
+        case 6:
+          if (tag !== 48) {
+            break;
+          }
+
+          message.refunded = longToNumber(reader.uint64() as Long);
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -188,26 +190,26 @@ export const TrustDepositRecord = {
 
   fromJSON(object: any): TrustDepositRecord {
     return {
-      corporation: isSet(object.corporation) ? globalThis.String(object.corporation) : "",
       share: isSet(object.share) ? globalThis.String(object.share) : "",
       deposit: isSet(object.deposit) ? globalThis.Number(object.deposit) : 0,
-      claimable: isSet(object.claimable) ? globalThis.Number(object.claimable) : 0,
+      corporationId: isSet(object.corporationId) ? globalThis.Number(object.corporationId) : 0,
+      refunded: isSet(object.refunded) ? globalThis.Number(object.refunded) : 0,
     };
   },
 
   toJSON(message: TrustDepositRecord): unknown {
     const obj: any = {};
-    if (message.corporation !== "") {
-      obj.corporation = message.corporation;
-    }
     if (message.share !== "") {
       obj.share = message.share;
     }
     if (message.deposit !== 0) {
       obj.deposit = Math.round(message.deposit);
     }
-    if (message.claimable !== 0) {
-      obj.claimable = Math.round(message.claimable);
+    if (message.corporationId !== 0) {
+      obj.corporationId = Math.round(message.corporationId);
+    }
+    if (message.refunded !== 0) {
+      obj.refunded = Math.round(message.refunded);
     }
     return obj;
   },
@@ -217,10 +219,10 @@ export const TrustDepositRecord = {
   },
   fromPartial<I extends Exact<DeepPartial<TrustDepositRecord>, I>>(object: I): TrustDepositRecord {
     const message = createBaseTrustDepositRecord();
-    message.corporation = object.corporation ?? "";
     message.share = object.share ?? "";
     message.deposit = object.deposit ?? 0;
-    message.claimable = object.claimable ?? 0;
+    message.corporationId = object.corporationId ?? 0;
+    message.refunded = object.refunded ?? 0;
     return message;
   },
 };
