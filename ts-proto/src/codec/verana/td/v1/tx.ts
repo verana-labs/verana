@@ -53,8 +53,8 @@ export interface MsgReclaimTrustDepositYieldResponse {
 export interface MsgSlashTrustDeposit {
   /** authority is the address that controls the module (defaults to x/gov unless overwritten). */
   authority: string;
-  /** corporation is the address of the corporation whose trust deposit will be slashed */
-  corporation: string;
+  /** corporation_id is the registered Corporation id whose trust deposit will be slashed */
+  corporationId: number;
   /** deposit is the deposit amount to slash (in base denom) */
   deposit: string;
   /** [MOD-TD-MSG-5-1] reason for the slash (mandatory per spec v4 draft 13) */
@@ -336,7 +336,7 @@ export const MsgReclaimTrustDepositYieldResponse = {
 };
 
 function createBaseMsgSlashTrustDeposit(): MsgSlashTrustDeposit {
-  return { authority: "", corporation: "", deposit: "", reason: "" };
+  return { authority: "", corporationId: 0, deposit: "", reason: "" };
 }
 
 export const MsgSlashTrustDeposit = {
@@ -344,8 +344,8 @@ export const MsgSlashTrustDeposit = {
     if (message.authority !== "") {
       writer.uint32(10).string(message.authority);
     }
-    if (message.corporation !== "") {
-      writer.uint32(18).string(message.corporation);
+    if (message.corporationId !== 0) {
+      writer.uint32(40).uint64(message.corporationId);
     }
     if (message.deposit !== "") {
       writer.uint32(26).string(message.deposit);
@@ -370,12 +370,12 @@ export const MsgSlashTrustDeposit = {
 
           message.authority = reader.string();
           continue;
-        case 2:
-          if (tag !== 18) {
+        case 5:
+          if (tag !== 40) {
             break;
           }
 
-          message.corporation = reader.string();
+          message.corporationId = longToNumber(reader.uint64() as Long);
           continue;
         case 3:
           if (tag !== 26) {
@@ -403,7 +403,7 @@ export const MsgSlashTrustDeposit = {
   fromJSON(object: any): MsgSlashTrustDeposit {
     return {
       authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
-      corporation: isSet(object.corporation) ? globalThis.String(object.corporation) : "",
+      corporationId: isSet(object.corporationId) ? globalThis.Number(object.corporationId) : 0,
       deposit: isSet(object.deposit) ? globalThis.String(object.deposit) : "",
       reason: isSet(object.reason) ? globalThis.String(object.reason) : "",
     };
@@ -414,8 +414,8 @@ export const MsgSlashTrustDeposit = {
     if (message.authority !== "") {
       obj.authority = message.authority;
     }
-    if (message.corporation !== "") {
-      obj.corporation = message.corporation;
+    if (message.corporationId !== 0) {
+      obj.corporationId = Math.round(message.corporationId);
     }
     if (message.deposit !== "") {
       obj.deposit = message.deposit;
@@ -432,7 +432,7 @@ export const MsgSlashTrustDeposit = {
   fromPartial<I extends Exact<DeepPartial<MsgSlashTrustDeposit>, I>>(object: I): MsgSlashTrustDeposit {
     const message = createBaseMsgSlashTrustDeposit();
     message.authority = object.authority ?? "";
-    message.corporation = object.corporation ?? "";
+    message.corporationId = object.corporationId ?? 0;
     message.deposit = object.deposit ?? "";
     message.reason = object.reason ?? "";
     return message;

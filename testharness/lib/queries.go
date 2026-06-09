@@ -49,6 +49,22 @@ func ListCorporations(client cosmosclient.Client, ctx context.Context, responseM
 	return qc.ListCorporations(ctx, &cotypes.QueryListCorporationsRequest{ResponseMaxSize: responseMaxSize})
 }
 
+// ResolveCorporationIDByAddress resolves a corporation policy_address to its
+// registered corporation_id. The co module has no by-address query, so this
+// lists corporations and matches on policy_address.
+func ResolveCorporationIDByAddress(client cosmosclient.Client, ctx context.Context, policyAddress string) (uint64, error) {
+	resp, err := ListCorporations(client, ctx, 1000)
+	if err != nil {
+		return 0, fmt.Errorf("failed to list corporations: %w", err)
+	}
+	for _, co := range resp.Corporations {
+		if co.PolicyAddress == policyAddress {
+			return co.Id, nil
+		}
+	}
+	return 0, fmt.Errorf("no corporation found for policy_address %s", policyAddress)
+}
+
 // QueryGFV fetches a GovernanceFrameworkVersion by its id.
 func QueryGFV(client cosmosclient.Client, ctx context.Context, gfvID uint64) (*gftypes.QueryGetGovernanceFrameworkVersionResponse, error) {
 	qc := gftypes.NewQueryClient(client.Context())

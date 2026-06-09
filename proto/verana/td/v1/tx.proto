@@ -71,10 +71,13 @@ message MsgSlashTrustDeposit {
   option (cosmos.msg.v1.signer) = "authority";
   option (amino.name) = "verana/x/td/MsgSlashTrustDeposit";
 
+  // Field 2 ("corporation", account string) is reserved: slashing now targets corporation_id.
+  reserved 2;
+  reserved "corporation";
   // authority is the address that controls the module (defaults to x/gov unless overwritten).
   string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  // corporation is the address of the corporation whose trust deposit will be slashed
-  string corporation = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // corporation_id is the registered Corporation id whose trust deposit will be slashed
+  uint64 corporation_id = 5;
   // deposit is the deposit amount to slash (in base denom)
   string deposit = 3 [
     (gogoproto.customtype) = "cosmossdk.io/math.Int",

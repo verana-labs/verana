@@ -1,16 +1,21 @@
 import type { AminoConverter } from "@cosmjs/stargate";
 import {
   MsgCreateExchangeRate,
+  MsgGrantExchangeRateAuthorization,
+  MsgRevokeExchangeRateAuthorization,
   MsgSetExchangeRateState,
   MsgUpdateExchangeRate,
 } from "../codec/verana/xr/v1/tx";
 import {
   aminoToDuration,
   clean,
+  dateToIsoAmino,
   durationToAmino,
+  isoToDate,
   strToU64,
   u32ToAmino,
   u64ToStr,
+  u64ToStrIfNonZero,
 } from "./util/helpers";
 
 export const MsgCreateExchangeRateAminoConverter: AminoConverter = {
@@ -73,5 +78,41 @@ export const MsgSetExchangeRateStateAminoConverter: AminoConverter = {
       authority: a.authority ?? "",
       id: strToU64(a.id) != null ? Number(strToU64(a.id)!.toString()) : 0,
       state: a.state ?? false,
+    }),
+};
+
+export const MsgGrantExchangeRateAuthorizationAminoConverter: AminoConverter = {
+  aminoType: "verana/x/xr/MsgGrantXrAuthz",
+  toAmino: (m: MsgGrantExchangeRateAuthorization) => clean({
+    authority: m.authority || undefined,
+    xr_id: u64ToStrIfNonZero(m.xrId),
+    operator: m.operator || undefined,
+    expiration: dateToIsoAmino(m.expiration),
+    min_interval: durationToAmino(m.minInterval),
+    max_deviation_bps: u32ToAmino(m.maxDeviationBps),
+  }),
+  fromAmino: (a: any): MsgGrantExchangeRateAuthorization =>
+    MsgGrantExchangeRateAuthorization.fromPartial({
+      authority: a.authority ?? "",
+      xrId: strToU64(a.xr_id) != null ? Number(strToU64(a.xr_id)!.toString()) : 0,
+      operator: a.operator ?? "",
+      expiration: isoToDate(a.expiration),
+      minInterval: aminoToDuration(a.min_interval),
+      maxDeviationBps: a.max_deviation_bps ?? 0,
+    }),
+};
+
+export const MsgRevokeExchangeRateAuthorizationAminoConverter: AminoConverter = {
+  aminoType: "verana/x/xr/MsgRevokeXrAuthz",
+  toAmino: (m: MsgRevokeExchangeRateAuthorization) => clean({
+    authority: m.authority || undefined,
+    xr_id: u64ToStrIfNonZero(m.xrId),
+    operator: m.operator || undefined,
+  }),
+  fromAmino: (a: any): MsgRevokeExchangeRateAuthorization =>
+    MsgRevokeExchangeRateAuthorization.fromPartial({
+      authority: a.authority ?? "",
+      xrId: strToU64(a.xr_id) != null ? Number(strToU64(a.xr_id)!.toString()) : 0,
+      operator: a.operator ?? "",
     }),
 };

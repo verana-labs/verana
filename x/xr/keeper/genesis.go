@@ -36,6 +36,13 @@ func (k Keeper) InitGenesis(ctx context.Context, genState types.GenesisState) er
 		}
 	}
 
+	for _, authz := range genState.ExchangeRateAuthorizations {
+		key := collections.Join(authz.XrId, authz.Operator)
+		if err := k.ExchangeRateAuthorizations.Set(ctx, key, authz); err != nil {
+			return fmt.Errorf("failed to set exchange rate authorization (%d, %s): %w", authz.XrId, authz.Operator, err)
+		}
+	}
+
 	return nil
 }
 
@@ -73,6 +80,23 @@ func (k Keeper) ExportGenesis(ctx context.Context) (*types.GenesisState, error) 
 		nextID = 0
 	}
 	genesis.NextExchangeRateId = nextID
+
+	var authorizations []types.ExchangeRateAuthorization
+	err = k.ExchangeRateAuthorizations.Walk(ctx, nil, func(_ collections.Pair[uint64, string], authz types.ExchangeRateAuthorization) (bool, error) {
+		authorizations = append(authorizations, authz)
+		return false, nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to export exchange rate authorizations: %w", err)
+	}
+	// Sort by (xr_id, operator) for deterministic output.
+	sort.Slice(authorizations, func(i, j int) bool {
+		if authorizations[i].XrId != authorizations[j].XrId {
+			return authorizations[i].XrId < authorizations[j].XrId
+		}
+		return authorizations[i].Operator < authorizations[j].Operator
+	})
+	genesis.ExchangeRateAuthorizations = authorizations
 
 	return genesis, nil
 }

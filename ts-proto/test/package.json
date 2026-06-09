@@ -32,6 +32,11 @@
     "test:perm-repay": "npx tsx src/journeys/permRepayPermissionSlashedTrustDeposit.ts",
     "test:td-reclaim-yield": "npx tsx src/journeys/tdReclaimTrustDepositYield.ts",
     "test:td-repay-slashed": "npx tsx src/journeys/tdRepaySlashedTrustDeposit.ts",
+    "test:td-slash": "npx tsx src/journeys/tdSlashTrustDeposit.ts",
+    "test:de-revoke-auth": "npx tsx src/journeys/deRevokeOperatorAuthorization.ts",
+    "test:co-update": "npx tsx src/journeys/coUpdateCorporation.ts",
+    "test:cs-policy": "npx tsx src/journeys/csSchemaAuthorizationPolicy.ts",
+    "test:xr-authz": "npx tsx src/journeys/xrExchangeRateAuthorization.ts",
     "test:co-ec-gf": "npx tsx src/journeys/runCoEcGf.ts",
     "test:all": "npx tsx src/journeys/runAll.ts"
   },

@@ -39,7 +39,7 @@
         ]
       }
     },
-    "/verana/td/v1/get/{corporation}": {
+    "/verana/td/v1/get/{corporation_id}": {
       "get": {
         "operationId": "Query_GetTrustDeposit",
         "responses": {
@@ -58,10 +58,11 @@
         },
         "parameters": [
           {
-            "name": "corporation",
+            "name": "corporation_id",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "format": "uint64"
           }
         ],
         "tags": [
@@ -154,17 +155,10 @@
     "verana.td.v1.TrustDeposit": {
       "type": "object",
       "properties": {
-        "corporation": {
-          "type": "string"
-        },
         "share": {
           "type": "string"
         },
         "deposit": {
-          "type": "string",
-          "format": "uint64"
-        },
-        "claimable": {
           "type": "string",
           "format": "uint64"
         },
@@ -187,6 +181,16 @@
         "slash_count": {
           "type": "string",
           "format": "uint64"
+        },
+        "corporation_id": {
+          "type": "string",
+          "format": "uint64",
+          "description": "corporation_id is the registered Corporation id that owns this trust deposit (primary key)."
+        },
+        "refunded": {
+          "type": "string",
+          "format": "uint64",
+          "description": "refunded is the amount eligible to be recycled/reclaimed (was \"claimable\")."
         }
       },
       "title": "TrustDeposit represents a corporation's trust deposit"

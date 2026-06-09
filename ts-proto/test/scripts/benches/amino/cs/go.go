@@ -20,7 +20,7 @@ import (
 	cstypes "github.com/verana-labs/verana/x/cs/types"
 )
 
-const jsonSchema = `{"$id":"vpr:verana:VPR_CHAIN_ID/cs/v1/js/VPR_CREDENTIAL_SCHEMA_ID","$schema":"https://json-schema.org/draft/2020-12/schema","title":"ExampleCredential","description":"ExampleCredential using JsonSchema","type":"object","properties":{"credentialSubject":{"type":"object","properties":{"id":{"type":"string","format":"uri"},"firstName":{"type":"string","minLength":0,"maxLength":256},"lastName":{"type":"string","minLength":1,"maxLength":256},"expirationDate":{"type":"string","format":"date"},"countryOfResidence":{"type":"string","minLength":2,"maxLength":2}},"required":["id","lastName","expirationDate","countryOfResidence"]}}}`
+const jsonSchema = `{"$id":"vpr:verana:VPR_CHAIN_ID:cs:VPR_CREDENTIAL_SCHEMA_ID","$schema":"https://json-schema.org/draft/2020-12/schema","title":"ExampleCredential","description":"ExampleCredential using JsonSchema","type":"object","properties":{"credentialSubject":{"type":"object","properties":{"id":{"type":"string","format":"uri"},"firstName":{"type":"string","minLength":0,"maxLength":256},"lastName":{"type":"string","minLength":1,"maxLength":256},"expirationDate":{"type":"string","format":"date"},"countryOfResidence":{"type":"string","minLength":2,"maxLength":2}},"required":["id","lastName","expirationDate","countryOfResidence"]}}}`
 
 func main() {
 	amino := codec.NewLegacyAmino()

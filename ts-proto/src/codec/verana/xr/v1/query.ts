@@ -9,7 +9,7 @@ import * as _m0 from "protobufjs/minimal";
 import { Timestamp } from "../../../google/protobuf/timestamp";
 import { PricingAssetType, pricingAssetTypeFromJSON, pricingAssetTypeToJSON } from "../../cs/v1/types";
 import { Params } from "./params";
-import { ExchangeRate } from "./tx";
+import { ExchangeRate, ExchangeRateAuthorization } from "./tx";
 import Long = require("long");
 
 export const protobufPackage = "verana.xr.v1";
@@ -77,7 +77,11 @@ export interface QueryGetExchangeRateRequest {
 
 /** QueryGetExchangeRateResponse is the response type for Query/GetExchangeRate. */
 export interface QueryGetExchangeRateResponse {
-  exchangeRate: ExchangeRate | undefined;
+  exchangeRate:
+    | ExchangeRate
+    | undefined;
+  /** authorizations lists the operators authorized to update this exchange rate. [MOD-XR-QRY-1] */
+  authorizations: ExchangeRateAuthorization[];
 }
 
 /** QueryListExchangeRatesRequest is the request type for Query/ListExchangeRates. */
@@ -361,13 +365,16 @@ export const QueryGetExchangeRateRequest = {
 };
 
 function createBaseQueryGetExchangeRateResponse(): QueryGetExchangeRateResponse {
-  return { exchangeRate: undefined };
+  return { exchangeRate: undefined, authorizations: [] };
 }
 
 export const QueryGetExchangeRateResponse = {
   encode(message: QueryGetExchangeRateResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.exchangeRate !== undefined) {
       ExchangeRate.encode(message.exchangeRate, writer.uint32(10).fork()).ldelim();
+    }
+    for (const v of message.authorizations) {
+      ExchangeRateAuthorization.encode(v!, writer.uint32(18).fork()).ldelim();
     }
     return writer;
   },
@@ -386,6 +393,13 @@ export const QueryGetExchangeRateResponse = {
 
           message.exchangeRate = ExchangeRate.decode(reader, reader.uint32());
           continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.authorizations.push(ExchangeRateAuthorization.decode(reader, reader.uint32()));
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -396,13 +410,21 @@ export const QueryGetExchangeRateResponse = {
   },
 
   fromJSON(object: any): QueryGetExchangeRateResponse {
-    return { exchangeRate: isSet(object.exchangeRate) ? ExchangeRate.fromJSON(object.exchangeRate) : undefined };
+    return {
+      exchangeRate: isSet(object.exchangeRate) ? ExchangeRate.fromJSON(object.exchangeRate) : undefined,
+      authorizations: globalThis.Array.isArray(object?.authorizations)
+        ? object.authorizations.map((e: any) => ExchangeRateAuthorization.fromJSON(e))
+        : [],
+    };
   },
 
   toJSON(message: QueryGetExchangeRateResponse): unknown {
     const obj: any = {};
     if (message.exchangeRate !== undefined) {
       obj.exchangeRate = ExchangeRate.toJSON(message.exchangeRate);
+    }
+    if (message.authorizations?.length) {
+      obj.authorizations = message.authorizations.map((e) => ExchangeRateAuthorization.toJSON(e));
     }
     return obj;
   },
@@ -415,6 +437,7 @@ export const QueryGetExchangeRateResponse = {
     message.exchangeRate = (object.exchangeRate !== undefined && object.exchangeRate !== null)
       ? ExchangeRate.fromPartial(object.exchangeRate)
       : undefined;
+    message.authorizations = object.authorizations?.map((e) => ExchangeRateAuthorization.fromPartial(e)) || [];
     return message;
   },
 };

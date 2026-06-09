@@ -42,12 +42,14 @@ func (ms msgServer) ReclaimTrustDepositYield(goCtx context.Context, msg *types.M
 	}
 
 	// [AUTHZ-CHECK-5] Signing corporation account MUST be a registered Corporation.
-	if _, err := ms.Keeper.coKeeper.ResolveCorporationByPolicyAddress(ctx, msg.Corporation); err != nil {
+	co, err := ms.Keeper.coKeeper.ResolveCorporationByPolicyAddress(ctx, msg.Corporation)
+	if err != nil {
 		return nil, err
 	}
+	corpID := co.Id
 
-	// [MOD-TD-MSG-2-2-1] Load TrustDeposit entry
-	td, err := ms.Keeper.TrustDeposit.Get(ctx, account)
+	// [MOD-TD-MSG-2-2-1] Load TrustDeposit entry (keyed by corporation_id)
+	td, err := ms.Keeper.TrustDeposit.Get(ctx, corpID)
 	if err != nil {
 		return nil, fmt.Errorf("trust deposit not found for account: %s", account)
 	}
@@ -58,14 +60,14 @@ func (ms msgServer) ReclaimTrustDepositYield(goCtx context.Context, msg *types.M
 		return nil, fmt.Errorf("deposit has been slashed and not repaid")
 	}
 
-	// [MOD-TD-MSG-2-2-1] Precondition: must have accrued claimable yield
-	if td.Claimable == 0 {
+	// [MOD-TD-MSG-2-2-1] Precondition: must have accrued refundable yield
+	if td.Refunded == 0 {
 		return nil, fmt.Errorf("no claimable yield")
 	}
 
-	// [MOD-TD-MSG-2-3] Spec v4 draft 13: transfer the full claimable balance
-	// and set claimable to 0. No per-call amount parameter.
-	claimed := td.Claimable
+	// [MOD-TD-MSG-2-3] Spec v4 draft 13: transfer the full refunded balance
+	// and set refunded to 0. No per-call amount parameter.
+	claimed := td.Refunded
 
 	// Get share value
 	params := ms.Keeper.GetParams(ctx)
@@ -74,8 +76,8 @@ func (ms msgServer) ReclaimTrustDepositYield(goCtx context.Context, msg *types.M
 	sharesToReduce := ms.Keeper.AmountToShare(claimed, params.TrustDepositShareValue)
 	td.Share = td.Share.Sub(sharesToReduce)
 
-	// Drain claimable per spec.
-	td.Claimable = 0
+	// Drain refunded per spec.
+	td.Refunded = 0
 
 	// Validate corporation address
 	addr, err := sdk.AccAddressFromBech32(account)
@@ -85,7 +87,7 @@ func (ms msgServer) ReclaimTrustDepositYield(goCtx context.Context, msg *types.M
 
 	// Save updated trust deposit BEFORE bank transfer to ensure atomicity —
 	// if Set fails, no coins have been transferred yet.
-	if err := ms.Keeper.TrustDeposit.Set(ctx, account, td); err != nil {
+	if err := ms.Keeper.TrustDeposit.Set(ctx, corpID, td); err != nil {
 		return nil, fmt.Errorf("failed to update trust deposit: %w", err)
 	}
 
@@ -106,6 +108,7 @@ func (ms msgServer) ReclaimTrustDepositYield(goCtx context.Context, msg *types.M
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeReclaimTrustDepositYield,
+			sdk.NewAttribute(types.AttributeKeyCorporationID, strconv.FormatUint(corpID, 10)),
 			sdk.NewAttribute(types.AttributeKeyAccount, account),
 			sdk.NewAttribute(types.AttributeKeyClaimedYield, strconv.FormatUint(claimed, 10)),
 			sdk.NewAttribute(types.AttributeKeySharesReduced, sharesToReduce.String()),
@@ -153,9 +156,9 @@ func (ms msgServer) SlashTrustDeposit(goCtx context.Context, msg *types.MsgSlash
 	}
 
 	// Check if TrustDeposit entry exists for the corporation
-	td, err := ms.Keeper.TrustDeposit.Get(ctx, msg.Corporation)
+	td, err := ms.Keeper.TrustDeposit.Get(ctx, msg.CorporationId)
 	if err != nil {
-		return nil, fmt.Errorf("trust deposit not found for corporation: %s", msg.Corporation)
+		return nil, fmt.Errorf("trust deposit not found for corporation_id: %d", msg.CorporationId)
 	}
 
 	// Check if deposit is sufficient
@@ -180,11 +183,18 @@ func (ms msgServer) SlashTrustDeposit(goCtx context.Context, msg *types.MsgSlash
 	td.LastSlashed = &now
 	td.SlashCount++
 
+	// [MOD-TD-MSG-5] Slash invariant: refunded MUST NOT exceed the post-slash
+	// deposit. If a slash reduces deposit below the outstanding refunded amount,
+	// clip refunded to the new deposit (the excess is forfeit).
+	if td.Refunded > td.Deposit {
+		td.Refunded = td.Deposit
+	}
+
 	// Save the updated TrustDeposit entry.
 	// Coins remain locked in the module account as slashed deposit;
 	// they are burned later by BurnEcosystemSlashedTrustDeposit (MOD-TD-MSG-7)
 	// or returned to the depositor via RepaySlashedTrustDeposit (MOD-TD-MSG-6).
-	if err := ms.Keeper.TrustDeposit.Set(ctx, msg.Corporation, td); err != nil {
+	if err := ms.Keeper.TrustDeposit.Set(ctx, msg.CorporationId, td); err != nil {
 		return nil, fmt.Errorf("failed to save trust deposit: %w", err)
 	}
 
@@ -192,7 +202,7 @@ func (ms msgServer) SlashTrustDeposit(goCtx context.Context, msg *types.MsgSlash
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeSlashTrustDeposit,
-			sdk.NewAttribute(types.AttributeKeyAccount, msg.Corporation),
+			sdk.NewAttribute(types.AttributeKeyCorporationID, strconv.FormatUint(msg.CorporationId, 10)),
 			sdk.NewAttribute(types.AttributeKeyAmount, msg.Deposit.String()),
 			sdk.NewAttribute(types.AttributeKeySlashCount, strconv.FormatUint(td.SlashCount, 10)),
 			sdk.NewAttribute("reason", msg.Reason),
@@ -222,12 +232,14 @@ func (ms msgServer) RepaySlashedTrustDeposit(goCtx context.Context, msg *types.M
 	}
 
 	// [AUTHZ-CHECK-5] Signing corporation account MUST be a registered Corporation.
-	if _, err := ms.Keeper.coKeeper.ResolveCorporationByPolicyAddress(ctx, msg.Corporation); err != nil {
+	co, err := ms.Keeper.coKeeper.ResolveCorporationByPolicyAddress(ctx, msg.Corporation)
+	if err != nil {
 		return nil, err
 	}
+	corpID := co.Id
 
-	// [MOD-TD-MSG-6-2-1] Load TrustDeposit entry for corporation (must exist)
-	td, err := ms.Keeper.TrustDeposit.Get(ctx, account)
+	// [MOD-TD-MSG-6-2-1] Load TrustDeposit entry for corporation (must exist, keyed by corporation_id)
+	td, err := ms.Keeper.TrustDeposit.Get(ctx, corpID)
 	if err != nil {
 		return nil, fmt.Errorf("trust deposit entry not found for corporation %s: %w", account, err)
 	}
@@ -263,7 +275,7 @@ func (ms msgServer) RepaySlashedTrustDeposit(goCtx context.Context, msg *types.M
 	td.LastRepaid = &now
 
 	// Save updated trust deposit BEFORE bank transfer to ensure atomicity
-	if err := ms.Keeper.TrustDeposit.Set(ctx, account, td); err != nil {
+	if err := ms.Keeper.TrustDeposit.Set(ctx, corpID, td); err != nil {
 		return nil, fmt.Errorf("failed to update trust deposit: %w", err)
 	}
 
@@ -293,6 +305,7 @@ func (ms msgServer) RepaySlashedTrustDeposit(goCtx context.Context, msg *types.M
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeRepaySlashedTrustDeposit,
+			sdk.NewAttribute(types.AttributeKeyCorporationID, strconv.FormatUint(corpID, 10)),
 			sdk.NewAttribute(types.AttributeKeyAccount, account),
 			sdk.NewAttribute(types.AttributeKeyAmount, strconv.FormatUint(msg.Deposit, 10)),
 			sdk.NewAttribute(types.AttributeKeyTimestamp, ctx.BlockTime().String()),

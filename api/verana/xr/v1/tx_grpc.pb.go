@@ -19,10 +19,12 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Msg_UpdateParams_FullMethodName         = "/verana.xr.v1.Msg/UpdateParams"
-	Msg_CreateExchangeRate_FullMethodName   = "/verana.xr.v1.Msg/CreateExchangeRate"
-	Msg_UpdateExchangeRate_FullMethodName   = "/verana.xr.v1.Msg/UpdateExchangeRate"
-	Msg_SetExchangeRateState_FullMethodName = "/verana.xr.v1.Msg/SetExchangeRateState"
+	Msg_UpdateParams_FullMethodName                    = "/verana.xr.v1.Msg/UpdateParams"
+	Msg_CreateExchangeRate_FullMethodName              = "/verana.xr.v1.Msg/CreateExchangeRate"
+	Msg_UpdateExchangeRate_FullMethodName              = "/verana.xr.v1.Msg/UpdateExchangeRate"
+	Msg_SetExchangeRateState_FullMethodName            = "/verana.xr.v1.Msg/SetExchangeRateState"
+	Msg_GrantExchangeRateAuthorization_FullMethodName  = "/verana.xr.v1.Msg/GrantExchangeRateAuthorization"
+	Msg_RevokeExchangeRateAuthorization_FullMethodName = "/verana.xr.v1.Msg/RevokeExchangeRateAuthorization"
 )
 
 // MsgClient is the client API for Msg service.
@@ -40,6 +42,12 @@ type MsgClient interface {
 	UpdateExchangeRate(ctx context.Context, in *MsgUpdateExchangeRate, opts ...grpc.CallOption) (*MsgUpdateExchangeRateResponse, error)
 	// SetExchangeRateState defines a governance operation for enabling or disabling an exchange rate.
 	SetExchangeRateState(ctx context.Context, in *MsgSetExchangeRateState, opts ...grpc.CallOption) (*MsgSetExchangeRateStateResponse, error)
+	// GrantExchangeRateAuthorization defines a governance operation authorizing an
+	// operator to update a given exchange rate. [MOD-XR-MSG-4]
+	GrantExchangeRateAuthorization(ctx context.Context, in *MsgGrantExchangeRateAuthorization, opts ...grpc.CallOption) (*MsgGrantExchangeRateAuthorizationResponse, error)
+	// RevokeExchangeRateAuthorization defines a governance operation revoking an
+	// operator's authorization for a given exchange rate. [MOD-XR-MSG-5]
+	RevokeExchangeRateAuthorization(ctx context.Context, in *MsgRevokeExchangeRateAuthorization, opts ...grpc.CallOption) (*MsgRevokeExchangeRateAuthorizationResponse, error)
 }
 
 type msgClient struct {
@@ -90,6 +98,26 @@ func (c *msgClient) SetExchangeRateState(ctx context.Context, in *MsgSetExchange
 	return out, nil
 }
 
+func (c *msgClient) GrantExchangeRateAuthorization(ctx context.Context, in *MsgGrantExchangeRateAuthorization, opts ...grpc.CallOption) (*MsgGrantExchangeRateAuthorizationResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(MsgGrantExchangeRateAuthorizationResponse)
+	err := c.cc.Invoke(ctx, Msg_GrantExchangeRateAuthorization_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *msgClient) RevokeExchangeRateAuthorization(ctx context.Context, in *MsgRevokeExchangeRateAuthorization, opts ...grpc.CallOption) (*MsgRevokeExchangeRateAuthorizationResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(MsgRevokeExchangeRateAuthorizationResponse)
+	err := c.cc.Invoke(ctx, Msg_RevokeExchangeRateAuthorization_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MsgServer is the server API for Msg service.
 // All implementations must embed UnimplementedMsgServer
 // for forward compatibility.
@@ -105,6 +133,12 @@ type MsgServer interface {
 	UpdateExchangeRate(context.Context, *MsgUpdateExchangeRate) (*MsgUpdateExchangeRateResponse, error)
 	// SetExchangeRateState defines a governance operation for enabling or disabling an exchange rate.
 	SetExchangeRateState(context.Context, *MsgSetExchangeRateState) (*MsgSetExchangeRateStateResponse, error)
+	// GrantExchangeRateAuthorization defines a governance operation authorizing an
+	// operator to update a given exchange rate. [MOD-XR-MSG-4]
+	GrantExchangeRateAuthorization(context.Context, *MsgGrantExchangeRateAuthorization) (*MsgGrantExchangeRateAuthorizationResponse, error)
+	// RevokeExchangeRateAuthorization defines a governance operation revoking an
+	// operator's authorization for a given exchange rate. [MOD-XR-MSG-5]
+	RevokeExchangeRateAuthorization(context.Context, *MsgRevokeExchangeRateAuthorization) (*MsgRevokeExchangeRateAuthorizationResponse, error)
 	mustEmbedUnimplementedMsgServer()
 }
 
@@ -126,6 +160,12 @@ func (UnimplementedMsgServer) UpdateExchangeRate(context.Context, *MsgUpdateExch
 }
 func (UnimplementedMsgServer) SetExchangeRateState(context.Context, *MsgSetExchangeRateState) (*MsgSetExchangeRateStateResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SetExchangeRateState not implemented")
+}
+func (UnimplementedMsgServer) GrantExchangeRateAuthorization(context.Context, *MsgGrantExchangeRateAuthorization) (*MsgGrantExchangeRateAuthorizationResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GrantExchangeRateAuthorization not implemented")
+}
+func (UnimplementedMsgServer) RevokeExchangeRateAuthorization(context.Context, *MsgRevokeExchangeRateAuthorization) (*MsgRevokeExchangeRateAuthorizationResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RevokeExchangeRateAuthorization not implemented")
 }
 func (UnimplementedMsgServer) mustEmbedUnimplementedMsgServer() {}
 func (UnimplementedMsgServer) testEmbeddedByValue()             {}
@@ -220,6 +260,42 @@ func _Msg_SetExchangeRateState_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Msg_GrantExchangeRateAuthorization_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgGrantExchangeRateAuthorization)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).GrantExchangeRateAuthorization(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Msg_GrantExchangeRateAuthorization_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).GrantExchangeRateAuthorization(ctx, req.(*MsgGrantExchangeRateAuthorization))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Msg_RevokeExchangeRateAuthorization_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgRevokeExchangeRateAuthorization)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).RevokeExchangeRateAuthorization(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Msg_RevokeExchangeRateAuthorization_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).RevokeExchangeRateAuthorization(ctx, req.(*MsgRevokeExchangeRateAuthorization))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Msg_ServiceDesc is the grpc.ServiceDesc for Msg service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -242,6 +318,14 @@ var Msg_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SetExchangeRateState",
 			Handler:    _Msg_SetExchangeRateState_Handler,
+		},
+		{
+			MethodName: "GrantExchangeRateAuthorization",
+			Handler:    _Msg_GrantExchangeRateAuthorization_Handler,
+		},
+		{
+			MethodName: "RevokeExchangeRateAuthorization",
+			Handler:    _Msg_RevokeExchangeRateAuthorization_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

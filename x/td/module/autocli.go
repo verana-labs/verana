@@ -19,12 +19,12 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 				},
 				{
 					RpcMethod: "GetTrustDeposit",
-					Use:       "get-trust-deposit [corporation]",
+					Use:       "get-trust-deposit [corporation-id]",
 					Short:     "Query trust deposit for a corporation",
-					Long:      "Get the trust deposit information for a given corporation address",
+					Long:      "Get the trust deposit information for a given corporation id",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{
-							ProtoField: "corporation",
+							ProtoField: "corporation_id",
 						},
 					},
 				},

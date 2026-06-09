@@ -29,17 +29,38 @@ import (
 // ErrCorporationNotRegistered abort path.
 type MockTDCorporationKeeper struct {
 	Unregistered map[string]bool
+	ids          map[string]uint64
+	nextID       uint64
 }
 
 func NewMockTDCorporationKeeper() *MockTDCorporationKeeper {
-	return &MockTDCorporationKeeper{Unregistered: map[string]bool{}}
+	return &MockTDCorporationKeeper{Unregistered: map[string]bool{}, ids: map[string]uint64{}, nextID: 1}
+}
+
+// IDFor returns the stable corporation_id assigned to addr (assigning a fresh
+// id on first use). Trust deposits are keyed by corporation_id, so tests use
+// this to look up records by the same id the keeper resolves internally.
+func (m *MockTDCorporationKeeper) IDFor(addr string) uint64 {
+	if m.ids == nil {
+		m.ids = map[string]uint64{}
+	}
+	if id, ok := m.ids[addr]; ok {
+		return id
+	}
+	if m.nextID == 0 {
+		m.nextID = 1
+	}
+	id := m.nextID
+	m.ids[addr] = id
+	m.nextID++
+	return id
 }
 
 func (m *MockTDCorporationKeeper) ResolveCorporationByPolicyAddress(_ context.Context, addr string) (types.CorporationView, error) {
 	if m.Unregistered[addr] {
 		return types.CorporationView{}, cotypes.ErrCorporationNotRegistered
 	}
-	return types.CorporationView{Id: 1, PolicyAddress: addr}, nil
+	return types.CorporationView{Id: m.IDFor(addr), PolicyAddress: addr}, nil
 }
 
 // MockMintKeeper is a mock implementation of types.MintKeeper

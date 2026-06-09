@@ -77,12 +77,15 @@ func (msg *MsgCreateExchangeRate) ValidateBasic() error {
 
 // ValidateBasic performs stateless validation on MsgUpdateExchangeRate.
 func (msg *MsgUpdateExchangeRate) ValidateBasic() error {
-	// Validate authority address
-	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
-		return fmt.Errorf("invalid authority address: %w", err)
+	// authority is optional: authorization is enforced via ExchangeRateAuthorization
+	// (xr_id, operator), not the corporation. Validate only when supplied.
+	if msg.Authority != "" {
+		if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
+			return fmt.Errorf("invalid authority address: %w", err)
+		}
 	}
 
-	// Validate operator address
+	// Validate operator address (signer)
 	if _, err := sdk.AccAddressFromBech32(msg.Operator); err != nil {
 		return fmt.Errorf("invalid operator address: %w", err)
 	}
@@ -116,6 +119,46 @@ func (msg *MsgSetExchangeRateState) ValidateBasic() error {
 		return fmt.Errorf("id must be greater than 0")
 	}
 
+	return nil
+}
+
+// ValidateBasic performs stateless validation on MsgGrantExchangeRateAuthorization. [MOD-XR-MSG-4-2-1]
+func (msg *MsgGrantExchangeRateAuthorization) ValidateBasic() error {
+	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
+		return fmt.Errorf("invalid authority address: %w", err)
+	}
+	if _, err := sdk.AccAddressFromBech32(msg.Operator); err != nil {
+		return fmt.Errorf("invalid operator address: %w", err)
+	}
+	if msg.XrId == 0 {
+		return fmt.Errorf("xr_id must be greater than 0")
+	}
+	// expiration MUST be set (statefully also checked against block time)
+	if msg.Expiration == nil {
+		return fmt.Errorf("expiration must be set")
+	}
+	// min_interval, if specified, MUST be strictly positive
+	if msg.MinInterval != nil && *msg.MinInterval <= 0 {
+		return ErrInvalidMinInterval
+	}
+	// max_deviation_bps, if specified, MUST be in range (0, 10000]
+	if msg.MaxDeviationBps > 10000 {
+		return ErrInvalidMaxDeviation
+	}
+	return nil
+}
+
+// ValidateBasic performs stateless validation on MsgRevokeExchangeRateAuthorization. [MOD-XR-MSG-5]
+func (msg *MsgRevokeExchangeRateAuthorization) ValidateBasic() error {
+	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
+		return fmt.Errorf("invalid authority address: %w", err)
+	}
+	if _, err := sdk.AccAddressFromBech32(msg.Operator); err != nil {
+		return fmt.Errorf("invalid operator address: %w", err)
+	}
+	if msg.XrId == 0 {
+		return fmt.Errorf("xr_id must be greater than 0")
+	}
 	return nil
 }
 

@@ -33,7 +33,7 @@ func TestMsgServerCreateCredentialSchema(t *testing.T) {
 
 	// Schema with placeholder $id (will be replaced with canonical $id)
 	validJsonSchemaWithPlaceholder := `{
-  "$id": "vpr:verana:VPR_CHAIN_ID/cs/v1/js/VPR_CREDENTIAL_SCHEMA_ID",
+  "$id": "vpr:verana:VPR_CHAIN_ID:cs:VPR_CREDENTIAL_SCHEMA_ID",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "ExampleCredential",
   "description": "ExampleCredential using JsonSchema",
@@ -237,7 +237,7 @@ func TestMsgServerCreateCredentialSchema(t *testing.T) {
 
 					canonicalId, ok := schemaDoc["$id"].(string)
 					require.True(t, ok, "$id field should be present")
-					expectedId := fmt.Sprintf("vpr:verana:%s/cs/v1/js/%d", sdkCtx.ChainID(), resp.Id)
+					expectedId := fmt.Sprintf("vpr:verana:%s:cs:%d", sdkCtx.ChainID(), resp.Id)
 					require.Equal(t, expectedId, canonicalId, "Schema should have canonical $id")
 
 					// Verify new fields
@@ -323,7 +323,7 @@ func TestCanonicalIdInjection(t *testing.T) {
 			name: "Correct placeholder $id",
 			inputSchema: `{
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "vpr:verana:VPR_CHAIN_ID/cs/v1/js/VPR_CREDENTIAL_SCHEMA_ID",
+  "$id": "vpr:verana:VPR_CHAIN_ID:cs:VPR_CREDENTIAL_SCHEMA_ID",
   "title": "PlaceholderIdSchema",
   "description": "Schema with placeholder $id",
   "type": "object",
@@ -355,7 +355,7 @@ func TestCanonicalIdInjection(t *testing.T) {
 
 			storedId, ok := schemaDoc["$id"].(string)
 			require.True(t, ok, "$id field should be present in stored schema")
-			expectedId := fmt.Sprintf("vpr:verana:%s/cs/v1/js/%d", sdkCtx.ChainID(), resp.Id)
+			expectedId := fmt.Sprintf("vpr:verana:%s:cs:%d", sdkCtx.ChainID(), resp.Id)
 			require.Equal(t, expectedId, storedId, "Stored schema should have canonical $id")
 
 			require.Equal(t, "https://json-schema.org/draft/2020-12/schema", schemaDoc["$schema"], "$schema should be preserved")
@@ -416,7 +416,7 @@ func TestQueryCanonicalId(t *testing.T) {
 
 		storedId, ok := schemaDoc["$id"].(string)
 		require.True(t, ok, "Query should return schema with $id")
-		expectedId := fmt.Sprintf("vpr:verana:%s/cs/v1/js/%d", sdkCtx.ChainID(), resp.Id)
+		expectedId := fmt.Sprintf("vpr:verana:%s:cs:%d", sdkCtx.ChainID(), resp.Id)
 		require.Equal(t, expectedId, storedId, "Query response should have canonical $id")
 	})
 
@@ -431,7 +431,7 @@ func TestQueryCanonicalId(t *testing.T) {
 
 		storedId, ok := schemaDoc["$id"].(string)
 		require.True(t, ok, "Render query should return schema with $id")
-		expectedId := fmt.Sprintf("vpr:verana:%s/cs/v1/js/%d", sdkCtx.ChainID(), resp.Id)
+		expectedId := fmt.Sprintf("vpr:verana:%s:cs:%d", sdkCtx.ChainID(), resp.Id)
 		require.Equal(t, expectedId, storedId, "Render response should have canonical $id")
 	})
 
@@ -451,7 +451,7 @@ func TestQueryCanonicalId(t *testing.T) {
 
 				storedId, ok := schemaDoc["$id"].(string)
 				require.True(t, ok, "List query should return schema with $id")
-				expectedId := fmt.Sprintf("vpr:verana:%s/cs/v1/js/%d", sdkCtx.ChainID(), resp.Id)
+				expectedId := fmt.Sprintf("vpr:verana:%s:cs:%d", sdkCtx.ChainID(), resp.Id)
 				require.Equal(t, expectedId, storedId, "List response should have canonical $id")
 			}
 		}

@@ -26,9 +26,8 @@ func (msg *MsgSlashTrustDeposit) ValidateBasic() error {
 		return errorsmod.Wrapf(sdkerrors.ErrInvalidAddress, "invalid authority address (%s)", err)
 	}
 
-	_, err = sdk.AccAddressFromBech32(msg.Corporation)
-	if err != nil {
-		return errorsmod.Wrapf(sdkerrors.ErrInvalidAddress, "invalid corporation address (%s)", err)
+	if msg.CorporationId == 0 {
+		return errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "corporation_id must be greater than 0")
 	}
 
 	if msg.Deposit.IsZero() || msg.Deposit.IsNegative() {

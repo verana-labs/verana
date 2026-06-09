@@ -22,7 +22,7 @@ func TestInjectCanonicalID_PreservesOrder(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if !strings.Contains(result, `"$id": "vpr:verana:verana-1/cs/v1/js/42"`) {
+	if !strings.Contains(result, `"$id": "vpr:verana:verana-1:cs:42"`) {
 		t.Errorf("canonical $id not found in result:\n%s", result)
 	}
 
@@ -50,7 +50,7 @@ func TestInjectCanonicalID_ReplacesExistingID(t *testing.T) {
 	if strings.Contains(result, "old-id") {
 		t.Error("old $id should be removed")
 	}
-	if !strings.Contains(result, `"$id": "vpr:verana:verana-1/cs/v1/js/7"`) {
+	if !strings.Contains(result, `"$id": "vpr:verana:verana-1:cs:7"`) {
 		t.Errorf("canonical $id not found in result:\n%s", result)
 	}
 
@@ -128,7 +128,7 @@ func TestInjectCanonicalID_IDAsOnlyField(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if !strings.Contains(result, `"$id": "vpr:verana:verana-1/cs/v1/js/1"`) {
+	if !strings.Contains(result, `"$id": "vpr:verana:verana-1:cs:1"`) {
 		t.Errorf("canonical $id not found in result:\n%s", result)
 	}
 
@@ -157,7 +157,7 @@ func TestInjectCanonicalID_NoExistingID(t *testing.T) {
 
 func TestEnsureCanonicalID_ShortCircuitsWhenCorrect(t *testing.T) {
 	input := `{
-  "$id": "vpr:verana:verana-1/cs/v1/js/5",
+  "$id": "vpr:verana:verana-1:cs:5",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Test",
   "description": "Desc",
@@ -177,7 +177,7 @@ func TestEnsureCanonicalID_ShortCircuitsWhenCorrect(t *testing.T) {
 
 func TestEnsureCanonicalID_UpdatesWrongID(t *testing.T) {
 	input := `{
-  "$id": "vpr:verana:verana-1/cs/v1/js/99",
+  "$id": "vpr:verana:verana-1:cs:99",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Test"
 }`
@@ -187,7 +187,7 @@ func TestEnsureCanonicalID_UpdatesWrongID(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if !strings.Contains(result, `"vpr:verana:verana-1/cs/v1/js/5"`) {
+	if !strings.Contains(result, `"vpr:verana:verana-1:cs:5"`) {
 		t.Errorf("expected updated $id in result:\n%s", result)
 	}
 	if strings.Contains(result, "js/99") {
@@ -299,7 +299,7 @@ func TestInjectCanonicalID_NestedIDNotAffected(t *testing.T) {
 	}
 
 	// Top-level canonical $id should be injected
-	if !strings.Contains(result, `"vpr:verana:verana-1/cs/v1/js/1"`) {
+	if !strings.Contains(result, `"vpr:verana:verana-1:cs:1"`) {
 		t.Errorf("canonical $id not found:\n%s", result)
 	}
 

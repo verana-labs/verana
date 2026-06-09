@@ -17,7 +17,7 @@ service Query {
     option (google.api.http).get = "/td/v1/params";
   }
   rpc GetTrustDeposit(QueryGetTrustDepositRequest) returns (QueryGetTrustDepositResponse) {
-    option (google.api.http).get = "/verana/td/v1/get/{corporation}";
+    option (google.api.http).get = "/verana/td/v1/get/{corporation_id}";
   }
 }
 
@@ -35,7 +35,9 @@ message QueryParamsResponse {
 
 // QueryGetTrustDepositRequest is request type for the GetTrustDeposit RPC method
 message QueryGetTrustDepositRequest {
-  string corporation = 1;
+  reserved 1;
+  reserved "corporation";
+  uint64 corporation_id = 2;
 }
 
 // QueryGetTrustDepositResponse is response type for the GetTrustDeposit RPC method

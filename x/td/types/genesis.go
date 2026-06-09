@@ -2,8 +2,6 @@ package types
 
 import (
 	"fmt"
-
-	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // DefaultIndex is the default global index
@@ -26,22 +24,22 @@ func (gs GenesisState) Validate() error {
 		return err
 	}
 
-	// Check for duplicate corporations in trust deposits
-	corporationSet := make(map[string]struct{}, len(gs.TrustDeposits))
+	// Check for duplicate corporation_ids in trust deposits
+	corporationSet := make(map[uint64]struct{}, len(gs.TrustDeposits))
 
 	for i, td := range gs.TrustDeposits {
-		if _, err := sdk.AccAddressFromBech32(td.Corporation); err != nil {
-			return fmt.Errorf("invalid corporation address at index %d: %s", i, err)
+		if td.CorporationId == 0 {
+			return fmt.Errorf("invalid corporation_id (zero) at index %d", i)
 		}
 
-		if _, exists := corporationSet[td.Corporation]; exists {
-			return fmt.Errorf("duplicate trust deposit for corporation: %s", td.Corporation)
+		if _, exists := corporationSet[td.CorporationId]; exists {
+			return fmt.Errorf("duplicate trust deposit for corporation_id: %d", td.CorporationId)
 		}
-		corporationSet[td.Corporation] = struct{}{}
+		corporationSet[td.CorporationId] = struct{}{}
 
-		if td.Deposit < td.Claimable {
-			return fmt.Errorf("claimable amount exceeds deposit for corporation %s: %d > %d",
-				td.Corporation, td.Claimable, td.Deposit)
+		if td.Deposit < td.Refunded {
+			return fmt.Errorf("refunded amount exceeds deposit for corporation_id %d: %d > %d",
+				td.CorporationId, td.Refunded, td.Deposit)
 		}
 	}
 

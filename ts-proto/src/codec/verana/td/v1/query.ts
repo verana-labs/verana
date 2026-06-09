@@ -8,6 +8,7 @@
 import * as _m0 from "protobufjs/minimal";
 import { Params } from "./params";
 import { TrustDeposit } from "./types";
+import Long = require("long");
 
 export const protobufPackage = "verana.td.v1";
 
@@ -23,7 +24,7 @@ export interface QueryParamsResponse {
 
 /** QueryGetTrustDepositRequest is request type for the GetTrustDeposit RPC method */
 export interface QueryGetTrustDepositRequest {
-  corporation: string;
+  corporationId: number;
 }
 
 /** QueryGetTrustDepositResponse is response type for the GetTrustDeposit RPC method */
@@ -134,13 +135,13 @@ export const QueryParamsResponse = {
 };
 
 function createBaseQueryGetTrustDepositRequest(): QueryGetTrustDepositRequest {
-  return { corporation: "" };
+  return { corporationId: 0 };
 }
 
 export const QueryGetTrustDepositRequest = {
   encode(message: QueryGetTrustDepositRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.corporation !== "") {
-      writer.uint32(10).string(message.corporation);
+    if (message.corporationId !== 0) {
+      writer.uint32(16).uint64(message.corporationId);
     }
     return writer;
   },
@@ -152,12 +153,12 @@ export const QueryGetTrustDepositRequest = {
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
-        case 1:
-          if (tag !== 10) {
+        case 2:
+          if (tag !== 16) {
             break;
           }
 
-          message.corporation = reader.string();
+          message.corporationId = longToNumber(reader.uint64() as Long);
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -169,13 +170,13 @@ export const QueryGetTrustDepositRequest = {
   },
 
   fromJSON(object: any): QueryGetTrustDepositRequest {
-    return { corporation: isSet(object.corporation) ? globalThis.String(object.corporation) : "" };
+    return { corporationId: isSet(object.corporationId) ? globalThis.Number(object.corporationId) : 0 };
   },
 
   toJSON(message: QueryGetTrustDepositRequest): unknown {
     const obj: any = {};
-    if (message.corporation !== "") {
-      obj.corporation = message.corporation;
+    if (message.corporationId !== 0) {
+      obj.corporationId = Math.round(message.corporationId);
     }
     return obj;
   },
@@ -185,7 +186,7 @@ export const QueryGetTrustDepositRequest = {
   },
   fromPartial<I extends Exact<DeepPartial<QueryGetTrustDepositRequest>, I>>(object: I): QueryGetTrustDepositRequest {
     const message = createBaseQueryGetTrustDepositRequest();
-    message.corporation = object.corporation ?? "";
+    message.corporationId = object.corporationId ?? 0;
     return message;
   },
 };
@@ -294,6 +295,21 @@ export type DeepPartial<T> = T extends Builtin ? T
 type KeysOfUnion<T> = T extends T ? keyof T : never;
 export type Exact<P, I extends P> = P extends Builtin ? P
   : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
+
+function longToNumber(long: Long): number {
+  if (long.gt(globalThis.Number.MAX_SAFE_INTEGER)) {
+    throw new globalThis.Error("Value is larger than Number.MAX_SAFE_INTEGER");
+  }
+  if (long.lt(globalThis.Number.MIN_SAFE_INTEGER)) {
+    throw new globalThis.Error("Value is smaller than Number.MIN_SAFE_INTEGER");
+  }
+  return long.toNumber();
+}
+
+if (_m0.util.Long !== Long) {
+  _m0.util.Long = Long as any;
+  _m0.configure();
+}
 
 function isSet(value: any): boolean {
   return value !== null && value !== undefined;

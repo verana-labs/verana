@@ -105,13 +105,19 @@ func voteAndPassGovProposal(
 		return fmt.Errorf("failed to vote on proposal %d: %w", proposalID, err)
 	}
 
-	// Wait for voting period to end and proposal to pass
+	// Poll for the proposal to leave the voting period and pass. The local chain
+	// uses a 30s voting period, so poll well past that before giving up.
 	fmt.Println("    - Waiting for voting period to end...")
-	time.Sleep(15 * time.Second)
-
-	proposal, err := lib.QueryGovProposal(client, ctx, proposalID)
-	if err != nil {
-		return fmt.Errorf("failed to query proposal %d: %w", proposalID, err)
+	var proposal *govtypes.Proposal
+	for i := 0; i < 30; i++ {
+		time.Sleep(3 * time.Second)
+		proposal, err = lib.QueryGovProposal(client, ctx, proposalID)
+		if err != nil {
+			return fmt.Errorf("failed to query proposal %d: %w", proposalID, err)
+		}
+		if proposal.Status != govtypes.StatusVotingPeriod && proposal.Status != govtypes.StatusDepositPeriod {
+			break
+		}
 	}
 
 	fmt.Printf("    Proposal status: %s\n", proposal.Status.String())
@@ -203,61 +209,48 @@ func RunXrCreateExchangeRateJourney(ctx context.Context, client cosmosclient.Cli
 	fmt.Printf("  Rate:  %s (scale: %d)\n", xr.Rate, xr.RateScale)
 	fmt.Printf("  State: %v\n", xr.State)
 
-	if xr.State != false {
-		return fmt.Errorf("step 3 failed: expected state=false, got state=%v", xr.State)
+	// CreateExchangeRate activates the rate on creation (state=true).
+	if xr.State != true {
+		return fmt.Errorf("step 3 failed: expected state=true, got state=%v", xr.State)
 	}
-	fmt.Println("✅ Step 3: Exchange rate created with state=false")
+	fmt.Println("✅ Step 3: Exchange rate created with state=true")
 
 	// =========================================================================
-	// Step 4: Submit governance proposal to toggle state to true
+	// Step 4-6: Exercise SetExchangeRateState. Per [MOD-XR-MSG-3] the handler
+	// TOGGLES the stored state (it ignores any explicit value). The rate is
+	// created active (true), so the first toggle disables it (false) and the
+	// second re-enables it (true), leaving it active for downstream journeys.
 	// =========================================================================
-	fmt.Println("\n--- Step 4: Submit ToggleExchangeRateState governance proposal ---")
-
-	toggleMsg := &xrtypes.MsgSetExchangeRateState{
-		Authority: govModuleAddr,
-		Id:        exchangeRateID,
-		State:     true,
+	toggle := func(label string, expected bool) error {
+		fmt.Printf("\n--- %s: SetExchangeRateState (toggle) -> expect state=%v ---\n", label, expected)
+		pid, err := submitXrGovProposal(
+			client, ctx, coolusrAddr, cooluser,
+			&xrtypes.MsgSetExchangeRateState{Authority: govModuleAddr, Id: exchangeRateID},
+			"Toggle TU/uvna Exchange Rate State", "Toggle exchange rate state",
+		)
+		if err != nil {
+			return err
+		}
+		if err := voteAndPassGovProposal(client, ctx, pid); err != nil {
+			return err
+		}
+		resp, err := xrQueryClient.GetExchangeRate(ctx, &xrtypes.QueryGetExchangeRateRequest{Id: exchangeRateID})
+		if err != nil {
+			return fmt.Errorf("could not query exchange rate: %w", err)
+		}
+		if resp.ExchangeRate.State != expected {
+			return fmt.Errorf("expected state=%v, got state=%v", expected, resp.ExchangeRate.State)
+		}
+		fmt.Printf("✅ %s: state is now %v\n", label, resp.ExchangeRate.State)
+		return nil
 	}
 
-	toggleProposalID, err := submitXrGovProposal(
-		client, ctx, coolusrAddr, cooluser,
-		toggleMsg,
-		"Toggle TU/uvna Exchange Rate State",
-		"Toggle exchange rate state to active (true)",
-	)
-	if err != nil {
-		return fmt.Errorf("step 4 failed: %w", err)
+	if err := toggle("Step 4-5", false); err != nil {
+		return fmt.Errorf("step 4-5 failed: %w", err)
 	}
-	fmt.Printf("✅ Step 4: Submitted ToggleExchangeRateState proposal (ID: %d)\n", toggleProposalID)
-
-	// =========================================================================
-	// Step 5: Vote and pass the toggle proposal
-	// =========================================================================
-	fmt.Println("\n--- Step 5: Vote and pass the toggle proposal ---")
-
-	err = voteAndPassGovProposal(client, ctx, toggleProposalID)
-	if err != nil {
-		return fmt.Errorf("step 5 failed: %w", err)
+	if err := toggle("Step 6", true); err != nil {
+		return fmt.Errorf("step 6 failed: %w", err)
 	}
-	fmt.Println("✅ Step 5: ToggleExchangeRateState proposal passed")
-
-	// =========================================================================
-	// Step 6: Query to verify state=true
-	// =========================================================================
-	fmt.Println("\n--- Step 6: Query exchange rate to verify state=true ---")
-
-	getResp, err := xrQueryClient.GetExchangeRate(ctx, &xrtypes.QueryGetExchangeRateRequest{
-		Id: exchangeRateID,
-	})
-	if err != nil {
-		return fmt.Errorf("step 6 failed: could not query exchange rate: %w", err)
-	}
-
-	if getResp.ExchangeRate.State != true {
-		return fmt.Errorf("step 6 failed: expected state=true, got state=%v", getResp.ExchangeRate.State)
-	}
-	fmt.Printf("  State: %v\n", getResp.ExchangeRate.State)
-	fmt.Println("✅ Step 6: Exchange rate state is now true")
 
 	// =========================================================================
 	// Step 7: Save exchange rate ID for downstream journeys
@@ -270,10 +263,9 @@ func RunXrCreateExchangeRateJourney(ctx context.Context, client cosmosclient.Cli
 	fmt.Println("\n========================================")
 	fmt.Println("Journey 601 completed successfully!")
 	fmt.Println("XR CreateExchangeRate via Governance tested:")
-	fmt.Println("  - CreateExchangeRate: proposal submitted and passed")
-	fmt.Println("  - Exchange rate created with state=false")
-	fmt.Println("  - ToggleExchangeRateState: proposal submitted and passed")
-	fmt.Println("  - Exchange rate state toggled to true")
+	fmt.Println("  - CreateExchangeRate: proposal submitted and passed (state=true)")
+	fmt.Println("  - SetExchangeRateState: toggled true->false then false->true")
+	fmt.Println("  - Exchange rate left active for downstream journeys")
 	fmt.Printf("  - Exchange Rate ID: %d\n", exchangeRateID)
 	fmt.Println("========================================")
 

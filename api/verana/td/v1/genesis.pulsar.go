@@ -653,20 +653,20 @@ func (x *fastReflection_GenesisState) ProtoMethods() *protoiface.Methods {
 }
 
 var (
-	md_TrustDepositRecord             protoreflect.MessageDescriptor
-	fd_TrustDepositRecord_corporation protoreflect.FieldDescriptor
-	fd_TrustDepositRecord_share       protoreflect.FieldDescriptor
-	fd_TrustDepositRecord_deposit     protoreflect.FieldDescriptor
-	fd_TrustDepositRecord_claimable   protoreflect.FieldDescriptor
+	md_TrustDepositRecord                protoreflect.MessageDescriptor
+	fd_TrustDepositRecord_share          protoreflect.FieldDescriptor
+	fd_TrustDepositRecord_deposit        protoreflect.FieldDescriptor
+	fd_TrustDepositRecord_corporation_id protoreflect.FieldDescriptor
+	fd_TrustDepositRecord_refunded       protoreflect.FieldDescriptor
 )
 
 func init() {
 	file_verana_td_v1_genesis_proto_init()
 	md_TrustDepositRecord = File_verana_td_v1_genesis_proto.Messages().ByName("TrustDepositRecord")
-	fd_TrustDepositRecord_corporation = md_TrustDepositRecord.Fields().ByName("corporation")
 	fd_TrustDepositRecord_share = md_TrustDepositRecord.Fields().ByName("share")
 	fd_TrustDepositRecord_deposit = md_TrustDepositRecord.Fields().ByName("deposit")
-	fd_TrustDepositRecord_claimable = md_TrustDepositRecord.Fields().ByName("claimable")
+	fd_TrustDepositRecord_corporation_id = md_TrustDepositRecord.Fields().ByName("corporation_id")
+	fd_TrustDepositRecord_refunded = md_TrustDepositRecord.Fields().ByName("refunded")
 }
 
 var _ protoreflect.Message = (*fastReflection_TrustDepositRecord)(nil)
@@ -734,12 +734,6 @@ func (x *fastReflection_TrustDepositRecord) Interface() protoreflect.ProtoMessag
 // While iterating, mutating operations may only be performed
 // on the current field descriptor.
 func (x *fastReflection_TrustDepositRecord) Range(f func(protoreflect.FieldDescriptor, protoreflect.Value) bool) {
-	if x.Corporation != "" {
-		value := protoreflect.ValueOfString(x.Corporation)
-		if !f(fd_TrustDepositRecord_corporation, value) {
-			return
-		}
-	}
 	if x.Share != "" {
 		value := protoreflect.ValueOfString(x.Share)
 		if !f(fd_TrustDepositRecord_share, value) {
@@ -752,9 +746,15 @@ func (x *fastReflection_TrustDepositRecord) Range(f func(protoreflect.FieldDescr
 			return
 		}
 	}
-	if x.Claimable != uint64(0) {
-		value := protoreflect.ValueOfUint64(x.Claimable)
-		if !f(fd_TrustDepositRecord_claimable, value) {
+	if x.CorporationId != uint64(0) {
+		value := protoreflect.ValueOfUint64(x.CorporationId)
+		if !f(fd_TrustDepositRecord_corporation_id, value) {
+			return
+		}
+	}
+	if x.Refunded != uint64(0) {
+		value := protoreflect.ValueOfUint64(x.Refunded)
+		if !f(fd_TrustDepositRecord_refunded, value) {
 			return
 		}
 	}
@@ -773,14 +773,14 @@ func (x *fastReflection_TrustDepositRecord) Range(f func(protoreflect.FieldDescr
 // a repeated field is populated if it is non-empty.
 func (x *fastReflection_TrustDepositRecord) Has(fd protoreflect.FieldDescriptor) bool {
 	switch fd.FullName() {
-	case "verana.td.v1.TrustDepositRecord.corporation":
-		return x.Corporation != ""
 	case "verana.td.v1.TrustDepositRecord.share":
 		return x.Share != ""
 	case "verana.td.v1.TrustDepositRecord.deposit":
 		return x.Deposit != uint64(0)
-	case "verana.td.v1.TrustDepositRecord.claimable":
-		return x.Claimable != uint64(0)
+	case "verana.td.v1.TrustDepositRecord.corporation_id":
+		return x.CorporationId != uint64(0)
+	case "verana.td.v1.TrustDepositRecord.refunded":
+		return x.Refunded != uint64(0)
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.td.v1.TrustDepositRecord"))
@@ -797,14 +797,14 @@ func (x *fastReflection_TrustDepositRecord) Has(fd protoreflect.FieldDescriptor)
 // Clear is a mutating operation and unsafe for concurrent use.
 func (x *fastReflection_TrustDepositRecord) Clear(fd protoreflect.FieldDescriptor) {
 	switch fd.FullName() {
-	case "verana.td.v1.TrustDepositRecord.corporation":
-		x.Corporation = ""
 	case "verana.td.v1.TrustDepositRecord.share":
 		x.Share = ""
 	case "verana.td.v1.TrustDepositRecord.deposit":
 		x.Deposit = uint64(0)
-	case "verana.td.v1.TrustDepositRecord.claimable":
-		x.Claimable = uint64(0)
+	case "verana.td.v1.TrustDepositRecord.corporation_id":
+		x.CorporationId = uint64(0)
+	case "verana.td.v1.TrustDepositRecord.refunded":
+		x.Refunded = uint64(0)
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.td.v1.TrustDepositRecord"))
@@ -821,17 +821,17 @@ func (x *fastReflection_TrustDepositRecord) Clear(fd protoreflect.FieldDescripto
 // of the value; to obtain a mutable reference, use Mutable.
 func (x *fastReflection_TrustDepositRecord) Get(descriptor protoreflect.FieldDescriptor) protoreflect.Value {
 	switch descriptor.FullName() {
-	case "verana.td.v1.TrustDepositRecord.corporation":
-		value := x.Corporation
-		return protoreflect.ValueOfString(value)
 	case "verana.td.v1.TrustDepositRecord.share":
 		value := x.Share
 		return protoreflect.ValueOfString(value)
 	case "verana.td.v1.TrustDepositRecord.deposit":
 		value := x.Deposit
 		return protoreflect.ValueOfUint64(value)
-	case "verana.td.v1.TrustDepositRecord.claimable":
-		value := x.Claimable
+	case "verana.td.v1.TrustDepositRecord.corporation_id":
+		value := x.CorporationId
+		return protoreflect.ValueOfUint64(value)
+	case "verana.td.v1.TrustDepositRecord.refunded":
+		value := x.Refunded
 		return protoreflect.ValueOfUint64(value)
 	default:
 		if descriptor.IsExtension() {
@@ -853,14 +853,14 @@ func (x *fastReflection_TrustDepositRecord) Get(descriptor protoreflect.FieldDes
 // Set is a mutating operation and unsafe for concurrent use.
 func (x *fastReflection_TrustDepositRecord) Set(fd protoreflect.FieldDescriptor, value protoreflect.Value) {
 	switch fd.FullName() {
-	case "verana.td.v1.TrustDepositRecord.corporation":
-		x.Corporation = value.Interface().(string)
 	case "verana.td.v1.TrustDepositRecord.share":
 		x.Share = value.Interface().(string)
 	case "verana.td.v1.TrustDepositRecord.deposit":
 		x.Deposit = value.Uint()
-	case "verana.td.v1.TrustDepositRecord.claimable":
-		x.Claimable = value.Uint()
+	case "verana.td.v1.TrustDepositRecord.corporation_id":
+		x.CorporationId = value.Uint()
+	case "verana.td.v1.TrustDepositRecord.refunded":
+		x.Refunded = value.Uint()
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.td.v1.TrustDepositRecord"))
@@ -881,14 +881,14 @@ func (x *fastReflection_TrustDepositRecord) Set(fd protoreflect.FieldDescriptor,
 // Mutable is a mutating operation and unsafe for concurrent use.
 func (x *fastReflection_TrustDepositRecord) Mutable(fd protoreflect.FieldDescriptor) protoreflect.Value {
 	switch fd.FullName() {
-	case "verana.td.v1.TrustDepositRecord.corporation":
-		panic(fmt.Errorf("field corporation of message verana.td.v1.TrustDepositRecord is not mutable"))
 	case "verana.td.v1.TrustDepositRecord.share":
 		panic(fmt.Errorf("field share of message verana.td.v1.TrustDepositRecord is not mutable"))
 	case "verana.td.v1.TrustDepositRecord.deposit":
 		panic(fmt.Errorf("field deposit of message verana.td.v1.TrustDepositRecord is not mutable"))
-	case "verana.td.v1.TrustDepositRecord.claimable":
-		panic(fmt.Errorf("field claimable of message verana.td.v1.TrustDepositRecord is not mutable"))
+	case "verana.td.v1.TrustDepositRecord.corporation_id":
+		panic(fmt.Errorf("field corporation_id of message verana.td.v1.TrustDepositRecord is not mutable"))
+	case "verana.td.v1.TrustDepositRecord.refunded":
+		panic(fmt.Errorf("field refunded of message verana.td.v1.TrustDepositRecord is not mutable"))
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: verana.td.v1.TrustDepositRecord"))
@@ -902,13 +902,13 @@ func (x *fastReflection_TrustDepositRecord) Mutable(fd protoreflect.FieldDescrip
 // For lists, maps, and messages, this returns a new, empty, mutable value.
 func (x *fastReflection_TrustDepositRecord) NewField(fd protoreflect.FieldDescriptor) protoreflect.Value {
 	switch fd.FullName() {
-	case "verana.td.v1.TrustDepositRecord.corporation":
-		return protoreflect.ValueOfString("")
 	case "verana.td.v1.TrustDepositRecord.share":
 		return protoreflect.ValueOfString("")
 	case "verana.td.v1.TrustDepositRecord.deposit":
 		return protoreflect.ValueOfUint64(uint64(0))
-	case "verana.td.v1.TrustDepositRecord.claimable":
+	case "verana.td.v1.TrustDepositRecord.corporation_id":
+		return protoreflect.ValueOfUint64(uint64(0))
+	case "verana.td.v1.TrustDepositRecord.refunded":
 		return protoreflect.ValueOfUint64(uint64(0))
 	default:
 		if fd.IsExtension() {
@@ -979,10 +979,6 @@ func (x *fastReflection_TrustDepositRecord) ProtoMethods() *protoiface.Methods {
 		var n int
 		var l int
 		_ = l
-		l = len(x.Corporation)
-		if l > 0 {
-			n += 1 + l + runtime.Sov(uint64(l))
-		}
 		l = len(x.Share)
 		if l > 0 {
 			n += 1 + l + runtime.Sov(uint64(l))
@@ -990,8 +986,11 @@ func (x *fastReflection_TrustDepositRecord) ProtoMethods() *protoiface.Methods {
 		if x.Deposit != 0 {
 			n += 1 + runtime.Sov(uint64(x.Deposit))
 		}
-		if x.Claimable != 0 {
-			n += 1 + runtime.Sov(uint64(x.Claimable))
+		if x.CorporationId != 0 {
+			n += 1 + runtime.Sov(uint64(x.CorporationId))
+		}
+		if x.Refunded != 0 {
+			n += 1 + runtime.Sov(uint64(x.Refunded))
 		}
 		if x.unknownFields != nil {
 			n += len(x.unknownFields)
@@ -1022,10 +1021,15 @@ func (x *fastReflection_TrustDepositRecord) ProtoMethods() *protoiface.Methods {
 			i -= len(x.unknownFields)
 			copy(dAtA[i:], x.unknownFields)
 		}
-		if x.Claimable != 0 {
-			i = runtime.EncodeVarint(dAtA, i, uint64(x.Claimable))
+		if x.Refunded != 0 {
+			i = runtime.EncodeVarint(dAtA, i, uint64(x.Refunded))
 			i--
-			dAtA[i] = 0x20
+			dAtA[i] = 0x30
+		}
+		if x.CorporationId != 0 {
+			i = runtime.EncodeVarint(dAtA, i, uint64(x.CorporationId))
+			i--
+			dAtA[i] = 0x28
 		}
 		if x.Deposit != 0 {
 			i = runtime.EncodeVarint(dAtA, i, uint64(x.Deposit))
@@ -1038,13 +1042,6 @@ func (x *fastReflection_TrustDepositRecord) ProtoMethods() *protoiface.Methods {
 			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Share)))
 			i--
 			dAtA[i] = 0x12
-		}
-		if len(x.Corporation) > 0 {
-			i -= len(x.Corporation)
-			copy(dAtA[i:], x.Corporation)
-			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Corporation)))
-			i--
-			dAtA[i] = 0xa
 		}
 		if input.Buf != nil {
 			input.Buf = append(input.Buf, dAtA...)
@@ -1095,38 +1092,6 @@ func (x *fastReflection_TrustDepositRecord) ProtoMethods() *protoiface.Methods {
 				return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: TrustDepositRecord: illegal tag %d (wire type %d)", fieldNum, wire)
 			}
 			switch fieldNum {
-			case 1:
-				if wireType != 2 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Corporation", wireType)
-				}
-				var stringLen uint64
-				for shift := uint(0); ; shift += 7 {
-					if shift >= 64 {
-						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
-					}
-					if iNdEx >= l {
-						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
-					}
-					b := dAtA[iNdEx]
-					iNdEx++
-					stringLen |= uint64(b&0x7F) << shift
-					if b < 0x80 {
-						break
-					}
-				}
-				intStringLen := int(stringLen)
-				if intStringLen < 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
-				}
-				postIndex := iNdEx + intStringLen
-				if postIndex < 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
-				}
-				if postIndex > l {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
-				}
-				x.Corporation = string(dAtA[iNdEx:postIndex])
-				iNdEx = postIndex
 			case 2:
 				if wireType != 2 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Share", wireType)
@@ -1178,11 +1143,11 @@ func (x *fastReflection_TrustDepositRecord) ProtoMethods() *protoiface.Methods {
 						break
 					}
 				}
-			case 4:
+			case 5:
 				if wireType != 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Claimable", wireType)
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field CorporationId", wireType)
 				}
-				x.Claimable = 0
+				x.CorporationId = 0
 				for shift := uint(0); ; shift += 7 {
 					if shift >= 64 {
 						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
@@ -1192,7 +1157,26 @@ func (x *fastReflection_TrustDepositRecord) ProtoMethods() *protoiface.Methods {
 					}
 					b := dAtA[iNdEx]
 					iNdEx++
-					x.Claimable |= uint64(b&0x7F) << shift
+					x.CorporationId |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+			case 6:
+				if wireType != 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Refunded", wireType)
+				}
+				x.Refunded = 0
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					x.Refunded |= uint64(b&0x7F) << shift
 					if b < 0x80 {
 						break
 					}
@@ -1305,10 +1289,12 @@ type TrustDepositRecord struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Corporation string `protobuf:"bytes,1,opt,name=corporation,proto3" json:"corporation,omitempty"`
-	Share       string `protobuf:"bytes,2,opt,name=share,proto3" json:"share,omitempty"`
-	Deposit     uint64 `protobuf:"varint,3,opt,name=deposit,proto3" json:"deposit,omitempty"`
-	Claimable   uint64 `protobuf:"varint,4,opt,name=claimable,proto3" json:"claimable,omitempty"`
+	Share   string `protobuf:"bytes,2,opt,name=share,proto3" json:"share,omitempty"`
+	Deposit uint64 `protobuf:"varint,3,opt,name=deposit,proto3" json:"deposit,omitempty"`
+	// corporation_id is the registered Corporation id that owns this trust deposit.
+	CorporationId uint64 `protobuf:"varint,5,opt,name=corporation_id,json=corporationId,proto3" json:"corporation_id,omitempty"`
+	// refunded is the amount eligible to be recycled/reclaimed (was "claimable").
+	Refunded uint64 `protobuf:"varint,6,opt,name=refunded,proto3" json:"refunded,omitempty"`
 }
 
 func (x *TrustDepositRecord) Reset() {
@@ -1331,13 +1317,6 @@ func (*TrustDepositRecord) Descriptor() ([]byte, []int) {
 	return file_verana_td_v1_genesis_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *TrustDepositRecord) GetCorporation() string {
-	if x != nil {
-		return x.Corporation
-	}
-	return ""
-}
-
 func (x *TrustDepositRecord) GetShare() string {
 	if x != nil {
 		return x.Share
@@ -1352,9 +1331,16 @@ func (x *TrustDepositRecord) GetDeposit() uint64 {
 	return 0
 }
 
-func (x *TrustDepositRecord) GetClaimable() uint64 {
+func (x *TrustDepositRecord) GetCorporationId() uint64 {
 	if x != nil {
-		return x.Claimable
+		return x.CorporationId
+	}
+	return 0
+}
+
+func (x *TrustDepositRecord) GetRefunded() uint64 {
+	if x != nil {
+		return x.Refunded
 	}
 	return 0
 }
@@ -1381,31 +1367,32 @@ var file_verana_td_v1_genesis_proto_rawDesc = []byte{
 	0x44, 0x65, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x52, 0x65, 0x63, 0x6f, 0x72, 0x64, 0x42, 0x04, 0xc8,
 	0xde, 0x1f, 0x00, 0x52, 0x0d, 0x74, 0x72, 0x75, 0x73, 0x74, 0x44, 0x65, 0x70, 0x6f, 0x73, 0x69,
 	0x74, 0x73, 0x12, 0x12, 0x0a, 0x04, 0x64, 0x75, 0x73, 0x74, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09,
-	0x52, 0x04, 0x64, 0x75, 0x73, 0x74, 0x22, 0xd3, 0x01, 0x0a, 0x12, 0x54, 0x72, 0x75, 0x73, 0x74,
-	0x44, 0x65, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x52, 0x65, 0x63, 0x6f, 0x72, 0x64, 0x12, 0x3a, 0x0a,
-	0x0b, 0x63, 0x6f, 0x72, 0x70, 0x6f, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x01, 0x20, 0x01,
-	0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41,
-	0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x0b, 0x63, 0x6f,
-	0x72, 0x70, 0x6f, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x49, 0x0a, 0x05, 0x73, 0x68, 0x61,
-	0x72, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x42, 0x33, 0xc8, 0xde, 0x1f, 0x00, 0xda, 0xde,
-	0x1f, 0x1b, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x73, 0x64, 0x6b, 0x2e, 0x69, 0x6f, 0x2f, 0x6d,
-	0x61, 0x74, 0x68, 0x2e, 0x4c, 0x65, 0x67, 0x61, 0x63, 0x79, 0x44, 0x65, 0x63, 0xf2, 0xde, 0x1f,
-	0x0c, 0x79, 0x61, 0x6d, 0x6c, 0x3a, 0x22, 0x73, 0x68, 0x61, 0x72, 0x65, 0x22, 0x52, 0x05, 0x73,
-	0x68, 0x61, 0x72, 0x65, 0x12, 0x18, 0x0a, 0x07, 0x64, 0x65, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x18,
-	0x03, 0x20, 0x01, 0x28, 0x04, 0x52, 0x07, 0x64, 0x65, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x12, 0x1c,
-	0x0a, 0x09, 0x63, 0x6c, 0x61, 0x69, 0x6d, 0x61, 0x62, 0x6c, 0x65, 0x18, 0x04, 0x20, 0x01, 0x28,
-	0x04, 0x52, 0x09, 0x63, 0x6c, 0x61, 0x69, 0x6d, 0x61, 0x62, 0x6c, 0x65, 0x42, 0xa7, 0x01, 0x0a,
-	0x10, 0x63, 0x6f, 0x6d, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x74, 0x64, 0x2e, 0x76,
-	0x31, 0x42, 0x0c, 0x47, 0x65, 0x6e, 0x65, 0x73, 0x69, 0x73, 0x50, 0x72, 0x6f, 0x74, 0x6f, 0x50,
-	0x01, 0x5a, 0x33, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x76, 0x65,
-	0x72, 0x61, 0x6e, 0x61, 0x2d, 0x6c, 0x61, 0x62, 0x73, 0x2f, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61,
-	0x2f, 0x61, 0x70, 0x69, 0x2f, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2f, 0x74, 0x64, 0x2f, 0x76,
-	0x31, 0x3b, 0x74, 0x64, 0x76, 0x31, 0xa2, 0x02, 0x03, 0x56, 0x54, 0x58, 0xaa, 0x02, 0x0c, 0x56,
-	0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x54, 0x64, 0x2e, 0x56, 0x31, 0xca, 0x02, 0x0c, 0x56, 0x65,
-	0x72, 0x61, 0x6e, 0x61, 0x5c, 0x54, 0x64, 0x5c, 0x56, 0x31, 0xe2, 0x02, 0x18, 0x56, 0x65, 0x72,
-	0x61, 0x6e, 0x61, 0x5c, 0x54, 0x64, 0x5c, 0x56, 0x31, 0x5c, 0x47, 0x50, 0x42, 0x4d, 0x65, 0x74,
-	0x61, 0x64, 0x61, 0x74, 0x61, 0xea, 0x02, 0x0e, 0x56, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x3a, 0x3a,
-	0x54, 0x64, 0x3a, 0x3a, 0x56, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x52, 0x04, 0x64, 0x75, 0x73, 0x74, 0x22, 0xe0, 0x01, 0x0a, 0x12, 0x54, 0x72, 0x75, 0x73, 0x74,
+	0x44, 0x65, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x52, 0x65, 0x63, 0x6f, 0x72, 0x64, 0x12, 0x49, 0x0a,
+	0x05, 0x73, 0x68, 0x61, 0x72, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x42, 0x33, 0xc8, 0xde,
+	0x1f, 0x00, 0xda, 0xde, 0x1f, 0x1b, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x73, 0x64, 0x6b, 0x2e,
+	0x69, 0x6f, 0x2f, 0x6d, 0x61, 0x74, 0x68, 0x2e, 0x4c, 0x65, 0x67, 0x61, 0x63, 0x79, 0x44, 0x65,
+	0x63, 0xf2, 0xde, 0x1f, 0x0c, 0x79, 0x61, 0x6d, 0x6c, 0x3a, 0x22, 0x73, 0x68, 0x61, 0x72, 0x65,
+	0x22, 0x52, 0x05, 0x73, 0x68, 0x61, 0x72, 0x65, 0x12, 0x18, 0x0a, 0x07, 0x64, 0x65, 0x70, 0x6f,
+	0x73, 0x69, 0x74, 0x18, 0x03, 0x20, 0x01, 0x28, 0x04, 0x52, 0x07, 0x64, 0x65, 0x70, 0x6f, 0x73,
+	0x69, 0x74, 0x12, 0x25, 0x0a, 0x0e, 0x63, 0x6f, 0x72, 0x70, 0x6f, 0x72, 0x61, 0x74, 0x69, 0x6f,
+	0x6e, 0x5f, 0x69, 0x64, 0x18, 0x05, 0x20, 0x01, 0x28, 0x04, 0x52, 0x0d, 0x63, 0x6f, 0x72, 0x70,
+	0x6f, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x49, 0x64, 0x12, 0x1a, 0x0a, 0x08, 0x72, 0x65, 0x66,
+	0x75, 0x6e, 0x64, 0x65, 0x64, 0x18, 0x06, 0x20, 0x01, 0x28, 0x04, 0x52, 0x08, 0x72, 0x65, 0x66,
+	0x75, 0x6e, 0x64, 0x65, 0x64, 0x4a, 0x04, 0x08, 0x01, 0x10, 0x02, 0x4a, 0x04, 0x08, 0x04, 0x10,
+	0x05, 0x52, 0x0b, 0x63, 0x6f, 0x72, 0x70, 0x6f, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x09,
+	0x63, 0x6c, 0x61, 0x69, 0x6d, 0x61, 0x62, 0x6c, 0x65, 0x42, 0xa7, 0x01, 0x0a, 0x10, 0x63, 0x6f,
+	0x6d, 0x2e, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2e, 0x74, 0x64, 0x2e, 0x76, 0x31, 0x42, 0x0c,
+	0x47, 0x65, 0x6e, 0x65, 0x73, 0x69, 0x73, 0x50, 0x72, 0x6f, 0x74, 0x6f, 0x50, 0x01, 0x5a, 0x33,
+	0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x76, 0x65, 0x72, 0x61, 0x6e,
+	0x61, 0x2d, 0x6c, 0x61, 0x62, 0x73, 0x2f, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2f, 0x61, 0x70,
+	0x69, 0x2f, 0x76, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x2f, 0x74, 0x64, 0x2f, 0x76, 0x31, 0x3b, 0x74,
+	0x64, 0x76, 0x31, 0xa2, 0x02, 0x03, 0x56, 0x54, 0x58, 0xaa, 0x02, 0x0c, 0x56, 0x65, 0x72, 0x61,
+	0x6e, 0x61, 0x2e, 0x54, 0x64, 0x2e, 0x56, 0x31, 0xca, 0x02, 0x0c, 0x56, 0x65, 0x72, 0x61, 0x6e,
+	0x61, 0x5c, 0x54, 0x64, 0x5c, 0x56, 0x31, 0xe2, 0x02, 0x18, 0x56, 0x65, 0x72, 0x61, 0x6e, 0x61,
+	0x5c, 0x54, 0x64, 0x5c, 0x56, 0x31, 0x5c, 0x47, 0x50, 0x42, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61,
+	0x74, 0x61, 0xea, 0x02, 0x0e, 0x56, 0x65, 0x72, 0x61, 0x6e, 0x61, 0x3a, 0x3a, 0x54, 0x64, 0x3a,
+	0x3a, 0x56, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (

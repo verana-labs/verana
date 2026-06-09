@@ -2,9 +2,7 @@ package journeys
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"os/exec"
 	"strings"
 
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
@@ -15,19 +13,18 @@ import (
 )
 
 // queryTrustDepositByAddr queries the trust deposit for an arbitrary address
-// (including non-keyring addresses like group policy accounts) using the CLI.
-func queryTrustDepositByAddr(addr string) (*tdtypes.TrustDeposit, error) {
-	cmd := exec.Command("veranad", "q", "td", "get-trust-deposit", addr, "-o", "json")
-	output, err := cmd.Output()
+// (including non-keyring addresses like group policy accounts) via the typed
+// gRPC query. Trust deposits are keyed by corporation_id, so the address is
+// resolved to its corporation_id first.
+func queryTrustDepositByAddr(client cosmosclient.Client, ctx context.Context, addr string) (*tdtypes.TrustDeposit, error) {
+	corpID, err := lib.ResolveCorporationIDByAddress(client, ctx, addr)
 	if err != nil {
-		return nil, fmt.Errorf("failed to query trust deposit for %s: %v", addr, err)
+		return nil, fmt.Errorf("failed to resolve corporation_id for %s: %v", addr, err)
 	}
-
-	var resp struct {
-		TrustDeposit tdtypes.TrustDeposit `json:"trustDeposit"`
-	}
-	if err := json.Unmarshal(output, &resp); err != nil {
-		return nil, fmt.Errorf("failed to parse trust deposit JSON for %s: %v", addr, err)
+	qc := tdtypes.NewQueryClient(client.Context())
+	resp, err := qc.GetTrustDeposit(ctx, &tdtypes.QueryGetTrustDepositRequest{CorporationId: corpID})
+	if err != nil {
+		return nil, fmt.Errorf("failed to query trust deposit for %s (corp_id %d): %w", addr, corpID, err)
 	}
 	return &resp.TrustDeposit, nil
 }
@@ -111,16 +108,16 @@ func RunTDReclaimYieldJourney(ctx context.Context, client cosmosclient.Client) e
 	// 1d: Verify TD state via query
 	// The group policy address is not a keyring account, so we query via CLI.
 	fmt.Println("\n--- Step 1d: Verify TD state for group policy ---")
-	td, err := queryTrustDepositByAddr(policyAddr)
+	td, err := queryTrustDepositByAddr(client, ctx, policyAddr)
 	if err != nil {
 		// TD may not exist if no deposit was ever created for the policy address.
 		// This is acceptable - the important test was the auth check in 1a/1c.
 		fmt.Printf("  Step 1d: Could not query TD for policy address (may not have a deposit): %s\n", err.Error())
 	} else {
 		fmt.Printf("OK Step 1d: TD state for policy address:\n")
-		fmt.Printf("    Account:        %s\n", td.Corporation)
+		fmt.Printf("    CorporationId:  %d\n", td.CorporationId)
 		fmt.Printf("    Amount:         %d\n", td.Deposit)
-		fmt.Printf("    Claimable:      %d\n", td.Claimable)
+		fmt.Printf("    Refunded:       %d\n", td.Refunded)
 		fmt.Printf("    SlashedDeposit: %d\n", td.SlashedDeposit)
 		fmt.Printf("    RepaidDeposit:  %d\n", td.RepaidDeposit)
 		fmt.Printf("    SlashCount:     %d\n", td.SlashCount)
@@ -159,7 +156,7 @@ func RunTDReclaimYieldJourney(ctx context.Context, client cosmosclient.Client) e
 
 	// 2c: Get outstanding slash amount from TD state
 	fmt.Println("\n--- Step 2c: Query outstanding slash amount ---")
-	tdBefore, err := queryTrustDepositByAddr(policyAddr)
+	tdBefore, err := queryTrustDepositByAddr(client, ctx, policyAddr)
 	if err != nil {
 		return fmt.Errorf("step 2c failed: could not query TD for policy address: %w", err)
 	}
@@ -192,7 +189,7 @@ func RunTDReclaimYieldJourney(ctx context.Context, client cosmosclient.Client) e
 
 		// 2f: Verify TD state after repayment
 		fmt.Println("\n--- Step 2f: Verify TD state after repayment ---")
-		tdAfter, err := queryTrustDepositByAddr(policyAddr)
+		tdAfter, err := queryTrustDepositByAddr(client, ctx, policyAddr)
 		if err != nil {
 			return fmt.Errorf("step 2f failed: could not query TD after repayment: %w", err)
 		}

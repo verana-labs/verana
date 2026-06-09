@@ -1,6 +1,7 @@
 import { GeneratedType, Registry } from "@cosmjs/proto-signing";
 import { AminoTypes, defaultRegistryTypes, createDefaultAminoConverters } from "@cosmjs/stargate";
 import { createGroupAminoConverters } from "./amino-converter/group";
+import { createGovAminoConverters } from "./amino-converter/gov";
 import {
   MsgCreateCorporation,
   MsgUpdateCorporation,
@@ -9,6 +10,9 @@ import {
   MsgArchiveCredentialSchema,
   MsgCreateCredentialSchema,
   MsgUpdateCredentialSchema,
+  MsgCreateSchemaAuthorizationPolicy,
+  MsgIncreaseActiveSchemaAuthorizationPolicyVersion,
+  MsgRevokeSchemaAuthorizationPolicy,
 } from "./codec/verana/cs/v1/tx";
 import {
   MsgGrantOperatorAuthorization,
@@ -44,6 +48,8 @@ import {
 } from "./codec/verana/td/v1/tx";
 import {
   MsgCreateExchangeRate,
+  MsgGrantExchangeRateAuthorization,
+  MsgRevokeExchangeRateAuthorization,
   MsgSetExchangeRateState,
   MsgUpdateExchangeRate,
 } from "./codec/verana/xr/v1/tx";
@@ -55,6 +61,9 @@ import {
   MsgArchiveCredentialSchemaAminoConverter,
   MsgCreateCredentialSchemaAminoConverter,
   MsgUpdateCredentialSchemaAminoConverter,
+  MsgCreateSchemaAuthorizationPolicyAminoConverter,
+  MsgIncreaseActiveSchemaAuthorizationPolicyVersionAminoConverter,
+  MsgRevokeSchemaAuthorizationPolicyAminoConverter,
 } from "./amino-converter/cs";
 import {
   MsgGrantOperatorAuthorizationAminoConverter,
@@ -90,6 +99,8 @@ import {
 } from "./amino-converter/td";
 import {
   MsgCreateExchangeRateAminoConverter,
+  MsgGrantExchangeRateAuthorizationAminoConverter,
+  MsgRevokeExchangeRateAuthorizationAminoConverter,
   MsgSetExchangeRateStateAminoConverter,
   MsgUpdateExchangeRateAminoConverter,
 } from "./amino-converter/xr";
@@ -105,6 +116,9 @@ export const veranaTypeUrls = {
   MsgCreateCredentialSchema: "/verana.cs.v1.MsgCreateCredentialSchema",
   MsgUpdateCredentialSchema: "/verana.cs.v1.MsgUpdateCredentialSchema",
   MsgArchiveCredentialSchema: "/verana.cs.v1.MsgArchiveCredentialSchema",
+  MsgCreateSchemaAuthorizationPolicy: "/verana.cs.v1.MsgCreateSchemaAuthorizationPolicy",
+  MsgIncreaseActiveSchemaAuthorizationPolicyVersion: "/verana.cs.v1.MsgIncreaseActiveSchemaAuthorizationPolicyVersion",
+  MsgRevokeSchemaAuthorizationPolicy: "/verana.cs.v1.MsgRevokeSchemaAuthorizationPolicy",
   MsgSelfCreateParticipant: "/verana.pp.v1.MsgSelfCreateParticipant",
   MsgCreateRootParticipant: "/verana.pp.v1.MsgCreateRootParticipant",
   MsgSetParticipantEffectiveUntil: "/verana.pp.v1.MsgSetParticipantEffectiveUntil",
@@ -125,6 +139,8 @@ export const veranaTypeUrls = {
   MsgCreateExchangeRate: "/verana.xr.v1.MsgCreateExchangeRate",
   MsgUpdateExchangeRate: "/verana.xr.v1.MsgUpdateExchangeRate",
   MsgSetExchangeRateState: "/verana.xr.v1.MsgSetExchangeRateState",
+  MsgGrantExchangeRateAuthorization: "/verana.xr.v1.MsgGrantExchangeRateAuthorization",
+  MsgRevokeExchangeRateAuthorization: "/verana.xr.v1.MsgRevokeExchangeRateAuthorization",
 } as const;
 
 export const typeUrls = veranaTypeUrls;
@@ -140,6 +156,9 @@ export const veranaRegistryTypes: ReadonlyArray<[string, GeneratedType]> = [
   [veranaTypeUrls.MsgCreateCredentialSchema, MsgCreateCredentialSchema as GeneratedType],
   [veranaTypeUrls.MsgUpdateCredentialSchema, MsgUpdateCredentialSchema as GeneratedType],
   [veranaTypeUrls.MsgArchiveCredentialSchema, MsgArchiveCredentialSchema as GeneratedType],
+  [veranaTypeUrls.MsgCreateSchemaAuthorizationPolicy, MsgCreateSchemaAuthorizationPolicy as GeneratedType],
+  [veranaTypeUrls.MsgIncreaseActiveSchemaAuthorizationPolicyVersion, MsgIncreaseActiveSchemaAuthorizationPolicyVersion as GeneratedType],
+  [veranaTypeUrls.MsgRevokeSchemaAuthorizationPolicy, MsgRevokeSchemaAuthorizationPolicy as GeneratedType],
   [veranaTypeUrls.MsgSelfCreateParticipant, MsgSelfCreateParticipant as GeneratedType],
   [veranaTypeUrls.MsgCreateRootParticipant, MsgCreateRootParticipant as GeneratedType],
   [veranaTypeUrls.MsgSetParticipantEffectiveUntil, MsgSetParticipantEffectiveUntil as GeneratedType],
@@ -160,6 +179,8 @@ export const veranaRegistryTypes: ReadonlyArray<[string, GeneratedType]> = [
   [veranaTypeUrls.MsgCreateExchangeRate, MsgCreateExchangeRate as GeneratedType],
   [veranaTypeUrls.MsgUpdateExchangeRate, MsgUpdateExchangeRate as GeneratedType],
   [veranaTypeUrls.MsgSetExchangeRateState, MsgSetExchangeRateState as GeneratedType],
+  [veranaTypeUrls.MsgGrantExchangeRateAuthorization, MsgGrantExchangeRateAuthorization as GeneratedType],
+  [veranaTypeUrls.MsgRevokeExchangeRateAuthorization, MsgRevokeExchangeRateAuthorization as GeneratedType],
 ];
 
 export function createVeranaRegistry(): Registry {
@@ -174,9 +195,11 @@ export function createVeranaAminoTypes(): AminoTypes {
   const registry = createVeranaRegistry();
   let aminoTypesRef: AminoTypes;
   const groupConverters = createGroupAminoConverters(() => aminoTypesRef, registry);
+  const govConverters = createGovAminoConverters(() => aminoTypesRef, registry);
   aminoTypesRef = new AminoTypes({
     ...createDefaultAminoConverters(),
     ...groupConverters,
+    ...govConverters,
     [veranaTypeUrls.MsgCreateCorporation]: MsgCreateCorporationAminoConverter,
     [veranaTypeUrls.MsgUpdateCorporation]: MsgUpdateCorporationAminoConverter,
     [veranaTypeUrls.MsgCreateEcosystem]: MsgCreateEcosystemAminoConverter,
@@ -187,6 +210,9 @@ export function createVeranaAminoTypes(): AminoTypes {
     [veranaTypeUrls.MsgCreateCredentialSchema]: MsgCreateCredentialSchemaAminoConverter,
     [veranaTypeUrls.MsgUpdateCredentialSchema]: MsgUpdateCredentialSchemaAminoConverter,
     [veranaTypeUrls.MsgArchiveCredentialSchema]: MsgArchiveCredentialSchemaAminoConverter,
+    [veranaTypeUrls.MsgCreateSchemaAuthorizationPolicy]: MsgCreateSchemaAuthorizationPolicyAminoConverter,
+    [veranaTypeUrls.MsgIncreaseActiveSchemaAuthorizationPolicyVersion]: MsgIncreaseActiveSchemaAuthorizationPolicyVersionAminoConverter,
+    [veranaTypeUrls.MsgRevokeSchemaAuthorizationPolicy]: MsgRevokeSchemaAuthorizationPolicyAminoConverter,
     [veranaTypeUrls.MsgSelfCreateParticipant]: MsgSelfCreateParticipantAminoConverter,
     [veranaTypeUrls.MsgCreateRootParticipant]: MsgCreateRootParticipantAminoConverter,
     [veranaTypeUrls.MsgSetParticipantEffectiveUntil]: MsgSetParticipantEffectiveUntilAminoConverter,
@@ -207,6 +233,8 @@ export function createVeranaAminoTypes(): AminoTypes {
     [veranaTypeUrls.MsgCreateExchangeRate]: MsgCreateExchangeRateAminoConverter,
     [veranaTypeUrls.MsgUpdateExchangeRate]: MsgUpdateExchangeRateAminoConverter,
     [veranaTypeUrls.MsgSetExchangeRateState]: MsgSetExchangeRateStateAminoConverter,
+    [veranaTypeUrls.MsgGrantExchangeRateAuthorization]: MsgGrantExchangeRateAuthorizationAminoConverter,
+    [veranaTypeUrls.MsgRevokeExchangeRateAuthorization]: MsgRevokeExchangeRateAuthorizationAminoConverter,
   });
   return aminoTypesRef;
 }

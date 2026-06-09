@@ -114,9 +114,18 @@ func runJourney(ctx context.Context, client cosmosclient.Client, journeyID int) 
 	case 310:
 		// Permission CreatePermission (Self Create) with Operator Authorization
 		return journeys.RunPermissionCreatePermJourney(ctx, client)
+	case 311:
+		// CS Schema Authorization Policy: create / increase version / revoke
+		return journeys.RunCsSchemaAuthPolicyJourney(ctx, client)
+	case 312:
+		// DE Revoke Operator Authorization (grant then revoke via group)
+		return journeys.RunDeRevokeOperatorAuthJourney(ctx, client)
 	case 401:
 		// Trust Deposit ReclaimYield + RepaySlashed with Operator Authorization
 		return journeys.RunTDReclaimYieldJourney(ctx, client)
+	case 402:
+		// Trust Deposit governance slash by corporation_id
+		return journeys.RunTdGovSlashJourney(ctx, client)
 	case 501:
 		// DI Store Digest with Operator Authorization
 		return journeys.RunDiStoreDigestJourney(ctx, client)

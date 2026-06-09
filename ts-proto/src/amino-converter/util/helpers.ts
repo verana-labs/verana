@@ -63,18 +63,31 @@ export const isoToDate = (s?: string | null) =>
 export const dateToAmino = dateToIsoAmino;
 export const dateFromAmino = isoToDate;
 
+// The chain's aminojson encodes google.protobuf.Duration (gogoproto stdduration)
+// as a string of TOTAL NANOSECONDS, e.g. 24h -> "86400000000000"
+// (see cosmossdk.io/x/tx/signing/aminojson/time.go marshalDuration).
+const NANOS_PER_SEC = Long.fromValue(1_000_000_000);
+
 export const durationToAmino = (d?: Duration | null) => {
   if (!d) return undefined;
-  return clean({
-    seconds: Long.fromValue(d.seconds).toString(),
-    nanos: d.nanos === 0 ? undefined : d.nanos,
-  });
+  const seconds = Long.fromValue(d.seconds ?? 0);
+  const nanos = Long.fromValue(d.nanos ?? 0);
+  return seconds.multiply(NANOS_PER_SEC).add(nanos).toString();
 };
 
 export const aminoToDuration = (
-  d?: { seconds?: string | number | null; nanos?: string | number | null } | null,
+  d?: string | number | { seconds?: string | number | null; nanos?: string | number | null } | null,
 ): Duration | undefined => {
-  if (!d) return undefined;
+  if (d == null) return undefined;
+  // New (correct) form: total-nanoseconds string/number.
+  if (typeof d === "string" || typeof d === "number") {
+    const total = Long.fromValue(d);
+    return {
+      seconds: total.divide(NANOS_PER_SEC).toNumber(),
+      nanos: total.modulo(NANOS_PER_SEC).toNumber(),
+    };
+  }
+  // Legacy object form fallback.
   return {
     seconds: d.seconds == null ? 0 : Number(d.seconds),
     nanos: d.nanos == null ? 0 : Number(d.nanos),

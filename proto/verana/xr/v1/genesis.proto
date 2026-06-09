@@ -19,4 +19,6 @@ message GenesisState {
   repeated ExchangeRate exchange_rates = 2 [(gogoproto.nullable) = false];
   // next_exchange_rate_id is the next auto-increment ID for exchange rates.
   uint64 next_exchange_rate_id = 3;
+  // exchange_rate_authorizations is the list of all exchange rate authorizations.
+  repeated ExchangeRateAuthorization exchange_rate_authorizations = 4 [(gogoproto.nullable) = false];
 }

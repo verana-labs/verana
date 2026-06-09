@@ -12,6 +12,7 @@ const (
 
 const (
 	AttributeKeyAccount               = "account"
+	AttributeKeyCorporationID         = "corporation_id"
 	AttributeKeyAmount                = "amount"
 	AttributeKeySlashCount            = "slash_count"
 	AttributeKeyRepaidBy              = "repaid_by"
@@ -25,7 +26,7 @@ const (
 	AttributeKeyAdjustmentType        = "adjustment_type"
 	AttributeKeyNewAmount             = "new_amount"
 	AttributeKeyNewShare              = "new_share"
-	AttributeKeyNewClaimable          = "new_claimable"
+	AttributeKeyNewRefunded           = "new_refunded"
 	AttributeKeyYIPIncomingBalance    = "yip_incoming_balance"
 	AttributeKeyYIPIncomingBalanceDec = "yip_incoming_balance_dec"
 	AttributeKeyYIPBalanceBefore      = "yip_balance_before"

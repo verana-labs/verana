@@ -23,19 +23,19 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 		}
 	}
 
-	// Initialize trust deposits
+	// Initialize trust deposits (keyed by corporation_id)
 	for _, td := range genState.TrustDeposits {
 		// Create trust deposit entry
 		trustDeposit := types.TrustDeposit{
-			Corporation: td.Corporation,
-			Share:       td.Share,
-			Deposit:     td.Deposit,
-			Claimable:   td.Claimable,
+			CorporationId: td.CorporationId,
+			Share:         td.Share,
+			Deposit:       td.Deposit,
+			Refunded:      td.Refunded,
 		}
 
 		// Store the trust deposit
-		if err := k.TrustDeposit.Set(ctx, td.Corporation, trustDeposit); err != nil {
-			panic(fmt.Sprintf("failed to set trust deposit for corporation %s: %s", td.Corporation, err))
+		if err := k.TrustDeposit.Set(ctx, td.CorporationId, trustDeposit); err != nil {
+			panic(fmt.Sprintf("failed to set trust deposit for corporation_id %d: %s", td.CorporationId, err))
 		}
 	}
 }
@@ -50,12 +50,12 @@ func ExportGenesis(ctx sdk.Context, k keeper.Keeper) *types.GenesisState {
 
 	// Use a callback to gather all trust deposits in deterministic order
 	// The Walk function should iterate over keys in lexicographical order
-	_ = k.TrustDeposit.Walk(ctx, nil, func(key string, value types.TrustDeposit) (bool, error) {
+	_ = k.TrustDeposit.Walk(ctx, nil, func(key uint64, value types.TrustDeposit) (bool, error) {
 		trustDeposits = append(trustDeposits, types.TrustDepositRecord{
-			Corporation: value.Corporation,
-			Share:       value.Share,
-			Deposit:     value.Deposit,
-			Claimable:   value.Claimable,
+			CorporationId: value.CorporationId,
+			Share:         value.Share,
+			Deposit:       value.Deposit,
+			Refunded:      value.Refunded,
 		})
 		return false, nil // Continue iteration
 	})
