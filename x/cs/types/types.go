@@ -20,7 +20,7 @@ const JsonSchemaMetaSchema = `{
     "$id": {
       "type": "string",
       "format": "uri-reference",
-      "pattern": "^vpr:verana:VPR_CHAIN_ID/cs/v1/js/VPR_CREDENTIAL_SCHEMA_ID$",
+      "pattern": "^vpr:verana:VPR_CHAIN_ID:cs:VPR_CREDENTIAL_SCHEMA_ID$",
       "description": "$id must be a URI matching the rendering URL format"
     },
     "$schema": {
@@ -84,7 +84,7 @@ const JsonSchemaMetaSchema = `{
   "examples": [
     {
       "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "$id": "vpr:verana:mainnet/cs/v1/js/1",
+      "$id": "vpr:verana:mainnet:cs:1",
       "title": "ExampleCredential",
       "description": "ExampleCredential using JsonSchema",
       "type": "object",
@@ -264,14 +264,14 @@ func validateJSONSchema(schemaJSON string) error {
 // InjectCanonicalID removes any existing $id from the JSON schema and injects the canonical $id
 // as the first property, preserving the original property ordering of all other fields.
 func InjectCanonicalID(schemaJSON string, chainID string, schemaID uint64) (string, error) {
-	canonicalID := fmt.Sprintf("vpr:verana:%s/cs/v1/js/%d", chainID, schemaID)
+	canonicalID := fmt.Sprintf("vpr:verana:%s:cs:%d", chainID, schemaID)
 	return injectOrReplaceID(schemaJSON, canonicalID)
 }
 
 // EnsureCanonicalID ensures the JSON schema has the canonical $id, updating it if needed.
 // Short-circuits if the $id is already correct. Preserves original property ordering.
 func EnsureCanonicalID(schemaJSON string, chainID string, schemaID uint64) (string, error) {
-	canonicalID := fmt.Sprintf("vpr:verana:%s/cs/v1/js/%d", chainID, schemaID)
+	canonicalID := fmt.Sprintf("vpr:verana:%s:cs:%d", chainID, schemaID)
 
 	// Short-circuit: if the $id is already correct, return as-is to avoid unnecessary work
 	// and prevent any formatting changes on the hot query path.

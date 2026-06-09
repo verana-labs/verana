@@ -42,7 +42,7 @@ const OPERATOR_INDEX = 13;
 
 function generateSimpleSchema(): string {
   return JSON.stringify({
-    $id: "vpr:verana:VPR_CHAIN_ID/cs/v1/js/VPR_CREDENTIAL_SCHEMA_ID",
+    $id: "vpr:verana:VPR_CHAIN_ID:cs:VPR_CREDENTIAL_SCHEMA_ID",
     $schema: "https://json-schema.org/draft/2020-12/schema",
     title: "ExampleCredential",
     description: "ExampleCredential using JsonSchema",

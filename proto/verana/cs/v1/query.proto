@@ -27,7 +27,7 @@ service Query {
   }
   // RenderJsonSchema returns the JSON schema definition
   rpc RenderJsonSchema(QueryRenderJsonSchemaRequest) returns (QueryRenderJsonSchemaResponse) {
-    option (google.api.http).get = "/verana/cs/v1/js/{id}";
+    option (google.api.http).get = "/verana:cs:{id}";
   }
 }
 

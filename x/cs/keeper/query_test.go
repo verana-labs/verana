@@ -200,7 +200,7 @@ func TestQueries(t *testing.T) {
 				// Verify canonical $id is present
 				canonicalId, ok := schemaDoc["$id"].(string)
 				require.True(t, ok, "$id field should be present")
-				expectedId := fmt.Sprintf("vpr:verana:%s/cs/v1/js/%d", ctx.ChainID(), tc.request.Id)
+				expectedId := fmt.Sprintf("vpr:verana:%s:cs:%d", ctx.ChainID(), tc.request.Id)
 				require.Equal(t, expectedId, canonicalId, "Schema should have canonical $id")
 			})
 		}

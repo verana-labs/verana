@@ -71,7 +71,7 @@
         ]
       }
     },
-    "/verana/cs/v1/js/{id}": {
+    "/verana:cs:{id}": {
       "get": {
         "summary": "RenderJsonSchema returns the JSON schema definition",
         "operationId": "Query_RenderJsonSchema",

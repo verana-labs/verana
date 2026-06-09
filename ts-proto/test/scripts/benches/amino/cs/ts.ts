@@ -30,7 +30,7 @@ const FEE = {
 const MEMO = "Amino bench demo";
 
 const JSON_SCHEMA =
-  "{\"$id\":\"vpr:verana:VPR_CHAIN_ID/cs/v1/js/VPR_CREDENTIAL_SCHEMA_ID\",\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"title\":\"ExampleCredential\",\"description\":\"ExampleCredential using JsonSchema\",\"type\":\"object\",\"properties\":{\"credentialSubject\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\",\"format\":\"uri\"},\"firstName\":{\"type\":\"string\",\"minLength\":0,\"maxLength\":256},\"lastName\":{\"type\":\"string\",\"minLength\":1,\"maxLength\":256},\"expirationDate\":{\"type\":\"string\",\"format\":\"date\"},\"countryOfResidence\":{\"type\":\"string\",\"minLength\":2,\"maxLength\":2}},\"required\":[\"id\",\"lastName\",\"expirationDate\",\"countryOfResidence\"]}}}";
+  "{\"$id\":\"vpr:verana:VPR_CHAIN_ID:cs:VPR_CREDENTIAL_SCHEMA_ID\",\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"title\":\"ExampleCredential\",\"description\":\"ExampleCredential using JsonSchema\",\"type\":\"object\",\"properties\":{\"credentialSubject\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\",\"format\":\"uri\"},\"firstName\":{\"type\":\"string\",\"minLength\":0,\"maxLength\":256},\"lastName\":{\"type\":\"string\",\"minLength\":1,\"maxLength\":256},\"expirationDate\":{\"type\":\"string\",\"format\":\"date\"},\"countryOfResidence\":{\"type\":\"string\",\"minLength\":2,\"maxLength\":2}},\"required\":[\"id\",\"lastName\",\"expirationDate\",\"countryOfResidence\"]}}}";
 
 function buildCreateCredentialSchemaMsg(): AminoMsg {
   const address = "verana16mzeyu9l6kua2cdg9x0jk5g6e7h0kk8q6uadu4";

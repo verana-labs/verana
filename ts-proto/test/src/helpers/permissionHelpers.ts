@@ -285,7 +285,7 @@ export async function createSchemaForTest(
   // Generate schema JSON
   function generateSimpleSchema(ecosystemId: string): string {
     return JSON.stringify({
-      $id: `vpr:verana:VPR_CHAIN_ID/cs/v1/js/VPR_CREDENTIAL_SCHEMA_ID`,
+      $id: `vpr:verana:VPR_CHAIN_ID:cs:VPR_CREDENTIAL_SCHEMA_ID`,
       $schema: "https://json-schema.org/draft/2020-12/schema",
       title: "ExampleCredential",
       description: "ExampleCredential using JsonSchema",
@@ -579,7 +579,7 @@ export async function createCSWithOperator(
   mode: IssuerOnboardingMode,
 ): Promise<number> {
   const jsonSchema = JSON.stringify({
-    $id: "vpr:verana:VPR_CHAIN_ID/cs/v1/js/VPR_CREDENTIAL_SCHEMA_ID",
+    $id: "vpr:verana:VPR_CHAIN_ID:cs:VPR_CREDENTIAL_SCHEMA_ID",
     $schema: "https://json-schema.org/draft/2020-12/schema",
     title: "PermTestCredential",
     description: "Credential schema for permission tests",

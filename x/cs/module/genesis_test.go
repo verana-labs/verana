@@ -14,7 +14,7 @@ import (
 func TestGenesisImportExport(t *testing.T) {
 	// Create a valid JSON schema for testing
 	validJsonSchema := `{
-  "$id": "vpr:verana:mainnet/cs/v1/js/1",
+  "$id": "vpr:verana:mainnet:cs:1",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "ExampleCredential",
   "description": "ExampleCredential using JsonSchema",
@@ -151,7 +151,7 @@ func TestGenesisImportExport(t *testing.T) {
 func TestGenesisValidation(t *testing.T) {
 	// Create a valid JSON schema for testing
 	validJsonSchema := `{
-  "$id": "vpr:verana:VPR_CHAIN_ID/cs/v1/js/VPR_CREDENTIAL_SCHEMA_ID",
+  "$id": "vpr:verana:VPR_CHAIN_ID:cs:VPR_CREDENTIAL_SCHEMA_ID",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "ExampleCredential",
   "description": "ExampleCredential using JsonSchema",
