@@ -7,6 +7,12 @@ on:
     # We only build on prerelease creation to avoid duplicate runs when the same
     # tag is later promoted from prerelease to full release.
     types: [prereleased]
+  workflow_dispatch:
+    inputs:
+      notify_tag:
+        description: "Release tag to (re)announce on Discord, e.g. v1.2.0"
+        required: true
+        type: string
 
 permissions:
   id-token: write   # Required for npm trusted publishing (OIDC)
@@ -30,7 +36,7 @@ env:
 
 jobs:
   resolve-version:
-    if: github.event_name != 'release'
+    if: github.event_name == 'push'
     uses: 2060-io/organization/.github/workflows/resolve-version-call.yml@v0.4.1
     with:
       bump-minor-pre-major: false
@@ -324,3 +330,24 @@ jobs:
           build-args: |
             USE_PREBUILT=true
             PREBUILT_BINARY=binaries/veranad-linux-amd64
+
+  discord-notify:
+    needs: [resolve-version, build-binaries-s3, build-canonical-image]
+    if: needs.resolve-version.outputs.new-release-published == 'true' && needs.resolve-version.outputs.release-type == 'stable'
+    permissions:
+      contents: read
+    uses: 2060-io/organization/.github/workflows/discord-release-notify-call.yml@main
+    with:
+      tag_name: ${{ needs.resolve-version.outputs.release-version }}
+    secrets:
+      DISCORD_UPDATES_WEBHOOK_URL: ${{ secrets.DISCORD_UPDATES_WEBHOOK_URL }}
+
+  discord-notify-manual:
+    if: github.event_name == 'workflow_dispatch'
+    permissions:
+      contents: read
+    uses: 2060-io/organization/.github/workflows/discord-release-notify-call.yml@main
+    with:
+      tag_name: ${{ inputs.notify_tag }}
+    secrets:
+      DISCORD_UPDATES_WEBHOOK_URL: ${{ secrets.DISCORD_UPDATES_WEBHOOK_URL }}
