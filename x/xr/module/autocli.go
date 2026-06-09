@@ -71,6 +71,14 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					RpcMethod: "SetExchangeRateState",
 					Skip:      true, // skipped because authority gated
 				},
+				{
+					RpcMethod: "GrantExchangeRateAuthorization",
+					Skip:      true, // skipped because authority gated (gov-only)
+				},
+				{
+					RpcMethod: "RevokeExchangeRateAuthorization",
+					Skip:      true, // skipped because authority gated (gov-only)
+				},
 				// this line is used by ignite scaffolding # autocli/tx
 			},
 		},

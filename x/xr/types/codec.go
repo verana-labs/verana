@@ -15,6 +15,8 @@ func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 	legacy.RegisterAminoMsg(cdc, &MsgCreateExchangeRate{}, "verana/x/xr/MsgCreateExchangeRate")
 	legacy.RegisterAminoMsg(cdc, &MsgUpdateExchangeRate{}, "verana/x/xr/MsgUpdateExchangeRate")
 	legacy.RegisterAminoMsg(cdc, &MsgSetExchangeRateState{}, "verana/x/xr/MsgSetExchangeRateState")
+	legacy.RegisterAminoMsg(cdc, &MsgGrantExchangeRateAuthorization{}, "verana/x/xr/MsgGrantXrAuthz")
+	legacy.RegisterAminoMsg(cdc, &MsgRevokeExchangeRateAuthorization{}, "verana/x/xr/MsgRevokeXrAuthz")
 }
 
 func RegisterInterfaces(registrar codectypes.InterfaceRegistry) {
@@ -23,6 +25,8 @@ func RegisterInterfaces(registrar codectypes.InterfaceRegistry) {
 		&MsgCreateExchangeRate{},
 		&MsgUpdateExchangeRate{},
 		&MsgSetExchangeRateState{},
+		&MsgGrantExchangeRateAuthorization{},
+		&MsgRevokeExchangeRateAuthorization{},
 	)
 	msgservice.RegisterMsgServiceDesc(registrar, &_Msg_serviceDesc)
 }

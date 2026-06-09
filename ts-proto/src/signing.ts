@@ -44,6 +44,8 @@ import {
 } from "./codec/verana/td/v1/tx";
 import {
   MsgCreateExchangeRate,
+  MsgGrantExchangeRateAuthorization,
+  MsgRevokeExchangeRateAuthorization,
   MsgSetExchangeRateState,
   MsgUpdateExchangeRate,
 } from "./codec/verana/xr/v1/tx";
@@ -90,6 +92,8 @@ import {
 } from "./amino-converter/td";
 import {
   MsgCreateExchangeRateAminoConverter,
+  MsgGrantExchangeRateAuthorizationAminoConverter,
+  MsgRevokeExchangeRateAuthorizationAminoConverter,
   MsgSetExchangeRateStateAminoConverter,
   MsgUpdateExchangeRateAminoConverter,
 } from "./amino-converter/xr";
@@ -125,6 +129,8 @@ export const veranaTypeUrls = {
   MsgCreateExchangeRate: "/verana.xr.v1.MsgCreateExchangeRate",
   MsgUpdateExchangeRate: "/verana.xr.v1.MsgUpdateExchangeRate",
   MsgSetExchangeRateState: "/verana.xr.v1.MsgSetExchangeRateState",
+  MsgGrantExchangeRateAuthorization: "/verana.xr.v1.MsgGrantExchangeRateAuthorization",
+  MsgRevokeExchangeRateAuthorization: "/verana.xr.v1.MsgRevokeExchangeRateAuthorization",
 } as const;
 
 export const typeUrls = veranaTypeUrls;
@@ -160,6 +166,8 @@ export const veranaRegistryTypes: ReadonlyArray<[string, GeneratedType]> = [
   [veranaTypeUrls.MsgCreateExchangeRate, MsgCreateExchangeRate as GeneratedType],
   [veranaTypeUrls.MsgUpdateExchangeRate, MsgUpdateExchangeRate as GeneratedType],
   [veranaTypeUrls.MsgSetExchangeRateState, MsgSetExchangeRateState as GeneratedType],
+  [veranaTypeUrls.MsgGrantExchangeRateAuthorization, MsgGrantExchangeRateAuthorization as GeneratedType],
+  [veranaTypeUrls.MsgRevokeExchangeRateAuthorization, MsgRevokeExchangeRateAuthorization as GeneratedType],
 ];
 
 export function createVeranaRegistry(): Registry {
@@ -207,6 +215,8 @@ export function createVeranaAminoTypes(): AminoTypes {
     [veranaTypeUrls.MsgCreateExchangeRate]: MsgCreateExchangeRateAminoConverter,
     [veranaTypeUrls.MsgUpdateExchangeRate]: MsgUpdateExchangeRateAminoConverter,
     [veranaTypeUrls.MsgSetExchangeRateState]: MsgSetExchangeRateStateAminoConverter,
+    [veranaTypeUrls.MsgGrantExchangeRateAuthorization]: MsgGrantExchangeRateAuthorizationAminoConverter,
+    [veranaTypeUrls.MsgRevokeExchangeRateAuthorization]: MsgRevokeExchangeRateAuthorizationAminoConverter,
   });
   return aminoTypesRef;
 }

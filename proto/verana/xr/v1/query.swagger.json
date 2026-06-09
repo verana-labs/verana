@@ -370,6 +370,30 @@
       },
       "description": "ExchangeRate defines the storage type for an exchange rate entry."
     },
+    "verana.xr.v1.ExchangeRateAuthorization": {
+      "type": "object",
+      "properties": {
+        "xr_id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "operator": {
+          "type": "string"
+        },
+        "expiration": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "min_interval": {
+          "type": "string"
+        },
+        "max_deviation_bps": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "description": "ExchangeRateAuthorization designates which operator account is authorized to\npush fresh values for a given ExchangeRate, with optional anti-spam\n(min_interval) and circuit-breaker (max_deviation_bps) bounds. Keyed by\n(xr_id, operator). Zero min_interval / max_deviation_bps means \"unset\"."
+    },
     "verana.xr.v1.Params": {
       "type": "object",
       "properties": {
@@ -385,6 +409,14 @@
       "properties": {
         "exchange_rate": {
           "$ref": "#/definitions/verana.xr.v1.ExchangeRate"
+        },
+        "authorizations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/verana.xr.v1.ExchangeRateAuthorization"
+          },
+          "title": "authorizations lists the operators authorized to update this exchange rate. [MOD-XR-QRY-1]"
         }
       },
       "description": "QueryGetExchangeRateResponse is the response type for Query/GetExchangeRate."

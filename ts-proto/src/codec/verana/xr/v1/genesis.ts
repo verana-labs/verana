@@ -7,7 +7,7 @@
 /* eslint-disable */
 import * as _m0 from "protobufjs/minimal";
 import { Params } from "./params";
-import { ExchangeRate } from "./tx";
+import { ExchangeRate, ExchangeRateAuthorization } from "./tx";
 import Long = require("long");
 
 export const protobufPackage = "verana.xr.v1";
@@ -22,10 +22,12 @@ export interface GenesisState {
   exchangeRates: ExchangeRate[];
   /** next_exchange_rate_id is the next auto-increment ID for exchange rates. */
   nextExchangeRateId: number;
+  /** exchange_rate_authorizations is the list of all exchange rate authorizations. */
+  exchangeRateAuthorizations: ExchangeRateAuthorization[];
 }
 
 function createBaseGenesisState(): GenesisState {
-  return { params: undefined, exchangeRates: [], nextExchangeRateId: 0 };
+  return { params: undefined, exchangeRates: [], nextExchangeRateId: 0, exchangeRateAuthorizations: [] };
 }
 
 export const GenesisState = {
@@ -38,6 +40,9 @@ export const GenesisState = {
     }
     if (message.nextExchangeRateId !== 0) {
       writer.uint32(24).uint64(message.nextExchangeRateId);
+    }
+    for (const v of message.exchangeRateAuthorizations) {
+      ExchangeRateAuthorization.encode(v!, writer.uint32(34).fork()).ldelim();
     }
     return writer;
   },
@@ -70,6 +75,13 @@ export const GenesisState = {
 
           message.nextExchangeRateId = longToNumber(reader.uint64() as Long);
           continue;
+        case 4:
+          if (tag !== 34) {
+            break;
+          }
+
+          message.exchangeRateAuthorizations.push(ExchangeRateAuthorization.decode(reader, reader.uint32()));
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -86,6 +98,9 @@ export const GenesisState = {
         ? object.exchangeRates.map((e: any) => ExchangeRate.fromJSON(e))
         : [],
       nextExchangeRateId: isSet(object.nextExchangeRateId) ? globalThis.Number(object.nextExchangeRateId) : 0,
+      exchangeRateAuthorizations: globalThis.Array.isArray(object?.exchangeRateAuthorizations)
+        ? object.exchangeRateAuthorizations.map((e: any) => ExchangeRateAuthorization.fromJSON(e))
+        : [],
     };
   },
 
@@ -100,6 +115,11 @@ export const GenesisState = {
     if (message.nextExchangeRateId !== 0) {
       obj.nextExchangeRateId = Math.round(message.nextExchangeRateId);
     }
+    if (message.exchangeRateAuthorizations?.length) {
+      obj.exchangeRateAuthorizations = message.exchangeRateAuthorizations.map((e) =>
+        ExchangeRateAuthorization.toJSON(e)
+      );
+    }
     return obj;
   },
 
@@ -113,6 +133,8 @@ export const GenesisState = {
       : undefined;
     message.exchangeRates = object.exchangeRates?.map((e) => ExchangeRate.fromPartial(e)) || [];
     message.nextExchangeRateId = object.nextExchangeRateId ?? 0;
+    message.exchangeRateAuthorizations =
+      object.exchangeRateAuthorizations?.map((e) => ExchangeRateAuthorization.fromPartial(e)) || [];
     return message;
   },
 };

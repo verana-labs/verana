@@ -27,6 +27,18 @@ message ExchangeRate {
   google.protobuf.Timestamp updated = 11 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
 }
 
+// ExchangeRateAuthorization designates which operator account is authorized to
+// push fresh values for a given ExchangeRate, with optional anti-spam
+// (min_interval) and circuit-breaker (max_deviation_bps) bounds. Keyed by
+// (xr_id, operator). Zero min_interval / max_deviation_bps means "unset".
+message ExchangeRateAuthorization {
+  uint64 xr_id = 1;
+  string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  google.protobuf.Timestamp expiration = 3 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+  google.protobuf.Duration min_interval = 4 [(gogoproto.nullable) = false, (gogoproto.stdduration) = true];
+  uint32 max_deviation_bps = 5;
+}
+
 // Msg defines the Msg service.
 service Msg {
   option (cosmos.msg.v1.service) = true;
@@ -43,6 +55,14 @@ service Msg {
 
   // SetExchangeRateState defines a governance operation for enabling or disabling an exchange rate.
   rpc SetExchangeRateState(MsgSetExchangeRateState) returns (MsgSetExchangeRateStateResponse);
+
+  // GrantExchangeRateAuthorization defines a governance operation authorizing an
+  // operator to update a given exchange rate. [MOD-XR-MSG-4]
+  rpc GrantExchangeRateAuthorization(MsgGrantExchangeRateAuthorization) returns (MsgGrantExchangeRateAuthorizationResponse);
+
+  // RevokeExchangeRateAuthorization defines a governance operation revoking an
+  // operator's authorization for a given exchange rate. [MOD-XR-MSG-5]
+  rpc RevokeExchangeRateAuthorization(MsgRevokeExchangeRateAuthorization) returns (MsgRevokeExchangeRateAuthorizationResponse);
 }
 
 // MsgCreateExchangeRate is the Msg/CreateExchangeRate request type.
@@ -132,6 +152,51 @@ message MsgSetExchangeRateState {
 
 // MsgSetExchangeRateStateResponse defines the response for MsgSetExchangeRateState.
 message MsgSetExchangeRateStateResponse {}
+
+// MsgGrantExchangeRateAuthorization is the Msg/GrantExchangeRateAuthorization request type. [MOD-XR-MSG-4]
+message MsgGrantExchangeRateAuthorization {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "verana/x/xr/MsgGrantXrAuthz";
+
+  // authority is the gov module account.
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // xr_id is the exchange rate the operator is authorized to update.
+  uint64 xr_id = 2;
+
+  // operator is the account authorized to update the exchange rate.
+  string operator = 3 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // expiration is when the authorization expires (must be in the future).
+  google.protobuf.Timestamp expiration = 4 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+
+  // min_interval is the minimum time between successful updates (optional anti-spam).
+  google.protobuf.Duration min_interval = 5 [(gogoproto.stdduration) = true, (gogoproto.nullable) = true];
+
+  // max_deviation_bps is the max allowed rate change in basis points, (0, 10000] (optional circuit breaker).
+  uint32 max_deviation_bps = 6;
+}
+
+// MsgGrantExchangeRateAuthorizationResponse defines the response for MsgGrantExchangeRateAuthorization.
+message MsgGrantExchangeRateAuthorizationResponse {}
+
+// MsgRevokeExchangeRateAuthorization is the Msg/RevokeExchangeRateAuthorization request type. [MOD-XR-MSG-5]
+message MsgRevokeExchangeRateAuthorization {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "verana/x/xr/MsgRevokeXrAuthz";
+
+  // authority is the gov module account.
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // xr_id is the exchange rate the authorization is for.
+  uint64 xr_id = 2;
+
+  // operator is the account whose authorization is revoked.
+  string operator = 3 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+}
+
+// MsgRevokeExchangeRateAuthorizationResponse defines the response for MsgRevokeExchangeRateAuthorization.
+message MsgRevokeExchangeRateAuthorizationResponse {}
 
 // MsgUpdateParamsResponse defines the response structure for executing a
 // MsgUpdateParams message.

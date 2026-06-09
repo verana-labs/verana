@@ -29,6 +29,20 @@ export interface ExchangeRate {
   updated: Date | undefined;
 }
 
+/**
+ * ExchangeRateAuthorization designates which operator account is authorized to
+ * push fresh values for a given ExchangeRate, with optional anti-spam
+ * (min_interval) and circuit-breaker (max_deviation_bps) bounds. Keyed by
+ * (xr_id, operator). Zero min_interval / max_deviation_bps means "unset".
+ */
+export interface ExchangeRateAuthorization {
+  xrId: number;
+  operator: string;
+  expiration: Date | undefined;
+  minInterval: Duration | undefined;
+  maxDeviationBps: number;
+}
+
 /** MsgCreateExchangeRate is the Msg/CreateExchangeRate request type. */
 export interface MsgCreateExchangeRate {
   /** authority is the address that controls the module (defaults to x/gov unless overwritten). */
@@ -92,6 +106,44 @@ export interface MsgSetExchangeRateState {
 
 /** MsgSetExchangeRateStateResponse defines the response for MsgSetExchangeRateState. */
 export interface MsgSetExchangeRateStateResponse {
+}
+
+/** MsgGrantExchangeRateAuthorization is the Msg/GrantExchangeRateAuthorization request type. [MOD-XR-MSG-4] */
+export interface MsgGrantExchangeRateAuthorization {
+  /** authority is the gov module account. */
+  authority: string;
+  /** xr_id is the exchange rate the operator is authorized to update. */
+  xrId: number;
+  /** operator is the account authorized to update the exchange rate. */
+  operator: string;
+  /** expiration is when the authorization expires (must be in the future). */
+  expiration:
+    | Date
+    | undefined;
+  /** min_interval is the minimum time between successful updates (optional anti-spam). */
+  minInterval:
+    | Duration
+    | undefined;
+  /** max_deviation_bps is the max allowed rate change in basis points, (0, 10000] (optional circuit breaker). */
+  maxDeviationBps: number;
+}
+
+/** MsgGrantExchangeRateAuthorizationResponse defines the response for MsgGrantExchangeRateAuthorization. */
+export interface MsgGrantExchangeRateAuthorizationResponse {
+}
+
+/** MsgRevokeExchangeRateAuthorization is the Msg/RevokeExchangeRateAuthorization request type. [MOD-XR-MSG-5] */
+export interface MsgRevokeExchangeRateAuthorization {
+  /** authority is the gov module account. */
+  authority: string;
+  /** xr_id is the exchange rate the authorization is for. */
+  xrId: number;
+  /** operator is the account whose authorization is revoked. */
+  operator: string;
+}
+
+/** MsgRevokeExchangeRateAuthorizationResponse defines the response for MsgRevokeExchangeRateAuthorization. */
+export interface MsgRevokeExchangeRateAuthorizationResponse {
 }
 
 /**
@@ -320,6 +372,127 @@ export const ExchangeRate = {
     message.expires = object.expires ?? undefined;
     message.state = object.state ?? false;
     message.updated = object.updated ?? undefined;
+    return message;
+  },
+};
+
+function createBaseExchangeRateAuthorization(): ExchangeRateAuthorization {
+  return { xrId: 0, operator: "", expiration: undefined, minInterval: undefined, maxDeviationBps: 0 };
+}
+
+export const ExchangeRateAuthorization = {
+  encode(message: ExchangeRateAuthorization, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.xrId !== 0) {
+      writer.uint32(8).uint64(message.xrId);
+    }
+    if (message.operator !== "") {
+      writer.uint32(18).string(message.operator);
+    }
+    if (message.expiration !== undefined) {
+      Timestamp.encode(toTimestamp(message.expiration), writer.uint32(26).fork()).ldelim();
+    }
+    if (message.minInterval !== undefined) {
+      Duration.encode(message.minInterval, writer.uint32(34).fork()).ldelim();
+    }
+    if (message.maxDeviationBps !== 0) {
+      writer.uint32(40).uint32(message.maxDeviationBps);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): ExchangeRateAuthorization {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseExchangeRateAuthorization();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 8) {
+            break;
+          }
+
+          message.xrId = longToNumber(reader.uint64() as Long);
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.operator = reader.string();
+          continue;
+        case 3:
+          if (tag !== 26) {
+            break;
+          }
+
+          message.expiration = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
+          continue;
+        case 4:
+          if (tag !== 34) {
+            break;
+          }
+
+          message.minInterval = Duration.decode(reader, reader.uint32());
+          continue;
+        case 5:
+          if (tag !== 40) {
+            break;
+          }
+
+          message.maxDeviationBps = reader.uint32();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): ExchangeRateAuthorization {
+    return {
+      xrId: isSet(object.xrId) ? globalThis.Number(object.xrId) : 0,
+      operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
+      expiration: isSet(object.expiration) ? fromJsonTimestamp(object.expiration) : undefined,
+      minInterval: isSet(object.minInterval) ? Duration.fromJSON(object.minInterval) : undefined,
+      maxDeviationBps: isSet(object.maxDeviationBps) ? globalThis.Number(object.maxDeviationBps) : 0,
+    };
+  },
+
+  toJSON(message: ExchangeRateAuthorization): unknown {
+    const obj: any = {};
+    if (message.xrId !== 0) {
+      obj.xrId = Math.round(message.xrId);
+    }
+    if (message.operator !== "") {
+      obj.operator = message.operator;
+    }
+    if (message.expiration !== undefined) {
+      obj.expiration = message.expiration.toISOString();
+    }
+    if (message.minInterval !== undefined) {
+      obj.minInterval = Duration.toJSON(message.minInterval);
+    }
+    if (message.maxDeviationBps !== 0) {
+      obj.maxDeviationBps = Math.round(message.maxDeviationBps);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<ExchangeRateAuthorization>, I>>(base?: I): ExchangeRateAuthorization {
+    return ExchangeRateAuthorization.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<ExchangeRateAuthorization>, I>>(object: I): ExchangeRateAuthorization {
+    const message = createBaseExchangeRateAuthorization();
+    message.xrId = object.xrId ?? 0;
+    message.operator = object.operator ?? "";
+    message.expiration = object.expiration ?? undefined;
+    message.minInterval = (object.minInterval !== undefined && object.minInterval !== null)
+      ? Duration.fromPartial(object.minInterval)
+      : undefined;
+    message.maxDeviationBps = object.maxDeviationBps ?? 0;
     return message;
   },
 };
@@ -961,6 +1134,333 @@ export const MsgSetExchangeRateStateResponse = {
   },
 };
 
+function createBaseMsgGrantExchangeRateAuthorization(): MsgGrantExchangeRateAuthorization {
+  return { authority: "", xrId: 0, operator: "", expiration: undefined, minInterval: undefined, maxDeviationBps: 0 };
+}
+
+export const MsgGrantExchangeRateAuthorization = {
+  encode(message: MsgGrantExchangeRateAuthorization, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.authority !== "") {
+      writer.uint32(10).string(message.authority);
+    }
+    if (message.xrId !== 0) {
+      writer.uint32(16).uint64(message.xrId);
+    }
+    if (message.operator !== "") {
+      writer.uint32(26).string(message.operator);
+    }
+    if (message.expiration !== undefined) {
+      Timestamp.encode(toTimestamp(message.expiration), writer.uint32(34).fork()).ldelim();
+    }
+    if (message.minInterval !== undefined) {
+      Duration.encode(message.minInterval, writer.uint32(42).fork()).ldelim();
+    }
+    if (message.maxDeviationBps !== 0) {
+      writer.uint32(48).uint32(message.maxDeviationBps);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgGrantExchangeRateAuthorization {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgGrantExchangeRateAuthorization();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.authority = reader.string();
+          continue;
+        case 2:
+          if (tag !== 16) {
+            break;
+          }
+
+          message.xrId = longToNumber(reader.uint64() as Long);
+          continue;
+        case 3:
+          if (tag !== 26) {
+            break;
+          }
+
+          message.operator = reader.string();
+          continue;
+        case 4:
+          if (tag !== 34) {
+            break;
+          }
+
+          message.expiration = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
+          continue;
+        case 5:
+          if (tag !== 42) {
+            break;
+          }
+
+          message.minInterval = Duration.decode(reader, reader.uint32());
+          continue;
+        case 6:
+          if (tag !== 48) {
+            break;
+          }
+
+          message.maxDeviationBps = reader.uint32();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MsgGrantExchangeRateAuthorization {
+    return {
+      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      xrId: isSet(object.xrId) ? globalThis.Number(object.xrId) : 0,
+      operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
+      expiration: isSet(object.expiration) ? fromJsonTimestamp(object.expiration) : undefined,
+      minInterval: isSet(object.minInterval) ? Duration.fromJSON(object.minInterval) : undefined,
+      maxDeviationBps: isSet(object.maxDeviationBps) ? globalThis.Number(object.maxDeviationBps) : 0,
+    };
+  },
+
+  toJSON(message: MsgGrantExchangeRateAuthorization): unknown {
+    const obj: any = {};
+    if (message.authority !== "") {
+      obj.authority = message.authority;
+    }
+    if (message.xrId !== 0) {
+      obj.xrId = Math.round(message.xrId);
+    }
+    if (message.operator !== "") {
+      obj.operator = message.operator;
+    }
+    if (message.expiration !== undefined) {
+      obj.expiration = message.expiration.toISOString();
+    }
+    if (message.minInterval !== undefined) {
+      obj.minInterval = Duration.toJSON(message.minInterval);
+    }
+    if (message.maxDeviationBps !== 0) {
+      obj.maxDeviationBps = Math.round(message.maxDeviationBps);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MsgGrantExchangeRateAuthorization>, I>>(
+    base?: I,
+  ): MsgGrantExchangeRateAuthorization {
+    return MsgGrantExchangeRateAuthorization.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgGrantExchangeRateAuthorization>, I>>(
+    object: I,
+  ): MsgGrantExchangeRateAuthorization {
+    const message = createBaseMsgGrantExchangeRateAuthorization();
+    message.authority = object.authority ?? "";
+    message.xrId = object.xrId ?? 0;
+    message.operator = object.operator ?? "";
+    message.expiration = object.expiration ?? undefined;
+    message.minInterval = (object.minInterval !== undefined && object.minInterval !== null)
+      ? Duration.fromPartial(object.minInterval)
+      : undefined;
+    message.maxDeviationBps = object.maxDeviationBps ?? 0;
+    return message;
+  },
+};
+
+function createBaseMsgGrantExchangeRateAuthorizationResponse(): MsgGrantExchangeRateAuthorizationResponse {
+  return {};
+}
+
+export const MsgGrantExchangeRateAuthorizationResponse = {
+  encode(_: MsgGrantExchangeRateAuthorizationResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgGrantExchangeRateAuthorizationResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgGrantExchangeRateAuthorizationResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(_: any): MsgGrantExchangeRateAuthorizationResponse {
+    return {};
+  },
+
+  toJSON(_: MsgGrantExchangeRateAuthorizationResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MsgGrantExchangeRateAuthorizationResponse>, I>>(
+    base?: I,
+  ): MsgGrantExchangeRateAuthorizationResponse {
+    return MsgGrantExchangeRateAuthorizationResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgGrantExchangeRateAuthorizationResponse>, I>>(
+    _: I,
+  ): MsgGrantExchangeRateAuthorizationResponse {
+    const message = createBaseMsgGrantExchangeRateAuthorizationResponse();
+    return message;
+  },
+};
+
+function createBaseMsgRevokeExchangeRateAuthorization(): MsgRevokeExchangeRateAuthorization {
+  return { authority: "", xrId: 0, operator: "" };
+}
+
+export const MsgRevokeExchangeRateAuthorization = {
+  encode(message: MsgRevokeExchangeRateAuthorization, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.authority !== "") {
+      writer.uint32(10).string(message.authority);
+    }
+    if (message.xrId !== 0) {
+      writer.uint32(16).uint64(message.xrId);
+    }
+    if (message.operator !== "") {
+      writer.uint32(26).string(message.operator);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgRevokeExchangeRateAuthorization {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgRevokeExchangeRateAuthorization();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.authority = reader.string();
+          continue;
+        case 2:
+          if (tag !== 16) {
+            break;
+          }
+
+          message.xrId = longToNumber(reader.uint64() as Long);
+          continue;
+        case 3:
+          if (tag !== 26) {
+            break;
+          }
+
+          message.operator = reader.string();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MsgRevokeExchangeRateAuthorization {
+    return {
+      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+      xrId: isSet(object.xrId) ? globalThis.Number(object.xrId) : 0,
+      operator: isSet(object.operator) ? globalThis.String(object.operator) : "",
+    };
+  },
+
+  toJSON(message: MsgRevokeExchangeRateAuthorization): unknown {
+    const obj: any = {};
+    if (message.authority !== "") {
+      obj.authority = message.authority;
+    }
+    if (message.xrId !== 0) {
+      obj.xrId = Math.round(message.xrId);
+    }
+    if (message.operator !== "") {
+      obj.operator = message.operator;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MsgRevokeExchangeRateAuthorization>, I>>(
+    base?: I,
+  ): MsgRevokeExchangeRateAuthorization {
+    return MsgRevokeExchangeRateAuthorization.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgRevokeExchangeRateAuthorization>, I>>(
+    object: I,
+  ): MsgRevokeExchangeRateAuthorization {
+    const message = createBaseMsgRevokeExchangeRateAuthorization();
+    message.authority = object.authority ?? "";
+    message.xrId = object.xrId ?? 0;
+    message.operator = object.operator ?? "";
+    return message;
+  },
+};
+
+function createBaseMsgRevokeExchangeRateAuthorizationResponse(): MsgRevokeExchangeRateAuthorizationResponse {
+  return {};
+}
+
+export const MsgRevokeExchangeRateAuthorizationResponse = {
+  encode(_: MsgRevokeExchangeRateAuthorizationResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgRevokeExchangeRateAuthorizationResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgRevokeExchangeRateAuthorizationResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(_: any): MsgRevokeExchangeRateAuthorizationResponse {
+    return {};
+  },
+
+  toJSON(_: MsgRevokeExchangeRateAuthorizationResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MsgRevokeExchangeRateAuthorizationResponse>, I>>(
+    base?: I,
+  ): MsgRevokeExchangeRateAuthorizationResponse {
+    return MsgRevokeExchangeRateAuthorizationResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgRevokeExchangeRateAuthorizationResponse>, I>>(
+    _: I,
+  ): MsgRevokeExchangeRateAuthorizationResponse {
+    const message = createBaseMsgRevokeExchangeRateAuthorizationResponse();
+    return message;
+  },
+};
+
 function createBaseMsgUpdateParamsResponse(): MsgUpdateParamsResponse {
   return {};
 }
@@ -1017,6 +1517,20 @@ export interface Msg {
   UpdateExchangeRate(request: MsgUpdateExchangeRate): Promise<MsgUpdateExchangeRateResponse>;
   /** SetExchangeRateState defines a governance operation for enabling or disabling an exchange rate. */
   SetExchangeRateState(request: MsgSetExchangeRateState): Promise<MsgSetExchangeRateStateResponse>;
+  /**
+   * GrantExchangeRateAuthorization defines a governance operation authorizing an
+   * operator to update a given exchange rate. [MOD-XR-MSG-4]
+   */
+  GrantExchangeRateAuthorization(
+    request: MsgGrantExchangeRateAuthorization,
+  ): Promise<MsgGrantExchangeRateAuthorizationResponse>;
+  /**
+   * RevokeExchangeRateAuthorization defines a governance operation revoking an
+   * operator's authorization for a given exchange rate. [MOD-XR-MSG-5]
+   */
+  RevokeExchangeRateAuthorization(
+    request: MsgRevokeExchangeRateAuthorization,
+  ): Promise<MsgRevokeExchangeRateAuthorizationResponse>;
 }
 
 export const MsgServiceName = "verana.xr.v1.Msg";
@@ -1030,6 +1544,8 @@ export class MsgClientImpl implements Msg {
     this.CreateExchangeRate = this.CreateExchangeRate.bind(this);
     this.UpdateExchangeRate = this.UpdateExchangeRate.bind(this);
     this.SetExchangeRateState = this.SetExchangeRateState.bind(this);
+    this.GrantExchangeRateAuthorization = this.GrantExchangeRateAuthorization.bind(this);
+    this.RevokeExchangeRateAuthorization = this.RevokeExchangeRateAuthorization.bind(this);
   }
   UpdateParams(request: MsgUpdateParams): Promise<MsgUpdateParamsResponse> {
     const data = MsgUpdateParams.encode(request).finish();
@@ -1053,6 +1569,22 @@ export class MsgClientImpl implements Msg {
     const data = MsgSetExchangeRateState.encode(request).finish();
     const promise = this.rpc.request(this.service, "SetExchangeRateState", data);
     return promise.then((data) => MsgSetExchangeRateStateResponse.decode(_m0.Reader.create(data)));
+  }
+
+  GrantExchangeRateAuthorization(
+    request: MsgGrantExchangeRateAuthorization,
+  ): Promise<MsgGrantExchangeRateAuthorizationResponse> {
+    const data = MsgGrantExchangeRateAuthorization.encode(request).finish();
+    const promise = this.rpc.request(this.service, "GrantExchangeRateAuthorization", data);
+    return promise.then((data) => MsgGrantExchangeRateAuthorizationResponse.decode(_m0.Reader.create(data)));
+  }
+
+  RevokeExchangeRateAuthorization(
+    request: MsgRevokeExchangeRateAuthorization,
+  ): Promise<MsgRevokeExchangeRateAuthorizationResponse> {
+    const data = MsgRevokeExchangeRateAuthorization.encode(request).finish();
+    const promise = this.rpc.request(this.service, "RevokeExchangeRateAuthorization", data);
+    return promise.then((data) => MsgRevokeExchangeRateAuthorizationResponse.decode(_m0.Reader.create(data)));
   }
 }
 

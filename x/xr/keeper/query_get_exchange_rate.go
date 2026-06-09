@@ -68,5 +68,15 @@ func (q queryServer) GetExchangeRate(ctx context.Context, req *types.QueryGetExc
 		return nil, status.Error(codes.NotFound, "exchange rate not found")
 	}
 
-	return &types.QueryGetExchangeRateResponse{ExchangeRate: xr}, nil
+	// [MOD-XR-QRY-1] Include the list of authorizations for this exchange rate.
+	var authorizations []types.ExchangeRateAuthorization
+	rng := collections.NewPrefixedPairRange[uint64, string](xr.Id)
+	if err := q.k.ExchangeRateAuthorizations.Walk(ctx, rng, func(_ collections.Pair[uint64, string], v types.ExchangeRateAuthorization) (bool, error) {
+		authorizations = append(authorizations, v)
+		return false, nil
+	}); err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &types.QueryGetExchangeRateResponse{ExchangeRate: xr, Authorizations: authorizations}, nil
 }

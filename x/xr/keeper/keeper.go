@@ -30,6 +30,8 @@ type Keeper struct {
 	Counter       collections.Map[string, uint64]
 	// PairIndex maps "baseType:baseAsset:quoteType:quoteAsset" -> exchange rate id for uniqueness checks
 	PairIndex collections.Map[string, uint64]
+	// ExchangeRateAuthorizations is keyed by (xr_id, operator).
+	ExchangeRateAuthorizations collections.Map[collections.Pair[uint64, string], types.ExchangeRateAuthorization]
 }
 
 func NewKeeper(
@@ -75,6 +77,13 @@ func NewKeeper(
 			"exchange_rate_pair_index",
 			collections.StringKey,
 			collections.Uint64Value,
+		),
+		ExchangeRateAuthorizations: collections.NewMap(
+			sb,
+			types.ExchangeRateAuthorizationKey,
+			"exchange_rate_authorization",
+			collections.PairKeyCodec(collections.Uint64Key, collections.StringKey),
+			codec.CollValue[types.ExchangeRateAuthorization](cdc),
 		),
 	}
 

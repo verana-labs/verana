@@ -29,3 +29,7 @@ var CounterKey = collections.NewPrefix("xr_ctr")
 
 // ExchangeRatePairIndexKey is the prefix for the pair uniqueness index
 var ExchangeRatePairIndexKey = collections.NewPrefix("xr_pidx")
+
+// ExchangeRateAuthorizationKey is the prefix for exchange rate authorizations,
+// keyed by (xr_id, operator).
+var ExchangeRateAuthorizationKey = collections.NewPrefix("xr_authz")

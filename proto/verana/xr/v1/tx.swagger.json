@@ -50,6 +50,72 @@
         ]
       }
     },
+    "/verana.xr.v1.Msg/GrantExchangeRateAuthorization": {
+      "post": {
+        "summary": "GrantExchangeRateAuthorization defines a governance operation authorizing an\noperator to update a given exchange rate. [MOD-XR-MSG-4]",
+        "operationId": "Msg_GrantExchangeRateAuthorization",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.xr.v1.MsgGrantExchangeRateAuthorizationResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.xr.v1.MsgGrantExchangeRateAuthorization"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
+    "/verana.xr.v1.Msg/RevokeExchangeRateAuthorization": {
+      "post": {
+        "summary": "RevokeExchangeRateAuthorization defines a governance operation revoking an\noperator's authorization for a given exchange rate. [MOD-XR-MSG-5]",
+        "operationId": "Msg_RevokeExchangeRateAuthorization",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.xr.v1.MsgRevokeExchangeRateAuthorizationResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.xr.v1.MsgRevokeExchangeRateAuthorization"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
     "/verana.xr.v1.Msg/SetExchangeRateState": {
       "post": {
         "summary": "SetExchangeRateState defines a governance operation for enabling or disabling an exchange rate.",
@@ -238,6 +304,66 @@
         }
       },
       "description": "MsgCreateExchangeRateResponse defines the response for MsgCreateExchangeRate."
+    },
+    "verana.xr.v1.MsgGrantExchangeRateAuthorization": {
+      "type": "object",
+      "properties": {
+        "authority": {
+          "type": "string",
+          "description": "authority is the gov module account."
+        },
+        "xr_id": {
+          "type": "string",
+          "format": "uint64",
+          "description": "xr_id is the exchange rate the operator is authorized to update."
+        },
+        "operator": {
+          "type": "string",
+          "description": "operator is the account authorized to update the exchange rate."
+        },
+        "expiration": {
+          "type": "string",
+          "format": "date-time",
+          "description": "expiration is when the authorization expires (must be in the future)."
+        },
+        "min_interval": {
+          "type": "string",
+          "description": "min_interval is the minimum time between successful updates (optional anti-spam)."
+        },
+        "max_deviation_bps": {
+          "type": "integer",
+          "format": "int64",
+          "description": "max_deviation_bps is the max allowed rate change in basis points, (0, 10000] (optional circuit breaker)."
+        }
+      },
+      "title": "MsgGrantExchangeRateAuthorization is the Msg/GrantExchangeRateAuthorization request type. [MOD-XR-MSG-4]"
+    },
+    "verana.xr.v1.MsgGrantExchangeRateAuthorizationResponse": {
+      "type": "object",
+      "description": "MsgGrantExchangeRateAuthorizationResponse defines the response for MsgGrantExchangeRateAuthorization."
+    },
+    "verana.xr.v1.MsgRevokeExchangeRateAuthorization": {
+      "type": "object",
+      "properties": {
+        "authority": {
+          "type": "string",
+          "description": "authority is the gov module account."
+        },
+        "xr_id": {
+          "type": "string",
+          "format": "uint64",
+          "description": "xr_id is the exchange rate the authorization is for."
+        },
+        "operator": {
+          "type": "string",
+          "description": "operator is the account whose authorization is revoked."
+        }
+      },
+      "title": "MsgRevokeExchangeRateAuthorization is the Msg/RevokeExchangeRateAuthorization request type. [MOD-XR-MSG-5]"
+    },
+    "verana.xr.v1.MsgRevokeExchangeRateAuthorizationResponse": {
+      "type": "object",
+      "description": "MsgRevokeExchangeRateAuthorizationResponse defines the response for MsgRevokeExchangeRateAuthorization."
     },
     "verana.xr.v1.MsgSetExchangeRateState": {
       "type": "object",
