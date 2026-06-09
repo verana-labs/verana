@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 
+	"cosmossdk.io/math"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
 
@@ -38,39 +39,46 @@ func RunTdGovSlashJourney(ctx context.Context, client cosmosclient.Client) error
 	}
 
 	// Step 0: grant operator authz for MsgStartParticipantOP (replaced by later grants)
-	fmt.Println("\n--- Step 0: Grant operator authz for MsgStartParticipantOP ---")
-	if err := lib.GrantOperatorAuthorizationViaGroup(
-		client, ctx, adminAccount, member1Account,
-		policyAddr, operatorAddr, operatorAddr,
-		[]string{"/verana.pp.v1.MsgStartParticipantOP"},
-	); err != nil {
-		return fmt.Errorf("step 0 failed: grant start-op authz: %w", err)
-	}
-	waitForTx("grant start-op authz")
-
-	// Step 1: Start a fresh participant VP to lock a trust deposit. Use
-	// VERIFIER_GRANTOR (a role the rest of the flow does not use against this
-	// validator) so there is no overlap, and a unique DID. The validator
-	// (journey304 ecosystem root) carries validation_fees, so the VP locks a
-	// positive trust deposit that persists (the VP is never cancelled).
-	fmt.Println("\n--- Step 1: Start participant VP to lock a trust deposit ---")
-	_, err = lib.StartPermissionVPWithAuthority(
-		client, ctx, operatorAccount, policyAddr,
-		permtypes.ParticipantRole_VERIFIER_GRANTOR,
-		rootPermID,
-		"did:example:td-gov-slash-deposit",
-	)
-	if err != nil {
-		return fmt.Errorf("step 1 failed: start VP: %w", err)
-	}
-	waitForTx("start vp deposit")
-
-	// Step 2: Read the corporation's trust deposit
-	fmt.Println("\n--- Step 2: Query corporation trust deposit ---")
+	// Step 1: Ensure the corporation has a (non-released) trust deposit to slash.
+	// If it does not already have one, lock a fresh one by starting a participant
+	// VP: StartParticipantOP charges validation fees to escrow plus a trust
+	// deposit (validator fees * trust_unit_price * trust_deposit_rate). We use
+	// VERIFIER_GRANTOR (a role the rest of the flow never uses against this
+	// validator, so no overlap) and never cancel it, so the deposit persists.
+	fmt.Println("\n--- Step 1: Ensure corporation has a trust deposit ---")
 	tdBefore, err := queryTrustDepositByAddr(client, ctx, policyAddr)
-	if err != nil {
-		return fmt.Errorf("step 2 failed: could not query TD for %s: %w", policyAddr, err)
+	if err != nil || tdBefore == nil || tdBefore.Deposit == 0 {
+		fmt.Println("  No existing deposit; locking one via a participant VP")
+		if err := lib.GrantOperatorAuthorizationViaGroup(
+			client, ctx, adminAccount, member1Account,
+			policyAddr, operatorAddr, operatorAddr,
+			[]string{"/verana.pp.v1.MsgStartParticipantOP"},
+		); err != nil {
+			return fmt.Errorf("step 1 failed: grant start-op authz: %w", err)
+		}
+		waitForTx("grant start-op authz")
+
+		lib.SendFunds(client, ctx, lib.COOLUSER_ADDRESS, policyAddr, math.NewInt(200000000))
+		waitForTx("fund policy for VP")
+
+		if _, err := lib.StartPermissionVPWithAuthority(
+			client, ctx, operatorAccount, policyAddr,
+			permtypes.ParticipantRole_VERIFIER_GRANTOR,
+			rootPermID,
+			"did:example:td-gov-slash-deposit",
+		); err != nil {
+			return fmt.Errorf("step 1 failed: start VP: %w", err)
+		}
+		waitForTx("start vp deposit")
+
+		tdBefore, err = queryTrustDepositByAddr(client, ctx, policyAddr)
+		if err != nil {
+			return fmt.Errorf("step 1 failed: could not query TD for %s: %w", policyAddr, err)
+		}
 	}
+
+	// Step 2: confirm a slashable deposit exists
+	fmt.Println("\n--- Step 2: Corporation trust deposit ---")
 	fmt.Printf("  Deposit: %d, SlashedDeposit: %d\n", tdBefore.Deposit, tdBefore.SlashedDeposit)
 	if tdBefore.Deposit == 0 {
 		return fmt.Errorf("step 2 failed: corporation has no trust deposit to slash")

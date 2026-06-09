@@ -2,9 +2,7 @@ package journeys
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"os/exec"
 	"strings"
 
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
@@ -15,24 +13,18 @@ import (
 )
 
 // queryTrustDepositByAddr queries the trust deposit for an arbitrary address
-// (including non-keyring addresses like group policy accounts) using the CLI.
-// Trust deposits are keyed by corporation_id, so the address is resolved first.
+// (including non-keyring addresses like group policy accounts) via the typed
+// gRPC query. Trust deposits are keyed by corporation_id, so the address is
+// resolved to its corporation_id first.
 func queryTrustDepositByAddr(client cosmosclient.Client, ctx context.Context, addr string) (*tdtypes.TrustDeposit, error) {
 	corpID, err := lib.ResolveCorporationIDByAddress(client, ctx, addr)
 	if err != nil {
 		return nil, fmt.Errorf("failed to resolve corporation_id for %s: %v", addr, err)
 	}
-	cmd := exec.Command("veranad", "q", "td", "get-trust-deposit", fmt.Sprintf("%d", corpID), "-o", "json")
-	output, err := cmd.Output()
+	qc := tdtypes.NewQueryClient(client.Context())
+	resp, err := qc.GetTrustDeposit(ctx, &tdtypes.QueryGetTrustDepositRequest{CorporationId: corpID})
 	if err != nil {
-		return nil, fmt.Errorf("failed to query trust deposit for %s (corp_id %d): %v", addr, corpID, err)
-	}
-
-	var resp struct {
-		TrustDeposit tdtypes.TrustDeposit `json:"trustDeposit"`
-	}
-	if err := json.Unmarshal(output, &resp); err != nil {
-		return nil, fmt.Errorf("failed to parse trust deposit JSON for %s: %v", addr, err)
+		return nil, fmt.Errorf("failed to query trust deposit for %s (corp_id %d): %w", addr, corpID, err)
 	}
 	return &resp.TrustDeposit, nil
 }
