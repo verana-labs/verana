@@ -105,13 +105,19 @@ func voteAndPassGovProposal(
 		return fmt.Errorf("failed to vote on proposal %d: %w", proposalID, err)
 	}
 
-	// Wait for voting period to end and proposal to pass
+	// Poll for the proposal to leave the voting period and pass. The local chain
+	// uses a 30s voting period, so poll well past that before giving up.
 	fmt.Println("    - Waiting for voting period to end...")
-	time.Sleep(15 * time.Second)
-
-	proposal, err := lib.QueryGovProposal(client, ctx, proposalID)
-	if err != nil {
-		return fmt.Errorf("failed to query proposal %d: %w", proposalID, err)
+	var proposal *govtypes.Proposal
+	for i := 0; i < 30; i++ {
+		time.Sleep(3 * time.Second)
+		proposal, err = lib.QueryGovProposal(client, ctx, proposalID)
+		if err != nil {
+			return fmt.Errorf("failed to query proposal %d: %w", proposalID, err)
+		}
+		if proposal.Status != govtypes.StatusVotingPeriod && proposal.Status != govtypes.StatusDepositPeriod {
+			break
+		}
 	}
 
 	fmt.Printf("    Proposal status: %s\n", proposal.Status.String())
@@ -203,10 +209,11 @@ func RunXrCreateExchangeRateJourney(ctx context.Context, client cosmosclient.Cli
 	fmt.Printf("  Rate:  %s (scale: %d)\n", xr.Rate, xr.RateScale)
 	fmt.Printf("  State: %v\n", xr.State)
 
-	if xr.State != false {
-		return fmt.Errorf("step 3 failed: expected state=false, got state=%v", xr.State)
+	// CreateExchangeRate activates the rate on creation (state=true).
+	if xr.State != true {
+		return fmt.Errorf("step 3 failed: expected state=true, got state=%v", xr.State)
 	}
-	fmt.Println("✅ Step 3: Exchange rate created with state=false")
+	fmt.Println("✅ Step 3: Exchange rate created with state=true")
 
 	// =========================================================================
 	// Step 4: Submit governance proposal to toggle state to true
