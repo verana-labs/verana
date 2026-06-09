@@ -331,7 +331,7 @@ jobs:
             PREBUILT_BINARY=binaries/veranad-linux-amd64
 
   discord-notify:
-    needs: resolve-version
+    needs: [resolve-version, build-binaries-s3, build-canonical-image]
     if: needs.resolve-version.outputs.new-release-published == 'true' && needs.resolve-version.outputs.release-type == 'stable'
     permissions:
       contents: read
