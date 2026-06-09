@@ -49,6 +49,7 @@ const tests: TestConfig[] = [
   { name: "PERM: Self Create Participant",            script: "test:perm-create" },
   { name: "PERM: Slash Participant Trust Deposit",    script: "test:perm-slash" },
   { name: "PERM: Repay Slashed Trust Deposit",        script: "test:perm-repay" },
+  { name: "XR: ExchangeRateAuthorization (gov+operator amino)", script: "test:xr-authz" },
 ];
 
 /**
