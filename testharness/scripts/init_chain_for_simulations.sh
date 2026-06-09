@@ -102,8 +102,8 @@ sedi 's/stake/uvna/g' "$GENESIS_JSON_PATH"
 # Update governance params in genesis.json (fast periods for simulations)
 log "Updating governance parameters in genesis.json..."
 sedi 's/"max_deposit_period": ".*"/"max_deposit_period": "100s"/' "$GENESIS_JSON_PATH"
-sedi 's/"voting_period": ".*"/"voting_period": "30s"/' "$GENESIS_JSON_PATH"
-sedi 's/"expedited_voting_period": ".*"/"expedited_voting_period": "20s"/' "$GENESIS_JSON_PATH"
+sedi 's/"voting_period": ".*"/"voting_period": "12s"/' "$GENESIS_JSON_PATH"
+sedi 's/"expedited_voting_period": ".*"/"expedited_voting_period": "8s"/' "$GENESIS_JSON_PATH"
 
 if [ $? -ne 0 ]; then
     log "Error: Failed to update governance parameters in genesis.json."
@@ -133,6 +133,9 @@ fi
 # Configure ports in config.toml
 sedi "s/:26656/:$P2P_PORT/" "$CONFIG_TOML_PATH"
 sedi "s/:26657/:$RPC_PORT/" "$CONFIG_TOML_PATH"
+
+# Fast blocks for simulations/tests (1s commit instead of the 5s default)
+sedi 's/timeout_commit = ".*"/timeout_commit = "1s"/' "$CONFIG_TOML_PATH"
 
 # Enable API and CORS
 log "Updating API and CORS settings..."

@@ -54,7 +54,8 @@ func getOrCreateAccount(client cosmosclient.Client, name string) cosmosaccount.A
 // waitForTx waits for a transaction to be fully processed before the next step.
 func waitForTx(description string) {
 	fmt.Printf("    - Waiting for %s to be processed...\n", description)
-	time.Sleep(3 * time.Second)
+	// 2s is sufficient with the sim chain's ~1s block time.
+	time.Sleep(2 * time.Second)
 }
 
 // RunEcosystemAuthzSetupJourney implements Journey 101: Setup group and fund accounts
