@@ -48,11 +48,15 @@ func RunTdGovSlashJourney(ctx context.Context, client cosmosclient.Client) error
 	}
 	waitForTx("grant start-op authz")
 
-	// Step 1: Start a fresh participant VP to lock a trust deposit
+	// Step 1: Start a fresh participant VP to lock a trust deposit. Use
+	// VERIFIER_GRANTOR (a role the rest of the flow does not use against this
+	// validator) so there is no overlap, and a unique DID. The validator
+	// (journey304 ecosystem root) carries validation_fees, so the VP locks a
+	// positive trust deposit that persists (the VP is never cancelled).
 	fmt.Println("\n--- Step 1: Start participant VP to lock a trust deposit ---")
 	_, err = lib.StartPermissionVPWithAuthority(
 		client, ctx, operatorAccount, policyAddr,
-		permtypes.ParticipantRole_ISSUER_GRANTOR,
+		permtypes.ParticipantRole_VERIFIER_GRANTOR,
 		rootPermID,
 		"did:example:td-gov-slash-deposit",
 	)
