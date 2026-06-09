@@ -96,11 +96,27 @@ for J in 302 303 304 305 306 307 308 309 310; do
   go run cmd/main.go "$J"
 done
 
-# Trust Deposit (TD) Journey: reclaim yield + repay slashed (depends on 301/302/304/308)
+# CS schema authorization policy (311) + DE revoke operator authz (312)
+for J in 311 312; do
+  echo "*****************************************************************************************"
+  echo "************************ Running test-harness journey $J *********************************"
+  echo "*****************************************************************************************"
+  go run cmd/main.go "$J"
+done
+
+# Digest (DI) StoreDigest
 echo "*****************************************************************************************"
-echo "************************ Running test-harness journey 401 *******************************"
+echo "************************ Running test-harness journey 501 *******************************"
 echo "*****************************************************************************************"
-go run cmd/main.go 401
+go run cmd/main.go 501
+
+# Trust Deposit (TD) Journeys: reclaim/repay (401) + governance slash by corporation_id (402)
+for J in 401 402; do
+  echo "*****************************************************************************************"
+  echo "************************ Running test-harness journey $J *******************************"
+  echo "*****************************************************************************************"
+  go run cmd/main.go "$J"
+done
 
 # Exchange Rate (XR) Journeys: create (gov) -> update (ExchangeRateAuthorization) -> get price
 for J in 601 602 603; do
