@@ -40,11 +40,13 @@ func RunDiStoreDigestJourney(ctx context.Context, client cosmosclient.Client) er
 	// =========================================================================
 	fmt.Println("\n--- Step 2: Operator tries StoreDigest without auth (expect failure) ---")
 
-	testDigest := fmt.Sprintf("sha256-test-digest-%d", time.Now().UnixNano())
+	// Valid W3C SRI digest (sha256-<base64>) + known digest algorithm.
+	testDigest := "sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU="
 	storeMsg := &ditypes.MsgStoreDigest{
-		Authority: policyAddr,
-		Operator:  operatorAddr,
-		Digest:    testDigest,
+		Authority:       policyAddr,
+		Operator:        operatorAddr,
+		Digest:          testDigest,
+		DigestAlgorithm: "sha2-256",
 	}
 
 	txResp, err := client.BroadcastTx(ctx, operatorAccount, storeMsg)
@@ -79,9 +81,10 @@ func RunDiStoreDigestJourney(ctx context.Context, client cosmosclient.Client) er
 	fmt.Println("\n--- Step 4: Operator stores digest with auth ---")
 
 	storeMsg = &ditypes.MsgStoreDigest{
-		Authority: policyAddr,
-		Operator:  operatorAddr,
-		Digest:    testDigest,
+		Authority:       policyAddr,
+		Operator:        operatorAddr,
+		Digest:          testDigest,
+		DigestAlgorithm: "sha2-256",
 	}
 
 	txResp, err = client.BroadcastTx(ctx, operatorAccount, storeMsg)
