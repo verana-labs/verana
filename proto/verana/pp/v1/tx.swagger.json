@@ -369,6 +369,40 @@
         ]
       }
     },
+    "/verana.pp.v1.Msg/TriggerResolver": {
+      "post": {
+        "summary": "[MOD-PP-MSG-15] Trigger Resolver (event-only)",
+        "operationId": "Msg_TriggerResolver",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/verana.pp.v1.MsgTriggerResolverResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "[MOD-PP-MSG-15] Trigger Resolver. Event-only; does not modify VPR state.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/verana.pp.v1.MsgTriggerResolver"
+            }
+          }
+        ],
+        "tags": [
+          "Msg"
+        ]
+      }
+    },
     "/verana.pp.v1.Msg/UpdateParams": {
       "post": {
         "summary": "UpdateParams defines a (governance) operation for updating the module\nparameters. The authority defaults to the x/gov module account.",
@@ -910,6 +944,28 @@
         }
       },
       "title": "MsgStartParticipantOPResponse defines the Msg/StartParticipantOP response type"
+    },
+    "verana.pp.v1.MsgTriggerResolver": {
+      "type": "object",
+      "properties": {
+        "corporation": {
+          "type": "string",
+          "description": "corporation is the policy_address of the corporation on whose behalf this\nmessage runs."
+        },
+        "operator": {
+          "type": "string",
+          "description": "operator is the account authorized by the corporation to run this Msg."
+        },
+        "id": {
+          "type": "string",
+          "format": "uint64",
+          "description": "id of the Participant entry for which a trust resolution must be triggered."
+        }
+      },
+      "description": "[MOD-PP-MSG-15] Trigger Resolver. Event-only; does not modify VPR state."
+    },
+    "verana.pp.v1.MsgTriggerResolverResponse": {
+      "type": "object"
     },
     "verana.pp.v1.MsgUpdateParams": {
       "type": "object",

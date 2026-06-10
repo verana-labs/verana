@@ -32,6 +32,8 @@ service Msg {
   rpc RepayParticipantSlashedTrustDeposit(MsgRepayParticipantSlashedTrustDeposit) returns (MsgRepayParticipantSlashedTrustDepositResponse);
   // [MOD-PP-MSG-14] Self Create Participant (OPEN mode)
   rpc SelfCreateParticipant(MsgSelfCreateParticipant) returns (MsgSelfCreateParticipantResponse);
+  // [MOD-PP-MSG-15] Trigger Resolver (event-only)
+  rpc TriggerResolver(MsgTriggerResolver) returns (MsgTriggerResolverResponse);
 }
 
 // MsgUpdateParams is the Msg/UpdateParams request type.
@@ -309,3 +311,19 @@ message MsgSelfCreateParticipant {
 message MsgSelfCreateParticipantResponse {
   uint64 id = 1;
 }
+
+// [MOD-PP-MSG-15] Trigger Resolver. Event-only; does not modify VPR state.
+message MsgTriggerResolver {
+  option (cosmos.msg.v1.signer) = "operator";
+  option (amino.name) = "verana/x/pp/MsgTriggerResolver";
+
+  // corporation is the policy_address of the corporation on whose behalf this
+  // message runs.
+  string corporation = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // operator is the account authorized by the corporation to run this Msg.
+  string operator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // id of the Participant entry for which a trust resolution must be triggered.
+  uint64 id = 3;
+}
+
+message MsgTriggerResolverResponse {}

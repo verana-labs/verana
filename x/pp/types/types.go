@@ -14,8 +14,8 @@ import (
 const (
 	MsgSetParticipantOPToValidatedTypeURL      = "/verana.pp.v1.MsgSetParticipantOPToValidated"
 	MsgCreateOrUpdateParticipantSessionTypeURL = "/verana.pp.v1.MsgCreateOrUpdateParticipantSession"
-	// MsgTriggerResolverTypeURL is the HOLDER-permitted msg type. The resolver
-	// trigger message is a spec placeholder not yet implemented in this codebase.
+	// MsgTriggerResolverTypeURL is the HOLDER-permitted msg type, implemented by
+	// [MOD-PP-MSG-15] (event-only trust-resolution trigger).
 	MsgTriggerResolverTypeURL = "/verana.pp.v1.MsgTriggerResolver"
 )
 

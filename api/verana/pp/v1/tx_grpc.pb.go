@@ -31,6 +31,7 @@ const (
 	Msg_SlashParticipantTrustDeposit_FullMethodName        = "/verana.pp.v1.Msg/SlashParticipantTrustDeposit"
 	Msg_RepayParticipantSlashedTrustDeposit_FullMethodName = "/verana.pp.v1.Msg/RepayParticipantSlashedTrustDeposit"
 	Msg_SelfCreateParticipant_FullMethodName               = "/verana.pp.v1.Msg/SelfCreateParticipant"
+	Msg_TriggerResolver_FullMethodName                     = "/verana.pp.v1.Msg/TriggerResolver"
 )
 
 // MsgClient is the client API for Msg service.
@@ -54,6 +55,8 @@ type MsgClient interface {
 	RepayParticipantSlashedTrustDeposit(ctx context.Context, in *MsgRepayParticipantSlashedTrustDeposit, opts ...grpc.CallOption) (*MsgRepayParticipantSlashedTrustDepositResponse, error)
 	// [MOD-PP-MSG-14] Self Create Participant (OPEN mode)
 	SelfCreateParticipant(ctx context.Context, in *MsgSelfCreateParticipant, opts ...grpc.CallOption) (*MsgSelfCreateParticipantResponse, error)
+	// [MOD-PP-MSG-15] Trigger Resolver (event-only)
+	TriggerResolver(ctx context.Context, in *MsgTriggerResolver, opts ...grpc.CallOption) (*MsgTriggerResolverResponse, error)
 }
 
 type msgClient struct {
@@ -184,6 +187,16 @@ func (c *msgClient) SelfCreateParticipant(ctx context.Context, in *MsgSelfCreate
 	return out, nil
 }
 
+func (c *msgClient) TriggerResolver(ctx context.Context, in *MsgTriggerResolver, opts ...grpc.CallOption) (*MsgTriggerResolverResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(MsgTriggerResolverResponse)
+	err := c.cc.Invoke(ctx, Msg_TriggerResolver_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MsgServer is the server API for Msg service.
 // All implementations must embed UnimplementedMsgServer
 // for forward compatibility.
@@ -205,6 +218,8 @@ type MsgServer interface {
 	RepayParticipantSlashedTrustDeposit(context.Context, *MsgRepayParticipantSlashedTrustDeposit) (*MsgRepayParticipantSlashedTrustDepositResponse, error)
 	// [MOD-PP-MSG-14] Self Create Participant (OPEN mode)
 	SelfCreateParticipant(context.Context, *MsgSelfCreateParticipant) (*MsgSelfCreateParticipantResponse, error)
+	// [MOD-PP-MSG-15] Trigger Resolver (event-only)
+	TriggerResolver(context.Context, *MsgTriggerResolver) (*MsgTriggerResolverResponse, error)
 	mustEmbedUnimplementedMsgServer()
 }
 
@@ -250,6 +265,9 @@ func (UnimplementedMsgServer) RepayParticipantSlashedTrustDeposit(context.Contex
 }
 func (UnimplementedMsgServer) SelfCreateParticipant(context.Context, *MsgSelfCreateParticipant) (*MsgSelfCreateParticipantResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SelfCreateParticipant not implemented")
+}
+func (UnimplementedMsgServer) TriggerResolver(context.Context, *MsgTriggerResolver) (*MsgTriggerResolverResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method TriggerResolver not implemented")
 }
 func (UnimplementedMsgServer) mustEmbedUnimplementedMsgServer() {}
 func (UnimplementedMsgServer) testEmbeddedByValue()             {}
@@ -488,6 +506,24 @@ func _Msg_SelfCreateParticipant_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Msg_TriggerResolver_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgTriggerResolver)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).TriggerResolver(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Msg_TriggerResolver_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).TriggerResolver(ctx, req.(*MsgTriggerResolver))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Msg_ServiceDesc is the grpc.ServiceDesc for Msg service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -542,6 +578,10 @@ var Msg_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SelfCreateParticipant",
 			Handler:    _Msg_SelfCreateParticipant_Handler,
+		},
+		{
+			MethodName: "TriggerResolver",
+			Handler:    _Msg_TriggerResolver_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
