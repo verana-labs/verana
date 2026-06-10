@@ -9,11 +9,10 @@ import (
 // DefaultGenesis returns the default genesis state
 func DefaultGenesis() *GenesisState {
 	return &GenesisState{
-		Params:                      DefaultParams(),
-		OperatorAuthorizations:      []OperatorAuthorization{},
-		FeeGrants:                   []FeeGrant{},
-		VsOperatorAuthorizations:    []VSOperatorAuthorization{},
-		OperatorAuthorizationUsages: []OperatorAuthorizationUsage{},
+		Params:                   DefaultParams(),
+		OperatorAuthorizations:   []OperatorAuthorization{},
+		FeeGrants:                []FeeGrant{},
+		VsOperatorAuthorizations: []VSOperatorAuthorization{},
 	}
 }
 
@@ -110,16 +109,6 @@ func (gs GenesisState) Validate() error {
 			if len(rec.MsgTypes) == 0 {
 				return fmt.Errorf("vs_operator_authorizations[%d].records[%d]: msg_types cannot be empty", i, j)
 			}
-		}
-	}
-
-	// OperatorAuthorizationUsage: must reference an OperatorAuthorization id.
-	for i, usage := range gs.OperatorAuthorizationUsages {
-		if usage.OperatorAuthorizationId == 0 {
-			return fmt.Errorf("operator_authorization_usages[%d]: operator_authorization_id cannot be 0", i)
-		}
-		if !oaIDs[usage.OperatorAuthorizationId] {
-			return fmt.Errorf("operator_authorization_usages[%d]: operator_authorization_id %d not found", i, usage.OperatorAuthorizationId)
 		}
 	}
 

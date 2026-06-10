@@ -62,31 +62,6 @@ export interface OperatorAuthorization {
 }
 
 /**
- * OperatorAuthorizationUsage tracks per-authorization spend consumption so spec
- * [AUTHZ-CHECK-1] can enforce the spend_limit / period-reset invariant. Keyed by
- * the parent OperatorAuthorization id.
- *
- * TODO(spec v4): the spec folds the runtime balance into OperatorAuthorization
- * (remaining_spend / remaining_fee_spend). This separate ledger is retained to
- * keep AUTHZ-CHECK-1 reset semantics unchanged (out of scope for the v4-rc2 VSOA
- * rebase); unify when AUTHZ-CHECK-1 is aligned to the spec.
- */
-export interface OperatorAuthorizationUsage {
-  /** operator_authorization_id is the id of the parent OperatorAuthorization. */
-  operatorAuthorizationId: number;
-  /**
-   * remaining is the balance still available inside the current period.
-   * Decremented on each successful execution that consumed funds.
-   */
-  remaining: Coin[];
-  /**
-   * last_reset is the timestamp at which `remaining` was last refilled to the
-   * parent authorization's spend_limit.
-   */
-  lastReset: Date | undefined;
-}
-
-/**
  * FeeGrant is the chain-level fee allowance, keyed by the composite
  * (grantor_corporation_id, grantee).
  */
@@ -403,97 +378,6 @@ export const OperatorAuthorization = {
     message.period = (object.period !== undefined && object.period !== null)
       ? Duration.fromPartial(object.period)
       : undefined;
-    return message;
-  },
-};
-
-function createBaseOperatorAuthorizationUsage(): OperatorAuthorizationUsage {
-  return { operatorAuthorizationId: 0, remaining: [], lastReset: undefined };
-}
-
-export const OperatorAuthorizationUsage = {
-  encode(message: OperatorAuthorizationUsage, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.operatorAuthorizationId !== 0) {
-      writer.uint32(8).uint64(message.operatorAuthorizationId);
-    }
-    for (const v of message.remaining) {
-      Coin.encode(v!, writer.uint32(18).fork()).ldelim();
-    }
-    if (message.lastReset !== undefined) {
-      Timestamp.encode(toTimestamp(message.lastReset), writer.uint32(26).fork()).ldelim();
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): OperatorAuthorizationUsage {
-    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseOperatorAuthorizationUsage();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          if (tag !== 8) {
-            break;
-          }
-
-          message.operatorAuthorizationId = longToNumber(reader.uint64() as Long);
-          continue;
-        case 2:
-          if (tag !== 18) {
-            break;
-          }
-
-          message.remaining.push(Coin.decode(reader, reader.uint32()));
-          continue;
-        case 3:
-          if (tag !== 26) {
-            break;
-          }
-
-          message.lastReset = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
-          continue;
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skipType(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): OperatorAuthorizationUsage {
-    return {
-      operatorAuthorizationId: isSet(object.operatorAuthorizationId)
-        ? globalThis.Number(object.operatorAuthorizationId)
-        : 0,
-      remaining: globalThis.Array.isArray(object?.remaining) ? object.remaining.map((e: any) => Coin.fromJSON(e)) : [],
-      lastReset: isSet(object.lastReset) ? fromJsonTimestamp(object.lastReset) : undefined,
-    };
-  },
-
-  toJSON(message: OperatorAuthorizationUsage): unknown {
-    const obj: any = {};
-    if (message.operatorAuthorizationId !== 0) {
-      obj.operatorAuthorizationId = Math.round(message.operatorAuthorizationId);
-    }
-    if (message.remaining?.length) {
-      obj.remaining = message.remaining.map((e) => Coin.toJSON(e));
-    }
-    if (message.lastReset !== undefined) {
-      obj.lastReset = message.lastReset.toISOString();
-    }
-    return obj;
-  },
-
-  create<I extends Exact<DeepPartial<OperatorAuthorizationUsage>, I>>(base?: I): OperatorAuthorizationUsage {
-    return OperatorAuthorizationUsage.fromPartial(base ?? ({} as any));
-  },
-  fromPartial<I extends Exact<DeepPartial<OperatorAuthorizationUsage>, I>>(object: I): OperatorAuthorizationUsage {
-    const message = createBaseOperatorAuthorizationUsage();
-    message.operatorAuthorizationId = object.operatorAuthorizationId ?? 0;
-    message.remaining = object.remaining?.map((e) => Coin.fromPartial(e)) || [];
-    message.lastReset = object.lastReset ?? undefined;
     return message;
   },
 };

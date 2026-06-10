@@ -93,6 +93,14 @@ func (k Keeper) GrantVSOperatorAuthorization(
 		}
 	}
 
+	// Seed runtime balances at record creation per [MOD-DE-MSG-5] / AUTHZ-CHECK-3.
+	if len(record.SpendLimit) > 0 {
+		record.RemainingSpend = record.SpendLimit
+	}
+	if len(record.FeeSpendLimit) > 0 {
+		record.RemainingFeeSpend = record.FeeSpendLimit
+	}
+
 	vsoa.Records = append(vsoa.Records, record)
 
 	if err := k.VSOperatorAuthorizations.Set(ctx, vsoa.Id, vsoa); err != nil {

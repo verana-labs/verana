@@ -28,11 +28,6 @@ var (
 	// OperatorAuthorizationSeqKey backs the OperatorAuthorization id counter.
 	OperatorAuthorizationSeqKey = collections.NewPrefix("oa_seq_de")
 
-	// OperatorAuthorizationUsageKey is the prefix for OperatorAuthorizationUsage
-	// storage — per-authorization spend-limit ledger for [AUTHZ-CHECK-1], keyed
-	// by the parent OperatorAuthorization id.
-	OperatorAuthorizationUsageKey = collections.NewPrefix("oau_de")
-
 	// FeeGrantKey is the prefix for FeeGrant storage, keyed by the composite
 	// (grantor_corporation_id, grantee).
 	FeeGrantKey = collections.NewPrefix("fg_de")

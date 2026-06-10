@@ -25,6 +25,8 @@ message GenesisState {
   // vs_operator_authorizations is a list of all VSOperatorAuthorization objects
   repeated VSOperatorAuthorization vs_operator_authorizations = 4 [(gogoproto.nullable) = false];
 
-  // operator_authorization_usages is a list of all OperatorAuthorizationUsage objects
-  repeated OperatorAuthorizationUsage operator_authorization_usages = 5 [(gogoproto.nullable) = false];
+  // Field 5 (operator_authorization_usages) was removed: runtime spend balances
+  // are now on-object on OperatorAuthorization (issue #324 Phase 1).
+  reserved 5;
+  reserved "operator_authorization_usages";
 }
