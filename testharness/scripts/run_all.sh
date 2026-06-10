@@ -95,3 +95,8 @@ for J in 302 303 304 305 306 307 308 309 310; do
   echo "*****************************************************************************************"
   go run cmd/main.go "$J"
 done
+
+# Journey 311 (PP Trigger Resolver, MOD-PP-MSG-15) reuses journey302's VALIDATED
+# child participant and authorizes via the ancestor-validator path.
+echo "************************ Running test-harness journey 311 *******************************"
+go run cmd/main.go 311
