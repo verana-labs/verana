@@ -30,9 +30,6 @@ func (ms msgServer) TriggerResolver(goCtx context.Context, msg *types.MsgTrigger
 	if err := IsValidParticipant(perm, now); err != nil {
 		return nil, fmt.Errorf("participant %d is not active: %w", msg.Id, err)
 	}
-	if perm.Did == "" {
-		return nil, fmt.Errorf("participant %d has no did", msg.Id)
-	}
 
 	// [AUTHZ-CHECK-5] Resolve the signing corporation account to its co.id.
 	corpID, err := ms.corpIDFromAccount(ctx, msg.Corporation)

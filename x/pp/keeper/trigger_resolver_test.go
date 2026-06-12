@@ -95,8 +95,9 @@ func TestTriggerResolver_Unauthorized(t *testing.T) {
 	require.ErrorContains(t, err, "authorization check failed")
 }
 
-// TestTriggerResolver_RejectNoDid — participant.did must be non-empty.
-func TestTriggerResolver_RejectNoDid(t *testing.T) {
+// TestTriggerResolver_EmptyDidAllowed — the spec (MOD-PP-MSG-15-2-1) does not
+// require a non-empty did, so an active participant with no did still triggers.
+func TestTriggerResolver_EmptyDidAllowed(t *testing.T) {
 	k, ms, ctx, trk, del := setupTriggerResolver(t)
 	corporation := sdk.AccAddress([]byte("corp_trigger________")).String()
 	operator := sdk.AccAddress([]byte("op_trigger__________")).String()
@@ -106,11 +107,11 @@ func TestTriggerResolver_RejectNoDid(t *testing.T) {
 	pid, err := k.CreateParticipant(ctx, activeParticipant(corpID, operator, "", 0, past))
 	require.NoError(t, err)
 
-	del.ErrToReturn = nil
+	del.ErrToReturn = nil // Path 1 (operator == vs_operator) passes
 	_, err = ms.TriggerResolver(sdk.WrapSDKContext(ctx), &types.MsgTriggerResolver{
 		Corporation: corporation, Operator: operator, Id: pid,
 	})
-	require.ErrorContains(t, err, "no did")
+	require.NoError(t, err)
 }
 
 // TestTriggerResolver_RejectInactive — participant must be active.
