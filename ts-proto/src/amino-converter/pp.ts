@@ -11,6 +11,7 @@ import {
   MsgSetParticipantOPToValidated,
   MsgSlashParticipantTrustDeposit,
   MsgStartParticipantOP,
+  MsgTriggerResolver,
 } from "../codec/verana/pp/v1/tx";
 import { ParticipantRole } from "../codec/verana/pp/v1/types";
 import {
@@ -300,5 +301,21 @@ export const MsgSelfCreateParticipantAminoConverter: AminoConverter = {
       vsOperatorAuthzWithFeegrant: a.vs_operator_authz_with_feegrant ?? false,
       vsOperatorAuthzFeeSpendLimit: a.vs_operator_authz_fee_spend_limit ?? [],
       vsOperatorAuthzPeriod: aminoToDuration(a.vs_operator_authz_period),
+    }),
+};
+
+export const MsgTriggerResolverAminoConverter: AminoConverter = {
+  aminoType: "verana/x/pp/MsgTriggerResolver",
+  // [MOD-PP-MSG-15] parameters: corporation, operator, id.
+  toAmino: (m: MsgTriggerResolver) => clean({
+    corporation: m.corporation ?? "",
+    operator: m.operator ?? "",
+    id: u64ToStr(m.id),
+  }),
+  fromAmino: (a: any): MsgTriggerResolver =>
+    MsgTriggerResolver.fromPartial({
+      corporation: a.corporation ?? "",
+      operator: a.operator ?? "",
+      id: strToU64(a.id) != null ? Number(strToU64(a.id)!.toString()) : 0,
     }),
 };
