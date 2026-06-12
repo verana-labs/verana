@@ -465,6 +465,27 @@ Parameters:
 						},
 					},
 				},
+				{
+					RpcMethod: "TriggerResolver",
+					Use:       "trigger-resolver [id] --corporation [corporation] --operator [operator]",
+					Short:     "Trigger a trust resolution for a participant",
+					Long:      "Emit an on-chain event signaling that a trust resolver must re-resolve the did registered in the participant entry. Does not modify VPR state.",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
+						{
+							ProtoField: "id",
+						},
+					},
+					FlagOptions: map[string]*autocliv1.FlagOptions{
+						"corporation": {
+							DefaultValue: "",
+							Usage:        "The group policy address (corporation) on whose behalf this message is executed",
+						},
+						"operator": {
+							DefaultValue: "",
+							Usage:        "The operator account authorized by the corporation to run this message",
+						},
+					},
+				},
 				// this line is used by ignite scaffolding # autocli/tx
 			},
 		},

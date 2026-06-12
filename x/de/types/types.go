@@ -39,6 +39,7 @@ var VPRDelegableMsgTypes = map[string]bool{
 	"/verana.pp.v1.MsgRepayParticipantSlashedTrustDeposit": true,
 	"/verana.pp.v1.MsgSelfCreateParticipant":               true,
 	"/verana.pp.v1.MsgCreateOrUpdateParticipantSession":    true,
+	"/verana.pp.v1.MsgTriggerResolver":                     true,
 	// Trust Deposit (TD)
 	"/verana.td.v1.MsgReclaimTrustDepositYield": true,
 	"/verana.td.v1.MsgRepaySlashedTrustDeposit": true,

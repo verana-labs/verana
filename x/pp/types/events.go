@@ -47,4 +47,6 @@ const (
 
 	EventTypeRevokeParticipant = "revoke_participant"
 	AttributeKeyRevokedAt      = "revoked_at"
+
+	EventTypeTriggerResolver = "trigger_resolver"
 )

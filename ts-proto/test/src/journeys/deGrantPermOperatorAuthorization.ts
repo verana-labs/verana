@@ -132,6 +132,8 @@ async function main() {
     // It uses VS operator authorization (AUTHZ-CHECK-3) instead
     typeUrls.MsgSlashParticipantTrustDeposit,
     typeUrls.MsgRepayParticipantSlashedTrustDeposit,
+    // [MOD-PP-MSG-15] Trigger Resolver
+    typeUrls.MsgTriggerResolver,
   ];
 
   // The corporation policy_address cannot sign directly; the corp's sole group

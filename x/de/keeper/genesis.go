@@ -34,12 +34,6 @@ func (k Keeper) InitGenesis(ctx context.Context, genState types.GenesisState) er
 		}
 	}
 
-	for _, usage := range genState.OperatorAuthorizationUsages {
-		if err := k.OperatorAuthorizationUsage.Set(ctx, usage.OperatorAuthorizationId, usage); err != nil {
-			return fmt.Errorf("failed to set operator authorization usage: %w", err)
-		}
-	}
-
 	for _, fg := range genState.FeeGrants {
 		key := collections.Join(fg.GrantorCorporationId, fg.Grantee)
 		if err := k.FeeGrants.Set(ctx, key, fg); err != nil {
@@ -93,19 +87,6 @@ func (k Keeper) ExportGenesis(ctx context.Context) (*types.GenesisState, error) 
 	}
 	sort.Slice(oaList, func(i, j int) bool { return oaList[i].Id < oaList[j].Id })
 	genesis.OperatorAuthorizations = oaList
-
-	// Operator authorization usages (keyed by operator_authorization_id).
-	usageList := []types.OperatorAuthorizationUsage{}
-	if err := k.OperatorAuthorizationUsage.Walk(ctx, nil, func(_ uint64, val types.OperatorAuthorizationUsage) (bool, error) {
-		usageList = append(usageList, val)
-		return false, nil
-	}); err != nil {
-		return nil, fmt.Errorf("failed to export operator authorization usages: %w", err)
-	}
-	sort.Slice(usageList, func(i, j int) bool {
-		return usageList[i].OperatorAuthorizationId < usageList[j].OperatorAuthorizationId
-	})
-	genesis.OperatorAuthorizationUsages = usageList
 
 	// Fee grants (composite key).
 	fgList := []types.FeeGrant{}

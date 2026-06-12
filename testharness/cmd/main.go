@@ -114,6 +114,9 @@ func runJourney(ctx context.Context, client cosmosclient.Client, journeyID int) 
 	case 310:
 		// Permission CreatePermission (Self Create) with Operator Authorization
 		return journeys.RunPermissionCreatePermJourney(ctx, client)
+	case 311:
+		// PP Trigger Resolver (MOD-PP-MSG-15) via ancestor-validator authorization
+		return journeys.RunPermissionTriggerResolverJourney(ctx, client)
 	case 401:
 		// Trust Deposit ReclaimYield + RepaySlashed with Operator Authorization
 		return journeys.RunTDReclaimYieldJourney(ctx, client)

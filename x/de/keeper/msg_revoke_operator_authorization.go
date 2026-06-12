@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strconv"
 
@@ -48,15 +47,12 @@ func (ms msgServer) RevokeOperatorAuthorization(goCtx context.Context, msg *type
 
 	// [MOD-DE-MSG-4-4] Execution.
 
-	// 1. Delete the OperatorAuthorization, its secondary index, and usage ledger.
+	// 1. Delete the OperatorAuthorization and its secondary index.
 	if err := ms.OperatorAuthorizations.Remove(ctx, existing.Id); err != nil {
 		return nil, fmt.Errorf("failed to remove OperatorAuthorization: %w", err)
 	}
 	if err := ms.OperatorAuthorizationByCorpOp.Remove(ctx, collections.Join(co.Id, msg.Grantee)); err != nil {
 		return nil, fmt.Errorf("failed to remove OperatorAuthorization index: %w", err)
-	}
-	if err := ms.OperatorAuthorizationUsage.Remove(ctx, existing.Id); err != nil && !errors.Is(err, collections.ErrNotFound) {
-		return nil, fmt.Errorf("failed to clear usage ledger: %w", err)
 	}
 
 	// 2. Revoke Fee Allowance for (co.id, grantee).

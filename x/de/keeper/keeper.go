@@ -25,12 +25,11 @@ type Keeper struct {
 	Params collections.Item[types.Params]
 
 	// OperatorAuthorization: keyed by its own uint64 id; (corporation_id,
-	// operator) is a unique secondary index. Usage is the AUTHZ-CHECK-1 spend
-	// ledger keyed by the parent OperatorAuthorization id.
+	// operator) is a unique secondary index. Runtime spend balances live
+	// on-object (remaining_spend / remaining_fee_spend).
 	OperatorAuthorizations        collections.Map[uint64, types.OperatorAuthorization]
 	OperatorAuthorizationByCorpOp collections.Map[collections.Pair[uint64, string], uint64]
 	OperatorAuthorizationSeq      collections.Sequence
-	OperatorAuthorizationUsage    collections.Map[uint64, types.OperatorAuthorizationUsage]
 
 	// FeeGrant: composite key (grantor_corporation_id, grantee).
 	FeeGrants collections.Map[collections.Pair[uint64, string], types.FeeGrant]
@@ -77,8 +76,6 @@ func NewKeeper(
 		OperatorAuthorizationByCorpOp: collections.NewMap(sb, types.OperatorAuthorizationByCorpOpKey, "operator_authorization_by_corp_op",
 			corpOpKeyCodec, collections.Uint64Value),
 		OperatorAuthorizationSeq: collections.NewSequence(sb, types.OperatorAuthorizationSeqKey, "operator_authorization_seq"),
-		OperatorAuthorizationUsage: collections.NewMap(sb, types.OperatorAuthorizationUsageKey, "operator_authorization_usage",
-			collections.Uint64Key, codec.CollValue[types.OperatorAuthorizationUsage](cdc)),
 
 		FeeGrants: collections.NewMap(sb, types.FeeGrantKey, "fee_grant",
 			corpOpKeyCodec, codec.CollValue[types.FeeGrant](cdc)),

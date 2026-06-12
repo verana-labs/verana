@@ -7,7 +7,7 @@
 /* eslint-disable */
 import * as _m0 from "protobufjs/minimal";
 import { Params } from "./params";
-import { FeeGrant, OperatorAuthorization, OperatorAuthorizationUsage, VSOperatorAuthorization } from "./types";
+import { FeeGrant, OperatorAuthorization, VSOperatorAuthorization } from "./types";
 
 export const protobufPackage = "verana.de.v1";
 
@@ -23,18 +23,10 @@ export interface GenesisState {
   feeGrants: FeeGrant[];
   /** vs_operator_authorizations is a list of all VSOperatorAuthorization objects */
   vsOperatorAuthorizations: VSOperatorAuthorization[];
-  /** operator_authorization_usages is a list of all OperatorAuthorizationUsage objects */
-  operatorAuthorizationUsages: OperatorAuthorizationUsage[];
 }
 
 function createBaseGenesisState(): GenesisState {
-  return {
-    params: undefined,
-    operatorAuthorizations: [],
-    feeGrants: [],
-    vsOperatorAuthorizations: [],
-    operatorAuthorizationUsages: [],
-  };
+  return { params: undefined, operatorAuthorizations: [], feeGrants: [], vsOperatorAuthorizations: [] };
 }
 
 export const GenesisState = {
@@ -50,9 +42,6 @@ export const GenesisState = {
     }
     for (const v of message.vsOperatorAuthorizations) {
       VSOperatorAuthorization.encode(v!, writer.uint32(34).fork()).ldelim();
-    }
-    for (const v of message.operatorAuthorizationUsages) {
-      OperatorAuthorizationUsage.encode(v!, writer.uint32(42).fork()).ldelim();
     }
     return writer;
   },
@@ -92,13 +81,6 @@ export const GenesisState = {
 
           message.vsOperatorAuthorizations.push(VSOperatorAuthorization.decode(reader, reader.uint32()));
           continue;
-        case 5:
-          if (tag !== 42) {
-            break;
-          }
-
-          message.operatorAuthorizationUsages.push(OperatorAuthorizationUsage.decode(reader, reader.uint32()));
-          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -120,9 +102,6 @@ export const GenesisState = {
       vsOperatorAuthorizations: globalThis.Array.isArray(object?.vsOperatorAuthorizations)
         ? object.vsOperatorAuthorizations.map((e: any) => VSOperatorAuthorization.fromJSON(e))
         : [],
-      operatorAuthorizationUsages: globalThis.Array.isArray(object?.operatorAuthorizationUsages)
-        ? object.operatorAuthorizationUsages.map((e: any) => OperatorAuthorizationUsage.fromJSON(e))
-        : [],
     };
   },
 
@@ -140,11 +119,6 @@ export const GenesisState = {
     if (message.vsOperatorAuthorizations?.length) {
       obj.vsOperatorAuthorizations = message.vsOperatorAuthorizations.map((e) => VSOperatorAuthorization.toJSON(e));
     }
-    if (message.operatorAuthorizationUsages?.length) {
-      obj.operatorAuthorizationUsages = message.operatorAuthorizationUsages.map((e) =>
-        OperatorAuthorizationUsage.toJSON(e)
-      );
-    }
     return obj;
   },
 
@@ -161,8 +135,6 @@ export const GenesisState = {
     message.feeGrants = object.feeGrants?.map((e) => FeeGrant.fromPartial(e)) || [];
     message.vsOperatorAuthorizations =
       object.vsOperatorAuthorizations?.map((e) => VSOperatorAuthorization.fromPartial(e)) || [];
-    message.operatorAuthorizationUsages =
-      object.operatorAuthorizationUsages?.map((e) => OperatorAuthorizationUsage.fromPartial(e)) || [];
     return message;
   },
 };

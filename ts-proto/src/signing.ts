@@ -36,6 +36,7 @@ import {
   MsgSetParticipantOPToValidated,
   MsgSlashParticipantTrustDeposit,
   MsgStartParticipantOP,
+  MsgTriggerResolver,
 } from "./codec/verana/pp/v1/tx";
 import {
   MsgReclaimTrustDepositYield,
@@ -82,6 +83,7 @@ import {
   MsgSetParticipantOPToValidatedAminoConverter,
   MsgSlashParticipantTrustDepositAminoConverter,
   MsgStartParticipantOPAminoConverter,
+  MsgTriggerResolverAminoConverter,
 } from "./amino-converter/pp";
 import {
   MsgReclaimTrustDepositYieldAminoConverter,
@@ -112,6 +114,7 @@ export const veranaTypeUrls = {
   MsgStartParticipantOP: "/verana.pp.v1.MsgStartParticipantOP",
   MsgRenewParticipantOP: "/verana.pp.v1.MsgRenewParticipantOP",
   MsgSetParticipantOPToValidated: "/verana.pp.v1.MsgSetParticipantOPToValidated",
+  MsgTriggerResolver: "/verana.pp.v1.MsgTriggerResolver",
   MsgCancelParticipantOPLastRequest: "/verana.pp.v1.MsgCancelParticipantOPLastRequest",
   MsgCreateOrUpdateParticipantSession: "/verana.pp.v1.MsgCreateOrUpdateParticipantSession",
   MsgSlashParticipantTrustDeposit: "/verana.pp.v1.MsgSlashParticipantTrustDeposit",
@@ -147,6 +150,7 @@ export const veranaRegistryTypes: ReadonlyArray<[string, GeneratedType]> = [
   [veranaTypeUrls.MsgStartParticipantOP, MsgStartParticipantOP as GeneratedType],
   [veranaTypeUrls.MsgRenewParticipantOP, MsgRenewParticipantOP as GeneratedType],
   [veranaTypeUrls.MsgSetParticipantOPToValidated, MsgSetParticipantOPToValidated as GeneratedType],
+  [veranaTypeUrls.MsgTriggerResolver, MsgTriggerResolver as GeneratedType],
   [veranaTypeUrls.MsgCancelParticipantOPLastRequest, MsgCancelParticipantOPLastRequest as GeneratedType],
   [veranaTypeUrls.MsgCreateOrUpdateParticipantSession, MsgCreateOrUpdateParticipantSession as GeneratedType],
   [veranaTypeUrls.MsgSlashParticipantTrustDeposit, MsgSlashParticipantTrustDeposit as GeneratedType],
@@ -194,6 +198,7 @@ export function createVeranaAminoTypes(): AminoTypes {
     [veranaTypeUrls.MsgStartParticipantOP]: MsgStartParticipantOPAminoConverter,
     [veranaTypeUrls.MsgRenewParticipantOP]: MsgRenewParticipantOPAminoConverter,
     [veranaTypeUrls.MsgSetParticipantOPToValidated]: MsgSetParticipantOPToValidatedAminoConverter,
+    [veranaTypeUrls.MsgTriggerResolver]: MsgTriggerResolverAminoConverter,
     [veranaTypeUrls.MsgCancelParticipantOPLastRequest]: MsgCancelParticipantOPLastRequestAminoConverter,
     [veranaTypeUrls.MsgCreateOrUpdateParticipantSession]: MsgCreateOrUpdateParticipantSessionAminoConverter,
     [veranaTypeUrls.MsgSlashParticipantTrustDeposit]: MsgSlashParticipantTrustDepositAminoConverter,

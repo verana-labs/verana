@@ -62,6 +62,7 @@ func (k Keeper) GrantFeeAllowance(
 		Grantee:              grantee,
 		MsgTypes:             msgTypes,
 		SpendLimit:           spendLimit,
+		RemainingSpend:       spendLimit,
 		Expiration:           expiration,
 		Period:               period,
 	}

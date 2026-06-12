@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strconv"
 
@@ -82,26 +81,24 @@ func (ms msgServer) GrantOperatorAuthorization(goCtx context.Context, msg *types
 		}
 	}
 
+	// Seed runtime balances at grant time per [MOD-DE-MSG-3] / AUTHZ-CHECK-1.
 	oa := types.OperatorAuthorization{
-		Id:            oaID,
-		CorporationId: co.Id,
-		Operator:      msg.Grantee,
-		MsgTypes:      msg.MsgTypes,
-		SpendLimit:    msg.AuthzSpendLimit,
-		FeeSpendLimit: msg.FeeSpendLimit,
-		Expiration:    msg.Expiration,
-		Period:        msg.AuthzSpendLimitPeriod,
+		Id:                oaID,
+		CorporationId:     co.Id,
+		Operator:          msg.Grantee,
+		MsgTypes:          msg.MsgTypes,
+		SpendLimit:        msg.AuthzSpendLimit,
+		FeeSpendLimit:     msg.FeeSpendLimit,
+		RemainingSpend:    msg.AuthzSpendLimit,
+		RemainingFeeSpend: msg.FeeSpendLimit,
+		Expiration:        msg.Expiration,
+		Period:            msg.AuthzSpendLimitPeriod,
 	}
 	if err := ms.OperatorAuthorizations.Set(ctx, oaID, oa); err != nil {
 		return nil, fmt.Errorf("failed to set OperatorAuthorization: %w", err)
 	}
 	if err := ms.OperatorAuthorizationByCorpOp.Set(ctx, collections.Join(co.Id, msg.Grantee), oaID); err != nil {
 		return nil, fmt.Errorf("failed to set OperatorAuthorization index: %w", err)
-	}
-
-	// Reset spend ledger when re-granting so a new limit takes effect from zero.
-	if err := ms.OperatorAuthorizationUsage.Remove(ctx, oaID); err != nil && !errors.Is(err, collections.ErrNotFound) {
-		return nil, fmt.Errorf("failed to reset usage ledger: %w", err)
 	}
 
 	// 2. Handle fee grant.
